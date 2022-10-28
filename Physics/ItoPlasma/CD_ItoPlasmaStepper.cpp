@@ -642,6 +642,7 @@ ItoPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_
   m_sigmaSolver->writePlotData(a_output, a_icomp);
 
   // Ito solvers copy their output data
+  m_ito->depositParticles();
   for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>& solver = solverIt();
 
@@ -1245,7 +1246,7 @@ ItoPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<E
   DataOps::scale(a_rho, Units::Qe);
 
   m_amr->conservativeAverage(a_rho, m_fluidRealm);
-  m_amr->interpGhost(a_rho, m_fluidRealm);
+  m_amr->interpGhostMG(a_rho, m_fluidRealm);
 
   // Interpolate to centroids.
   m_amr->interpToCentroids(rhoPhase, m_fluidRealm, m_plasmaPhase);

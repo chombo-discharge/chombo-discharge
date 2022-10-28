@@ -198,18 +198,12 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
     solverIt()->clear(ItoSolver::WhichContainer::Domain);
   }
 
-  // Deposit particles on the mesh.
-  m_timer.startEvent("Mesh deposit");
-  m_ito->depositParticles();
-  m_timer.stopEvent("Mesh deposit");
-
   // Prepare for the next time step
-  m_timer.startEvent("Compute v and D");
+  m_timer.startEvent("Post-compute v/D");
   this->computeItoVelocities();
   this->computeItoDiffusion();
-  m_timer.stopEvent("Compute v and D");
+  m_timer.stopEvent("Post-compute v/D");
 
-  // Compute the current density (mostly for I/O purposes).
   m_timer.startEvent("Compute J");
   this->computeCurrentDensity(m_currentDensity);
   m_timer.stopEvent("Compute J");
@@ -782,7 +776,8 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
   // Store X^k positions.
   this->setOldPositions();
 
-  // Diffuse the particles. This copies onto m_rhoDaggerParticles and stores the hop on the full particles.
+  // Diffuse the particles. This copies onto m_rhoDaggerParticles and stores the hop on the full particles. We need
+  // to remap the particles species that made a diffusion hop.
   m_timer.startEvent("Diffuse particles");
   this->diffuseParticlesEulerMaruyama(m_rhoDaggerParticles, a_dt);
   this->remapPointParticles(m_rhoDaggerParticles, SpeciesSubset::AllDiffusive);
@@ -802,7 +797,7 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
   // Compute space charge density arising from the new particle positions X^k + sqrt(2*D*dt)*W. Only need to
   // do the diffusive and charged species.
   m_timer.startEvent("Deposit point particles");
-  this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::AllDiffusive);
+  this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::All);
   m_timer.stopEvent("Deposit point particles");
 
   // Solve the stinking equation.
@@ -812,14 +807,14 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
 
   // Recompute velocities with the new electric field. This interpolates the velocities to the current particle positions, i.e.
   // we compute V^(k+1)(X^k) = mu^k * E^(k+1)(X^k)
-  m_timer.startEvent("Compute velocities");
-#if 1 // This is what the algorithm says.
+  m_timer.startEvent("Step-compute v");
+#if 0 // This is what the algorithm says.
   this->setItoVelocityFunctions();
   m_ito->interpolateVelocities();
 #else // Have to use this for LEA - need to debug.
   this->computeItoVelocities();
 #endif
-  m_timer.stopEvent("Compute velocities");
+  m_timer.stopEvent("Step-compute v");
 
   // Finalize the Euler-Maruyama update.
   m_timer.startEvent("Euler-Maruyama step");
@@ -832,10 +827,6 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
   const bool deleteParticles = true;
   this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, deleteParticles);
   this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_toleranceEB);
-
-  // Deposit particles on the mesh.
-  // NOTE: Not necessary unless we use LFA...?
-  this->depositParticles(SpeciesSubset::AllMobileOrDiffusive);
   m_timer.stopEvent("EB/Particle intersection");
 }
 
