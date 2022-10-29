@@ -37,10 +37,13 @@ namespace Physics {
       All,
       AllMobile,
       AllDiffusive,
+      AllMobileOrDiffusive,
+      AllMobileAndDiffusive,
+      Charged,
       ChargedMobile,
       ChargedDiffusive,
-      AllMobileOrDiffusive,
-      ChargedAndMobileOrDiffusive,
+      ChargedMobileOrDiffusive,
+      ChargedMobileAndDiffusive,      
       Stationary,
     };
 

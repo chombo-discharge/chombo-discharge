@@ -1452,6 +1452,27 @@ ItoPlasmaStepper::intersectParticles(const SpeciesSubset             a_speciesSu
 
       break;
     }
+    case SpeciesSubset::AllMobileOrDiffusive: {
+      if (mobile || diffusive) {
+        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
+      }
+
+      break;
+    }
+    case SpeciesSubset::AllMobileAndDiffusive: {
+      if (mobile && diffusive) {
+        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
+      }
+
+      break;
+    }
+    case SpeciesSubset::Charged: {
+      if (charged) {
+        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
+      }
+
+      break;
+    }      
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
         solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
@@ -1466,20 +1487,20 @@ ItoPlasmaStepper::intersectParticles(const SpeciesSubset             a_speciesSu
 
       break;
     }
-    case SpeciesSubset::AllMobileOrDiffusive: {
-      if (mobile || diffusive) {
-        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
-      }
-
-      break;
-    }
-    case SpeciesSubset::ChargedAndMobileOrDiffusive: {
+    case SpeciesSubset::ChargedMobileOrDiffusive: {
       if (charged && (mobile || diffusive)) {
         solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
       }
 
       break;
     }
+    case SpeciesSubset::ChargedMobileAndDiffusive: {
+      if (charged && (mobile && diffusive)) {
+        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
+      }
+
+      break;
+    }      
     case SpeciesSubset::Stationary: {
       if (!mobile && !diffusive) {
         solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
@@ -1548,6 +1569,27 @@ ItoPlasmaStepper::removeCoveredParticles(const SpeciesSubset             a_which
 
       break;
     }
+    case SpeciesSubset::AllMobileOrDiffusive: {
+      if (mobile || diffusive) {
+        solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
+      }
+
+      break;
+    }
+    case SpeciesSubset::AllMobileAndDiffusive: {
+      if (mobile && diffusive) {
+        solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
+      }
+
+      break;
+    }
+    case SpeciesSubset::Charged: {
+      if (charged) {
+        solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
+      }
+
+      break;
+    }      
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
@@ -1562,20 +1604,20 @@ ItoPlasmaStepper::removeCoveredParticles(const SpeciesSubset             a_which
 
       break;
     }
-    case SpeciesSubset::AllMobileOrDiffusive: {
-      if (mobile || diffusive) {
-        solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
-      }
-
-      break;
-    }
-    case SpeciesSubset::ChargedAndMobileOrDiffusive: {
+    case SpeciesSubset::ChargedMobileOrDiffusive: {
       if (charged && (mobile || diffusive)) {
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       }
 
       break;
     }
+    case SpeciesSubset::ChargedMobileAndDiffusive: {
+      if (charged && (mobile && diffusive)) {
+        solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
+      }
+
+      break;
+    }      
     case SpeciesSubset::Stationary: {
       if (!mobile && !diffusive) {
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
@@ -1649,6 +1691,27 @@ ItoPlasmaStepper::transferCoveredParticles(const SpeciesSubset             a_spe
 
       break;
     }
+    case SpeciesSubset::AllMobileOrDiffusive: {
+      if (mobile || diffusive) {
+        solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
+      }
+
+      break;
+    }
+    case SpeciesSubset::AllMobileAndDiffusive: {
+      if (mobile && diffusive) {
+        solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
+      }
+
+      break;
+    }
+    case SpeciesSubset::Charged: {
+      if (charged) {
+        solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
+      }
+
+      break;
+    }      
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
@@ -1663,20 +1726,20 @@ ItoPlasmaStepper::transferCoveredParticles(const SpeciesSubset             a_spe
 
       break;
     }
-    case SpeciesSubset::AllMobileOrDiffusive: {
-      if (mobile || diffusive) {
-        solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
-      }
-
-      break;
-    }
-    case SpeciesSubset::ChargedAndMobileOrDiffusive: {
+    case SpeciesSubset::ChargedMobileOrDiffusive: {
       if (charged && (mobile || diffusive)) {
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       }
 
       break;
     }
+    case SpeciesSubset::ChargedMobileAndDiffusive: {
+      if (charged && (mobile && diffusive)) {
+        solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
+      }
+
+      break;
+    }      
     case SpeciesSubset::Stationary: {
       if (!mobile && !diffusive) {
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
@@ -1743,6 +1806,27 @@ ItoPlasmaStepper::remapParticles(const SpeciesSubset             a_speciesSubset
 
       break;
     }
+    case SpeciesSubset::AllMobileOrDiffusive: {
+      if (mobile || diffusive) {
+        solver->remap(a_container);
+      }
+
+      break;
+    }
+    case SpeciesSubset::AllMobileAndDiffusive: {
+      if (mobile && diffusive) {
+        solver->remap(a_container);
+      }
+
+      break;
+    }
+    case SpeciesSubset::Charged: {
+      if (charged) {
+        solver->remap(a_container);
+      }
+
+      break;
+    }      
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
         solver->remap(a_container);
@@ -1757,15 +1841,15 @@ ItoPlasmaStepper::remapParticles(const SpeciesSubset             a_speciesSubset
 
       break;
     }
-    case SpeciesSubset::AllMobileOrDiffusive: {
-      if (mobile || diffusive) {
+    case SpeciesSubset::ChargedMobileOrDiffusive: {
+      if (charged && (mobile || diffusive)) {
         solver->remap(a_container);
       }
 
       break;
     }
-    case SpeciesSubset::ChargedAndMobileOrDiffusive: {
-      if (charged && (mobile || diffusive)) {
+    case SpeciesSubset::ChargedMobileAndDiffusive: {
+      if (charged && (mobile && diffusive)) {
         solver->remap(a_container);
       }
 
@@ -1837,20 +1921,6 @@ ItoPlasmaStepper::depositParticles(const SpeciesSubset             a_speciesSubs
 
       break;
     }
-    case SpeciesSubset::ChargedMobile: {
-      if (charged && mobile) {
-        solver->depositParticles(a_container);
-      }
-
-      break;
-    }
-    case SpeciesSubset::ChargedDiffusive: {
-      if (charged && diffusive) {
-        solver->depositParticles(a_container);
-      }
-
-      break;
-    }
     case SpeciesSubset::AllMobileOrDiffusive: {
       if (mobile || diffusive) {
         solver->depositParticles(a_container);
@@ -1858,8 +1928,43 @@ ItoPlasmaStepper::depositParticles(const SpeciesSubset             a_speciesSubs
 
       break;
     }
-    case SpeciesSubset::ChargedAndMobileOrDiffusive: {
+    case SpeciesSubset::AllMobileAndDiffusive: {
+      if (mobile && diffusive) {
+        solver->depositParticles(a_container);
+      }
+
+      break;
+    }      
+    case SpeciesSubset::Charged: {
+      if (charged) {
+        solver->depositParticles(a_container);
+      }
+
+      break;
+    }
+    case SpeciesSubset::ChargedMobile: {
+      if (charged && mobile) {
+        solver->depositParticles(a_container);
+      }
+
+      break;
+    }      
+    case SpeciesSubset::ChargedDiffusive: {
+      if (charged && diffusive) {
+        solver->depositParticles(a_container);
+      }
+
+      break;
+    }
+    case SpeciesSubset::ChargedMobileOrDiffusive: {
       if (charged && (mobile || diffusive)) {
+        solver->depositParticles(a_container);
+      }
+
+      break;
+    }
+    case SpeciesSubset::ChargedMobileAndDiffusive: {
+      if (charged && (mobile && diffusive)) {
         solver->depositParticles(a_container);
       }
 
