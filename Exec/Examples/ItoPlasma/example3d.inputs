@@ -213,7 +213,7 @@ ItoPlasmaGodunovStepper.load_balance            = true           # Turn on/off l
 ItoPlasmaGodunovStepper.load_index              = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoPlasmaGodunovStepper.load_per_cell           = 1.0            # Default load per grid cell.
 ItoPlasmaGodunovStepper.box_sorting             = morton         # Box sorting when load balancing
-ItoPlasmaGodunovStepper.particles_per_cell      = 16             # Max computational particles per cell
+ItoPlasmaGodunovStepper.particles_per_cell      = 32             # Max computational particles per cell
 ItoPlasmaGodunovStepper.merge_interval          = 1              # Time steps between superparticle merging
 ItoPlasmaGodunovStepper.regrid_superparticles   = true           # Make superparticles during regrids
 ItoPlasmaGodunovStepper.advection_cfl           = 1.0            # Advective time step CFL restriction
@@ -244,9 +244,9 @@ ItoPlasmaAir3LFA.ion_transport   = false         # By default, stationary ions.
 ItoPlasmaAir3LFA.ion_mobility    = 2E-4          # Turn on/off ion mobility
 
 # Kinetic Monte Carlo solver settings. 
-ItoPlasmaAir3LFA.react_ppc      = 16             # Maximum number of particles to produce in reaction step	
+ItoPlasmaAir3LFA.react_ppc      = 512             # Maximum number of particles to produce in reaction step	
 ItoPlasmaAir3LFA.Ncrit          = 10             # How many firings away from a Negative particle number?
-ItoPlasmaAir3LFA.prop_eps       = 1.E99          # Maximum relative change in propensity function
+ItoPlasmaAir3LFA.prop_eps       = 0.1            # Maximum relative change in propensity function
 ItoPlasmaAir3LFA.NSSA           = 10             # How many SSA steps to run when tau-leaping is inefficient
 ItoPlasmaAir3LFA.SSAlim         = 10.0           # When to enter SSA instead of tau-leaping
 ItoPlasmaAir3LFA.algorithm      = hybrid         # 'tau', 'ssa', or 'hybrid'
