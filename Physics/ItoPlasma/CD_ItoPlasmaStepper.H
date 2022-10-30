@@ -43,7 +43,7 @@ namespace Physics {
       ChargedMobile,
       ChargedDiffusive,
       ChargedMobileOrDiffusive,
-      ChargedMobileAndDiffusive,      
+      ChargedMobileAndDiffusive,
       Stationary,
     };
 

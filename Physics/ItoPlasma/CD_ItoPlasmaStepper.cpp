@@ -1472,7 +1472,7 @@ ItoPlasmaStepper::intersectParticles(const SpeciesSubset             a_speciesSu
       }
 
       break;
-    }      
+    }
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
         solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
@@ -1500,7 +1500,7 @@ ItoPlasmaStepper::intersectParticles(const SpeciesSubset             a_speciesSu
       }
 
       break;
-    }      
+    }
     case SpeciesSubset::Stationary: {
       if (!mobile && !diffusive) {
         solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
@@ -1589,7 +1589,7 @@ ItoPlasmaStepper::removeCoveredParticles(const SpeciesSubset             a_which
       }
 
       break;
-    }      
+    }
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
@@ -1617,7 +1617,7 @@ ItoPlasmaStepper::removeCoveredParticles(const SpeciesSubset             a_which
       }
 
       break;
-    }      
+    }
     case SpeciesSubset::Stationary: {
       if (!mobile && !diffusive) {
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
@@ -1711,7 +1711,7 @@ ItoPlasmaStepper::transferCoveredParticles(const SpeciesSubset             a_spe
       }
 
       break;
-    }      
+    }
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
@@ -1739,7 +1739,7 @@ ItoPlasmaStepper::transferCoveredParticles(const SpeciesSubset             a_spe
       }
 
       break;
-    }      
+    }
     case SpeciesSubset::Stationary: {
       if (!mobile && !diffusive) {
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
@@ -1826,7 +1826,7 @@ ItoPlasmaStepper::remapParticles(const SpeciesSubset             a_speciesSubset
       }
 
       break;
-    }      
+    }
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
         solver->remap(a_container);
@@ -1934,7 +1934,7 @@ ItoPlasmaStepper::depositParticles(const SpeciesSubset             a_speciesSubs
       }
 
       break;
-    }      
+    }
     case SpeciesSubset::Charged: {
       if (charged) {
         solver->depositParticles(a_container);
@@ -1948,7 +1948,7 @@ ItoPlasmaStepper::depositParticles(const SpeciesSubset             a_speciesSubs
       }
 
       break;
-    }      
+    }
     case SpeciesSubset::ChargedDiffusive: {
       if (charged && diffusive) {
         solver->depositParticles(a_container);

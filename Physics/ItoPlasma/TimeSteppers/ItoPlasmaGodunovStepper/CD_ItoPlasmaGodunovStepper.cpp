@@ -376,7 +376,7 @@ ItoPlasmaGodunovStepper::remapPointParticles(Vector<ParticleContainer<PointParti
       }
 
       break;
-    }      
+    }
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
         a_particles[idx]->remap();
@@ -404,7 +404,7 @@ ItoPlasmaGodunovStepper::remapPointParticles(Vector<ParticleContainer<PointParti
       }
 
       break;
-    }      
+    }
     case SpeciesSubset::Stationary: {
       if (!mobile && !diffusive) {
         a_particles[idx]->remap();
@@ -477,7 +477,7 @@ ItoPlasmaGodunovStepper::depositPointParticles(const Vector<ParticleContainer<Po
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       }
       break;
-    }      
+    }
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
@@ -504,7 +504,7 @@ ItoPlasmaGodunovStepper::depositPointParticles(const Vector<ParticleContainer<Po
       }
 
       break;
-    }      
+    }
     case SpeciesSubset::Stationary: {
       if (!mobile && !diffusive) {
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
@@ -580,7 +580,7 @@ ItoPlasmaGodunovStepper::clearPointParticles(const Vector<ParticleContainer<Poin
       }
 
       break;
-    }      
+    }
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
         a_particles[idx]->clearParticles();
@@ -608,7 +608,7 @@ ItoPlasmaGodunovStepper::clearPointParticles(const Vector<ParticleContainer<Poin
       }
 
       break;
-    }      
+    }
     case SpeciesSubset::Stationary: {
       if (!mobile && !diffusive) {
         a_particles[idx]->clearParticles();

@@ -31,13 +31,13 @@ inline ItoPlasmaPhysics::ItoPlasmaPhysics()
   m_photoReactions.clear();
 
   // Some default settings in case user forgets to call the parsing algorithms.
-  m_debug     = true;
-  m_ppc       = 32;
-  m_Ncrit     = 5;
-  m_eps       = 0.1;
-  m_NSSA      = 10;
-  m_SSAlim    = 5.0;
-  m_algorithm = Algorithm::Hybrid;
+  m_debug           = true;
+  m_maxNewParticles = 32;
+  m_Ncrit           = 5;
+  m_eps             = 0.1;
+  m_NSSA            = 10;
+  m_SSAlim          = 5.0;
+  m_algorithm       = Algorithm::Hybrid;
 }
 
 inline ItoPlasmaPhysics::~ItoPlasmaPhysics() { CH_TIME("ItoPlasmaPhysics::~ItoPlasmaPhysics"); }
@@ -83,7 +83,8 @@ ItoPlasmaPhysics::parsePPC() noexcept
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("react_ppc", m_ppc);
+  pp.get("max_new_particles", m_maxNewParticles);
+  pp.get("max_new_photons", m_maxNewPhotons);
 }
 
 inline void
@@ -244,7 +245,8 @@ ItoPlasmaPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
 
     if (diff > 0LL) {
       // Adding particles, which is fairly simple. Just choose weights for the particles and go.
-      std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(diff, (long long)m_ppc);
+      std::vector<long long> particleWeights =
+        ParticleManagement::partitionParticleWeights(diff, (long long)m_maxNewParticles);
 
       for (const auto& w : particleWeights) {
         const RealVect x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
@@ -341,7 +343,7 @@ ItoPlasmaPhysics::reconcilePhotons(Vector<List<Photon>*>& a_newPhotons,
     if (a_numNewPhotons[i] > 0LL) {
 
       const std::vector<long long> photonWeights =
-        ParticleManagement::partitionParticleWeights((long long)a_numNewPhotons[i], (long long)m_ppc);
+        ParticleManagement::partitionParticleWeights((long long)a_numNewPhotons[i], (long long)m_maxNewPhotons);
 
       for (const auto& w : photonWeights) {
         const RealVect x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
