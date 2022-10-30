@@ -1,7 +1,7 @@
 .. _Chap:CdrPlasmaModel:
 
-CDR plasma
-**********
+CDR plasma model
+****************
 
 The CDR plasma model resides in :file:`/Physics/CdrPlasma` and describes plasmas in the drift-diffusion approximation.
 This physics model also includes the following subfolders:
