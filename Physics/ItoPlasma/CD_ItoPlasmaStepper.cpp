@@ -2013,7 +2013,7 @@ ItoPlasmaStepper::setItoVelocityFunctions() noexcept
 
       // Coarsen and update ghost cells.
       m_amr->conservativeAverage(velocityFunction, m_particleRealm, m_plasmaPhase);
-      m_amr->interpGhost(velocityFunction, m_particleRealm, m_plasmaPhase);
+      m_amr->interpGhostMG(velocityFunction, m_particleRealm, m_plasmaPhase);
     }
   }
 }
@@ -2108,7 +2108,7 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobiliti
       a_meshMobilities[idx]->copy(fluidScratchMobilities[idx]);
 
       m_amr->conservativeAverage(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);
-      m_amr->interpGhost(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);
+      m_amr->interpGhostMG(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);
 
       solver->interpolateMobilities();
     }
@@ -2297,7 +2297,7 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusi
       a_diffusionCoefficients[idx]->copy(fluidScratchDiffusion[idx]);
 
       m_amr->conservativeAverage(*a_diffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);
-      m_amr->interpGhost(*a_diffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);
+      m_amr->interpGhostMG(*a_diffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);
 
       solver->interpolateDiffusion();
     }

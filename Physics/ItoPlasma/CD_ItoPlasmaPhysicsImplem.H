@@ -33,6 +33,7 @@ inline ItoPlasmaPhysics::ItoPlasmaPhysics()
   // Some default settings in case user forgets to call the parsing algorithms.
   m_debug           = true;
   m_maxNewParticles = 32;
+  m_maxNewPhotons   = 32;
   m_Ncrit           = 5;
   m_eps             = 0.1;
   m_NSSA            = 10;

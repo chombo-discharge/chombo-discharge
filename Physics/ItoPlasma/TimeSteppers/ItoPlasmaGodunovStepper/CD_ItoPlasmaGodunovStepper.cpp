@@ -15,6 +15,7 @@
 // Our includes
 #include <CD_ItoPlasmaGodunovStepper.H>
 #include <CD_Timer.H>
+#include <CD_ParallelOps.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
@@ -162,11 +163,13 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   // ====== END TRANSPORT STEP ======
 
   // Photon transport
+  ParallelOps::barrier();
   m_timer.startEvent("Photon transport");
   this->advancePhotons(a_dt);
   m_timer.stopEvent("Photon transport");
 
   // Sort the particles and photons per cell so we can call reaction algorithms
+  ParallelOps::barrier();
   m_timer.startEvent("Sort by cell");
   m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Bulk);
@@ -174,18 +177,21 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   m_timer.stopEvent("Sort by cell");
 
   // Run the Kinetic Monte Carlo reaction kernels.
+  ParallelOps::barrier();
   m_timer.startEvent("Reaction network");
   this->advanceReactionNetwork(a_dt);
   m_timer.stopEvent("Reaction network");
 
   // Build superparticles.
   if ((m_timeStep + 1) % m_mergeInterval == 0 && m_mergeInterval > 0) {
+    ParallelOps::barrier();
     m_timer.startEvent("Super-particle management");
     m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
     m_timer.stopEvent("Super-particle management");
   }
 
   // Sort particles per patch.
+  ParallelOps::barrier();
   m_timer.startEvent("Sort by patch");
   m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Bulk);
@@ -199,13 +205,17 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   }
 
   // Prepare for the next time step
+  ParallelOps::barrier();
   m_timer.startEvent("Post-compute v");
   this->computeItoVelocities();
   m_timer.stopEvent("Post-compute v");
+
+  ParallelOps::barrier();
   m_timer.startEvent("Post-compute D");
   this->computeItoDiffusion();
   m_timer.stopEvent("Post-compute D");
 
+  ParallelOps::barrier();
   m_timer.startEvent("Compute J");
   this->computeCurrentDensity(m_currentDensity);
   m_timer.stopEvent("Compute J");
@@ -841,35 +851,41 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
 
   // Diffuse the particles. This copies onto m_rhoDaggerParticles and stores the hop on the full particles. We need
   // to remap the particles species that made a diffusion hop.
+  ParallelOps::barrier();
   m_timer.startEvent("Diffuse particles");
   this->diffuseParticlesEulerMaruyama(m_rhoDaggerParticles, a_dt);
   this->remapPointParticles(m_rhoDaggerParticles, SpeciesSubset::ChargedDiffusive);
   m_timer.stopEvent("Diffuse particles");
 
   // Compute the conductivity on the mesh. This deposits q_e * Z * w * mu on the mesh.
+  ParallelOps::barrier();
   m_timer.startEvent("Compute conductivities");
   this->copyConductivityParticles(m_conductivityParticles);
   this->computeConductivities(m_conductivityParticles);
   m_timer.stopEvent("Compute conductivities");
 
   // Set up the semi-implicit Poisson solver with the computed conductivities.
+  ParallelOps::barrier();
   m_timer.startEvent("Setup Poisson");
   this->setupSemiImplicitPoisson(a_dt);
   m_timer.stopEvent("Setup Poisson");
 
   // Compute space charge density arising from the new particle positions X^k + sqrt(2*D*dt)*W. Only need to
   // do the diffusive and charged species.
+  ParallelOps::barrier();
   m_timer.startEvent("Deposit point particles");
   this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::Charged);
   m_timer.stopEvent("Deposit point particles");
 
   // Solve the stinking equation.
+  ParallelOps::barrier();
   m_timer.startEvent("Solve Poisson");
   this->solvePoisson();
   m_timer.stopEvent("Solve Poisson");
 
   // Recompute velocities with the new electric field. This interpolates the velocities to the current particle positions, i.e.
   // we compute V^(k+1)(X^k) = mu^k * E^(k+1)(X^k)
+  ParallelOps::barrier();
   m_timer.startEvent("Step-compute v");
 #if 1 // This is what the algorithm says.
   this->setItoVelocityFunctions();
@@ -880,16 +896,20 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
   m_timer.stopEvent("Step-compute v");
 
   // Finalize the Euler-Maruyama update.
+  ParallelOps::barrier();
   m_timer.startEvent("Euler-Maruyama step");
   this->stepEulerMaruyama(a_dt);
   this->remapParticles(SpeciesSubset::AllMobileOrDiffusive);
   m_timer.stopEvent("Euler-Maruyama step");
 
   // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
+  ParallelOps::barrier();
   m_timer.startEvent("EB/Particle intersection");
   const bool deleteParticles = true;
   this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, deleteParticles);
   m_timer.stopEvent("EB/Particle intersection");
+
+  ParallelOps::barrier();
   m_timer.startEvent("Remove covered");
   this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_toleranceEB);
   m_timer.stopEvent("Remove covered");
