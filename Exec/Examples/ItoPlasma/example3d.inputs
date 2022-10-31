@@ -220,8 +220,8 @@ ItoPlasmaGodunovStepper.advection_cfl           = 1.0            # Advective tim
 ItoPlasmaGodunovStepper.diffusion_cfl           = 1.0            # Diffusive time step CFL restriction
 ItoPlasmaGodunovStepper.advection_diffusion_cfl = 1.0            # Advection-diffusion time step CFL restriction
 ItoPlasmaGodunovStepper.relax_dt_factor         = 500.           # Relaxation time step restriction. 
-ItoPlasmaGodunovStepper.min_dt                  = 100E-99        # Minimum permitted time step
-ItoPlasmaGodunovStepper.max_dt                  = 100E99        # Maximum permitted time step
+ItoPlasmaGodunovStepper.min_dt                  = 0.0            # Minimum permitted time step
+ItoPlasmaGodunovStepper.max_dt                  = 1.0            # Maximum permitted time step
 ItoPlasmaGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
 ItoPlasmaGodunovStepper.algorithm               = euler_maruyama # Integration algorithm. 'euler_maruyama' or 'trapezoidal'
 
@@ -244,10 +244,10 @@ ItoPlasmaAir3LFA.ion_transport   = false         # By default, stationary ions.
 ItoPlasmaAir3LFA.ion_mobility    = 2E-4          # Turn on/off ion mobility
 
 # Kinetic Monte Carlo solver settings.
-ItoPlasmaAir3LFA.max_new_particles = 128         # Maximum number of computational particles to produce in reaction step
-ItoPlasmaAir3LFA.max_new_photons   = 128         # Maximum number of computational photons to produce in reaction step	
+ItoPlasmaAir3LFA.max_new_particles = 256         # Maximum number of computational particles to produce in reaction step
+ItoPlasmaAir3LFA.max_new_photons   = 256         # Maximum number of computational photons to produce in reaction step	
 ItoPlasmaAir3LFA.Ncrit             = 5           # How many firings away from a Negative particle number?
-ItoPlasmaAir3LFA.prop_eps          = 0.1         # Maximum relative change in propensity function
+ItoPlasmaAir3LFA.prop_eps          = 0.05        # Maximum relative change in propensity function
 ItoPlasmaAir3LFA.NSSA              = 10          # How many SSA steps to run when tau-leaping is inefficient
 ItoPlasmaAir3LFA.SSAlim            = 1.0         # When to enter SSA instead of tau-leaping
 ItoPlasmaAir3LFA.algorithm         = hybrid      # 'tau', 'ssa', or 'hybrid'

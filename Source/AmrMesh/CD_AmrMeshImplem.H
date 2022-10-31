@@ -372,13 +372,16 @@ AmrMesh::removeCoveredParticlesIF(ParticleContainer<P>&     a_particles,
       List<P>& particles = a_particles[lvl][dit()].listItems();
 
       // Check if particles are outside the implicit function.
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+      for (ListIterator<P> lit(particles); lit.ok();) {
         const RealVect& pos = lit().position();
 
         const Real f = implicitFunction->value(pos);
 
         if (f > tol) {
-          particles.remove(lit());
+          particles.remove(lit);
+        }
+        else {
+          lit++;
         }
       }
     }
@@ -418,7 +421,7 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
         particles.clear();
       }
       else if (isIrregular) {
-        for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        for (ListIterator<P> lit(particles); lit.ok();) {
           const P&        particle = lit();
           const RealVect& pos      = particle.position();
 
@@ -429,7 +432,7 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
           CH_assert(region.contains(iv));
 
           if (ebisBox.isCovered(iv)) {
-            particles.remove(lit());
+            particles.remove(lit);
           }
           else if (ebisBox.isIrregular(iv)) {
             // There could potentially be multiple degrees of freedom -- we check if the particle is inside at least one of the VoFs in the cell.
@@ -451,8 +454,14 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
             }
 
             if (!insideAtLeastOneVoF) {
-              particles.remove(lit());
+              particles.remove(lit);
             }
+            else {
+              ++lit;
+            }
+          }
+          else {
+            ++lit;
           }
         }
       }
@@ -490,7 +499,7 @@ AmrMesh::removeCoveredParticlesVoxels(ParticleContainer<P>& a_particles, const p
         particles.clear();
       }
       else if (isIrregular) {
-        for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        for (ListIterator<P> lit(particles); lit.ok();) {
           const P&        particle = lit();
           const RealVect& pos      = particle.position();
 
@@ -501,7 +510,10 @@ AmrMesh::removeCoveredParticlesVoxels(ParticleContainer<P>& a_particles, const p
           CH_assert(region.contains(iv));
 
           if (ebisBox.isCovered(iv)) {
-            particles.remove(lit());
+            particles.remove(lit);
+          }
+          else {
+            ++lit;
           }
         }
       }
@@ -560,13 +572,16 @@ AmrMesh::transferCoveredParticlesIF(ParticleContainer<P>&     a_particlesFrom,
       List<P>& particlesTo   = a_particlesTo[lvl][dit()].listItems();
 
       // Check if particles are outside the implicit function.
-      for (ListIterator<P> lit(particlesFrom); lit.ok(); ++lit) {
+      for (ListIterator<P> lit(particlesFrom); lit.ok();) {
         const RealVect& pos = lit().position();
 
         const Real f = implicitFunction->value(pos);
 
         if (f > tol) {
           particlesTo.transfer(lit);
+        }
+        else {
+          ++lit;
         }
       }
     }
@@ -612,7 +627,7 @@ AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesF
         particlesTo.catenate(particlesFrom);
       }
       else if (isIrregular) {
-        for (ListIterator<P> lit(particlesFrom); lit.ok(); ++lit) {
+        for (ListIterator<P> lit(particlesFrom); lit.ok();) {
           const P&        particle = lit();
           const RealVect& pos      = particle.position();
 
@@ -647,6 +662,12 @@ AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesF
             if (!insideAtLeastOneVoF) {
               particlesTo.transfer(lit);
             }
+            else {
+              ++lit;
+            }
+          }
+          else {
+            ++lit;
           }
         }
       }
@@ -691,7 +712,7 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFro
         particlesTo.catenate(particlesFrom);
       }
       else if (isIrregular) {
-        for (ListIterator<P> lit(particlesFrom); lit.ok(); ++lit) {
+        for (ListIterator<P> lit(particlesFrom); lit.ok();) {
           const P&        particle = lit();
           const RealVect& pos      = particle.position();
 
@@ -703,6 +724,9 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFro
 
           if (ebisBox.isCovered(iv)) {
             particlesTo.transfer(lit);
+          }
+          else {
+            ++lit;
           }
         }
       }
@@ -768,7 +792,7 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
       List<P>& ebParticles     = a_ebParticles[lvl][dit()].listItems();
       List<P>& domainParticles = a_domainParticles[lvl][dit()].listItems();
 
-      for (ListIterator<P> lit(activeParticles); lit.ok(); ++lit) {
+      for (ListIterator<P> lit(activeParticles); lit.ok();) {
         P& particle = lit();
 
         const RealVect newPos = particle.position();
@@ -823,6 +847,8 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
               }
               else {
                 ebParticles.add(lit());
+
+                lit++;
               }
             }
             else {
@@ -836,9 +862,17 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
               }
               else {
                 domainParticles.add(lit());
+
+                ++lit;
               }
             }
           }
+          else {
+            ++lit;
+          }
+        }
+        else {
+          ++lit;
         }
       }
     }
@@ -910,7 +944,7 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
       List<P>& ebParticles     = a_ebParticles[lvl][dit()].listItems();
       List<P>& domainParticles = a_domainParticles[lvl][dit()].listItems();
 
-      for (ListIterator<P> lit(activeParticles); lit.ok(); ++lit) {
+      for (ListIterator<P> lit(activeParticles); lit.ok();) {
         P& particle = lit();
 
         const RealVect newPos = particle.position();
@@ -957,7 +991,8 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
 
           // Particle bumped into something.
           if (contactDomain || contactEB) {
-            if (sEB <= sDomain) { // Crashed with EB "first".
+            if (sEB <= sDomain) {
+              // Crashed with EB "first".
               particle.position() = oldPos + sEB * path;
 
               if (a_deleteParticles) {
@@ -965,12 +1000,13 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
               }
               else {
                 ebParticles.add(lit());
+
+                ++lit;
               }
             }
-            else { // Crashed with domain "first".
-              const Real sSafety = std::max(0.0,
-                                            sDomain -
-                                              safety); // To prevent particles falling off the high side of the domain
+            else {
+              // Crashed with domain "first".
+              const Real sSafety = std::max(0.0, sDomain - safety);
 
               particle.position() = oldPos + sSafety * path;
 
@@ -979,9 +1015,17 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
               }
               else {
                 domainParticles.add(lit());
+
+                ++lit;
               }
             }
           }
+          else {
+            ++lit;
+          }
+        }
+        else {
+          ++lit;
         }
       }
     }

@@ -199,10 +199,12 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   }
 
   // Prepare for the next time step
-  m_timer.startEvent("Post-compute v/D");
+  m_timer.startEvent("Post-compute v");
   this->computeItoVelocities();
+  m_timer.stopEvent("Post-compute v");
+  m_timer.startEvent("Post-compute D");
   this->computeItoDiffusion();
-  m_timer.stopEvent("Post-compute v/D");
+  m_timer.stopEvent("Post-compute D");
 
   m_timer.startEvent("Compute J");
   this->computeCurrentDensity(m_currentDensity);
@@ -887,8 +889,10 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
   m_timer.startEvent("EB/Particle intersection");
   const bool deleteParticles = true;
   this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, deleteParticles);
-  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_toleranceEB);
   m_timer.stopEvent("EB/Particle intersection");
+  m_timer.startEvent("Remove covered");
+  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_toleranceEB);
+  m_timer.stopEvent("Remove covered");
 }
 
 void
