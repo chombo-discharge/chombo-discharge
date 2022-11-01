@@ -88,13 +88,9 @@ namespace Physics {
 	@param[in] a_time      Time
 	@param[in] a_pos       Position
 	@param[in] a_E         Electric field
-	@param[in] a_densities Mesh-based densities for the plasma species
       */
       Vector<Real>
-      computeItoDiffusion(const Real         a_time,
-                          const RealVect     a_pos,
-                          const RealVect     a_E,
-                          const Vector<Real> a_densities) const noexcept override;
+      computeItoDiffusion(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override;
 
     protected:
       /*!

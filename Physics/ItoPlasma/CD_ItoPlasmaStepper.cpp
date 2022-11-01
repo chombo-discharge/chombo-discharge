@@ -2236,20 +2236,18 @@ ItoPlasmaStepper::computeItoDiffusionLFA() noexcept
   }
 
   Vector<EBAMRCellData*> diffusionCoefficients = m_ito->getDiffusionFunctions();
-  Vector<EBAMRCellData*> densities             = m_ito->getDensities();
 
-  this->computeItoDiffusionLFA(diffusionCoefficients, densities, m_electricFieldFluid, m_time);
+  this->computeItoDiffusionLFA(diffusionCoefficients, m_electricFieldFluid, m_time);
 }
 
 void
-ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusionCoefficients,
-                                         const Vector<EBAMRCellData*>& a_densities,
-                                         const EBAMRCellData&          a_electricField,
-                                         const Real                    a_time) noexcept
+ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>& a_diffusionCoefficients,
+                                         const EBAMRCellData&    a_electricField,
+                                         const Real              a_time) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData>x2, EBAMRCellData, Real)");
+  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>, EBAMRCellData, Real)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoDiffusionLFA(Vector<EBAMRCellData>x2, EBAMRCellData, Real)" << endl;
+    pout() << m_name + "::computeItoDiffusionLFA(Vector<EBAMRCellData*>, EBAMRCellData, Real)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
@@ -2261,29 +2259,21 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusi
   // The mesh diffusion coefficients belong on the particle realm (they are the ItoSolver diffusion coefficients) but we need to run
   // the computation on the fluid realm. So, create some transient storage for that.
   Vector<EBAMRCellData> fluidScratchDiffusion(numPlasmaSpecies);
-  Vector<EBAMRCellData> fluidScratchDensities(numPlasmaSpecies);
   for (int i = 0; i < numPlasmaSpecies; i++) {
     m_amr->allocate(fluidScratchDiffusion[i], m_fluidRealm, m_plasmaPhase, 1);
-    m_amr->allocate(fluidScratchDensities[i], m_fluidRealm, m_plasmaPhase, 1);
-
-    // Copy particle realm data over to fluid realm
-    fluidScratchDensities[i].copy(*(a_densities[i]));
 
     CH_assert(a_diffusionCoefficients[i].getRealm() == m_particleRealm);
-    CH_assert(a_densities[i].getRealm() == m_particleRealm);
   }
 
   // Compute mesh-based diffusion coefficients on the fluid realm.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     Vector<LevelData<EBCellFAB>*> diffusionCoefficients(numPlasmaSpecies);
-    Vector<LevelData<EBCellFAB>*> densities(numPlasmaSpecies);
 
     for (int i = 0; i < numPlasmaSpecies; i++) {
       diffusionCoefficients[i] = &(*(fluidScratchDiffusion[i])[lvl]);
-      densities[i]             = &(*(fluidScratchDensities[i])[lvl]);
     }
 
-    this->computeItoDiffusionLFA(diffusionCoefficients, densities, *a_electricField[lvl], lvl, a_time);
+    this->computeItoDiffusionLFA(diffusionCoefficients, *a_electricField[lvl], lvl, a_time);
   }
 
   // Copy the fluid realm data over to the particle realm data and then coarsen and interpolate diffusion coefficients
@@ -2305,21 +2295,19 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusi
 }
 
 void
-ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>&       a_diffusionCoefficients,
-                                         const Vector<LevelData<EBCellFAB>*>& a_densities,
-                                         const LevelData<EBCellFAB>&          a_electricField,
-                                         const int                            a_level,
-                                         const Real                           a_time) noexcept
+ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>& a_diffusionCoefficients,
+                                         const LevelData<EBCellFAB>&    a_electricField,
+                                         const int                      a_level,
+                                         const Real                     a_time) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LD<EBCellFAB>*>x2, LD<EBCellFAB>, int, Real)");
+  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LD<EBCellFAB>*>, LD<EBCellFAB>, int, Real)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoDiffusionLFA(Vector<LD<EBCellFAB>*>x2, LD<EBCellFAB>, int, Real)" << endl;
+    pout() << m_name + "::computeItoDiffusionLFA(Vector<LD<EBCellFAB>*>, LD<EBCellFAB>, int, Real)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_diffusionCoefficients.size() == numPlasmaSpecies);
-  CH_assert(a_densities.size() == numPlasmaSpecies);
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
 
@@ -2327,7 +2315,6 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>&       a_
 
     // Populate the patch data.
     Vector<EBCellFAB*> diffusionCoefficients(numPlasmaSpecies);
-    Vector<EBCellFAB*> densities(numPlasmaSpecies);
 
     for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
@@ -2338,38 +2325,28 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>&       a_
       else {
         diffusionCoefficients[idx] = nullptr;
       }
-
-      densities[idx] = &(*a_densities[idx])[dit()];
     }
 
-    this->computeItoDiffusionLFA(diffusionCoefficients,
-                                 densities,
-                                 a_electricField[dit()],
-                                 a_level,
-                                 dit(),
-                                 dbl[dit()],
-                                 a_time);
+    this->computeItoDiffusionLFA(diffusionCoefficients, a_electricField[dit()], a_level, dit(), dbl[dit()], a_time);
   }
 }
 
 void
-ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCoefficients,
-                                         const Vector<EBCellFAB*>& a_densities,
-                                         const EBCellFAB&          a_electricField,
-                                         const int                 a_level,
-                                         const DataIndex           a_dit,
-                                         const Box                 a_box,
-                                         const Real                a_time) noexcept
+ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>& a_diffusionCoefficients,
+                                         const EBCellFAB&    a_electricField,
+                                         const int           a_level,
+                                         const DataIndex     a_dit,
+                                         const Box           a_box,
+                                         const Real          a_time) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, level, dit, time)");
+  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(Patch)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoDiffusionLFA(velo, E, level, dit, time)" << endl;
+    pout() << m_name + "::computeItoDiffusionLFA(Patch)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_diffusionCoefficients.size() == numPlasmaSpecies);
-  CH_assert(a_densities.size() == numPlasmaSpecies);
   CH_assert(a_electricField.nComp() == SpaceDim);
 
   // Geometric information that we need.
@@ -2381,30 +2358,18 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCo
   const FArrayBox& electricFieldReg = a_electricField.getFArrayBox();
 
   Vector<FArrayBox*> diffCoReg(numPlasmaSpecies);
-  Vector<FArrayBox*> densitiesReg(numPlasmaSpecies);
 
   for (int i = 0; i < numPlasmaSpecies; i++) {
-    diffCoReg[i]    = &(a_diffusionCoefficients[i]->getFArrayBox());
-    densitiesReg[i] = &(a_densities[i]->getFArrayBox());
-
-    CH_assert(a_densities[i]->nComp() == 1);
+    diffCoReg[i] = &(a_diffusionCoefficients[i]->getFArrayBox());
   }
-
-  // Storage needed for interfacing into the physics.
-  Vector<Real> cellDensities(numPlasmaSpecies);
 
   // Regular kernel definition.
   auto regularKernel = [&](const IntVect& iv) -> void {
     const RealVect pos = probLo + dx * (RealVect(iv) + 0.5 * RealVect::Unit);
     const RealVect E   = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
 
-    // Make grid densities
-    for (int i = 0; i < numPlasmaSpecies; i++) {
-      cellDensities[i] = (*densitiesReg[i])(iv, 0);
-    }
-
     // Compute diffusion coefficients.
-    const Vector<Real> diffusion = m_physics->computeItoDiffusion(a_time, pos, E, cellDensities);
+    const Vector<Real> diffusion = m_physics->computeItoDiffusion(a_time, pos, E);
 
     // Put diffusion coefficients into correct storage.
     for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -2423,13 +2388,8 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCo
     const RealVect E   = RealVect(D_DECL(a_electricField(vof, 0), a_electricField(vof, 1), a_electricField(vof, 2)));
     const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
 
-    // Make grid densities
-    for (int i = 0; i < numPlasmaSpecies; i++) {
-      cellDensities[i] = (*a_densities[i])(vof, 0);
-    }
-
     // Compute diffusion coefficients.
-    const Vector<Real> diffusion = m_physics->computeItoDiffusion(a_time, pos, E, cellDensities);
+    const Vector<Real> diffusion = m_physics->computeItoDiffusion(a_time, pos, E);
 
     // Put diffusion in the appropriate place.
     for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {

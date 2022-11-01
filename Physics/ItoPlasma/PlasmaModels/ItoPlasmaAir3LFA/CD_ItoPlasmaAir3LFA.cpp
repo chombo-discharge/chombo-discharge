@@ -228,10 +228,7 @@ ItoPlasmaAir3LFA::computeItoMobilities(const Real a_time, const RealVect a_pos, 
 }
 
 Vector<Real>
-ItoPlasmaAir3LFA::computeItoDiffusion(const Real         a_time,
-                                      const RealVect     a_pos,
-                                      const RealVect     a_E,
-                                      const Vector<Real> a_cdr_densities) const noexcept
+ItoPlasmaAir3LFA::computeItoDiffusion(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept
 {
   Vector<Real> D(3);
 

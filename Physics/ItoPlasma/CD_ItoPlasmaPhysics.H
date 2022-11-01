@@ -146,14 +146,10 @@ namespace Physics {
 	@param[in] a_time Time
 	@param[in] a_pos  Position
 	@param[in] a_E    Electric field
-	@param[in] a_densities Mesh-based densities for the plasma species
 	@return Must return a vector of non-negative diffusion coefficients for the plasma species
       */
       virtual Vector<Real>
-      computeItoDiffusion(const Real         a_time,
-                          const RealVect     a_pos,
-                          const RealVect     a_E,
-                          const Vector<Real> a_densities) const noexcept = 0;
+      computeItoDiffusion(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept = 0;
 
       /*!
 	@brief Advance particles. 

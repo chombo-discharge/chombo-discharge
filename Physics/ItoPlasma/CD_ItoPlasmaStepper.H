@@ -603,35 +603,30 @@ namespace Physics {
       /*!
 	@brief Compute mesh-based diffusion coefficients for LFA coupling
 	@param[out] a_diffusionCoefficients Mesh-based diffusion coefficients. Must be defined on the particle realm. 
-	@param[in]  a_densities             Ito solver densities. Must be defined on the particle realm. 
 	@param[in]  a_electricField         Electric field. Must be defined on the fluid realm. 
 	@param[in]  a_time                  Time
       */
       virtual void
-      computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusionCoefficient,
-                             const Vector<EBAMRCellData*>& a_densities,
-                             const EBAMRCellData&          a_electricField,
-                             const Real                    a_time) noexcept;
+      computeItoDiffusionLFA(Vector<EBAMRCellData*>& a_diffusionCoefficient,
+                             const EBAMRCellData&    a_electricField,
+                             const Real              a_time) noexcept;
 
       /*!
 	@brief Level-routine when computing mesh-based mobilities for LFA coupling
 	@param[out] a_diffusionCoefficients Diffusion coefficients. Must be defined on the fluid realm. 
-	@param[in]  a_densities             Ito solver densities. Must be defined on the fluid realm. 
 	@param[in]  a_electricField         Electric field. Must be defined on the fluid realm. 
 	@param[in]  a_level                 Grid level
 	@param[in]  a_time                  Time
       */
       virtual void
-      computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>&       a_diffusionCoefficient,
-                             const Vector<LevelData<EBCellFAB>*>& a_densities,
-                             const LevelData<EBCellFAB>&          a_electricField,
-                             const int                            a_level,
-                             const Real                           a_time) noexcept;
+      computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>& a_diffusionCoefficient,
+                             const LevelData<EBCellFAB>&    a_electricField,
+                             const int                      a_level,
+                             const Real                     a_time) noexcept;
 
       /*!
 	@brief Patch-routine when computing mesh-based diffusion coefficients in the LFA coupling
 	@param[out] a_diffusionCoefficients Diffusion coefficients. Must be defined on the fluid realm. 
-	@param[in]  a_densities             Ito solver densities. Must be defined on the fluid realm. 
 	@param[in]  a_electricField         Electric field. Must be defined on the fluid realm. 
 	@param[in]  a_level                 Grid level
 	@param[in]  a_time                  Time
@@ -641,13 +636,12 @@ namespace Physics {
 	@param[in]  a_time                  Time      
       */
       virtual void
-      computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCoefficient,
-                             const Vector<EBCellFAB*>& a_densities,
-                             const EBCellFAB&          a_E,
-                             const int                 a_level,
-                             const DataIndex           a_dit,
-                             const Box                 a_box,
-                             const Real                a_time) noexcept;
+      computeItoDiffusionLFA(Vector<EBCellFAB*>& a_diffusionCoefficient,
+                             const EBCellFAB&    a_E,
+                             const int           a_level,
+                             const DataIndex     a_dit,
+                             const Box           a_box,
+                             const Real          a_time) noexcept;
 
       /*!
 	@brief Compute the IonSolver particle diffusion coefficients in the LEA coupling regime
