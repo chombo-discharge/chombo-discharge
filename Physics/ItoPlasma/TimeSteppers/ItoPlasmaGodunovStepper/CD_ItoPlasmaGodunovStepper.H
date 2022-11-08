@@ -134,6 +134,13 @@ namespace Physics {
       setOldPositions() noexcept;
 
       /*!
+	@brief Set an MPI barrier if using debug mode. 
+	@details This defaults to ParallelOps::barrier() if m_debug=true
+      */
+      virtual void
+      barrier() const noexcept;
+
+      /*!
 	@brief Remap the input point particles
 	@param[inout] a_particles List of particle containers to remap. Indices must correspond to indices in the ItoSolvers
 	@param[in]    a_subset    Particle subset to remap.
