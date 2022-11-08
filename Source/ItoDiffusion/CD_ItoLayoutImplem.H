@@ -189,19 +189,19 @@ ItoLayout<T>::setTime(const int a_step, const Real a_time, const Real a_dt)
 
 template <class T>
 void
-ItoLayout<T>::sortParticlesByCell(const ItoSolver::WhichContainer a_whichContainer)
+ItoLayout<T>::organizeParticlesByCell(const ItoSolver::WhichContainer a_whichContainer)
 {
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
-    iter()->sortParticlesByCell(a_whichContainer);
+    iter()->organizeParticlesByCell(a_whichContainer);
   }
 }
 
 template <class T>
 void
-ItoLayout<T>::sortParticlesByPatch(const ItoSolver::WhichContainer a_whichContainer)
+ItoLayout<T>::organizeParticlesByPatch(const ItoSolver::WhichContainer a_whichContainer)
 {
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
-    iter()->sortParticlesByPatch(a_whichContainer);
+    iter()->organizeParticlesByPatch(a_whichContainer);
   }
 }
 

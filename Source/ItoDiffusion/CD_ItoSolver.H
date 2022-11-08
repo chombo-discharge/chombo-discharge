@@ -759,14 +759,14 @@ public:
     @param[in] a_container Container to be sorted. 
   */
   virtual void
-  sortParticlesByCell(const WhichContainer a_container);
+  organizeParticlesByCell(const WhichContainer a_container);
 
   /*!
     @brief Sort the input particle container by patch.
     @param[in] a_container Container to be sorted. 
   */
   virtual void
-  sortParticlesByPatch(const WhichContainer a_container);
+  organizeParticlesByPatch(const WhichContainer a_container);
 
   /*!
     @brief Make superparticles for a full container -- this is the AMR version that users will usually call. 

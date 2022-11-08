@@ -2899,29 +2899,29 @@ ItoSolver::getPhase() const
 }
 
 void
-ItoSolver::sortParticlesByCell(const WhichContainer a_container)
+ItoSolver::organizeParticlesByCell(const WhichContainer a_container)
 {
-  CH_TIME("ItoSolver::sortParticlesByCell");
+  CH_TIME("ItoSolver::organizeParticlesByCell");
   if (m_verbosity > 5) {
-    pout() << m_name + "::sortParticlesByCell" << endl;
+    pout() << m_name + "::organizeParticlesByCell" << endl;
   }
 
   ParticleContainer<ItoParticle>& particles = this->getParticles(a_container);
 
-  particles.sortParticlesByCell();
+  particles.organizeParticlesByCell();
 }
 
 void
-ItoSolver::sortParticlesByPatch(const WhichContainer a_container)
+ItoSolver::organizeParticlesByPatch(const WhichContainer a_container)
 {
-  CH_TIME("ItoSolver::sortParticlesByPatch");
+  CH_TIME("ItoSolver::organizeParticlesByPatch");
   if (m_verbosity > 5) {
-    pout() << m_name + "::sortParticlesByPatch" << endl;
+    pout() << m_name + "::organizeParticlesByPatch" << endl;
   }
 
   ParticleContainer<ItoParticle>& particles = this->getParticles(a_container);
 
-  particles.sortParticlesByPatch();
+  particles.organizeParticlesByPatch();
 }
 
 void

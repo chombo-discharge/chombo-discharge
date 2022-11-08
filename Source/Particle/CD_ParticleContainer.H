@@ -340,14 +340,14 @@ public:
     @details This will fill m_cellSortedParticles and destroy the patch-sorted particles. 
   */
   void
-  sortParticlesByCell();
+  organizeParticlesByCell();
 
   /*!
     @brief Sort particles by cell
     @details This will fill m_particles from m_cellSortedParticles and destroy the cell-sorted particles. 
   */
   void
-  sortParticlesByPatch();
+  organizeParticlesByPatch();
 
   /*!
     @brief Add particles to container

@@ -532,9 +532,9 @@ BrownianWalkerStepper::makeSuperParticles()
   //       need to call cell/patch sorting methods.
 
   if (m_ppc > 0) {
-    m_solver->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
+    m_solver->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
     m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
-    m_solver->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+    m_solver->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   }
 }
 

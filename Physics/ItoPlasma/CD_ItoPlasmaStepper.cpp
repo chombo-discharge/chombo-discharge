@@ -468,9 +468,9 @@ ItoPlasmaStepper::initialData()
   this->initialSigma();
 
   // Make superparticles.
-  m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
+  m_ito->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
   m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
-  m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+  m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
 
   // Solve Poisson equation and compute the E-field
   this->solvePoisson();
@@ -1037,9 +1037,9 @@ ItoPlasmaStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int
   m_sigmaSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
   if (m_regridSuperparticles) {
-    m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
+    m_ito->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
     m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
-    m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+    m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   }
 
   // Redeposit particles
@@ -3195,7 +3195,7 @@ ItoPlasmaStepper::computePhysicsDt(const EBAMRCellData& a_electricField) noexcep
   Real minDt = std::numeric_limits<Real>::max();
 
   // Sort by cell so we can compute the number of particles.
-  m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
+  m_ito->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
 
   // Compute the number of reactive particles per cell and put the result on the fluid realm.
   if (m_dualGrid) {
@@ -3214,7 +3214,7 @@ ItoPlasmaStepper::computePhysicsDt(const EBAMRCellData& a_electricField) noexcep
   }
 
   // Sort by patch.
-  m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+  m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
 
   return minDt;
 }
@@ -3521,9 +3521,9 @@ ItoPlasmaStepper::loadBalanceParticleRealm(Vector<Vector<int>>&             a_pr
     // If we make superparticles during regrids, do it here so we can better estimate the computational loads for each patch. This way, if a grid is removed the realistic
     // load estimate of the underlying grid(s) is improved.
     if (m_regridSuperparticles) {
-      particles.sortParticlesByCell();
+      particles.organizeParticlesByCell();
       loadBalanceProxySolvers[i]->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
-      particles.sortParticlesByPatch();
+      particles.organizeParticlesByPatch();
     }
   }
 

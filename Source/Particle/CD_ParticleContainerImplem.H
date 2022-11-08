@@ -393,9 +393,9 @@ ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex a_dit)
 
 template <class P>
 void
-ParticleContainer<P>::sortParticlesByCell()
+ParticleContainer<P>::organizeParticlesByCell()
 {
-  CH_TIME("ParticleContainer<P>::sortParticlesByPatch");
+  CH_TIME("ParticleContainer<P>::organizeParticlesByPatch");
 
   CH_assert(m_isDefined);
 
@@ -418,9 +418,9 @@ ParticleContainer<P>::sortParticlesByCell()
 
 template <class P>
 void
-ParticleContainer<P>::sortParticlesByPatch()
+ParticleContainer<P>::organizeParticlesByPatch()
 {
-  CH_TIME("ParticleContainer<P>::sortParticlesByPatch");
+  CH_TIME("ParticleContainer<P>::organizeParticlesByPatch");
 
   CH_assert(m_isDefined);
 

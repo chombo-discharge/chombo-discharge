@@ -521,27 +521,27 @@ McPhoto::sortPhotonsByCell(const WhichContainer& a_which)
 
   switch (a_which) {
   case WhichContainer::Photons: {
-    m_photons.sortParticlesByCell();
+    m_photons.organizeParticlesByCell();
 
     break;
   }
   case WhichContainer::Bulk: {
-    m_bulkPhotons.sortParticlesByCell();
+    m_bulkPhotons.organizeParticlesByCell();
 
     break;
   }
   case WhichContainer::EB: {
-    m_ebPhotons.sortParticlesByCell();
+    m_ebPhotons.organizeParticlesByCell();
 
     break;
   }
   case WhichContainer::Domain: {
-    m_domainPhotons.sortParticlesByCell();
+    m_domainPhotons.organizeParticlesByCell();
 
     break;
   }
   case WhichContainer::Source: {
-    m_sourcePhotons.sortParticlesByCell();
+    m_sourcePhotons.organizeParticlesByCell();
 
     break;
   }
@@ -563,27 +563,27 @@ McPhoto::sortPhotonsByPatch(const WhichContainer& a_which)
 
   switch (a_which) {
   case WhichContainer::Photons: {
-    m_photons.sortParticlesByPatch();
+    m_photons.organizeParticlesByPatch();
 
     break;
   }
   case WhichContainer::Bulk: {
-    m_bulkPhotons.sortParticlesByPatch();
+    m_bulkPhotons.organizeParticlesByPatch();
 
     break;
   }
   case WhichContainer::EB: {
-    m_ebPhotons.sortParticlesByPatch();
+    m_ebPhotons.organizeParticlesByPatch();
 
     break;
   }
   case WhichContainer::Domain: {
-    m_domainPhotons.sortParticlesByPatch();
+    m_domainPhotons.organizeParticlesByPatch();
 
     break;
   }
   case WhichContainer::Source: {
-    m_sourcePhotons.sortParticlesByPatch();
+    m_sourcePhotons.organizeParticlesByPatch();
 
     break;
   }

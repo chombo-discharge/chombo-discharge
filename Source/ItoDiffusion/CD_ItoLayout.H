@@ -212,14 +212,14 @@ public:
     @param[in] a_whichContainer Which ItoSolver container to sort by cell. 
   */
   virtual void
-  sortParticlesByCell(const ItoSolver::WhichContainer a_whichContainer);
+  organizeParticlesByCell(const ItoSolver::WhichContainer a_whichContainer);
 
   /*!
     @brief Sort ItoSolver particles by patch -- this is done for all solvers. 
     @param[in] a_whichContainer Which ItoSolver container to sort by cell. 
   */
   virtual void
-  sortParticlesByPatch(const ItoSolver::WhichContainer a_whichContainer);
+  organizeParticlesByPatch(const ItoSolver::WhichContainer a_whichContainer);
 
   /*!
     @brief Rearrange the input container particle into new superparticles -- this is done for all solvers. 

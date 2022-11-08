@@ -72,13 +72,14 @@ ItoPlasmaGodunovStepper::allocate()
 }
 
 void
-ItoPlasmaGodunovStepper::barrier() const noexcept{
+ItoPlasmaGodunovStepper::barrier() const noexcept
+{
   CH_TIME("ItoPlasmaGodunovStepper::barrier");
   if (m_verbosity > 5) {
     pout() << m_name + "::barrier" << endl;
   }
 
-  if(m_profile) {
+  if (m_profile) {
     ParallelOps::barrier();
   }
 }
@@ -183,7 +184,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   // Sort the particles and photons per cell so we can call reaction algorithms
   this->barrier();
   m_timer.startEvent("Sort by cell");
-  m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
+  m_ito->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Source);
   m_timer.stopEvent("Sort by cell");
@@ -205,7 +206,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   // Sort particles per patch.
   this->barrier();
   m_timer.startEvent("Sort by patch");
-  m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+  m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
   m_timer.stopEvent("Sort by patch");
@@ -299,9 +300,9 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
 
   // Regrid superparticles.
   if (m_regridSuperparticles) {
-    m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
+    m_ito->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
     m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
-    m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+    m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   }
 
   // Now let Ihe ito solver deposit its actual particles... In the above it deposit m_rhoDaggerParticles.
