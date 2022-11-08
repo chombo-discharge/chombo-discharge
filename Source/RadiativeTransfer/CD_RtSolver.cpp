@@ -398,4 +398,17 @@ RtSolver::getSpecies()
   return m_rtSpecies;
 }
 
+void
+RtSolver::parseVerbosity() noexcept
+{
+  CH_TIME("RtSolver::parseVerbosity");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::parseVerbosity" << endl;
+  }
+
+  ParmParse pp(m_name.c_str());
+
+  pp.get("verbosity", m_verbosity);
+}
+
 #include <CD_NamespaceFooter.H>
