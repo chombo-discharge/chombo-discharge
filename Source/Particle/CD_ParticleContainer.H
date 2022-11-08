@@ -163,6 +163,12 @@ public:
   transferMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask);
 
   /*!
+    @brief Sort particles according to the < operator in the particle.
+  */
+  void
+  sortParticles() noexcept;
+
+  /*!
     @brief Clear all particles
   */
   void
@@ -191,7 +197,7 @@ public:
     @brief Is cell-sorted or not
   */
   bool
-  isCellSorted() const;
+  isOrganizedByCell() const;
 
   /*!
     @brief Get finest AMR level
@@ -535,7 +541,7 @@ protected:
   /*!
     @brief Check if particle container is "cell sorted". 
   */
-  bool m_isCellSorted;
+  bool m_isOrganizedByCell;
 
   /*!
     @brief AMR grids

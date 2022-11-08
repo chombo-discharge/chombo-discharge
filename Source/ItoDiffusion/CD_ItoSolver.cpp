@@ -772,9 +772,9 @@ ItoSolver::intersectParticles(ParticleContainer<ItoParticle>& a_particles,
     pout() << m_name + "::intersectParticles(ParticleContainerx3, EBIntersection, bool)" << endl;
   }
 
-  CH_assert(!a_particles.isCellSorted());
-  CH_assert(!a_ebParticles.isCellSorted());
-  CH_assert(!a_domainParticles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
+  CH_assert(!a_ebParticles.isOrganizedByCell());
+  CH_assert(!a_domainParticles.isOrganizedByCell());
 
   constexpr Real tolerance = 0.0;
 
@@ -1104,7 +1104,7 @@ ItoSolver::readCheckpointLevelParticles(HDF5Handle& a_handle, const int a_level)
   ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
   CH_assert(m_checkpointing == WhichCheckpoint::Particles);
-  CH_assert(!particles.isCellSorted());
+  CH_assert(!particles.isOrganizedByCell());
 
   const std::string str = m_name + "_particlesP";
 
@@ -1450,7 +1450,7 @@ ItoSolver::depositConductivity(EBAMRCellData&                  a_phi,
   }
 
   CH_assert(a_phi[0]->nComp() == 1);
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   if (m_isMobile) {
     this->depositParticles<ItoParticle, &ItoParticle::conductivity>(a_phi,
@@ -1486,7 +1486,7 @@ ItoSolver::depositDiffusivity(EBAMRCellData&                  a_phi,
   }
 
   CH_assert(a_phi[0]->nComp() == 1);
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   this->depositParticles<ItoParticle, &ItoParticle::diffusivity>(a_phi,
                                                                  a_particles,
@@ -1517,7 +1517,7 @@ ItoSolver::depositEnergyDensity(EBAMRCellData&                  a_phi,
   }
 
   CH_assert(a_phi[0]->nComp() == 1);
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   this->depositParticles<ItoParticle, &ItoParticle::totalEnergy>(a_phi,
                                                                  a_particles,
@@ -1534,7 +1534,7 @@ ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<ItoPar
   }
 
   CH_assert(a_phi[0]->nComp() == 1);
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   DataOps::setValue(a_phi, 0.0);
   DataOps::setValue(m_scratch, 0.0);
@@ -1565,7 +1565,7 @@ ItoSolver::computeAverageDiffusion(EBAMRCellData& a_phi, ParticleContainer<ItoPa
   }
 
   CH_assert(a_phi[0]->nComp() == 1);
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   DataOps::setValue(a_phi, 0.0);
   DataOps::setValue(m_scratch, 0.0);
@@ -1596,7 +1596,7 @@ ItoSolver::computeAverageEnergy(EBAMRCellData& a_phi, ParticleContainer<ItoParti
   }
 
   CH_assert(a_phi[0]->nComp() == 1);
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   DataOps::setValue(a_phi, 0.0);
   DataOps::setValue(m_scratch, 0.0);

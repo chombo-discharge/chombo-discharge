@@ -118,6 +118,12 @@ public:
   operator!=(const GenericParticle<M, N>& a_other) const;
 
   /*!
+    @brief Particle comparison operator. Returns lexicographical ordering.
+  */
+  inline bool
+  operator<(const GenericParticle<M, N>& a_other) const noexcept;
+
+  /*!
     @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
   */
   inline virtual int

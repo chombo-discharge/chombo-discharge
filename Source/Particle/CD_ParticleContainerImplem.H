@@ -17,14 +17,15 @@
 
 // Our includes
 #include <CD_ParticleContainer.H>
+#include <CD_ParticleOps.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 template <class P>
 ParticleContainer<P>::ParticleContainer()
 {
-  m_isDefined    = false;
-  m_isCellSorted = false;
+  m_isDefined         = false;
+  m_isOrganizedByCell = false;
 }
 
 template <class P>
@@ -83,8 +84,8 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   this->setupGrownGrids(base, m_finestLevel);
   this->setupParticleData(base, m_finestLevel);
 
-  m_isDefined    = true;
-  m_isCellSorted = false;
+  m_isDefined         = true;
+  m_isOrganizedByCell = false;
 }
 
 template <class P>
@@ -156,10 +157,25 @@ ParticleContainer<P>::setupParticleData(const int a_base, const int a_finestLeve
 }
 
 template <class P>
-bool
-ParticleContainer<P>::isCellSorted() const
+void
+ParticleContainer<P>::sortParticles() noexcept
 {
-  return m_isCellSorted;
+  CH_TIME("ParticleContainer<P>::sortParticles()");
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
+      List<P>& particles = (*m_particles[lvl])[dit()].listItems();
+
+      particles.sort();
+    }
+  }
+}
+
+template <class P>
+bool
+ParticleContainer<P>::isOrganizedByCell() const
+{
+  return m_isOrganizedByCell;
 }
 
 template <class P>
@@ -193,7 +209,7 @@ ParticleContainer<P>::getParticles()
 {
   CH_assert(m_isDefined);
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::getParticles - particles are sorted by cell!");
   }
 
@@ -206,7 +222,7 @@ ParticleContainer<P>::getParticles() const
 {
   CH_assert(m_isDefined);
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
     MayDay::Abort("ParticleContainer<P>::getParticles - particles are sorted by cell!");
   }
 
@@ -255,7 +271,7 @@ ParticleContainer<P>::operator[](const int a_lvl)
 {
   CH_assert(m_isDefined);
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::operator[](a_lvl) - particles are sorted by cell!");
   }
 
@@ -268,7 +284,7 @@ ParticleContainer<P>::operator[](const int a_level) const
 {
   CH_assert(m_isDefined);
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::operator[](a_lvl) - particles are sorted by cell!");
   }
 
@@ -281,7 +297,7 @@ ParticleContainer<P>::getCellParticles()
 {
   CH_assert(m_isDefined);
 
-  if (!m_isCellSorted) {
+  if (!m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::getCellParticles()- particles are not sorted by cell!");
   }
 
@@ -294,7 +310,7 @@ ParticleContainer<P>::getCellParticles() const
 {
   CH_assert(m_isDefined);
 
-  if (!m_isCellSorted) {
+  if (!m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::getCellParticles()- particles are not sorted by cell!");
   }
 
@@ -307,7 +323,7 @@ ParticleContainer<P>::getCellParticles(const int a_level)
 {
   CH_assert(m_isDefined);
 
-  if (!m_isCellSorted) {
+  if (!m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::getCellParticles(level)- particles are not sorted by cell!");
   }
 
@@ -322,7 +338,7 @@ ParticleContainer<P>::getCellParticles(const int a_level) const
 
   CH_assert(m_isDefined);
 
-  if (!m_isCellSorted) {
+  if (!m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::getCellParticles(level)- particles are not sorted by cell!");
   }
 
@@ -337,7 +353,7 @@ ParticleContainer<P>::getCellParticles(BinFab<P>& cellParticles, const int a_lvl
 
   CH_assert(m_isDefined);
 
-  if (!m_isCellSorted) {
+  if (!m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::getCellParticles - particles are not sorted by cell!");
   }
 
@@ -353,7 +369,7 @@ ParticleContainer<P>::getCellParticlesDestructive(BinFab<P>& cellParticles, cons
 
   CH_assert(m_isDefined);
 
-  if (!m_isCellSorted) {
+  if (!m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::getCellParticlesDestructive - particles are not sorted by cell!");
   }
 
@@ -369,7 +385,7 @@ ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex a_dit)
 
   CH_assert(m_isDefined);
 
-  if (!m_isCellSorted) {
+  if (!m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::getCellParticles(int, dit) - particles are not sorted by cell!");
   }
 
@@ -384,7 +400,7 @@ ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex a_dit)
 
   CH_assert(m_isDefined);
 
-  if (!m_isCellSorted) {
+  if (!m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::getCellParticles(int, dit) - particles are not sorted by cell!");
   }
 
@@ -399,7 +415,7 @@ ParticleContainer<P>::organizeParticlesByCell()
 
   CH_assert(m_isDefined);
 
-  if (!m_isCellSorted) {
+  if (!m_isOrganizedByCell) {
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl = m_grids[lvl];
@@ -412,7 +428,7 @@ ParticleContainer<P>::organizeParticlesByCell()
       }
     }
 
-    m_isCellSorted = true;
+    m_isOrganizedByCell = true;
   }
 }
 
@@ -424,7 +440,7 @@ ParticleContainer<P>::organizeParticlesByPatch()
 
   CH_assert(m_isDefined);
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
 
     constexpr int comp = 0;
 
@@ -446,7 +462,7 @@ ParticleContainer<P>::organizeParticlesByPatch()
       }
     }
 
-    m_isCellSorted = false;
+    m_isOrganizedByCell = false;
   }
 }
 
@@ -458,7 +474,7 @@ ParticleContainer<P>::addParticles(const List<P>& a_particles)
 
   CH_assert(m_isDefined);
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::addParticles(List<P>) - particles are sorted by cell!");
   }
 
@@ -484,7 +500,7 @@ ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles)
 
   CH_assert(m_isDefined);
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::addParticlesDestructive(List<P>) - particles are sorted by cell!");
   }
 
@@ -512,7 +528,7 @@ ParticleContainer<P>::addParticles(const BinFab<P>& a_particles, const int a_lvl
   CH_assert(m_isDefined);
   CH_assert(m_grids[a_lvl].get(a_dit) == a_particles.getRegion());
 
-  if (!m_isCellSorted) {
+  if (!m_isOrganizedByCell) {
     MayDay::Abort("ParticleContainer<P>::addParticles(BinFab<P>) - particles are not sorted by cell!");
   }
 
@@ -539,7 +555,7 @@ ParticleContainer<P>::addParticlesDestructive(BinFab<P>& a_particles, const int 
   CH_assert(m_isDefined);
   CH_assert(m_grids[a_lvl].get(a_dit) == a_particles.getRegion());
 
-  if (!m_isCellSorted) {
+  if (!m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::addParticles(BinFab<P>) - particles are not sorted by cell!");
   }
 
@@ -565,7 +581,7 @@ ParticleContainer<P>::addParticles(const ParticleContainer<P>& a_otherContainer)
 
   CH_assert(m_isDefined);
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
   }
 
@@ -614,7 +630,7 @@ ParticleContainer<P>::addParticlesDestructive(ParticleContainer<P>& a_otherConta
 
   CH_assert(m_isDefined);
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
   }
 
@@ -661,11 +677,11 @@ ParticleContainer<P>::transferParticles(ParticleContainer<P>& a_otherContainer)
   CH_assert(m_isDefined);
   CH_assert(this->getRealm() == a_otherContainer.getRealm());
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::transferParticles(ParticleContainer<P>) - particles are sorted by cell!");
   }
 
-  if (a_otherContainer.isCellSorted()) {
+  if (a_otherContainer.isOrganizedByCell()) {
     MayDay::Error(
       "ParticleContainer<P>::transferParticles(ParticleContainer<P>) - other particles are sorted by cell!");
   }
@@ -686,7 +702,7 @@ ParticleContainer<P>::transferParticles(AMRParticles<P>& a_particles)
 
   CH_assert(m_isDefined);
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::transferParticles(ParticleContainer<P>) - particles are sorted by cell!");
   }
 
@@ -742,7 +758,7 @@ ParticleContainer<P>::remap()
 
   CH_assert(m_isDefined);
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::remap() - particles are sorted by cell!");
   }
 
@@ -792,7 +808,7 @@ ParticleContainer<P>::levelRemap()
 
   CH_assert(m_isDefined);
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
   }
 
@@ -809,7 +825,7 @@ ParticleContainer<P>::levelRemap(const int a_lvl)
 
   CH_assert(m_isDefined);
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
   }
 
@@ -828,7 +844,7 @@ ParticleContainer<P>::preRegrid(const int a_lmin)
 
   CH_assert(m_isDefined);
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
   }
 
@@ -864,7 +880,7 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 
   CH_assert(m_isDefined);
 
-  if (m_isCellSorted) {
+  if (m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::regrid(...) - particles are sorted by cell!");
   }
 

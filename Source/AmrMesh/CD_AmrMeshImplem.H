@@ -338,7 +338,7 @@ AmrMesh::removeCoveredParticlesIF(ParticleContainer<P>&     a_particles,
 {
   CH_TIME("AmrMesh::removeCoveredParticlesIF");
 
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   // Figure out the implicit function
   RefCountedPtr<BaseIF> implicitFunction;
@@ -396,7 +396,7 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
 {
   CH_TIME("AmrMesh::removeCoveredParticlesIF");
 
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   // Get the realm where the particles live.
   const std::string whichRealm = a_particles.getRealm();
@@ -475,7 +475,7 @@ AmrMesh::removeCoveredParticlesVoxels(ParticleContainer<P>& a_particles, const p
 {
   CH_TIME("AmrMesh::removeCoveredParticlesVoxels");
 
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   // Get the realm where the particles live.
   const std::string whichRealm = a_particles.getRealm();
@@ -530,8 +530,8 @@ AmrMesh::transferCoveredParticlesIF(ParticleContainer<P>&     a_particlesFrom,
 {
   CH_TIME("AmrMesh::transferCoveredParticlesIF");
 
-  CH_assert(!a_particlesFrom.isCellSorted());
-  CH_assert(!a_particlesTo.isCellSorted());
+  CH_assert(!a_particlesFrom.isOrganizedByCell());
+  CH_assert(!a_particlesTo.isOrganizedByCell());
 
   // Figure out the implicit function
   RefCountedPtr<BaseIF> implicitFunction;
@@ -597,8 +597,8 @@ AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesF
 {
   CH_TIME("AmrMesh::transferCoveredParticlesDiscrete");
 
-  CH_assert(!a_particlesFrom.isCellSorted());
-  CH_assert(!a_particlesTo.isCellSorted());
+  CH_assert(!a_particlesFrom.isOrganizedByCell());
+  CH_assert(!a_particlesTo.isOrganizedByCell());
 
   // Get the realm where the particles live.
   const std::string realmFrom = a_particlesFrom.getRealm();
@@ -683,8 +683,8 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFro
 {
   CH_TIME("AmrMesh::transferCoveredParticlesVoxels");
 
-  CH_assert(!a_particlesFrom.isCellSorted());
-  CH_assert(!a_particlesTo.isCellSorted());
+  CH_assert(!a_particlesFrom.isOrganizedByCell());
+  CH_assert(!a_particlesTo.isOrganizedByCell());
 
   // Get the realm where the particles live.
   const std::string realmFrom = a_particlesFrom.getRealm();

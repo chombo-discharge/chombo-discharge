@@ -93,7 +93,7 @@ ItoSolver::depositParticles(EBAMRCellData&             a_phi,
   }
 
   CH_assert(a_phi[0]->nComp() == 1);
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   // TLDR: First, deposit onto the mesh as usual (as if the EB wasn't there). If the user asks for it, he can redistribute mass in order to
   //       conserve total mass (if that is important). But the corresponding scheme will be O(1) accurate.
@@ -120,7 +120,7 @@ ItoSolver::depositParticles(EBAMRCellData&             a_phi,
   }
 
   CH_assert(a_phi[0]->nComp() == 1);
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   // TLDR: First, deposit onto the mesh as usual (as if the EB wasn't there). If the user asks for it, he can redistribute mass in order to
   //       conserve total mass (if that is important). But the corresponding scheme will be O(1) accurate.
