@@ -406,7 +406,7 @@ RtSolver::parseVerbosity() noexcept
     pout() << m_name + "::parseVerbosity" << endl;
   }
 
-  ParmParse pp(m_name.c_str());
+  ParmParse pp(m_className.c_str());
 
   pp.get("verbosity", m_verbosity);
 }

@@ -101,6 +101,7 @@ McPhoto::parseOptions()
   // For registering the CIC deposition mask.
   m_haloBuffer = 1;
 
+  this->parseVerbosity();
   this->parsePseudoPhotons();
   this->parsePhotoGeneration();
   this->parseSourceType();
@@ -119,6 +120,7 @@ McPhoto::parseRuntimeOptions()
     pout() << m_name + "::parseRuntimeOptions" << endl;
   }
 
+  this->parseVerbosity();
   this->parsePseudoPhotons();
   this->parsePhotoGeneration();
   this->parseSourceType();
