@@ -78,8 +78,8 @@ SphereArray::SphereArray(const Real     a_radius,
   };
 
   // Make the slow and fast unions.
-  m_slowUnion =
-    std::make_shared<EBGeometry::Union<Real, Sphere>>((const std::vector<std::shared_ptr<Sphere>>&)spheres, false);
+  m_slowUnion = std::make_shared<EBGeometry::Union<Real, Sphere>>((const std::vector<std::shared_ptr<Sphere>>&)spheres,
+                                                                  false);
   m_fastUnion = std::make_shared<
     EBGeometry::UnionBVH<Real, Sphere, AABB, SphereArray::K>>((const std::vector<std::shared_ptr<Sphere>>&)spheres,
                                                               false,

@@ -4937,7 +4937,7 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time,
   const bool isCathode = a_E.dotProduct(a_normal) < 0;
   const bool isAnode   = a_E.dotProduct(a_normal) > 0;
 
-  const Real E   = a_E.vectorLength();
+  const Real E = a_E.vectorLength();
 
   // Compute the outflow fluxes.
   for (int i = 0; i < m_numCdrSpecies; i++) {

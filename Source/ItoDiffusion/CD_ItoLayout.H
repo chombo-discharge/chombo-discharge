@@ -43,7 +43,7 @@ public:
   /*!
     @brief Destructor (does nothing).
   */
-  ~ItoLayout();
+  virtual ~ItoLayout();
 
   /*!
     @brief Return phase where the solvers are defined. 

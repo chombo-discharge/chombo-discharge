@@ -32,7 +32,7 @@ namespace DataParser {
     @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
     @note xColumn = 0 is the FIRST column, xColumn=1 is the SECOND column and so on. 
   */
-  static LookupTable1D<2>
+  LookupTable1D<2>
   simpleFileReadASCII(const std::string       a_fileName,
                       const int               a_xColumn     = 0,
                       const int               a_yColumn     = 1,
@@ -51,7 +51,7 @@ namespace DataParser {
     @param[in] a_yColumn     Which column to use as the y-column. 
     @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
   */
-  static LookupTable1D<2>
+  LookupTable1D<2>
   fractionalFileReadASCII(const std::string       a_fileName,
                           const std::string       a_startRead,
                           const std::string       a_stopRead,

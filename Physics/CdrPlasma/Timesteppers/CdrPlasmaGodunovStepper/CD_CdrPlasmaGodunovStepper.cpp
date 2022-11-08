@@ -740,7 +740,7 @@ CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(const Real a_dt)
     RefCountedPtr<CdrSolver>&  solver  = solverIt();
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
-    const EBAMRCellData& state  = solver->getPhi();
+    const EBAMRCellData& state = solver->getPhi();
     //    const EBAMRCellData& source = solver->getSource();
 
     EBAMRCellData& extrap = storage->getExtrap();
@@ -910,7 +910,7 @@ CdrPlasmaGodunovStepper::extrapolateCdrToDomain()
 
   // Run through the CDR solvers and populate the vectors.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    RefCountedPtr<CdrStorage>&      storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
     cdrDensities.push_back(&(storage->getExtrap()));   // Already known and computed in extrapolateWithSourceTerm
     cdrGradients.push_back(&(storage->getGradient())); // Should already be computed in computeGradients

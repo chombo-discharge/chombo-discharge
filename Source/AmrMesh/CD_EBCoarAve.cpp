@@ -430,7 +430,7 @@ EBCoarAve::arithmeticAverage(EBFaceFAB&       a_coarData,
   const int xDoLoop     = (a_dir == 0) ? 0 : 1;
   const int yDoLoop     = (a_dir == 1) ? 0 : 1;
 #if CH_SPACEDIM == 3
-  const int zDoLoop     = (a_dir == 2) ? 0 : 1;
+  const int zDoLoop = (a_dir == 2) ? 0 : 1;
 #endif
 
   // Regular faces
@@ -511,7 +511,7 @@ EBCoarAve::harmonicAverage(EBFaceFAB&       a_coarData,
   const int xDoLoop     = (a_dir == 0) ? 0 : 1;
   const int yDoLoop     = (a_dir == 1) ? 0 : 1;
 #if CH_SPACEDIM == 3
-  const int zDoLoop     = (a_dir == 2) ? 0 : 1;
+  const int zDoLoop = (a_dir == 2) ? 0 : 1;
 #endif
 
   BaseFab<Real>&       coarDataReg = a_coarData.getSingleValuedFAB();
@@ -599,8 +599,8 @@ EBCoarAve::conservativeAverage(EBFaceFAB&       a_coarData,
   const int finePerCoar = std::pow(m_refRat, SpaceDim - 1);
   const int xDoLoop     = (a_dir == 0) ? 0 : 1;
   const int yDoLoop     = (a_dir == 1) ? 0 : 1;
-#if CH_SPACEDIM == 3  
-  const int zDoLoop     = (a_dir == 2) ? 0 : 1;
+#if CH_SPACEDIM == 3
+  const int zDoLoop = (a_dir == 2) ? 0 : 1;
 #endif
 
   BaseFab<Real>&       coarDataReg = a_coarData.getSingleValuedFAB();

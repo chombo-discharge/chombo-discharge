@@ -577,7 +577,7 @@ CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
   CH_assert(a_facePhi.nComp() == 1);
   CH_assert(a_faceVelocity.nComp() == 1);
 
-  const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     for (int dir = 0; dir < SpaceDim; dir++) {
