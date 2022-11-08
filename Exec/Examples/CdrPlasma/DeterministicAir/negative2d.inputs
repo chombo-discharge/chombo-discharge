@@ -128,6 +128,7 @@ CdrCTU.gmg_smoother         = red_black               # Relaxation type. 'jacobi
 # ====================================================================================================
 # EddingtonSP1 class options
 # ====================================================================================================
+EddingtonSP1.verbosity           = -1           # Solver verbosity
 EddingtonSP1.stationary          = true         # Stationary solver
 EddingtonSP1.reflectivity        = 0.           # Reflectivity
 EddingtonSP1.use_tga             = false        # Use TGA for integration

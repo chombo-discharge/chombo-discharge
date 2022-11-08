@@ -122,6 +122,7 @@ ItoSolver.deposition_cf       = halo          # Coarse-fine deposition. interp, 
 # ====================================================================================================
 # McPhoto class options
 # ====================================================================================================
+McPhoto.verbosity          = -1            # Solver verbosity
 McPhoto.instantaneous      = true          # Instantaneous transport or not
 McPhoto.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical photons)
 McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence

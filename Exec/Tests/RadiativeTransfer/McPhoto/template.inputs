@@ -81,6 +81,7 @@ Driver.refine_dielectrics              = -1            # Refine dielectric surfa
 # algorithm and one would use McPhoto.source_type = deterministic. For CFD models one would probably
 # work with a volumetric rate, in which one could draw the number of Photons from a Poisson distribution. 
 # ====================================================================================================
+McPhoto.verbosity          = -1            # Solver verbosity
 McPhoto.instantaneous     = false         # Instantaneous transport or not
 McPhoto.max_photons       = 1             # Maximum no. generated in a cell (<= 0 yields physical Photons)
 McPhoto.random_kappa      = true          # Randomize absorption length (taken from Photon implementation)

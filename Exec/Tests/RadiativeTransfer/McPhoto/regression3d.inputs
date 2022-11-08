@@ -63,6 +63,7 @@ Driver.refine_dielectrics              = -1            # Refine dielectric surfa
 # ====================================================================================================
 # MC_PHOTO CLASS OPTIONS
 # ====================================================================================================
+McPhoto.verbosity          = -1            # Solver verbosity
 McPhoto.instantaneous      = true          # Instantaneous transport or not
 McPhoto.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical Photons)
 McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
