@@ -703,8 +703,6 @@ CdrPlasmaGodunovStepper::computeCdrGradients()
   }
 
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    const int idx = solverIt.index();
-
     // Fetch solver and associated storage.
     RefCountedPtr<CdrSolver>&  solver  = solverIt();
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
@@ -743,7 +741,7 @@ CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(const Real a_dt)
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
     const EBAMRCellData& state  = solver->getPhi();
-    const EBAMRCellData& source = solver->getSource();
+    //    const EBAMRCellData& source = solver->getSource();
 
     EBAMRCellData& extrap = storage->getExtrap();
 
@@ -779,8 +777,6 @@ CdrPlasmaGodunovStepper::extrapolateCdrToEB()
 
   // Run through the solvers and fetch the various data used for the extrapolation.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    const RefCountedPtr<CdrSolver>& solver = solverIt();
-
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
     // Note: For the CDR densities we use the extrap data holder in the scratch storage. The routine extrapolateWithSourceTerm will have
@@ -914,7 +910,6 @@ CdrPlasmaGodunovStepper::extrapolateCdrToDomain()
 
   // Run through the CDR solvers and populate the vectors.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    const RefCountedPtr<CdrSolver>& solver  = solverIt();
     RefCountedPtr<CdrStorage>&      storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
     cdrDensities.push_back(&(storage->getExtrap()));   // Already known and computed in extrapolateWithSourceTerm
@@ -1491,7 +1486,6 @@ CdrPlasmaGodunovStepper::computeDt()
       const int idx = solverIt.index();
 
       const Real dtA  = advectionDt[idx];
-      const Real dtD  = diffusionDt[idx];
       const Real dtAD = advectionDiffusionDt[idx];
 
       // Check if this solver should use implicit or explicit diffusion.
@@ -1518,8 +1512,6 @@ CdrPlasmaGodunovStepper::computeDt()
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
 
-      const Real dtA  = advectionDt[idx];
-      const Real dtD  = diffusionDt[idx];
       const Real dtAD = advectionDiffusionDt[idx];
 
       // Switch to explicit diffusion if we can.

@@ -59,8 +59,6 @@ ItoPlasmaGodunovStepper::allocate()
   m_rhoDaggerParticles.resize(numItoSpecies);
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    const RefCountedPtr<ItoSolver>& solver = solverIt();
-
     const int idx = solverIt.index();
 
     m_conductivityParticles[idx] = new ParticleContainer<PointParticle>();

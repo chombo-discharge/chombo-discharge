@@ -4937,8 +4937,6 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time,
   const bool isCathode = a_E.dotProduct(a_normal) < 0;
   const bool isAnode   = a_E.dotProduct(a_normal) > 0;
 
-  // Compute the magnitude of the electric field both in SI units and Townsend units
-  const Real N   = m_gasDensity(a_pos);
   const Real E   = a_E.vectorLength();
 
   // Compute the outflow fluxes.
