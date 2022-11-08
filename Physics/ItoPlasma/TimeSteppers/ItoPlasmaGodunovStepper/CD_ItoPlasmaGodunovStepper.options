@@ -6,7 +6,7 @@ ItoPlasmaGodunovStepper.profile                 = false          # Turn on/off r
 ItoPlasmaGodunovStepper.plt_vars                = none           # 'conductivity', 'current_density', 'particles_per_patch'
 ItoPlasmaGodunovStepper.dual_grid               = true           # Turn on/off dual-grid functionality
 ItoPlasmaGodunovStepper.load_balance            = true           # Turn on/off load balancing
-ItoPlasmaGodunovStepper.load_index              = -1             # Which particle containers to use for load balancing (-1 => all)
+ItoPlasmaGodunovStepper.load_indices            = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoPlasmaGodunovStepper.load_per_cell           = 1.0            # Default load per grid cell.
 ItoPlasmaGodunovStepper.box_sorting             = morton         # Box sorting when load balancing
 ItoPlasmaGodunovStepper.particles_per_cell      = 64             # Max computational particles per cell

@@ -208,7 +208,6 @@ ItoPlasmaStepper::parseLoadBalance() noexcept
   std::string str;
 
   pp.get("load_balance", m_loadBalance);
-  pp.get("load_index", m_loadBalanceIndex);
   pp.get("load_per_cell", m_loadPerCell);
 
   // Box sorting for load balancing
@@ -227,6 +226,18 @@ ItoPlasmaStepper::parseLoadBalance() noexcept
   }
   else {
     const std::string err = "ItoPlasmaStepper::parseLoadBalance - 'box_sorting = " + str + "' not recognized";
+
+    MayDay::Error(err.c_str());
+  }
+
+  // Get the load balancing index.
+  const int numIndices = pp.countval("load_indices");
+
+  if (numIndices > 0) {
+    pp.getarr("load_indices", m_loadBalanceIndices, 0, numIndices);
+  }
+  else {
+    const std::string err = "ItoPlasmaStepper::parseLoadBalance - 'load_indices' argument has zero entries";
 
     MayDay::Error(err.c_str());
   }
@@ -3556,14 +3567,25 @@ ItoPlasmaStepper::getLoadBalanceSolvers() const noexcept
 
   Vector<RefCountedPtr<ItoSolver>> loadBalanceProxySolvers;
 
-  if (m_loadBalanceIndex < 0) {
+  // If there's an index < 0 we load balance everything.
+  bool loadBalanceAll = false;
+  for (int i = 0; i < m_loadBalanceIndices.size(); i++) {
+    if (m_loadBalanceIndices[i] < 0) {
+      loadBalanceAll = true;
+    }
+  }
+
+  if (loadBalanceAll) {
     for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
       loadBalanceProxySolvers.push_back(solverIt());
     }
   }
   else {
-    RefCountedPtr<ItoSolver>& solver = m_ito->getSolvers()[m_loadBalanceIndex];
-    loadBalanceProxySolvers.push_back(solver);
+    for (int i = 0; i < m_loadBalanceIndices.size(); i++) {
+      RefCountedPtr<ItoSolver>& solver = m_ito->getSolvers()[i];
+
+      loadBalanceProxySolvers.push_back(solver);
+    }
   }
 
   return loadBalanceProxySolvers;

@@ -1037,12 +1037,9 @@ namespace Physics {
       int m_mergeInterval;
 
       /*!
-	@brief Solver index used when load-balancing the particle solvers.
-	@details If m_loadBalanceIndex we use the total number of particles in the patch as a metric. If
-	m_loadBalanceIndex >= 0 we use the solver corresponding to m_loadBalanceIndex. This needs to be
-	consistent with the definitions of the species in the ItoPlasmaPhysics implementation that is used. 
+	@brief Solver indices used when load-balancing the particle solvers.
       */
-      int m_loadBalanceIndex;
+      Vector<int> m_loadBalanceIndices;
 
       /*!
 	@brief The "background" load per cell when using particle load balancing.
