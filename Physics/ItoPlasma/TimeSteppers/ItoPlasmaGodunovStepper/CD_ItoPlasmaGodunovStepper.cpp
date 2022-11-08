@@ -945,7 +945,6 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<
 
     const int idx = solverIt.index();
 
-    const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
     const int  Z         = species->getChargeNumber();
 

@@ -267,8 +267,6 @@ LookupTable1D<N>::getEntry(const Real a_x) const
         break;
       }
       case OutOfRangeStrategy::Linear: {
-        const int size = m_data.size();
-
         const Real idxLo = 0;
         const Real idxHi = 1;
 

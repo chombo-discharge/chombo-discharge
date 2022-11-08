@@ -101,8 +101,7 @@ CdrPlasmaJSON::parseIntegrator()
 
   ParmParse pp("CdrPlasmaJSON");
 
-  std::string        str;
-  ReactionIntegrator integrator;
+  std::string str;
 
   pp.get("integrator", str);
   pp.get("chemistry_dt", m_chemistryDt);
@@ -216,8 +215,6 @@ CdrPlasmaJSON::sanityCheckSpecies() const
   for (const auto& s : m_rteSpeciesMap) {
     allSpecies.emplace_back(s.first);
   }
-
-  const int numSpecies = allSpecies.size();
 
   // Sort the container.
   std::sort(allSpecies.begin(), allSpecies.end());
@@ -748,11 +745,6 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
   json initData;
   if (a_json.contains("initial data")) {
     initData = a_json["initial data"];
-
-    bool addUniformData   = false;
-    bool addGauss2        = false;
-    bool addGauss4        = false;
-    bool addHeightProfile = false;
 
     // Uniform density
     Real uniformDensity = 0.0;
@@ -2886,10 +2878,6 @@ CdrPlasmaJSON::parsePlasmaReactionDescription(const int a_reactionIndex, const j
     description = reactionString;
   }
 
-  // Check if reaction string had a wildcard '@'. If it did we replace the wildcard with the corresponding species. This means that we need to
-  // build additional reactions.
-  const bool containsWildcard = this->containsWildcard(reactionString);
-
   // If the reaction string contained a wildcard, we append the description with the wildcard name.
   if (this->containsWildcard(reactionString)) {
     description = description + " " + a_wildcard;
@@ -4030,7 +4018,6 @@ CdrPlasmaJSON::getPlotVariables(const Vector<Real>     a_cdrDensities,
   // God how I hate the Chombo Vector.
   const std::vector<Real>&     cdrDensities = ((Vector<Real>&)a_cdrDensities).stdVector();
   const std::vector<RealVect>& cdrGradients = ((Vector<RealVect>&)a_cdrGradients).stdVector();
-  const std::vector<Real>&     rteDensities = ((Vector<Real>&)a_rteDensities).stdVector();
 
   // These may or may not be needed.
   const std::vector<Real> cdrMobilities            = this->computePlasmaSpeciesMobilities(a_pos, a_E, cdrDensities);
@@ -4046,9 +4033,6 @@ CdrPlasmaJSON::getPlotVariables(const Vector<Real>     a_cdrDensities,
   // Townsend ionization and attachment coefficients. May or may not be used.
   const Real alpha = this->computeAlpha(E, a_pos);
   const Real eta   = this->computeEta(E, a_pos);
-
-  // Grid cell volume
-  const Real vol = std::pow(a_dx, SpaceDim);
 
   // If using the LEA, the energy of each species should be plotted as well.
   for (const auto& energySolverMap : m_cdrHasEnergySolver) {
@@ -4093,14 +4077,10 @@ CdrPlasmaJSON::getPlotVariables(const Vector<Real>     a_cdrDensities,
   }
 
   if (m_plotAlpha) {
-    const Real alpha = this->computeAlpha(E, a_pos);
-
     ret.push_back(alpha);
   }
 
   if (m_plotEta) {
-    const Real alpha = this->computeEta(E, a_pos);
-
     ret.push_back(eta);
   }
 
@@ -4452,8 +4432,6 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
   // Get list of reactants and products.
   const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants();
   const std::list<int>& neutralReactants = reaction.getNeutralReactants();
-  const std::list<int>& plasmaProducts   = reaction.getPlasmaProducts();
-  const std::list<int>& photonProducts   = reaction.getPhotonProducts();
 
   // Figure out how to compute the reaction rate.
   Real k = 0.0;
@@ -4819,9 +4797,7 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real         a_time,
   const bool isAnode   = a_E.dotProduct(a_normal) > 0;
 
   // Compute the magnitude of the electric field both in SI units and Townsend units
-  const Real N   = m_gasDensity(a_pos);
-  const Real E   = a_E.vectorLength();
-  const Real Etd = E / (Units::Td * N);
+  const Real E = a_E.vectorLength();
 
   // Compute temperatures
   const std::vector<Real> cdrTemperatures =
@@ -4964,7 +4940,6 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time,
   // Compute the magnitude of the electric field both in SI units and Townsend units
   const Real N   = m_gasDensity(a_pos);
   const Real E   = a_E.vectorLength();
-  const Real Etd = E / (Units::Td * N);
 
   // Compute the outflow fluxes.
   for (int i = 0; i < m_numCdrSpecies; i++) {
@@ -5381,10 +5356,9 @@ CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&          a_cdrSources,
     // Reaction and species involved in the reaction.
     const CdrPlasmaReactionJSON& reaction = m_plasmaReactions[i];
 
-    const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants();
-    const std::list<int>& neutralReactants = reaction.getNeutralReactants();
-    const std::list<int>& plasmaProducts   = reaction.getPlasmaProducts();
-    const std::list<int>& photonProducts   = reaction.getPhotonProducts();
+    const std::list<int>& plasmaReactants = reaction.getPlasmaReactants();
+    const std::list<int>& plasmaProducts  = reaction.getPlasmaProducts();
+    const std::list<int>& photonProducts  = reaction.getPhotonProducts();
 
     // Compute the rate. This returns a volumetric rate in units of #/(m^3 * s) (or #/(m^2 * s) for Cartesian 2D).
     const Real k = this->computePlasmaReactionRate(i,

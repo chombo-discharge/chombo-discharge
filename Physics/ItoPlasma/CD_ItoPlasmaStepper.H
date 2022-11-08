@@ -1322,7 +1322,7 @@ namespace Physics {
       parsePlotVariables() noexcept;
     };
   } // namespace ItoPlasma
-};  // namespace Physics
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

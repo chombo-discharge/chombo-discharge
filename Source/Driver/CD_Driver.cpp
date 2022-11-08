@@ -2712,10 +2712,7 @@ Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
   // Instantiate m_tags. When we wrote the tags we put a floating point value of 0 where we didn't have tags
   // and a floating point value of 1 where we had.
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const Box        box     = dbl.get(dit());
-    const EBCellFAB& tmp     = scratch[dit()];
-    const EBISBox&   ebisbox = tmp.getEBISBox();
-    const EBGraph&   ebgraph = ebisbox.getEBGraph();
+    const Box        box = dbl.get(dit());
     const IntVectSet ivs(box);
 
     DenseIntVectSet& taggedCells = (*m_tags[a_level])[dit()];

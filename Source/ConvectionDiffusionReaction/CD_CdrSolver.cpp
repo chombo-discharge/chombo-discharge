@@ -579,12 +579,10 @@ CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
 
   const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_lvl];
   const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
-  const ProblemDomain&     domain = m_amr->getDomains()[a_lvl];
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box      cellBox = dbl[dit()];
     const EBISBox& ebisbox = ebisl[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
 
     for (int dir = 0; dir < SpaceDim; dir++) {
       EBFaceFAB&       flux = a_flux[dit()][dir];
@@ -738,8 +736,6 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
 
         // Regular grid data.
         BaseFab<Real>&       regFluxFace = fluxFace.getSingleValuedFAB();
-        const BaseFab<Real>& regPhiFace  = phiFace.getSingleValuedFAB();
-        const BaseFab<Real>& regVelFace  = velFace.getSingleValuedFAB();
         const BaseFab<Real>& regDcoFace  = dcoFace.getSingleValuedFAB();
 
         // Compute advective flux
@@ -777,7 +773,6 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
           const VolIndex hiVoF = face.getVoF(Side::Hi);
           const VolIndex loVoF = face.getVoF(Side::Lo);
 
-          Real&       faceFlux  = fluxFace(face, m_comp);
           const Real& cellPhiLo = phiCell(loVoF, m_comp);
           const Real& cellPhiHi = phiCell(hiVoF, m_comp);
           const Real& faceDco   = dcoFace(face, m_comp);

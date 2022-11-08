@@ -25,7 +25,7 @@ inline KMCDualStateReaction<State, T>::KMCDualStateReaction(const std::list<size
   m_rhsReactives    = a_rhsReactives;
   m_rhsNonReactives = a_rhsNonReactives;
 
-  CH_assert(a_lhsReactives > 0);
+  CH_assert(a_lhsReactives.size() > 0);
 
   this->computeStateChanges();
 }

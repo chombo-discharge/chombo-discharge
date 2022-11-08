@@ -177,7 +177,6 @@ CdrPlasmaTagger::tagCells(EBAMRTags& a_tags)
       for (DataIterator dit(dbl); dit.ok(); ++dit) {
         const Box      box     = dbl[dit()];
         const EBISBox& ebisbox = ebisl[dit()];
-        const EBGraph& ebgraph = ebisbox.getEBGraph();
 
         // Create data holders that hold which cells were coarsened and which cells were refined
         DenseIntVectSet coarsenTags(box, false); // Cells that will be coarsened
@@ -246,8 +245,6 @@ CdrPlasmaTagger::refineCellsBox(DenseIntVectSet&          a_refinedCells,
   if (m_verbosity > 5) {
     pout() << m_name + "::refineCellsBox(...)" << endl;
   }
-
-  constexpr int comp = 0;
 
   // Get a handle to the single-valued data.
   Vector<FArrayBox*> tracersReg;
@@ -331,8 +328,6 @@ CdrPlasmaTagger::coarsenCellsBox(DenseIntVectSet&          a_coarsenedCells,
   if (m_verbosity > 5) {
     pout() << m_name + "::coarsenCellsBox(...)" << endl;
   }
-
-  constexpr int comp = 0;
 
   // Get a handle to the single-valued data.
   Vector<FArrayBox*> tracersReg;

@@ -1791,8 +1791,6 @@ ItoPlasmaStepper::remapParticles(const SpeciesSubset             a_speciesSubset
     RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solverIt.index();
-
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
     const bool charged   = (species->getChargeNumber() != 0);
@@ -1905,8 +1903,6 @@ ItoPlasmaStepper::depositParticles(const SpeciesSubset             a_speciesSubs
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
-
-    const int idx = solverIt.index();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
@@ -2265,7 +2261,6 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>& a_diffusionCoef
 
   CH_assert(a_electricField.getRealm() == m_fluidRealm);
   CH_assert(a_diffusionCoefficients.size() == numPlasmaSpecies);
-  CH_assert(a_densities.size() == numPlasmaSpecies);
 
   // The mesh diffusion coefficients belong on the particle realm (they are the ItoSolver diffusion coefficients) but we need to run
   // the computation on the fluid realm. So, create some transient storage for that.
@@ -2273,7 +2268,7 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>& a_diffusionCoef
   for (int i = 0; i < numPlasmaSpecies; i++) {
     m_amr->allocate(fluidScratchDiffusion[i], m_fluidRealm, m_plasmaPhase, 1);
 
-    CH_assert(a_diffusionCoefficients[i].getRealm() == m_particleRealm);
+    CH_assert(a_diffusionCoefficients[i]->getRealm() == m_particleRealm);
   }
 
   // Compute mesh-based diffusion coefficients on the fluid realm.
@@ -2559,7 +2554,7 @@ ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBAMRCellData& a_meanEnergi
     pout() << m_name + "::computeReactiveMaeanEnergiesPerCell(EBAMRCellData)" << endl;
   }
 
-  CH_assert(meanEnergies.getRealm() == m_particleRealm);
+  CH_assert(a_meanEnergies.getRealm() == m_particleRealm);
 
   DataOps::setValue(a_meanEnergies, 0.0);
 
@@ -2807,7 +2802,6 @@ ItoPlasmaStepper::advanceReactionNetwork(EBCellFAB&       a_particlesPerCell,
   // Geometric information that we require.
   const RealVect probLo  = m_amr->getProbLo();
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_dit];
-  const EBISBox& ebgraph = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_dit];
 
   const FArrayBox& electricFieldReg = a_electricField.getFArrayBox();
 
@@ -2992,7 +2986,6 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
   // Geometric information that we need.
   const RealVect probLo  = m_amr->getProbLo();
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level][a_dit];
-  const EBISBox& ebgraph = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level][a_dit];
 
   // List of valid grid cells
   const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_particleRealm)[a_level])[a_dit];

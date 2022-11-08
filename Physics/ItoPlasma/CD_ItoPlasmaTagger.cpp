@@ -170,7 +170,6 @@ ItoPlasmaTagger::tagCells(EBAMRTags& a_tags)
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
         const Box      box     = dbl.get(dit());
         const EBISBox& ebisbox = ebisl[dit()];
-        const EBGraph& ebgraph = ebisbox.getEBGraph();
 
         const IntVectSet irreg_ivs = ebisbox.getIrregIVS(box);
         const IntVectSet prev_tags = IntVectSet((*a_tags[lvl])[dit()]);
@@ -216,7 +215,7 @@ ItoPlasmaTagger::tagCells(EBAMRTags& a_tags)
   int glo = 1;
   int loc = got_new_tags ? 1 : 0;
 
-  const int result = MPI_Allreduce(&loc, &glo, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+  MPI_Allreduce(&loc, &glo, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
 
   got_new_tags = (glo == 1) ? true : false;
 #endif

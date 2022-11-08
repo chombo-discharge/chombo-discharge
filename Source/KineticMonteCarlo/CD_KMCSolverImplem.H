@@ -323,9 +323,6 @@ KMCSolver<R, State, T>::stepTau(State& a_state, const ReactionList& a_reactions,
 {
   CH_TIME("KMCSolver::stepTau(State, ReactionList, Real)");
 
-  const size_t numReactions = a_reactions.size();
-
-  // Compute propensities.
   const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
 
   this->stepTau(a_state, a_reactions, propensities, a_dt);

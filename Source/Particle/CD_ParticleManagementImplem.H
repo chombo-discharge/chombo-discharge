@@ -455,7 +455,6 @@ namespace ParticleManagement {
   ParticleManagement::partitionParticles(const T a_numParticles)
   {
 #ifdef CH_MPI
-    const T numProcs  = T(numProc());
     const T quotient  = a_numParticles / numProc();
     const T remainder = a_numParticles % numProc();
 

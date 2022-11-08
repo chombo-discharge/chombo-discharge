@@ -1174,7 +1174,6 @@ FieldSolver::writeMultifluidData(EBAMRCellData&           a_output,
 
   const int numComp = a_data[0]->nComp();
 
-  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   const bool reallyMultiPhase = !(ebisSol.isNull());
@@ -1280,11 +1279,8 @@ FieldSolver::writeMultifluidData(EBAMRCellData&           a_output,
             for (int comp = 0; comp < numComp; comp++) {
 
               auto kernel = [&](const IntVect& iv) -> void {
-                const bool coveredGas = ebisBoxGas.isCovered(iv);
-                const bool regularGas = ebisBoxGas.isRegular(iv);
-                const bool irregGas   = ebisBoxGas.isIrregular(iv);
-
-                const bool coveredSolid = ebisBoxSolid.isCovered(iv);
+                const bool coveredGas   = ebisBoxGas.isCovered(iv);
+                const bool irregGas     = ebisBoxGas.isIrregular(iv);
                 const bool regularSolid = ebisBoxSolid.isRegular(iv);
                 const bool irregSolid   = ebisBoxSolid.isIrregular(iv);
 

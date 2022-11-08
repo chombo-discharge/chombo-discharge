@@ -59,7 +59,7 @@ namespace DataParser {
                           const int               a_yColumn     = 1,
                           const std::vector<char> a_ignoreChars = {'#', '/'});
 
-}; // namespace DataParser
+} // namespace DataParser
 
 #include <CD_NamespaceFooter.H>
 

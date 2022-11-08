@@ -639,9 +639,8 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
     m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->getPhase());
 
   // Grids and EBIS information for this grid level.
-  const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_lvl];
-  const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
-  const Real               dx    = m_amr->getDx()[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const Real               dx  = m_amr->getDx()[a_lvl];
 
   // Grid loop
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
@@ -2638,7 +2637,6 @@ CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>    
 
   // Iterate through patches on this level.
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box&     box     = dbl.get(dit());
     const EBISBox& ebisBox = ebisl[dit()];
     const EBGraph& ebgraph = ebisBox.getEBGraph();
 
@@ -3564,9 +3562,8 @@ CdrPlasmaStepper::projectFlux(LevelData<BaseIVFAB<Real>>&       a_projectedFlux,
 
   // Iterate through grid patches.
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box&     box     = dbl.get(dit());
+
     const EBISBox& ebisbox = ebisl[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
 
     BaseIVFAB<Real>&       projectedFlux = a_projectedFlux[dit()];
     const BaseIVFAB<Real>& flux          = a_flux[dit()];
@@ -3604,9 +3601,7 @@ CdrPlasmaStepper::projectDomain(EBAMRIFData& a_projectedFlux, const EBAMRIFData&
     CH_assert(a_projectedFlux[lvl]->nComp() == 1);
     CH_assert(a_flux[lvl]->nComp() == SpaceDim);
 
-    // Get grid and EB information on this level.
-    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
     // Stop criterion for our face iteration loop. We only do boundary faces.
     const FaceStop::WhichFaces stopCrit = FaceStop::AllBoundaryOnly;
@@ -3712,7 +3707,6 @@ CdrPlasmaStepper::resetDielectricCells(EBAMRIVData& a_data) const
 
     // Get handle to grid information on this level.
     const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];
-    const Real               dx   = m_amr->getDx()[lvl];
     const MFLevelGrid&       mflg = *m_amr->getMFLevelGrid(m_realm)[lvl];
 
     // Grid loop -- go through all patches.
@@ -4593,7 +4587,6 @@ CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
   if (numVars > 0) {
 
     const int numCdrSpecies = m_physics->getNumCdrSpecies();
-    const int numRteSpecies = m_physics->getNumRtSpecies();
 
     // Compute the electric field
     EBAMRCellData E;
