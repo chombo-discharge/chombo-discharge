@@ -39,7 +39,6 @@ Tesselation::Tesselation()
   // Binary tree
 
   Real zCoord = 0.0;
-  bool useBVH = true;
 
   ParmParse pp("Tesselation");
 

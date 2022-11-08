@@ -216,7 +216,6 @@ EBCoarAve::harmonicAverage(EBCellFAB&       a_coarData,
   const Box&        coarBox      = m_eblgCoFi.getDBL()[a_datInd];
   const Box         refiBox      = Box(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
   const EBISBox&    ebisBoxCoar  = m_eblgCoFi.getEBISL()[a_datInd];
-  const EBISBox&    ebisBoxFine  = m_eblgFine.getEBISL()[a_datInd];
   const IntVectSet& coarIrregIVS = ebisBoxCoar.getIrregIVS(coarBox);
 
   // Regular cells.
@@ -430,7 +429,7 @@ EBCoarAve::arithmeticAverage(EBFaceFAB&       a_coarData,
   const int finePerCoar = std::pow(m_refRat, SpaceDim - 1);
   const int xDoLoop     = (a_dir == 0) ? 0 : 1;
   const int yDoLoop     = (a_dir == 1) ? 0 : 1;
-#ifdef CH_SPACEDIM == 3
+#if CH_SPACEDIM == 3
   const int zDoLoop     = (a_dir == 2) ? 0 : 1;
 #endif
 
@@ -502,8 +501,6 @@ EBCoarAve::harmonicAverage(EBFaceFAB&       a_coarData,
   CH_assert(m_isDefined);
   CH_assert(a_fineInterv.size() == a_coarInterv.size());
 
-  const Real dxCoar = 1.0;
-
   const Box&       coarBox      = m_eblgCoFi.getDBL()[a_datInd];
   const Box        coarFaceBox  = surroundingNodes(coarBox, a_dir);
   const EBISBox&   ebisBoxCoar  = m_eblgCoFi.getEBISL()[a_datInd];
@@ -513,7 +510,9 @@ EBCoarAve::harmonicAverage(EBFaceFAB&       a_coarData,
   const int finePerCoar = std::pow(m_refRat, SpaceDim - 1);
   const int xDoLoop     = (a_dir == 0) ? 0 : 1;
   const int yDoLoop     = (a_dir == 1) ? 0 : 1;
+#if CH_SPACEDIM == 3
   const int zDoLoop     = (a_dir == 2) ? 0 : 1;
+#endif
 
   BaseFab<Real>&       coarDataReg = a_coarData.getSingleValuedFAB();
   const BaseFab<Real>& fineDataReg = a_fineData.getSingleValuedFAB();
@@ -600,7 +599,9 @@ EBCoarAve::conservativeAverage(EBFaceFAB&       a_coarData,
   const int finePerCoar = std::pow(m_refRat, SpaceDim - 1);
   const int xDoLoop     = (a_dir == 0) ? 0 : 1;
   const int yDoLoop     = (a_dir == 1) ? 0 : 1;
+#if CH_SPACEDIM == 3  
   const int zDoLoop     = (a_dir == 2) ? 0 : 1;
+#endif
 
   BaseFab<Real>&       coarDataReg = a_coarData.getSingleValuedFAB();
   const BaseFab<Real>& fineDataReg = a_fineData.getSingleValuedFAB();

@@ -329,10 +329,6 @@ MFHelmholtzOpFactory::defineMultigridLevels()
           auto coarJump = RefCountedPtr<LevelData<BaseIVFAB<Real>>>(
             new LevelData<BaseIVFAB<Real>>(dblCoar, m_nComp, nghost * IntVect::Zero, irregFact));
 
-          const LevelData<MFCellFAB>&   fineAcoef      = *m_mgAcoef[amrLevel].back();
-          const LevelData<MFFluxFAB>&   fineBcoef      = *m_mgBcoef[amrLevel].back();
-          const LevelData<MFBaseIVFAB>& fineBcoefIrreg = *m_mgBcoefIrreg[amrLevel].back();
-
           DataOps::setValue(*coarJump, 0.0);
 
           // This is a special object for coarsening jump data between MG levels.
