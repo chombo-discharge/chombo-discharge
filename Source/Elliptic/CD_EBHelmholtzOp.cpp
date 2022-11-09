@@ -132,6 +132,8 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                        m_nComp,
                        m_eblg.getEBIS(),
                        m_ghostPhi);
+
+    m_ebRestrict.define(m_eblg, m_eblgCoar, m_eblgCoar.getDomain(), m_refToCoar);
   }
 
   if (m_hasMGObjects) {
@@ -739,8 +741,11 @@ EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
   this->applyOp(resThisLevel, a_correction, &a_coarseCorrection, homogeneousPhysBC, homogeneousCFBC);
   this->incr(resThisLevel, a_residual, -1.0);
   this->scale(resThisLevel, -1.0);
-
+#if 0
   m_ebAverage.average(a_residualCoarse, resThisLevel, m_interval);
+#else
+  m_ebRestrict.restrict(a_residualCoarse, resThisLevel, m_interval);
+#endif
 }
 
 void

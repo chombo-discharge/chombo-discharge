@@ -85,7 +85,8 @@ EBMGRestrict::define(const EBLevelGrid&   a_eblgFine,
     for (vofit.reset(); vofit.ok(); ++vofit) {
       const VolIndex&        coarVoF     = vofit();
       const Vector<VolIndex> fineVoFs    = ebislCoFi.refine(coarVoF, m_refRat, dit());
-      const int              numFineVoFs = 1. / fineVoFs.size();
+      const int              numFineVoFs = fineVoFs.size();
+      const Real             fineWeight  = 1.0 / numFineVoFs;
 
       CH_assert(numFineVoFs > 0);
 
@@ -93,7 +94,7 @@ EBMGRestrict::define(const EBLevelGrid&   a_eblgFine,
 
       restrictSten.clear();
       for (int i = 0; i < numFineVoFs; i++) {
-        restrictSten.add(fineVoFs[i], 1. / numFineVoFs);
+        restrictSten.add(fineVoFs[i], fineWeight);
       }
     }
   }
@@ -110,8 +111,8 @@ EBMGRestrict::restrict(LevelData<EBCellFAB>&       a_coarData,
   CH_assert(a_fineData.nComp() > a_variables.end());
 
   // Needed for single-valued data kernels.
-  const Box refineBox(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
-  const int weight = 1.0 / refineBox.numPts();
+  const Box  refineBox(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
+  const Real weight = 1.0 / refineBox.numPts();
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
 

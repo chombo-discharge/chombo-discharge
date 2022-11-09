@@ -29,6 +29,7 @@
 #include <CD_Location.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBCoarAve.H>
+#include <CD_EBMGRestrict.H>
 #include <CD_EBHelmholtzEBBC.H>
 #include <CD_EBHelmholtzDomainBC.H>
 #include <CD_NamespaceHeader.H>
@@ -816,6 +817,7 @@ protected:
     @brief Averaging operator to AMR level
   */
   EBMGAverage m_ebAverage;
+  EBMGRestrict m_ebRestrict;
 
   /*!
     @brief Prolongation operator from MG level
