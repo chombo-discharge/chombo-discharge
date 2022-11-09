@@ -149,8 +149,6 @@ DataOps::averageCellToFace(EBAMRFluxData&               a_faceData,
   CH_TIME("DataOps::averageCellToFace(EBAMRFluxData, EBAMRCellData, Vector<ProblemDomain>");
 
   for (int lvl = 0; lvl < a_faceData.size(); lvl++) {
-    const int nComps = a_faceData[lvl]->nComp();
-
     const Average  average  = Average::Arithmetic;
     const int      tanGhost = 0;
     const Interval interv   = Interval(0, 0);
