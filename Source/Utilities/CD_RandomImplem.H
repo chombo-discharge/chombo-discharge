@@ -26,24 +26,25 @@
 inline void
 Random::seed()
 {
+  if (!s_seeded) {
+    ParmParse pp("Random");
 
-  // Set the RNG seed.
-  ParmParse pp("Random");
-
-  if (pp.contains("seed")) {
-    int seed;
-    pp.get("seed", seed);
-    if (seed < 0) {
-      Random::setRandomSeed();
+    if (pp.contains("seed")) {
+      int seed;
+      pp.get("seed", seed);
+      if (seed < 0) {
+        Random::setRandomSeed();
+      }
+      else {
+        Random::setSeed(seed);
+      }
     }
     else {
-      Random::setSeed(seed);
+      Random::setSeed(0);
     }
+
+    s_seeded = true;
   }
-  else {
-    Random::setSeed(0);
-  }
-  s_seeded = true;
 }
 
 inline void
