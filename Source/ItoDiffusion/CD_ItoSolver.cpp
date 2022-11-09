@@ -831,8 +831,8 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
     m_amr->reallocate(m_velocityFunction, m_phase, a_lmin);
   }
   else {
-    m_amr->allocatePointer(m_mobilityFunction);
-    m_amr->allocatePointer(m_velocityFunction);
+    m_amr->allocatePointer(m_mobilityFunction, m_realm);
+    m_amr->allocatePointer(m_velocityFunction, m_realm);
   }
 
   // Only allocate memory if we have diffusion.
@@ -840,7 +840,7 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
     m_amr->reallocate(m_diffusionFunction, m_phase, a_lmin);
   }
   else {
-    m_amr->allocatePointer(m_diffusionFunction);
+    m_amr->allocatePointer(m_diffusionFunction, m_realm);
   }
 
   // Regrid particle containers.
@@ -893,8 +893,8 @@ ItoSolver::allocateInternals()
     m_amr->allocate(m_velocityFunction, m_realm, m_phase, SpaceDim);
   }
   else {
-    m_amr->allocatePointer(m_mobilityFunction);
-    m_amr->allocatePointer(m_velocityFunction);
+    m_amr->allocatePointer(m_mobilityFunction, m_realm);
+    m_amr->allocatePointer(m_velocityFunction, m_realm);
   }
 
   // Only allocate memory if we actually have a diffusion solver
@@ -902,7 +902,7 @@ ItoSolver::allocateInternals()
     m_amr->allocate(m_diffusionFunction, m_realm, m_phase, 1);
   }
   else {
-    m_amr->allocatePointer(m_diffusionFunction);
+    m_amr->allocatePointer(m_diffusionFunction, m_realm);
   }
 
   m_particleContainers.emplace(WhichContainer::Bulk, ParticleContainer<ItoParticle>());

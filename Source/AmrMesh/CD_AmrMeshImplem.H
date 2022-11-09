@@ -190,26 +190,30 @@ AmrMesh::allocatePointer(Vector<RefCountedPtr<T>>& a_data, const int a_finestLev
 
 template <typename T>
 void
-AmrMesh::allocatePointer(EBAMRData<T>& a_data) const
+AmrMesh::allocatePointer(EBAMRData<T>& a_data, const std::string a_realm) const
 {
-  CH_TIME("AmrMesh::allocatePointer(EBAMRData<T>)");
+  CH_TIME("AmrMesh::allocatePointer(EBAMRData<T>, std::string)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::allocatePointer(EBAMRData<T>)" << endl;
+    pout() << "AmrMesh::allocatePointer(EBAMRData<T>, std::string)" << endl;
   }
 
-  return this->allocatePointer(a_data.getData());
+  this->allocatePointer(a_data.getData());
+
+  a_data.setRealm(a_realm);
 }
 
 template <typename T>
 void
-AmrMesh::allocatePointer(EBAMRData<T>& a_data, const int a_finestLevel) const
+AmrMesh::allocatePointer(EBAMRData<T>& a_data, const std::string a_realm, const int a_finestLevel) const
 {
-  CH_TIME("AmrMesh::allocatePointer(EBAMRData<T>, int)");
+  CH_TIME("AmrMesh::allocatePointer(EBAMRData<T>, std::string, int)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::allocatePointer(EBAMRData<T>, int)" << endl;
+    pout() << "AmrMesh::allocatePointer(EBAMRData<T>, std::string, int)" << endl;
   }
 
-  return this->allocatePointer(a_data.getData(), a_finestLevel);
+  this->allocatePointer(a_data.getData(), a_finestLevel);
+
+  a_data.setRealm(a_realm);
 }
 
 template <class P>

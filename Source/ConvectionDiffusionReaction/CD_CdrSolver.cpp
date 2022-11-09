@@ -275,9 +275,9 @@ CdrSolver::allocateInternals()
     DataOps::setValue(m_faceStates, 0.0);
   }
   else {
-    m_amr->allocatePointer(m_faceVelocity);
-    m_amr->allocatePointer(m_cellVelocity);
-    m_amr->allocatePointer(m_faceStates);
+    m_amr->allocatePointer(m_faceVelocity, m_realm);
+    m_amr->allocatePointer(m_cellVelocity, m_realm);
+    m_amr->allocatePointer(m_faceStates, m_realm);
   }
 
   // Only allocate memory for diffusion coefficients if we need it. Otherwise, allocate a NULL pointer that we can
@@ -291,8 +291,8 @@ CdrSolver::allocateInternals()
     DataOps::setValue(m_ebCenteredDiffusionCoefficient, 0.0);
   }
   else {
-    m_amr->allocatePointer(m_faceCenteredDiffusionCoefficient);
-    m_amr->allocatePointer(m_ebCenteredDiffusionCoefficient);
+    m_amr->allocatePointer(m_faceCenteredDiffusionCoefficient, m_realm);
+    m_amr->allocatePointer(m_ebCenteredDiffusionCoefficient, m_realm);
   }
 
   // Allocate stuff for holding fluxes -- this data is used when computing advection and diffusion fluxes.

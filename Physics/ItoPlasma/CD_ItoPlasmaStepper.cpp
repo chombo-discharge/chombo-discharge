@@ -1386,7 +1386,7 @@ ItoPlasmaStepper::solvePoisson() noexcept
   // Copy the electric field to appropriate data holders and perform center-to-centroid
   // interpolation.
   EBAMRCellData E;
-  m_amr->allocatePointer(E);
+  m_amr->allocatePointer(E, m_fluidRealm);
   m_amr->alias(E, m_plasmaPhase, m_fieldSolver->getElectricField());
 
   // Fluid realm
@@ -2365,8 +2365,13 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>& a_diffusionCoeffici
 
   Vector<FArrayBox*> diffCoReg(numPlasmaSpecies);
 
-  for (int i = 0; i < numPlasmaSpecies; i++) {
-    diffCoReg[i] = &(a_diffusionCoefficients[i]->getFArrayBox());
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>& solver = solverIt();
+
+    if (solver->isDiffusive()) {
+      const int i  = solverIt.index();
+      diffCoReg[i] = &(a_diffusionCoefficients[i]->getFArrayBox());
+    }
   }
 
   // Regular kernel definition.

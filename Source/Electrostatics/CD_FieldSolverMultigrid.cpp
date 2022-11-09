@@ -866,7 +866,7 @@ FieldSolverMultigrid::computeElectricField(EBAMRCellData&           a_electricFi
   EBAMRCellData scratch;
   EBAMRCellData potentialPhase;
 
-  m_amr->allocatePointer(potentialPhase);
+  m_amr->allocatePointer(potentialPhase, m_realm);
   m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
   m_amr->alias(potentialPhase, a_phase, a_potential);
 
@@ -901,7 +901,7 @@ FieldSolverMultigrid::computeElectricField(EBAMRFluxData&           a_electricFi
   EBAMRCellData scratch;
   EBAMRCellData potentialPhase;
 
-  m_amr->allocatePointer(potentialPhase);
+  m_amr->allocatePointer(potentialPhase, m_realm);
   m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
   m_amr->alias(potentialPhase, a_phase, a_potential);
 

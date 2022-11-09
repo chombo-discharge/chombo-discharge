@@ -57,7 +57,7 @@ AmrMesh::alias(const phase::which_phase a_phase, const MFAMRCellData& a_mfdata) 
 
   const int finestLevel = a_mfdata.size() - 1;
 
-  this->allocatePointer(ret, finestLevel);
+  this->allocatePointer(ret, a_mfdata.getRealm(), finestLevel);
 
   this->alias(ret, a_phase, a_mfdata, finestLevel);
 
@@ -78,7 +78,7 @@ AmrMesh::alias(const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata) 
 
   const int finestLevel = a_mfdata.size() - 1;
 
-  this->allocatePointer(ret, finestLevel);
+  this->allocatePointer(ret, a_mfdata.getRealm(), finestLevel);
 
   this->alias(ret, a_phase, a_mfdata, finestLevel);
 
@@ -97,7 +97,7 @@ AmrMesh::alias(const phase::which_phase a_phase, const MFAMRIVData& a_mfdata) co
 
   EBAMRIVData ret;
 
-  this->allocatePointer(ret);
+  this->allocatePointer(ret, a_mfdata.getRealm());
 
   this->alias(ret, a_phase, a_mfdata);
 
