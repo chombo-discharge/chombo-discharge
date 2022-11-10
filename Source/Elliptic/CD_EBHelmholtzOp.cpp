@@ -567,7 +567,7 @@ EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>&       a_resCoar,
   this->residual(res, a_phi, a_rhs, true);
 
   // Restrict it onto the coarse level.
-  m_restrictOpMG.restrict(a_resCoar, res, m_interval);
+  m_restrictOpMG.restrictResidual(a_resCoar, res, m_interval);
 }
 
 void
@@ -575,7 +575,7 @@ EBHelmholtzOp::prolongIncrement(LevelData<EBCellFAB>& a_phi, const LevelData<EBC
 {
   CH_TIME("EBHelmholtzOp::prolongIncrement(LD<EBCellFAB>, LD<EBCellFAB>)");
 
-  m_prolongOpMG.prolong(a_phi, a_correctCoarse, m_interval);
+  m_prolongOpMG.prolongResidual(a_phi, a_correctCoarse, m_interval);
 }
 
 int
@@ -708,7 +708,7 @@ EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
   this->scale(resThisLevel, -1.0);
 
   // Restrict residual.
-  m_restrictOp.restrict(a_residualCoarse, resThisLevel, m_interval);
+  m_restrictOp.restrictResidual(a_residualCoarse, resThisLevel, m_interval);
 }
 
 void
@@ -716,7 +716,7 @@ EBHelmholtzOp::AMRProlong(LevelData<EBCellFAB>& a_correction, const LevelData<EB
 {
   CH_TIME("EBHelmholtzOp::AMRProlong(LD<EBCellFAB>, LD<EBCellFAB>)");
 
-  m_prolongOp.prolong(a_correction, a_coarseCorrection, m_interval);
+  m_prolongOp.prolongResidual(a_correction, a_coarseCorrection, m_interval);
 }
 
 void

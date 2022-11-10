@@ -100,11 +100,11 @@ EBMGRestrict::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoa
 }
 
 void
-EBMGRestrict::restrict(LevelData<EBCellFAB>&       a_coarData,
-                       const LevelData<EBCellFAB>& a_fineData,
-                       const Interval              a_variables) const noexcept
+EBMGRestrict::restrictResidual(LevelData<EBCellFAB>&       a_coarData,
+                               const LevelData<EBCellFAB>& a_fineData,
+                               const Interval              a_variables) const noexcept
 {
-  CH_TIME("EBMGRestrict::restrict");
+  CH_TIME("EBMGRestrict::restrictResidual");
 
   CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() > a_variables.end());

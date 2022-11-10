@@ -97,11 +97,11 @@ EBMGProlong::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar
 }
 
 void
-EBMGProlong::prolong(LevelData<EBCellFAB>&       a_fineData,
-                     const LevelData<EBCellFAB>& a_coarData,
-                     const Interval              a_variables) const noexcept
+EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
+                             const LevelData<EBCellFAB>& a_coarData,
+                             const Interval              a_variables) const noexcept
 {
-  CH_TIME("EBMGProlong::prolong");
+  CH_TIME("EBMGProlong::prolongResidual");
 
   CH_assert(m_isDefined);
   CH_assert(a_fineData.nComp() > a_variables.end());

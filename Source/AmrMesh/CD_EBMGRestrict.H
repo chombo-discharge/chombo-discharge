@@ -65,9 +65,9 @@ public:
     @param[in]    a_variables Variables to restrict
   */
   virtual void
-  restrict(LevelData<EBCellFAB>&       a_coarData,
-           const LevelData<EBCellFAB>& a_fineData,
-           const Interval              a_variables) const noexcept;
+  restrictResidual(LevelData<EBCellFAB>&       a_coarData,
+                   const LevelData<EBCellFAB>& a_fineData,
+                   const Interval              a_variables) const noexcept;
 
 protected:
   /*!

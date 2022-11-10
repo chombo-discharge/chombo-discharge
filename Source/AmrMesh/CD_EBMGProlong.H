@@ -63,9 +63,9 @@ public:
     @param[in]    a_variables Variables to prolong.
   */
   virtual void
-  prolong(LevelData<EBCellFAB>&       a_fineData,
-          const LevelData<EBCellFAB>& a_coarData,
-          const Interval              a_variables) const noexcept;
+  prolongResidual(LevelData<EBCellFAB>&       a_fineData,
+                  const LevelData<EBCellFAB>& a_coarData,
+                  const Interval              a_variables) const noexcept;
 
 protected:
   /*!
