@@ -1,0 +1,24 @@
+# ====================================================================================================
+# RodNeedlePlane geometry class options
+# ====================================================================================================
+RodNeedlePlane.rod.on			= true			# Use rod or not
+RodNeedlePlane.rod.endpoint1		= 0 0.003 0		# One endpoint
+RodNeedlePlane.rod.endpoint2		= 0 2 0			# Other endpoint
+RodNeedlePlane.rod.radius		= 0.035			# Rod radius
+RodNeedlePlane.rod.live			= true			# Live or not
+
+RodNeedlePlane.needle.on		= true 			# Use needle or not
+RodNeedlePlane.needle.length		= 0.9			# Length of the needle
+RodNeedlePlane.needle.radius		= 0.0005		# Needle radius
+RodNeedlePlane.needle.tipRadius		= 0.0002		# Needle tip radius (curve radius of the tip)
+RodNeedlePlane.needle.angle		= 30			# Opening angle of needle tip (in degrees) (NB! Opening of "entire" tip)
+RodNeedlePlane.needle.cornerCurve	= 0.000001		# Corner curve between rod and needle
+RodNeedlePlane.needle.live		= true			# Live or not
+
+RodNeedlePlane.plane.on			= true			# Use plane or not
+RodNeedlePlane.plane.point		= 0 -0.053 0		# Plane point
+RodNeedlePlane.plane.normal		= 0 1 0			# Plane normal vector (outward)
+RodNeedlePlane.plane.radius		= 0.125			# Plane radius
+RodNeedlePlane.plane.thickness		= 0.01			# Plane thickness
+RodNeedlePlane.plane.curve		= 0.005			# Plane curve (edge)
+RodNeedlePlane.plane.live		= true			# Live or not
