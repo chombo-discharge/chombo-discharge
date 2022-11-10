@@ -16,9 +16,7 @@
 #include <map>
 
 // Chombo includes
-#include <ConductivityBaseDomainBC.H>
 #include <BaseEBBC.H>
-#include <EBMGInterp.H>
 #include <LevelTGA.H>
 #include <BaseIVFAB.H>
 #include <VCAggStencil.H>
@@ -29,6 +27,7 @@
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBCoarAve.H>
 #include <CD_EBMGRestrict.H>
+#include <CD_EBMGProlong.H>
 #include <CD_EBHelmholtzEBBC.H>
 #include <CD_EBHelmholtzDomainBC.H>
 #include <CD_NamespaceHeader.H>
@@ -818,14 +817,14 @@ protected:
   EBMGRestrict m_restrictOpMG;
 
   /*!
-    @brief Prolongation operator from AMR level
+    @brief Prolongation operator for AMR levels
   */
-  EBMGInterp m_ebInterp;
+  EBMGProlong m_prolongOp;
 
   /*!
-    @brief Prolongation operator from MG level
+    @brief Prolongation operator for MG levels
   */
-  EBMGInterp m_ebInterpMG;
+  EBMGProlong m_prolongOpMG;
 
   /*!
     @brief Domain bc object
