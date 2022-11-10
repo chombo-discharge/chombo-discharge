@@ -18,7 +18,6 @@
 // Chombo includes
 #include <ConductivityBaseDomainBC.H>
 #include <BaseEBBC.H>
-#include <EBMGAverage.H>
 #include <EBMGInterp.H>
 #include <LevelTGA.H>
 #include <BaseIVFAB.H>
@@ -809,34 +808,24 @@ protected:
   EBLevelGrid m_eblgCoarMG;
 
   /*!
-    @brief Averaging operator to MG level
-  */
-  EBMGAverage m_ebAverageMG;
-
-  /*!
-    @brief Averaging operator to AMR level
-  */
-  EBMGAverage m_ebAverage;
-
-  /*!
-    @brief Restriction operator for averaging residual onto coarse level
+    @brief Restriction operator for AMR levels.
   */
   EBMGRestrict m_restrictOp;
 
   /*!
     @brief Restriction operator if this is an MG level
   */
-  EBMGRestrict m_restrictOpMG;  
-
-  /*!
-    @brief Prolongation operator from MG level
-  */
-  EBMGInterp m_ebInterpMG;
+  EBMGRestrict m_restrictOpMG;
 
   /*!
     @brief Prolongation operator from AMR level
   */
   EBMGInterp m_ebInterp;
+
+  /*!
+    @brief Prolongation operator from MG level
+  */
+  EBMGInterp m_ebInterpMG;
 
   /*!
     @brief Domain bc object

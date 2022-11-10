@@ -23,6 +23,8 @@
 
 /*!
   @brief Class for restricting multigrid residual onto a coarser grid.
+  @details This class defines an operator for setting phiC = 1/Nref^D * sum(phiFine). This assumes that the input data has already been
+  scaled by the volume fraction (which is what the EB multigrid operators do anyways).
 */
 class EBMGRestrict
 {
@@ -34,10 +36,11 @@ public:
 
   /*!
     @brief Full constructor. Calls the define fucntion
+    @param[in] a_eblgFine Fine level
+    @param[in] a_eblgCoar Coarse level
+    @param[in] a_refRat   Refinement factor between levels.
   */
-  EBMGRestrict(const EBLevelGrid&   a_eblgFine,
-               const EBLevelGrid&   a_eblgCoar,
-               const int&           a_refRat) noexcept;
+  EBMGRestrict(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept;
 
   /*!
     @brief Destructor
@@ -46,14 +49,20 @@ public:
 
   /*!
     @brief Define function.
+    @param[in] a_eblgFine Fine level
+    @param[in] a_eblgCoar Coarse level
+    @param[in] a_refRat   Refinement factor between levels.
   */
   virtual void
-  define(const EBLevelGrid&   a_eblgFine,
-         const EBLevelGrid&   a_eblgCoar,
-         const int&           a_refRat) noexcept;
+  define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept;
 
   /*!
-    @brief Restrict residual onto the coarse grid
+    @brief Restrict residual onto the coarse grid.
+    @details This replaces the coarse-grid residual by an average of the fine-grid residual. Only affects the invalid
+    region of the coarse grid. 
+    @param[inout] a_coarData  Coarse-grid residual.
+    @param[in]    a_fineData  Fine-grid residual
+    @param[in]    a_variables Variables to restrict
   */
   virtual void
   restrict(LevelData<EBCellFAB>&       a_coarData,

@@ -26,25 +26,24 @@ EBMGRestrict::EBMGRestrict() noexcept
   m_isDefined = false;
 }
 
-EBMGRestrict::EBMGRestrict(const EBLevelGrid&   a_eblgFine,
-                           const EBLevelGrid&   a_eblgCoar,
-                           const int&           a_refRat) noexcept
+EBMGRestrict::EBMGRestrict(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept
 {
   CH_TIME("EBMGRestrict::EBMGRestrict(full)");
 
   m_isDefined = false;
-  
+
   this->define(a_eblgFine, a_eblgCoar, a_refRat);
 }
 
 EBMGRestrict::~EBMGRestrict() noexcept { CH_TIME("EBMGRestrict::~EBMGRestrict"); }
 
 void
-EBMGRestrict::define(const EBLevelGrid&   a_eblgFine,
-                     const EBLevelGrid&   a_eblgCoar,
-                     const int&           a_refRat) noexcept
+EBMGRestrict::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept
 {
   CH_TIME("EBMGRestrict::define");
+
+  CH_assert(a_refRat >= 2);
+  CH_assert(a_refRat % 2 == 0);
 
   m_refRat   = a_refRat;
   m_eblgFine = a_eblgFine;
@@ -63,6 +62,9 @@ EBMGRestrict::define(const EBLevelGrid&   a_eblgFine,
   const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
 
   m_dataCoFi.define(dblCoFi, 1, IntVect::Zero, EBCellFactory(ebislCoFi));
+
+  // Weighting factor for stencils.
+  const Real fineWeight = 1. / std::pow(m_refRat, SpaceDim);
 
   // Figure out the EB restriction stencils.
   m_vofitCoar.define(dblCoFi);
@@ -84,9 +86,6 @@ EBMGRestrict::define(const EBLevelGrid&   a_eblgFine,
       const VolIndex&        coarVoF     = vofit();
       const Vector<VolIndex> fineVoFs    = ebislCoFi.refine(coarVoF, m_refRat, dit());
       const int              numFineVoFs = fineVoFs.size();
-      const Real             fineWeight  = 1.0 / numFineVoFs;
-
-      CH_assert(numFineVoFs > 0);
 
       VoFStencil& restrictSten = restrictStencils(coarVoF, 0);
 
@@ -112,15 +111,12 @@ EBMGRestrict::restrict(LevelData<EBCellFAB>&       a_coarData,
   CH_assert(a_fineData.nComp() > a_variables.end());
 
   // Needed for single-valued data kernels.
-  const Box  refineBox(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
-  const Real weight = 1.0 / refineBox.numPts();
+  const Box  refineBox     = Box(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
+  const Real regFineWeight = 1.0 / std::pow(m_refRat, SpaceDim);
+
+  const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
-
-    DataOps::setValue(m_dataCoFi, 0.0);
-
-    const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
-
     for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
       EBCellFAB&       coarData = m_dataCoFi[dit()];
       const EBCellFAB& fineData = a_fineData[dit()];
@@ -135,7 +131,7 @@ EBMGRestrict::restrict(LevelData<EBCellFAB>&       a_coarData,
         for (BoxIterator bit(refineBox); bit.ok(); ++bit) {
           const IntVect ivFine = m_refRat * ivCoar + bit();
 
-          coarDataReg(ivCoar, 0) += weight * fineDataReg(ivFine, ivar);
+          coarDataReg(ivCoar, 0) += regFineWeight * fineDataReg(ivFine, ivar);
         }
       };
 
@@ -153,6 +149,8 @@ EBMGRestrict::restrict(LevelData<EBCellFAB>&       a_coarData,
       };
 
       // Run kernels
+      coarData.setVal(0.0);
+
       const Box    coarBox  = dblCoar[dit()];
       VoFIterator& coarVoFs = m_vofitCoar[dit()];
 

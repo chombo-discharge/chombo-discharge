@@ -25,8 +25,6 @@
 constexpr int EBHelmholtzOp::m_nComp;
 constexpr int EBHelmholtzOp::m_comp;
 
-#define USE_NEW_RESTRICT 1
-
 EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_dataLocation,
                              const EBLevelGrid&                               a_eblgFine,
                              const EBLevelGrid&                               a_eblg,
@@ -111,6 +109,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
     }
   }
 
+  // Define restriction and prolongation operators.
   if (m_hasCoar) {
     m_eblgCoFi = a_eblgCoFi;
     m_eblgCoar = a_eblgCoar;
@@ -124,16 +123,6 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                       m_nComp,
                       m_eblg.getEBIS(),
                       m_ghostPhi);
-
-    m_ebAverage.define(m_eblg.getDBL(),
-                       m_eblgCoFi.getDBL(),
-                       m_eblg.getEBISL(),
-                       m_eblgCoar.getEBISL(),
-                       m_eblgCoar.getDomain(),
-                       m_refToCoar,
-                       m_nComp,
-                       m_eblg.getEBIS(),
-                       m_ghostPhi);
 
     m_restrictOp.define(m_eblg, m_eblgCoar, m_refToCoar);
   }
@@ -152,16 +141,6 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                         m_nComp,
                         m_eblg.getEBIS(),
                         m_ghostPhi);
-
-    m_ebAverageMG.define(m_eblg.getDBL(),
-                         m_eblgCoarMG.getDBL(),
-                         m_eblg.getEBISL(),
-                         m_eblgCoarMG.getEBISL(),
-                         m_eblgCoarMG.getDomain(),
-                         mgRef,
-                         m_nComp,
-                         m_eblg.getEBIS(),
-                         m_ghostPhi);
 
     m_restrictOpMG.define(m_eblg, m_eblgCoarMG, mgRef);
   }
@@ -606,11 +585,7 @@ EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>&       a_resCoar,
   this->residual(res, a_phi, a_rhs, true);
 
   // Restrict it onto the coarse level.
-#if USE_NEW_RESTRICT
   m_restrictOpMG.restrict(a_resCoar, res, m_interval);
-#else
-  m_ebAverageMG.average(a_resCoar, res, m_interval);  
-#endif
 }
 
 void
@@ -749,11 +724,9 @@ EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
   this->applyOp(resThisLevel, a_correction, &a_coarseCorrection, homogeneousPhysBC, homogeneousCFBC);
   this->incr(resThisLevel, a_residual, -1.0);
   this->scale(resThisLevel, -1.0);
-#if USE_NEW_RESTRICT
+
+  // Restrict residual.
   m_restrictOp.restrict(a_residualCoarse, resThisLevel, m_interval);
-#else
-  m_ebAverage.average(a_residualCoarse, resThisLevel, m_interval);  
-#endif
 }
 
 void
