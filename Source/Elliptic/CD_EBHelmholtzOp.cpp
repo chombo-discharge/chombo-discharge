@@ -109,29 +109,13 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
     }
   }
 
+  // Define restriction and prolongation operators.
   if (m_hasCoar) {
     m_eblgCoFi = a_eblgCoFi;
     m_eblgCoar = a_eblgCoar;
 
-    m_ebInterp.define(m_eblg.getDBL(),
-                      m_eblgCoar.getDBL(),
-                      m_eblg.getEBISL(),
-                      m_eblgCoar.getEBISL(),
-                      m_eblgCoar.getDomain(),
-                      m_refToCoar,
-                      m_nComp,
-                      m_eblg.getEBIS(),
-                      m_ghostPhi);
-
-    m_ebAverage.define(m_eblg.getDBL(),
-                       m_eblgCoFi.getDBL(),
-                       m_eblg.getEBISL(),
-                       m_eblgCoar.getEBISL(),
-                       m_eblgCoar.getDomain(),
-                       m_refToCoar,
-                       m_nComp,
-                       m_eblg.getEBIS(),
-                       m_ghostPhi);
+    m_restrictOp.define(m_eblg, m_eblgCoar, m_refToCoar);
+    m_prolongOp.define(m_eblg, m_eblgCoar, m_refToCoar);
   }
 
   if (m_hasMGObjects) {
@@ -139,25 +123,8 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
 
     m_eblgCoarMG = a_eblgCoarMG;
 
-    m_ebInterpMG.define(m_eblg.getDBL(),
-                        m_eblgCoarMG.getDBL(),
-                        m_eblg.getEBISL(),
-                        m_eblgCoarMG.getEBISL(),
-                        m_eblgCoarMG.getDomain(),
-                        mgRef,
-                        m_nComp,
-                        m_eblg.getEBIS(),
-                        m_ghostPhi);
-
-    m_ebAverageMG.define(m_eblg.getDBL(),
-                         m_eblgCoarMG.getDBL(),
-                         m_eblg.getEBISL(),
-                         m_eblgCoarMG.getEBISL(),
-                         m_eblgCoarMG.getDomain(),
-                         mgRef,
-                         m_nComp,
-                         m_eblg.getEBIS(),
-                         m_ghostPhi);
+    m_restrictOpMG.define(m_eblg, m_eblgCoarMG, mgRef);
+    m_prolongOpMG.define(m_eblg, m_eblgCoarMG, mgRef);
   }
 
   // Define BC objects.
@@ -600,7 +567,7 @@ EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>&       a_resCoar,
   this->residual(res, a_phi, a_rhs, true);
 
   // Restrict it onto the coarse level.
-  m_ebAverageMG.average(a_resCoar, res, m_interval);
+  m_restrictOpMG.restrictResidual(a_resCoar, res, m_interval);
 }
 
 void
@@ -608,7 +575,7 @@ EBHelmholtzOp::prolongIncrement(LevelData<EBCellFAB>& a_phi, const LevelData<EBC
 {
   CH_TIME("EBHelmholtzOp::prolongIncrement(LD<EBCellFAB>, LD<EBCellFAB>)");
 
-  m_ebInterpMG.pwcInterp(a_phi, a_correctCoarse, m_interval);
+  m_prolongOpMG.prolongResidual(a_phi, a_correctCoarse, m_interval);
 }
 
 int
@@ -740,7 +707,8 @@ EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
   this->incr(resThisLevel, a_residual, -1.0);
   this->scale(resThisLevel, -1.0);
 
-  m_ebAverage.average(a_residualCoarse, resThisLevel, m_interval);
+  // Restrict residual.
+  m_restrictOp.restrictResidual(a_residualCoarse, resThisLevel, m_interval);
 }
 
 void
@@ -748,7 +716,7 @@ EBHelmholtzOp::AMRProlong(LevelData<EBCellFAB>& a_correction, const LevelData<EB
 {
   CH_TIME("EBHelmholtzOp::AMRProlong(LD<EBCellFAB>, LD<EBCellFAB>)");
 
-  m_ebInterp.pwcInterp(a_correction, a_coarseCorrection, m_interval);
+  m_prolongOp.prolongResidual(a_correction, a_coarseCorrection, m_interval);
 }
 
 void
