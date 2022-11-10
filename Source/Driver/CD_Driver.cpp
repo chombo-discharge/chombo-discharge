@@ -474,6 +474,7 @@ Driver::gridReport()
   Vector<long long> totalLevelBoxes;
   Vector<long long> localLevelCells;
   Vector<long long> totalLevelCells;
+  Vector<long long> validLevelCells;
 
   // Total number of grid points for a Cartesian grid covering entire finest domain. Used for "grid sparsity".
   const long long uniformPoints = (domains[finestLevel].domainBox()).numPts();
@@ -507,6 +508,11 @@ Driver::gridReport()
                            m_amr->getGrids(str));
   }
 
+  validLevelCells = totalLevelCells;
+  for (int lvl = 0; lvl < finestLevel; lvl++) {
+    validLevelCells[lvl] -= totalLevelCells[lvl + 1] / std::pow(refRat[lvl], SpaceDim);
+  }
+
   // Begin writing a report.
   pout() << "-----------------------------------------------------------------------" << endl
          << "Driver::Grid report - timestep = " << m_timeStep << endl
@@ -527,7 +533,8 @@ Driver::gridReport()
          << "\t\t\t        Number of valid cells  = " << numberFmt(totalCells) << endl
          << "\t\t\t        Including ghost cells  = " << numberFmt(totalCellsGhosts) << endl
          << "\t\t\t        Total # of boxes (lvl) = " << numberFmt(totalLevelBoxes) << endl
-         << "\t\t\t        Total # of cells (lvl) = " << numberFmt(totalLevelCells) << endl;
+         << "\t\t\t        Total # of cells (lvl) = " << numberFmt(totalLevelCells) << endl
+         << "\t\t\t        Valid # of cells (lvl) = " << numberFmt(validLevelCells) << endl;
 
   // Do a local report for each Realm
   for (const auto& str : realms) {
