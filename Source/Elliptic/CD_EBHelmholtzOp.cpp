@@ -25,6 +25,8 @@
 constexpr int EBHelmholtzOp::m_nComp;
 constexpr int EBHelmholtzOp::m_comp;
 
+#define USE_NEW_RESTRICT 1
+
 EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_dataLocation,
                              const EBLevelGrid&                               a_eblgFine,
                              const EBLevelGrid&                               a_eblg,
@@ -133,7 +135,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                        m_eblg.getEBIS(),
                        m_ghostPhi);
 
-    m_ebRestrict.define(m_eblg, m_eblgCoar, m_eblgCoar.getDomain(), m_refToCoar);
+    m_restrictOp.define(m_eblg, m_eblgCoar, m_refToCoar);
   }
 
   if (m_hasMGObjects) {
@@ -160,6 +162,8 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                          m_nComp,
                          m_eblg.getEBIS(),
                          m_ghostPhi);
+
+    m_restrictOpMG.define(m_eblg, m_eblgCoarMG, mgRef);
   }
 
   // Define BC objects.
@@ -602,7 +606,11 @@ EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>&       a_resCoar,
   this->residual(res, a_phi, a_rhs, true);
 
   // Restrict it onto the coarse level.
-  m_ebAverageMG.average(a_resCoar, res, m_interval);
+#if USE_NEW_RESTRICT
+  m_restrictOpMG.restrict(a_resCoar, res, m_interval);
+#else
+  m_ebAverageMG.average(a_resCoar, res, m_interval);  
+#endif
 }
 
 void
@@ -741,10 +749,10 @@ EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
   this->applyOp(resThisLevel, a_correction, &a_coarseCorrection, homogeneousPhysBC, homogeneousCFBC);
   this->incr(resThisLevel, a_residual, -1.0);
   this->scale(resThisLevel, -1.0);
-#if 0
-  m_ebAverage.average(a_residualCoarse, resThisLevel, m_interval);
+#if USE_NEW_RESTRICT
+  m_restrictOp.restrict(a_residualCoarse, resThisLevel, m_interval);
 #else
-  m_ebRestrict.restrict(a_residualCoarse, resThisLevel, m_interval);
+  m_ebAverage.average(a_residualCoarse, resThisLevel, m_interval);  
 #endif
 }
 

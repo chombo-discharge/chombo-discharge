@@ -28,12 +28,13 @@ EBMGRestrict::EBMGRestrict() noexcept
 
 EBMGRestrict::EBMGRestrict(const EBLevelGrid&   a_eblgFine,
                            const EBLevelGrid&   a_eblgCoar,
-                           const ProblemDomain& a_domainCoar,
                            const int&           a_refRat) noexcept
 {
   CH_TIME("EBMGRestrict::EBMGRestrict(full)");
 
-  this->define(a_eblgFine, a_eblgCoar, a_domainCoar, a_refRat);
+  m_isDefined = false;
+  
+  this->define(a_eblgFine, a_eblgCoar, a_refRat);
 }
 
 EBMGRestrict::~EBMGRestrict() noexcept { CH_TIME("EBMGRestrict::~EBMGRestrict"); }
@@ -41,7 +42,6 @@ EBMGRestrict::~EBMGRestrict() noexcept { CH_TIME("EBMGRestrict::~EBMGRestrict");
 void
 EBMGRestrict::define(const EBLevelGrid&   a_eblgFine,
                      const EBLevelGrid&   a_eblgCoar,
-                     const ProblemDomain& a_domainCoar,
                      const int&           a_refRat) noexcept
 {
   CH_TIME("EBMGRestrict::define");
@@ -50,11 +50,9 @@ EBMGRestrict::define(const EBLevelGrid&   a_eblgFine,
   m_eblgFine = a_eblgFine;
   m_eblgCoar = a_eblgCoar;
 
-#if 1 // Debug hook
-  if (!a_eblgFine.getDBL().coarsenable(m_refRat)) {
+  if (!(a_eblgFine.getDBL().coarsenable(m_refRat))) {
     MayDay::Abort("EBMGRestrict::define -- the input grid is not coarsenable. We need to adopt a new strategy!");
   }
-#endif
 
   // Create the coarsend layout
   coarsen(m_eblgCoFi, m_eblgFine, m_refRat);
@@ -98,6 +96,8 @@ EBMGRestrict::define(const EBLevelGrid&   a_eblgFine,
       }
     }
   }
+
+  m_isDefined = true;
 }
 
 void
@@ -107,6 +107,7 @@ EBMGRestrict::restrict(LevelData<EBCellFAB>&       a_coarData,
 {
   CH_TIME("EBMGRestrict::restrict");
 
+  CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() > a_variables.end());
   CH_assert(a_fineData.nComp() > a_variables.end());
 

@@ -817,7 +817,16 @@ protected:
     @brief Averaging operator to AMR level
   */
   EBMGAverage m_ebAverage;
-  EBMGRestrict m_ebRestrict;
+
+  /*!
+    @brief Restriction operator for averaging residual onto coarse level
+  */
+  EBMGRestrict m_restrictOp;
+
+  /*!
+    @brief Restriction operator if this is an MG level
+  */
+  EBMGRestrict m_restrictOpMG;  
 
   /*!
     @brief Prolongation operator from MG level

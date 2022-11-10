@@ -37,7 +37,6 @@ public:
   */
   EBMGRestrict(const EBLevelGrid&   a_eblgFine,
                const EBLevelGrid&   a_eblgCoar,
-               const ProblemDomain& a_domainCoar,
                const int&           a_refRat) noexcept;
 
   /*!
@@ -51,7 +50,6 @@ public:
   virtual void
   define(const EBLevelGrid&   a_eblgFine,
          const EBLevelGrid&   a_eblgCoar,
-         const ProblemDomain& a_domainCoar,
          const int&           a_refRat) noexcept;
 
   /*!
