@@ -1,3 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classEddingtonSP1DomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="5,5,184,32"/>
+<area shape="rect" id="node1" href="$classEBMultigridInterpolator.html" title="Multigrid interpolator class." alt="" coords="5,5,179,32"/>
+<area shape="rect" id="node2" href="$classEBLeastSquaresMultigridInterpolator.html" title="Multigrid interpolator class." alt="" coords="227,5,487,32"/>
 </map>

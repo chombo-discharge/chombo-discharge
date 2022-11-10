@@ -1,4 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="node1" href="$classGenericParticle.html" title=" " alt="" coords="5,5,180,32"/>
-<area shape="rect" id="node2" href="$classPhoton.html" title="Particle class for usage with Monte Carlo radiative transfer." alt="" coords="228,5,295,32"/>
+<area shape="rect" id="node2" href="$classPointParticle.html" title="A particle class that only has a position and a weight." alt="" coords="228,5,331,32"/>
 </map>

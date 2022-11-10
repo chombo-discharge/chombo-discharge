@@ -98,8 +98,10 @@ Collaboration diagram for EBHelmholtzOp:</div>
 <div class="dyncontent">
 <div class="center"><img src="classEBHelmholtzOp__coll__graph.png" border="0" usemap="#EBHelmholtzOp_coll__map" alt="Collaboration graph"/></div>
 <map name="EBHelmholtzOp_coll__map" id="EBHelmholtzOp_coll__map">
-<area shape="rect" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho." alt="" coords="53,95,177,121"/>
+<area shape="rect" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho." alt="" coords="242,124,366,151"/>
 <area shape="rect" title=" " alt="" coords="5,5,224,47"/>
+<area shape="rect" href="classEBMGProlong.html" title="Class for prolongation of multigrid residual onto a finer grid." alt="" coords="249,13,359,39"/>
+<area shape="rect" href="classEBMGRestrict.html" title="Class for restricting multigrid residual onto a coarser grid." alt="" coords="389,13,499,39"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -439,22 +441,22 @@ EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#af97169e501ec2753602a17a036965d41">m_eblgCoarMG</a></td></tr>
 <tr class="memdesc:af97169e501ec2753602a17a036965d41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarser grids (multigrid level) <br /></td></tr>
 <tr class="separator:af97169e501ec2753602a17a036965d41"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0c35d5e4a202668e489552cb2de1cad0"><td class="memItemLeft" align="right" valign="top"><a id="a0c35d5e4a202668e489552cb2de1cad0"></a>
-EBMGAverage&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a0c35d5e4a202668e489552cb2de1cad0">m_ebAverageMG</a></td></tr>
-<tr class="memdesc:a0c35d5e4a202668e489552cb2de1cad0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Averaging operator to MG level. <br /></td></tr>
-<tr class="separator:a0c35d5e4a202668e489552cb2de1cad0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3930c7901a8a885b63bb18c60fedf5a3"><td class="memItemLeft" align="right" valign="top"><a id="a3930c7901a8a885b63bb18c60fedf5a3"></a>
-EBMGAverage&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a3930c7901a8a885b63bb18c60fedf5a3">m_ebAverage</a></td></tr>
-<tr class="memdesc:a3930c7901a8a885b63bb18c60fedf5a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Averaging operator to AMR level. <br /></td></tr>
-<tr class="separator:a3930c7901a8a885b63bb18c60fedf5a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad034f94aa70321c2e2c4d9a20d3f7462"><td class="memItemLeft" align="right" valign="top"><a id="ad034f94aa70321c2e2c4d9a20d3f7462"></a>
-EBMGInterp&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ad034f94aa70321c2e2c4d9a20d3f7462">m_ebInterpMG</a></td></tr>
-<tr class="memdesc:ad034f94aa70321c2e2c4d9a20d3f7462"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prolongation operator from MG level. <br /></td></tr>
-<tr class="separator:ad034f94aa70321c2e2c4d9a20d3f7462"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3064a2d082711cf78ce3a587e9c8cdbf"><td class="memItemLeft" align="right" valign="top"><a id="a3064a2d082711cf78ce3a587e9c8cdbf"></a>
-EBMGInterp&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a3064a2d082711cf78ce3a587e9c8cdbf">m_ebInterp</a></td></tr>
-<tr class="memdesc:a3064a2d082711cf78ce3a587e9c8cdbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prolongation operator from AMR level. <br /></td></tr>
-<tr class="separator:a3064a2d082711cf78ce3a587e9c8cdbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42a88482a371edd69315efd0a2eace72"><td class="memItemLeft" align="right" valign="top"><a id="a42a88482a371edd69315efd0a2eace72"></a>
+<a class="el" href="classEBMGRestrict.html">EBMGRestrict</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a42a88482a371edd69315efd0a2eace72">m_restrictOp</a></td></tr>
+<tr class="memdesc:a42a88482a371edd69315efd0a2eace72"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restriction operator for AMR levels. <br /></td></tr>
+<tr class="separator:a42a88482a371edd69315efd0a2eace72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade2af3c7ffaec567f4c36cc136e51b95"><td class="memItemLeft" align="right" valign="top"><a id="ade2af3c7ffaec567f4c36cc136e51b95"></a>
+<a class="el" href="classEBMGRestrict.html">EBMGRestrict</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ade2af3c7ffaec567f4c36cc136e51b95">m_restrictOpMG</a></td></tr>
+<tr class="memdesc:ade2af3c7ffaec567f4c36cc136e51b95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restriction operator if this is an MG level. <br /></td></tr>
+<tr class="separator:ade2af3c7ffaec567f4c36cc136e51b95"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74b2ee58b9ddea7e0c2459a80921d5d9"><td class="memItemLeft" align="right" valign="top"><a id="a74b2ee58b9ddea7e0c2459a80921d5d9"></a>
+<a class="el" href="classEBMGProlong.html">EBMGProlong</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a74b2ee58b9ddea7e0c2459a80921d5d9">m_prolongOp</a></td></tr>
+<tr class="memdesc:a74b2ee58b9ddea7e0c2459a80921d5d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prolongation operator for AMR levels. <br /></td></tr>
+<tr class="separator:a74b2ee58b9ddea7e0c2459a80921d5d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8263d9cdaf26393e567b4c9c7d02a83f"><td class="memItemLeft" align="right" valign="top"><a id="a8263d9cdaf26393e567b4c9c7d02a83f"></a>
+<a class="el" href="classEBMGProlong.html">EBMGProlong</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a8263d9cdaf26393e567b4c9c7d02a83f">m_prolongOpMG</a></td></tr>
+<tr class="memdesc:a8263d9cdaf26393e567b4c9c7d02a83f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prolongation operator for MG levels. <br /></td></tr>
+<tr class="separator:a8263d9cdaf26393e567b4c9c7d02a83f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43efc38b910817a754526fd136e6ca58"><td class="memItemLeft" align="right" valign="top"><a id="a43efc38b910817a754526fd136e6ca58"></a>
 RefCountedPtr&lt; <a class="el" href="classEBHelmholtzDomainBC.html">EBHelmholtzDomainBC</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a43efc38b910817a754526fd136e6ca58">m_domainBc</a></td></tr>
 <tr class="memdesc:a43efc38b910817a754526fd136e6ca58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain bc object. <br /></td></tr>

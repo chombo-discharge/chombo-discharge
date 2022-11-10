@@ -1,52 +1,52 @@
 <map id="Source/ConvectionDiffusionReaction/CD_CdrMultigrid.H" name="Source/ConvectionDiffusionReaction/CD_CdrMultigrid.H">
-<area shape="rect" id="node1" title="Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves." alt="" coords="3249,5,3452,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,169,77,196"/>
-<area shape="rect" id="node3" title=" " alt="" coords="101,169,165,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="189,169,256,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="3531,95,3658,121"/>
-<area shape="rect" id="node6" title=" " alt="" coords="3682,95,3819,121"/>
-<area shape="rect" id="node7" title=" " alt="" coords="3844,95,3983,121"/>
-<area shape="rect" id="node8" title=" " alt="" coords="4007,95,4129,121"/>
-<area shape="rect" id="node9" href="$CD__EBHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making Poisson operators for multigrid." alt="" coords="3246,95,3455,121"/>
-<area shape="rect" id="node20" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="3189,468,3374,495"/>
-<area shape="rect" id="node21" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="2203,468,2381,495"/>
-<area shape="rect" id="node37" href="$CD__CdrSolver_8H.html" title="Declaration of an abstract class for solving scalar convection&#45;diffusion&#45;reaction problems." alt="" coords="397,95,521,121"/>
-<area shape="rect" id="node10" title=" " alt="" coords="1985,319,2079,345"/>
-<area shape="rect" id="node11" title=" " alt="" coords="3092,319,3207,345"/>
-<area shape="rect" id="node12" title=" " alt="" coords="4351,244,4486,271"/>
-<area shape="rect" id="node13" title=" " alt="" coords="2457,319,2559,345"/>
-<area shape="rect" id="node14" title=" " alt="" coords="2635,319,2741,345"/>
-<area shape="rect" id="node15" title=" " alt="" coords="3866,319,3971,345"/>
-<area shape="rect" id="node16" title=" " alt="" coords="4831,244,5049,271"/>
-<area shape="rect" id="node17" title=" " alt="" coords="3613,244,3715,271"/>
-<area shape="rect" id="node18" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="3725,319,3843,345"/>
-<area shape="rect" id="node23" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="2777,244,2911,271"/>
-<area shape="rect" id="node25" href="$CD__EBMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="2935,244,3147,271"/>
-<area shape="rect" id="node26" href="$CD__EBHelmholtzOp_8H.html" title="Declaration of Helmholtz multigrid operators." alt="" coords="3806,169,3970,196"/>
-<area shape="rect" id="node35" href="$CD__EBHelmholtzEBBCFactory_8H_source.html" title=" " alt="" coords="3555,169,3781,196"/>
-<area shape="rect" id="node36" href="$CD__EBHelmholtzDomainBCFactory_8H_source.html" title=" " alt="" coords="3221,169,3481,196"/>
-<area shape="rect" id="node19" title=" " alt="" coords="3881,393,3972,420"/>
-<area shape="rect" id="node22" href="$CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="3639,393,3806,420"/>
-<area shape="rect" id="node24" href="$CD__Average_8H.html" title="Declaration of averaging methods." alt="" coords="2861,393,2976,420"/>
-<area shape="rect" id="node27" title=" " alt="" coords="2145,244,2196,271"/>
-<area shape="rect" id="node28" title=" " alt="" coords="4199,244,4327,271"/>
-<area shape="rect" id="node29" title=" " alt="" coords="2639,244,2753,271"/>
-<area shape="rect" id="node30" title=" " alt="" coords="4511,244,4609,271"/>
-<area shape="rect" id="node31" title=" " alt="" coords="4633,244,4756,271"/>
-<area shape="rect" id="node32" href="$CD__EBHelmholtzEBBC_8H_source.html" title=" " alt="" coords="3791,244,3972,271"/>
-<area shape="rect" id="node34" href="$CD__EBHelmholtzDomainBC_8H_source.html" title=" " alt="" coords="3374,244,3589,271"/>
-<area shape="rect" id="node33" title=" " alt="" coords="3231,319,3361,345"/>
-<area shape="rect" id="node38" title=" " alt="" coords="149,244,235,271"/>
-<area shape="rect" id="node39" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="1253,169,1377,196"/>
-<area shape="rect" id="node48" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="463,244,684,271"/>
-<area shape="rect" id="node49" href="$CD__CdrSpecies_8H.html" title="Declaration of a class that passes information into CdrSolver (e.g., initial conditions)." alt="" coords="1986,244,2121,271"/>
-<area shape="rect" id="node50" href="$CD__CdrDomainBC_8H.html" title="Declaration of domain boundary condition types for CdrSolver." alt="" coords="382,169,535,196"/>
-<area shape="rect" id="node40" title=" " alt="" coords="708,244,863,271"/>
-<area shape="rect" id="node41" title=" " alt="" coords="887,244,1017,271"/>
-<area shape="rect" id="node42" title=" " alt="" coords="1041,244,1207,271"/>
-<area shape="rect" id="node43" title=" " alt="" coords="1231,244,1399,271"/>
-<area shape="rect" id="node44" title=" " alt="" coords="1423,244,1588,271"/>
-<area shape="rect" id="node45" title=" " alt="" coords="1612,244,1759,271"/>
-<area shape="rect" id="node46" title=" " alt="" coords="432,319,573,345"/>
-<area shape="rect" id="node47" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="2423,244,2563,271"/>
+<area shape="rect" id="node1" title="Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves." alt="" coords="2725,5,2927,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="913,169,985,196"/>
+<area shape="rect" id="node3" title=" " alt="" coords="1009,169,1073,196"/>
+<area shape="rect" id="node4" title=" " alt="" coords="1097,169,1163,196"/>
+<area shape="rect" id="node5" title=" " alt="" coords="3007,95,3133,121"/>
+<area shape="rect" id="node6" title=" " alt="" coords="3157,95,3295,121"/>
+<area shape="rect" id="node7" title=" " alt="" coords="3319,95,3458,121"/>
+<area shape="rect" id="node8" title=" " alt="" coords="3482,95,3605,121"/>
+<area shape="rect" id="node9" href="$CD__EBHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making Poisson operators for multigrid." alt="" coords="2721,95,2931,121"/>
+<area shape="rect" id="node20" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2572,468,2757,495"/>
+<area shape="rect" id="node21" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="3477,468,3655,495"/>
+<area shape="rect" id="node38" href="$CD__CdrSolver_8H.html" title="Declaration of an abstract class for solving scalar convection&#45;diffusion&#45;reaction problems." alt="" coords="1387,95,1511,121"/>
+<area shape="rect" id="node10" title=" " alt="" coords="1890,319,1983,345"/>
+<area shape="rect" id="node11" title=" " alt="" coords="3719,319,3834,345"/>
+<area shape="rect" id="node12" title=" " alt="" coords="2469,244,2604,271"/>
+<area shape="rect" id="node13" title=" " alt="" coords="3044,319,3147,345"/>
+<area shape="rect" id="node14" title=" " alt="" coords="4208,319,4313,345"/>
+<area shape="rect" id="node15" title=" " alt="" coords="2812,319,2917,345"/>
+<area shape="rect" id="node16" title=" " alt="" coords="2469,169,2687,196"/>
+<area shape="rect" id="node17" title=" " alt="" coords="2704,244,2807,271"/>
+<area shape="rect" id="node18" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="4067,319,4185,345"/>
+<area shape="rect" id="node23" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="2210,244,2343,271"/>
+<area shape="rect" id="node25" href="$CD__EBMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="3603,244,3815,271"/>
+<area shape="rect" id="node26" href="$CD__EBHelmholtzOp_8H.html" title="Declaration of Helmholtz multigrid operators." alt="" coords="3013,169,3177,196"/>
+<area shape="rect" id="node36" href="$CD__EBHelmholtzEBBCFactory_8H_source.html" title=" " alt="" coords="4046,169,4273,196"/>
+<area shape="rect" id="node37" href="$CD__EBHelmholtzDomainBCFactory_8H_source.html" title=" " alt="" coords="4409,169,4669,196"/>
+<area shape="rect" id="node19" title=" " alt="" coords="4151,393,4242,420"/>
+<area shape="rect" id="node22" href="$CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="3960,393,4127,420"/>
+<area shape="rect" id="node24" href="$CD__Average_8H.html" title="Declaration of averaging methods." alt="" coords="2702,393,2817,420"/>
+<area shape="rect" id="node27" title=" " alt="" coords="2629,244,2679,271"/>
+<area shape="rect" id="node28" title=" " alt="" coords="3283,244,3382,271"/>
+<area shape="rect" id="node29" title=" " alt="" coords="3406,244,3529,271"/>
+<area shape="rect" id="node30" href="$CD__EBMGRestrict_8H.html" title="Declaration of a restriction operator for EB geometric multigrid." alt="" coords="2933,244,3084,271"/>
+<area shape="rect" id="node32" href="$CD__EBMGProlong_8H.html" title="Declaration of a prolongation operator for EB geometric multigrid." alt="" coords="3108,244,3259,271"/>
+<area shape="rect" id="node33" href="$CD__EBHelmholtzEBBC_8H_source.html" title=" " alt="" coords="3990,244,4171,271"/>
+<area shape="rect" id="node35" href="$CD__EBHelmholtzDomainBC_8H_source.html" title=" " alt="" coords="4348,244,4563,271"/>
+<area shape="rect" id="node31" title=" " alt="" coords="2595,319,2737,345"/>
+<area shape="rect" id="node34" title=" " alt="" coords="4484,319,4613,345"/>
+<area shape="rect" id="node39" title=" " alt="" coords="1635,244,1721,271"/>
+<area shape="rect" id="node40" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="1188,169,1312,196"/>
+<area shape="rect" id="node48" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="1338,244,1559,271"/>
+<area shape="rect" id="node49" href="$CD__CdrSpecies_8H.html" title="Declaration of a class that passes information into CdrSolver (e.g., initial conditions)." alt="" coords="1899,244,2033,271"/>
+<area shape="rect" id="node50" href="$CD__CdrDomainBC_8H.html" title="Declaration of domain boundary condition types for CdrSolver." alt="" coords="1669,169,1823,196"/>
+<area shape="rect" id="node41" title=" " alt="" coords="903,244,1058,271"/>
+<area shape="rect" id="node42" title=" " alt="" coords="1083,244,1212,271"/>
+<area shape="rect" id="node43" title=" " alt="" coords="23,244,189,271"/>
+<area shape="rect" id="node44" title=" " alt="" coords="213,244,327,271"/>
+<area shape="rect" id="node45" title=" " alt="" coords="351,244,519,271"/>
+<area shape="rect" id="node46" title=" " alt="" coords="543,244,709,271"/>
+<area shape="rect" id="node47" title=" " alt="" coords="733,244,879,271"/>
 </map>

@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['advectionsolver_6249',['AdvectionSolver',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a44046dbe4844b024496aa76377582930',1,'Physics::CdrPlasma::CdrPlasmaGodunovStepper']]],
-  ['average_6250',['Average',['../CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4',1,'CD_Average.H']]]
+  ['advectionsolver_6279',['AdvectionSolver',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a44046dbe4844b024496aa76377582930',1,'Physics::CdrPlasma::CdrPlasmaGodunovStepper']]],
+  ['average_6280',['Average',['../CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4',1,'CD_Average.H']]]
 ];

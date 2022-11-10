@@ -1,3 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classMFLevelGrid.html" title="Wrapper class for holding multifluid EBLevelGrids." alt="" coords="5,5,109,32"/>
+<area shape="rect" id="node1" href="$classMFHelmholtzJumpBCFactory.html" title="Factory class for making jump boundary condition objects in a multifluid MFHelmholtzOp context." alt="" coords="5,13,212,39"/>
+<area shape="rect" id="node2" href="$classMFHelmholtzSaturationChargeJumpBCFactory.html" title="Factory class for making saturation charge jump boundary condition objects in multifluid Helmholtz co..." alt="" coords="260,5,483,47"/>
 </map>
