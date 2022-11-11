@@ -250,6 +250,14 @@ LookupTable1D<N>::getEntry(const Real a_x) const
   }
   else {
 
+    if (!(std::get<Sorted>(m_state))) {
+      MayDay::Warning("LookupTable1D<N>::getEntry - table is not sorted");
+    }
+
+    if (!(std::get<Uniform>(m_state))) {
+      MayDay::Warning("LookupTable1D<N>::getEntry - table is not uniform");
+    }
+
     // We have sorted our data from smallest to largest along some column -- this is that column.
     const int sortedColumn = std::get<Column>(m_state);
 
@@ -360,6 +368,14 @@ LookupTable1D<N>::getData(const Real a_x) const
     ret = m_data.front();
   }
   else {
+    if (!(std::get<Sorted>(m_state))) {
+      MayDay::Error("LookupTable1D<N>::getEntry - table is not sorted");
+    }
+
+    if (!(std::get<Uniform>(m_state))) {
+      MayDay::Error("LookupTable1D<N>::getEntry - table is not uniform");
+    }
+
     const int sortedColumn = std::get<Column>(m_state);
 
     // This is the LOWER index among the two indices we will interpolate between.
@@ -454,7 +470,7 @@ LookupTable1D<N>::directLookup(const Real a_x) const
 {
 
   std::array<Real, N> ret;
-  if (!std::get<Sorted>(m_state)) {
+  if (!(std::get<Sorted>(m_state))) {
     std::cerr << "LookupTable1D<N>::directLookup -- logic bust. Data must be sorted along the input column!\n";
   }
   else {
