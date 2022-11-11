@@ -327,10 +327,18 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a28279b812ca6bc3130cd50491e7b00c1">m_isCellSorted</a></td></tr>
 <tr class="memdesc:a28279b812ca6bc3130cd50491e7b00c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if particle container is "cell sorted". <br /></td></tr>
 <tr class="separator:a28279b812ca6bc3130cd50491e7b00c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85fa3352cd8221499915666a870243a6"><td class="memItemLeft" align="right" valign="top"><a id="a85fa3352cd8221499915666a870243a6"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a85fa3352cd8221499915666a870243a6">m_profile</a></td></tr>
+<tr class="memdesc:a85fa3352cd8221499915666a870243a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Profile or not. <br /></td></tr>
+<tr class="separator:a85fa3352cd8221499915666a870243a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaefbb1f4bc933a5431a67b9bcd815a8f"><td class="memItemLeft" align="right" valign="top"><a id="aaefbb1f4bc933a5431a67b9bcd815a8f"></a>
 Vector&lt; DisjointBoxLayout &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#aaefbb1f4bc933a5431a67b9bcd815a8f">m_grids</a></td></tr>
 <tr class="memdesc:aaefbb1f4bc933a5431a67b9bcd815a8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">AMR grids. <br /></td></tr>
 <tr class="separator:aaefbb1f4bc933a5431a67b9bcd815a8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac19ab1218435bde090d4ea275f7258f3"><td class="memItemLeft" align="right" valign="top"><a id="ac19ab1218435bde090d4ea275f7258f3"></a>
+Vector&lt; DisjointBoxLayout &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ac19ab1218435bde090d4ea275f7258f3">m_oldGrids</a></td></tr>
+<tr class="memdesc:ac19ab1218435bde090d4ea275f7258f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Old AMR grids. Used during regrids. <br /></td></tr>
+<tr class="separator:ac19ab1218435bde090d4ea275f7258f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a012337ae54b14648f8d7c6493e30fbeb"><td class="memItemLeft" align="right" valign="top"><a id="a012337ae54b14648f8d7c6493e30fbeb"></a>
 Vector&lt; ProblemDomain &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a012337ae54b14648f8d7c6493e30fbeb">m_domains</a></td></tr>
 <tr class="memdesc:a012337ae54b14648f8d7c6493e30fbeb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Problem domains. <br /></td></tr>
@@ -351,10 +359,6 @@ Vector&lt; RealVect &gt;&#160;</td><td class="memItemRight" valign="bottom"><a c
 Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a85436cd2d0371d28abeb950be9ff3428">m_refRat</a></td></tr>
 <tr class="memdesc:a85436cd2d0371d28abeb950be9ff3428"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refinement ratios. Entry at index 'l' is the refinement between level 'l' and level 'l+1'. <br /></td></tr>
 <tr class="separator:a85436cd2d0371d28abeb950be9ff3428"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af16fe311a1b510e437c3726c5598fcfb"><td class="memItemLeft" align="right" valign="top"><a id="af16fe311a1b510e437c3726c5598fcfb"></a>
-Vector&lt; List&lt; P &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#af16fe311a1b510e437c3726c5598fcfb">m_cacheParticles</a></td></tr>
-<tr class="memdesc:af16fe311a1b510e437c3726c5598fcfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache particles. Use during pre-regrid operations, and for transferring particles between coarse and fine before deposition steps. <br /></td></tr>
-<tr class="separator:af16fe311a1b510e437c3726c5598fcfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c197ca6b601406a4087eb3cbb3258a6"><td class="memItemLeft" align="right" valign="top"><a id="a2c197ca6b601406a4087eb3cbb3258a6"></a>
 <a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; P &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a2c197ca6b601406a4087eb3cbb3258a6">m_particles</a></td></tr>
 <tr class="memdesc:a2c197ca6b601406a4087eb3cbb3258a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">The actual particles that this <a class="el" href="classParticleContainer.html" title="Templated class for holding particles on an AMR hierarchy with particle remapping.">ParticleContainer</a> represents. <br /></td></tr>
@@ -366,6 +370,9 @@ Vector&lt; List&lt; P &gt; &gt;&#160;</td><td class="memItemRight" valign="botto
 <a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; P &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ac29c4836c732dde4e52035aefd73ba3f">m_maskParticles</a></td></tr>
 <tr class="memdesc:ac29c4836c732dde4e52035aefd73ba3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special data holder that holds copies of particles on the coarse level that are within a specified range of the refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. <br /></td></tr>
 <tr class="separator:ac29c4836c732dde4e52035aefd73ba3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7b8e818c93458929ae2bc5b3a54e486"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; P &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ae7b8e818c93458929ae2bc5b3a54e486">m_regridParticles</a></td></tr>
+<tr class="memdesc:ae7b8e818c93458929ae2bc5b3a54e486"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particles stored on the old grid.  <a href="classParticleContainer.html#ae7b8e818c93458929ae2bc5b3a54e486">More...</a><br /></td></tr>
+<tr class="separator:ae7b8e818c93458929ae2bc5b3a54e486"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a28a02527e8bea0e8dc8e8cd7180d4aec"><td class="memItemLeft" align="right" valign="top"><a id="a28a02527e8bea0e8dc8e8cd7180d4aec"></a>
 <a class="el" href="CD__ParticleContainer_8H.html#a7d58e41c5d4c425cb2ab9d9eb80da621">AMRCellParticles</a>&lt; P &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a28a02527e8bea0e8dc8e8cd7180d4aec">m_cellSortedParticles</a></td></tr>
 <tr class="memdesc:a28a02527e8bea0e8dc8e8cd7180d4aec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell particles. <br /></td></tr>
@@ -1888,6 +1895,33 @@ template&lt;class P &gt; </div>
 
 <p>Special data holder that holds particles on a grown grid layout. </p>
 <p>This particle data holder uses grids that exceed the DisjointBoxLayout on each level (boxes are grown by m_refRat). This means that this particle data holder can store particles that are out the DisjointBoxLayout by m_refRat cells. This is very useful when one wants to deposit particles on the fine level, but where the particles live on the coarse level. In such cases one will typically copy some (or all) particles from the coarse level to this data holder and deposit from this data holder onto the fine level. </p>
+
+</div>
+</div>
+<a id="ae7b8e818c93458929ae2bc5b3a54e486"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7b8e818c93458929ae2bc5b3a54e486">&#9670;&nbsp;</a></span>m_regridParticles</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt;P&gt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt;::m_regridParticles</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Particles stored on the old grid. </p>
+<p>Populated during the preRegrid call. </p>
 
 </div>
 </div>
