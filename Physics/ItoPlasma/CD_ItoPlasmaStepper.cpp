@@ -207,7 +207,8 @@ ItoPlasmaStepper::parseLoadBalance() noexcept
 
   std::string str;
 
-  pp.get("load_balance", m_loadBalance);
+  pp.get("load_balance_particles", m_loadBalanceParticles);
+  pp.get("load_balance_fluid", m_loadBalanceFluid);  
   pp.get("load_per_cell", m_loadPerCell);
 
   // Box sorting for load balancing
@@ -3419,7 +3420,10 @@ ItoPlasmaStepper::loadBalanceThisRealm(const std::string a_realm) const
 
   bool ret = false;
 
-  if (a_realm == m_particleRealm && m_loadBalance) {
+  if (a_realm == m_particleRealm && m_loadBalanceParticles) {
+    ret = true;
+  }
+  if(a_realm == m_fluidRealm && m_loadBalanceFluid) {
     ret = true;
   }
 
@@ -3439,11 +3443,11 @@ ItoPlasmaStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
     pout() << m_name + "::loadBalanceBoxes" << endl;
   }
 
-  if (m_loadBalance && a_realm == m_particleRealm) {
+  if (m_loadBalanceParticles && a_realm == m_particleRealm) {
     this->loadBalanceParticleRealm(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finestLevel);
   }
-  else {
-    MayDay::Abort("ItoPlasmaStepper::loadBalanceBoxes - shouldn't happen, how did you get here..?");
+  if(m_loadBalanceFluid && a_realm == m_fluidRealm) {
+    this->loadBalanceFluidRealm(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finestLevel);
   }
 }
 
@@ -3460,7 +3464,7 @@ ItoPlasmaStepper::getCheckpointLoads(const std::string a_realm, const int a_leve
 
   Vector<long int> loads(nbox, 0L);
 
-  if (m_loadBalance && a_realm == m_particleRealm) {
+  if (m_loadBalanceParticles && a_realm == m_particleRealm) {
 
     // If we're load balancing with particles, get the number of particles per patch
     // from the relevant particle solvers. Since these are Ito solvers, the loads
@@ -3587,6 +3591,50 @@ ItoPlasmaStepper::getLoadBalanceSolvers() const noexcept
   }
 
   return loadBalanceProxySolvers;
+}
+
+void
+ItoPlasmaStepper::loadBalanceFluidRealm(Vector<Vector<int>>&             a_procs,
+					Vector<Vector<Box>>&             a_boxes,
+					const std::string                a_realm,
+					const Vector<DisjointBoxLayout>& a_grids,
+					const int                        a_lmin,
+					const int                        a_finestLevel) noexcept
+{
+  CH_TIME("ItoPlasmaStepper::loadBalanceFluidRealm(...)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::loadBalanceFluidRealm(...)" << endl;
+  }
+  
+  CH_assert(m_loadBalanceFluid);
+  CH_assert(a_realm == m_fluidRealm);
+
+  // TLDR: This code tries to compute a load for each grid patch by applying a relaxation operator to each box. This means that the load
+  //       should be a decent estimate that takes into account boundary conditions, coarse-fine interface arithmetic, and enlargened stencils
+  //       near the embedded boundary.
+  
+  a_procs.resize(1 + a_finestLevel);
+  a_boxes.resize(1 + a_finestLevel);
+
+  // We need to make AmrMesh restore some operators that we need in order to create a multigrid object. Fortunately, FieldSolver has routines
+  // for doing that but it will not know if AmrMesh has updated it's operators or not. So, we need to regrid them.
+
+  m_amr->regridOperators(a_lmin);
+
+  // Field solver needs to allocate solver and set up the multigrid solver.
+  m_fieldSolver->allocateInternals();
+  m_fieldSolver->setupSolver();
+  
+  // Field solver implementation gets the responsibility of computing loads on each level.
+  for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
+    Vector<long long> loads = m_fieldSolver->computeLoads(a_grids[lvl], lvl);
+
+    // Do the desired sorting and load balancing
+    a_boxes[lvl] = a_grids[lvl].boxArray();
+    
+    LoadBalancing::sort(a_boxes[lvl], loads, m_boxSort);
+    LoadBalancing::makeBalance(a_procs[lvl], loads, a_boxes[lvl]);
+  }
 }
 
 void

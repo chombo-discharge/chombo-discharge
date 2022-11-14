@@ -44,7 +44,7 @@ Driver.checkpoint_interval             = 10               # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 0                # Number of initial regrids
+Driver.initial_regrids                 = 2                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
@@ -209,8 +209,9 @@ RodDielectric.sphere.radius             = 0.5           # Radius
 ItoPlasmaGodunovStepper.verbosity               = -1             # Verbosity
 ItoPlasmaGodunovStepper.profile                 = true          # Turn on/off run-time profiling
 ItoPlasmaGodunovStepper.plt_vars                = current_density           # 'conductivity', 'current_density', 'particles_per_patch'
-ItoPlasmaGodunovStepper.dual_grid               = true           # Turn on/off dual-grid functionality
-ItoPlasmaGodunovStepper.load_balance            = true           # Turn on/off load balancing
+ItoPlasmaGodunovStepper.dual_grid               = false           # Turn on/off dual-grid functionality
+ItoPlasmaGodunovStepper.load_balance_fluid      = false           # Turn on/off fluid realm load balancing. 
+ItoPlasmaGodunovStepper.load_balance_particles  = false           # Turn on/off particle load balancing
 ItoPlasmaGodunovStepper.load_indices            = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoPlasmaGodunovStepper.load_per_cell           = 1.0            # Default load per grid cell.
 ItoPlasmaGodunovStepper.box_sorting             = morton         # Box sorting when load balancing
@@ -238,17 +239,17 @@ ItoPlasmaAir3LFA.init_center     = 0 0 0         # Blob center
 ItoPlasmaAir3LFA.init_radius     = 500E-6        # Blob radius
 
 # For controlling the time step
-ItoPlasmaAir3LFA.dX              = 2.0           # Maximum relative change Xnew/Xold during one time step.
+ItoPlasmaAir3LFA.dX              = 10.0           # Maximum relative change Xnew/Xold during one time step.
 
 # Ion transport settings. 
 ItoPlasmaAir3LFA.ion_transport   = false         # By default, stationary ions. 
 ItoPlasmaAir3LFA.ion_mobility    = 2E-4          # Turn on/off ion mobility
 
 # Kinetic Monte Carlo solver settings.
-ItoPlasmaAir3LFA.max_new_particles = 256         # Maximum number of computational particles to produce in reaction step
+ItoPlasmaAir3LFA.max_new_particles = 64          # Maximum number of computational particles to produce in reaction step
 ItoPlasmaAir3LFA.max_new_photons   = 256         # Maximum number of computational photons to produce in reaction step	
 ItoPlasmaAir3LFA.Ncrit          = 10             # How many firings away from a Negative particle number?
-ItoPlasmaAir3LFA.prop_eps       = 0.1            # Maximum relative change in propensity function
+ItoPlasmaAir3LFA.prop_eps       = 1.E99          # Maximum relative change in propensity function
 ItoPlasmaAir3LFA.NSSA           = 10             # How many SSA steps to run when tau-leaping is inefficient
 ItoPlasmaAir3LFA.SSAlim         = 10.0           # When to enter SSA instead of tau-leaping
 ItoPlasmaAir3LFA.algorithm      = hybrid         # 'tau', 'ssa', or 'hybrid'
@@ -268,11 +269,11 @@ ItoPlasmaStreamerTagger.verbosity         = -1           # Verbosity
 ItoPlasmaStreamerTagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
 ItoPlasmaStreamerTagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
 ItoPlasmaStreamerTagger.box1_hi           = 0.0 0.0 0.0  # these two corners
-ItoPlasmaStreamerTagger.buffer            = 0            # Grow tagged cells
+ItoPlasmaStreamerTagger.buffer            = 16           # Grow tagged cells
 
 ItoPlasmaStreamerTagger.refine_curvature  = 10.0     # Curvature refinement
 ItoPlasmaStreamerTagger.coarsen_curvature = 1000.0     # Curvature coarsening	
-ItoPlasmaStreamerTagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
-ItoPlasmaStreamerTagger.coarsen_alpha     = 99.0          # Set alpha coarsening. Higher => Less mesh
+ItoPlasmaStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
+ItoPlasmaStreamerTagger.coarsen_alpha     = 0.25         # Set alpha coarsening. Higher => Less mesh
 ItoPlasmaStreamerTagger.max_coarsen_lvl   = 2            # Set max coarsening depth
 

@@ -1001,9 +1001,14 @@ namespace Physics {
       bool m_regridSuperparticles;
 
       /*!
-	@brief Load balance or don't load balance.
+	@brief Load balance particle realm or not
       */
-      bool m_loadBalance;
+      bool m_loadBalanceParticles;
+
+      /*!
+	@brief Load balance fluid realm or not
+      */
+      bool m_loadBalanceFluid;
 
       /*!
 	@brief For switching between the old and new reaction algorithms
@@ -1262,6 +1267,23 @@ namespace Physics {
                                const Vector<DisjointBoxLayout>& a_grids,
                                const int                        a_lmin,
                                const int                        a_finestLevel) noexcept;
+
+      /*!
+	@brief Routine called by loadBalanceBoxes and used for particle-based load balancing.
+	@param[out] a_procs       MPI ranks owning the various grid boxes. 
+	@param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
+	@param[in]  a_realm       Realm identifier
+	@param[in]  a_grids       Original grids
+	@param[in]  a_lmin        Coarsest grid level to load balance. 
+	@param[in]  a_finestLevel Finest grid level
+      */
+      virtual void
+      loadBalanceFluidRealm(Vector<Vector<int>>&             a_procs,
+			    Vector<Vector<Box>>&             a_boxes,
+			    const std::string                a_realm,
+			    const Vector<DisjointBoxLayout>& a_grids,
+			    const int                        a_lmin,
+			    const int                        a_finestLevel) noexcept;      
 
       /*!
 	@brief Get the solvers used for load balancing
