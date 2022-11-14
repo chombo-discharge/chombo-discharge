@@ -542,7 +542,9 @@ MFHelmholtzOp::computeOperatorLoads(LevelData<MFCellFAB>& a_phi, TimedDataIterat
     }
 
     // Matching time
-    m_jumpBC->matchBC((*m_jump)[a_timeDit()], a_phi[a_timeDit()], true, a_timeDit());
+    if(m_multifluid) {
+      m_jumpBC->matchBC((*m_jump)[a_timeDit()], a_phi[a_timeDit()], true, a_timeDit());
+    }
 
     // Apply operator application
     for (auto& op : m_helmOps) {
