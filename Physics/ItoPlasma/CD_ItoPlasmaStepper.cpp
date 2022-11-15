@@ -208,7 +208,7 @@ ItoPlasmaStepper::parseLoadBalance() noexcept
   std::string str;
 
   pp.get("load_balance_particles", m_loadBalanceParticles);
-  pp.get("load_balance_fluid", m_loadBalanceFluid);  
+  pp.get("load_balance_fluid", m_loadBalanceFluid);
   pp.get("load_per_cell", m_loadPerCell);
 
   // Box sorting for load balancing
@@ -1258,7 +1258,7 @@ ItoPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<E
   DataOps::scale(a_rho, Units::Qe);
 
   m_amr->conservativeAverage(a_rho, m_fluidRealm);
-  m_amr->interpGhostMG(a_rho, m_fluidRealm);
+  m_amr->interpGhostPwl(a_rho, m_fluidRealm);
 
   // Interpolate to centroids.
   m_amr->interpToCentroids(rhoPhase, m_fluidRealm, m_plasmaPhase);
@@ -1308,7 +1308,7 @@ ItoPlasmaStepper::computeConductivityCell(EBAMRCellData&                        
   DataOps::scale(a_conductivity, Units::Qe);
 
   m_amr->conservativeAverage(a_conductivity, m_fluidRealm, m_plasmaPhase);
-  m_amr->interpGhostMG(a_conductivity, m_fluidRealm, m_plasmaPhase);
+  m_amr->interpGhostPwl(a_conductivity, m_fluidRealm, m_plasmaPhase);
 
   // Interpolate to centroids.
   m_amr->interpToCentroids(a_conductivity, m_fluidRealm, m_plasmaPhase);
@@ -1356,8 +1356,8 @@ ItoPlasmaStepper::computeRelaxationTime() noexcept
 
   m_amr->conservativeAverage(relaxTime, m_fluidRealm, m_plasmaPhase);
 
-  Real min = 0.0;
-  Real max = 0.0;
+  Real min = std::numeric_limits<Real>::max();
+  Real max = -std::numeric_limits<Real>::max();
 
   DataOps::getMaxMinNorm(max, min, relaxTime);
 
@@ -2021,7 +2021,7 @@ ItoPlasmaStepper::setItoVelocityFunctions() noexcept
 
       // Coarsen and update ghost cells.
       m_amr->conservativeAverage(velocityFunction, m_particleRealm, m_plasmaPhase);
-      m_amr->interpGhostMG(velocityFunction, m_particleRealm, m_plasmaPhase);
+      m_amr->interpGhostPwl(velocityFunction, m_particleRealm, m_plasmaPhase);
     }
   }
 }
@@ -2116,7 +2116,7 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobiliti
       a_meshMobilities[idx]->copy(fluidScratchMobilities[idx]);
 
       m_amr->conservativeAverage(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);
-      m_amr->interpGhostMG(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);
+      m_amr->interpGhostPwl(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);
 
       solver->interpolateMobilities();
     }
@@ -2294,7 +2294,7 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>& a_diffusionCoef
       a_diffusionCoefficients[idx]->copy(fluidScratchDiffusion[idx]);
 
       m_amr->conservativeAverage(*a_diffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);
-      m_amr->interpGhostMG(*a_diffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);
+      m_amr->interpGhostPwl(*a_diffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);
 
       solver->interpolateDiffusion();
     }
@@ -3423,7 +3423,7 @@ ItoPlasmaStepper::loadBalanceThisRealm(const std::string a_realm) const
   if (a_realm == m_particleRealm && m_loadBalanceParticles) {
     ret = true;
   }
-  if(a_realm == m_fluidRealm && m_loadBalanceFluid) {
+  else if (a_realm == m_fluidRealm && m_loadBalanceFluid) {
     ret = true;
   }
 
@@ -3446,7 +3446,7 @@ ItoPlasmaStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
   if (m_loadBalanceParticles && a_realm == m_particleRealm) {
     this->loadBalanceParticleRealm(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finestLevel);
   }
-  if(m_loadBalanceFluid && a_realm == m_fluidRealm) {
+  else if (m_loadBalanceFluid && a_realm == m_fluidRealm) {
     this->loadBalanceFluidRealm(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finestLevel);
   }
 }
@@ -3595,43 +3595,42 @@ ItoPlasmaStepper::getLoadBalanceSolvers() const noexcept
 
 void
 ItoPlasmaStepper::loadBalanceFluidRealm(Vector<Vector<int>>&             a_procs,
-					Vector<Vector<Box>>&             a_boxes,
-					const std::string                a_realm,
-					const Vector<DisjointBoxLayout>& a_grids,
-					const int                        a_lmin,
-					const int                        a_finestLevel) noexcept
+                                        Vector<Vector<Box>>&             a_boxes,
+                                        const std::string                a_realm,
+                                        const Vector<DisjointBoxLayout>& a_grids,
+                                        const int                        a_lmin,
+                                        const int                        a_finestLevel) noexcept
 {
   CH_TIME("ItoPlasmaStepper::loadBalanceFluidRealm(...)");
   if (m_verbosity > 5) {
     pout() << m_name + "::loadBalanceFluidRealm(...)" << endl;
   }
-  
+
   CH_assert(m_loadBalanceFluid);
   CH_assert(a_realm == m_fluidRealm);
 
   // TLDR: This code tries to compute a load for each grid patch by applying a relaxation operator to each box. This means that the load
   //       should be a decent estimate that takes into account boundary conditions, coarse-fine interface arithmetic, and enlargened stencils
   //       near the embedded boundary.
-  
+
   a_procs.resize(1 + a_finestLevel);
   a_boxes.resize(1 + a_finestLevel);
 
   // We need to make AmrMesh restore some operators that we need in order to create a multigrid object. Fortunately, FieldSolver has routines
   // for doing that but it will not know if AmrMesh has updated it's operators or not. So, we need to regrid them.
-
-  m_amr->regridOperators(a_lmin);
+  m_amr->regridOperators(m_fluidRealm, a_lmin);
 
   // Field solver needs to allocate solver and set up the multigrid solver.
   m_fieldSolver->allocateInternals();
   m_fieldSolver->setupSolver();
-  
+
   // Field solver implementation gets the responsibility of computing loads on each level.
   for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
     Vector<long long> loads = m_fieldSolver->computeLoads(a_grids[lvl], lvl);
 
     // Do the desired sorting and load balancing
     a_boxes[lvl] = a_grids[lvl].boxArray();
-    
+
     LoadBalancing::sort(a_boxes[lvl], loads, m_boxSort);
     LoadBalancing::makeBalance(a_procs[lvl], loads, a_boxes[lvl]);
   }

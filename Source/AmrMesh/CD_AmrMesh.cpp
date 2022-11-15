@@ -958,8 +958,24 @@ AmrMesh::regridOperators(const int a_lmin)
   }
 
   for (auto& r : m_realms) {
-    r.second->regridOperators(a_lmin);
+    this->regridOperators(r.first, a_lmin);
   }
+}
+
+void
+AmrMesh::regridOperators(const std::string a_realm, const int a_lmin)
+{
+  CH_TIME("AmrMesh::regridOperators(string, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::regridOperators(string, int)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::regridOperators(string, int) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  m_realms[a_realm]->regridOperators(a_lmin);
 }
 
 void

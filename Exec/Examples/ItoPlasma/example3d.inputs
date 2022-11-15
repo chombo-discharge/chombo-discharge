@@ -207,10 +207,11 @@ RodDielectric.sphere.radius             = 0.5           # Radius
 # ItoPlasmaGodunovStepper class options
 # ====================================================================================================
 ItoPlasmaGodunovStepper.verbosity               = -1             # Verbosity
-ItoPlasmaGodunovStepper.profile                 = true          # Turn on/off run-time profiling
-ItoPlasmaGodunovStepper.plt_vars                = current_density           # 'conductivity', 'current_density', 'particles_per_patch'
+ItoPlasmaGodunovStepper.profile                 = true           # Turn on/off run-time profiling
+ItoPlasmaGodunovStepper.plt_vars                = none           # 'conductivity', 'current_density', 'particles_per_patch'
 ItoPlasmaGodunovStepper.dual_grid               = true           # Turn on/off dual-grid functionality
-ItoPlasmaGodunovStepper.load_balance            = true           # Turn on/off load balancing
+ItoPlasmaGodunovStepper.load_balance_fluid      = true           # Turn on/off fluid realm load balancing. 
+ItoPlasmaGodunovStepper.load_balance_particles  = true           # Turn on/off particle load balancing
 ItoPlasmaGodunovStepper.load_indices            = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoPlasmaGodunovStepper.load_per_cell           = 1.0            # Default load per grid cell.
 ItoPlasmaGodunovStepper.box_sorting             = morton         # Box sorting when load balancing

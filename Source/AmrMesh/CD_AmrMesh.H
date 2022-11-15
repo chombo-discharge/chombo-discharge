@@ -1332,6 +1332,14 @@ public:
   regridOperators(const int a_lmin);
 
   /*!
+    @brief Regrid AMR operators. This is done for a specific realm.
+    @param[in] a_realm Realm
+    @param[in] a_lmin  Coarsest grid level that changes. 
+  */
+  void
+  regridOperators(const std::string a_realm, const int a_lmin);
+
+  /*!
     @brief Do a sanity check to make sure everything is set up correctly
   */
   void

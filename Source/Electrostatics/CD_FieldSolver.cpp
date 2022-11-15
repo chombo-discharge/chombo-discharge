@@ -349,7 +349,7 @@ FieldSolver::computeCapacitance()
   // Do a backup of the voltage.
   auto voltageBackup = m_voltage;
   auto voltageOne    = [](const Real a_time) -> Real {
-    return 100.0;
+    return 1.0;
   };
 
   // Set the voltage to one and use that to compute the potential/E-field
