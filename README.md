@@ -8,6 +8,8 @@ A modified version of ``Chombo`` is distributed together with this code.
 
 Click [here](https://chombo-discharge.github.io/chombo-discharge/Base/Installation.html) for installation instructions.
 
+![screen-gif](./Media/BranchingPositiveAir.gif)
+
 Documentation
 -------------
 
