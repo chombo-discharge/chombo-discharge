@@ -916,7 +916,7 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 
   // Go through the new grids. Check if the old grids overlap with the new grids and if they do, move the particles around locally.
   timer.startEvent("Local transfer");
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+  for (int lvl = 0; lvl <= std::min(oldFinestLevel, m_finestLevel); lvl++) {
     const DisjointBoxLayout& oldDBL = m_oldGrids[lvl];
     const DisjointBoxLayout& newDBL = m_grids[lvl];
 
