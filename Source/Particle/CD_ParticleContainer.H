@@ -544,9 +544,19 @@ protected:
   bool m_isOrganizedByCell;
 
   /*!
+    @brief Profile or not
+  */
+  bool m_profile;
+
+  /*!
     @brief AMR grids
   */
   Vector<DisjointBoxLayout> m_grids;
+
+  /*!
+    @brief Old AMR grids. Used during regrids
+  */
+  Vector<DisjointBoxLayout> m_oldGrids;
 
   /*!
     @brief Problem domains
@@ -574,12 +584,6 @@ protected:
   Vector<int> m_refRat;
 
   /*!
-    @brief Cache particles. Use during pre-regrid operations, and for transferring particles between coarse and fine before
-    deposition steps. 
-  */
-  Vector<List<P>> m_cacheParticles;
-
-  /*!
     @brief The actual particles that this ParticleContainer represents
   */
   mutable AMRParticles<P> m_particles;
@@ -598,6 +602,12 @@ protected:
     refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
   */
   mutable AMRParticles<P> m_maskParticles;
+
+  /*!
+    @brief Particles stored on the old grid. 
+    @details Populated during the preRegrid call.
+  */
+  AMRParticles<P> m_regridParticles;
 
   /*!
     @brief Cell particles. 

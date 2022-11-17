@@ -27,6 +27,16 @@ namespace ParallelOps {
   barrier() noexcept;
 
   /*!
+    @brief Partition the input number such that each MPI rank gets an equal chunk. We assume
+    that N is the length of some container whose indexing starts at 0.
+    @details Returns start/stop indices along N. For example, if using two MPI ranks
+    with N = 10 the first rank obtains pair(0,4) and the second rank get (5,9)
+    @param[in] a_N Some container size.
+  */
+  inline std::pair<int, int>
+  partition(const int a_N) noexcept;
+
+  /*!
     @brief Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)
     @param[in] a_input Data input. Returns the smallest. 
   */

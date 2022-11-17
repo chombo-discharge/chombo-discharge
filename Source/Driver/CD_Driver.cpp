@@ -2755,6 +2755,23 @@ Driver::readCheckpointRealmLoads(Vector<long int>& a_loads,
   // Identifier in HDF5 file.
   const std::string str = a_realm + "_loads";
 
+#ifdef CH_MPI
+  const int                 nBoxes   = a_loads.size();
+  const std::pair<int, int> beginEnd = ParallelOps::partition(nBoxes);
+  for (int i = 0; i < nBoxes; i++) {
+    a_loads[i] = 0L;
+  }
+
+  for (int ibox = beginEnd.first; ibox <= beginEnd.second; ibox++) {
+    FArrayBox fab;
+
+    readFArrayBox(a_handle, fab, a_level, ibox, Interval(0, 0), str);
+
+    a_loads[ibox] = lround(fab.max());
+  }
+
+  ParallelOps::vectorSum(a_loads);
+#else
   // Read into an FArrayBox.
   FArrayBox fab;
   for (int ibox = 0; ibox < a_loads.size(); ibox++) {
@@ -2762,6 +2779,7 @@ Driver::readCheckpointRealmLoads(Vector<long int>& a_loads,
 
     a_loads[ibox] = lround(fab.max());
   }
+#endif
 }
 #endif
 

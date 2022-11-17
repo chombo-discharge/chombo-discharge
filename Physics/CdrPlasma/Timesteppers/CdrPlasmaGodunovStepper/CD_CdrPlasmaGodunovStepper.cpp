@@ -504,6 +504,8 @@ CdrPlasmaGodunovStepper::postCheckpointSetup()
 
     // When we enter this routine we will already have called read the checkpoint data into the conductivityFactor and semiimplicit space charge. We need
     // to set up the field solver with those quantities rather than the regular space charge.
+    m_fieldSolver->setupSolver();
+
     m_amr->conservativeAverage(m_conductivityFactorCell, m_realm, m_phase);
     m_amr->interpGhostMG(m_conductivityFactorCell, m_realm, m_phase);
 

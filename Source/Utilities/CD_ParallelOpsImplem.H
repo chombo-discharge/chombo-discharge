@@ -26,6 +26,27 @@ ParallelOps::barrier() noexcept
 #endif
 }
 
+inline std::pair<int, int>
+ParallelOps::partition(const int a_N) noexcept
+{
+#ifdef CH_MPI
+  const int equalChunk = a_N / numProc();
+  const int remainder  = a_N % numProc();
+
+  int begin = procID() * equalChunk;
+  int end   = begin + equalChunk - 1;
+
+  // Remainder goes to last rank.
+  if (procID() == numProc() - 1) {
+    end += remainder;
+  }
+
+  return std::make_pair(begin, end);
+#else
+  return std::make_pair(0, N - 1);
+#endif
+}
+
 inline Real
 ParallelOps::min(const Real& a_input) noexcept
 {
