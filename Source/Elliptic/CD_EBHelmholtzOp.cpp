@@ -92,7 +92,9 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
 
   // Default settings. Always solve for comp = 0. If you want something different, copy your
   // input two different data holders before you use AMRMultiGrid.
-  m_turnOffBCs = false;
+  m_doInterpCF = true;
+  m_doCoarsen  = true;
+  m_doExchange = true;
   m_interval   = Interval(m_comp, m_comp);
 
   if (m_hasFine) {
@@ -173,19 +175,51 @@ EBHelmholtzOp::getBcoefIrreg()
 EBHelmholtzOp::~EBHelmholtzOp() { CH_TIME("EBHelmholtzOp::~EBHelmholtzOp()"); }
 
 void
-EBHelmholtzOp::turnOffBCs()
+EBHelmholtzOp::turnOffCFInterp()
 {
-  CH_TIME("EBHelmholtzOp::turnOffBCs()");
+  CH_TIME("EBHelmholtzOp::turnOffCFInterp()");
 
-  m_turnOffBCs = true;
+  m_doInterpCF = false;
 }
 
 void
-EBHelmholtzOp::turnOnBCs()
+EBHelmholtzOp::turnOnCFInterp()
 {
-  CH_TIME("EBHelmholtzOp::turnOnBCs()");
+  CH_TIME("EBHelmholtzOp::turnOnCFInterp()");
 
-  m_turnOffBCs = false;
+  m_doInterpCF = true;
+}
+
+void
+EBHelmholtzOp::turnOffExchange()
+{
+  CH_TIME("EBHelmholtzOp::turnOffExchange()");
+
+  m_doExchange = false;
+}
+
+void
+EBHelmholtzOp::turnOnExchange()
+{
+  CH_TIME("EBHelmholtzOp::turnOnExchange()");
+
+  m_doExchange = true;
+}
+
+void
+EBHelmholtzOp::turnOffCoarsening()
+{
+  CH_TIME("EBHelmholtzOp::turnOffCoarsening()");
+
+  m_doCoarsen = false;
+}
+
+void
+EBHelmholtzOp::turnOnCoarsening()
+{
+  CH_TIME("EBHelmholtzOp::turnOnCoarsening()");
+
+  m_doCoarsen = true;
 }
 
 LevelData<EBFluxFAB>&
@@ -597,7 +631,7 @@ EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&             a_Lphi,
   // If we have a finer level, there is a chance that the stencils from the EB will reach under it, in which case
   // it might fetch potentially bogus data. A clunky way of handling this is to coarsen the data on the fine level
   // first. The best solution would probably be to have the EB flux stencil reach directly into the fine level.
-  if (m_hasFine) {
+  if (m_hasFine && m_doCoarsen) {
     EBHelmholtzOp* fineOp = (EBHelmholtzOp*)a_finerOp;
     fineOp->coarsen((LevelData<EBCellFAB>&)a_phi, a_phiFine);
   }
@@ -763,9 +797,11 @@ EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
   // do a local copy, but that can end up being expensive since this is called on every relaxation.
   LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>&)a_phi;
 
-  phi.exchange();
+  if (m_doExchange) {
+    phi.exchange();
+  }
 
-  if (m_hasCoar && !m_turnOffBCs) {
+  if (m_hasCoar && m_doInterpCF) {
     this->interpolateCF(phi, a_phiCoar, a_homogeneousCFBC);
   }
 
@@ -1028,9 +1064,9 @@ EBHelmholtzOp::applyOpNoBoundary(LevelData<EBCellFAB>& a_Lphi, const LevelData<E
 {
   CH_TIME("EBHelmholtzOp::applyOpNoBounary(LD<EBCellFAB>, LD<EBCellFAB>)");
 
-  m_turnOffBCs = true;
+  m_doInterpCF = false;
   this->applyOp(a_Lphi, a_phi, true);
-  m_turnOffBCs = false;
+  m_doInterpCF = true;
 }
 
 void
@@ -1154,7 +1190,9 @@ EBHelmholtzOp::relaxPointJacobi(LevelData<EBCellFAB>&       a_correction,
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
 
   for (int iter = 0; iter < a_iterations; iter++) {
-    a_correction.exchange();
+    if (m_doExchange) {
+      a_correction.exchange();
+    }
 
     this->homogeneousCFInterp(a_correction);
 
@@ -1208,7 +1246,9 @@ EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>&       a_correction,
 
     // First do "red" cells, then "black" cells. Note that ghost cell interpolation and exchanges are required between the colors.
     for (int redBlack = 0; redBlack <= 1; redBlack++) {
-      a_correction.exchange();
+      if (m_doExchange) {
+        a_correction.exchange();
+      }
 
       this->homogeneousCFInterp(a_correction);
 
@@ -1290,7 +1330,9 @@ EBHelmholtzOp::relaxGSMultiColor(LevelData<EBCellFAB>&       a_correction,
 
   for (int iter = 0; iter < a_iterations; iter++) {
     for (int icolor = 0; icolor < m_colors.size(); icolor++) {
-      a_correction.exchange();
+      if (m_doExchange) {
+        a_correction.exchange();
+      }
 
       this->homogeneousCFInterp(a_correction);
 

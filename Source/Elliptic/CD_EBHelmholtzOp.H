@@ -146,13 +146,41 @@ public:
     @brief Turn off BCs
   */
   void
-  turnOffBCs();
+  turnOffCFInterp();
 
   /*!
     @brief Turn on BCs
   */
   void
-  turnOnBCs();
+  turnOnCFInterp();
+
+  /*!
+    @brief Turn off exchange operation
+    @note Done when MFHelmholtzOp does the exchange and we don't want EBHelmholtzOp to redo it.
+  */
+  void
+  turnOffExchange();
+
+  /*!
+    @brief Turn on exchange operation
+    @note Done when MFHelmholtzOp does the exchange and we don't want EBHelmholtzOp to redo it.
+  */
+  void
+  turnOnExchange();
+
+  /*!
+    @brief Turn off coarsening operation
+    @note Done when MFHelmholtzOp does the coarsening and we don't want EBHelmholtzOp to redo it.
+  */
+  void
+  turnOffCoarsening();
+
+  /*!
+    @brief Turn on coarsening operation
+    @note Done when MFHelmholtzOp does the coarsening and we don't want EBHelmholtzOp to redo it.
+  */
+  void
+  turnOnCoarsening();
 
   /*!
     @brief Update with new A and B coefficients.
@@ -742,9 +770,22 @@ protected:
   int m_refToFine;
 
   /*!
-    @brief Turn off BCs or not. Used in applyOpNoBoundary
+    @brief Do coarse-fine interpolation or not. 
+    @note Used by MFHelmholtzOp for optimizing how calls in EBHelmholtzOp are made
   */
-  int m_turnOffBCs;
+  bool m_doInterpCF;
+
+  /*!
+    @brief Turn on/off exchange operation.
+    @note Used by MFHelmholtzOp for optimizing how calls in EBHelmholtzOp are made
+  */
+  bool m_doExchange;
+
+  /*!
+    @brief Turn on/off exchange operation.
+    @note Used by MFHelmholtzOp for optimizing how calls in EBHelmholtzOp are made
+  */
+  bool m_doCoarsen;
 
   /*!
     @brief Ghost cells for phi
