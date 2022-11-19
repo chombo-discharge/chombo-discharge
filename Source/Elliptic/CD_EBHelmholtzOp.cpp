@@ -11,6 +11,7 @@
 */
 
 // Chombo includes
+#include <ParmParse.H>
 #include <EBLevelDataOps.H>
 #include <EBCellFactory.H>
 #include <CH_Timer.H>
@@ -19,6 +20,7 @@
 #include <CD_EBHelmholtzOp.H>
 #include <CD_LeastSquares.H>
 #include <CD_BoxLoops.H>
+#include <CD_Timer.H>
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
@@ -95,7 +97,11 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
   m_doInterpCF = true;
   m_doCoarsen  = true;
   m_doExchange = true;
+  m_refluxFree = false;
   m_interval   = Interval(m_comp, m_comp);
+
+  ParmParse pp("EBHelmholtzOp");
+  pp.query("reflux_free", m_refluxFree);
 
   if (m_hasFine) {
     m_eblgFine = a_eblgFine;
@@ -628,6 +634,41 @@ EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&             a_Lphi,
 {
   CH_TIME("EBHelmholtzOp::AMROperator(4xLD<EBCellFAB>, bool, AMRLevelOp<LD<EBCellFAB> >*)");
 
+  if (m_refluxFree) {
+    this->refluxFreeAMROperator(a_Lphi, a_phiFine, a_phi, a_phiCoar, a_homogeneousPhysBC, a_finerOp);
+  }
+  else {
+    // Standard approach:
+    //
+    // If we have a finer level, there is a chance that the stencils from the EB will reach under it, in which case
+    // it might fetch potentially bogus data. A clunky way of handling this is to coarsen the data on the fine level
+    // first. The best solution would probably be to have the EB flux stencil reach directly into the fine level.
+    if (m_hasFine && m_doCoarsen) {
+      EBHelmholtzOp* fineOp = (EBHelmholtzOp*)a_finerOp;
+      fineOp->coarsen((LevelData<EBCellFAB>&)a_phi, a_phiFine);
+    }
+
+    this->applyOp(a_Lphi, a_phi, &a_phiCoar, a_homogeneousPhysBC, false);
+
+    if (m_hasFine) {
+      this->reflux(a_Lphi, a_phiFine, a_phi, *a_finerOp);
+    }
+  }
+}
+
+void
+EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
+                                     const LevelData<EBCellFAB>&       a_phiFine,
+                                     const LevelData<EBCellFAB>&       a_phi,
+                                     const LevelData<EBCellFAB>&       a_phiCoar,
+                                     const bool                        a_homogeneousPhysBC,
+                                     AMRLevelOp<LevelData<EBCellFAB>>* a_finerOp)
+{
+  CH_TIME("EBHelmholtzOp::refluxFreeAMROperator(4xLD<EBCellFAB>, bool, AMRLevelOp<LD<EBCellFAB> >*)");
+
+  // TLDR: This is the "reflux-free" version of the AMROperator which gets rid of the refluxing step and
+  //       rather replaces the whole coarse-fine choreopgraphy by conservative flux coarsening.
+
   // If we have a finer level, there is a chance that the stencils from the EB will reach under it, in which case
   // it might fetch potentially bogus data. A clunky way of handling this is to coarsen the data on the fine level
   // first. The best solution would probably be to have the EB flux stencil reach directly into the fine level.
@@ -636,10 +677,145 @@ EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&             a_Lphi,
     fineOp->coarsen((LevelData<EBCellFAB>&)a_phi, a_phiFine);
   }
 
-  this->applyOp(a_Lphi, a_phi, &a_phiCoar, a_homogeneousPhysBC, false);
+  // Make sure this level has updated ghost cells. The guards around these calls
+  // are there because MFHelmholtzOp might decide to update ghost cells for us, in
+  // which case we won't redo them.
+  if (m_doExchange) {
+    LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>&)a_phi;
 
+    phi.exchange();
+  }
+  if (m_hasCoar && m_doInterpCF) {
+    this->inhomogeneousCFInterp((LevelData<EBCellFAB>&)a_phi, a_phiCoar);
+  }
+
+  // Compute the centroid-centered fluxes on this level.
+  this->computeFlux(a_phi);
+
+  // Finer level also computes fluxes and coarsens them onto this level.
   if (m_hasFine) {
-    this->reflux(a_Lphi, a_phiFine, a_phi, *a_finerOp);
+    EBHelmholtzOp* fineOp = (EBHelmholtzOp*)a_finerOp;
+
+    // Need to update ghost cells on the finer level. This MIGHT have been
+    // done oalready but we have no guarantee of that so we have to do it anyways!
+    LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&)a_phiFine;
+
+    phiFine.exchange();
+    fineOp->inhomogeneousCFInterp(phiFine, a_phi);
+
+    // Compute flux on finer level and coarsen onto this level.
+    fineOp->computeFlux(a_phiFine);
+    fineOp->coarsen(m_flux, fineOp->getFlux());
+  }
+
+  MayDay::Error("Diagonal term is missing");
+  MayDay::Error("Need to fill BC fluxes in regular kernels!");
+  MayDay::Error("Kernels should be organized and made compact!!");
+
+  // The above calls replaced the fluxes on this level by (conservative) averages of the fluxes on
+  // the finer level. We can proceed as usual now, ignoring the fine level.
+  const Real inverseDx = 1.0 / m_dx;
+  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit) {
+    const Box      cellBox = m_eblg.getDBL()[dit()];
+    const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
+
+    const BaseIVFAB<Real>& bcoIrreg = (*m_BcoefIrreg)[dit()];
+
+    // REGULAR CELLS BEGIN HERE
+    this->applyDomainFlux((EBCellFAB&)a_phi[dit()], cellBox, dit(), a_homogeneousPhysBC);
+
+    a_Lphi[dit()].setVal(0.0);
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      FArrayBox&       Lphi         = a_Lphi[dit()].getFArrayBox();
+      const FArrayBox& betaBGradPhi = m_flux[dit()][dir].getFArrayBox();
+
+      // Recall that beta and Bcoef is a part of the flux!
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        Lphi(iv, m_comp) += inverseDx * (betaBGradPhi(iv + BASISV(dir), m_comp) - betaBGradPhi(iv, m_comp));
+      };
+
+      BoxLoops::loop(cellBox, regularKernel);
+    }
+
+    // CUT-CELLS BELOW HERE
+    EBCellFAB& Lphi = a_Lphi[dit()];
+
+    // Non-EB faces
+    auto irregularKernel = [&](const VolIndex& vof) -> void {
+      Lphi(vof, m_comp) = 0.0;
+      for (int dir = 0; dir < SpaceDim; dir++) {
+
+        // Fluxes already includes beta.
+        const EBFaceFAB& flux = m_flux[dit()][dir];
+
+        for (SideIterator sit; sit.ok(); ++sit) {
+          const Side::LoHiSide side = sit();
+
+          const int               isign = sign(side);
+          const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, side);
+
+          for (int iface = 0; iface < faces.size(); iface++) {
+            const FaceIndex face     = faces[iface];
+            const Real      faceArea = ebisbox.areaFrac(face);
+
+            if (!face.isBoundary()) {
+              Lphi(vof, m_comp) += isign * faceArea * flux(face, m_comp) / m_dx;
+            }
+          }
+        }
+      }
+    };
+
+    BoxLoops::loop(m_vofIterIrreg[dit()], irregularKernel);
+
+    // Apply the gradient stencil
+    const BaseIVFAB<VoFStencil>& ebFluxStencil = m_ebBc->getGradPhiStencils()[dit()];
+
+    auto irreg2 = [&](const VolIndex& vof) -> void {
+      const VoFStencil& sten = ebFluxStencil(vof, m_comp);
+
+      for (int i = 0; i < sten.size(); i++) {
+        const Real      weight = sten.weight(i);
+        const VolIndex& ivof   = sten.vof(i);
+
+        Lphi(vof, m_comp) += m_beta * bcoIrreg(vof, m_comp) * weight * a_phi[dit()](ivof, m_comp);
+      }
+    };
+
+    BoxLoops::loop(m_vofIterIrreg[dit()], irreg2);
+
+    // SMoosh in the part of the cut-cell flux that is not a part of the operator.
+    m_ebBc->applyEBFlux(m_vofIterIrreg[dit()],
+                        Lphi,
+                        a_phi[dit()],
+                        (*m_BcoefIrreg)[dit()],
+                        dit(),
+                        m_beta,
+                        a_homogeneousPhysBC);
+
+    // Cut-cell domain fluxes.
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      VoFIterator& vofitLo = m_vofIterDomLo[dir][dit()];
+      VoFIterator& vofitHi = m_vofIterDomHi[dir][dit()];
+
+      const EBFaceFAB& Bcoef = (*m_Bcoef)[dit()][dir];
+
+      // Kernels for high and low sides.
+      auto kernelLo = [&](const VolIndex& vof) -> void {
+        const Real flux = m_domainBc->getFaceFlux(vof, a_phi[dit()], Bcoef, dir, Side::Lo, dit(), a_homogeneousPhysBC);
+        Lphi(vof, m_comp) -= flux * m_beta / m_dx;
+      };
+
+      auto kernelHi = [&](const VolIndex& vof) -> void {
+        const Real flux = m_domainBc->getFaceFlux(vof, a_phi[dit()], Bcoef, dir, Side::Hi, dit(), a_homogeneousPhysBC);
+        Lphi(vof, m_comp) += flux * m_beta / m_dx;
+      };
+
+      // Execute kernels on lo and hi side
+      BoxLoops::loop(vofitLo, kernelLo);
+      BoxLoops::loop(vofitHi, kernelHi);
+    }
   }
 }
 
@@ -978,28 +1154,28 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&       a_Lphi,
 
   // Apply the operator in all cells where we needed an explicit stencil. Note that the operator stencils do NOT include stencils for fluxes
   // through the domain faces. That is handled below.
-#if 0 // Original code that does not use AggStencil. Leaving this in place for backwards compatibility and debugging, in case this should ever break. 
+#if 0 // Original code that does not use AggStencil. Leaving this in place for backwards compatibility and debugging, in case this should ever break.
   VoFIterator& vofit = m_vofIterStenc[a_dit];
-  for (vofit.reset(); vofit.ok(); ++vofit){
-    const VolIndex& vof     = vofit();
+  for (vofit.reset(); vofit.ok(); ++vofit) {
+    const VolIndex& vof = vofit();
 
-    // Finite volume stencil representation of Int[B*grad(phi)]dA    
+    // Finite volume stencil representation of Int[B*grad(phi)]dA
     const VoFStencil& stenc = m_relaxStencils[a_dit](vof, m_comp);
 
-    // kappa * alpha * aco (m_alphaDiagWeight holds kappa* aco)    
-    const Real& alphaDiag   = m_alpha * m_alphaDiagWeight[a_dit](vof, m_comp); 
-    
+    // kappa * alpha * aco (m_alphaDiagWeight holds kappa* aco)
+    const Real& alphaDiag = m_alpha * m_alphaDiagWeight[a_dit](vof, m_comp);
+
     a_Lphi(vof, m_comp) = alphaDiag * a_phi(vof, m_comp);
 
-    // Add the term corresponding to kappa*div(b*grad(phi)), excluding contributions from domain faces. 
-    for (int i = 0; i < stenc.size(); i++){
-      const VolIndex& ivof = stenc.vof(i);
-      const Real& iweight  = stenc.weight(i);
+    // Add the term corresponding to kappa*div(b*grad(phi)), excluding contributions from domain faces.
+    for (int i = 0; i < stenc.size(); i++) {
+      const VolIndex& ivof    = stenc.vof(i);
+      const Real&     iweight = stenc.weight(i);
 
-      a_Lphi(vof, m_comp) += m_beta * iweight * a_phi(ivof, m_comp); // Note that bco is a part of the stencil weight. 
+      a_Lphi(vof, m_comp) += m_beta * iweight * a_phi(ivof, m_comp); // Note that bco is a part of the stencil weight.
     }
   }
-  m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, (*m_BcoefIrreg)[a_dit], a_phi, a_dit, m_beta, a_homogeneousPhysBC);
+  m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, (*m_BcoefIrreg)[a_dit], a_dit, m_beta, a_homogeneousPhysBC);
 #else // New code that uses AggStencil.
   constexpr bool incrementOnly = false;
 
@@ -1735,6 +1911,20 @@ EBHelmholtzOp::computeFaceCentroidFlux(EBFaceFAB&       a_flux,
 }
 
 void
+EBHelmholtzOp::computeFlux(const LevelData<EBCellFAB>& a_phi)
+{
+  CH_TIME("EBHelmholtzOp::computeFlux(LD<EBCellFAB>)");
+
+  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      this->getFaceCentroidFlux(m_flux[dit()][dir], a_phi[dit()], dbl[dit()], dit(), dir);
+    }
+  }
+}
+
+void
 EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi)
 {
   CH_TIME("EBHelmholtzOp::incrementFRCoar(LD<EBCellFAB>)");
@@ -1745,8 +1935,10 @@ EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi)
 
   const Real scale = 1.0;
 
-  LevelData<EBCellFAB>& phiCoar = (LevelData<EBCellFAB>&)a_phi;
-  phiCoar.exchange();
+  if (m_doExchange) {
+    LevelData<EBCellFAB>& phiCoar = (LevelData<EBCellFAB>&)a_phi;
+    phiCoar.exchange();
+  }
 
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit) {
     for (int dir = 0; dir < SpaceDim; dir++) {
@@ -1836,6 +2028,12 @@ EBHelmholtzOp::coarsen(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& 
   CH_TIME("EBHelmholtzOp::coarsen(LD<EBCellFAB>, LD<EBCellFAB>)");
 
   m_coarAve->averageData(a_phi, a_phiFine, m_interval, Average::Conservative);
+}
+
+void
+EBHelmholtzOp::coarsen(LevelData<EBFluxFAB>& a_flux, const LevelData<EBFluxFAB>& a_fineFlux)
+{
+  m_coarAve->averageData(a_flux, a_fineFlux, m_interval, Average::Conservative);
 }
 
 #include <CD_NamespaceFooter.H>

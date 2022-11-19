@@ -225,6 +225,16 @@ public:
   coarsen(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiFine);
 
   /*!
+    @brief Coarsen fluxes on the fine level onto this level. 
+    @details User must update fluxes before calling this routine. 
+    @param[in] a_flux     Flux on this level. 
+    @param[in] a_fineFlux Flux on finer level
+    @note This routine is used in the reflux-free AMROperator
+  */
+  void
+  coarsen(LevelData<EBFluxFAB>& a_flux, const LevelData<EBFluxFAB>& a_fineFlux);
+
+  /*!
     @brief Point Jacobi kernel. 
     @param[inout] a_Lcorr Storage for computing L(a_corr)
     @param[inout] a_corr    Correction
@@ -539,6 +549,25 @@ public:
               AMRLevelOp<LevelData<EBCellFAB>>* a_finerOp);
 
   /*!
+    @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context. 
+    @details This is the reflux-free version of AMROperator.
+    @param[out] a_residual          Residual on this level
+    @param[in]  a_phiFine           Phi on fine level
+    @param[in]  a_phi               Phi on this level
+    @param[in]  a_phiCoar           Phi on coar level
+    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @param[in]  a_finerOp           Finer operatator
+    @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
+  */
+  void
+  refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
+                        const LevelData<EBCellFAB>&       a_phiFine,
+                        const LevelData<EBCellFAB>&       a_phi,
+                        const LevelData<EBCellFAB>&       a_phiCoar,
+                        const bool                        a_homogeneousPhysBC,
+                        AMRLevelOp<LevelData<EBCellFAB>>* a_finerOp);
+
+  /*!
     @brief Compute residual on this level. AMR version. 
     @param[out] a_residual          Residual on this level
     @param[in]  a_phiFine           Phi on fine level
@@ -743,6 +772,11 @@ protected:
     @brief Data centering
   */
   Location::Cell m_dataLocation;
+
+  /*!
+    @brief Use reflux-free formulation or not
+  */
+  bool m_refluxFree;
 
   /*!
     @brief True if there is a multigrid level below this operator
@@ -1105,6 +1139,14 @@ protected:
                           const Box&       a_cellBox,
                           const DataIndex& a_dit,
                           const int        a_dir);
+
+  /*!
+    @brief Fill face centroid-centered fluxes on this level
+    @param[in] a_phi Cell-centered data. Must have updated ghost cells for this to make any sense. 
+    @note This computes the flux onto m_flux everywhere except on boundary faces. 
+  */
+  void
+  computeFlux(const LevelData<EBCellFAB>& a_phi);
 
   /*!
     @brief Increment coarse flux register
