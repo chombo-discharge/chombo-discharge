@@ -947,7 +947,7 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
                 flux(face, m_comp) += areaFrac * flux(f, m_comp);
               }
 
-              flux(face, m_comp) = sign(sit()) * std::max(0.0, sign(sit()) * flux(face, m_comp)) / sumArea;
+              flux(face, m_comp) = sign(sit()) * std::max((Real)0.0, sign(sit()) * flux(face, m_comp)) / sumArea;
             }
 
             break;
@@ -3150,8 +3150,8 @@ CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a
           const VolIndex loVof = face.getVoF(Side::Lo);
           const VolIndex hiVof = face.getVoF(Side::Hi);
 
-          const Real loVal = std::max(0.0, cellPhi(loVof, m_comp));
-          const Real hiVal = std::max(0.0, cellPhi(hiVof, m_comp));
+          const Real loVal = std::max((Real)0.0, cellPhi(loVof, m_comp));
+          const Real hiVal = std::max((Real)0.0, cellPhi(hiVof, m_comp));
 
           Real Hlo = 0.0;
           Real Hhi = 0.0;

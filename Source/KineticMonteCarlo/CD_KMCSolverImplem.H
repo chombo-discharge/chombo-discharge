@@ -243,6 +243,8 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
 
   CH_assert(a_nonCriticalReactions.size() == a_nonCriticalPropensities.size());
 
+  constexpr Real one = 1.0;
+
   Real dt = std::numeric_limits<Real>::max();
 
   const size_t numReactions = a_nonCriticalReactions.size();
@@ -291,7 +293,7 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
         Real dt1 = std::numeric_limits<Real>::max();
         Real dt2 = std::numeric_limits<Real>::max();
 
-        const Real f = std::max(m_eps * Xi / gi, 1.0);
+        const Real f = std::max(m_eps * Xi / gi, one);
 
         if (mu > std::numeric_limits<Real>::min()) {
           dt1 = f / mu;

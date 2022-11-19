@@ -1364,7 +1364,7 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
               ebPhotons.add(p);
             }
             else {
-              p.position() = oldPos + Max(0.0, sDom - SAFETY) * path;
+              p.position() = oldPos + std::max((Real)0.0, sDom - SAFETY) * path;
               domPhotons.add(p);
             }
           }
@@ -1508,7 +1508,7 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
         // Check absorption on EBs and domain
         if (checkDom) {
           absorbedDomain = ParticleOps::domainIntersection(oldPos, newPos, probLo, probHi, sDomain);
-          sDomain        = (absorbedDomain) ? Max(0.0, sDomain - SAFETY) : sDomain;
+          sDomain        = (absorbedDomain) ? std::max((Real)0.0, sDomain - SAFETY) : sDomain;
         }
 
         if (checkEB) {

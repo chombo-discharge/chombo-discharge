@@ -4360,7 +4360,7 @@ CdrPlasmaJSON::computePlasmaSpeciesEnergies(const RealVect&          a_position,
         const Real& maxEnergy = std::get<1>(m_cdrEnergyComputation.at(i));
         const Real& safety    = std::get<2>(m_cdrEnergyComputation.at(i));
 
-        const Real safeEnergy = std::max(a_cdrDensities[energyIdx], 0.0) / (std::max(a_cdrDensities[i], safety));
+        const Real safeEnergy = std::max(a_cdrDensities[energyIdx], (Real)0.0) / (std::max(a_cdrDensities[i], safety));
 
         energies[i] = std::max(minEnergy, std::min(maxEnergy, safeEnergy));
       }
@@ -4549,8 +4549,8 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
 
     Real fcorr = 1.0 + (a_vectorE.dotProduct(D * g)) / (safety + n * mu * a_E * a_E);
 
-    fcorr = std::max(fcorr, 0.0);
-    fcorr = std::min(fcorr, 1.0);
+    fcorr = std::max(fcorr, (Real)0.0);
+    fcorr = std::min(fcorr, (Real)1.0);
 
     k *= fcorr;
   }
@@ -4809,9 +4809,9 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real         a_time,
 
     // Outflow on of negative species on anodes.
     if (Z < 0 && isAnode)
-      outflowFluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
+      outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
     if (Z > 0 && isCathode)
-      outflowFluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
+      outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
   }
 
   // Go through our list of electrode reactions and compute the inflow fluxes from secondary emission from plasma species
@@ -4945,9 +4945,9 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time,
 
     // Outflow on of negative species on anodes.
     if (Z < 0 && isAnode)
-      outflowFluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
+      outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
     if (Z > 0 && isCathode)
-      outflowFluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
+      outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
   }
 
   // Compute temperatures
@@ -5092,9 +5092,9 @@ CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
 
     // Outflow on of negative species on anodes.
     if (Z < 0 && isAnode)
-      outflowFluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
+      outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
     if (Z > 0 && isCathode)
-      outflowFluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
+      outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
   }
 
   // Go through our list of dielectric reactions and compute the inflow fluxes from secondary emission from plasma species

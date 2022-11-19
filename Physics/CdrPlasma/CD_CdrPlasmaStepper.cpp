@@ -1705,6 +1705,8 @@ CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&       a_c
 
   constexpr int comp = 0;
 
+  constexpr Real zero = 0.0;
+
   // Number of CDR solvers
   const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
@@ -1742,7 +1744,7 @@ CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&       a_c
         phi += sten.weight(i) * (*a_cdrDensities[idx])(sten.vof(i), comp);
       }
 #endif
-      cdrDensities[idx] = std::max(0.0, phi);
+      cdrDensities[idx] = std::max(zero, phi);
     }
 
 #if 0

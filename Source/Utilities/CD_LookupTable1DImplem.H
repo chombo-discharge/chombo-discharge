@@ -55,7 +55,7 @@ template <typename... Ts>
 inline void
 LookupTable1D<N>::addEntry(const Ts&... x)
 {
-  std::array<Real, sizeof...(Ts)> arr = {x...};
+  std::array<Real, sizeof...(Ts)> arr = {(Real)x...};
   m_data.emplace_back(arr);
 
   std::get<Sorted>(m_state)  = false;
