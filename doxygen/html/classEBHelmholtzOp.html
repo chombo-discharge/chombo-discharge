@@ -98,10 +98,11 @@ Collaboration diagram for EBHelmholtzOp:</div>
 <div class="dyncontent">
 <div class="center"><img src="classEBHelmholtzOp__coll__graph.png" border="0" usemap="#EBHelmholtzOp_coll__map" alt="Collaboration graph"/></div>
 <map name="EBHelmholtzOp_coll__map" id="EBHelmholtzOp_coll__map">
-<area shape="rect" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho." alt="" coords="242,124,366,151"/>
+<area shape="rect" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho." alt="" coords="311,124,435,151"/>
 <area shape="rect" title=" " alt="" coords="5,5,224,47"/>
 <area shape="rect" href="classEBMGProlong.html" title="Class for prolongation of multigrid residual onto a finer grid." alt="" coords="249,13,359,39"/>
 <area shape="rect" href="classEBMGRestrict.html" title="Class for restricting multigrid residual onto a coarser grid." alt="" coords="389,13,499,39"/>
+<area shape="rect" href="classTimer.html" title="Class which is used for run&#45;time monitoring of events." alt="" coords="551,13,611,39"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -131,7 +132,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:afeac0ebb0abf0cbda3ce47d3819039ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <a href="classEBHelmholtzOp.html#afeac0ebb0abf0cbda3ce47d3819039ec">More...</a><br /></td></tr>
 <tr class="separator:afeac0ebb0abf0cbda3ce47d3819039ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2d728e76605bb07ea19198787f6ade65"><td class="memItemLeft" align="right" valign="top"><a id="a2d728e76605bb07ea19198787f6ade65"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a2d728e76605bb07ea19198787f6ade65">~EBHelmholtzOp</a> ()</td></tr>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a2d728e76605bb07ea19198787f6ade65">~EBHelmholtzOp</a> ()</td></tr>
 <tr class="memdesc:a2d728e76605bb07ea19198787f6ade65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dtor. <br /></td></tr>
 <tr class="separator:a2d728e76605bb07ea19198787f6ade65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a80e416373921daca959a91a607b0b43d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBHelmholtzOp.html">EBHelmholtzOp</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a80e416373921daca959a91a607b0b43d">operator=</a> (const <a class="el" href="classEBHelmholtzOp.html">EBHelmholtzOp</a> &amp;a_oper)=delete</td></tr>
@@ -140,14 +141,26 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1a53dc81d65b3ed7216b65ca78fd5434"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBHelmholtzOp.html">EBHelmholtzOp</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a1a53dc81d65b3ed7216b65ca78fd5434">operator=</a> (const <a class="el" href="classEBHelmholtzOp.html">EBHelmholtzOp</a> &amp;&amp;a_oper)=delete</td></tr>
 <tr class="memdesc:a1a53dc81d65b3ed7216b65ca78fd5434"><td class="mdescLeft">&#160;</td><td class="mdescRight">No move assigment allowed.  <a href="classEBHelmholtzOp.html#a1a53dc81d65b3ed7216b65ca78fd5434">More...</a><br /></td></tr>
 <tr class="separator:a1a53dc81d65b3ed7216b65ca78fd5434"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0061d261795d0af5973c281740356d8d"><td class="memItemLeft" align="right" valign="top"><a id="a0061d261795d0af5973c281740356d8d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a0061d261795d0af5973c281740356d8d">turnOffBCs</a> ()</td></tr>
-<tr class="memdesc:a0061d261795d0af5973c281740356d8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn off BCs. <br /></td></tr>
-<tr class="separator:a0061d261795d0af5973c281740356d8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0d947bd259b32e3dacf0c5f7284be373"><td class="memItemLeft" align="right" valign="top"><a id="a0d947bd259b32e3dacf0c5f7284be373"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a0d947bd259b32e3dacf0c5f7284be373">turnOnBCs</a> ()</td></tr>
-<tr class="memdesc:a0d947bd259b32e3dacf0c5f7284be373"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn on BCs. <br /></td></tr>
-<tr class="separator:a0d947bd259b32e3dacf0c5f7284be373"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa48cbf089cbe718bc2e0cf12041f5a6b"><td class="memItemLeft" align="right" valign="top"><a id="aa48cbf089cbe718bc2e0cf12041f5a6b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#aa48cbf089cbe718bc2e0cf12041f5a6b">turnOffCFInterp</a> ()</td></tr>
+<tr class="memdesc:aa48cbf089cbe718bc2e0cf12041f5a6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn off BCs. <br /></td></tr>
+<tr class="separator:aa48cbf089cbe718bc2e0cf12041f5a6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12d12353fb23d282ce5dc66ca01c7c47"><td class="memItemLeft" align="right" valign="top"><a id="a12d12353fb23d282ce5dc66ca01c7c47"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a12d12353fb23d282ce5dc66ca01c7c47">turnOnCFInterp</a> ()</td></tr>
+<tr class="memdesc:a12d12353fb23d282ce5dc66ca01c7c47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn on BCs. <br /></td></tr>
+<tr class="separator:a12d12353fb23d282ce5dc66ca01c7c47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d53b6c0821c782c9ea8eb5e7681ce28"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a5d53b6c0821c782c9ea8eb5e7681ce28">turnOffExchange</a> ()</td></tr>
+<tr class="memdesc:a5d53b6c0821c782c9ea8eb5e7681ce28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn off exchange operation.  <a href="classEBHelmholtzOp.html#a5d53b6c0821c782c9ea8eb5e7681ce28">More...</a><br /></td></tr>
+<tr class="separator:a5d53b6c0821c782c9ea8eb5e7681ce28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab901979aec1589777f2eebec85f7992e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ab901979aec1589777f2eebec85f7992e">turnOnExchange</a> ()</td></tr>
+<tr class="memdesc:ab901979aec1589777f2eebec85f7992e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn on exchange operation.  <a href="classEBHelmholtzOp.html#ab901979aec1589777f2eebec85f7992e">More...</a><br /></td></tr>
+<tr class="separator:ab901979aec1589777f2eebec85f7992e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a369711725d619cca18ed5f15c0a43a0f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a369711725d619cca18ed5f15c0a43a0f">turnOffCoarsening</a> ()</td></tr>
+<tr class="memdesc:a369711725d619cca18ed5f15c0a43a0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn off coarsening operation.  <a href="classEBHelmholtzOp.html#a369711725d619cca18ed5f15c0a43a0f">More...</a><br /></td></tr>
+<tr class="separator:a369711725d619cca18ed5f15c0a43a0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1421c86a5022532413b4320ccade732"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ad1421c86a5022532413b4320ccade732">turnOnCoarsening</a> ()</td></tr>
+<tr class="memdesc:ad1421c86a5022532413b4320ccade732"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn on coarsening operation.  <a href="classEBHelmholtzOp.html#ad1421c86a5022532413b4320ccade732">More...</a><br /></td></tr>
+<tr class="separator:ad1421c86a5022532413b4320ccade732"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0cdbaa4d871750098c48a369aa2c8355"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a0cdbaa4d871750098c48a369aa2c8355">setAcoAndBco</a> (const RefCountedPtr&lt; LevelData&lt; EBCellFAB &gt;&gt; &amp;a_Acoef, const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt;&gt; &amp;a_Bcoef, const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt;&gt;&gt; &amp;a_BcoefIrreg)</td></tr>
 <tr class="memdesc:a0cdbaa4d871750098c48a369aa2c8355"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update with new A and B coefficients.  <a href="classEBHelmholtzOp.html#a0cdbaa4d871750098c48a369aa2c8355">More...</a><br /></td></tr>
 <tr class="separator:a0cdbaa4d871750098c48a369aa2c8355"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -163,6 +176,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:afabaf780d215951b42cdaa13e7bf2832"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#afabaf780d215951b42cdaa13e7bf2832">coarsen</a> (LevelData&lt; EBCellFAB &gt; &amp;a_phi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiFine)</td></tr>
 <tr class="memdesc:afabaf780d215951b42cdaa13e7bf2832"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen data from fine to coar level.  <a href="classEBHelmholtzOp.html#afabaf780d215951b42cdaa13e7bf2832">More...</a><br /></td></tr>
 <tr class="separator:afabaf780d215951b42cdaa13e7bf2832"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a492c4e1109d648fa396e52cd686b0a38"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a492c4e1109d648fa396e52cd686b0a38">coarsen</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_flux, const LevelData&lt; EBFluxFAB &gt; &amp;a_fineFlux)</td></tr>
+<tr class="memdesc:a492c4e1109d648fa396e52cd686b0a38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen fluxes on the fine level onto this level.  <a href="classEBHelmholtzOp.html#a492c4e1109d648fa396e52cd686b0a38">More...</a><br /></td></tr>
+<tr class="separator:a492c4e1109d648fa396e52cd686b0a38"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55a11630804c46a822948f522c9fd0dc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a55a11630804c46a822948f522c9fd0dc">pointJacobiKernel</a> (EBCellFAB &amp;a_Lcorr, EBCellFAB &amp;a_corr, const EBCellFAB &amp;a_resid, const Box &amp;a_cellBox, const DataIndex &amp;a_dit)</td></tr>
 <tr class="memdesc:a55a11630804c46a822948f522c9fd0dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Point Jacobi kernel.  <a href="classEBHelmholtzOp.html#a55a11630804c46a822948f522c9fd0dc">More...</a><br /></td></tr>
 <tr class="separator:a55a11630804c46a822948f522c9fd0dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -205,6 +221,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a9c84d18c5437d9bd530fe8e5a58378a0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a9c84d18c5437d9bd530fe8e5a58378a0">applyDomainFlux</a> (EBCellFAB &amp;a_phi, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const bool a_homogeneousPhysBc)</td></tr>
 <tr class="memdesc:a9c84d18c5437d9bd530fe8e5a58378a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply domain flux.  <a href="classEBHelmholtzOp.html#a9c84d18c5437d9bd530fe8e5a58378a0">More...</a><br /></td></tr>
 <tr class="separator:a9c84d18c5437d9bd530fe8e5a58378a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dd96a0878237551c9896f32aefa8b59"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a8dd96a0878237551c9896f32aefa8b59">fillDomainFlux</a> (EBFluxFAB &amp;a_flux, const EBCellFAB &amp;a_phi, const Box &amp;a_cellBox, const DataIndex &amp;a_dit)</td></tr>
+<tr class="memdesc:a8dd96a0878237551c9896f32aefa8b59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill domain flux. This fills the flux on the domain face using centered differencing ala applyDomainFlux.  <a href="classEBHelmholtzOp.html#a8dd96a0878237551c9896f32aefa8b59">More...</a><br /></td></tr>
+<tr class="separator:a8dd96a0878237551c9896f32aefa8b59"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6aee6d047d1f9dec4e4d3642175a01b3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a6aee6d047d1f9dec4e4d3642175a01b3">applyOpIrregular</a> (EBCellFAB &amp;a_Lphi, const EBCellFAB &amp;a_phi, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const bool a_homogeneousPhysBC)</td></tr>
 <tr class="memdesc:a6aee6d047d1f9dec4e4d3642175a01b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply operator in irregular cells.  <a href="classEBHelmholtzOp.html#a6aee6d047d1f9dec4e4d3642175a01b3">More...</a><br /></td></tr>
 <tr class="separator:a6aee6d047d1f9dec4e4d3642175a01b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -252,6 +271,9 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 <tr class="memitem:a735497e11967e45bbdb87e166675b572"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a735497e11967e45bbdb87e166675b572">AMROperator</a> (LevelData&lt; EBCellFAB &gt; &amp;a_Lphi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiFine, const LevelData&lt; EBCellFAB &gt; &amp;a_phi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiCoar, const bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; EBCellFAB &gt;&gt; *a_finerOp)</td></tr>
 <tr class="memdesc:a735497e11967e45bbdb87e166675b572"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the AMR operator, i.e. compute L(phi) in an AMR context.  <a href="classEBHelmholtzOp.html#a735497e11967e45bbdb87e166675b572">More...</a><br /></td></tr>
 <tr class="separator:a735497e11967e45bbdb87e166675b572"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42bd80f7129900c761f5400613ffbd53"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a42bd80f7129900c761f5400613ffbd53">refluxFreeAMROperator</a> (LevelData&lt; EBCellFAB &gt; &amp;a_Lphi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiFine, const LevelData&lt; EBCellFAB &gt; &amp;a_phi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiCoar, const bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; EBCellFAB &gt;&gt; *a_finerOp)</td></tr>
+<tr class="memdesc:a42bd80f7129900c761f5400613ffbd53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the AMR operator, i.e. compute L(phi) in an AMR context.  <a href="classEBHelmholtzOp.html#a42bd80f7129900c761f5400613ffbd53">More...</a><br /></td></tr>
+<tr class="separator:a42bd80f7129900c761f5400613ffbd53"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adb2abfffd5efab0c32b37c745d85d70d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#adb2abfffd5efab0c32b37c745d85d70d">AMRResidual</a> (LevelData&lt; EBCellFAB &gt; &amp;a_residual, const LevelData&lt; EBCellFAB &gt; &amp;a_phiFine, const LevelData&lt; EBCellFAB &gt; &amp;a_phi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiCoar, const LevelData&lt; EBCellFAB &gt; &amp;a_rhs, bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; EBCellFAB &gt;&gt; *a_finerOp) override final</td></tr>
 <tr class="memdesc:adb2abfffd5efab0c32b37c745d85d70d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute residual on this level. AMR version.  <a href="classEBHelmholtzOp.html#adb2abfffd5efab0c32b37c745d85d70d">More...</a><br /></td></tr>
 <tr class="separator:adb2abfffd5efab0c32b37c745d85d70d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -345,6 +367,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a1ef10fff10e74c67de808c5ef081b590"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a1ef10fff10e74c67de808c5ef081b590">computeFaceCentroidFlux</a> (EBFaceFAB &amp;a_flux, const EBCellFAB &amp;a_phi, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const int a_dir)</td></tr>
 <tr class="memdesc:a1ef10fff10e74c67de808c5ef081b590"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute face-centered fluxes.  <a href="classEBHelmholtzOp.html#a1ef10fff10e74c67de808c5ef081b590">More...</a><br /></td></tr>
 <tr class="separator:a1ef10fff10e74c67de808c5ef081b590"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adaacce511ffcf17c35c8feec84b24a22"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#adaacce511ffcf17c35c8feec84b24a22">computeFlux</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_phi)</td></tr>
+<tr class="memdesc:adaacce511ffcf17c35c8feec84b24a22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill face centroid-centered fluxes on this level.  <a href="classEBHelmholtzOp.html#adaacce511ffcf17c35c8feec84b24a22">More...</a><br /></td></tr>
+<tr class="separator:adaacce511ffcf17c35c8feec84b24a22"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae03bf5de8b696312d49d5219bb5f2cdb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ae03bf5de8b696312d49d5219bb5f2cdb">incrementFRCoar</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_phi)</td></tr>
 <tr class="memdesc:ae03bf5de8b696312d49d5219bb5f2cdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increment coarse flux register.  <a href="classEBHelmholtzOp.html#ae03bf5de8b696312d49d5219bb5f2cdb">More...</a><br /></td></tr>
 <tr class="separator:ae03bf5de8b696312d49d5219bb5f2cdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -357,6 +382,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
+<tr class="memitem:a93f7d13f56b4b1571acee2affabd3c33"><td class="memItemLeft" align="right" valign="top"><a id="a93f7d13f56b4b1571acee2affabd3c33"></a>
+<a class="el" href="classTimer.html">Timer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a93f7d13f56b4b1571acee2affabd3c33">m_timer</a></td></tr>
+<tr class="memdesc:a93f7d13f56b4b1571acee2affabd3c33"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classTimer.html" title="Class which is used for run-time monitoring of events.">Timer</a> so user can profile. <br /></td></tr>
+<tr class="separator:a93f7d13f56b4b1571acee2affabd3c33"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a80743c35212206afd44aea6c4a5a8265"><td class="memItemLeft" align="right" valign="top"><a id="a80743c35212206afd44aea6c4a5a8265"></a>
 Interval&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a80743c35212206afd44aea6c4a5a8265">m_interval</a></td></tr>
 <tr class="memdesc:a80743c35212206afd44aea6c4a5a8265"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interval. <br /></td></tr>
@@ -369,6 +398,14 @@ Interval&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a9885702db598ef57d6ee1c88a2a6a714">m_dataLocation</a></td></tr>
 <tr class="memdesc:a9885702db598ef57d6ee1c88a2a6a714"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data centering. <br /></td></tr>
 <tr class="separator:a9885702db598ef57d6ee1c88a2a6a714"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a435a4db01dad9ce21d02b954ba369896"><td class="memItemLeft" align="right" valign="top"><a id="a435a4db01dad9ce21d02b954ba369896"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a435a4db01dad9ce21d02b954ba369896">m_refluxFree</a></td></tr>
+<tr class="memdesc:a435a4db01dad9ce21d02b954ba369896"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use reflux-free formulation or not. <br /></td></tr>
+<tr class="separator:a435a4db01dad9ce21d02b954ba369896"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5caf666b228aa4846124cf59fff59489"><td class="memItemLeft" align="right" valign="top"><a id="a5caf666b228aa4846124cf59fff59489"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a5caf666b228aa4846124cf59fff59489">m_profile</a></td></tr>
+<tr class="memdesc:a5caf666b228aa4846124cf59fff59489"><td class="mdescLeft">&#160;</td><td class="mdescRight">Profile the operator. <br /></td></tr>
+<tr class="separator:a5caf666b228aa4846124cf59fff59489"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58286af71a1baa26c298290a83119485"><td class="memItemLeft" align="right" valign="top"><a id="a58286af71a1baa26c298290a83119485"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a58286af71a1baa26c298290a83119485">m_hasMGObjects</a></td></tr>
 <tr class="memdesc:a58286af71a1baa26c298290a83119485"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if there is a multigrid level below this operator. <br /></td></tr>
@@ -389,10 +426,15 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a538f9d934de68c90d6984f6f12f14b52">m_refToFine</a></td></tr>
 <tr class="memdesc:a538f9d934de68c90d6984f6f12f14b52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refinement factor to fine level. <br /></td></tr>
 <tr class="separator:a538f9d934de68c90d6984f6f12f14b52"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a16b29f56ff1657f8386cb642089f3553"><td class="memItemLeft" align="right" valign="top"><a id="a16b29f56ff1657f8386cb642089f3553"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a16b29f56ff1657f8386cb642089f3553">m_turnOffBCs</a></td></tr>
-<tr class="memdesc:a16b29f56ff1657f8386cb642089f3553"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn off BCs or not. Used in applyOpNoBoundary. <br /></td></tr>
-<tr class="separator:a16b29f56ff1657f8386cb642089f3553"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a488cb7bfd1b5c53eeb42ef7aada04dd9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a488cb7bfd1b5c53eeb42ef7aada04dd9">m_doInterpCF</a></td></tr>
+<tr class="memdesc:a488cb7bfd1b5c53eeb42ef7aada04dd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do coarse-fine interpolation or not.  <a href="classEBHelmholtzOp.html#a488cb7bfd1b5c53eeb42ef7aada04dd9">More...</a><br /></td></tr>
+<tr class="separator:a488cb7bfd1b5c53eeb42ef7aada04dd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81e458a426b5054f15876184bdf86e91"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a81e458a426b5054f15876184bdf86e91">m_doExchange</a></td></tr>
+<tr class="memdesc:a81e458a426b5054f15876184bdf86e91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn on/off exchange operation.  <a href="classEBHelmholtzOp.html#a81e458a426b5054f15876184bdf86e91">More...</a><br /></td></tr>
+<tr class="separator:a81e458a426b5054f15876184bdf86e91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc9fc7b10d58f9e22b3d51d4bf6c6327"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#abc9fc7b10d58f9e22b3d51d4bf6c6327">m_doCoarsen</a></td></tr>
+<tr class="memdesc:abc9fc7b10d58f9e22b3d51d4bf6c6327"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn on/off exchange operation.  <a href="classEBHelmholtzOp.html#abc9fc7b10d58f9e22b3d51d4bf6c6327">More...</a><br /></td></tr>
+<tr class="separator:abc9fc7b10d58f9e22b3d51d4bf6c6327"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e45b06e04297ed3e73cc9191c6b4ad1"><td class="memItemLeft" align="right" valign="top"><a id="a9e45b06e04297ed3e73cc9191c6b4ad1"></a>
 IntVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a9e45b06e04297ed3e73cc9191c6b4ad1">m_ghostPhi</a></td></tr>
 <tr class="memdesc:a9e45b06e04297ed3e73cc9191c6b4ad1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ghost cells for phi. <br /></td></tr>
@@ -1454,6 +1496,15 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 </div><div class="memdoc">
 
 <p>Apply domain flux. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Cell data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellBox</td><td>Computation box </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Data index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_homogeneousPhysBC</td><td>Homogeneous BC or not </td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section note"><dt>Note</dt><dd>This sets the ghost cells of phi to phi(i-1) = phi(i) + F*dx/bco such that when we take the centered difference we get -bco*(phi(i) - phi(i-1))/dx = F. </dd></dl>
 
 </div>
@@ -1850,7 +1901,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 </div>
 </div>
 <a id="afabaf780d215951b42cdaa13e7bf2832"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afabaf780d215951b42cdaa13e7bf2832">&#9670;&nbsp;</a></span>coarsen()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#afabaf780d215951b42cdaa13e7bf2832">&#9670;&nbsp;</a></span>coarsen() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1884,6 +1935,44 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This routine is used in AMROperator to ensure that EB fluxes which are described by stencils get consistent data under the fine level. </dd></dl>
+
+</div>
+</div>
+<a id="a492c4e1109d648fa396e52cd686b0a38"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a492c4e1109d648fa396e52cd686b0a38">&#9670;&nbsp;</a></span>coarsen() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::coarsen </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBFluxFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_flux</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; EBFluxFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_fineFlux</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Coarsen fluxes on the fine level onto this level. </p>
+<p>User must update fluxes before calling this routine. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_flux</td><td>Flux on this level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineFlux</td><td>Flux on finer level </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>This routine is used in the reflux-free AMROperator </dd></dl>
 
 </div>
 </div>
@@ -2016,6 +2105,41 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. </dd></dl>
+
+</div>
+</div>
+<a id="adaacce511ffcf17c35c8feec84b24a22"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adaacce511ffcf17c35c8feec84b24a22">&#9670;&nbsp;</a></span>computeFlux()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::computeFlux </td>
+          <td>(</td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_phi</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fill face centroid-centered fluxes on this level. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Cell-centered data. Must have updated ghost cells for this to make any sense. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>This computes the flux onto m_flux everywhere except on boundary faces. </dd></dl>
 
 </div>
 </div>
@@ -2233,6 +2357,57 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_rhs</td><td>Divided data </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a8dd96a0878237551c9896f32aefa8b59"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8dd96a0878237551c9896f32aefa8b59">&#9670;&nbsp;</a></span>fillDomainFlux()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::fillDomainFlux </td>
+          <td>(</td>
+          <td class="paramtype">EBFluxFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_flux</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_phi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_cellBox</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;&#160;</td>
+          <td class="paramname"><em>a_dit</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fill domain flux. This fills the flux on the domain face using centered differencing ala applyDomainFlux. </p>
+<p>a_flux is replaced by the user-specified flux on the domain faces. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_flux</td><td>Flux data holder. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Cell-centered data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellBox</td><td>Computation box </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Data index </td></tr>
   </table>
   </dd>
 </dl>
@@ -3303,6 +3478,72 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
+<a id="a42bd80f7129900c761f5400613ffbd53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42bd80f7129900c761f5400613ffbd53">&#9670;&nbsp;</a></span>refluxFreeAMROperator()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::refluxFreeAMROperator </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_Lphi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_phiFine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_phi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_phiCoar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_homogeneousPhysBC</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">AMRLevelOp&lt; LevelData&lt; EBCellFAB &gt;&gt; *&#160;</td>
+          <td class="paramname"><em>a_finerOp</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Apply the AMR operator, i.e. compute L(phi) in an AMR context. </p>
+<p>This is the reflux-free version of AMROperator. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_residual</td><td>Residual on this level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phiFine</td><td>Phi on fine level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Phi on this level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phiCoar</td><td>Phi on coar level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_homogeneousPhysBC</td><td>Use homogeneous physical BCs or not </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerOp</td><td>Finer operatator</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level. </p>
+
+</div>
+</div>
 <a id="a2d8a9c316590e8931f66b7e161655c36"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2d8a9c316590e8931f66b7e161655c36">&#9670;&nbsp;</a></span>relax()</h2>
 
@@ -3783,6 +4024,86 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
+<a id="a369711725d619cca18ed5f15c0a43a0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a369711725d619cca18ed5f15c0a43a0f">&#9670;&nbsp;</a></span>turnOffCoarsening()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::turnOffCoarsening </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Turn off coarsening operation. </p>
+<dl class="section note"><dt>Note</dt><dd>Done when <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> does the coarsening and we don't want <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a> to redo it. </dd></dl>
+
+</div>
+</div>
+<a id="a5d53b6c0821c782c9ea8eb5e7681ce28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d53b6c0821c782c9ea8eb5e7681ce28">&#9670;&nbsp;</a></span>turnOffExchange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::turnOffExchange </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Turn off exchange operation. </p>
+<dl class="section note"><dt>Note</dt><dd>Done when <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> does the exchange and we don't want <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a> to redo it. </dd></dl>
+
+</div>
+</div>
+<a id="ad1421c86a5022532413b4320ccade732"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad1421c86a5022532413b4320ccade732">&#9670;&nbsp;</a></span>turnOnCoarsening()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::turnOnCoarsening </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Turn on coarsening operation. </p>
+<dl class="section note"><dt>Note</dt><dd>Done when <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> does the coarsening and we don't want <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a> to redo it. </dd></dl>
+
+</div>
+</div>
+<a id="ab901979aec1589777f2eebec85f7992e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab901979aec1589777f2eebec85f7992e">&#9670;&nbsp;</a></span>turnOnExchange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::turnOnExchange </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Turn on exchange operation. </p>
+<dl class="section note"><dt>Note</dt><dd>Done when <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> does the exchange and we don't want <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a> to redo it. </dd></dl>
+
+</div>
+</div>
 <h2 class="groupheader">Member Data Documentation</h2>
 <a id="a3e00b437e4fa34bb970084238f8e3f77"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3e00b437e4fa34bb970084238f8e3f77">&#9670;&nbsp;</a></span>m_aggRelaxStencil</h2>
@@ -3806,6 +4127,81 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 <p>For making irregular stencil applications go faster. </p>
 <p>This wraps m_relaxStencils in VCAggStencil (which computes explicit stencil offsets) </p>
+
+</div>
+</div>
+<a id="abc9fc7b10d58f9e22b3d51d4bf6c6327"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc9fc7b10d58f9e22b3d51d4bf6c6327">&#9670;&nbsp;</a></span>m_doCoarsen</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool EBHelmholtzOp::m_doCoarsen</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Turn on/off exchange operation. </p>
+<dl class="section note"><dt>Note</dt><dd>Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> for optimizing how calls in <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a> are made </dd></dl>
+
+</div>
+</div>
+<a id="a81e458a426b5054f15876184bdf86e91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81e458a426b5054f15876184bdf86e91">&#9670;&nbsp;</a></span>m_doExchange</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool EBHelmholtzOp::m_doExchange</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Turn on/off exchange operation. </p>
+<dl class="section note"><dt>Note</dt><dd>Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> for optimizing how calls in <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a> are made </dd></dl>
+
+</div>
+</div>
+<a id="a488cb7bfd1b5c53eeb42ef7aada04dd9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a488cb7bfd1b5c53eeb42ef7aada04dd9">&#9670;&nbsp;</a></span>m_doInterpCF</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool EBHelmholtzOp::m_doInterpCF</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Do coarse-fine interpolation or not. </p>
+<dl class="section note"><dt>Note</dt><dd>Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> for optimizing how calls in <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a> are made </dd></dl>
 
 </div>
 </div>

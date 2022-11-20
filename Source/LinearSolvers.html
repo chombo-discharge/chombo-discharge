@@ -284,6 +284,9 @@ For this particular case there are 10 nearby grid cells available, which is suff
 <p class="admonition-title">Note</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> implements a fairly general ghost cell interpolation scheme near the EB. The ghost cell values can be reconstructed to specified order (and with specified least squares weights).</p>
 </div>
+<p>On coarse-fine interfaces the Helmholtz operators will perform a <em>refluxing</em> operations where the coarse-grid fluxes are replaced by the sum of the fine-grid fluxes.
+<code class="docutils literal notranslate"><span class="pre">EBHelmholtzOp</span></code> has a special flag for replacing the refluxing operation by flux coarsening, which can be specified with <code class="docutils literal notranslate"><span class="pre">EBHelmholtzOp.reflux_free</span> <span class="pre">=</span> <span class="pre">true/false</span></code>.
+In this case the reflux operation is turned off and we compute the fluxes on the entire fine level (not just the interface) and replace the coarse-grid fluxes by averages of the fine-grid fluxes.</p>
 </div>
 <div class="section" id="relaxation-methods">
 <h3>Relaxation methods<a class="headerlink" href="#relaxation-methods" title="Permalink to this heading"></a></h3>

@@ -799,11 +799,20 @@ $(function() {
 <li>m_discretePhotons
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a8d8ffa4189eb28207d4edc0ee71afb78">Physics::CdrPlasma::CdrPlasmaJSON</a>
 </li>
+<li>m_doCoarsen
+: <a class="el" href="classEBHelmholtzOp.html#abc9fc7b10d58f9e22b3d51d4bf6c6327">EBHelmholtzOp</a>
+</li>
 <li>m_doCoarsening
 : <a class="el" href="classDriver.html#ae5715f69ed912ec8ebe8b8879360e9ca">Driver</a>
 </li>
+<li>m_doExchange
+: <a class="el" href="classEBHelmholtzOp.html#a81e458a426b5054f15876184bdf86e91">EBHelmholtzOp</a>
+</li>
 <li>m_doInitLoadBalancing
 : <a class="el" href="classDriver.html#ade96cee36aa91b656f3b45086594b5ed">Driver</a>
+</li>
+<li>m_doInterpCF
+: <a class="el" href="classEBHelmholtzOp.html#a488cb7bfd1b5c53eeb42ef7aada04dd9">EBHelmholtzOp</a>
 </li>
 <li>m_domain
 : <a class="el" href="classDomainFluxIFFAB.html#a639dcd4cc1d6f5a462455fb3f84f8328">DomainFluxIFFAB</a>
@@ -2587,7 +2596,8 @@ $(function() {
 : <a class="el" href="classTimer.html#a401d55d4d8936ffaada5aac6d0685bfd">Timer</a>
 </li>
 <li>m_profile
-: <a class="el" href="classParticleContainer.html#a85fa3352cd8221499915666a870243a6">ParticleContainer&lt; P &gt;</a>
+: <a class="el" href="classEBHelmholtzOp.html#a5caf666b228aa4846124cf59fff59489">EBHelmholtzOp</a>
+, <a class="el" href="classParticleContainer.html#a85fa3352cd8221499915666a870243a6">ParticleContainer&lt; P &gt;</a>
 , <a class="el" href="classPhaseRealm.html#aeffe0b158dd91a412091743437887d00">PhaseRealm</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#ad219740b321ef0f59401683cd3b4028a">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
 , <a class="el" href="classScanShop.html#aa7e623b835cf0ffa5ba7cd42ef31e6d4">ScanShop</a>
@@ -2721,6 +2731,9 @@ $(function() {
 </li>
 <li>m_reflectCoefTwo
 : <a class="el" href="classEddingtonSP1.html#a4b636bf61c8a681f23007b34cebbabfc">EddingtonSP1</a>
+</li>
+<li>m_refluxFree
+: <a class="el" href="classEBHelmholtzOp.html#a435a4db01dad9ce21d02b954ba369896">EBHelmholtzOp</a>
 </li>
 <li>m_refMagn
 : <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionTagger.html#a4586705cafeae435846af9b2b88a1b53">Physics::AdvectionDiffusion::AdvectionDiffusionTagger</a>
@@ -2956,11 +2969,11 @@ $(function() {
 <li>m_shroom_live
 : <a class="el" href="classVessel.html#aa2add00ec06e29cd6482fbc95bdb03a9">Vessel</a>
 </li>
-<li>m_shroom_R
-: <a class="el" href="classVessel.html#acaa7e92cf60b067ab42ac485d438901d">Vessel</a>
-</li>
 <li>m_shroom_r
 : <a class="el" href="classVessel.html#adc6b2dd667bb3ab8a90b4b18489ef992">Vessel</a>
+</li>
+<li>m_shroom_R
+: <a class="el" href="classVessel.html#acaa7e92cf60b067ab42ac485d438901d">Vessel</a>
 </li>
 <li>m_sideBox
 : <a class="el" href="classEBHelmholtzOp.html#ac102826540a335e1087e506e6c87a38d">EBHelmholtzOp</a>
@@ -3133,7 +3146,8 @@ $(function() {
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a4a7899b23f68ee6bd474b6f9fa09eaa0">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
 <li>m_timer
-: <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a3632daba2ab06d025f2c7d12c525e726">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
+: <a class="el" href="classEBHelmholtzOp.html#a93f7d13f56b4b1571acee2affabd3c33">EBHelmholtzOp</a>
+, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a3632daba2ab06d025f2c7d12c525e726">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
 , <a class="el" href="classScanShop.html#ac59906b037e4a9dc699f497b4eef0c5b">ScanShop</a>
 </li>
 <li>m_timespan
@@ -3177,9 +3191,6 @@ $(function() {
 </li>
 <li>m_transportAlgorithm
 : <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a282dcf83dcf619936d2a2698b0e3dce2">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
-</li>
-<li>m_turnOffBCs
-: <a class="el" href="classEBHelmholtzOp.html#a16b29f56ff1657f8386cb642089f3553">EBHelmholtzOp</a>
 </li>
 <li>m_uniformDistribution0d
 : <a class="el" href="classItoSolver.html#a1d1432b00602a2602938d0477a76b378">ItoSolver</a>

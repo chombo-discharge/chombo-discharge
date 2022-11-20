@@ -799,11 +799,20 @@ $(function() {
 <li>m_discretePhotons
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a8d8ffa4189eb28207d4edc0ee71afb78">Physics::CdrPlasma::CdrPlasmaJSON</a>
 </li>
+<li>m_doCoarsen
+: <a class="el" href="classEBHelmholtzOp.html#abc9fc7b10d58f9e22b3d51d4bf6c6327">EBHelmholtzOp</a>
+</li>
 <li>m_doCoarsening
 : <a class="el" href="classDriver.html#ae5715f69ed912ec8ebe8b8879360e9ca">Driver</a>
 </li>
+<li>m_doExchange
+: <a class="el" href="classEBHelmholtzOp.html#a81e458a426b5054f15876184bdf86e91">EBHelmholtzOp</a>
+</li>
 <li>m_doInitLoadBalancing
 : <a class="el" href="classDriver.html#ade96cee36aa91b656f3b45086594b5ed">Driver</a>
+</li>
+<li>m_doInterpCF
+: <a class="el" href="classEBHelmholtzOp.html#a488cb7bfd1b5c53eeb42ef7aada04dd9">EBHelmholtzOp</a>
 </li>
 <li>m_domain
 : <a class="el" href="classDomainFluxIFFAB.html#a639dcd4cc1d6f5a462455fb3f84f8328">DomainFluxIFFAB</a>
@@ -2587,7 +2596,8 @@ $(function() {
 : <a class="el" href="classTimer.html#a401d55d4d8936ffaada5aac6d0685bfd">Timer</a>
 </li>
 <li>m_profile
-: <a class="el" href="classParticleContainer.html#a85fa3352cd8221499915666a870243a6">ParticleContainer&lt; P &gt;</a>
+: <a class="el" href="classEBHelmholtzOp.html#a5caf666b228aa4846124cf59fff59489">EBHelmholtzOp</a>
+, <a class="el" href="classParticleContainer.html#a85fa3352cd8221499915666a870243a6">ParticleContainer&lt; P &gt;</a>
 , <a class="el" href="classPhaseRealm.html#aeffe0b158dd91a412091743437887d00">PhaseRealm</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#ad219740b321ef0f59401683cd3b4028a">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
 , <a class="el" href="classScanShop.html#aa7e623b835cf0ffa5ba7cd42ef31e6d4">ScanShop</a>
@@ -2721,6 +2731,9 @@ $(function() {
 </li>
 <li>m_reflectCoefTwo
 : <a class="el" href="classEddingtonSP1.html#a4b636bf61c8a681f23007b34cebbabfc">EddingtonSP1</a>
+</li>
+<li>m_refluxFree
+: <a class="el" href="classEBHelmholtzOp.html#a435a4db01dad9ce21d02b954ba369896">EBHelmholtzOp</a>
 </li>
 <li>m_refMagn
 : <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionTagger.html#a4586705cafeae435846af9b2b88a1b53">Physics::AdvectionDiffusion::AdvectionDiffusionTagger</a>
@@ -3133,7 +3146,8 @@ $(function() {
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a4a7899b23f68ee6bd474b6f9fa09eaa0">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
 <li>m_timer
-: <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a3632daba2ab06d025f2c7d12c525e726">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
+: <a class="el" href="classEBHelmholtzOp.html#a93f7d13f56b4b1571acee2affabd3c33">EBHelmholtzOp</a>
+, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a3632daba2ab06d025f2c7d12c525e726">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
 , <a class="el" href="classScanShop.html#ac59906b037e4a9dc699f497b4eef0c5b">ScanShop</a>
 </li>
 <li>m_timespan
@@ -3177,9 +3191,6 @@ $(function() {
 </li>
 <li>m_transportAlgorithm
 : <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a282dcf83dcf619936d2a2698b0e3dce2">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
-</li>
-<li>m_turnOffBCs
-: <a class="el" href="classEBHelmholtzOp.html#a16b29f56ff1657f8386cb642089f3553">EBHelmholtzOp</a>
 </li>
 <li>m_uniformDistribution0d
 : <a class="el" href="classItoSolver.html#a1d1432b00602a2602938d0477a76b378">ItoSolver</a>
@@ -3473,7 +3484,7 @@ $(function() {
 </li>
 <li>makeSuperparticles()
 : <a class="el" href="classItoLayout.html#a1ce54d1788882b20dbeff5cd3a61b6b2">ItoLayout&lt; T &gt;</a>
-, <a class="el" href="classItoSolver.html#a05f1a0fcf4c8a6cb67745a9a3b21c0a9">ItoSolver</a>
+, <a class="el" href="classItoSolver.html#ae0cb1432cb164650e8b71c4c5657fb36">ItoSolver</a>
 </li>
 <li>makeSuperParticles()
 : <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a5ca4b5d910f842b23cad9ebe90fe088d">Physics::BrownianWalker::BrownianWalkerStepper</a>
@@ -3482,7 +3493,7 @@ $(function() {
 : <a class="el" href="classLookupTable1D.html#a598e96cdd3ddf4220937486e6d258ac4">LookupTable1D&lt; N &gt;</a>
 </li>
 <li>mass()
-: <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaGodunovParticle.html#aadd904d83850b7a24c17b562fc65ff1c">Physics::ItoPlasma::ItoPlasmaGodunovParticle</a>
+: <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaGodunovParticle.html#a7ea0441697265d4269df2d23d87a73eb">Physics::ItoPlasma::ItoPlasmaGodunovParticle</a>
 </li>
 <li>matchBC()
 : <a class="el" href="classMFHelmholtzJumpBC.html#a3dc9e8202fa8f716c125bc96b9b9b97f">MFHelmholtzJumpBC</a>
@@ -3495,19 +3506,19 @@ $(function() {
 : <a class="el" href="classLoadBalancing.html#a01ba7abba0755904cb9b12f4769d3bf3">LoadBalancing</a>
 </li>
 <li>McPhoto()
-: <a class="el" href="classMcPhoto.html#a852aed4d457e23aaabed633ec8abcc25">McPhoto</a>
+: <a class="el" href="classMcPhoto.html#ac0dae30c8ce8768edfcdd074161f5dfa">McPhoto</a>
 </li>
 <li>Mesh
 : <a class="el" href="classSignedDistanceDCEL.html#ac3ba4cb079ccd274977cf3ee9ff80e69">SignedDistanceDCEL&lt; T &gt;</a>
 </li>
 <li>MeshODESolver()
-: <a class="el" href="classMeshODESolver.html#ad8db7cd246e4a0f97d09aa272ccb1169">MeshODESolver&lt; N &gt;</a>
+: <a class="el" href="classMeshODESolver.html#a5a824db056b2ce43bf99e12e5f0c41fb">MeshODESolver&lt; N &gt;</a>
 </li>
 <li>MeshODEStepper()
-: <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#af27c3d40ffa283e4c07727af3ce84834">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>
+: <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#ac8208c26ceb09a93f3379646cfb03501">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>
 </li>
 <li>MFBaseIVFAB()
-: <a class="el" href="classMFBaseIVFAB.html#ab3c83426270cd8fd870ea92bb4deaa28">MFBaseIVFAB</a>
+: <a class="el" href="classMFBaseIVFAB.html#a1ea286eecb86a3eb7986420d9ab71b6c">MFBaseIVFAB</a>
 </li>
 <li>MFBaseIVFABFactory()
 : <a class="el" href="classMFBaseIVFABFactory.html#ad71b2810084fc969dce80bd8f90d1c6b">MFBaseIVFABFactory</a>
@@ -3519,19 +3530,19 @@ $(function() {
 : <a class="el" href="classMFFluxReg.html#ac64e66fe632d5c392bff30f1985b7923">MFFluxReg</a>
 </li>
 <li>MFHelmholtzDirichletDomainBCFactory()
-: <a class="el" href="classMFHelmholtzDirichletDomainBCFactory.html#a71b8edf842afd156e88a306858426c71">MFHelmholtzDirichletDomainBCFactory</a>
+: <a class="el" href="classMFHelmholtzDirichletDomainBCFactory.html#aaacf999f311f1b7f30f3d8390592f990">MFHelmholtzDirichletDomainBCFactory</a>
 </li>
 <li>MFHelmholtzDirichletEBBC()
 : <a class="el" href="classMFHelmholtzDirichletEBBC.html#a18b95b3d890712dd1416340fef08f4ab">MFHelmholtzDirichletEBBC</a>
 </li>
 <li>MFHelmholtzDirichletEBBCFactory()
-: <a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#ad20e599282940cc5e208c078ee918126">MFHelmholtzDirichletEBBCFactory</a>
+: <a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#a240d4c17ccc61f9229c93036e3baf3f5">MFHelmholtzDirichletEBBCFactory</a>
 </li>
 <li>MFHelmholtzDomainBCFactory()
-: <a class="el" href="classMFHelmholtzDomainBCFactory.html#a991237439f6f945a60d7f1a2c970ccb8">MFHelmholtzDomainBCFactory</a>
+: <a class="el" href="classMFHelmholtzDomainBCFactory.html#abb09d8122443521683cafaa65d01235d">MFHelmholtzDomainBCFactory</a>
 </li>
 <li>MFHelmholtzEBBC()
-: <a class="el" href="classMFHelmholtzEBBC.html#a63fef12806b66743d4ac7f929afe3e04">MFHelmholtzEBBC</a>
+: <a class="el" href="classMFHelmholtzEBBC.html#a6480dab6e6e59982d7b50810a5cb2bdc">MFHelmholtzEBBC</a>
 </li>
 <li>MFHelmholtzEBBCFactory()
 : <a class="el" href="classMFHelmholtzEBBCFactory.html#a22cc270285ea051a3052eba13aa5b9b2">MFHelmholtzEBBCFactory</a>
@@ -3540,31 +3551,31 @@ $(function() {
 : <a class="el" href="classMFHelmholtzElectrostaticDomainBCFactory.html#a3848d1e7c22ddf017d81cdd55a47f806">MFHelmholtzElectrostaticDomainBCFactory</a>
 </li>
 <li>MFHelmholtzElectrostaticEBBC()
-: <a class="el" href="classMFHelmholtzElectrostaticEBBC.html#ad87e9eeedf833c8b5620958c9be5a443">MFHelmholtzElectrostaticEBBC</a>
+: <a class="el" href="classMFHelmholtzElectrostaticEBBC.html#af09b648479832646f5e8a0e325c711ad">MFHelmholtzElectrostaticEBBC</a>
 </li>
 <li>MFHelmholtzElectrostaticEBBCFactory()
-: <a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#a3aa8ca207ff547801a59750e2393d4e1">MFHelmholtzElectrostaticEBBCFactory</a>
+: <a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#ac536856d538465a0f168b309b289c58d">MFHelmholtzElectrostaticEBBCFactory</a>
 </li>
 <li>MFHelmholtzJumpBC()
-: <a class="el" href="classMFHelmholtzJumpBC.html#a64b722f12762dd9ed825d6376221a09b">MFHelmholtzJumpBC</a>
+: <a class="el" href="classMFHelmholtzJumpBC.html#ae2dd6c6857b9f8fc5b9b4ec30ca0db0d">MFHelmholtzJumpBC</a>
 </li>
 <li>MFHelmholtzJumpBCFactory()
 : <a class="el" href="classMFHelmholtzJumpBCFactory.html#a3c75a6d341adcab52c1cf2523320093c">MFHelmholtzJumpBCFactory</a>
 </li>
 <li>MFHelmholtzNeumannDomainBCFactory()
-: <a class="el" href="classMFHelmholtzNeumannDomainBCFactory.html#a0db1db2a09b8f7fe801a334784d1924c">MFHelmholtzNeumannDomainBCFactory</a>
+: <a class="el" href="classMFHelmholtzNeumannDomainBCFactory.html#a1bc62b956b7af5c7bf5050e1f7074416">MFHelmholtzNeumannDomainBCFactory</a>
 </li>
 <li>MFHelmholtzNeumannEBBC()
 : <a class="el" href="classMFHelmholtzNeumannEBBC.html#a919ffe862c85218d77847996c3fe94c7">MFHelmholtzNeumannEBBC</a>
 </li>
 <li>MFHelmholtzNeumannEBBCFactory()
-: <a class="el" href="classMFHelmholtzNeumannEBBCFactory.html#a0ad15ec0624424cf1ff91cf04370c0c4">MFHelmholtzNeumannEBBCFactory</a>
+: <a class="el" href="classMFHelmholtzNeumannEBBCFactory.html#a6c43203aed379251d4baa7b6ddad8b32">MFHelmholtzNeumannEBBCFactory</a>
 </li>
 <li>MFHelmholtzOp()
-: <a class="el" href="classMFHelmholtzOp.html#a154770218de08dfb3b4bf7d59c2f8224">MFHelmholtzOp</a>
+: <a class="el" href="classMFHelmholtzOp.html#ac9a3628ce62e9bc0dca91806c07a1cf4">MFHelmholtzOp</a>
 </li>
 <li>MFHelmholtzOpFactory()
-: <a class="el" href="classMFHelmholtzOpFactory.html#a3c99674cf3c2592650a464038773f0f9">MFHelmholtzOpFactory</a>
+: <a class="el" href="classMFHelmholtzOpFactory.html#a962a0821c2c2c6fa3b251812782f43a1">MFHelmholtzOpFactory</a>
 </li>
 <li>MFHelmholtzRobinDomainBCFactory()
 : <a class="el" href="classMFHelmholtzRobinDomainBCFactory.html#abe5a0a2bdb4401f1b1f5d1d6265ed9eb">MFHelmholtzRobinDomainBCFactory</a>
@@ -3573,7 +3584,7 @@ $(function() {
 : <a class="el" href="classMFHelmholtzRobinEBBC.html#a2aa5215b91efe24cbf81c805de12d57b">MFHelmholtzRobinEBBC</a>
 </li>
 <li>MFHelmholtzRobinEBBCFactory()
-: <a class="el" href="classMFHelmholtzRobinEBBCFactory.html#afbb0e77fd75796425b33e69f97f3cdf5">MFHelmholtzRobinEBBCFactory</a>
+: <a class="el" href="classMFHelmholtzRobinEBBCFactory.html#a62c3d63d98e0b75db2f3d8a9074decc5">MFHelmholtzRobinEBBCFactory</a>
 </li>
 <li>MFHelmholtzSaturationChargeJumpBC()
 : <a class="el" href="classMFHelmholtzSaturationChargeJumpBC.html#a16bac89c616a8efcce984f82a0cfd5c8">MFHelmholtzSaturationChargeJumpBC</a>
@@ -3582,10 +3593,10 @@ $(function() {
 : <a class="el" href="classMFHelmholtzSaturationChargeJumpBCFactory.html#a2e7f97fb6aee42c916e0abbb00fea79e">MFHelmholtzSaturationChargeJumpBCFactory</a>
 </li>
 <li>MFInterfaceFAB()
-: <a class="el" href="classMFInterfaceFAB.html#a9e9773180f04247c742b4fba03c82bf2">MFInterfaceFAB&lt; T &gt;</a>
+: <a class="el" href="classMFInterfaceFAB.html#a0c1665a8fb77aac838aab83eaf8e379e">MFInterfaceFAB&lt; T &gt;</a>
 </li>
 <li>MFLevelGrid()
-: <a class="el" href="classMFLevelGrid.html#afe44617ae9ba33a480e7f9e6913d6b09">MFLevelGrid</a>
+: <a class="el" href="classMFLevelGrid.html#a5c50e3b1ac6a138e60dfd466b14fbfad">MFLevelGrid</a>
 </li>
 <li>MFMultigridInterpolator()
 : <a class="el" href="classMFMultigridInterpolator.html#a245094d73dd0db3702ffd1cb0f8e6dab">MFMultigridInterpolator</a>
@@ -3598,7 +3609,7 @@ $(function() {
 : <a class="el" href="classCdrCTU.html#a3a2b95413b485c6353ecc593740548a2">CdrCTU</a>
 </li>
 <li>mobility()
-: <a class="el" href="classItoParticle.html#a3f414bcb46464d52219fb0ab7ef70617">ItoParticle</a>
+: <a class="el" href="classItoParticle.html#aa26a658c575baff1e2c7ae8d71e18580">ItoParticle</a>
 , <a class="el" href="classItoSpecies.html#a60ffd4cb59f0fd5daf7e3fe7db381c1b">ItoSpecies</a>
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaAir3LEA_1_1Electron.html#ac61c0f3c56b4e7a57a41e70925c3e905">Physics::ItoPlasma::ItoPlasmaAir3LEA::Electron</a>
 </li>
@@ -3623,16 +3634,16 @@ $(function() {
 , <a class="el" href="classFieldSolverMultigrid.html#aaf89c3ef8e19504afb28976473f2b797">FieldSolverMultigrid</a>
 </li>
 <li>MultiIndex()
-: <a class="el" href="classMultiIndex.html#a7be7d1bfd359b1423bfa0fb2e1e88f50">MultiIndex</a>
+: <a class="el" href="classMultiIndex.html#a0befb03478fd9c883de9e44e8e7a09ef">MultiIndex</a>
 </li>
 <li>multiply()
-: <a class="el" href="classDataOps.html#a72685cbfeebb9d46777890fbf5a0b3e6">DataOps</a>
+: <a class="el" href="classDataOps.html#a1208055ecb1c07f59713e9d071d43a03">DataOps</a>
 </li>
 <li>multiplyByBcoef()
 : <a class="el" href="classEBHelmholtzDomainBC.html#a7490f4615fc89eafb6aaccfe3be36b27">EBHelmholtzDomainBC</a>
 </li>
 <li>multiplyScalar()
-: <a class="el" href="classDataOps.html#a6b2e5e74146775c916a97582d3b44865">DataOps</a>
+: <a class="el" href="classDataOps.html#ae960c5190d2423bb4247bb6c58516e4c">DataOps</a>
 </li>
 <li>MushroomIF()
 : <a class="el" href="classMushroomIF.html#a0e517cf46c60c919066a9ac10b875de6">MushroomIF</a>
