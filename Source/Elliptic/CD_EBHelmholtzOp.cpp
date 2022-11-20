@@ -20,7 +20,6 @@
 #include <CD_EBHelmholtzOp.H>
 #include <CD_LeastSquares.H>
 #include <CD_BoxLoops.H>
-#include <CD_Timer.H>
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
@@ -98,10 +97,14 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
   m_doCoarsen  = true;
   m_doExchange = true;
   m_refluxFree = false;
+  m_profile    = false;
   m_interval   = Interval(m_comp, m_comp);
 
   ParmParse pp("EBHelmholtzOp");
   pp.query("reflux_free", m_refluxFree);
+  pp.query("profile", m_profile);
+
+  m_timer = Timer("EBHelmholtzOp");
 
   if (m_hasFine) {
     m_eblgFine = a_eblgFine;
@@ -634,6 +637,10 @@ EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&             a_Lphi,
 {
   CH_TIME("EBHelmholtzOp::AMROperator(4xLD<EBCellFAB>, bool, AMRLevelOp<LD<EBCellFAB> >*)");
 
+  if (m_profile) {
+    m_timer.startEvent("AMROperator");
+  }
+
   if (m_refluxFree) {
     this->refluxFreeAMROperator(a_Lphi, a_phiFine, a_phi, a_phiCoar, a_homogeneousPhysBC, a_finerOp);
   }
@@ -654,6 +661,11 @@ EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&             a_Lphi,
       this->reflux(a_Lphi, a_phiFine, a_phi, *a_finerOp);
     }
   }
+
+  if (m_profile) {
+    m_timer.stopEvent("AMROperator");
+    m_timer.eventReport(pout(), false);
+  }
 }
 
 void
@@ -667,7 +679,9 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
   CH_TIME("EBHelmholtzOp::refluxFreeAMROperator(4xLD<EBCellFAB>, bool, AMRLevelOp<LD<EBCellFAB> >*)");
 
   // TLDR: This is the "reflux-free" version of the AMROperator which gets rid of the refluxing step and
-  //       rather replaces the whole coarse-fine choreopgraphy by conservative flux coarsening.
+  //       rather replaces the whole coarse-fine choreopgraphy by conservative flux coarsening. This routine is
+  //       a bit more complex than the other version, but that is mostly because the other version reuses the
+  //       things I wrote for the relaxation step.
 
   // If we have a finer level, there is a chance that the stencils from the EB will reach under it, in which case
   // it might fetch potentially bogus data. A clunky way of handling this is to coarsen the data on the fine level
@@ -692,25 +706,25 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
   // Compute the centroid-centered fluxes on this level.
   this->computeFlux(a_phi);
 
-  // Finer level also computes fluxes and coarsens them onto this level.
+  // Finer level must compute fluxes and coarsens them onto this level. We also update the ghost cells,
+  // although this MIGHT have been done already we have no guarantee of that. Then we coarsen those fluxes
+  // onto this level.
   if (m_hasFine) {
     EBHelmholtzOp* fineOp = (EBHelmholtzOp*)a_finerOp;
 
-    // Need to update ghost cells on the finer level. This MIGHT have been
-    // done oalready but we have no guarantee of that so we have to do it anyways!
     LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&)a_phiFine;
 
     phiFine.exchange();
     fineOp->inhomogeneousCFInterp(phiFine, a_phi);
 
-    // Compute flux on finer level and coarsen onto this level.
     fineOp->computeFlux(a_phiFine);
     fineOp->coarsen(m_flux, fineOp->getFlux());
   }
 
-  MayDay::Error("Diagonal term is missing");
-  MayDay::Error("Need to fill BC fluxes in regular kernels!");
-  MayDay::Error("Kernels should be organized and made compact!!");
+  // Fill the domain fluxes.
+  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit) {
+    this->fillDomainFlux(m_flux[dit()], a_phi[dit()], m_eblg.getDBL()[dit()], dit());
+  }
 
   // The above calls replaced the fluxes on this level by (conservative) averages of the fluxes on
   // the finer level. We can proceed as usual now, ignoring the fine level.
@@ -719,35 +733,50 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
     const Box      cellBox = m_eblg.getDBL()[dit()];
     const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
 
-    const BaseIVFAB<Real>& bcoIrreg = (*m_BcoefIrreg)[dit()];
+    EBCellFAB& Lphi    = a_Lphi[dit()];
+    FArrayBox& LphiReg = Lphi.getFArrayBox();
 
-    // REGULAR CELLS BEGIN HERE
-    this->applyDomainFlux((EBCellFAB&)a_phi[dit()], cellBox, dit(), a_homogeneousPhysBC);
+    const EBCellFAB& phi  = a_phi[dit()];
+    const EBCellFAB& Aco  = (*m_Acoef)[dit()];
+    const EBFluxFAB& Bco  = (*m_Bcoef)[dit()];
+    const EBFluxFAB& flux = m_flux[dit()];
 
-    a_Lphi[dit()].setVal(0.0);
+    const BaseIVFAB<Real>&       BcoIrreg      = (*m_BcoefIrreg)[dit()];
+    const BaseIVFAB<VoFStencil>& ebFluxStencil = m_ebBc->getGradPhiStencils()[dit()];
+    const BaseIVFAB<Real>&       alphaDiag     = m_alphaDiagWeight[dit()];
 
+    // Add alpha-term.
+    Lphi.setVal(0.0);
+    Lphi += Aco;
+    Lphi *= phi;
+    Lphi *= m_alpha;
+
+    // Add in the beta-term -- b-coefficient and m_beta is already a part of the flux.
     for (int dir = 0; dir < SpaceDim; dir++) {
-      FArrayBox&       Lphi         = a_Lphi[dit()].getFArrayBox();
-      const FArrayBox& betaBGradPhi = m_flux[dit()][dir].getFArrayBox();
+      const FArrayBox& fluxReg = flux[dir].getFArrayBox();
 
-      // Recall that beta and Bcoef is a part of the flux!
       auto regularKernel = [&](const IntVect& iv) -> void {
-        Lphi(iv, m_comp) += inverseDx * (betaBGradPhi(iv + BASISV(dir), m_comp) - betaBGradPhi(iv, m_comp));
+        LphiReg(iv, m_comp) += inverseDx * (fluxReg(iv + BASISV(dir), m_comp) - fluxReg(iv, m_comp));
       };
 
       BoxLoops::loop(cellBox, regularKernel);
     }
 
-    // CUT-CELLS BELOW HERE
-    EBCellFAB& Lphi = a_Lphi[dit()];
-
-    // Non-EB faces
+    // Kernel for cut-cells. This will add everything except the inhomogeneous flux through the EB
+    // and the domain fluxes in cut-cells.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
-      Lphi(vof, m_comp) = 0.0;
-      for (int dir = 0; dir < SpaceDim; dir++) {
+      // Stencil that describes the EB flux into the cell. This is the part of the flux due to
+      // beta * b * dphi/dn on the EB face.
+      const VoFStencil& ebFluxSten = ebFluxStencil(vof, m_comp);
 
-        // Fluxes already includes beta.
-        const EBFaceFAB& flux = m_flux[dit()][dir];
+      // Set L(phi) = kappa * alpha * Acoef * phi
+      Lphi(vof, m_comp) = alphaDiag(vof, m_comp) * phi(vof, m_comp);
+
+      // Add in the fluxes from the non-EB/non-domain cut-cell faces. When doing this we set
+      // L(phi) = kappa * alpha * Acoef * phi + beta * sum_f(b*grad(phi)) where the sum runs
+      // over internal faces.
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        const EBFaceFAB& faceFlux = flux[dir];
 
         for (SideIterator sit; sit.ok(); ++sit) {
           const Side::LoHiSide side = sit();
@@ -759,63 +788,37 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
             const FaceIndex face     = faces[iface];
             const Real      faceArea = ebisbox.areaFrac(face);
 
+            // Distinguish between domain and internal faces; the domain bc object does not multiply the
+            // flux by beta.
+            Real curFlux = 0.0;
             if (!face.isBoundary()) {
-              Lphi(vof, m_comp) += isign * faceArea * flux(face, m_comp) / m_dx;
+              curFlux = faceFlux(face, m_comp);
             }
+            else {
+              curFlux = m_domainBc->getFaceFlux(vof, phi, Bco[dir], dir, sit(), dit(), a_homogeneousPhysBC);
+              curFlux *= m_beta;
+            }
+
+            Lphi(vof, m_comp) += isign * inverseDx * faceArea * curFlux;
           }
         }
+      }
+
+      // Add in the flux from the EB face. After this the only term missing the inhomogeneous
+      // flux from the EB. I.e. when dphi/dn = w_b * phi_b + sum(w_i * phi(i)) then we are
+      // missing only the term w_b * phi_b. This is added by the EBBC object.
+      for (int i = 0; i < ebFluxSten.size(); i++) {
+        const Real      weight = ebFluxSten.weight(i);
+        const VolIndex& ivof   = ebFluxSten.vof(i);
+
+        Lphi(vof, m_comp) += m_beta * BcoIrreg(vof, m_comp) * weight * phi(ivof, m_comp);
       }
     };
 
     BoxLoops::loop(m_vofIterIrreg[dit()], irregularKernel);
 
-    // Apply the gradient stencil
-    const BaseIVFAB<VoFStencil>& ebFluxStencil = m_ebBc->getGradPhiStencils()[dit()];
-
-    auto irreg2 = [&](const VolIndex& vof) -> void {
-      const VoFStencil& sten = ebFluxStencil(vof, m_comp);
-
-      for (int i = 0; i < sten.size(); i++) {
-        const Real      weight = sten.weight(i);
-        const VolIndex& ivof   = sten.vof(i);
-
-        Lphi(vof, m_comp) += m_beta * bcoIrreg(vof, m_comp) * weight * a_phi[dit()](ivof, m_comp);
-      }
-    };
-
-    BoxLoops::loop(m_vofIterIrreg[dit()], irreg2);
-
-    // SMoosh in the part of the cut-cell flux that is not a part of the operator.
-    m_ebBc->applyEBFlux(m_vofIterIrreg[dit()],
-                        Lphi,
-                        a_phi[dit()],
-                        (*m_BcoefIrreg)[dit()],
-                        dit(),
-                        m_beta,
-                        a_homogeneousPhysBC);
-
-    // Cut-cell domain fluxes.
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      VoFIterator& vofitLo = m_vofIterDomLo[dir][dit()];
-      VoFIterator& vofitHi = m_vofIterDomHi[dir][dit()];
-
-      const EBFaceFAB& Bcoef = (*m_Bcoef)[dit()][dir];
-
-      // Kernels for high and low sides.
-      auto kernelLo = [&](const VolIndex& vof) -> void {
-        const Real flux = m_domainBc->getFaceFlux(vof, a_phi[dit()], Bcoef, dir, Side::Lo, dit(), a_homogeneousPhysBC);
-        Lphi(vof, m_comp) -= flux * m_beta / m_dx;
-      };
-
-      auto kernelHi = [&](const VolIndex& vof) -> void {
-        const Real flux = m_domainBc->getFaceFlux(vof, a_phi[dit()], Bcoef, dir, Side::Hi, dit(), a_homogeneousPhysBC);
-        Lphi(vof, m_comp) += flux * m_beta / m_dx;
-      };
-
-      // Execute kernels on lo and hi side
-      BoxLoops::loop(vofitLo, kernelLo);
-      BoxLoops::loop(vofitHi, kernelHi);
-    }
+    // Finally, add in the inhomogeneous EB flux.
+    m_ebBc->applyEBFlux(m_vofIterIrreg[dit()], Lphi, phi, BcoIrreg, dit(), m_beta, a_homogeneousPhysBC);
   }
 }
 
@@ -1136,6 +1139,60 @@ EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
       };
 
       BoxLoops::loop(ghostBox, kernel);
+    }
+  }
+}
+
+void
+EBHelmholtzOp::fillDomainFlux(EBFluxFAB& a_flux, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit)
+{
+  CH_TIME("EBHelmholtzOp::fillDomainFlux(EBFluxFAB, EBCellFAB, Box, DataIndex)");
+
+  // TLDR: We compute the flux on the domain edges and store it in a cell-centered box. We then monkey with the ghost cells outside
+  //       the domain so that centered differences on the edge cells inject said flux. This is a simple trick for enforcing the flux
+  //       on the domain edges when we later compute the finite volume Laplacian.
+
+  constexpr Real tol = 1.E-15;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+
+    BaseFab<Real>&       fluxReg = a_flux[dir].getSingleValuedFAB();
+    const BaseFab<Real>& phiReg  = a_phi.getSingleValuedFAB();
+    const BaseFab<Real>& bco     = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
+
+    Box loBox;
+    Box hiBox;
+    int hasLo;
+    int hasHi;
+    EBArith::loHi(loBox, hasLo, hiBox, hasHi, m_eblg.getDomain(), a_cellBox, dir);
+
+    if (hasLo == 1) {
+
+      // Fill the domain flux. This might look weird because we are putting the flux in a cell-centered box. By this, we implicitly
+      // understand that the flux that is stored in the box is the flux that comes in through the lo side in the coordinate direction we are looking.
+      FArrayBox faceFlux(loBox, m_nComp);
+      m_domainBc->getFaceFlux(faceFlux, phiReg, bco, dir, Side::Lo, a_dit, false);
+
+      // Copy flux over to the input data holder and multiply by beta.
+      auto kernel = [&](const IntVect& iv) -> void {
+        fluxReg(iv, m_comp) = m_beta * faceFlux(iv, m_comp);
+      };
+
+      BoxLoops::loop(loBox, kernel);
+    }
+
+    if (hasHi == 1) {
+      // Fill the domain flux. This might look weird because we are putting the flux in a cell-centered box. By this, we implicitly
+      // understand that the flux that is stored in the box is the flux that comes in through the lo side in the coordinate direction we are looking.
+      FArrayBox faceFlux(hiBox, m_nComp);
+      m_domainBc->getFaceFlux(faceFlux, phiReg, bco, dir, Side::Hi, a_dit, false);
+
+      // Copy flux over to the input data holder and multiply by beta.
+      auto kernel = [&](const IntVect& iv) -> void {
+        fluxReg(iv + BASISV(dir), m_comp) = m_beta * faceFlux(iv, m_comp);
+      };
+
+      BoxLoops::loop(hiBox, kernel);
     }
   }
 }

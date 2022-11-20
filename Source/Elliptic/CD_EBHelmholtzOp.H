@@ -23,6 +23,7 @@
 #include <EBFluxRegister.H>
 
 // Our includes
+#include <CD_Timer.H>
 #include <CD_Location.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBCoarAve.H>
@@ -126,7 +127,7 @@ public:
   /*!
     @brief Dtor
   */
-  ~EBHelmholtzOp();
+  virtual ~EBHelmholtzOp();
 
   /*!
     @brief No copy assigment allowed
@@ -398,11 +399,26 @@ public:
 
   /*!
     @brief Apply domain flux. 
+    @param[inout] a_phi               Cell data
+    @param[in]    a_cellBox           Computation box
+    @param[in]    a_dit               Data index
+    @param[in]    a_homogeneousPhysBC Homogeneous BC or not
     @note This sets the ghost cells of phi to phi(i-1) = phi(i) + F*dx/bco such that when we take the centered difference we get
     -bco*(phi(i) - phi(i-1))/dx = F. 
   */
   void
   applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
+
+  /*!
+    @brief Fill domain flux. This fills the flux on the domain face using centered differencing ala applyDomainFlux
+    @details a_flux is replaced by the user-specified flux on the domain faces. 
+    @param[inout] a_flux              Flux data holder.
+    @param[inout] a_phi               Cell-centered data
+    @param[in]    a_cellBox           Computation box
+    @param[in]    a_dit               Data index
+  */
+  void
+  fillDomainFlux(EBFluxFAB& a_flux, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit);
 
   /*!
     @brief Apply operator in irregular cells
@@ -759,6 +775,11 @@ protected:
   static constexpr int m_comp = 0;
 
   /*!
+    @brief Timer so user can profile.
+  */
+  Timer m_timer;
+
+  /*!
     @brief Interval
   */
   Interval m_interval;
@@ -777,6 +798,11 @@ protected:
     @brief Use reflux-free formulation or not
   */
   bool m_refluxFree;
+
+  /*!
+    @brief Profile the operator
+  */
+  bool m_profile;
 
   /*!
     @brief True if there is a multigrid level below this operator
