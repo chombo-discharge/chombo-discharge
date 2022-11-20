@@ -176,7 +176,11 @@ For this particular case there are 10 nearby grid cells available, which is suff
 
 .. note::
 
-   ``chombo-discharge`` implements a fairly general ghost cell interpolation scheme near the EB. The ghost cell values can be reconstructed to specified order (and with specified least squares weights). 
+   ``chombo-discharge`` implements a fairly general ghost cell interpolation scheme near the EB. The ghost cell values can be reconstructed to specified order (and with specified least squares weights).
+
+On coarse-fine interfaces the Helmholtz operators will perform a *refluxing* operations where the coarse-grid fluxes are replaced by the sum of the fine-grid fluxes.
+``EBHelmholtzOp`` has a special flag for replacing the refluxing operation by flux coarsening, which can be specified with ``EBHelmholtzOp.reflux_free = true/false``.
+In this case the reflux operation is turned off and we compute the fluxes on the entire fine level (not just the interface) and replace the coarse-grid fluxes by averages of the fine-grid fluxes.
    
 
 Relaxation methods
