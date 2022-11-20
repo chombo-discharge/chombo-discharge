@@ -680,8 +680,8 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
 
   // TLDR: This is the "reflux-free" version of the AMROperator which gets rid of the refluxing step and
   //       rather replaces the whole coarse-fine choreopgraphy by conservative flux coarsening. This routine is
-  //       a bit more complex than the other version, but that is mostly because the other version reuses the
-  //       things I wrote for the relaxation step.
+  //       a bit more complex and more expensive than the other version, but it also replaces the operator
+  //       by a coarsening of the fine-grid operator so it should be more accurate also.
 
   // If we have a finer level, there is a chance that the stencils from the EB will reach under it, in which case
   // it might fetch potentially bogus data. A clunky way of handling this is to coarsen the data on the fine level
@@ -814,7 +814,6 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
         Lphi(vof, m_comp) += m_beta * BcoIrreg(vof, m_comp) * weight * phi(ivof, m_comp);
       }
     };
-
     BoxLoops::loop(m_vofIterIrreg[dit()], irregularKernel);
 
     // Finally, add in the inhomogeneous EB flux.
@@ -2047,11 +2046,10 @@ EBHelmholtzOp::incrementFRFine(const LevelData<EBCellFAB>&       a_phiFine,
 
         // The CF interface always ends at the boundary of a fine-level grid box, so we can run the computation for
         // the subset of cells that align with the CF.
-        Box stripBox = adjCellBox(cellBox, dir, sit(), 1); // This box is outside the cellBox patch
-        stripBox.shift(dir, -sign(sit()));                 // This box is inside the cellBox patch
+        const Box stripBox = adjCellBox(cellBox, dir, sit(), -1);
 
         // Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces.
-        finerOp.getFaceCentroidFlux(flux, phiFine[dit()], stripBox, dit(), dir);
+        finerOp.getFaceCentroidFlux(flux, a_phiFine[dit()], stripBox, dit(), dir);
 
         // Increment flux register, recall that beta and the b-coefficient are included in getFaceCentroidFlux.
         m_fluxReg->incrementFineBoth(flux, scale, dit(), m_interval, dir, sit());
@@ -2070,6 +2068,8 @@ EBHelmholtzOp::reflux(LevelData<EBCellFAB>&             a_Lphi,
 
   // This routine computes the fluxes on the coarse and fine-side of the boundary and does a refluxing operation where
   // we subtract the contribution from the coarse grid fluxes in a_Lphi and add in the contribution from the fine grid fluxes.
+  //
+  // Note: The most expensive part of this is incrementFRFine because it will redo the ghost cells on the fine level!
 
   m_fluxReg->setToZero();
 
