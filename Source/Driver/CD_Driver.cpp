@@ -2574,7 +2574,7 @@ void
 Driver::readCheckpointFile(const std::string& a_restartFile)
 {
   CH_TIME("Driver::readCheckpointFile(string)");
-  if (m_verbosity > 3) {
+  if (m_verbosity > 0) {
     pout() << "Driver::readCheckpointFile(string)" << endl;
   }
 
@@ -2694,6 +2694,10 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
 
   // Close input file
   handle_in.close();
+
+  if (m_verbosity > 0) {
+    pout() << "Driver::readCheckpointFile(string) -- DONE!" << endl;
+  }  
 }
 #endif
 
