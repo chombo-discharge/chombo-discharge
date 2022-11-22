@@ -3044,7 +3044,7 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
   auto regularKernel = [&](const IntVect& iv) -> void {
     if (ebisbox.isRegular(iv) && validCells(iv)) {
       const RealVect cellPos       = probLo + a_dx * (RealVect(iv) + 0.5 * RealVect::Unit);
-      const RealVect centroidPos   = cellPos;
+      const RealVect centroidPos   = RealVect::Zero;
       const RealVect lo            = -0.5 * RealVect::Unit;
       const RealVect hi            = 0.5 * RealVect::Unit;
       const RealVect bndryCentroid = RealVect::Zero;
