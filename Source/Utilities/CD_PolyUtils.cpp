@@ -112,7 +112,7 @@ PolyUtils::brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVec
 
       p = Abs(p);
 
-      if (2.0 * p < Min(3.0 * xm * q - Abs(tol1 * q), Abs(e * q))) {
+      if (2.0 * p < std::min((Real)3.0 * xm * q - std::abs(tol1 * q), std::abs(e * q))) {
         // Accept interpolation
         e = d;
         d = p / q;

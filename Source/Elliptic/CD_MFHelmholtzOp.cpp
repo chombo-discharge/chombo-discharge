@@ -925,9 +925,9 @@ MFHelmholtzOp::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
     MultifluidAlias::aliasMF(correction, op.first, a_correction);
     MultifluidAlias::aliasMF(coarseCorrection, op.first, a_coarseCorrection);
 
-    //    op.second->turnOffBCs(); // Don't need to interpolate ghost cells again.
+    //    op.second->turnOffCFInterp(); // Don't need to interpolate ghost cells again.
     op.second->AMRUpdateResidual(residual, correction, coarseCorrection);
-    //    op.second->turnOnBCs();
+    //    op.second->turnOnCFInterp();
   }
 }
 
@@ -1054,9 +1054,15 @@ MFHelmholtzOp::AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
     MultifluidAlias::aliasMF(phi, op.first, a_phi);
     MultifluidAlias::aliasMF(phiCoar, op.first, a_phiCoar);
 
-    op.second->turnOffBCs(); // Don't need to interpolate ghost cells again.
+    op.second->turnOffCFInterp();
+    op.second->turnOffCoarsening();
+    op.second->turnOffExchange();
+
     op.second->AMROperatorNF(Lphi, phi, phiCoar, a_homogeneousPhysBC);
-    op.second->turnOnBCs();
+
+    op.second->turnOffCFInterp();
+    op.second->turnOffCoarsening();
+    op.second->turnOffExchange();
   }
 }
 
@@ -1099,7 +1105,16 @@ MFHelmholtzOp::AMROperatorNC(LevelData<MFCellFAB>&             a_Lphi,
 
     MFHelmholtzOp* finerOp = (MFHelmholtzOp*)(a_finerOp);
 
+    // Don't need to update ghost cells again, coarsen, or exchange data.
+    op.second->turnOffCFInterp();
+    op.second->turnOffCoarsening();
+    op.second->turnOffExchange();
+
     op.second->AMROperatorNC(Lphi, phiFine, phi, a_homogeneousPhysBC, (finerOp->m_helmOps).at(op.first));
+
+    op.second->turnOnCFInterp();
+    op.second->turnOnCoarsening();
+    op.second->turnOnExchange();
   }
 }
 
@@ -1151,9 +1166,16 @@ MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&             a_Lphi,
 
     MFHelmholtzOp* finerOp = (MFHelmholtzOp*)(a_finerOp);
 
-    op.second->turnOffBCs(); // Don't need to interpolate ghost cells again.
+    // Don't need to update ghost cells again, coarsen, or exchange data.
+    op.second->turnOffCFInterp();
+    op.second->turnOffCoarsening();
+    op.second->turnOffExchange();
+
     op.second->AMROperator(Lphi, phiFine, phi, phiCoar, a_homogeneousPhysBC, (finerOp->m_helmOps).at(op.first));
-    op.second->turnOnBCs();
+
+    op.second->turnOnCFInterp();
+    op.second->turnOnCoarsening();
+    op.second->turnOnExchange();
   }
 }
 

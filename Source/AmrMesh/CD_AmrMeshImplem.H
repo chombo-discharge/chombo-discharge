@@ -857,7 +857,7 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
             }
             else {
               // Crashed with domain "first". Safety factor is to prevent particles falling off the high side of the domain
-              const Real sSafety = std::max(0.0, sDomain - safety);
+              const Real sSafety = std::max((Real)0.0, sDomain - safety);
 
               particle.position() = oldPos + sSafety * path;
 
@@ -1010,7 +1010,7 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
             }
             else {
               // Crashed with domain "first".
-              const Real sSafety = std::max(0.0, sDomain - safety);
+              const Real sSafety = std::max((Real)0.0, sDomain - safety);
 
               particle.position() = oldPos + sSafety * path;
 

@@ -23,6 +23,7 @@
 #include <EBFluxRegister.H>
 
 // Our includes
+#include <CD_Timer.H>
 #include <CD_Location.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBCoarAve.H>
@@ -126,7 +127,7 @@ public:
   /*!
     @brief Dtor
   */
-  ~EBHelmholtzOp();
+  virtual ~EBHelmholtzOp();
 
   /*!
     @brief No copy assigment allowed
@@ -146,13 +147,41 @@ public:
     @brief Turn off BCs
   */
   void
-  turnOffBCs();
+  turnOffCFInterp();
 
   /*!
     @brief Turn on BCs
   */
   void
-  turnOnBCs();
+  turnOnCFInterp();
+
+  /*!
+    @brief Turn off exchange operation
+    @note Done when MFHelmholtzOp does the exchange and we don't want EBHelmholtzOp to redo it.
+  */
+  void
+  turnOffExchange();
+
+  /*!
+    @brief Turn on exchange operation
+    @note Done when MFHelmholtzOp does the exchange and we don't want EBHelmholtzOp to redo it.
+  */
+  void
+  turnOnExchange();
+
+  /*!
+    @brief Turn off coarsening operation
+    @note Done when MFHelmholtzOp does the coarsening and we don't want EBHelmholtzOp to redo it.
+  */
+  void
+  turnOffCoarsening();
+
+  /*!
+    @brief Turn on coarsening operation
+    @note Done when MFHelmholtzOp does the coarsening and we don't want EBHelmholtzOp to redo it.
+  */
+  void
+  turnOnCoarsening();
 
   /*!
     @brief Update with new A and B coefficients.
@@ -195,6 +224,16 @@ public:
   */
   void
   coarsen(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiFine);
+
+  /*!
+    @brief Coarsen fluxes on the fine level onto this level. 
+    @details User must update fluxes before calling this routine. 
+    @param[in] a_flux     Flux on this level. 
+    @param[in] a_fineFlux Flux on finer level
+    @note This routine is used in the reflux-free AMROperator
+  */
+  void
+  coarsen(LevelData<EBFluxFAB>& a_flux, const LevelData<EBFluxFAB>& a_fineFlux);
 
   /*!
     @brief Point Jacobi kernel. 
@@ -360,11 +399,26 @@ public:
 
   /*!
     @brief Apply domain flux. 
+    @param[inout] a_phi               Cell data
+    @param[in]    a_cellBox           Computation box
+    @param[in]    a_dit               Data index
+    @param[in]    a_homogeneousPhysBC Homogeneous BC or not
     @note This sets the ghost cells of phi to phi(i-1) = phi(i) + F*dx/bco such that when we take the centered difference we get
     -bco*(phi(i) - phi(i-1))/dx = F. 
   */
   void
   applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
+
+  /*!
+    @brief Fill domain flux. This fills the flux on the domain face using centered differencing ala applyDomainFlux
+    @details a_flux is replaced by the user-specified flux on the domain faces. 
+    @param[inout] a_flux              Flux data holder.
+    @param[inout] a_phi               Cell-centered data
+    @param[in]    a_cellBox           Computation box
+    @param[in]    a_dit               Data index
+  */
+  void
+  fillDomainFlux(EBFluxFAB& a_flux, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit);
 
   /*!
     @brief Apply operator in irregular cells
@@ -509,6 +563,25 @@ public:
               const LevelData<EBCellFAB>&       a_phiCoar,
               const bool                        a_homogeneousPhysBC,
               AMRLevelOp<LevelData<EBCellFAB>>* a_finerOp);
+
+  /*!
+    @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context. 
+    @details This is the reflux-free version of AMROperator.
+    @param[out] a_residual          Residual on this level
+    @param[in]  a_phiFine           Phi on fine level
+    @param[in]  a_phi               Phi on this level
+    @param[in]  a_phiCoar           Phi on coar level
+    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @param[in]  a_finerOp           Finer operatator
+    @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
+  */
+  void
+  refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
+                        const LevelData<EBCellFAB>&       a_phiFine,
+                        const LevelData<EBCellFAB>&       a_phi,
+                        const LevelData<EBCellFAB>&       a_phiCoar,
+                        const bool                        a_homogeneousPhysBC,
+                        AMRLevelOp<LevelData<EBCellFAB>>* a_finerOp);
 
   /*!
     @brief Compute residual on this level. AMR version. 
@@ -702,6 +775,11 @@ protected:
   static constexpr int m_comp = 0;
 
   /*!
+    @brief Timer so user can profile.
+  */
+  Timer m_timer;
+
+  /*!
     @brief Interval
   */
   Interval m_interval;
@@ -715,6 +793,16 @@ protected:
     @brief Data centering
   */
   Location::Cell m_dataLocation;
+
+  /*!
+    @brief Use reflux-free formulation or not
+  */
+  bool m_refluxFree;
+
+  /*!
+    @brief Profile the operator
+  */
+  bool m_profile;
 
   /*!
     @brief True if there is a multigrid level below this operator
@@ -742,9 +830,22 @@ protected:
   int m_refToFine;
 
   /*!
-    @brief Turn off BCs or not. Used in applyOpNoBoundary
+    @brief Do coarse-fine interpolation or not. 
+    @note Used by MFHelmholtzOp for optimizing how calls in EBHelmholtzOp are made
   */
-  int m_turnOffBCs;
+  bool m_doInterpCF;
+
+  /*!
+    @brief Turn on/off exchange operation.
+    @note Used by MFHelmholtzOp for optimizing how calls in EBHelmholtzOp are made
+  */
+  bool m_doExchange;
+
+  /*!
+    @brief Turn on/off exchange operation.
+    @note Used by MFHelmholtzOp for optimizing how calls in EBHelmholtzOp are made
+  */
+  bool m_doCoarsen;
 
   /*!
     @brief Ghost cells for phi
@@ -1064,6 +1165,14 @@ protected:
                           const Box&       a_cellBox,
                           const DataIndex& a_dit,
                           const int        a_dir);
+
+  /*!
+    @brief Fill face centroid-centered fluxes on this level
+    @param[in] a_phi Cell-centered data. Must have updated ghost cells for this to make any sense. 
+    @note This computes the flux onto m_flux everywhere except on boundary faces. 
+  */
+  void
+  computeFlux(const LevelData<EBCellFAB>& a_phi);
 
   /*!
     @brief Increment coarse flux register
