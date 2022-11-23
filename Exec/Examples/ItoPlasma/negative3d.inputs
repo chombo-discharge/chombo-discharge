@@ -1,16 +1,16 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoPlasma.potential = -80E3
+ItoPlasma.potential = -60E3
 ItoPlasma.basename  = pout
 
 # ====================================================================================================
 # AmrMesh class options
 # ====================================================================================================
-AmrMesh.lo_corner        = -5E-2 -5E-2 # Low corner of problem domain
-AmrMesh.hi_corner        =  5E-2  5E-2 # High corner of problem domain
+AmrMesh.lo_corner        = -5E-2 -5E-2 -5E-2 # Low corner of problem domain
+AmrMesh.hi_corner        =  5E-2  5E-2 5E-2 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 128 128     # Number of cells on coarsest domain
+AmrMesh.coarsest_domain  = 64 64 64    # of cells on coarsest domain
 AmrMesh.max_amr_depth    = 5           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
@@ -37,14 +37,14 @@ AmrMesh.redist_radius    = 1           # Redistribution radius for hyperbolic co
 # ====================================================================================================
 Driver.verbosity                       = 2                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
-Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
+Driver.geometry_scan_level             = 2                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
 Driver.plot_interval                   = 10               # Plot interval
 Driver.checkpoint_interval             = 10               # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 2                # Number of initial regrids
+Driver.initial_regrids                 = 0                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
@@ -73,24 +73,24 @@ FieldSolverMultigrid.verbosity         = -1                # Class verbosity
 FieldSolverMultigrid.jump_bc           = natural           # Jump BC type ('natural' or 'saturation_charge')
 FieldSolverMultigrid.bc.x.lo           = neumann 0.0       # Bc type (see docs)
 FieldSolverMultigrid.bc.x.hi           = neumann 0.0       # Bc type (see docs)
-FieldSolverMultigrid.bc.y.lo           = dirichlet 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.y.hi           = dirichlet 1.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.y.lo           = neumann 0.0       # Bc type (see docs)
+FieldSolverMultigrid.bc.y.hi           = neumann 0.0       # Bc type (see docs)
 FieldSolverMultigrid.bc.z.lo           = dirichlet 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.z.hi           = dirichlet 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.z.hi           = dirichlet 1.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
 
 FieldSolverMultigrid.gmg_verbosity     = 10                # GMG verbosity
-FieldSolverMultigrid.gmg_pre_smooth    = 24                # Number of relaxations in downsweep
-FieldSolverMultigrid.gmg_post_smooth   = 24                # Number of relaxations in upsweep
-FieldSolverMultigrid.gmg_bott_smooth   = 24                # Number of at bottom level (before dropping to bottom solver)
+FieldSolverMultigrid.gmg_pre_smooth    = 12                # Number of relaxations in downsweep
+FieldSolverMultigrid.gmg_post_smooth   = 12                # Number of relaxations in upsweep
+FieldSolverMultigrid.gmg_bott_smooth   = 12                # Number of at bottom level (before dropping to bottom solver)
 FieldSolverMultigrid.gmg_min_iter      = 5                 # Minimum number of iterations
 FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2               # Solver hang
-FieldSolverMultigrid.gmg_min_cells     = 4                 # Bottom drop
-FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
+FieldSolverMultigrid.gmg_min_cells     = 4                  # Bottom drop
+FieldSolverMultigrid.gmg_drop_order    = 0                # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2                 # Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight     = 2                 # Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order    = 2                 # Boundary condition order for jump conditions
@@ -108,7 +108,7 @@ ItoSolver.plt_vars            = phi vel dco   # 'phi', 'vel', 'dco', 'part', 'eb
 ItoSolver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
 ItoSolver.normal_max          = 5.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
 ItoSolver.redistribute        = false          # Turn on/off redistribution. 
-ItoSolver.blend_conservation  = false          # Turn on/off blending with nonconservative divergenceo
+ItoSolver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
 ItoSolver.checkpointing       = particles     # 'particles' or 'numbers'
 ItoSolver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
 ItoSolver.irr_ngp_deposition  = false         # Force irregular deposition in cut cells or not
@@ -127,7 +127,7 @@ McPhoto.instantaneous      = true          # Instantaneous transport or not
 McPhoto.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical photons)
 McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
 McPhoto.random_kappa       = true          # Randomize absorption length (taken from Photon implementation)
-McPhoto.plt_vars           = phi src_phot  # Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot', 'src_phot'
+McPhoto.plt_vars           = phi src phot  # Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot', 'src_phot'
 McPhoto.plot_deposition    = cic           # Cloud-in-cell for plotting particles. 
 McPhoto.intersection_alg   = bisection     # EB intersection algorithm. Supported are: 'raycast' 'bisection'
 McPhoto.bisect_step        = 1.E-4         # Bisection step length for intersection tests
@@ -161,18 +161,18 @@ SurfaceODESolver.plt_vars  = phi               # Plot variables. Valid arguments
 # GeoCoarsener class options
 # ====================================================================================================
 GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
-GeoCoarsener.box1_lo     = -1.0 1.0 1E-3  # Remove irregular cell tags 
+GeoCoarsener.box1_lo     = -1.0 -1.0 500E-6 # Remove irregular cell tags 
 GeoCoarsener.box1_hi     = 1.0 1.0 1.0  # between these two corners
-GeoCoarsener.box1_lvl    = 2            # up to this level
+GeoCoarsener.box1_lvl    = 3            # up to this level
 GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
 # RodDielectric geometry class options
 # ====================================================================================================
 RodDielectric.electrode.on              = true          # Use electrode or not
-RodDielectric.electrode.endpoint1       = 0 0           # One endpoint
-RodDielectric.electrode.endpoint2       = 0 1           # Other endpoint
-RodDielectric.electrode.radius          = 250E-6        # Electrode radius
+RodDielectric.electrode.endpoint1       = 0 0 0           # One endpoint
+RodDielectric.electrode.endpoint2       = 0 0 1           # Other endpoint
+RodDielectric.electrode.radius          = 500E-6        # Electrode radius
 RodDielectric.electrode.live            = true          # Live or not
 
 RodDielectric.dielectric.on             = false         # Use dielectric or not
@@ -210,7 +210,7 @@ ItoPlasmaGodunovStepper.verbosity               = -1             # Verbosity
 ItoPlasmaGodunovStepper.profile                 = true           # Turn on/off run-time profiling
 ItoPlasmaGodunovStepper.plt_vars                = none           # 'conductivity', 'current_density', 'particles_per_patch'
 ItoPlasmaGodunovStepper.dual_grid               = true           # Turn on/off dual-grid functionality
-ItoPlasmaGodunovStepper.load_balance_fluid      = true           # Turn on/off fluid realm load balancing. 
+ItoPlasmaGodunovStepper.load_balance_fluid      = false          # Turn on/off fluid realm load balancing. 
 ItoPlasmaGodunovStepper.load_balance_particles  = true           # Turn on/off particle load balancing
 ItoPlasmaGodunovStepper.load_indices            = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoPlasmaGodunovStepper.load_per_cell           = 1.0            # Default load per grid cell.
@@ -218,12 +218,12 @@ ItoPlasmaGodunovStepper.box_sorting             = morton         # Box sorting w
 ItoPlasmaGodunovStepper.particles_per_cell      = 32             # Max computational particles per cell
 ItoPlasmaGodunovStepper.merge_interval          = 1              # Time steps between superparticle merging
 ItoPlasmaGodunovStepper.regrid_superparticles   = true           # Make superparticles during regrids
-ItoPlasmaGodunovStepper.advection_cfl           = 1.0           # Advective time step CFL restriction
-ItoPlasmaGodunovStepper.diffusion_cfl           = 100.0          # Diffusive time step CFL restriction
-ItoPlasmaGodunovStepper.advection_diffusion_cfl = 100.0          # Advection-diffusion time step CFL restriction
+ItoPlasmaGodunovStepper.advection_cfl           = 1.0            # Advective time step CFL restriction
+ItoPlasmaGodunovStepper.diffusion_cfl           = 1.0            # Diffusive time step CFL restriction
+ItoPlasmaGodunovStepper.advection_diffusion_cfl = 1.0            # Advection-diffusion time step CFL restriction
 ItoPlasmaGodunovStepper.relax_dt_factor         = 500.           # Relaxation time step restriction. 
 ItoPlasmaGodunovStepper.min_dt                  = 0.0            # Minimum permitted time step
-ItoPlasmaGodunovStepper.max_dt                  = 1.E99          # Maximum permitted time step
+ItoPlasmaGodunovStepper.max_dt                  = 1.0            # Maximum permitted time step
 ItoPlasmaGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
 ItoPlasmaGodunovStepper.algorithm               = euler_maruyama # Integration algorithm. 'euler_maruyama' or 'trapezoidal'
 
@@ -242,17 +242,17 @@ ItoPlasmaAir3LFA.init_radius     = 500E-6        # Blob radius
 ItoPlasmaAir3LFA.dX              = 50.0           # Maximum relative change Xnew/Xold during one time step.
 
 # Ion transport settings. 
-ItoPlasmaAir3LFA.ion_transport   = true         # By default, stationary ions. 
+ItoPlasmaAir3LFA.ion_transport   = false         # By default, stationary ions. 
 ItoPlasmaAir3LFA.ion_mobility    = 2E-4          # Turn on/off ion mobility
 
 # Kinetic Monte Carlo solver settings.
-ItoPlasmaAir3LFA.max_new_particles = 32          # Maximum number of computational particles to produce in reaction step
-ItoPlasmaAir3LFA.max_new_photons   = 32         # Maximum number of computational photons to produce in reaction step	
-ItoPlasmaAir3LFA.Ncrit          = 10             # How many firings away from a Negative particle number?
-ItoPlasmaAir3LFA.prop_eps       = 1.E99          # Maximum relative change in propensity function
-ItoPlasmaAir3LFA.NSSA           = 10             # How many SSA steps to run when tau-leaping is inefficient
-ItoPlasmaAir3LFA.SSAlim         = 10.0           # When to enter SSA instead of tau-leaping
-ItoPlasmaAir3LFA.algorithm      = hybrid         # 'tau', 'ssa', or 'hybrid'
+ItoPlasmaAir3LFA.max_new_particles = 256         # Maximum number of computational particles to produce in reaction step
+ItoPlasmaAir3LFA.max_new_photons   = 1024        # Maximum number of computational photons to produce in reaction step	
+ItoPlasmaAir3LFA.Ncrit             = 5           # How many firings away from a Negative particle number?
+ItoPlasmaAir3LFA.prop_eps          = 1.E99       # Maximum relative change in propensity function
+ItoPlasmaAir3LFA.NSSA              = 10          # How many SSA steps to run when tau-leaping is inefficient
+ItoPlasmaAir3LFA.SSAlim            = 1.0         # When to enter SSA instead of tau-leaping
+ItoPlasmaAir3LFA.algorithm         = hybrid      # 'tau', 'ssa', or 'hybrid'
 
 # Photoionization parameters
 ItoPlasmaAir3LFA.quenching_pressure = 0.03947    # Quenching pressure for photo-emission (atm)
@@ -267,13 +267,13 @@ ItoPlasmaAir3LFA.photoi_K2          = 1.5        # Converted to (mPa)^-1
 # ====================================================================================================
 ItoPlasmaStreamerTagger.verbosity         = -1           # Verbosity
 ItoPlasmaStreamerTagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
-ItoPlasmaStreamerTagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
-ItoPlasmaStreamerTagger.box1_hi           = 0.0 0.0 0.0  # these two corners
-ItoPlasmaStreamerTagger.buffer            = 4           # Grow tagged cells
+ItoPlasmaStreamerTagger.box1_lo           = -1 -1 3E-3  # Only allow tags that fall between
+ItoPlasmaStreamerTagger.box1_hi           = 1 1 1  # these two corners
+ItoPlasmaStreamerTagger.buffer            = 8            # Grow tagged cells
 
 ItoPlasmaStreamerTagger.refine_curvature  = 100000.0     # Curvature refinement
 ItoPlasmaStreamerTagger.coarsen_curvature = 100000.0     # Curvature coarsening	
 ItoPlasmaStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
-ItoPlasmaStreamerTagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
-ItoPlasmaStreamerTagger.max_coarsen_lvl   = 4            # Set max coarsening depth
+ItoPlasmaStreamerTagger.coarsen_alpha     = 0.2          # Set alpha coarsening. Higher => Less mesh
+ItoPlasmaStreamerTagger.max_coarsen_lvl   = 3            # Set max coarsening depth
 
