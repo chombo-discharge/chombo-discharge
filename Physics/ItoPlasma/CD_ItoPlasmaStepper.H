@@ -835,6 +835,23 @@ namespace Physics {
                          const Real       a_dx) noexcept;
 
       /*!
+	@brief Resolve particle injection at EBs.
+	@param[in] a_dt Time step.
+	@note Calls the other version.
+      */
+      virtual void
+      injectParticlesEB(const Real a_dt) noexcept;
+
+      /*!
+	@brief Resolve particle injection at EBs.
+	@param[in] a_dt Time step
+      */
+      virtual void
+      injectParticlesEB(Vector<ParticleContainer<ItoParticle>*>& a_particles,
+                        Vector<ParticleContainer<Photon>*>&      a_photons,
+                        const Real                               a_dt) noexcept;
+
+      /*!
 	@brief Compute a maximum time step from the physics interface.
 	@note Calls the other version with m_electricFieldParticle and the ItoSolver densities. The kernels are only
 	called on the valid region.

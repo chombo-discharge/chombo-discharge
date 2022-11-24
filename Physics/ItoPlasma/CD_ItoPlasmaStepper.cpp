@@ -3179,6 +3179,61 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
   BoxLoops::loop(vofit, irregularKernel);
 }
 
+void
+ItoPlasmaStepper::injectParticlesEB(const Real a_dt) noexcept
+{
+  CH_TIME("ItoPlasmaStepper::injectParticlesEB(Real)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::injectParticlesEB(Real)" << endl;
+  }
+
+  // Get the intersected particles
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
+
+  Vector<ParticleContainer<ItoParticle>*> intersectedParticlesAMR;
+  Vector<ParticleContainer<Photon>*> intersectedPhotonsAMR;
+
+  // Build list of particles and photons that hit the EB, and organize them by cell. 
+  for (auto it = m_ito->iterator(); it.ok(); ++it) {
+    ParticleContainer<ItoParticle>& intersectedParticles = it()->getParticles(ItoSolver::WhichContainer::EB);
+
+    intersectedParticles.organizeParticlesByCell();
+
+    intersectedParticlesAMR.push_back(&intersectedParticles);
+  }
+
+  for (auto it = m_rte->iterator(); it.ok(); ++it) {
+    ParticleContainer<Photon>& intersectedPhotons = it()->getEbPhotons();
+
+    intersectedPhotons.organizeParticlesByCell();
+
+    intersectedPhotonsAMR.push_back(&intersectedPhotons);
+  }
+
+  // Call the other version.
+  this->injectParticlesEB(intersectedParticlesAMR, intersectedPhotonsAMR, a_dt);
+}
+
+void
+ItoPlasmaStepper::injectParticlesEB(Vector<ParticleContainer<ItoParticle>*>& a_particles,
+                                    Vector<ParticleContainer<Photon>*>&      a_photons,
+                                    const Real                               a_dt) noexcept
+{
+  CH_TIME("ItoPlasmaStepper::injectParticlesEB(Vector<ParticleContainer>x2, Real)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::injectParticlesEB(Vector<ParticleContainer>x2, Real)" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      MayDay::Abort("ItoPlasmaStepper::injectParticlesEB -- need to stop here for now");
+    }
+  }
+}
+
 Real
 ItoPlasmaStepper::computePhysicsDt() noexcept
 {
