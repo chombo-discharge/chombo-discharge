@@ -3108,7 +3108,7 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
     const IntVect iv = vof.gridIndex();
     if (ebisbox.isIrregular(iv) && validCells(iv, 0)) {
       const Real     kappa         = ebisbox.volFrac(vof);
-      const RealVect cellPos       = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, a_dx);
+      const RealVect cellPos       = probLo + Location::position(Location::Cell::Center, vof, ebisbox, a_dx);
       const RealVect centroidPos   = ebisbox.centroid(vof);
       const RealVect bndryCentroid = ebisbox.bndryCentroid(vof);
       const RealVect bndryNormal   = ebisbox.normal(vof);
