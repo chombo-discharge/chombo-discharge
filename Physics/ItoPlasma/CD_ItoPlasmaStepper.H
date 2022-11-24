@@ -849,6 +849,7 @@ namespace Physics {
       virtual void
       injectParticlesEB(Vector<ParticleContainer<ItoParticle>*>& a_particles,
                         Vector<ParticleContainer<Photon>*>&      a_photons,
+			const EBAMRCellData&                     a_electricField,
                         const Real                               a_dt) noexcept;
 
       /*!
