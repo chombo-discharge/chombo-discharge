@@ -3180,11 +3180,11 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
 }
 
 void
-ItoPlasmaStepper::injectParticlesEB(const Real a_dt) noexcept
+ItoPlasmaStepper::resolveParticlesEB(const Real a_dt) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::injectParticlesEB(Real)");
+  CH_TIME("ItoPlasmaStepper::resolveParticlesEB(Real)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::injectParticlesEB(Real)" << endl;
+    pout() << m_name + "::resolveParticlesEB(Real)" << endl;
   }
 
   // Get the intersected particles
@@ -3208,36 +3208,41 @@ ItoPlasmaStepper::injectParticlesEB(const Real a_dt) noexcept
   }
 
   // Call the other version.
-  this->injectParticlesEB(intersectedParticlesAMR, intersectedPhotonsAMR, m_electricFieldParticle, a_dt);
+  this->resolveParticlesEB(intersectedParticlesAMR, intersectedPhotonsAMR, m_electricFieldParticle, a_dt);
 }
 
 void
-ItoPlasmaStepper::injectParticlesEB(Vector<ParticleContainer<ItoParticle>*>& a_particles,
-                                    Vector<ParticleContainer<Photon>*>&      a_photons,
-                                    const EBAMRCellData&                     a_electricField,
-                                    const Real                               a_dt) noexcept
+ItoPlasmaStepper::resolveParticlesEB(Vector<ParticleContainer<ItoParticle>*>& a_inOutParticles,
+                                     Vector<ParticleContainer<Photon>*>&      a_inOutPhotons,
+                                     const EBAMRCellData&                     a_electricField,
+                                     const Real                               a_dt) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::injectParticlesEB(Vector<ParticleContainer>x2, Real)");
+  CH_TIME("ItoPlasmaStepper::resolveParticlesEB(Vector<ParticleContainer>x2, Real)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::injectParticlesEB(Vector<ParticleContainer>x2, Real)" << endl;
+    pout() << m_name + "::resolveParticlesEB(Vector<ParticleContainer>x2, Real)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
   const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
   CH_assert(a_electricField.getRealm() == m_particleRealm);
-  CH_assert(a_particles.size() == numPlasmaSpecies);
-  CH_assert(a_photons.size() == numPhotonSpecies);
+  CH_assert(a_inOutParticles.size() == numPlasmaSpecies);
+  CH_assert(a_inOutPhotons.size() == numPhotonSpecies);
 
   // Sort incoming containers by celll
   for (int i = 0; i < numPlasmaSpecies; i++) {
-    a_particles[i]->organizeParticlesByCell();
+    a_inOutParticles[i]->organizeParticlesByCell();
   }
   for (int i = 0; i < numPhotonSpecies; i++) {
-    a_photons[i]->organizeParticlesByCell();
+    a_inOutPhotons[i]->organizeParticlesByCell();
   }
 
   const RealVect probLo = m_amr->getProbLo();
+
+  const Vector<Electrode>&  electrodes  = m_computationalGeometry->getElectrodes();
+  const Vector<Dielectric>& dielectrics = m_computationalGeometry->getDielectrics();
+
+  bool isDielectric = false;
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_particleRealm)[lvl];
@@ -3245,35 +3250,94 @@ ItoPlasmaStepper::injectParticlesEB(Vector<ParticleContainer<ItoParticle>*>& a_p
     const Real               dx    = m_amr->getDx()[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox&   ebisbox       = ebisl[dit()];
-      const EBCellFAB& electricField = (*a_electricField[lvl])[dit()];
+      const EBISBox&       ebisbox       = ebisl[dit()];
+      const EBCellFAB&     electricField = (*a_electricField[lvl])[dit()];
+      const BaseFab<bool>& validCells    = (*m_amr->getValidCells(m_particleRealm)[lvl])[dit()];
 
       Vector<BinFab<ItoParticle>*> cellParticles;
       Vector<BinFab<Photon>*>      cellPhotons;
 
       for (auto it = m_ito->iterator(); it.ok(); ++it) {
-        cellParticles.push_back(&(a_particles[it.index()]->getCellParticles(lvl)[dit()]));
+        cellParticles.push_back(&(a_inOutParticles[it.index()]->getCellParticles(lvl)[dit()]));
       }
 
       for (auto it = m_rte->iterator(); it.ok(); ++it) {
-        cellPhotons.push_back(&(a_photons[it.index()]->getCellParticles(lvl)[dit()]));
+        cellPhotons.push_back(&(a_inOutPhotons[it.index()]->getCellParticles(lvl)[dit()]));
       }
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
-        const RealVect E = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-        const RealVect bndryNormal   = ebisbox.normal(vof);
-        const RealVect bndryCentroid = ebisbox.bndryCentroid(vof);
-        const RealVect cellCentroid  = ebisbox.centroid(vof);
-        const RealVect cellCenter    = probLo + Location::position(Location::Cell::Center, vof, ebisbox, dx);
-        const Real     bndryArea     = ebisbox.bndryArea(vof);
+        const IntVect iv = vof.gridIndex();
 
-        Vector<List<ItoParticle>> outgoingParticles(numPlasmaSpecies);
-        Vector<List<ItoParticle>> incomingParticles(numPlasmaSpecies);
+        if (validCells(iv, 0)) {
+          const RealVect E = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+          const RealVect bndryNormal   = ebisbox.normal(vof);
+          const RealVect bndryCentroid = ebisbox.bndryCentroid(vof);
+          const RealVect cellCentroid  = ebisbox.centroid(vof);
+          const RealVect cellCenter    = probLo + Location::position(Location::Cell::Center, vof, ebisbox, dx);
+          const RealVect physPos       = cellCenter + bndryCentroid * dx;
+          const Real     bndryArea     = ebisbox.bndryArea(vof);
 
-        Vector<List<Photon>> outgoingPhotons(numPhotonSpecies);
-        Vector<List<Photon>> incomingPhotons(numPhotonSpecies);
+          Vector<List<ItoParticle>> outgoingParticles(numPlasmaSpecies);
+          Vector<List<ItoParticle>> incomingParticles(numPlasmaSpecies);
 
-        for (int i = 0; i < numPlasmaSpecies; i++) {
+          Vector<List<Photon>> outgoingPhotons(numPhotonSpecies);
+          Vector<List<Photon>> incomingPhotons(numPhotonSpecies);
+
+          for (int i = 0; i < numPlasmaSpecies; i++) {
+            outgoingParticles[i] = (*cellParticles[i])(iv, 0);
+          }
+
+          for (int i = 0; i < numPhotonSpecies; i++) {
+            outgoingPhotons[i] = (*cellPhotons[i])(iv, 0);
+          }
+
+          // Figure out which material we are dealing with.
+          int  matIndex = -1;
+          Real minDist  = std::numeric_limits<Real>::max();
+
+          for (int i = 0; i < electrodes.size(); i++) {
+            const Real curDist = electrodes[i].getImplicitFunction()->value(physPos);
+
+            if (std::abs(curDist) < std::abs(minDist)) {
+              minDist  = curDist;
+              matIndex = i;
+            }
+          }
+
+          for (int i = 0; i < dielectrics.size(); i++) {
+            const Real curDist = dielectrics[i].getImplicitFunction()->value(physPos);
+
+            if (std::abs(curDist) < std::abs(minDist)) {
+              minDist      = curDist;
+              matIndex     = i;
+              isDielectric = true;
+            }
+          }
+
+          // Call the physics framework.
+          m_physics->injectParticlesEB(incomingParticles,
+                                       incomingPhotons,
+                                       outgoingParticles,
+                                       outgoingPhotons,
+                                       E,
+                                       cellCenter,
+                                       cellCentroid,
+                                       bndryCentroid,
+                                       bndryNormal,
+                                       bndryArea,
+                                       dx,
+                                       a_dt,
+                                       isDielectric,
+                                       matIndex);
+
+          // Populate containers with incoming particles and photons
+          for (int i = 0; i < numPlasmaSpecies; i++) {
+            (*cellParticles[i])(iv, 0) = incomingParticles[i];
+          }
+
+          for (int i = 0; i < numPhotonSpecies; i++) {
+            (*cellPhotons[i])(iv, 0) = incomingPhotons[i];
+          }
         }
       };
 
@@ -3285,10 +3349,44 @@ ItoPlasmaStepper::injectParticlesEB(Vector<ParticleContainer<ItoParticle>*>& a_p
 
   // Organize by patch
   for (int i = 0; i < numPlasmaSpecies; i++) {
-    a_particles[i]->organizeParticlesByPatch();
+    a_inOutParticles[i]->organizeParticlesByPatch();
   }
   for (int i = 0; i < numPhotonSpecies; i++) {
-    a_photons[i]->organizeParticlesByPatch();
+    a_inOutPhotons[i]->organizeParticlesByPatch();
+  }
+}
+
+void
+ItoPlasmaStepper::injectParticlesEB() noexcept
+{
+  CH_TIME("ItoPlasmaStepper::injectParticlesEB()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::injectParticlesEB()" << endl;
+  }
+
+  Vector<ParticleContainer<ItoParticle>*> bulkParticles = m_ito->getParticles(ItoSolver::WhichContainer::Bulk);
+  Vector<ParticleContainer<ItoParticle>*> ebParticles   = m_ito->getParticles(ItoSolver::WhichContainer::EB);
+
+  // Transfer particles from the EB container to the bulk particle container.
+  this->injectParticlesEB(bulkParticles, ebParticles);
+}
+
+void
+ItoPlasmaStepper::injectParticlesEB(Vector<ParticleContainer<ItoParticle>*> a_bulkParticles,
+                                    Vector<ParticleContainer<ItoParticle>*> a_injectedParticles) noexcept
+{
+  CH_TIME("ItoPlasmaStepper::injectParticlesEB(Vector<ParticleContainer<ItoParticle>*>x2)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::injectParticlesEB(Vector<ParticleContainer<ItoParticle>*>x2)" << endl;
+  }
+
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+
+  CH_assert(a_bulkParticles.size() == numPlasmaSpecies);
+  CH_assert(a_injectedParticles.size() == numPlasmaSpecies);
+
+  for (int i = 0; i < numPlasmaSpecies; i++) {
+    a_bulkParticles[i]->transferParticles(*a_injectedParticles[i]);
   }
 }
 

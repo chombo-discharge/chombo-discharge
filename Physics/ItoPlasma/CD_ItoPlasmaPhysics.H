@@ -152,6 +152,40 @@ namespace Physics {
       computeItoDiffusion(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept = 0;
 
       /*!
+	@brief Resolve particle and photon injection at the EB.
+	@details Routine is here to handle charge injection, secondary emission etc.
+	@param[out] a_outgoingParticles Outgoing plasma species particles. 
+	@param[out] a_outgoingPhotons   Photons injected through the EB
+	@param[in]  a_incomingParticles Particles that left the computational domain through the EB
+	@param[in]  a_incomingPhotons   Photons that left the computational domain through the EB
+	@param[in]  a_electricField     Electric field                  
+	@param[in]  a_cellCenter        Physical position of the cell center. 
+	@param[in]  a_cellCentroid      Cell centroid relative to the cell center (not multiplied by dx)
+	@param[in]  a_bndryCentroid     EB face centroid relative to the cell center (not multiplied by dx)
+	@param[in]  a_bndryNormal       Cut-cell normal vector. 
+	@param[in]  a_bndryArea         Cut-cell boundary area - not multiplied by dx (2D) or dx^2 (3D)
+	@param[in]  a_dx                Grid resolution on this level. 
+	@param[in]  a_dt                Time step
+	@param[in]  a_isDielectric      Dielectric or electrode. 
+	@param[in]  a_matIndex          Material index (taken from computationalGeometry)
+      */
+      virtual void
+      injectParticlesEB(Vector<List<ItoParticle>>&       a_outgoingParticles,
+                        Vector<List<Photon>>&            a_outgoingPhotons,
+                        const Vector<List<ItoParticle>>& a_incomingParticles,
+                        const Vector<List<Photon>>&      a_incomingPhotons,
+                        const RealVect&                  a_E,
+                        const RealVect&                  a_cellCenter,
+                        const RealVect&                  a_cellCentroid,
+                        const RealVect&                  a_bndryCentroid,
+                        const RealVect&                  a_bndryNormal,
+                        const Real                       a_bndryArea,
+                        const Real                       a_dx,
+                        const Real                       a_dt,
+                        const bool                       a_isDielectric,
+                        const int                        a_matIndex) const noexcept = 0;
+
+      /*!
 	@brief Advance particles. 
 	@param[inout] a_numParticles  Number of physical particles
 	@param[out]   a_numNewPhotons Number of new physical photons to generate (of each type)
@@ -247,6 +281,25 @@ namespace Physics {
       };
 
       /*!
+	@brief Enum for switching between various particle placement algorithms
+      */
+      enum class ParticlePlacement
+      {
+        Random,
+        Centroid
+      };
+
+      /*!
+	@brief Algorithm to use for KMC advance
+      */
+      Algorithm m_algorithm;
+
+      /*!
+	@brief Particle placement algorithm
+      */
+      ParticlePlacement m_particlePlacement;
+
+      /*!
 	@brief Class name. Used for options parsing
       */
       std::string m_className;
@@ -255,11 +308,6 @@ namespace Physics {
 	@brief Turn on/off debugging
       */
       bool m_debug;
-
-      /*!
-	@brief Algorithm to use for KMC advance
-      */
-      Algorithm m_algorithm;
 
       /*!
 	@brief Kinetic Monte Carlo state

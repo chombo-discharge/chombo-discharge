@@ -2697,7 +2697,7 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
 
   if (m_verbosity > 0) {
     pout() << "Driver::readCheckpointFile(string) -- DONE!" << endl;
-  }  
+  }
 }
 #endif
 

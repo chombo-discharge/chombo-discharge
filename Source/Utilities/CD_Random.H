@@ -67,10 +67,20 @@ public:
 
   /*!
     @brief Get Poisson distributed number
+    @param[in] a_mean Poisson mean value (inverse rate)
   */
   template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   inline static T
   getPoisson(const Real a_mean);
+
+  /*!
+    @brief Get Poisson distributed number. 
+    @param[in] a_N Number of trials
+    @param[in] a_p The usual success probability in binomial distributions
+  */
+  template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+  inline static T
+  getBinomial(const T a_N, const Real a_p) noexcept;
 
   /*!
     @brief Get a uniform real number on the interval [0,1]

@@ -840,17 +840,31 @@ namespace Physics {
 	@note Calls the other version.
       */
       virtual void
-      injectParticlesEB(const Real a_dt) noexcept;
+      resolveParticlesEB(const Real a_dt) noexcept;
 
       /*!
 	@brief Resolve particle injection at EBs.
 	@param[in] a_dt Time step
       */
       virtual void
-      injectParticlesEB(Vector<ParticleContainer<ItoParticle>*>& a_particles,
-                        Vector<ParticleContainer<Photon>*>&      a_photons,
-			const EBAMRCellData&                     a_electricField,
-                        const Real                               a_dt) noexcept;
+      resolveParticlesEB(Vector<ParticleContainer<ItoParticle>*>& a_inOutParticles,
+                         Vector<ParticleContainer<Photon>*>&      a_inOutPhotons,
+                         const EBAMRCellData&                     a_electricField,
+                         const Real                               a_dt) noexcept;
+
+      /*!
+	@brief Inject particles through the EB
+	@note Calls the other version with solver containers. 
+      */
+      virtual void
+      injectParticlesEB() noexcept;
+
+      /*!
+	@brief Inject particles through the EB
+      */
+      virtual void
+      injectParticlesEB(Vector<ParticleContainer<ItoParticle>*> a_bulkParticles,
+                        Vector<ParticleContainer<ItoParticle>*> a_injectedParticles) noexcept;
 
       /*!
 	@brief Compute a maximum time step from the physics interface.

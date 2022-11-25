@@ -127,6 +127,7 @@ ItoPlasmaAir3LFA::parseRuntimeOptions() noexcept
   this->parseDebug();
   this->parseAlgorithm();
   this->parseDx();
+  this->parseTransport();
 }
 
 void
@@ -150,6 +151,11 @@ ItoPlasmaAir3LFA::parseTransport() noexcept
   pp.get("quenching_pressure", m_pq);
   pp.get("photoi_factor", m_photoIonizationFactor);
   pp.get("ion_mobility", m_ionMobility);
+  pp.get("impact_efficiency", m_ionImpactEfficiency);
+  pp.get("quantum_efficiency", m_quantumEfficiency);
+
+  m_ionImpactEfficiency = std::max(m_ionImpactEfficiency, 0.0);
+  m_ionImpactEfficiency = std::min(m_ionImpactEfficiency, 1.0);
 }
 
 void
@@ -237,6 +243,54 @@ ItoPlasmaAir3LFA::computeItoDiffusion(const Real a_time, const RealVect a_pos, c
   D[2] = m_ionDiffCo;
 
   return D;
+}
+
+void
+ItoPlasmaAir3LFA::injectParticlesEB(Vector<List<ItoParticle>>&       a_incomingParticles,
+                                    Vector<List<Photon>>&            a_incomingPhotons,
+                                    const Vector<List<ItoParticle>>& a_outgoingParticles,
+                                    const Vector<List<Photon>>&      a_outgoingPhotons,
+                                    const RealVect&                  a_E,
+                                    const RealVect&                  a_cellCenter,
+                                    const RealVect&                  a_cellCentroid,
+                                    const RealVect&                  a_bndryCentroid,
+                                    const RealVect&                  a_bndryNormal,
+                                    const Real                       a_bndryArea,
+                                    const Real                       a_dx,
+                                    const Real                       a_dt,
+                                    const bool                       a_isDielectric,
+                                    const int                        a_matIndex) const noexcept
+{
+  CH_TIME("ItoPlasmaAir3LFA::injectParticlesEB");
+
+  const bool isCathode = a_E.dotProduct(a_bndryNormal) < 0.0;
+  const bool isAnode   = a_E.dotProduct(a_bndryNormal) > 0.0;
+
+  const RealVect bndryPos = a_cellCenter + a_dx * a_bndryCentroid;
+
+  if (isCathode) {
+    List<ItoParticle>&       ingoingElectrons = a_incomingParticles[0];
+    const List<ItoParticle>& outgoingIons     = a_outgoingParticles[1];
+    const List<Photon>&      outgoingPhotons  = a_outgoingPhotons[0];
+
+    // SEE from ion impact
+    for (ListIterator<ItoParticle> lit(outgoingIons); lit.ok(); ++lit) {
+      const long long success = Random::getBinomial<long long>(llround(lit().weight()), m_ionImpactEfficiency);
+      if (success > 0LL) {
+        ingoingElectrons.add(ItoParticle(1.0 * success, bndryPos));
+      }
+    }
+
+    // SEE from photo-electric effect
+    for (ListIterator<Photon> lit(outgoingPhotons); lit.ok(); ++lit) {
+      const long long success = Random::getBinomial<long long>(llround(lit().weight()), m_quantumEfficiency);
+      if (success > 0LL) {
+        ingoingElectrons.add(ItoParticle(1.0 * success, bndryPos));
+      }
+    }
+  }
+  else if (isAnode) {
+  }
 }
 
 void

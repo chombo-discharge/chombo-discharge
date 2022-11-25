@@ -12,6 +12,9 @@
 #ifndef CD_ItoPlasmaPhysicsImplem_H
 #define CD_ItoPlasmaPhysicsImplem_H
 
+// Chombo includes
+#include <ParmParse.H>
+
 // Our includes
 #include <CD_ItoPlasmaPhysics.H>
 #include <CD_ParticleManagement.H>
@@ -31,14 +34,25 @@ inline ItoPlasmaPhysics::ItoPlasmaPhysics()
   m_photoReactions.clear();
 
   // Some default settings in case user forgets to call the parsing algorithms.
-  m_debug           = true;
-  m_maxNewParticles = 32;
-  m_maxNewPhotons   = 32;
-  m_Ncrit           = 5;
-  m_eps             = 0.1;
-  m_NSSA            = 10;
-  m_SSAlim          = 5.0;
-  m_algorithm       = Algorithm::Hybrid;
+  m_debug             = true;
+  m_maxNewParticles   = 32;
+  m_maxNewPhotons     = 32;
+  m_Ncrit             = 5;
+  m_eps               = 0.1;
+  m_NSSA              = 10;
+  m_SSAlim            = 5.0;
+  m_algorithm         = Algorithm::Hybrid;
+  m_particlePlacement = ParticlePlacement::Random;
+
+  // Development code for switching to centroid for secondary emission. To be removed later.
+#if 1
+  bool      useCentroid = false;
+  ParmParse pp("ItoPlasmaPhysics");
+  pp.query("use_centroid", useCentroid);
+  if (useCentroid) {
+    m_particlePlacement = ParticlePlacement::Centroid;
+  }
+#endif
 }
 
 inline ItoPlasmaPhysics::~ItoPlasmaPhysics() { CH_TIME("ItoPlasmaPhysics::~ItoPlasmaPhysics"); }
@@ -246,11 +260,30 @@ ItoPlasmaPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
 
     if (diff > 0LL) {
       // Adding particles, which is fairly simple. Just choose weights for the particles and go.
-      std::vector<long long> particleWeights =
+      const std::vector<long long> particleWeights =
         ParticleManagement::partitionParticleWeights(diff, (long long)m_maxNewParticles);
 
       for (const auto& w : particleWeights) {
-        const RealVect x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+        RealVect x = RealVect::Zero;
+
+        // Figure out where to place the particles.
+        switch (m_particlePlacement) {
+        case ParticlePlacement::Random: {
+          x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+
+          break;
+        }
+        case ParticlePlacement::Centroid: {
+          x = a_cellPos + a_centroidPos * a_dx;
+
+          break;
+        }
+        default: {
+          MayDay::Error("ItoPlasmaPhysics::reconcileParticles - logic bust");
+
+          break;
+        }
+        }
 
         a_particles[i]->add(ItoParticle(1.0 * w, x));
       }

@@ -103,6 +103,32 @@ Random::getPoisson(const Real a_mean)
   return ret;
 }
 
+template <typename T, typename>
+inline T
+Random::getBinomial(const T a_N, const Real a_p) noexcept
+{
+  CH_assert(s_seeded);
+
+  T ret = 0;
+
+  const bool useNormalApprox = (a_N > (T)9.0 * ((1.0 - a_p) / a_p)) && (a_N > (T)9.0 * a_p / (1.0 - a_p));
+
+  if (useNormalApprox) {
+    const Real mean = a_N * a_p;
+
+    std::normal_distribution<Real> normalDist(mean, mean * (1.0 - a_p));
+
+    ret = (T)std::max(normalDist(s_rng), (Real)0.0);
+  }
+  else {
+    std::binomial_distribution<T> binomDist(a_N, a_p);
+
+    ret = binomDist(s_rng);
+  }
+
+  return ret;
+}
+
 inline Real
 Random::getUniformReal01()
 {
