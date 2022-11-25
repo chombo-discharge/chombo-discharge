@@ -193,6 +193,12 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   this->injectParticlesEB();
   m_timer.stopEvent("EB particle injection");
 
+  // Remove particles that are inside the EB.
+  this->barrier();
+  m_timer.startEvent("Remove covered");
+  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_toleranceEB);
+  m_timer.stopEvent("Remove covered");
+
   // Sort the particles and photons per cell so we can call reaction algorithms
   this->barrier();
   m_timer.startEvent("Sort by cell");
@@ -222,12 +228,6 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
   m_timer.stopEvent("Sort by patch");
-
-  // Remove particles that are inside the EB.
-  this->barrier();
-  m_timer.startEvent("Remove covered");
-  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_toleranceEB);
-  m_timer.stopEvent("Remove covered");
 
   // Clear other data holders for now.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -313,7 +313,14 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   // Solve the Poisson equation.
   const bool converged = this->solvePoisson();
   if (!converged) {
-    MayDay::Warning("ItoPlasmaGodunovStepper::regrid - Poisson solve did not converge after regrid!!!");
+    const std::string err = "ItoPlasmaGodunovStepper::regrid - Poisson solve did not converge after regrid!!!";
+
+    if (m_abortOnFailure) {
+      MayDay::Error(err.c_str());
+    }
+    else {
+      MayDay::Warning(err.c_str());
+    }
   }
 
   // Regrid superparticles.
@@ -911,8 +918,18 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
   // Solve the stinking equation.
   this->barrier();
   m_timer.startEvent("Solve Poisson");
-  this->solvePoisson();
+  const bool converged = this->solvePoisson();
   m_timer.stopEvent("Solve Poisson");
+  if (!converged) {
+    const std::string err = "ItoPlasmaStepper::advanceParticlesEulerMaruyama - Poisson solve did not converge!!!!";
+
+    if (m_abortOnFailure) {
+      MayDay::Error(err.c_str());
+    }
+    else {
+      MayDay::Warning(err.c_str());
+    }
+  }
 
   // Recompute velocities with the new electric field. This interpolates the velocities to the current particle positions, i.e.
   // we compute V^(k+1)(X^k) = mu^k * E^(k+1)(X^k)

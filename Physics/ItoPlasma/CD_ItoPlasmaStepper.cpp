@@ -70,6 +70,7 @@ ItoPlasmaStepper::parseOptions()
   }
 
   this->parseVerbosity();
+  this->parseAbort();
   this->parsePlotVariables();
   this->parseSuperParticles();
   this->parseDualGrid();
@@ -87,6 +88,7 @@ ItoPlasmaStepper::parseRuntimeOptions()
   }
 
   this->parseVerbosity();
+  this->parseAbort();
   this->parsePlotVariables();
   this->parseSuperParticles();
   this->parseLoadBalance();
@@ -113,6 +115,19 @@ ItoPlasmaStepper::parseVerbosity() noexcept
 
   pp.get("verbosity", m_verbosity);
   pp.get("profile", m_profile);
+}
+
+void
+ItoPlasmaStepper::parseAbort() noexcept
+{
+  CH_TIME("ItoPlasmaStepper::parseAbort");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::parseAbort" << endl;
+  }
+
+  ParmParse pp(m_name.c_str());
+
+  pp.get("abort_on_failure", m_abortOnFailure);
 }
 
 void
@@ -1060,7 +1075,14 @@ ItoPlasmaStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int
   // Recompute the electric field
   const bool converged = this->solvePoisson();
   if (!converged) {
-    MayDay::Abort("ItoPlasmaStepper::regrid - Poisson solve did not converge after regrid!!!");
+    const std::string err = "ItoPlasmaStepper::regrid - Poisson solve did not converge after regrid!!!";
+
+    if (m_abortOnFailure) {
+      MayDay::Error(err.c_str());
+    }
+    else {
+      MayDay::Warning(err.c_str());
+    }
   }
 
   // Recompute new velocities and diffusion coefficients

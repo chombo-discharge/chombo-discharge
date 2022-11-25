@@ -1018,6 +1018,11 @@ namespace Physics {
       std::function<Real(const Real a_time)> m_voltage;
 
       /*!
+	@brief Flag for abandoning simulation of Poisson solver fails
+      */
+      bool m_abortOnFailure;
+
+      /*!
 	@brief Using dual grid or not
       */
       bool m_dualGrid;
@@ -1336,6 +1341,12 @@ namespace Physics {
       */
       virtual void
       parseVerbosity() noexcept;
+
+      /*!
+	@brief Parse abort on failure
+      */
+      virtual void
+      parseAbort() noexcept;
 
       /*!
 	@brief Parse the desired number of particles per cell. 

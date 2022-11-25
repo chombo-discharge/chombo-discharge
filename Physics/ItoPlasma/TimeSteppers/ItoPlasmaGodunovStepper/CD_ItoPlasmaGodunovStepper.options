@@ -2,6 +2,7 @@
 # ItoPlasmaGodunovStepper class options
 # ====================================================================================================
 ItoPlasmaGodunovStepper.verbosity               = -1             # Verbosity
+ItoPlasmaGodunovStepper.abort_on_failure        = false          # Abort on Poisson solver failure or not
 ItoPlasmaGodunovStepper.profile                 = false          # Turn on/off run-time profiling
 ItoPlasmaGodunovStepper.plt_vars                = none           # 'conductivity', 'current_density', 'particles_per_patch'
 ItoPlasmaGodunovStepper.dual_grid               = true           # Turn on/off dual-grid functionality
