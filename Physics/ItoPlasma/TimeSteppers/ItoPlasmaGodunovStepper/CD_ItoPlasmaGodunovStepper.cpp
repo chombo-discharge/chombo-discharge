@@ -170,13 +170,6 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   }
   }
 
-  // Do intersection test and remove particles that struck the EB or domain. Transfer them to appropriate containers.
-  this->barrier();
-  m_timer.startEvent("EB/Particle intersection");
-  const bool deleteParticles = true;
-  this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, deleteParticles);
-  m_timer.stopEvent("EB/Particle intersection");
-
   // Remove the run-time configurable particle storage. It is no longer needed.
   // ====== END TRANSPORT STEP ======
 
@@ -185,19 +178,6 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   m_timer.startEvent("Photon transport");
   this->advancePhotons(a_dt);
   m_timer.stopEvent("Photon transport");
-
-  // Resolve injection at the EB.
-  this->barrier();
-  m_timer.startEvent("EB particle injection");
-  this->resolveParticlesEB(a_dt);
-  this->injectParticlesEB();
-  m_timer.stopEvent("EB particle injection");
-
-  // Remove particles that are inside the EB.
-  this->barrier();
-  m_timer.startEvent("Remove covered");
-  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_toleranceEB);
-  m_timer.stopEvent("Remove covered");
 
   // Sort the particles and photons per cell so we can call reaction algorithms
   this->barrier();
@@ -229,7 +209,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
   m_timer.stopEvent("Sort by patch");
 
-  // Clear other data holders for now.
+  // Clear other data holders for now. BC comes later...
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     solverIt()->clear(ItoSolver::WhichContainer::EB);
     solverIt()->clear(ItoSolver::WhichContainer::Domain);
@@ -248,7 +228,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
 
   this->barrier();
   m_timer.startEvent("Compute J");
-  //  this->computeCurrentDensity(m_currentDensity);
+  this->computeCurrentDensity(m_currentDensity);
   m_timer.stopEvent("Compute J");
 
   if (m_profile) {
@@ -313,14 +293,7 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   // Solve the Poisson equation.
   const bool converged = this->solvePoisson();
   if (!converged) {
-    const std::string err = "ItoPlasmaGodunovStepper::regrid - Poisson solve did not converge after regrid!!!";
-
-    if (m_abortOnFailure) {
-      MayDay::Error(err.c_str());
-    }
-    else {
-      MayDay::Warning(err.c_str());
-    }
+    MayDay::Warning("ItoPlasmaGodunovStepper::regrid - Poisson solve did not converge after regrid!!!");
   }
 
   // Regrid superparticles.
@@ -918,18 +891,8 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
   // Solve the stinking equation.
   this->barrier();
   m_timer.startEvent("Solve Poisson");
-  const bool converged = this->solvePoisson();
+  this->solvePoisson();
   m_timer.stopEvent("Solve Poisson");
-  if (!converged) {
-    const std::string err = "ItoPlasmaStepper::advanceParticlesEulerMaruyama - Poisson solve did not converge!!!!";
-
-    if (m_abortOnFailure) {
-      MayDay::Error(err.c_str());
-    }
-    else {
-      MayDay::Warning(err.c_str());
-    }
-  }
 
   // Recompute velocities with the new electric field. This interpolates the velocities to the current particle positions, i.e.
   // we compute V^(k+1)(X^k) = mu^k * E^(k+1)(X^k)
@@ -949,6 +912,18 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
   this->stepEulerMaruyama(a_dt);
   this->remapParticles(SpeciesSubset::AllMobileOrDiffusive);
   m_timer.stopEvent("Euler-Maruyama step");
+
+  // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
+  this->barrier();
+  m_timer.startEvent("EB/Particle intersection");
+  const bool deleteParticles = true;
+  this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, deleteParticles);
+  m_timer.stopEvent("EB/Particle intersection");
+
+  this->barrier();
+  m_timer.startEvent("Remove covered");
+  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_toleranceEB);
+  m_timer.stopEvent("Remove covered");
 }
 
 void

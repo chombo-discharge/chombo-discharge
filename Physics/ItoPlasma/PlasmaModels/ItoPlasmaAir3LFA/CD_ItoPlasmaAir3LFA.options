@@ -26,8 +26,8 @@ ItoPlasmaAir3LFA.SSAlim            = 1.0         # When to enter SSA instead of 
 ItoPlasmaAir3LFA.algorithm         = hybrid      # 'tau', 'ssa', or 'hybrid'
 
 # Secondary emission
-ItoPlasmaAir3LFA.impact_efficiency  = 0.01       # Impact efficiency
-ItoPlasmaAir3LFA.quantum_efficiency = 0.01       # Quantum efficiency
+ItoPlasmaAir3LFA.impact_efficiency  = 0.00       # Impact efficiency
+ItoPlasmaAir3LFA.quantum_efficiency = 0.00       # Quantum efficiency
 
 # Photoionization parameters
 ItoPlasmaAir3LFA.quenching_pressure = 0.03947    # Quenching pressure for photo-emission (atm)

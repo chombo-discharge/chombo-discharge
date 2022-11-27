@@ -255,6 +255,10 @@ ItoPlasmaAir3LFA.NSSA              = 10          # How many SSA steps to run whe
 ItoPlasmaAir3LFA.SSAlim            = 1.0         # When to enter SSA instead of tau-leaping
 ItoPlasmaAir3LFA.algorithm         = hybrid      # 'tau', 'ssa', or 'hybrid'
 
+# Secondary emission
+ItoPlasmaAir3LFA.impact_efficiency  = 0.00       # Impact efficiency
+ItoPlasmaAir3LFA.quantum_efficiency = 0.00       # Quantum efficiency
+
 # Photoionization parameters
 ItoPlasmaAir3LFA.quenching_pressure = 0.03947    # Quenching pressure for photo-emission (atm)
 ItoPlasmaAir3LFA.photoi_factor      = 1.0        # Photoionization factor
