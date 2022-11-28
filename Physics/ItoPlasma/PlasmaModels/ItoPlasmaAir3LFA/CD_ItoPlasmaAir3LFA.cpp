@@ -127,7 +127,6 @@ ItoPlasmaAir3LFA::parseRuntimeOptions() noexcept
   this->parseDebug();
   this->parseAlgorithm();
   this->parseDx();
-  this->parseTransport();
 }
 
 void
@@ -156,6 +155,9 @@ ItoPlasmaAir3LFA::parseTransport() noexcept
 
   m_ionImpactEfficiency = std::max(m_ionImpactEfficiency, 0.0);
   m_ionImpactEfficiency = std::min(m_ionImpactEfficiency, 1.0);
+
+  m_quantumEfficiency = std::max(m_quantumEfficiency, 0.0);
+  m_quantumEfficiency = std::min(m_quantumEfficiency, 1.0);
 }
 
 void
