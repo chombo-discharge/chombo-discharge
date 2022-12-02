@@ -187,6 +187,15 @@ public:
   allocatePointer(EBAMRData<T>& a_data, const std::string a_realm, const int a_finestLevel) const;
 
   /*!
+    @brief Slice cell-centered data in order to fetch a subset of components
+    @param[in] a_other Original data
+    @param[in] a_variables Variables
+    @return Subset of variables. The first component in the returned data holder corresponds to a_variables.begin(), the last to a_variables.end()
+  */
+  EBAMRCellData
+  slice(EBAMRCellData& a_original, const Interval a_variables) const noexcept;
+
+  /*!
     @brief Parse options. Called during the constructor. 
   */
   void

@@ -210,6 +210,20 @@ ParticleContainer<P>::getGrids() const
 }
 
 template <class P>
+const RealVect
+ParticleContainer<P>::getProbLo() const noexcept
+{
+  return m_probLo;
+}
+
+template <class P>
+const Vector<RealVect>
+ParticleContainer<P>::getDx() const noexcept
+{
+  return m_dx;
+}
+
+template <class P>
 AMRParticles<P>&
 ParticleContainer<P>::getParticles()
 {

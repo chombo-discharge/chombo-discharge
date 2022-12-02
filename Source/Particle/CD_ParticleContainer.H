@@ -20,7 +20,7 @@
 #include <BinFab.H>
 #include <ProblemDomain.H>
 #include <DisjointBoxLayout.H>
-#include "BaseEBCellFAB.H"
+#include <BaseEBCellFAB.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
@@ -258,6 +258,20 @@ public:
   */
   const Vector<DisjointBoxLayout>&
   getGrids() const;
+
+  /*!
+    @brief Get lower-left corner
+    @return m_probLo
+  */
+  const RealVect
+  getProbLo() const noexcept;
+
+  /*!
+    @brief Get grid resolutions
+    @return m_dx
+  */
+  const Vector<RealVect>
+  getDx() const noexcept;
 
   /*!
     @brief Get particle data on a level

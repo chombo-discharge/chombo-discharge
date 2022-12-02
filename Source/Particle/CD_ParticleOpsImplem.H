@@ -22,6 +22,75 @@
 #include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
+template <typename P, const Real& (P::*weight)() const>
+inline void
+ParticleOps::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P>& a_src) noexcept
+{
+  CH_TIME("ParticleOps::getPhysicalParticlesPerCell");
+
+  const RealVect probLo = a_src.getProbLo();
+
+  for (int lvl = 0; lvl <= a_src.getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = a_src.getGrids()[lvl];
+    const RealVect           dx  = a_src.getDx()[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const List<P>& particles = a_src[lvl][dit()].listItems();
+
+      FArrayBox& ppc = (*a_ppc[lvl])[dit()].getFArrayBox();
+      ppc.setVal(0.0);
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        const P&       p  = lit();
+        const RealVect x  = p.position();
+        const Real     w  = (p.*weight)();
+        const IntVect  iv = ParticleOps::getParticleGridCell(x, probLo, dx);
+
+        ppc(iv, 0) += w;
+      }
+    }
+  }
+}
+
+template <typename P>
+inline void
+ParticleOps::getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P>& a_src) noexcept
+{
+  CH_TIME("ParticleOps::getComputationalParticlesPerCell");
+
+  const RealVect probLo = a_src.getProbLo();
+
+  for (int lvl = 0; lvl <= a_src.getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = a_src.getGrids()[lvl];
+    const RealVect           dx  = a_src.getDx()[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const List<P>& particles = a_src[lvl][dit()].listItems();
+
+      FArrayBox& ppc = (*a_ppc[lvl])[dit()].getFArrayBox();
+      ppc.setVal(0.0);
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        const P&       p  = lit();
+        const RealVect x  = p.position();
+        const IntVect  iv = ParticleOps::getParticleGridCell(x, probLo, dx);
+
+        ppc(iv, 0) += 1.0;
+      }
+    }
+  }
+}
+
+inline IntVect
+ParticleOps::getParticleGridCell(const RealVect& a_particlePosition,
+                                 const RealVect& a_probLo,
+                                 const RealVect& a_dx) noexcept
+{
+  return IntVect(D_DECL(std::floor((a_particlePosition[0] - a_probLo[0]) / a_dx[0]),
+                        std::floor((a_particlePosition[1] - a_probLo[1]) / a_dx[1]),
+                        std::floor((a_particlePosition[2] - a_probLo[2]) / a_dx[2])));
+}
+
 inline bool
 ParticleOps::domainIntersection(const RealVect& a_oldPos,
                                 const RealVect& a_newPos,
