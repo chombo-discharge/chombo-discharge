@@ -265,8 +265,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     // the grid patch so grow the box by one, but don't include
     // boundary cells.
     Box interiorCells = grow(a_cellBox, 1);
-    interiorCells &= domainBox;
-    interiorCells.grow(dir, -1);
+    interiorCells &= grow(domainBox, -1);
 
     // Boundary cells on the low/high sides.
     Box bndryLo = adjCellLo(domainBox, dir, -1);
