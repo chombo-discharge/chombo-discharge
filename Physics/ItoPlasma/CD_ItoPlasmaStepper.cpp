@@ -2521,6 +2521,9 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
 
   CH_assert(a_ppc.nComp() == numPlasmaSpecies);
 
+  const Real     dx     = m_amr->getDx()[a_level];
+  const RealVect probLo = m_amr->getProbLo();
+
   // TLDR: We go through each solver and add the number of PHYSICAL particles per cell to a_ppc.
 
   FArrayBox& ppcRegular = a_ppc.getFArrayBox();
@@ -2549,16 +2552,16 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
 
     // Irregular kernel -- note that only particles that lie inside the domain get to react.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
-      const IntVect  iv         = vof.gridIndex();
-      const RealVect normal     = a_ebisbox.normal(vof);
-      const RealVect ebCentroid = a_ebisbox.bndryCentroid(vof);
+      const IntVect  iv           = vof.gridIndex();
+      const RealVect normal       = a_ebisbox.normal(vof);
+      const RealVect physCentroid = probLo + Location::position(Location::Cell::Boundary, vof, a_ebisbox, dx);
 
       Real num = 0.0;
 
       for (ListIterator<ItoParticle> lit(cellParticles(iv, 0)); lit.ok(); ++lit) {
         const RealVect& pos = lit().position();
 
-        if ((pos - ebCentroid).dotProduct(normal) >= 0.0) {
+        if ((pos - physCentroid).dotProduct(normal) >= 0.0) {
           num += lit().weight();
         }
       }
@@ -2630,6 +2633,9 @@ ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_meanEnerg
 
   CH_assert(a_meanEnergies.nComp() == numPlasmaSpecies);
 
+  const Real     dx     = m_amr->getDx()[a_level];
+  const RealVect probLo = m_amr->getProbLo();
+
   // Get single-valued data.
   FArrayBox& meanEnergiesReg = a_meanEnergies.getFArrayBox();
 
@@ -2666,7 +2672,7 @@ ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_meanEnerg
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const IntVect  iv         = vof.gridIndex();
       const RealVect normal     = a_ebisbox.normal(vof);
-      const RealVect ebCentroid = a_ebisbox.bndryCentroid(vof);
+      const RealVect ebCentroid = probLo + Location::position(Location::Cell::Boundary, vof, a_ebisbox, dx);
 
       Real totalWeight = 0.0;
       Real totalEnergy = 0.0;

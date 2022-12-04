@@ -170,6 +170,13 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   }
   }
 
+  // Do intersection test and remove particles that struck the EB or domain. Transfer them to appropriate containers.
+  this->barrier();
+  m_timer.startEvent("EB/Particle intersection");
+  const bool deleteParticles = true;
+  this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, deleteParticles);
+  m_timer.stopEvent("EB/Particle intersection");
+
   // Remove the run-time configurable particle storage. It is no longer needed.
   // ====== END TRANSPORT STEP ======
 
@@ -178,6 +185,13 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   m_timer.startEvent("Photon transport");
   this->advancePhotons(a_dt);
   m_timer.stopEvent("Photon transport");
+
+  // Resolve injection at the EB.
+  this->barrier();
+  m_timer.startEvent("EB particle injection");
+  this->resolveParticlesEB(a_dt);
+  this->injectParticlesEB();
+  m_timer.stopEvent("EB particle injection");
 
   // Sort the particles and photons per cell so we can call reaction algorithms
   this->barrier();
@@ -209,7 +223,13 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
   m_timer.stopEvent("Sort by patch");
 
-  // Clear other data holders for now. BC comes later...
+  // Remove particles that are inside the EB.
+  this->barrier();
+  m_timer.startEvent("Remove covered");
+  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Discrete, m_toleranceEB);
+  m_timer.stopEvent("Remove covered");
+
+  // Clear other data holders for now.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     solverIt()->clear(ItoSolver::WhichContainer::EB);
     solverIt()->clear(ItoSolver::WhichContainer::Domain);
@@ -912,18 +932,6 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
   this->stepEulerMaruyama(a_dt);
   this->remapParticles(SpeciesSubset::AllMobileOrDiffusive);
   m_timer.stopEvent("Euler-Maruyama step");
-
-  // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
-  this->barrier();
-  m_timer.startEvent("EB/Particle intersection");
-  const bool deleteParticles = true;
-  this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, deleteParticles);
-  m_timer.stopEvent("EB/Particle intersection");
-
-  this->barrier();
-  m_timer.startEvent("Remove covered");
-  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_toleranceEB);
-  m_timer.stopEvent("Remove covered");
 }
 
 void
