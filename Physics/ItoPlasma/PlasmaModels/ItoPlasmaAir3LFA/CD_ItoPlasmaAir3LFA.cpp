@@ -152,6 +152,7 @@ ItoPlasmaAir3LFA::parseTransport() noexcept
   pp.get("ion_mobility", m_ionMobility);
   pp.get("impact_efficiency", m_ionImpactEfficiency);
   pp.get("quantum_efficiency", m_quantumEfficiency);
+  pp.get("extrap_bc", m_extrapBC);
 
   m_ionImpactEfficiency = std::max(m_ionImpactEfficiency, 0.0);
   m_ionImpactEfficiency = std::min(m_ionImpactEfficiency, 1.0);
@@ -252,6 +253,8 @@ ItoPlasmaAir3LFA::injectParticlesEB(Vector<List<ItoParticle>>&       a_incomingP
                                     Vector<List<Photon>>&            a_incomingPhotons,
                                     const Vector<List<ItoParticle>>& a_outgoingParticles,
                                     const Vector<List<Photon>>&      a_outgoingPhotons,
+                                    const Vector<FPR>&               a_newNumParticles,
+                                    const Vector<FPR>&               a_oldNumParticles,
                                     const RealVect&                  a_E,
                                     const RealVect&                  a_cellCenter,
                                     const RealVect&                  a_cellCentroid,
@@ -265,33 +268,42 @@ ItoPlasmaAir3LFA::injectParticlesEB(Vector<List<ItoParticle>>&       a_incomingP
 {
   CH_TIME("ItoPlasmaAir3LFA::injectParticlesEB");
 
-  const bool isCathode = a_E.dotProduct(a_bndryNormal) < 0.0;
-  const bool isAnode   = a_E.dotProduct(a_bndryNormal) > 0.0;
+  List<ItoParticle>&       ingoingElectrons = a_incomingParticles[0];
+  const List<ItoParticle>& outgoingIons     = a_outgoingParticles[1];
+  const List<Photon>&      outgoingPhotons  = a_outgoingPhotons[0];
 
-  const RealVect bndryPos = a_cellCenter + a_dx * a_bndryCentroid;
-
-  if (isCathode) {
-    List<ItoParticle>&       ingoingElectrons = a_incomingParticles[0];
-    const List<ItoParticle>& outgoingIons     = a_outgoingParticles[1];
-    const List<Photon>&      outgoingPhotons  = a_outgoingPhotons[0];
-
-    // SEE from ion impact
-    for (ListIterator<ItoParticle> lit(outgoingIons); lit.ok(); ++lit) {
-      const long long success = Random::getBinomial<long long>(llround(lit().weight()), m_ionImpactEfficiency);
-      if (success > 0LL) {
-        ingoingElectrons.add(ItoParticle(1.0 * success, bndryPos));
-      }
-    }
-
-    // SEE from photo-electric effect
-    for (ListIterator<Photon> lit(outgoingPhotons); lit.ok(); ++lit) {
-      const long long success = Random::getBinomial<long long>(llround(lit().weight()), m_quantumEfficiency);
-      if (success > 0LL) {
-        ingoingElectrons.add(ItoParticle(1.0 * success, bndryPos));
-      }
+  if (m_extrapBC) {
+    const Real diff   = a_oldNumParticles[0] - a_newNumParticles[0];
+    const Real diffLL = (long long)diff;
+    if (diffLL > 0LL) {
+      ingoingElectrons.add(ItoParticle(diff, a_cellCenter + a_cellCentroid * a_dx));
     }
   }
-  else if (isAnode) {
+  else {
+    const bool isCathode = a_E.dotProduct(a_bndryNormal) < 0.0;
+    const bool isAnode   = a_E.dotProduct(a_bndryNormal) > 0.0;
+
+    const RealVect bndryPos = a_cellCenter + a_dx * a_bndryCentroid;
+
+    if (isCathode) {
+      // SEE from ion impact
+      for (ListIterator<ItoParticle> lit(outgoingIons); lit.ok(); ++lit) {
+        const long long success = Random::getBinomial<long long>(llround(lit().weight()), m_ionImpactEfficiency);
+        if (success > 0LL) {
+          ingoingElectrons.add(ItoParticle(1.0 * success, bndryPos));
+        }
+      }
+
+      // SEE from photo-electric effect
+      for (ListIterator<Photon> lit(outgoingPhotons); lit.ok(); ++lit) {
+        const long long success = Random::getBinomial<long long>(llround(lit().weight()), m_quantumEfficiency);
+        if (success > 0LL) {
+          ingoingElectrons.add(ItoParticle(1.0 * success, bndryPos));
+        }
+      }
+    }
+    else if (isAnode) {
+    }
   }
 }
 

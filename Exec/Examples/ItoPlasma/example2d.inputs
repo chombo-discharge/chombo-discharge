@@ -231,7 +231,8 @@ ItoPlasmaGodunovStepper.algorithm               = euler_maruyama # Integration a
 # ====================================================================================================
 # ItoPlasmaAir3LFA class options
 # ====================================================================================================
-ItoPlasmaAir3LFA.debug = true                    # Turn on/off debugging
+ItoPlasmaAir3LFA.debug     = true                # Turn on/off debugging
+ItoPlasmaAir3LFA.extrap_bc = true                # Use extrapolated BC or not
 
 # Initial data
 ItoPlasmaAir3LFA.init_particles  = 10000         # Number of initial particles

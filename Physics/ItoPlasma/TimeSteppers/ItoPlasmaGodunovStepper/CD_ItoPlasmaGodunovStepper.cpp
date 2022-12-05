@@ -155,6 +155,9 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   }
   m_timer.stopEvent("Deposit photons");
 
+  // Compute the number of particles per cell.
+  this->getPhysicalParticlesPerCell(m_oldPPC);
+
   // ====== BEGIN TRANSPORT STEP ======
   // Semi-implicitly advance the particles and the field.
   switch (m_algorithm) {
@@ -170,11 +173,12 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   }
   }
 
-  // Do intersection test and remove particles that struck the EB or domain. Transfer them to appropriate containers.
+  // Do intersection test and remove particles that struck the EB or domain. Transfer them to appropriate containers. Then recompute the number of particles per cell.
   this->barrier();
   m_timer.startEvent("EB/Particle intersection");
   const bool deleteParticles = true;
   this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, deleteParticles);
+  this->getPhysicalParticlesPerCell(m_newPPC);
   m_timer.stopEvent("EB/Particle intersection");
 
   // Remove the run-time configurable particle storage. It is no longer needed.

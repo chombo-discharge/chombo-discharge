@@ -458,6 +458,8 @@ ItoPlasmaStepper::allocateInternals()
   m_amr->allocate(m_electricFieldFluid, m_fluidRealm, m_plasmaPhase, SpaceDim);
 
   // Particles and photons per cell on the realms.
+  m_amr->allocate(m_oldPPC, m_particleRealm, m_plasmaPhase, numPlasmaSpecies);
+  m_amr->allocate(m_newPPC, m_particleRealm, m_plasmaPhase, numPlasmaSpecies);
   m_amr->allocate(m_particlePPC, m_particleRealm, m_plasmaPhase, numPlasmaSpecies);
   m_amr->allocate(m_particleEPS, m_particleRealm, m_plasmaPhase, numPlasmaSpecies);
   m_amr->allocate(m_particleOldPPC, m_particleRealm, m_plasmaPhase, numPlasmaSpecies);
@@ -2466,6 +2468,27 @@ ItoPlasmaStepper::computeItoDiffusionLEA() noexcept
 }
 
 void
+ItoPlasmaStepper::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc) const noexcept
+{
+  CH_TIME("ItoPlasmaStepper::getPhysicalParticlesPerCell(EBAMRCellData)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getPhysicaParticlesPerCell(EBAMRCellData)" << endl;
+  }
+
+  CH_assert(a_ppc.getRealm() == m_particleRealm);
+
+  for (auto it = m_ito->iterator(); it.ok(); ++it) {
+    const int idx = it.index();
+
+    EBAMRCellData ppc = m_amr->slice(a_ppc, Interval(idx, idx));
+
+    const ParticleContainer<ItoParticle>& particles = it()->getParticles(ItoSolver::WhichContainer::Bulk);
+
+    ParticleOps::getPhysicalParticlesPerCell<ItoParticle, &ItoParticle::weight>(ppc, particles);
+  }
+}
+
+void
 ItoPlasmaStepper::computeReactiveParticlesPerCell(EBAMRCellData& a_ppc) noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(EBAMRCellData)");
@@ -3280,6 +3303,8 @@ ItoPlasmaStepper::resolveParticlesEB(Vector<ParticleContainer<ItoParticle>*>& a_
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
       const EBISBox&       ebisbox       = ebisl[dit()];
       const EBCellFAB&     electricField = (*a_electricField[lvl])[dit()];
+      const EBCellFAB&     oldPPC        = (*m_oldPPC[lvl])[dit()];
+      const EBCellFAB&     newPPC        = (*m_newPPC[lvl])[dit()];
       const BaseFab<bool>& validCells    = (*m_amr->getValidCells(m_particleRealm)[lvl])[dit()];
 
       Vector<BinFab<ItoParticle>*> cellParticles;
@@ -3305,6 +3330,9 @@ ItoPlasmaStepper::resolveParticlesEB(Vector<ParticleContainer<ItoParticle>*>& a_
           const RealVect physPos       = cellCenter + bndryCentroid * dx;
           const Real     bndryArea     = ebisbox.bndryArea(vof);
 
+          Vector<FPR> oldNumParticles(numPlasmaSpecies, 0.0);
+          Vector<FPR> newNumParticles(numPlasmaSpecies, 0.0);
+
           Vector<List<ItoParticle>> outgoingParticles(numPlasmaSpecies);
           Vector<List<ItoParticle>> incomingParticles(numPlasmaSpecies);
 
@@ -3313,6 +3341,9 @@ ItoPlasmaStepper::resolveParticlesEB(Vector<ParticleContainer<ItoParticle>*>& a_
 
           for (int i = 0; i < numPlasmaSpecies; i++) {
             outgoingParticles[i] = (*cellParticles[i])(iv, 0);
+
+            oldNumParticles[i] = oldPPC(vof, i);
+            newNumParticles[i] = newPPC(vof, i);
           }
 
           for (int i = 0; i < numPhotonSpecies; i++) {
@@ -3347,6 +3378,8 @@ ItoPlasmaStepper::resolveParticlesEB(Vector<ParticleContainer<ItoParticle>*>& a_
                                        incomingPhotons,
                                        outgoingParticles,
                                        outgoingPhotons,
+                                       newNumParticles,
+                                       oldNumParticles,
                                        E,
                                        cellCenter,
                                        cellCentroid,

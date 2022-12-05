@@ -651,6 +651,13 @@ namespace Physics {
       computeItoDiffusionLEA() noexcept;
 
       /*!
+	@brief Get the physical number of particles per cell.
+	@param[out] a_ppc Number of physical particles per cell. Must be defined over the fluid realm.
+       */
+      virtual void
+      getPhysicalParticlesPerCell(EBAMRCellData& a_ppc) const noexcept;
+
+      /*!
 	@brief Compute the number of reactive particles per cell
 	@param[out] a_ppc Number of physical particles per grid cell for all species
 	@note a_ppc Must be defined over the particle realm and have the same number of components as the number of plasma species involved in the simulation. 
@@ -1174,6 +1181,18 @@ namespace Physics {
 	@note Defined on the fluid realm with 1 component
       */
       EBAMRIVData m_conductivityEB;
+
+      /*!
+	@brief For holding the number of physical particles per cell
+	@note Defined over the particle realm. 
+      */
+      EBAMRCellData m_oldPPC;
+
+      /*!
+	@brief For holding the number of physical particles per cell
+	@note Defined over the particle realm. 
+      */
+      EBAMRCellData m_newPPC;
 
       /*!
 	@brief For holding the number of physical particles per cell for all species.

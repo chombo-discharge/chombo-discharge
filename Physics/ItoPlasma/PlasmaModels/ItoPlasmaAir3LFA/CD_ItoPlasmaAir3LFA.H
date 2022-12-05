@@ -115,6 +115,8 @@ namespace Physics {
                         Vector<List<Photon>>&            a_outgoingPhotons,
                         const Vector<List<ItoParticle>>& a_incomingParticles,
                         const Vector<List<Photon>>&      a_incomingPhotons,
+                        const Vector<FPR>&               a_newNumParticles,
+                        const Vector<FPR>&               a_oldNumParticles,
                         const RealVect&                  a_E,
                         const RealVect&                  a_cellCenter,
                         const RealVect&                  a_cellCentroid,
@@ -127,6 +129,11 @@ namespace Physics {
                         const int                        a_matIndex) const noexcept override;
 
     protected:
+      /*!
+	@brief Extrapolate BC or not
+      */
+      bool m_extrapBC;
+
       /*!
 	@brief User-defined parameter for time step restriction
       */
