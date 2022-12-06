@@ -644,6 +644,12 @@ namespace Physics {
 	@brief Plasma reaction rates that are eta*|v|
       */
       std::map<int, int> m_plasmaReactionEtaV;
+      /*!
+	@brief Maps for functions of the type k = f(T) where T is the temperature of some species.
+	@details In the tuple the first index in the pair indicates the species we are talking about here. A special rule is enforced
+	when this index is < 0 in which case the temperature is replaced by the background gas temperature. 
+      */
+      std::map<int, std::pair<int, FunctionT>> m_plasmaReactionFunctionsT;
 
       /*!
 	@brief Maps for functions of the type k = f(T1,T2) where T1 and T2 are the temperatures of some species. 
@@ -956,6 +962,13 @@ namespace Physics {
       */
       virtual InitialDataFunction
       parsePlasmaSpeciesInitialData(const json& a_json) const;
+
+      /*!
+	@brief Generate initial particles for a given plasma species
+	@param[in] a_json JSON field, usually (always?) describing one of the objects in the 'plasma species' field.
+      */
+      virtual List<PointParticle>
+      parsePlasmaSpeciesInitialParticles(const json& a_json) const;
 
       /*!
 	@brief Make a reaction set into a superset. This parses wildcards '@' in reaction string.

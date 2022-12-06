@@ -1214,14 +1214,10 @@ CdrSolver::initialData()
   // deposit particles (with an NGP scheme) on the mesh. This function does both -- first particles if we have them and
   // then we increment with the function.
 
-  const bool depositParticles = m_species->getInitialParticles().length() > 0;
-
   DataOps::setValue(m_phi, 0.0);
 
   // Deposit particles if we have them.
-  if (depositParticles) {
-    this->initialDataParticles();
-  }
+  this->initialDataParticles();
 
   // Increment with function values if this is also called for. Note that this increments,
   // why is why initialDataParticles is called first!
@@ -1270,12 +1266,12 @@ CdrSolver::initialDataParticles()
 
   const List<PointParticle>& initialParticles = m_species->getInitialParticles();
 
-  if (initialParticles.length() > 0) {
+  // Make a ParticleContainer<T> and redistribute particles over the AMR hierarchy.
+  ParticleContainer<PointParticle> particles;
+  m_amr->allocate(particles, m_realm);
+  particles.addParticles(m_species->getInitialParticles());
 
-    // Make a ParticleContainer<T> and redistribute particles over the AMR hierarchy.
-    ParticleContainer<PointParticle> particles;
-    m_amr->allocate(particles, m_realm);
-    particles.addParticles(m_species->getInitialParticles());
+  if (particles.getNumberOfValidParticlesGlobal() > 0) {
 
     // This function will be called BEFORE initialDataFunction, we it is safe to set m_phi to zero
     DataOps::setValue(m_phi, 0.0);
@@ -1302,8 +1298,8 @@ CdrSolver::initialDataParticles()
                                                               forceIrregNGP);
       }
 
-#if CH_SPACEDIM == \
-  2 // Scale for 2D Cartesian. We do this because the 2D deposition object will normalize by 1/(dx*dx), but we want 1/(dx*dx*dx) in both 2D and 3D
+#if CH_SPACEDIM == 2
+      // Scale for 2D Cartesian. We do this because the 2D deposition object will normalize by 1/(dx*dx), but we want 1/(dx*dx*dx) in both 2D and 3D
       DataOps::scale(*m_phi[lvl], 1. / dx[0]);
 #endif
     }
