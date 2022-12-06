@@ -1297,11 +1297,6 @@ CdrSolver::initialDataParticles()
                                                               DepositionType::NGP,
                                                               forceIrregNGP);
       }
-
-#if CH_SPACEDIM == 2
-      // Scale for 2D Cartesian. We do this because the 2D deposition object will normalize by 1/(dx*dx), but we want 1/(dx*dx*dx) in both 2D and 3D
-      DataOps::scale(*m_phi[lvl], 1. / dx[0]);
-#endif
     }
   }
 }
