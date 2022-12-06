@@ -512,6 +512,16 @@ namespace Physics {
       LookupMethod m_etaLookup;
 
       /*!
+	@brief For when we can use alpha = constant
+      */
+      Real m_alphaConstant;
+
+      /*!
+	@brief For when we can use eta = constant
+      */
+      Real m_etaConstant;
+
+      /*!
 	@brief For when we can put alpha = alpha(E,N) as an analytic function. 
       */
       FunctionEN m_alphaFunctionEN;

@@ -1412,7 +1412,16 @@ CdrPlasmaJSON::parseEta()
   const std::string lookup = eta["lookup"].get<std::string>();
 
   // If we made it here we're good.
-  if (lookup == "table E/N") {
+  if(lookup == "constant") {
+    if(!(eta.contains("value"))) {
+      this->throwParserError(baseError + " and got 'constant' but field 'value' is missing");
+    }
+
+    m_etaConstant = eta["value"].get<Real>();
+
+    m_etaLookup = LookupMethod::Constant;
+  }
+  else if (lookup == "table E/N") {
     if (!(eta.contains("file"))) {
       this->throwParserError(baseError + " and got 'table E/N' but field 'file' is missing");
     }
@@ -4822,6 +4831,11 @@ CdrPlasmaJSON::computeEta(const Real a_E, const RealVect a_position) const
   const Real Etd = a_E / (Units::Td * N);
 
   switch (m_etaLookup) {
+  case LookupMethod::Constant: {
+    eta = m_etaConstant;
+
+    break;
+  }
   case LookupMethod::TableEN: {
     eta = m_etaTableEN.getEntry<1>(Etd); // Get eta/N
     eta *= N;                            // Get eta
