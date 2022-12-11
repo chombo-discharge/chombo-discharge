@@ -603,8 +603,8 @@ MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi,
   //       was written so that we avoid calling Multifluid::aliasMF, since that tends to be expensive to call during every smoothing step.
 
   if (m_hasCoar) {
-    if (
-      a_homogeneousCF) { // The homogeneous version will be called on every relaxation so we use a format which avoid having to alias data (which can be expensive).
+    if (a_homogeneousCF) {
+      // The homogeneous version will be called on every relaxation so we use a format which avoid having to alias data (which can be expensive).
       for (DataIterator dit = a_phi.dataIterator(); dit.ok(); ++dit) {
         for (auto& op : m_helmOps) {
           const int iphase = op.first;
@@ -1076,9 +1076,9 @@ MFHelmholtzOp::AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
 
     op.second->AMROperatorNF(Lphi, phi, phiCoar, a_homogeneousPhysBC);
 
-    op.second->turnOffCFInterp();
-    op.second->turnOffCoarsening();
-    op.second->turnOffExchange();
+    op.second->turnOnCFInterp();
+    op.second->turnOnCoarsening();
+    op.second->turnOnExchange();
   }
 }
 
