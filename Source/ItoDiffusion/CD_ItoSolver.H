@@ -437,7 +437,7 @@ public:
     @param[in] a_whichContainer Which container to count particles in. 
     @param[in] a_localOnly      Only report local particles (i.e. not reduced over MPI ranks)
   */
-  virtual size_t
+  virtual unsigned long long
   getNumParticles(const WhichContainer a_container, const bool a_localOnly) const;
 
   /*!

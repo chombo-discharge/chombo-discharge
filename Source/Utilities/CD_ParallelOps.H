@@ -109,6 +109,34 @@ namespace ParallelOps {
   sum(const Real& a_value) noexcept;
 
   /*!
+    @brief Compute the sum across all MPI ranks
+    @param[in] a_value Value to the take the sum of. 
+  */
+  inline int
+  sum(const int& a_value) noexcept;
+
+  /*!
+    @brief Compute the sum across all MPI ranks
+    @param[in] a_value Value to the take the sum of. 
+  */
+  inline long
+  sum(const long& a_value) noexcept;
+
+  /*!
+    @brief Compute the sum across all MPI ranks
+    @param[in] a_value Value to the take the sum of. 
+  */
+  inline long long
+  sum(const long long& a_value) noexcept;
+
+  /*!
+    @brief Compute the sum across all MPI ranks
+    @param[in] a_value Value to the take the sum of. 
+  */
+  inline unsigned long long
+  sum(const unsigned long long& a_value) noexcept;
+
+  /*!
     @brief Compute the standard deviation of the input value.
     @param[in] a_value Value to compute the standard deviation of.
   */

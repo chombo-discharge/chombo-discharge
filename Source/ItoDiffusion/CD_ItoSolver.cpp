@@ -450,7 +450,7 @@ ItoSolver::getNumberOfPlotVariables() const
   return numPlotVars;
 }
 
-size_t
+unsigned long long
 ItoSolver::getNumParticles(const WhichContainer a_whichContainer, const bool a_localOnly) const
 {
   CH_TIME("ItoSolver::getNumParticles(WhichContainer, bool)");
@@ -460,7 +460,7 @@ ItoSolver::getNumParticles(const WhichContainer a_whichContainer, const bool a_l
 
   const ParticleContainer<ItoParticle>& particles = m_particleContainers.at(a_whichContainer);
 
-  size_t N = 0;
+  unsigned long long N = 0;
   if (a_localOnly) {
     N = particles.getNumberOfValidParticlesLocal();
   }

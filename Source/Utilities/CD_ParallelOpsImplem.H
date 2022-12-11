@@ -297,6 +297,74 @@ ParallelOps::sum(const Real& a_value) noexcept
 #endif
 }
 
+inline int
+ParallelOps::sum(const int& a_value) noexcept
+{
+#ifdef CH_MPI
+  int ret = 0;
+
+  const int result = MPI_Allreduce(&a_value, &ret, 1, MPI_INT, MPI_SUM, Chombo_MPI::comm);
+  if (result != MPI_SUCCESS) {
+    MayDay::Error("In file ParallelOps::sum -- MPI communication error");
+  }
+
+  return ret;
+#else
+  return a_value;
+#endif
+}
+
+inline long
+ParallelOps::sum(const long& a_value) noexcept
+{
+#ifdef CH_MPI
+  long ret = 0;
+
+  const int result = MPI_Allreduce(&a_value, &ret, 1, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
+  if (result != MPI_SUCCESS) {
+    MayDay::Error("In file ParallelOps::sum -- MPI communication error");
+  }
+
+  return ret;
+#else
+  return a_value;
+#endif
+}
+
+inline long long
+ParallelOps::sum(const long long& a_value) noexcept
+{
+#ifdef CH_MPI
+  long long ret = 0;
+
+  const int result = MPI_Allreduce(&a_value, &ret, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+  if (result != MPI_SUCCESS) {
+    MayDay::Error("In file ParallelOps::sum -- MPI communication error");
+  }
+
+  return ret;
+#else
+  return a_value;
+#endif
+}
+
+inline unsigned long long
+ParallelOps::sum(const unsigned long long& a_value) noexcept
+{
+#ifdef CH_MPI
+  unsigned long long ret = 0;
+
+  const int result = MPI_Allreduce(&a_value, &ret, 1, MPI_UNSIGNED_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+  if (result != MPI_SUCCESS) {
+    MayDay::Error("In file ParallelOps::sum -- MPI communication error");
+  }
+
+  return ret;
+#else
+  return a_value;
+#endif
+}
+
 inline void
 ParallelOps::vectorSum(Vector<Real>& a_data) noexcept
 {

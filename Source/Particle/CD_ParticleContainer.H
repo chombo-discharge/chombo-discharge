@@ -493,37 +493,37 @@ public:
   /*!
     @brief Get local number of particles
   */
-  size_t
+  unsigned long long
   getNumberOfValidParticlesLocal() const;
 
   /*!
     @brief Get global number of particles
   */
-  size_t
+  unsigned long long
   getNumberOfValidParticlesGlobal() const;
 
   /*!
     @brief Get local number of particles
   */
-  size_t
+  unsigned long long
   getNumberOfOutcastParticlesLocal() const;
 
   /*!
     @brief Get global number of particles
   */
-  size_t
+  unsigned long long
   getNumberOfOutcastParticlesGlobal() const;
 
   /*!
     @brief Get the number particles in the halo cells. 
   */
-  size_t
+  unsigned long long
   getNumberOfMaskParticlesLocal() const;
 
   /*!
     @brief Get the number particles in the halo cells. 
   */
-  size_t
+  unsigned long long
   getNumberOfMaskParticlesGlobal() const;
 
 protected:

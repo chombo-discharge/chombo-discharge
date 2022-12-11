@@ -770,14 +770,14 @@ ItoPlasmaStepper::printStepReport()
 
   const Real Emax = this->computeMaxElectricField(m_plasmaPhase);
 
-  const size_t localParticlesBulk    = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, true);
-  const size_t globalParticlesBulk   = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, false);
-  const size_t localParticlesEB      = m_ito->getNumParticles(ItoSolver::WhichContainer::EB, true);
-  const size_t globalParticlesEB     = m_ito->getNumParticles(ItoSolver::WhichContainer::EB, false);
-  const size_t localParticlesDomain  = m_ito->getNumParticles(ItoSolver::WhichContainer::Domain, true);
-  const size_t globalParticlesDomain = m_ito->getNumParticles(ItoSolver::WhichContainer::Domain, false);
-  const size_t localParticlesSource  = m_ito->getNumParticles(ItoSolver::WhichContainer::Source, true);
-  const size_t globalParticlesSource = m_ito->getNumParticles(ItoSolver::WhichContainer::Source, false);
+  const unsigned long long localParticlesBulk    = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, true);
+  const unsigned long long globalParticlesBulk   = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, false);
+  const unsigned long long localParticlesEB      = m_ito->getNumParticles(ItoSolver::WhichContainer::EB, true);
+  const unsigned long long globalParticlesEB     = m_ito->getNumParticles(ItoSolver::WhichContainer::EB, false);
+  const unsigned long long localParticlesDomain  = m_ito->getNumParticles(ItoSolver::WhichContainer::Domain, true);
+  const unsigned long long globalParticlesDomain = m_ito->getNumParticles(ItoSolver::WhichContainer::Domain, false);
+  const unsigned long long localParticlesSource  = m_ito->getNumParticles(ItoSolver::WhichContainer::Source, true);
+  const unsigned long long globalParticlesSource = m_ito->getNumParticles(ItoSolver::WhichContainer::Source, false);
 
   // Compute some global particle statistics
   Real avgParticles = 0.0;

@@ -18,6 +18,7 @@
 
 // Our includes
 #include <CD_ParticleContainer.H>
+#include <CD_ParallelOps.H>
 #include <CD_Timer.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
@@ -1046,105 +1047,105 @@ ParticleContainer<P>::setValue(const RealVect a_value)
 }
 
 template <class P>
-size_t
+unsigned long long
 ParticleContainer<P>::getNumberOfValidParticlesLocal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfValidParticlesLocal");
 
   CH_assert(m_isDefined);
 
-  size_t n = 0;
+  unsigned long long n = 0;
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    n += m_particles[lvl]->numValidLocal();
+    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
+      const List<P>& particles = (*m_particles[lvl])[dit()].listItems();
+
+      n += (unsigned long long)particles.length();
+    }
   }
 
   return n;
 }
 
 template <class P>
-size_t
+unsigned long long
 ParticleContainer<P>::getNumberOfValidParticlesGlobal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfValidParticlesGlobal");
 
   CH_assert(m_isDefined);
 
-  size_t n = 0;
+  const unsigned long long n = this->getNumberOfValidParticlesLocal();
 
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    n += m_particles[lvl]->numValid();
-  }
-
-  return n;
+  return ParallelOps::sum(n);
 }
 
 template <class P>
-size_t
+unsigned long long
 ParticleContainer<P>::getNumberOfOutcastParticlesLocal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfOutcastParticlesLocal");
 
   CH_assert(m_isDefined);
 
-  size_t n = 0;
+  unsigned long long n = 0;
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    n += m_particles[lvl]->numOutcastLocal();
+    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
+      const List<P>& outcast = m_particles[lvl]->outcast();
+
+      n += (unsigned long long)outcast.length();
+    }
   }
 
   return n;
 }
 
 template <class P>
-size_t
+unsigned long long
 ParticleContainer<P>::getNumberOfOutcastParticlesGlobal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfOutcastParticlesGlobal");
 
   CH_assert(m_isDefined);
 
-  size_t n = 0;
+  const unsigned long long n = this->getNumberOfOutcastParticlesLocal();
 
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    n += m_particles[lvl]->numOutcast();
-  }
-
-  return n;
+  return ParallelOps::sum(n);
 }
 
 template <class P>
-size_t
+unsigned long long
 ParticleContainer<P>::getNumberOfMaskParticlesLocal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfMaskparticlesLocal");
 
   CH_assert(m_isDefined);
 
-  size_t n = 0;
+  unsigned long long n = 0;
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    n += m_maskParticles[lvl]->numValidLocal();
+    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
+      const List<P>& maskParticles = (*m_maskParticles[lvl])[dit()].listItems();
+
+      n += (unsigned long long)maskParticles.length();
+    }
   }
 
   return n;
 }
 
 template <class P>
-size_t
+unsigned long long
 ParticleContainer<P>::getNumberOfMaskParticlesGlobal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfMaskParticlesGlobal");
 
   CH_assert(m_isDefined);
 
-  size_t n = 0;
+  const unsigned long long n = this->getNumberOfMaskParticlesLocal();
 
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    n += m_maskParticles[lvl]->numValid();
-  }
-
-  return n;
+  return ParallelOps::sum(n);
 }
 
 template <class P>
