@@ -925,9 +925,16 @@ MFHelmholtzOp::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
     MultifluidAlias::aliasMF(correction, op.first, a_correction);
     MultifluidAlias::aliasMF(coarseCorrection, op.first, a_coarseCorrection);
 
-    //    op.second->turnOffCFInterp(); // Don't need to interpolate ghost cells again.
+    // Don't need to update ghost cells or exchange again.
+    op.second->turnOffCFInterp();
+    op.second->turnOffCoarsening();
+    op.second->turnOffExchange();
+
     op.second->AMRUpdateResidual(residual, correction, coarseCorrection);
-    //    op.second->turnOnCFInterp();
+
+    op.second->turnOnCFInterp();
+    op.second->turnOnCoarsening();
+    op.second->turnOnExchange();
   }
 }
 
@@ -958,7 +965,16 @@ MFHelmholtzOp::AMRRestrict(LevelData<MFCellFAB>&       a_residualCoarse,
     MultifluidAlias::aliasMF(correction, op.first, a_correction);
     MultifluidAlias::aliasMF(coarseCorrection, op.first, a_coarseCorrection);
 
+    // Don't need to update ghost cells or exchange again.
+    op.second->turnOffCFInterp();
+    op.second->turnOffCoarsening();
+    op.second->turnOffExchange();
+
     op.second->AMRRestrict(residualCoarse, residual, correction, coarseCorrection, a_skip_res);
+
+    op.second->turnOnCFInterp();
+    op.second->turnOnCoarsening();
+    op.second->turnOnExchange();
   }
 }
 
