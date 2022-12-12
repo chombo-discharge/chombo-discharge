@@ -869,20 +869,17 @@ ParticleContainer<P>::preRegrid(const int a_lmin)
     MayDay::Error("ParticleContainer<P>::preRegrid - particles are sorted by cell!");
   }
 
-  // Backup of old grids.
-  m_oldGrids = m_grids;
-
-  // Populate the regrid particle data holder.
-  m_regridParticles.resize(1 + m_finestLevel);
+  // Fill cache particles on each level
+  m_cacheParticles.resize(1 + m_finestLevel);
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    m_regridParticles[lvl] = RefCountedPtr<ParticleData<P>>(
-      new ParticleData<P>(m_grids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
+    m_cacheParticles[lvl].clear();
 
     for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
-      List<P>& regridParticles = (*m_regridParticles[lvl])[dit()].listItems();
-      List<P>& particles       = (*m_particles[lvl])[dit()].listItems();
+      List<P>& p = (*m_particles[lvl])[dit()].listItems();
 
-      regridParticles.catenate(particles);
+      m_cacheParticles[lvl].catenate(p);
+
+      p.clear();
     }
   }
 }
@@ -906,8 +903,6 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     MayDay::Error("ParticleContainer<P>::regrid(...) - particles are sorted by cell!");
   }
 
-  Timer timer("ParticleContainer<P>::regrid");
-
   // Update this stuff
   m_grids       = a_grids;
   m_domains     = a_domains;
@@ -920,86 +915,56 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     m_dx[lvl] = a_dx[lvl] * RealVect::Unit;
   }
 
-  // Set up grids and data.
-  timer.startEvent("Grids & data");
   this->setupGrownGrids(a_lmin, m_finestLevel);
   this->setupParticleData(a_lmin, m_finestLevel);
-  timer.stopEvent("Grids & data");
 
-  // If a level was removed we put the particles that fell of the grids onto a temporary list on the new finest level.
-  const int oldFinestLevel = m_regridParticles.size() - 1;
+  const int oldFinestLevel = m_cacheParticles.size() - 1;
 
-  Vector<List<P>> cacheParticles(1 + m_finestLevel);
+  // If a level was removed, the length of m_cacheParticles exceeds the size of the new data holders. We need somewhere to put the particles
+  // on the grid levels that were removed -- just put them on the new finest level.
   if (m_finestLevel < oldFinestLevel) {
-    timer.startEvent("Cache particles");
-    List<P>& cacheFinest = cacheParticles[m_finestLevel];
+    List<P>& cacheFinest = m_cacheParticles[m_finestLevel];
     for (int lvl = m_finestLevel + 1; lvl <= oldFinestLevel; lvl++) {
+      List<P>& p = m_cacheParticles[lvl];
 
-      for (DataIterator dit(m_oldGrids[lvl]); dit.ok(); ++dit) {
-        List<P>& p = (*m_regridParticles[lvl])[dit()].listItems();
-
-        cacheFinest.catenate(p);
-      }
-    }
-    timer.stopEvent("Cache particles");
-  }
-
-  // Go through the new grids. Check if the old grids overlap with the new grids and if they do, move the particles around locally.
-  timer.startEvent("Local transfer");
-  for (int lvl = 0; lvl <= std::min(oldFinestLevel, m_finestLevel); lvl++) {
-    const DisjointBoxLayout& oldDBL = m_oldGrids[lvl];
-    const DisjointBoxLayout& newDBL = m_grids[lvl];
-
-    for (DataIterator ditOld(oldDBL); ditOld.ok(); ++ditOld) {
-
-      for (DataIterator ditNew(newDBL); ditNew.ok(); ++ditNew) {
-        const Box newBox = newDBL[ditNew()];
-        const Box oldBox = oldDBL[ditOld()];
-
-        // If old/new boxes overlap, transfer the particles from the old grid to the new grid.
-        if (newBox.intersects(oldBox)) {
-          List<P>&    oldParticles = (*m_regridParticles[lvl])[ditOld()].listItems();
-          ListBox<P>& newParticles = (*m_particles[lvl])[ditNew()];
-
-          newParticles.addItemsDestructive(oldParticles);
-        }
-      }
+      cacheFinest.catenate(p);
+      p.clear();
     }
   }
-  timer.stopEvent("Local transfer");
 
-  // Add the rest of the particles into the outcast lists. The same goes for the "cache" particles if we removed an AMR level. Then we remap
-  // on each level.
-  timer.startEvent("Level remap");
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+  // Add the particles from m_cacheParticles to each outcast list in m_particles. After we remap, many particles will be remapped to the correct level but the
+  // outcast list is probably not empty after this. For example, we could have removed a grid patch on level 'lvl' and the particles in that grid patch will
+  // still be in the outcast list on level 'lvl' after remapping.
+  for (int lvl = 0; lvl <= a_newFinestLevel; lvl++) {
     List<P>& outcast = m_particles[lvl]->outcast();
 
-    // Add particles from the "cache" and then from the old grids.
-    outcast.catenate(cacheParticles[lvl]);
-
+    // Add particles from cache
     if (lvl <= oldFinestLevel) {
-      for (DataIterator dit(m_oldGrids[lvl]); dit.ok(); ++dit) {
-        List<P>& oldParticles = (*m_regridParticles[lvl])[dit()].listItems();
-
-        outcast.catenate(oldParticles);
-      }
+      outcast.catenate(m_cacheParticles[lvl]);
+      m_cacheParticles[lvl].clear();
     }
 
     m_particles[lvl]->remapOutcast();
   }
-  timer.stopEvent("Level remap");
 
-  // Now do the AMR remap.
-  timer.startEvent("AMR remap");
-  this->remap();
-  timer.stopEvent("AMR remap");
+  // If grids were removed the fine particle outcast list is definitely not empty. Transfer fine particles
+  // to the outcast list below and remap the coarse level again. Some of these particles may be outside the
+  // coar level PVR, but that is taken care of later. After this, only the outcast list on lvl = 0 has particles.
+  for (int lvl = a_newFinestLevel; lvl > 0; lvl--) {
+    List<P>& fineParticles = m_particles[lvl]->outcast();
+    List<P>& coarParticles = m_particles[lvl - 1]->outcast();
 
-  // Discard the transient data holder.
-  m_regridParticles.resize(0);
+    coarParticles.catenate(fineParticles);
+    fineParticles.clear();
 
-  if (m_profile) {
-    timer.eventReport(pout(), false);
+    m_particles[lvl - 1]->remapOutcast();
   }
+
+  // At this point all the particles have been moved to their correct patches, but the PVR is so far not respected. We call ::remap to ensure that
+  // particles that fall off their level's PVR are put in the correct place.
+  this->remap();
+
+  m_cacheParticles.resize(0);
 }
 
 template <class P>

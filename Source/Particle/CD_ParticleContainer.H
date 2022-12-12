@@ -618,6 +618,12 @@ protected:
   mutable AMRParticles<P> m_maskParticles;
 
   /*!
+    @brief Cache particles. Use during pre-regrid operations, and for transferring particles between coarse and fine before
+    deposition steps. 
+  */
+  Vector<List<P>> m_cacheParticles;
+
+  /*!
     @brief Particles stored on the old grid. 
     @details Populated during the preRegrid call.
   */
