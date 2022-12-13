@@ -844,13 +844,21 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
           // Particle bumped into something.
           if (contactDomain || contactEB) {
             if (sEB <= sDomain) { // Crashed with EB "first".
-              particle.position() = oldPos + sEB * path;
+              const RealVect newPos = oldPos + sEB * path;
 
+              // If we delete the original particles we can just transfer the one we have. Otherwise we create
+              // a new particle.
               if (a_deleteParticles) {
+                particle.position() = newPos;
+
                 ebParticles.transfer(lit);
               }
               else {
-                ebParticles.add(lit());
+                P p = lit();
+
+                p.position() = newPos;
+
+                ebParticles.add(p);
 
                 lit++;
               }
@@ -859,13 +867,19 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
               // Crashed with domain "first". Safety factor is to prevent particles falling off the high side of the domain
               const Real sSafety = std::max((Real)0.0, sDomain - safety);
 
-              particle.position() = oldPos + sSafety * path;
+              const RealVect newPos = oldPos + sSafety * path;
 
               if (a_deleteParticles) {
+                particle.position() = newPos;
+
                 domainParticles.transfer(lit);
               }
               else {
-                domainParticles.add(lit());
+                P p = lit();
+
+                p.position() = newPos;
+
+                domainParticles.add(p);
 
                 ++lit;
               }
@@ -997,13 +1011,19 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
           if (contactDomain || contactEB) {
             if (sEB <= sDomain) {
               // Crashed with EB "first".
-              particle.position() = oldPos + sEB * path;
+              const RealVect newPos = oldPos + sEB * path;
 
               if (a_deleteParticles) {
+                particle.position() = newPos;
+
                 ebParticles.transfer(lit);
               }
               else {
-                ebParticles.add(lit());
+                P p = particle;
+
+                p.position() = newPos;
+
+                ebParticles.add(p);
 
                 ++lit;
               }
@@ -1015,10 +1035,16 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
               particle.position() = oldPos + sSafety * path;
 
               if (a_deleteParticles) {
+                particle.position() = newPos;
+
                 domainParticles.transfer(lit);
               }
               else {
-                domainParticles.add(lit());
+                P p = particle;
+
+                p.position() = newPos;
+
+                domainParticles.add(p);
 
                 ++lit;
               }
