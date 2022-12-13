@@ -276,7 +276,7 @@ ItoPlasmaStreamerTagger.verbosity         = -1           # Verbosity
 ItoPlasmaStreamerTagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
 ItoPlasmaStreamerTagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
 ItoPlasmaStreamerTagger.box1_hi           = 0.0 0.0 0.0  # these two corners
-ItoPlasmaStreamerTagger.buffer            = 8           # Grow tagged cells
+ItoPlasmaStreamerTagger.buffer            = 0           # Grow tagged cells
 
 ItoPlasmaStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
 ItoPlasmaStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
