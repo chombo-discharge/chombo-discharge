@@ -2431,11 +2431,12 @@ Driver::writeCheckpointFile()
 
   // Write header containing time step information, grid resolution, etc.
   HDF5HeaderData header;
-  header.m_real["coarsest_dx"] = m_amr->getDx()[0];
-  header.m_real["time"]        = m_time;
-  header.m_real["dt"]          = m_dt;
-  header.m_int["step"]         = m_timeStep;
-  header.m_int["finestLevel"]  = finestLevel;
+  header.m_int["finest_eb_lvl"] = m_amr->getMaxAmrDepth();
+  header.m_real["coarsest_dx"]  = m_amr->getDx()[0];
+  header.m_real["time"]         = m_time;
+  header.m_real["dt"]           = m_dt;
+  header.m_int["step"]          = m_timeStep;
+  header.m_int["finestLevel"]   = finestLevel;
 
   // Write realm names -- these are needed because we also write computational loads to checkpoint files
   // so we can load balance on immediately restart, using the checkpointed loads.
@@ -2596,6 +2597,13 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
   const Real coarsestDx  = header.m_real["coarsest_dx"];
   const int  baseLevel   = 0;
   const int  finestLevel = header.m_int["finestLevel"];
+  const int  prevMaxEB   = header.m_int["finest_eb_lvl"];
+
+  if (prevMaxEB != m_amr->getMaxAmrDepth()) {
+    const std::string err = "Driver::readCheckpointFile -- max EB level changed. Proceed at your own peril";
+
+    MayDay::Warning(err.c_str());
+  }
 
   // Get the names of the realms that were checkpointed. This is a part of the HDF header.
   std::map<std::string, Vector<Vector<long int>>> checkpointedLoads;
