@@ -135,6 +135,16 @@ namespace Physics {
       };
 
       /*!
+	@brief If true, then the particles are checkpointed so we can regrid on checkpoint-restart.
+      */
+      bool m_writeCheckpointParticles;
+
+      /*!
+	@brief If true, then the HDF5 checkpoint file contained particles that we can read.
+      */
+      bool m_readCheckpointParticles;
+
+      /*!
 	@brief Previous time step.
       */
       Real m_prevDt;
@@ -164,6 +174,12 @@ namespace Physics {
       */
       virtual void
       parseAlgorithm() noexcept;
+
+      /*!
+	@brief Parse checkpoint-restart functionality.
+      */
+      virtual void
+      parseRegridOnRestart() noexcept;
 
       /*!
 	@brief Set the starting positions for the ItoSolver particles

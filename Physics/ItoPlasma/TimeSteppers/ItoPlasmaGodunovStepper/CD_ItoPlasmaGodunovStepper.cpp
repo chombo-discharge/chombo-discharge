@@ -27,8 +27,10 @@ ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>
 {
   CH_TIME("ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper");
 
-  m_name   = "ItoPlasmaGodunovStepper";
-  m_prevDt = 0.0;
+  m_name                     = "ItoPlasmaGodunovStepper";
+  m_prevDt                   = 0.0;
+  m_writeCheckpointParticles = true;
+  m_readCheckpointParticles  = false;
 
   this->parseOptions();
 }
@@ -134,6 +136,19 @@ ItoPlasmaGodunovStepper::parseAlgorithm() noexcept
   else {
     MayDay::Abort("ItoPlasmaGodunovStepper::parseAlgorithm - unknown algorithm requested");
   }
+}
+
+void
+ItoPlasmaGodunovStepper::parseRegridOnRestart() noexcept
+{
+  CH_TIME("ItoPlasmaGodunovStepper::parseRegridOnRestart");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::parseRegridOnRestart" << endl;
+  }
+
+  ParmParse pp(m_name.c_str());
+
+  pp.query("checkpoint_particles", m_writeCheckpointParticles);
 }
 
 Real
@@ -1100,7 +1115,8 @@ ItoPlasmaGodunovStepper::writeCheckpointHeader(HDF5HeaderData& a_header) const
     pout() << m_name + "::writeCheckpointHeader" << endl;
   }
 
-  a_header.m_real["prev_dt"] = m_prevDt;
+  a_header.m_real["prev_dt"]             = m_prevDt;
+  a_header.m_int["checkpoint_particles"] = m_writeCheckpointParticles ? 1 : 0;
 }
 #endif
 
@@ -1113,7 +1129,8 @@ ItoPlasmaGodunovStepper::readCheckpointHeader(HDF5HeaderData& a_header)
     pout() << m_name + "::readCheckpointHeader" << endl;
   }
 
-  m_prevDt = a_header.m_real["prev_dt"];
+  m_prevDt                  = a_header.m_real["prev_dt"];
+  m_readCheckpointParticles = (a_header.m_int["checkpoint_particles"] != 0) ? true : false;
 }
 #endif
 
@@ -1129,15 +1146,17 @@ ItoPlasmaGodunovStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_l
   ItoPlasmaStepper::writeCheckpointData(a_handle, a_lvl);
 
   // Write the point-particles.
-  for (int i = 0; i < m_physics->getNumPlasmaSpecies(); i++) {
-    const std::string identifierSigma = "ItoPlasmaGodunovStepper::conductivityParticles_" + std::to_string(i);
-    const std::string identifierRho   = "ItoPlasmaGodunovStepper::spaceChargeParticles_" + std::to_string(i);
+  if (m_writeCheckpointParticles) {
+    for (int i = 0; i < m_physics->getNumPlasmaSpecies(); i++) {
+      const std::string identifierSigma = "ItoPlasmaGodunovStepper::conductivityParticles_" + std::to_string(i);
+      const std::string identifierRho   = "ItoPlasmaGodunovStepper::spaceChargeParticles_" + std::to_string(i);
 
-    const ParticleContainer<PointParticle>& conductivityParticles = *m_conductivityParticles[i];
-    const ParticleContainer<PointParticle>& rhoDaggerParticles    = *m_rhoDaggerParticles[i];
+      const ParticleContainer<PointParticle>& conductivityParticles = *m_conductivityParticles[i];
+      const ParticleContainer<PointParticle>& rhoDaggerParticles    = *m_rhoDaggerParticles[i];
 
-    writeParticlesToHDF(a_handle, conductivityParticles[a_lvl], identifierSigma);
-    writeParticlesToHDF(a_handle, rhoDaggerParticles[a_lvl], identifierRho);
+      writeParticlesToHDF(a_handle, conductivityParticles[a_lvl], identifierSigma);
+      writeParticlesToHDF(a_handle, rhoDaggerParticles[a_lvl], identifierRho);
+    }
   }
 }
 #endif
@@ -1153,16 +1172,18 @@ ItoPlasmaGodunovStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lv
 
   ItoPlasmaStepper::readCheckpointData(a_handle, a_lvl);
 
-  // Write the point-particles.z
-  for (int i = 0; i < m_physics->getNumPlasmaSpecies(); i++) {
-    const std::string identifierSigma = "ItoPlasmaGodunovStepper::conductivityParticles_" + std::to_string(i);
-    const std::string identifierRho   = "ItoPlasmaGodunovStepper::spaceChargeParticles_" + std::to_string(i);
+  // Write the point-particles.
+  if (m_readCheckpointParticles) {
+    for (int i = 0; i < m_physics->getNumPlasmaSpecies(); i++) {
+      const std::string identifierSigma = "ItoPlasmaGodunovStepper::conductivityParticles_" + std::to_string(i);
+      const std::string identifierRho   = "ItoPlasmaGodunovStepper::spaceChargeParticles_" + std::to_string(i);
 
-    ParticleContainer<PointParticle>& conductivityParticles = *m_conductivityParticles[i];
-    ParticleContainer<PointParticle>& rhoDaggerParticles    = *m_rhoDaggerParticles[i];
+      ParticleContainer<PointParticle>& conductivityParticles = *m_conductivityParticles[i];
+      ParticleContainer<PointParticle>& rhoDaggerParticles    = *m_rhoDaggerParticles[i];
 
-    readParticlesFromHDF(a_handle, conductivityParticles[a_lvl], identifierSigma);
-    readParticlesFromHDF(a_handle, rhoDaggerParticles[a_lvl], identifierRho);
+      readParticlesFromHDF(a_handle, conductivityParticles[a_lvl], identifierSigma);
+      readParticlesFromHDF(a_handle, rhoDaggerParticles[a_lvl], identifierRho);
+    }
   }
 }
 #endif
