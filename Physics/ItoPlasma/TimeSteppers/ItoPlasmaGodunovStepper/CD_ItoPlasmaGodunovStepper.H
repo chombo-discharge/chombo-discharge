@@ -87,6 +87,44 @@ namespace Physics {
       virtual void
       regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
+#ifdef CH_USE_HDF5
+      /*!
+	@brief Read header data from checkpoint file.
+	@param[inout] a_header HDF5 header.
+      */
+      virtual void
+      readCheckpointHeader(HDF5HeaderData& a_header) override;
+#endif
+
+#ifdef CH_USE_HDF5
+      /*!
+	@brief Write header data to checkpoint file.
+	@param[inout] a_header HDF5 header.
+      */
+      virtual void
+      writeCheckpointHeader(HDF5HeaderData& a_header) const override;
+#endif
+
+#ifdef CH_USE_HDF5
+      /*!  
+	@brief Write checkpoint data to file
+	@param[inout] a_handle HDF5 fil
+	@param[in]    a_lvl    Grid level
+      */
+      virtual void
+      writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
+#endif
+
+#ifdef CH_USE_HDF5
+      /*!
+	@brief Read checkpoint data from file
+	@param[inout] a_handle HDF5 file
+	@param[in]    a_lvl    Grid level
+      */
+      virtual void
+      readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+#endif
+
     protected:
       /*!
 	@brief Simple enum for distinguishing between algorithms

@@ -150,6 +150,24 @@ namespace Physics {
       setupSigma();
 
 #ifdef CH_USE_HDF5
+      /*!
+	@brief Read header data from checkpoint file.
+	@param[inout] a_header HDF5 header.
+      */
+      virtual void
+      readCheckpointHeader(HDF5HeaderData& a_header);
+#endif
+
+#ifdef CH_USE_HDF5
+      /*!
+	@brief Write header data to checkpoint file.
+	@param[inout] a_header HDF5 header.
+      */
+      virtual void
+      writeCheckpointHeader(HDF5HeaderData& a_header) const override;
+#endif
+
+#ifdef CH_USE_HDF5
       /*!  
 	@brief Write checkpoint data to file
 	@param[inout] a_handle HDF5 fil
@@ -962,6 +980,22 @@ namespace Physics {
       };
 
       /*!
+	@brief Enum for switching between cut-cell reaction/transport algorithms
+	@details This exists so we can switch between algorithms in the cut-cells. There's no unique way of coupling the reactions and transport
+	in the cut-cells, so we provide two common options. 
+
+	ValidRegion means that only particles that fall on the "correct" side of the EB are included in the simulation. This means that 1) We remove
+	all particles that cross the EB and 2) Only particles on the "correct" side of the EB are allowed to react.
+	
+	FullCell means that all particles in the cut-cell are allowed to react.
+      */
+      enum class CutCellCoupling
+      {
+        ValidRegion,
+        FullCell
+      };
+
+      /*!
 	@brief Box sorting method when using dual-grid with particle load balancing.
       */
       BoxSorting m_boxSort;
@@ -970,6 +1004,11 @@ namespace Physics {
 	@brief Time code for understanding how the time step was restricted. 
       */
       TimeCode m_timeCode;
+
+      /*!
+	@brief For switching between algorithms in the cut-cells
+      */
+      CutCellCoupling m_cutCellCoupling;
 
       /*!
 	@brief Realm used for the fluid part (i.e., electrostatic) part of the simulation

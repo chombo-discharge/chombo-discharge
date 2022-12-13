@@ -27,7 +27,8 @@ ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>
 {
   CH_TIME("ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper");
 
-  m_name = "ItoPlasmaGodunovStepper";
+  m_name   = "ItoPlasmaGodunovStepper";
+  m_prevDt = 0.0;
 
   this->parseOptions();
 }
@@ -176,8 +177,21 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   // Do intersection test and remove particles that struck the EB or domain. Transfer them to appropriate containers. Then recompute the number of particles per cell.
   this->barrier();
   m_timer.startEvent("EB/Particle intersection");
-  const bool deleteParticles = true;
-  this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, deleteParticles);
+  switch (m_cutCellCoupling) {
+  case CutCellCoupling::ValidRegion: {
+    this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, true);
+
+    break;
+  }
+  case CutCellCoupling::FullCell: {
+    this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, false);
+
+    break;
+  }
+  default: {
+    MayDay::Error("ItoPlasmaGodunovStepper::advance -- unsupported algorithm for particle intersection");
+  }
+  }
   this->getPhysicalParticlesPerCell(m_newPPC);
   m_timer.stopEvent("EB/Particle intersection");
 
@@ -227,10 +241,24 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
   m_timer.stopEvent("Sort by patch");
 
-  // Remove particles that are inside the EB.
+  // Remove particles that are inside the EB. This depends on the algorithm.
   this->barrier();
   m_timer.startEvent("Remove covered");
-  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Discrete, m_toleranceEB);
+  switch (m_cutCellCoupling) {
+  case CutCellCoupling::ValidRegion: {
+    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Voxel, m_toleranceEB);
+
+    break;
+  }
+  case CutCellCoupling::FullCell: {
+    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Voxel, m_toleranceEB);
+
+    break;
+  }
+  default: {
+    MayDay::Error("ItoPlasmaGodunovStepper::advance -- unsupported algorithm for covered particle removal");
+  }
+  }
   m_timer.stopEvent("Remove covered");
 
   // Clear other data holders for now.
@@ -1026,5 +1054,81 @@ ItoPlasmaGodunovStepper::stepEulerMaruyama(const Real a_dt) noexcept
     }
   }
 }
+
+#ifdef CH_USE_HDF5
+void
+ItoPlasmaGodunovStepper::writeCheckpointHeader(HDF5HeaderData& a_header) const
+{
+  CH_TIME("ItoPlasmaGodunovStepper::writeCheckpointHeader");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::writeCheckpointHeader" << endl;
+  }
+
+  a_header.m_real["prev_dt"] = m_prevDt;
+}
+#endif
+
+#ifdef CH_USE_HDF5
+void
+ItoPlasmaGodunovStepper::readCheckpointHeader(HDF5HeaderData& a_header)
+{
+  CH_TIME("ItoPlasmaGodunovStepper::readCheckpointHeader");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::readCheckpointHeader" << endl;
+  }
+
+  m_prevDt = a_header.m_real["prev_dt"];
+}
+#endif
+
+#ifdef CH_USE_HDF5
+void
+ItoPlasmaGodunovStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const
+{
+  CH_TIME("ItoPlasmaGodunovStepper::writeCheckpointData");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::writeCheckpointData" << endl;
+  }
+
+  ItoPlasmaStepper::writeCheckpointData(a_handle, a_lvl);
+
+  // Write the point-particles.
+  for (int i = 0; i < m_physics->getNumPlasmaSpecies(); i++) {
+    const std::string identifierSigma = "ItoPlasmaGodunovStepper::conductivityParticles_" + std::to_string(i);
+    const std::string identifierRho   = "ItoPlasmaGodunovStepper::spaceChargeParticles_" + std::to_string(i);
+
+    const ParticleContainer<PointParticle>& conductivityParticles = *m_conductivityParticles[i];
+    const ParticleContainer<PointParticle>& rhoDaggerParticles    = *m_rhoDaggerParticles[i];
+
+    writeParticlesToHDF(a_handle, conductivityParticles[a_lvl], identifierSigma);
+    writeParticlesToHDF(a_handle, rhoDaggerParticles[a_lvl], identifierRho);
+  }
+}
+#endif
+
+#ifdef CH_USE_HDF5
+void
+ItoPlasmaGodunovStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
+{
+  CH_TIME("ItoPlasmaGodunovStepper::readCheckpointData");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::readCheckpointData" << endl;
+  }
+
+  ItoPlasmaStepper::readCheckpointData(a_handle, a_lvl);
+
+  // Write the point-particles.z
+  for (int i = 0; i < m_physics->getNumPlasmaSpecies(); i++) {
+    const std::string identifierSigma = "ItoPlasmaGodunovStepper::conductivityParticles_" + std::to_string(i);
+    const std::string identifierRho   = "ItoPlasmaGodunovStepper::spaceChargeParticles_" + std::to_string(i);
+
+    ParticleContainer<PointParticle>& conductivityParticles = *m_conductivityParticles[i];
+    ParticleContainer<PointParticle>& rhoDaggerParticles    = *m_rhoDaggerParticles[i];
+
+    readParticlesFromHDF(a_handle, conductivityParticles[a_lvl], identifierSigma);
+    readParticlesFromHDF(a_handle, rhoDaggerParticles[a_lvl], identifierRho);
+  }
+}
+#endif
 
 #include <CD_NamespaceFooter.H>

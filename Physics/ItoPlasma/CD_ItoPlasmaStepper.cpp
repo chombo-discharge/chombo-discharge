@@ -42,6 +42,7 @@ ItoPlasmaStepper::ItoPlasmaStepper()
   m_loadPerCell             = 1.0;
   m_useNewReactionAlgorithm = true;
   m_regridSuperparticles    = true;
+  m_cutCellCoupling         = CutCellCoupling::ValidRegion;
   m_fluidRealm              = Realm::Primal;
   m_particleRealm           = Realm::Primal;
   m_advectionCFL            = 1.0;
@@ -311,7 +312,20 @@ ItoPlasmaStepper::parseParametersEB() noexcept
 
   ParmParse pp(m_name.c_str());
 
+  std::string str;
+
   pp.get("eb_tolerance", m_toleranceEB);
+  pp.get("eb_coupling", str);
+
+  if (str == "valid_region") {
+    m_cutCellCoupling = CutCellCoupling::ValidRegion;
+  }
+  else if (str == "full_cell") {
+    m_cutCellCoupling = CutCellCoupling::FullCell;
+  }
+  else {
+    MayDay::Error("ItoPlasmaStepper::parseParametersEB -- logic bust for 'eb_coupling'");
+  }
 }
 
 void
@@ -609,6 +623,28 @@ ItoPlasmaStepper::postCheckpointPoisson()
   // Set up the Poisson solver
   m_fieldSolver->setupSolver();
 }
+
+#ifdef CH_USE_HDF5
+void
+ItoPlasmaStepper::writeCheckpointHeader(HDF5HeaderData& a_header) const
+{
+  CH_TIME("ItoPlasmaStepper::writeCheckpointHeader");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::writeCheckpointHeader" << endl;
+  }
+}
+#endif
+
+#ifdef CH_USE_HDF5
+void
+ItoPlasmaStepper::readCheckpointHeader(HDF5HeaderData& a_header)
+{
+  CH_TIME("ItoPlasmaStepper::readCheckpointHeader");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::readCheckpointHeader" << endl;
+  }
+}
+#endif
 
 #ifdef CH_USE_HDF5
 void
@@ -2584,8 +2620,19 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
       for (ListIterator<ItoParticle> lit(cellParticles(iv, 0)); lit.ok(); ++lit) {
         const RealVect& pos = lit().position();
 
-        if ((pos - physCentroid).dotProduct(normal) >= 0.0) {
+        switch (m_cutCellCoupling) {
+        case CutCellCoupling::ValidRegion: {
+          if ((pos - physCentroid).dotProduct(normal) >= 0.0) {
+            num += lit().weight();
+          }
+
+          break;
+        }
+        case CutCellCoupling::FullCell: {
           num += lit().weight();
+
+          break;
+        }
         }
       }
 
