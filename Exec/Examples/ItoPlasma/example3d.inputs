@@ -226,6 +226,7 @@ ItoPlasmaGodunovStepper.relax_dt_factor         = 500.           # Relaxation ti
 ItoPlasmaGodunovStepper.min_dt                  = 0.0            # Minimum permitted time step
 ItoPlasmaGodunovStepper.max_dt                  = 1.0            # Maximum permitted time step
 ItoPlasmaGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
+ItoPlasmaGodunovStepper.eb_coupling             = valid_region   # Cut-cell algorithmic coupling
 ItoPlasmaGodunovStepper.algorithm               = euler_maruyama # Integration algorithm. 'euler_maruyama' or 'trapezoidal'
 
 # ====================================================================================================

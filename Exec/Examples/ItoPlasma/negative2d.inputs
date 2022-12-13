@@ -226,13 +226,14 @@ ItoPlasmaGodunovStepper.relax_dt_factor         = 5000.          # Relaxation ti
 ItoPlasmaGodunovStepper.min_dt                  = 0.0            # Minimum permitted time step
 ItoPlasmaGodunovStepper.max_dt                  = 1.E99          # Maximum permitted time step
 ItoPlasmaGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
+ItoPlasmaGodunovStepper.eb_coupling             = valid_region   # Cut-cell algorithmic coupling
 ItoPlasmaGodunovStepper.algorithm               = euler_maruyama # Integration algorithm. 'euler_maruyama' or 'trapezoidal'
 
 # ====================================================================================================
 # ItoPlasmaAir3LFA class options
 # ====================================================================================================
 ItoPlasmaAir3LFA.debug     = true                # Turn on/off debugging
-ItoPlasmaAir3LFA.extrap_bc = true                # Use extrapolated BC or not
+ItoPlasmaAir3LFA.extrap_bc = false                # Use extrapolated BC or not
 
 # Initial data
 ItoPlasmaAir3LFA.init_particles  = 10000         # Number of initial particles
@@ -251,7 +252,7 @@ ItoPlasmaAir3LFA.ion_mobility    = 2E-4          # Turn on/off ion mobility
 ItoPlasmaAir3LFA.max_new_particles = 32          # Maximum number of computational particles to produce in reaction step
 ItoPlasmaAir3LFA.max_new_photons   = 512         # Maximum number of computational photons to produce in reaction step	
 ItoPlasmaAir3LFA.Ncrit          = 10             # How many firings away from a Negative particle number?
-ItoPlasmaAir3LFA.prop_eps       = 1.E99          # Maximum relative change in propensity function
+ItoPlasmaAir3LFA.prop_eps       = 1.0            # Maximum relative change in propensity function
 ItoPlasmaAir3LFA.NSSA           = 10             # How many SSA steps to run when tau-leaping is inefficient
 ItoPlasmaAir3LFA.SSAlim         = 10.0           # When to enter SSA instead of tau-leaping
 ItoPlasmaAir3LFA.algorithm      = hybrid         # 'tau', 'ssa', or 'hybrid'
