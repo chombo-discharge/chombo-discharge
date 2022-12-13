@@ -211,7 +211,7 @@ ItoPlasmaGodunovStepper.profile                 = true           # Turn on/off r
 ItoPlasmaGodunovStepper.abort_on_failure        = false          # Turn on/off abort on Poisson failure
 ItoPlasmaGodunovStepper.plt_vars                = none           # 'conductivity', 'current_density', 'particles_per_patch'
 ItoPlasmaGodunovStepper.dual_grid               = true           # Turn on/off dual-grid functionality
-ItoPlasmaGodunovStepper.load_balance_fluid      = true           # Turn on/off fluid realm load balancing. 
+ItoPlasmaGodunovStepper.load_balance_fluid      = false          # Turn on/off fluid realm load balancing. 
 ItoPlasmaGodunovStepper.load_balance_particles  = true           # Turn on/off particle load balancing
 ItoPlasmaGodunovStepper.load_indices            = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoPlasmaGodunovStepper.load_per_cell           = 1.0            # Default load per grid cell.
