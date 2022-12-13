@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoPlasma.potential = 60E3
+ItoPlasma.potential = 80E3
 ItoPlasma.basename  = pout
 
 # ====================================================================================================
@@ -62,7 +62,7 @@ Driver.restart                         = 0                # Restart step (less o
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
 Driver.refine_angles                   = 15.              # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = 0                # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_electrodes               = 3                # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = 0                # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
@@ -216,13 +216,13 @@ ItoPlasmaGodunovStepper.load_balance_particles  = true           # Turn on/off p
 ItoPlasmaGodunovStepper.load_indices            = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoPlasmaGodunovStepper.load_per_cell           = 1.0            # Default load per grid cell.
 ItoPlasmaGodunovStepper.box_sorting             = morton         # Box sorting when load balancing
-ItoPlasmaGodunovStepper.particles_per_cell      = 32             # Max computational particles per cell
+ItoPlasmaGodunovStepper.particles_per_cell      = 16             # Max computational particles per cell
 ItoPlasmaGodunovStepper.merge_interval          = 1              # Time steps between superparticle merging
 ItoPlasmaGodunovStepper.regrid_superparticles   = true           # Make superparticles during regrids
 ItoPlasmaGodunovStepper.advection_cfl           = 100.0          # Advective time step CFL restriction
 ItoPlasmaGodunovStepper.diffusion_cfl           = 100.0          # Diffusive time step CFL restriction
 ItoPlasmaGodunovStepper.advection_diffusion_cfl = 100.0          # Advection-diffusion time step CFL restriction
-ItoPlasmaGodunovStepper.relax_dt_factor         = 5000.          # Relaxation time step restriction. 
+ItoPlasmaGodunovStepper.relax_dt_factor         = 1000.          # Relaxation time step restriction. 
 ItoPlasmaGodunovStepper.min_dt                  = 0.0            # Minimum permitted time step
 ItoPlasmaGodunovStepper.max_dt                  = 1.E99          # Maximum permitted time step
 ItoPlasmaGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
@@ -242,15 +242,15 @@ ItoPlasmaAir3LFA.init_center     = 0 0 0         # Blob center
 ItoPlasmaAir3LFA.init_radius     = 500E-6        # Blob radius
 
 # For controlling the time step
-ItoPlasmaAir3LFA.dX              = 50.0          # Maximum relative change Xnew/Xold during one time step.
+ItoPlasmaAir3LFA.dX              = 100.0         # Maximum relative change Xnew/Xold during one time step.
 
 # Ion transport settings. 
-ItoPlasmaAir3LFA.ion_transport   = true          # By default, stationary ions. 
+ItoPlasmaAir3LFA.ion_transport   = false         # By default, stationary ions. 
 ItoPlasmaAir3LFA.ion_mobility    = 2E-4          # Turn on/off ion mobility
 
 # Kinetic Monte Carlo solver settings.
-ItoPlasmaAir3LFA.max_new_particles = 32          # Maximum number of computational particles to produce in reaction step
-ItoPlasmaAir3LFA.max_new_photons   = 128         # Maximum number of computational photons to produce in reaction step	
+ItoPlasmaAir3LFA.max_new_particles = 16          # Maximum number of computational particles to produce in reaction step
+ItoPlasmaAir3LFA.max_new_photons   = 16         # Maximum number of computational photons to produce in reaction step	
 ItoPlasmaAir3LFA.Ncrit          = 10             # How many firings away from a Negative particle number?
 ItoPlasmaAir3LFA.prop_eps       = 1.0            # Maximum relative change in propensity function
 ItoPlasmaAir3LFA.NSSA           = 10             # How many SSA steps to run when tau-leaping is inefficient
@@ -276,10 +276,10 @@ ItoPlasmaStreamerTagger.verbosity         = -1           # Verbosity
 ItoPlasmaStreamerTagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
 ItoPlasmaStreamerTagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
 ItoPlasmaStreamerTagger.box1_hi           = 0.0 0.0 0.0  # these two corners
-ItoPlasmaStreamerTagger.buffer            = 4           # Grow tagged cells
+ItoPlasmaStreamerTagger.buffer            = 8           # Grow tagged cells
 
-ItoPlasmaStreamerTagger.refine_curvature  = 10.0         # Curvature refinement
-ItoPlasmaStreamerTagger.coarsen_curvature = 100000.0     # Curvature coarsening	
+ItoPlasmaStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
+ItoPlasmaStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
 ItoPlasmaStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
-ItoPlasmaStreamerTagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
-ItoPlasmaStreamerTagger.max_coarsen_lvl   = 2            # Set max coarsening depth
+ItoPlasmaStreamerTagger.coarsen_alpha     = 0.2          # Set alpha coarsening. Higher => Less mesh
+ItoPlasmaStreamerTagger.max_coarsen_lvl   = 3            # Set max coarsening depth

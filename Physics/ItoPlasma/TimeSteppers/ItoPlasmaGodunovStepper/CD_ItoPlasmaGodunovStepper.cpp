@@ -747,8 +747,8 @@ ItoPlasmaGodunovStepper::computeCellConductivity(EBAMRCellData&                 
   DataOps::scale(a_conductivityCell, Units::Qe);
 
   // Coarsen, update ghost cells and interpolate to centroids
-  m_amr->conservativeAverage(a_conductivityCell, m_fluidRealm, m_plasmaPhase);
-  m_amr->interpGhostMG(a_conductivityCell, m_fluidRealm, m_plasmaPhase);
+  m_amr->arithmeticAverage(a_conductivityCell, m_fluidRealm, m_plasmaPhase);
+  m_amr->interpGhostPwl(a_conductivityCell, m_fluidRealm, m_plasmaPhase);
 
   m_amr->interpToCentroids(a_conductivityCell, m_fluidRealm, m_plasmaPhase);
 }
@@ -825,6 +825,7 @@ ItoPlasmaGodunovStepper::copyConductivityParticles(
     pout() << m_name + "::copyConductivityParticles" << endl;
   }
 
+  // Clear particles first.
   this->clearPointParticles(a_conductivityParticles, SpeciesSubset::All);
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -854,6 +855,24 @@ ItoPlasmaGodunovStepper::copyConductivityParticles(
             pointParticles.add(PointParticle(pos, weight * mobility));
           }
         }
+      }
+
+      // Remove the ones outside the domain.
+      switch (m_cutCellCoupling) {
+      case CutCellCoupling::ValidRegion: {
+        m_amr->removeCoveredParticlesDiscrete((*a_conductivityParticles[idx]), m_plasmaPhase, 0.0);
+
+        break;
+      }
+      case CutCellCoupling::FullCell: {
+        m_amr->removeCoveredParticlesVoxels((*a_conductivityParticles[idx]), m_plasmaPhase);
+
+        break;
+      }
+      default: {
+        MayDay::Error(
+          "ItoPlasmaGodunovStepper::copyConductivityParticles -- unsupported algorithm for particle removal");
+      }
       }
     }
   }
@@ -896,6 +915,23 @@ ItoPlasmaGodunovStepper::copyRhoDaggerParticles(
             pointParticles.add(PointParticle(pos, weight));
           }
         }
+      }
+
+      // Remove the ones outside the domain.
+      switch (m_cutCellCoupling) {
+      case CutCellCoupling::ValidRegion: {
+        m_amr->removeCoveredParticlesDiscrete((*a_rhoDaggerParticles[idx]), m_plasmaPhase, 0.0);
+
+        break;
+      }
+      case CutCellCoupling::FullCell: {
+        m_amr->removeCoveredParticlesVoxels((*a_rhoDaggerParticles[idx]), m_plasmaPhase);
+
+        break;
+      }
+      default: {
+        MayDay::Error("ItoPlasmaGodunovStepper::copyRhoDaggerParticles -- unsupported algorithm for particle removal");
+      }
       }
     }
   }
