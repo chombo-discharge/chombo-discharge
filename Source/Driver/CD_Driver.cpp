@@ -2443,6 +2443,9 @@ Driver::writeCheckpointFile()
     header.m_string[r] = r;
   }
 
+  // Time stepper writes necessary meta-data to header.
+  m_timeStepper->writeCheckpointHeader(header);
+
   // Create the output file name.
   char              str[100];
   const std::string prefix = m_outputDirectory + "/chk/" + m_outputFileNames;
@@ -2616,6 +2619,8 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
     }
     pout() << endl;
   }
+
+  m_timeStepper->readCheckpointHeader(header);
 
   // Abort if base resolution has changed.
   if (!(coarsestDx == m_amr->getDx()[0])) {

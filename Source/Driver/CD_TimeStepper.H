@@ -12,6 +12,9 @@
 #ifndef CD_TimeStepper_H
 #define CD_TimeStepper_H
 
+// Chombo includes
+#include <CH_HDF5.H>
+
 // Our includes
 #include <CD_ComputationalGeometry.H>
 #include <CD_MultiFluidIndexSpace.H>
@@ -99,6 +102,24 @@ public:
   */
   virtual void
   parseRuntimeOptions();
+
+#ifdef CH_USE_HDF5
+  /*!
+    @brief Read header data from checkpoint file.
+    @param[inout] a_header HDF5 header.
+  */
+  virtual void
+  readCheckpointHeader(HDF5HeaderData& a_header);
+#endif
+
+#ifdef CH_USE_HDF5
+  /*!
+    @brief Write header data to checkpoint file.
+    @param[inout] a_header HDF5 header.
+  */
+  virtual void
+  writeCheckpointHeader(HDF5HeaderData& a_header) const;
+#endif
 
 #ifdef CH_USE_HDF5
   /*!  
