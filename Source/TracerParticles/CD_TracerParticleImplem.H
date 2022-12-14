@@ -23,11 +23,11 @@ inline TracerParticle<M, N>::TracerParticle()
   this->m_weight   = 0.0;
   this->m_velocity = RealVect::Zero;
 
-  for (auto& s : this->m_compileTimeScalars) {
+  for (auto& s : this->m_scalars) {
     s = 0.0;
   }
 
-  for (auto& v : this->m_compileTimeVectors) {
+  for (auto& v : this->m_vectors) {
     v = RealVect::Zero;
   }
 }
@@ -35,11 +35,11 @@ inline TracerParticle<M, N>::TracerParticle()
 template <size_t M, size_t N>
 inline TracerParticle<M, N>::TracerParticle(const TracerParticle<M, N>& a_other)
 {
-  this->m_position           = a_other.m_position;
-  this->m_weight             = a_other.m_weight;
-  this->m_velocity           = a_other.m_velocity;
-  this->m_compileTimeScalars = a_other.m_compileTimeScalars;
-  this->m_compileTimeVectors = a_other.m_compileTimeVectors;
+  this->m_position = a_other.m_position;
+  this->m_weight   = a_other.m_weight;
+  this->m_velocity = a_other.m_velocity;
+  this->m_scalars  = a_other.m_scalars;
+  this->m_vectors  = a_other.m_vectors;
 }
 
 template <size_t M, size_t N>
@@ -93,14 +93,14 @@ TracerParticle<M, N>::linearOut(void* buf) const
 	 *buffer++ = this->m_position[1];,
 	 *buffer++ = this->m_position[2];);
 
-  // Linearize m_compileTimeScalars onto the buffer
+  // Linearize m_scalars onto the buffer
   for (size_t i = 0; i < M; i++) {
-    *buffer++ = this->m_compileTimeScalars[i];
+    *buffer++ = this->m_scalars[i];
   }
 
   // Linearize vectors onto the buffer
   for (size_t i = 0; i < N; i++) {
-    const RealVect& v = this->m_compileTimeVectors[i];
+    const RealVect& v = this->m_vectors[i];
 
     D_TERM(*buffer++ = v[0];, *buffer++ = v[1];, *buffer++ = v[2];);
   }
@@ -130,12 +130,12 @@ TracerParticle<M, N>::linearIn(void* buf)
 
   // Linearize buffer onto scalars
   for (size_t i = 0; i < M; i++) {
-    this->m_compileTimeScalars[i] = *buffer++;
+    this->m_scalars[i] = *buffer++;
   }
 
   // Linearize buffer onto vectors
   for (size_t i = 0; i < N; i++) {
-    RealVect& v = this->m_compileTimeVectors[i];
+    RealVect& v = this->m_vectors[i];
 
     D_TERM(v[0] = *buffer++;,
 	   v[1] = *buffer++;,
