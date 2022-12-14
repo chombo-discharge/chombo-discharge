@@ -145,6 +145,12 @@ namespace Physics {
       bool m_readCheckpointParticles;
 
       /*!
+	@brief If true, then the class supports regrid-on-restart
+	@details This is populated in the constructor or when reading the checkpoint file. 
+      */
+      bool m_canRegridOnRestart;
+
+      /*!
 	@brief Previous time step.
       */
       Real m_prevDt;
@@ -179,7 +185,7 @@ namespace Physics {
 	@brief Parse checkpoint-restart functionality.
       */
       virtual void
-      parseRegridOnRestart() noexcept;
+      parseCheckpointParticles() noexcept;
 
       /*!
 	@brief Set the starting positions for the ItoSolver particles

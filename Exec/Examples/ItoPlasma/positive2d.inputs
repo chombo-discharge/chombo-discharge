@@ -206,7 +206,7 @@ RodDielectric.sphere.radius             = 0.5           # Radius
 # ==================================================================================================== 
 # ItoPlasmaGodunovStepper class options
 # ====================================================================================================
-ItoPlasmaGodunovStepper.checkpoint_particles    = false          # If true, regrid on restart is supported (otherwise it's not)
+ItoPlasmaGodunovStepper.checkpoint_particles    = true           # If true, regrid on restart is supported (otherwise it's not)
 ItoPlasmaGodunovStepper.verbosity               = -1             # Verbosity
 ItoPlasmaGodunovStepper.profile                 = true           # Turn on/off run-time profiling
 ItoPlasmaGodunovStepper.abort_on_failure        = false          # Turn on/off abort on Poisson failure

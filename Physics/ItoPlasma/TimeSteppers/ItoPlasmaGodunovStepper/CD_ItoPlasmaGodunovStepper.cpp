@@ -29,8 +29,9 @@ ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>
 
   m_name                     = "ItoPlasmaGodunovStepper";
   m_prevDt                   = 0.0;
-  m_writeCheckpointParticles = true;
+  m_writeCheckpointParticles = false;
   m_readCheckpointParticles  = false;
+  m_canRegridOnRestart       = true;
 
   this->parseOptions();
 }
@@ -96,6 +97,7 @@ ItoPlasmaGodunovStepper::parseOptions()
   ItoPlasmaStepper::parseOptions();
 
   this->parseAlgorithm();
+  this->parseCheckpointParticles();
 }
 
 void
@@ -109,6 +111,7 @@ ItoPlasmaGodunovStepper::parseRuntimeOptions()
   ItoPlasmaStepper::parseRuntimeOptions();
 
   this->parseAlgorithm();
+  this->parseCheckpointParticles();
 
   m_ito->parseRuntimeOptions();
   m_fieldSolver->parseRuntimeOptions();
@@ -139,11 +142,11 @@ ItoPlasmaGodunovStepper::parseAlgorithm() noexcept
 }
 
 void
-ItoPlasmaGodunovStepper::parseRegridOnRestart() noexcept
+ItoPlasmaGodunovStepper::parseCheckpointParticles() noexcept
 {
-  CH_TIME("ItoPlasmaGodunovStepper::parseRegridOnRestart");
+  CH_TIME("ItoPlasmaGodunovStepper::parseCheckpointParticles");
   if (m_verbosity > 5) {
-    pout() << m_name + "::parseRegridOnRestart" << endl;
+    pout() << m_name + "::parseCheckpointParticles" << endl;
   }
 
   ParmParse pp(m_name.c_str());
@@ -158,6 +161,11 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   if (m_verbosity > 5) {
     pout() << m_name + "::advance" << endl;
   }
+
+  // Special flag for telling the class that we have the necessary things in place for doing a regrid. This is
+  // an if-but-maybe situation where the user chose not to checkpoint the particles we need for regrids, yet tries
+  // to restart a simulation and regrid without all the prerequisites being in place.
+  m_canRegridOnRestart = true;
 
   m_timer = Timer("ItoPlasmaGodunovStepper::advance");
 
@@ -331,6 +339,17 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   CH_TIME("ItoPlasmaGodunovStepper::regrid");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaGodunovStepper::regrid" << endl;
+  }
+
+  // A special flag for aborting the simulation if the user did NOT put checkpoint particles in the checkpoint
+  // file but still try to regrid on restart.
+  if (!m_canRegridOnRestart) {
+    const std::string baseErr = "ItoPlasmaGodunovStepper::regrid -- can't regrid because";
+    const std::string err1    = "checkpoint file does not contain particles. Set Driver.initial_regrids=0";
+
+    pout() << baseErr + err1 << endl;
+
+    MayDay::Error((baseErr + err1).c_str());
   }
 
   // Regrid solvers
@@ -1131,6 +1150,7 @@ ItoPlasmaGodunovStepper::readCheckpointHeader(HDF5HeaderData& a_header)
 
   m_prevDt                  = a_header.m_real["prev_dt"];
   m_readCheckpointParticles = (a_header.m_int["checkpoint_particles"] != 0) ? true : false;
+  m_canRegridOnRestart      = m_readCheckpointParticles;
 }
 #endif
 
