@@ -876,26 +876,22 @@ ItoPlasmaStepper::printStepReport()
   }
 
   // Print the step report.
+  // clang-format off
+  const std::string whitespace = "                                   ";
   pout() << "                                   " + str << endl;
-  pout() << "                                   Emax        = " << Emax << endl
-         << "                                   Max density = " << maxDensity << " (" << maxSolver << ")" << endl
-         << "                                   CFL         = " << m_dt / m_advectionDiffusionDt << endl
-         << "                                   Relax time  = " << m_dt / m_relaxationTime << endl
-         << "                                   #Particles  = " << localParticlesBulk << " (" << globalParticlesBulk
-         << ")" << endl
-         << "                                   #EB part.   = " << localParticlesEB << " (" << globalParticlesEB << ")"
-         << endl
-         << "                                   #Dom. part. = " << localParticlesDomain << " (" << globalParticlesDomain
-         << ")" << endl
-         << "                                   #Src. part. = " << localParticlesSource << " (" << globalParticlesSource
-         << ")" << endl
-         << "                                   #Min part.  = " << minParticles << " (on rank = " << minRank << ")"
-         << endl
-         << "                                   #Max part.  = " << maxParticles << " (on rank = " << maxRank << ")"
-         << endl
-         << "                                   #Avg. part. = " << avgParticles << endl
-         << "                                   #Dev. part. = " << stdDev << " (" << 100. * stdDev / avgParticles
-         << "%)" << endl;
+  pout() << whitespace + "Emax        = " << Emax << endl
+         << whitespace + "Max density = " << maxDensity << " (" << maxSolver << ")" << endl
+         << whitespace + "CFL         = " << m_dt / m_advectionDiffusionDt << endl
+         << whitespace + "Relax time  = " << m_dt / m_relaxationTime << endl
+         << whitespace + "#Particles  = " << DischargeIO::numberFmt(localParticlesBulk) << " (" << DischargeIO::numberFmt(globalParticlesBulk) << ")" << endl
+         << whitespace + "#EB part.   = " << DischargeIO::numberFmt(localParticlesEB) << " (" << DischargeIO::numberFmt(globalParticlesEB) << ")" << endl
+         << whitespace + "#Dom. part. = " << DischargeIO::numberFmt(localParticlesDomain) << " (" << DischargeIO::numberFmt(globalParticlesDomain) << ")" << endl
+         << whitespace + "#Src. part. = " << DischargeIO::numberFmt(localParticlesSource) << " (" << DischargeIO::numberFmt(globalParticlesSource) << ")" << endl
+         << whitespace + "#Min part.  = " << minParticles << " (on rank = " << minRank << ")" << endl
+         << whitespace + "#Max part.  = " << maxParticles << " (on rank = " << maxRank << ")" << endl
+         << whitespace + "#Avg. part. = " << avgParticles << endl
+         << whitespace + "#Dev. part. = " << stdDev << " (" << 100. * stdDev / avgParticles << "%)" << endl;
+  // clang-format on  
 }
 
 void
@@ -2619,21 +2615,9 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
 
       for (ListIterator<ItoParticle> lit(cellParticles(iv, 0)); lit.ok(); ++lit) {
         const RealVect& pos = lit().position();
-
-        switch (m_cutCellCoupling) {
-        case CutCellCoupling::ValidRegion: {
-          if ((pos - physCentroid).dotProduct(normal) >= 0.0) {
-            num += lit().weight();
-          }
-
-          break;
-        }
-        case CutCellCoupling::FullCell: {
-          num += lit().weight();
-
-          break;
-        }
-        }
+	if ((pos - physCentroid).dotProduct(normal) >= 0.0) {
+	  num += lit().weight();
+	}
       }
 
       ppcRegular(iv, idx) = num;
