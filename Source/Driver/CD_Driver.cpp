@@ -411,43 +411,6 @@ Driver::getCellsAndBoxes(long long&                       a_numLocalCells,
   }
 }
 
-std::string
-Driver::numberFmt(const long long n, char sep) const
-{
-  CH_TIME("Driver::numberFmt(long long, char)");
-  if (m_verbosity > 5) {
-    //    pout() << "Driver::numberFmt(long long, char)" << endl;
-  }
-
-  stringstream fmt;
-  fmt << n;
-  string s = fmt.str();
-  s.reserve(s.length() + s.length() / 3);
-
-  for (int i = 0, j = 3 - s.length() % 3; i < s.length(); ++i, ++j)
-    if (i != 0 && j % 3 == 0)
-      s.insert(i++, 1, sep);
-
-  return s;
-}
-
-Vector<std::string>
-Driver::numberFmt(const Vector<long long> a_numbers, char a_sep) const
-{
-  CH_TIME("Driver::numberFmt(Vector<long long>, char)");
-  if (m_verbosity > 5) {
-    //    pout() << "Driver::numberFmt(Vector<long long>, char)" << endl;
-  }
-
-  Vector<std::string> ret(a_numbers.size());
-
-  for (int i = 0; i < a_numbers.size(); i++) {
-    ret[i] = numberFmt(a_numbers[i], a_sep) + " ";
-  }
-
-  return ret;
-}
-
 void
 Driver::gridReport()
 {
@@ -529,12 +492,12 @@ Driver::gridReport()
          << "\t\t\t        Refinement ratios      = " << ref_rat << endl
          << "\t\t\t        Grid sparsity          = " << 1.0 * totalCells / uniformPoints << endl
          << "\t\t\t        Finest dx              = " << dx[finestLevel] << endl
-         << "\t\t\t        Total number boxes     = " << numberFmt(totalBoxes) << endl
-         << "\t\t\t        Number of valid cells  = " << numberFmt(totalCells) << endl
-         << "\t\t\t        Including ghost cells  = " << numberFmt(totalCellsGhosts) << endl
-         << "\t\t\t        Total # of boxes (lvl) = " << numberFmt(totalLevelBoxes) << endl
-         << "\t\t\t        Total # of cells (lvl) = " << numberFmt(totalLevelCells) << endl
-         << "\t\t\t        Valid # of cells (lvl) = " << numberFmt(validLevelCells) << endl;
+         << "\t\t\t        Total number boxes     = " << DischargeIO::numberFmt(totalBoxes) << endl
+         << "\t\t\t        Number of valid cells  = " << DischargeIO::numberFmt(totalCells) << endl
+         << "\t\t\t        Including ghost cells  = " << DischargeIO::numberFmt(totalCellsGhosts) << endl
+         << "\t\t\t        Total # of boxes (lvl) = " << DischargeIO::numberFmt(totalLevelBoxes) << endl
+         << "\t\t\t        Total # of cells (lvl) = " << DischargeIO::numberFmt(totalLevelCells) << endl
+         << "\t\t\t        Valid # of cells (lvl) = " << DischargeIO::numberFmt(validLevelCells) << endl;
 
   // Do a local report for each Realm
   for (const auto& str : realms) {
@@ -552,11 +515,11 @@ Driver::gridReport()
                            m_amr->getGrids(str));
 
     pout() << "\t\t\t        Realm = " << str << endl
-           << "\t\t\t\t        Proc. # of valid cells = " << numberFmt(localCells) << endl
-           << "\t\t\t\t        Including ghost cells  = " << numberFmt(localCellsGhosts) << endl
-           << "\t\t\t\t        Proc. # of boxes       = " << numberFmt(localBoxes) << endl
-           << "\t\t\t\t        Proc. # of boxes (lvl) = " << numberFmt(localLevelBoxes) << endl
-           << "\t\t\t\t        Proc. # of cells (lvl) = " << numberFmt(localLevelCells) << endl;
+           << "\t\t\t\t        Proc. # of valid cells = " << DischargeIO::numberFmt(localCells) << endl
+           << "\t\t\t\t        Including ghost cells  = " << DischargeIO::numberFmt(localCellsGhosts) << endl
+           << "\t\t\t\t        Proc. # of boxes       = " << DischargeIO::numberFmt(localBoxes) << endl
+           << "\t\t\t\t        Proc. # of boxes (lvl) = " << DischargeIO::numberFmt(localLevelBoxes) << endl
+           << "\t\t\t\t        Proc. # of cells (lvl) = " << DischargeIO::numberFmt(localLevelCells) << endl;
   }
 
   // Write a memory report if Chombo was to compiled to use memory tracking.

@@ -18,6 +18,37 @@
 #include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
+std::string
+DischargeIO::numberFmt(const long long n, char sep) noexcept
+{
+  CH_TIME("DischargeIO::numberFmt(long long, char)");
+
+  stringstream fmt;
+  fmt << n;
+  string s = fmt.str();
+  s.reserve(s.length() + s.length() / 3);
+
+  for (int i = 0, j = 3 - s.length() % 3; i < s.length(); ++i, ++j)
+    if (i != 0 && j % 3 == 0)
+      s.insert(i++, 1, sep);
+
+  return s;
+}
+
+Vector<std::string>
+DischargeIO::numberFmt(const Vector<long long> a_numbers, char a_sep) noexcept
+{
+  CH_TIME("DischargeIO::numberFmt(Vector<long long>, char)");
+
+  Vector<std::string> ret(a_numbers.size());
+
+  for (int i = 0; i < a_numbers.size(); i++) {
+    ret[i] = numberFmt(a_numbers[i], a_sep) + " ";
+  }
+
+  return ret;
+}
+
 #ifdef CH_USE_HDF5
 void
 DischargeIO::writeEBHDF5(const std::string&                   a_filename,
