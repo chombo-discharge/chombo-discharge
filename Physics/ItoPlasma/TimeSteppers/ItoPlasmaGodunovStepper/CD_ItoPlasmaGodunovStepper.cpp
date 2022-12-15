@@ -207,7 +207,8 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
     break;
   }
   case CutCellCoupling::FullCell: {
-    this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, false);
+    // Not supported yet -- don't know how we would do this!.
+    //    this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, false);
 
     break;
   }
@@ -269,7 +270,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   m_timer.startEvent("Remove covered");
   switch (m_cutCellCoupling) {
   case CutCellCoupling::ValidRegion: {
-    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Voxel, m_toleranceEB);
+    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Discrete, m_toleranceEB);
 
     break;
   }
@@ -851,6 +852,44 @@ ItoPlasmaGodunovStepper::setupSemiImplicitPoisson(const Real a_dt) noexcept
 }
 
 void
+ItoPlasmaGodunovStepper::removeCoveredPointParticles(Vector<ParticleContainer<PointParticle>*>& a_particles,
+                                                     const EBRepresentation                     a_representation,
+                                                     const Real a_tolerance) const noexcept
+{
+  CH_TIME("ItoPlasmaGodunovStepper::removeCoveredPointParticles");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::removeCoveredPointParticles" << endl;
+  }
+
+  for (int i = 0; i < a_particles.size(); i++) {
+    if (a_particles[i] != nullptr) {
+      ParticleContainer<PointParticle>& particles = *a_particles[i];
+
+      switch (a_representation) {
+      case EBRepresentation::Discrete: {
+        m_amr->removeCoveredParticlesDiscrete(particles, m_plasmaPhase, a_tolerance);
+
+        break;
+      }
+      case EBRepresentation::ImplicitFunction: {
+        m_amr->removeCoveredParticlesIF(particles, m_plasmaPhase, a_tolerance);
+
+        break;
+      }
+      case EBRepresentation::Voxel: {
+        m_amr->removeCoveredParticlesVoxels(particles, m_plasmaPhase);
+
+        break;
+      }
+      default: {
+        MayDay::Error("ItoPlasmaGodunovStepper::removeCoveredParticles - logic bust");
+      }
+      }
+    }
+  }
+}
+
+void
 ItoPlasmaGodunovStepper::copyConductivityParticles(
   Vector<ParticleContainer<PointParticle>*>& a_conductivityParticles) noexcept
 {
@@ -889,83 +928,6 @@ ItoPlasmaGodunovStepper::copyConductivityParticles(
             pointParticles.add(PointParticle(pos, weight * mobility));
           }
         }
-      }
-
-      // Remove the ones outside the domain.
-      switch (m_cutCellCoupling) {
-      case CutCellCoupling::ValidRegion: {
-        m_amr->removeCoveredParticlesDiscrete((*a_conductivityParticles[idx]), m_plasmaPhase, 0.0);
-
-        break;
-      }
-      case CutCellCoupling::FullCell: {
-        m_amr->removeCoveredParticlesVoxels((*a_conductivityParticles[idx]), m_plasmaPhase);
-
-        break;
-      }
-      default: {
-        MayDay::Error(
-          "ItoPlasmaGodunovStepper::copyConductivityParticles -- unsupported algorithm for particle removal");
-      }
-      }
-    }
-  }
-}
-
-void
-ItoPlasmaGodunovStepper::copyRhoDaggerParticles(
-  Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles) noexcept
-{
-  CH_TIME("ItoPlasmaGodunovStepper::copyRhoDaggerParticles");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::copyRhoDaggerParticles" << endl;
-  }
-
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    const RefCountedPtr<ItoSolver>&  solver  = solverIt();
-    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
-
-    const int idx = solverIt.index();
-    const int Z   = species->getChargeNumber();
-
-    if (Z != 0) {
-      const ParticleContainer<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
-
-      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-        const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
-
-        for (DataIterator dit(dbl); dit.ok(); ++dit) {
-          const List<ItoParticle>& patchParticles = solverParticles[lvl][dit()].listItems();
-
-          List<PointParticle>& pointParticles = (*a_rhoDaggerParticles[idx])[lvl][dit()].listItems();
-
-          pointParticles.clear();
-
-          for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
-            const ItoParticle& p      = lit();
-            const RealVect&    pos    = p.position();
-            const Real&        weight = p.weight();
-
-            pointParticles.add(PointParticle(pos, weight));
-          }
-        }
-      }
-
-      // Remove the ones outside the domain.
-      switch (m_cutCellCoupling) {
-      case CutCellCoupling::ValidRegion: {
-        m_amr->removeCoveredParticlesDiscrete((*a_rhoDaggerParticles[idx]), m_plasmaPhase, 0.0);
-
-        break;
-      }
-      case CutCellCoupling::FullCell: {
-        m_amr->removeCoveredParticlesVoxels((*a_rhoDaggerParticles[idx]), m_plasmaPhase);
-
-        break;
-      }
-      default: {
-        MayDay::Error("ItoPlasmaGodunovStepper::copyRhoDaggerParticles -- unsupported algorithm for particle removal");
-      }
       }
     }
   }

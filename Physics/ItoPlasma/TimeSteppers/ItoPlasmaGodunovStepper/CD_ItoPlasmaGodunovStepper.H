@@ -259,18 +259,22 @@ namespace Physics {
       setupSemiImplicitPoisson(const Real a_dt) noexcept;
 
       /*!
+	@brief Remove covered particles
+	@param[inout] a_particles      Particles to remove
+	@param[in]    a_representation Representation of the EB
+	@param[in]    a_tolerance      EB tolerance
+      */
+      virtual void
+      removeCoveredPointParticles(Vector<ParticleContainer<PointParticle>*>& a_particles,
+                                  const EBRepresentation                     a_representation,
+                                  const Real                                 a_tolerance) const noexcept;
+
+      /*!
 	@brief Copy particles from the ItoSolver into PointParticles whose weight are ItoParticle::m_weight * ItoParticle::m_mobility
 	@param[out] a_conductivityParticles Point-particles holding the mobility * weight
       */
       virtual void
       copyConductivityParticles(Vector<ParticleContainer<PointParticle>*>& a_conductivityParticles) noexcept;
-
-      /*!
-	@brief Copy particles from the ItoSolver (if they are charged) into PointParticles whose weight are ItoParticle::m_weight.
-	@param[out] a_conductivityParticles Point-particles holding the mobility * weight     
-      */
-      virtual void
-      copyRhoDaggerParticles(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles) noexcept;
 
       /*!
 	@brief Advance the particles using the Euler-Maruyama scheme
