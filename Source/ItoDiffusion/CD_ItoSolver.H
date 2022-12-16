@@ -777,6 +777,14 @@ public:
   makeSuperparticles(const WhichContainer a_container, const int a_particlesPerCell);
 
   /*!
+    @brief Make superparticles for a full container -- this is the AMR version that users will usually call. 
+    @param[in] a_container        Which container to repartition into new superparticles
+    @param[in] a_particlesPerCell Target number of particles per cell. Vector indicates grid levels. 
+  */
+  virtual void
+  makeSuperparticles(const WhichContainer a_container, const Vector<int> a_particlesPerCell);
+
+  /*!
     @brief Make superparticles for a particle container -- this is used for a specified grid level. 
     @param[in] a_container        Which container to repartition into new superparticles
     @param[in] a_particlesPerCell Target number of particles per cell

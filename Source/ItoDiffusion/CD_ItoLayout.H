@@ -228,6 +228,13 @@ public:
   */
   virtual void
   makeSuperparticles(const ItoSolver::WhichContainer a_whichContainer, const int a_ppc);
+  /*!
+    @brief Rearrange the input container particle into new superparticles -- this is done for all solvers. 
+    @param[in] a_whichContainer Which ItoSolver container to sort by cell. 
+    @param[in] a_ppc            Target particle-per-cell (ppc) per level
+  */
+  virtual void
+  makeSuperparticles(const ItoSolver::WhichContainer a_whichContainer, const Vector<int> a_ppc);
 
   /*!
     @brief Compute smallest possible time step. 

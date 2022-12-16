@@ -216,6 +216,15 @@ ItoLayout<T>::makeSuperparticles(const ItoSolver::WhichContainer a_whichContaine
 
 template <class T>
 void
+ItoLayout<T>::makeSuperparticles(const ItoSolver::WhichContainer a_whichContainer, const Vector<int> a_ppc)
+{
+  for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
+    iter()->makeSuperparticles(a_whichContainer, a_ppc);
+  }
+}
+
+template <class T>
+void
 ItoLayout<T>::depositParticles()
 {
   this->depositParticles(ItoSolver::WhichContainer::Bulk);

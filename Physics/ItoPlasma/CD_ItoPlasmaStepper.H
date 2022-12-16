@@ -456,7 +456,7 @@ namespace Physics {
       /*!
 	@brief Target number of particles per cell when squishing ItoParticle's into superparticles
       */
-      int m_particlesPerCell;
+      Vector<int> m_particlesPerCell;
 
       /*!
 	@brief How often to merge superparticles

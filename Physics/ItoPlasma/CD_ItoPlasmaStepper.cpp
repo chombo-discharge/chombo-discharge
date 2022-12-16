@@ -176,12 +176,16 @@ ItoPlasmaStepper::parseSuperParticles() noexcept
 
   ParmParse pp(m_name.c_str());
 
-  pp.get("particles_per_cell", m_particlesPerCell);
+  m_particlesPerCell.resize(pp.countval("particles_per_cell"));
+
   pp.get("merge_interval", m_mergeInterval);
   pp.get("regrid_superparticles", m_regridSuperparticles);
+  pp.getarr("particles_per_cell", m_particlesPerCell, 0, m_particlesPerCell.size());
 
-  if (m_particlesPerCell <= 0) {
-    MayDay::Error("ItoPlasmaStepper::parseSuperParticles -- must have 'particles_per_cell' > 0");
+  for (int lvl = 0; lvl < m_particlesPerCell.size(); lvl++) {
+    if (m_particlesPerCell[lvl] <= 0) {
+      MayDay::Error("ItoPlasmaStepper::parseSuperParticles -- must have 'particles_per_cell' > 0");
+    }
   }
 
   if (m_mergeInterval <= 1) {

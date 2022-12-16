@@ -2938,6 +2938,32 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a_part
 }
 
 void
+ItoSolver::makeSuperparticles(const WhichContainer a_container, const Vector<int> a_particlesPerPatch)
+{
+  CH_TIME("ItoSolver::makeSuperparticles(WhichContainer, Vector<int>)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::makeSuperparticles(WhichContainer, Vector<int>)" << endl;
+  }
+
+  if (a_particlesPerPatch.size() < 1) {
+    MayDay::Error("ItoSolver::makeSuperParticles(Container, Vector<int>) -logic bust");
+  }
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    int ppc;
+
+    if (lvl < a_particlesPerPatch.size()) {
+      ppc = a_particlesPerPatch[lvl];
+    }
+    else {
+      ppc = a_particlesPerPatch.back();
+    }
+
+    this->makeSuperparticles(a_container, ppc, lvl);
+  }
+}
+
+void
 ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a_particlesPerPatch, const int a_level)
 {
   CH_TIME("ItoSolver::makeSuperparticles(WhichContainer, int, int)");
