@@ -3,11 +3,11 @@
 # ====================================================================================================
 ItoPlasmaGodunovStepper.checkpoint_particles    = false          # If true, regrid on restart is supported (otherwise it's not)
 ItoPlasmaGodunovStepper.verbosity               = -1             # Verbosity
-ItoPlasmaGodunovStepper.abort_on_failure        = false          # Abort on Poisson solver failure or not
+ItoPlasmaGodunovStepper.abort_on_failure        = true           # Abort on Poisson solver failure or not
 ItoPlasmaGodunovStepper.profile                 = false          # Turn on/off run-time profiling
 ItoPlasmaGodunovStepper.plt_vars                = none           # 'conductivity', 'current_density', 'particles_per_patch'
 ItoPlasmaGodunovStepper.dual_grid               = true           # Turn on/off dual-grid functionality
-ItoPlasmaGodunovStepper.load_balance_fluid      = true           # Turn on/off fluid realm load balancing. 
+ItoPlasmaGodunovStepper.load_balance_fluid      = false          # Turn on/off fluid realm load balancing. 
 ItoPlasmaGodunovStepper.load_balance_particles  = true           # Turn on/off particle load balancing
 ItoPlasmaGodunovStepper.load_indices            = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoPlasmaGodunovStepper.load_per_cell           = 1.0            # Default load per grid cell.
@@ -22,5 +22,4 @@ ItoPlasmaGodunovStepper.relax_dt_factor         = 50.0           # Relaxation ti
 ItoPlasmaGodunovStepper.min_dt                  = 0.0            # Minimum permitted time step
 ItoPlasmaGodunovStepper.max_dt                  = 1.E99          # Maximum permitted time step
 ItoPlasmaGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
-ItoPlasmaGodunovStepper.eb_coupling             = full_cell      # Cut-cell algorithmic coupling
 ItoPlasmaGodunovStepper.algorithm               = euler_maruyama # Integration algorithm. 'euler_maruyama' or 'trapezoidal'

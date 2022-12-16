@@ -31,11 +31,11 @@ main(int argc, char* argv[])
   MPI_Init(&argc, &argv);
 #endif
 
-  Random::seed();
-
   // Build class options from input script and command line options
   const std::string input_file = argv[1];
   ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
+
+  Random::seed();
 
   // Get potential from input script
   std::string basename;

@@ -16,6 +16,7 @@
 #include <ParmParse.H>
 
 // Our includes
+#include <CD_EBFineInterp.H>
 #include <CD_ItoPlasmaStepper.H>
 #include <CD_ParticleOps.H>
 #include <CD_DataOps.H>
@@ -42,7 +43,6 @@ ItoPlasmaStepper::ItoPlasmaStepper()
   m_loadPerCell             = 1.0;
   m_useNewReactionAlgorithm = true;
   m_regridSuperparticles    = true;
-  m_cutCellCoupling         = CutCellCoupling::ValidRegion;
   m_fluidRealm              = Realm::Primal;
   m_particleRealm           = Realm::Primal;
   m_advectionCFL            = 1.0;
@@ -315,17 +315,6 @@ ItoPlasmaStepper::parseParametersEB() noexcept
   std::string str;
 
   pp.get("eb_tolerance", m_toleranceEB);
-  pp.get("eb_coupling", str);
-
-  if (str == "valid_region") {
-    m_cutCellCoupling = CutCellCoupling::ValidRegion;
-  }
-  else if (str == "full_cell") {
-    m_cutCellCoupling = CutCellCoupling::FullCell;
-  }
-  else {
-    MayDay::Error("ItoPlasmaStepper::parseParametersEB -- logic bust for 'eb_coupling'");
-  }
 }
 
 void
@@ -876,22 +865,27 @@ ItoPlasmaStepper::printStepReport()
   }
 
   // Print the step report.
-  // clang-format off
+
+  //clang-format off
   const std::string whitespace = "                                   ";
   pout() << "                                   " + str << endl;
   pout() << whitespace + "Emax        = " << Emax << endl
          << whitespace + "Max density = " << maxDensity << " (" << maxSolver << ")" << endl
          << whitespace + "CFL         = " << m_dt / m_advectionDiffusionDt << endl
          << whitespace + "Relax time  = " << m_dt / m_relaxationTime << endl
-         << whitespace + "#Particles  = " << DischargeIO::numberFmt(localParticlesBulk) << " (" << DischargeIO::numberFmt(globalParticlesBulk) << ")" << endl
-         << whitespace + "#EB part.   = " << DischargeIO::numberFmt(localParticlesEB) << " (" << DischargeIO::numberFmt(globalParticlesEB) << ")" << endl
-         << whitespace + "#Dom. part. = " << DischargeIO::numberFmt(localParticlesDomain) << " (" << DischargeIO::numberFmt(globalParticlesDomain) << ")" << endl
-         << whitespace + "#Src. part. = " << DischargeIO::numberFmt(localParticlesSource) << " (" << DischargeIO::numberFmt(globalParticlesSource) << ")" << endl
+         << whitespace + "#Particles  = " << DischargeIO::numberFmt(localParticlesBulk) << " ("
+         << DischargeIO::numberFmt(globalParticlesBulk) << ")" << endl
+         << whitespace + "#EB part.   = " << DischargeIO::numberFmt(localParticlesEB) << " ("
+         << DischargeIO::numberFmt(globalParticlesEB) << ")" << endl
+         << whitespace + "#Dom. part. = " << DischargeIO::numberFmt(localParticlesDomain) << " ("
+         << DischargeIO::numberFmt(globalParticlesDomain) << ")" << endl
+         << whitespace + "#Src. part. = " << DischargeIO::numberFmt(localParticlesSource) << " ("
+         << DischargeIO::numberFmt(globalParticlesSource) << ")" << endl
          << whitespace + "#Min part.  = " << minParticles << " (on rank = " << minRank << ")" << endl
          << whitespace + "#Max part.  = " << maxParticles << " (on rank = " << maxRank << ")" << endl
          << whitespace + "#Avg. part. = " << avgParticles << endl
          << whitespace + "#Dev. part. = " << stdDev << " (" << 100. * stdDev / avgParticles << "%)" << endl;
-  // clang-format on  
+  //clang-format on
 }
 
 void
@@ -1074,6 +1068,27 @@ ItoPlasmaStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
     pout() << m_name + "::preRegrid" << endl;
   }
 
+  // We use the number of computational particles per grid cell as a load proxy, so
+  // allocate storage for that and compute the PPC.
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+
+  // Allocate storage for holding the computational PPC on each grid cell.
+  if (m_loadBalanceParticles) {
+    Vector<RefCountedPtr<ItoSolver>> lbSolvers = this->getLoadBalanceSolvers();
+
+    m_loadBalancePPC.resize(lbSolvers.size());
+
+    // Allocate and compute number of computational particles per cell.
+    for (int i = 0; i < lbSolvers.size(); i++) {
+      m_amr->allocate(m_loadBalancePPC[i], m_particleRealm, m_plasmaPhase, 1);
+
+      EBAMRCellData&                        compPPC   = m_loadBalancePPC[i];
+      const ParticleContainer<ItoParticle>& particles = lbSolvers[i]->getParticles(ItoSolver::WhichContainer::Bulk);
+
+      ParticleOps::getComputationalParticlesPerCell(compPPC, particles);
+    }
+  }
+
   m_ito->preRegrid(a_lmin, a_oldFinestLevel);
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_rte->preRegrid(a_lmin, a_oldFinestLevel);
@@ -1128,6 +1143,15 @@ void
 ItoPlasmaStepper::postRegrid()
 {
   CH_TIME("ItoPlasmaStepper::postRegrid");
+
+  // Release storage that we allocated for holding the PPC
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+
+  if (m_loadBalanceParticles) {
+    for (int i = 0; i < m_loadBalancePPC.size(); i++) {
+      m_amr->deallocate(m_loadBalancePPC[i]);
+    }
+  }
 }
 
 int
@@ -2615,9 +2639,9 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
 
       for (ListIterator<ItoParticle> lit(cellParticles(iv, 0)); lit.ok(); ++lit) {
         const RealVect& pos = lit().position();
-	if ((pos - physCentroid).dotProduct(normal) >= 0.0) {
-	  num += lit().weight();
-	}
+        if ((pos - physCentroid).dotProduct(normal) >= 0.0) {
+          num += lit().weight();
+        }
       }
 
       ppcRegular(iv, idx) = num;
@@ -3713,6 +3737,40 @@ ItoPlasmaStepper::sortPhotonsByPatch(const McPhoto::WhichContainer a_which) noex
   }
 }
 
+Vector<RefCountedPtr<ItoSolver>>
+ItoPlasmaStepper::getLoadBalanceSolvers() const noexcept
+{
+  CH_TIME("ItoPlasmaStepper::getLoadBalanceSolvers()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getLoadBalanceSolvers()" << endl;
+  }
+
+  Vector<RefCountedPtr<ItoSolver>> lbSolvers;
+
+  // If there's an index < 0 we load balance everything.
+  bool loadBalanceAll = false;
+  for (int i = 0; i < m_loadBalanceIndices.size(); i++) {
+    if (m_loadBalanceIndices[i] < 0) {
+      loadBalanceAll = true;
+    }
+  }
+
+  if (loadBalanceAll) {
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      lbSolvers.push_back(solverIt());
+    }
+  }
+  else {
+    for (int i = 0; i < m_loadBalanceIndices.size(); i++) {
+      RefCountedPtr<ItoSolver>& solver = m_ito->getSolvers()[i];
+
+      lbSolvers.push_back(solver);
+    }
+  }
+
+  return lbSolvers;
+}
+
 bool
 ItoPlasmaStepper::loadBalanceThisRealm(const std::string a_realm) const
 {
@@ -3751,6 +3809,189 @@ ItoPlasmaStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
   }
   else if (m_loadBalanceFluid && a_realm == m_fluidRealm) {
     this->loadBalanceFluidRealm(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finestLevel);
+  }
+}
+
+void
+ItoPlasmaStepper::loadBalanceParticleRealm(Vector<Vector<int>>&             a_procs,
+                                           Vector<Vector<Box>>&             a_boxes,
+                                           const std::string                a_realm,
+                                           const Vector<DisjointBoxLayout>& a_grids,
+                                           const int                        a_lmin,
+                                           const int                        a_finestLevel) noexcept
+{
+  CH_TIME("ItoPlasmaStepper::loadBalanceParticleRealm(...)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::loadBalanceParticleRealm(...)" << endl;
+  }
+
+  // TLDR: This is a bit involved due to the fact that the simulation lives in a state between the old grids
+  //       and the new grids. We want to compute the number of computational in patch on the new grid, and
+  //       use that for load balancing. We have already computed the number of computational particles per
+  //       grid cell on the old grids, but the new grids are not ready (yet). We only have the proxy-grids
+  //       coming in through the argument (a_grids), and our job is to take this grid and reassign the patches
+  //       so that each MPI rank gets roughly the same number of computational particles. To do this we perform
+  //       the following steps:
+  //
+  //       1. Allocate storage on the proxy grids (a_grids) so we have something to regrid into.
+  //       2. Define regrid operators for going between the proxy grids and the old grids.
+  //       3. Regrid the PPC on the old grids onto the proxy grids.
+  //       4. Go through the patches on the proxy grids and figure out the total number of particles
+  //          in each patch (there's a weird global-to-local remapping taking place through intCode()).
+  //       5. Call our nifty load-balancing routines.
+  //
+
+  if (!m_loadBalanceParticles) {
+    MayDay::Error("ItoPlasmaStepper::loadBalanceParticleRealm -- logic bust, should not have been called!");
+  }
+
+  // Get the solvers that we will use for load balancing.
+  Vector<RefCountedPtr<ItoSolver>> lbSolvers = this->getLoadBalanceSolvers();
+
+  // Decompose the DisjointBoxLayout
+  a_procs.resize(1 + a_finestLevel);
+  a_boxes.resize(1 + a_finestLevel);
+
+  for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++) {
+    a_procs[lvl] = a_grids[lvl].procIDs();
+    a_boxes[lvl] = a_grids[lvl].boxArray();
+  }
+
+  // 1. Allocate something that we can regrid the PPC for each species into, and something that holds the total
+  // PPC on the new grids.
+  EBAMRCellData totalPPC;
+  EBAMRCellData speciesPPC;
+
+  m_amr->allocate(totalPPC, m_particleRealm, m_plasmaPhase, 1);
+  m_amr->allocate(speciesPPC, m_particleRealm, m_plasmaPhase, 1);
+
+  DataOps::setValue(totalPPC, 0.0);
+  DataOps::setValue(speciesPPC, 0.0);
+
+  // 2. EBFineInterp is not a part of the registry for ItoSolver so we just define it here ourselves. Note that
+  // it is stored on the same level that we interpolate to.
+  Vector<RefCountedPtr<EBFineInterp>> interpOp(1 + a_finestLevel);
+  for (int lvl = 1; lvl <= a_finestLevel; lvl++) {
+    const EBLevelGrid& eblgFine = *m_amr->getEBLevelGrid(m_particleRealm, m_plasmaPhase)[lvl];
+    const EBLevelGrid& eblgCoar = *m_amr->getEBLevelGrid(m_particleRealm, m_plasmaPhase)[lvl - 1];
+    const int          refRat   = m_amr->getRefinementRatios()[lvl - 1];
+    const int          nComp    = 1;
+
+    interpOp[lvl] = RefCountedPtr<EBFineInterp>(
+      new EBFineInterp(eblgFine, eblgCoar, refRat, nComp, eblgFine.getEBIS()));
+  }
+
+  // 3. Go through each solver and figure out the number of particles on the new grids. Add
+  // these to totalPPC.
+  for (int i = 0; i < lbSolvers.size(); i++) {
+    const EBAMRCellData& oldData        = m_loadBalancePPC[i];
+    const int            oldFinestLevel = oldData.size() - 1;
+
+    // These levels have not changed but ownship MIGHT have changed.
+    for (int lvl = 0; lvl <= std::max(0, a_lmin - 1); lvl++) {
+      oldData[lvl]->copyTo(*speciesPPC[lvl]);
+    }
+
+    // These levels have changed.
+    for (int lvl = std::max(1, a_lmin); lvl <= a_finestLevel; lvl++) {
+      RefCountedPtr<EBFineInterp>& interpolator = interpOp[lvl];
+
+      interpolator->regridNoSlopes(*speciesPPC[lvl], *speciesPPC[lvl - 1], Interval(0, 0));
+
+      // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
+      // to pollute the solution with interpolation there since we already have valid data.
+      if (lvl <= std::min(oldFinestLevel, a_finestLevel)) {
+        oldData[lvl]->copyTo(*speciesPPC[lvl]);
+      }
+    }
+
+    // Add to totalPPC.
+    DataOps::incr(totalPPC, speciesPPC, 1.0);
+  }
+
+  // 4. totalPPC contains the total number of computational particles per cell on the new grids,
+  // we need to map this to something we can load balance.
+  Vector<Vector<long int>> loads(1 + a_finestLevel, 0L);
+  for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
+    const DisjointBoxLayout&        dbl        = a_grids[lvl];
+    const LevelData<BaseFab<bool>>& validCells = *m_amr->getValidCells(m_particleRealm)[lvl];
+
+    Vector<long int>& levelLoads = loads[lvl];
+
+    levelLoads.resize(dbl.size());
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const Box            cellBox    = dbl[dit()];
+      const EBCellFAB&     PPC        = (*totalPPC[lvl])[dit()];
+      const EBISBox&       ebisbox    = PPC.getEBISBox();
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_particleRealm)[lvl])[dit()];
+      const FArrayBox&     regPPC     = PPC.getFArrayBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
+          levelLoads[dit().intCode()] += (long int)regPPC(iv, 0);
+        }
+      };
+
+      BoxLoops::loop(cellBox, regularKernel);
+    }
+
+    ParallelOps::vectorSum(levelLoads);
+
+    // Add the "constant" load from the other PPC stuff
+    for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
+      const Box cellBox = dbl[lit()];
+
+      levelLoads[lit().intCode()] += (long int)m_loadPerCell * cellBox.numPts();
+    }
+  }
+
+  // 5. Finally do the actual load balancing.
+  LoadBalancing::sort(a_boxes, loads, m_boxSort);
+  LoadBalancing::balanceLevelByLevel(a_procs, loads, a_boxes);
+  //  LoadBalancing::hierarchy(a_procs, loads, a_boxes); If you want to try something crazy...
+}
+
+void
+ItoPlasmaStepper::loadBalanceFluidRealm(Vector<Vector<int>>&             a_procs,
+                                        Vector<Vector<Box>>&             a_boxes,
+                                        const std::string                a_realm,
+                                        const Vector<DisjointBoxLayout>& a_grids,
+                                        const int                        a_lmin,
+                                        const int                        a_finestLevel) noexcept
+{
+  CH_TIME("ItoPlasmaStepper::loadBalanceFluidRealm(...)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::loadBalanceFluidRealm(...)" << endl;
+  }
+
+  CH_assert(m_loadBalanceFluid);
+  CH_assert(a_realm == m_fluidRealm);
+
+  // TLDR: This code tries to compute a load for each grid patch by applying a relaxation operator to each box. This means that the load
+  //       should be a decent estimate that takes into account boundary conditions, coarse-fine interface arithmetic, and enlargened stencils
+  //       near the embedded boundary.
+
+  a_procs.resize(1 + a_finestLevel);
+  a_boxes.resize(1 + a_finestLevel);
+
+  // We need to make AmrMesh restore some operators that we need in order to create a multigrid object. Fortunately, FieldSolver has routines
+  // for doing that but it will not know if AmrMesh has updated it's operators or not. So, we need to regrid them.
+  m_amr->regridOperators(m_fluidRealm, a_lmin);
+
+  // Field solver needs to allocate solver and set up the multigrid solver.
+  m_fieldSolver->allocateInternals();
+  m_fieldSolver->setupSolver();
+
+  // Field solver implementation gets the responsibility of computing loads on each level.
+  for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
+    Vector<long long> loads = m_fieldSolver->computeLoads(a_grids[lvl], lvl);
+
+    // Do the desired sorting and load balancing
+    a_boxes[lvl] = a_grids[lvl].boxArray();
+
+    LoadBalancing::sort(a_boxes[lvl], loads, m_boxSort);
+    LoadBalancing::makeBalance(a_procs[lvl], loads, a_boxes[lvl]);
   }
 }
 
@@ -3800,143 +4041,6 @@ ItoPlasmaStepper::getCheckpointLoads(const std::string a_realm, const int a_leve
   }
 
   return loads;
-}
-
-void
-ItoPlasmaStepper::loadBalanceParticleRealm(Vector<Vector<int>>&             a_procs,
-                                           Vector<Vector<Box>>&             a_boxes,
-                                           const std::string                a_realm,
-                                           const Vector<DisjointBoxLayout>& a_grids,
-                                           const int                        a_lmin,
-                                           const int                        a_finestLevel) noexcept
-{
-  CH_TIME("ItoPlasmaStepper::loadBalanceParticleRealm(...)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::loadBalanceParticleRealm(...)" << endl;
-  }
-
-  // Decompose the DisjointBoxLayout
-  a_procs.resize(1 + a_finestLevel);
-  a_boxes.resize(1 + a_finestLevel);
-
-  for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++) {
-    a_procs[lvl] = a_grids[lvl].procIDs();
-    a_boxes[lvl] = a_grids[lvl].boxArray();
-  }
-
-  // Get the particles that we will use for load balancing.
-  Vector<RefCountedPtr<ItoSolver>> loadBalanceProxySolvers = this->getLoadBalanceSolvers();
-
-  // Regrid particles onto the "dummy grids" a_grids
-  for (int i = 0; i < loadBalanceProxySolvers.size(); i++) {
-    ParticleContainer<ItoParticle>& particles = loadBalanceProxySolvers[i]->getParticles(
-      ItoSolver::WhichContainer::Bulk);
-
-    m_amr->remapToNewGrids(particles, a_lmin, a_finestLevel);
-
-    // If we make superparticles during regrids, do it here so we can better estimate the computational loads for each patch. This way, if a grid is removed the realistic
-    // load estimate of the underlying grid(s) is improved.
-    if (m_regridSuperparticles) {
-      particles.organizeParticlesByCell();
-      loadBalanceProxySolvers[i]->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
-      particles.organizeParticlesByPatch();
-    }
-  }
-
-  // Get loads on each level
-  Vector<Vector<long int>> loads(1 + a_finestLevel);
-  for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
-    loads[lvl] = this->getCheckpointLoads(a_realm, lvl);
-  }
-
-  // Do the actual load balancing
-  LoadBalancing::sort(a_boxes, loads, m_boxSort);
-  LoadBalancing::balanceLevelByLevel(a_procs, loads, a_boxes);
-  //  LoadBalancing::hierarchy(a_procs, loads, a_boxes); If you want to try something crazy...
-
-  // Go back to "pre-regrid" mode so we can get particles to the correct patches after load balancing.
-  for (int i = 0; i < loadBalanceProxySolvers.size(); i++) {
-    ParticleContainer<ItoParticle>& particles = loadBalanceProxySolvers[i]->getParticles(
-      ItoSolver::WhichContainer::Bulk);
-    particles.preRegrid(a_lmin);
-  }
-}
-
-Vector<RefCountedPtr<ItoSolver>>
-ItoPlasmaStepper::getLoadBalanceSolvers() const noexcept
-{
-  CH_TIME("ItoPlasmaStepper::getLoadBalanceSolvers()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getLoadBalanceSolvers()" << endl;
-  }
-
-  Vector<RefCountedPtr<ItoSolver>> loadBalanceProxySolvers;
-
-  // If there's an index < 0 we load balance everything.
-  bool loadBalanceAll = false;
-  for (int i = 0; i < m_loadBalanceIndices.size(); i++) {
-    if (m_loadBalanceIndices[i] < 0) {
-      loadBalanceAll = true;
-    }
-  }
-
-  if (loadBalanceAll) {
-    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      loadBalanceProxySolvers.push_back(solverIt());
-    }
-  }
-  else {
-    for (int i = 0; i < m_loadBalanceIndices.size(); i++) {
-      RefCountedPtr<ItoSolver>& solver = m_ito->getSolvers()[i];
-
-      loadBalanceProxySolvers.push_back(solver);
-    }
-  }
-
-  return loadBalanceProxySolvers;
-}
-
-void
-ItoPlasmaStepper::loadBalanceFluidRealm(Vector<Vector<int>>&             a_procs,
-                                        Vector<Vector<Box>>&             a_boxes,
-                                        const std::string                a_realm,
-                                        const Vector<DisjointBoxLayout>& a_grids,
-                                        const int                        a_lmin,
-                                        const int                        a_finestLevel) noexcept
-{
-  CH_TIME("ItoPlasmaStepper::loadBalanceFluidRealm(...)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::loadBalanceFluidRealm(...)" << endl;
-  }
-
-  CH_assert(m_loadBalanceFluid);
-  CH_assert(a_realm == m_fluidRealm);
-
-  // TLDR: This code tries to compute a load for each grid patch by applying a relaxation operator to each box. This means that the load
-  //       should be a decent estimate that takes into account boundary conditions, coarse-fine interface arithmetic, and enlargened stencils
-  //       near the embedded boundary.
-
-  a_procs.resize(1 + a_finestLevel);
-  a_boxes.resize(1 + a_finestLevel);
-
-  // We need to make AmrMesh restore some operators that we need in order to create a multigrid object. Fortunately, FieldSolver has routines
-  // for doing that but it will not know if AmrMesh has updated it's operators or not. So, we need to regrid them.
-  m_amr->regridOperators(m_fluidRealm, a_lmin);
-
-  // Field solver needs to allocate solver and set up the multigrid solver.
-  m_fieldSolver->allocateInternals();
-  m_fieldSolver->setupSolver();
-
-  // Field solver implementation gets the responsibility of computing loads on each level.
-  for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
-    Vector<long long> loads = m_fieldSolver->computeLoads(a_grids[lvl], lvl);
-
-    // Do the desired sorting and load balancing
-    a_boxes[lvl] = a_grids[lvl].boxArray();
-
-    LoadBalancing::sort(a_boxes[lvl], loads, m_boxSort);
-    LoadBalancing::makeBalance(a_procs[lvl], loads, a_boxes[lvl]);
-  }
 }
 
 void

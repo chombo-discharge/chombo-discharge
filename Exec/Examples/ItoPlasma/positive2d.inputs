@@ -219,7 +219,7 @@ ItoPlasmaGodunovStepper.load_per_cell           = 1.0            # Default load 
 ItoPlasmaGodunovStepper.box_sorting             = morton         # Box sorting when load balancing
 ItoPlasmaGodunovStepper.particles_per_cell      = 16             # Max computational particles per cell
 ItoPlasmaGodunovStepper.merge_interval          = 1              # Time steps between superparticle merging
-ItoPlasmaGodunovStepper.regrid_superparticles   = true           # Make superparticles during regrids
+ItoPlasmaGodunovStepper.regrid_superparticles   = false          # Make superparticles during regrids
 ItoPlasmaGodunovStepper.advection_cfl           = 100.0          # Advective time step CFL restriction
 ItoPlasmaGodunovStepper.diffusion_cfl           = 100.0          # Diffusive time step CFL restriction
 ItoPlasmaGodunovStepper.advection_diffusion_cfl = 100.0          # Advection-diffusion time step CFL restriction
@@ -227,7 +227,6 @@ ItoPlasmaGodunovStepper.relax_dt_factor         = 1000.          # Relaxation ti
 ItoPlasmaGodunovStepper.min_dt                  = 0.0            # Minimum permitted time step
 ItoPlasmaGodunovStepper.max_dt                  = 1.E99          # Maximum permitted time step
 ItoPlasmaGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
-ItoPlasmaGodunovStepper.eb_coupling             = full_cell      # Cut-cell algorithmic coupling
 ItoPlasmaGodunovStepper.algorithm               = euler_maruyama # Integration algorithm. 'euler_maruyama' or 'trapezoidal'
 
 # ====================================================================================================

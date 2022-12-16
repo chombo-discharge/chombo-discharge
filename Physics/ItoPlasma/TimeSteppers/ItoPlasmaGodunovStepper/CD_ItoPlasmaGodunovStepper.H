@@ -151,6 +151,11 @@ namespace Physics {
       bool m_canRegridOnRestart;
 
       /*!
+	@brief
+      */
+      bool m_gradientFix;
+
+      /*!
 	@brief Previous time step.
       */
       Real m_prevDt;

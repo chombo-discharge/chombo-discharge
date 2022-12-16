@@ -32,6 +32,7 @@ ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>
   m_writeCheckpointParticles = false;
   m_readCheckpointParticles  = false;
   m_canRegridOnRestart       = true;
+  m_gradientFix              = true;
 
   this->parseOptions();
 }
@@ -130,6 +131,7 @@ ItoPlasmaGodunovStepper::parseAlgorithm() noexcept
   ParmParse   pp(m_name.c_str());
   std::string str;
 
+  pp.query("gradient_fix", m_gradientFix);
   pp.get("algorithm", str);
 
   // Get algorithm
@@ -169,6 +171,10 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
 
   m_timer = Timer("ItoPlasmaGodunovStepper::advance");
 
+  if (m_gradientFix) {
+    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Voxel, m_toleranceEB);
+  }
+
   // Previous time step is needed when regridding.
   m_prevDt = a_dt;
 
@@ -198,23 +204,14 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   }
 
   // Do intersection test and remove particles that struck the EB or domain. Transfer them to appropriate containers. Then recompute the number of particles per cell.
+  //
   this->barrier();
   m_timer.startEvent("EB/Particle intersection");
-  switch (m_cutCellCoupling) {
-  case CutCellCoupling::ValidRegion: {
+  if (m_gradientFix) {
+    this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, false);
+  }
+  else {
     this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, true);
-
-    break;
-  }
-  case CutCellCoupling::FullCell: {
-    // Not supported yet -- don't know how we would do this!.
-    //    this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, false);
-
-    break;
-  }
-  default: {
-    MayDay::Error("ItoPlasmaGodunovStepper::advance -- unsupported algorithm for particle intersection");
-  }
   }
   this->getPhysicalParticlesPerCell(m_newPPC);
   m_timer.stopEvent("EB/Particle intersection");
@@ -268,20 +265,11 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   // Remove particles that are inside the EB. This depends on the algorithm.
   this->barrier();
   m_timer.startEvent("Remove covered");
-  switch (m_cutCellCoupling) {
-  case CutCellCoupling::ValidRegion: {
-    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Discrete, m_toleranceEB);
-
-    break;
-  }
-  case CutCellCoupling::FullCell: {
+  if (m_gradientFix) {
     this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Voxel, m_toleranceEB);
-
-    break;
   }
-  default: {
-    MayDay::Error("ItoPlasmaGodunovStepper::advance -- unsupported algorithm for covered particle removal");
-  }
+  else {
+    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Discrete, m_toleranceEB);
   }
   m_timer.stopEvent("Remove covered");
 
@@ -342,6 +330,8 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
     pout() << "ItoPlasmaGodunovStepper::regrid" << endl;
   }
 
+  m_timer = Timer("ItoPlasmaGodunovStepper::regrid");
+
   // A special flag for aborting the simulation if the user did NOT put checkpoint particles in the checkpoint
   // file but still try to regrid on restart.
   if (!m_canRegridOnRestart) {
@@ -354,48 +344,76 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   }
 
   // Regrid solvers
+
+  m_timer.startEvent("Regrid ItoSolver");
   m_ito->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  m_timer.stopEvent("Regrid ItoSolver");
+
+  m_timer.startEvent("Regrid FieldSolver");
   m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  m_timer.stopEvent("Regrid FieldSolver");
+
+  m_timer.startEvent("Regrid RTE");
   m_rte->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  m_timer.stopEvent("Regrid RTE");
+
+  m_timer.startEvent("Regrid SurfaceODESolver");
   m_sigmaSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  m_timer.stopEvent("Regrid SurfaceODESolver");
 
   // Allocate internal memory for ItoPlasmaGodunovStepper now....
+  m_timer.startEvent("Allocate internals");
   this->allocateInternals();
+  m_timer.stopEvent("Allocate internals");
 
   // We need to remap/regrid the stored particles as well.
+  m_timer.startEvent("Remap algorithm-particles");
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
     m_amr->remapToNewGrids(*m_rhoDaggerParticles[idx], a_lmin, a_newFinestLevel);
     m_amr->remapToNewGrids(*m_conductivityParticles[idx], a_lmin, a_newFinestLevel);
   }
+  m_timer.stopEvent("Remap algorithm-particles");
 
   // Set up the field solver
+  m_timer.startEvent("Setup field solver");
   m_fieldSolver->setupSolver();
 
   // Recompute the conductivity and space charge densities.
   this->computeConductivities(m_conductivityParticles);
   this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::All);
   this->setupSemiImplicitPoisson(m_prevDt);
+  m_timer.stopEvent("Setup field solver");
 
   // Solve the Poisson equation.
+  m_timer.startEvent("Solve Poisson");
   const bool converged = this->solvePoisson();
   if (!converged) {
     MayDay::Warning("ItoPlasmaGodunovStepper::regrid - Poisson solve did not converge after regrid!!!");
   }
+  m_timer.stopEvent("Solve Poisson");
 
   // Regrid superparticles.
   if (m_regridSuperparticles) {
+    m_timer.startEvent("Make superparticles");
     m_ito->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
     m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
     m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+    m_timer.stopEvent("Make superparticles");
   }
 
   // Now let Ihe ito solver deposit its actual particles... In the above it deposit m_rhoDaggerParticles.
+  m_timer.startEvent("Deposit particles");
   m_ito->depositParticles();
+  m_timer.stopEvent("Deposit particles");
 
   // Recompute new velocities and diffusion coefficients
+  m_timer.startEvent("Prepare next step");
   this->computeItoVelocities();
   this->computeItoDiffusion();
+  m_timer.stopEvent("Prepare next step");
+
+  m_timer.eventReport(pout(), false);
 }
 
 void
