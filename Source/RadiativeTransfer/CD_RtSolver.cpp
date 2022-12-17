@@ -26,6 +26,7 @@ RtSolver::RtSolver()
   CH_TIME("RtSolver::RtSolver");
 
   // Default settings
+  m_verbosity = -1;
   m_name      = "RtSolver";
   m_className = "RtSolver";
 }

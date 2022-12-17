@@ -66,8 +66,9 @@ ItoPlasmaGodunovStepper::allocate()
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    m_conductivityParticles[idx] = new ParticleContainer<PointParticle>();
-    m_rhoDaggerParticles[idx]    = new ParticleContainer<PointParticle>();
+    m_conductivityParticles[idx] = RefCountedPtr<ParticleContainer<PointParticle>>(
+      new ParticleContainer<PointParticle>());
+    m_rhoDaggerParticles[idx] = RefCountedPtr<ParticleContainer<PointParticle>>(new ParticleContainer<PointParticle>());
 
     m_amr->allocate(*m_conductivityParticles[idx], m_particleRealm);
     m_amr->allocate(*m_rhoDaggerParticles[idx], m_particleRealm);
@@ -446,8 +447,8 @@ ItoPlasmaGodunovStepper::setOldPositions() noexcept
 }
 
 void
-ItoPlasmaGodunovStepper::remapPointParticles(Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                             const SpeciesSubset                        a_subset) noexcept
+ItoPlasmaGodunovStepper::remapPointParticles(Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
+                                             const SpeciesSubset                                      a_subset) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::remapPointParticles");
   if (m_verbosity > 5) {
@@ -550,8 +551,9 @@ ItoPlasmaGodunovStepper::remapPointParticles(Vector<ParticleContainer<PointParti
 }
 
 void
-ItoPlasmaGodunovStepper::depositPointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                               const SpeciesSubset                              a_subset) noexcept
+ItoPlasmaGodunovStepper::depositPointParticles(
+  const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
+  const SpeciesSubset                                            a_subset) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::depositPointParticles");
   if (m_verbosity > 5) {
@@ -650,8 +652,8 @@ ItoPlasmaGodunovStepper::depositPointParticles(const Vector<ParticleContainer<Po
 }
 
 void
-ItoPlasmaGodunovStepper::clearPointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                             const SpeciesSubset                              a_subset) noexcept
+ItoPlasmaGodunovStepper::clearPointParticles(const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
+                                             const SpeciesSubset a_subset) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::clearPointParticles");
   if (m_verbosity > 5) {
@@ -754,7 +756,8 @@ ItoPlasmaGodunovStepper::clearPointParticles(const Vector<ParticleContainer<Poin
 }
 
 void
-ItoPlasmaGodunovStepper::computeConductivities(const Vector<ParticleContainer<PointParticle>*>& a_particles) noexcept
+ItoPlasmaGodunovStepper::computeConductivities(
+  const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::computeConductivities");
   if (m_verbosity > 5) {
@@ -768,8 +771,9 @@ ItoPlasmaGodunovStepper::computeConductivities(const Vector<ParticleContainer<Po
 }
 
 void
-ItoPlasmaGodunovStepper::computeCellConductivity(EBAMRCellData&                                   a_conductivityCell,
-                                                 const Vector<ParticleContainer<PointParticle>*>& a_particles) noexcept
+ItoPlasmaGodunovStepper::computeCellConductivity(
+  EBAMRCellData&                                                 a_conductivityCell,
+  const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::computeCellConductivity(EBAMRCellData, PointParticle");
   if (m_verbosity > 5) {
@@ -870,9 +874,10 @@ ItoPlasmaGodunovStepper::setupSemiImplicitPoisson(const Real a_dt) noexcept
 }
 
 void
-ItoPlasmaGodunovStepper::removeCoveredPointParticles(Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                                     const EBRepresentation                     a_representation,
-                                                     const Real a_tolerance) const noexcept
+ItoPlasmaGodunovStepper::removeCoveredPointParticles(
+  Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
+  const EBRepresentation                                   a_representation,
+  const Real                                               a_tolerance) const noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::removeCoveredPointParticles");
   if (m_verbosity > 5) {
@@ -909,7 +914,7 @@ ItoPlasmaGodunovStepper::removeCoveredPointParticles(Vector<ParticleContainer<Po
 
 void
 ItoPlasmaGodunovStepper::copyConductivityParticles(
-  Vector<ParticleContainer<PointParticle>*>& a_conductivityParticles) noexcept
+  Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_conductivityParticles) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::copyConductivityParticles");
   if (m_verbosity > 5) {
@@ -1017,8 +1022,9 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
 }
 
 void
-ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles,
-                                                       const Real                                 a_dt) noexcept
+ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(
+  Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_rhoDaggerParticles,
+  const Real                                               a_dt) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama");
   if (m_verbosity > 5) {

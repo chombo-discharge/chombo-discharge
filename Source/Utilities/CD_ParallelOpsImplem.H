@@ -43,7 +43,7 @@ ParallelOps::partition(const int a_N) noexcept
 
   return std::make_pair(begin, end);
 #else
-  return std::make_pair(0, N - 1);
+  return std::make_pair(0, a_N - 1);
 #endif
 }
 

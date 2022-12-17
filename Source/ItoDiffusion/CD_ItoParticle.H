@@ -31,8 +31,10 @@
   m_scalars[1] => mobility
   m_scalars[2] => diffusion
   m_scalars[3] => energy
+  m_scalars[4] => Temp storage. 
   m_vectors[0] => oldPosition 
   m_vectors[1] => velocity
+  m_vectors[3] => Temp storage. 
 */
 class ItoParticle : public GenericParticle<5, 3>
 {

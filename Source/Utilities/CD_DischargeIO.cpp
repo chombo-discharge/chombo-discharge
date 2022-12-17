@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Std includes
+#include <sstream>
+
 // Chombo includes
 #include <CH_HDF5.H>
 #include <EBAMRIO.H>
@@ -23,7 +26,7 @@ DischargeIO::numberFmt(const long long n, char sep) noexcept
 {
   CH_TIME("DischargeIO::numberFmt(long long, char)");
 
-  stringstream fmt;
+  std::stringstream fmt;
   fmt << n;
   string s = fmt.str();
   s.reserve(s.length() + s.length() / 3);

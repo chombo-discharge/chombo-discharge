@@ -173,12 +173,12 @@ namespace Physics {
       /*!
 	@brief Storage for simplified particles that gave us sigma^k
       */
-      Vector<ParticleContainer<PointParticle>*> m_conductivityParticles;
+      Vector<RefCountedPtr<ParticleContainer<PointParticle>>> m_conductivityParticles;
 
       /*!
 	@brief Storage for particles that gave rho^dagger
       */
-      Vector<ParticleContainer<PointParticle>*> m_rhoDaggerParticles;
+      Vector<RefCountedPtr<ParticleContainer<PointParticle>>> m_rhoDaggerParticles;
 
       /*!
 	@brief Parse advancement algorithm
@@ -211,8 +211,8 @@ namespace Physics {
 	@param[in]    a_subset    Particle subset to remap.
       */
       virtual void
-      remapPointParticles(Vector<ParticleContainer<PointParticle>*>& a_particles,
-                          const SpeciesSubset                        a_subset) noexcept;
+      remapPointParticles(Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
+                          const SpeciesSubset                                      a_subset) noexcept;
 
       /*!
 	@brief Deposit the input point particles on the mesh
@@ -221,8 +221,8 @@ namespace Physics {
 	@note This deposits into the ItoSolver m_phi data. 
       */
       virtual void
-      depositPointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
-                            const SpeciesSubset                              a_subset) noexcept;
+      depositPointParticles(const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
+                            const SpeciesSubset                                            a_subset) noexcept;
 
       /*!
 	@brief Clear the input particle data holders
@@ -230,8 +230,8 @@ namespace Physics {
 	@param[in]    a_subset    Particle subset to remap. 
       */
       virtual void
-      clearPointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
-                          const SpeciesSubset                              a_subset) noexcept;
+      clearPointParticles(const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
+                          const SpeciesSubset                                            a_subset) noexcept;
 
       /*!
 	@brief Compute all conductivities (cell, face, and EB) from the input point particles
@@ -239,7 +239,7 @@ namespace Physics {
 	@note This deposits the input particle weights onto m_conductivityCell, m_conductivityFace etc. 
       */
       virtual void
-      computeConductivities(const Vector<ParticleContainer<PointParticle>*>& a_particles) noexcept;
+      computeConductivities(const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles) noexcept;
 
       /*!
 	@brief Compute the cell-centered conductivity
@@ -247,8 +247,8 @@ namespace Physics {
 	@param[in]  a_particles        Particles to deposit. Particle weights must hold the mobility*weight
       */
       virtual void
-      computeCellConductivity(EBAMRCellData&                                   a_conductivityCell,
-                              const Vector<ParticleContainer<PointParticle>*>& a_particles) noexcept;
+      computeCellConductivity(EBAMRCellData&                                                 a_conductivityCell,
+                              const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles) noexcept;
 
       /*!
 	@brief Compute the cell-centered conductivity
@@ -270,16 +270,17 @@ namespace Physics {
 	@param[in]    a_tolerance      EB tolerance
       */
       virtual void
-      removeCoveredPointParticles(Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                  const EBRepresentation                     a_representation,
-                                  const Real                                 a_tolerance) const noexcept;
+      removeCoveredPointParticles(Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
+                                  const EBRepresentation                                   a_representation,
+                                  const Real                                               a_tolerance) const noexcept;
 
       /*!
 	@brief Copy particles from the ItoSolver into PointParticles whose weight are ItoParticle::m_weight * ItoParticle::m_mobility
 	@param[out] a_conductivityParticles Point-particles holding the mobility * weight
       */
       virtual void
-      copyConductivityParticles(Vector<ParticleContainer<PointParticle>*>& a_conductivityParticles) noexcept;
+      copyConductivityParticles(
+        Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_conductivityParticles) noexcept;
 
       /*!
 	@brief Advance the particles using the Euler-Maruyama scheme
@@ -294,8 +295,8 @@ namespace Physics {
 	"rho dagger" particles which correspond to the position of the charged particles after the diffusionhop. 
       */
       virtual void
-      diffuseParticlesEulerMaruyama(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles,
-                                    const Real                                 a_dt) noexcept;
+      diffuseParticlesEulerMaruyama(Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_rhoDaggerParticles,
+                                    const Real                                               a_dt) noexcept;
 
       /*!
 	@brief Step the particles according to the regular Euler-Maruyama scheme.

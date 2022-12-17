@@ -22,7 +22,7 @@
 #include <CD_ItoParticle.H>
 #include <CD_NamespaceHeader.H>
 
-inline ItoParticle::ItoParticle() {}
+inline ItoParticle::ItoParticle() { this->define(1.0, RealVect::Zero, RealVect::Zero, 0.0, 0.0, 0.0); }
 
 inline ItoParticle::ItoParticle(const Real      a_weight,
                                 const RealVect& a_position,
