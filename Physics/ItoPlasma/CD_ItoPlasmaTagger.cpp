@@ -119,12 +119,6 @@ ItoPlasmaTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_p
 
   this->computeTracers();
   for (int i = 0; i < m_num_tracers; i++) {
-    std::string one = "Tracer field-";
-    long int    j   = i;
-    char        s[2];
-    sprintf(s, "%ld", j);
-    std::string two(s);
-
     const EBAMRCellData& tracer = m_tracer[i];
 
     const Interval src_interv(0, 0);
@@ -132,11 +126,13 @@ ItoPlasmaTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_p
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       tracer[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+
       DataOps::setCoveredValue(*a_output[lvl], a_icomp, 0.0);
     }
 
     // Add component and name
-    a_plotVariableNames.push_back(one + two);
+    a_plotVariableNames.push_back("Tracer field-" + std::to_string(i));
+
     a_icomp++;
   }
 }
