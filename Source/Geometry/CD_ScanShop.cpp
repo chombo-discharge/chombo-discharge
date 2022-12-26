@@ -332,9 +332,8 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   reguCovTypes.append(regularTypes);
 
   //   LoadBalancing::sort(  reguCovBoxes, reguCovTypes, m_boxSorting); Don't need to sort these, I think.
-  LoadBalancing::sort(
-    a_cutCellBoxes,
-    m_boxSorting); // We don't need to track the "type" for cut-cell boxes because this call only sorts one type of box.
+  // We don't need to track the "type" for cut-cell boxes because this call only sorts one type of box.
+  LoadBalancing::sort(a_cutCellBoxes, m_boxSorting);
   m_timer.stopEvent("Sort boxes");
 
   // Load balance the boxes.

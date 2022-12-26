@@ -114,7 +114,7 @@ CellTagger::parseBoxes()
 
       m_tagBoxes[ibox] = RealBox(c1, c2);
 
-      delete cstr;
+      delete[] cstr;
     }
   }
 }
