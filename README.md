@@ -8,7 +8,7 @@ A modified version of ``Chombo`` is distributed together with this code.
 
 Click [here](https://chombo-discharge.github.io/chombo-discharge/Base/Installation.html) for installation instructions.
 
-<img src="./Docs/Sphinx/source/_static/figures/BranchingPositiveAir.gif" width="50%">
+<img src="./Docs/Sphinx/source/_static/figures/BranchingAir.gif" width="50%">
 
 
 Documentation
