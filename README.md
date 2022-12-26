@@ -10,6 +10,7 @@ Click [here](https://chombo-discharge.github.io/chombo-discharge/Base/Installati
 
 <img src="./Docs/Sphinx/source/_static/figures/BranchingPositiveAir.gif" width="50%">
 
+
 Documentation
 -------------
 
