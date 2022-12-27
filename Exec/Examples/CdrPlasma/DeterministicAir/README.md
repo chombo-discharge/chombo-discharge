@@ -35,6 +35,7 @@ The user can select between different algorithms and initial conditions in the i
 # Output
 
 Output is given to HDF5 files in the plt folder.
+Panels below show typical output for positive (top) and negative (bottom).
 
 <img src="positive2d.png" alt="Positive streamer" width="400"/>
 <img src="negative2d.png" alt="Negative streamer" width="400"/>
