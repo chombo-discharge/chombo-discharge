@@ -251,9 +251,9 @@ CdrPlasmaJSON.chemistry_dt     = 1.E99             # Maximum allowed chemistry t
 # CdrPlasmaStreamerTagger class options
 # ====================================================================================================
 CdrPlasmaStreamerTagger.verbosity         = -1           # Verbosity
-CdrPlasmaStreamerTagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
-CdrPlasmaStreamerTagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
-CdrPlasmaStreamerTagger.box1_hi           = 0.0 0.0 0.0  # these two corners
+CdrPlasmaStreamerTagger.num_tag_boxes     = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
+CdrPlasmaStreamerTagger.tag_box1_lo       = 0.0 0.0 0.0  # Only allow tags that fall between
+CdrPlasmaStreamerTagger.tag_box1_hi       = 0.0 0.0 0.0  # these two corners
 CdrPlasmaStreamerTagger.buffer            = 4            # Grow tagged cells
 
 CdrPlasmaStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
