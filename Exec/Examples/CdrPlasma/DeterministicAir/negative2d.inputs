@@ -52,7 +52,7 @@ Driver.geometry_only                   = false            # Special option that 
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
 Driver.output_directory                = ./               # Output directory
-Driver.output_names                    = negative2d       # Simulation output names
+Driver.output_names                    = negative         # Simulation output names
 Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
 Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
