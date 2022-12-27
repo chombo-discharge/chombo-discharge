@@ -7,7 +7,8 @@ The Input scripts and plasma chemistry are defined in
 * 2D input: positive2d.inputs and negative2d.inputs
 * 3D input: positive3d.inputs and negative3d.inputs
 
-For an explanation to the parameters in the chemistry file, see the [chombo-discharge documentation](https://chombo-discharge.github.io/chombo-discharge/Applications/CdrPlasmaModel.html#json-interface).
+This model uses a drift-diffusion for the electrons and ions, and an Eddington approximation (or strictly speaking a Helmholtz reconstruction) for the photons.
+For a further explanation to the parameters in the chemistry file, see the [chombo-discharge documentation](https://chombo-discharge.github.io/chombo-discharge/Applications/CdrPlasmaModel.html#json-interface).
 
 # Compilation
 
@@ -33,4 +34,7 @@ The user can select between different algorithms and initial conditions in the i
 
 # Output
 
-Output is given to HDF5 files in the plt folder. 
+Output is given to HDF5 files in the plt folder.
+
+<img src="positive2d.png" alt="Positive streamer" width="400"/>
+<img src="negative2d.png" alt="Negative streamer" width="400"/>
