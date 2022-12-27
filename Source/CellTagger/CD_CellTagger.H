@@ -94,7 +94,7 @@ public:
     @return Returns m_buffer
     @note This will look for a string in the form "m_name.buffer = <integer>". 
   */
-  int
+  virtual int
   getBuffer() const;
 
 protected:
@@ -119,6 +119,11 @@ protected:
   Vector<RealBox> m_tagBoxes;
 
   /*!
+    @brief Refinement boxes for adding manual refinement.
+  */
+  std::vector<std::pair<RealBox, int>> m_refBoxes;
+
+  /*!
     @brief Check if a point is inside a tagging box
     @param[in] a_pos Physical coordinates. 
     @return Returns true if a_pos is inside any of the boxes in m_tagBoxes. Otherwise it returns false. 
@@ -127,12 +132,24 @@ protected:
   insideTagBox(const RealVect a_pos) const;
 
   /*!
+    @brief Get the specified level for this position when doing manual refinement. 
+  */
+  int
+  getManualRefinementLevel(const RealVect a_pos) const;
+
+  /*!
     @brief Parse boxes.
     @details This will look for input parameters in the form m_name.num_boxes = <integer>. If <integer> = 0 then the function will process additional lines
     in the form "m_name.box1_lo = <float> <float> <float>" which indicates the lower corner of the "tag box". 
   */
   virtual void
-  parseBoxes();
+  parseTagBoxes();
+
+  /*!
+    @brief Parse refinement boxes
+  */
+  virtual void
+  parseRefinementBoxes();
 
   /*!
     @brief Parse refinement buffer.
