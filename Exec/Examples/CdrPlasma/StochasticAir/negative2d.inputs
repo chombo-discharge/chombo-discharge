@@ -23,7 +23,7 @@ AmrMesh.max_ebis_box     = 16          # Maximum allowed box size for EBIS gener
 AmrMesh.ref_rat          = 2 2 2 2 2 2 # Refinement ratios (mixed ratios are allowed). 
 AmrMesh.num_ghost        = 2           # Number of ghost cells. 
 AmrMesh.lsf_ghost        = 2           # Number of ghost cells when writing level-set to grid
-AmrMesh.eb_ghost         = 4           # Set number of of ghost cells for EB stuff
+AmrMesh.eb_ghost         = 2           # Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
 AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
@@ -39,7 +39,7 @@ Driver.geometry_generation             = chombo-discharge # Grid generation meth
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
 Driver.plot_interval                   = 10               # Plot interval
-Driver.checkpoint_interval             = 10               # Checkpoint interval
+Driver.checkpoint_interval             = 100              # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
@@ -47,12 +47,12 @@ Driver.initial_regrids                 = 3                # Number of initial re
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 200E-9           # Stop time
-Driver.max_steps                       = 2500             # Maximum number of steps
+Driver.max_steps                       = 500              # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
 Driver.output_directory                = ./               # Output directory
-Driver.output_names                    = negative2d       # Simulation output names
+Driver.output_names                    = negative        # Simulation output names
 Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
 Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
@@ -85,13 +85,13 @@ FieldSolverMultigrid.gmg_min_iter      = 5                 # Minimum number of i
 FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2               # Solver hang
-FieldSolverMultigrid.gmg_min_cells     = 4                 # Bottom drop
-FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
+FieldSolverMultigrid.gmg_min_cells     = 8                 # Bottom drop
+FieldSolverMultigrid.gmg_drop_order    = 16                 # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2                 # Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight     = 1                 # Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order    = 2                 # Boundary condition order for jump conditions
 FieldSolverMultigrid.gmg_jump_weight   = 1                 # Boundary condition weight for jump conditions (for least squares)
-FieldSolverMultigrid.gmg_bottom_solver = simple 128          # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
+FieldSolverMultigrid.gmg_bottom_solver = simple 256          # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverMultigrid.gmg_cycle         = vcycle            # Cycle type. Only 'vcycle' supported for now. 
 FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 
@@ -106,7 +106,7 @@ CdrCTU.bc.y.lo              = wall                    # 'data', 'function', 'wal
 CdrCTU.bc.y.hi              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.bc.z.lo              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.bc.z.hi              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
-CdrCTU.slope_limiter        = mc                      # Slope limiter. 'none', 'minmod', 'mc', or 'superbee'
+CdrCTU.slope_limiter        = none                      # Slope limiter. 'none', 'minmod', 'mc', or 'superbee'
 CdrCTU.use_ctu              = true                    # If true, use CTU. Otherwise it's DTU.
 CdrCTU.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 CdrCTU.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
@@ -242,5 +242,5 @@ CdrPlasmaStreamerTagger.buffer            = 4            # Grow tagged cells
 CdrPlasmaStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
 CdrPlasmaStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
 CdrPlasmaStreamerTagger.refine_alpha      = 1.5          # Set alpha refinement. Lower  => More mesh
-CdrPlasmaStreamerTagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
+CdrPlasmaStreamerTagger.coarsen_alpha     = 0.2          # Set alpha coarsening. Higher => Less mesh
 CdrPlasmaStreamerTagger.max_coarsen_lvl   = 6            # Set max coarsening depth
