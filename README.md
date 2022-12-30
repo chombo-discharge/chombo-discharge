@@ -11,7 +11,7 @@ A modified version of ``Chombo`` is distributed together with this code.
 Installation
 ------------
 
-See (https://chombo-discharge.github.io/chombo-discharge/Base/Installation.html) for installation instructions.
+See https://chombo-discharge.github.io/chombo-discharge/Base/Installation.html for installation instructions.
 
 Documentation
 -------------
