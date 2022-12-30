@@ -156,7 +156,7 @@ CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<E
   DataOps::scale(a_rho, Units::Qe);
 
   // Above, we computed the cell-centered space charge. We must have centroid-centered.
-  m_amr->conservativeAverage(a_rho, m_realm);
+  m_amr->arithmeticAverage(a_rho, m_realm);
   m_amr->interpGhost(a_rho, m_realm);
   m_amr->interpToCentroids(rhoGas, m_realm, phase::gas);
 }
@@ -206,7 +206,7 @@ CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity) con
         DataOps::multiply(speciesConductivity, phi);                  // Compute f = mu*n
 
         // Add to total conductivity.
-        DataOps::incr(a_cellConductivity, speciesConductivity, 1.0);
+        DataOps::incr(a_cellConductivity, speciesConductivity, 1.0 * std::abs(Z));
       }
     }
   }
@@ -215,8 +215,8 @@ CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity) con
   DataOps::scale(a_cellConductivity, Units::Qe);
 
   // Fill ghost cells.
-  m_amr->conservativeAverage(a_cellConductivity, m_realm, phase::gas);
-  m_amr->interpGhost(a_cellConductivity, m_realm, phase::gas);
+  m_amr->arithmeticAverage(a_cellConductivity, m_realm, phase::gas);
+  m_amr->interpGhostPwl(a_cellConductivity, m_realm, phase::gas);
 }
 
 void
@@ -264,9 +264,11 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
   DataOps::incr(a_conductivityEB, a_conductivityCell, 1.0);
 #endif
 
+  DataOps::floor(a_conductivityEB, 0.0);
+
   // Coarsen coefficients.
   m_amr->arithmeticAverage(a_conductivityFace, m_realm, phase::gas);
-  m_amr->conservativeAverage(a_conductivityEB, m_realm, phase::gas);
+  m_amr->arithmeticAverage(a_conductivityEB, m_realm, phase::gas);
 }
 
 void
@@ -336,7 +338,7 @@ CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFa
 
   // Coarsen coefficients.
   m_amr->arithmeticAverage(permFaceGas, m_realm, phase::gas);
-  m_amr->conservativeAverage(permEBGas, m_realm, phase::gas);
+  m_amr->arithmeticAverage(permEBGas, m_realm, phase::gas);
 
   // Set up the solver with the new "permittivities".
   m_fieldSolver->setSolverPermittivities(permCell, permFace, permEB);
@@ -469,11 +471,11 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cdrSour
     // Copy the cell-centered density to the scratch data holder. Need to do this because the CDR solvers may not
     // have updated their ghost cells.
     DataOps::copy(scratch, *a_cdrDensities[idx]);
-    m_amr->interpGhostMG(scratch, m_realm, m_cdr->getPhase());
+    m_amr->interpGhostPwl(scratch, m_realm, m_cdr->getPhase());
 
     // Compute the gradient and coarsen the result.
     m_amr->computeGradient(*cdrGradients[idx], scratch, m_realm, m_cdr->getPhase());
-    m_amr->conservativeAverage(*cdrGradients[idx], m_realm, m_cdr->getPhase());
+    m_amr->arithmeticAverage(*cdrGradients[idx], m_realm, m_cdr->getPhase());
     m_amr->interpGhost(*cdrGradients[idx], m_realm, m_cdr->getPhase());
   }
 
@@ -1837,8 +1839,8 @@ CdrPlasmaStepper::computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_cdrDco
       DataOps::setValue(*a_cdrDcoFace[idx], std::numeric_limits<Real>::max());
 
       // Coarsen the cell-centered diffusion coefficient before averaging to faces.
-      m_amr->conservativeAverage(cdrDcoCell[idx], m_realm, m_cdr->getPhase());
-      m_amr->interpGhostMG(cdrDcoCell[idx], m_realm, m_cdr->getPhase());
+      m_amr->arithmeticAverage(cdrDcoCell[idx], m_realm, m_cdr->getPhase());
+      m_amr->interpGhostPwl(cdrDcoCell[idx], m_realm, m_cdr->getPhase());
 
       // Average to cell faces. Note that this call also includes one ghost face.
       const int      tanGhost = 1;
@@ -2044,8 +2046,8 @@ CdrPlasmaStepper::computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a_cdrV
     const int idx = solverIt.index();
 
     if (solverIt()->isMobile()) {
-      m_amr->conservativeAverage(*a_cdrVelocities[idx], m_realm, m_cdr->getPhase());
-      m_amr->interpGhostMG(*a_cdrVelocities[idx], m_realm, m_cdr->getPhase());
+      m_amr->arithmeticAverage(*a_cdrVelocities[idx], m_realm, m_cdr->getPhase());
+      m_amr->interpGhostPwl(*a_cdrVelocities[idx], m_realm, m_cdr->getPhase());
     }
   }
 }
@@ -2766,7 +2768,7 @@ CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extra
       this->projectFlux(*a_extrapCdrFluxesEB[idx], ebFlux);
 
       // Synchronize with deeper levels.
-      m_amr->conservativeAverage(*a_extrapCdrFluxesEB[idx], m_realm, a_phase);
+      m_amr->arithmeticAverage(*a_extrapCdrFluxesEB[idx], m_realm, a_phase);
     }
     else {
       DataOps::setValue(*a_extrapCdrFluxesEB[idx], 0.0);
@@ -3011,8 +3013,8 @@ CdrPlasmaStepper::computeJ(EBAMRCellData& a_J) const
       // We need updated ghost cells when computing the gradient so we use scratchONE as a scratch data holder when we compute grad(phi)
       DataOps::copy(scratchONE, phi);
 
-      m_amr->conservativeAverage(scratchONE, m_realm, m_phase);
-      m_amr->interpGhostMG(scratchONE, m_realm, m_phase);
+      m_amr->arithmeticAverage(scratchONE, m_realm, m_phase);
+      m_amr->interpGhostPwl(scratchONE, m_realm, m_phase);
       m_amr->computeGradient(scratchDIM, scratchONE, m_realm, m_phase);
 
       // scratchONE now holds grad(phi). We need to put the diffusion coefficient on the cell center now.
@@ -3032,8 +3034,8 @@ CdrPlasmaStepper::computeJ(EBAMRCellData& a_J) const
   DataOps::scale(a_J, Units::Qe);
 
   // Coarsen and update ghost cells
-  m_amr->conservativeAverage(a_J, m_realm, m_phase);
-  m_amr->interpGhostMG(a_J, m_realm, m_phase);
+  m_amr->arithmeticAverage(a_J, m_realm, m_phase);
+  m_amr->interpGhostPwl(a_J, m_realm, m_phase);
 }
 
 void
@@ -3051,8 +3053,8 @@ CdrPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& 
   m_fieldSolver->computeElectricField(a_E, a_potential);
 
   // Update ghost cells.
-  m_amr->conservativeAverage(a_E, m_realm);
-  m_amr->interpGhostMG(a_E, m_realm);
+  m_amr->arithmeticAverage(a_E, m_realm);
+  m_amr->interpGhostPwl(a_E, m_realm);
 }
 
 void
@@ -3083,8 +3085,8 @@ CdrPlasmaStepper::computeElectricField(EBAMRCellData&           a_E,
 
   m_fieldSolver->computeElectricField(a_E, a_phase, a_potential);
 
-  m_amr->conservativeAverage(a_E, m_realm, a_phase);
-  m_amr->interpGhostMG(a_E, m_realm, a_phase);
+  m_amr->arithmeticAverage(a_E, m_realm, a_phase);
+  m_amr->interpGhostPwl(a_E, m_realm, a_phase);
 }
 
 void
@@ -3523,7 +3525,7 @@ CdrPlasmaStepper::initialSigma()
   }
 
   // Coarsen the data
-  m_amr->conservativeAverage(sigma, m_realm, phase::gas);
+  m_amr->arithmeticAverage(sigma, m_realm, phase::gas);
 
   // Set surface charge to zero on electrode interface cells.
   m_sigma->resetElectrodes(sigma, 0.0);
@@ -4107,7 +4109,7 @@ CdrPlasmaStepper::computeElectrodeCurrent()
   // Reset the current density only dielectric interface cells so we get the electrode cells. We also
   // coarsen the currentDensity so that we can perform the integration on the coarsest grid level.
   this->resetDielectricCells(currentDensity);
-  m_amr->conservativeAverage(currentDensity, m_realm, m_cdr->getPhase());
+  m_amr->arithmeticAverage(currentDensity, m_realm, m_cdr->getPhase());
 
   // Next, we integrate the current over the EB surface on the coarsest level only.
   const int integrationLevel = 0;
@@ -4189,7 +4191,7 @@ CdrPlasmaStepper::computeDielectricCurrent()
   // Reset the current density only electrode interface cells so we get the electrode cells. We also
   // coarsen the currentDensity so that we can perform the integration on the coarsest grid level.
   m_sigma->resetElectrodes(currentDensity, 0.0);
-  m_amr->conservativeAverage(currentDensity, m_realm, m_cdr->getPhase());
+  m_amr->arithmeticAverage(currentDensity, m_realm, m_cdr->getPhase());
 
   // Next, we integrate the current over the EB surface on the coarsest level only.
   const int integrationLevel = 0;
@@ -4342,7 +4344,7 @@ CdrPlasmaStepper::computeOhmicInductionCurrent()
   DataOps::dotProduct(JdotE, J, E);
 
   // Coarsen so we can integrate on the coarsest level.
-  m_amr->conservativeAverage(JdotE, m_realm, m_cdr->getPhase());
+  m_amr->arithmeticAverage(JdotE, m_realm, m_cdr->getPhase());
 
   // Integrate on the coarsest level.
   const int integrationLevel = 0;
@@ -4377,8 +4379,8 @@ CdrPlasmaStepper::computeRelaxationTime()
   this->computeCellConductivity(conductivity);
 
   // Coarsen it and put it on centroids.
-  m_amr->conservativeAverage(conductivity, m_realm, phase::gas);
-  m_amr->interpGhostMG(conductivity, m_realm, phase::gas);
+  m_amr->arithmeticAverage(conductivity, m_realm, phase::gas);
+  m_amr->interpGhostPwl(conductivity, m_realm, phase::gas);
 
   m_amr->interpToCentroids(conductivity, m_realm, phase::gas);
 
@@ -4617,11 +4619,11 @@ CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
       // Copy the densities to a scratch data holder so we can compute the gradient. Must do this because
       // the gradient is a two-level AMR operator.
       DataOps::copy(scratch, *cdrDensities[idx]);
-      m_amr->interpGhostMG(scratch, m_realm, m_cdr->getPhase());
+      m_amr->interpGhostPwl(scratch, m_realm, m_cdr->getPhase());
 
       // Now compute the gradient and coarsen/interpolate the invalid regions.
       m_amr->computeGradient(*cdrGradients[idx], scratch, m_realm, m_cdr->getPhase());
-      m_amr->conservativeAverage(*cdrGradients[idx], m_realm, m_cdr->getPhase());
+      m_amr->arithmeticAverage(*cdrGradients[idx], m_realm, m_cdr->getPhase());
       m_amr->interpGhost(*cdrGradients[idx], m_realm, m_cdr->getPhase());
     }
 
@@ -4736,7 +4738,7 @@ CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
 
     // I want to coarsen and interpolate this data because it might otherwise contain bogus values.
     const Interval interv(a_icomp, a_icomp + numVars - 1);
-    m_amr->conservativeAverage(a_output, m_realm, phase::gas, interv);
+    m_amr->arithmeticAverage(a_output, m_realm, phase::gas, interv);
 
     // Need to let the outside world know that we've written to some of the variables.
     a_icomp += numVars;
