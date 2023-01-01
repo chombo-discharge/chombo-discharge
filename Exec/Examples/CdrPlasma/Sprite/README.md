@@ -1,7 +1,7 @@
 ## Exec/Examples/CdrPlasma/Sprite
 
 This example runs a Cartesian 2D model of a sprite discharge.
-the input scripts and plasma chemistry are defined in
+The input scripts and plasma chemistry are defined in
 
 * Plasma chemistry: air_chemistry2d.json (containing reactions and initial conditions)
 * 2D input: sprite2d.inputs
