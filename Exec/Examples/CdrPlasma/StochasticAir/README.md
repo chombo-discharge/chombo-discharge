@@ -1,7 +1,7 @@
 ## Exec/Examples/CdrPlasma/DeterministicAir
 
 This example runs a model 2D and 3D streamer discharges in a high-voltage vessel geometry.
-The Input scripts and plasma chemistry are defined in
+the input scripts and plasma chemistry are defined in
 
 * Plasma chemistry: air_chemistry.json
 * 2D input: positive2d.inputs and negative2d.inputs
