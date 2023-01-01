@@ -1,0 +1,392 @@
+{"gas":
+ {
+     "law": "ideal",
+     "temperature": 300,
+     "pressure": 1,
+     "plot": true,
+     "neutral species":
+     [
+	 {
+	     "name": " O2 ",
+	     "molar fraction": 0.2
+	 },
+	 {
+	     "name": "N2",
+	     "molar fraction": 0.8
+	 }
+     ]
+ },
+ "plasma species":
+ [
+     {
+	 "name": "e",
+	 "Z": -1,
+	 "mobile": true,
+	 "diffusive": true,
+	 "mobility": {
+	     "lookup" : "table E/N",
+	     "file": "transport_air.dat",
+	     "header": "E/N (Td)\tMobility *N (1/m/V/s)",
+	     "E/N": 0,
+	     "mu*N": 1,
+	     "min E/N": 1,
+	     "max E/N": 2000,
+	     "points" : 500,
+	     "spacing": "exponential"
+	 },
+	 "diffusion": {
+	     "lookup": "table E/N",
+	     "file": "transport_air.dat",
+	     "header": "E/N (Td)\tDiffusion coefficient *N (1/m/s)",
+	     "E/N": 0,
+	     "D*N": 1,
+	     "min E/N": 1,
+	     "max E/N": 2000,
+	     "points": 500,
+	     "spacing": "exponential"
+	 },
+	 "initial data": {
+	     "uniform": 1.0E10,
+	     "gauss2":
+	     [
+		 {
+		     "radius": 100E-6,
+		     "amplitude": 1E16,
+		     "position": [0, 7.5E-3, 0]
+		 }
+	     ]
+	 },
+	 "temperature": {
+	     "lookup": "table E/N",
+	     "file": "transport_air.dat",
+	     "header": "E/N (Td)\tMean energy (eV)",
+	     "E/N": 0,
+	     "eV": 1,
+	     "min E/N": 1,
+	     "max E/N": 2000,
+	     "points": 500,
+	     "spacing": "exponential"
+	 }
+     },
+     {
+	 "name": "N2+",
+	 "Z":  1,
+	 "mobile": true,
+	 "diffusive": false,
+	 "mobility": {
+	     "lookup": "constant",
+	     "value": 2E-4
+	 },	 
+	 "initial data": {
+	     "uniform": 0.8E10,
+	     "gauss2":
+	     [
+		 {
+		     "radius": 100E-6,
+		     "amplitude": 0.8E16,
+		     "position": [0, 7.5E-3, 0]
+		 }
+	     ]
+	 }
+     },
+     {
+	 "name": "O2+",
+	 "Z":  1,
+	 "mobile": true,
+	 "diffusive": false,
+	 "mobility": {
+	     "lookup": "constant",
+	     "value": 2E-4
+	 },
+	 "initial data": {
+	     "uniform": 0.2E10,
+	     "gauss2":
+	     [
+		 {
+		     "radius": 100E-6,
+		     "amplitude": 0.2E16,
+		     "position": [0, 7.5E-3, 0]
+		 }
+	     ]
+	 }
+     },
+     {"name":"O2-", "Z":  -1, "mobile": true, "diffusive": false, "mobility": {"lookup": "constant", "value": 2E-4} },
+     {"name":"O-",  "Z":  -1, "mobile": true, "diffusive": false, "mobility": {"lookup": "constant", "value": 2E-4} },
+     {"name":"O3-", "Z":  -1, "mobile": true, "diffusive": false, "mobility": {"lookup": "constant", "value": 2E-4} },
+     {"name":"N4+", "Z":   1, "mobile": true, "diffusive": false, "mobility": {"lookup": "constant", "value": 2E-4} },
+     {"name":"O4+", "Z":   1, "mobile": true, "diffusive": false, "mobility": {"lookup": "constant", "value": 2E-4} }
+ ],
+ "photon species":
+ [
+     {
+	 "name": "Bourdon1",
+	 "kappa": "helmholtz",
+	 "neutral": "O2",
+	 "lambda": 0.0415
+     },
+     {
+	 "name": "Bourdon2",
+	 "kappa": "helmholtz",
+	 "neutral": "O2",
+	 "lambda": 0.1095
+     },
+     {
+	 "name": "Bourdon3",
+	 "kappa": "helmholtz",
+	 "neutral": "O2",
+	 "lambda": 0.6675
+     }
+ ],
+ "sigma": {
+     "initial density": 0.0
+ },
+ "alpha": {
+     "lookup": "table E/N",
+     "file" : "transport_air.dat",
+     "header": "E/N (Td)\tTownsend ioniz. coef. alpha/N (m2)",
+     "E/N": 0,
+     "alpha/N": 1,	  
+     "min E/N": 1,
+     "max E/N": 2000,
+     "points": 500,
+     "spacing": "exponential",
+     "plot": true
+ },
+ "eta": {
+     "lookup": "table E/N",
+     "file" : "transport_air.dat",
+     "header": "E/N (Td)\tTownsend attach. coef. eta/N (m2)",
+     "E/N": 0,
+     "eta/N": 1,	  
+     "min E/N": 1,
+     "max E/N": 2000,
+     "points": 500,
+     "spacing": "exponential",
+     "plot": true     
+ }, 
+ "plasma reactions": 
+ [
+     {
+	 "description": "O2 ionization",	 
+	 "reaction": "e + N2 -> e + e + N2+",
+	 "lookup": "table E/N",
+	 "file" : "transport_air.dat",
+	 "header": "C25   N2    Ionization    15.60 eV",
+	 "E/N": 0,
+	 "rate": 1,	  
+	 "min E/N": 1,
+	 "max E/N": 2000,
+	 "points": 500,
+	 "spacing": "exponential",	 
+	 "soloviev" : {
+	     "correction": true,
+	     "species": "e"
+	 }
+     },
+     {
+	 "description": "O2 ionization",	 
+	 "reaction": "e + O2 -> e + e + O2+",
+	 "lookup": "table E/N",
+	 "file" : "transport_air.dat",
+	 "header": "C42   O2    Ionization    12.06 eV",
+	 "E/N": 0,
+	 "rate": 1,
+	 "min E/N": 1,
+	 "max E/N": 2000,
+	 "points": 500,
+	 "spacing": "exponential",	 	 
+	 "soloviev" : {
+	     "correction": true,
+	     "species": "e"
+	 }
+     },
+     {
+	 "description": "O2 three-body attachment",	 
+	 "reaction": "e + O2 + O2 -> O2- + O2",
+	 "lookup": "table E/N",
+	 "file" : "transport_air.dat",
+	 "header": "C26   O2    Attachment",
+	 "E/N": 0,
+	 "rate": 1,
+	 "min E/N": 1,
+	 "max E/N": 2000,
+	 "points": 500,
+	 "spacing": "exponential",
+	 "scale": 1E-6
+     },
+     {
+	 "description": "O2 dissociative attachment",	 
+	 "reaction": "e + O2 -> O- + (O)",
+	 "lookup": "table E/N",
+	 "file" : "transport_air.dat",
+	 "header": "C27   O2    Attachment",
+	 "E/N": 0,
+	 "rate": 1,
+	 "min E/N": 1,
+	 "max E/N": 2000,
+	 "points": 500,
+	 "spacing": "exponential",	 	 
+	 "scale": 1.0
+     },
+     {
+	 "description": "O2- detachment (1)",	 
+	 "reaction": "O2- + N2 -> O2 + N2 + e",
+	 "lookup": "constant",
+	 "rate": 1.13E-25
+     },
+     {
+	 "description": "O2- detachment (2)",	 
+	 "reaction": "O2- + O2 -> O2 + O2 + e",
+	 "lookup": "constant",
+	 "rate": 2.2E-24,
+	 "scale": 1.0
+     },
+     {
+	 "description": "O- detachment (N2)",	 
+	 "reaction": "O- + N2 -> e + (N2O)",
+	 "lookup": "functionEN expA",
+	 "c1": 1.16E-18,
+	 "c2": 48.9,
+	 "c3": 11,
+	 "c4": 1.0,
+	 "c5": 2,
+	 "plot": true,
+	 "scale": 1.0
+     },
+     {
+	 "description": "O- conversion to O2-",	 
+	 "reaction": "O- + O2 -> O2- + (O)",
+	 "lookup": "functionEN expA",
+	 "c1": 6.96E-17,
+	 "c2": 198,
+	 "c3": 5.6,
+	 "c4": 1.0,
+	 "c5": 2,
+	 "plot": true,
+	 "scale": 1.0
+     },
+     {
+	 "description": "O- conversion to O3-",	 
+	 "reaction": "O- + O2 + @ -> O3- + (@)",
+	 "@": ["N2", "O2"],
+	 "lookup": "functionEN expA",
+	 "c1": 1.1E-42,
+	 "c2": 65,
+	 "c3": 0,
+	 "c4": 1.0,
+	 "c5": -2,
+	 "plot": true,
+	 "scale": 1.0
+     },
+     {
+	 "description": "N2+ conversion to N4+",	 
+	 "reaction": "N2+ + N2 + @ -> N4+ + (@)",
+	 "@": ["N2", "O2"],
+	 "lookup": "constant",
+	 "rate": 5E-41,
+	 "plot": true,
+	 "scale": 1.0
+     },
+     {
+	 "description": "N4+ conversion to O2+",	 
+	 "reaction": "N4+ + O2 -> O2+ + N2 + N2",
+	 "lookup": "constant",
+	 "rate": 2.5E-16,
+	 "plot": true,
+	 "scale": 1.0
+     },
+     {
+	 "description": "O2+ conversion to O4+",
+	 "reaction": "O2+ + O2 + @ -> O4+ + (@)",
+	 "@": ["O2", "N2"],
+	 "lookup": "constant",
+	 "rate": 2.4E-42,
+	 "plot": true,
+	 "scale": 1.0
+     },
+     {
+	 "description": "electron-O4+ recombination",
+	 "reaction": "e + O4+ -> O2 + O2",
+	 "lookup": "functionT1T2 A",
+	 "c1": 1.4E-12,
+	 "c2": 0.5,
+	 "T1": "O4+",
+	 "T2": "e",
+	 "scale": 1.0
+     },
+     {
+	 "description": "electron-N4+ recombination",
+	 "reaction": "e + N4+ -> N2 + N2",
+	 "lookup": "functionT1T2 A",
+	 "c1": 2E-12,
+	 "c2": 0.5,
+	 "T1": "N4+",
+	 "T2": "e",
+	 "scale": 1.0
+     },     
+     {
+	 "reaction": "e + N2 -> e + N2 + @",
+	 "@": ["Bourdon1", "Bourdon2", "Bourdon3"],
+	 "lookup": "table E/N",
+	 "file" : "transport_air.dat",
+	 "header": "C25   N2    Ionization    15.60 eV",
+	 "E/N": 0,
+	 "rate": 1,	  
+	 "min E/N": 1,
+	 "max E/N": 2000,
+	 "points": 500,
+	 "spacing": "exponential",	 
+	 "quenching pressure": 4000,
+	 "scale": 0.06,
+	 "soloviev" : {
+	     "correction": true,
+	     "species": "e"
+	 }	 
+     }
+ ],
+ "photo reactions":
+ [
+     {
+	 "reaction": "Bourdon1 -> e + O2+",
+	 "helmholtz": {
+	     "A": 1.12E-4,
+	     "lambda": 0.0415,
+	     "species": "O2"
+	 }
+     },
+     {
+	 "reaction": "Bourdon2 -> e + O2+",
+	 "helmholtz": {
+	     "A": 2.87E-3,
+	     "lambda": 0.1095,
+	     "species": "O2"
+	 }
+     },
+     {
+	 "reaction": "Bourdon3 -> e + O2+",
+	 "helmholtz": {
+	     "A": 0.275,
+	     "lambda": 0.6675,
+	     "species": "O2"
+	 }
+     }
+ ],
+ "electrode reactions":
+ [
+     { "reaction": "@ -> e",
+       "@": ["Bourdon1", "Bourdon2", "Bourdon3"],
+       "lookup": "constant",
+       "value": 1E-3,
+       "scale": 0.0
+     }
+ ],
+ "dielectric reactions":
+ [
+     { "reaction": "@ -> e",
+       "@": ["Bourdon1", "Bourdon2", "Bourdon3"],
+       "lookup": "constant",
+       "value": 1E-3,
+       "scale": 0.0       
+     }
+ ] 
+}

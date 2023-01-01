@@ -18,6 +18,10 @@
 #include <algorithm>
 #include <math.h>
 
+// Chombo includes
+#include <SPMD.H>
+#include <MayDay.H>
+
 // Our includes
 #include <CD_LookupTable1D.H>
 #include <CD_NamespaceHeader.H>

@@ -63,6 +63,4 @@ namespace DataParser {
 
 #include <CD_NamespaceFooter.H>
 
-#include <CD_DataParserImplem.H>
-
 #endif

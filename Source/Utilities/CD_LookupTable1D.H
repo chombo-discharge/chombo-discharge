@@ -15,6 +15,8 @@
 // Std includes
 #include <iostream>
 #include <vector>
+#include <array>
+#include <tuple>
 
 // Chombo includes
 #include <REAL.H>
