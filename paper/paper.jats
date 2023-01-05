@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Publishing DTD v1.2 20190208//EN"
+                  "JATS-publishing1.dtd">
+<article xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" dtd-version="1.2" article-type="other">
+<front>
+<journal-meta>
+<journal-id></journal-id>
+<journal-title-group>
+<journal-title>Journal of Open Source Software</journal-title>
+<abbrev-journal-title>JOSS</abbrev-journal-title>
+</journal-title-group>
+<issn publication-format="electronic">2475-9066</issn>
+<publisher>
+<publisher-name>Open Journals</publisher-name>
+</publisher>
+</journal-meta>
+<article-meta>
+<article-id pub-id-type="publisher-id">0</article-id>
+<article-id pub-id-type="doi">N/A</article-id>
+<title-group>
+<article-title>chombo-discharge: An adaptive code for gas discharge
+simulations in complex geometries</article-title>
+</title-group>
+<contrib-group>
+<contrib contrib-type="author">
+<contrib-id contrib-id-type="orcid">0000-0003-1706-9736</contrib-id>
+<name>
+<surname>Marskar</surname>
+<given-names>Robert</given-names>
+</name>
+<xref ref-type="aff" rid="aff-1"/>
+</contrib>
+<aff id="aff-1">
+<institution-wrap>
+<institution>SINTEF Energy Research, Norway</institution>
+</institution-wrap>
+</aff>
+</contrib-group>
+<pub-date date-type="pub" publication-format="electronic" iso-8601-date="2023-01-05">
+<day>5</day>
+<month>1</month>
+<year>2023</year>
+</pub-date>
+<volume>¿VOL?</volume>
+<issue>¿ISSUE?</issue>
+<fpage>¿PAGE?</fpage>
+<permissions>
+<copyright-statement>Authors of papers retain copyright and release the
+work under a Creative Commons Attribution 4.0 International License (CC
+BY 4.0)</copyright-statement>
+<copyright-year>2022</copyright-year>
+<copyright-holder>The article authors</copyright-holder>
+<license license-type="open-access" xlink:href="https://creativecommons.org/licenses/by/4.0/">
+<license-p>Authors of papers retain copyright and release the work under
+a Creative Commons Attribution 4.0 International License (CC BY
+4.0)</license-p>
+</license>
+</permissions>
+<kwd-group kwd-group-type="author">
+<kwd>Python</kwd>
+<kwd>astronomy</kwd>
+<kwd>dynamics</kwd>
+<kwd>galactic dynamics</kwd>
+<kwd>milky way</kwd>
+</kwd-group>
+</article-meta>
+</front>
+<body>
+<sec id="summary">
+  <title>Summary</title>
+  <p>chombo-discharge is 2D and 3D adaptive code for simulating
+  low-temperature gas discharges in complex geometries. Such discharges
+  occur when electrons accelerate in strong electric fields and ionize
+  the gas, and further evolution is often determined by the space charge
+  set up by electrons and ions. Streamers, for example, are filamentary
+  plasma dominated by space charge effects and are precursors to leader,
+  sparks, and lightning.</p>
+  <p>Gas discharge problems typically involve simulations over multiple
+  scales in time and space. chombo-discharge reduces the cost of such
+  simulations by using Cartesian Adaptive Mesh Refinement (AMR). It also
+  provides support for multi-material complex geometries (gas phase,
+  electrodes, and solid dielectrics) through an embedded boundary (EB)
+  formulation. The code uses a solver-centered modular design where
+  larger applications are constructed by strongly or weakly coupling
+  numerical solvers shipped with the chombo-discharge base code.
+  Depending on their needs, users can therefore enter the code through
+  several layers: E.g. they only need to learn pre-existing text
+  interfaces when using existing applications; use solver C++ APIs when
+  typing up new applications, or use the EB AMR infrastructure when
+  writing entirely new solvers.</p>
+  <p>Several solvers exist in chombo-discharge, all of which are
+  parallelized and compatible with EBs and AMR:</p>
+  <list list-type="bullet">
+    <list-item>
+      <p>Advection-diffusion-reaction solvers.</p>
+    </list-item>
+    <list-item>
+      <p>Helmholtz equation solvers, using geometric multigrid.</p>
+    </list-item>
+    <list-item>
+      <p>Electrostatic solvers (with support for discontinuous
+      coefficients).</p>
+    </list-item>
+    <list-item>
+      <p>Kinetic Monte Carlo solvers.</p>
+    </list-item>
+    <list-item>
+      <p>Radiative transfer solvers.</p>
+    </list-item>
+    <list-item>
+      <p>Various particle solvers, e.g. for Monte Carlo radiative
+      transfer, tracer particles, Brownian walkers, or kinetic
+      Particle-In-Cell.</p>
+    </list-item>
+    <list-item>
+      <p>Volumetric and cut-cell ODE solvers.</p>
+    </list-item>
+  </list>
+  <p>All solvers exist as stand-alone applications, but many of these
+  solvers are also coupled through more complex physics applications
+  that aim at resolving different types of discharge phenomena
+  (e.g. statistical inception models or streamer discharges). The
+  interaction of these solvers occurs through a common AMR core, which
+  can also use dual grids where e.g. fluid and particle kernels are
+  load-balanced separately. chombo-discharge uses the Chombo
+  infrastructure for the AMR and EB infrastructure, and is parallelized
+  using MPI. However, chombo-discharge supplies its own solver
+  discretizations.</p>
+</sec>
+<sec id="statement-of-need">
+  <title>Statement of need</title>
+  <p>There is already a number of discharge simulation codes currently
+  available. Commerical codes used for simulating discharge include
+  COMSOL, ANSYS Fluent, OpenFOAM, PLASIMO, VSIM/VPIC, and Vizglow. Many
+  non-commerical codes also exist, such as Afivo-streamer
+  (<xref alt="Teunissen &amp; Ebert, 2017" rid="ref-TeunissenU003A2017" ref-type="bibr">Teunissen
+  &amp; Ebert, 2017</xref>), which also uses Cartesian AMR.</p>
+  <p>While chombo-discharge is not the only open-source discharge
+  simulation code, it has a number of unique features. In particular,
+  chombo-discharge supports complex geometries and is therefore useful
+  for lightning initiation investigations (from hydrometeors), in
+  high-voltage technology, plasma medicine and plasma-assisted
+  combustion. The code is also quite performant, and its design pattern
+  permits a flexible and extensible approach to numerically solving
+  various discharge problems, even when these require many thousands of
+  CPU cores. For example, coupling a drift-diffusion Particle-In-Cell
+  model together with an electrostatics and Monte Carlo based radiative
+  transfer solvers required about 3500 lines of C++ code, and this
+  includes the work for dual-grid load-balancing up to at least 8000 CPU
+  cores, and all integration and I/O functionality.</p>
+</sec>
+<sec id="application-examples">
+  <title>Application examples</title>
+  <p>Originally, the code was written for studying pre-breakdown
+  phenomena in high-voltage equipment
+  (<xref alt="Marskar, 2019" rid="ref-MarskarU003A2019" ref-type="bibr">Marskar,
+  2019</xref>), but over time it has been adapted to fit a wider
+  category of discharge problems.</p>
+  <list list-type="bullet">
+    <list-item>
+      <p>Studying upper atmospheric lightning (sprite discharges).</p>
+      <p specific-use="wrapper">
+        <fig>
+          <caption><p>Simulation of laboratory-scale streamer
+          corona<styled-content id="figU003Aexample"></styled-content></p></caption>
+          <graphic mimetype="image" mime-subtype="png" xlink:href="media/figures/sprite2d.png" xlink:title="" />
+        </fig>
+      </p>
+    </list-item>
+    <list-item>
+      <p>Simulation of laboratory-scale using non-kinetic
+      Particle-In-Cell.</p>
+      <p specific-use="wrapper">
+        <fig>
+          <caption><p>Simulation of laboratory-scale streamer
+          corona<styled-content id="figU003Aexample"></styled-content></p></caption>
+          <graphic mimetype="application" mime-subtype="pdf" xlink:href="media/figures/ItoKMC.pdf" xlink:title="" />
+        </fig>
+      </p>
+    </list-item>
+    <list-item>
+      <p>Surface discharge evolution over complex surfaces.</p>
+      <p specific-use="wrapper">
+        <fig>
+          <caption><p>Simulation of laboratory-scale streamer
+          corona<styled-content id="figU003Aexample"></styled-content></p></caption>
+          <graphic mimetype="application" mime-subtype="pdf" xlink:href="media/figures/SquareEvolution.pdf" xlink:title="" />
+        </fig>
+      </p>
+    </list-item>
+  </list>
+</sec>
+<sec id="acknowledgements">
+  <title>Acknowledgements</title>
+</sec>
+</body>
+<back>
+<ref-list>
+  <ref id="ref-MarskarU003A2019">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Marskar</surname><given-names>R</given-names></name>
+      </person-group>
+      <article-title>An adaptive cartesian embedded boundary approach for fluid simulations of two- and three-dimensional low temperature plasma filaments in complex geometries</article-title>
+      <source>Journal of Computational Physics</source>
+      <year iso-8601-date="2019">2019</year>
+      <uri>https://doi.org/10.1016/j.jcp.2019.03.036</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-TeunissenU003A2017">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Teunissen</surname><given-names>J</given-names></name>
+        <name><surname>Ebert</surname><given-names>E</given-names></name>
+      </person-group>
+      <article-title>Simulating streamer discharges in 3D with the parallel adaptive afivo framework</article-title>
+      <source>Journal of Physics D: Applied Physics</source>
+      <year iso-8601-date="2017-11">2017</year><month>11</month>
+      <volume>50</volume>
+      <uri>https://doi.org/10.1088/1361-6463/aa8faf</uri>
+      <fpage>474001</fpage>
+      <lpage></lpage>
+    </element-citation>
+  </ref>
+</ref-list>
+</back>
+</article>

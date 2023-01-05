@@ -1,0 +1,27 @@
+view0:
+	x = [0mm, 40mm]
+	y = [0mm, 40mm]
+
+view1:
+	x = [4.6mm, 6.6mm]
+	y = [4.2mm, 5.2mm]
+
+view2:
+	x = [21.9mm, 23.9mm]
+	y = [4.3mm, 5.3mm]
+
+view3:
+	x = [21.85mm, 23.85mm]
+	y = [4.3mm, 5.3mm]
+
+view5:
+	x = [20.50mm, 24.50mm]
+	y = [3.8mm, 5.8mm]
+
+view6:
+	x = [20.5mm, 24.5mm]
+	y = [4mm, 6mm]
+
+view7:
+	x = [20mm, 24mm]
+	y = [4mm, 6mm]
