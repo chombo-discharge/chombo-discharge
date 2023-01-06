@@ -21,11 +21,16 @@ To compile:
 
 ```make -s -j<num_proc> OPT=HIGH DEBUG=FALSE DIM=2 program```
 
+where DIM=2 can be replaced by DIM=3 for 3D. 
+
 # Running the example
 
 To run with MPI:
 
 ```mpirun -np <num_proc> program2d.*ex sprite2d.inputs```
+
+where program2d.*.ex and sprite2d.inputs can be replaced by corresponding 3D versions.
+Note that the 3D version will generate lots of mesh (hundreds of millions of grid cells) and thus requires a cluster/supercomputer.
 
 The user can select between different algorithms and initial conditions in the input script and chemistry file. 
 
@@ -33,6 +38,6 @@ The user can select between different algorithms and initial conditions in the i
 
 Output is given to HDF5 files in the plt folder.
 
-<img src="sprite2d.png" alt="2D sprite discharge" width="100%"/>
+<img src="sprite2d.png" alt="2D sprite discharge" width="50%"/>
 
-<img src="sprite3d.png" alt="3D sprite discharge" width="100%"/>
+<img src="sprite3d.png" alt="3D sprite discharge" width="50%"/>
