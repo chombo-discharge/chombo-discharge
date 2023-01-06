@@ -727,7 +727,7 @@ For an introduction to the particle radiative transfer solver, see :ref:`Chap:Mo
 
 The user must use one of the following:
 
-#. Set the following class options:
+* Set the following class options:
 
    .. code-block:: text
 		   
@@ -736,11 +736,11 @@ The user must use one of the following:
       McPhoto.photon_generation = deterministic
       McPhoto.source_type       = number
 
-   When specifying ``CdrPlasmaJSON.discrete_photons=true``, ``CdrPlasmaJSON`` will do a Poisson sampling of the number of photons that are generated in each cell and put this in the radiative transfer solvers' source terms.
+   When specifying ``CdrPlasmaJSON.discrete_photons = true``, ``CdrPlasmaJSON`` will do a Poisson sampling of the number of photons that are generated in each cell and put this in the radiative transfer solvers' source terms.
    This means that the radiative transfer solver source terms *contain the physical number of photons generated in one time step*. 
    To turn off sampling inside the radiative transfer solver, we specify ``McPhoto.photon_generation = stochastic`` and set ``McPhoto.source_type = number`` to let the solver know that the source contains the number of physical photons. 
 
-#. Set the following class options:
+* Alternatively, set the following class options:
    
    .. code-block:: text
 		   

@@ -34,3 +34,5 @@ The user can select between different algorithms and initial conditions in the i
 Output is given to HDF5 files in the plt folder.
 
 <img src="sprite2d.png" alt="2D sprite discharge" width="100%"/>
+
+<img src="sprite3d.png" alt="3D sprite discharge" width="100%"/>
