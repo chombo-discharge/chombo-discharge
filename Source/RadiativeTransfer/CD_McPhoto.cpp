@@ -15,14 +15,11 @@
 #include <chrono>
 
 // Chombo includes
-#include <PolyGeom.H>
-#include <EBAlias.H>
-#include <EBLevelDataOps.H>
-#include <EBArith.H>
 #include <ParmParse.H>
 #include <ParticleIO.H>
 
 // Our includes
+#include <CD_ParticleManagement.H>
 #include <CD_Location.H>
 #include <CD_McPhoto.H>
 #include <CD_DataOps.H>
@@ -809,94 +806,97 @@ McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellDa
 
   CH_assert(a_source[0]->nComp() == 1);
 
-  constexpr int srcComp =
-    0; // We assume that a_source only has one component and that the source term is found on component zero.
-
-  const RealVect probLo = m_amr->getProbLo();
-
-  AMRParticles<Photon>& photons = a_photons.getParticles();
-
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl     = m_amr->getGrids(m_realm)[lvl];
-    const Real               dx      = m_amr->getDx()[lvl];
-    const Real               vol     = pow(dx, SpaceDim);
-    const bool               hasCoar = (lvl > 0);
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const RealVect           probLo = m_amr->getProbLo();
+    const Real               dx     = m_amr->getDx()[lvl];
+    const Real               vol    = pow(dx, SpaceDim);
 
-    // If there is a coarser level, remove particles from the overlapping region and regenerate on this level. We do this
-    // because the next section of code iterates through all boxes on all levels. But we don't want to generate photons
-    // on the part of the coarse grid that is covered by a finer grid. This code removes those photons.
-    if (hasCoar) {
-
-      a_photons.evictInvalidParticles(photons[lvl]->outcast(), *photons[lvl - 1], lvl - 1);
-      photons[lvl]->outcast().clear();
-    }
-
-    // Create new particles on this level.
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      const Box      box     = dbl.get(dit());
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const Box      cellBox = dbl.get(dit());
       const EBISBox& ebisbox = (*a_source[lvl])[dit()].getEBISBox();
 
-      const EBCellFAB& source = (*a_source[lvl])[dit()];
-      const FArrayBox& srcFAB = source.getFArrayBox();
+      const EBCellFAB&     source     = (*a_source[lvl])[dit()];
+      const FArrayBox&     srcFAB     = source.getFArrayBox();
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
 
-      Real sum = srcFAB.sum(srcComp);
+      List<Photon>& photons = a_photons[lvl][dit()].listItems();
+      photons.clear();
 
-      // Generate new particles in this box
-      List<Photon> particles;
-      if (sum > 0.0) {
+      // Regular cells. Note that we make superphotons if we have to. Also, only draw photons in valid cells,
+      // grids that are covered by finer grids don't draw photons.
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (ebisbox.isRegular(iv) && validCells(iv, 0)) {
 
-        // Kernel region for cut-cells.
-        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-
-        // Regular cells. Note that we make superphotons if we have to.
-        auto regularKernel = [&](const IntVect& iv) -> void {
-          if (ebisbox.isRegular(iv)) {
-            const RealVect pos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
-
-            // Number of physical photons
-            const size_t numPhysPhotons = this->drawPhotons(srcFAB(iv, srcComp), vol, a_dt);
-
-            // Make superPhotons if we have to
-            if (numPhysPhotons > 0) {
-              const size_t numComputationalPhotons = (numPhysPhotons <= m_maxPhotonsGeneratedPerCell)
-                                                       ? numPhysPhotons
-                                                       : m_maxPhotonsGeneratedPerCell;
-              const Real weight = (1.0 * numPhysPhotons) / numComputationalPhotons;
-
-              for (size_t i = 0; i < numComputationalPhotons; i++) {
-                const RealVect v = Units::c * Random::getDirection();
-                particles.append(Photon(pos, v, m_rtSpecies->getAbsorptionCoefficient(pos), weight));
-              }
-            }
-          }
-        };
-
-        // Irregular kernel. Same as the above really.
-        auto irregularKernel = [&](const VolIndex& vof) -> void {
-          const RealVect pos            = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-          const size_t   numPhysPhotons = this->drawPhotons(source(vof, srcComp), vol, a_dt);
+          const size_t numPhysPhotons = this->drawPhotons(srcFAB(iv, 0), vol, a_dt);
 
           if (numPhysPhotons > 0) {
-            const size_t numComputationalPhotons = (numPhysPhotons <= m_maxPhotonsGeneratedPerCell)
-                                                     ? numPhysPhotons
-                                                     : m_maxPhotonsGeneratedPerCell;
-            const Real weight = (1.0 * numPhysPhotons) / numComputationalPhotons;
+            const std::vector<size_t> photonWeights =
+              ParticleManagement::partitionParticleWeights(numPhysPhotons, m_maxPhotonsGeneratedPerCell);
 
-            // Generate computational Photons
-            for (size_t i = 0; i < numComputationalPhotons; i++) {
-              const RealVect v = Units::c * Random::getDirection();
-              particles.append(Photon(pos, v, m_rtSpecies->getAbsorptionCoefficient(pos), weight));
+            const RealVect lo = probLo + RealVect(iv) * dx;
+            const RealVect hi = lo + RealVect::Unit * dx;
+
+            for (size_t i = 0; i < photonWeights.size(); i++) {
+
+              // Determine starting position within cell, propagation direction, absorption
+              // length, and weight.
+              const RealVect pos    = Random::randomPosition(lo, hi);
+              const RealVect v      = Units::c * Random::getDirection();
+              const Real     weight = (Real)photonWeights[i];
+              const Real     kappa  = m_rtSpecies->getAbsorptionCoefficient(pos);
+
+              photons.add(Photon(pos, v, kappa, weight));
             }
           }
-        };
+        }
+      };
 
-        // Run the irregular kernl
-        BoxLoops::loop(box, regularKernel);
-        BoxLoops::loop(vofit, irregularKernel);
+      // Irregular kernel. Same as the above really.
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const IntVect iv = vof.gridIndex();
 
-        // Add new particles to data holder
-        (*photons[lvl])[dit()].addItemsDestructive(particles);
-      }
+        if (validCells(iv, 0)) {
+
+          const size_t numPhysPhotons = this->drawPhotons(source(vof, 0), vol, a_dt);
+
+          if (numPhysPhotons > 0) {
+            const std::vector<size_t> photonWeights =
+              ParticleManagement::partitionParticleWeights(numPhysPhotons, m_maxPhotonsGeneratedPerCell);
+
+            // These are needed when drawing photon starting positions within cut-cells -- we compute the
+            // minimum bounding box when we draw the position within the valid region of the cut-cell.
+            const Real     volFrac       = ebisbox.volFrac(vof);
+            const RealVect cellPos       = probLo + Location::position(Location::Cell::Center, vof, ebisbox, dx);
+            const RealVect bndryCentroid = ebisbox.bndryCentroid(vof);
+            const RealVect bndryNormal   = ebisbox.normal(vof);
+
+            RealVect lo = -0.5 * RealVect::Unit;
+            RealVect hi = 0.5 * RealVect::Unit;
+            if (volFrac < 1.0) {
+              DataOps::computeMinValidBox(lo, hi, bndryNormal, bndryCentroid);
+            }
+
+            for (size_t i = 0; i < photonWeights.size(); i++) {
+
+              // Determine starting position within cell, propagation direction, absorption
+              // length, and weight.
+              const RealVect pos    = Random::randomPosition(cellPos, lo, hi, bndryCentroid, bndryNormal, dx, volFrac);
+              const RealVect v      = Units::c * Random::getDirection();
+              const Real     kappa  = m_rtSpecies->getAbsorptionCoefficient(pos);
+              const Real     weight = (Real)photonWeights[i];
+
+              photons.add(Photon(pos, v, m_rtSpecies->getAbsorptionCoefficient(pos), weight));
+            }
+          }
+        }
+      };
+
+      // Run the kernels.
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
     }
   }
 }
