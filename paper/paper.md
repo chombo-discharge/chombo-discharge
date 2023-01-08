@@ -56,8 +56,8 @@ However, chombo-discharge supplies most solver and infrastructure discretization
 # Statement of need
 
 There is already a number of discharge simulation codes currently available.
-Commercial codes used for simulating discharges include COMSOL, ANSYS Fluent, OpenFOAM, PLASIMO, VSIM/VPIC, and Vizglow.
-Several non-commerical codes also exist, such as Afivo-streamer [@Teunissen:2017], which also uses Cartesian AMR.
+Commercial codes used for simulating discharges include COMSOL, ANSYS Fluent, PLASIMO, VSIM/VPIC, and Vizglow.
+Several non-commerical codes also exist, such as Afivo-streamer [@Teunissen:2017], which is also open source and uses Cartesian AMR.
 
 While chombo-discharge is not the only open-source discharge simulation code, it has a number of unique features.
 In particular, chombo-discharge supports complex geometries, and is therefore useful in many discharge-related science applications.
@@ -71,7 +71,7 @@ Some examples science examples are given in \autoref{fig:surface} (HV technology
 
 ![Streamer corona in a nanosecond pulsed discharge in atmospheric air. The two figures show the same discharge, viewed from the side and from the bottom. \label{fig:corona}](figures/ItoKMC.pdf)
 
-![Sprite discharges in the upper atmosphere.\label{fig:sprite}](figures/sprite3d_2.png)
+![Sprite discharges in the upper atmosphere.\label{fig:sprite}](figures/sprite3d_3.png)
 
 # Acknowledgements
 

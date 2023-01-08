@@ -135,10 +135,11 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <title>Statement of need</title>
   <p>There is already a number of discharge simulation codes currently
   available. Commercial codes used for simulating discharges include
-  COMSOL, ANSYS Fluent, OpenFOAM, PLASIMO, VSIM/VPIC, and Vizglow.
-  Several non-commerical codes also exist, such as Afivo-streamer
+  COMSOL, ANSYS Fluent, PLASIMO, VSIM/VPIC, and Vizglow. Several
+  non-commerical codes also exist, such as Afivo-streamer
   (<xref alt="Teunissen &amp; Ebert, 2017" rid="ref-TeunissenU003A2017" ref-type="bibr">Teunissen
-  &amp; Ebert, 2017</xref>), which also uses Cartesian AMR.</p>
+  &amp; Ebert, 2017</xref>), which is also open source and uses
+  Cartesian AMR.</p>
   <p>While chombo-discharge is not the only open-source discharge
   simulation code, it has a number of unique features. In particular,
   chombo-discharge supports complex geometries, and is therefore useful
@@ -179,7 +180,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <fig>
     <caption><p>Sprite discharges in the upper
     atmosphere.<styled-content id="figU003Asprite"></styled-content></p></caption>
-    <graphic mimetype="image" mime-subtype="png" xlink:href="media/figures/sprite3d_2.png" xlink:title="" />
+    <graphic mimetype="image" mime-subtype="png" xlink:href="media/figures/sprite3d_3.png" xlink:title="" />
   </fig>
 </sec>
 <sec id="acknowledgements">
