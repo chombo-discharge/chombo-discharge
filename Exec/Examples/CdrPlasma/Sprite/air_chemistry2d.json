@@ -35,7 +35,7 @@
 	     [
 		 {
 		     "radius": 10E3,
-		     "amplitude": 1.2E7,
+		     "amplitude": 0.8E7,
 		     "position": [0, 10E3, 0]
 		 }
 	     ]
@@ -51,7 +51,7 @@
 	     [
 		 {
 		     "radius": 10E3,
-		     "amplitude": 1.2E7,
+		     "amplitude": 0.8E7,
 		     "position": [0, 10E3, 0]
 		 }
 	     ]

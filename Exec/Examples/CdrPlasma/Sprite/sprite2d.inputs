@@ -39,7 +39,7 @@ Driver.verbosity                       = 2                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
-Driver.plot_interval                   = 50               # Plot interval
+Driver.plot_interval                   = 10               # Plot interval
 Driver.checkpoint_interval             = 100              # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
@@ -107,7 +107,7 @@ CdrCTU.bc.y.lo              = data                    # 'data', 'function', 'wal
 CdrCTU.bc.y.hi              = data                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.bc.z.lo              = data                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.bc.z.hi              = data                    # 'data', 'function', 'wall', 'outflow', or 'solver'
-CdrCTU.slope_limiter        = minmod                  # Slope limiter. 'none', 'minmod', 'mc', or 'superbee'
+CdrCTU.slope_limiter        = none                    # Slope limiter. 'none', 'minmod', 'mc', or 'superbee'
 CdrCTU.use_ctu              = true                    # If true, use CTU. Otherwise it's DTU.
 CdrCTU.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 CdrCTU.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
@@ -133,7 +133,7 @@ CdrCTU.gmg_smoother         = red_black               # Relaxation type. 'jacobi
 # ====================================================================================================
 McPhoto.verbosity          = -1            # Solver verbosity.
 McPhoto.instantaneous      = true          # Instantaneous transport or not
-McPhoto.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical photons)
+McPhoto.max_photons        = 64            # Maximum no. generated in a cell (< = 0 yields physical photons)
 McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
 McPhoto.pvr_buffer         = 0             # Buffer for PVR. 
 McPhoto.halo_buffer        = 1             # Halo region for particles. 
@@ -202,23 +202,23 @@ CdrPlasmaGodunovStepper.fhd               = false         # Set to true if you w
 CdrPlasmaGodunovStepper.source_comp       = interp        # Interpolated 'interp', 'interp2', or 'upwind X' for first species (X = integer).
 CdrPlasmaGodunovStepper.floor_cdr         = true          # Floor CDR solvers to avoid negative densities
 CdrPlasmaGodunovStepper.debug             = false         # Turn on debugging messages. Also monitors mass if it was injected into the system. 
-CdrPlasmaGodunovStepper.profile           = false         # Turn on/off performance profiling.
+CdrPlasmaGodunovStepper.profile           = true          # Turn on/off performance profiling.
 
 # ====================================================================================================
 # CdrPlasmaStreamerTagger class options
 # ====================================================================================================
-CdrPlasmaStreamerTagger.buffer            = 0		 # Refinement buffer
+CdrPlasmaStreamerTagger.buffer            = 8		 # Refinement buffer
 CdrPlasmaStreamerTagger.verbosity         = -1           # Verbosity
 CdrPlasmaStreamerTagger.num_ref_boxes     = 1            # Manual refinement            
-CdrPlasmaStreamerTagger.ref_box1_lo       = -100E3 75E3  # Between this corner
-CdrPlasmaStreamerTagger.ref_box1_hi       = 100E3  90E3  # and this corner
-CdrPlasmaStreamerTagger.ref_box1_lvl      = 2            # Refine to this level
+CdrPlasmaStreamerTagger.ref_box1_lo       = -50E3 70E3   # Between this corner
+CdrPlasmaStreamerTagger.ref_box1_hi       = 50E3  85E3   # and this corner
+CdrPlasmaStreamerTagger.ref_box1_lvl      = 4            # Refine to this level
 
 CdrPlasmaStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
 CdrPlasmaStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
 CdrPlasmaStreamerTagger.refine_alpha      = 5.0          # Set alpha refinement. Lower  => More mesh
 CdrPlasmaStreamerTagger.coarsen_alpha     = 0.25         # Set alpha coarsening. Higher => Less mesh
-CdrPlasmaStreamerTagger.max_coarsen_lvl   = 5            # Set max coarsening depth
+CdrPlasmaStreamerTagger.max_coarsen_lvl   = 4            # Set max coarsening depth
 
 # ====================================================================================================
 # CdrPlasmaJSON class options
