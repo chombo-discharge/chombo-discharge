@@ -133,7 +133,7 @@ CdrCTU.gmg_smoother         = red_black               # Relaxation type. 'jacobi
 # ====================================================================================================
 McPhoto.verbosity          = -1            # Solver verbosity.
 McPhoto.instantaneous      = true          # Instantaneous transport or not
-McPhoto.max_photons        = 64            # Maximum no. generated in a cell (< = 0 yields physical photons)
+McPhoto.max_photons        = 128           # Maximum no. generated in a cell (< = 0 yields physical photons)
 McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
 McPhoto.pvr_buffer         = 0             # Buffer for PVR. 
 McPhoto.halo_buffer        = 1             # Halo region for particles. 
@@ -150,8 +150,8 @@ McPhoto.bc_y_high          = outflow       # Boundary condition
 McPhoto.bc_z_low           = outflow       # Boundary condition
 McPhoto.bc_z_high          = outflow       # Boundary condition
 McPhoto.poiss_exp_swap     = 100           # Swap out Poisson with exponential distribution above this mean
-McPhoto.photon_generation  = deterministic # Volumetric source term. 'deterministic' or 'stochastic'
-McPhoto.source_type        = number        # 'number'      = Source term contains the number of photons produced
+McPhoto.photon_generation  = stochastic    # Volumetric source term. 'deterministic' or 'stochastic'
+McPhoto.source_type        = volume_rate   # 'number'      = Source term contains the number of photons produced
                                            # 'volume'      = Source terms contains the number of photons produced per unit volume
                                            # 'volume_rate' = Source terms contains the volumetric rate
                                            # 'rate'        = Source terms contains the rate
@@ -187,8 +187,8 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 CdrPlasmaGodunovStepper.verbosity         = -1            # Class verbosity
 CdrPlasmaGodunovStepper.solver_verbosity  = -1            # Individual solver verbosities
 CdrPlasmaGodunovStepper.min_dt            = 0.            # Minimum permitted time step
-CdrPlasmaGodunovStepper.max_dt            = 100E-6        # Maximum permitted time step
-CdrPlasmaGodunovStepper.cfl               = 0.8		             # CFL number
+CdrPlasmaGodunovStepper.max_dt            = 25E-6         # Maximum permitted time step
+CdrPlasmaGodunovStepper.cfl               = 0.8	          # CFL number
 CdrPlasmaGodunovStepper.use_regrid_slopes = true          # Use slopes when regridding (or not)
 CdrPlasmaGodunovStepper.field_coupling    = semi_implicit # Field coupling. 'explicit' or 'semi_implicit'
 CdrPlasmaGodunovStepper.advection         = muscl         # Advection algorithm. 'euler', 'rk2', or 'muscl'
@@ -212,21 +212,21 @@ CdrPlasmaStreamerTagger.verbosity         = -1           # Verbosity
 CdrPlasmaStreamerTagger.num_ref_boxes     = 1            # Manual refinement            
 CdrPlasmaStreamerTagger.ref_box1_lo       = -50E3 70E3   # Between this corner
 CdrPlasmaStreamerTagger.ref_box1_hi       = 50E3  85E3   # and this corner
-CdrPlasmaStreamerTagger.ref_box1_lvl      = 4            # Refine to this level
+CdrPlasmaStreamerTagger.ref_box1_lvl      = 3            # Refine to this level
 
 CdrPlasmaStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
 CdrPlasmaStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
-CdrPlasmaStreamerTagger.refine_alpha      = 5.0          # Set alpha refinement. Lower  => More mesh
+CdrPlasmaStreamerTagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
 CdrPlasmaStreamerTagger.coarsen_alpha     = 0.25         # Set alpha coarsening. Higher => Less mesh
 CdrPlasmaStreamerTagger.max_coarsen_lvl   = 4            # Set max coarsening depth
 
 # ====================================================================================================
 # CdrPlasmaJSON class options
 # ====================================================================================================
-CdrPlasmaJSON.verbose          = false
-CdrPlasmaJSON.chemistry_file   = air_chemistry2d.json
-CdrPlasmaJSON.discrete_photons = true
-CdrPlasmaJSON.skip_reactions   = false
-CdrPlasmaJSON.integrator       = explicit_euler    # Reaction network integrator
-CdrPlasmaJSON.substeps         = 1                 # Substeps in the reaction integrator
-CdrPlasmaJSON.chemistry_dt     = 1.E99
+CdrPlasmaJSON.verbose          = false                 # Verbosity.
+CdrPlasmaJSON.chemistry_file   = air_chemistry2d.json  # Chemistry input file
+CdrPlasmaJSON.discrete_photons = false                 # Set to false but McPhoto settings set to stochastic
+CdrPlasmaJSON.skip_reactions   = false                 # For debugging, turn on/off reactions
+CdrPlasmaJSON.integrator       = explicit_trapezoidal  # Reaction network integrator
+CdrPlasmaJSON.substeps         = 1                     # Substeps in the reaction integrator
+CdrPlasmaJSON.chemistry_dt     = 1.E99                 # Time step to use for chemistry integration
