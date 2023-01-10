@@ -41,14 +41,9 @@ LoadBalancing::sort(Vector<Box>& a_boxes, const BoxSorting a_which)
   CH_TIME("LoadBalancing::sort");
 
   // The LoadBalancing::sort routines takes pairs of boxes/loads. Just use dummy loads here.
-  if (a_which == BoxSorting::Morton) {
-    mortonOrdering(a_boxes);
-  }
-  else { // Call chombo-discharge code
-    Vector<int> dummy(a_boxes.size(), 0);
+  Vector<int> dummy(a_boxes.size(), 0);
 
-    LoadBalancing::sort(a_boxes, dummy, a_which);
-  }
+  LoadBalancing::sort(a_boxes, dummy, a_which);
 }
 
 void
