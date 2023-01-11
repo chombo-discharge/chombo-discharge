@@ -543,6 +543,110 @@ DataOps::dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellF
 }
 
 void
+DataOps::filterSmooth(EBAMRCellData& a_data, const Real a_alpha, const int a_stride) noexcept
+{
+  CH_TIME("DataOps::filterSmooth(EBAMRCellData)");
+
+  for (int lvl = 0; lvl < a_data.size(); lvl++) {
+    DataOps::filterSmooth(*a_data[lvl], a_alpha, a_stride);
+  }
+}
+
+void
+DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const int a_stride) noexcept
+{
+  CH_TIME("DataOps::filterSmooth(LevelData<EBCellFAB>)");
+
+  const IntVect ghostVec = a_data.ghostVect();
+  const int     nComp    = a_data.nComp();
+
+  CH_assert(a_alpha >= 0.0);
+  CH_assert(a_alpha <= 0.0);
+  CH_assert(a_stride > 0);
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if (ghostVec[dir] < a_stride) {
+      MayDay::Error("DataOps::filterSmooth -- not enough ghost cells for input stride!");
+    }
+  }
+
+  const DisjointBoxLayout& dbl = a_data.disjointBoxLayout();
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    FArrayBox& data = a_data[dit()].getFArrayBox();
+
+    const Box            cellBox = dbl[dit()];
+    const EBISBox&       ebisbox = a_data[dit()].getEBISBox();
+    const ProblemDomain& domain  = ebisbox.getDomain();
+
+    // Compute box -- don't filter data that is too close to the domain boundary
+    // since we don't have enough cells there. This is an interior-only box, not reaching
+    // out of the domain.
+    Box interiorBox = cellBox;
+    interiorBox.grow(a_stride);
+    interiorBox &= domain;
+    interiorBox.grow(-a_stride);
+
+    // Make a copy of the input data.
+    FArrayBox phi;
+    phi.define(data.box(), 1);
+
+#if CH_SPACEDIM == 2
+    const Real A = std::pow(a_alpha, 2.0) * std::pow((1.0 - a_alpha) / 2.0, 0.0);
+    const Real B = std::pow(a_alpha, 1.0) * std::pow((1.0 - a_alpha) / 2.0, 1.0);
+    const Real C = std::pow(a_alpha, 0.0) * std::pow((1.0 - a_alpha) / 2.0, 2.0);
+
+    const IntVect x = a_stride * BASISV(0);
+    const IntVect y = a_stride * BASISV(1);
+
+    for (int icomp = 0; icomp < nComp; icomp++) {
+
+      // Copy current compnent into transient storage.
+      phi.copy(data, icomp, 0);
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        data(iv, icomp) = A * phi(iv);
+        data(iv, icomp) += B * (phi(iv + x) + phi(iv - x) + phi(iv + y) + phi(iv - y));
+        data(iv, icomp) += C * (phi(iv + x + y) + phi(iv + x - y) + phi(iv - x + y) + phi(iv - x - y));
+      };
+
+      BoxLoops::loop(interiorBox, regularKernel);
+    }
+#elif CH_SPACEDIM == 3
+
+    const Real A = std::pow(a_alpha, 3.0) * std::pow((1.0 - a_alpha) / 2.0, 0.0);
+    const Real B = std::pow(a_alpha, 2.0) * std::pow((1.0 - a_alpha) / 2.0, 1.0);
+    const Real C = std::pow(a_alpha, 1.0) * std::pow((1.0 - a_alpha) / 2.0, 2.0);
+    const Real D = std::pow(a_alpha, 0.0) * std::pow((1.0 - a_alpha) / 2.0, 3.0);
+
+    const IntVect x = a_stride * BASISV(0);
+    const IntVect y = a_stride * BASISV(1);
+    const IntVect z = a_stride * BASISV(2);
+
+    for (int icomp = 0; icomp < nComp; icomp++) {
+
+      // Copy current compnent into transient storage.
+      phi.copy(data, icomp, 0);
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        data(iv, icomp) = A * phi(iv);
+        data(iv, icomp) += B * (phi(iv + x) + phi(iv - x) + phi(iv + y) + phi(iv - y) + phi(iv + z) + phi(iv - z));
+        data(iv, icomp) += C * (phi(iv + x + y) + phi(iv + x - y) + phi(iv - x + y) + phi(iv - x - y));
+        data(iv, icomp) += C * (phi(iv + x + z) + phi(iv + x - z) + phi(iv - x + z) + phi(iv - x - z));
+        data(iv, icomp) += C * (phi(iv + y + z) + phi(iv + y - z) + phi(iv - y + z) + phi(iv - y - z));
+        data(iv, icomp) += D * (phi(iv + x + y + z) + phi(iv + x + y - z) + phi(iv + x - y + z) + phi(iv + x - y - z));
+        data(iv, icomp) += D * (phi(iv - x + y + z) + phi(iv - x + y - z) + phi(iv - x - y + z) + phi(iv - x - y - z));
+      };
+
+      BoxLoops::loop(interiorBox, regularKernel);
+    }
+#else
+    MayDay::Error("DataOps::filterSmooth -- dimensionality logic bust");
+#endif
+  }
+}
+
+void
 DataOps::incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale)
 {
   CH_TIME("DataOps::incr(MFAMRCellData)");
