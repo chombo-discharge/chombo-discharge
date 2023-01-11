@@ -274,14 +274,14 @@ ItoPlasmaAir3LFA.photoi_K2          = 1.5        # Converted to (mPa)^-1
 # ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS
 # ====================================================================================================
 ItoPlasmaStreamerTagger.verbosity         = -1           # Verbosity
-ItoPlasmaStreamerTagger.num_tag_boxes     = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
-ItoPlasmaStreamerTagger.tag_box1_lo       = 0.0 0.0 0.0  # Only allow tags that fall between
-ItoPlasmaStreamerTagger.tag_box1_hi       = 0.0 0.0 0.0  # these two corners
+ItoPlasmaStreamerTagger.num_tag_boxes     = 1            # Number of allowed tag boxes (0 = tags allowe everywhere)
+ItoPlasmaStreamerTagger.tag_box1_lo       = -1 -1 -1     # Only allow tags that fall between
+ItoPlasmaStreamerTagger.tag_box1_hi       =  1  1 2E-3   # these two corners
 ItoPlasmaStreamerTagger.buffer            = 8            # Grow tagged cells
 
 ItoPlasmaStreamerTagger.refine_curvature  = 100000.0     # Curvature refinement
 ItoPlasmaStreamerTagger.coarsen_curvature = 100000.0     # Curvature coarsening	
 ItoPlasmaStreamerTagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
-ItoPlasmaStreamerTagger.coarsen_alpha     = 99.0          # Set alpha coarsening. Higher => Less mesh
-ItoPlasmaStreamerTagger.max_coarsen_lvl   = 0            # Set max coarsening depth
+ItoPlasmaStreamerTagger.coarsen_alpha     = 0.25         # Set alpha coarsening. Higher => Less mesh
+ItoPlasmaStreamerTagger.max_coarsen_lvl   = 2            # Set max coarsening depth
 
