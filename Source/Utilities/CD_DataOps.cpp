@@ -591,6 +591,21 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
     FArrayBox phi;
     phi.define(data.box(), 1);
 
+    // Kernel for checking if we should indeed smooth the cell.
+    auto doThisCell = [&](const IntVect& iv) -> bool {
+      bool ret = ebisbox.isRegular(iv);
+
+      const Box grownBox = grow(Box(iv, iv), a_stride);
+
+      for (BoxIterator bit(grownBox); bit.ok(); ++bit) {
+        if (!(ebisbox.isRegular(bit()))) {
+          ret = false;
+        }
+      }
+
+      return ret;
+    };
+
 #if CH_SPACEDIM == 2
     const Real A = std::pow(a_alpha, 2.0) * std::pow((1.0 - a_alpha) / 2.0, 0.0);
     const Real B = std::pow(a_alpha, 1.0) * std::pow((1.0 - a_alpha) / 2.0, 1.0);
@@ -605,9 +620,14 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
       phi.copy(data, icomp, 0);
 
       auto regularKernel = [&](const IntVect& iv) -> void {
-        data(iv, icomp) = A * phi(iv);
-        data(iv, icomp) += B * (phi(iv + x) + phi(iv - x) + phi(iv + y) + phi(iv - y));
-        data(iv, icomp) += C * (phi(iv + x + y) + phi(iv + x - y) + phi(iv - x + y) + phi(iv - x - y));
+        if (doThisCell(iv)) {
+          data(iv, icomp) = A * phi(iv);
+          data(iv, icomp) += B * (phi(iv + x) + phi(iv - x) + phi(iv + y) + phi(iv - y));
+          data(iv, icomp) += C * (phi(iv + x + y) + phi(iv + x - y) + phi(iv - x + y) + phi(iv - x - y));
+        }
+        else {
+          data(iv, icomp) = phi(iv);
+        }
       };
 
       BoxLoops::loop(interiorBox, regularKernel);
@@ -629,13 +649,20 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
       phi.copy(data, icomp, 0);
 
       auto regularKernel = [&](const IntVect& iv) -> void {
-        data(iv, icomp) = A * phi(iv);
-        data(iv, icomp) += B * (phi(iv + x) + phi(iv - x) + phi(iv + y) + phi(iv - y) + phi(iv + z) + phi(iv - z));
-        data(iv, icomp) += C * (phi(iv + x + y) + phi(iv + x - y) + phi(iv - x + y) + phi(iv - x - y));
-        data(iv, icomp) += C * (phi(iv + x + z) + phi(iv + x - z) + phi(iv - x + z) + phi(iv - x - z));
-        data(iv, icomp) += C * (phi(iv + y + z) + phi(iv + y - z) + phi(iv - y + z) + phi(iv - y - z));
-        data(iv, icomp) += D * (phi(iv + x + y + z) + phi(iv + x + y - z) + phi(iv + x - y + z) + phi(iv + x - y - z));
-        data(iv, icomp) += D * (phi(iv - x + y + z) + phi(iv - x + y - z) + phi(iv - x - y + z) + phi(iv - x - y - z));
+        if (doThisCell(iv)) {
+          data(iv, icomp) = A * phi(iv);
+          data(iv, icomp) += B * (phi(iv + x) + phi(iv - x) + phi(iv + y) + phi(iv - y) + phi(iv + z) + phi(iv - z));
+          data(iv, icomp) += C * (phi(iv + x + y) + phi(iv + x - y) + phi(iv - x + y) + phi(iv - x - y));
+          data(iv, icomp) += C * (phi(iv + x + z) + phi(iv + x - z) + phi(iv - x + z) + phi(iv - x - z));
+          data(iv, icomp) += C * (phi(iv + y + z) + phi(iv + y - z) + phi(iv - y + z) + phi(iv - y - z));
+          data(iv, icomp) += D *
+                             (phi(iv + x + y + z) + phi(iv + x + y - z) + phi(iv + x - y + z) + phi(iv + x - y - z));
+          data(iv, icomp) += D *
+                             (phi(iv - x + y + z) + phi(iv - x + y - z) + phi(iv - x - y + z) + phi(iv - x - y - z));
+        }
+        else {
+          data(iv, icomp) = phi(iv);
+        }
       };
 
       BoxLoops::loop(interiorBox, regularKernel);
