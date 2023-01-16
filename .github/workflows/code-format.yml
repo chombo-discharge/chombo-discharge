@@ -29,6 +29,6 @@ jobs:
       - name: Run clang-format
         uses: jidicula/clang-format-action@v4.10.1
         with:
-          clang-format-version: clang-format-version: '10'
-          check-path: ${{ matrix.direction }}
+          clang-format-version: '10'
+          check-path: ${{ matrix.directory }}
 
