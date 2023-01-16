@@ -14,6 +14,7 @@ jobs:
     name: Format source
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    
     strategy:
       fail-fast: false
       matrix:
@@ -24,23 +25,10 @@ jobs:
       CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
 
     steps:
-      - name: Checkout chombo-discharge
-        uses: actions/checkout@v2
-        with:
-          submodules: true      
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install clang-format
-
+      - uses: actions/checkout@v3
       - name: Run clang-format
-        if: always()        
-        run: |
-          find ${{ matrix.directory }} \( -name "*.H" -o -name "*.cpp" \) -exec clang-format -i {} +
+        uses: jidicula/clang-format-action@v4.10.1
+        with:
+          submodules: clang-format-version: '10'
+          check-path: ${{ matrix.direction }}
 
-      - name: Check for modified files
-        if: always()
-        run: |
-          git diff-index --quiet HEAD
-          if [[ $? == 0 ]]; then exit 0; else exit 1; fi
