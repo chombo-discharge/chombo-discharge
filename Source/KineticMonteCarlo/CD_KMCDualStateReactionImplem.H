@@ -12,6 +12,8 @@
 #ifndef CD_KMCDualStateReactionImplem_H
 #define CD_KMCDualStateReactionImplem_H
 
+#include <limits>
+
 // Our includes
 #include <CD_KMCDualStateReaction.H>
 #include <CD_NamespaceHeader.H>
