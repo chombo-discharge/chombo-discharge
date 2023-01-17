@@ -57,7 +57,7 @@ AmrMesh::slice(EBAMRCellData& a_original, const Interval a_variables) const noex
   this->allocatePointer(ret, a_original.getRealm(), a_original.size() - 1);
 
   for (int i = 0; i < a_original.size(); i++) {
-    CH_assert(a_variables.end() < a_original[lvl]->numComp());
+    CH_assert(a_variables.end() < a_original[lvl]->nComp());
 
     aliasLevelData<EBCellFAB>(*ret[i], &(*a_original[i]), a_variables);
   }
