@@ -12,6 +12,9 @@
 #ifndef CD_ParallelOpsImplem_H
 #define CD_ParallelOpsImplem_H
 
+// Std includes
+#include <limits>
+
 // Chombo includes
 #include <SPMD.H>
 
