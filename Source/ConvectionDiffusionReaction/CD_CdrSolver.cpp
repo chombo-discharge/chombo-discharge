@@ -1266,12 +1266,14 @@ CdrSolver::initialDataParticles()
 
   const List<PointParticle>& initialParticles = m_species->getInitialParticles();
 
-  // Make a ParticleContainer<T> and redistribute particles over the AMR hierarchy.
-  ParticleContainer<PointParticle> particles;
-  m_amr->allocate(particles, m_realm);
-  particles.addParticles(m_species->getInitialParticles());
+  const long long numParticles = (long long)initialParticles.length();
 
-  if (particles.getNumberOfValidParticlesGlobal() > 0) {
+  if (ParallelOps::sum(numParticles) > 0LL) {
+
+    // Make a ParticleContainer<T> and redistribute particles over the AMR hierarchy.
+    ParticleContainer<PointParticle> particles;
+    m_amr->allocate(particles, m_realm);
+    particles.addParticles(m_species->getInitialParticles());
 
     // This function will be called BEFORE initialDataFunction, we it is safe to set m_phi to zero
     DataOps::setValue(m_phi, 0.0);
