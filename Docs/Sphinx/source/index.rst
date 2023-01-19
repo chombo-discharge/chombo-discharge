@@ -68,8 +68,6 @@ We aim for (but cannot guarantee) backward compatibility such that existing ``ch
    .. toctree::
       :caption: Contents
 
-.. _Chap:blabla:
-
 Introduction
 ************
 

@@ -19,27 +19,27 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt install doxygen
-          sudo apt install graphviz
-          sudo apt install texlive
-          sudo apt install texlive-latex-extra
-          sudo apt install latexmk
-          python3 -m pip install sphinx==5.0.0 sphinx_rtd_theme sphinxcontrib-bibtex
-#          python3 -m pip install -I docutils==0.16  # Downgrade docutils so that bullet points render properly with Sphinx
+#          sudo apt install doxygen
+#          sudo apt install graphviz
+#          sudo apt install texlive
+#          sudo apt install texlive-latex-extra
+#          sudo apt install latexmk
+          python3 -m pip install sphinx sphinx_rtd_theme sphinxcontrib-bibtex
+          python3 -m pip install -I docutils==0.16  # Downgrade docutils so that bullet points render properly with Sphinx
 
-      - name: Build doxygen
-        run: |
-          doxygen Docs/doxygen.conf
+      # - name: Build doxygen
+      #   run: |
+      #     doxygen Docs/doxygen.conf
 
       - name: Build HTML documentation
         working-directory: ${{ github.workspace }}/Docs/Sphinx        
         run: |
           make html
 
-      - name: Build PDF documentation
-        working-directory: ${{ github.workspace }}/Docs/Sphinx
-        run: |
-          make latexpdf
+      # - name: Build PDF documentation
+      #   working-directory: ${{ github.workspace }}/Docs/Sphinx
+      #   run: |
+      #     make latexpdf
 
       - name: Upload
         uses: actions/upload-artifact@v1
@@ -51,7 +51,7 @@ jobs:
         working-directory: ${{ github.workspace }}/Docs
         run: |
           cp -a Sphinx/build/html/* ./
-          mv Sphinx/build/latex/chombo-discharge.pdf ./
+#          mv Sphinx/build/latex/chombo-discharge.pdf ./
           rm -rf Sphinx/build
           
       - name: Deploy
