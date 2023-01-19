@@ -34,23 +34,25 @@ jobs:
       - name: Build HTML documentation
         working-directory: ${{ github.workspace }}/Docs/Sphinx        
         run: |
-          make github
+          make clean html
 
       - name: Build PDF documentation
         working-directory: ${{ github.workspace }}/Docs/Sphinx
         run: |
-          make github-tex
-          cd ${{ github.workspace }}/Docs/Sphinx/build/latex
-          make
-          cp chombo-discharge.pdf ${{ github.workspace }}/Docs
-          cd ${{ github.workspace }}/Docs/Sphinx/          
-          make clean
+          make clean latexpdf
 
       - name: Upload
         uses: actions/upload-artifact@v1
         with:
-          name: Docs
-          path: Docs          
+          name: docs
+          path: Docs/build
+
+      - name: Cleanup
+        working-directory: ${{ github.workspace }}/Docs
+        run: |
+          mv Sphinx/build/html/* ./
+          mv Sphinx/build/latex/chombo-discharge.pdf ./
+          rm -rf Sphinx/build
           
       - name: Deploy
         if: github.event_name == 'push' && github.repository == 'chombo-discharge/chombo-discharge' && github.ref == 'refs/heads/main'        
