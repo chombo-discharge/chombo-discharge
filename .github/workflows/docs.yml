@@ -45,7 +45,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: docs
-          path: Docs/build
+          path: Docs/Sphinx/build
 
       - name: Cleanup
         working-directory: ${{ github.workspace }}/Docs
