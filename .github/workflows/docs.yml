@@ -36,6 +36,12 @@ jobs:
         run: |
           make github
 
+      - name: Upload
+        uses: actions/upload-artifact@v1
+        with:
+          name: Docs_html
+          path: Docs/Sphinx/build/html
+
       - name: Build PDF documentation
         working-directory: ${{ github.workspace }}/Docs/Sphinx
         run: |
@@ -45,6 +51,8 @@ jobs:
           cp chombo-discharge.pdf ${{ github.workspace }}/Docs
           cd ${{ github.workspace }}/Docs/Sphinx/          
           make clean
+
+          
           
       - name: Deploy
         if: github.event_name == 'push' && github.repository == 'chombo-discharge/chombo-discharge' && github.ref == 'refs/heads/main'        
