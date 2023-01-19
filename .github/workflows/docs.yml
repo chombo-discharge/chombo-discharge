@@ -35,13 +35,6 @@ jobs:
         working-directory: ${{ github.workspace }}/Docs/Sphinx        
         run: |
           make github
-          make html
-
-      - name: Upload
-        uses: actions/upload-artifact@v1
-        with:
-          name: Docs_html
-          path: Docs/Sphinx/build/html
 
       - name: Build PDF documentation
         working-directory: ${{ github.workspace }}/Docs/Sphinx
@@ -53,7 +46,11 @@ jobs:
           cd ${{ github.workspace }}/Docs/Sphinx/          
           make clean
 
-          
+      - name: Upload
+        uses: actions/upload-artifact@v1
+        with:
+          name: Docs
+          path: Docs          
           
       - name: Deploy
         if: github.event_name == 'push' && github.repository == 'chombo-discharge/chombo-discharge' && github.ref == 'refs/heads/main'        
