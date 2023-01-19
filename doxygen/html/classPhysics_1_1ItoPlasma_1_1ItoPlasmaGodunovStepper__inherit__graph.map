@@ -1,5 +1,5 @@
 <map id="Physics::ItoPlasma::ItoPlasmaGodunovStepper" name="Physics::ItoPlasma::ItoPlasmaGodunovStepper">
-<area shape="rect" id="node1" title=" " alt="" coords="5,169,208,211"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html" title=" " alt="" coords="34,80,179,121"/>
+<area shape="rect" id="node1" title="Implementation of ItoPlasmaStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the I..." alt="" coords="5,169,208,211"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html" title="Base time stepper class that advances the Ito&#45;Poisson system of equations." alt="" coords="34,80,179,121"/>
 <area shape="rect" id="node3" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="54,5,159,32"/>
 </map>

@@ -1,38 +1,76 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Mesh ODE solver &mdash; chombo-discharge  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Radiative transfer" href="RTE.html" />
-    <link rel="prev" title="Electrostatic solver" href="Electrostatics.html" /> 
+    <link rel="prev" title="Kinetic Monte Carlo" href="KineticMonteCarlo.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
+          
+
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -40,7 +78,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
@@ -77,6 +126,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Mesh ODE solver</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#setting-vec-phi">Setting <span class="math notranslate nohighlight">\(\vec{\phi}\)</span></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#mesh-based">Mesh-based</a></li>
@@ -100,8 +150,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ItoPlasmaModel.html">Îto-KMC plasma model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
 <ul>
@@ -135,45 +186,86 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">Mesh ODE solver</li>
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Mesh ODE solver</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/Solvers/MeshODESolver.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
-  <div class="section" id="mesh-ode-solver">
-<span id="chap-meshodesolver"></span><h1>Mesh ODE solver<a class="headerlink" href="#mesh-ode-solver" title="Permalink to this heading"></a></h1>
+            
+  <section id="mesh-ode-solver">
+<span id="chap-meshodesolver"></span><h1>Mesh ODE solver<a class="headerlink" href="#mesh-ode-solver" title="Permalink to this heading">¶</a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">MeshODESolver</span></code> implements a solver for</p>
 <div class="math notranslate nohighlight">
 \[\frac{\partial \vec{\phi}}{\partial t} = \vec{S},\]</div>
 <p>where <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> represents <span class="math notranslate nohighlight">\(N\)</span> unknowns on the mesh, and <span class="math notranslate nohighlight">\(\vec{S}\)</span> is the corresponding source term.
 The class is templated as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span><span class="w"></span>
-<span class="k">class</span><span class="w"> </span><span class="nc">MeshODESolver</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MeshODESolver</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">N</span></code> indicates the number of variables stored on the mesh.</p>
 <p>To instantiate the solver, use the full constructor with reference to <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">MeshODESolver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_amr</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">MeshODESolver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_amr</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>If running dual grid simulations, the corresponding <a class="reference internal" href="../Source/Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> can be set through the public API, see <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classMeshODESolver.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classMeshODESolver.html</a>.</p>
@@ -181,10 +273,10 @@ The class is templated as</p>
 <p class="admonition-title">Note</p>
 <p>Source code for the <code class="docutils literal notranslate"><span class="pre">MeshODESolver</span></code> resides in <code class="file docutils literal notranslate"><span class="pre">Source/MeshODESolver</span></code>.</p>
 </div>
-<div class="section" id="setting-vec-phi">
-<h2>Setting <span class="math notranslate nohighlight">\(\vec{\phi}\)</span><a class="headerlink" href="#setting-vec-phi" title="Permalink to this heading"></a></h2>
-<div class="section" id="mesh-based">
-<h3>Mesh-based<a class="headerlink" href="#mesh-based" title="Permalink to this heading"></a></h3>
+<section id="setting-vec-phi">
+<h2>Setting <span class="math notranslate nohighlight">\(\vec{\phi}\)</span><a class="headerlink" href="#setting-vec-phi" title="Permalink to this heading">¶</a></h2>
+<section id="mesh-based">
+<h3>Mesh-based<a class="headerlink" href="#mesh-based" title="Permalink to this heading">¶</a></h3>
 <p>To set the initial data in a general way, one can fetch the <span class="math notranslate nohighlight">\(N\)</span> mesh components from</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span> <span class="o">&lt;</span><span class="n">size_t</span> <span class="n">N</span><span class="o">&gt;</span>
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span>
@@ -192,91 +284,91 @@ The class is templated as</p>
 </pre></div>
 </div>
 <p>This will return the data holder that holds the cell centered data <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> which the user can iterate through.</p>
-</div>
-<div class="section" id="analytic-function">
-<h3>Analytic function<a class="headerlink" href="#analytic-function" title="Permalink to this heading"></a></h3>
+</section>
+<section id="analytic-function">
+<h3>Analytic function<a class="headerlink" href="#analytic-function" title="Permalink to this heading">¶</a></h3>
 <p>One can set <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> by using analytic functions <span class="math notranslate nohighlight">\(\vec{\phi}(\mathbf{x}) = \vec{f}\left(\mathbf{x}\right)\)</span> through</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Func1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Func1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
 
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="k">using</span><span class="w"> </span><span class="n">Func2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Func2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
 
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"></span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">setPhi</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Func1</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_func1</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_comp</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="kt">void</span>
+<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">setPhi</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Func1</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_func1</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_comp</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"></span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">setPhi</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Func2</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_func2</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="kt">void</span>
+<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">setPhi</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Func2</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_func2</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>These differ in the sense that <code class="docutils literal notranslate"><span class="pre">Func1</span></code>, which is just an alias for a function <span class="math notranslate nohighlight">\(f = f\left(\mathbf{x}\right)\)</span>, sets the value for a specified component.
 The other version that takes <code class="docutils literal notranslate"><span class="pre">Func2</span></code> as an argument sets the corresponding values for all components.</p>
-</div>
-</div>
-<div class="section" id="setting-vec-s">
-<h2>Setting <span class="math notranslate nohighlight">\(\vec{S}\)</span><a class="headerlink" href="#setting-vec-s" title="Permalink to this heading"></a></h2>
-<div class="section" id="general-approach">
-<h3>General approach<a class="headerlink" href="#general-approach" title="Permalink to this heading"></a></h3>
+</section>
+</section>
+<section id="setting-vec-s">
+<h2>Setting <span class="math notranslate nohighlight">\(\vec{S}\)</span><a class="headerlink" href="#setting-vec-s" title="Permalink to this heading">¶</a></h2>
+<section id="general-approach">
+<h3>General approach<a class="headerlink" href="#general-approach" title="Permalink to this heading">¶</a></h3>
 <p>For a general method of setting the source term one can fetch <span class="math notranslate nohighlight">\(\vec{S}\)</span> through</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"></span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">getRHS</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="n">EBAMRCellData</span><span class="o">&amp;</span>
+<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">getRHS</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>This returns an l-value reference to <span class="math notranslate nohighlight">\(\vec{S}\)</span> which the user can iterate through and set the value in each cell.</p>
-</div>
-<div class="section" id="spatially-dependent">
-<h3>Spatially dependent<a class="headerlink" href="#spatially-dependent" title="Permalink to this heading"></a></h3>
+</section>
+<section id="spatially-dependent">
+<h3>Spatially dependent<a class="headerlink" href="#spatially-dependent" title="Permalink to this heading">¶</a></h3>
 <p>The source term can also be set on a component-by-component basis using</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
 
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"></span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">setRHS</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Func</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_rhsFunction</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_comp</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="kt">void</span>
+<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">setRHS</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Func</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_rhsFunction</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_comp</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>The above function will evaluate a function <span class="math notranslate nohighlight">\(f(\mathbf{x})\)</span> in each cell.</p>
-</div>
-<div class="section" id="analytically-coupled">
-<h3>Analytically coupled<a class="headerlink" href="#analytically-coupled" title="Permalink to this heading"></a></h3>
+</section>
+<section id="analytically-coupled">
+<h3>Analytically coupled<a class="headerlink" href="#analytically-coupled" title="Permalink to this heading">¶</a></h3>
 <p>A third option is to compute the right-hand side directly using a coupling function.
 <code class="docutils literal notranslate"><span class="pre">MeshODESolver</span></code> aliases a function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="k">using</span><span class="w"> </span><span class="n">RHSFunction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">time</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">RHSFunction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">time</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>which computes the source term <span class="math notranslate nohighlight">\(\vec{S}\)</span> as a function</p>
 <div class="math notranslate nohighlight">
 \[\vec{S} = \vec{f}\left(\vec{\phi},t\right)\]</div>
 <p>To fill the source term using an analytic coupling function like this, one can call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"></span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">computeRHS</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RHSFunction</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_rhsFunction</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="kt">void</span>
+<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">computeRHS</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RHSFunction</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_rhsFunction</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="regridding">
-<h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+<section id="regridding">
+<h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this heading">¶</a></h2>
 <p>When regridding the <code class="docutils literal notranslate"><span class="pre">MeshODESolver</span></code>, one should call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"></span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lbase</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="kt">void</span>
+<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lbase</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p><em>before</em> <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> creates the new grids.
 This will store <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> on the old mesh.
 After <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> has generated the new grids, <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> can be interpolated onto the new grids by calling</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>Users can also choose to turn on/off slope limiters when putting the solution on the new mesh, see <a class="reference internal" href="../Source/Regridding.html#chap-regridding"><span class="std std-ref">Regridding</span></a>.
 The source term <span class="math notranslate nohighlight">\(\vec{S}\)</span> is also allocated on the new mesh, but is not interpolated onto the new grids.</p>
-</div>
-<div class="section" id="i-o">
-<h2>I/O<a class="headerlink" href="#i-o" title="Permalink to this heading"></a></h2>
+</section>
+<section id="i-o">
+<h2>I/O<a class="headerlink" href="#i-o" title="Permalink to this heading">¶</a></h2>
 <p>The user can add <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> and <span class="math notranslate nohighlight">\(\vec{S}\)</span> to output files by specifying these in the input script.
 These variables are named</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>MeshODESolver.plt_vars = phi rhs
@@ -288,38 +380,55 @@ If choosing to omit output variables for the solver, one can put e.g. <code clas
 <p class="admonition-title">Note</p>
 <p><code class="docutils literal notranslate"><span class="pre">MeshODESolver</span></code> checkpoint files only contain <span class="math notranslate nohighlight">\(\vec{\phi}\)</span>.</p>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Electrostatics.html" class="btn btn-neutral float-left" title="Electrostatic solver" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="RTE.html" class="btn btn-neutral float-right" title="Radiative transfer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="KineticMonteCarlo.html" class="btn btn-neutral float-left" title="Kinetic Monte Carlo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
-  </div>
+    <p>
+        &#169; Copyright 2022, SINTEF Energy Research.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

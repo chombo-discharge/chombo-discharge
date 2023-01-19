@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['particlelist_6290',['ParticleList',['../classSuperParticles_1_1KDNode.html#ac7e6cbfa6635e1062ab7795576b2e50a',1,'SuperParticles::KDNode']]],
-  ['partitioner_6291',['Partitioner',['../classSuperParticles_1_1KDNode.html#a6751b69e1d99860393d872e9c8921b04',1,'SuperParticles::KDNode']]]
+  ['particlelist_6670',['ParticleList',['../classParticleManagement_1_1KDNode.html#ac890e4c3132ca191fe9d87995845ff58',1,'ParticleManagement::KDNode']]],
+  ['partitioner_6671',['Partitioner',['../classParticleManagement_1_1KDNode.html#ab815af391286cd7a58c83a6bd449bb19',1,'ParticleManagement::KDNode']]]
 ];

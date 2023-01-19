@@ -1,8 +1,9 @@
 <map id="Source/Particle/CD_PointParticle.H" name="Source/Particle/CD_PointParticle.H">
-<area shape="rect" id="node1" title="Declaration of a computational point particle." alt="" coords="2785,5,2926,47"/>
+<area shape="rect" id="node1" title="Declaration of a computational point particle." alt="" coords="3185,5,3326,47"/>
 <area shape="rect" id="node2" href="$CD__CdrSpecies_8H.html" title="Declaration of a class that passes information into CdrSolver (e.g., initial conditions)." alt="" coords="2111,95,2312,136"/>
-<area shape="rect" id="node41" href="$CD__PointParticleImplem_8H.html" title="Implementation of CD_PointParticle.H." alt="" coords="2768,95,2943,136"/>
-<area shape="rect" id="node42" href="$CD__ItoPlasmaStepper_8H.html" title="Abstract class for integrating the Ito plasma equations." alt="" coords="3246,95,3409,136"/>
+<area shape="rect" id="node41" href="$CD__PointParticleImplem_8H.html" title="Implementation of CD_PointParticle.H." alt="" coords="3168,95,3343,136"/>
+<area shape="rect" id="node42" href="$CD__ItoPlasmaStepper_8H.html" title="Abstract class for integrating the Ito plasma equations." alt="" coords="3367,95,3530,136"/>
+<area shape="rect" id="node49" href="$CD__ItoPlasmaGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="3558,184,3793,240"/>
 <area shape="rect" id="node3" href="$CD__CdrSolver_8H.html" title="Declaration of an abstract class for solving scalar convection&#45;diffusion&#45;reaction problems." alt="" coords="2111,191,2312,233"/>
 <area shape="rect" id="node27" href="$CD__CdrSpecies_8cpp.html" title="Implementation of CD_CdrSpecies.H." alt="" coords="2337,191,2545,233"/>
 <area shape="rect" id="node28" href="$CD__AdvectionDiffusionSpecies_8H.html" title="Simple species for AdvectionDiffusion test problem." alt="" coords="2853,191,3092,233"/>
@@ -41,9 +42,8 @@
 <area shape="rect" id="node35" href="$CD__CdrPlasmaReactionJSON_8cpp.html" title="Implementation of CD_CdrPlasmaReactionJSON.H." alt="" coords="281,392,496,448"/>
 <area shape="rect" id="node37" href="$CD__CdrPlasmaSurfaceReactionJSON_8cpp.html" title="Implementation of CD_CdrPlasmaSurfaceReactionJSON.H." alt="" coords="743,392,1007,448"/>
 <area shape="rect" id="node39" href="$CD__CdrSpeciesJSON_8cpp.html" title="Implementation of CD_CdrSpeciesJSON.H." alt="" coords="1007,288,1205,344"/>
-<area shape="rect" id="node43" href="$CD__ItoPlasmaStepper_8cpp.html" title="Implementation of CD_ItoPlasmaStepper.H." alt="" coords="3147,191,3318,233"/>
-<area shape="rect" id="node44" href="$CD__ItoPlasmaTagger_8H.html" title="Parent tagger class for ItoPlasma." alt="" coords="3342,191,3505,233"/>
-<area shape="rect" id="node49" href="$CD__ItoPlasmaGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="3543,184,3778,240"/>
+<area shape="rect" id="node43" href="$CD__ItoPlasmaStepper_8cpp.html" title="Implementation of CD_ItoPlasmaStepper.H." alt="" coords="3363,191,3534,233"/>
+<area shape="rect" id="node44" href="$CD__ItoPlasmaTagger_8H.html" title="Parent tagger class for ItoPlasma." alt="" coords="3177,191,3339,233"/>
 <area shape="rect" id="node45" href="$CD__ItoPlasmaFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="3167,295,3349,337"/>
 <area shape="rect" id="node48" href="$CD__ItoPlasmaTagger_8cpp.html" title="Implementation of CD_ItoPlasmaTagger.H." alt="" coords="3373,295,3535,337"/>
 <area shape="rect" id="node46" href="$CD__ItoPlasmaFieldTagger_8cpp.html" title="Implementation of CD_ItoPlasmaFieldTagger.H." alt="" coords="3157,399,3351,441"/>

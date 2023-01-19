@@ -1,38 +1,76 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Mesh data &mdash; chombo-discharge  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Particles" href="Particles.html" />
     <link rel="prev" title="Chombo-3 basics" href="ChomboBasics.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
+          
+
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -40,7 +78,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
@@ -87,6 +136,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
@@ -95,8 +145,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ItoPlasmaModel.html">Îto-KMC plasma model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
 <ul>
@@ -130,41 +181,84 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">Mesh data</li>
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Mesh data</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/Source/MeshData.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
-  <div class="section" id="mesh-data">
-<span id="chap-meshdata"></span><h1>Mesh data<a class="headerlink" href="#mesh-data" title="Permalink to this heading"></a></h1>
+            
+  <section id="mesh-data">
+<span id="chap-meshdata"></span><h1>Mesh data<a class="headerlink" href="#mesh-data" title="Permalink to this heading">¶</a></h1>
 <p>Mesh data structures of the type discussed in <a class="reference internal" href="SpatialDiscretization.html#chap-spatialdiscretization"><span class="std std-ref">Spatial discretization</span></a> are derived from a class <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> which holds a <code class="docutils literal notranslate"><span class="pre">T</span></code> in every grid patch across the AMR hiearchy.
 Internally, the data is stored as a <code class="docutils literal notranslate"><span class="pre">Vector&lt;RefCountedPtr&lt;LevelData&lt;T&gt;</span> <span class="pre">&gt;</span> <span class="pre">&gt;</span></code>.
 Here, the <code class="docutils literal notranslate"><span class="pre">Vector</span></code> holds data on each AMR level; the data is allocated with a smart pointer called <code class="docutils literal notranslate"><span class="pre">RefCountedPtr</span></code> which points to a <code class="docutils literal notranslate"><span class="pre">LevelData</span></code> template structure, see <a class="reference internal" href="ChomboBasics.html#chap-basics"><span class="std std-ref">Chombo-3 basics</span></a>.
 The first entry in the Vector is base AMR level and finer levels follow later in the Vector, see e.g. <a class="reference internal" href="#fig-ebamrdata"><span class="std std-numref">Fig. 9</span></a>.</p>
-<div class="figure align-center" id="id3">
+<figure class="align-center" id="id3">
 <span id="fig-ebamrdata"></span><a class="reference internal image-reference" href="../_images/PatchBasedAMR.png"><img alt="../_images/PatchBasedAMR.png" src="../_images/PatchBasedAMR.png" style="width: 60%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 9 </span><span class="caption-text">Cartesian patch-based refinement showing two grid levels.
-This is encapsulated by <code class="docutils literal notranslate"><span class="pre">EBAMRData</span></code> where the levels are stored in a <code class="docutils literal notranslate"><span class="pre">Vector</span></code> and the grid patches in the <code class="docutils literal notranslate"><span class="pre">LevelData</span></code> object.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
-</div>
+<figcaption>
+<p><span class="caption-number">Fig. 9 </span><span class="caption-text">Cartesian patch-based refinement showing two grid levels.
+This is encapsulated by <code class="docutils literal notranslate"><span class="pre">EBAMRData</span></code> where the levels are stored in a <code class="docutils literal notranslate"><span class="pre">Vector</span></code> and the grid patches in the <code class="docutils literal notranslate"><span class="pre">LevelData</span></code> object.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
 <p>The reason for having class encapsulation of mesh data is due to <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>, so that we can only keep track on which <code class="docutils literal notranslate"><span class="pre">Realm</span></code> the mesh data is defined.
 Users will interact with <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> through application code, or interacting with the core AMR functionality in <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> (such as computing gradients, interpolating ghost cells etc.).
 <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> (see <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>) has functionality for defining most <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> types on a <code class="docutils literal notranslate"><span class="pre">Realm</span></code>, and <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> itself it typically not used anywhere elsewhere within <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</p>
@@ -187,54 +281,54 @@ There are many more data structures in place, but the above data structures are 
 Here, <code class="docutils literal notranslate"><span class="pre">EBAMRFluxData</span></code> is precisely like <code class="docutils literal notranslate"><span class="pre">EBAMRCellData</span></code>, except that the data is stored on <em>cell faces</em> rather than cell centers.
 Likewise, <code class="docutils literal notranslate"><span class="pre">EBAMRIVData</span></code> is a typedef’ed data holder that holds data on each cut-cell center across the entire AMR hierachy.
 In the same way, <code class="docutils literal notranslate"><span class="pre">EBAMRIFData</span></code> holds data on each face of all cut cells.</p>
-<div class="section" id="allocating-mesh-data">
-<h2>Allocating mesh data<a class="headerlink" href="#allocating-mesh-data" title="Permalink to this heading"></a></h2>
+<section id="allocating-mesh-data">
+<h2>Allocating mesh data<a class="headerlink" href="#allocating-mesh-data" title="Permalink to this heading">¶</a></h2>
 <p>To allocate data over a particular <code class="docutils literal notranslate"><span class="pre">Realm</span></code>, the user will interact with <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">nComps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
-<span class="n">EBAMRCellData</span><span class="w"> </span><span class="n">myData</span><span class="p">;</span><span class="w"></span>
-<span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">allocate</span><span class="p">(</span><span class="n">myData</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;myRealm&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">gas</span><span class="p">,</span><span class="w"> </span><span class="n">nComps</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">nComps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="n">EBAMRCellData</span><span class="w"> </span><span class="n">myData</span><span class="p">;</span>
+<span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">allocate</span><span class="p">(</span><span class="n">myData</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;myRealm&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">gas</span><span class="p">,</span><span class="w"> </span><span class="n">nComps</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>Here, <code class="docutils literal notranslate"><span class="pre">nComps</span></code> determine the number of cell-centered data components.
 Note that it <em>does</em> matter on which <code class="docutils literal notranslate"><span class="pre">Realm</span></code> and on which <code class="docutils literal notranslate"><span class="pre">phase</span></code> the data is defined.
 See <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> for details.</p>
 <p>The user <em>can</em> specify a number of ghost cells for his/hers application code directly in the <code class="docutils literal notranslate"><span class="pre">AmrMesh::allocate</span></code> routine, like so:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">nComps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
-<span class="n">EBAMRCellData</span><span class="w"> </span><span class="n">myData</span><span class="p">;</span><span class="w"></span>
-<span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">allocate</span><span class="p">(</span><span class="n">myData</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;myRealm&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">gas</span><span class="p">,</span><span class="w"> </span><span class="n">nComps</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="o">*</span><span class="n">IntVect</span><span class="o">::</span><span class="n">Unit</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">nComps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="n">EBAMRCellData</span><span class="w"> </span><span class="n">myData</span><span class="p">;</span>
+<span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">allocate</span><span class="p">(</span><span class="n">myData</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;myRealm&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">gas</span><span class="p">,</span><span class="w"> </span><span class="n">nComps</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="o">*</span><span class="n">IntVect</span><span class="o">::</span><span class="n">Unit</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>If the user does not specify the number of ghost cells when calling <code class="docutils literal notranslate"><span class="pre">AmrMesh::allocate</span></code>, <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> will use the default number of ghost cells specified in the input file.</p>
-</div>
-<div class="section" id="iterating-over-patches">
-<span id="chap-meshiteration"></span><h2>Iterating over patches<a class="headerlink" href="#iterating-over-patches" title="Permalink to this heading"></a></h2>
+</section>
+<section id="iterating-over-patches">
+<span id="chap-meshiteration"></span><h2>Iterating over patches<a class="headerlink" href="#iterating-over-patches" title="Permalink to this heading">¶</a></h2>
 <p>To iterate over data in an AMR hierarchy, you will first iterate over levels and the patches in levels:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">myData</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="n">lvl</span><span class="o">++</span><span class="p">){</span><span class="w"></span>
-<span class="w">   </span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">levelData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">myData</span><span class="p">[</span><span class="n">lvl</span><span class="p">];</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">myData</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="n">lvl</span><span class="o">++</span><span class="p">){</span>
+<span class="w">   </span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">levelData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">myData</span><span class="p">[</span><span class="n">lvl</span><span class="p">];</span>
 
-<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">DisjointBoxLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">levelGrids</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">levelData</span><span class="p">.</span><span class="n">disjointBoxLayout</span><span class="p">();</span><span class="w"></span>
+<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">DisjointBoxLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">levelGrids</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">levelData</span><span class="p">.</span><span class="n">disjointBoxLayout</span><span class="p">();</span>
 
-<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">levelGrids</span><span class="p">.</span><span class="n">dataIterator</span><span class="p">();</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span><span class="w"></span>
-<span class="w">      </span><span class="n">EBCellFAB</span><span class="o">&amp;</span><span class="w"> </span><span class="n">patchData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">levelData</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">levelGrids</span><span class="p">.</span><span class="n">dataIterator</span><span class="p">();</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span>
+<span class="w">      </span><span class="n">EBCellFAB</span><span class="o">&amp;</span><span class="w"> </span><span class="n">patchData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">levelData</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="iterating-over-cells">
-<h2>Iterating over cells<a class="headerlink" href="#iterating-over-cells" title="Permalink to this heading"></a></h2>
+</section>
+<section id="iterating-over-cells">
+<h2>Iterating over cells<a class="headerlink" href="#iterating-over-cells" title="Permalink to this heading">¶</a></h2>
 <p>For single-valued data, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses standard loops (in column-major order) for iterating over data.
 For example, the standard loops for iterating over cell-centered data are</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">BoxLoops</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">BoxLoops</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">   </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Functor</span><span class="o">&gt;</span><span class="w"></span>
-<span class="w">   </span><span class="n">ALWAYS_INLINE</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="w">   </span><span class="n">loop</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Box</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_computeBox</span><span class="p">,</span><span class="w"> </span><span class="n">Functor</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">IntVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_stride</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IntVect</span><span class="o">::</span><span class="n">Unit</span><span class="p">);</span><span class="w"></span>
+<span class="w">   </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Functor</span><span class="o">&gt;</span>
+<span class="w">   </span><span class="n">ALWAYS_INLINE</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">   </span><span class="n">loop</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Box</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_computeBox</span><span class="p">,</span><span class="w"> </span><span class="n">Functor</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">IntVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_stride</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IntVect</span><span class="o">::</span><span class="n">Unit</span><span class="p">);</span>
 
-<span class="w">   </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Functor</span><span class="o">&gt;</span><span class="w"></span>
-<span class="w">   </span><span class="n">ALWAYS_INLINE</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="w">   </span><span class="n">loop</span><span class="p">(</span><span class="n">VoFIterator</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_iter</span><span class="p">,</span><span class="w"> </span><span class="n">Functor</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">a_kernel</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Functor</span><span class="o">&gt;</span>
+<span class="w">   </span><span class="n">ALWAYS_INLINE</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">   </span><span class="n">loop</span><span class="p">(</span><span class="n">VoFIterator</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_iter</span><span class="p">,</span><span class="w"> </span><span class="n">Functor</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">a_kernel</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Here, the <code class="docutils literal notranslate"><span class="pre">Functor</span></code> argument is a C++ lambda or <code class="docutils literal notranslate"><span class="pre">std::function</span></code> which takes a grid cell as a single argument.
@@ -242,69 +336,69 @@ For the first loop, we iterate over all grid cells in <code class="docutils lite
 In the second function we use a <code class="docutils literal notranslate"><span class="pre">VoFIterator</span></code>, which
 Iterating over the cells in a patch data holder (like the <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code>) can be done with a <code class="docutils literal notranslate"><span class="pre">VoFIterator</span></code>, which can iterate through cells on an <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code> that are not covered by the geometry
 For example:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">component</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">component</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">myData</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="n">lvl</span><span class="o">++</span><span class="p">){</span><span class="w"></span>
-<span class="w">   </span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">levelData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">myData</span><span class="p">[</span><span class="n">lvl</span><span class="p">];</span><span class="w"></span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">myData</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="n">lvl</span><span class="o">++</span><span class="p">){</span>
+<span class="w">   </span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">levelData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">myData</span><span class="p">[</span><span class="n">lvl</span><span class="p">];</span>
 
-<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">DisjointBoxLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">levelGrids</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">levelData</span><span class="p">.</span><span class="n">disjointBoxLayout</span><span class="p">();</span><span class="w"></span>
+<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">DisjointBoxLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">levelGrids</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">levelData</span><span class="p">.</span><span class="n">disjointBoxLayout</span><span class="p">();</span>
 
-<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">levelGrids</span><span class="p">.</span><span class="n">dataIterator</span><span class="p">();</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span><span class="w"></span>
+<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">levelGrids</span><span class="p">.</span><span class="n">dataIterator</span><span class="p">();</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span>
 
 
-<span class="w">      </span><span class="n">EBCellFAB</span><span class="o">&amp;</span><span class="w"> </span><span class="n">patchData</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">levelData</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span><span class="w"></span>
-<span class="w">      </span><span class="n">BaseFab</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">regularData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">patchData</span><span class="p">.</span><span class="n">getSingleValuedFab</span><span class="p">();</span><span class="w"></span>
+<span class="w">      </span><span class="n">EBCellFAB</span><span class="o">&amp;</span><span class="w"> </span><span class="n">patchData</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">levelData</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span>
+<span class="w">      </span><span class="n">BaseFab</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">regularData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">patchData</span><span class="p">.</span><span class="n">getSingleValuedFab</span><span class="p">();</span>
 
-<span class="w">      </span><span class="k">auto</span><span class="w"> </span><span class="n">regularKernel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">IntVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">iv</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">         </span><span class="n">regularData</span><span class="p">(</span><span class="n">iv</span><span class="p">,</span><span class="w"> </span><span class="n">component</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"></span>
-<span class="w">      </span><span class="p">};</span><span class="w"></span>
+<span class="w">      </span><span class="k">auto</span><span class="w"> </span><span class="n">regularKernel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">IntVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">iv</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="n">regularData</span><span class="p">(</span><span class="n">iv</span><span class="p">,</span><span class="w"> </span><span class="n">component</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">      </span><span class="p">};</span>
 
-<span class="w">      </span><span class="k">auto</span><span class="w"> </span><span class="n">irregularKernel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">VolIndex</span><span class="o">&amp;</span><span class="w"> </span><span class="n">vof</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">         </span><span class="n">patchData</span><span class="p">(</span><span class="n">vof</span><span class="p">,</span><span class="w"> </span><span class="n">component</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"></span>
-<span class="w">      </span><span class="p">};</span><span class="w"></span>
+<span class="w">      </span><span class="k">auto</span><span class="w"> </span><span class="n">irregularKernel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">VolIndex</span><span class="o">&amp;</span><span class="w"> </span><span class="n">vof</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="n">patchData</span><span class="p">(</span><span class="n">vof</span><span class="p">,</span><span class="w"> </span><span class="n">component</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">      </span><span class="p">};</span>
 
 <span class="w">      </span><span class="c1">// Kernel regions (defined by user)</span>
-<span class="w">      </span><span class="n">Box</span><span class="w"> </span><span class="n">computeBox</span><span class="p">;</span><span class="w"></span>
-<span class="w">      </span><span class="n">VoFIterator</span><span class="w"> </span><span class="n">vofit</span><span class="p">;</span><span class="w"></span>
+<span class="w">      </span><span class="n">Box</span><span class="w"> </span><span class="n">computeBox</span><span class="p">;</span>
+<span class="w">      </span><span class="n">VoFIterator</span><span class="w"> </span><span class="n">vofit</span><span class="p">;</span>
 
-<span class="w">      </span><span class="n">BoxLoops</span><span class="o">::</span><span class="n">loop</span><span class="p">(</span><span class="n">computeBox</span><span class="p">,</span><span class="w"> </span><span class="n">regularKernel</span><span class="p">);</span><span class="w"></span>
-<span class="w">      </span><span class="n">BoxLoops</span><span class="o">::</span><span class="n">loop</span><span class="p">(</span><span class="n">vofit</span><span class="p">,</span><span class="w"> </span><span class="n">irregularKernel</span><span class="p">);</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="n">BoxLoops</span><span class="o">::</span><span class="n">loop</span><span class="p">(</span><span class="n">computeBox</span><span class="p">,</span><span class="w"> </span><span class="n">regularKernel</span><span class="p">);</span>
+<span class="w">      </span><span class="n">BoxLoops</span><span class="o">::</span><span class="n">loop</span><span class="p">(</span><span class="n">vofit</span><span class="p">,</span><span class="w"> </span><span class="n">irregularKernel</span><span class="p">);</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>There are loops available for other types of data (e.g., face-centered data), see the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/CD__BoxLoops_8H.html">BoxLoop documentation</a>.</p>
-</div>
-<div class="section" id="coarsening-data">
-<span id="chap-coarsening"></span><h2>Coarsening data<a class="headerlink" href="#coarsening-data" title="Permalink to this heading"></a></h2>
+</section>
+<section id="coarsening-data">
+<span id="chap-coarsening"></span><h2>Coarsening data<a class="headerlink" href="#coarsening-data" title="Permalink to this heading">¶</a></h2>
 <p>Conservative coarsening of data is done using the <code class="docutils literal notranslate"><span class="pre">averageDown(...)</span></code> functions in <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>.
 When using these functions, coarse-grid data is replaced by a conservative average of fine grid data throughout the entire AMR hierarchy.
 The signatures for various types of data are as follows:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Conservatively coarsen multifluid cell-centered data</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">averageDown</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">averageDown</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="c1">// Conservatively coarsen multifluid face-centered data</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">averageDown</span><span class="p">(</span><span class="n">MFAMRFluxData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">averageDown</span><span class="p">(</span><span class="n">MFAMRFluxData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="c1">// Conservatively coarsen cell-centered data</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">averageDown</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">averageDown</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="c1">// Conservatively coarsen face-centered data</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">averageDown</span><span class="p">(</span><span class="n">EBAMRFluxData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">averageDown</span><span class="p">(</span><span class="n">EBAMRFluxData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="c1">// Conservatively coarsen EB-centered data</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">averageDown</span><span class="p">(</span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">averageDown</span><span class="p">(</span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>There are other types of coarsening available also.
 For example, the <code class="docutils literal notranslate"><span class="pre">averageFaces(...)</span></code> will use unweighted averaging, see the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html">AmrMesh API</a> for further details.</p>
-</div>
-<div class="section" id="filling-ghost-cells">
-<span id="chap-ghostcells"></span><h2>Filling ghost cells<a class="headerlink" href="#filling-ghost-cells" title="Permalink to this heading"></a></h2>
+</section>
+<section id="filling-ghost-cells">
+<span id="chap-ghostcells"></span><h2>Filling ghost cells<a class="headerlink" href="#filling-ghost-cells" title="Permalink to this heading">¶</a></h2>
 <p>Filling ghost cells is done using the <code class="docutils literal notranslate"><span class="pre">interpGhost(...)</span></code> functions in <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">interpGhost</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">interpGhost</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="kt">void</span><span class="w"> </span><span class="nf">interpGhost</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">interpGhost</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>This will fill the specified number of ghost cells using data from the coarse level only, using piecewise linear interpolation.</p>
@@ -312,15 +406,15 @@ For example, the <code class="docutils literal notranslate"><span class="pre">av
 In this case only a single layer of ghost cells are filled in regular regions, but additional ghost cells (up to some specified range) are filled near the EB.
 This is often required when computing gradients (to avoid reaching into invalid cut-cells), see <a class="reference internal" href="#chap-gradients"><span class="std std-ref">Computing gradients</span></a> for details.
 The functions for filling ghost cells in this way are</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">interpGhostMG</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">interpGhostMG</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="kt">void</span><span class="w"> </span><span class="nf">interpGhostMG</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">interpGhostMG</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>See the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html">AmrMesh API</a> for further details.</p>
-</div>
-<div class="section" id="computing-gradients">
-<span id="chap-gradients"></span><h2>Computing gradients<a class="headerlink" href="#computing-gradients" title="Permalink to this heading"></a></h2>
+</section>
+<section id="computing-gradients">
+<span id="chap-gradients"></span><h2>Computing gradients<a class="headerlink" href="#computing-gradients" title="Permalink to this heading">¶</a></h2>
 <p>In <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> gradients are computed using a standard second-order stencil based on finite differences.
 This is true everywhere except near the refinement boundary and EB where the coarse-side stencil will avoid using the coarsened data beneath the fine level.
 This is shown in <a class="reference internal" href="#fig-ebgradient"><span class="std std-numref">Fig. 10</span></a> which shows the typical 5-point stencil in regular grid regions, and also a much larger and more complex stencil.</p>
@@ -334,26 +428,28 @@ Since there is no unique way (that we know of) for coarsening the cut-cell fine-
 In this case we fetch a sufficiently large neighborhood of cells for computing a least squares minimization of a local solution reconstruction in the neighborhood of the coarse cell.
 In order to avoid fetching potentially badly coarsened data, this neighborhood of cells only uses <em>valid</em> grid cells, i.e. the stencil does not reach underneath the fine level at all.
 Once this neighborhood of cells is obtained, we compute the gradient using the procedure in <a class="reference internal" href="../Utilities/LeastSquares.html#chap-leastsquares"><span class="std std-ref">Least squares</span></a>.</p>
-<div class="figure align-center" id="id4">
+<figure class="align-center" id="id4">
 <span id="fig-ebgradient"></span><a class="reference internal image-reference" href="../_images/EBGradient.png"><img alt="../_images/EBGradient.png" src="../_images/EBGradient.png" style="width: 50%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 10 </span><span class="caption-text">Example of stencils for computing gradients near embedded boundaries.
+<figcaption>
+<p><span class="caption-number">Fig. 10 </span><span class="caption-text">Example of stencils for computing gradients near embedded boundaries.
 The red stencil shows a regular 5-point stencil for computing the gradient on the coarse side of the refinement boundary; it reaches into the coarsened data beneath the fine level.
 The green stencil shows a similar 5-point stencil on the fine side of the refinement boundary; the stencil reaches over the refinement boundary and into one ghost cell.
-The blue stencils shows a much more complex stencil which is computed using a least squares reconstruction procedure.</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
-</div>
+The blue stencils shows a much more complex stencil which is computed using a least squares reconstruction procedure.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
 <p>To compute gradients of a scalar, one can simply call <code class="docutils literal notranslate"><span class="pre">AmrMesh::computeGradient(...)</span></code> functions:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">computeGradient</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">           </span><span class="n">a_gradient</span><span class="p">,</span><span class="w"></span>
-<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_phi</span><span class="p">,</span><span class="w"></span>
-<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">        </span><span class="n">a_realm</span><span class="p">,</span><span class="w"></span>
-<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">computeGradient</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">           </span><span class="n">a_gradient</span><span class="p">,</span>
+<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_phi</span><span class="p">,</span>
+<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">        </span><span class="n">a_realm</span><span class="p">,</span>
+<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="kt">void</span><span class="w"> </span><span class="nf">computeGradient</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_gradient</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">computeGradient</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_gradient</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>See <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> or refer to the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html">AmrMesh API</a> for further details.</p>
-</div>
-<div class="section" id="copying-data">
-<span id="chap-copyingdata"></span><h2>Copying data<a class="headerlink" href="#copying-data" title="Permalink to this heading"></a></h2>
+</section>
+<section id="copying-data">
+<span id="chap-copyingdata"></span><h2>Copying data<a class="headerlink" href="#copying-data" title="Permalink to this heading">¶</a></h2>
 <p>To copy data, one may use the <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;::copy(...)</span></code> function <em>or</em> <code class="docutils literal notranslate"><span class="pre">DataOps::copy</span></code> (see <a class="reference internal" href="#chap-dataops"><span class="std std-ref">DataOps</span></a>).
 These differ in the following way:</p>
 <ul class="simple">
@@ -363,53 +459,70 @@ These differ in the following way:</p>
 <p>If you call <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;::copy(...)</span></code>, the data holders will first check if they are both defined on the same realm.
 If they are, a purely local copy is perform, which will include ghost cells.
 Communication copies involving MPI are performed otherwise, in which case ghost cells are <em>not</em> copied into the new data holder.</p>
-</div>
-<div class="section" id="dataops">
-<span id="chap-dataops"></span><h2>DataOps<a class="headerlink" href="#dataops" title="Permalink to this heading"></a></h2>
+</section>
+<section id="dataops">
+<span id="chap-dataops"></span><h2>DataOps<a class="headerlink" href="#dataops" title="Permalink to this heading">¶</a></h2>
 <p>We have prototyped functions for many common data operations in a static class <code class="docutils literal notranslate"><span class="pre">DataOps</span></code>.
 For example, setting the value of various data holders can be done with</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBAMRFluxData</span><span class="w"> </span><span class="n">cellData</span><span class="p">;</span><span class="w"></span>
-<span class="n">EBAMRFluxData</span><span class="w"> </span><span class="n">fluxData</span><span class="p">;</span><span class="w"></span>
-<span class="n">EBAMRIVData</span><span class="w">   </span><span class="n">irreData</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBAMRFluxData</span><span class="w"> </span><span class="n">cellData</span><span class="p">;</span>
+<span class="n">EBAMRFluxData</span><span class="w"> </span><span class="n">fluxData</span><span class="p">;</span>
+<span class="n">EBAMRIVData</span><span class="w">   </span><span class="n">irreData</span><span class="p">;</span>
 
-<span class="n">DataOps</span><span class="o">::</span><span class="n">setValue</span><span class="p">(</span><span class="n">cellData</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w"></span>
-<span class="n">DataOps</span><span class="o">::</span><span class="n">setValue</span><span class="p">(</span><span class="n">fluxData</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span><span class="w"></span>
-<span class="n">DataOps</span><span class="o">::</span><span class="n">setValue</span><span class="p">(</span><span class="n">irreData</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">);</span><span class="w"></span>
+<span class="n">DataOps</span><span class="o">::</span><span class="n">setValue</span><span class="p">(</span><span class="n">cellData</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+<span class="n">DataOps</span><span class="o">::</span><span class="n">setValue</span><span class="p">(</span><span class="n">fluxData</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="n">DataOps</span><span class="o">::</span><span class="n">setValue</span><span class="p">(</span><span class="n">irreData</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>For the full API, see the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classDataOps.html">DataOps documentation</a>.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="ChomboBasics.html" class="btn btn-neutral float-left" title="Chombo-3 basics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="Particles.html" class="btn btn-neutral float-right" title="Particles" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ChomboBasics.html" class="btn btn-neutral float-left" title="Chombo-3 basics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
-  </div>
+    <p>
+        &#169; Copyright 2022, SINTEF Energy Research.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

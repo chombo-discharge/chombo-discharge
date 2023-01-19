@@ -1,37 +1,75 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Chombo-3 basics &mdash; chombo-discharge  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Mesh data" href="MeshData.html" />
     <link rel="prev" title="Spatial discretization" href="SpatialDiscretization.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
+          
+
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -39,7 +77,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
@@ -89,6 +138,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
@@ -97,8 +147,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ItoPlasmaModel.html">Îto-KMC plasma model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
 <ul>
@@ -132,59 +183,100 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</li>
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/Source/ChomboBasics.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
-  <div class="section" id="chombo-3-basics">
-<span id="chap-basics"></span><h1><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics<a class="headerlink" href="#chombo-3-basics" title="Permalink to this heading"></a></h1>
+            
+  <section id="chombo-3-basics">
+<span id="chap-basics"></span><h1><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics<a class="headerlink" href="#chombo-3-basics" title="Permalink to this heading">¶</a></h1>
 <p>To fully understand this documentation the user should be familiar with <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>.
 This documentation uses class names from <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and the most relevant <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> data structures are summarized here.
 What follows is a <em>very</em> brief introduction to these data structures, for in-depth explanations please see the <a class="reference external" href="https://github.com/applied-numerical-algorithms-group-lbnl/Chombo_3.2/tree/master/doc">Chombo manual</a>.</p>
-<div class="section" id="real">
-<h2>Real<a class="headerlink" href="#real" title="Permalink to this heading"></a></h2>
+<section id="real">
+<h2>Real<a class="headerlink" href="#real" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">Real</span></code> is a typedef’ed structure for holding a single floating point number.
 Compiling with double precision will typedef <code class="docutils literal notranslate"><span class="pre">Real</span></code> as <code class="docutils literal notranslate"><span class="pre">double</span></code>, otherwise it is typedef’ed as <code class="docutils literal notranslate"><span class="pre">float</span></code>.</p>
-</div>
-<div class="section" id="realvect">
-<h2>RealVect<a class="headerlink" href="#realvect" title="Permalink to this heading"></a></h2>
+</section>
+<section id="realvect">
+<h2>RealVect<a class="headerlink" href="#realvect" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">RealVect</span></code> is a spatial vector.
 It holds two <code class="docutils literal notranslate"><span class="pre">Real</span></code> components in 2D and three <code class="docutils literal notranslate"><span class="pre">Real</span></code> components in 3D.
 The <code class="docutils literal notranslate"><span class="pre">RealVect</span></code> class has floating point arithmetic, e.g. addition, subtraction, multiplication etc.</p>
 <p>Most of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is written in dimension-independent code, and for cases where <code class="docutils literal notranslate"><span class="pre">RealVect</span></code> is initialized with components the constructor uses <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> macros for expanding the correct number of arguments.
 For example</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVect</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">D_DECL</span><span class="p">(</span><span class="n">vx</span><span class="p">,</span><span class="w"> </span><span class="n">vy</span><span class="p">,</span><span class="w"> </span><span class="n">vz</span><span class="p">));</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVect</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">D_DECL</span><span class="p">(</span><span class="n">vx</span><span class="p">,</span><span class="w"> </span><span class="n">vy</span><span class="p">,</span><span class="w"> </span><span class="n">vz</span><span class="p">));</span>
 </pre></div>
 </div>
 <p>will expand to <code class="docutils literal notranslate"><span class="pre">RealVect</span> <span class="pre">v(vx,vy)</span></code> in 2D and <code class="docutils literal notranslate"><span class="pre">RealVect</span> <span class="pre">v(vx,</span> <span class="pre">vy,</span> <span class="pre">vz)</span></code> in 3D.</p>
-</div>
-<div class="section" id="intvect">
-<h2>IntVect<a class="headerlink" href="#intvect" title="Permalink to this heading"></a></h2>
+</section>
+<section id="intvect">
+<h2>IntVect<a class="headerlink" href="#intvect" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">IntVect</span></code> is an integer spatial vector, and is used for indexing data structures.
 It works in much the same way as <code class="docutils literal notranslate"><span class="pre">RealVect</span></code>, except that the components are integers.</p>
-</div>
-<div class="section" id="box">
-<h2>Box<a class="headerlink" href="#box" title="Permalink to this heading"></a></h2>
+</section>
+<section id="box">
+<h2>Box<a class="headerlink" href="#box" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">Box</span></code> object describes a box in Cartesian space.
 The boxes are indexed by the low and high corners, both of which are an <code class="docutils literal notranslate"><span class="pre">IntVect</span></code>.
 The <code class="docutils literal notranslate"><span class="pre">Box</span></code> may be cell-centered or face-centered.
@@ -194,181 +286,198 @@ To turn a cell-centered <code class="docutils literal notranslate"><span class="
 </pre></div>
 </div>
 <p>This will increase the box dimensions by one in each coordinate direction.</p>
-</div>
-<div class="section" id="ebcellfab-and-farraybox">
-<h2>EBCellFAB and FArrayBox<a class="headerlink" href="#ebcellfab-and-farraybox" title="Permalink to this heading"></a></h2>
+</section>
+<section id="ebcellfab-and-farraybox">
+<h2>EBCellFAB and FArrayBox<a class="headerlink" href="#ebcellfab-and-farraybox" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code> object is an array for holding cell-centered data in an embedded boundary context.
 The <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code> has two data structures: An <code class="docutils literal notranslate"><span class="pre">FArrayBox</span></code> that holds the data on the cell centers, and a additional data structure that holds data in cells that are multiply cut.
 Doing arithmetic with <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code> usually requires one to iterate over all the cell in the <code class="docutils literal notranslate"><span class="pre">FArrayBox</span></code>, and then to iterate over the <em>irregular cells</em> (i.e. cut-cells) later.
 A <code class="docutils literal notranslate"><span class="pre">VoFIterator</span></code> is such as object; it can iterate over cut-cells.
 Usually, code for doing anything with the <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code> looks like this:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Call Fortran code</span>
-<span class="n">FORT_DO_SOMETHING</span><span class="p">(....)</span><span class="w"></span>
+<span class="n">FORT_DO_SOMETHING</span><span class="p">(....)</span>
 
 <span class="c1">// Iterate over cut-cells</span>
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">VoFIterator</span><span class="w"> </span><span class="n">vofit</span><span class="p">(...);</span><span class="w"> </span><span class="n">vofit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">vofit</span><span class="p">){</span><span class="w"></span>
-<span class="w">   </span><span class="p">(...)</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">VoFIterator</span><span class="w"> </span><span class="n">vofit</span><span class="p">(...);</span><span class="w"> </span><span class="n">vofit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">vofit</span><span class="p">){</span>
+<span class="w">   </span><span class="p">(...)</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">FArrayBox</span></code> stores the data in column major order.</p>
 </div>
-</div>
-<div class="section" id="vector">
-<h2>Vector<a class="headerlink" href="#vector" title="Permalink to this heading"></a></h2>
+</section>
+<section id="vector">
+<h2>Vector<a class="headerlink" href="#vector" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">Vector&lt;T&gt;</span></code> is a one-dimensional array with constant-time random access and range checking.
 It uses <code class="docutils literal notranslate"><span class="pre">std::vector</span></code> under the hood and can access the most commonly used <code class="docutils literal notranslate"><span class="pre">std::vector</span></code> functionality through the public member functions.
 E.g. to obtain an element in the vector</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">my_vector</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="p">());</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">my_vector</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="p">());</span>
 
-<span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">element</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">my_vector</span><span class="p">[</span><span class="mi">5</span><span class="p">];</span><span class="w"></span>
+<span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">element</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">my_vector</span><span class="p">[</span><span class="mi">5</span><span class="p">];</span>
 </pre></div>
 </div>
 <p>Likewise, <code class="docutils literal notranslate"><span class="pre">push_back</span></code>, <code class="docutils literal notranslate"><span class="pre">resize</span></code> etc works in much the same way as for <code class="docutils literal notranslate"><span class="pre">std::vector</span></code>.</p>
-</div>
-<div class="section" id="refcountedptr">
-<h2>RefCountedPtr<a class="headerlink" href="#refcountedptr" title="Permalink to this heading"></a></h2>
+</section>
+<section id="refcountedptr">
+<h2>RefCountedPtr<a class="headerlink" href="#refcountedptr" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">RefCountedPtr&lt;T&gt;</span></code> is a pointer class in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> with reference counting.
 That is, when objects that hold a reference to some <code class="docutils literal notranslate"><span class="pre">RefCountedPtr&lt;T&gt;</span></code> object goes out of scope the reference counter is decremented.
 If the reference counter reaches zero, the object that <code class="docutils literal notranslate"><span class="pre">RefCountedPtr&lt;T&gt;</span></code> points to it deallocated.
 Using <code class="docutils literal notranslate"><span class="pre">RefCountedPtr&lt;T&gt;</span></code> is much preferred over using a raw pointer <code class="docutils literal notranslate"><span class="pre">T*</span></code> to 1) avoid memory leaks and 2) compress code since no explicit deallocations need to be called.</p>
 <p>In modern C++-speak, <code class="docutils literal notranslate"><span class="pre">RefCountedPtr&lt;T&gt;</span></code> can be thought of as a <em>very</em> simple version of <code class="docutils literal notranslate"><span class="pre">std::shared_ptr&lt;T&gt;</span></code>.</p>
-</div>
-<div class="section" id="disjointboxlayout">
-<h2>DisjointBoxLayout<a class="headerlink" href="#disjointboxlayout" title="Permalink to this heading"></a></h2>
+</section>
+<section id="disjointboxlayout">
+<h2>DisjointBoxLayout<a class="headerlink" href="#disjointboxlayout" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> class describes a grid on an AMR level where all the boxes are <em>disjoint</em>, i.e. they don’t overlap.
 <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> is built upon a union of non-overlapping boxes having the same grid resolution and with unique rank-to-box ownership.
 The constructor is</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Box</span><span class="o">&gt;</span><span class="w"> </span><span class="n">boxes</span><span class="p">(...);</span><span class="w">  </span><span class="c1">// Vector of disjoint boxes</span>
 <span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ranks</span><span class="p">(...);</span><span class="w">  </span><span class="c1">// Ownership of each box</span>
 
-<span class="n">DisjointBoxLayout</span><span class="w"> </span><span class="nf">dbl</span><span class="p">(</span><span class="n">boxes</span><span class="p">,</span><span class="w"> </span><span class="n">ranks</span><span class="p">);</span><span class="w"></span>
+<span class="n">DisjointBoxLayout</span><span class="w"> </span><span class="nf">dbl</span><span class="p">(</span><span class="n">boxes</span><span class="p">,</span><span class="w"> </span><span class="n">ranks</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>In simple terms,  <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> is the decomposed grid on each level in which MPI ranks have unique ownership of specific parts of the grid.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> view is global, i.e. each MPI rank knows about all the boxes and the box ownership on the entire AMR level.
 However, ranks will only allocate data on the part of the grid that they own.
 Data iterators also exist, and the most common is to use iterators that only iterate over the part of the <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> that the specific MPI ranks own:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DisjointBoxLayout</span><span class="w"> </span><span class="n">dbl</span><span class="p">;</span><span class="w"></span>
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DisjointBoxLayout</span><span class="w"> </span><span class="n">dbl</span><span class="p">;</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span>
 <span class="w">   </span><span class="c1">// Do something</span>
-<span class="p">}</span><span class="w"></span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Each MPI rank will then iterate <em>only</em> over the part of the grid where it has ownership.</p>
 <p>Other data iterators exist that iterate over all boxes in the grid:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">LayoutIterator</span><span class="w"> </span><span class="n">lit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dbl</span><span class="p">.</span><span class="n">layoutIterator</span><span class="p">();</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">LayoutIterator</span><span class="w"> </span><span class="n">lit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dbl</span><span class="p">.</span><span class="n">layoutIterator</span><span class="p">();</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span>
 <span class="w">   </span><span class="c1">// Do something</span>
-<span class="p">}</span><span class="w"></span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>This is typically used if one wants to do some global operation, e.g. count the number of cells in the grid.
 However, trying to use <code class="docutils literal notranslate"><span class="pre">LayoutIterator</span></code> to retrieve data that was allocated locally on a different MPI rank is an error.</p>
-</div>
-<div class="section" id="leveldata">
-<h2>LevelData<a class="headerlink" href="#leveldata" title="Permalink to this heading"></a></h2>
+</section>
+<section id="leveldata">
+<h2>LevelData<a class="headerlink" href="#leveldata" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> template structure holds data on all the grid patches of one AMR level.
 The data is distributed with the domain decomposition specified by <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code>, and each patch contains exactly one instance of <code class="docutils literal notranslate"><span class="pre">T</span></code>.
 <code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> uses a factory pattern for creating the <code class="docutils literal notranslate"><span class="pre">T</span></code> objects, so if you have new data structures that should fit the in <code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> structure you must also implement a factory method for <code class="docutils literal notranslate"><span class="pre">T</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> object provides the domain decomposition method in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
 Often, <code class="docutils literal notranslate"><span class="pre">T</span></code> is an <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code>, i.e. a Cartesian grid patch that also supports EB formulations.</p>
 <p>To iterate over <code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> one will use the data iterator above:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myData</span><span class="p">;</span><span class="w"></span>
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span><span class="w"></span>
-<span class="w">   </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myData</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myData</span><span class="p">;</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span>
+<span class="w">   </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myData</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> also includes the concept of ghost cells and exchange operations.</p>
-</div>
-<div class="section" id="ebislayout-and-ebisbox">
-<h2>EBISLayout and EBISBox<a class="headerlink" href="#ebislayout-and-ebisbox" title="Permalink to this heading"></a></h2>
+</section>
+<section id="ebislayout-and-ebisbox">
+<h2>EBISLayout and EBISBox<a class="headerlink" href="#ebislayout-and-ebisbox" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code> holds the geometric information over one <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> level.
 Typically, the <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code> is used for fetching the geometric moments that are required for performing computations near cut-cells.
 <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code> can be thought of as an object which provides all EB-related information on a specific grid level.
 The EB information consists of e.g. cell flags (i.e., is the cell a cut-cell?), volume fractions, etc.
 This information is stored in a class <code class="docutils literal notranslate"><span class="pre">EBISBox</span></code>, which holds all the EB information for one specific grid patch.
 To obtain the EB-information for a specific grid patch, one will call:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBISLayout</span><span class="w"> </span><span class="n">ebisl</span><span class="p">;</span><span class="w"></span>
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span><span class="w"></span>
-<span class="w">   </span><span class="n">EBISBox</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ebisbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ebisl</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBISLayout</span><span class="w"> </span><span class="n">ebisl</span><span class="p">;</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span>
+<span class="w">   </span><span class="n">EBISBox</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ebisbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ebisl</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">EBISBox</span></code> contains the geometric information over only one grid patch.
 One can thus think of the <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code> as a <code class="docutils literal notranslate"><span class="pre">LevelData&lt;EBISBox&gt;</span></code> structure.</p>
 <p>As an example, to iterate over all the cut-cells defined for a cell-centered data holder an AMR-level one would do:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">constexpr</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">constexpr</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="c1">// Assume that these exist.</span>
-<span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myData</span><span class="p">;</span><span class="w"></span>
-<span class="n">EBISLayout</span><span class="w"> </span><span class="n">ebisl</span><span class="p">;</span><span class="w"></span>
+<span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myData</span><span class="p">;</span>
+<span class="n">EBISLayout</span><span class="w"> </span><span class="n">ebisl</span><span class="p">;</span>
 
 <span class="c1">// Iterate over all the patches on a grid level.</span>
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span><span class="w"></span>
-<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">Box</span><span class="w">  </span><span class="n">cellBox</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">dbl</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span><span class="w"></span>
-<span class="w">   </span><span class="n">EBCellFAB</span><span class="o">&amp;</span><span class="w"> </span><span class="n">patchData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myData</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span><span class="w"></span>
-<span class="w">   </span><span class="n">EBISBox</span><span class="o">&amp;</span><span class="w">   </span><span class="n">ebisbox</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">ebisl</span><span class="w"> </span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span><span class="w"></span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span>
+<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">Box</span><span class="w">  </span><span class="n">cellBox</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">dbl</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span>
+<span class="w">   </span><span class="n">EBCellFAB</span><span class="o">&amp;</span><span class="w"> </span><span class="n">patchData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myData</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span>
+<span class="w">   </span><span class="n">EBISBox</span><span class="o">&amp;</span><span class="w">   </span><span class="n">ebisbox</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">ebisl</span><span class="w"> </span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span>
 
 <span class="w">   </span><span class="c1">// Get all the cut-cells in the grid patch</span>
-<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">IntVectSet</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ivs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ebisbox</span><span class="p">.</span><span class="n">getIrregIVS</span><span class="p">(</span><span class="n">cellBox</span><span class="p">);</span><span class="w"></span>
-<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">EBGraph</span><span class="o">&amp;</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="n">ebisbox</span><span class="p">.</span><span class="n">getEBGraph</span><span class="p">();</span><span class="w"></span>
+<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">IntVectSet</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ivs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ebisbox</span><span class="p">.</span><span class="n">getIrregIVS</span><span class="p">(</span><span class="n">cellBox</span><span class="p">);</span>
+<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">EBGraph</span><span class="o">&amp;</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="n">ebisbox</span><span class="p">.</span><span class="n">getEBGraph</span><span class="p">();</span>
 
 <span class="w">   </span><span class="c1">// Define a VoFIterator for the cut-cells and iterate over all the cut-cells.</span>
-<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">VoFIterator</span><span class="w"> </span><span class="n">vofit</span><span class="p">(</span><span class="n">ivs</span><span class="p">,</span><span class="w"> </span><span class="n">ebgraph</span><span class="p">);</span><span class="w"> </span><span class="n">vofit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">vofit</span><span class="p">){</span><span class="w"></span>
-<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">VolIndex</span><span class="o">&amp;</span><span class="w"> </span><span class="n">vof</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vofit</span><span class="p">();</span><span class="w"></span>
+<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">VoFIterator</span><span class="w"> </span><span class="n">vofit</span><span class="p">(</span><span class="n">ivs</span><span class="p">,</span><span class="w"> </span><span class="n">ebgraph</span><span class="p">);</span><span class="w"> </span><span class="n">vofit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">vofit</span><span class="p">){</span>
+<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">VolIndex</span><span class="o">&amp;</span><span class="w"> </span><span class="n">vof</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vofit</span><span class="p">();</span>
 
-<span class="w">      </span><span class="n">patchData</span><span class="p">(</span><span class="n">vof</span><span class="p">,</span><span class="w"> </span><span class="n">comp</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="n">patchData</span><span class="p">(</span><span class="n">vof</span><span class="p">,</span><span class="w"> </span><span class="n">comp</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Here, <code class="docutils literal notranslate"><span class="pre">EBGraph</span></code> is the graph that describes the connectivity of the cut cells.</p>
-</div>
-<div class="section" id="baseif">
-<span id="chap-baseif"></span><h2>BaseIF<a class="headerlink" href="#baseif" title="Permalink to this heading"></a></h2>
+</section>
+<section id="baseif">
+<span id="chap-baseif"></span><h2>BaseIF<a class="headerlink" href="#baseif" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">BaseIF</span></code> is a <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> class which encapsulates an implicit function (recall that all SDFs are also implicit functions, see <a class="reference internal" href="SpatialDiscretization.html#chap-geometryrepresentation"><span class="std std-ref">Geometry representation</span></a>).
 <code class="docutils literal notranslate"><span class="pre">BaseIF</span></code> is therefore used for fundamentally constructing a geometric object.
 Many examples of <code class="docutils literal notranslate"><span class="pre">BaseIF</span></code> are found in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> itself, and <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> includes additional ones.</p>
 <p>To implement a new implicit function, the user must inherit from <code class="docutils literal notranslate"><span class="pre">BaseIF</span></code> and implement the pure function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="nf">BaseIF::value</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_point</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="nf">BaseIF::value</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_point</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>The implemention should return a positive value if the point <code class="docutils literal notranslate"><span class="pre">a_point</span></code> is inside the object and a negative value otherwise.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="SpatialDiscretization.html" class="btn btn-neutral float-left" title="Spatial discretization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="MeshData.html" class="btn btn-neutral float-right" title="Mesh data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="SpatialDiscretization.html" class="btn btn-neutral float-left" title="Spatial discretization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
-  </div>
+    <p>
+        &#169; Copyright 2022, SINTEF Energy Research.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

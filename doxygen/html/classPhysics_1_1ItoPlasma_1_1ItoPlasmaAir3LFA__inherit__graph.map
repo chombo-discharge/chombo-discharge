@@ -1,5 +1,4 @@
 <map id="Physics::ItoPlasma::ItoPlasmaAir3LFA" name="Physics::ItoPlasma::ItoPlasmaAir3LFA">
-<area shape="rect" id="node1" title="Abstract clas for specifying plasma kinetics." alt="" coords="17,184,161,225"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysicsLFA.html" title="Middle layer for describing ItoPlasmaPhysics in the LFA." alt="" coords="5,95,172,136"/>
-<area shape="rect" id="node3" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html" title="Abstract clas for specifying plasma kinetics." alt="" coords="17,5,161,47"/>
+<area shape="rect" id="node1" title="Hard&#45;coded implementation of ItoPlasmaPhysics for simplified discharges in STP air...." alt="" coords="5,95,149,136"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="5,5,149,47"/>
 </map>

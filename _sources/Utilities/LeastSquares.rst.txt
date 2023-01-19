@@ -5,8 +5,7 @@ Least squares
 
 Least squares routines are useful for reconstructing a local polynomial in the vicinity of the embedded boundary.
 ``chombo-discharge`` supports the expansion of such solutions in a fairly general way.
-The need for such routines are motivated e.g. by the fact that the embedded boundary introduces grid pathologies which are difficult to meet with pure finite differencing.
-An example of this is filling ghost cells near the embedded boundary. 
+These routines are often needed because the embedded boundary introduces grid pathologies which are difficult to meet with pure finite differencing, see e.g. :ref:`Chap:MultigridInterpolation`.
 
 Polynomial expansion
 --------------------

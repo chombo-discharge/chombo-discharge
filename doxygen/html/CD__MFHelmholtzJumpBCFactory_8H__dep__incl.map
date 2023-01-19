@@ -4,9 +4,8 @@
 <area shape="rect" id="node3" href="$CD__MFHelmholtzOp_8H.html" title="Declaration of a class for solving multiphase Helmholtz equations." alt="" coords="281,102,429,143"/>
 <area shape="rect" id="node5" href="$CD__MFHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="371,199,564,240"/>
 <area shape="rect" id="node4" href="$CD__MFHelmholtzOp_8cpp.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="185,199,347,240"/>
-<area shape="rect" id="node6" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="257,288,453,329"/>
-<area shape="rect" id="node10" href="$CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="477,288,684,329"/>
-<area shape="rect" id="node7" href="$CD__ItoPlasmaStepper_8cpp.html" title="Implementation of CD_ItoPlasmaStepper.H." alt="" coords="157,377,327,419"/>
-<area shape="rect" id="node8" href="$CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="351,377,586,419"/>
-<area shape="rect" id="node9" href="$CD__StreamerInceptionStepperImplem_8H.html" title="Implementation of CD_StreamerInceptionStepper.H." alt="" coords="325,467,612,508"/>
+<area shape="rect" id="node6" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="256,288,452,329"/>
+<area shape="rect" id="node9" href="$CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="476,288,683,329"/>
+<area shape="rect" id="node7" href="$CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="237,377,471,419"/>
+<area shape="rect" id="node8" href="$CD__StreamerInceptionStepperImplem_8H.html" title="Implementation of CD_StreamerInceptionStepper.H." alt="" coords="211,467,497,508"/>
 </map>

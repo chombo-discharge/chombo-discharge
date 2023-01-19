@@ -1,37 +1,75 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Controlling chombo-discharge &mdash; chombo-discharge  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Examples" href="Examples.html" />
     <link rel="prev" title="Visualization" href="Visualization.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
+          
+
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -39,7 +77,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Documentation.html">Using this documentation</a></li>
@@ -92,6 +141,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
@@ -100,8 +150,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ItoPlasmaModel.html">Îto-KMC plasma model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
 <ul>
@@ -135,75 +186,116 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></li>
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/Base/Control.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
-  <div class="section" id="controlling-chombo-discharge">
-<span id="chap-control"></span><h1>Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code><a class="headerlink" href="#controlling-chombo-discharge" title="Permalink to this heading"></a></h1>
+            
+  <section id="controlling-chombo-discharge">
+<span id="chap-control"></span><h1>Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code><a class="headerlink" href="#controlling-chombo-discharge" title="Permalink to this heading">¶</a></h1>
 <p>In this chapter we give a brief overview of how to run a <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulation and control its behavior through input scripts or command line options.</p>
-<div class="section" id="compiling-and-running">
-<h2>Compiling and running<a class="headerlink" href="#compiling-and-running" title="Permalink to this heading"></a></h2>
+<section id="compiling-and-running">
+<h2>Compiling and running<a class="headerlink" href="#compiling-and-running" title="Permalink to this heading">¶</a></h2>
 <p>To run simulations, the user must first compile his application.
 Once the application has been setup, the user can compile by</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make -s -j <span class="m">32</span> <span class="nv">DIM</span><span class="o">=</span>N &lt;application_name&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>-s<span class="w"> </span>-j<span class="w"> </span><span class="m">32</span><span class="w"> </span><span class="nv">DIM</span><span class="o">=</span>N<span class="w"> </span>&lt;application_name&gt;
 </pre></div>
 </div>
 <p>where <em>N</em> may be 2 or 3, and &lt;application_name&gt; is the name of the file that holds the <code class="docutils literal notranslate"><span class="pre">main()</span></code> function.
 This will compile an executable whose name depends on your application name and compiler settings.
 Please refer to the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> manual for explanation of the executable name. You may, of course, rename your application.</p>
-<div class="section" id="compilation-options">
-<h3>Compilation options<a class="headerlink" href="#compilation-options" title="Permalink to this heading"></a></h3>
+<section id="compilation-options">
+<h3>Compilation options<a class="headerlink" href="#compilation-options" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> can compile with various code guards enabled, to spot bugs or potential errors in the code.
 To compile with these guards turned on, compile with <code class="docutils literal notranslate"><span class="pre">DEBUG=TRUE</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">-s</span> <span class="pre">-j32</span> <span class="pre">DIM=2</span> <span class="pre">DEBUG=TRUE</span> <span class="pre">&lt;application_name&gt;</span></code>.</p>
 <p>To compile for production runs, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> should generally speaking be compiled with <code class="docutils literal notranslate"><span class="pre">DEBUG=FALSE</span></code> and <code class="docutils literal notranslate"><span class="pre">OPT=HIGH</span></code>, for example</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make -s -j32 <span class="nv">DIM</span><span class="o">=</span><span class="m">2</span> <span class="nv">OPT</span><span class="o">=</span>HIGH <span class="nv">DEBUG</span><span class="o">=</span>FALSE &lt;application_name&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>-s<span class="w"> </span>-j32<span class="w"> </span><span class="nv">DIM</span><span class="o">=</span><span class="m">2</span><span class="w"> </span><span class="nv">OPT</span><span class="o">=</span>HIGH<span class="w"> </span><span class="nv">DEBUG</span><span class="o">=</span>FALSE<span class="w"> </span>&lt;application_name&gt;
 </pre></div>
 </div>
 <p>Recall also that default settings for the dimension (<code class="docutils literal notranslate"><span class="pre">DIM</span></code>), optimization level (<code class="docutils literal notranslate"><span class="pre">OPT</span></code>), and debug mode (<code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>) can be set in <code class="file docutils literal notranslate"><span class="pre">Make.defs.local</span></code>, see <a class="reference internal" href="Installation.html#chap-installation"><span class="std std-ref">Installation</span></a>.</p>
-</div>
-</div>
-<div class="section" id="running-applications">
-<h2>Running applications<a class="headerlink" href="#running-applications" title="Permalink to this heading"></a></h2>
-<div class="section" id="serial">
-<h3>Serial<a class="headerlink" href="#serial" title="Permalink to this heading"></a></h3>
+</section>
+</section>
+<section id="running-applications">
+<h2>Running applications<a class="headerlink" href="#running-applications" title="Permalink to this heading">¶</a></h2>
+<section id="serial">
+<h3>Serial<a class="headerlink" href="#serial" title="Permalink to this heading">¶</a></h3>
 <p>Next, if the application was compiled for serial execution one runs it with:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./&lt;application_executable&gt; &lt;input_file&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;
 </pre></div>
 </div>
 <p>where &lt;input_file&gt; is your input file.</p>
-</div>
-<div class="section" id="parallel">
-<h3>Parallel<a class="headerlink" href="#parallel" title="Permalink to this heading"></a></h3>
+</section>
+<section id="parallel">
+<h3>Parallel<a class="headerlink" href="#parallel" title="Permalink to this heading">¶</a></h3>
 <p>If the executable was compiled with MPI, one executes with e.g. <code class="docutils literal notranslate"><span class="pre">mpirun</span></code> (or one of its aliases):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun -np <span class="m">32</span> &lt;application_executable&gt; &lt;input_file&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">32</span><span class="w"> </span>&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;
 </pre></div>
 </div>
 <p>On clusters, this is a little bit different and usually requires passing the above command through a batch system.</p>
-</div>
-</div>
-<div class="section" id="simulation-inputs">
-<h2>Simulation inputs<a class="headerlink" href="#simulation-inputs" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+<section id="simulation-inputs">
+<h2>Simulation inputs<a class="headerlink" href="#simulation-inputs" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulations take their input from a single simulation input file (possibly appended with overriding options on the command line).
 Simulations may consist of several hundred possible switches for altering the behavior of a simulation, and all physics models in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> are therefore equipped with Python setup tools that collect all such options into a single file when setting up a new application.
 Generally, these input parameters are fetched from the options file of component that is used in a simulation.
@@ -217,16 +309,16 @@ For example, the configuration options that adjusts the number of time steps tha
 </pre></div>
 </div>
 <p>You may also pass input parameters through the command line. For example, running</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun -np <span class="m">32</span> &lt;application_executable&gt; &lt;input_file&gt; Driver.max_steps<span class="o">=</span><span class="m">10</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">32</span><span class="w"> </span>&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;<span class="w"> </span>Driver.max_steps<span class="o">=</span><span class="m">10</span>
 </pre></div>
 </div>
 <p>will set the <code class="docutils literal notranslate"><span class="pre">Driver.max_steps</span></code> parameter to 10.
 Command-line parameters override definitions in the input file.
 Moreover, parameters parsed through the command line become static parameters, i.e. they are not run-time configurable (see <a class="reference internal" href="#chap-runtimeconfig"><span class="std std-ref">Run-time configurations</span></a>).
 Also note that if you define a parameter multiple times in the input file, the last definition is canon.</p>
-</div>
-<div class="section" id="simulation-outputs">
-<h2>Simulation outputs<a class="headerlink" href="#simulation-outputs" title="Permalink to this heading"></a></h2>
+</section>
+<section id="simulation-outputs">
+<h2>Simulation outputs<a class="headerlink" href="#simulation-outputs" title="Permalink to this heading">¶</a></h2>
 <p>Mesh data from <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulations is by default written to HDF5 files, and if HDF5 is disabled <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> will not write any plot or checkpoint files.
 In addition to plot files, MPI ranks can output information to separate files so that the simulation progress can be tracked.</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> comes with controls for adjusting output.
@@ -234,11 +326,11 @@ Through the <a class="reference internal" href="../Source/Driver.html#chap-drive
 This directory is relative to the location where the application is run.
 If this directory does not exist, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> will create it.
 It will also create the following subdirectories given in <a class="reference internal" href="#tab-outputdirectories"><span class="std std-ref">Simulation output organization.</span></a>.</p>
-<span id="tab-outputdirectories"></span><table class="colwidths-given docutils align-default" id="id1">
-<caption><span class="caption-number">Table 3 </span><span class="caption-text">Simulation output organization.</span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
+<span id="tab-outputdirectories"></span><table class="docutils align-default" id="id1">
+<caption><span class="caption-number">Table 3 </span><span class="caption-text">Simulation output organization.</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col style="width: 13%" />
-<col style="width: 88%" />
+<col style="width: 12.5%" />
+<col style="width: 87.5%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Folder</p></th>
@@ -284,28 +376,28 @@ For example, one of our convection-diffusion-reaction solver classes have the fo
 <p>where <code class="docutils literal notranslate"><span class="pre">phi</span></code> is the state density, <code class="docutils literal notranslate"><span class="pre">vel</span></code> is the drift velocity, <code class="docutils literal notranslate"><span class="pre">dco</span></code> is the diffusion coefficient, <code class="docutils literal notranslate"><span class="pre">src</span></code> is the source term, and <code class="docutils literal notranslate"><span class="pre">ebflux</span></code> is the flux at embedded boundaries.
 If you only want to plot the density, then you should put <code class="docutils literal notranslate"><span class="pre">CdrGodunov.plt_vars</span> <span class="pre">=</span> <span class="pre">phi</span></code>.
 An empty entry like <code class="docutils literal notranslate"><span class="pre">CdrGodunov.plt_vars</span> <span class="pre">=</span></code> may lead to run-time errors, so if you do not want a class to provide plot data you may put <code class="docutils literal notranslate"><span class="pre">CdrGodunov.plt_vars</span> <span class="pre">=</span> <span class="pre">none</span></code>.</p>
-</div>
-<div class="section" id="controlling-parallel-processor-verbosity">
-<h2>Controlling parallel processor verbosity<a class="headerlink" href="#controlling-parallel-processor-verbosity" title="Permalink to this heading"></a></h2>
+</section>
+<section id="controlling-parallel-processor-verbosity">
+<h2>Controlling parallel processor verbosity<a class="headerlink" href="#controlling-parallel-processor-verbosity" title="Permalink to this heading">¶</a></h2>
 <p>By default, <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> will write a process output file <em>per MPI process</em> and this file will be named <code class="file docutils literal notranslate"><span class="pre">pout.n</span></code> where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the MPI rank.
 These files are written in the directory where you executed your application, and are <em>not</em> related to plot files or checkpoint files.
 However, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> prints information to these files as simulations advance (for example by displaying information of the current time step, or convergence rates for multigrid solvers).
 While it is possible to monitor the evolution of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> for each MPI rank, most of these files contain redundant information.
 To adjust the number of files that will be written, <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> can read an environment variable <code class="docutils literal notranslate"><span class="pre">CH_OUTPUT_INTERVAL</span></code> that determines which MPI ranks write <code class="file docutils literal notranslate"><span class="pre">pout.n</span></code> files.
 For example, if you only want the master MPI rank to write <code class="file docutils literal notranslate"><span class="pre">pout.0</span></code>, you would do</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">CH_OUTPUT_INTERVAL</span><span class="o">=</span><span class="m">999999999</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">CH_OUTPUT_INTERVAL</span><span class="o">=</span><span class="m">999999999</span>
 </pre></div>
 </div>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>If you run simulations at high concurrencies, you <em>should</em> turn off the number of process output files since they impact the performance of the file system.</p>
 </div>
-</div>
-<div class="section" id="restarting-simulations">
-<span id="chap-restartingsimulations"></span><h2>Restarting simulations<a class="headerlink" href="#restarting-simulations" title="Permalink to this heading"></a></h2>
+</section>
+<section id="restarting-simulations">
+<span id="chap-restartingsimulations"></span><h2>Restarting simulations<a class="headerlink" href="#restarting-simulations" title="Permalink to this heading">¶</a></h2>
 <p>Restarting simulations is done in exactly the same way as running simulations, although the user must set the <code class="docutils literal notranslate"><span class="pre">Driver.restart</span></code> parameter.
 For example,</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun -np <span class="m">32</span> &lt;application_executable&gt; &lt;input_file&gt; Driver.restart<span class="o">=</span><span class="m">10</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">32</span><span class="w"> </span>&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;<span class="w"> </span>Driver.restart<span class="o">=</span><span class="m">10</span>
 </pre></div>
 </div>
 <p>will restart from step 10.</p>
@@ -319,9 +411,9 @@ This also implies that you cannot change the <code class="docutils literal notra
 <p class="admonition-title">Note</p>
 <p>If you set <code class="docutils literal notranslate"><span class="pre">Driver.restart=0</span></code>, you will get a fresh simulation.</p>
 </div>
-</div>
-<div class="section" id="run-time-configurations">
-<span id="chap-runtimeconfig"></span><h2>Run-time configurations<a class="headerlink" href="#run-time-configurations" title="Permalink to this heading"></a></h2>
+</section>
+<section id="run-time-configurations">
+<span id="chap-runtimeconfig"></span><h2>Run-time configurations<a class="headerlink" href="#run-time-configurations" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> reads input parameters before the simulation starts, but also during run-time.
 This is useful when your simulation waited 5 days in the queue on a cluster before starting, but you forgot to tweak one parameter and don’t want to wait another 5 days.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Driver</span></code> re-reads the simulation input parameters after every time step.
@@ -329,38 +421,55 @@ The new options are parsed by the core classes <code class="docutils literal not
 Note that not all input configurations are suitable for run-time configuration.
 For example, increasing the size of the simulation domain does not make sense but changing the blocking factor, refinement criteria, or plot intervals do.
 To see which options are run-time configurable, see <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>, <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>, or the <a class="reference internal" href="../Source/TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> and <a class="reference internal" href="../Source/CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a> that you use.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Visualization.html" class="btn btn-neutral float-left" title="Visualization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="Examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Visualization.html" class="btn btn-neutral float-left" title="Visualization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
-  </div>
+    <p>
+        &#169; Copyright 2022, SINTEF Energy Research.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

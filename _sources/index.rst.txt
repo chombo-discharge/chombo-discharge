@@ -130,6 +130,7 @@ Solvers
 
    Solvers/CDR
    Solvers/Electrostatics
+   Solvers/KineticMonteCarlo
    Solvers/MeshODESolver
    Solvers/RTE
    Solvers/SurfaceODESolver
@@ -146,7 +147,7 @@ Multi-physics applications
 
    Applications/CdrPlasmaModel
    Applications/StreamerInceptionModel
-..   ItoPlasmaModel   
+   Applications/ItoPlasmaModel   
 
 Single-solver applications
 **************************

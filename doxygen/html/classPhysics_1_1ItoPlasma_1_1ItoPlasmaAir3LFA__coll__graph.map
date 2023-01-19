@@ -1,5 +1,8 @@
 <map id="Physics::ItoPlasma::ItoPlasmaAir3LFA" name="Physics::ItoPlasma::ItoPlasmaAir3LFA">
-<area shape="rect" id="node1" title="Abstract clas for specifying plasma kinetics." alt="" coords="17,184,161,225"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysicsLFA.html" title="Middle layer for describing ItoPlasmaPhysics in the LFA." alt="" coords="5,95,172,136"/>
-<area shape="rect" id="node3" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html" title="Abstract clas for specifying plasma kinetics." alt="" coords="17,5,161,47"/>
+<area shape="rect" id="node1" title="Hard&#45;coded implementation of ItoPlasmaPhysics for simplified discharges in STP air...." alt="" coords="123,304,267,345"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="123,213,267,255"/>
+<area shape="rect" id="node3" href="$classKMCDualState.html" title=" " alt="" coords="5,117,176,143"/>
+<area shape="rect" id="node4" href="$classKMCDualState.html" title="Declaration of a &quot;dual state&quot; for advancing with the Kinetic Monte Carlo module." alt="" coords="13,5,168,32"/>
+<area shape="rect" id="node5" href="$classKMCSolver.html" title=" " alt="" coords="201,109,399,151"/>
+<area shape="rect" id="node6" href="$classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="205,5,395,32"/>
 </map>

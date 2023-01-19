@@ -1,10 +1,10 @@
 <map id="CdrMultigrid" name="CdrMultigrid">
-<area shape="rect" id="node1" title="Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic di..." alt="" coords="1028,447,1131,473"/>
-<area shape="rect" id="node2" href="$classCdrSolver.html" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="891,309,976,336"/>
-<area shape="rect" id="node3" href="$classCdrDomainBC.html" title="Class for encapsulating possible domain boundary conditions for CdrSolver." alt="" coords="421,140,534,167"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="385,273,569,314"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,313,144,340"/>
-<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="355,339,600,365"/>
-<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="379,451,575,477"/>
-<area shape="rect" id="node8" href="$classEBAMRData.html" title=" " alt="" coords="378,89,577,116"/>
+<area shape="rect" id="node1" title="Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic di..." alt="" coords="1032,416,1135,443"/>
+<area shape="rect" id="node2" href="$classCdrSolver.html" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="893,279,978,305"/>
+<area shape="rect" id="node3" href="$classCdrDomainBC.html" title="Class for encapsulating possible domain boundary conditions for CdrSolver." alt="" coords="421,139,534,165"/>
+<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="385,242,569,283"/>
+<area shape="rect" id="node5" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,283,144,309"/>
+<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="355,308,600,335"/>
+<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="379,420,575,447"/>
+<area shape="rect" id="node8" href="$classEBAMRData.html" title=" " alt="" coords="378,88,577,115"/>
 </map>

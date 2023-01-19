@@ -1,37 +1,75 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Overview &mdash; chombo-discharge  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Installation" href="Installation.html" />
     <link rel="prev" title="Using this documentation" href="Documentation.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
+          
+
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -39,7 +77,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Documentation.html">Using this documentation</a></li>
@@ -80,6 +129,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
@@ -88,8 +138,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ItoPlasmaModel.html">Îto-KMC plasma model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
 <ul>
@@ -123,40 +174,81 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">Overview</li>
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Overview</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/Base/Overview.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
-  <div class="section" id="overview">
-<span id="chap-overview"></span><h1>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h1>
-<div class="section" id="history">
-<h2>History<a class="headerlink" href="#history" title="Permalink to this heading"></a></h2>
+            
+  <section id="overview">
+<span id="chap-overview"></span><h1>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h1>
+<section id="history">
+<h2>History<a class="headerlink" href="#history" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is aimed at solving discharge problems.
 It was originally developed at SINTEF Energy Research between 2015-2018, and aimed at simulating discharges in high-voltage engineering.
 Further development was started in 2021, where much of the code was redesigned for improved modularity and performance.</p>
-</div>
-<div class="section" id="key-functionalities">
-<h2>Key functionalities<a class="headerlink" href="#key-functionalities" title="Permalink to this heading"></a></h2>
+</section>
+<section id="key-functionalities">
+<h2>Key functionalities<a class="headerlink" href="#key-functionalities" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses a Cartesian embedded boundary (EB) grid formulation and adaptive mesh refinement (AMR) formalism where the grids frequently change and are adapted to the solution as simulations progress.
 Key functionalities are provided in <a class="reference internal" href="#tab-keycapabilities"><span class="std std-numref">Table 1</span></a>.</p>
 <div class="admonition important">
@@ -166,11 +258,11 @@ It is an evolving research code with occasionally expanded capabilities, API cha
 Although problems can be set up through our Python toos, users should nonetheless be willing to take time to understand how the code works.
 In particular, developers should invest some effort in understanding the data structures and <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> basics (see <a class="reference internal" href="../Source/ChomboBasics.html#chap-basics"><span class="std std-ref">Chombo-3 basics</span></a>).</p>
 </div>
-<span id="tab-keycapabilities"></span><table class="colwidths-given docutils align-default" id="id1">
-<caption><span class="caption-number">Table 1 </span><span class="caption-text">Key capabilities.</span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
+<span id="tab-keycapabilities"></span><table class="docutils align-default" id="id1">
+<caption><span class="caption-number">Table 1 </span><span class="caption-text">Key capabilities.</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col style="width: 29%" />
-<col style="width: 71%" />
+<col style="width: 28.6%" />
+<col style="width: 71.4%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Capabilities</p></th>
@@ -219,38 +311,55 @@ That is, all the AMR levels are advanced using the same time step.
 This includes much faster grid generation, support for polygon surfaces, and many performance optimizations (in particular to the EB formulation).</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports both fluid and particle methods, and can use multiply parallel distributed grids (see <a class="reference internal" href="../Source/Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>) for individually load balancing particle and fluid kernels.
 Although many abstractions are in place so that user can describe a new set of physics, or write entirely new solvers into <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> and still use the embedded boundary formalism, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also provides several physics modules for describing various types of problems.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Documentation.html" class="btn btn-neutral float-left" title="Using this documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="Installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Documentation.html" class="btn btn-neutral float-left" title="Using this documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
-  </div>
+    <p>
+        &#169; Copyright 2022, SINTEF Energy Research.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

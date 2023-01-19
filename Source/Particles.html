@@ -1,38 +1,76 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Particles &mdash; chombo-discharge  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Realm" href="Realm.html" />
     <link rel="prev" title="Mesh data" href="MeshData.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
+          
+
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -40,7 +78,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
@@ -132,6 +181,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
@@ -140,8 +190,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ItoPlasmaModel.html">Îto-KMC plasma model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
 <ul>
@@ -175,67 +226,108 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">Particles</li>
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Particles</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/Source/Particles.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
-  <div class="section" id="particles">
-<span id="chap-particles"></span><h1>Particles<a class="headerlink" href="#particles" title="Permalink to this heading"></a></h1>
+            
+  <section id="particles">
+<span id="chap-particles"></span><h1>Particles<a class="headerlink" href="#particles" title="Permalink to this heading">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports computational particles using native <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> particle data.
 The source code for the particle functionality resides in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle</span></code>.</p>
-<div class="section" id="genericparticle">
-<span id="chap-genericparticle"></span><h2>GenericParticle<a class="headerlink" href="#genericparticle" title="Permalink to this heading"></a></h2>
+<section id="genericparticle">
+<span id="chap-genericparticle"></span><h2>GenericParticle<a class="headerlink" href="#genericparticle" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">GenericParticle</span></code> is a default particle usable by the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> particle library.
 The particle type is a template</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="k">class</span><span class="w"> </span><span class="nc">GenericParticle</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="w"></span>
-<span class="w">   </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"></span>
-<span class="w">   </span><span class="nf">position</span><span class="p">();</span><span class="w"></span>
-<span class="k">protected</span><span class="o">:</span><span class="w"></span>
-<span class="w">   </span><span class="n">RealVect</span><span class="w"> </span><span class="n">m_position</span><span class="p">;</span><span class="w"></span>
-<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">M</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_scalars</span><span class="p">;</span><span class="w"></span>
-<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">RealVcet</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_vectors</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GenericParticle</span>
+<span class="p">{</span>
+<span class="k">public</span>
+<span class="w">   </span><span class="n">RealVect</span><span class="o">&amp;</span>
+<span class="w">   </span><span class="nf">position</span><span class="p">();</span>
+<span class="k">protected</span><span class="o">:</span>
+<span class="w">   </span><span class="n">RealVect</span><span class="w"> </span><span class="n">m_position</span><span class="p">;</span>
+<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">M</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_scalars</span><span class="p">;</span>
+<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">RealVcet</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_vectors</span><span class="p">;</span>
+<span class="p">};</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">M</span></code> and <code class="docutils literal notranslate"><span class="pre">N</span></code> are the number of <code class="docutils literal notranslate"><span class="pre">Real</span></code> and <code class="docutils literal notranslate"><span class="pre">RealVect</span></code> variables for the particle.
 The <code class="docutils literal notranslate"><span class="pre">GenericParticle</span></code> also stores the position of the particle, which is available through <code class="docutils literal notranslate"><span class="pre">GenericParticle&lt;M,N&gt;::position</span></code>.</p>
 <p>To fetch the <code class="docutils literal notranslate"><span class="pre">Real</span></code> and <code class="docutils literal notranslate"><span class="pre">RealVect</span></code> variables, <code class="docutils literal notranslate"><span class="pre">GenericParticle</span></code> has member functions</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kr">inline</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"></span>
-<span class="n">GenericParticle</span><span class="o">&lt;</span><span class="n">M</span><span class="p">,</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">real</span><span class="p">();</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="o">&gt;</span>
+<span class="kr">inline</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span>
+<span class="n">GenericParticle</span><span class="o">&lt;</span><span class="n">M</span><span class="p">,</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">real</span><span class="p">();</span>
 
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kr">inline</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"></span>
-<span class="n">GenericParticle</span><span class="o">&lt;</span><span class="n">M</span><span class="p">,</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">vect</span><span class="p">();</span><span class="w"></span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="o">&gt;</span>
+<span class="kr">inline</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span>
+<span class="n">GenericParticle</span><span class="o">&lt;</span><span class="n">M</span><span class="p">,</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">vect</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>If using <code class="docutils literal notranslate"><span class="pre">GenericParticle</span></code> directly, the correct C++ way of fetching one of these variables is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">p</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">p</span><span class="p">;</span>
 
-<span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="k">template</span><span class="w"> </span><span class="n">real</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">();</span><span class="w"></span>
+<span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="k">template</span><span class="w"> </span><span class="n">real</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>Note that one must include the template keyword.</p>
@@ -243,34 +335,34 @@ The <code class="docutils literal notranslate"><span class="pre">GenericParticle
 <p class="admonition-title">Tip</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">GenericParticle</span></code> C++ API is found at <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classGenericParticle.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classGenericParticle.html</a>.</p>
 </div>
-</div>
-<div class="section" id="custom-particles">
-<h2>Custom particles<a class="headerlink" href="#custom-particles" title="Permalink to this heading"></a></h2>
+</section>
+<section id="custom-particles">
+<h2>Custom particles<a class="headerlink" href="#custom-particles" title="Permalink to this heading">¶</a></h2>
 <p>To create a simple custom particle class with more sane signatures, one can inherit from <code class="docutils literal notranslate"><span class="pre">GenericParticle</span></code> and specify new function signatures that return the appropriate fields:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">KineticParticle</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="o">:</span><span class="w"></span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"></span>
-<span class="w">   </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">weight</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">real</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">();</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">KineticParticle</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">&gt;</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">   </span><span class="kr">inline</span>
+<span class="w">   </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">weight</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">real</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="w">   </span><span class="p">}</span>
 
-<span class="w">   </span><span class="kr">inline</span><span class="w"></span>
-<span class="w">   </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">velocity</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">vect</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">();</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span>
+<span class="w">   </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">velocity</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">vect</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="w">   </span><span class="p">}</span>
 
-<span class="w">   </span><span class="kr">inline</span><span class="w"></span>
-<span class="w">   </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">acceleration</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">vect</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">();</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span>
+<span class="w">   </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">acceleration</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">vect</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">};</span>
 </pre></div>
 </div>
 <p>There are many particles in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, see the <code class="docutils literal notranslate"><span class="pre">GenericParticle</span></code> C++ API for more information.</p>
-</div>
-<div class="section" id="particlecontainer">
-<span id="chap-particlecontainer"></span><h2>ParticleContainer<a class="headerlink" href="#particlecontainer" title="Permalink to this heading"></a></h2>
+</section>
+<section id="particlecontainer">
+<span id="chap-particlecontainer"></span><h2>ParticleContainer<a class="headerlink" href="#particlecontainer" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> is a template class that</p>
 <ol class="arabic simple">
 <li><p>Stores computational particles of type <code class="docutils literal notranslate"><span class="pre">P</span></code> over an AMR hierchy.</p></li>
@@ -279,11 +371,11 @@ The <code class="docutils literal notranslate"><span class="pre">GenericParticle
 <p><code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> uses the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> structure <code class="docutils literal notranslate"><span class="pre">ParticleData&lt;P&gt;</span></code> under the hood, and therefore has template constraints on <code class="docutils literal notranslate"><span class="pre">P</span></code>.
 The simplest way to use <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code> for a new type of particle is to let <code class="docutils literal notranslate"><span class="pre">P</span></code> inherit from <a class="reference internal" href="#chap-genericparticle"><span class="std std-ref">GenericParticle</span></a>.
 Howver, the fundamental requirement on <code class="docutils literal notranslate"><span class="pre">P</span></code> is just that it must contain the appropriate Chombo linearization functions and a <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">RealVect&amp;</span> <span class="pre">P::position()</span></code> function.</p>
-</div>
-<div class="section" id="data-structures">
-<h2>Data structures<a class="headerlink" href="#data-structures" title="Permalink to this heading"></a></h2>
-<div class="section" id="list-p-and-listbox-p">
-<h3>List&lt;P&gt; and ListBox&lt;P&gt;<a class="headerlink" href="#list-p-and-listbox-p" title="Permalink to this heading"></a></h3>
+</section>
+<section id="data-structures">
+<h2>Data structures<a class="headerlink" href="#data-structures" title="Permalink to this heading">¶</a></h2>
+<section id="list-p-and-listbox-p">
+<h3>List&lt;P&gt; and ListBox&lt;P&gt;<a class="headerlink" href="#list-p-and-listbox-p" title="Permalink to this heading">¶</a></h3>
 <p>At the lowest level the particles are always stored in a linked list <code class="docutils literal notranslate"><span class="pre">List&lt;P&gt;</span></code>.
 The class can be simply be through of as a regular list of <code class="docutils literal notranslate"><span class="pre">P</span></code> with non-random access.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">ListBox&lt;P&gt;</span></code> consists of a <code class="docutils literal notranslate"><span class="pre">List&lt;P&gt;</span></code> <em>and</em> a <code class="docutils literal notranslate"><span class="pre">Box</span></code>.
@@ -294,106 +386,106 @@ The latter specifies the grid patch that the particles are assigned to.</p>
 <span class="n">List</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span> <span class="n">myList</span> <span class="o">=</span> <span class="n">myListBox</span><span class="o">.</span><span class="n">listItems</span><span class="p">();</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="listiterator-p">
-<h3>ListIterator&lt;P&gt;<a class="headerlink" href="#listiterator-p" title="Permalink to this heading"></a></h3>
+</section>
+<section id="listiterator-p">
+<h3>ListIterator&lt;P&gt;<a class="headerlink" href="#listiterator-p" title="Permalink to this heading">¶</a></h3>
 <p>In order to iterate over particles, use an iterator <code class="docutils literal notranslate"><span class="pre">ListIterator&lt;P&gt;</span></code> (which is not random access):</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">List</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticles</span><span class="p">;</span><span class="w"></span>
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ListIterator</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lit</span><span class="p">(</span><span class="n">myParticles</span><span class="p">);</span><span class="w"> </span><span class="n">lit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">lit</span><span class="p">){</span><span class="w"></span>
-<span class="w">   </span><span class="n">P</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lit</span><span class="p">();</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">List</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticles</span><span class="p">;</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ListIterator</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lit</span><span class="p">(</span><span class="n">myParticles</span><span class="p">);</span><span class="w"> </span><span class="n">lit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">lit</span><span class="p">){</span>
+<span class="w">   </span><span class="n">P</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lit</span><span class="p">();</span>
 
 <span class="w">   </span><span class="c1">// ... do something with this particle</span>
-<span class="p">}</span><span class="w"></span>
+<span class="p">}</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="particledata-p">
-<h3>ParticleData&lt;P&gt;<a class="headerlink" href="#particledata-p" title="Permalink to this heading"></a></h3>
+</section>
+<section id="particledata-p">
+<h3>ParticleData&lt;P&gt;<a class="headerlink" href="#particledata-p" title="Permalink to this heading">¶</a></h3>
 <p>On each grid level, <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> stores the particles in a <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> class <code class="docutils literal notranslate"><span class="pre">ParticleData</span></code>.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span><span class="w"></span>
-<span class="n">ParticleData</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span>
+<span class="n">ParticleData</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">P</span></code> is the particle type.
 <code class="docutils literal notranslate"><span class="pre">ParticleData&lt;P&gt;</span></code> can be thought of as a <code class="docutils literal notranslate"><span class="pre">LevelData&lt;ListBox&lt;P&gt;</span> <span class="pre">&gt;</span></code>, although it actually inherits from <code class="docutils literal notranslate"><span class="pre">LayoutData&lt;ListBox&lt;P&gt;</span> <span class="pre">&gt;</span></code>.
 Each grid patch contains a <code class="docutils literal notranslate"><span class="pre">ListBox&lt;P&gt;</span></code> of particles.</p>
-</div>
-<div class="section" id="amrparticles-p">
-<h3>AMRParticles&lt;P&gt;<a class="headerlink" href="#amrparticles-p" title="Permalink to this heading"></a></h3>
+</section>
+<section id="amrparticles-p">
+<h3>AMRParticles&lt;P&gt;<a class="headerlink" href="#amrparticles-p" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">AMRParticles&lt;P&gt;</span></code> is our AMR version of <code class="docutils literal notranslate"><span class="pre">ParticleData&lt;P&gt;</span></code>.
 It is a simply a typedef of a vector of pointers to <code class="docutils literal notranslate"><span class="pre">ParticleData&lt;P&gt;</span></code> on each level:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span><span class="w"></span>
-<span class="k">using</span><span class="w"> </span><span class="n">AMRParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ParticleData</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">AMRParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ParticleData</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>Again, the <code class="docutils literal notranslate"><span class="pre">Vector</span></code> indicates the AMR level and the <code class="docutils literal notranslate"><span class="pre">ParticleData&lt;P&gt;</span></code> is a distributed data holder that holds the particles on each AMR level.</p>
-</div>
-</div>
-<div class="section" id="basic-use">
-<h2>Basic use<a class="headerlink" href="#basic-use" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+<section id="basic-use">
+<h2>Basic use<a class="headerlink" href="#basic-use" title="Permalink to this heading">¶</a></h2>
 <p>Here, we give some examples of basic use of <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code>.
 For the full API, see the <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code> C++ API <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleContainer.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleContainer.html</a>.</p>
-<div class="section" id="getting-the-particles">
-<h3>Getting the particles<a class="headerlink" href="#getting-the-particles" title="Permalink to this heading"></a></h3>
+<section id="getting-the-particles">
+<h3>Getting the particles<a class="headerlink" href="#getting-the-particles" title="Permalink to this heading">¶</a></h3>
 <p>To get the particles from a <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> one can call <code class="docutils literal notranslate"><span class="pre">AMRParticles&lt;P&gt;&amp;</span> <span class="pre">ParticleContainer&lt;P&gt;::getParticles()</span></code> which will provide the particles:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">;</span>
 
-<span class="n">AMRParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">myParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">.</span><span class="n">getParticles</span><span class="p">();</span><span class="w"></span>
+<span class="n">AMRParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">myParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">.</span><span class="n">getParticles</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>Alternatively, one can fetch directly from a specified grid level as follows:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">lvl</span><span class="p">;</span><span class="w"></span>
-<span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">lvl</span><span class="p">;</span>
+<span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">;</span>
 
-<span class="n">ParticleData</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">levelParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">[</span><span class="n">lvl</span><span class="p">];</span><span class="w"></span>
+<span class="n">ParticleData</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">levelParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">[</span><span class="n">lvl</span><span class="p">];</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="iterating-over-particles">
-<h3>Iterating over particles<a class="headerlink" href="#iterating-over-particles" title="Permalink to this heading"></a></h3>
+</section>
+<section id="iterating-over-particles">
+<h3>Iterating over particles<a class="headerlink" href="#iterating-over-particles" title="Permalink to this heading">¶</a></h3>
 <p>To do something basic with the particle in a <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code>, one will typically iterate over the particles in all grid levels and patches.</p>
 <p>The code bit below shows a typical example of how the particles can be moved, and then remapped onto the correct grid patches and ranks if they fall off their original one.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">;</span>
 
 <span class="c1">// Iterate over grid levels</span>
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getFinestLevel</span><span class="p">();</span><span class="w"> </span><span class="n">lvl</span><span class="o">++</span><span class="p">){</span><span class="w"></span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getFinestLevel</span><span class="p">();</span><span class="w"> </span><span class="n">lvl</span><span class="o">++</span><span class="p">){</span>
 
 <span class="w">   </span><span class="c1">// Get the grid on this level.</span>
-<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">DisjointBoxLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getGrids</span><span class="p">(</span><span class="n">myParticleContainer</span><span class="p">.</span><span class="n">getRealm</span><span class="p">())[</span><span class="n">lvl</span><span class="p">];</span><span class="w"></span>
+<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">DisjointBoxLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getGrids</span><span class="p">(</span><span class="n">myParticleContainer</span><span class="p">.</span><span class="n">getRealm</span><span class="p">())[</span><span class="n">lvl</span><span class="p">];</span>
 
 <span class="w">   </span><span class="c1">// Get the distributed particles on this level</span>
-<span class="w">   </span><span class="n">ParticleData</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">levelParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">[</span><span class="n">lvl</span><span class="p">]</span><span class="w"></span>
+<span class="w">   </span><span class="n">ParticleData</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">levelParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">[</span><span class="n">lvl</span><span class="p">]</span>
 
 <span class="w">   </span><span class="c1">// Iterate over grid patches on this level</span>
-<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span><span class="w"></span>
+<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span>
 
 <span class="w">      </span><span class="c1">// Get the particles in the current patch.</span>
-<span class="w">      </span><span class="n">List</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">patchParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">levelParticles</span><span class="p">[</span><span class="n">dit</span><span class="p">()].</span><span class="n">listItems</span><span class="p">();</span><span class="w"></span>
+<span class="w">      </span><span class="n">List</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">patchParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">levelParticles</span><span class="p">[</span><span class="n">dit</span><span class="p">()].</span><span class="n">listItems</span><span class="p">();</span>
 
 <span class="w">      </span><span class="c1">// Iterate over the particles in the current patch.</span>
-<span class="w">      </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ListIterator</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lit</span><span class="p">(</span><span class="n">patchParticles</span><span class="p">);</span><span class="w"> </span><span class="n">lit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">lit</span><span class="p">){</span><span class="w"></span>
-<span class="w">         </span><span class="n">P</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lit</span><span class="p">();</span><span class="w"></span>
+<span class="w">      </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ListIterator</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lit</span><span class="p">(</span><span class="n">patchParticles</span><span class="p">);</span><span class="w"> </span><span class="n">lit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">lit</span><span class="p">){</span>
+<span class="w">         </span><span class="n">P</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lit</span><span class="p">();</span>
 
 <span class="w">         </span><span class="c1">// Move the particle</span>
-<span class="w">         </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...</span><span class="w"></span>
-<span class="w">      </span><span class="p">}</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">         </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">}</span>
 
 <span class="c1">// Remap particles onto new patches and ranks (they may have moved off their original ones)</span>
-<span class="n">myParticleContainer</span><span class="p">.</span><span class="n">remap</span><span class="p">();</span><span class="w"></span>
+<span class="n">myParticleContainer</span><span class="p">.</span><span class="n">remap</span><span class="p">();</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="sorting-particles">
-<h2>Sorting particles<a class="headerlink" href="#sorting-particles" title="Permalink to this heading"></a></h2>
-<div class="section" id="sorting-by-cell">
-<h3>Sorting by cell<a class="headerlink" href="#sorting-by-cell" title="Permalink to this heading"></a></h3>
+</section>
+</section>
+<section id="sorting-particles">
+<h2>Sorting particles<a class="headerlink" href="#sorting-particles" title="Permalink to this heading">¶</a></h2>
+<section id="sorting-by-cell">
+<h3>Sorting by cell<a class="headerlink" href="#sorting-by-cell" title="Permalink to this heading">¶</a></h3>
 <p>The particles can also be sorted by cell by calling <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">ParticleContainer&lt;P&gt;::sortParticleByCell()</span></code>, like so:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">;</span>
 
-<span class="n">myParticleContainer</span><span class="p">.</span><span class="n">sortParticlesByCell</span><span class="p">();</span><span class="w"></span>
+<span class="n">myParticleContainer</span><span class="p">.</span><span class="n">sortParticlesByCell</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>Internally in <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code>, this will place the particles in another container which can be iterated over on a per-cell basis.
@@ -403,50 +495,50 @@ The <code class="docutils literal notranslate"><span class="pre">BinFab</span></
 Thus, this data structure stores the particles per cell rather than per patch.
 Due to the horrific template depth, this container is typedef’ed as <code class="docutils literal notranslate"><span class="pre">AMRCellParticles&lt;P&gt;</span></code>.</p>
 <p>To get cell-sorted particles one can call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">AMRCellParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">cellSortedParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">.</span><span class="n">getCellParticles</span><span class="p">();</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">AMRCellParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">cellSortedParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">.</span><span class="n">getCellParticles</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>Iteration over cell-sorted particles is mostly the same as for patch-sorted particles, except that we also need to explicitly iterate over the grid cells in each grid patch:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="c1">// Iterate over all AMR levels</span>
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getFinestLevel</span><span class="p">();</span><span class="w"> </span><span class="n">lvl</span><span class="o">++</span><span class="p">){</span><span class="w"></span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getFinestLevel</span><span class="p">();</span><span class="w"> </span><span class="n">lvl</span><span class="o">++</span><span class="p">){</span>
 
 <span class="w">   </span><span class="c1">// Get the grids on this level</span>
-<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">DisjointBoxLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getGrids</span><span class="p">(</span><span class="n">myParticleContainer</span><span class="p">.</span><span class="n">getRealm</span><span class="p">())[</span><span class="n">lvl</span><span class="p">];</span><span class="w"></span>
+<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">DisjointBoxLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getGrids</span><span class="p">(</span><span class="n">myParticleContainer</span><span class="p">.</span><span class="n">getRealm</span><span class="p">())[</span><span class="n">lvl</span><span class="p">];</span>
 
 <span class="w">   </span><span class="c1">// Iterate over grid patches on this level</span>
-<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span><span class="w"></span>
+<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span>
 
 <span class="w">      </span><span class="c1">// Get the Cartesian box for the current grid aptch</span>
-<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">Box</span><span class="w"> </span><span class="n">cellBox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dbl</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span><span class="w"></span>
+<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">Box</span><span class="w"> </span><span class="n">cellBox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dbl</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span>
 
 <span class="w">      </span><span class="c1">// Get the particles in the current grid patch.</span>
-<span class="w">      </span><span class="n">BinFab</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">cellSortedBoxParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">cellSortedParticles</span><span class="p">[</span><span class="n">lvl</span><span class="p">])[</span><span class="n">dit</span><span class="p">()];</span><span class="w"></span>
+<span class="w">      </span><span class="n">BinFab</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">cellSortedBoxParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">cellSortedParticles</span><span class="p">[</span><span class="n">lvl</span><span class="p">])[</span><span class="n">dit</span><span class="p">()];</span>
 
 <span class="w">      </span><span class="c1">// Iterate over all cells in the current box</span>
-<span class="w">      </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">BoxIterator</span><span class="w"> </span><span class="n">bit</span><span class="p">(</span><span class="n">cellBox</span><span class="p">);</span><span class="w"> </span><span class="n">bit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">bit</span><span class="p">){</span><span class="w"></span>
-<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">IntVect</span><span class="w"> </span><span class="n">iv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bit</span><span class="p">();</span><span class="w"></span>
+<span class="w">      </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">BoxIterator</span><span class="w"> </span><span class="n">bit</span><span class="p">(</span><span class="n">cellBox</span><span class="p">);</span><span class="w"> </span><span class="n">bit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">bit</span><span class="p">){</span>
+<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">IntVect</span><span class="w"> </span><span class="n">iv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bit</span><span class="p">();</span>
 
 <span class="w">         </span><span class="c1">// Get the particles in the current grid cell.</span>
-<span class="w">         </span><span class="n">List</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">cellParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cellSortedBoxParticles</span><span class="p">(</span><span class="n">iv</span><span class="p">,</span><span class="w"> </span><span class="n">comp</span><span class="p">);</span><span class="w"></span>
+<span class="w">         </span><span class="n">List</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">cellParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cellSortedBoxParticles</span><span class="p">(</span><span class="n">iv</span><span class="p">,</span><span class="w"> </span><span class="n">comp</span><span class="p">);</span>
 
 <span class="w">         </span><span class="c1">// Do something with cellParticles</span>
-<span class="w">         </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ListIterator</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lit</span><span class="p">(</span><span class="n">cellParticles</span><span class="p">);</span><span class="w"> </span><span class="n">lit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">lit</span><span class="p">){</span><span class="w"></span>
-<span class="w">            </span><span class="n">P</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lit</span><span class="p">();</span><span class="w"></span>
-<span class="w">         </span><span class="p">}</span><span class="w"></span>
-<span class="w">      </span><span class="p">}</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">         </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ListIterator</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lit</span><span class="p">(</span><span class="n">cellParticles</span><span class="p">);</span><span class="w"> </span><span class="n">lit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">lit</span><span class="p">){</span>
+<span class="w">            </span><span class="n">P</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lit</span><span class="p">();</span>
+<span class="w">         </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="sorting-by-patch">
-<h3>Sorting by patch<a class="headerlink" href="#sorting-by-patch" title="Permalink to this heading"></a></h3>
+</section>
+<section id="sorting-by-patch">
+<h3>Sorting by patch<a class="headerlink" href="#sorting-by-patch" title="Permalink to this heading">¶</a></h3>
 <p>If the particles need to return to patch-sorted particles:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">;</span>
 
-<span class="n">myParticleContainer</span><span class="p">.</span><span class="n">sortParticlesByPatch</span><span class="p">();</span><span class="w"></span>
+<span class="n">myParticleContainer</span><span class="p">.</span><span class="n">sortParticlesByPatch</span><span class="p">();</span>
 </pre></div>
 </div>
 <div class="admonition important">
@@ -456,24 +548,24 @@ This is done by design since the patch-sorted particles have been moved to a dif
 Note that remapping particles also requires that the particles are patch-sorted.
 Calling <code class="docutils literal notranslate"><span class="pre">remap()</span></code> with cell-sorted particles will issue a run-time error.</p>
 </div>
-</div>
-</div>
-<div class="section" id="allocating-particles">
-<h2>Allocating particles<a class="headerlink" href="#allocating-particles" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+<section id="allocating-particles">
+<h2>Allocating particles<a class="headerlink" href="#allocating-particles" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> has a very simple function for allocating a <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code>:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"> </span><span class="n">allocate</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_container</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">allocate</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_container</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>which will allocate a <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code> on realm <code class="docutils literal notranslate"><span class="pre">a_realm</span></code>.
 See <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> for further details.</p>
-</div>
-<div class="section" id="particle-mapping">
-<span id="chap-particlemapping"></span><h2>Particle mapping<a class="headerlink" href="#particle-mapping" title="Permalink to this heading"></a></h2>
+</section>
+<section id="particle-mapping">
+<span id="chap-particlemapping"></span><h2>Particle mapping<a class="headerlink" href="#particle-mapping" title="Permalink to this heading">¶</a></h2>
 <p>Particles that move off their original grid patch must be remapped in order to ensure that they are assigned to the correct grid.
 The remapping function for <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;::</span><span class="n">remap</span><span class="p">();</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;::</span><span class="n">remap</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>This is simply used as follows:</p>
@@ -482,13 +574,13 @@ The remapping function for <code class="docutils literal notranslate"><span clas
 <span class="n">myParticles</span><span class="o">.</span><span class="n">remap</span><span class="p">();</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="regridding">
-<h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this heading"></a></h2>
+</section>
+<section id="regridding">
+<h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> is comparatively simple to regrid, and this is done in two steps:</p>
 <ol class="arabic">
 <li><p><em>Before</em> creating the new grids, each MPI rank collects <em>all</em> particles on a single <code class="docutils literal notranslate"><span class="pre">List&lt;P&gt;</span></code> by calling</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;::</span><span class="n">preRegrid</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a_base</span><span class="p">)</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;::</span><span class="n">preRegrid</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a_base</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This will pull the particles off their current grids and collect them in a single list (on a per-rank basis).</p>
@@ -496,127 +588,129 @@ The remapping function for <code class="docutils literal notranslate"><span clas
 <li><p>When <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> regrids, each rank adds his <code class="docutils literal notranslate"><span class="pre">List&lt;P&gt;</span></code> back into the internal particle containers.</p></li>
 </ol>
 <p>The use case typically looks like this:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">;</span>
 
 <span class="c1">// Each rank caches his particles</span>
-<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">baseLevel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="n">myParticleContainer</span><span class="p">.</span><span class="n">preRegrid</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">baseLevel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="n">myParticleContainer</span><span class="p">.</span><span class="n">preRegrid</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
 
 <span class="c1">// Driver does a regrid.</span>
-<span class="p">.</span><span class="w"></span>
-<span class="p">.</span><span class="w"></span>
-<span class="p">.</span><span class="w"></span>
+<span class="p">.</span>
+<span class="p">.</span>
+<span class="p">.</span>
 
 <span class="c1">// After the regrid we fetch grids from AmrMesh:</span>
-<span class="n">Vector</span><span class="o">&lt;</span><span class="n">DisjointBoxLayout</span><span class="o">&gt;</span><span class="w"> </span><span class="n">grids</span><span class="p">;</span><span class="w"></span>
-<span class="n">Vector</span><span class="o">&lt;</span><span class="n">ProblemDomain</span><span class="o">&gt;</span><span class="w"> </span><span class="n">domains</span><span class="p">;</span><span class="w"></span>
-<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dx</span><span class="p">;</span><span class="w"></span>
-<span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">refinement_ratios</span><span class="p">;</span><span class="w"></span>
-<span class="kt">int</span><span class="w"> </span><span class="n">base</span><span class="p">;</span><span class="w"></span>
-<span class="kt">int</span><span class="w"> </span><span class="n">newFinestLevel</span><span class="p">;</span><span class="w"></span>
+<span class="n">Vector</span><span class="o">&lt;</span><span class="n">DisjointBoxLayout</span><span class="o">&gt;</span><span class="w"> </span><span class="n">grids</span><span class="p">;</span>
+<span class="n">Vector</span><span class="o">&lt;</span><span class="n">ProblemDomain</span><span class="o">&gt;</span><span class="w"> </span><span class="n">domains</span><span class="p">;</span>
+<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dx</span><span class="p">;</span>
+<span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">refinement_ratios</span><span class="p">;</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">base</span><span class="p">;</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">newFinestLevel</span><span class="p">;</span>
 
-<span class="n">myParticleContainer</span><span class="p">.</span><span class="n">regrid</span><span class="p">(</span><span class="n">grids</span><span class="p">,</span><span class="w"> </span><span class="n">domains</span><span class="p">,</span><span class="w"> </span><span class="n">dx</span><span class="p">,</span><span class="w"> </span><span class="n">refinement_ratios</span><span class="p">,</span><span class="w"> </span><span class="n">baseLevel</span><span class="p">,</span><span class="w"> </span><span class="n">newFinestLevel</span><span class="p">);</span><span class="w"></span>
+<span class="n">myParticleContainer</span><span class="p">.</span><span class="n">regrid</span><span class="p">(</span><span class="n">grids</span><span class="p">,</span><span class="w"> </span><span class="n">domains</span><span class="p">,</span><span class="w"> </span><span class="n">dx</span><span class="p">,</span><span class="w"> </span><span class="n">refinement_ratios</span><span class="p">,</span><span class="w"> </span><span class="n">baseLevel</span><span class="p">,</span><span class="w"> </span><span class="n">newFinestLevel</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>Here, <code class="docutils literal notranslate"><span class="pre">baseLevel</span></code> is the finest level that didn’t change and <code class="docutils literal notranslate"><span class="pre">newFinestLevel</span></code> is the finest AMR level after the regrid.</p>
-</div>
-<div class="section" id="masked-particles">
-<span id="chap-maskedparticles"></span><h2>Masked particles<a class="headerlink" href="#masked-particles" title="Permalink to this heading"></a></h2>
+</section>
+<section id="masked-particles">
+<span id="chap-maskedparticles"></span><h2>Masked particles<a class="headerlink" href="#masked-particles" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> also supports the concept of <em>masked particles</em>, where one can fetch a subset of particles that live only in specified regions in space.
 Typically, this “specified region” is the refinement boundary, but the functionality is generic and might prove useful also in other cases.</p>
 <p>When <em>masked particles</em> are used, the user can provide a boolean mask over the AMR hierarchy and obtain the subset of particles that live in regions where the mask evaluates to true.
 This functionality is for example used for some of the particle deposition methods in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> where we deposit particles that live near the refinement boundary with special deposition functions.</p>
 <p>To fill the masked particles, <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> has members functions for copying the particles into internal data containers which the user can later fetch.
 The function signatures for these are</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">AmrMask</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">BaseFab</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">AmrMask</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">BaseFab</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">;</span>
 
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"> </span><span class="n">copyMaskParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">AmrMask</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_mask</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">copyMaskParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">AmrMask</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_mask</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"> </span><span class="n">copyNonMaskParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">AmrMask</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_mask</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">copyNonMaskParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">AmrMask</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_mask</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>The argument <code class="docutils literal notranslate"><span class="pre">a_mask</span></code> holds a bool at each cell in the AMR hierarchy.
 Particles that live in cells where <code class="docutils literal notranslate"><span class="pre">a_mask</span></code> is true will be copied to an internal data holder in <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> which can be retrieved through a call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">AMRParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">maskParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">.</span><span class="n">getMaskParticles</span><span class="p">();</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">AMRParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">maskParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">.</span><span class="n">getMaskParticles</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>Note that <code class="docutils literal notranslate"><span class="pre">copyNonMaskParticles</span></code> is just like <code class="docutils literal notranslate"><span class="pre">copyMaskParticles</span></code> except that the bools in <code class="docutils literal notranslate"><span class="pre">a_mask</span></code> have been flipped.</p>
 <p>In the above functions the mask particles are <em>copied</em>, and the original particles are left untouched.
 After the user is done with the particles, they should be deleted through the functions <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">clearMaskParticles()</span></code> and <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">clearNonMaskParticles</span></code>, like so:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">AmrMask</span><span class="w"> </span><span class="n">myMask</span><span class="p">;</span><span class="w"></span>
-<span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticles</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">AmrMask</span><span class="w"> </span><span class="n">myMask</span><span class="p">;</span>
+<span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticles</span><span class="p">;</span>
 
 <span class="c1">// Copy mask particles</span>
-<span class="n">myParticles</span><span class="p">.</span><span class="n">copyMaskParticles</span><span class="p">(</span><span class="n">myMask</span><span class="p">);</span><span class="w"></span>
+<span class="n">myParticles</span><span class="p">.</span><span class="n">copyMaskParticles</span><span class="p">(</span><span class="n">myMask</span><span class="p">);</span>
 
 <span class="c1">// Do something with the mask particles</span>
-<span class="n">AMRParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">maskParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">.</span><span class="n">getMaskParticles</span><span class="p">();</span><span class="w"></span>
+<span class="n">AMRParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">maskParticles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myParticleContainer</span><span class="p">.</span><span class="n">getMaskParticles</span><span class="p">();</span>
 
 <span class="c1">// Release the mask particles</span>
-<span class="n">myParticles</span><span class="p">.</span><span class="n">clearMaskParticles</span><span class="p">();</span><span class="w"></span>
+<span class="n">myParticles</span><span class="p">.</span><span class="n">clearMaskParticles</span><span class="p">();</span>
 </pre></div>
 </div>
-<div class="section" id="creating-particle-halo-masks">
-<h3>Creating particle halo masks<a class="headerlink" href="#creating-particle-halo-masks" title="Permalink to this heading"></a></h3>
+<section id="creating-particle-halo-masks">
+<h3>Creating particle halo masks<a class="headerlink" href="#creating-particle-halo-masks" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> can register a <em>halo</em> mask with a specified width:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">registerMask</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_mask</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_buffer</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">registerMask</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_mask</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_buffer</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">a_mask</span></code> must be <code class="docutils literal notranslate"><span class="pre">&quot;s_particle_halo&quot;</span></code>.
 This will register a mask which is false everywhere except in coarse-grid cells that are within a distance <code class="docutils literal notranslate"><span class="pre">a_buffer</span></code> from the refinement boundary, see <a class="reference internal" href="#fig-halomask"><span class="std std-numref">Fig. 11</span></a>.
 This functionality is useful when processing particles on the refinement boundary using special deposition functions since the halo mask allows us to straightforwardly extract those particles.</p>
-<div class="figure align-center" id="id1">
+<figure class="align-center" id="id1">
 <span id="fig-halomask"></span><a class="reference internal image-reference" href="../_images/HaloMask.png"><img alt="../_images/HaloMask.png" src="../_images/HaloMask.png" style="width: 40%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 11 </span><span class="caption-text">Example of a particle halo mask (shaded green color) surrounding refined grid levels.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
-</div>
-</div>
-</div>
-<div class="section" id="wall-interaction">
-<span id="chap-particleeb"></span><h2>Wall interaction<a class="headerlink" href="#wall-interaction" title="Permalink to this heading"></a></h2>
+<figcaption>
+<p><span class="caption-number">Fig. 11 </span><span class="caption-text">Example of a particle halo mask (shaded green color) surrounding refined grid levels.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+<section id="wall-interaction">
+<span id="chap-particleeb"></span><h2>Wall interaction<a class="headerlink" href="#wall-interaction" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> is EB-agnostic and has no information about the embedded boundary.
 This means that particles remap just as if the EB was not there.
 Interaction with the EB is done via the implicit function or discrete information, as well as modifications in the interpolation and deposition steps.</p>
-<div class="section" id="signed-distance-function">
-<h3>Signed distance function<a class="headerlink" href="#signed-distance-function" title="Permalink to this heading"></a></h3>
+<section id="signed-distance-function">
+<h3>Signed distance function<a class="headerlink" href="#signed-distance-function" title="Permalink to this heading">¶</a></h3>
 <p>When signed distance functions are used, one can always query how far a particle is from a boundary:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">List</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">particles</span><span class="p">;</span><span class="w"></span>
-<span class="n">BaseIF</span><span class="w"> </span><span class="n">distanceFunction</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">List</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">particles</span><span class="p">;</span>
+<span class="n">BaseIF</span><span class="w"> </span><span class="n">distanceFunction</span><span class="p">;</span>
 
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ListIterator</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lit</span><span class="p">(</span><span class="n">particles</span><span class="p">);</span><span class="w"> </span><span class="n">lit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">lit</span><span class="p">){</span><span class="w"></span>
-<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">P</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="n">lit</span><span class="p">();</span><span class="w"></span>
-<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">();</span><span class="w"></span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ListIterator</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lit</span><span class="p">(</span><span class="n">particles</span><span class="p">);</span><span class="w"> </span><span class="n">lit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">lit</span><span class="p">){</span>
+<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">P</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="n">lit</span><span class="p">();</span>
+<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">();</span>
 
-<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">distanceToBoundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">distanceFunction</span><span class="p">.</span><span class="n">value</span><span class="p">(</span><span class="n">pos</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">distanceToBoundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">distanceFunction</span><span class="p">.</span><span class="n">value</span><span class="p">(</span><span class="n">pos</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>If the particle is inside the EB then the signed distance function will be positive and the particle can be removed from the simulation.
 The distance function can also be used to detect collisions between particles and the EB.
 See <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> for details on how to obtain the distance function.</p>
-</div>
-<div class="section" id="domain-edges">
-<h3>Domain edges<a class="headerlink" href="#domain-edges" title="Permalink to this heading"></a></h3>
+</section>
+<section id="domain-edges">
+<h3>Domain edges<a class="headerlink" href="#domain-edges" title="Permalink to this heading">¶</a></h3>
 <p>By default, the <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code> remapping function will discard particles that fall outside of the domain.
 The user can also check if this happen by checking if the particle position is outside the computational domain:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="o">&gt;</span><span class="w"> </span><span class="n">p</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="o">&gt;</span><span class="w"> </span><span class="n">p</span><span class="p">;</span>
 
-<span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">pos</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">();</span><span class="w"></span>
-<span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">probLo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getProbLo</span><span class="p">();</span><span class="w"></span>
-<span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">probHi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getProbHi</span><span class="p">();</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">pos</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">();</span>
+<span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">probLo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getProbLo</span><span class="p">();</span>
+<span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">probHi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getProbHi</span><span class="p">();</span>
 
-<span class="kt">bool</span><span class="w"> </span><span class="n">outside</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"></span>
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">dir</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">SpaceDim</span><span class="p">;</span><span class="w"> </span><span class="n">dir</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="k">if</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="n">dir</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">probLo</span><span class="p">[</span><span class="n">dir</span><span class="p">]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">pos</span><span class="p">[</span><span class="n">dir</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">probHi</span><span class="p">[</span><span class="n">dir</span><span class="p">])</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="n">outside</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">outside</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">dir</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">SpaceDim</span><span class="p">;</span><span class="w"> </span><span class="n">dir</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="k">if</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="n">dir</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">probLo</span><span class="p">[</span><span class="n">dir</span><span class="p">]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">pos</span><span class="p">[</span><span class="n">dir</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">probHi</span><span class="p">[</span><span class="n">dir</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">outside</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="particle-intersection">
-<h3>Particle intersection<a class="headerlink" href="#particle-intersection" title="Permalink to this heading"></a></h3>
+</section>
+<section id="particle-intersection">
+<h3>Particle intersection<a class="headerlink" href="#particle-intersection" title="Permalink to this heading">¶</a></h3>
 <p>It is occasionally useful to catch particles that hit an EB or crossed a domain side.
 Assuming that the particle type <code class="docutils literal notranslate"><span class="pre">P</span></code> also has a member function that stores the starting position of the particle, one can compute the intersection point between the particle trajectory and the EB and domain edges/faces.
 Currently, <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> supports two methods for computing this</p>
@@ -637,30 +731,30 @@ Future versions of <code class="docutils literal notranslate"><span class="pre">
 <p class="admonition-title">Tip</p>
 <p><code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> also stores the implicit function on the mesh, which could also be used to resolved particle collisions with the EB/domain.</p>
 </div>
-</div>
-</div>
-<div class="section" id="particle-mesh">
-<span id="chap-particlemesh"></span><h2>Particle-mesh<a class="headerlink" href="#particle-mesh" title="Permalink to this heading"></a></h2>
-<div class="section" id="particle-deposition">
-<h3>Particle deposition<a class="headerlink" href="#particle-deposition" title="Permalink to this heading"></a></h3>
+</section>
+</section>
+<section id="particle-mesh">
+<span id="chap-particlemesh"></span><h2>Particle-mesh<a class="headerlink" href="#particle-mesh" title="Permalink to this heading">¶</a></h2>
+<section id="particle-deposition">
+<h3>Particle deposition<a class="headerlink" href="#particle-deposition" title="Permalink to this heading">¶</a></h3>
 <p>To deposit particles on the mesh, the user can call the templated function <code class="docutils literal notranslate"><span class="pre">AmrMesh::depositParticles</span></code> which have a signatures</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleScalarField</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"> </span><span class="n">depositParticles</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">              </span><span class="n">a_meshData</span><span class="p">,</span><span class="w"></span>
-<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">          </span><span class="n">a_realm</span><span class="p">,</span><span class="w"></span>
-<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="o">&amp;</span><span class="w">   </span><span class="n">a_phase</span><span class="p">,</span><span class="w"></span>
-<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span><span class="w"></span>
-<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">DepositionType</span><span class="w">        </span><span class="n">a_depositionType</span><span class="p">,</span><span class="w"></span>
-<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">CoarseFineDeposition</span><span class="w">  </span><span class="n">a_coarseFineDeposition</span><span class="p">,</span><span class="w"></span>
-<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                  </span><span class="n">a_forceIrregNGP</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleScalarField</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="o">&gt;</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">depositParticles</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">              </span><span class="n">a_meshData</span><span class="p">,</span>
+<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">          </span><span class="n">a_realm</span><span class="p">,</span>
+<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="o">&amp;</span><span class="w">   </span><span class="n">a_phase</span><span class="p">,</span>
+<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span>
+<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">DepositionType</span><span class="w">        </span><span class="n">a_depositionType</span><span class="p">,</span>
+<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">CoarseFineDeposition</span><span class="w">  </span><span class="n">a_coarseFineDeposition</span><span class="p">,</span>
+<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                  </span><span class="n">a_forceIrregNGP</span><span class="p">);</span>
 
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleVectorField</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"> </span><span class="n">depositParticles</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">              </span><span class="n">a_meshData</span><span class="p">,</span><span class="w"></span>
-<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">          </span><span class="n">a_realm</span><span class="p">,</span><span class="w"></span>
-<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="o">&amp;</span><span class="w">   </span><span class="n">a_phase</span><span class="p">,</span><span class="w"></span>
-<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span><span class="w"></span>
-<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">DepositionType</span><span class="w">        </span><span class="n">a_depositionType</span><span class="p">,</span><span class="w"></span>
-<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">CoarseFineDeposition</span><span class="w">  </span><span class="n">a_coarseFineDeposition</span><span class="p">,</span><span class="w"></span>
-<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                  </span><span class="n">a_forceIrregNGP</span><span class="p">);</span><span class="w"></span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleVectorField</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="o">&gt;</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">depositParticles</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">              </span><span class="n">a_meshData</span><span class="p">,</span>
+<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">          </span><span class="n">a_realm</span><span class="p">,</span>
+<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="o">&amp;</span><span class="w">   </span><span class="n">a_phase</span><span class="p">,</span>
+<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span>
+<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">DepositionType</span><span class="w">        </span><span class="n">a_depositionType</span><span class="p">,</span>
+<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">CoarseFineDeposition</span><span class="w">  </span><span class="n">a_coarseFineDeposition</span><span class="p">,</span>
+<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                  </span><span class="n">a_forceIrregNGP</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>Here, the template parameter <code class="docutils literal notranslate"><span class="pre">P</span></code> is the particle type and the template parameter <code class="docutils literal notranslate"><span class="pre">particleScalarField</span></code> is a C++ pointer-to-member-function.
@@ -674,8 +768,8 @@ Finally, the flag <code class="docutils literal notranslate"><span class="pre">a
 This option is motivated by the fact that some applications might require hard mass conservation, and the user can ensure that mass is never deposited into covered grid cells.</p>
 <p>The input argument <code class="docutils literal notranslate"><span class="pre">a_depositionType</span></code> indicates the deposition method, while <code class="docutils literal notranslate"><span class="pre">a_coarseFineDeposition</span></code> deposition modifications near refinement boundaries.
 These are discussed below.</p>
-<div class="section" id="base-deposition">
-<h4>Base deposition<a class="headerlink" href="#base-deposition" title="Permalink to this heading"></a></h4>
+<section id="base-deposition">
+<h4>Base deposition<a class="headerlink" href="#base-deposition" title="Permalink to this heading">¶</a></h4>
 <p>The base deposition scheme is specified by an enum <code class="docutils literal notranslate"><span class="pre">DepositionType</span></code> with valid values:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">DepositionType::NGP</span></code> (Nearest grid-point).</p></li>
@@ -683,19 +777,21 @@ These are discussed below.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">DepositionType::TSC</span></code> (Triangle-Shaped Cloud).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">DepositionType::W4</span></code>  (Fourth order weighted).</p></li>
 </ul>
-</div>
-<div class="section" id="coarse-fine-deposition">
-<h4>Coarse-fine deposition<a class="headerlink" href="#coarse-fine-deposition" title="Permalink to this heading"></a></h4>
+</section>
+<section id="coarse-fine-deposition">
+<h4>Coarse-fine deposition<a class="headerlink" href="#coarse-fine-deposition" title="Permalink to this heading">¶</a></h4>
 <p>The input argument <code class="docutils literal notranslate"><span class="pre">a_coarseFineDeposition</span></code> determines how coarse-fine deposition is handled.
 Refinement boundaries introduce additional complications in the deposition scheme due to</p>
 <ol class="arabic simple">
 <li><p>Fine-grid particles whose deposition clouds hang over the refinement boundary and onto the coarse level.</p></li>
 <li><p>Coarse-grid particles whose deposition clouds stick underneath the fine-level.</p></li>
 </ol>
-<div class="figure align-center" id="id2">
+<figure class="align-center" id="id2">
 <span id="fig-particledeposition"></span><a class="reference internal image-reference" href="../_images/ParticleDeposition.png"><img alt="../_images/ParticleDeposition.png" src="../_images/ParticleDeposition.png" style="width: 75%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 12 </span><span class="caption-text">Sketch of deposition schemes near refinement boundaries and cut-cells.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
-</div>
+<figcaption>
+<p><span class="caption-number">Fig. 12 </span><span class="caption-text">Sketch of deposition schemes near refinement boundaries and cut-cells.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> currently supports three methods for handling coarse-fine deposition.
 In all of these methods the mass on the fine grid particles whose deposition clouds hang over the refinement boundaries is simply added to the coarse grid.
 For the coarse-grid particles the following processes then occur:</p>
@@ -716,115 +812,117 @@ For example, if using a CIC scheme and having a refinement factor of 2 between t
 <li><p><code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::HaloNGP</span></code>
 Like <code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::Halo</span></code>, this method also extracts the coarse-grid particles on the coarse side of the refinement boundary, but rather than using the original scheme these particles are deposited with an NGP scheme.</p></li>
 </ul>
-</div>
-</div>
-<div class="section" id="particle-interpolation">
-<h3>Particle interpolation<a class="headerlink" href="#particle-interpolation" title="Permalink to this heading"></a></h3>
+</section>
+</section>
+<section id="particle-interpolation">
+<h3>Particle interpolation<a class="headerlink" href="#particle-interpolation" title="Permalink to this heading">¶</a></h3>
 <p>To interpolate a field onto a particle position, the user can call the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> member functions</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleScalarField</span><span class="p">)()</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"> </span><span class="n">interpolateParticles</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w">      </span><span class="n">a_particles</span><span class="p">,</span><span class="w"></span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">         </span><span class="n">a_realm</span><span class="p">,</span><span class="w"></span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="o">&amp;</span><span class="w">  </span><span class="n">a_phase</span><span class="p">,</span><span class="w"></span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_meshScalarField</span><span class="p">,</span><span class="w"></span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">DepositionType</span><span class="w">       </span><span class="n">a_interpType</span><span class="p">,</span><span class="w"></span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                 </span><span class="n">a_forceIrregNGP</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleScalarField</span><span class="p">)()</span><span class="o">&gt;</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">interpolateParticles</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w">      </span><span class="n">a_particles</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">         </span><span class="n">a_realm</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="o">&amp;</span><span class="w">  </span><span class="n">a_phase</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_meshScalarField</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">DepositionType</span><span class="w">       </span><span class="n">a_interpType</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                 </span><span class="n">a_forceIrregNGP</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleVectorField</span><span class="p">)()</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"> </span><span class="n">interpolateParticles</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w">      </span><span class="n">a_particles</span><span class="p">,</span><span class="w"></span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">         </span><span class="n">a_realm</span><span class="p">,</span><span class="w"></span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="o">&amp;</span><span class="w">  </span><span class="n">a_phase</span><span class="p">,</span><span class="w"></span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_meshVectorField</span><span class="p">,</span><span class="w"></span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">DepositionType</span><span class="w">       </span><span class="n">a_interpType</span><span class="p">,</span><span class="w"></span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                 </span><span class="n">a_forceIrregNGP</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleVectorField</span><span class="p">)()</span><span class="o">&gt;</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">interpolateParticles</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w">      </span><span class="n">a_particles</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">         </span><span class="n">a_realm</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="o">&amp;</span><span class="w">  </span><span class="n">a_phase</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_meshVectorField</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">DepositionType</span><span class="w">       </span><span class="n">a_interpType</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                 </span><span class="n">a_forceIrregNGP</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>The function signature for particle interpolation is pretty much the same as for particle deposition, with the exception of the interpolated field.
 The template parameter <code class="docutils literal notranslate"><span class="pre">P</span></code> still indicates the particle type, but the user can interpolate onto either a scalar particle variable or a vector variable.
 For example, in order to interpolate the particle acceleration, the particle class (let’s call it <code class="docutils literal notranslate"><span class="pre">MyParticleClass</span></code>) will typically have a member function <code class="docutils literal notranslate"><span class="pre">RealVect&amp;</span> <span class="pre">acceleration()</span></code>, and in this case one can interpolate the acceleration by</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span><span class="w"> </span><span class="n">amr</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span><span class="w"> </span><span class="n">amr</span><span class="p">;</span>
 
-<span class="n">amr</span><span class="o">-&gt;</span><span class="n">interpolateParticles</span><span class="o">&lt;</span><span class="n">MyParticleClass</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">MyParticleClass</span><span class="o">::</span><span class="n">acceleration</span><span class="o">&gt;</span><span class="p">(...)</span><span class="w"></span>
+<span class="n">amr</span><span class="o">-&gt;</span><span class="n">interpolateParticles</span><span class="o">&lt;</span><span class="n">MyParticleClass</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">MyParticleClass</span><span class="o">::</span><span class="n">acceleration</span><span class="o">&gt;</span><span class="p">(...)</span>
 </pre></div>
 </div>
 <p>Note that if the user interpolates onto a scalar variable, the mesh variable must have exactly one component.
 Likewise, if interpolating a vector variable, the mesh variable must have exact <code class="docutils literal notranslate"><span class="pre">SpaceDim</span></code> components.</p>
-</div>
-<div class="section" id="example">
-<h3>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h3>
+</section>
+<section id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h3>
 <p>Assume that we have some particle class <code class="docutils literal notranslate"><span class="pre">KineticParticle</span></code> defined as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">KineticParticle</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="o">:</span><span class="w"></span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"></span>
-<span class="w">   </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">weight</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">real</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">();</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">KineticParticle</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">&gt;</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">   </span><span class="kr">inline</span>
+<span class="w">   </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">weight</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">real</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="w">   </span><span class="p">}</span>
 
-<span class="w">   </span><span class="kr">inline</span><span class="w"></span>
-<span class="w">   </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">velocity</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">vect</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">();</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span>
+<span class="w">   </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">velocity</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">vect</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="w">   </span><span class="p">}</span>
 
-<span class="w">   </span><span class="kr">inline</span><span class="w"></span>
-<span class="w">   </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">acceleration</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">vect</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">();</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span>
+<span class="w">   </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">acceleration</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">vect</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="w">   </span><span class="p">}</span>
 
-<span class="w">   </span><span class="kr">inline</span><span class="w"></span>
-<span class="w">   </span><span class="n">RealVect</span><span class="w"> </span><span class="n">momentum</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">weight</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">velocity</span><span class="p">();</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span>
+<span class="w">   </span><span class="n">RealVect</span><span class="w"> </span><span class="n">momentum</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">weight</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">velocity</span><span class="p">();</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">};</span>
 </pre></div>
 </div>
 <p>To deposit the weight, velocity, and momentum on the grid we would call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span><span class="w"> </span><span class="n">amr</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span><span class="w"> </span><span class="n">amr</span><span class="p">;</span>
 
-<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">mass</span><span class="w"> </span><span class="o">&gt;</span><span class="p">(...);</span><span class="w"></span>
-<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">velocity</span><span class="o">&gt;</span><span class="p">(...);</span><span class="w"></span>
-<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">momentum</span><span class="o">&gt;</span><span class="p">(...);</span><span class="w"></span>
+<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">mass</span><span class="w"> </span><span class="o">&gt;</span><span class="p">(...);</span>
+<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">velocity</span><span class="o">&gt;</span><span class="p">(...);</span>
+<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">momentum</span><span class="o">&gt;</span><span class="p">(...);</span>
 </pre></div>
 </div>
 <p>Likewise, to interpolate onto these fields we can call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span><span class="w"> </span><span class="n">amr</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span><span class="w"> </span><span class="n">amr</span><span class="p">;</span>
 
-<span class="n">amr</span><span class="o">-&gt;</span><span class="n">interpolateParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">mass</span><span class="w"> </span><span class="o">&gt;</span><span class="p">(...);</span><span class="w"></span>
-<span class="n">amr</span><span class="o">-&gt;</span><span class="n">interpolateParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">velocity</span><span class="o">&gt;</span><span class="p">(...);</span><span class="w"></span>
+<span class="n">amr</span><span class="o">-&gt;</span><span class="n">interpolateParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">mass</span><span class="w"> </span><span class="o">&gt;</span><span class="p">(...);</span>
+<span class="n">amr</span><span class="o">-&gt;</span><span class="n">interpolateParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">velocity</span><span class="o">&gt;</span><span class="p">(...);</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="superparticles">
-<span id="chap-superparticles"></span><h2>Superparticles<a class="headerlink" href="#superparticles" title="Permalink to this heading"></a></h2>
-<div class="section" id="custom-approach">
-<h3>Custom approach<a class="headerlink" href="#custom-approach" title="Permalink to this heading"></a></h3>
+</section>
+</section>
+<section id="superparticles">
+<span id="chap-superparticles"></span><h2>Superparticles<a class="headerlink" href="#superparticles" title="Permalink to this heading">¶</a></h2>
+<section id="custom-approach">
+<h3>Custom approach<a class="headerlink" href="#custom-approach" title="Permalink to this heading">¶</a></h3>
 <p>For a custom approach of managing superparticles, users can simply manipulate the particle lists in the grid patches or grid cells.
 In each case one starts with a list <code class="docutils literal notranslate"><span class="pre">List&lt;P&gt;</span></code> that needs to be modified.</p>
-</div>
-<div class="section" id="kd-trees">
-<h3>kD-trees<a class="headerlink" href="#kd-trees" title="Permalink to this heading"></a></h3>
-<div class="section" id="overview">
-<h4>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h4>
+</section>
+<section id="kd-trees">
+<h3>kD-trees<a class="headerlink" href="#kd-trees" title="Permalink to this heading">¶</a></h3>
+<section id="overview">
+<h4>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> has functionality for spatially partitioning particles using kD-trees, which can be used as a basis for particle merging and splitting.
 kD-trees operate by partitioning a set of input primitives into spatially coherent subsets.
 At each level in the tree recursion one chooses an axis for partitioning one subset into two new subsets, and the recursion continues until the partitioning is complete.
 <a class="reference internal" href="#fig-partitionkd"><span class="std std-numref">Fig. 13</span></a> shows an example where a set of initial particles are partitioned using such a tree.</p>
-<div class="figure align-center" id="id3">
+<figure class="align-center" id="id3">
 <span id="fig-partitionkd"></span><a class="reference internal image-reference" href="../_images/PartitionKD.png"><img alt="../_images/PartitionKD.png" src="../_images/PartitionKD.png" style="width: 90%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 13 </span><span class="caption-text">Example of a kD-tree partitioning of particles in a single cell.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
-</div>
+<figcaption>
+<p><span class="caption-number">Fig. 13 </span><span class="caption-text">Example of a kD-tree partitioning of particles in a single cell.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>The source code for the kD-tree functionality is given in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_SuperParticles.H</span></code>.</p>
 </div>
-</div>
-<div class="section" id="particle-partitioners">
-<h4>Particle partitioners<a class="headerlink" href="#particle-partitioners" title="Permalink to this heading"></a></h4>
+</section>
+<section id="particle-partitioners">
+<h4>Particle partitioners<a class="headerlink" href="#particle-partitioners" title="Permalink to this heading">¶</a></h4>
 <p>The kD-tree partitioner requires a user-supplied criterion for particle partitioning.
 Only the partitioner <code class="docutils literal notranslate"><span class="pre">PartitionEqualWeight</span></code> is currently supported, and this partitioner will divide the original subset into two new subsets such that the particle weights in the two halves differs by at most one physical particle.
 This partitioner is imlemented as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">weight</span><span class="p">)(),</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">position</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="o">&gt;</span><span class="w"></span>
-<span class="k">typename</span><span class="w"> </span><span class="nc">KDNode</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;::</span><span class="n">Partitioner</span><span class="w"> </span><span class="n">PartitionEqualWeight</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">weight</span><span class="p">)(),</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">position</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="o">&gt;</span>
+<span class="k">typename</span><span class="w"> </span><span class="nc">KDNode</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;::</span><span class="n">Partitioner</span><span class="w"> </span><span class="n">PartitionEqualWeight</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>Here, <code class="docutils literal notranslate"><span class="pre">P</span></code> is the particle type, and this class <em>must</em> have function members <code class="docutils literal notranslate"><span class="pre">Real&amp;</span> <span class="pre">P::weight()</span></code> and <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">RealVect&amp;</span> <span class="pre">P::position()</span></code> which return the particle weight and position.</p>
@@ -835,17 +933,19 @@ In this case any other members in the particle type are copied over into the new
 </div>
 <p>The particles in each leaf of the kD-tree can then be merged into new particles.
 Since the weight in the nodes of the tree differ by at most one, the resulting computational particles also have weights that differ by at most one.</p>
-<div class="figure align-center" id="id4">
+<figure class="align-center" id="id4">
 <span id="fig-superkd"></span><a class="reference internal image-reference" href="../_images/SuperKD.png"><img alt="../_images/SuperKD.png" src="../_images/SuperKD.png" style="width: 75%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 14 </span><span class="caption-text">kD-tree partitioning of particles into new particles whose weight differ by at most one.
+<figcaption>
+<p><span class="caption-number">Fig. 14 </span><span class="caption-text">kD-tree partitioning of particles into new particles whose weight differ by at most one.
 Left: Original particles with weights between 1 and 100.
-Right: Merged particles.</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
-</div>
-</div>
-</div>
-</div>
-<div class="section" id="particleops">
-<span id="chap-particleops"></span><h2>ParticleOps<a class="headerlink" href="#particleops" title="Permalink to this heading"></a></h2>
+Right: Merged particles.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+</section>
+<section id="particleops">
+<span id="chap-particleops"></span><h2>ParticleOps<a class="headerlink" href="#particleops" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleOps</span></code> is a static data class that provides methods for commonly used particle operations.
 These include</p>
 <ul class="simple">
@@ -854,38 +954,55 @@ These include</p>
 <li><p>Drawing particles from a probability distribution.</p></li>
 </ul>
 <p>The <code class="docutils literal notranslate"><span class="pre">ParticleOps</span></code> API is found at <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleOps.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleOps.html</a>.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="MeshData.html" class="btn btn-neutral float-left" title="Mesh data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="Realm.html" class="btn btn-neutral float-right" title="Realm" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="MeshData.html" class="btn btn-neutral float-left" title="Mesh data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
-  </div>
+    <p>
+        &#169; Copyright 2022, SINTEF Energy Research.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

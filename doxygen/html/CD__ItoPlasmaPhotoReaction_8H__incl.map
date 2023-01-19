@@ -1,8 +1,7 @@
 <map id="Physics/ItoPlasma/CD_ItoPlasmaPhotoReaction.H" name="Physics/ItoPlasma/CD_ItoPlasmaPhotoReaction.H">
-<area shape="rect" id="node1" title="Declaration of a class for holding photoionization reaction types in ito_plasma physics." alt="" coords="206,5,409,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,102,81,129"/>
-<area shape="rect" id="node3" title=" " alt="" coords="106,102,199,129"/>
-<area shape="rect" id="node4" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="181,184,367,211"/>
-<area shape="rect" id="node5" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="410,184,589,211"/>
-<area shape="rect" id="node6" href="$CD__ItoPlasmaPhotoReactionImplem_8H.html" title="Implementation of CD_ItoPlasmaPhotoReaction.H." alt="" coords="275,95,481,136"/>
+<area shape="rect" id="node1" title="Declaration of a class for holding photoionization reaction types in ito_plasma physics." alt="" coords="125,5,328,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,102,48,129"/>
+<area shape="rect" id="node3" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="30,184,215,211"/>
+<area shape="rect" id="node4" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="259,184,437,211"/>
+<area shape="rect" id="node5" href="$CD__ItoPlasmaPhotoReactionImplem_8H.html" title="Implementation of CD_ItoPlasmaPhotoReaction.H." alt="" coords="123,95,330,136"/>
 </map>

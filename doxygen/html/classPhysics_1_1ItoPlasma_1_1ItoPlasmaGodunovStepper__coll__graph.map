@@ -1,9 +1,10 @@
 <map id="Physics::ItoPlasma::ItoPlasmaGodunovStepper" name="Physics::ItoPlasma::ItoPlasmaGodunovStepper">
-<area shape="rect" id="node1" title=" " alt="" coords="992,273,1195,314"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html" title=" " alt="" coords="797,137,943,178"/>
-<area shape="rect" id="node3" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="400,8,505,35"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="355,248,551,275"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,311,144,338"/>
-<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="582,304,766,345"/>
-<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="575,370,773,396"/>
+<area shape="rect" id="node1" title="Implementation of ItoPlasmaStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the I..." alt="" coords="1003,170,1205,211"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html" title="Base time stepper class that advances the Ito&#45;Poisson system of equations." alt="" coords="749,129,895,170"/>
+<area shape="rect" id="node3" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="401,5,507,32"/>
+<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="362,86,546,127"/>
+<area shape="rect" id="node5" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,227,144,253"/>
+<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="356,227,552,253"/>
+<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="355,277,553,304"/>
+<area shape="rect" id="node8" href="$classTimer.html" title="Class which is used for run&#45;time monitoring of events." alt="" coords="792,195,852,221"/>
 </map>

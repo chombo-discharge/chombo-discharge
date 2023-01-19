@@ -1,7 +1,8 @@
 <map id="Source/Utilities/CD_ParallelOps.H" name="Source/Utilities/CD_ParallelOps.H">
-<area shape="rect" id="node1" title="Agglomeration of basic MPI reductions." alt="" coords="181,5,325,47"/>
+<area shape="rect" id="node1" title="Agglomeration of basic MPI reductions." alt="" coords="167,5,311,47"/>
 <area shape="rect" id="node2" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,169,191,196"/>
-<area shape="rect" id="node3" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="314,169,493,196"/>
-<area shape="rect" id="node4" href="$CD__ParallelOpsImplem_8H.html" title="Implementation of CD_ParallelOps.H." alt="" coords="160,95,345,121"/>
-<area shape="rect" id="node5" title=" " alt="" coords="215,169,290,196"/>
+<area shape="rect" id="node3" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="215,169,394,196"/>
+<area shape="rect" id="node4" href="$CD__ParallelOpsImplem_8H.html" title="Implementation of CD_ParallelOps.H." alt="" coords="277,95,463,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="418,169,477,196"/>
+<area shape="rect" id="node6" title=" " alt="" coords="501,169,575,196"/>
 </map>

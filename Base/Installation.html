@@ -1,37 +1,75 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Installation &mdash; chombo-discharge  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Visualization" href="Visualization.html" />
     <link rel="prev" title="Overview" href="Overview.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
+          
+
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -39,7 +77,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Documentation.html">Using this documentation</a></li>
@@ -102,6 +151,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
@@ -110,8 +160,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ItoPlasmaModel.html">Îto-KMC plasma model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
 <ul>
@@ -145,34 +196,75 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">Installation</li>
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Installation</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/Base/Installation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
-  <div class="section" id="installation">
-<span id="chap-installation"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h1>
-<div class="section" id="obtaining-chombo-discharge">
-<h2>Obtaining <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code><a class="headerlink" href="#obtaining-chombo-discharge" title="Permalink to this heading"></a></h2>
+            
+  <section id="installation">
+<span id="chap-installation"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h1>
+<section id="obtaining-chombo-discharge">
+<h2>Obtaining <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code><a class="headerlink" href="#obtaining-chombo-discharge" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> can be freely obtained from <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge">https://github.com/chombo-discharge/chombo-discharge</a>.
 The following packages are <em>required</em>:</p>
 <ul class="simple">
@@ -194,15 +286,15 @@ It will not compile with other versions of <code class="docutils literal notrans
 <li><p>An MPI installation, which is used for parallelization.</p></li>
 <li><p><a class="reference external" href="https://visit-dav.github.io/visit-website/">https://visit-dav.github.io/visit-website/</a> visualization, which used for visualization.</p></li>
 </ul>
-</div>
-<div class="section" id="organization">
-<h2>Organization<a class="headerlink" href="#organization" title="Permalink to this heading"></a></h2>
+</section>
+<section id="organization">
+<h2>Organization<a class="headerlink" href="#organization" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> source files are organized as follows:</p>
-<table class="colwidths-given docutils align-default" id="id1">
-<caption><span class="caption-number">Table 2 </span><span class="caption-text">Code organization.</span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-number">Table 2 </span><span class="caption-text">Code organization.</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col style="width: 17%" />
-<col style="width: 83%" />
+<col style="width: 16.7%" />
+<col style="width: 83.3%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Folder</p></th>
@@ -227,16 +319,16 @@ It will not compile with other versions of <code class="docutils literal notrans
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="cloning-chombo-discharge">
-<h2>Cloning <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code><a class="headerlink" href="#cloning-chombo-discharge" title="Permalink to this heading"></a></h2>
+</section>
+<section id="cloning-chombo-discharge">
+<h2>Cloning <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code><a class="headerlink" href="#cloning-chombo-discharge" title="Permalink to this heading">¶</a></h2>
 <p>To obtain <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, the simplest approach is to clone it and recursively fetch the submodules:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>--recursive<span class="w"> </span>git@github.com:chombo-discharge/chombo-discharge.git
 </pre></div>
 </div>
-</div>
-<div class="section" id="setting-up-the-environment">
-<h2>Setting up the environment<a class="headerlink" href="#setting-up-the-environment" title="Permalink to this heading"></a></h2>
+</section>
+<section id="setting-up-the-environment">
+<h2>Setting up the environment<a class="headerlink" href="#setting-up-the-environment" title="Permalink to this heading">¶</a></h2>
 <p>When compiling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, makefiles must be able to find both <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> and <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>.
 In our makefiles the paths to these are supplied through the environment variables</p>
 <ul class="simple">
@@ -248,10 +340,10 @@ When cloning with submodules, both <code class="docutils literal notranslate"><s
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>To clone <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> directly to <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME</span></code>, set the environment variables and clone (using <code class="docutils literal notranslate"><span class="pre">--recursive</span></code> to fetch submodules):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">DISCHARGE_HOME</span><span class="o">=</span>/home/foo/chombo-discharge
-<span class="nb">export</span> <span class="nv">CHOMBO_HOME</span><span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/Submodules/Chombo-3.3/lib
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">DISCHARGE_HOME</span><span class="o">=</span>/home/foo/chombo-discharge
+<span class="nb">export</span><span class="w"> </span><span class="nv">CHOMBO_HOME</span><span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/Submodules/Chombo-3.3/lib
 
-git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git <span class="si">${</span><span class="nv">DISCHARGE_HOME</span><span class="si">}</span>
+git<span class="w"> </span>clone<span class="w"> </span>--recursive<span class="w"> </span>git@github.com:chombo-discharge/chombo-discharge.git<span class="w"> </span><span class="si">${</span><span class="nv">DISCHARGE_HOME</span><span class="si">}</span>
 </pre></div>
 </div>
 </div>
@@ -259,9 +351,9 @@ git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git <span
 This file must reside in <code class="docutils literal notranslate"><span class="pre">$CHOMBO_HOME/mk</span></code>.
 Some standard configuration files are supplied with <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, and reside in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Lib/Local</span></code>.
 These files may or may not work right off the bat.</p>
-</div>
-<div class="section" id="test-build">
-<h2>Test build<a class="headerlink" href="#test-build" title="Permalink to this heading"></a></h2>
+</section>
+<section id="test-build">
+<h2>Test build<a class="headerlink" href="#test-build" title="Permalink to this heading">¶</a></h2>
 <p>For a quick compilation test the user can use the GNU configuration file supplied with <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> by following the steps below.</p>
 <ol class="arabic">
 <li><p>Copy the GNU configuration file</p>
@@ -290,9 +382,9 @@ make -s -j4
 </ol>
 <p>This will compile the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> source code in serial and without HDF5 (using four cores for the compilation).
 If successful, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> libraries will appear in <code class="docutils literal notranslate"><span class="pre">$DISCARGE_HOME/Lib</span></code>.</p>
-</div>
-<div class="section" id="advanced-configuration">
-<span id="chap-advancedconfig"></span><h2>Advanced configuration<a class="headerlink" href="#advanced-configuration" title="Permalink to this heading"></a></h2>
+</section>
+<section id="advanced-configuration">
+<span id="chap-advancedconfig"></span><h2>Advanced configuration<a class="headerlink" href="#advanced-configuration" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is compiled using GNU Make, following the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>.
 Compilers, libraries, and configuration options are defined in a file <code class="docutils literal notranslate"><span class="pre">Make.defs.local</span></code> which resides in <code class="docutils literal notranslate"><span class="pre">$CHOMBO_HOME/mk</span></code>.
 Users need to supply this file in order to compile <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
@@ -302,8 +394,8 @@ Typically, these steps include</p>
 <li><p>Specifying configurations. E.g., serial or parallel builds, and compiler flags.</p></li>
 <li><p>Specifying library paths (in particular for HDF5).</p></li>
 </ul>
-<div class="section" id="main-settings">
-<h3>Main settings<a class="headerlink" href="#main-settings" title="Permalink to this heading"></a></h3>
+<section id="main-settings">
+<h3>Main settings<a class="headerlink" href="#main-settings" title="Permalink to this heading">¶</a></h3>
 <p>The main variables that the user needs to set are</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">DIM</span> <span class="pre">=</span> <span class="pre">2/3</span></code> The dimensionality (must be 2 or 3).</p></li>
@@ -330,9 +422,9 @@ This is a requirement.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">USE_HDF5</span> <span class="pre">=</span> <span class="pre">TRUE/FALSE</span></code>
 This enables and disables HDF5 code.</p></li>
 </ul>
-</div>
-<div class="section" id="hdf5">
-<h3>HDF5<a class="headerlink" href="#hdf5" title="Permalink to this heading"></a></h3>
+</section>
+<section id="hdf5">
+<h3>HDF5<a class="headerlink" href="#hdf5" title="Permalink to this heading">¶</a></h3>
 <p>If using HDF5, one must also set the following flags:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">HDFINCFLAGS</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">=</span> <span class="pre">-I&lt;path</span> <span class="pre">to</span> <span class="pre">hdf5-serial&gt;/include</span></code> (for serial HDF5).</p></li>
@@ -340,9 +432,9 @@ This enables and disables HDF5 code.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">HDFMPIINCFLAGS</span>&#160;&#160; <span class="pre">=</span> <span class="pre">-I&lt;path</span> <span class="pre">to</span> <span class="pre">hdf5-parallel&gt;/include</span></code> (for parallel HDF5)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">HDFMPILIBFLAGS</span>&#160;&#160; <span class="pre">=</span> <span class="pre">-L&lt;path</span> <span class="pre">to</span> <span class="pre">hdf5-parallel&gt;/lib</span> <span class="pre">-lhdf5</span> <span class="pre">-lz</span></code> (for parallel HDF5).</p></li>
 </ul>
-</div>
-<div class="section" id="compiler-flags">
-<h3>Compiler flags<a class="headerlink" href="#compiler-flags" title="Permalink to this heading"></a></h3>
+</section>
+<section id="compiler-flags">
+<h3>Compiler flags<a class="headerlink" href="#compiler-flags" title="Permalink to this heading">¶</a></h3>
 <p>Compiler flags are set through</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">cxxoptflags</span>&#160; <span class="pre">=</span> <span class="pre">&lt;C++</span> <span class="pre">compiler</span> <span class="pre">flags</span></code></p></li>
@@ -355,23 +447,23 @@ Linking to these can often be done using</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">syslibflag</span> <span class="pre">=</span> <span class="pre">-llapack</span> <span class="pre">-lblas</span></code> (for GNU compilers)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">syslibflag</span> <span class="pre">=</span> <span class="pre">-mkl=sequential</span></code> (for Intel compilers)</p></li>
 </ul>
-</div>
-<div class="section" id="pre-defined-configuration-files">
-<h3>Pre-defined configuration files<a class="headerlink" href="#pre-defined-configuration-files" title="Permalink to this heading"></a></h3>
+</section>
+<section id="pre-defined-configuration-files">
+<h3>Pre-defined configuration files<a class="headerlink" href="#pre-defined-configuration-files" title="Permalink to this heading">¶</a></h3>
 <p>Some commonly used configuration files are found in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Lib/Local</span></code>.
 <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> can be compiled in serial or with MPI, and with or without HDF5.
 The user need to configure the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> makefile to ensure that the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is properly configured.
 Below, we include brief instructions for compilation on a Linux workstation and for a cluster.</p>
-</div>
-<div class="section" id="gnu-configuration-for-workstations">
-<h3>GNU configuration for workstations<a class="headerlink" href="#gnu-configuration-for-workstations" title="Permalink to this heading"></a></h3>
+</section>
+<section id="gnu-configuration-for-workstations">
+<h3>GNU configuration for workstations<a class="headerlink" href="#gnu-configuration-for-workstations" title="Permalink to this heading">¶</a></h3>
 <p>Here, we provide a more complete installation example using GNU compilers for a workstation.
 These steps are intended for users that do not have MPI or HDF5 installed.
 If you already have installed MPI and/or HDF5, the steps below might require modifications.</p>
 <ol class="arabic">
 <li><p>Ensure that <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME</span></code> and <code class="docutils literal notranslate"><span class="pre">$CHOMBO_HOME</span></code> point to the correct locations:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="nv">$DISCHARGE_HOME</span>
-<span class="nb">echo</span> <span class="nv">$CHOMBO_HOME</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="nv">$DISCHARGE_HOME</span>
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$CHOMBO_HOME</span>
 </pre></div>
 </div>
 </li>
@@ -441,16 +533,16 @@ make -s -j4 discharge-lib
 <p>This will compile the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> source code using the configuration settings set by the user.
 To compile <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> in 3D, do <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">-s</span> <span class="pre">-j4</span> <span class="pre">DIM=3</span> <span class="pre">discharge-lib</span></code>.
 If successful, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> libraries will appear in <code class="docutils literal notranslate"><span class="pre">$DISCARGE_HOME/Lib</span></code>.</p>
-</div>
-<div class="section" id="configuration-on-clusters">
-<h3>Configuration on clusters<a class="headerlink" href="#configuration-on-clusters" title="Permalink to this heading"></a></h3>
+</section>
+<section id="configuration-on-clusters">
+<h3>Configuration on clusters<a class="headerlink" href="#configuration-on-clusters" title="Permalink to this heading">¶</a></h3>
 <p>To configure <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> for executation on a cluster, use one of the makefiles supplied in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Lib/Local</span></code> if it exists for your computer.
 Alternatively, copy <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Lib/Local/Make.defs.local.template</span></code> to <code class="docutils literal notranslate"><span class="pre">$CHOMBO_HOME/mk/Make.defs.local</span></code> and set the compilers, optimization flags, and paths to HDF5 library.</p>
 <p>On clusters, MPI and HDF5 are usually already installed, but must usually be loaded (e.g. as modules) before compilation.</p>
-</div>
-</div>
-<div class="section" id="running-an-example-application">
-<h2>Running an example application<a class="headerlink" href="#running-an-example-application" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+<section id="running-an-example-application">
+<h2>Running an example application<a class="headerlink" href="#running-an-example-application" title="Permalink to this heading">¶</a></h2>
 <p>In <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, applications are set up so that they use the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> source code and one <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> physics module.
 To run one of the applications that use a particular <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> physics module, we will run a simulation of a positive streamer (in air).</p>
 <p>The application code is located in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/CdrPlasma/DeterministicAir</span></code> and it uses the convection-diffusion-reaction plasma module (located in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma</span></code>).</p>
@@ -471,85 +563,102 @@ If one compiles for 3D, i.e. <code class="docutils literal notranslate"><span cl
 </pre></div>
 </div>
 <p>If the user also compiled with HDF5, plot files will appear in the subfolder <code class="docutils literal notranslate"><span class="pre">plt</span></code>.</p>
-</div>
-<div class="section" id="troubleshooting">
-<span id="chap-troubleshooting"></span><h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this heading"></a></h2>
+</section>
+<section id="troubleshooting">
+<span id="chap-troubleshooting"></span><h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this heading">¶</a></h2>
 <p>If the prerequisites are in place, compilation of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is usually straightforward.
 However, due to dependencies on <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and HDF5, compilation can sometimes be an issue.
 Our experience is that if <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> compiles, so does <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</p>
 <p>If experiencing issues, try cleaning <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> by</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$DISCHARGE_HOME</span>
-make pristine
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$DISCHARGE_HOME</span>
+make<span class="w"> </span>pristine
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Do not hesitate to contact us at <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge">GitHub</a> regarding installation issues.</p>
 </div>
-<div class="section" id="recommended-configurations">
-<h3>Recommended configurations<a class="headerlink" href="#recommended-configurations" title="Permalink to this heading"></a></h3>
-<div class="section" id="production-runs">
-<h4>Production runs<a class="headerlink" href="#production-runs" title="Permalink to this heading"></a></h4>
+<section id="recommended-configurations">
+<h3>Recommended configurations<a class="headerlink" href="#recommended-configurations" title="Permalink to this heading">¶</a></h3>
+<section id="production-runs">
+<h4>Production runs<a class="headerlink" href="#production-runs" title="Permalink to this heading">¶</a></h4>
 <p>For production runs, we generally recommend that the user compiles with <code class="docutils literal notranslate"><span class="pre">DEBUG=FALSE</span></code> and <code class="docutils literal notranslate"><span class="pre">OPT=HIGH</span></code>.
 These settings can be set directly in <code class="file docutils literal notranslate"><span class="pre">Make.defs.local</span></code>.
 Alternatively, they can be included directly on the command line when compiling problems.</p>
-</div>
-<div class="section" id="debugging">
-<h4>Debugging<a class="headerlink" href="#debugging" title="Permalink to this heading"></a></h4>
+</section>
+<section id="debugging">
+<h4>Debugging<a class="headerlink" href="#debugging" title="Permalink to this heading">¶</a></h4>
 <p>If you believe that there might be a bug in the code, one can compile with <code class="docutils literal notranslate"><span class="pre">DEBUG=TRUE</span></code> and <code class="docutils literal notranslate"><span class="pre">OPT=TRUE</span></code>.
 This will turn on some assertions throughout <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</p>
-</div>
-</div>
-<div class="section" id="common-problems">
-<h3>Common problems<a class="headerlink" href="#common-problems" title="Permalink to this heading"></a></h3>
+</section>
+</section>
+<section id="common-problems">
+<h3>Common problems<a class="headerlink" href="#common-problems" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p>Missing library paths:</p>
 <blockquote>
 <div><p>On some installations the linker can not find the HDF5 library.
 To troubleshoot, make sure that the the environment variable <code class="docutils literal notranslate"><span class="pre">LD_LIBRARY_PATH</span></code> can find the HDF5 libraries:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="nv">$LD_LIBRARY_PATH</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="nv">$LD_LIBRARY_PATH</span>
 </pre></div>
 </div>
 <p>If the path is not included, it can be defined by:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="nv">$LD_LIBRARY_PATH</span>:/&lt;path_to_hdf5_installation&gt;/lib
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="nv">$LD_LIBRARY_PATH</span>:/&lt;path_to_hdf5_installation&gt;/lib
 </pre></div>
 </div>
 </div></blockquote>
 </li>
 </ul>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="Visualization.html" class="btn btn-neutral float-right" title="Visualization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
-  </div>
+    <p>
+        &#169; Copyright 2022, SINTEF Energy Research.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

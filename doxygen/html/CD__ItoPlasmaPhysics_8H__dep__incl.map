@@ -1,21 +1,16 @@
 <map id="Physics/ItoPlasma/CD_ItoPlasmaPhysics.H" name="Physics/ItoPlasma/CD_ItoPlasmaPhysics.H">
-<area shape="rect" id="node1" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="364,5,527,47"/>
-<area shape="rect" id="node2" href="$CD__ItoPlasmaPhysics_8cpp.html" title="Implementation of CD_ItoPlasmaPhysics.H." alt="" coords="5,95,176,136"/>
-<area shape="rect" id="node3" href="$CD__ItoPlasmaPhysicsImplem_8H.html" title="Implementation of CD_ItoPlasmaPhysics.H." alt="" coords="201,95,407,136"/>
-<area shape="rect" id="node4" href="$CD__ItoPlasmaPhysicsLFA_8H.html" title="Interface file for LFA&#45;based ito plasma physics." alt="" coords="215,191,393,233"/>
-<area shape="rect" id="node7" href="$CD__ItoPlasmaPhysicsLEA_8H.html" title="Interface file for LEA&#45;based ito plasma physics." alt="" coords="483,95,664,136"/>
-<area shape="rect" id="node10" href="$CD__ItoPlasmaStepper_8H.html" title="Abstract class for integrating the Ito plasma equations." alt="" coords="776,95,939,136"/>
-<area shape="rect" id="node12" href="$CD__ItoPlasmaTagger_8H.html" title="Parent tagger class for ItoPlasma." alt="" coords="1088,191,1251,233"/>
-<area shape="rect" id="node5" href="$CD__ItoPlasmaAir3LFA_8H.html" title="Ito plasma three&#45;species model for air." alt="" coords="204,288,396,344"/>
-<area shape="rect" id="node6" href="$CD__ItoPlasmaAir3LFA_8cpp.html" title="Implementation of CD_ItoPlasmaAir3LFA.H." alt="" coords="204,392,396,448"/>
-<area shape="rect" id="node8" href="$CD__ItoPlasmaAir3LEA_8H.html" title="Declaration of a three&#45;species air model with energy transport." alt="" coords="419,184,611,240"/>
-<area shape="rect" id="node9" href="$CD__ItoPlasmaAir3LEA_8cpp.html" title="Implementation of CD_ItoPlasmaAir3LEA.H." alt="" coords="420,288,615,344"/>
-<area shape="rect" id="node11" href="$CD__ItoPlasmaStepper_8cpp.html" title="Implementation of CD_ItoPlasmaStepper.H." alt="" coords="635,191,805,233"/>
-<area shape="rect" id="node18" href="$CD__ItoPlasmaGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="829,184,1064,240"/>
-<area shape="rect" id="node13" href="$CD__ItoPlasmaFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="1275,295,1456,337"/>
-<area shape="rect" id="node17" href="$CD__ItoPlasmaTagger_8cpp.html" title="Implementation of CD_ItoPlasmaTagger.H." alt="" coords="1088,295,1251,337"/>
-<area shape="rect" id="node14" href="$CD__ItoPlasmaFieldTagger_8cpp.html" title="Implementation of CD_ItoPlasmaFieldTagger.H." alt="" coords="1387,399,1581,441"/>
-<area shape="rect" id="node15" href="$CD__ItoPlasmaStreamerTagger_8H.html" title="Implementation ItoPlasmaTagger which tags on alpha and curvature of field." alt="" coords="1129,392,1362,448"/>
-<area shape="rect" id="node16" href="$CD__ItoPlasmaStreamerTagger_8cpp.html" title="Implementation CD_ItoPlasmaStreamerTagger.H." alt="" coords="1122,496,1369,552"/>
-<area shape="rect" id="node19" href="$CD__ItoPlasmaGodunovStepper_8cpp.html" title="Implementation of CD_ItoPlasmaGodunovStepper.H." alt="" coords="829,288,1064,344"/>
+<area shape="rect" id="node1" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="340,5,503,47"/>
+<area shape="rect" id="node2" href="$CD__ItoPlasmaPhysicsImplem_8H.html" title="Implementation of CD_ItoPlasmaPhysics.H." alt="" coords="109,102,315,143"/>
+<area shape="rect" id="node3" href="$CD__ItoPlasmaStepper_8H.html" title="Abstract class for integrating the Ito plasma equations." alt="" coords="340,102,503,143"/>
+<area shape="rect" id="node5" href="$CD__ItoPlasmaTagger_8H.html" title="Parent tagger class for ItoPlasma." alt="" coords="459,206,621,247"/>
+<area shape="rect" id="node13" href="$CD__ItoPlasmaAir3LFA_8H.html" title="Ito plasma three&#45;species model for air." alt="" coords="612,95,804,151"/>
+<area shape="rect" id="node4" href="$CD__ItoPlasmaStepper_8cpp.html" title="Implementation of CD_ItoPlasmaStepper.H." alt="" coords="264,206,435,247"/>
+<area shape="rect" id="node11" href="$CD__ItoPlasmaGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="5,199,240,255"/>
+<area shape="rect" id="node6" href="$CD__ItoPlasmaFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="548,310,729,351"/>
+<area shape="rect" id="node10" href="$CD__ItoPlasmaTagger_8cpp.html" title="Implementation of CD_ItoPlasmaTagger.H." alt="" coords="361,310,524,351"/>
+<area shape="rect" id="node7" href="$CD__ItoPlasmaFieldTagger_8cpp.html" title="Implementation of CD_ItoPlasmaFieldTagger.H." alt="" coords="421,414,616,455"/>
+<area shape="rect" id="node8" href="$CD__ItoPlasmaStreamerTagger_8H.html" title="Implementation ItoPlasmaTagger which tags on alpha and curvature of field." alt="" coords="641,407,874,463"/>
+<area shape="rect" id="node9" href="$CD__ItoPlasmaStreamerTagger_8cpp.html" title="Implementation CD_ItoPlasmaStreamerTagger.H." alt="" coords="634,511,881,567"/>
+<area shape="rect" id="node12" href="$CD__ItoPlasmaGodunovStepper_8cpp.html" title="Implementation of CD_ItoPlasmaGodunovStepper.H." alt="" coords="5,303,240,359"/>
+<area shape="rect" id="node14" href="$CD__ItoPlasmaAir3LFA_8cpp.html" title="Implementation of CD_ItoPlasmaAir3LFA.H." alt="" coords="645,199,837,255"/>
 </map>

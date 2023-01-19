@@ -1,38 +1,76 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Spatial discretization &mdash; chombo-discharge  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Chombo-3 basics" href="ChomboBasics.html" />
     <link rel="prev" title="GeoCoarsener" href="GeoCoarsener.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
+          
+
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -40,7 +78,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
@@ -97,6 +146,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
@@ -105,8 +155,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ItoPlasmaModel.html">Îto-KMC plasma model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
 <ul>
@@ -140,35 +191,76 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">Spatial discretization</li>
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Spatial discretization</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/Source/SpatialDiscretization.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
-  <div class="section" id="spatial-discretization">
-<span id="chap-spatialdiscretization"></span><h1>Spatial discretization<a class="headerlink" href="#spatial-discretization" title="Permalink to this heading"></a></h1>
-<div class="section" id="cartesian-amr">
-<h2>Cartesian AMR<a class="headerlink" href="#cartesian-amr" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses patch-based structured adaptive mesh refinement (AMR) provided by <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id82" title="P Colella, D T Graves, T J Ligocki, G Miller, D Modiano, P O Schwartz, B Van Straalen, J Pilliod, D Trebotich, M Barad, B Keen, A Nonaka, and C Shen. EBChombo software package for cartesian grid, embedded boundary applications. Technical Report, Lawrence Berkeley National Laboratory, 2004.">4</a>]</span>.
+            
+  <section id="spatial-discretization">
+<span id="chap-spatialdiscretization"></span><h1>Spatial discretization<a class="headerlink" href="#spatial-discretization" title="Permalink to this heading">¶</a></h1>
+<section id="cartesian-amr">
+<h2>Cartesian AMR<a class="headerlink" href="#cartesian-amr" title="Permalink to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses patch-based structured adaptive mesh refinement (AMR) provided by <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id82" title="P Colella, D T Graves, T J Ligocki, G Miller, D Modiano, P O Schwartz, B Van Straalen, J Pilliod, D Trebotich, M Barad, B Keen, A Nonaka, and C Shen. EBChombo software package for cartesian grid, embedded boundary applications. Technical Report, Lawrence Berkeley National Laboratory, 2004.">5</a>]</span>.
 In patch-based AMR the domain is subdivided into a collection of hierarchically nested grid levels, see <a class="reference internal" href="#fig-patchbasedamr"><span class="std std-numref">Fig. 2</span></a>.
 With Cartesian AMR each patch is a Cartesian block of grid cells.
 A <em>grid level</em> is composed of a union of grid patches sharing the same grid resolution, with the additional requirement that the patches on a grid level are <em>non-overlapping</em>.
@@ -176,20 +268,22 @@ With AMR, such levels can be hierarchically nested; finer grid levels exist on t
 In patch-based AMR there are only a few fundamental requirements on how such grids are constructed.
 For example, a refined grid level must exist completely within the bounds of it’s parent level.
 In other words, grid levels <span class="math notranslate nohighlight">\(l-1\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span> are spatially separated by a non-zero number of grid cells on level <span class="math notranslate nohighlight">\(l\)</span>.</p>
-<div class="figure align-center" id="id6">
+<figure class="align-center" id="id6">
 <span id="fig-patchbasedamr"></span><a class="reference internal image-reference" href="../_images/PatchBasedAMR.png"><img alt="../_images/PatchBasedAMR.png" src="../_images/PatchBasedAMR.png" style="width: 60%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 2 </span><span class="caption-text">Cartesian patch-based refinement showing two grid levels.
-The fine-grid level lives on top of the coarse level, and consists of two patches (red and blue colors) with two layers of ghost cells (dashed lines and orange shaded region).</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
-</div>
+<figcaption>
+<p><span class="caption-number">Fig. 2 </span><span class="caption-text">Cartesian patch-based refinement showing two grid levels.
+The fine-grid level lives on top of the coarse level, and consists of two patches (red and blue colors) with two layers of ghost cells (dashed lines and orange shaded region).</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
 <p>The resolution on level <span class="math notranslate nohighlight">\(l+1\)</span> is typically finer than the resolution on level <span class="math notranslate nohighlight">\(l\)</span> by an integer (usually power of two).
 However,</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> only supports refinement factors of 2 and 4.</p>
 </div>
-</div>
-<div class="section" id="embedded-boundaries">
-<h2>Embedded boundaries<a class="headerlink" href="#embedded-boundaries" title="Permalink to this heading"></a></h2>
+</section>
+<section id="embedded-boundaries">
+<h2>Embedded boundaries<a class="headerlink" href="#embedded-boundaries" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharges</span></code> uses an embedded boundary (EB) formulation for describing complex geometries.
 With EBs, the Cartesian grid is directly intersected by the geometry.
 This is fundamentally different from unstructured grid where one generates a volume mesh that conforms to the surface mesh of the input geometry.
@@ -197,10 +291,12 @@ Since EBs are directly intersected by the geometry, there is no fundamental need
 Moreover, Cartesian EBs have a data layout which remains (almost) fully structured.
 The connectivity of neighboring grid cells is still trivially found by fundamental strides along the data rows/columns, which allows extending the efficiency of patch-based AMR to complex geometries.
 Figure <a class="reference internal" href="#fig-complexpatches"><span class="std std-numref">Fig. 3</span></a> shows an example of patch-based grid refinement for a complex surface.</p>
-<div class="figure align-center" id="id7">
+<figure class="align-center" id="id7">
 <span id="fig-complexpatches"></span><a class="reference internal image-reference" href="../_images/ComplexPatches.png"><img alt="../_images/ComplexPatches.png" src="../_images/ComplexPatches.png" style="width: 50%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 3 </span><span class="caption-text">Patch-based refinement (factor 4 between levels) of a complex surface. Each color shows a patch, which is a rectangular computational unit.</span><a class="headerlink" href="#id7" title="Permalink to this image"></a></p>
-</div>
+<figcaption>
+<p><span class="caption-number">Fig. 3 </span><span class="caption-text">Patch-based refinement (factor 4 between levels) of a complex surface. Each color shows a patch, which is a rectangular computational unit.</span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
 <p>Since EBs are directly intersected by the geometry, pathological cases can arise where a Cartesian grid cell consists of multiple volumes.
 One can easily envision this case by intersecting a thin body with a Cartesian grid, as shown in <a class="reference internal" href="#fig-multicells"><span class="std std-numref">Fig. 4</span></a>.
 This figure shows a thin body which is intersected by a Cartesian grid, and this grid is then coarsened.
@@ -212,15 +308,17 @@ Because of multi-cells, EB data structures are not purely Cartesian.
 Data structures need to live on more complex graphs that describe support multi-cells and, furthermore, describe the cell connectivity.
 Without multi-cells it would be impossible to describe most complex geometries.
 It would also be extremely difficult to obtain performant geometric multigrid methods (which rely on this type of coarsening).</p>
-<div class="figure align-center" id="id8">
+<figure class="align-center" id="id8">
 <span id="fig-multicells"></span><a class="reference internal image-reference" href="../_images/MultiCells.png"><img alt="../_images/MultiCells.png" src="../_images/MultiCells.png" style="width: 50%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 4 </span><span class="caption-text">Example of how multi-valued cells occur during grid coarsening.
+<figcaption>
+<p><span class="caption-number">Fig. 4 </span><span class="caption-text">Example of how multi-valued cells occur during grid coarsening.
 Left: Original grid.
-Right: Coarsened grid.</span><a class="headerlink" href="#id8" title="Permalink to this image"></a></p>
-</div>
-</div>
-<div class="section" id="geometry-representation">
-<span id="chap-geometryrepresentation"></span><h2>Geometry representation<a class="headerlink" href="#geometry-representation" title="Permalink to this heading"></a></h2>
+Right: Coarsened grid.</span><a class="headerlink" href="#id8" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="geometry-representation">
+<span id="chap-geometryrepresentation"></span><h2>Geometry representation<a class="headerlink" href="#geometry-representation" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses (approximations to) signed distance functions (SDFs) for describing geometries.
 Signed distance fields are functions <span class="math notranslate nohighlight">\(f: \mathbb{R}^3\rightarrow \mathbb{R}\)</span> that describe the distance from the object.
 These functions are also <em>implicit functions</em>, i.e. <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right)=0\)</span> describes the surface of the object, <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right) &gt; 0\)</span> decribes a point inside the object and <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right) &lt; 0\)</span> describes a point outside the object.</p>
@@ -239,8 +337,8 @@ d_2\left(\mathbf{x}\right) &amp;= R^2 - \mathbf{x}\cdot\mathbf{x}.
 <p>In <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, SDFs can be generated through analytic expressions, constructive solid geometry, or by supplying polygon tesselation.
 NURBS geometries are, unfortunately, not supported.
 Fundamentally, all geometric objects are described using <code class="docutils literal notranslate"><span class="pre">BaseIF</span></code> objects from <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>, see <a class="reference internal" href="ChomboBasics.html#chap-baseif"><span class="std std-ref">BaseIF</span></a>.</p>
-<div class="section" id="constructive-solid-geometry-csg">
-<h3>Constructive solid geometry (CSG)<a class="headerlink" href="#constructive-solid-geometry-csg" title="Permalink to this heading"></a></h3>
+<section id="constructive-solid-geometry-csg">
+<h3>Constructive solid geometry (CSG)<a class="headerlink" href="#constructive-solid-geometry-csg" title="Permalink to this heading">¶</a></h3>
 <p>Constructive solid geometry can be used to generate complex shapes from geometric primitives.
 For example, to describe the union between two SDFs <span class="math notranslate nohighlight">\(d_1\left(\mathbf{x}\right)\)</span> and <span class="math notranslate nohighlight">\(d_2\left(\mathbf{x}\right)\)</span>:</p>
 <div class="math notranslate nohighlight">
@@ -248,9 +346,9 @@ For example, to describe the union between two SDFs <span class="math notranslat
 <p>Note that the resulting is an implicit function but is <em>not</em> an SDF.
 However, the union typically approximates the signed distance field quite well near the surface.
 <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> natively supports many ways of performing CSG.</p>
-</div>
-<div class="section" id="ebgeometry">
-<h3>EBGeometry<a class="headerlink" href="#ebgeometry" title="Permalink to this heading"></a></h3>
+</section>
+<section id="ebgeometry">
+<span id="chap-ebgeometry"></span><h3>EBGeometry<a class="headerlink" href="#ebgeometry" title="Permalink to this heading">¶</a></h3>
 <p>While functions like <span class="math notranslate nohighlight">\(R - \left|\mathbf{x}\right|\)</span> are quick to compute, a polygon surface may consist of hundreds of thousands of primitives (e.g., triangles).
 Generating signed distance function from polygon tesselations is quite involved as it requires computing the signed distance to the closest feature, which can be a planar polygon (e.g., a triangle), edge, or a vertex.
 <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports such functions through the <a class="reference external" href="https://github.com/rmrsk/EBGeometry">EBGeometry</a> package.</p>
@@ -264,22 +362,24 @@ The bounding volume hierarchy is top-down constructed, using a root bounding vol
 Using heuristics, the root bounding volume is then subdivided into two separate bounding volumes that contain roughly half of the primitives each.
 The process is then recursed downwards until specified recursion criteria are met.
 Additional details are provided in the <a class="reference external" href="https://rmrsk.github.io/EBGeometry/">EBGeometry documentation</a>.</p>
-<div class="figure align-center" id="id9">
+<figure class="align-center" id="id9">
 <a class="reference internal image-reference" href="../_images/Armadillo.png"><img alt="../_images/Armadillo.png" src="../_images/Armadillo.png" style="width: 50%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 5 </span><span class="caption-text">Example of an SDF reconstruction and cut-cell grid from a surface tesselation in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</span><a class="headerlink" href="#id9" title="Permalink to this image"></a></p>
-</div>
-</div>
-</div>
-<div class="section" id="geometry-generation">
-<span id="chap-geometrygeneration"></span><h2>Geometry generation<a class="headerlink" href="#geometry-generation" title="Permalink to this heading"></a></h2>
-<div class="section" id="chombo-approach">
-<h3><code class="docutils literal notranslate"><span class="pre">Chombo</span></code> approach<a class="headerlink" href="#chombo-approach" title="Permalink to this heading"></a></h3>
+<figcaption>
+<p><span class="caption-number">Fig. 5 </span><span class="caption-text">Example of an SDF reconstruction and cut-cell grid from a surface tesselation in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</span><a class="headerlink" href="#id9" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+<section id="geometry-generation">
+<span id="chap-geometrygeneration"></span><h2>Geometry generation<a class="headerlink" href="#geometry-generation" title="Permalink to this heading">¶</a></h2>
+<section id="chombo-approach">
+<h3><code class="docutils literal notranslate"><span class="pre">Chombo</span></code> approach<a class="headerlink" href="#chombo-approach" title="Permalink to this heading">¶</a></h3>
 <p>The default geometry generation method in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> is to locate cut-cells on the finest AMR level first and then generate the coarser levels cells through grid coarsening.
 This will look through all cells on the finest level, so for a domain which is effectively <span class="math notranslate nohighlight">\(N\times N\times N\)</span> cells there are <span class="math notranslate nohighlight">\(\mathcal{O}\left(N^3\right)\)</span> implicit function queries (in 2D, the complexity is <span class="math notranslate nohighlight">\(\mathcal{O}\left(N^2\right)\)</span>).
 Note that as <span class="math notranslate nohighlight">\(N\)</span> becomes large, say <span class="math notranslate nohighlight">\(N=10^5\)</span>, geometric queries of this type become a bottleneck.</p>
-</div>
-<div class="section" id="chombo-discharge-pruning">
-<h3><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> pruning<a class="headerlink" href="#chombo-discharge-pruning" title="Permalink to this heading"></a></h3>
+</section>
+<section id="chombo-discharge-pruning">
+<h3><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> pruning<a class="headerlink" href="#chombo-discharge-pruning" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> has made modifications to the geometry generation routines in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>, resolving a few bugs and, most importantly, using the signed distance function for load balancing the geometry generation step.
 This modification to <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> yields a reduction of the original <span class="math notranslate nohighlight">\(\mathcal{O}\left(N^3\right)\)</span> scaling in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> grid generation to an <span class="math notranslate nohighlight">\(\mathcal{O}\left(N^2\right)\)</span> scaling in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
 Typically, we find that this makes geometry generation computationally trivial (in the sense that it is very fast compared to the simulation).</p>
@@ -299,55 +399,65 @@ The subregions that did contain cut-cells are refined and decomposed into sub-su
 This procedure recurses until <span class="math notranslate nohighlight">\(l=l_{\text{max}}\)</span>, at which point we have determined all sub-regions in space where cut-cells can exist (on each AMR level), and pruned the ones that don’t.
 This process is shown in <a class="reference internal" href="#fig-pruning"><span class="std std-numref">Fig. 6</span></a>.
 Once all the grid patches that contain cut-cells have been found, these patches are distributed (i.e., load balanced) to the various MPI ranks for computing the discrete grid information.</p>
-<div class="figure align-center" id="id10">
+<figure class="align-center" id="id10">
 <span id="fig-pruning"></span><a class="reference internal image-reference" href="../_images/Pruning.png"><img alt="../_images/Pruning.png" src="../_images/Pruning.png" style="width: 75%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 6 </span><span class="caption-text">Pruning cut-cells with the signed distance field.
+<figcaption>
+<p><span class="caption-number">Fig. 6 </span><span class="caption-text">Pruning cut-cells with the signed distance field.
 Red-colored grid patches are grid patches entirely contained inside the EB.
-Green-colored grid patches are entirely outside the EB, while blue-colored grid patches contain cut-cells.</span><a class="headerlink" href="#id10" title="Permalink to this image"></a></p>
-</div>
+Green-colored grid patches are entirely outside the EB, while blue-colored grid patches contain cut-cells.</span><a class="headerlink" href="#id10" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
 <p>The above load balancing strategy is very simple, and it reduces the original <span class="math notranslate nohighlight">\(O(N^3)\)</span> complexity in 3D to <span class="math notranslate nohighlight">\(O(N^2)\)</span> complexity (in 2D the complexity is reduced from <span class="math notranslate nohighlight">\(O(N^2)\)</span> to <span class="math notranslate nohighlight">\(O(N)\)</span>).
 The strategy works for all SDFs although, strictly speaking, an SDF is not fundamentally needed.
 If a well-behaved Taylor series can be found for an implicit function, the bounds on the series can also be used to infer the location of the cut-cells, and the same algorithm can be used.
 For example, generating compound objects with CSG are typically sufficiently well behaved (provided that the components are SDFs).
 However, implicit functions like <span class="math notranslate nohighlight">\(d\left(\mathbf{x}\right) = R^2 - \mathbf{x}\cdot\mathbf{x}\)</span> must be used with caution.</p>
-</div>
-</div>
-<div class="section" id="mesh-generation">
-<span id="chap-meshgeneration"></span><h2>Mesh generation<a class="headerlink" href="#mesh-generation" title="Permalink to this heading"></a></h2>
+<p>When polygonal surfaces are involved the above process might lead to load imbalance if the input grids to <a class="reference internal" href="#chap-ebgeometry"><span class="std std-ref">EBGeometry</span></a> do not produce well-balanced bounding volume hierarchies (which is often the case).
+In this case it might be beneficial to shuffle the cut-cell boxes among the ranks by specifying <code class="docutils literal notranslate"><span class="pre">ScanShop.box_sorting</span> <span class="pre">=</span> <span class="pre">shuffle</span></code>, which will normally lead to well-balanced cut-cell grid generation.
+Other options are <code class="docutils literal notranslate"><span class="pre">ScanShop.box_sorting</span> <span class="pre">=</span> <span class="pre">morton</span></code> and <code class="docutils literal notranslate"><span class="pre">ScanShop.box_sorting</span> <span class="pre">=</span> <span class="pre">std</span></code>.
+The default behavior is to use a Morton space-filling curve for organizing the cut-cell patches among the ranks.</p>
+</section>
+</section>
+<section id="mesh-generation">
+<span id="chap-meshgeneration"></span><h2>Mesh generation<a class="headerlink" href="#mesh-generation" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports two algorithm for AMR grid generation:</p>
 <ol class="arabic simple">
 <li><p>The classical Berger-Rigoutsos algorithm <span id="id3">[<a class="reference internal" href="../ZZReferences.html#id38" title="Marsha Berger and Isidore Rigoutsos. An Algorithm for Point Clustering and Grid Generation. IEEE Transactions on Systems, Man and Cybernetics, 1991. doi:10.1109/21.120081.">1</a>]</span>.</p></li>
-<li><p>A <em>tiled</em> algorithm <span id="id4">[<a class="reference internal" href="../ZZReferences.html#id164" title="Brian T.N. Gunney and Robert W. Anderson. Advances in patch-based adaptive mesh refinement scalability. Journal of Parallel and Distributed Computing, 2016. doi:10.1016/j.jpdc.2015.11.005.">5</a>]</span>.</p></li>
+<li><p>A <em>tiled</em> algorithm <span id="id4">[<a class="reference internal" href="../ZZReferences.html#id164" title="Brian T.N. Gunney and Robert W. Anderson. Advances in patch-based adaptive mesh refinement scalability. Journal of Parallel and Distributed Computing, 2016. doi:10.1016/j.jpdc.2015.11.005.">7</a>]</span>.</p></li>
 </ol>
 <p>Both algorithms work by taking a set of flagged cells on each grid level and generating new boxes that cover the flags.
 Only <em>properly nested</em> grids are generated, in which case two grid levels <span class="math notranslate nohighlight">\(l-1\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span> are separated by a non-zero number of grid cells on level <span class="math notranslate nohighlight">\(l\)</span>.
 This requirement is not fundamentally required for quad- and oct-tree grids, but is nevertheless usually imposed.
 For patch based AMR, the rationale for this requirement is that stencils on level <span class="math notranslate nohighlight">\(l+1\)</span> should should only reach into grid cells on levels <span class="math notranslate nohighlight">\(l\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span>.
 For example, ghost cells on level <span class="math notranslate nohighlight">\(l+1\)</span> can then be interpolated from data only on levels <span class="math notranslate nohighlight">\(l\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span>.</p>
-<div class="section" id="berger-rigoutsos-algorithm">
-<h3>Berger-Rigoutsos algorithm<a class="headerlink" href="#berger-rigoutsos-algorithm" title="Permalink to this heading"></a></h3>
+<section id="berger-rigoutsos-algorithm">
+<h3>Berger-Rigoutsos algorithm<a class="headerlink" href="#berger-rigoutsos-algorithm" title="Permalink to this heading">¶</a></h3>
 <p>The Berger-Rigoustous grid algorithm is implemented in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and is called by <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
 The classical Berger-Rigoustous algorithm is inherently serial in the sense that is collects the flagged cells onto each MPI rank and then generates the boxes, see <span id="id5">[<a class="reference internal" href="../ZZReferences.html#id38" title="Marsha Berger and Isidore Rigoutsos. An Algorithm for Point Clustering and Grid Generation. IEEE Transactions on Systems, Man and Cybernetics, 1991. doi:10.1109/21.120081.">1</a>]</span> for implementation details.
 Typically, it is not used at large scale in 3D due to its memory consumption.</p>
-<div class="figure align-center" id="id11">
+<figure class="align-center" id="id11">
 <span id="brmeshrefine"></span><a class="reference internal image-reference" href="../_images/BRMeshRefine.png"><img alt="../_images/BRMeshRefine.png" src="../_images/BRMeshRefine.png" style="width: 25%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 7 </span><span class="caption-text">Classical cartoon of patch-based refinement. Bold lines indicate entire grid blocks.</span><a class="headerlink" href="#id11" title="Permalink to this image"></a></p>
-</div>
-</div>
-<div class="section" id="tiled-mesh-refinement">
-<h3>Tiled mesh refinement<a class="headerlink" href="#tiled-mesh-refinement" title="Permalink to this heading"></a></h3>
+<figcaption>
+<p><span class="caption-number">Fig. 7 </span><span class="caption-text">Classical cartoon of patch-based refinement. Bold lines indicate entire grid blocks.</span><a class="headerlink" href="#id11" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="tiled-mesh-refinement">
+<h3>Tiled mesh refinement<a class="headerlink" href="#tiled-mesh-refinement" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also supports a tiled algorithm where the grid boxes on each block are generated according to a predefined tiled pattern.
 If a tile contains a single tag, the entire tile is flagged for refinement.
 The tiled algorithm produces grids that are visually similar to octrees, but is slightly more general since it also supports refinement factors other than 2 and is not restricted to domain extensions that are an integer factor of 2 (e.g. <span class="math notranslate nohighlight">\(2^{10}\)</span> cells in each direction).
 Moreover, the algorithm is extremely fast and has low memory consumption even at large scales.</p>
-<div class="figure align-center" id="id12">
+<figure class="align-center" id="id12">
 <span id="tiledmeshrefine"></span><a class="reference internal image-reference" href="../_images/TiledMeshRefine.png"><img alt="../_images/TiledMeshRefine.png" src="../_images/TiledMeshRefine.png" style="width: 25%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 8 </span><span class="caption-text">Classical cartoon of tiled patch-based refinement. Bold lines indicate entire grid blocks.</span><a class="headerlink" href="#id12" title="Permalink to this image"></a></p>
-</div>
-</div>
-</div>
-<div class="section" id="cell-refinement-philosophy">
-<span id="chap-refinementphilosophy"></span><h2>Cell refinement philosophy<a class="headerlink" href="#cell-refinement-philosophy" title="Permalink to this heading"></a></h2>
+<figcaption>
+<p><span class="caption-number">Fig. 8 </span><span class="caption-text">Classical cartoon of tiled patch-based refinement. Bold lines indicate entire grid blocks.</span><a class="headerlink" href="#id12" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+<section id="cell-refinement-philosophy">
+<span id="chap-refinementphilosophy"></span><h2>Cell refinement philosophy<a class="headerlink" href="#cell-refinement-philosophy" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> can flag cells for refinement using various methods:</p>
 <ol class="arabic simple">
 <li><p>Refine all embedded boundaries down to a specified refinement level.</p></li>
@@ -363,38 +473,55 @@ Given two normal vectors <span class="math notranslate nohighlight">\(\mathbf{n}
 \[\mathbf{n}\cdot\mathbf{n}^\prime \geq \cos\theta_c,\]</div>
 <p>where <span class="math notranslate nohighlight">\(\theta_c\)</span> is a threshold angle for grid refinent.</p>
 <p>The other two cases are more complicated, and are covered by the <a class="reference internal" href="GeoCoarsener.html#chap-geocoarsener"><span class="std std-ref">GeoCoarsener</span></a> and <a class="reference internal" href="CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a> classes.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="GeoCoarsener.html" class="btn btn-neutral float-left" title="GeoCoarsener" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="ChomboBasics.html" class="btn btn-neutral float-right" title="Chombo-3 basics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="GeoCoarsener.html" class="btn btn-neutral float-left" title="GeoCoarsener" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
-  </div>
+    <p>
+        &#169; Copyright 2022, SINTEF Energy Research.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

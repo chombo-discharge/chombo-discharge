@@ -1,4 +1,4 @@
 <map id="Physics::ItoPlasma::ItoPlasmaAir3LFA::Electron" name="Physics::ItoPlasma::ItoPlasmaAir3LFA::Electron">
-<area shape="rect" id="node1" title=" " alt="" coords="5,80,156,136"/>
+<area shape="rect" id="node1" title="Electron species." alt="" coords="5,80,156,136"/>
 <area shape="rect" id="node2" href="$classItoSpecies.html" title="Class that acts as user interface for parsing initial data and mobility/diffusion kernels into ItoSol..." alt="" coords="36,5,125,32"/>
 </map>

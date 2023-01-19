@@ -1,37 +1,75 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>TimeStepper &mdash; chombo-discharge  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="AmrMesh" href="AmrMesh.html" />
     <link rel="prev" title="ComputationalGeometry" href="ComputationalGeometry.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
+          
+
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -39,7 +77,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
@@ -114,6 +163,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
@@ -122,8 +172,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ItoPlasmaModel.html">Îto-KMC plasma model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
 <ul>
@@ -157,32 +208,73 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">TimeStepper</li>
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>TimeStepper</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/Source/TimeStepper.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
-  <div class="section" id="timestepper">
-<span id="chap-timestepper"></span><h1>TimeStepper<a class="headerlink" href="#timestepper" title="Permalink to this heading"></a></h1>
+            
+  <section id="timestepper">
+<span id="chap-timestepper"></span><h1>TimeStepper<a class="headerlink" href="#timestepper" title="Permalink to this heading">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> represents the EB+AMR equation solving class in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
 It owns the various numerical solvers and is responsible for setting up solvers and advancing the equations of motion.
 Because <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> and not <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> owns the solvers as class members, it will also coordinate I/O (together with <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>).</p>
@@ -190,73 +282,73 @@ Because <code class="docutils literal notranslate"><span class="pre">TimeStepper
 <p class="admonition-title">Tip</p>
 <p><a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTimeStepper.html">TimeStepper C++ API</a></p>
 </div>
-<div class="section" id="basic-functions">
-<h2>Basic functions<a class="headerlink" href="#basic-functions" title="Permalink to this heading"></a></h2>
+<section id="basic-functions">
+<h2>Basic functions<a class="headerlink" href="#basic-functions" title="Permalink to this heading">¶</a></h2>
 <p>Since it is necessary to implement different solvers for different types of physics, <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> is an abstract class with the following pure functions:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Setup routines</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setupSolvers</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">allocate</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">initialData</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postInitialize</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postCheckpointSetup</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerRealms</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerOperators</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">parseRuntimeOptions</span><span class="p">();</span><span class="w"></span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setupSolvers</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">allocate</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">initialData</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postInitialize</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postCheckpointSetup</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerRealms</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerOperators</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">parseRuntimeOptions</span><span class="p">();</span>
 
 <span class="c1">// IO routines</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">writeCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">readCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">writePlotData</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_plotVariableNames</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">int</span><span class="w">  </span><span class="nf">getNumberOfPlotVariables</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">getCheckpointLoads</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_level</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">writeCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">readCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">writePlotData</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_plotVariableNames</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">int</span><span class="w">  </span><span class="nf">getNumberOfPlotVariables</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">getCheckpointLoads</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_level</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="c1">// Advance routines</span>
-<span class="k">virtual</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="nf">computeDt</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="nf">advance</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">synchronizeSolverTimes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_step</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">printStepReport</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="nf">computeDt</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="nf">advance</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">synchronizeSolverTimes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_step</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">printStepReport</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="c1">// Regrid routines</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postRegrid</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">needToRegrid</span><span class="p">();</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">loadBalanceThisRealm</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">loadBalanceBoxes</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_procs</span><span class="p">,</span><span class="w"></span>
-<span class="w">                              </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Box</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_boxes</span><span class="p">,</span><span class="w"></span>
-<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">                </span><span class="n">a_realm</span><span class="p">,</span><span class="w"></span>
-<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DisjointBoxLayout</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_grids</span><span class="p">,</span><span class="w"></span>
-<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"></span>
-<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_finestLevel</span><span class="p">);</span><span class="w"></span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postRegrid</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">needToRegrid</span><span class="p">();</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">loadBalanceThisRealm</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">loadBalanceBoxes</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_procs</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Box</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_boxes</span><span class="p">,</span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">                </span><span class="n">a_realm</span><span class="p">,</span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DisjointBoxLayout</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_grids</span><span class="p">,</span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_lmin</span><span class="p">,</span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_finestLevel</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>These functions are all used by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> class at various stages.</p>
-</div>
-<div class="section" id="setup-routines">
-<h2>Setup routines<a class="headerlink" href="#setup-routines" title="Permalink to this heading"></a></h2>
+</section>
+<section id="setup-routines">
+<h2>Setup routines<a class="headerlink" href="#setup-routines" title="Permalink to this heading">¶</a></h2>
 <p>Here, we consider the various setup routines in <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>.
 The routines are used by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> in the simulation setup step.</p>
-<div class="section" id="registerrealms">
-<span id="chap-registerrealms"></span><h3>registerRealms<a class="headerlink" href="#registerrealms" title="Permalink to this heading"></a></h3>
+<section id="registerrealms">
+<span id="chap-registerrealms"></span><h3>registerRealms<a class="headerlink" href="#registerrealms" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> permits solvers to run on different realms (see <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>) for individual load balancing of various components.
 To register a <code class="docutils literal notranslate"><span class="pre">Realm</span></code>, users will have <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> register realms in the <code class="docutils literal notranslate"><span class="pre">registerRealms()</span></code>, as follows:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">myTimeStepper::registerRealms</span><span class="p">(){</span><span class="w"></span>
-<span class="w">   </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="n">Realm</span><span class="o">::</span><span class="n">Primal</span><span class="p">);</span><span class="w"></span>
-<span class="w">   </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="s">&quot;particleRealm&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">   </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="s">&quot;otherParticleRealm&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">myTimeStepper::registerRealms</span><span class="p">(){</span>
+<span class="w">   </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="n">Realm</span><span class="o">::</span><span class="n">Primal</span><span class="p">);</span>
+<span class="w">   </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="s">&quot;particleRealm&quot;</span><span class="p">);</span>
+<span class="w">   </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="s">&quot;otherParticleRealm&quot;</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Since at least one realm is required, <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> will <em>always</em> register the realm <code class="docutils literal notranslate"><span class="pre">&quot;Primal&quot;</span></code>.
 Fundamentally, there is no limitation to the number of realms that can be allocated.</p>
-</div>
-<div class="section" id="registeroperators">
-<span id="chap-registeroperators"></span><h3>registerOperators<a class="headerlink" href="#registeroperators" title="Permalink to this heading"></a></h3>
+</section>
+<section id="registeroperators">
+<span id="chap-registeroperators"></span><h3>registerOperators<a class="headerlink" href="#registeroperators" title="Permalink to this heading">¶</a></h3>
 <p>Internally, an instantiation of <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> contains the grids and the geometric information (e.g. <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code>), as well as any operators that the user has seen fit to <em>register</em>.
 Various operators are available for e.g. gradient stencils, conservative coarsening, ghost cell interpolation, filling a patch with interpolation data, redistribution, and so on.
 Since operators always incur overhead and not all applications require <em>all</em> operators, they must be <em>registered</em>.
 If a solver needs an operator for, say, piecewise linear ghost cell interpolation, the solver needs to <em>register</em> that operator through the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> public interface:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerOperator</span><span class="p">(</span><span class="n">s_eb_pwl_interp</span><span class="p">,</span><span class="w"> </span><span class="n">m_realm</span><span class="p">,</span><span class="w"> </span><span class="n">m_phase</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerOperator</span><span class="p">(</span><span class="n">s_eb_pwl_interp</span><span class="p">,</span><span class="w"> </span><span class="n">m_realm</span><span class="p">,</span><span class="w"> </span><span class="n">m_phase</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>Once an operator has been registered, <code class="docutils literal notranslate"><span class="pre">Realm</span></code> will define those operators during initialization e.g. regrids.
@@ -278,153 +370,170 @@ A valid <code class="docutils literal notranslate"><span class="pre">TimeStepper
 <li><p>Particle-mesh support, <code class="docutils literal notranslate"><span class="pre">s_eb_particle_mesh</span></code>.</p></li>
 </ol>
 <p>Solvers will typically allocate a subset of these operators, but for multiphysics code that use both fluid and particles, most of these will probably be in use.</p>
-</div>
-<div class="section" id="setupsolvers">
-<h3>setupSolvers<a class="headerlink" href="#setupsolvers" title="Permalink to this heading"></a></h3>
+</section>
+<section id="setupsolvers">
+<h3>setupSolvers<a class="headerlink" href="#setupsolvers" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">setupSolvers</span></code> is used for setting up solvers.
 This step is done <em>prior</em> to setting up the grids, so it is not possible to allocate mesh data inside this routine.</p>
-</div>
-<div class="section" id="allocate">
-<h3>allocate<a class="headerlink" href="#allocate" title="Permalink to this heading"></a></h3>
+</section>
+<section id="allocate">
+<h3>allocate<a class="headerlink" href="#allocate" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">allocate</span></code> is used for allocating particle and mesh data for the solvers and <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>.
 This step is done <em>after</em> the grids have been initialized by <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> <em>and</em> during regrids.</p>
-</div>
-<div class="section" id="initialdata">
-<h3>initialData<a class="headerlink" href="#initialdata" title="Permalink to this heading"></a></h3>
+</section>
+<section id="initialdata">
+<h3>initialData<a class="headerlink" href="#initialdata" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">initialData</span></code> is called by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> setup routines after the <code class="docutils literal notranslate"><span class="pre">allocate</span></code> step.
 This routine must fill solvers with initial data.</p>
-</div>
-<div class="section" id="postinitialize">
-<h3>postInitialize<a class="headerlink" href="#postinitialize" title="Permalink to this heading"></a></h3>
+</section>
+<section id="postinitialize">
+<h3>postInitialize<a class="headerlink" href="#postinitialize" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">postInitialize</span></code> is called <em>after</em> <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> has filled the solvers with initial data.
 Most data initialization steps can, however, be done in <code class="docutils literal notranslate"><span class="pre">initialData</span></code>.</p>
-</div>
-<div class="section" id="postcheckpointsetup">
-<h3>postCheckpointSetup<a class="headerlink" href="#postcheckpointsetup" title="Permalink to this heading"></a></h3>
+</section>
+<section id="postcheckpointsetup">
+<h3>postCheckpointSetup<a class="headerlink" href="#postcheckpointsetup" title="Permalink to this heading">¶</a></h3>
 <p>During simulation restarts, <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> will open an HDF5 file and have <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> fill solvers with data from that file.
 <code class="docutils literal notranslate"><span class="pre">postCheckpointSetup</span></code> is a routine which is called immediately after the solvers have been filled with data.</p>
-</div>
-</div>
-<div class="section" id="i-o-routines">
-<h2>I/O routines<a class="headerlink" href="#i-o-routines" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+<section id="i-o-routines">
+<h2>I/O routines<a class="headerlink" href="#i-o-routines" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> I/O routines serves two purposes:</p>
 <ol class="arabic simple">
 <li><p>To add solver data to HDF5 plot files.</p></li>
 <li><p>To write and read data for checkpoint/restart files.</p></li>
 </ol>
 <p>In general, plot and checkpoint data do not contain the same data.</p>
-<div class="section" id="getnumberofplotvariables">
-<h3>getNumberOfPlotVariables<a class="headerlink" href="#getnumberofplotvariables" title="Permalink to this heading"></a></h3>
+<section id="getnumberofplotvariables">
+<h3>getNumberOfPlotVariables<a class="headerlink" href="#getnumberofplotvariables" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">getNumberOfPlotVariables</span></code> must return the number of components that will be plotted by <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>.
 Note that if <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> will plot a single scalar, it must return a value of one.
 If it plots a single vector, it must return a value of <code class="docutils literal notranslate"><span class="pre">SpaceDim</span></code>.</p>
 <p>The existence of <code class="docutils literal notranslate"><span class="pre">getNumberOfPlotVariables</span></code> is due to pre-allocation of memory that will be written to the plot file.</p>
-</div>
-<div class="section" id="writeplotdata">
-<h3>writePlotData<a class="headerlink" href="#writeplotdata" title="Permalink to this heading"></a></h3>
+</section>
+<section id="writeplotdata">
+<h3>writePlotData<a class="headerlink" href="#writeplotdata" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">writePlotData</span></code> will write the plot data to the provided data holder.
 The signature is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">writePlotData</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_plotVariableNames</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">writePlotData</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_plotVariableNames</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>Here, <code class="docutils literal notranslate"><span class="pre">a_output</span></code> is pre-allocate block of memory that <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> will write its components to, and <code class="docutils literal notranslate"><span class="pre">a_plotVariable</span></code> are the associated plot variable names.
 <code class="docutils literal notranslate"><span class="pre">a_icomp</span></code> is the starting component in <code class="docutils literal notranslate"><span class="pre">a_output</span></code> where we start writing data.</p>
-</div>
-<div class="section" id="writecheckpointdata">
-<h3>writeCheckpointData<a class="headerlink" href="#writecheckpointdata" title="Permalink to this heading"></a></h3>
+</section>
+<section id="writecheckpointdata">
+<h3>writeCheckpointData<a class="headerlink" href="#writecheckpointdata" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">writeCheckpointData</span></code> will write solver data to the provided HDF5 file handle.
 This data is used when restarting simulations from a checkpoint file.
 Note that checkpoint data is written on a level-by-level basis.</p>
-</div>
-<div class="section" id="readcheckpointdata">
-<h3>readCheckpointData<a class="headerlink" href="#readcheckpointdata" title="Permalink to this heading"></a></h3>
+</section>
+<section id="readcheckpointdata">
+<h3>readCheckpointData<a class="headerlink" href="#readcheckpointdata" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">readCheckpointData</span></code> will read data from the provided HDF5 file handle and back into the solvers.
 Note that the data is read on a level-by-level basis.</p>
-</div>
-</div>
-<div class="section" id="advance-routines">
-<h2>Advance routines<a class="headerlink" href="#advance-routines" title="Permalink to this heading"></a></h2>
-<div class="section" id="computedt">
-<h3>computeDt<a class="headerlink" href="#computedt" title="Permalink to this heading"></a></h3>
+</section>
+</section>
+<section id="advance-routines">
+<h2>Advance routines<a class="headerlink" href="#advance-routines" title="Permalink to this heading">¶</a></h2>
+<section id="computedt">
+<h3>computeDt<a class="headerlink" href="#computedt" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">computeDt</span></code> will compute a time step for <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> to use when calling the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method.</p>
-</div>
-<div class="section" id="advance">
-<h3>advance<a class="headerlink" href="#advance" title="Permalink to this heading"></a></h3>
+</section>
+<section id="advance">
+<h3>advance<a class="headerlink" href="#advance" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">advance</span></code> is called by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> when advancing the equation of motion one time step.
 Note that <code class="docutils literal notranslate"><span class="pre">advancpe</span></code> takes a trial time step as input argument and returns the actual time step that was used.
 These do not need to be the same.</p>
-</div>
-<div class="section" id="synchronizesolvertimes">
-<h3>synchronizeSolverTimes<a class="headerlink" href="#synchronizesolvertimes" title="Permalink to this heading"></a></h3>
+</section>
+<section id="synchronizesolvertimes">
+<h3>synchronizeSolverTimes<a class="headerlink" href="#synchronizesolvertimes" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">synchronizeSolverTimes</span></code> is called after the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method and is used to update the simulation time for all solvers.</p>
-</div>
-<div class="section" id="printstepreport">
-<h3>printStepReport<a class="headerlink" href="#printstepreport" title="Permalink to this heading"></a></h3>
+</section>
+<section id="printstepreport">
+<h3>printStepReport<a class="headerlink" href="#printstepreport" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">printStepReport</span></code> called after the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method – it can be left empty but is otherwise used to print some information about the time step that was taken.</p>
-</div>
-</div>
-<div class="section" id="regrid-routines">
-<h2>Regrid routines<a class="headerlink" href="#regrid-routines" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+<section id="regrid-routines">
+<h2>Regrid routines<a class="headerlink" href="#regrid-routines" title="Permalink to this heading">¶</a></h2>
 <p>For an explanation to how regridding occurs in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, see <a class="reference internal" href="Regridding.html#chap-regridding"><span class="std std-ref">Regridding</span></a>.</p>
-<div class="section" id="preregrid">
-<h3>preRegrid<a class="headerlink" href="#preregrid" title="Permalink to this heading"></a></h3>
+<section id="preregrid">
+<h3>preRegrid<a class="headerlink" href="#preregrid" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">preRegrid</span></code> should any necessary pre-regrid operation.
 Note that when solvers regrid their data, solution is allocated on new grids and the previously defined data is lost.
 For this reason most solvers have the option of putting the old grid data into temporary storage that permits us to interpolate to the new grids.</p>
-</div>
-<div class="section" id="regrid">
-<h3>regrid<a class="headerlink" href="#regrid" title="Permalink to this heading"></a></h3>
+</section>
+<section id="regrid">
+<h3>regrid<a class="headerlink" href="#regrid" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">regrid</span></code> will perform the actual regrid operation.</p>
-</div>
-<div class="section" id="postregrid">
-<h3>postRegrid<a class="headerlink" href="#postregrid" title="Permalink to this heading"></a></h3>
+</section>
+<section id="postregrid">
+<h3>postRegrid<a class="headerlink" href="#postregrid" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">postRegrid</span></code> is called after <code class="docutils literal notranslate"><span class="pre">regrid</span></code> can be used to perform any post-regrid operations.</p>
-</div>
-</div>
-<div class="section" id="load-balancing-routines">
-<h2>Load balancing routines<a class="headerlink" href="#load-balancing-routines" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+<section id="load-balancing-routines">
+<h2>Load balancing routines<a class="headerlink" href="#load-balancing-routines" title="Permalink to this heading">¶</a></h2>
 <p>During the regrid step, <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> will check if any of the realms should be load balanced.
 If a realm should be load balanced then <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> take a <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> which originally load balanced using the patch volume, and generate a new set of grids.</p>
-<div class="section" id="loadbalancethisrealm">
-<h3>loadBalanceThisRealm<a class="headerlink" href="#loadbalancethisrealm" title="Permalink to this heading"></a></h3>
+<section id="loadbalancethisrealm">
+<h3>loadBalanceThisRealm<a class="headerlink" href="#loadbalancethisrealm" title="Permalink to this heading">¶</a></h3>
 <p>Return true if a <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> should be load balanced and false otherwise.</p>
-</div>
-<div class="section" id="loadbalanceboxes">
-<h3>loadBalanceBoxes<a class="headerlink" href="#loadbalanceboxes" title="Permalink to this heading"></a></h3>
+</section>
+<section id="loadbalanceboxes">
+<h3>loadBalanceBoxes<a class="headerlink" href="#loadbalanceboxes" title="Permalink to this heading">¶</a></h3>
 <p>This is called if <code class="docutils literal notranslate"><span class="pre">loadBalanceThisRealm</span></code> evaluates to true, and in this case the <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> should compute a new set of rank ownership for the input grid boxes.</p>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="ComputationalGeometry.html" class="btn btn-neutral float-left" title="ComputationalGeometry" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="AmrMesh.html" class="btn btn-neutral float-right" title="AmrMesh" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ComputationalGeometry.html" class="btn btn-neutral float-left" title="ComputationalGeometry" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
-  </div>
+    <p>
+        &#169; Copyright 2022, SINTEF Energy Research.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

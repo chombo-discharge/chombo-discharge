@@ -1,52 +1,52 @@
 <map id="Physics/ItoPlasma/CD_ItoPlasmaFieldTagger.H" name="Physics/ItoPlasma/CD_ItoPlasmaFieldTagger.H">
-<area shape="rect" id="node1" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="2195,5,2376,47"/>
-<area shape="rect" id="node2" href="$CD__ItoPlasmaTagger_8H.html" title="Parent tagger class for ItoPlasma." alt="" coords="2201,95,2370,121"/>
-<area shape="rect" id="node13" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2641,543,2826,569"/>
-<area shape="rect" id="node14" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1379,543,1557,569"/>
-<area shape="rect" id="node3" href="$CD__CellTagger_8H.html" title="Declaration of a base class for tagging cells across an AMR hierarchy." alt="" coords="2221,244,2350,271"/>
-<area shape="rect" id="node26" href="$CD__ItoPlasmaStepper_8H.html" title="Abstract class for integrating the Ito plasma equations." alt="" coords="2401,169,2577,196"/>
-<area shape="rect" id="node28" href="$CD__ItoPlasmaPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="1251,319,1427,345"/>
-<area shape="rect" id="node4" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="2755,393,2976,420"/>
-<area shape="rect" id="node17" href="$CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="1951,468,2067,495"/>
-<area shape="rect" id="node18" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="3066,319,3190,345"/>
-<area shape="rect" id="node25" href="$CD__EBAMRTags_8H.html" title="Contains an alias declaration of EBAMRTags." alt="" coords="2091,468,2229,495"/>
-<area shape="rect" id="node5" title=" " alt="" coords="3617,543,3695,569"/>
-<area shape="rect" id="node6" title=" " alt="" coords="3283,543,3413,569"/>
-<area shape="rect" id="node7" title=" " alt="" coords="2267,543,2328,569"/>
-<area shape="rect" id="node8" title=" " alt="" coords="720,543,813,569"/>
-<area shape="rect" id="node9" title=" " alt="" coords="3732,468,3873,495"/>
-<area shape="rect" id="node10" href="$CD__Dielectric_8H.html" title="Dielectric class." alt="" coords="4167,468,4291,495"/>
-<area shape="rect" id="node15" href="$CD__Electrode_8H.html" title="Declaration of an electrode class." alt="" coords="3445,468,3568,495"/>
-<area shape="rect" id="node16" href="$CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="3067,468,3269,495"/>
-<area shape="rect" id="node11" title=" " alt="" coords="4327,543,4414,569"/>
-<area shape="rect" id="node12" title=" " alt="" coords="4165,543,4294,569"/>
-<area shape="rect" id="node19" title=" " alt="" coords="3051,393,3205,420"/>
-<area shape="rect" id="node20" title=" " alt="" coords="3230,393,3365,420"/>
-<area shape="rect" id="node21" title=" " alt="" coords="3389,393,3518,420"/>
-<area shape="rect" id="node22" title=" " alt="" coords="3543,393,3708,420"/>
-<area shape="rect" id="node23" title=" " alt="" coords="3733,393,3846,420"/>
-<area shape="rect" id="node24" title=" " alt="" coords="3871,393,4039,420"/>
-<area shape="rect" id="node27" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="2603,244,2747,271"/>
-<area shape="rect" id="node45" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="2253,468,2376,495"/>
-<area shape="rect" id="node46" href="$CD__PointParticle_8H.html" title="Declaration of a computational point particle." alt="" coords="2401,468,2543,495"/>
-<area shape="rect" id="node47" href="$CD__RtLayout_8H.html" title="Declaration of a class that holds a set of RtSolvers." alt="" coords="2821,468,2941,495"/>
-<area shape="rect" id="node48" href="$CD__McPhoto_8H.html" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="2054,393,2173,420"/>
-<area shape="rect" id="node49" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="3040,244,3173,271"/>
-<area shape="rect" id="node50" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="2793,244,2972,271"/>
-<area shape="rect" id="node29" title=" " alt="" coords="1023,393,1089,420"/>
-<area shape="rect" id="node30" title=" " alt="" coords="1673,468,1745,495"/>
-<area shape="rect" id="node31" title=" " alt="" coords="1113,393,1191,420"/>
-<area shape="rect" id="node32" title=" " alt="" coords="1215,393,1278,420"/>
-<area shape="rect" id="node33" title=" " alt="" coords="1302,393,1375,420"/>
-<area shape="rect" id="node34" title=" " alt="" coords="1400,393,1475,420"/>
-<area shape="rect" id="node35" title=" " alt="" coords="700,393,793,420"/>
-<area shape="rect" id="node36" title=" " alt="" coords="952,468,1011,495"/>
-<area shape="rect" id="node37" href="$CD__ItoSpecies_8H.html" title="Declaration of an ItoSpecies class that passes in names and initial data to ItoSolvers." alt="" coords="869,393,998,420"/>
-<area shape="rect" id="node38" href="$CD__ItoParticle_8H.html" title="Declaration of a particle class for Ito diffusion." alt="" coords="1086,468,1213,495"/>
-<area shape="rect" id="node39" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="1237,468,1363,495"/>
-<area shape="rect" id="node40" href="$CD__Photon_8H.html" title="Declaration of a photon class for particle methods." alt="" coords="1820,468,1927,495"/>
-<area shape="rect" id="node41" href="$CD__ItoPlasmaReaction_8H.html" title="Declaration of a class for holding reaction types in ito_plasma physics." alt="" coords="448,468,632,495"/>
-<area shape="rect" id="node42" href="$CD__ItoPlasmaPhotoReaction_8H.html" title="Declaration of a class for holding photoionization reaction types in ito_plasma physics." alt="" coords="656,468,877,495"/>
-<area shape="rect" id="node43" href="$CD__LookupTable1D_8H.html" title="Declaration of a table for looking up coefficients etc." alt="" coords="1388,468,1548,495"/>
-<area shape="rect" id="node44" href="$CD__ItoPlasmaPhysicsImplem_8H.html" title="Implementation of CD_ItoPlasmaPhysics.H." alt="" coords="1651,393,1877,420"/>
+<area shape="rect" id="node1" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="2533,5,2715,47"/>
+<area shape="rect" id="node2" href="$CD__ItoPlasmaTagger_8H.html" title="Parent tagger class for ItoPlasma." alt="" coords="2539,95,2709,121"/>
+<area shape="rect" id="node13" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1873,543,2058,569"/>
+<area shape="rect" id="node14" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="2901,543,3080,569"/>
+<area shape="rect" id="node3" href="$CD__CellTagger_8H.html" title="Declaration of a base class for tagging cells across an AMR hierarchy." alt="" coords="1621,244,1750,271"/>
+<area shape="rect" id="node30" href="$CD__ItoPlasmaStepper_8H.html" title="Abstract class for integrating the Ito plasma equations." alt="" coords="2536,169,2712,196"/>
+<area shape="rect" id="node32" href="$CD__ItoPlasmaPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="3492,319,3668,345"/>
+<area shape="rect" id="node4" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="233,393,455,420"/>
+<area shape="rect" id="node17" href="$CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="643,468,759,495"/>
+<area shape="rect" id="node18" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="1623,319,1747,345"/>
+<area shape="rect" id="node29" href="$CD__EBAMRTags_8H.html" title="Contains an alias declaration of EBAMRTags." alt="" coords="1950,468,2087,495"/>
+<area shape="rect" id="node5" title=" " alt="" coords="167,543,246,569"/>
+<area shape="rect" id="node6" title=" " alt="" coords="665,543,796,569"/>
+<area shape="rect" id="node7" title=" " alt="" coords="545,543,607,569"/>
+<area shape="rect" id="node8" title=" " alt="" coords="889,543,983,569"/>
+<area shape="rect" id="node9" title=" " alt="" coords="1061,468,1203,495"/>
+<area shape="rect" id="node10" href="$CD__Dielectric_8H.html" title="Dielectric class." alt="" coords="145,468,269,495"/>
+<area shape="rect" id="node15" href="$CD__Electrode_8H.html" title="Declaration of an electrode class." alt="" coords="445,468,568,495"/>
+<area shape="rect" id="node16" href="$CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="835,468,1037,495"/>
+<area shape="rect" id="node11" title=" " alt="" coords="9,543,95,569"/>
+<area shape="rect" id="node12" title=" " alt="" coords="357,543,486,569"/>
+<area shape="rect" id="node19" title=" " alt="" coords="1524,393,1679,420"/>
+<area shape="rect" id="node20" title=" " alt="" coords="1703,393,1838,420"/>
+<area shape="rect" id="node21" title=" " alt="" coords="1862,393,1991,420"/>
+<area shape="rect" id="node22" title=" " alt="" coords="2016,393,2181,420"/>
+<area shape="rect" id="node23" title=" " alt="" coords="834,393,947,420"/>
+<area shape="rect" id="node24" title=" " alt="" coords="972,393,1140,420"/>
+<area shape="rect" id="node25" title=" " alt="" coords="1164,393,1329,420"/>
+<area shape="rect" id="node26" title=" " alt="" coords="1353,393,1500,420"/>
+<area shape="rect" id="node27" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="1633,468,1773,495"/>
+<area shape="rect" id="node28" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="2112,468,2245,495"/>
+<area shape="rect" id="node31" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="2024,244,2168,271"/>
+<area shape="rect" id="node45" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="2565,468,2688,495"/>
+<area shape="rect" id="node46" href="$CD__PointParticle_8H.html" title="Declaration of a computational point particle." alt="" coords="2865,468,3007,495"/>
+<area shape="rect" id="node47" href="$CD__RtLayout_8H.html" title="Declaration of a class that holds a set of RtSolvers." alt="" coords="2320,468,2440,495"/>
+<area shape="rect" id="node48" href="$CD__McPhoto_8H.html" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="3125,393,3243,420"/>
+<area shape="rect" id="node49" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="1004,244,1137,271"/>
+<area shape="rect" id="node50" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="2357,244,2536,271"/>
+<area shape="rect" id="node33" title=" " alt="" coords="4637,543,4715,569"/>
+<area shape="rect" id="node34" title=" " alt="" coords="4495,543,4558,569"/>
+<area shape="rect" id="node35" title=" " alt="" coords="3915,468,3973,495"/>
+<area shape="rect" id="node36" href="$CD__ItoSpecies_8H.html" title="Declaration of an ItoSpecies class that passes in names and initial data to ItoSolvers." alt="" coords="3769,393,3898,420"/>
+<area shape="rect" id="node37" href="$CD__ItoParticle_8H.html" title="Declaration of a particle class for Ito diffusion." alt="" coords="3713,468,3839,495"/>
+<area shape="rect" id="node38" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="1329,468,1455,495"/>
+<area shape="rect" id="node39" href="$CD__Photon_8H.html" title="Declaration of a photon class for particle methods." alt="" coords="3133,468,3240,495"/>
+<area shape="rect" id="node40" href="$CD__ItoPlasmaPhotoReaction_8H.html" title="Declaration of a class for holding photoionization reaction types in ito_plasma physics." alt="" coords="3315,468,3536,495"/>
+<area shape="rect" id="node41" href="$CD__KMCDualState_8H.html" title="Declaration of a simple state vector for running Kinetic Monte Carlo for plasma problems." alt="" coords="4099,468,4255,495"/>
+<area shape="rect" id="node42" href="$CD__KMCDualStateReaction_8H.html" title="Declaration of a simple plasma reaction type for Kinetic Monte Carlo." alt="" coords="4093,393,4307,420"/>
+<area shape="rect" id="node43" href="$CD__KMCSolver_8H.html" title="Class for running Kinetic Monte Carlo functionality." alt="" coords="4433,468,4565,495"/>
+<area shape="rect" id="node44" href="$CD__ItoPlasmaPhysicsImplem_8H.html" title="Implementation of CD_ItoPlasmaPhysics.H." alt="" coords="3467,393,3693,420"/>
 </map>

@@ -1,6 +1,8 @@
 .. _Chap:ItoPlasmaModel:
 
-Îto plasma model
-================
+Îto-KMC plasma model
+====================
 
-Todo. 
+.. warning::
+
+   This is a work-in-progress.

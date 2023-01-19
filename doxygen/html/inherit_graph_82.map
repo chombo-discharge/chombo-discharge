@@ -1,3 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classMultiIndex.html" title="SpaceDim multi&#45;index type for use with higher order Taylor series." alt="" coords="5,5,96,32"/>
+<area shape="rect" id="node1" href="$classMFHelmholtzJumpBC.html" title="Class for computing &quot;jump interface&quot; boundary conditions for multifluid code." alt="" coords="5,13,165,39"/>
+<area shape="rect" id="node2" href="$classMFHelmholtzSaturationChargeJumpBC.html" title="Class for computing matching the saturation charge boundary condition in an MFHelmholtzOp context." alt="" coords="213,5,436,47"/>
 </map>

@@ -1,52 +1,52 @@
 <map id="Physics/BrownianWalker/CD_BrownianWalkerStepper.H" name="Physics/BrownianWalker/CD_BrownianWalkerStepper.H">
-<area shape="rect" id="node1" title="TimeStepper class for only solving the Brownian_Walker equation (with surface charge)" alt="" coords="3306,5,3526,47"/>
-<area shape="rect" id="node2" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="1435,169,1579,196"/>
-<area shape="rect" id="node10" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1711,557,1897,584"/>
-<area shape="rect" id="node11" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="3155,557,3333,584"/>
-<area shape="rect" id="node37" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="3582,169,3701,196"/>
-<area shape="rect" id="node49" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="3355,95,3477,121"/>
-<area shape="rect" id="node3" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="660,393,881,420"/>
-<area shape="rect" id="node13" href="$CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="215,475,417,502"/>
-<area shape="rect" id="node17" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="2014,244,2138,271"/>
-<area shape="rect" id="node4" title=" " alt="" coords="841,557,919,584"/>
-<area shape="rect" id="node5" title=" " alt="" coords="5,557,136,584"/>
-<area shape="rect" id="node6" title=" " alt="" coords="687,557,748,584"/>
-<area shape="rect" id="node7" title=" " alt="" coords="944,557,1037,584"/>
-<area shape="rect" id="node8" title=" " alt="" coords="485,557,627,584"/>
-<area shape="rect" id="node9" href="$CD__Dielectric_8H.html" title="Dielectric class." alt="" coords="887,475,1011,502"/>
-<area shape="rect" id="node12" href="$CD__Electrode_8H.html" title="Declaration of an electrode class." alt="" coords="1036,475,1159,502"/>
-<area shape="rect" id="node16" href="$CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="695,475,811,502"/>
-<area shape="rect" id="node14" title=" " alt="" coords="312,557,461,584"/>
-<area shape="rect" id="node15" title=" " alt="" coords="160,557,288,584"/>
-<area shape="rect" id="node18" title=" " alt="" coords="2793,393,2948,420"/>
-<area shape="rect" id="node19" title=" " alt="" coords="1517,319,1651,345"/>
-<area shape="rect" id="node20" title=" " alt="" coords="1675,319,1805,345"/>
-<area shape="rect" id="node21" title=" " alt="" coords="1829,319,1995,345"/>
-<area shape="rect" id="node22" title=" " alt="" coords="2019,319,2133,345"/>
-<area shape="rect" id="node23" title=" " alt="" coords="2157,319,2325,345"/>
-<area shape="rect" id="node24" title=" " alt="" coords="2349,319,2515,345"/>
-<area shape="rect" id="node25" title=" " alt="" coords="2539,319,2685,345"/>
-<area shape="rect" id="node26" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="1258,393,1398,420"/>
-<area shape="rect" id="node27" href="$CD__DomainFluxIFFAB_8H.html" title="Declaration of a BaseIFFAB wrapper that holds domain fluxes." alt="" coords="1437,475,1614,502"/>
-<area shape="rect" id="node28" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="2535,475,2668,502"/>
-<area shape="rect" id="node29" href="$CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="1177,319,1340,345"/>
-<area shape="rect" id="node30" href="$CD__LoadBalancing_8H.html" title="Declaration of a static class for various load balancing operations." alt="" coords="1025,393,1183,420"/>
-<area shape="rect" id="node31" href="$CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="1720,393,1864,420"/>
-<area shape="rect" id="node32" href="$CD__DomainFluxIFFABFactory_8H.html" title="Declaration of factory class for DomainFluxIFFAB." alt="" coords="1473,393,1695,420"/>
-<area shape="rect" id="node33" href="$CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="2939,319,3111,345"/>
-<area shape="rect" id="node34" href="$CD__NonConservativeDivergenceStencil_8H.html" title="Implementation of IrregStencil that can perform the nonconservative divergence averaging." alt="" coords="2743,468,2977,509"/>
-<area shape="rect" id="node35" href="$CD__Realm_8H.html" title="Declaration of the Realm class." alt="" coords="2709,319,2813,345"/>
-<area shape="rect" id="node36" href="$CD__AmrMeshImplem_8H.html" title="Implementation of CD_AmrMesh.H." alt="" coords="3175,393,3350,420"/>
-<area shape="rect" id="node38" href="$CD__ItoSpecies_8H.html" title="Declaration of an ItoSpecies class that passes in names and initial data to ItoSolvers." alt="" coords="4119,393,4249,420"/>
-<area shape="rect" id="node40" href="$CD__ItoParticle_8H.html" title="Declaration of a particle class for Ito diffusion." alt="" coords="4271,475,4398,502"/>
-<area shape="rect" id="node44" href="$CD__EBParticleMesh_8H.html" title="Declaration of a class for handling particle&#45;mesh interpolation and deposition." alt="" coords="2095,475,2257,502"/>
-<area shape="rect" id="node45" href="$CD__SuperParticles_8H.html" title="Namespace containing various particle merging utilities." alt="" coords="3001,475,3156,502"/>
-<area shape="rect" id="node46" href="$CD__EbRepresentation_8H.html" title="Enum for putting some logic into EB intersection tests." alt="" coords="3333,475,3510,502"/>
-<area shape="rect" id="node47" href="$CD__EbIntersection_8H.html" title="Enum for putting some logic into EB intersection tests." alt="" coords="3585,475,3740,502"/>
-<area shape="rect" id="node48" href="$CD__ItoSolverImplem_8H.html" title="Implementation of CD_ItoSolver.H." alt="" coords="3823,244,3993,271"/>
-<area shape="rect" id="node39" title=" " alt="" coords="3744,557,3803,584"/>
-<area shape="rect" id="node41" title=" " alt="" coords="4213,557,4272,584"/>
-<area shape="rect" id="node42" title=" " alt="" coords="4297,557,4373,584"/>
-<area shape="rect" id="node43" title=" " alt="" coords="4397,557,4459,584"/>
-<area shape="rect" id="node50" href="$CD__ItoLayoutImplem_8H.html" title="Implementation of CD_ItoLayout.H." alt="" coords="3329,244,3503,271"/>
+<area shape="rect" id="node1" title="TimeStepper class for only solving the Brownian_Walker equation (with surface charge)" alt="" coords="3185,5,3405,47"/>
+<area shape="rect" id="node2" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="569,169,713,196"/>
+<area shape="rect" id="node11" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1601,557,1786,584"/>
+<area shape="rect" id="node12" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="3140,557,3319,584"/>
+<area shape="rect" id="node38" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="3406,169,3525,196"/>
+<area shape="rect" id="node49" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="3233,95,3356,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="564,244,663,271"/>
+<area shape="rect" id="node4" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="331,393,552,420"/>
+<area shape="rect" id="node14" href="$CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="575,475,777,502"/>
+<area shape="rect" id="node18" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="2098,244,2222,271"/>
+<area shape="rect" id="node5" title=" " alt="" coords="854,557,933,584"/>
+<area shape="rect" id="node6" title=" " alt="" coords="256,557,387,584"/>
+<area shape="rect" id="node7" title=" " alt="" coords="171,557,232,584"/>
+<area shape="rect" id="node8" title=" " alt="" coords="411,557,504,584"/>
+<area shape="rect" id="node9" title=" " alt="" coords="5,557,147,584"/>
+<area shape="rect" id="node10" href="$CD__Dielectric_8H.html" title="Dielectric class." alt="" coords="949,475,1073,502"/>
+<area shape="rect" id="node13" href="$CD__Electrode_8H.html" title="Declaration of an electrode class." alt="" coords="801,475,924,502"/>
+<area shape="rect" id="node17" href="$CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="383,475,499,502"/>
+<area shape="rect" id="node15" title=" " alt="" coords="528,557,677,584"/>
+<area shape="rect" id="node16" title=" " alt="" coords="701,557,829,584"/>
+<area shape="rect" id="node19" title=" " alt="" coords="2820,393,2975,420"/>
+<area shape="rect" id="node20" title=" " alt="" coords="1245,319,1379,345"/>
+<area shape="rect" id="node21" title=" " alt="" coords="1403,319,1533,345"/>
+<area shape="rect" id="node22" title=" " alt="" coords="1557,319,1723,345"/>
+<area shape="rect" id="node23" title=" " alt="" coords="1747,319,1861,345"/>
+<area shape="rect" id="node24" title=" " alt="" coords="1885,319,2053,345"/>
+<area shape="rect" id="node25" title=" " alt="" coords="2077,319,2243,345"/>
+<area shape="rect" id="node26" title=" " alt="" coords="2267,319,2413,345"/>
+<area shape="rect" id="node27" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="1431,393,1571,420"/>
+<area shape="rect" id="node28" href="$CD__DomainFluxIFFAB_8H.html" title="Declaration of a BaseIFFAB wrapper that holds domain fluxes." alt="" coords="1351,475,1529,502"/>
+<area shape="rect" id="node29" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="2247,475,2380,502"/>
+<area shape="rect" id="node30" href="$CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="2616,319,2779,345"/>
+<area shape="rect" id="node31" href="$CD__LoadBalancing_8H.html" title="Declaration of a static class for various load balancing operations." alt="" coords="1249,393,1407,420"/>
+<area shape="rect" id="node32" href="$CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="1596,393,1740,420"/>
+<area shape="rect" id="node33" href="$CD__DomainFluxIFFABFactory_8H.html" title="Declaration of factory class for DomainFluxIFFAB." alt="" coords="953,393,1175,420"/>
+<area shape="rect" id="node34" href="$CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="3006,319,3178,345"/>
+<area shape="rect" id="node35" href="$CD__NonConservativeDivergenceStencil_8H.html" title="Implementation of IrregStencil that can perform the nonconservative divergence averaging." alt="" coords="2455,468,2689,509"/>
+<area shape="rect" id="node36" href="$CD__Realm_8H.html" title="Declaration of the Realm class." alt="" coords="2488,319,2592,345"/>
+<area shape="rect" id="node37" href="$CD__AmrMeshImplem_8H.html" title="Implementation of CD_AmrMesh.H." alt="" coords="3101,393,3275,420"/>
+<area shape="rect" id="node39" href="$CD__ItoSpecies_8H.html" title="Declaration of an ItoSpecies class that passes in names and initial data to ItoSolvers." alt="" coords="3807,393,3937,420"/>
+<area shape="rect" id="node41" href="$CD__ItoParticle_8H.html" title="Declaration of a particle class for Ito diffusion." alt="" coords="4063,475,4190,502"/>
+<area shape="rect" id="node45" href="$CD__EBParticleMesh_8H.html" title="Declaration of a class for handling particle&#45;mesh interpolation and deposition." alt="" coords="2009,475,2172,502"/>
+<area shape="rect" id="node46" href="$CD__EBRepresentation_8H.html" title="Enum for putting some logic into EB intersection tests." alt="" coords="2865,475,3044,502"/>
+<area shape="rect" id="node47" href="$CD__EBIntersection_8H.html" title="Enum for putting some logic into EB intersection tests." alt="" coords="3069,475,3225,502"/>
+<area shape="rect" id="node48" href="$CD__ItoSolverImplem_8H.html" title="Implementation of CD_ItoSolver.H." alt="" coords="3604,244,3775,271"/>
+<area shape="rect" id="node40" title=" " alt="" coords="3807,475,3865,502"/>
+<area shape="rect" id="node42" title=" " alt="" coords="4005,557,4064,584"/>
+<area shape="rect" id="node43" title=" " alt="" coords="4089,557,4165,584"/>
+<area shape="rect" id="node44" title=" " alt="" coords="4189,557,4251,584"/>
+<area shape="rect" id="node50" href="$CD__ItoLayoutImplem_8H.html" title="Implementation of CD_ItoLayout.H." alt="" coords="3208,169,3381,196"/>
 </map>

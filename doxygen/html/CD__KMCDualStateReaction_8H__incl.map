@@ -1,0 +1,13 @@
+<map id="Source/KineticMonteCarlo/CD_KMCDualStateReaction.H" name="Source/KineticMonteCarlo/CD_KMCDualStateReaction.H">
+<area shape="rect" id="node1" title="Declaration of a simple plasma reaction type for Kinetic Monte Carlo." alt="" coords="389,5,606,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,95,56,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="131,169,194,196"/>
+<area shape="rect" id="node4" title=" " alt="" coords="823,95,865,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="889,95,959,121"/>
+<area shape="rect" id="node6" href="$CD__KMCDualState_8H.html" title="Declaration of a simple state vector for running Kinetic Monte Carlo for plasma problems." alt="" coords="295,95,451,121"/>
+<area shape="rect" id="node7" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="229,244,414,271"/>
+<area shape="rect" id="node8" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="476,244,655,271"/>
+<area shape="rect" id="node10" href="$CD__KMCDualStateReactionImplem_8H.html" title="Implementation of CD_KMCDualStateReaction.H." alt="" coords="535,95,798,121"/>
+<area shape="rect" id="node9" href="$CD__KMCDualStateImplem_8H.html" title="Implementation of CD_KMCDualState.H." alt="" coords="270,169,477,196"/>
+<area shape="rect" id="node11" title=" " alt="" coords="704,169,763,196"/>
+</map>
