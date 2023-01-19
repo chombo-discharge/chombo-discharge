@@ -9,12 +9,13 @@
   @author Robert marskar
 */
 
+// Std includes
+#include <string>
+
 // Chombo includes
-#include <EBArith.H>
 #include <ParmParse.H>
 
 // Our includes
-#include <CD_DataOps.H>
 #include <CD_CellTagger.H>
 #include <CD_NamespaceHeader.H>
 
@@ -62,11 +63,11 @@ CellTagger::parseRuntimeOptions()
 }
 
 void
-CellTagger::parseBoxes()
+CellTagger::parseTagBoxes()
 {
-  CH_TIME("CellTagger::parseBoxes()");
+  CH_TIME("CellTagger::parseTagBoxes()");
   if (m_verbosity > 5) {
-    pout() << m_name + "::parseBoxes()" << endl;
+    pout() << m_name + "::parseTagBoxes()" << endl;
   }
 
   // TLDR: This code parses strings from the command line in the form
@@ -75,10 +76,10 @@ CellTagger::parseBoxes()
   //
   // If num_boxes > 0 we process lines
   //
-  //    m_name.box1_lo = 0 0 0
-  //    m_name.box1_hi = 1 1 1
-  //    m_name.box2_lo = 0 0 0
-  //    m_name.box2_hi = 1 1
+  //    m_name.tag_box1_lo = 0 0 0
+  //    m_name.tag_box1_hi = 1 1 1
+  //    m_name.tag_box2_lo = 0 0 0
+  //    m_name.tag_box2_hi = 1 1
   //
   // We then populate m_tagBoxes with RealBox (an axis-aligned box with physical coordinates). These
   // boxes can be used in tagCells(...) to prune regions in space where tagging is unnecessary. Users
@@ -86,22 +87,17 @@ CellTagger::parseBoxes()
 
   ParmParse pp(m_name.c_str());
 
-  int numBoxes;
-  pp.get("num_boxes", numBoxes);
+  int numBoxes = 0;
+  pp.query("num_tag_boxes", numBoxes);
 
   m_tagBoxes.resize(0);
 
   if (numBoxes > 0) {
     m_tagBoxes.resize(numBoxes);
 
-    const int ndigits = (int)log10(1.0 * numBoxes) + 1;
-
     for (int ibox = 0; ibox < numBoxes; ibox++) {
-      char* cstr = new char[ndigits];
-      sprintf(cstr, "%d", 1 + ibox);
-
-      const std::string str1 = "box" + std::string(cstr) + "_lo";
-      const std::string str2 = "box" + std::string(cstr) + "_hi";
+      const std::string str1 = "tag_box" + std::to_string(1 + ibox) + "_lo";
+      const std::string str2 = "tag_box" + std::to_string(1 + ibox) + "_hi";
 
       Vector<Real> cornerLo(SpaceDim);
       Vector<Real> cornerHi(SpaceDim);
@@ -113,8 +109,67 @@ CellTagger::parseBoxes()
       const RealVect c2 = RealVect(D_DECL(cornerHi[0], cornerHi[1], cornerHi[2]));
 
       m_tagBoxes[ibox] = RealBox(c1, c2);
+    }
+  }
+}
 
-      delete cstr;
+void
+CellTagger::parseRefinementBoxes()
+{
+  CH_TIME("CellTagger::parseRefinementBoxes()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::parseRefinementBoxes()" << endl;
+  }
+
+  // TLDR: This code parses strings from the command line in the form
+  //
+  //    m_name.num_boxes = 0
+  //
+  // If num_boxes > 0 we process lines
+  //
+  //    m_name.ref_box1_lo  = 0 0 0
+  //    m_name.ref_box1_hi  = 1 1 1
+  //    m_name.ref_box1_lvl = 1
+  //    m_name.ref_box2_lo  = 0 0 0
+  //    m_name.ref_box2_hi  = 1 1 1
+  //    m_name.ref_box2_lvl = 3
+  //
+  // and so on.
+  //
+  // We then populate m_tagBoxes with RealBox (an axis-aligned box with physical coordinates). These
+  // boxes can be used in tagCells(...) to prune regions in space where tagging is unnecessary. Users
+  // are free to leave num_boxes=0 if they don't want to that.
+
+  int numBoxes = 0;
+  m_refBoxes.resize(0);
+
+  // Get from input script.
+  ParmParse pp(m_name.c_str());
+  pp.query("num_ref_boxes", numBoxes);
+
+  // Construct the refinement boxes.
+  if (numBoxes > 0) {
+    m_refBoxes.resize(numBoxes);
+
+    for (int ibox = 0; ibox < numBoxes; ibox++) {
+      const std::string str1 = "ref_box" + std::to_string(1 + ibox) + "_lo";
+      const std::string str2 = "ref_box" + std::to_string(1 + ibox) + "_hi";
+      const std::string str3 = "ref_box" + std::to_string(1 + ibox) + "_lvl";
+
+      int          refLevel = 0;
+      Vector<Real> cornerLo(SpaceDim);
+      Vector<Real> cornerHi(SpaceDim);
+
+      pp.getarr(str1.c_str(), cornerLo, 0, SpaceDim);
+      pp.getarr(str2.c_str(), cornerHi, 0, SpaceDim);
+      pp.get(str3.c_str(), refLevel);
+
+      const RealVect c1 = RealVect(D_DECL(cornerLo[0], cornerLo[1], cornerLo[2]));
+      const RealVect c2 = RealVect(D_DECL(cornerHi[0], cornerHi[1], cornerHi[2]));
+
+      if (refLevel > 0) {
+        m_refBoxes[ibox] = std::pair<RealBox, int>(RealBox(c1, c2), refLevel);
+      }
     }
   }
 }
@@ -179,6 +234,31 @@ CellTagger::insideTagBox(const RealVect a_pos) const
   }
 
   return doThisRefine;
+}
+
+int
+CellTagger::getManualRefinementLevel(const RealVect a_pos) const
+{
+  CH_TIME("CellTagger::insideTagBox(RealVect)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::insideTagBox(RealVect)" << endl;
+  }
+
+  int refToThisLevel = -1;
+
+  for (int i = 0; i < m_refBoxes.size(); i++) {
+    const RealBox& refBox = m_refBoxes[i].first;
+    const int&     refLvl = m_refBoxes[i].second;
+
+    const RealVect lo = refBox.getLo();
+    const RealVect hi = refBox.getHi();
+
+    if (a_pos >= lo && a_pos <= hi) {
+      refToThisLevel = std::max(refToThisLevel, refLvl);
+    }
+  }
+
+  return refToThisLevel;
 }
 
 #include <CD_NamespaceFooter.H>

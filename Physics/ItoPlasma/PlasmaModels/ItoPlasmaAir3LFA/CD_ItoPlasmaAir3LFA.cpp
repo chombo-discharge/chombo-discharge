@@ -15,137 +15,158 @@
 // Our includes
 #include <CD_ItoPlasmaAir3LFA.H>
 #include <CD_Units.H>
+#include <CD_DataParser.H>
+#include <CD_ParticleManagement.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::ItoPlasma;
 
 ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
 {
-  m_num_ItoSpecies = 3;
-  m_numRtSpecies   = 1;
+  CH_TIME("ItoPlasmaAir3LFA::ItoPlasmaAir3LFA");
 
-  m_coupling == ItoPlasmaPhysics::coupling::LFA;
+  m_className = "ItoPlasmaAir3LFA";
 
-  ParmParse    pp("ItoPlasmaAir3LFA");
-  Vector<Real> v;
+  // Parse some transport settings
+  this->parsePPC();
+  this->parseAlgorithm();
+  this->parseDebug();
+  this->parseDx();
+  this->parseTransport();
 
-  // For controlling time step
-  pp.get("dX", m_deltaX);
-
-  // Stuff for initial particles
-  pp.get("seed", m_seed);
-  pp.get("blob_radius", m_blob_radius);
-  pp.get("num_particles", m_num_particles);
-  pp.get("particle_weight", m_particle_weight);
-  pp.getarr("blob_center", v, 0, SpaceDim);
-  m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
-
-  // Mobile ions or not
-  pp.get("mobile_ions", m_isMobile_ions);
-  pp.get("ion_mobility", m_ion_mu);
-
-  // Photostuff
-  pp.get("quenching_pressure", m_pq);
-  pp.get("photoi_factor", m_photoi_factor);
-
-  // Algorithm stuff
-  std::string str;
-  pp.get("react_ppc", m_ppc);
-  pp.get("poisson_switch", m_fieldSolver_switch);
-  pp.get("Ncrit", m_Ncrit);
-  pp.get("prop_eps", m_eps);
-  pp.get("NSSA", m_NSSA);
-  pp.get("SSAlim", m_SSAlim);
-
-  // Get algorithm
-  pp.get("algorithm", str);
-  if (str == "hybrid") {
-    m_algorithm = algorithm::hybrid;
-  }
-  else if (str == "tau") {
-    m_algorithm = algorithm::tau;
-  }
-  else if (str == "ssa") {
-    m_algorithm = algorithm::ssa;
-  }
-  else {
-    MayDay::Abort("ItoPlasmaAir3LFA::ItoPlasmaAir3LFA - unknown algorithm requested");
-  }
-
-  // Random seed
-  if (m_seed < 0) {
-    m_seed = std::chrono::system_clock::now().time_since_epoch().count();
-  }
-
-  // Standard air.
-  m_p      = 1.0;
-  m_T      = 300;
-  m_N2frac = 0.8;
-  m_O2frac = 0.2;
-
-  // Convert to SI units
-  m_p  = m_p * Units::atm2pascal;
-  m_pq = m_pq * Units::atm2pascal;
-  m_N  = m_p * Units::Na / (m_T * Units::R);
+  // Set gas parameters.
+  m_p         = 1.0 * Units::atm2pascal;
+  m_T         = 300.0;
+  m_N2frac    = 0.8;
+  m_O2frac    = 0.2;
+  m_pq        = m_pq * Units::atm2pascal;
+  m_N         = m_p * Units::Na / (m_T * Units::R);
+  m_ionDiffCo = m_ionMobility * Units::kb * m_T / Units::Qe;
 
   // Set up species
-  m_ItoSpecies.resize(m_num_ItoSpecies);
-  m_rtSpecies.resize(m_numRtSpecies);
+  m_plasmaSpecies.resize(3);
+  m_rtSpecies.resize(1);
 
-  m_ElectronIdx = 0;
-  m_PositiveIdx = 1;
-  m_NegativeIdx = 2;
-  m_PhotonZ_idx = 0;
+  m_plasmaSpecies[0] = RefCountedPtr<ItoSpecies>(new Electron());
+  m_plasmaSpecies[1] = RefCountedPtr<ItoSpecies>(new Positive());
+  m_plasmaSpecies[2] = RefCountedPtr<ItoSpecies>(new Negative());
+  m_rtSpecies[0]     = RefCountedPtr<RtSpecies>(new PhotonZ());
 
-  m_ItoSpecies[m_ElectronIdx] = RefCountedPtr<ItoSpecies>(new Electron());
-  m_ItoSpecies[m_PositiveIdx] = RefCountedPtr<ItoSpecies>(new Positive());
-  m_ItoSpecies[m_NegativeIdx] = RefCountedPtr<ItoSpecies>(new Negative());
-  m_rtSpecies[m_PhotonZ_idx]  = RefCountedPtr<RtSpecies>(new PhotonZ());
+  List<ItoParticle>& electrons    = m_plasmaSpecies[0]->getInitialParticles();
+  List<ItoParticle>& positiveIons = m_plasmaSpecies[1]->getInitialParticles();
+  List<ItoParticle>& negativeIons = m_plasmaSpecies[2]->getInitialParticles();
 
-  // To avoid that MPI ranks draw the same particle positions, increment the seed for each rank
-  m_seed += procID();
-  m_rng = std::mt19937_64(m_seed);
+  electrons.clear();
+  positiveIons.clear();
+  negativeIons.clear();
 
-  List<ItoParticle>& Electrons = m_ItoSpecies[m_ElectronIdx]->getInitialParticles();
-  List<ItoParticle>& Positives = m_ItoSpecies[m_PositiveIdx]->getInitialParticles();
-  List<ItoParticle>& Negatives = m_ItoSpecies[m_NegativeIdx]->getInitialParticles();
+  // Draw some initial electrons and add corresponding positive ions.
+  ParmParse pp("ItoPlasmaAir3LFA");
 
-  Electrons.clear();
-  Positives.clear();
-  Negatives.clear();
+  int          initParticles;
+  Real         initParticleWeight;
+  Real         blobRadius;
+  RealVect     blobCenter;
+  Vector<Real> v;
 
-  this->drawSphereParticles(Electrons,
-                            Positives,
-                            m_num_particles,
-                            m_blob_center,
-                            m_blob_radius,
-                            m_particle_weight,
-                            0.0,
-                            0.0);
+  pp.get("init_particles", initParticles);
+  pp.get("init_weights", initParticleWeight);
+  pp.get("init_radius", blobRadius);
+  pp.getarr("init_center", v, 0, SpaceDim);
+  blobCenter = RealVect(D_DECL(v[0], v[1], v[2]));
 
-  // Particle-particle reactions
-  m_reactions.emplace("impact_ionization",
-                      ItoPlasmaReaction({m_ElectronIdx}, {m_ElectronIdx, m_ElectronIdx, m_PositiveIdx}));
-  m_reactions.emplace("Electron_attachment", ItoPlasmaReaction({m_ElectronIdx}, {m_NegativeIdx}));
-  m_reactions.emplace("Electron_recombination", ItoPlasmaReaction({m_ElectronIdx, m_PositiveIdx}, {}));
-  m_reactions.emplace("ion_recombination", ItoPlasmaReaction({m_PositiveIdx, m_NegativeIdx}, {}));
-  m_reactions.emplace("photo_excitation", ItoPlasmaReaction({m_ElectronIdx}, {m_ElectronIdx}, {m_PhotonZ_idx}));
+  ParticleManagement::drawSphereParticles(electrons, initParticles, blobCenter, blobRadius);
+
+  for (ListIterator<ItoParticle> lit(electrons); lit.ok(); ++lit) {
+    const RealVect& x = lit().position();
+
+    lit().weight() = initParticleWeight;
+
+    positiveIons.add(ItoParticle(initParticleWeight, x));
+  }
+
+  // Add reactions. These are
+  //
+  // e -> e + e + M+ (ionization)
+  // e -> M- (attachment)
+  // e + M+ -> null (electron-ion recombination)
+  // M- + M+ -> null (ion-ion recombination)
+  // e -> e + Y (photon generation)
+  //
+  auto r1 = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{0, 0, 1}, std::list<size_t>{});
+  auto r2 = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{2}, std::list<size_t>{});
+  auto r3 = std::make_shared<KMCReaction>(std::list<size_t>{0, 1}, std::list<size_t>{}, std::list<size_t>{});
+  auto r4 = std::make_shared<KMCReaction>(std::list<size_t>{1, 2}, std::list<size_t>{}, std::list<size_t>{});
+  auto r5 = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{0}, std::list<size_t>{0});
+
+  m_kmcReactions.emplace_back(r1);
+  m_kmcReactions.emplace_back(r2);
+  m_kmcReactions.emplace_back(r3);
+  m_kmcReactions.emplace_back(r4);
+  m_kmcReactions.emplace_back(r5);
 
   // Photo-reactions
-  m_photoReactions.emplace("zheleznyak", ItoPlasmaPhotoReaction({m_PhotonZ_idx}, {m_ElectronIdx, m_PositiveIdx}));
+  auto y1 = std::make_shared<ItoPlasmaPhotoReaction>(0, std::list<size_t>{0, 1});
+  m_photoReactions.emplace_back(y1);
 
-  // Set the ions diffusion coefficient
-  m_ion_D = m_ion_mu * Units::kb * m_T / Units::Qe;
+  // Define the KMC solver and read in transport data.
+  this->defineKMC();
 
+  // Read in transport data.
   this->readTables();
 }
 
-ItoPlasmaAir3LFA::~ItoPlasmaAir3LFA() {}
+ItoPlasmaAir3LFA::~ItoPlasmaAir3LFA() { CH_TIME("ItoPlasmaAir3LFA::~ItoPlasmaAir3LFA"); }
 
 void
-ItoPlasmaAir3LFA::readTables()
+ItoPlasmaAir3LFA::parseRuntimeOptions() noexcept
 {
+  CH_TIME("ItoPlasmaAir3LFA::parseRuntimeOptions");
 
+  this->parsePPC();
+  this->parseDebug();
+  this->parseAlgorithm();
+  this->parseDx();
+}
+
+void
+ItoPlasmaAir3LFA::parseDx() noexcept
+{
+  CH_TIME("ItoPlasmaAir3LFA::parseDx");
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("dX", m_deltaX);
+}
+
+void
+ItoPlasmaAir3LFA::parseTransport() noexcept
+{
+  CH_TIME("ItoPlasmaAir3LFA::parseTransport");
+
+  ParmParse pp(m_className.c_str());
+
+  // Tunable photoionization parameters.
+  pp.get("quenching_pressure", m_pq);
+  pp.get("photoi_factor", m_photoIonizationFactor);
+  pp.get("ion_mobility", m_ionMobility);
+  pp.get("impact_efficiency", m_ionImpactEfficiency);
+  pp.get("quantum_efficiency", m_quantumEfficiency);
+  pp.get("extrap_bc", m_extrapBC);
+
+  m_ionImpactEfficiency = std::max(m_ionImpactEfficiency, 0.0);
+  m_ionImpactEfficiency = std::min(m_ionImpactEfficiency, 1.0);
+
+  m_quantumEfficiency = std::max(m_quantumEfficiency, 0.0);
+  m_quantumEfficiency = std::min(m_quantumEfficiency, 1.0);
+}
+
+void
+ItoPlasmaAir3LFA::readTables() noexcept
+{
+  CH_TIME("ItoPlasmaAir3LFA::readTables");
+
+  // Read tables in
   this->addTable("mobility", "mobility.dat");
   this->addTable("diffco", "diffusion.dat");
   this->addTable("alpha", "alpha.dat");
@@ -170,81 +191,155 @@ ItoPlasmaAir3LFA::readTables()
   m_tables["Te"].scale<1>(2.0 * Units::Qe / (3.0 * Units::kb));
 }
 
-Real
-ItoPlasmaAir3LFA::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const
+void
+ItoPlasmaAir3LFA::addTable(const std::string a_table_name, const std::string a_file) noexcept
 {
+  CH_TIME("ItoPlasmaAir3LFA::addTable");
+
+  LookupTable1D<2> table = DataParser::simpleFileReadASCII(a_file);
+
+  table.sort();
+  table.makeUniform(1000);
+  m_tables.emplace(a_table_name, table);
+}
+
+Real
+ItoPlasmaAir3LFA::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_numParticles) const noexcept
+{
+  CH_TIME("ItoPlasmaAir3LFA::computeDt");
+  const Real E     = a_E.vectorLength();
   const Real alpha = this->computeAlpha(a_E);
-  const Real velo  = this->computeElectronDriftVelocity(a_E).vectorLength();
+  const Real mu    = m_tables.at("mobility").getEntry<1>(E);
 
-  const Real k_alpha = alpha * velo;
-
-  return log(m_deltaX) / k_alpha;
+  return log(m_deltaX) / (mu * E * alpha);
 }
 
 Real
 ItoPlasmaAir3LFA::computeAlpha(const RealVect a_E) const
 {
-  const Real E = a_E.vectorLength();
+  CH_TIME("ItoPlasmaAir3LFA::computeAlpha");
 
-  return m_tables.at("alpha").getEntry<1>(E);
+  return m_tables.at("alpha").getEntry<1>(a_E.vectorLength());
 }
 
 Vector<Real>
-ItoPlasmaAir3LFA::computeItoMobilitiesLFA(const Real a_time, const RealVect a_pos, const RealVect a_E) const
+ItoPlasmaAir3LFA::computeItoMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept
 {
-  Vector<Real> mobilities(m_num_ItoSpecies, m_ion_mu);
-  mobilities[m_ElectronIdx] = m_tables.at("mobility").getEntry<1>(a_E.vectorLength());
+  CH_TIME("ItoPlasmaAir3LFA::computeItoMobilities");
+
+  Vector<Real> mobilities(3);
+
+  mobilities[0] = m_tables.at("mobility").getEntry<1>(a_E.vectorLength());
+  mobilities[1] = m_ionMobility;
+  mobilities[2] = m_ionMobility;
 
   return mobilities;
 }
 
-RealVect
-ItoPlasmaAir3LFA::computeElectronDriftVelocity(const RealVect a_E) const
-{
-  return -m_tables.at("mobility").getEntry<1>(a_E.vectorLength()) * a_E;
-}
-
 Vector<Real>
-ItoPlasmaAir3LFA::computeItoDiffusionLFA(const Real         a_time,
-                                         const RealVect     a_pos,
-                                         const RealVect     a_E,
-                                         const Vector<Real> a_cdr_densities) const
+ItoPlasmaAir3LFA::computeItoDiffusion(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept
 {
-  Vector<Real> D(m_num_ItoSpecies, m_ion_D);
-  D[m_ElectronIdx] = m_tables.at("diffco").getEntry<1>(a_E.vectorLength());
+  Vector<Real> D(3);
+
+  D[0] = m_tables.at("diffco").getEntry<1>(a_E.vectorLength());
+  D[1] = m_ionDiffCo;
+  D[2] = m_ionDiffCo;
 
   return D;
 }
 
 void
-ItoPlasmaAir3LFA::updateReactionRatesLFA(const RealVect a_E, const Real a_dx, const Real a_kappa) const
+ItoPlasmaAir3LFA::injectParticlesEB(Vector<List<ItoParticle>>&       a_incomingParticles,
+                                    Vector<List<Photon>>&            a_incomingPhotons,
+                                    const Vector<List<ItoParticle>>& a_outgoingParticles,
+                                    const Vector<List<Photon>>&      a_outgoingPhotons,
+                                    const Vector<FPR>&               a_newNumParticles,
+                                    const Vector<FPR>&               a_oldNumParticles,
+                                    const RealVect&                  a_E,
+                                    const RealVect&                  a_cellCenter,
+                                    const RealVect&                  a_cellCentroid,
+                                    const RealVect&                  a_bndryCentroid,
+                                    const RealVect&                  a_bndryNormal,
+                                    const Real                       a_bndryArea,
+                                    const Real                       a_dx,
+                                    const Real                       a_dt,
+                                    const bool                       a_isDielectric,
+                                    const int                        a_matIndex) const noexcept
 {
+  CH_TIME("ItoPlasmaAir3LFA::injectParticlesEB");
+
+  List<ItoParticle>&       ingoingElectrons = a_incomingParticles[0];
+  const List<ItoParticle>& outgoingIons     = a_outgoingParticles[1];
+  const List<Photon>&      outgoingPhotons  = a_outgoingPhotons[0];
+
+  if (m_extrapBC) {
+    const Real diff   = a_oldNumParticles[0] - a_newNumParticles[0];
+    const Real diffLL = (long long)diff;
+    if (diffLL > 0LL) {
+      ingoingElectrons.add(ItoParticle(diff, a_cellCenter + a_cellCentroid * a_dx));
+    }
+  }
+  else {
+    const bool isCathode = a_E.dotProduct(a_bndryNormal) < 0.0;
+    const bool isAnode   = a_E.dotProduct(a_bndryNormal) > 0.0;
+
+    const RealVect bndryPos = a_cellCenter + a_dx * a_bndryCentroid;
+
+    if (isCathode) {
+      // SEE from ion impact
+      for (ListIterator<ItoParticle> lit(outgoingIons); lit.ok(); ++lit) {
+        const long long success = Random::getBinomial<long long>(llround(lit().weight()), m_ionImpactEfficiency);
+        if (success > 0LL) {
+          ingoingElectrons.add(ItoParticle(1.0 * success, bndryPos));
+        }
+      }
+
+      // SEE from photo-electric effect
+      for (ListIterator<Photon> lit(outgoingPhotons); lit.ok(); ++lit) {
+        const long long success = Random::getBinomial<long long>(llround(lit().weight()), m_quantumEfficiency);
+        if (success > 0LL) {
+          ingoingElectrons.add(ItoParticle(1.0 * success, bndryPos));
+        }
+      }
+    }
+    else if (isAnode) {
+    }
+  }
+}
+
+void
+ItoPlasmaAir3LFA::updateReactionRates(const RealVect a_E, const Real a_dx, const Real a_kappa) const noexcept
+{
+  CH_TIME("ItoPlasmaAir3LFA::updateReactionRates");
 
   // Compute the reaction rates.
-  const Real dV      = pow(a_dx, SpaceDim); //*a_kappa;
+  const Real dV      = pow(a_dx, SpaceDim);
   const Real E       = a_E.vectorLength();
   const Real alpha   = m_tables.at("alpha").getEntry<1>(E);
   const Real eta     = m_tables.at("eta").getEntry<1>(E);
   const Real Te      = m_tables.at("Te").getEntry<1>(E);
-  const Real velo    = this->computeElectronDriftVelocity(a_E).vectorLength();
-  const Real xfactor = (m_pq / (m_p + m_pq)) * excitationRates(E) * sergeyFactor(m_O2frac) * m_photoi_factor;
+  const Real mu      = m_tables.at("mobility").getEntry<1>(E);
+  const Real velo    = mu * E;
+  const Real xfactor = (m_pq / (m_p + m_pq)) * excitationRates(E) * sergeyFactor(m_O2frac) * m_photoIonizationFactor;
   const Real bpn     = 2E-13 * sqrt(300 / m_T) / dV;
   const Real bpe     = 1.138E-11 * pow(Te, -0.7) / dV;
 
-  m_reactions.at("impact_ionization").rate()      = alpha * velo;
-  m_reactions.at("Electron_attachment").rate()    = eta * velo;
-  m_reactions.at("Electron_recombination").rate() = bpe;
-  m_reactions.at("ion_recombination").rate()      = bpn;
-  m_reactions.at("photo_excitation").rate()       = alpha * velo * xfactor;
+  m_kmcReactions[0]->rate() = alpha * velo;
+  m_kmcReactions[1]->rate() = eta * velo;
+  m_kmcReactions[2]->rate() = bpe;
+  m_kmcReactions[3]->rate() = bpn;
+  m_kmcReactions[4]->rate() = alpha * velo * xfactor;
 }
 
 Real
 ItoPlasmaAir3LFA::excitationRates(const Real a_E) const
 {
+  CH_TIME("ItoPlasmaAir3LFA::excitationRates");
+
   const Real Etd = a_E / (m_N * Units::Td);
 
   Real y = 1.0;
-  if (Etd > 100) {
+  if (Etd > 100.0) {
     y = 0.1 * exp(233 / Etd);
   }
 
@@ -254,59 +349,60 @@ ItoPlasmaAir3LFA::excitationRates(const Real a_E) const
 Real
 ItoPlasmaAir3LFA::sergeyFactor(const Real a_O2frac) const
 {
-  return 3E-2 + 0.4 * pow(a_O2frac, 0.6);
-}
+  CH_TIME("ItoPlasmaAir3LFA::sergeyFactor");
 
-Real
-ItoPlasmaAir3LFA::photoionizationRate(const Real a_E) const
-{
-  return excitationRates(a_E) * sergeyFactor(m_O2frac) * m_photoi_factor;
+  return 3E-2 + 0.4 * pow(a_O2frac, 0.6);
 }
 
 ItoPlasmaAir3LFA::Electron::Electron()
 {
+  CH_TIME("ItoPlasmaAir3LFA::Electron::Electron");
+
   m_isMobile     = true;
   m_isDiffusive  = true;
   m_name         = "Electron";
   m_chargeNumber = -1;
 }
 
-ItoPlasmaAir3LFA::Electron::~Electron() {}
+ItoPlasmaAir3LFA::Electron::~Electron() { CH_TIME("ItoPlasmaAir3LFA::Electron::Electron"); }
 
 ItoPlasmaAir3LFA::Positive::Positive()
 {
+  CH_TIME("ItoPlasmaAir3LFA::Positive::Positive");
+
   m_isMobile     = false;
   m_isDiffusive  = false;
   m_name         = "Positive";
   m_chargeNumber = 1;
 
   ParmParse pp("ItoPlasmaAir3LFA");
-  pp.get("mobile_ions", m_isMobile);
-  pp.get("mobile_ions", m_isDiffusive);
+  pp.get("ion_transport", m_isMobile);
+  pp.get("ion_transport", m_isDiffusive);
 }
 
-ItoPlasmaAir3LFA::Positive::~Positive() {}
+ItoPlasmaAir3LFA::Positive::~Positive() { CH_TIME("ItoPlasmaAir3LFA::Positive::~Positive"); }
 
 ItoPlasmaAir3LFA::Negative::Negative()
 {
+  CH_TIME("ItoPlasmaAir3LFA::Negative::Negative");
+
   m_isMobile     = false;
   m_isDiffusive  = false;
   m_name         = "Negative";
   m_chargeNumber = -1;
 
   ParmParse pp("ItoPlasmaAir3LFA");
-  pp.get("mobile_ions", m_isMobile);
-  pp.get("mobile_ions", m_isDiffusive);
+  pp.get("ion_transport", m_isMobile);
+  pp.get("ion_transport", m_isDiffusive);
 }
 
-ItoPlasmaAir3LFA::Negative::~Negative() {}
+ItoPlasmaAir3LFA::Negative::~Negative() { CH_TIME("ItoPlasmaAir3LFA::Negative::~Negative"); }
 
 ItoPlasmaAir3LFA::PhotonZ::PhotonZ()
 {
-  m_name = "PhotonZ";
+  CH_TIME("ItoPlasmaAir3LFA::PhotonZ::PhotonZ");
 
-  const Real O2_frac  = 0.2;
-  const Real pressure = 1.0;
+  m_name = "PhotonZ";
 
   ParmParse pp("ItoPlasmaAir3LFA");
 
@@ -314,26 +410,24 @@ ItoPlasmaAir3LFA::PhotonZ::PhotonZ()
   pp.get("photoi_f2", m_f2);
   pp.get("photoi_K1", m_K1);
   pp.get("photoi_K2", m_K2);
-  pp.get("photoi_seed", m_seed);
 
-  // Convert units
-  m_pO2 = pressure * O2_frac * Units::atm2pascal;
-  m_K1  = m_K1 * m_pO2;
-  m_K2  = m_K2 * m_pO2;
+  constexpr Real fracO2   = 0.2;
+  constexpr Real pressure = 1.0;
+  constexpr Real pO2      = fracO2 * pressure * Units::atm2pascal;
 
-  // Seed the RNG
-  if (m_seed < 0)
-    m_seed = std::chrono::system_clock::now().time_since_epoch().count();
-  m_rng     = new std::mt19937_64(m_seed);
-  m_udist01 = new std::uniform_real_distribution<Real>(0.0, 1.0);
+  m_K1 = m_K1 * pO2;
+  m_K2 = m_K2 * pO2;
 }
 
-ItoPlasmaAir3LFA::PhotonZ::~PhotonZ() {}
+ItoPlasmaAir3LFA::PhotonZ::~PhotonZ() { CH_TIME("ItoPlasmaAir3LFA::PhotonZ::~PhotonZ"); }
 
 Real
 ItoPlasmaAir3LFA::PhotonZ::getAbsorptionCoefficient(const RealVect a_pos) const
 {
-  const Real f = m_f1 + (*m_udist01)(*m_rng) * (m_f2 - m_f1);
+  // Draw random frequency in interval.
+  const Real f = m_f1 + Random::getUniformReal01() * (m_f2 - m_f1);
+
+  // Return random absorption coefficient.
   return m_K1 * pow(m_K2 / m_K1, (f - m_f1) / (m_f2 - m_f1));
 }
 

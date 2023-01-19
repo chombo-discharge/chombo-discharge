@@ -64,6 +64,7 @@ Driver.refine_dielectrics              = -1            # Refine dielectric surfa
 # ====================================================================================================
 # ITO_SOLVER CLASS OPTIONS
 # ====================================================================================================
+ItoSolver.verbosity           = -1            # Class verbosity
 ItoSolver.plt_vars            = phi vel dco   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
 ItoSolver.seed                = 0             # Seed for RNG

@@ -135,7 +135,7 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags)
   int globalFoundTags = 0;
   int localFoundTags  = foundTags ? 1 : 0;
 
-  const int result = MPI_Allreduce(&localFoundTags, &globalFoundTags, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+  MPI_Allreduce(&localFoundTags, &globalFoundTags, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
 
   foundTags = (globalFoundTags == 1) ? true : false;
 #endif

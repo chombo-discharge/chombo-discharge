@@ -18,22 +18,31 @@
 
 using namespace Physics::ItoPlasma;
 
-inline const int&
-ItoPlasmaPhotoReaction::source() const
+inline ItoPlasmaPhotoReaction::ItoPlasmaPhotoReaction(const size_t a_source, const std::list<size_t> a_targets) noexcept
+{
+  this->define(a_source, a_targets);
+}
+
+inline ItoPlasmaPhotoReaction::~ItoPlasmaPhotoReaction() noexcept {}
+
+inline void
+ItoPlasmaPhotoReaction::define(const size_t a_source, const std::list<size_t> a_targets) noexcept
+{
+
+  m_source  = a_source;
+  m_targets = a_targets;
+}
+
+inline const size_t&
+ItoPlasmaPhotoReaction::getSourcePhoton() const noexcept
 {
   return m_source;
 }
 
-inline const std::deque<int>&
-ItoPlasmaPhotoReaction::targets() const
+inline const std::list<size_t>&
+ItoPlasmaPhotoReaction::getTargetSpecies() const noexcept
 {
   return m_targets;
-}
-
-inline const std::deque<std::pair<int, Real>>&
-ItoPlasmaPhotoReaction::getTargetEnergies() const
-{
-  return m_energies;
 }
 
 #include <CD_NamespaceFooter.H>

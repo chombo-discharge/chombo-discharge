@@ -90,7 +90,6 @@ protected:
     @brief Number of solvers
   */
   int m_num;
-  ;
 
   /*!
     @brief Ion solvers

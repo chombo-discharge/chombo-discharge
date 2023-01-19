@@ -26,8 +26,9 @@ RtLayout<T>::RtLayout(const Vector<RefCountedPtr<RtSpecies>>& a_RtSpecies)
   CH_TIME("RtLayout<T>::RtLayout(Vector)");
 
   // Default settings.
-  m_species = a_RtSpecies;
-  m_solvers.resize(0); // Solvers added through the addSolver function
+  m_verbosity = -1;
+  m_species   = a_RtSpecies;
+  m_solvers.resize(0);
 }
 
 template <class T>

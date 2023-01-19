@@ -13,17 +13,12 @@
 #define CD_ItoPlasmaPhysics_H
 
 // Std includes
-#include <chrono>
-#include <random>
 #include <memory>
-#include <deque>
-#include <fstream>
-#include <sstream>
+#include <vector>
 
 // Chombo includes
 #include <RealVect.H>
 #include <RefCountedPtr.H>
-#include <LoHiSide.H>
 #include <List.H>
 
 // Our includes
@@ -31,60 +26,81 @@
 #include <CD_RtSpecies.H>
 #include <CD_Photon.H>
 #include <CD_ItoParticle.H>
-#include <CD_ItoPlasmaReaction.H>
 #include <CD_ItoPlasmaPhotoReaction.H>
-#include <CD_LookupTable1D.H>
+#include <CD_KMCDualState.H>
+#include <CD_KMCDualStateReaction.H>
+#include <CD_KMCSolver.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
   namespace ItoPlasma {
 
-    // Ease up on the typing.
-    using ReactionPtrs  = std::deque<std::shared_ptr<ItoPlasmaReaction>>;
-    using ReactionTypes = std::pair<ReactionPtrs, ReactionPtrs>;
+    /*!
+      @brief Numerical representation of the KMC state. Can be floating-point or integer type
+    */
+    using FPR = Real;
 
     /*!
-      @brief Abstract clas for specifying plasma kinetics
+      @brief KMC state used in the Kinetic Monte Carlo advancement
+    */
+    using KMCState = KMCDualState<FPR>;
+
+    /*!
+      @brief KMC reaction used in the Kinetic Monte Carlo advancement
+    */
+    using KMCReaction = KMCDualStateReaction<KMCState, FPR>;
+
+    /*!
+      @brief KMC solverl type used in the Kinetic Monte carlo advancement
+    */
+    using KMCSolverType = KMCSolver<KMCReaction, KMCState, FPR>;
+
+    /*!
+      @brief Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers. 
+      @details When using this class, the user should populate m_kmcReactions with the appropriate reactions AND implement routines
+      for computing the mobility/diffusion coefficeints. 
     */
     class ItoPlasmaPhysics
     {
     public:
-      enum class coupling
-      {
-        LFA,
-        LEA
-      };
-
       /*!
-	@brief Ctor. Does nothing.
+	@brief Constructor. Does nothing.
       */
-      ItoPlasmaPhysics();
+      inline ItoPlasmaPhysics();
 
       /*!
-	@brief Dtor. Does nothing. 
+	@brief Destructor. Does nothing. 
       */
-      ~ItoPlasmaPhysics();
+      inline virtual ~ItoPlasmaPhysics();
 
       /*!
-	@brief Compute a time step
+	@brief Compute a time step to use. 
+	@param[in] a_E            Electric field. 
+	@param[in] a_pos          Position
+	@param[in] a_numParticles Number of reactive particles of each species
+	@return Default returns infinity but user can implement a physics based time step. 
       */
-      virtual Real
-      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const = 0;
+      inline virtual Real
+      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<FPR> a_numParticles) const noexcept;
 
       /*!
-	@brief Compute Townsend ionization length
+	@brief Compute Townsend ionization coefficient
+	@param[in] a_E Electric field. 
+	@return Should return the Townsend ionization coefficient. 
       */
       virtual Real
       computeAlpha(const RealVect a_E) const = 0;
 
       /*!
-	@brief Get all species
+	@brief Get all particle species
+	@return m_plasmaSpecies
       */
       const Vector<RefCountedPtr<ItoSpecies>>&
       getItoSpecies() const;
 
       /*!
-	@brief Get all Photons
+	@brief Get all photon species
+	@return m_rtSpecies
       */
       const Vector<RefCountedPtr<RtSpecies>>&
       getRtSpecies() const;
@@ -92,122 +108,124 @@ namespace Physics {
       /*!
 	@brief Return number of ion equations
       */
-      int
-      getNumItoSpecies() const;
+      inline int
+      getNumPlasmaSpecies() const;
 
       /*!
 	@brief Return number of RTE equations
       */
-      int
-      getNumRtSpecies() const;
+      inline int
+      getNumPhotonSpecies() const;
 
       /*!
-	@brief Get the coupling, LFA/LEA
+	@brief Parse run-time options
       */
-      coupling
-      getCoupling() const;
+      inline virtual void
+      parseRuntimeOptions() noexcept;
 
       /*!
 	@brief Set initial surface charge. Default is 0, override if you want.
+	@param[in] a_time Simulation time
+	@param[in] a_pos  Physical coordinate
       */
-      virtual Real
+      inline virtual Real
       initialSigma(const Real a_time, const RealVect a_pos) const;
 
       /*!
-	@brief Compute the ito mobilities in the lfa approximation
+	@brief Compute the Ito solver mobilities.
+	@param[in] a_time Time
+	@param[in] a_pos  Position
+	@param[in] a_E    Electric field
+	@return Must return a vector of non-negative mobility coefficients for the plasma species
       */
       virtual Vector<Real>
-      computeItoMobilitiesLFA(const Real a_time, const RealVect a_pos, const RealVect a_E) const = 0;
+      computeItoMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept = 0;
 
       /*!
-	@brief Compute diffusion coefficients
+	@brief Compute the Ito solver diffusion coefficients
+	@param[in] a_time Time
+	@param[in] a_pos  Position
+	@param[in] a_E    Electric field
+	@return Must return a vector of non-negative diffusion coefficients for the plasma species
       */
       virtual Vector<Real>
-      computeItoDiffusionLFA(const Real         a_time,
-                             const RealVect     a_pos,
-                             const RealVect     a_E,
-                             const Vector<Real> a_cdr_densities) const = 0;
+      computeItoDiffusion(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept = 0;
 
       /*!
-	@brief Update reaction rates for LFA updates. Since the rates don't change during the advance, they can
-	be set to a constant. 
+	@brief Resolve particle and photon injection at the EB.
+	@details Routine is here to handle charge injection, secondary emission etc.
+	@param[out] a_outgoingParticles Outgoing plasma species particles. 
+	@param[out] a_outgoingPhotons   Photons injected through the EB
+	@param[in]  a_incomingParticles Particles that left the computational domain through the EB
+	@param[in]  a_incomingPhotons   Photons that left the computational domain through the EB
+	@param[in]  a_newNumParticles   Total number of particles in the cut-cell AFTER the transport step
+	@param[in]  a_oldNumParticles   Total number of particles in the cut-cell BEFORE the transport step
+	@param[in]  a_electricField     Electric field                  
+	@param[in]  a_cellCenter        Physical position of the cell center. 
+	@param[in]  a_cellCentroid      Cell centroid relative to the cell center (not multiplied by dx)
+	@param[in]  a_bndryCentroid     EB face centroid relative to the cell center (not multiplied by dx)
+	@param[in]  a_bndryNormal       Cut-cell normal vector. 
+	@param[in]  a_bndryArea         Cut-cell boundary area - not multiplied by dx (2D) or dx^2 (3D)
+	@param[in]  a_dx                Grid resolution on this level. 
+	@param[in]  a_dt                Time step
+	@param[in]  a_isDielectric      Dielectric or electrode. 
+	@param[in]  a_matIndex          Material index (taken from computationalGeometry)
       */
       virtual void
-      updateReactionRatesLFA(const RealVect a_E, const Real a_dx, const Real a_kappa) const = 0;
+      injectParticlesEB(Vector<List<ItoParticle>>&       a_outgoingParticles,
+                        Vector<List<Photon>>&            a_outgoingPhotons,
+                        const Vector<List<ItoParticle>>& a_incomingParticles,
+                        const Vector<List<Photon>>&      a_incomingPhotons,
+                        const Vector<FPR>&               a_newNumParticles,
+                        const Vector<FPR>&               a_oldNumParticles,
+                        const RealVect&                  a_E,
+                        const RealVect&                  a_cellCenter,
+                        const RealVect&                  a_cellCentroid,
+                        const RealVect&                  a_bndryCentroid,
+                        const RealVect&                  a_bndryNormal,
+                        const Real                       a_bndryArea,
+                        const Real                       a_dx,
+                        const Real                       a_dt,
+                        const bool                       a_isDielectric,
+                        const int                        a_matIndex) const noexcept = 0;
 
       /*!
-	@brief Update reaction rates for LFA updates. Since the rates don't change during the advance, they can
-	be set to a constant. 
-      */
-      virtual void
-      updateReactionRatesLEA(const RealVect     a_E,
-                             const Vector<Real> a_mean_energies,
-                             const Real         a_dx,
-                             const Real         a_kappa) const = 0;
-
-      /*!
-	@brief Update reaction rates
-      */
-      inline void
-      updateReactionRates(const RealVect     a_E,
-                          const Vector<Real> a_mean_energies,
-                          const Real         a_dx,
-                          const Real         a_kappa) const;
-
-      /*!
-	@brief Advance particles. If usign the LFA then a_mean_energies and a_sources are dummy arugments. 
-      */
-      inline void
-      advanceParticles(Vector<long long>&  a_particles,
-                       Vector<long long>&  a_newPhotons,
-                       Vector<Real>&       a_mean_energies,
-                       const Vector<Real>& a_sources,
-                       const Real          a_dt,
-                       const RealVect      a_E,
-                       const Real          a_dx,
-                       const Real          a_kappa) const;
-
-      /*!
-	@brief Reaction network advance in the LEA.
+	@brief Advance particles. 
+	@param[inout] a_numParticles  Number of physical particles
+	@param[out]   a_numNewPhotons Number of new physical photons to generate (of each type)
+	@param[in]    a_dt            Time step
+	@param[in]    a_E             Electric field
+	@param[in]    a_dx            Grid resolution
+	@param[in]    a_kappa         Cut-cell volume fraction. 
       */
       inline void
-      advanceReactionNetwork(Vector<List<ItoParticle>*>& a_particles,
-                             Vector<List<Photon>*>&      a_Photons,
-                             Vector<List<Photon>*>&      a_newPhotons,
-                             const Vector<Real>&         a_sources,
-                             const RealVect              a_E,
-                             const RealVect              a_cellPos,
-                             const RealVect              a_centroidPos,
-                             const RealVect              a_bndryCentroid,
-                             const RealVect              a_bndryNormal,
-                             const RealVect              a_lo,
-                             const RealVect              a_hi,
-                             const Real                  a_dx,
-                             const Real                  a_kappa,
-                             const Real                  a_dt);
+      advanceKMC(Vector<FPR>&   a_numParticles,
+                 Vector<FPR>&   a_numNewPhotons,
+                 const Real     a_dt,
+                 const RealVect a_E,
+                 const Real     a_dx,
+                 const Real     a_kappa) const;
 
       /*!
-	@brief Reconcile the number of particles
-      */
-      inline void
-      reconcilePhotons(Vector<List<Photon>*>&   a_newPhotons,
-                       const Vector<long long>& a_numNewPhotons,
-                       const RealVect           a_cellPos,
-                       const RealVect           a_centroidPos,
-                       const RealVect           a_lo,
-                       const RealVect           a_hi,
-                       const RealVect           a_bndryCentroid,
-                       const RealVect           a_bndryNormal,
-                       const Real               a_dx,
-                       const Real               a_kappa) const;
-
-      /*!
-	@brief Reconcile the number of particles
+	@brief Reconcile the number of particles.
+	@details This will add/remove particles and potentially also adjust the particle weights.
+	@param[inout] a_particles Computational particles
+	@param[in]    a_newNumParticles New number of particles (i.e., after the KMC advance)
+	@param[in]    a_oldNumParticles Previous number of particles (i.e., before the KMC advance)
+	@param[in]    a_cellPos         Cell center position
+	@param[in]    a_centroidPos     Cell centroid position
+	@param[in]    a_loCorner        Low corner of minimum box enclosing the cut-cell
+	@param[in]    a_hiCorner        High corner of minimum box enclosing the cut-cell
+	@param[in]    a_bndryCentroid   Cut-cell boundary centroid
+	@param[in]    a_bndryNormal     Cut-cell normal (pointing into the domain)
+	@param[in]    a_dx              Grid resolution
+	@param[in]    a_kappa           Cut-cell volume fraction. 
+	@note Public because this is called by ItoPlasmaStepper
       */
       inline void
       reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
-                         const Vector<long long>&    a_newNumParticles,
-                         const Vector<long long>&    a_oldNumParticles,
+                         const Vector<FPR>&          a_newNumParticles,
+                         const Vector<FPR>&          a_oldNumParticles,
                          const RealVect              a_cellPos,
                          const RealVect              a_centroidPos,
                          const RealVect              a_lo,
@@ -215,520 +233,192 @@ namespace Physics {
                          const RealVect              a_bndryCentroid,
                          const RealVect              a_bndryNormal,
                          const Real                  a_dx,
-                         const Real                  a_kappa) const;
+                         const Real                  a_kappa) const noexcept;
 
       /*!
-	@brief Reconcile number of Photons
+	@brief Generate new photons. 
+	@details This will add photons
+	@param[in] a_newPhotons      New photons
+	@param[in] a_numNewPhotons   Number of physical photons to be generated. 
+	@param[in] a_cellPos         Cell center position
+	@param[in] a_centroidPos     Cell centroid position
+	@param[in] a_loCorner        Low corner of minimum box enclosing the cut-cell
+	@param[in] a_hiCorner        High corner of minimum box enclosing the cut-cell
+	@param[in] a_bndryCentroid   Cut-cell boundary centroid
+	@param[in] a_bndryNormal     Cut-cell normal (pointing into the domain)
+	@param[in] a_dx              Grid resolution
+	@param[in] a_kappa           Cut-cell volume fraction. 
+	@note Public because this is called by ItoPlasmaStepper
       */
       inline void
-      reconcilePhotons(List<Photon>&    a_newPhotons,
-                       const RtSpecies& a_species,
-                       const long long  a_numNewPhotons,
-                       const RealVect   a_cellPos,
-                       const RealVect   a_centroidPos,
-                       const RealVect   a_lo,
-                       const RealVect   a_hi,
-                       const RealVect   a_bndryCentroid,
-                       const RealVect   a_normal,
-                       const Real       a_dx,
-                       const Real       a_kappa) const;
+      reconcilePhotons(Vector<List<Photon>*>& a_newPhotons,
+                       const Vector<FPR>&     a_numNewPhotons,
+                       const RealVect         a_cellPos,
+                       const RealVect         a_centroidPos,
+                       const RealVect         a_lo,
+                       const RealVect         a_hi,
+                       const RealVect         a_bndryCentroid,
+                       const RealVect         a_bndryNormal,
+                       const Real             a_dx,
+                       const Real             a_kappa) const noexcept;
 
       /*!
-	@brief Reconcile photoionization mechanism
+	@brief Reconcile photoionization reactions.
+	@param[inout] a_particles       Particle products. 
+	@param[in]    a_absorbedPhotons Photons absorbed on the mesh. 
+	@details This runs through the photo-reactions and associates photo-ionization products. 
       */
       inline void
       reconcilePhotoionization(Vector<List<ItoParticle>*>&  a_particles,
-                               Vector<Real>&                a_mean_energies,
-                               const Vector<long long>&     a_numParticles,
-                               const Vector<List<Photon>*>& a_Photons) const;
-
-      /*!
-	@brief Set mean particle energy
-      */
-      inline void
-      setMeanParticleEnergy(Vector<List<ItoParticle>*>& a_particles, const Vector<Real> a_mean_energy) const;
+                               const Vector<List<Photon>*>& a_absorbedPhotons) const noexcept;
 
     protected:
-      enum class algorithm
+      /*!
+	@brief Enum for switching between KMC algorithms
+	@details 'SSA' is the Gillespie algorithm, 'Tau' is tau-leaping and 'Hybrid' is the Cao et. al. algorithm. 
+      */
+      enum class Algorithm
       {
-        ssa,
-        tau,
-        hybrid
+        SSA,
+        Tau,
+        Hybrid
       };
 
-      int m_seed;
-      int m_table_entries;
+      /*!
+	@brief Enum for switching between various particle placement algorithms
+      */
+      enum class ParticlePlacement
+      {
+        Random,
+        Centroid
+      };
 
-      algorithm m_algorithm;
-      coupling  m_coupling;
+      /*!
+	@brief Algorithm to use for KMC advance
+      */
+      Algorithm m_algorithm;
 
-      mutable std::mt19937_64                      m_rng;
-      mutable std::uniform_real_distribution<Real> m_udist01;
-      mutable std::uniform_real_distribution<Real> m_udist11;
+      /*!
+	@brief Particle placement algorithm
+      */
+      ParticlePlacement m_particlePlacement;
 
-      Vector<RefCountedPtr<ItoSpecies>> m_ItoSpecies;
-      Vector<RefCountedPtr<RtSpecies>>  m_rtSpecies;
+      /*!
+	@brief Class name. Used for options parsing
+      */
+      std::string m_className;
 
-      int m_num_ItoSpecies;
-      int m_numRtSpecies;
-      int m_ppc;
-      int m_fieldSolver_switch;
-      int m_init_weights;
+      /*!
+	@brief Turn on/off debugging
+      */
+      bool m_debug;
+
+      /*!
+	@brief Kinetic Monte Carlo state
+      */
+      mutable KMCState m_kmcState;
+
+      /*!
+	@brief Kinetic Monte Carlo solver. 
+      */
+      mutable KMCSolverType m_kmcSolver;
+
+      /*!
+	@brief List of reactions for the KMC solver
+      */
+      std::vector<std::shared_ptr<const KMCReaction>> m_kmcReactions;
+
+      /*!
+	@brief List of photoionization reactions
+      */
+      std::vector<std::shared_ptr<const ItoPlasmaPhotoReaction>> m_photoReactions;
+
+      /*!
+	@brief List of solver-tracked particle species. 
+      */
+      Vector<RefCountedPtr<ItoSpecies>> m_plasmaSpecies;
+
+      /*!
+	@brief List of solver-tracked photon species. 
+      */
+      Vector<RefCountedPtr<RtSpecies>> m_rtSpecies;
+
+      /*!
+	@brief Maximum new number of particles generated by the chemistry advance
+      */
+      int m_maxNewParticles;
+
+      /*!
+	@brief Maximum new number of photons generated by the chemistry advance
+      */
+      int m_maxNewPhotons;
+
+      /*!
+	@brief Solver setting for the Cao et. al algorithm. 
+	@details Determines critical reactions. A reaction is critical if it is m_Ncrit firings away from depleting a reactant. 
+      */
       int m_Ncrit;
+
+      /*!
+	@brief Solver setting for the Cao et. al algorithm. 
+	@details Maximum number of SSA steps to run when switching into SSA-based advancement for non-critical reactions. 
+      */
       int m_NSSA;
 
+      /*!
+	@brief Solver setting for the Cao et. al. algorithm. 
+	@details Equal to the maximum permitted change in the relative propensity for non-critical reactions
+      */
       Real m_SSAlim;
+
+      /*!
+	@brief Solver setting for the Cao et. al. algorithm. 
+	@details Equal to the maximum permitted change in the relative propensity for non-critical reactions
+      */
       Real m_eps;
 
-      // These are all the reactions
-      std::map<std::string, ItoPlasmaReaction>              m_reactions;
-      mutable std::map<std::string, ItoPlasmaPhotoReaction> m_photoReactions;
-
-      // Lookup tables if you need them.
-      std::map<std::string, LookupTable1D<2>> m_tables;
-
       /*!
-	@brief Add a table
-      */
-      void
-      addTable(const std::string a_table_name, const std::string a_file);
-
-      /*!
-	@brief Read a file and put it in a lookup table
-      */
-      void
-      readFile(LookupTable1D<2>& a_table, const std::string a_file);
-
-      /*!
-	@brief Draw a valid random position somewhere in a cell
-      */
-      inline RealVect
-      randomPosition(const RealVect a_cellPos,
-                     const RealVect a_centroidPos,
-                     const RealVect a_lo,
-                     const RealVect a_hi,
-                     const RealVect a_bndryCentroid,
-                     const RealVect a_normal,
-                     const Real     a_dx,
-                     const Real     a_kappa) const;
-
-      /*!
-	@brief Draw a random position somewhere in the cube (a_lo, a_hi) such that the position is
-	(pos-bndryCentroid).dotProduct.a_normal > 0, i.e. inside the valid region. 
-      */
-      inline RealVect
-      randomPosition(const RealVect a_lo,
-                     const RealVect a_hi,
-                     const RealVect a_bndryCentroid,
-                     const RealVect a_normal) const;
-
-      /*!
-	@brief Return a random position in the cube (a_lo, a_hi);
-      */
-      inline RealVect
-      randomPosition(const RealVect a_lo, const RealVect a_hi) const;
-
-      /*!
-	@brief Draw a random direction in space
-      */
-      inline RealVect
-      randomDirection() const;
-
-      /*!
-	@brief Returns true if all particle numbers are >= 0
-      */
-      inline bool
-      isStateValid(const Vector<long long>& a_particles) const;
-
-      /*!
-	@brief Check charge conservation in a cell
+	@brief Define the KMC solver and state
       */
       inline void
-      checkChargeConservation(const Vector<long long>& a_oldNumParticles,
-                              const Vector<long long>& a_newNumParticles) const;
+      defineKMC() noexcept;
 
       /*!
-	@brief Compute total charge in a cell
-      */
-      inline long long
-      computeCharge(const Vector<List<ItoParticle>*>& a_particles) const;
-
-      /*!
-	@brief Reconcile number of particles
+	@brief Parse the maximum number of particles generated per cell
       */
       inline void
-      reconcileParticles(List<ItoParticle>& a_particles,
-                         const long long    a_numNewParticles,
-                         const long long    a_oldNewParticles,
-                         const RealVect     a_cellPos,
-                         const RealVect     a_centroidPos,
-                         const RealVect     a_lo,
-                         const RealVect     a_hi,
-                         const RealVect     a_bndryCentroid,
-                         const RealVect     a_normal,
-                         const Real         a_dx,
-                         const Real         a_kappa) const;
+      parsePPC() noexcept;
 
       /*!
-	@brief Add particles
+	@brief Parse the maximum number of particles generated per cell
       */
       inline void
-      addParticles(List<ItoParticle>& a_particles,
-                   const long long    a_numParticlesToAdd,
-                   const RealVect     a_cellPos,
-                   const RealVect     a_centroidPos,
-                   const RealVect     a_lo,
-                   const RealVect     a_hi,
-                   const RealVect     a_bndryCentroid,
-                   const RealVect     a_bndryNormal,
-                   const Real         a_dx,
-                   const Real         a_kappa) const;
+      parseDebug() noexcept;
 
       /*!
-	@brief Remove particles
+	@brief Parse reaction algorithm
       */
       inline void
-      remove_particles(List<ItoParticle>& a_particles, const long long a_numParticlesToRemove) const;
+      parseAlgorithm() noexcept;
 
       /*!
-	@brief Set mean particle energy
+	@brief Update reaction rates
+	@param[in] a_E     Electric field
+	@param[in] a_dx    Grid resolution
+	@param[in] a_kappa Cut-cell volume fraction
+	@note Must be implemented by the user.
+      */
+      virtual void
+      updateReactionRates(const RealVect a_E, const Real a_dx, const Real a_kappa) const noexcept = 0;
+
+      /*!
+	@brief Remove particles from the input list.
+	@details This will remove weight from the input particles if we can. Otherwise we remove full particles. 
+	@param[inout] a_particles   List of (super-)particles to remove from. 
+	@param[in]    a_numToRemove Number of physical particles to remove from the input list
       */
       inline void
-      setMeanParticleEnergy(List<ItoParticle>& a_particles, const Real a_mean_energy) const;
-
-      /*!
-	@brief Check that all weights are > 0
-      */
-      inline void
-      sanityCheck(const List<ItoParticle>& a_lit) const;
-
-      /*!
-	@brief Check that all weights are > 0
-      */
-      inline long long
-      getTotalWeight(const List<ItoParticle>& a_lit) const;
-
-      /*!
-	@brief Compute particle weights
-      */
-      inline void
-      computeWeights(ListIterator<ItoParticle>& a_lit,
-                     Vector<long long>&         a_particleWeights,
-                     long long&                 a_minWeight) const;
-
-      /*!
-	@brief Trim particle weights down to a_minWeight
-      */
-      inline void
-      trimWeights(long long&         a_numRemoved,
-                  Vector<long long>& a_particleWeights,
-                  const long long    a_numParticlesToRemove,
-                  const long long    a_minWeight) const;
-
-      /*!
-	@brief Remove particle weight down to a_numParticlesToRemove
-      */
-      inline void
-      removeWeights(Vector<long long>& a_particleWeights, const long long a_numParticlesToRemove) const;
-
-      /*!
-	@brief Remove particle weight down to a_numParticlesToRemove
-      */
-      inline void
-      reconcileWeights(List<ItoParticle>& a_particles, const Vector<long long>& a_particleWeights) const;
-
-      /*!
-	@brief Compute particle weights for superparticles
-      */
-      inline void
-      computeParticleWeights(long long&      a_weight,
-                             long long&      a_num,
-                             long long&      a_remainder,
-                             const long long a_numNewParticles) const;
-
-      /*!
-	@brief Poisson reaction
-      */
-      inline long long
-      poissonReaction(const Real a_propensity, const Real a_dt) const;
-
-      /*!
-	@brief Compute particles to draw per rank
-      */
-      inline int
-      computeParticlesPerRank(const int a_numParticles) const;
-
-      /*!
-	@brief Draw Gaussian distributed particles
-      */
-      inline void
-      drawGaussianParticles(List<ItoParticle>& a_particles1,
-                            List<ItoParticle>& a_particles2,
-                            const int          a_numParticles,
-                            const RealVect     a_blobCenter,
-                            const Real         a_blobRadius,
-                            const Real         a_weight,
-                            const Real         a_energy1,
-                            const Real         a_energy2);
-
-      /*!
-	@brief Draw sphere particles
-      */
-      inline void
-      drawSphereParticles(List<ItoParticle>& a_particles1,
-                          List<ItoParticle>& a_particles2,
-                          const int          a_numParticles,
-                          const RealVect     a_blobCenter,
-                          const Real         a_blobRadius,
-                          const Real         a_weight,
-                          const Real         a_energy1,
-                          const Real         a_energy2);
-
-      /*!
-	@brief Draw particles in a box
-      */
-      inline void
-      drawBoxParticles(List<ItoParticle>& a_particles1,
-                       List<ItoParticle>& a_particles2,
-                       const int          a_numParticles,
-                       const RealVect     a_boxLo,
-                       const RealVect     a_boxHi,
-                       const Real         a_weight,
-                       const Real         a_energy1,
-                       const Real         a_energy2);
-
-      /*!
-	@brief Get the particle count
-      */
-      inline Vector<long long>
-      getParticleCount(const Vector<List<ItoParticle>*>& a_particles) const;
-
-      /*!
-	@brief Get the particle count
-      */
-      inline long long
-      getParticleCount(const List<ItoParticle>& a_particles) const;
-
-      /*!
-	@brief Get the particle energies
-      */
-      inline Vector<Real>
-      getParticleEnergy(const Vector<List<ItoParticle>*>& a_particles) const;
-
-      /*!
-	@brief Get the particle energies
-      */
-      inline Real
-      getParticleEnergy(const List<ItoParticle>& a_particles) const;
-
-      /*!
-	@brief Get the mean particle energies
-      */
-      inline Vector<Real>
-      getParticleMeanEnergy(const Vector<Real>& a_energies, const Vector<long long>& a_particle_count) const;
-
-      /*!
-	@brief Get the particle energies
-      */
-      inline Real
-      getParticleMeanEnergy(const Real& a_energy, const long long& a_particle_count) const;
-
-      /*!
-	@brief Get critical and non-critical reactions
-      */
-      inline ReactionTypes
-      getCriticalReactions(const Vector<long long>& a_particles) const;
-
-      /*!
-	@brief Get the time to the next critical reaction. 
-      */
-      inline Real
-      getCriticalTimeStep(const Vector<long long>& a_particles, const ReactionPtrs& a_critical_reactions) const;
-
-      /*!
-	@brief Get the time to the next critical reaction. 
-      */
-      inline Real
-      getNonCriticalTimeStep(const Vector<long long>& a_particles, const ReactionPtrs& a_non_critical_reactions) const;
-
-      /*!
-	@brief Compute the total propensity for all reactions. 
-      */
-      inline Real
-      propensity(const Vector<long long>& a_particles) const;
-
-      /*!
-	@brief Compute total propensity for a subset of reactions. 
-      */
-      inline Real
-      propensity(const Vector<long long>& a_particles, const ReactionPtrs& a_critical_reactions) const;
-
-      /*!
-	@brief Computes all propensities
-      */
-      inline std::deque<Real>
-      propensities(const Vector<long long>& a_particles) const;
-
-      /*!
-	@brief Compute critical propensities
-      */
-      inline std::deque<Real>
-      propensities(const Vector<long long>& a_particles, const ReactionPtrs& a_critical_reactions) const;
-
-      /*!
-	@brief Do a tau-step with all reactions. You must update the reaction rates before entering this routine! This calls the other version. 
-      */
-      inline void
-      stepTau(Vector<long long>&  a_particles,
-              Vector<long long>&  a_newPhotons,
-              Vector<Real>&       a_mean_energies,
-              const Vector<Real>& a_sources,
-              const Real          a_dx,
-              const Real          a_kappa,
-              const Real          a_dt) const;
-
-      /*!
-	@brief Do a tau-step with a subset of reactions. You must update the reaction rates before entering this routine!
-      */
-      inline void
-      stepTau(Vector<long long>&  a_particles,
-              Vector<long long>&  a_newPhotons,
-              Vector<Real>&       a_mean_energies,
-              const Vector<Real>& a_sources,
-              const ReactionPtrs& a_reactions,
-              const Real          a_dx,
-              const Real          a_kappa,
-              const Real          a_dt) const;
-
-      /*!
-	@brief Do a tau-step with a subset of reactions. You must update the reaction rates before entering this routine! Propensities are not
-	recomputed with this version. 
-      */
-      inline void
-      stepTau(Vector<long long>&      a_particles,
-              Vector<long long>&      a_newPhotons,
-              Vector<Real>&           a_mean_energies,
-              const Vector<Real>&     a_sources,
-              const ReactionPtrs&     a_reactions,
-              const std::deque<Real>& a_propensities,
-              const Real              a_dx,
-              const Real              a_kappa,
-              const Real              a_dt) const;
-
-      /*!
-	@brief New tau leaping advance. If using the LFA then a_mean_energies and a_sources are dummy arguments. 
-      */
-      inline void
-      advanceTau(Vector<long long>&  a_particles,
-                 Vector<long long>&  a_newPhotons,
-                 Vector<Real>&       a_mean_energies,
-                 const Vector<Real>& a_sources,
-                 const Real          a_dt,
-                 const RealVect      a_E,
-                 const Real          a_dx,
-                 const Real          a_kappa) const;
-
-      /*!
-	@brief Do an SSA-step with a subset of reactions. You must update the reaction rates before entering this routine!
-      */
-      inline void
-      stepSSA(Vector<long long>&      a_particles,
-              Vector<long long>&      a_newPhotons,
-              Vector<Real>&           a_mean_energies,
-              const Vector<Real>&     a_sources,
-              const std::deque<Real>& a_propensities,
-              const ReactionPtrs&     a_reactions,
-              const Real              a_A,
-              const Real              a_dx,
-              const Real              a_kappa,
-              const Real              a_dt) const;
-
-      /*!
-	@brief This is a version that steps with all reactions, but where the propensities have been computed in advance. 
-      */
-      inline void
-      stepSSA(Vector<long long>&      a_particles,
-              Vector<long long>&      a_newPhotons,
-              Vector<Real>&           a_mean_energies,
-              const Vector<Real>&     a_sources,
-              const std::deque<Real>& a_propensities,
-              const Real              a_A,
-              const Real              a_dx,
-              const Real              a_kappa,
-              const Real              a_dt) const;
-
-      /*!
-	@brief Do an SSA-step with all reactions. You must update the reaction rates before entering this routine! This computes all propensities and
-	then calls the other version. 
-      */
-      inline void
-      stepSSA(Vector<long long>&  a_particles,
-              Vector<long long>&  a_newPhotons,
-              Vector<Real>&       a_mean_energies,
-              const Vector<Real>& a_sources,
-              const Real          a_dx,
-              const Real          a_kappa,
-              const Real          a_dt) const;
-
-      /*!
-	@brief Increase/decrease the mean energies with a volumetric source term
-      */
-      inline void
-      stepEnergy(Vector<Real>&            a_mean_energies,
-                 const Vector<long long>& a_particles,
-                 const Vector<Real>&      a_sources,
-                 const Real               a_dx,
-                 const Real               a_kappa,
-                 const Real               a_dt) const;
-
-      /*!
-	@brief New SSA advance. If using the LFA then a_mean_energies and a_sources are dummy arguments. 
-      */
-      inline void
-      advanceSSA(Vector<long long>&  a_particles,
-                 Vector<long long>&  a_newPhotons,
-                 Vector<Real>&       a_mean_energies,
-                 const Vector<Real>& a_sources,
-                 const Real          a_dt,
-                 const RealVect      a_E,
-                 const Real          a_dx,
-                 const Real          a_kappa) const;
-
-      /*!
-	@brief New hybrid advance. If using the LFA then a_mean_energies and a_sources are dummy arguments. 
-      */
-      inline void
-      advanceHybrid(Vector<long long>&  a_particles,
-                    Vector<long long>&  a_newPhotons,
-                    Vector<Real>&       a_mean_energies,
-                    const Vector<Real>& a_sources,
-                    const Real          a_dt,
-                    const RealVect      a_E,
-                    const Real          a_dx,
-                    const Real          a_kappa) const;
-
-    private:
-      // trim from start (in place)
-      inline void
-      ltrim(std::string& s)
-      {
-        s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
-      }
-
-      // trim from end (in place)
-      inline void
-      rtrim(std::string& s)
-      {
-        s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
-      }
-
-      // trim from both ends (in place)
-      inline void
-      trim(std::string& s)
-      {
-        ltrim(s);
-        rtrim(s);
-      }
+      removeParticles(List<ItoParticle>& a_particles, const long long a_numToRemove) const;
     };
   } // namespace ItoPlasma
 } // namespace Physics

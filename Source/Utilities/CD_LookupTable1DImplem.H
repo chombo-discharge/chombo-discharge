@@ -18,6 +18,10 @@
 #include <algorithm>
 #include <math.h>
 
+// Chombo includes
+#include <SPMD.H>
+#include <MayDay.H>
+
 // Our includes
 #include <CD_LookupTable1D.H>
 #include <CD_NamespaceHeader.H>
@@ -55,7 +59,7 @@ template <typename... Ts>
 inline void
 LookupTable1D<N>::addEntry(const Ts&... x)
 {
-  std::array<Real, sizeof...(Ts)> arr = {x...};
+  std::array<Real, sizeof...(Ts)> arr = {(Real)x...};
   m_data.emplace_back(arr);
 
   std::get<Sorted>(m_state)  = false;
@@ -185,7 +189,7 @@ LookupTable1D<N>::dumpTable(const std::string a_fileName) const
 #ifdef CH_MPI
   if (procID() == 0) {
 #endif
-    ofstream outputFile;
+    std::ofstream outputFile;
 
     outputFile.open(a_fileName);
 
@@ -275,8 +279,6 @@ LookupTable1D<N>::getEntry(const Real a_x) const
         break;
       }
       case OutOfRangeStrategy::Linear: {
-        const int size = m_data.size();
-
         const Real idxLo = 0;
         const Real idxHi = 1;
 

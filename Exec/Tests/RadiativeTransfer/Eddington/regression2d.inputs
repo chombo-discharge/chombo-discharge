@@ -63,6 +63,7 @@ Driver.refine_dielectrics              = -1            # Refine dielectric surfa
 # ====================================================================================================
 # EDDINGTON_SP1 CLASS OPTIONS
 # ====================================================================================================
+EddingtonSP1.verbosity           = -1           # Solver verbosity
 EddingtonSP1.stationary          = false     # Stationary solver
 EddingtonSP1.reflectivity        = 0.        # Reflectivity
 EddingtonSP1.use_tga             = false     # Use TGA for integration

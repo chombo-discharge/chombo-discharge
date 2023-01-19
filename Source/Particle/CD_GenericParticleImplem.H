@@ -103,6 +103,36 @@ GenericParticle<M, N>::operator!=(const GenericParticle<M, N>& a_p) const
 }
 
 template <size_t M, size_t N>
+inline bool
+GenericParticle<M, N>::operator<(const GenericParticle<M, N>& a_other) const noexcept
+{
+  const RealVect& x = m_position;
+  const RealVect& y = a_other.m_position;
+
+  if (x[0] < y[0]) {
+    return true;
+  }
+#if CH_SPACEDIM > 1
+  if (x[0] > y[0]) {
+    return false;
+  }
+  if (x[1] < y[1]) {
+    return true;
+  }
+#endif
+#if CH_SPACEDIM > 2
+  if (x[1] > y[1]) {
+    return false;
+  }
+  if (x[2] < y[2]) {
+    return true;
+  }
+#endif
+
+  return false;
+}
+
+template <size_t M, size_t N>
 inline int
 GenericParticle<M, N>::size() const
 {

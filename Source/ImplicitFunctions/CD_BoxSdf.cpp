@@ -48,7 +48,7 @@ BoxSdf::value(const RealVect& a_pos) const
                                          Max(m_loCorner[2] - a_pos[2], a_pos[2] - m_hiCorner[2])));
 
   Real retval =
-    Min(0.0, delta[delta.maxDir(false)]) +
+    Min((Real)0.0, delta[delta.maxDir(false)]) +
     max(RealVect::Zero, delta).vectorLength(); // Negative inside box. NOTE: This is RealVect::max and not std::max
 
   if (!m_fluidInside) { // Flip so lsf is positive inside box and negative outside box.

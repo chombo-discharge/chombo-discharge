@@ -97,7 +97,6 @@ CdrIterator<T>::operator++()
     m_isolver++;
 
     for (int isolver = m_isolver; this->ok(); ++isolver) {
-      const RefCountedPtr<T>&          solver  = m_solvers[isolver];
       const RefCountedPtr<CdrSpecies>& species = m_species[isolver];
 
       if (m_mode == SpeciesIteration::Charged) {

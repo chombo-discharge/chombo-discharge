@@ -64,6 +64,7 @@ EddingtonSP1::parseOptions()
     pout() << m_name + "::parseOptions" << endl;
   }
 
+  this->parseVerbosity();         // Parse verbosity
   this->parseDomainBC();          // Parses domain bc
   this->parseEBBC();              // Parse ebbc
   this->parseReflection();        // Parses "reflection coefficients"
@@ -82,6 +83,7 @@ EddingtonSP1::parseRuntimeOptions()
     pout() << m_name + "::parseRuntimeOptions" << endl;
   }
 
+  this->parseVerbosity();         // Parse verbosity
   this->parsePlotVariables();     // Parses plot variables
   this->parseMultigridSettings(); // Parses solver parameters for geometric multigrid
   this->parseKappaScale();        // Parses kappa-scaling

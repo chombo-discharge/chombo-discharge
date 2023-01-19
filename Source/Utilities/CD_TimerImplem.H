@@ -47,6 +47,12 @@ inline Timer::Timer(const std::string a_processName)
 inline Timer::~Timer() { m_events.clear(); }
 
 inline void
+Timer::clear() noexcept
+{
+  m_events.clear();
+}
+
+inline void
 Timer::startEvent(const std::string a_event) noexcept
 {
   if (m_events.find(a_event) == m_events.end()) { // Create a new event.

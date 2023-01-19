@@ -491,6 +491,12 @@ protected:
   */
   void
   setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis);
+
+  /*!
+    @brief Parse verbosity
+  */
+  void
+  parseVerbosity() noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

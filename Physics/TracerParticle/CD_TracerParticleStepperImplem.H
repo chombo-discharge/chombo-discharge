@@ -16,7 +16,7 @@
 #include <CH_Timer.H>
 
 // Our includes
-#include <CD_ParticleOps.H>
+#include <CD_ParticleManagement.H>
 #include <CD_Random.H>
 #include <CD_TracerParticleStepper.H>
 #include <CD_NamespaceHeader.H>
@@ -417,7 +417,7 @@ TracerParticleStepper<P>::initialParticles()
     pout() << "TracerParticleStepper::initialParticles()" << endl;
   }
 
-  // TLDR: This code draws distributed particles. Thanks to our nifty ParticleOps and Random static classes this is just
+  // TLDR: This code draws distributed particles. Thanks to our nifty ParticleManagement and Random static classes this is just
   //       a matter of defining a distribution function. We define this as a lambda that draws particles uniformly distributed
   //       inside a box.
   //
@@ -442,7 +442,7 @@ TracerParticleStepper<P>::initialParticles()
   // Draw particles using the distribution above. Set their weight to one.
   List<P> initialParticles;
 
-  ParticleOps::drawRandomParticles(initialParticles, m_numInitialParticles, uniformDistribution);
+  ParticleManagement::drawRandomParticles(initialParticles, m_numInitialParticles, uniformDistribution);
   for (ListIterator<P> lit(initialParticles); lit.ok(); ++lit) {
     lit().weight() = 1.0;
   }

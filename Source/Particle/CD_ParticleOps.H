@@ -29,6 +29,37 @@ class ParticleOps
 {
 public:
   /*!
+    @brief Get the number of physical particles per cell
+    @param[out] a_ppc Physical particles per cell
+    @param[in]  a_src Particle source container. 
+    @details The second template parameter is a pointer to a member function in P that provides the number of physical particles for the computational
+    particles. If P has a function const Real& P::weight() const, we can call this as
+
+    ParticleOps::getPhysicalParticlesPerCell<P, &P::weight>(...)
+  */
+  template <typename P, const Real& (P::*weight)() const>
+  static inline void
+  getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P>& a_src) noexcept;
+
+  /*!
+    @brief Get the number of computational particles per cell
+    @param[out] a_ppc Physical particles per cell
+    @param[in]  a_src Particle source container. 
+  */
+  template <typename P>
+  static inline void
+  getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P>& a_src) noexcept;
+
+  /*!
+    @brief Get the grid cell where the particle lives
+    @param[in] a_particlePosition Physical particle position
+    @param[in] a_probLo           Lower-left physical corner of simulation domain 
+    @param[in] a_dx               Grid resolution.
+  */
+  static inline IntVect
+  getParticleGridCell(const RealVect& a_particlePosition, const RealVect& a_probLo, const RealVect& a_dx) noexcept;
+
+  /*!
     @brief Compute the intersection point between a particle path and a domain side.
     @details If the particle crossed the domain side, the output argument a_s determines the intersection point by x(s) = x0 + s*(x1-x0) where
     x0 is the starting position (a_oldPos), x1 is the end position (a_newPos), and x(s) is the intersection point with the boundary. 
@@ -84,45 +115,6 @@ public:
                         const RealVect&              a_newPos,
                         const Real&                  a_tolerance,
                         Real&                        a_s);
-
-  /*!
-    @brief Compute particle weights. 
-    @param[out] a_weight               Particle weights for "whole" computational particles. 
-    @param[out] a_num                  Number of "whole" computational particles
-    @param[out] a_remainder            Weight remainder
-    @param[in]  a_numPhysicalParticles Number of physical particles
-    @param[in]  a_ppc                  Desired number of computational particles
-    @details This takes a specified number of physical particles and "desired" number of computational particles and computes
-    the number of "whole" computational particles and a remainder. So, if we have 10 physical particles but want 3 computational particles
-    we have a_weight = 3, a_num=3, and a_remainder = 1
-  */
-  static inline void
-  computeParticleWeights(unsigned long long&      a_weight,
-                         unsigned long long&      a_num,
-                         unsigned long long&      a_remainder,
-                         const unsigned long long a_numPhysicalParticles,
-                         const int                a_ppc);
-
-  /*!
-    @brief Partition particles so that all MPI rank draw a cumulative number of particles equal to a_numParticles
-    @param[in] a_numParticles Total number of particles to be drawn. 
-    @return Returns the number of particles drawn by each rank. 
-  */
-  template <typename T>
-  static inline T
-  partitionParticles(const T a_numParticles);
-
-  /*!
-    @brief Draw a specified number of random particles distributed according to a predefined distribution. 
-    @details The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles.
-    P is the particle type (must derived from BinItem) and T is an integer type. 
-    @param[out] a_particles    Output particles (different for each rank)
-    @param[in]  a_numParticles Number of particles
-    @param[in]  a_distribution Particle distribution. Must return a random position when calling the function. 
-  */
-  template <typename P, typename T>
-  static inline void
-  drawRandomParticles(List<P>& a_particles, const T a_numParticles, const std::function<RealVect()>& a_distribution);
 
   /*!
     @brief Copy all the particles from the a_src to a_dst

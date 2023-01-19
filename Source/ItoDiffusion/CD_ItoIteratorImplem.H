@@ -86,30 +86,33 @@ ItoIterator<T>::operator++()
     m_isolver++;
 
     for (int isolver = m_isolver; this->ok(); ++isolver) {
-      const RefCountedPtr<ItoSolver>&  solver  = m_solvers[isolver];
       const RefCountedPtr<ItoSpecies>& species = m_species[isolver];
 
       if (m_mode == SpeciesIteration::Charged) {
         if (species->getChargeNumber() != 0) {
           m_isolver = isolver;
+
           break;
         }
       }
       else if (m_mode == SpeciesIteration::Negative) {
         if (species->getChargeNumber() < 0) {
           m_isolver = isolver;
+
           break;
         }
       }
       else if (m_mode == SpeciesIteration::Positive) {
         if (species->getChargeNumber() > 0) {
           m_isolver = isolver;
+
           break;
         }
       }
       else if (m_mode == SpeciesIteration::Neutral) {
         if (species->getChargeNumber() == 0) {
           m_isolver = isolver;
+
           break;
         }
       }

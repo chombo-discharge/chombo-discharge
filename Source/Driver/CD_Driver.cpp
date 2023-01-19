@@ -411,43 +411,6 @@ Driver::getCellsAndBoxes(long long&                       a_numLocalCells,
   }
 }
 
-std::string
-Driver::numberFmt(const long long n, char sep) const
-{
-  CH_TIME("Driver::numberFmt(long long, char)");
-  if (m_verbosity > 5) {
-    //    pout() << "Driver::numberFmt(long long, char)" << endl;
-  }
-
-  stringstream fmt;
-  fmt << n;
-  string s = fmt.str();
-  s.reserve(s.length() + s.length() / 3);
-
-  for (int i = 0, j = 3 - s.length() % 3; i < s.length(); ++i, ++j)
-    if (i != 0 && j % 3 == 0)
-      s.insert(i++, 1, sep);
-
-  return s;
-}
-
-Vector<std::string>
-Driver::numberFmt(const Vector<long long> a_numbers, char a_sep) const
-{
-  CH_TIME("Driver::numberFmt(Vector<long long>, char)");
-  if (m_verbosity > 5) {
-    //    pout() << "Driver::numberFmt(Vector<long long>, char)" << endl;
-  }
-
-  Vector<std::string> ret(a_numbers.size());
-
-  for (int i = 0; i < a_numbers.size(); i++) {
-    ret[i] = numberFmt(a_numbers[i], a_sep) + " ";
-  }
-
-  return ret;
-}
-
 void
 Driver::gridReport()
 {
@@ -529,12 +492,12 @@ Driver::gridReport()
          << "\t\t\t        Refinement ratios      = " << ref_rat << endl
          << "\t\t\t        Grid sparsity          = " << 1.0 * totalCells / uniformPoints << endl
          << "\t\t\t        Finest dx              = " << dx[finestLevel] << endl
-         << "\t\t\t        Total number boxes     = " << numberFmt(totalBoxes) << endl
-         << "\t\t\t        Number of valid cells  = " << numberFmt(totalCells) << endl
-         << "\t\t\t        Including ghost cells  = " << numberFmt(totalCellsGhosts) << endl
-         << "\t\t\t        Total # of boxes (lvl) = " << numberFmt(totalLevelBoxes) << endl
-         << "\t\t\t        Total # of cells (lvl) = " << numberFmt(totalLevelCells) << endl
-         << "\t\t\t        Valid # of cells (lvl) = " << numberFmt(validLevelCells) << endl;
+         << "\t\t\t        Total number boxes     = " << DischargeIO::numberFmt(totalBoxes) << endl
+         << "\t\t\t        Number of valid cells  = " << DischargeIO::numberFmt(totalCells) << endl
+         << "\t\t\t        Including ghost cells  = " << DischargeIO::numberFmt(totalCellsGhosts) << endl
+         << "\t\t\t        Total # of boxes (lvl) = " << DischargeIO::numberFmt(totalLevelBoxes) << endl
+         << "\t\t\t        Total # of cells (lvl) = " << DischargeIO::numberFmt(totalLevelCells) << endl
+         << "\t\t\t        Valid # of cells (lvl) = " << DischargeIO::numberFmt(validLevelCells) << endl;
 
   // Do a local report for each Realm
   for (const auto& str : realms) {
@@ -552,11 +515,11 @@ Driver::gridReport()
                            m_amr->getGrids(str));
 
     pout() << "\t\t\t        Realm = " << str << endl
-           << "\t\t\t\t        Proc. # of valid cells = " << numberFmt(localCells) << endl
-           << "\t\t\t\t        Including ghost cells  = " << numberFmt(localCellsGhosts) << endl
-           << "\t\t\t\t        Proc. # of boxes       = " << numberFmt(localBoxes) << endl
-           << "\t\t\t\t        Proc. # of boxes (lvl) = " << numberFmt(localLevelBoxes) << endl
-           << "\t\t\t\t        Proc. # of cells (lvl) = " << numberFmt(localLevelCells) << endl;
+           << "\t\t\t\t        Proc. # of valid cells = " << DischargeIO::numberFmt(localCells) << endl
+           << "\t\t\t\t        Including ghost cells  = " << DischargeIO::numberFmt(localCellsGhosts) << endl
+           << "\t\t\t\t        Proc. # of boxes       = " << DischargeIO::numberFmt(localBoxes) << endl
+           << "\t\t\t\t        Proc. # of boxes (lvl) = " << DischargeIO::numberFmt(localLevelBoxes) << endl
+           << "\t\t\t\t        Proc. # of cells (lvl) = " << DischargeIO::numberFmt(localLevelCells) << endl;
   }
 
   // Write a memory report if Chombo was to compiled to use memory tracking.
@@ -2431,17 +2394,21 @@ Driver::writeCheckpointFile()
 
   // Write header containing time step information, grid resolution, etc.
   HDF5HeaderData header;
-  header.m_real["coarsest_dx"] = m_amr->getDx()[0];
-  header.m_real["time"]        = m_time;
-  header.m_real["dt"]          = m_dt;
-  header.m_int["step"]         = m_timeStep;
-  header.m_int["finestLevel"]  = finestLevel;
+  header.m_int["finest_eb_lvl"] = m_amr->getMaxAmrDepth();
+  header.m_real["coarsest_dx"]  = m_amr->getDx()[0];
+  header.m_real["time"]         = m_time;
+  header.m_real["dt"]           = m_dt;
+  header.m_int["step"]          = m_timeStep;
+  header.m_int["finestLevel"]   = finestLevel;
 
   // Write realm names -- these are needed because we also write computational loads to checkpoint files
   // so we can load balance on immediately restart, using the checkpointed loads.
   for (auto r : m_amr->getRealms()) {
     header.m_string[r] = r;
   }
+
+  // Time stepper writes necessary meta-data to header.
+  m_timeStepper->writeCheckpointHeader(header);
 
   // Create the output file name.
   char              str[100];
@@ -2574,7 +2541,7 @@ void
 Driver::readCheckpointFile(const std::string& a_restartFile)
 {
   CH_TIME("Driver::readCheckpointFile(string)");
-  if (m_verbosity > 3) {
+  if (m_verbosity > 0) {
     pout() << "Driver::readCheckpointFile(string)" << endl;
   }
 
@@ -2593,6 +2560,13 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
   const Real coarsestDx  = header.m_real["coarsest_dx"];
   const int  baseLevel   = 0;
   const int  finestLevel = header.m_int["finestLevel"];
+  const int  prevMaxEB   = header.m_int["finest_eb_lvl"];
+
+  if (prevMaxEB != m_amr->getMaxAmrDepth()) {
+    const std::string err = "Driver::readCheckpointFile -- max EB level changed. Proceed at your own peril";
+
+    MayDay::Warning(err.c_str());
+  }
 
   // Get the names of the realms that were checkpointed. This is a part of the HDF header.
   std::map<std::string, Vector<Vector<long int>>> checkpointedLoads;
@@ -2616,6 +2590,8 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
     }
     pout() << endl;
   }
+
+  m_timeStepper->readCheckpointHeader(header);
 
   // Abort if base resolution has changed.
   if (!(coarsestDx == m_amr->getDx()[0])) {
@@ -2694,6 +2670,10 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
 
   // Close input file
   handle_in.close();
+
+  if (m_verbosity > 0) {
+    pout() << "Driver::readCheckpointFile(string) -- DONE!" << endl;
+  }
 }
 #endif
 
@@ -2719,10 +2699,7 @@ Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
   // Instantiate m_tags. When we wrote the tags we put a floating point value of 0 where we didn't have tags
   // and a floating point value of 1 where we had.
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const Box        box     = dbl.get(dit());
-    const EBCellFAB& tmp     = scratch[dit()];
-    const EBISBox&   ebisbox = tmp.getEBISBox();
-    const EBGraph&   ebgraph = ebisbox.getEBGraph();
+    const Box        box = dbl.get(dit());
     const IntVectSet ivs(box);
 
     DenseIntVectSet& taggedCells = (*m_tags[a_level])[dit()];
@@ -2758,6 +2735,23 @@ Driver::readCheckpointRealmLoads(Vector<long int>& a_loads,
   // Identifier in HDF5 file.
   const std::string str = a_realm + "_loads";
 
+#ifdef CH_MPI
+  const int                 nBoxes   = a_loads.size();
+  const std::pair<int, int> beginEnd = ParallelOps::partition(nBoxes);
+  for (int i = 0; i < nBoxes; i++) {
+    a_loads[i] = 0L;
+  }
+
+  for (int ibox = beginEnd.first; ibox <= beginEnd.second; ibox++) {
+    FArrayBox fab;
+
+    readFArrayBox(a_handle, fab, a_level, ibox, Interval(0, 0), str);
+
+    a_loads[ibox] = lround(fab.max());
+  }
+
+  ParallelOps::vectorSum(a_loads);
+#else
   // Read into an FArrayBox.
   FArrayBox fab;
   for (int ibox = 0; ibox < a_loads.size(); ibox++) {
@@ -2765,6 +2759,7 @@ Driver::readCheckpointRealmLoads(Vector<long int>& a_loads,
 
     a_loads[ibox] = lround(fab.max());
   }
+#endif
 }
 #endif
 

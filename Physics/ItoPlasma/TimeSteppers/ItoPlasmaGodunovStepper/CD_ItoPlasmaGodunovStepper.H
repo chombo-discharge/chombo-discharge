@@ -14,154 +14,298 @@
 
 // Our includes
 #include <CD_ItoPlasmaStepper.H>
-#include <CD_ItoPlasmaGodunovParticle.H>
+#include <CD_Timer.H>
+#include <CD_PointParticle.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
   namespace ItoPlasma {
 
+    /*!
+      @brief Implementation of ItoPlasmaStepper that uses a semi-implicit split-step formalism for advancing the Ito-Poisson-KMC system. 
+    */
     class ItoPlasmaGodunovStepper : public ItoPlasmaStepper
     {
     public:
-      // Ctor and dtor
+      /*!
+	@brief Disallowed default constructor. Use the full constructor.
+      */
       ItoPlasmaGodunovStepper() = delete;
+
+      /*!
+	@brief Full constructor. 
+	@param[in] a_phyics Physics implementation. 
+      */
       ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics);
-      ~ItoPlasmaGodunovStepper();
 
-      // IO routines
-      int
-      getNumberOfPlotVariables() const override;
-      void
-      writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
-      void
-      writeConductivity(EBAMRCellData& a_output, int& a_icomp) const;
+      /*!
+	@brief Destructor. Does nothing
+      */
+      virtual ~ItoPlasmaGodunovStepper();
 
-      // Advance routines
-      Real
+      /*!
+	@brief Advance the Ito-Poisson-KMC system over a_dt
+	@param[in] a_dt Time step
+      */
+      virtual Real
       advance(const Real a_dt) override;
-      Real
-      computeDt() override;
 
-      // Setup routines
-      void
+      /*!
+	@brief Allocate storage required for advancing the equations
+      */
+      virtual void
       allocate() override;
-      void
-      parseOptions() override;
-      void
-      parseRuntimeOptions() override;
-      void
-      allocateInternals() override;
 
-      // Regrid routines
-      void
+      /*!
+	@brief Parse options
+      */
+      virtual void
+      parseOptions() override;
+
+      /*!
+	@brief Parse run-time options
+      */
+      virtual void
+      parseRuntimeOptions() override;
+
+      /*!
+	@brief Perform pre-regrid operations.
+	@details This stores the particles and mesh data on the old grids. 
+	@param[in] a_lmin           The coarsest level that changes
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@note This will store the "conductivity" and "rho dagger" particles. 
+      */
+      virtual void
       preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
-      void
+
+      /*!
+	@brief Regrid methods -- puts all data on the new mesh. 
+	@param[in] a_lmin           The coarsest level that changed. 
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_newFinestLevel The finest level after the regrid. 
+      */
+      virtual void
       regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
+#ifdef CH_USE_HDF5
+      /*!
+	@brief Read header data from checkpoint file.
+	@param[inout] a_header HDF5 header.
+      */
+      virtual void
+      readCheckpointHeader(HDF5HeaderData& a_header) override;
+#endif
+
+#ifdef CH_USE_HDF5
+      /*!
+	@brief Write header data to checkpoint file.
+	@param[inout] a_header HDF5 header.
+      */
+      virtual void
+      writeCheckpointHeader(HDF5HeaderData& a_header) const override;
+#endif
+
+#ifdef CH_USE_HDF5
+      /*!  
+	@brief Write checkpoint data to file
+	@param[inout] a_handle HDF5 fil
+	@param[in]    a_lvl    Grid level
+      */
+      virtual void
+      writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
+#endif
+
+#ifdef CH_USE_HDF5
+      /*!
+	@brief Read checkpoint data from file
+	@param[inout] a_handle HDF5 file
+	@param[in]    a_lvl    Grid level
+      */
+      virtual void
+      readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+#endif
+
     protected:
-      // Switching between algorithms.
-      enum class which_algorithm
+      /*!
+	@brief Simple enum for distinguishing between algorithms
+      */
+      enum class WhichAlgorithm
       {
-        euler_maruyama,
-        trapezoidal,
+        EulerMaruyama,
       };
 
-      // How to restrict dt.
-      enum class which_dt
-      {
-        advection,
-        diffusion,
-        AdvectionDiffusion
-      };
+      /*!
+	@brief If true, then the particles are checkpointed so we can regrid on checkpoint-restart.
+      */
+      bool m_writeCheckpointParticles;
 
-      // These are things that are used to compute the conductivity.
-      EBAMRCellData m_scratch1;
-      EBAMRCellData m_scratch2;
-      EBAMRCellData m_conduct_cell;
-      EBAMRCellData m_cache; // Used to store the cell-centered conductivity
-      EBAMRFluxData m_conduct_face;
-      EBAMRIVData   m_conduct_eb;
+      /*!
+	@brief If true, then the HDF5 checkpoint file contained particles that we can read.
+      */
+      bool m_readCheckpointParticles;
 
-      bool m_profile;
-      bool m_filter_cond;
+      /*!
+	@brief If true, then the class supports regrid-on-restart
+	@details This is populated in the constructor or when reading the checkpoint file. 
+      */
+      bool m_canRegridOnRestart;
 
-      Real m_relax_factor; // Factor for relaxation time
-      Real m_avg_cfl;      // Average CFL number
+      /*!
+	@brief
+      */
+      bool m_gradientFix;
+
+      /*!
+	@brief Previous time step.
+      */
       Real m_prevDt;
-      Real m_eb_tolerance; // Tolerance for EB particle removal.
 
-      which_algorithm m_algorithm;
-      which_dt        m_whichDt;
+      /*!
+	@brief Which advancement algorithm to use.
+      */
+      WhichAlgorithm m_algorithm;
 
-      Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>
-        m_conductivity_particles; // Used to store the particle that gave the sigma^k
-      Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>
-        m_rho_dagger_particles; // Used to store the particles that gave rho^dagger
+      /*!
+	@brief Timer used for run-time logging of routines
+      */
+      Timer m_timer;
 
-      int m_merge_interval; // How often to merge superparticles
+      /*!
+	@brief Storage for simplified particles that gave us sigma^k
+      */
+      Vector<RefCountedPtr<ParticleContainer<PointParticle>>> m_conductivityParticles;
 
-      // Routine for setting up extra particle storage
-      void
-      setupRuntimeStorage();
+      /*!
+	@brief Storage for particles that gave rho^dagger
+      */
+      Vector<RefCountedPtr<ParticleContainer<PointParticle>>> m_rhoDaggerParticles;
 
-      // Global routines
-      void
-      setOldPositions();
-      void
-      remapGodunovParticles(Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_particles,
-                            const WhichParticles                                  a_which);
-      void
-      deposit_ItoPlasmaGodunovParticles(const Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_particles,
-                                        const WhichParticles                                        a_which);
-      void
-      clearGodunovParticles(const Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_particles,
-                            const WhichParticles                                        a_which);
+      /*!
+	@brief Parse advancement algorithm
+      */
+      virtual void
+      parseAlgorithm() noexcept;
 
-      // Routines for semi-implicit Poisson solution
-      void
-      computeAllConductivities(const Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_particles);
-      void
-      compute_cell_conductivity(EBAMRCellData&                                              a_conductivity,
-                                const Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_particles);
-      void
-      compute_face_conductivity();
-      void
-      setupSemiImplicitPoisson(const Real a_dt);
+      /*!
+	@brief Parse checkpoint-restart functionality.
+      */
+      virtual void
+      parseCheckpointParticles() noexcept;
 
-      // Routines for standard Poisson
-      void
-      setupStandardPoisson();
+      /*!
+	@brief Set the starting positions for the ItoSolver particles
+      */
+      virtual void
+      setOldPositions() noexcept;
 
-      // Routines for semi-implicit regridding
-      void
-      copyConductivityParticles(Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_conductivity_particles);
-      void
-      copyRhoDaggerParticles(Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_rho_dagger_particles);
-      void
-      computeRegridConductivity();
-      void
-      computeRegridRho();
+      /*!
+	@brief Set an MPI barrier if using debug mode. 
+	@details This defaults to ParallelOps::barrier() if m_debug=true
+      */
+      virtual void
+      barrier() const noexcept;
 
-      // Specific routines for Euler-Maruyama
-      void
-      advanceParticlesEulerMaruyama(const Real a_dt);
-      void
-      diffuseParticlesEulerMaruyama(Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_rho_dagger,
-                                    const Real                                            a_dt);
-      void
-      stepEulerMaruyama(const Real a_dt);
+      /*!
+	@brief Remap the input point particles
+	@param[inout] a_particles List of particle containers to remap. Indices must correspond to indices in the ItoSolvers
+	@param[in]    a_subset    Particle subset to remap.
+      */
+      virtual void
+      remapPointParticles(Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
+                          const SpeciesSubset                                      a_subset) noexcept;
 
-      // Specific routines for trapezoidal integration
-      void
-      advanceParticlesTrapezoidal(const Real a_dt);
-      void
-      preTrapezoidalPredictor(Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_rho_dagger, const Real a_dt);
-      void
-      preTrapezoidalCorrector(Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_rho_dagger, const Real a_dt);
-      void
-      trapezoidalPredictor(const Real a_dt);
-      void
-      trapezoidalCorrector(const Real a_dt);
+      /*!
+	@brief Deposit the input point particles on the mesh
+	@param[inout] a_particles List of particle containers to remap. Indices must correspond to indices in the ItoSolvers
+	@param[in]    a_subset    Particle subset to remap. 
+	@note This deposits into the ItoSolver m_phi data. 
+      */
+      virtual void
+      depositPointParticles(const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
+                            const SpeciesSubset                                            a_subset) noexcept;
+
+      /*!
+	@brief Clear the input particle data holders
+	@param[inout] a_particles List of particle containers to remap. Indices must correspond to indices in the ItoSolvers
+	@param[in]    a_subset    Particle subset to remap. 
+      */
+      virtual void
+      clearPointParticles(const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
+                          const SpeciesSubset                                            a_subset) noexcept;
+
+      /*!
+	@brief Compute all conductivities (cell, face, and EB) from the input point particles
+	@param[in] a_particles Particles to deposit. Particle weights must hold the mobility*weight
+	@note This deposits the input particle weights onto m_conductivityCell, m_conductivityFace etc. 
+      */
+      virtual void
+      computeConductivities(const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles) noexcept;
+
+      /*!
+	@brief Compute the cell-centered conductivity
+	@param[out] a_conductivityCell Cell-centered conductivity
+	@param[in]  a_particles        Particles to deposit. Particle weights must hold the mobility*weight
+      */
+      virtual void
+      computeCellConductivity(EBAMRCellData&                                                 a_conductivityCell,
+                              const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles) noexcept;
+
+      /*!
+	@brief Compute the cell-centered conductivity
+	@note Interpolates m_conductivityCell to m_conductivityFace
+      */
+      virtual void
+      computeFaceConductivity() noexcept;
+
+      /*!
+	@brief Set up the semi-implicit Poisson solver
+      */
+      virtual void
+      setupSemiImplicitPoisson(const Real a_dt) noexcept;
+
+      /*!
+	@brief Remove covered particles
+	@param[inout] a_particles      Particles to remove
+	@param[in]    a_representation Representation of the EB
+	@param[in]    a_tolerance      EB tolerance
+      */
+      virtual void
+      removeCoveredPointParticles(Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
+                                  const EBRepresentation                                   a_representation,
+                                  const Real                                               a_tolerance) const noexcept;
+
+      /*!
+	@brief Copy particles from the ItoSolver into PointParticles whose weight are ItoParticle::m_weight * ItoParticle::m_mobility
+	@param[out] a_conductivityParticles Point-particles holding the mobility * weight
+      */
+      virtual void
+      copyConductivityParticles(
+        Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_conductivityParticles) noexcept;
+
+      /*!
+	@brief Advance the particles using the Euler-Maruyama scheme
+	@param[in] a_dt Time step
+      */
+      virtual void
+      advanceParticlesEulerMaruyama(const Real a_dt) noexcept;
+
+      /*!
+	@brief Perform the diffusive advance in the Euler-Maruyama step.
+	@details This computes the diffusion hop onto run-time enabled storage on the ItoParticles. We also store the
+	"rho dagger" particles which correspond to the position of the charged particles after the diffusionhop. 
+      */
+      virtual void
+      diffuseParticlesEulerMaruyama(Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_rhoDaggerParticles,
+                                    const Real                                               a_dt) noexcept;
+
+      /*!
+	@brief Step the particles according to the regular Euler-Maruyama scheme.
+	@param[in] a_dt Time step. 
+	@details This sets X^(k+1) = X^k + a_dt * V + sqrt(2*D*a_dt) * W
+	@note The hop MUST have been stored on the particle run-time storage 
+      */
+      virtual void
+      stepEulerMaruyama(const Real a_dt) noexcept;
     };
   } // namespace ItoPlasma
 } // namespace Physics

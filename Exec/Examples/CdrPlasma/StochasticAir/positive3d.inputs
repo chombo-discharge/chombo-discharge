@@ -78,6 +78,7 @@ FieldSolverMultigrid.bc.z.hi           = neumann   0.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
+FieldSolverMultigrid.filter            = 0                 # Number of filterings after Poisson solve
 
 FieldSolverMultigrid.gmg_verbosity     = 10                # GMG verbosity
 FieldSolverMultigrid.gmg_pre_smooth    = 16                # Number of relaxations in downsweep
@@ -130,6 +131,7 @@ CdrCTU.gmg_smoother         = red_black               # Relaxation type. 'jacobi
 # ====================================================================================================
 # McPhoto class options
 # ====================================================================================================
+McPhoto.verbosity          = -1            # Solver verbosity
 McPhoto.instantaneous      = true          # Instantaneous transport or not
 McPhoto.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical photons)
 McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
@@ -233,9 +235,9 @@ CdrPlasmaJSON.chemistry_dt     = 1.E99              # Maximum allowed chemistry 
 # CdrPlasmaStreamerTagger class options
 # ====================================================================================================
 CdrPlasmaStreamerTagger.verbosity         = -1           # Verbosity
-CdrPlasmaStreamerTagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
-CdrPlasmaStreamerTagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
-CdrPlasmaStreamerTagger.box1_hi           = 0.0 0.0 0.0  # these two corners
+CdrPlasmaStreamerTagger.num_tag_boxes     = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
+CdrPlasmaStreamerTagger.tag_box1_lo       = 0.0 0.0 0.0  # Only allow tags that fall between
+CdrPlasmaStreamerTagger.tag_box1_hi       = 0.0 0.0 0.0  # these two corners
 CdrPlasmaStreamerTagger.buffer            = 0            # Grow tagged cells
 
 CdrPlasmaStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement

@@ -83,24 +83,6 @@ ItoLayout<T>::parseRuntimeOptions()
 
 template <class T>
 void
-ItoLayout<T>::setPVRBuffer(const int a_pvrBuffer)
-{
-  for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
-    iter()->setPVRBuffer(a_pvrBuffer);
-  }
-}
-
-template <class T>
-void
-ItoLayout<T>::setHaloBuffer(const int a_haloBuffer)
-{
-  for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
-    iter()->setHaloBuffer(a_haloBuffer);
-  }
-}
-
-template <class T>
-void
 ItoLayout<T>::allocateInternals()
 {
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
@@ -207,25 +189,34 @@ ItoLayout<T>::setTime(const int a_step, const Real a_time, const Real a_dt)
 
 template <class T>
 void
-ItoLayout<T>::sortParticlesByCell(const ItoSolver::WhichContainer a_whichContainer)
+ItoLayout<T>::organizeParticlesByCell(const ItoSolver::WhichContainer a_whichContainer)
 {
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
-    iter()->sortParticlesByCell(a_whichContainer);
+    iter()->organizeParticlesByCell(a_whichContainer);
   }
 }
 
 template <class T>
 void
-ItoLayout<T>::sortParticlesByPatch(const ItoSolver::WhichContainer a_whichContainer)
+ItoLayout<T>::organizeParticlesByPatch(const ItoSolver::WhichContainer a_whichContainer)
 {
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
-    iter()->sortParticlesByPatch(a_whichContainer);
+    iter()->organizeParticlesByPatch(a_whichContainer);
   }
 }
 
 template <class T>
 void
 ItoLayout<T>::makeSuperparticles(const ItoSolver::WhichContainer a_whichContainer, const int a_ppc)
+{
+  for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
+    iter()->makeSuperparticles(a_whichContainer, a_ppc);
+  }
+}
+
+template <class T>
+void
+ItoLayout<T>::makeSuperparticles(const ItoSolver::WhichContainer a_whichContainer, const Vector<int> a_ppc)
 {
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
     iter()->makeSuperparticles(a_whichContainer, a_ppc);
@@ -312,34 +303,6 @@ ItoLayout<T>::computeHopDt(const Real a_maxCellsToMove)
 
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
     const Real thisDt = iter()->computeHopDt(a_maxCellsToMove);
-    minDt             = std::min(minDt, thisDt);
-  }
-
-  return minDt;
-}
-
-template <class T>
-Real
-ItoLayout<T>::computeMinDriftDt(const Real a_maxCellsToMove)
-{
-  Real minDt = std::numeric_limits<Real>::max();
-
-  for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
-    const Real thisDt = iter()->computeMinDriftDt(a_maxCellsToMove);
-    minDt             = std::min(minDt, thisDt);
-  }
-
-  return minDt;
-}
-
-template <class T>
-Real
-ItoLayout<T>::computeMinDiffusionDt(const Real a_maxCellsToMove)
-{
-  Real minDt = std::numeric_limits<Real>::max();
-
-  for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
-    const Real thisDt = iter()->computeMinDiffusionDt(a_maxCellsToMove);
     minDt             = std::min(minDt, thisDt);
   }
 

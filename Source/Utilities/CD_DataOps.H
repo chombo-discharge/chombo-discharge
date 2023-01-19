@@ -199,6 +199,26 @@ public:
   dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellFAB& a_data2, const Box& a_box);
 
   /*!
+    @brief Apply a convolved filter phi = alpha * phi_i + 0.5*(1-alpha) * [phi_(i+s) + phi_(i-s)] in each direction. 
+    @details Ghost cells and coarsening must be done before entering this routine
+    @param[inout] a_data   Data to be filtered.
+    @param[in]    a_alpha  Filter factor
+    @param[in]    a_stride Cell stride s
+  */
+  static void
+  filterSmooth(EBAMRCellData& a_data, const Real a_alpha, const int a_stride) noexcept;
+
+  /*!
+    @brief Apply a convolved filter phi = alpha * phi_i + 0.5*(1-alpha) * [phi_(i+s) + phi_(i-s)] in each direction. 
+    @details Ghost cells must be updated before entering this routine. 
+    @param[inout] a_data   Data to be filtered.
+    @param[in]    a_alpha  Filter factor
+    @param[in]    a_stride Cell stride s
+  */
+  static void
+  filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const int a_stride) noexcept;
+
+  /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @param[inout] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.

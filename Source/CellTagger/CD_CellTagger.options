@@ -1,7 +1,13 @@
 # ====================================================================================================
 # CellTagger class options
 # ====================================================================================================
-CellTagger.num_boxes   = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
-CellTagger.box1_lo     = 0.0 0.0 0.0  # Only allow tags that fall between
-CellTagger.box1_hi     = 0.0 0.0 0.0  # these two corners
-CellTagger.buffer      = 0            # Grow tagged cells
+CellTagger.buffer          = 0            # Grow tagged cells
+
+CellTagger.num_tag_boxes   = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
+CellTagger.tag_box1_lo     = 0.0 0.0 0.0  # Only allow tags that fall between
+CellTagger.tag_box1_hi     = 0.0 0.0 0.0  # these two corners
+
+CellTagger.num_ref_boxes   = 0            # Number of specified refinement boxes
+CellTagger.ref_box1_lo     = 0.0 0.0 0.0  # Refine region between
+CellTagger.ref_box1_hi     = 0.0 0.0 0.0  # these two corners.
+CellTagger.ref_box1_lvl    = 0            # Refine to this level.

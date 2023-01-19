@@ -19,9 +19,8 @@
 #include <CD_ItoParticle.H>
 #include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
-#include <CD_SuperParticles.H>
-#include <CD_EbRepresentation.H>
-#include <CD_EbIntersection.H>
+#include <CD_EBRepresentation.H>
+#include <CD_EBIntersection.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -270,6 +269,17 @@ public:
     the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
     @param[out] a_phi                  Mesh data -- must have exactly one component. 
     @param[in]  a_particles            Particles to be deposited
+  */
+  template <class P, const Real& (P::*particleScalarField)() const>
+  void
+  depositParticles(EBAMRCellData& a_phi, ParticleContainer<P>& a_particles) const;
+
+  /*!
+    @brief Generic deposition function which deposits a particle field onto the mesh using a specified deposition method. 
+    @details The template parameters indicate the particle type and quantity to be deposited. The second template parameter must be a pointer to a member function in 
+    the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
+    @param[out] a_phi                  Mesh data -- must have exactly one component. 
+    @param[in]  a_particles            Particles to be deposited
     @param[in]  a_deposition           Deposition method
     @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
   */
@@ -302,7 +312,7 @@ public:
     @details Calls the other version with m_particles.
   */
   virtual void
-  removeCoveredParticles(const EbRepresentation a_representation, const Real a_tol);
+  removeCoveredParticles(const EBRepresentation a_representation, const Real a_tol);
 
   /*!
     @brief Remove particles that are inside the EB. 
@@ -312,7 +322,7 @@ public:
     @note Calls the other version with ParticleContainer = m_particles.at(a_container)
   */
   virtual void
-  removeCoveredParticles(const WhichContainer a_container, const EbRepresentation a_representation, const Real a_tol);
+  removeCoveredParticles(const WhichContainer a_container, const EBRepresentation a_representation, const Real a_tol);
 
   /*!
     @brief Remove particles that are inside the EB
@@ -322,7 +332,7 @@ public:
   */
   virtual void
   removeCoveredParticles(ParticleContainer<ItoParticle>& a_particles,
-                         const EbRepresentation          a_representation,
+                         const EBRepresentation          a_representation,
                          const Real                      a_tol) const;
 
   /*!
@@ -332,7 +342,7 @@ public:
     @param[in] a_tol              Tolerance -- removes particles if they are less than a_tol*dx away from the boundary. 
   */
   virtual void
-  transferCoveredParticles(const EbRepresentation a_representation, const Real a_tol);
+  transferCoveredParticles(const EBRepresentation a_representation, const Real a_tol);
 
   /*!
     @brief Transfer particles that are covered (within a_tol distance from EB) to another container. 
@@ -344,7 +354,7 @@ public:
   virtual void
   transferCoveredParticles(const WhichContainer   a_containerFrom,
                            const WhichContainer   a_containerTo,
-                           const EbRepresentation a_representation,
+                           const EBRepresentation a_representation,
                            const Real             a_tol);
 
   /*!
@@ -357,7 +367,7 @@ public:
   virtual void
   transferCoveredParticles(ParticleContainer<ItoParticle>& a_particlesFrom,
                            ParticleContainer<ItoParticle>& a_particlesTo,
-                           const EbRepresentation          a_representation,
+                           const EBRepresentation          a_representation,
                            const Real                      a_tol) const;
 
   /*!
@@ -369,7 +379,7 @@ public:
     @note This will call the other version with WhichContainer::Bulk, WhichContainer::EB, and WhichContainer::Domain.
   */
   virtual void
-  intersectParticles(const EbIntersection a_ebIntersection, const bool a_deleteParticles);
+  intersectParticles(const EBIntersection a_ebIntersection, const bool a_deleteParticles);
 
   /*!
     @brief Do boundary intersection tests.
@@ -386,7 +396,7 @@ public:
   intersectParticles(const WhichContainer a_particles,
                      const WhichContainer a_ebParticles,
                      const WhichContainer a_domainParticles,
-                     const EbIntersection a_ebIntersection,
+                     const EBIntersection a_ebIntersection,
                      const bool           a_deleteParticles);
 
   /*!
@@ -403,7 +413,7 @@ public:
   intersectParticles(ParticleContainer<ItoParticle>& a_particles,
                      ParticleContainer<ItoParticle>& a_ebParticles,
                      ParticleContainer<ItoParticle>& a_domainParticles,
-                     const EbIntersection            a_ebIntersection,
+                     const EBIntersection            a_ebIntersection,
                      const bool                      a_deleteParticles);
 
   /*!
@@ -427,7 +437,7 @@ public:
     @param[in] a_whichContainer Which container to count particles in. 
     @param[in] a_localOnly      Only report local particles (i.e. not reduced over MPI ranks)
   */
-  virtual size_t
+  virtual unsigned long long
   getNumParticles(const WhichContainer a_container, const bool a_localOnly) const;
 
   /*!
@@ -749,14 +759,14 @@ public:
     @param[in] a_container Container to be sorted. 
   */
   virtual void
-  sortParticlesByCell(const WhichContainer a_container);
+  organizeParticlesByCell(const WhichContainer a_container);
 
   /*!
     @brief Sort the input particle container by patch.
     @param[in] a_container Container to be sorted. 
   */
   virtual void
-  sortParticlesByPatch(const WhichContainer a_container);
+  organizeParticlesByPatch(const WhichContainer a_container);
 
   /*!
     @brief Make superparticles for a full container -- this is the AMR version that users will usually call. 
@@ -765,6 +775,14 @@ public:
   */
   virtual void
   makeSuperparticles(const WhichContainer a_container, const int a_particlesPerCell);
+
+  /*!
+    @brief Make superparticles for a full container -- this is the AMR version that users will usually call. 
+    @param[in] a_container        Which container to repartition into new superparticles
+    @param[in] a_particlesPerCell Target number of particles per cell. Vector indicates grid levels. 
+  */
+  virtual void
+  makeSuperparticles(const WhichContainer a_container, const Vector<int> a_particlesPerCell);
 
   /*!
     @brief Make superparticles for a particle container -- this is used for a specified grid level. 
@@ -791,20 +809,20 @@ public:
   /*!
     @brief Remap the bulk particle container.
   */
-  void
+  virtual void
   remap();
 
   /*!
     @brief Remap all particles in the input container
     @param[in] a_container Particle container
   */
-  void
+  virtual void
   remap(const WhichContainer a_container);
 
   /*!
     @brief Remap all particle containers
   */
-  void
+  virtual void
   remapAll();
 
   /*!
@@ -829,7 +847,7 @@ public:
     If only diffusion is active the time step is computed as dt = (dx*dx)/(2*D) = dtD. 
     If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
   */
-  Real
+  virtual Real
   computeDt() const;
 
   /*!
@@ -841,7 +859,7 @@ public:
     If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
     @param[in] a_lvl Grid level
   */
-  Real
+  virtual Real
   computeDt(const int a_lvl) const;
 
   /*!
@@ -854,7 +872,7 @@ public:
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
   */
-  Real
+  virtual Real
   computeDt(const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
@@ -868,7 +886,7 @@ public:
     requires a solution to a quadratic equation. Fortunately, this is easy to solve for. 
     @param[in] a_maxCellsToMove
   */
-  Real
+  virtual Real
   computeHopDt(const Real a_maxCellsToMove) const;
 
   /*!
@@ -883,7 +901,7 @@ public:
     @param[in] a_maxCellsToMove Maximum number of cells to move with a standard Ito kernel dX = v*dt + sqrt(2*D*dt)*N
     @param[in] a_lvl            Grid level
   */
-  Real
+  virtual Real
   computeHopDt(const Real a_maxCellsToMove, const int a_lvl) const;
 
   /*!
@@ -899,20 +917,20 @@ public:
     @param[in] a_lvl            Grid level
     @param[in] a_dit            Grid index
   */
-  Real
+  virtual Real
   computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
     @brief Compute advection time step dt = dx/vMax where vMax is the largest velocity component of the particle. 
   */
-  Real
+  virtual Real
   computeAdvectiveDt() const;
 
   /*!
     @brief Compute the drift dt. This computes the minimum dt = dx/vMax on the input level. 
     @param[in] a_lvl Grid level
   */
-  Real
+  virtual Real
   computeAdvectiveDt(const int a_lvl) const;
 
   /*!
@@ -920,20 +938,20 @@ public:
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
   */
-  Real
+  virtual Real
   computeAdvectiveDt(const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
     @brief Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles
   */
-  Real
+  virtual Real
   computeDiffusiveDt() const;
 
   /*!
     @brief Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles on the input level
     @param[in] a_lvl Grid level
   */
-  Real
+  virtual Real
   computeDiffusiveDt(const int a_lvl) const;
 
   /*!
@@ -941,7 +959,7 @@ public:
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
   */
-  Real
+  virtual Real
   computeDiffusiveDt(const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
@@ -950,6 +968,12 @@ public:
   */
   DepositionType
   getDeposition() const;
+
+  /*!
+    @brief Get the coarse-fine deposition strategy
+  */
+  CoarseFineDeposition
+  getCoarseFineDeposition() const;
 
   /*!
     @brief Return phase
@@ -1245,6 +1269,12 @@ protected:
   */
   void
   parseBisectStep();
+
+  /*!
+    @brief Parse class verbosity
+  */
+  void
+  parseVerbosity();
 
   /*!
     @brief Parse plot variables
