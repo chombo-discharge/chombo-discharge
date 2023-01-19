@@ -34,12 +34,12 @@ jobs:
       - name: Build HTML documentation
         working-directory: ${{ github.workspace }}/Docs/Sphinx        
         run: |
-          make clean html
+          make html
 
       - name: Build PDF documentation
         working-directory: ${{ github.workspace }}/Docs/Sphinx
         run: |
-          make clean latexpdf
+          make latexpdf
 
       - name: Upload
         uses: actions/upload-artifact@v1
