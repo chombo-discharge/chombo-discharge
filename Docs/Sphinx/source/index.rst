@@ -47,7 +47,7 @@ We aim for (but cannot guarantee) backward compatibility such that existing ``ch
 .. raw:: html
 
    <style>
-   div#introduction.section,
+   section#introduction,
    section#design,
    section#discretization,
    section#solvers,
