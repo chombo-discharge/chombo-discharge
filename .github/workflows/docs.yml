@@ -50,7 +50,7 @@ jobs:
       - name: Cleanup
         working-directory: ${{ github.workspace }}/Docs
         run: |
-          mv Sphinx/build/html/* ./
+          cp -a Sphinx/build/html/* ./
           mv Sphinx/build/latex/chombo-discharge.pdf ./
           rm -rf Sphinx/build
           
