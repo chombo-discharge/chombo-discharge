@@ -33,7 +33,6 @@ Exec/Examples/StreamerInception/Vessel/report.txt
 Exec/Examples/StreamerInception/ElectrodeRoughness/report.txt
 Exec/Tests/StreamerInception/Vessel/report.txt
 
-
 pout.*
 time.table.*
 
@@ -50,4 +49,3 @@ Docs/*
 !Docs/README.md
 Docs/Sphinx/build
 Docs/**/*.dat
-

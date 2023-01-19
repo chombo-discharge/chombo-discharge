@@ -43,32 +43,30 @@ There are interfaces for describing e.g. the plasma physics, boundary conditions
 As ``chombo-discharge`` evolves, so will these interfaces.
 We aim for (but cannot guarantee) backward compatibility such that existing ``chombo-discharge`` models can be run on future versions of ``chombo-discharge``.
 
-.. This is for getting rid of the TOC in html view. 
+.. This is for getting rid of the TOC in html view.
 .. raw:: html
 
    <style>
-   div#introduction.section,
-   div#design.section,
-   div#discretization.section,   
-   div#solvers.section,
-   div#multi-physics-applications.section,
-   div#single-solver-applications.section,   
-   div#tutorial.section,
-   div#utilities.section,
-   div#contributing.section,
-   div#references.section,
-   div#bibliography.section,               
-   div#epilogue.section {
-       display:none;
+   section#introduction,
+   section#design,
+   section#discretization,
+   section#solvers,
+   section#multi-physics-applications,
+   section#single-solver-applications,
+   section#tutorial,
+   section#utilities,
+   section#contributing,
+   section#references,
+   section#bibliography,
+   section#epilogue {
+	 display:none;
    }
-   </style>
+   </style>   
 
 .. only:: latex
 
    .. toctree::
       :caption: Contents
-
-.. _Chap:blabla:
 
 Introduction
 ************
