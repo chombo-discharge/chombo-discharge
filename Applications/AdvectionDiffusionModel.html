@@ -1,76 +1,38 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Advection-diffusion model &mdash; chombo-discharge  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Brownian walker" href="BrownianWalkerModel.html" />
     <link rel="prev" title="Îto-KMC plasma model" href="ItoPlasmaModel.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -78,18 +40,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
@@ -203,73 +154,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Advection-diffusion model</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Advection-diffusion model</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/Applications/AdvectionDiffusionModel.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="advection-diffusion-model">
-<span id="chap-advectiondiffusionmodel"></span><h1>Advection-diffusion model<a class="headerlink" href="#advection-diffusion-model" title="Permalink to this heading">¶</a></h1>
+<span id="chap-advectiondiffusionmodel"></span><h1>Advection-diffusion model<a class="headerlink" href="#advection-diffusion-model" title="Permalink to this heading"></a></h1>
 <p>The advection-diffusion model simply advects a scalar quantity with EB and AMR.
 The equation of motion is</p>
 <div class="math notranslate nohighlight">
@@ -283,14 +193,14 @@ The equation of motion is</p>
 <p>The source code for this problem is found in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/AdvectionDiffusion</span></code>.
 See <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html">AdvectionDiffusionStepper</a> for the C++ API for this time stepper.</p>
 <section id="solvers">
-<h2>Solvers<a class="headerlink" href="#solvers" title="Permalink to this heading">¶</a></h2>
+<h2>Solvers<a class="headerlink" href="#solvers" title="Permalink to this heading"></a></h2>
 <p>This class uses the following solvers:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="../Solvers/CDR.html#chap-cdrsolver"><span class="std std-ref">CdrSolver</span></a>.</p></li>
 </ul>
 </section>
 <section id="time-stepping">
-<h2>Time stepping<a class="headerlink" href="#time-stepping" title="Permalink to this heading">¶</a></h2>
+<h2>Time stepping<a class="headerlink" href="#time-stepping" title="Permalink to this heading"></a></h2>
 <p>Two time stepping algorithms are supported:</p>
 <ol class="arabic simple">
 <li><p>A second-order Runge-Kutta method (Heun’s method).</p></li>
@@ -308,7 +218,7 @@ AdvectionDiffusion.max_dt = 1.E99
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusion.cfl</span></code> is computed differently based on the chosen discretization.</p>
 <section id="heun-s-method">
-<h3>Heun’s method<a class="headerlink" href="#heun-s-method" title="Permalink to this heading">¶</a></h3>
+<h3>Heun’s method<a class="headerlink" href="#heun-s-method" title="Permalink to this heading"></a></h3>
 <p>For Heun’s method we perform the following steps:
 Let <span class="math notranslate nohighlight">\(\left[\nabla\cdot\mathbf{J}\left(\phi\right)\right]\)</span> be the finite-volume approximation to <span class="math notranslate nohighlight">\(\nabla\cdot\left(\mathbf{v}\phi - D\nabla\phi\right)\)</span>, where <span class="math notranslate nohighlight">\(\mathbf{J}\left(\phi\right) = \mathbf{v}\phi - D\nabla\phi\)</span>.
 The Runge-Kutta advance is then</p>
@@ -321,7 +231,7 @@ The Runge-Kutta advance is then</p>
 <p>where <span class="math notranslate nohighlight">\(d\)</span> is the dimensionality and <span class="math notranslate nohighlight">\(D\)</span> is the diffusion coefficient.</p>
 </section>
 <section id="imex">
-<h3>IMEX<a class="headerlink" href="#imex" title="Permalink to this heading">¶</a></h3>
+<h3>IMEX<a class="headerlink" href="#imex" title="Permalink to this heading"></a></h3>
 <p>For the implicit-explicit advance, we use the CTU discretization to center the divergence at the half time step.
 We seek the update</p>
 <div class="math notranslate nohighlight">
@@ -342,9 +252,9 @@ For the <a class="reference internal" href="../Solvers/CDR.html#chap-cdrctu"><sp
 </section>
 </section>
 <section id="initial-data">
-<h2>Initial data<a class="headerlink" href="#initial-data" title="Permalink to this heading">¶</a></h2>
+<h2>Initial data<a class="headerlink" href="#initial-data" title="Permalink to this heading"></a></h2>
 <section id="default-behavior">
-<h3>Default behavior<a class="headerlink" href="#default-behavior" title="Permalink to this heading">¶</a></h3>
+<h3>Default behavior<a class="headerlink" href="#default-behavior" title="Permalink to this heading"></a></h3>
 <p>By default, the initial data for this problem is given by a super-Gaussian blob</p>
 <div class="math notranslate nohighlight">
 \[\phi\left(\mathbf{x},t=0\right) = \phi_0\exp\left(-\frac{\left|\mathbf{x}-\mathbf{x}_0\right|^4}{2R^4}\right),\]</div>
@@ -357,7 +267,7 @@ AdvectionDiffusion.blob_center    = 0 0 0
 </div>
 </section>
 <section id="custom-value">
-<h3>Custom value<a class="headerlink" href="#custom-value" title="Permalink to this heading">¶</a></h3>
+<h3>Custom value<a class="headerlink" href="#custom-value" title="Permalink to this heading"></a></h3>
 <p>For a more general way of specifying initial data, <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionStepper</span></code> has a public member function</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">void</span> <span class="n">setInitialData</span><span class="p">(</span><span class="n">const</span> <span class="n">std</span><span class="p">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="n">const</span> <span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span> <span class="n">a_func</span><span class="p">)</span> <span class="n">noexcept</span><span class="p">;</span>
 </pre></div>
@@ -365,9 +275,9 @@ AdvectionDiffusion.blob_center    = 0 0 0
 </section>
 </section>
 <section id="velocity-field">
-<h2>Velocity field<a class="headerlink" href="#velocity-field" title="Permalink to this heading">¶</a></h2>
+<h2>Velocity field<a class="headerlink" href="#velocity-field" title="Permalink to this heading"></a></h2>
 <section id="id1">
-<h3>Default behavior<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3>Default behavior<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <p>The default velocity field for this class is</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}v_x &amp;= -r\omega\sin\theta, \\
@@ -381,17 +291,17 @@ I.e. the flow field is a circulation around the Cartesian grid origin.</p>
 </div>
 </section>
 <section id="id2">
-<h3>Custom value<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3>Custom value<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <p>For a more general way of setting a user-specified velocity, <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionStepper</span></code> has a public member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setVelocity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_velocity</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setVelocity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_velocity</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="diffusion-coefficient">
-<h2>Diffusion coefficient<a class="headerlink" href="#diffusion-coefficient" title="Permalink to this heading">¶</a></h2>
+<h2>Diffusion coefficient<a class="headerlink" href="#diffusion-coefficient" title="Permalink to this heading"></a></h2>
 <section id="id3">
-<h3>Default behavior<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<h3>Default behavior<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
 <p>The default diffusion coefficient for this problem is set to a constant.
 To adjust it,  <span class="math notranslate nohighlight">\(\omega\)</span>, set</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>AdvectionDiffusion.diffco = 1.0
@@ -400,15 +310,15 @@ To adjust it,  <span class="math notranslate nohighlight">\(\omega\)</span>, set
 <p>to a chosen value.</p>
 </section>
 <section id="id4">
-<h3>Custom value<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<h3>Custom value<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
 <p>For a more general way of setting the diffusion coefficient, <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionStepper</span></code> has a public member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setDiffusionCoefficient</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_diffusion</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setDiffusionCoefficient</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_diffusion</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="boundary-conditions">
-<h2>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Permalink to this heading">¶</a></h2>
+<h2>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Permalink to this heading"></a></h2>
 <p>At the EB, this module uses a wall boundary condition (i.e. no flux into or out of the EB).
 On domain edges (faces in 3D), the user can select between wall boundary conditions or outflow boundary conditions by selecting the corresponding input option for the solver.
 E.g. for the <a class="reference internal" href="../Solvers/CDR.html#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a> discretization:</p>
@@ -419,7 +329,7 @@ CdrCTU.bc.x.hi = wall # &#39;wall&#39; or &#39;outflow&#39;
 <p>The syntax for the other boundaries are completely analogous.</p>
 </section>
 <section id="cell-refinement">
-<h2>Cell refinement<a class="headerlink" href="#cell-refinement" title="Permalink to this heading">¶</a></h2>
+<h2>Cell refinement<a class="headerlink" href="#cell-refinement" title="Permalink to this heading"></a></h2>
 <p>The cell refinement is based on two criteria:</p>
 <ol class="arabic simple">
 <li><p>The amplitude of <span class="math notranslate nohighlight">\(\phi\)</span>.</p></li>
@@ -433,20 +343,20 @@ AdvectionDiffusion.refine_magn = 1E-2
 </div>
 </section>
 <section id="setting-up-a-new-problem">
-<h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading">¶</a></h2>
+<h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading"></a></h2>
 <p>To set up a new problem, using the Python setup tools in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/AdvectionDiffusion</span></code> is the simplest way.
 To see available setup options, run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>--help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py --help
 </pre></div>
 </div>
 <p>For example, to set up a new problem in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/MyApplications/MyAdvectionDiffusionProblem</span></code> for a coaxial cable geometry, run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyAdvectionDiffusionProblem<span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py -base_dir<span class="o">=</span>MyApplications -app_name<span class="o">=</span>MyAdvectionDiffusionProblem -geometry<span class="o">=</span>CoaxialCable
 </pre></div>
 </div>
 <p>This will set up a new problem in a coaxial cable geometry (defined in <code class="file docutils literal notranslate"><span class="pre">Geometries/CoaxialCable</span></code>).</p>
 </section>
 <section id="example-programs">
-<h2>Example programs<a class="headerlink" href="#example-programs" title="Permalink to this heading">¶</a></h2>
+<h2>Example programs<a class="headerlink" href="#example-programs" title="Permalink to this heading"></a></h2>
 <p>Some example programs for this module are given in</p>
 <ul class="simple">
 <li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/AdvectionDiffusion/DiagonalFlowNoEB</span></code></p></li>
@@ -454,20 +364,20 @@ To see available setup options, run</p>
 </ul>
 </section>
 <section id="verification">
-<h2>Verification<a class="headerlink" href="#verification" title="Permalink to this heading">¶</a></h2>
+<h2>Verification<a class="headerlink" href="#verification" title="Permalink to this heading"></a></h2>
 <p>Spatial and temporal convergence tests for this module (and thus also the underlying solver implementation) are given in</p>
 <ul class="simple">
 <li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C1</span></code></p></li>
 <li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C2</span></code></p></li>
 </ul>
 <section id="c1-spatial-convergence">
-<h3>C1: Spatial convergence<a class="headerlink" href="#c1-spatial-convergence" title="Permalink to this heading">¶</a></h3>
+<h3>C1: Spatial convergence<a class="headerlink" href="#c1-spatial-convergence" title="Permalink to this heading"></a></h3>
 <p>A spatial convergence test is given in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C1</span></code>.
 The problem solves for an advected and diffused scalar in a rotational velocity in the presence of an EB:</p>
 <figure class="align-center" id="id5">
 <span id="fig-advectiondiffusionc1-1"></span><a class="reference internal image-reference" href="../_images/AdvectionDiffusionC1_1.png"><img alt="../_images/AdvectionDiffusionC1_1.png" src="../_images/AdvectionDiffusionC1_1.png" style="width: 40%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 25 </span><span class="caption-text">Final state on a <span class="math notranslate nohighlight">\(512^2\)</span> uniform grid.</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+<p><span class="caption-number">Fig. 25 </span><span class="caption-text">Final state on a <span class="math notranslate nohighlight">\(512^2\)</span> uniform grid.</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>To compute the convergence rate we compute two solutions with grid spacings <span class="math notranslate nohighlight">\(\Delta x\)</span> and <span class="math notranslate nohighlight">\(\Delta x/2\)</span>, and estimate the solution error using the approach in <a class="reference internal" href="../Source/VV.html#chap-spatialconvergence"><span class="std std-ref">Spatial convergence</span></a>.
@@ -477,12 +387,12 @@ The reduced convergence rates at coarser grids occur due to 1) insufficient reso
 <figure class="align-center" id="id6">
 <span id="fig-advectiondiffusionc1-2"></span><a class="reference internal image-reference" href="../_images/AdvectionDiffusionC1_2.png"><img alt="../_images/AdvectionDiffusionC1_2.png" src="../_images/AdvectionDiffusionC1_2.png" style="width: 70%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 26 </span><span class="caption-text">Spatial convergence rates with various limiters.</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+<p><span class="caption-number">Fig. 26 </span><span class="caption-text">Spatial convergence rates with various limiters.</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 </section>
 <section id="c2-temporal-convergence">
-<h3>C2: Temporal convergence<a class="headerlink" href="#c2-temporal-convergence" title="Permalink to this heading">¶</a></h3>
+<h3>C2: Temporal convergence<a class="headerlink" href="#c2-temporal-convergence" title="Permalink to this heading"></a></h3>
 <p>A temporal convergence test is given in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C2</span></code>.
 To compute the temporal convergence rate we compute two solutions using time steps <span class="math notranslate nohighlight">\(\Delta t\)</span> and <span class="math notranslate nohighlight">\(\Delta t/2\)</span>, and estimate the solution error using the approach in <a class="reference internal" href="../Source/VV.html#chap-temporalconvergence"><span class="std std-ref">Temporal convergence</span></a>.
 Figure <a class="reference internal" href="#fig-advectiondiffusionc2"><span class="std std-numref">Fig. 27</span></a> shows the computed convergence rates for the second order Runge-Kutta and the IMEX discretization.
@@ -490,7 +400,7 @@ As expected, we find 2nd order convergence for Heun’s method and first order c
 <figure class="align-center" id="id7">
 <span id="fig-advectiondiffusionc2"></span><a class="reference internal image-reference" href="../_images/AdvectionDiffusionC2.png"><img alt="../_images/AdvectionDiffusionC2.png" src="../_images/AdvectionDiffusionC2.png" style="width: 70%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 27 </span><span class="caption-text">Temporal convergence rates.</span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
+<p><span class="caption-number">Fig. 27 </span><span class="caption-text">Temporal convergence rates.</span><a class="headerlink" href="#id7" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 </section>
@@ -499,50 +409,33 @@ As expected, we find 2nd order convergence for Heun’s method and first order c
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="BrownianWalkerModel.html" class="btn btn-neutral float-right" title="Brownian walker" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="ItoPlasmaModel.html" class="btn btn-neutral float-left" title="Îto-KMC plasma model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="BrownianWalkerModel.html" class="btn btn-neutral float-right" title="Brownian walker" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2022, SINTEF Energy Research.
-
-    </p>
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

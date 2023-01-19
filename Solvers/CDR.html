@@ -1,76 +1,38 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Convection-Diffusion-Reaction &mdash; chombo-discharge  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Electrostatic solver" href="Electrostatics.html" />
     <link rel="prev" title="Verification and validation" href="../Source/VV.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -78,18 +40,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
@@ -199,73 +150,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Convection-Diffusion-Reaction</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Convection-Diffusion-Reaction</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/Solvers/CDR.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="convection-diffusion-reaction">
-<span id="chap-cdr"></span><h1>Convection-Diffusion-Reaction<a class="headerlink" href="#convection-diffusion-reaction" title="Permalink to this heading">¶</a></h1>
+<span id="chap-cdr"></span><h1>Convection-Diffusion-Reaction<a class="headerlink" href="#convection-diffusion-reaction" title="Permalink to this heading"></a></h1>
 <p>Here, we discuss the discretization of the equation</p>
 <div class="math notranslate nohighlight">
 \[\frac{\partial \phi}{\partial t} + \nabla\cdot\left(\mathbf{v} \phi - D\nabla \phi\right) = S.\]</div>
@@ -278,7 +188,7 @@ Models might have to recenter the state in order compute e.g. physically meaning
 </div>
 <p>Source code for the convection-diffusion-reaction solvers reside in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/ConvectionDiffusionReaction</span></code> and the full API can be found at <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classCdrSolver.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classCdrSolver.html</a>.</p>
 <section id="cdrsolver">
-<span id="chap-cdrsolver"></span><h2>CdrSolver<a class="headerlink" href="#cdrsolver" title="Permalink to this heading">¶</a></h2>
+<span id="chap-cdrsolver"></span><h2>CdrSolver<a class="headerlink" href="#cdrsolver" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code> class contains the interface for solving advection-diffusion-reaction problems.
 <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code> is an abstract class and does not contain any specific advective or diffusive discretization (these are added by implementation classes).</p>
 <p>Currently, the implementation layers consist of the following:</p>
@@ -291,26 +201,26 @@ Models might have to recenter the state in order compute e.g. physically meaning
 The C++ API for these classes can be obtained from <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classCdrSolver.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classCdrSolver.html</a>.</p>
 <p>The advance methods for <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code> are encapsulated by the following functions:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// For advancing the diffusion equation with an implicit Euler method.</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">advanceEuler</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_newPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_oldPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_source</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">advanceEuler</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_newPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_oldPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_source</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
 
 <span class="c1">// For advancing the diffusion equation with a Crank-Nicholson method.</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">advanceCrankNicholson</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_newPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_oldPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_source</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">advanceCrankNicholson</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_newPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_oldPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_source</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
 
 <span class="c1">// For computing div(v*phi - D*grad(phi)).</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">computeDivJ</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divJ</span><span class="p">,</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_conservativeOnly</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_ebFlux</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_domainFlux</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">computeDivJ</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divJ</span><span class="p">,</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_conservativeOnly</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_ebFlux</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_domainFlux</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
 
 <span class="c1">// For computing div(v*phi).</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">computeDivF</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divJ</span><span class="p">,</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_conservativeOnly</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_ebFlux</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_domainFlux</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">computeDivF</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divJ</span><span class="p">,</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_conservativeOnly</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_ebFlux</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_domainFlux</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
 
 <span class="c1">// For computing div(D*grad(phi)).</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">computeDivD</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divJ</span><span class="p">,</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_conservativeOnly</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_ebFlux</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_domainFlux</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">computeDivD</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divJ</span><span class="p">,</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_conservativeOnly</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_ebFlux</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_domainFlux</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="discretization-details">
-<span id="chap-cdrdetails"></span><h2>Discretization details<a class="headerlink" href="#discretization-details" title="Permalink to this heading">¶</a></h2>
+<span id="chap-cdrdetails"></span><h2>Discretization details<a class="headerlink" href="#discretization-details" title="Permalink to this heading"></a></h2>
 <section id="explicit-divergences-and-redistribution">
-<span id="chap-explicitdivergence"></span><h3>Explicit divergences and redistribution<a class="headerlink" href="#explicit-divergences-and-redistribution" title="Permalink to this heading">¶</a></h3>
+<span id="chap-explicitdivergence"></span><h3>Explicit divergences and redistribution<a class="headerlink" href="#explicit-divergences-and-redistribution" title="Permalink to this heading"></a></h3>
 <p>Computing explicit divergences for equations like</p>
 <div class="math notranslate nohighlight">
 \[\frac{\partial \phi}{\partial t} + \nabla\cdot\mathbf{G} = 0\]</div>
@@ -318,7 +228,7 @@ The C++ API for these classes can be obtained from <a class="reference external"
 In general, we seek a method-of-lines update <span class="math notranslate nohighlight">\(\phi^{k+1} = \phi^k - \Delta t \left[\nabla\cdot \mathbf{G}^k\right]\)</span> where <span class="math notranslate nohighlight">\(\left[\nabla\cdot\mathbf{G}\right]\)</span> is a stable numerical approximation based on some finite volume approximation.</p>
 <p>Pure finite volume methods use</p>
 <div class="math notranslate nohighlight" id="equation-conservativeupdate">
-<span class="eqno">(2)<a class="headerlink" href="#equation-conservativeupdate" title="Permalink to this equation">¶</a></span>\[\phi^{k+1} = \phi^k - \frac{\Delta t}{\kappa \Delta x^{\textrm{DIM}}}\int_V\nabla\cdot\mathbf{G}dV,\]</div>
+<span class="eqno">(2)<a class="headerlink" href="#equation-conservativeupdate" title="Permalink to this equation"></a></span>\[\phi^{k+1} = \phi^k - \frac{\Delta t}{\kappa \Delta x^{\textrm{DIM}}}\int_V\nabla\cdot\mathbf{G}dV,\]</div>
 <p>where <span class="math notranslate nohighlight">\(\kappa\)</span> is the volume fraction of a grid cell, <span class="math notranslate nohighlight">\(\textrm{DIM}\)</span> is the spatial dimension and the volume integral is written as discretized surface integral</p>
 <div class="math notranslate nohighlight">
 \[\int_V\nabla\cdot\mathbf{G}dV =\sum_{f\in f(V)}\left(\mathbf{G}_f\cdot \mathbf{n}_f\right)\alpha_f\Delta x^{\textrm{DIM} -1}.\]</div>
@@ -326,7 +236,7 @@ In general, we seek a method-of-lines update <span class="math notranslate nohig
 <figure class="align-center" id="id2">
 <a class="reference internal image-reference" href="../_images/CutCell.png"><img alt="../_images/CutCell.png" src="../_images/CutCell.png" style="width: 40%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 22 </span><span class="caption-text">Location of centroid fluxes for cut cells.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+<p><span class="caption-number">Fig. 22 </span><span class="caption-text">Location of centroid fluxes for cut cells.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>However, taking <span class="math notranslate nohighlight">\([\nabla\cdot\mathbf{G}^k]\)</span> to be this sum leads to a time step constraint proportional to <span class="math notranslate nohighlight">\(\kappa\)</span>, which can be arbitrarily small.
@@ -358,7 +268,7 @@ After these steps, we define</p>
 \[\left[\nabla\cdot\mathbf{G}^k\right]_{\mathbf{i}} \equiv \frac{1}{\Delta t}\left(\phi_{\mathbf{i}}^{k+1} - \phi_{\mathbf{i}}^k\right)\]</div>
 <p>Numerically, the above steps for computing a conservative divergence of a one-component flux <span class="math notranslate nohighlight">\(\mathbf{G}\)</span> are implemented in the convection-diffusion-reaction solvers, which also respects boundary conditions (e.g. charge injection).
 The user will need to call the function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">CdrSolver</span><span class="o">::</span><span class="n">computeDivG</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divG</span><span class="p">,</span><span class="w"> </span><span class="n">EBAMRFluxData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_G</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_ebG</span><span class="p">)</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">CdrSolver</span><span class="o">::</span><span class="n">computeDivG</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divG</span><span class="p">,</span><span class="w"> </span><span class="n">EBAMRFluxData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_G</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_ebG</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">a_G</span></code> is the numerical representation of <span class="math notranslate nohighlight">\(\mathbf{G}\)</span> over the cut-cell AMR hierarchy and must be stored on cell-centered faces, and <code class="docutils literal notranslate"><span class="pre">a_ebG</span></code> is the flux on the embedded boundary.
@@ -372,20 +282,20 @@ These additional complicated are taken care of inside <code class="docutils lite
 </div>
 </section>
 <section id="explicit-advection">
-<span id="chap-explicitadvection"></span><h3>Explicit advection<a class="headerlink" href="#explicit-advection" title="Permalink to this heading">¶</a></h3>
+<span id="chap-explicitadvection"></span><h3>Explicit advection<a class="headerlink" href="#explicit-advection" title="Permalink to this heading"></a></h3>
 <p>Scalar advection updates follows the computation of the explicit divergence discussed in <a class="reference internal" href="#chap-explicitdivergence"><span class="std std-ref">Explicit divergences and redistribution</span></a>.
 The face-centered fluxes <span class="math notranslate nohighlight">\(\mathbf{G} = \phi\mathbf{v}\)</span> are computed by instantiation classes for the convection-diffusion-reaction solvers.
 The function signature for explicit advection is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">computeDivF</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divF</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">computeDivF</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divF</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where the face-centered fluxes are computed by using the velocities and boundary conditions that reside in the solver, and result is put in <code class="docutils literal notranslate"><span class="pre">a_divF</span></code> using the procedure outlined above.
 The argument <code class="docutils literal notranslate"><span class="pre">a_dt</span></code> is the time step size.
 It is not needed in a method-of-lines context, but it is used in e.g. <a class="reference internal" href="#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a> for computing transverse derivatives in order to expand the stability region (i.e., use larger CFL numbers).</p>
 <p>For example, in order to perform an advective advance over a time step <span class="math notranslate nohighlight">\(\Delta t\)</span>, one would perform the following:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CdrSolver</span><span class="o">*</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CdrSolver</span><span class="o">*</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"></span>
 
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">phi</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getPhi</span><span class="p">();</span><span class="w">     </span><span class="c1">// Cell-centered state</span>
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">divF</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getScratch</span><span class="p">();</span><span class="w"> </span><span class="c1">// Scratch storage in solver</span>
@@ -395,16 +305,16 @@ It is not needed in a method-of-lines context, but it is used in e.g. <a class="
 </div>
 </section>
 <section id="explicit-diffusion">
-<span id="chap-explicitdiffusion"></span><h3>Explicit diffusion<a class="headerlink" href="#explicit-diffusion" title="Permalink to this heading">¶</a></h3>
+<span id="chap-explicitdiffusion"></span><h3>Explicit diffusion<a class="headerlink" href="#explicit-diffusion" title="Permalink to this heading"></a></h3>
 <p>Explicit diffusion is performed in much the same way as implicit advection, with the exception that the general flux <span class="math notranslate nohighlight">\(\mathbf{G} = D\nabla\phi\)</span> is computed by using centered differences on face centers.
 The function signature for explicit diffusion is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">computeDivD</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divF</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">computeDivD</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divF</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>and we increment in the same way as for explicit advection:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CdrSolver</span><span class="o">*</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CdrSolver</span><span class="o">*</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"></span>
 
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">phi</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getPhi</span><span class="p">();</span><span class="w">     </span><span class="c1">// Cell-centered state</span>
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">divD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getScratch</span><span class="p">();</span><span class="w"> </span><span class="c1">// Scratch storage in solver</span>
@@ -414,17 +324,17 @@ The function signature for explicit diffusion is</p>
 </div>
 </section>
 <section id="explicit-advection-diffusion">
-<span id="chap-explicitadvectiondiffusion"></span><h3>Explicit advection-diffusion<a class="headerlink" href="#explicit-advection-diffusion" title="Permalink to this heading">¶</a></h3>
+<span id="chap-explicitadvectiondiffusion"></span><h3>Explicit advection-diffusion<a class="headerlink" href="#explicit-advection-diffusion" title="Permalink to this heading"></a></h3>
 <p>There is also functionality for aggregating explicit advection and diffusion advances.
 The reason for this is that the cut-cell overhead is only applied once on the combined flux <span class="math notranslate nohighlight">\(\phi\mathbf{v} - D\nabla\phi\)</span> rather than on the individual fluxes.
 For non-split methods this leads to some performance improvement since the interpolation of fluxes on cut-cell faces only needs to be performed once.
 The signature for this is precisely the same as for explicit advection only:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">computeDivJ</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divJ</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_extrapDt</span><span class="p">)</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">computeDivJ</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divJ</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_extrapDt</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where the face-centered fluxes are computed by using the velocities and boundary conditions that reside in the solver, and result is put in <code class="docutils literal notranslate"><span class="pre">a_divF</span></code>.
 For example, in order to perform an advective advance over a time step <span class="math notranslate nohighlight">\(\Delta t\)</span>, one would perform the following:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"></span>
 
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">phi</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getPhi</span><span class="p">();</span><span class="w">     </span><span class="c1">// Cell-centered state</span>
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">divJ</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getScratch</span><span class="p">();</span><span class="w"> </span><span class="c1">// Scratch storage in solver</span>
@@ -435,9 +345,9 @@ For example, in order to perform an advective advance over a time step <span cla
 <p>Often, time integrators have the option of using implicit or explicit diffusion.
 If the time-evolution is not split (i.e. not using a Strang or Godunov splitting), the integrators will often call <code class="docutils literal notranslate"><span class="pre">computeDivJ</span></code> rather separately calling <code class="docutils literal notranslate"><span class="pre">computeDivF</span></code> and <code class="docutils literal notranslate"><span class="pre">computeDivD</span></code>.
 If you had a split-step Godunov method, the above procedure for a forward Euler method for both parts would be:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CdrSolver</span><span class="o">*</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CdrSolver</span><span class="o">*</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"></span>
 
 <span class="n">solver</span><span class="o">-&gt;</span><span class="n">computeDivF</span><span class="p">(</span><span class="n">divF</span><span class="p">,</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Computes divF = div(n*phi)</span>
 <span class="nl">DataOps</span><span class="p">:</span><span class="n">incr</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">divF</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">dt</span><span class="p">);</span><span class="w">        </span><span class="c1">// makes phi -&gt; phi - dt*divF</span>
@@ -449,31 +359,31 @@ If you had a split-step Godunov method, the above procedure for a forward Euler 
 <p>However, the cut-cell redistribution dance (flux interpolation, hybrid divergence, and redistribution) would be performed twice.</p>
 </section>
 <section id="implicit-diffusion">
-<span id="chap-implicitdiffusion"></span><h3>Implicit diffusion<a class="headerlink" href="#implicit-diffusion" title="Permalink to this heading">¶</a></h3>
+<span id="chap-implicitdiffusion"></span><h3>Implicit diffusion<a class="headerlink" href="#implicit-diffusion" title="Permalink to this heading"></a></h3>
 <p>Implicit diffusion can occasionally be necesasry.
 The convection-diffusion-reaction solvers support two basic diffusion solves:
 Backward Euler and the Crank-Nicholson methods.
 The function signatures for these are</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">advanceEuler</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_newPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_oldPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_source</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">advanceCrankNicholson</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_newPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_oldPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_source</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">advanceEuler</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_newPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_oldPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_source</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">advanceCrankNicholson</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_newPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_oldPhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_source</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">a_newPhi</span></code> is the state at the new time <span class="math notranslate nohighlight">\(t + \Delta t\)</span>, <code class="docutils literal notranslate"><span class="pre">a_oldPhi</span></code> is the state at time <span class="math notranslate nohighlight">\(t\)</span> and <code class="docutils literal notranslate"><span class="pre">a_source</span></code> is the source term which strictly speaking should be centered at time <span class="math notranslate nohighlight">\(t + \Delta t\)</span> for the Euler update and at time <span class="math notranslate nohighlight">\(t + \Delta t/2\)</span> for the Crank-Nicholson update.
 This may or may not be possible for your particular problem.</p>
 <p>For example, performing a split step Godunov method for advection-diffusion is as simple as:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// First. Compute phi = phi - dt*div(F)</span>
-<span class="n">solver</span><span class="o">-&gt;</span><span class="n">computeDivF</span><span class="p">(</span><span class="n">divF</span><span class="p">,</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
-<span class="nl">DataOps</span><span class="p">:</span><span class="n">incr</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">divF</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">dt</span><span class="p">);</span>
+<span class="n">solver</span><span class="o">-&gt;</span><span class="n">computeDivF</span><span class="p">(</span><span class="n">divF</span><span class="p">,</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w"></span>
+<span class="nl">DataOps</span><span class="p">:</span><span class="n">incr</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">divF</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">dt</span><span class="p">);</span><span class="w"></span>
 
 <span class="c1">// Implicit diffusion advance over a time step dt</span>
-<span class="n">DataOps</span><span class="o">::</span><span class="n">copy</span><span class="p">(</span><span class="n">phiOld</span><span class="p">,</span><span class="w"> </span><span class="n">phi</span><span class="p">);</span>
-<span class="n">solver</span><span class="o">-&gt;</span><span class="n">advanceEuler</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">phiOld</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">);</span>
+<span class="n">DataOps</span><span class="o">::</span><span class="n">copy</span><span class="p">(</span><span class="n">phiOld</span><span class="p">,</span><span class="w"> </span><span class="n">phi</span><span class="p">);</span><span class="w"></span>
+<span class="n">solver</span><span class="o">-&gt;</span><span class="n">advanceEuler</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">phiOld</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="cdrmultigrid">
-<span id="chap-cdrmultigrid"></span><h2>CdrMultigrid<a class="headerlink" href="#cdrmultigrid" title="Permalink to this heading">¶</a></h2>
+<span id="chap-cdrmultigrid"></span><h2>CdrMultigrid<a class="headerlink" href="#cdrmultigrid" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">CdrMultigrid</span></code> adds second-order accurate implicit diffusion code to <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code>, but leaves the advection code unimplemented.
 The class can use either implicit or explicit diffusion using second-order cell-centered stencils.
 In addition, <code class="docutils literal notranslate"><span class="pre">CdrMultigrid</span></code> adds two implicit time-integrators, an implicit Euler method and a Crank-Nicholson method.</p>
@@ -485,7 +395,7 @@ It implements the pure functions required by <a class="reference internal" href=
 <p>The faces states defined by the above function are used when forming a finite-volume approximation to the divergence operators, see <a class="reference internal" href="#chap-cdrdetails"><span class="std std-ref">Discretization details</span></a>.</p>
 </section>
 <section id="cdrctu">
-<span id="chap-cdrctu"></span><h2>CdrCTU<a class="headerlink" href="#cdrctu" title="Permalink to this heading">¶</a></h2>
+<span id="chap-cdrctu"></span><h2>CdrCTU<a class="headerlink" href="#cdrctu" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">CdrCTU</span></code> is an implementation class that uses the corner transport upwind (CTU) discretization.
 The CTU discretization uses information that propagates over corners of grid cells when calculating the face states.
 It can combine this with use various limiters:</p>
@@ -499,7 +409,7 @@ It can combine this with use various limiters:</p>
 Our motivation for using the CTU discretization lies in the time step selection for the CTU and donor-cell methods, see <a class="reference internal" href="#chap-ctustep"><span class="std std-ref">Time step limitation</span></a>.
 Typically, we want to achieve a dimensionally independent time step that is the same in 1D, 2D, and 3D, but without directional splitting.</p>
 <section id="face-extrapolation">
-<h3>Face extrapolation<a class="headerlink" href="#face-extrapolation" title="Permalink to this heading">¶</a></h3>
+<h3>Face extrapolation<a class="headerlink" href="#face-extrapolation" title="Permalink to this heading"></a></h3>
 <p>The finite volume discretization uses an upstream-centered Taylor expansion that extrapolates the cell-centered term to half-edges and half-steps:</p>
 <div class="math notranslate nohighlight">
 \[\phi_{i+1/2,j,}^{n+1/2} = \phi_{i,j,k}^n + \frac{\Delta x}{2}\frac{\partial \phi}{\partial x} + \frac{\Delta t}{2}\frac{\partial \phi}{\partial t} + \mathcal{O}\left(\Delta t^2\right) + \mathcal{O}\left(\Delta t\Delta x\right)\]</div>
@@ -516,7 +426,7 @@ The transverse slopes are given by</p>
 \end{cases}\end{split}\]</div>
 </section>
 <section id="slopes">
-<span id="chap-ctuslopes"></span><h3>Slopes<a class="headerlink" href="#slopes" title="Permalink to this heading">¶</a></h3>
+<span id="chap-ctuslopes"></span><h3>Slopes<a class="headerlink" href="#slopes" title="Permalink to this heading"></a></h3>
 <p>For the normal slopes, the user can choose between the minmod, superbee, and monotonized central difference (MC) slopes.
 Let <span class="math notranslate nohighlight">\(\Delta_l = \phi_{i,j}^n - \phi_{i-1,j}^n\)</span> and <span class="math notranslate nohighlight">\(\Delta_r = \phi_{i+1,j}^n - \phi_{i,j}^n\)</span>.
 The slopes are given by:</p>
@@ -540,14 +450,14 @@ If slopes are turned off, however, the scheme is guaranteed to be monotone.</p>
 </div>
 </section>
 <section id="time-step-limitation">
-<span id="chap-ctustep"></span><h3>Time step limitation<a class="headerlink" href="#time-step-limitation" title="Permalink to this heading">¶</a></h3>
+<span id="chap-ctustep"></span><h3>Time step limitation<a class="headerlink" href="#time-step-limitation" title="Permalink to this heading"></a></h3>
 <p>The stability region for the donor-cell and corner transport upwind methods are:</p>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}\text{Donor-cell}: \Delta t \leq \frac{\Delta x}{|v_x| + |v_y| + |v_z|}\\\text{CTU}: \Delta t \leq \frac{\Delta x}{\max\left(|v_x|,|v_y|,|v_z|\right)}\end{aligned}\end{align} \]</div>
 <p>Note that when the flow is diagonal to the grid, i.e. <span class="math notranslate nohighlight">\(|v_x| = |v_y| = |v_z|\)</span>, the CTU can use a time step that is three times larger than for the donor-cell method.</p>
 </section>
 <section id="class-options">
-<h3>Class options<a class="headerlink" href="#class-options" title="Permalink to this heading">¶</a></h3>
+<h3>Class options<a class="headerlink" href="#class-options" title="Permalink to this heading"></a></h3>
 <p>When running the <code class="docutils literal notranslate"><span class="pre">CdrCTU</span></code> solver the user can adjust the advective algorithm by turning on/off slope limiters and the transverse term through the class options:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">CdrCTU.slope_limiter</span></code>, which must be <em>none</em>, <em>minmod</em>, <em>mc</em>, or <em>superbee</em>.</p></li>
@@ -557,7 +467,7 @@ If slopes are turned off, however, the scheme is guaranteed to be monotone.</p>
 </section>
 </section>
 <section id="cdrgodunov">
-<span id="chap-cdrgodunov"></span><h2>CdrGodunov<a class="headerlink" href="#cdrgodunov" title="Permalink to this heading">¶</a></h2>
+<span id="chap-cdrgodunov"></span><h2>CdrGodunov<a class="headerlink" href="#cdrgodunov" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">CdrGodunov</span></code> inherits from <code class="docutils literal notranslate"><span class="pre">CdrMultigrid</span></code> and adds advection code for Godunov methods.
 This class borrows from <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> internals (specifically, <code class="docutils literal notranslate"><span class="pre">EBLevelAdvectIntegrator</span></code>) and can do second-order advection with time-extrapolation.</p>
 <p><code class="docutils literal notranslate"><span class="pre">CdrGodunov</span></code> supplies (almost) the same discretization as <code class="docutils literal notranslate"><span class="pre">CdrCTU</span></code> with the exception that the underlying discretization can also be used for the incompressible Navier-Stokes equation.
@@ -568,19 +478,19 @@ However, it only supports the monotonized central difference limiter.</p>
 </div>
 </section>
 <section id="using-cdrsolver">
-<h2>Using CdrSolver<a class="headerlink" href="#using-cdrsolver" title="Permalink to this heading">¶</a></h2>
+<h2>Using CdrSolver<a class="headerlink" href="#using-cdrsolver" title="Permalink to this heading"></a></h2>
 <section id="setting-up-the-solver">
-<h3>Setting up the solver<a class="headerlink" href="#setting-up-the-solver" title="Permalink to this heading">¶</a></h3>
+<h3>Setting up the solver<a class="headerlink" href="#setting-up-the-solver" title="Permalink to this heading"></a></h3>
 <p>To set up the <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code>, the following commands are usually sufficient:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Assume m_solver and m_species are pointers to a CdrSolver and CdrSpecies</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">solver</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSolver</span><span class="o">&gt;</span><span class="w">  </span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">MyCdrSolver</span><span class="p">());</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSpecies</span><span class="o">&gt;</span><span class="w"> </span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">MyCdrSpecies</span><span class="p">());</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">solver</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSolver</span><span class="o">&gt;</span><span class="w">  </span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">MyCdrSolver</span><span class="p">());</span><span class="w"></span>
+<span class="k">auto</span><span class="w"> </span><span class="n">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSpecies</span><span class="o">&gt;</span><span class="w"> </span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">MyCdrSpecies</span><span class="p">());</span><span class="w"></span>
 </pre></div>
 </div>
 <p>To see an example, the advection-diffusion code in <code class="file docutils literal notranslate"><span class="pre">/Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp</span></code> shows how to set up a <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code>.</p>
 </section>
 <section id="filling-the-solver">
-<h3>Filling the solver<a class="headerlink" href="#filling-the-solver" title="Permalink to this heading">¶</a></h3>
+<h3>Filling the solver<a class="headerlink" href="#filling-the-solver" title="Permalink to this heading"></a></h3>
 <p>In order to obtain mesh data from the <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code>, the user should use the following public member functions:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">getPhi</span><span class="p">();</span><span class="w">                               </span><span class="c1">// Return  phi</span>
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">getSource</span><span class="p">();</span><span class="w">                            </span><span class="c1">// Returns S</span>
@@ -593,40 +503,40 @@ However, it only supports the monotonized central difference limiter.</p>
 <p>To set the drift velocities, the user will fill the <em>cell-centered</em> velocities.
 Interpolation to face-centered transport fluxes are done by <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code> during the discretization step.</p>
 <p>The general way of setting the velocity is to get a direct handle to the velocity data:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CdrSolver</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CdrSolver</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">veloCell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="p">.</span><span class="n">getCellCenteredVelocity</span><span class="p">();</span>
+<span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">veloCell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="p">.</span><span class="n">getCellCenteredVelocity</span><span class="p">();</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Then, <code class="docutils literal notranslate"><span class="pre">veloCell</span></code> can be filled with the cell-centered velocity.
 This would typically look something like this:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">veloCell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">getCellCenteredVelocity</span><span class="p">();</span>
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getFinestLevel</span><span class="p">();</span><span class="w"> </span><span class="n">lvl</span><span class="o">++</span><span class="p">){</span>
-<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">DisjointBoxLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getGrids</span><span class="p">()[</span><span class="n">lvl</span><span class="p">];</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">veloCell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">getCellCenteredVelocity</span><span class="p">();</span><span class="w"></span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getFinestLevel</span><span class="p">();</span><span class="w"> </span><span class="n">lvl</span><span class="o">++</span><span class="p">){</span><span class="w"></span>
+<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">DisjointBoxLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getGrids</span><span class="p">()[</span><span class="n">lvl</span><span class="p">];</span><span class="w"></span>
 
-<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span>
-<span class="w">      </span><span class="n">EBCellFAB</span><span class="o">&amp;</span><span class="w"> </span><span class="n">patchVel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">veloCell</span><span class="p">[</span><span class="n">lvl</span><span class="p">])[</span><span class="n">dit</span><span class="p">()];</span>
+<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span><span class="w"></span>
+<span class="w">      </span><span class="n">EBCellFAB</span><span class="o">&amp;</span><span class="w"> </span><span class="n">patchVel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">veloCell</span><span class="p">[</span><span class="n">lvl</span><span class="p">])[</span><span class="n">dit</span><span class="p">()];</span><span class="w"></span>
 
 <span class="w">      </span><span class="c1">// Do something with patchVel</span>
-<span class="w">   </span><span class="p">}</span>
-<span class="p">}</span>
+<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The same procedure goes for the source terms, diffusion coefficients, boundary conditions and so on.
 For example, an explicit Euler discretization for the problem <span class="math notranslate nohighlight">\(\partial_t\phi = S\)</span> is:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CdrSolver</span><span class="o">*</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CdrSolver</span><span class="o">*</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">phi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getPhi</span><span class="p">();</span>
-<span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">src</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getSource</span><span class="p">();</span>
+<span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">phi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getPhi</span><span class="p">();</span><span class="w"></span>
+<span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">src</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getSource</span><span class="p">();</span><span class="w"></span>
 
-<span class="n">DataOps</span><span class="o">::</span><span class="n">incr</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">);</span>
+<span class="n">DataOps</span><span class="o">::</span><span class="n">incr</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="adjusting-output">
-<h3>Adjusting output<a class="headerlink" href="#adjusting-output" title="Permalink to this heading">¶</a></h3>
+<h3>Adjusting output<a class="headerlink" href="#adjusting-output" title="Permalink to this heading"></a></h3>
 <p>It is possible to adjust solver output when plotting data.
 This is done through the input file for the class that you’re using.
 For example, for the <code class="docutils literal notranslate"><span class="pre">CdrCTU</span></code> implementation the following variables are available:</p>
@@ -635,13 +545,13 @@ For example, for the <code class="docutils literal notranslate"><span class="pre
 </div>
 <p>Here, you adjust the plotted variables by adding or omitting them from your input script.
 E.g. if you only want to plot the cell-centered states you would do:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>CdrGodunov.plt_vars<span class="w"> </span><span class="o">=</span><span class="w"> </span>phi<span class="w">  </span><span class="c1"># Plot variables. Options are &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;src&#39;, &#39;ebflux&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>CdrGodunov.plt_vars <span class="o">=</span> phi  <span class="c1"># Plot variables. Options are &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;src&#39;, &#39;ebflux&#39;</span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="cdrspecies">
-<span id="chap-cdrspecies"></span><h2>CdrSpecies<a class="headerlink" href="#cdrspecies" title="Permalink to this heading">¶</a></h2>
+<span id="chap-cdrspecies"></span><h2>CdrSpecies<a class="headerlink" href="#cdrspecies" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">CdrSpecies</span></code> class is a supporting class that passes information and initial conditions into <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code> instances.
 <code class="docutils literal notranslate"><span class="pre">CdrSpecies</span></code> specifies whether or not the advect-diffusion solver will use only advection, diffusion, both advection and diffusion, or neither.
 It also specifies initial data, and provides a string identifier to the class (e.g. for identifying output in plot files).
@@ -652,21 +562,21 @@ However, it does not contain any discretization.</p>
 </div>
 <p>The below code block shows an example of how to instantiate a species.
 Here, diffusion code is turned off and the initial data is one everywhere.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MySpecies</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">CdrSpecies</span><span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MySpecies</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">CdrSpecies</span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
 
-<span class="w">   </span><span class="n">MySpecies</span><span class="p">(){</span>
-<span class="w">      </span><span class="n">m_mobile</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
-<span class="w">      </span><span class="n">m_diffusive</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
-<span class="w">      </span><span class="n">m_name</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;mySpecies&quot;</span><span class="p">;</span>
-<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="n">MySpecies</span><span class="p">(){</span><span class="w"></span>
+<span class="w">      </span><span class="n">m_mobile</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">      </span><span class="n">m_diffusive</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">      </span><span class="n">m_name</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;mySpecies&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"></span>
 
-<span class="w">   </span><span class="o">~</span><span class="n">MySpecies</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>
+<span class="w">   </span><span class="o">~</span><span class="n">MySpecies</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span><span class="w"></span>
 
-<span class="w">   </span><span class="n">Real</span><span class="w"> </span><span class="nf">initialData</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
-<span class="w">   </span><span class="p">}</span>
-<span class="p">}</span>
+<span class="w">   </span><span class="n">Real</span><span class="w"> </span><span class="nf">initialData</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <div class="admonition tip">
@@ -677,7 +587,7 @@ See <a class="reference internal" href="../Source/Particles.html#chap-particles"
 </div>
 </section>
 <section id="example-application-s">
-<h2>Example application(s)<a class="headerlink" href="#example-application-s" title="Permalink to this heading">¶</a></h2>
+<h2>Example application(s)<a class="headerlink" href="#example-application-s" title="Permalink to this heading"></a></h2>
 <p>Example applications that use the <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code> are:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a>.</p></li>
@@ -688,50 +598,33 @@ See <a class="reference internal" href="../Source/Particles.html#chap-particles"
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="Electrostatics.html" class="btn btn-neutral float-right" title="Electrostatic solver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../Source/VV.html" class="btn btn-neutral float-left" title="Verification and validation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Electrostatics.html" class="btn btn-neutral float-right" title="Electrostatic solver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2022, SINTEF Energy Research.
-
-    </p>
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

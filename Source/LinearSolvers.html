@@ -1,76 +1,38 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Linear solvers &mdash; chombo-discharge  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Verification and validation" href="VV.html" />
     <link rel="prev" title="Regridding" href="Regridding.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -78,18 +40,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
@@ -194,75 +145,34 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Linear solvers</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Linear solvers</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/Source/LinearSolvers.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="linear-solvers">
-<span id="chap-linearsolvers"></span><h1>Linear solvers<a class="headerlink" href="#linear-solvers" title="Permalink to this heading">¶</a></h1>
+<span id="chap-linearsolvers"></span><h1>Linear solvers<a class="headerlink" href="#linear-solvers" title="Permalink to this heading"></a></h1>
 <section id="helmholtz-equation">
-<span id="chap-helmholtz"></span><h2>Helmholtz equation<a class="headerlink" href="#helmholtz-equation" title="Permalink to this heading">¶</a></h2>
+<span id="chap-helmholtz"></span><h2>Helmholtz equation<a class="headerlink" href="#helmholtz-equation" title="Permalink to this heading"></a></h2>
 <p>The Helmholtz equation is represented by</p>
 <div class="math notranslate nohighlight">
 \[\alpha a\left(\mathbf{x}\right)\Phi + \beta\nabla\cdot\left[b\left(\mathbf{x}\right)\nabla\Phi\right] = \rho\]</div>
@@ -273,7 +183,7 @@
 <p>where <span class="math notranslate nohighlight">\(L\)</span> is the Helmholtz operator above.
 The preconditioning by the volume fraction <span class="math notranslate nohighlight">\(\kappa\)</span> is done in order to avoid the small-cell problem encountered in finite-volume discretizations on EB grids.</p>
 <section id="discretization-and-fluxes">
-<h3>Discretization and fluxes<a class="headerlink" href="#discretization-and-fluxes" title="Permalink to this heading">¶</a></h3>
+<h3>Discretization and fluxes<a class="headerlink" href="#discretization-and-fluxes" title="Permalink to this heading"></a></h3>
 <p>The Helmholtz equation is solved by assuming that <span class="math notranslate nohighlight">\(\Phi\)</span> lies on the cell-center.
 The <span class="math notranslate nohighlight">\(b\left(\mathbf{x}\right)\)</span>-coefficient lies on face centers and EB faces.
 In the general case the cell center might lie inside the embedded boundary, and the cell-centered discretization relies on the concept of an extended state.
@@ -281,7 +191,7 @@ Thus, <span class="math notranslate nohighlight">\(\Phi\)</span> does not satisf
 <figure class="align-center" id="id1">
 <span id="fig-helmholtzfluxes"></span><a class="reference internal image-reference" href="../_images/CutCell.png"><img alt="../_images/CutCell.png" src="../_images/CutCell.png" style="width: 40%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 16 </span><span class="caption-text">Location of fluxes for finite volume discretization.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+<p><span class="caption-number">Fig. 16 </span><span class="caption-text">Location of fluxes for finite volume discretization.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>The finite volume update require fluxes on the face centroids rather than the centers.
@@ -291,7 +201,7 @@ For example, the flux <span class="math notranslate nohighlight">\(F_3\)</span> 
 \[F_3 = \beta b_{i,j+1/2}\frac{\Phi_{i,j+1} - \Phi_{i,j}}{\Delta x}.\]</div>
 </section>
 <section id="boundary-conditions">
-<h3>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Permalink to this heading">¶</a></h3>
+<h3>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Permalink to this heading"></a></h3>
 <p>The finite volume discretization of the Helmholtz equation require fluxes through the EB and domain faces.
 Below, we discuss how these are implemented.</p>
 <div class="admonition note">
@@ -299,12 +209,12 @@ Below, we discuss how these are implemented.</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports spatially dependent boundary conditions</p>
 </div>
 <section id="neumann">
-<h4>Neumann<a class="headerlink" href="#neumann" title="Permalink to this heading">¶</a></h4>
+<h4>Neumann<a class="headerlink" href="#neumann" title="Permalink to this heading"></a></h4>
 <p>Neumann boundary conditions are straightforward since the flux through the EB or domain faces are specified directly.</p>
 <p>From the above figure, the fluxes <span class="math notranslate nohighlight">\(F_{\textrm{EB}}\)</span> and <span class="math notranslate nohighlight">\(F_{\textrm{D}}\)</span> are specified.</p>
 </section>
 <section id="dirichlet">
-<span id="chap-linearsolverdirichletbc"></span><h4>Dirichlet<a class="headerlink" href="#dirichlet" title="Permalink to this heading">¶</a></h4>
+<span id="chap-linearsolverdirichletbc"></span><h4>Dirichlet<a class="headerlink" href="#dirichlet" title="Permalink to this heading"></a></h4>
 <p>Dirichlet boundary conditions are more involved since only the value at the boundary is prescribed, but the finite volume discretization requires a flux.
 On the domain boundaries the fluxes are face-centered and we therefore use finite differencing for obtaining a second order accurate approximation to the flux at the boundary.</p>
 <p>On the embedded boundaries the flux is more complicated to compute, and requires us to compute an approximation to the normal gradient <span class="math notranslate nohighlight">\(\partial_n\Phi\)</span> at the boundary.
@@ -315,7 +225,7 @@ If we can not find enough equations, the strategy is to 1) drop order and 2) inc
 <figure class="align-center" id="id2">
 <span id="fig-gradientreconstruction"></span><a class="reference internal image-reference" href="../_images/GradientReconstruction.png"><img alt="../_images/GradientReconstruction.png" src="../_images/GradientReconstruction.png" style="width: 40%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 17 </span><span class="caption-text">Examples of neighborhoods (quadrant and half-space) used for gradient reconstruction on the EB.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+<p><span class="caption-number">Fig. 17 </span><span class="caption-text">Examples of neighborhoods (quadrant and half-space) used for gradient reconstruction on the EB.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>Once the cells used for the gradient reconstruction have been obtained, we use weighted least squares to compute the approximation to the derivative to specified order (for details, see <a class="reference internal" href="../Utilities/LeastSquares.html#chap-leastsquares"><span class="std std-ref">Least squares</span></a>).
@@ -330,12 +240,12 @@ For the same reason, gradient reconstruction near the cut-cells might require in
 <figure class="align-center" id="id3">
 <span id="fig-stencilregion"></span><a class="reference internal image-reference" href="../_images/StencilRegion.png"><img alt="../_images/StencilRegion.png" src="../_images/StencilRegion.png" style="width: 40%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 18 </span><span class="caption-text">Example of the region of a second order stencil for the Laplacian operator with second order gradient reconstruction on the embedded boundary.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+<p><span class="caption-number">Fig. 18 </span><span class="caption-text">Example of the region of a second order stencil for the Laplacian operator with second order gradient reconstruction on the embedded boundary.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 </section>
 <section id="robin">
-<h4>Robin<a class="headerlink" href="#robin" title="Permalink to this heading">¶</a></h4>
+<h4>Robin<a class="headerlink" href="#robin" title="Permalink to this heading"></a></h4>
 <p>Robin boundary conditions are in the form</p>
 <div class="math notranslate nohighlight">
 \[A\partial_n\Phi + B\Phi = C,\]</div>
@@ -353,7 +263,7 @@ The Robin boundary condition takes the form</p>
 </section>
 </section>
 <section id="ghost-cell-interpolation">
-<span id="chap-multigridinterpolation"></span><h3>Ghost cell interpolation<a class="headerlink" href="#ghost-cell-interpolation" title="Permalink to this heading">¶</a></h3>
+<span id="chap-multigridinterpolation"></span><h3>Ghost cell interpolation<a class="headerlink" href="#ghost-cell-interpolation" title="Permalink to this heading"></a></h3>
 <p>With AMR, multigrid requires ghost cells on the refinement boundary.
 The interior stencils for the Helmholtz operator have a radius of one and thus only require a single layer of ghost cells (and no corner ghost cells).
 These ghost cells are filled using a finite-difference stencil, see <a class="reference internal" href="#fig-multigridinterpolation"><span class="std std-numref">Fig. 19</span></a>.</p>
@@ -362,7 +272,7 @@ These ghost cells are filled using a finite-difference stencil, see <a class="re
 <figcaption>
 <p><span class="caption-number">Fig. 19 </span><span class="caption-text">Standard finite-difference stencil for ghost cell interpolation (open circle).
 We first interpolate the coarse-grid cells to the centerline (diamond).
-The coarse-grid interpolation is then used together with the fine-grid cells (filled circles) for interpolation to the ghost cell (open circle).</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+The coarse-grid interpolation is then used together with the fine-grid cells (filled circles) for interpolation to the ghost cell (open circle).</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>Embedded boundaries introduce many pathologies for multigrid:</p>
@@ -379,7 +289,7 @@ For this particular case there are 10 nearby grid cells available, which is suff
 <figure class="align-center" id="id5">
 <span id="fig-ebmultigridinterpolation"></span><a class="reference internal image-reference" href="../_images/EBMultigridInterpolation.png"><img alt="../_images/EBMultigridInterpolation.png" src="../_images/EBMultigridInterpolation.png" style="width: 40%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 20 </span><span class="caption-text">Multigrid interpolation for refinement boundaries away from and close to an embedded boundary.</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+<p><span class="caption-number">Fig. 20 </span><span class="caption-text">Multigrid interpolation for refinement boundaries away from and close to an embedded boundary.</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <div class="admonition note">
@@ -391,7 +301,7 @@ For this particular case there are 10 nearby grid cells available, which is suff
 In this case the reflux operation is turned off and we compute the fluxes on the entire fine level (not just the interface) and replace the coarse-grid fluxes by averages of the fine-grid fluxes.</p>
 </section>
 <section id="relaxation-methods">
-<h3>Relaxation methods<a class="headerlink" href="#relaxation-methods" title="Permalink to this heading">¶</a></h3>
+<h3>Relaxation methods<a class="headerlink" href="#relaxation-methods" title="Permalink to this heading"></a></h3>
 <p>The Helmholtz equation is solved using multigrid, with various smoothers available on each grid level.
 The currently supported smoothers are:</p>
 <ol class="arabic simple">
@@ -408,14 +318,14 @@ However, the multi-colored kernels are twice as expensive as red-black Gauss-Sei
 </section>
 </section>
 <section id="multiphase-helmholtz-equation">
-<h2>Multiphase Helmholtz equation<a class="headerlink" href="#multiphase-helmholtz-equation" title="Permalink to this heading">¶</a></h2>
+<h2>Multiphase Helmholtz equation<a class="headerlink" href="#multiphase-helmholtz-equation" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also supports a <em>multiphase version</em> where data exists on both sides of the embedded boundary.
 The most common case is that involving discontinuous coefficients, e.g. for</p>
 <div class="math notranslate nohighlight">
 \[\nabla\cdot\left[b\left(\mathbf{x}\right)\nabla\Phi\left(\mathbf{x}\right)\right] = 0.\]</div>
 <p>where <span class="math notranslate nohighlight">\(b\left(\mathbf{x}\right)\)</span> is only piecewise constant.</p>
 <section id="jump-conditions">
-<h3>Jump conditions<a class="headerlink" href="#jump-conditions" title="Permalink to this heading">¶</a></h3>
+<h3>Jump conditions<a class="headerlink" href="#jump-conditions" title="Permalink to this heading"></a></h3>
 <p>For the case of discontinous coefficients there is a jump condition on the interface between two materials:</p>
 <div class="math notranslate nohighlight">
 \[b_1\partial_{n_1}\Phi + b_2\partial_{n_2}\Phi = \sigma,\]</div>
@@ -424,12 +334,12 @@ The most common case is that involving discontinuous coefficients, e.g. for</p>
 <figure class="align-center" id="id6">
 <span id="fig-jumpcondition"></span><a class="reference internal image-reference" href="../_images/JumpCondition.png"><img alt="../_images/JumpCondition.png" src="../_images/JumpCondition.png" style="width: 40%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 21 </span><span class="caption-text">Example of cells and stencils that are involved in discretizing the jump condition. Open and filled circles indicate cells in separate phases.</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+<p><span class="caption-number">Fig. 21 </span><span class="caption-text">Example of cells and stencils that are involved in discretizing the jump condition. Open and filled circles indicate cells in separate phases.</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 </section>
 <section id="discretization">
-<h3>Discretization<a class="headerlink" href="#discretization" title="Permalink to this heading">¶</a></h3>
+<h3>Discretization<a class="headerlink" href="#discretization" title="Permalink to this heading"></a></h3>
 <p>To incorporate the jump condition in the Helmholtz discretization, we use a gradient reconstruction to obtain a solution to <span class="math notranslate nohighlight">\(\Phi\)</span> on the boundary, and use this value to impose a Dirichlet boundary condition during multigrid relaxation.
 Recalling the gradient reconstruction <span class="math notranslate nohighlight">\(\frac{\partial\Phi}{\partial n} = w_{\textrm{B}}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i}}\Phi_{\mathbf{i}}\)</span>, the matching condition (see <a class="reference internal" href="#fig-jumpcondition"><span class="std std-numref">Fig. 21</span></a>) can be written as</p>
 <div class="math notranslate nohighlight">
@@ -442,7 +352,7 @@ Recalling the gradient reconstruction <span class="math notranslate nohighlight"
 </section>
 </section>
 <section id="amrmultigrid">
-<h2>AMRMultiGrid<a class="headerlink" href="#amrmultigrid" title="Permalink to this heading">¶</a></h2>
+<h2>AMRMultiGrid<a class="headerlink" href="#amrmultigrid" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">AMRMultiGrid</span></code> is the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> implementation of the Martin-Cartwright multigrid algorithm.
 It takes an “operator factory” as an argument, and the factory can generate objects (i.e., operators) that encapsulate the discretization on each AMR level.</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> runs its own operator, and the user can use either of:</p>
@@ -452,7 +362,7 @@ It takes an “operator factory” as an argument, and the factory can generate 
 </ol>
 <p>The source code for these are located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Elliptic</span></code>.</p>
 <section id="bottom-solvers">
-<h3>Bottom solvers<a class="headerlink" href="#bottom-solvers" title="Permalink to this heading">¶</a></h3>
+<h3>Bottom solvers<a class="headerlink" href="#bottom-solvers" title="Permalink to this heading"></a></h3>
 <p>Chombo provides (at least) three bottom solvers which can be used with <code class="docutils literal notranslate"><span class="pre">AMRMultiGrid</span></code>.</p>
 <ol class="arabic simple">
 <li><p>A regular smoother (e.g., point Jacobi).</p></li>
@@ -466,50 +376,33 @@ It takes an “operator factory” as an argument, and the factory can generate 
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="VV.html" class="btn btn-neutral float-right" title="Verification and validation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Regridding.html" class="btn btn-neutral float-left" title="Regridding" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="VV.html" class="btn btn-neutral float-right" title="Verification and validation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2022, SINTEF Energy Research.
-
-    </p>
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

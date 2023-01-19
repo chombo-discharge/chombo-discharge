@@ -1,76 +1,38 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Îto diffusion &mdash; chombo-discharge  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="CDR plasma model" href="../Applications/CdrPlasmaModel.html" />
     <link rel="prev" title="Tracer particles" href="TracerParticles.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -78,18 +40,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
@@ -195,73 +146,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Îto diffusion</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Îto diffusion</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/Solvers/Ito.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="ito-diffusion">
-<span id="chap-itodiffusion"></span><h1>Îto diffusion<a class="headerlink" href="#ito-diffusion" title="Permalink to this heading">¶</a></h1>
+<span id="chap-itodiffusion"></span><h1>Îto diffusion<a class="headerlink" href="#ito-diffusion" title="Permalink to this heading"></a></h1>
 <p>The Îto diffusion model advances computational particles as drifting Brownian walkers</p>
 <div class="math notranslate nohighlight">
 \[\Delta\mathbf{X} = \mathbf{V}\Delta t + \sqrt{2D\Delta t}\mathbf{W}\]</div>
@@ -272,7 +182,7 @@ The vector term <span class="math notranslate nohighlight">\(\mathbf{W}\)</span>
 <p>The code for Îto diffusion is given in <code class="file docutils literal notranslate"><span class="pre">/Source/ItoSolver</span></code>.</p>
 </div>
 <section id="itosolver">
-<span id="chap-itosolver"></span><h2>ItoSolver<a class="headerlink" href="#itosolver" title="Permalink to this heading">¶</a></h2>
+<span id="chap-itosolver"></span><h2>ItoSolver<a class="headerlink" href="#itosolver" title="Permalink to this heading"></a></h2>
 <p>The class <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> encapsulatse the motion of drift-diffusion particles.
 This class can advance a set of particles (see <a class="reference internal" href="#chap-itoparticle"><span class="std std-ref">ItoParticle</span></a>) with the following functionality:</p>
 <ul class="simple">
@@ -306,45 +216,45 @@ The solver can, alternatively, also compute the velocity as</p>
 Regardless of which method is chosen (see <a class="reference internal" href="#chap-itointerpolation"><span class="std std-ref">Velocity interpolation</span></a>), both <span class="math notranslate nohighlight">\(\mu\)</span> and <span class="math notranslate nohighlight">\(\mathbf{v}\)</span> exist on the mesh (stored as <code class="docutils literal notranslate"><span class="pre">EBAMRCellData</span></code>).</p>
 </section>
 <section id="itoparticle">
-<span id="chap-itoparticle"></span><h2>ItoParticle<a class="headerlink" href="#itoparticle" title="Permalink to this heading">¶</a></h2>
+<span id="chap-itoparticle"></span><h2>ItoParticle<a class="headerlink" href="#itoparticle" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">ItoParticle</span></code> is used as the underlying particle type for running the Ito drift-diffusion solvers.
 It derives from <a class="reference internal" href="../Source/Particles.html#chap-genericparticle"><span class="std std-ref">GenericParticle</span></a> as follows:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ItoParticle</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="o">&gt;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ItoParticle</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>and contains the following relevant member functions</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Storing for particle weight</span>
-<span class="n">Real</span><span class="o">&amp;</span>
-<span class="nf">ItoParticle::weight</span><span class="p">();</span>
+<span class="n">Real</span><span class="o">&amp;</span><span class="w"></span>
+<span class="nf">ItoParticle::weight</span><span class="p">();</span><span class="w"></span>
 
 <span class="c1">// Storage for particle diffusion coefficient</span>
-<span class="n">Real</span><span class="o">&amp;</span>
-<span class="nf">ItoParticle::diffusion</span><span class="p">();</span>
+<span class="n">Real</span><span class="o">&amp;</span><span class="w"></span>
+<span class="nf">ItoParticle::diffusion</span><span class="p">();</span><span class="w"></span>
 
 <span class="c1">// Storage for particle mobility</span>
-<span class="n">Real</span><span class="o">&amp;</span>
-<span class="nf">ItoParticle::mobility</span><span class="p">();</span>
+<span class="n">Real</span><span class="o">&amp;</span><span class="w"></span>
+<span class="nf">ItoParticle::mobility</span><span class="p">();</span><span class="w"></span>
 
 <span class="c1">// Storage for particle energy</span>
-<span class="n">Real</span><span class="o">&amp;</span>
-<span class="nf">ItoParticle::energy</span><span class="p">();</span>
+<span class="n">Real</span><span class="o">&amp;</span><span class="w"></span>
+<span class="nf">ItoParticle::energy</span><span class="p">();</span><span class="w"></span>
 
 <span class="c1">// Storage for particle velocity</span>
-<span class="n">RealVect</span><span class="o">&amp;</span>
-<span class="nf">ItoParticle::velocity</span><span class="p">();</span>
+<span class="n">RealVect</span><span class="o">&amp;</span><span class="w"></span>
+<span class="nf">ItoParticle::velocity</span><span class="p">();</span><span class="w"></span>
 
 <span class="c1">// Storage for previous particle position</span>
-<span class="n">RealVect</span><span class="o">&amp;</span>
-<span class="nf">ItoParticle::oldPosition</span><span class="p">();</span>
+<span class="n">RealVect</span><span class="o">&amp;</span><span class="w"></span>
+<span class="nf">ItoParticle::oldPosition</span><span class="p">();</span><span class="w"></span>
 </pre></div>
 </div>
 <p>All of these functions have corresponding functions with <code class="docutils literal notranslate"><span class="pre">const</span></code> qualifiers.</p>
 </section>
 <section id="itospecies">
-<span id="chap-itospecies"></span><h2>ItoSpecies<a class="headerlink" href="#itospecies" title="Permalink to this heading">¶</a></h2>
+<span id="chap-itospecies"></span><h2>ItoSpecies<a class="headerlink" href="#itospecies" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ItoSpecies</span></code> is a class for parsing information into <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code>.
 The constructor for the <code class="docutils literal notranslate"><span class="pre">ItoSpecies</span></code> class is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ItoSpecies</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_name</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_chargeNumber</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_mobile</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_diffusive</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ItoSpecies</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_name</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_chargeNumber</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_mobile</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_diffusive</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>and this will set the name of the class, the charge, and whether or not the transport kernels use drift and/or diffusion.</p>
@@ -354,33 +264,33 @@ The constructor for the <code class="docutils literal notranslate"><span class="
 </div>
 <p>Initial data for the <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> is provided through <code class="docutils literal notranslate"><span class="pre">ItoSpecies</span></code> by providing it with a list of initial particles.
 <code class="docutils literal notranslate"><span class="pre">ItoSpecies</span></code> have members that provide/modify the initial particles:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ItoSpecies</span><span class="w"> </span><span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ItoSpecies</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
 
-<span class="w">   </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span>
-<span class="w">   </span><span class="n">getInitialParticles</span><span class="p">();</span>
+<span class="w">   </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"></span>
+<span class="w">   </span><span class="n">getInitialParticles</span><span class="p">();</span><span class="w"></span>
 
-<span class="k">protected</span><span class="o">:</span>
+<span class="k">protected</span><span class="o">:</span><span class="w"></span>
 
-<span class="w">   </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_initialParticles</span><span class="p">;</span>
-<span class="p">};</span>
+<span class="w">   </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_initialParticles</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
 </pre></div>
 </div>
 <p>When <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> initializes the data in the solver, it transfers the particles from the species and into the solver.
 See <a class="reference internal" href="../Source/Particles.html#chap-particleops"><span class="std std-ref">ParticleOps</span></a> for examples on how to draw initial particles and how to partition them when using MPI.</p>
 </section>
 <section id="transport-kernel">
-<h2>Transport kernel<a class="headerlink" href="#transport-kernel" title="Permalink to this heading">¶</a></h2>
+<h2>Transport kernel<a class="headerlink" href="#transport-kernel" title="Permalink to this heading"></a></h2>
 <p>The transport kernels for the <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> will simply consist of particle updates of the following type:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">;</span>
-<span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;</span><span class="w"> </span><span class="n">particles</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">;</span><span class="w"></span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;</span><span class="w"> </span><span class="n">particles</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ListIterator</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">lit</span><span class="p">(</span><span class="n">particles</span><span class="p">);</span><span class="w"> </span><span class="n">lit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">lit</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">   </span><span class="n">ItoParticle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lit</span><span class="p">();</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ListIterator</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">lit</span><span class="p">(</span><span class="n">particles</span><span class="p">);</span><span class="w"> </span><span class="n">lit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">lit</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">ItoParticle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lit</span><span class="p">();</span><span class="w"></span>
 
-<span class="w">   </span><span class="n">p</span><span class="p">.</span><span class="n">oldPosition</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">();</span>
-<span class="w">   </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">()</span><span class="w">   </span><span class="o">+=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">velocity</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a_dt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">p</span><span class="p">.</span><span class="n">diffusion</span><span class="p">()</span><span class="o">*</span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">randomGaussian</span><span class="p">();</span>
-<span class="p">}</span>
+<span class="w">   </span><span class="n">p</span><span class="p">.</span><span class="n">oldPosition</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">();</span><span class="w"></span>
+<span class="w">   </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">()</span><span class="w">   </span><span class="o">+=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">velocity</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a_dt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">p</span><span class="p">.</span><span class="n">diffusion</span><span class="p">()</span><span class="o">*</span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">randomGaussian</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The function <code class="docutils literal notranslate"><span class="pre">randomGaussian</span></code> implements a diffusion hopping and returns a 2D/3D dimensional vector with values drawn from a normal distribution with standard width of one and mean value of zero.
@@ -388,36 +298,36 @@ The implementation uses the random number generators in <a class="reference inte
 The user can choose to truncate the normal distribution, see <a class="reference internal" href="#chap-itoinput"><span class="std std-ref">Input options</span></a>.</p>
 </section>
 <section id="remapping-particles">
-<h2>Remapping particles<a class="headerlink" href="#remapping-particles" title="Permalink to this heading">¶</a></h2>
+<h2>Remapping particles<a class="headerlink" href="#remapping-particles" title="Permalink to this heading"></a></h2>
 <p>To remap, call the <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> remapping functions as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="nf">ItoSolver::remap</span><span class="p">();</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
+<span class="nf">ItoSolver::remap</span><span class="p">();</span><span class="w"></span>
 </pre></div>
 </div>
 <p>This will remap the particles to the correct grid patches.</p>
 <p>To remap the other <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code> data holders (holding e.g. particles that intersected the EB), there’s an alternative function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="nf">ItoSolver::remap</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
+<span class="nf">ItoSolver::remap</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">a_container</span></code> is one of the particle containers.</p>
 </section>
 <section id="deposition">
-<h2>Deposition<a class="headerlink" href="#deposition" title="Permalink to this heading">¶</a></h2>
+<h2>Deposition<a class="headerlink" href="#deposition" title="Permalink to this heading"></a></h2>
 <p>To deposit the particle weights onto the grid one can use</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="nf">ItoSolver::depositParticles</span><span class="p">();</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
+<span class="nf">ItoSolver::depositParticles</span><span class="p">();</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The particles are deposited into the data holder <code class="docutils literal notranslate"><span class="pre">m_phi</span></code>.
 The data can then be fetched with</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBAMRCellData</span><span class="o">&amp;</span>
-<span class="nf">ItoSolver::getPhi</span><span class="p">();</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"></span>
+<span class="nf">ItoSolver::getPhi</span><span class="p">();</span><span class="w"></span>
 </pre></div>
 </div>
 <p>To deposit a different particle data holder into <code class="docutils literal notranslate"><span class="pre">m_phi</span></code> one can use</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="nf">ItoSolver::depositParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
+<span class="nf">ItoSolver::depositParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>This can be used, for example, to deposit the EB particles on the mesh.
@@ -430,14 +340,14 @@ More general methods also exist, see the <code class="docutils literal notransla
 </ul>
 <p>Here, <span class="math notranslate nohighlight">\(W\)</span> is the particle weight, <span class="math notranslate nohighlight">\(\mu\)</span> is the particle mobility, <span class="math notranslate nohighlight">\(D\)</span> is the particle diffusion coefficient and <span class="math notranslate nohighlight">\(\epsilon\)</span> is the particle energy.
 These functions exist as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="nf">ItoSolver::depositConductivity</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
+<span class="nf">ItoSolver::depositConductivity</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
 
-<span class="kt">void</span>
-<span class="nf">ItoSolver::depositDiffusivity</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="kt">void</span><span class="w"></span>
+<span class="nf">ItoSolver::depositDiffusivity</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
 
-<span class="kt">void</span>
-<span class="nf">ItoSolver::depositEnergyDensity</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="kt">void</span><span class="w"></span>
+<span class="nf">ItoSolver::depositEnergyDensity</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <div class="admonition important">
@@ -446,11 +356,11 @@ These functions exist as</p>
 </div>
 </section>
 <section id="velocity-interpolation">
-<span id="chap-itointerpolation"></span><h2>Velocity interpolation<a class="headerlink" href="#velocity-interpolation" title="Permalink to this heading">¶</a></h2>
+<span id="chap-itointerpolation"></span><h2>Velocity interpolation<a class="headerlink" href="#velocity-interpolation" title="Permalink to this heading"></a></h2>
 <p>Computing the particle velocity is done by first computing the particle mobility and then computing the particle velocity.
 For interpolating the mobility to the particle position one will call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="nf">ItoSolver::interpolateMobilities</span><span class="p">();</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
+<span class="nf">ItoSolver::interpolateMobilities</span><span class="p">();</span><span class="w"></span>
 </pre></div>
 </div>
 <p>which will compute <span class="math notranslate nohighlight">\(\mu\left(\mathbf{X}\right)\)</span> using the user-specified deposition/interpolation method for computing the mobility.
@@ -466,8 +376,8 @@ The other is to compute the mobility as</p>
 See <a class="reference internal" href="#chap-itoinput"><span class="std std-ref">Input options</span></a>.</p>
 </div>
 <p>After the mobility has been appropriately set, the velocity can be interpolated from</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="nf">ItoSolver::interpolateVelocities</span><span class="p">();</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
+<span class="nf">ItoSolver::interpolateVelocities</span><span class="p">();</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The above will compute <span class="math notranslate nohighlight">\(v\left(\mathbf{X}\right)\)</span> and set the velocity as <span class="math notranslate nohighlight">\(\mathbf{V} = \mu\left(\mathbf{X}\right)\mathbf{v}\left(\mathbf{X}\right)\)</span>.</p>
@@ -477,12 +387,12 @@ See <a class="reference internal" href="#chap-itoinput"><span class="std std-ref
 </div>
 </section>
 <section id="particle-intersections">
-<h2>Particle intersections<a class="headerlink" href="#particle-intersections" title="Permalink to this heading">¶</a></h2>
+<h2>Particle intersections<a class="headerlink" href="#particle-intersections" title="Permalink to this heading"></a></h2>
 <p>It will happen that particles occasionally hit the embedded boundary or leave through the domain sides.
 In this case one might want to keep the particles in separate data holders rather than discard them.
 <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> supplies the following routine for transferring the particles to the containers that hold the EB and domain particles:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="nf">ItoSolver::intersectParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">EbIntersection</span><span class="w"> </span><span class="n">a_ebIntersection</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_deleteParticles</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
+<span class="nf">ItoSolver::intersectParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">EbIntersection</span><span class="w"> </span><span class="n">a_ebIntersection</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_deleteParticles</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Here, <code class="docutils literal notranslate"><span class="pre">EbIntersection</span></code> is a just an enum for putting logic into how the intersection is computed.
@@ -492,7 +402,7 @@ The flag <code class="docutils literal notranslate"><span class="pre">a_deletePa
 <p>After calling <code class="docutils literal notranslate"><span class="pre">intersectParticles</span></code>, the particles that crossed the EB or domain walls are available through the <code class="docutils literal notranslate"><span class="pre">getParticles</span></code> routine, see <a class="reference internal" href="#chap-itosolver"><span class="std std-ref">ItoSolver</span></a>.</p>
 </section>
 <section id="computing-time-steps">
-<h2>Computing time steps<a class="headerlink" href="#computing-time-steps" title="Permalink to this heading">¶</a></h2>
+<h2>Computing time steps<a class="headerlink" href="#computing-time-steps" title="Permalink to this heading"></a></h2>
 <p>The drift time step routines are implemented such that one restricts the time step such that the fastest particle does not move more than a specified number of grid cells.
 This routine is implemented as</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span>
@@ -501,8 +411,8 @@ This routine is implemented as</p>
 </div>
 <p>which returns a CFL-like condition <span class="math notranslate nohighlight">\(\Delta x/\textrm{max}(v_x, v_y, v_z)\)</span> on the the various AMR levels and patches.</p>
 <p>The signatures for the diffusion time step are similar to the ones for drift:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span>
-<span class="nf">ItoSolver::computeDiffusiveDt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"></span>
+<span class="nf">ItoSolver::computeDiffusiveDt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>and this returns another CFL-like condition <span class="math notranslate nohighlight">\(\Delta x^2 / (2dD)\)</span> for all the particles, where <span class="math notranslate nohighlight">\(d\)</span> is the spatial dimension.
@@ -517,20 +427,20 @@ Note that there is no fundamental limitation to how far the particles can move, 
 \[\Delta t = \frac{1}{\frac{\Delta x}{\textrm{max}(v_x, v_y, v_z)} + \frac{\Delta x^2}{2dD}},\]</div>
 </section>
 <section id="superparticles">
-<h2>Superparticles<a class="headerlink" href="#superparticles" title="Permalink to this heading">¶</a></h2>
+<h2>Superparticles<a class="headerlink" href="#superparticles" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> currently handles superparticles through a kD-tree, see <a class="reference internal" href="../Source/Particles.html#chap-superparticles"><span class="std std-ref">Superparticles</span></a>.
 The function for splitting and merging the particles is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="nf">ItoSolver::makeSuperparticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_particlesPerCell</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
+<span class="nf">ItoSolver::makeSuperparticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_particlesPerCell</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Calling this function will merge/split the particles such that their computational weights differ by at most one.
 <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> uses the kD-node implementation from <a class="reference internal" href="../Source/Particles.html#chap-superparticles"><span class="std std-ref">Superparticles</span></a> and partitioners for splitting the particles into two subsets with equal weights.</p>
 </section>
 <section id="i-o">
-<span id="chap-itoio"></span><h2>I/O<a class="headerlink" href="#i-o" title="Permalink to this heading">¶</a></h2>
+<span id="chap-itoio"></span><h2>I/O<a class="headerlink" href="#i-o" title="Permalink to this heading"></a></h2>
 <section id="plot-files">
-<span id="chap-itoplot"></span><h3>Plot files<a class="headerlink" href="#plot-files" title="Permalink to this heading">¶</a></h3>
+<span id="chap-itoplot"></span><h3>Plot files<a class="headerlink" href="#plot-files" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> can output the following variables to plot files:</p>
 <ul class="simple">
 <li><p><span class="math notranslate nohighlight">\(\phi\)</span>, i.e. the deposited particle weights (<code class="docutils literal notranslate"><span class="pre">ItoSolver.plt_vars</span> <span class="pre">=</span> <span class="pre">phi</span></code>)</p></li>
@@ -546,7 +456,7 @@ The function for splitting and merging the particles is</p>
 </ul>
 </section>
 <section id="checkpoint-files">
-<span id="chap-itocheck"></span><h3>Checkpoint files<a class="headerlink" href="#checkpoint-files" title="Permalink to this heading">¶</a></h3>
+<span id="chap-itocheck"></span><h3>Checkpoint files<a class="headerlink" href="#checkpoint-files" title="Permalink to this heading"></a></h3>
 <p>When writing checkpoint files, <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> can either</p>
 <ul class="simple">
 <li><p>Add the particles to the HDF5 file,</p></li>
@@ -561,15 +471,15 @@ If checkpointing fluid data then a subsequent restart will generate a new set of
 </section>
 </section>
 <section id="input-options">
-<span id="chap-itoinput"></span><h2>Input options<a class="headerlink" href="#input-options" title="Permalink to this heading">¶</a></h2>
+<span id="chap-itoinput"></span><h2>Input options<a class="headerlink" href="#input-options" title="Permalink to this heading"></a></h2>
 <section id="id1">
-<h3>I/O<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3>I/O<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <p>Plot variables are specified using <code class="docutils literal notranslate"><span class="pre">ItoSolver.plt_vars</span></code>, see <a class="reference internal" href="#chap-itoplot"><span class="std std-ref">Plot files</span></a>).
 If adding the various particle container data holders to the plot file, the deposition method for those is specified using <code class="docutils literal notranslate"><span class="pre">ItoSolver.plot_deposition</span></code>.</p>
 <p>If using fluid checkpointing for simulation restarts, the flag <code class="docutils literal notranslate"><span class="pre">ItoSolver.ppc_restart</span></code> determines the maximum number of particles that will initialized in each grid cell during a restart.</p>
 </section>
 <section id="particle-mesh">
-<h3>Particle-mesh<a class="headerlink" href="#particle-mesh" title="Permalink to this heading">¶</a></h3>
+<h3>Particle-mesh<a class="headerlink" href="#particle-mesh" title="Permalink to this heading"></a></h3>
 <p>To specify the mobility interpolation, use <code class="docutils literal notranslate"><span class="pre">ItoSolver.mobility_interp</span></code>.
 Valid options are <code class="docutils literal notranslate"><span class="pre">direct</span></code> and <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, see <a class="reference internal" href="#chap-itointerpolation"><span class="std std-ref">Velocity interpolation</span></a>.</p>
 <p>Deposition and coarse-fine deposition (see <a class="reference internal" href="../Source/Particles.html#chap-particlemesh"><span class="std std-ref">Particle-mesh</span></a>) is controlled using the flags</p>
@@ -586,7 +496,7 @@ Valid options are <code class="docutils literal notranslate"><span class="pre">i
 </ul>
 </section>
 <section id="checkpoint-restart">
-<h3>Checkpoint-restart<a class="headerlink" href="#checkpoint-restart" title="Permalink to this heading">¶</a></h3>
+<h3>Checkpoint-restart<a class="headerlink" href="#checkpoint-restart" title="Permalink to this heading"></a></h3>
 <p>Available input options for the <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> are listed below:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
 <span class="c1"># ItoSolver class options</span>
@@ -610,7 +520,7 @@ Valid options are <code class="docutils literal notranslate"><span class="pre">i
 </section>
 </section>
 <section id="example-application">
-<h2>Example application<a class="headerlink" href="#example-application" title="Permalink to this heading">¶</a></h2>
+<h2>Example application<a class="headerlink" href="#example-application" title="Permalink to this heading"></a></h2>
 <p>An example application of usage of the <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> is found in</p>
 <ul class="simple">
 <li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/BrownianWalker</span></code>, see <a class="reference internal" href="../Applications/BrownianWalkerModel.html#chap-brownianwalkermodel"><span class="std std-ref">Brownian walker</span></a>.</p></li>
@@ -620,50 +530,33 @@ Valid options are <code class="docutils literal notranslate"><span class="pre">i
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../Applications/CdrPlasmaModel.html" class="btn btn-neutral float-right" title="CDR plasma model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="TracerParticles.html" class="btn btn-neutral float-left" title="Tracer particles" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Applications/CdrPlasmaModel.html" class="btn btn-neutral float-right" title="CDR plasma model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2022, SINTEF Energy Research.
-
-    </p>
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

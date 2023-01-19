@@ -1,75 +1,37 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Realm &mdash; chombo-discharge  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Regridding" href="Regridding.html" />
     <link rel="prev" title="Particles" href="Particles.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -77,18 +39,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
@@ -174,78 +125,37 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Realm</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Realm</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/Source/Realm.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="realm">
-<span id="chap-realm"></span><h1>Realm<a class="headerlink" href="#realm" title="Permalink to this heading">¶</a></h1>
+<span id="chap-realm"></span><h1>Realm<a class="headerlink" href="#realm" title="Permalink to this heading"></a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">Realm</span></code> is a class for centralizing EBAMR-related grids and operators for a specific AMR grid.
 For example, a <code class="docutils literal notranslate"><span class="pre">Realm</span></code> consists of a set of grids (i.e. a <code class="docutils literal notranslate"><span class="pre">Vector&lt;DisjointBoxLayout&gt;</span></code>) as well as <em>operators</em>, e.g. functionality for filling ghost cells or averaging down a solution from a fine level to a coarse level.
 One may think of a <code class="docutils literal notranslate"><span class="pre">Realm</span></code> as a fully-fledged AMR hierarchy with associated multilevel operators, i.e. how one would usually do AMR.</p>
 <section id="dual-grid">
-<h2>Dual grid<a class="headerlink" href="#dual-grid" title="Permalink to this heading">¶</a></h2>
+<h2>Dual grid<a class="headerlink" href="#dual-grid" title="Permalink to this heading"></a></h2>
 <p>The reason why <code class="docutils literal notranslate"><span class="pre">Realm</span></code> exists at all is due to individual load balancing of algorithmic components.
 The terminology <em>dual grid</em> is used when more than one <code class="docutils literal notranslate"><span class="pre">Realm</span></code> is used in a simulation, and in this case the user/developer has chosen to solve the equations of motion over a different set of <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> on each level.
 This approach is very useful when using computational particles since users can quickly generate separate Eulerian sets of grids for fluids and particles, and the grids can then be load balanced separately.
@@ -255,7 +165,7 @@ The difference lies primarily in the assignment of MPI ranks to grids; i.e. the 
 <span id="fig-dualmesh"></span><a class="reference internal image-reference" href="../_images/DualMesh.png"><img alt="../_images/DualMesh.png" src="../_images/DualMesh.png" style="width: 35%;" /></a>
 <figcaption>
 <p><span class="caption-number">Fig. 15 </span><span class="caption-text">Sketch of dual grid approach.
-Each rectangle represents a grid patch and the numbers show MPI ranks. a) Load balancing with the number of grid cells. b) Load balancing with the number of particles.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+Each rectangle represents a grid patch and the numbers show MPI ranks. a) Load balancing with the number of grid cells. b) Load balancing with the number of particles.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p><a class="reference internal" href="#fig-dualmesh"><span class="std std-numref">Fig. 15</span></a> shows an example of a dual-grid approach.
@@ -266,24 +176,24 @@ In the bottom panel we have introduced computational particles in some of the pa
 For particles, the computational load is better defined by the number of computational particles assigned to the patch, and so using the number of particles as a proxy for the load yields different rank ownership over the grid patches.</p>
 </section>
 <section id="interacting-with-realms">
-<h2>Interacting with realms<a class="headerlink" href="#interacting-with-realms" title="Permalink to this heading">¶</a></h2>
+<h2>Interacting with realms<a class="headerlink" href="#interacting-with-realms" title="Permalink to this heading"></a></h2>
 <p>Users will not interact with <code class="docutils literal notranslate"><span class="pre">Realm</span></code> directly.
 Every <code class="docutils literal notranslate"><span class="pre">Realm</span></code> is owned by <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>, and the user will only interact with realms through the public <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> interface, for example by fetching operators for performing AMR operations.
 In addition, data that is defined on one realm can be copied to another; <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> takes care of this.
 You will simply call a copier:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBAMRCellData</span><span class="w"> </span><span class="n">realmOneData</span><span class="p">;</span>
-<span class="n">EBAMRCellData</span><span class="w"> </span><span class="n">realmTwoData</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBAMRCellData</span><span class="w"> </span><span class="n">realmOneData</span><span class="p">;</span><span class="w"></span>
+<span class="n">EBAMRCellData</span><span class="w"> </span><span class="n">realmTwoData</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">realmOneData</span><span class="p">.</span><span class="n">copy</span><span class="p">(</span><span class="n">realmTwoData</span><span class="p">);</span>
+<span class="n">realmOneData</span><span class="p">.</span><span class="n">copy</span><span class="p">(</span><span class="n">realmTwoData</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The rest of the functionality uses the public interface of <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>.
 For example for coarsening of multifluid data:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">multifluidRealm</span><span class="p">;</span>
-<span class="n">MFAMRCellData</span><span class="w"> </span><span class="n">multifluidData</span><span class="p">;</span>
-<span class="n">AmrMesh</span><span class="w"> </span><span class="n">amrMesh</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">multifluidRealm</span><span class="p">;</span><span class="w"></span>
+<span class="n">MFAMRCellData</span><span class="w"> </span><span class="n">multifluidData</span><span class="p">;</span><span class="w"></span>
+<span class="n">AmrMesh</span><span class="w"> </span><span class="n">amrMesh</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">amrMesh</span><span class="p">.</span><span class="n">averageDown</span><span class="p">(</span><span class="n">multifluidData</span><span class="p">,</span><span class="w"> </span><span class="n">multifluidRealm</span><span class="p">);</span>
+<span class="n">amrMesh</span><span class="p">.</span><span class="n">averageDown</span><span class="p">(</span><span class="n">multifluidData</span><span class="p">,</span><span class="w"> </span><span class="n">multifluidRealm</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -291,50 +201,33 @@ For example for coarsening of multifluid data:</p>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="Regridding.html" class="btn btn-neutral float-right" title="Regridding" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Particles.html" class="btn btn-neutral float-left" title="Particles" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Regridding.html" class="btn btn-neutral float-right" title="Regridding" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2022, SINTEF Energy Research.
-
-    </p>
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -1,75 +1,37 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>CellTagger &mdash; chombo-discharge  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="GeoCoarsener" href="GeoCoarsener.html" />
     <link rel="prev" title="AmrMesh" href="AmrMesh.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -77,18 +39,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
@@ -183,73 +134,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>CellTagger</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">CellTagger</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/Source/CellTagger.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="celltagger">
-<span id="chap-celltagger"></span><h1>CellTagger<a class="headerlink" href="#celltagger" title="Permalink to this heading">¶</a></h1>
+<span id="chap-celltagger"></span><h1>CellTagger<a class="headerlink" href="#celltagger" title="Permalink to this heading"></a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> class is responsible for flagging grid cells for refinement or coarsening.
 If the user wants to implement a new refinement or coarsening routine, he will do so by writing a new derived class from <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code>.
 The <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> parent class is a stand-alone class - it does not have a view of <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>, <code class="docutils literal notranslate"><span class="pre">Driver</span></code>, or <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>.
@@ -260,7 +170,7 @@ Since refinement is intended to be quite general, the user is responsible for pr
 </div>
 <p>Refinement flags live in a data holder called <code class="docutils literal notranslate"><span class="pre">EBAMRTags</span></code> inside of <code class="docutils literal notranslate"><span class="pre">Driver</span></code>.
 This data is typedef’ed as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LayoutData</span><span class="o">&lt;</span><span class="n">DenseIntVectSet</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">EBAMRTags</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LayoutData</span><span class="o">&lt;</span><span class="n">DenseIntVectSet</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">EBAMRTags</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>For performance reasons, <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> onlys store refinement cells on a per-patch basis.
@@ -268,57 +178,57 @@ It is not possible to add a grid cell to a <code class="docutils literal notrans
 Furthermore, the <code class="docutils literal notranslate"><span class="pre">EBAMRTags</span></code> structure is a distributed data structure which makes sure that each MPI rank is aware of the refinement flags on the corresponding grid patches.
 The flags themselves are owned by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>, and they are copied onto the new grids in the regrid step.</p>
 <section id="user-interface">
-<h2>User interface<a class="headerlink" href="#user-interface" title="Permalink to this heading">¶</a></h2>
+<h2>User interface<a class="headerlink" href="#user-interface" title="Permalink to this heading"></a></h2>
 <p>To implement a new <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code>, the following functions must be implemented:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">regrid</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">parseOptions</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">parseRuntimeOptions</span><span class="p">();</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">tagCells</span><span class="p">(</span><span class="n">EBAMRTags</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_tags</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">regrid</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">parseOptions</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">parseRuntimeOptions</span><span class="p">();</span><span class="w"></span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">tagCells</span><span class="p">(</span><span class="n">EBAMRTags</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_tags</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Users can also parse run-time options and even have <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> write to plot files, by implementing</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getNumberOfPlotVariables</span><span class="p">();</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">writePlotData</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_plotvar_names</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getNumberOfPlotVariables</span><span class="p">();</span><span class="w"></span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">writePlotData</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_plotvar_names</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>This is primarily useful for debugging the tracer fields that are used for flagging cells for refinement.</p>
 <section id="tagcells">
-<h3>tagCells<a class="headerlink" href="#tagcells" title="Permalink to this heading">¶</a></h3>
+<h3>tagCells<a class="headerlink" href="#tagcells" title="Permalink to this heading"></a></h3>
 <p>When the regrid routine enters, the <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> will be asked to generate the refinement flags through a function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">tagCells</span><span class="p">(</span><span class="n">EBAMRTags</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_tags</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">tagCells</span><span class="p">(</span><span class="n">EBAMRTags</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_tags</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>This routine should add cells that will be refined, and remove cells that will be coarsened.</p>
 </section>
 <section id="regrid">
-<h3>regrid<a class="headerlink" href="#regrid" title="Permalink to this heading">¶</a></h3>
+<h3>regrid<a class="headerlink" href="#regrid" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">regrid</span></code> is called by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> during regrids.
 The existence of this routine is due to the common usage pattern where <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> holds some auxiliary mesh data that is used when evaluating refinement and coarsening criteria.
 This routine should reallocate such temporary storage during regrids.</p>
 </section>
 <section id="parseoptions">
-<h3>parseOptions<a class="headerlink" href="#parseoptions" title="Permalink to this heading">¶</a></h3>
+<h3>parseOptions<a class="headerlink" href="#parseoptions" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">parseOptions</span></code> is called by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> when setting the <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code>.
 This routine should parse options into the <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> instance.</p>
 </section>
 <section id="parseruntimeoptions">
-<h3>parseRuntimeOptions<a class="headerlink" href="#parseruntimeoptions" title="Permalink to this heading">¶</a></h3>
+<h3>parseRuntimeOptions<a class="headerlink" href="#parseruntimeoptions" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">parseRuntimeOptions</span></code> is called by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> after each grid step.
 This routine will re-read class options into the <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> instance.
 See <a class="reference internal" href="../Base/Control.html#chap-runtimeconfig"><span class="std std-ref">Run-time configurations</span></a> for further details.</p>
 </section>
 <section id="getnumberofplotvariables">
-<h3>getNumberOfPlotVariables<a class="headerlink" href="#getnumberofplotvariables" title="Permalink to this heading">¶</a></h3>
+<h3>getNumberOfPlotVariables<a class="headerlink" href="#getnumberofplotvariables" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">getNumberOfPlotVariables</span></code> will return the number of plot variables that <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> will write to plot files.</p>
 </section>
 <section id="writeplotdata">
-<h3>writePlotData<a class="headerlink" href="#writeplotdata" title="Permalink to this heading">¶</a></h3>
+<h3>writePlotData<a class="headerlink" href="#writeplotdata" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">writePlotData</span></code> will write the plot data to the provided data holder.
 The functionality is the same as for <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>.</p>
 </section>
 </section>
 <section id="restrict-tagging">
-<h2>Restrict tagging<a class="headerlink" href="#restrict-tagging" title="Permalink to this heading">¶</a></h2>
+<h2>Restrict tagging<a class="headerlink" href="#restrict-tagging" title="Permalink to this heading"></a></h2>
 <p>It is possible to prevent <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> from adding refinement flags in specified regions.
 The default behavior is to add a number of boxes where refinement and coarsening is allowed:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>MyCellTagger.num_boxes   = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
@@ -331,7 +241,7 @@ By adding restrictive boxes, tagging will only be allowed inside the specified b
 More boxes can be specified by following the same convention, e.g. <code class="docutils literal notranslate"><span class="pre">box2_lo</span></code> and <code class="docutils literal notranslate"><span class="pre">box2_hi</span></code> etc.</p>
 </section>
 <section id="adding-a-buffer">
-<h2>Adding a buffer<a class="headerlink" href="#adding-a-buffer" title="Permalink to this heading">¶</a></h2>
+<h2>Adding a buffer<a class="headerlink" href="#adding-a-buffer" title="Permalink to this heading"></a></h2>
 <p>By default, each MPI rank can only tag grid cells where it owns data.
 This has been done for performance and communication reasons.
 Under the hood, the <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> is an array of boolean values on a patch which is very fast and simple to communicate with MPI.
@@ -346,50 +256,33 @@ It is nonetheless still possible to do this by growing the final generated tags 
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="GeoCoarsener.html" class="btn btn-neutral float-right" title="GeoCoarsener" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="AmrMesh.html" class="btn btn-neutral float-left" title="AmrMesh" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="GeoCoarsener.html" class="btn btn-neutral float-right" title="GeoCoarsener" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2022, SINTEF Energy Research.
-
-    </p>
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

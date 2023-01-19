@@ -1,76 +1,38 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>AmrMesh &mdash; chombo-discharge  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="CellTagger" href="CellTagger.html" />
     <link rel="prev" title="TimeStepper" href="TimeStepper.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -78,18 +40,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
@@ -177,73 +128,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>AmrMesh</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">AmrMesh</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/Source/AmrMesh.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="amrmesh">
-<span id="chap-amrmesh"></span><h1>AmrMesh<a class="headerlink" href="#amrmesh" title="Permalink to this heading">¶</a></h1>
+<span id="chap-amrmesh"></span><h1>AmrMesh<a class="headerlink" href="#amrmesh" title="Permalink to this heading"></a></h1>
 <p><a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> handles (almost) all spatial operations in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
 Internally, <a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> contains a bunch of operators that are useful across classes, such as ghost cell interpolation operators, coarsening operators, and stencils for interpolation and extrapolation near the embedded boundaries.
 <a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> also contains routines for generation and load-balancing of grids based and also contains simple routines for allocation and deallocation of memory.</p>
@@ -258,7 +168,7 @@ The behavior of <a class="reference internal" href="#chap-amrmesh"><span class="
 <p><a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html">AmrMesh C++ API</a></p>
 </div>
 <section id="main-functionality">
-<h2>Main functionality<a class="headerlink" href="#main-functionality" title="Permalink to this heading">¶</a></h2>
+<h2>Main functionality<a class="headerlink" href="#main-functionality" title="Permalink to this heading"></a></h2>
 <p>There are two main functionalities in <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>:</p>
 <ol class="arabic simple">
 <li><p>Building grid hierarchies, and providing geometric information</p></li>
@@ -270,18 +180,18 @@ However, since <code class="docutils literal notranslate"><span class="pre">chom
 Although these <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> consist of the same boxes, the patch-to-rank mapping can be different (see <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>).
 To fetch a grid on a particular level, one can call <code class="docutils literal notranslate"><span class="pre">AmrMesh::getGrids(const</span> <span class="pre">std::string</span> <span class="pre">a_realm)</span></code>.
 E.g.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">myRealm</span><span class="p">;</span>
-<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">myLevel</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">myRealm</span><span class="p">;</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">myLevel</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">const</span><span class="w"> </span><span class="n">DisjointBoxLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getGrids</span><span class="p">(</span><span class="s">&quot;myRealm&quot;</span><span class="p">)[</span><span class="n">myLevel</span><span class="p">];</span>
+<span class="k">const</span><span class="w"> </span><span class="n">DisjointBoxLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getGrids</span><span class="p">(</span><span class="s">&quot;myRealm&quot;</span><span class="p">)[</span><span class="n">myLevel</span><span class="p">];</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Likewise, to fetch the geometric (EB) information for a specified realm, phase, and level:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">myRealm</span><span class="p">;</span>
-<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">myLevel</span><span class="p">;</span>
-<span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">myPhase</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">myRealm</span><span class="p">;</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">myLevel</span><span class="p">;</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">myPhase</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">const</span><span class="w"> </span><span class="n">EBISLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ebisl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getEBISLayout</span><span class="p">(</span><span class="n">myRealm</span><span class="p">,</span><span class="w"> </span><span class="n">myPhase</span><span class="p">)[</span><span class="n">myLevel</span><span class="p">];</span>
+<span class="k">const</span><span class="w"> </span><span class="n">EBISLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ebisl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getEBISLayout</span><span class="p">(</span><span class="n">myRealm</span><span class="p">,</span><span class="w"> </span><span class="n">myPhase</span><span class="p">)[</span><span class="n">myLevel</span><span class="p">];</span><span class="w"></span>
 </pre></div>
 </div>
 <p>In addition to the grids, the user can fetch AMR operators.
@@ -300,10 +210,10 @@ See <a class="reference internal" href="Realm.html#chap-realm"><span class="std 
 <p>The <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html">AmrMesh API</a> is a good place to start for figuring out the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> functionality.</p>
 </section>
 <section id="particle-intersection">
-<span id="chap-amrparticleintersection"></span><h2>Particle intersection<a class="headerlink" href="#particle-intersection" title="Permalink to this heading">¶</a></h2>
+<span id="chap-amrparticleintersection"></span><h2>Particle intersection<a class="headerlink" href="#particle-intersection" title="Permalink to this heading"></a></h2>
 </section>
 <section id="class-options">
-<h2>Class options<a class="headerlink" href="#class-options" title="Permalink to this heading">¶</a></h2>
+<h2>Class options<a class="headerlink" href="#class-options" title="Permalink to this heading"></a></h2>
 <p>The class options below control <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.lo_corner</span></code>. Low corner of problem domain (e.g. 0 0 0)</p></li>
@@ -338,7 +248,7 @@ I.e. the user must specify consist domain sizes and resolutions.</p>
 </div>
 </section>
 <section id="runtime-options">
-<h2>Runtime options<a class="headerlink" href="#runtime-options" title="Permalink to this heading">¶</a></h2>
+<h2>Runtime options<a class="headerlink" href="#runtime-options" title="Permalink to this heading"></a></h2>
 <p>The following options are runtime options for <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.verbosity</span></code>.</p></li>
@@ -356,50 +266,33 @@ I.e. the user must specify consist domain sizes and resolutions.</p>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="CellTagger.html" class="btn btn-neutral float-right" title="CellTagger" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="TimeStepper.html" class="btn btn-neutral float-left" title="TimeStepper" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="CellTagger.html" class="btn btn-neutral float-right" title="CellTagger" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2022, SINTEF Energy Research.
-
-    </p>
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

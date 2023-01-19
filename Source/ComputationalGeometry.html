@@ -1,75 +1,37 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>ComputationalGeometry &mdash; chombo-discharge  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="TimeStepper" href="TimeStepper.html" />
     <link rel="prev" title="Driver" href="Driver.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -77,18 +39,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
@@ -176,73 +127,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>ComputationalGeometry</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">ComputationalGeometry</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/Source/ComputationalGeometry.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="computationalgeometry">
-<span id="chap-computationalgeometry"></span><h1>ComputationalGeometry<a class="headerlink" href="#computationalgeometry" title="Permalink to this heading">¶</a></h1>
+<span id="chap-computationalgeometry"></span><h1>ComputationalGeometry<a class="headerlink" href="#computationalgeometry" title="Permalink to this heading"></a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> is the class that implements geometries in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
 In principle, geometries consist of electrodes and dielectrics but there are many problems where the actual nature of the EB is irrelevant (such as fluid flow).</p>
 <div class="admonition tip">
@@ -252,9 +162,9 @@ In principle, geometries consist of electrodes and dielectrics but there are man
 <p><code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> is <em>not</em> an abstract class.
 The default implementation is an empty geometry – i.e. a geometry without any objects, but several geometries are included in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Geometries</span></code>.
 Making a non-empty <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> class requires that you inherit from <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> and instantiate the following class members:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="n">m_eps0</span><span class="p">;</span>
-<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Electrode</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_electrodes</span><span class="p">;</span>
-<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Dielectric</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_dielectrics</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="n">m_eps0</span><span class="p">;</span><span class="w"></span>
+<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Electrode</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_electrodes</span><span class="p">;</span><span class="w"></span>
+<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Dielectric</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_dielectrics</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Here, <code class="docutils literal notranslate"><span class="pre">m_eps0</span></code> is the relative gas permittivity, <code class="docutils literal notranslate"><span class="pre">m_electrodes</span></code> are the electrodes for the geometry and <code class="docutils literal notranslate"><span class="pre">m_dielectrics</span></code> are the dielectrics for the geometry.
@@ -262,11 +172,11 @@ These are described in detail further down.</p>
 <p>When geometries are created, the <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> class will first create the (approximations to the) signed distance functions that describe two possible material phases (gas and solid).
 Here, the <em>solid</em> phase is the part of the computational domain inside the dielectrics, while the <em>gas phase</em> is the part of the computational domain that is outside both the electrodes and the dielectrics.</p>
 <section id="electrode">
-<span id="chap-electrode"></span><h2>Electrode<a class="headerlink" href="#electrode" title="Permalink to this heading">¶</a></h2>
+<span id="chap-electrode"></span><h2>Electrode<a class="headerlink" href="#electrode" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">Electrode</span></code> class is responsible for describing an electrode and potentially also its boundary condition.
 Internally, this class is lightweight and consists only of a tuple that holds a level-set function and an associated boolean value that tells whether or not the level-set function is at a live voltage or not.
 The constructor for the electrode class is:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Electrode</span><span class="p">(</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_baseIF</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_live</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_fraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Electrode</span><span class="p">(</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_baseIF</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_live</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_fraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where the <code class="docutils literal notranslate"><span class="pre">a_baseIF</span></code> argument is the level-set function and the <code class="docutils literal notranslate"><span class="pre">a_live</span></code> argument is used by some solvers in order to determine if the electrode is at a live voltage or not.
@@ -278,12 +188,12 @@ Otherwise, if <code class="docutils literal notranslate"><span class="pre">a_liv
 </div>
 </section>
 <section id="dielectric">
-<span id="chap-dielectric"></span><h2>Dielectric<a class="headerlink" href="#dielectric" title="Permalink to this heading">¶</a></h2>
+<span id="chap-dielectric"></span><h2>Dielectric<a class="headerlink" href="#dielectric" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">Dielectric</span></code> class describes a dielectric.
 This class is lightweight and consists of a tuple that holds a level-set function and the associated permittivity.
 The constructors are</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Dielectric</span><span class="p">(</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_baseIF</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_permittivity</span><span class="p">);</span>
-<span class="n">Dielectric</span><span class="p">(</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_baseIF</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">a_permittivity</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Dielectric</span><span class="p">(</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_baseIF</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_permittivity</span><span class="p">);</span><span class="w"></span>
+<span class="n">Dielectric</span><span class="p">(</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_baseIF</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">a_permittivity</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where the <code class="docutils literal notranslate"><span class="pre">a_baseIF</span></code> argument is the level-set function and the second argument sets a the permittivity.
@@ -294,20 +204,20 @@ The permittivity can be set to a constant (first constructor) or to a spatially 
 </div>
 </section>
 <section id="retrieving-parts">
-<h2>Retrieving parts<a class="headerlink" href="#retrieving-parts" title="Permalink to this heading">¶</a></h2>
+<h2>Retrieving parts<a class="headerlink" href="#retrieving-parts" title="Permalink to this heading"></a></h2>
 <p>It is possible to retrieve the implicit functions for the electrodes and dielectrics through the following member functions:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Dielectric</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getDielectrics</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
-<span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Electrode</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getElectrodes</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Dielectric</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getDielectrics</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Electrode</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getElectrodes</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="retrieving-implicit-functions">
-<h2>Retrieving implicit functions<a class="headerlink" href="#retrieving-implicit-functions" title="Permalink to this heading">¶</a></h2>
+<h2>Retrieving implicit functions<a class="headerlink" href="#retrieving-implicit-functions" title="Permalink to this heading"></a></h2>
 <p>When generating the geometry we compute the implicit functions for each <em>phase</em>, the gas-phase and the dielectric-phase.
 If none of the implicit functions for the electrodes/dielectrics overlap, the resulting function will also be a signed distance function.
 Note that these functions are the unions/intersections of all electrodes and dielectrics.</p>
 <p>To retrive the implicit function corresponding to a particular phase, use</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getImplicitFunction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getImplicitFunction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">a_phase</span></code> will be <code class="docutils literal notranslate"><span class="pre">phase::gas</span></code> or <code class="docutils literal notranslate"><span class="pre">phase::solid</span></code>.</p>
@@ -316,50 +226,33 @@ Note that these functions are the unions/intersections of all electrodes and die
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="TimeStepper.html" class="btn btn-neutral float-right" title="TimeStepper" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Driver.html" class="btn btn-neutral float-left" title="Driver" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="TimeStepper.html" class="btn btn-neutral float-right" title="TimeStepper" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2022, SINTEF Energy Research.
-
-    </p>
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

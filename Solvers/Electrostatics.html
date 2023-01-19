@@ -1,76 +1,38 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Electrostatic solver &mdash; chombo-discharge  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Kinetic Monte Carlo" href="KineticMonteCarlo.html" />
     <link rel="prev" title="Convection-Diffusion-Reaction" href="CDR.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> chombo-discharge
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -78,18 +40,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
@@ -205,76 +156,35 @@
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">chombo-discharge</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Electrostatic solver</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Electrostatic solver</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/Solvers/Electrostatics.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="electrostatic-solver">
-<span id="chap-electrostatics"></span><h1>Electrostatic solver<a class="headerlink" href="#electrostatic-solver" title="Permalink to this heading">¶</a></h1>
+<span id="chap-electrostatics"></span><h1>Electrostatic solver<a class="headerlink" href="#electrostatic-solver" title="Permalink to this heading"></a></h1>
 <p>Here, we discuss the discretization of the equation</p>
 <div class="math notranslate nohighlight" id="equation-poisson">
-<span class="eqno">(3)<a class="headerlink" href="#equation-poisson" title="Permalink to this equation">¶</a></span>\[\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0}\]</div>
+<span class="eqno">(3)<a class="headerlink" href="#equation-poisson" title="Permalink to this equation"></a></span>\[\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\Phi\)</span> is the electric potential, <span class="math notranslate nohighlight">\(\rho\)</span> is the space charge density and <span class="math notranslate nohighlight">\(\epsilon_0\)</span> is the vacuum permittivity.
 The relative permittivity is <span class="math notranslate nohighlight">\(\epsilon_r = \epsilon_r\left(\mathbf{x}\right)\)</span> and can additionally be discontinuous at gas-dielectric interfaces.</p>
 <div class="admonition note">
@@ -283,7 +193,7 @@ The relative permittivity is <span class="math notranslate nohighlight">\(\epsil
 The code for the electrostatics solver is given in <code class="file docutils literal notranslate"><span class="pre">/Source/Electrostatics</span></code> and <code class="file docutils literal notranslate"><span class="pre">/Source/Elliptic</span></code>.</p>
 </div>
 <section id="fieldsolver">
-<span id="chap-fieldsolver"></span><h2>FieldSolver<a class="headerlink" href="#fieldsolver" title="Permalink to this heading">¶</a></h2>
+<span id="chap-fieldsolver"></span><h2>FieldSolver<a class="headerlink" href="#fieldsolver" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is an abstract class for electrostatic solves in an EB context and contains most routines required for setting up and solving electrostatic problems.
 <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> can solve over three phases, gas, dielectric, and electrode, and thus it is uses <code class="docutils literal notranslate"><span class="pre">MFAMRCellData</span></code> functionality where data is defined over multiple phases (see <a class="reference internal" href="../Source/MeshData.html#chap-meshdata"><span class="std std-ref">Mesh data</span></a>).</p>
 <p>Note that in order to separate the electrostatic solver interface from the implementation, <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is a pure class without knowledge of numerical discretizations.
@@ -291,7 +201,7 @@ See the <a class="reference external" href="https://chombo-discharge.github.io/c
 Currently, our only supported implementation is <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> (see <a class="reference internal" href="#chap-fieldsolvermultigrid"><span class="std std-ref">FieldSolverMultigrid</span></a>).</p>
 <p>On gas-dielectric interfaces we enforce an extra equation</p>
 <div class="math notranslate nohighlight" id="equation-gaussbc">
-<span class="eqno">(4)<a class="headerlink" href="#equation-gaussbc" title="Permalink to this equation">¶</a></span>\[\epsilon_1\partial_{n_1}\Phi + \epsilon_2\partial_{n_2}\Phi = \sigma/\epsilon_0\]</div>
+<span class="eqno">(4)<a class="headerlink" href="#equation-gaussbc" title="Permalink to this equation"></a></span>\[\epsilon_1\partial_{n_1}\Phi + \epsilon_2\partial_{n_2}\Phi = \sigma/\epsilon_0\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathbf{n}_1 = -\mathbf{n}_2\)</span> are the normal vectors pointing away from interface, and <span class="math notranslate nohighlight">\(\sigma\)</span> is the surface charge density.</p>
 <p>We point out that this equation can be enforced in various formats.
 The most common case is that <span class="math notranslate nohighlight">\(\partial_n\Phi\)</span> are free parameters and <span class="math notranslate nohighlight">\(\sigma\)</span> is a fixed parameter.
@@ -299,18 +209,18 @@ However, we <em>can</em> also fix <span class="math notranslate nohighlight">\(\
 When using <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> (see <a class="reference internal" href="#chap-fieldsolvermultigrid"><span class="std std-ref">FieldSolverMultigrid</span></a>), users can choose between these two natural boundary conditions, see <a class="reference internal" href="#chap-poissonebbc"><span class="std std-ref">EB boundary conditions</span></a>.</p>
 </section>
 <section id="using-fieldsolver">
-<h2>Using FieldSolver<a class="headerlink" href="#using-fieldsolver" title="Permalink to this heading">¶</a></h2>
+<h2>Using FieldSolver<a class="headerlink" href="#using-fieldsolver" title="Permalink to this heading"></a></h2>
 <p>Using the <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is usually straightforward by first constructing the solver and then parsing the class options.
 Creating a solver is usually done by means of a pointer cast:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">fieldSolver</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">FieldSolver</span><span class="o">&gt;</span><span class="w"> </span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">FieldSolverMultigrid</span><span class="p">());</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">fieldSolver</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">FieldSolver</span><span class="o">&gt;</span><span class="w"> </span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">FieldSolverMultigrid</span><span class="p">());</span><span class="w"></span>
 </pre></div>
 </div>
 <p>In addition, one must parse run-time options to the class, provide the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> and <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> instances, and set the initial conditions.
 This is done as follows:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span><span class="w"> </span><span class="n">amr</span><span class="p">;</span>
-<span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">geo</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span><span class="w"> </span><span class="n">amr</span><span class="p">;</span><span class="w"></span>
+<span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">geo</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">voltage</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">voltage</span><span class="p">;</span><span class="w"></span>
 
 <span class="n">fieldSolver</span><span class="o">-&gt;</span><span class="n">parseOptions</span><span class="p">();</span><span class="w">                </span><span class="c1">// Parse class options</span>
 <span class="n">fieldSolver</span><span class="o">-&gt;</span><span class="n">setAmr</span><span class="p">(</span><span class="n">amr</span><span class="p">);</span><span class="w">                   </span><span class="c1">// Set amr - we assume that `amr` is an object</span>
@@ -320,35 +230,35 @@ This is done as follows:</p>
 </pre></div>
 </div>
 <p>The argument in the function <code class="docutils literal notranslate"><span class="pre">setVoltage(...)</span></code> is a function pointer of the type:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="n">voltage</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="n">voltage</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 <p>This allows setting a time-dependent voltage on electrodes and domain boundaries.
 As shown above, one can also use <code class="docutils literal notranslate"><span class="pre">std::function&lt;Real(const</span> <span class="pre">Real)&gt;</span></code> or lambdas to set the voltage.
 E.g.,</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">FieldSolver</span><span class="o">*</span><span class="w"> </span><span class="n">fieldSolver</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">FieldSolver</span><span class="o">*</span><span class="w"> </span><span class="n">fieldSolver</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">Real</span><span class="w"> </span><span class="n">myVoltage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="p">{</span>
-<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="o">*</span><span class="n">a_time</span><span class="p">;</span>
-<span class="p">};</span>
+<span class="n">Real</span><span class="w"> </span><span class="n">myVoltage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="o">*</span><span class="n">a_time</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
 
-<span class="n">fieldSolver</span><span class="o">-&gt;</span><span class="n">setVoltage</span><span class="p">(</span><span class="n">myVoltage</span><span class="p">);</span>
+<span class="n">fieldSolver</span><span class="o">-&gt;</span><span class="n">setVoltage</span><span class="p">(</span><span class="n">myVoltage</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The electrostatic solver in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> has a lot of supporting functionality, but essentially relies on only one critical function:
 Solving for the potential.
 This is encapsulated by the pure member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">FieldSolver::solve</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rho</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">sigma</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">FieldSolver::solve</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rho</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">sigma</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">phi</span></code> is the resulting potential that was computing with the space charge density <code class="docutils literal notranslate"><span class="pre">rho</span></code> and surface charge density <code class="docutils literal notranslate"><span class="pre">sigma</span></code>.</p>
 </section>
 <section id="domain-boundary-conditions">
-<span id="chap-poissondomainbc"></span><h2>Domain boundary conditions<a class="headerlink" href="#domain-boundary-conditions" title="Permalink to this heading">¶</a></h2>
+<span id="chap-poissondomainbc"></span><h2>Domain boundary conditions<a class="headerlink" href="#domain-boundary-conditions" title="Permalink to this heading"></a></h2>
 <p>Domain boundary conditions for the solver must be set by the user through an input script, whereas the boundary conditions on internal surfaces are Dirichlet by default.
 Note that on multifluid-boundaries the boundary condition is enforced by the conventional matching boundary condition that follows from Gauss` law.</p>
 <section id="general-format">
-<h3>General format<a class="headerlink" href="#general-format" title="Permalink to this heading">¶</a></h3>
+<h3>General format<a class="headerlink" href="#general-format" title="Permalink to this heading"></a></h3>
 <p>The most general form of setting domain boundary conditions for <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is to specify a boundary condition <em>type</em> (e.g., Dirichlet) together with a function specifying the value.
 Domain boundary condition <em>types</em> are parsed through a member function <code class="docutils literal notranslate"><span class="pre">FieldSolver::parseDomainBc</span></code>.
 This function will read string identifiers from the input script, and these identifiers are either in the format <code class="docutils literal notranslate"><span class="pre">&lt;string&gt;</span> <span class="pre">&lt;float&gt;</span></code> (simplified format) or in the format <code class="docutils literal notranslate"><span class="pre">&lt;string&gt;</span></code> (general format).
@@ -360,13 +270,13 @@ FieldSolverMultigrid.bc.x.high = dirichlet_neumann
 <p>Unfortunately, due to the many degrees of freedom in setting domain boundary conditions, the procedure is a bit convoluted.
 We first explain the general procedure.</p>
 <p><code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> will always set individual space-time functions on each domain side, and these functions are always in the form</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">bcFunction</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">bcFunction</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>To set a domain boundary condition function on a side, one can use the following member function:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">FieldSolver::setDomainSideBcFunction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_dir</span><span class="p">,</span>
-<span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span><span class="w"> </span><span class="n">a_side</span><span class="p">,</span>
-<span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="o">&gt;</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">FieldSolver::setDomainSideBcFunction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_dir</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span><span class="w"> </span><span class="n">a_side</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="o">&gt;</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>For a general way of setting the function value on the domain side, one will use the above function together with an identifier <code class="docutils literal notranslate"><span class="pre">dirichlet_custom</span></code> or <code class="docutils literal notranslate"><span class="pre">neumann_custom</span></code> in the input script.
@@ -378,7 +288,7 @@ These functions are then directly processed by the numerical discretizations.</p
 </div>
 </section>
 <section id="simplified-format">
-<h3>Simplified format<a class="headerlink" href="#simplified-format" title="Permalink to this heading">¶</a></h3>
+<h3>Simplified format<a class="headerlink" href="#simplified-format" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> also supports a simplified method of setting the domain boundary conditions, in which case the user will specify Neumann or Dirichlet values (rather than functions) for each domain side.
 These values are usually, but not necessarily, constant values.</p>
 <p>In this case one will use an identifier <code class="docutils literal notranslate"><span class="pre">&lt;string&gt;</span> <span class="pre">&lt;float&gt;</span></code> in the input script, like so:</p>
@@ -391,15 +301,15 @@ Moreover, when using the simplified format the function specified through <code 
 Although this may <em>seem</em> more involved, this procedure is usually easier to use when setting constant Neumann/Dirichlet values on the domain boundaries.
 It also automatically provides a link between a specified voltage wave form and the boundary conditions (unlike the general format, where the user must supply that link themselves).</p>
 <section id="dirichlet">
-<h4>Dirichlet<a class="headerlink" href="#dirichlet" title="Permalink to this heading">¶</a></h4>
+<h4>Dirichlet<a class="headerlink" href="#dirichlet" title="Permalink to this heading"></a></h4>
 <p>When using simplified parsing of Dirichlet domain BCs, <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> will generate and parse a different function into the discretizations.
 This function is <em>not</em> the same function as that which is parsed through <code class="docutils literal notranslate"><span class="pre">setDomainSideBcFunction</span></code>.
 In C++ pseudo-code, this function is in the format</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="n">dirichletFraction</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="n">dirichletFraction</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">auto</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="n">func</span><span class="p">,</span><span class="w"> </span><span class="p">...](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="p">{</span>
-<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">func</span><span class="p">(</span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">voltage</span><span class="p">(</span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dirichletFraction</span><span class="p">;</span>
-<span class="p">};</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="n">func</span><span class="p">,</span><span class="w"> </span><span class="p">...](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">func</span><span class="p">(</span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">voltage</span><span class="p">(</span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dirichletFraction</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">voltage</span></code> is the voltage wave form specified through <code class="docutils literal notranslate"><span class="pre">FieldSolver::setVoltage</span></code>, and <code class="docutils literal notranslate"><span class="pre">dirichletFraction</span></code> is a placeholder for the floating point number specified in the input script, i.e. the floating point number in the input option.
@@ -413,22 +323,22 @@ FieldSolverMultigrid.bc.y.high = dirichlet 1.0
 </div>
 <p>will the set voltage on the lower y-plane to ground and the voltage on the upper y-plane to the live voltage.
 Specifically, on the upper y-plane this specification will generate a potential boundary condition function of the type</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="p">};</span>
-<span class="n">dirichletFraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="p">};</span><span class="w"></span>
+<span class="n">dirichletFraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">auto</span><span class="w"> </span><span class="n">bc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">func</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">func</span><span class="p">(</span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">voltage</span><span class="p">(</span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dirichletFraction</span><span class="p">;</span>
-<span class="p">};</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">bc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">func</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">func</span><span class="p">(</span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">voltage</span><span class="p">(</span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dirichletFraction</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
 </pre></div>
 </div>
 <p>In order to set the voltage on the domain side to also be spatially dependent, one can either use <code class="docutils literal notranslate"><span class="pre">dirichlet_custom</span></code> as an input option, or <code class="docutils literal notranslate"><span class="pre">dirichlet</span> <span class="pre">&lt;float&gt;</span></code> and set a different multiplier on the domain edge (face).
 As an example. by specifying <code class="docutils literal notranslate"><span class="pre">bc.y.high</span> <span class="pre">=</span> <span class="pre">dirichlet</span> <span class="pre">1.234</span></code> in the input script AND setting the multiplier on the wall as follows:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">wallFunc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="p">{</span>
-<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
-<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">y</span><span class="p">;</span>
-<span class="p">};</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">wallFunc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">y</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
 
-<span class="n">fieldSolver</span><span class="o">-&gt;</span><span class="n">setDomainSideBcFunction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">Hi</span><span class="p">,</span><span class="w"> </span><span class="n">wallFunc</span><span class="p">);</span>
+<span class="n">fieldSolver</span><span class="o">-&gt;</span><span class="n">setDomainSideBcFunction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">Hi</span><span class="p">,</span><span class="w"> </span><span class="n">wallFunc</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>we end up with a voltage of</p>
@@ -437,14 +347,14 @@ As an example. by specifying <code class="docutils literal notranslate"><span cl
 <p>on the upper y-plane.</p>
 </section>
 <section id="neumann">
-<h4>Neumann<a class="headerlink" href="#neumann" title="Permalink to this heading">¶</a></h4>
+<h4>Neumann<a class="headerlink" href="#neumann" title="Permalink to this heading"></a></h4>
 <p>When using simplified parsing of Neumann boundary conditions, the procedure is precisely like that for Dirichlet boundary conditions <em>except</em> that multiplication by the voltage wave form is not made.
 I.e. the boundary condition function that is passed into the numerical discretization is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="n">neumannFraction</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="n">neumannFraction</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">auto</span><span class="w"> </span><span class="n">func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="n">func</span><span class="p">,</span><span class="w"> </span><span class="p">...](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="p">{</span>
-<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">func</span><span class="p">(</span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">neumannFraction</span><span class="p">;</span>
-<span class="p">};</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="n">func</span><span class="p">,</span><span class="w"> </span><span class="p">...](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">func</span><span class="p">(</span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">neumannFraction</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Note that since <code class="docutils literal notranslate"><span class="pre">func</span></code> is initialized to one, the floating point number in the input option directly specifies the value of <span class="math notranslate nohighlight">\(\partial_n\Phi\)</span>.</p>
@@ -452,9 +362,9 @@ I.e. the boundary condition function that is passed into the numerical discretiz
 </section>
 </section>
 <section id="eb-boundary-conditions">
-<span id="chap-poissonebbc"></span><h2>EB boundary conditions<a class="headerlink" href="#eb-boundary-conditions" title="Permalink to this heading">¶</a></h2>
+<span id="chap-poissonebbc"></span><h2>EB boundary conditions<a class="headerlink" href="#eb-boundary-conditions" title="Permalink to this heading"></a></h2>
 <section id="electrodes">
-<h3>Electrodes<a class="headerlink" href="#electrodes" title="Permalink to this heading">¶</a></h3>
+<h3>Electrodes<a class="headerlink" href="#electrodes" title="Permalink to this heading"></a></h3>
 <p>For the current <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> the natural BC at the EB is Dirichlet with a specified voltage, whereas on dielectrics we enforce <a class="reference internal" href="#equation-gaussbc">Eq. 4</a>.
 The voltage on the electrodes are automatically retrieved from the specified voltages on the electrodes in the geometry being used (see <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code>).
 The exception to this is that while <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> specifies that an electrode will be at some fraction of a specified voltage, <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> uses this fraction <em>and</em> the specified voltage wave form in <code class="docutils literal notranslate"><span class="pre">setVoltage</span></code>.</p>
@@ -465,22 +375,22 @@ This voltage has the form</p>
 <p>where <span class="math notranslate nohighlight">\(V_i\)</span> is the voltage on electrode <span class="math notranslate nohighlight">\(i\)</span>.
 It is possible to interact with this function directly, going through all electrodes and setting the electrode to be spatially and temporally varying.
 The member function that does this is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">FieldSolver::setElectrodeDirichletFunction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_electrode</span><span class="p">,</span>
-<span class="w">                                                </span><span class="k">const</span><span class="w"> </span><span class="n">ElectrostaticEbBc</span><span class="o">::</span><span class="n">BcFunction</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_function</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">FieldSolver::setElectrodeDirichletFunction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_electrode</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                                </span><span class="k">const</span><span class="w"> </span><span class="n">ElectrostaticEbBc</span><span class="o">::</span><span class="n">BcFunction</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_function</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Here, the type <code class="docutils literal notranslate"><span class="pre">ElectrostaticEbBc::BcFunction</span></code> is just an alias:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">ElectrodestaticEbBc</span><span class="o">::</span><span class="n">BcFunction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">ElectrodestaticEbBc</span><span class="o">::</span><span class="n">BcFunction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The voltage on an electrode <span class="math notranslate nohighlight">\(i\)</span> could thus be set as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">electrode</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">electrode</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">auto</span><span class="w"> </span><span class="n">myElectrodeVoltage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Real</span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
-<span class="p">};</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">myElectrodeVoltage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Real</span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
 
-<span class="n">fieldSolver</span><span class="o">-&gt;</span><span class="n">setElectrodeDirichletFunction</span><span class="p">(</span><span class="n">electrode</span><span class="p">,</span><span class="w"> </span><span class="n">myElectrodeVoltage</span><span class="p">);</span>
+<span class="n">fieldSolver</span><span class="o">-&gt;</span><span class="n">setElectrodeDirichletFunction</span><span class="p">(</span><span class="n">electrode</span><span class="p">,</span><span class="w"> </span><span class="n">myElectrodeVoltage</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where the return value can be replaced by the user’ function.</p>
@@ -488,32 +398,32 @@ The member function that does this is</p>
 Thus, although the above format is a general way of setting the voltage individually on each electrode (in both space and time) <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> supports a simpler way of generating these voltage waveforms.
 When <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is instantiated, it will interally generate these functions through simplified expression such that the user only needs to set a single wave form that applies to all electrodes.
 The voltages that are set on the various electrodes are thus in the form:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">electrode</span><span class="p">;</span>
-<span class="n">Real</span><span class="w"> </span><span class="n">voltageFraction</span><span class="p">;</span>
-<span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">voltageWaveForm</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">electrode</span><span class="p">;</span><span class="w"></span>
+<span class="n">Real</span><span class="w"> </span><span class="n">voltageFraction</span><span class="p">;</span><span class="w"></span>
+<span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">voltageWaveForm</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">auto</span><span class="w"> </span><span class="n">defaultElectrodeVoltage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[...](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Real</span><span class="p">{</span>
-<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">voltageFraction</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nf">voltageWaveForm</span><span class="p">(</span><span class="n">a_time</span><span class="p">);</span>
-<span class="p">};</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">defaultElectrodeVoltage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[...](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Real</span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">voltageFraction</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nf">voltageWaveForm</span><span class="p">(</span><span class="n">a_time</span><span class="p">);</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
 
-<span class="n">fieldSolver</span><span class="o">-&gt;</span><span class="n">setElectrodeDirichletFunction</span><span class="p">(</span><span class="n">electrode</span><span class="p">,</span><span class="w"> </span><span class="n">defaultElectrodeVoltage</span><span class="p">);</span>
+<span class="n">fieldSolver</span><span class="o">-&gt;</span><span class="n">setElectrodeDirichletFunction</span><span class="p">(</span><span class="n">electrode</span><span class="p">,</span><span class="w"> </span><span class="n">defaultElectrodeVoltage</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Thus, the default voltage which is set on an electrode is the voltage <em>fraction</em> specified on the electrodes (in <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code>) multiplied by a voltage wave form (specified by <code class="docutils literal notranslate"><span class="pre">FieldSolver::setVoltage</span></code>).</p>
 </section>
 <section id="dielectrics">
-<h3>Dielectrics<a class="headerlink" href="#dielectrics" title="Permalink to this heading">¶</a></h3>
+<h3>Dielectrics<a class="headerlink" href="#dielectrics" title="Permalink to this heading"></a></h3>
 <p>On dielectrics, we enforce the jump boundary condition directly.</p>
 </section>
 </section>
 <section id="fieldsolvermultigrid">
-<span id="chap-fieldsolvermultigrid"></span><h2>FieldSolverMultigrid<a class="headerlink" href="#fieldsolvermultigrid" title="Permalink to this heading">¶</a></h2>
+<span id="chap-fieldsolvermultigrid"></span><h2>FieldSolverMultigrid<a class="headerlink" href="#fieldsolvermultigrid" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> implements a multigrid routine for solving <a class="reference internal" href="#equation-poisson">Eq. 3</a>, and is currently the only implementation of <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code>.</p>
 <p>The discretization used by <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> is described in <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.
 The underlying solver type is a Helmholtz solver, but <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> considers only the Laplacian term.
 For further details on the spatial discretization, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.</p>
 <section id="solver-configuration">
-<h3>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this heading">¶</a></h3>
+<h3>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> has a number of switches for determining how it operates.
 Some of these switches are intended for parsing boundary conditions, whereas others are settings for operating multigrid or for I/O.
 The current list of configuration options are indicated below</p>
@@ -552,7 +462,7 @@ FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. &#
 <p>Note that <em>all</em> options pertaining to IO or multigrid are run-time configurable (see <a class="reference internal" href="../Base/Control.html#chap-runtimeconfig"><span class="std std-ref">Run-time configurations</span></a>).</p>
 </section>
 <section id="setting-boundary-conditions">
-<h3>Setting boundary conditions<a class="headerlink" href="#setting-boundary-conditions" title="Permalink to this heading">¶</a></h3>
+<h3>Setting boundary conditions<a class="headerlink" href="#setting-boundary-conditions" title="Permalink to this heading"></a></h3>
 <p>The flags that are in the format <code class="docutils literal notranslate"><span class="pre">bc.coord.side</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">bc.x.low</span></code>) parse the domain boundary condition type to the solver.
 See <a class="reference internal" href="#chap-poissondomainbc"><span class="std std-ref">Domain boundary conditions</span></a> for details.</p>
 <p>The flag <code class="docutils literal notranslate"><span class="pre">jump_bc</span></code> indicates how the dielectric jump condition is enforced.
@@ -564,7 +474,7 @@ If you want to use numerical mock-ups of dielectric-dielectric interfaces, you c
 </div>
 </section>
 <section id="algorithmic-adjustments">
-<h3>Algorithmic adjustments<a class="headerlink" href="#algorithmic-adjustments" title="Permalink to this heading">¶</a></h3>
+<h3>Algorithmic adjustments<a class="headerlink" href="#algorithmic-adjustments" title="Permalink to this heading"></a></h3>
 <p>By default, the Helmholtz operator uses a diagonally weighting of the operator using the volume fraction as weight.
 This means that the quantity that is passed into <code class="docutils literal notranslate"><span class="pre">AMRMultiGrid</span></code> should be weighted by the volume fraction to avoid the small-cell problem of EB grids.
 The flag <code class="docutils literal notranslate"><span class="pre">kappa_source</span></code> indicates whether or not we should multiply the right-hand side by the volume fraction before passing it into the solver routine.
@@ -572,7 +482,7 @@ If this flag is set to <code class="docutils literal notranslate"><span class="p
 If this flag is set to <code class="docutils literal notranslate"><span class="pre">true</span></code>, <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> will perform the multiplication before the multigrid solve.</p>
 </section>
 <section id="tuning-multigrid-performance">
-<h3>Tuning multigrid performance<a class="headerlink" href="#tuning-multigrid-performance" title="Permalink to this heading">¶</a></h3>
+<h3>Tuning multigrid performance<a class="headerlink" href="#tuning-multigrid-performance" title="Permalink to this heading"></a></h3>
 <p>Multigrid operates by coarsening the solution (and the geometry with it) on a hierarchy of grid levels, and smoothing the solution on each level.
 There are a number of factors that influence the multigrid performance.
 Often the most critical factors are the radius of the cut-cell stencils and how far multigrid is allowed to coarsen.
@@ -627,14 +537,14 @@ Setting the bottom solver to <code class="docutils literal notranslate"><span cl
 </div>
 </section>
 <section id="adjusting-output">
-<h3>Adjusting output<a class="headerlink" href="#adjusting-output" title="Permalink to this heading">¶</a></h3>
+<h3>Adjusting output<a class="headerlink" href="#adjusting-output" title="Permalink to this heading"></a></h3>
 <p>The user may plot the potential, the space charge, the electric, and the GMG residue as follows:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.plt_vars  = phi rho E res     # Plot variables. Possible vars are &#39;phi&#39;, &#39;rho&#39;, &#39;E&#39;, &#39;res&#39;
 </pre></div>
 </div>
 </section>
 <section id="saturation-charge-bc">
-<span id="chap-poissondielectricbc"></span><h3>Saturation charge BC<a class="headerlink" href="#saturation-charge-bc" title="Permalink to this heading">¶</a></h3>
+<span id="chap-poissondielectricbc"></span><h3>Saturation charge BC<a class="headerlink" href="#saturation-charge-bc" title="Permalink to this heading"></a></h3>
 <p>As mentioned above, on dielectric interfaces the user can choose to specify which “form” of <a class="reference internal" href="#equation-gaussbc">Eq. 4</a> to solve.
 If the user wants the natural form in which the surface charge is the free parameter, he can specify</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.which_jump = natural
@@ -652,7 +562,7 @@ Support for setting <span class="math notranslate nohighlight">\(\partial_n\Phi\
 </section>
 </section>
 <section id="frequency-dependent-permittivity">
-<h2>Frequency dependent permittivity<a class="headerlink" href="#frequency-dependent-permittivity" title="Permalink to this heading">¶</a></h2>
+<h2>Frequency dependent permittivity<a class="headerlink" href="#frequency-dependent-permittivity" title="Permalink to this heading"></a></h2>
 <p>Frequency-dependent permittivities are fundamentally supported by the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> elliptic discretization but none of the solvers implement it.
 Recall that the polarization (in frequency space) is</p>
 <div class="math notranslate nohighlight">
@@ -660,7 +570,7 @@ Recall that the polarization (in frequency space) is</p>
 <p>where <span class="math notranslate nohighlight">\(\chi(\omega)\)</span> is the dielectric susceptibility.</p>
 <p>There are two forms that <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> can support frequency dependent permittivities; through convolution or through auxiliary differential equations (ADEs).</p>
 <section id="convolution-approach">
-<h3>Convolution approach<a class="headerlink" href="#convolution-approach" title="Permalink to this heading">¶</a></h3>
+<h3>Convolution approach<a class="headerlink" href="#convolution-approach" title="Permalink to this heading"></a></h3>
 <p>In the time domain, the displacement field is.</p>
 <div class="math notranslate nohighlight">
 \[\mathbf{D}(t_k) = \epsilon_0\mathbf{E}(t_k) + \epsilon_0\int_0^{t_k} \chi(t)\mathbf{E}(t_k-t)\text{d}t.\]</div>
@@ -682,7 +592,7 @@ E.g. with the trapezoidal rule then</p>
 Unfortunately, inclusion of dispersion means that we must store <span class="math notranslate nohighlight">\(\mathbf{E}(t_n)\)</span> for all previous time steps.</p>
 </section>
 <section id="auxiliary-differential-equation">
-<h3>Auxiliary differential equation<a class="headerlink" href="#auxiliary-differential-equation" title="Permalink to this heading">¶</a></h3>
+<h3>Auxiliary differential equation<a class="headerlink" href="#auxiliary-differential-equation" title="Permalink to this heading"></a></h3>
 <p>With the ADE approach we seek a solution to <span class="math notranslate nohighlight">\(\mathbf{P}(\omega) = \epsilon_0\chi(\omega)\mathbf{E}(\omega)\)</span> in the form</p>
 <div class="math notranslate nohighlight">
 \[\sum_k a_k(i\omega)^k\mathbf{P}(\omega) = \epsilon_0\mathbf{E}(\omega),\]</div>
@@ -706,7 +616,7 @@ Normally, the ADE is a low-order PDE and a few terms are sufficient.</p>
 </section>
 </section>
 <section id="limitations">
-<h2>Limitations<a class="headerlink" href="#limitations" title="Permalink to this heading">¶</a></h2>
+<h2>Limitations<a class="headerlink" href="#limitations" title="Permalink to this heading"></a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>There is currently a bug where having a dielectric interface align <em>completely</em> with a grid face will cause the cell to be identified as an electrode EB.
@@ -718,7 +628,7 @@ In the meantime, a sufficient workaround is simply to displace the dielectric sl
 </div>
 </section>
 <section id="example-application-s">
-<h2>Example application(s)<a class="headerlink" href="#example-application-s" title="Permalink to this heading">¶</a></h2>
+<h2>Example application(s)<a class="headerlink" href="#example-application-s" title="Permalink to this heading"></a></h2>
 <p>Example applications that use the electrostatics capabilities are:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="../Applications/ElectrostaticsModel.html#chap-electrostaticsmodel"><span class="std std-ref">Electrostatics model</span></a>.</p></li>
@@ -729,50 +639,33 @@ In the meantime, a sufficient workaround is simply to displace the dielectric sl
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="KineticMonteCarlo.html" class="btn btn-neutral float-right" title="Kinetic Monte Carlo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="CDR.html" class="btn btn-neutral float-left" title="Convection-Diffusion-Reaction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="KineticMonteCarlo.html" class="btn btn-neutral float-right" title="Kinetic Monte Carlo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2022, SINTEF Energy Research.
-
-    </p>
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
