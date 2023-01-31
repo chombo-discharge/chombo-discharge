@@ -70,7 +70,7 @@ ItoPlasmaPhysics::defineKMC() noexcept
 {
   CH_TIME("ItoPlasmaPhysics::defineKMC");
 
-  m_kmcState.define(m_plasmaSpecies.size(), m_rtSpecies.size());
+  m_kmcState.define(m_itoSpecies.size(), m_rtSpecies.size());
 
   m_kmcSolver.define(m_kmcReactions);
 
@@ -144,7 +144,13 @@ ItoPlasmaPhysics::parseAlgorithm() noexcept
 inline const Vector<RefCountedPtr<ItoSpecies>>&
 ItoPlasmaPhysics::getItoSpecies() const
 {
-  return m_plasmaSpecies;
+  return m_itoSpecies;
+}
+
+inline const Vector<RefCountedPtr<CdrSpecies>>&
+ItoPlasmaPhysics::getCdrSpecies() const
+{
+  return m_cdrSpecies;
 }
 
 inline const Vector<RefCountedPtr<RtSpecies>>&
@@ -154,9 +160,21 @@ ItoPlasmaPhysics::getRtSpecies() const
 }
 
 inline int
+ItoPlasmaPhysics::getNumItoSpecies() const
+{
+  return m_itoSpecies.size();
+}
+
+inline int
+ItoPlasmaPhysics::getNumCdrSpecies() const
+{
+  return m_cdrSpecies.size();
+}
+
+inline int
 ItoPlasmaPhysics::getNumPlasmaSpecies() const
 {
-  return m_plasmaSpecies.size();
+  return m_itoSpecies.size() + m_cdrSpecies.size();
 }
 
 inline int

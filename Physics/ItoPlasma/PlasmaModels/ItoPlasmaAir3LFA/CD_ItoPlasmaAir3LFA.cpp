@@ -44,17 +44,17 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   m_ionDiffCo = m_ionMobility * Units::kb * m_T / Units::Qe;
 
   // Set up species
-  m_plasmaSpecies.resize(3);
+  m_itoSpecies.resize(3);
   m_rtSpecies.resize(1);
 
-  m_plasmaSpecies[0] = RefCountedPtr<ItoSpecies>(new Electron());
-  m_plasmaSpecies[1] = RefCountedPtr<ItoSpecies>(new Positive());
-  m_plasmaSpecies[2] = RefCountedPtr<ItoSpecies>(new Negative());
-  m_rtSpecies[0]     = RefCountedPtr<RtSpecies>(new PhotonZ());
+  m_itoSpecies[0] = RefCountedPtr<ItoSpecies>(new Electron());
+  m_itoSpecies[1] = RefCountedPtr<ItoSpecies>(new Positive());
+  m_itoSpecies[2] = RefCountedPtr<ItoSpecies>(new Negative());
+  m_rtSpecies[0]  = RefCountedPtr<RtSpecies>(new PhotonZ());
 
-  List<ItoParticle>& electrons    = m_plasmaSpecies[0]->getInitialParticles();
-  List<ItoParticle>& positiveIons = m_plasmaSpecies[1]->getInitialParticles();
-  List<ItoParticle>& negativeIons = m_plasmaSpecies[2]->getInitialParticles();
+  List<ItoParticle>& electrons    = m_itoSpecies[0]->getInitialParticles();
+  List<ItoParticle>& positiveIons = m_itoSpecies[1]->getInitialParticles();
+  List<ItoParticle>& negativeIons = m_itoSpecies[2]->getInitialParticles();
 
   electrons.clear();
   positiveIons.clear();

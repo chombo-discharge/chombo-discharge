@@ -4,91 +4,98 @@
  */
 
 /*!
-  @file   CD_ItoPlasmaFieldTagger.cpp
+  @file   CD_ItoPlasmaFieldTaggerImplem.H
   @brief  Implementation of CD_ItoPlasmaFieldTagger.H
   @author Robert Marskar
 */
 
-// Chombo includes
-#include <EBArith.H>
+#ifndef CD_ItoPlasmaFieldTaggerImplem_H
+#define CD_ItoPlasmaFieldTaggerImplem_H
 
 // Our includes
 #include <CD_ItoPlasmaFieldTagger.H>
 #include <CD_DataOps.H>
+#include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::ItoPlasma;
 
-ItoPlasmaFieldTagger::ItoPlasmaFieldTagger()
+template <typename S>
+ItoPlasmaFieldTagger<S>::ItoPlasmaFieldTagger()
 {
   CH_TIME("ItoPlasmaFieldTagger::ItoPlasmaFieldTagger");
-  if (m_verbosity > 5) {
+  if (this->m_verbosity > 5) {
     pout() << "ItoPlasmaFieldTagger::ItoPlasmaFieldTagger" << endl;
   }
 
-  m_name = "ItoPlasmaFieldTagger";
+  this->m_name = "ItoPlasmaFieldTagger";
 }
 
-ItoPlasmaFieldTagger::~ItoPlasmaFieldTagger() {}
+template <typename S>
+ItoPlasmaFieldTagger<S>::~ItoPlasmaFieldTagger() {}
 
+template <typename S>
 void
-ItoPlasmaFieldTagger::allocateStorage()
+ItoPlasmaFieldTagger<S>::allocateStorage()
 {
   CH_TIME("ItoPlasmaFieldTagger::allocateStorage");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::allocateStorage" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::allocateStorage" << endl;
   }
 
-  m_amr->allocate(m_scratch, m_realm, m_phase, 1);
-  m_amr->allocate(m_E, m_realm, m_phase, SpaceDim);
-  m_amr->allocate(m_grad_E, m_realm, m_phase, SpaceDim);
+  this->m_amr->allocate(m_scratch, this->m_realm, this->m_phase, 1);
+  this->m_amr->allocate(m_E, this->m_realm, this->m_phase, SpaceDim);
+  this->m_amr->allocate(m_grad_E, this->m_realm, this->m_phase, SpaceDim);
 }
 
+template <typename S>
 void
-ItoPlasmaFieldTagger::deallocateStorage()
+ItoPlasmaFieldTagger<S>::deallocateStorage()
 {
   CH_TIME("ItoPlasmaFieldTagger::deallocateStorage");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::deallocateStorage" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::deallocateStorage" << endl;
   }
 
-  m_amr->deallocate(m_scratch);
-  m_amr->deallocate(m_E);
-  m_amr->deallocate(m_grad_E);
+  this->m_amr->deallocate(m_scratch);
+  this->m_amr->deallocate(m_E);
+  this->m_amr->deallocate(m_grad_E);
 }
 
+template <typename S>
 void
-ItoPlasmaFieldTagger::computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E)
+ItoPlasmaFieldTagger<S>::computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E)
 {
   CH_TIME("ItoPlasmaFieldTagger::computeElectricField");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computeElectricField" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::computeElectricField" << endl;
   }
 
-  m_timeStepper->computeElectricField(a_E, m_phase);
+  this->m_timeStepper->computeElectricField(a_E, this->m_phase);
   DataOps::vectorLength(m_scratch, a_E);
-  m_amr->computeGradient(a_grad_E, m_scratch, m_realm, phase::gas);
+  this->m_amr->computeGradient(a_grad_E, m_scratch, this->m_realm, phase::gas);
 
-  m_amr->conservativeAverage(a_grad_E, m_realm, m_phase);
-  m_amr->interpGhost(a_grad_E, m_realm, m_phase);
+  this->m_amr->conservativeAverage(a_grad_E, this->m_realm, this->m_phase);
+  this->m_amr->interpGhost(a_grad_E, this->m_realm, this->m_phase);
 
   // Interpolate to centroids
-  m_amr->interpToCentroids(a_E, m_realm, m_phase);
-  m_amr->interpToCentroids(a_grad_E, m_realm, m_phase);
+  this->m_amr->interpToCentroids(a_E, this->m_realm, this->m_phase);
+  this->m_amr->interpToCentroids(a_grad_E, this->m_realm, this->m_phase);
 }
 
+template <typename S>
 void
-ItoPlasmaFieldTagger::computeTracers()
+ItoPlasmaFieldTagger<S>::computeTracers()
 {
   CH_TIME("ItoPlasmaFieldTagger::computeTracers");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computeTracers" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::computeTracers" << endl;
   }
 
   this->allocateStorage();
 
-  const RealVect origin = m_amr->getProbLo();
-  const Real     time   = m_timeStepper->getTime();
+  const RealVect origin = this->m_amr->getProbLo();
+  const Real     time   = this->m_timeStepper->getTime();
 
   // Compute electric field on volumetric centroids
   this->computeElectricField(m_E, m_grad_E);
@@ -100,10 +107,10 @@ ItoPlasmaFieldTagger::computeTracers()
   DataOps::getMaxMinNorm(E_max, E_min, m_E);
   DataOps::getMaxMinNorm(grad_E_max, grad_E_min, m_grad_E);
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const Real               dx    = m_amr->getDx()[lvl];
+  for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl   = this->m_amr->getGrids(this->m_realm)[lvl];
+    const EBISLayout&        ebisl = this->m_amr->getEBISLayout(this->m_realm, this->m_phase)[lvl];
+    const Real               dx    = this->m_amr->getDx()[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
       const Box&       box     = dbl.get(dit());
@@ -120,8 +127,8 @@ ItoPlasmaFieldTagger::computeTracers()
       // Avoid the extra point lookups by getting these before the point loops
       Vector<EBCellFAB*>     tr;
       Vector<BaseFab<Real>*> tr_fab;
-      for (int i = 0; i < m_num_tracers; i++) {
-        tr.push_back(&((*m_tracer[i][lvl])[dit()]));
+      for (int i = 0; i < this->m_num_tracers; i++) {
+        tr.push_back(&((*this->m_tracer[i][lvl])[dit()]));
         tr_fab.push_back(&(tr[i]->getSingleValuedFAB()));
       }
 
@@ -135,7 +142,7 @@ ItoPlasmaFieldTagger::computeTracers()
 
         Vector<Real> tracers = this->tracer(pos, time, dx, E, E_min, E_max, grad_E, grad_E_min, grad_E_max);
 
-        for (int i = 0; i < m_num_tracers; i++) {
+        for (int i = 0; i < this->m_num_tracers; i++) {
           (*tr_fab[i])(iv, 0) = tracers[i];
         }
       }
@@ -144,7 +151,7 @@ ItoPlasmaFieldTagger::computeTracers()
       const IntVectSet& irreg = ebisbox.getIrregIVS(box);
       for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit) {
         const VolIndex& vof = vofit();
-        const RealVect  pos = EBArith::getVofLocation(vof, dx * RealVect::Unit, origin);
+        const RealVect  pos = Location::position(Location::Cell::Center, vof, ebisbox, dx);
 
         // Electric field and grad(|E|)
         const RealVect E      = RealVect(D_DECL(E_fab(vof, 0), E_fab(vof, 1), E_fab(vof, 2)));
@@ -152,25 +159,27 @@ ItoPlasmaFieldTagger::computeTracers()
 
         Vector<Real> tracers = this->tracer(pos, time, dx, E, E_min, E_max, grad_E, grad_E_min, grad_E_max);
 
-        for (int i = 0; i < m_num_tracers; i++) {
+        for (int i = 0; i < this->m_num_tracers; i++) {
           (*tr[i])(vof, 0);
         }
       }
     }
   }
 
-  for (int i = 0; i < m_num_tracers; i++) {
-    m_amr->conservativeAverage(m_tracer[i], m_realm, m_phase);
-    m_amr->interpGhost(m_tracer[i], m_realm, m_phase);
+  for (int i = 0; i < this->m_num_tracers; i++) {
+    this->m_amr->conservativeAverage(this->m_tracer[i], this->m_realm, this->m_phase);
+    this->m_amr->interpGhost(this->m_tracer[i], this->m_realm, this->m_phase);
   }
 
   // Compute gradient of tracers
-  for (int i = 0; i < m_num_tracers; i++) {
-    m_amr->computeGradient(m_grad_tracer[i], m_tracer[i], m_realm, m_phase);
-    m_amr->conservativeAverage(m_grad_tracer[i], m_realm, m_phase);
+  for (int i = 0; i < this->m_num_tracers; i++) {
+    this->m_amr->computeGradient(this->m_grad_tracer[i], this->m_tracer[i], this->m_realm, this->m_phase);
+    this->m_amr->conservativeAverage(this->m_grad_tracer[i], this->m_realm, this->m_phase);
   }
 
   this->deallocateStorage(); // No reason to keep the extra storage lying around...
 }
 
 #include <CD_NamespaceFooter.H>
+
+#endif

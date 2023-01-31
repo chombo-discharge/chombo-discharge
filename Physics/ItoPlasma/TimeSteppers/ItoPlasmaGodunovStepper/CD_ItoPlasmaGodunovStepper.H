@@ -24,7 +24,8 @@ namespace Physics {
     /*!
       @brief Implementation of ItoPlasmaStepper that uses a semi-implicit split-step formalism for advancing the Ito-Poisson-KMC system. 
     */
-    class ItoPlasmaGodunovStepper : public ItoPlasmaStepper
+    template <typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMultigrid>
+    class ItoPlasmaGodunovStepper : public ItoPlasmaStepper<I, C, R, F>
     {
     public:
       /*!
@@ -311,5 +312,7 @@ namespace Physics {
 } // namespace Physics
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_ItoPlasmaGodunovStepperImplem.H>
 
 #endif

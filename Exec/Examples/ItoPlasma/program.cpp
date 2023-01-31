@@ -1,3 +1,5 @@
+#include "ParmParse.H"
+
 #include <CD_Driver.H>
 #include <CD_GeoCoarsener.H>
 #include <CD_FieldSolverFactory.H>
@@ -7,10 +9,10 @@
 #include <CD_RtLayout.H>
 #include <CD_McPhoto.H>
 #include <CD_ItoPlasmaAir3LFA.H>
+#include <CD_CdrCTU.H>
 #include <CD_RodDielectric.H>
 #include <CD_ItoPlasmaGodunovStepper.H>
 #include <CD_ItoPlasmaStreamerTagger.H>
-#include "ParmParse.H"
 
 // This is the potential curve (constant in this case). Modify it if you want to.
 Real g_potential;
@@ -26,7 +28,6 @@ using namespace Physics::ItoPlasma;
 int
 main(int argc, char* argv[])
 {
-
 #ifdef CH_MPI
   MPI_Init(&argc, &argv);
 #endif
@@ -46,37 +47,18 @@ main(int argc, char* argv[])
     setPoutBaseName(basename);
   }
 
-  // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
-  RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
-  RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
-
-  // Set up physics
-  RefCountedPtr<ItoPlasmaPhysics> physics     = RefCountedPtr<ItoPlasmaPhysics>(new ItoPlasmaAir3LFA());
-  RefCountedPtr<ItoPlasmaStepper> timestepper = RefCountedPtr<ItoPlasmaStepper>(new ItoPlasmaGodunovStepper(physics));
-  RefCountedPtr<CellTagger>       tagger      = RefCountedPtr<CellTagger>(
-    new ItoPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
-
-  // Create solver factories
-  auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
-  auto ito_fact = new ItoFactory<ItoSolver, ItoSolver>();
-  auto rte_fact = new RtFactory<McPhoto, McPhoto>();
-
-  // Instantiate solvers
-  auto poi = poi_fact->newSolver();
-  auto cdr = ito_fact->newLayout(physics->getItoSpecies());
-  auto rte = rte_fact->newLayout(physics->getRtSpecies());
-
-  // Send solvers to TimeStepper
-  timestepper->setFieldSolver(poi);
-  timestepper->setIto(cdr);
-  timestepper->setRadiativeTransferSolvers(rte);
+  auto geometry    = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
+  auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
+  auto geocoarsen  = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
+  auto physics     = RefCountedPtr<ItoPlasmaPhysics>(new ItoPlasmaAir3LFA());
+  auto timestepper = RefCountedPtr<ItoPlasmaStepper<>>(new ItoPlasmaGodunovStepper<>(physics));
+  auto tagger      = RefCountedPtr<CellTagger>(new ItoPlasmaStreamerTagger(physics, timestepper, amr, geometry));
 
   // Set potential
   timestepper->setVoltage(potential_curve);
 
   // Set up the Driver and run it
-  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(geometry, timestepper, amr, tagger, geocoarsen));
   engine->setupAndRun(input_file);
 
 #ifdef CH_MPI

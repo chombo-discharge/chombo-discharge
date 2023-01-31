@@ -4,10 +4,13 @@
  */
 
 /*!
-  @file   CD_ItoPlasmaTagger.cpp
+  @file   CD_ItoPlasmaTaggerImplem.H
   @brief  Implementation of CD_ItoPlasmaTagger.H
   @author Robert marskar
 */
+
+#ifndef CD_ItoPlasmaTaggerImplem_H
+#define CD_ItoPlasmaTaggerImplem_H
 
 // Chombo includes
 #include <EBArith.H>
@@ -22,7 +25,8 @@
 
 using namespace Physics::ItoPlasma;
 
-ItoPlasmaTagger::ItoPlasmaTagger()
+template <typename S>
+ItoPlasmaTagger<S>::ItoPlasmaTagger()
 {
   CH_TIME("ItoPlasmaTagger::ItoPlasmaTagger");
   m_verbosity = 10;
@@ -35,22 +39,26 @@ ItoPlasmaTagger::ItoPlasmaTagger()
   m_realm = Realm::Primal;
 }
 
-ItoPlasmaTagger::ItoPlasmaTagger(const RefCountedPtr<ItoPlasmaPhysics>&      a_physics,
-                                 const RefCountedPtr<ItoPlasmaStepper>&      a_timeStepper,
-                                 const RefCountedPtr<AmrMesh>&               a_amr,
-                                 const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry)
+template <typename S>
+ItoPlasmaTagger<S>::ItoPlasmaTagger(const RefCountedPtr<ItoPlasmaPhysics>&      a_physics,
+                                    const RefCountedPtr<S>&                     a_timeStepper,
+                                    const RefCountedPtr<AmrMesh>&               a_amr,
+                                    const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry)
   : ItoPlasmaTagger()
 {
   this->define(a_physics, a_timeStepper, a_amr, a_computationalGeometry);
 }
 
-ItoPlasmaTagger::~ItoPlasmaTagger() {}
+template <typename S>
+ItoPlasmaTagger<S>::~ItoPlasmaTagger()
+{}
 
+template <typename S>
 void
-ItoPlasmaTagger::define(const RefCountedPtr<ItoPlasmaPhysics>&      a_physics,
-                        const RefCountedPtr<ItoPlasmaStepper>&      a_timeStepper,
-                        const RefCountedPtr<AmrMesh>&               a_amr,
-                        const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry)
+ItoPlasmaTagger<S>::define(const RefCountedPtr<ItoPlasmaPhysics>&      a_physics,
+                           const RefCountedPtr<S>&                     a_timeStepper,
+                           const RefCountedPtr<AmrMesh>&               a_amr,
+                           const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry)
 {
   CH_TIME("ItoPlasmaTagger::define");
   if (m_verbosity > 5) {
@@ -63,8 +71,9 @@ ItoPlasmaTagger::define(const RefCountedPtr<ItoPlasmaPhysics>&      a_physics,
   m_computationalGeometry = a_computationalGeometry;
 }
 
+template <typename S>
 void
-ItoPlasmaTagger::regrid()
+ItoPlasmaTagger<S>::regrid()
 {
   CH_TIME("ItoPlasmaTagger::regrid");
   if (m_verbosity > 5) {
@@ -81,8 +90,9 @@ ItoPlasmaTagger::regrid()
   }
 }
 
+template <typename S>
 void
-ItoPlasmaTagger::setPhase(const phase::which_phase a_phase)
+ItoPlasmaTagger<S>::setPhase(const phase::which_phase a_phase)
 {
   CH_TIME("ItoPlasmaTagger::setPhase");
   if (m_verbosity > 5) {
@@ -92,8 +102,9 @@ ItoPlasmaTagger::setPhase(const phase::which_phase a_phase)
   m_phase = a_phase;
 }
 
+template <typename S>
 int
-ItoPlasmaTagger::getNumberOfPlotVariables()
+ItoPlasmaTagger<S>::getNumberOfPlotVariables()
 {
   CH_TIME("ItoPlasmaTagger::getNumberOfPlotVariables_cells");
   if (m_verbosity > 5) {
@@ -103,14 +114,16 @@ ItoPlasmaTagger::getNumberOfPlotVariables()
   return m_num_tracers;
 }
 
+template <typename S>
 Vector<EBAMRCellData>&
-ItoPlasmaTagger::getTracerFields()
+ItoPlasmaTagger<S>::getTracerFields()
 {
   return m_tracer;
 }
 
+template <typename S>
 void
-ItoPlasmaTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp)
+ItoPlasmaTagger<S>::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp)
 {
   CH_TIME("ItoPlasmaTagger::writePlotData");
   if (m_verbosity > 5) {
@@ -137,8 +150,9 @@ ItoPlasmaTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_p
   }
 }
 
+template <typename S>
 bool
-ItoPlasmaTagger::tagCells(EBAMRTags& a_tags)
+ItoPlasmaTagger<S>::tagCells(EBAMRTags& a_tags)
 {
   CH_TIME("ItoPlasmaTagger::tagCells");
   if (m_verbosity > 5) {
@@ -219,16 +233,17 @@ ItoPlasmaTagger::tagCells(EBAMRTags& a_tags)
   return got_new_tags;
 }
 
+template <typename S>
 void
-ItoPlasmaTagger::refineCellsBox(DenseIntVectSet&          a_refined_tags,
-                                const Vector<EBCellFAB*>& a_tracers,
-                                const Vector<EBCellFAB*>& a_grad_tracers,
-                                const int                 a_lvl,
-                                const Box                 a_box,
-                                const EBISBox&            a_ebisbox,
-                                const Real                a_time,
-                                const Real                a_dx,
-                                const RealVect            a_origin)
+ItoPlasmaTagger<S>::refineCellsBox(DenseIntVectSet&          a_refined_tags,
+                                   const Vector<EBCellFAB*>& a_tracers,
+                                   const Vector<EBCellFAB*>& a_grad_tracers,
+                                   const int                 a_lvl,
+                                   const Box                 a_box,
+                                   const EBISBox&            a_ebisbox,
+                                   const Real                a_time,
+                                   const Real                a_dx,
+                                   const RealVect            a_origin)
 {
 
   Vector<BaseFab<Real>*> reg_tracers;
@@ -294,16 +309,17 @@ ItoPlasmaTagger::refineCellsBox(DenseIntVectSet&          a_refined_tags,
   }
 }
 
+template <typename S>
 void
-ItoPlasmaTagger::coarsenCellsBox(DenseIntVectSet&          a_coarsened_tags,
-                                 const Vector<EBCellFAB*>& a_tracers,
-                                 const Vector<EBCellFAB*>& a_grad_tracers,
-                                 const int                 a_lvl,
-                                 const Box                 a_box,
-                                 const EBISBox&            a_ebisbox,
-                                 const Real                a_time,
-                                 const Real                a_dx,
-                                 const RealVect            a_origin)
+ItoPlasmaTagger<S>::coarsenCellsBox(DenseIntVectSet&          a_coarsened_tags,
+                                    const Vector<EBCellFAB*>& a_tracers,
+                                    const Vector<EBCellFAB*>& a_grad_tracers,
+                                    const int                 a_lvl,
+                                    const Box                 a_box,
+                                    const EBISBox&            a_ebisbox,
+                                    const Real                a_time,
+                                    const Real                a_dx,
+                                    const RealVect            a_origin)
 {
 
   Vector<BaseFab<Real>*> reg_tracers;
@@ -378,3 +394,5 @@ ItoPlasmaTagger::coarsenCellsBox(DenseIntVectSet&          a_coarsened_tags,
 }
 
 #include <CD_NamespaceFooter.H>
+
+#endif

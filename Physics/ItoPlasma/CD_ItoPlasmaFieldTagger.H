@@ -24,7 +24,8 @@ namespace Physics {
       @details This class fetches the point-wise electric field. The class is pure, so users must implement 
       the actual tagging criterion themselves. 
     */
-    class ItoPlasmaFieldTagger : public ItoPlasmaTagger
+    template <typename S>
+    class ItoPlasmaFieldTagger : public ItoPlasmaTagger<S>
     {
     public:
       /*!
@@ -35,12 +36,12 @@ namespace Physics {
       /*!
 	@brief Destructor
       */
-      ~ItoPlasmaFieldTagger();
+      virtual ~ItoPlasmaFieldTagger();
 
       /*!
 	@brief Compute tracer fields
       */
-      void
+      virtual void
       computeTracers();
 
       /*!
@@ -74,19 +75,19 @@ namespace Physics {
       /*!
 	@brief Allocate memory
       */
-      void
+      virtual void
       allocateStorage();
 
       /*!
 	@brief Deallocate memory
       */
-      void
+      virtual void
       deallocateStorage();
 
       /*!
 	@brief Compute electric field
       */
-      void
+      virtual void
       computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E);
 
       /*!
@@ -129,5 +130,7 @@ namespace Physics {
 } // namespace Physics
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_ItoPlasmaFieldTaggerImplem.H>
 
 #endif

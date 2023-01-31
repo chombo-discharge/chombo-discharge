@@ -22,8 +22,9 @@ namespace Physics {
   namespace ItoPlasma {
 
     /*!
-      @brief Abstract class for tagging cells across an AMR hierarchy
+      @brief Class for tagging grid cells using the Ito-KMC-Poisson module. 
     */
+    template <typename S>
     class ItoPlasmaTagger : public CellTagger
     {
     public:
@@ -36,7 +37,7 @@ namespace Physics {
 	@brief Full constructor
       */
       ItoPlasmaTagger(const RefCountedPtr<ItoPlasmaPhysics>&      a_physics,
-                      const RefCountedPtr<ItoPlasmaStepper>&      a_timeStepper,
+                      const RefCountedPtr<S>&                     a_timeStepper,
                       const RefCountedPtr<AmrMesh>&               a_amr,
                       const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
@@ -54,7 +55,7 @@ namespace Physics {
       */
       virtual void
       define(const RefCountedPtr<ItoPlasmaPhysics>&      a_physics,
-             const RefCountedPtr<ItoPlasmaStepper>&      a_timeStepper,
+             const RefCountedPtr<S>&                     a_timeStepper,
              const RefCountedPtr<AmrMesh>&               a_amr,
              const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
@@ -131,7 +132,7 @@ namespace Physics {
       /*!
 	@brief Time stepper
       */
-      RefCountedPtr<ItoPlasmaStepper> m_timeStepper;
+      RefCountedPtr<S> m_timeStepper;
 
       /*!
 	@brief AmrMesh. Needed for computing tracer stuff
@@ -212,5 +213,7 @@ namespace Physics {
 } // namespace Physics
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_ItoPlasmaTaggerImplem.H>
 
 #endif

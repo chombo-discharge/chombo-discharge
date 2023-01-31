@@ -23,6 +23,7 @@
 
 // Our includes
 #include <CD_ItoSpecies.H>
+#include <CD_CdrSpecies.H>
 #include <CD_RtSpecies.H>
 #include <CD_Photon.H>
 #include <CD_ItoParticle.H>
@@ -92,11 +93,18 @@ namespace Physics {
       computeAlpha(const RealVect a_E) const = 0;
 
       /*!
-	@brief Get all particle species
-	@return m_plasmaSpecies
+	@brief Get all particle drift-diffusion species
+	@return m_itoSpecies
       */
       const Vector<RefCountedPtr<ItoSpecies>>&
       getItoSpecies() const;
+
+      /*!
+	@brief Get all fluid drift-diffusion species
+	@return m_cdrSpecies
+      */
+      const Vector<RefCountedPtr<CdrSpecies>>&
+      getCdrSpecies() const;
 
       /*!
 	@brief Get all photon species
@@ -106,13 +114,25 @@ namespace Physics {
       getRtSpecies() const;
 
       /*!
-	@brief Return number of ion equations
+	@brief Return number of Ito solvers.
+      */
+      inline int
+      getNumItoSpecies() const;
+
+      /*!
+	@brief Return number of CDR solvers.
+      */
+      inline int
+      getNumCdrSpecies() const;
+
+      /*!
+	@brief Return total number of plasma species.
       */
       inline int
       getNumPlasmaSpecies() const;
 
       /*!
-	@brief Return number of RTE equations
+	@brief Return number of RTE solvers.
       */
       inline int
       getNumPhotonSpecies() const;
@@ -334,9 +354,14 @@ namespace Physics {
       std::vector<std::shared_ptr<const ItoPlasmaPhotoReaction>> m_photoReactions;
 
       /*!
-	@brief List of solver-tracked particle species. 
+	@brief List of solver-tracked particle drift-diffusion species. 
       */
-      Vector<RefCountedPtr<ItoSpecies>> m_plasmaSpecies;
+      Vector<RefCountedPtr<ItoSpecies>> m_itoSpecies;
+
+      /*!
+	@brief List of solver-tracked fluid drift-diffusion species. 
+      */
+      Vector<RefCountedPtr<CdrSpecies>> m_cdrSpecies;
 
       /*!
 	@brief List of solver-tracked photon species. 

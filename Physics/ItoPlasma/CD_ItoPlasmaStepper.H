@@ -6,7 +6,7 @@
 /*!
   @file   CD_ItoPlasmaStepper.H
   @author Robert Marskar
-  @brief  Abstract class for integrating the Ito plasma equations
+  @brief  Declaration of an abstract class for integrating the Ito-KMC-Poisson equations.
 */
 
 #ifndef CD_ItoPlasmaStepper_H
@@ -19,10 +19,14 @@
 #include <CD_TimeStepper.H>
 #include <CD_ItoPlasmaPhysics.H>
 #include <CD_ItoLayout.H>
+#include <CD_CdrLayout.H>
 #include <CD_PointParticle.H>
 #include <CD_RtLayout.H>
 #include <CD_McPhoto.H>
 #include "CD_FieldSolver.H"
+#include "CD_ItoSolver.H"
+#include "CD_CdrCTU.H"
+#include "CD_FieldSolverMultigrid.H"
 #include "CD_SurfaceODESolver.H"
 #include <CD_NamespaceHeader.H>
 
@@ -48,8 +52,10 @@ namespace Physics {
     };
 
     /*!
-      @brief Base time stepper class that advances the Ito-Poisson system of equations
+      @brief Base time stepper class that advances the Ito-KMC-Poisson system of equations. If you want a different
+      underlying solver, change the template arguments. 
     */
+    template <typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMultigrid>
     class ItoPlasmaStepper : public TimeStepper
     {
     public:
@@ -283,27 +289,6 @@ namespace Physics {
                        const int                        a_finestLevel) override;
 
       /*!
-	@brief Set the Ito layout 
-	@param[in] a_itoLayout Set of ItoSolver solvers. 
-      */
-      virtual void
-      setIto(RefCountedPtr<ItoLayout<ItoSolver>>& a_itoLayout) noexcept;
-
-      /*!
-	@brief Set the field solver
-	@param[in] a_fieldSolver Field solver
-      */
-      virtual void
-      setFieldSolver(RefCountedPtr<FieldSolver>& a_fieldSolver) noexcept;
-
-      /*!
-	@brief Set the radiative transfer solvers
-	@param[in] a_rteLayout Radiative transfer solvers
-      */
-      virtual void
-      setRadiativeTransferSolvers(RefCountedPtr<RtLayout<McPhoto>>& a_rteLayout) noexcept;
-
-      /*!
 	@brief Set voltage used for the simulation
 	@param[in] a_voltage Voltage
 	@note This should be done BEFORE calling setupSolvers. 
@@ -382,6 +367,11 @@ namespace Physics {
 	@brief Ito solvers
       */
       RefCountedPtr<ItoLayout<ItoSolver>> m_ito;
+
+      /*!
+	@brief CDR solvers
+      */
+      RefCountedPtr<CdrLayout<CdrSolver>> m_cdr;
 
       /*!
 	@brief Radiative transfer solvers. 
@@ -662,10 +652,16 @@ namespace Physics {
       mutable EBAMRCellData m_particleScratchD;
 
       /*!
-	@brief Set up the Ito particle solvers
+	@brief Set up the Ito particle solvers.
       */
       virtual void
       setupIto();
+
+      /*!
+	@brief Set up the CDR solvers.
+      */
+      virtual void
+      setupCdr();
 
       /*!
 	@brief Set up the electrostatic field solver
@@ -1432,5 +1428,7 @@ namespace Physics {
 } // namespace Physics
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_ItoPlasmaStepperImplem.H>
 
 #endif

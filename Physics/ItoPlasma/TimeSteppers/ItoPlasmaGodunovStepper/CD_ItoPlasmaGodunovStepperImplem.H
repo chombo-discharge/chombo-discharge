@@ -4,10 +4,13 @@
  */
 
 /*!
-  @file   CD_ItoPlasmaGodunovStepper.cpp
+  @file   CD_ItoPlasmaGodunovStepperImplem.H
   @brief  Implementation of CD_ItoPlasmaGodunovStepper.H
   @author Robert Marskar
 */
+
+#ifndef CD_ItoPlasmaGodunovStepperImplem_H
+#define CD_ItoPlasmaGodunovStepperImplem_H
 
 // Chombo includes
 #include <ParmParse.H>
@@ -22,114 +25,121 @@
 
 using namespace Physics::ItoPlasma;
 
-ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics)
-  : ItoPlasmaStepper(a_physics)
+template <typename I, typename C, typename R, typename F>
+ItoPlasmaGodunovStepper<I, C, R, F>::ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics)
+  : ItoPlasmaStepper<I, C, R, F>(a_physics)
 {
   CH_TIME("ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper");
 
-  m_name                     = "ItoPlasmaGodunovStepper";
-  m_prevDt                   = 0.0;
-  m_writeCheckpointParticles = false;
-  m_readCheckpointParticles  = false;
-  m_canRegridOnRestart       = true;
-  m_gradientFix              = true;
+  this->m_name                     = "ItoPlasmaGodunovStepper";
+  this->m_prevDt                   = 0.0;
+  this->m_writeCheckpointParticles = false;
+  this->m_readCheckpointParticles  = false;
+  this->m_canRegridOnRestart       = true;
+  this->m_gradientFix              = true;
 
   this->parseOptions();
 }
 
-ItoPlasmaGodunovStepper::~ItoPlasmaGodunovStepper()
+template <typename I, typename C, typename R, typename F>
+ItoPlasmaGodunovStepper<I, C, R, F>::~ItoPlasmaGodunovStepper()
 {
   CH_TIME("ItoPlasmaGodunovStepper::~ItoPlasmaGodunovStepper");
-  if (m_verbosity > 5) {
+  if (this->m_verbosity > 5) {
     pout() << "ItoPlasmaGodunovStepper::~ItoPlasmaGodunovStepper" << endl;
   }
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::allocate()
+ItoPlasmaGodunovStepper<I, C, R, F>::allocate()
 {
   CH_TIME("ItoPlasmaGodunovStepper::allocate");
-  if (m_verbosity > 5) {
+  if (this->m_verbosity > 5) {
     pout() << "ItoPlasmaGodunovStepper::allocate" << endl;
   }
 
-  ItoPlasmaStepper::allocate();
+  ItoPlasmaStepper<I, C, R, F>::allocate();
 
   // Now allocate for the conductivity particles and rho^dagger particles. This is only done in the 'allocate' routine
   // and not in 'allocateInternals' because that would discard the particles during regrids. That has definitely never
   // happen, and there's no way I've spent countless hours tracking down such a bug.
-  const int numItoSpecies = m_physics->getNumPlasmaSpecies();
+  const int numItoSpecies = this->m_physics->getNumItoSpecies();
 
   m_conductivityParticles.resize(numItoSpecies);
   m_rhoDaggerParticles.resize(numItoSpecies);
 
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
     m_conductivityParticles[idx] = RefCountedPtr<ParticleContainer<PointParticle>>(
       new ParticleContainer<PointParticle>());
     m_rhoDaggerParticles[idx] = RefCountedPtr<ParticleContainer<PointParticle>>(new ParticleContainer<PointParticle>());
 
-    m_amr->allocate(*m_conductivityParticles[idx], m_particleRealm);
-    m_amr->allocate(*m_rhoDaggerParticles[idx], m_particleRealm);
+    (this->m_amr)->allocate(*m_conductivityParticles[idx], this->m_particleRealm);
+    (this->m_amr)->allocate(*m_rhoDaggerParticles[idx], this->m_particleRealm);
   }
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::barrier() const noexcept
+ItoPlasmaGodunovStepper<I, C, R, F>::barrier() const noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::barrier");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::barrier" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::barrier" << endl;
   }
 
-  if (m_profile) {
+  if ((this->m_profile)) {
     ParallelOps::barrier();
   }
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::parseOptions()
+ItoPlasmaGodunovStepper<I, C, R, F>::parseOptions()
 {
   CH_TIME("ItoPlasmaGodunovStepper::parseOptions");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::parseOptions" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::parseOptions" << endl;
   }
 
-  ItoPlasmaStepper::parseOptions();
+  ItoPlasmaStepper<I, C, R, F>::parseOptions();
 
   this->parseAlgorithm();
   this->parseCheckpointParticles();
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::parseRuntimeOptions()
+ItoPlasmaGodunovStepper<I, C, R, F>::parseRuntimeOptions()
 {
   CH_TIME("ItoPlasmaGodunovStepper::parseRuntimeOptions");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::parseRuntimeOptions" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::parseRuntimeOptions" << endl;
   }
 
-  ItoPlasmaStepper::parseRuntimeOptions();
+  ItoPlasmaStepper<I, C, R, F>::parseRuntimeOptions();
 
   this->parseAlgorithm();
   this->parseCheckpointParticles();
 
-  m_ito->parseRuntimeOptions();
-  m_fieldSolver->parseRuntimeOptions();
-  m_rte->parseRuntimeOptions();
-  m_sigmaSolver->parseRuntimeOptions();
+  this->m_ito->parseRuntimeOptions();
+  this->m_fieldSolver->parseRuntimeOptions();
+  this->m_rte->parseRuntimeOptions();
+  this->m_sigmaSolver->parseRuntimeOptions();
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::parseAlgorithm() noexcept
+ItoPlasmaGodunovStepper<I, C, R, F>::parseAlgorithm() noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::parseAlgorithm");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::parseAlgorithm" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::parseAlgorithm" << endl;
   }
 
-  ParmParse   pp(m_name.c_str());
+  ParmParse   pp(this->m_name.c_str());
   std::string str;
 
   pp.query("gradient_fix", m_gradientFix);
@@ -144,25 +154,27 @@ ItoPlasmaGodunovStepper::parseAlgorithm() noexcept
   }
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::parseCheckpointParticles() noexcept
+ItoPlasmaGodunovStepper<I, C, R, F>::parseCheckpointParticles() noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::parseCheckpointParticles");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::parseCheckpointParticles" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::parseCheckpointParticles" << endl;
   }
 
-  ParmParse pp(m_name.c_str());
+  ParmParse pp(this->m_name.c_str());
 
   pp.query("checkpoint_particles", m_writeCheckpointParticles);
 }
 
+template <typename I, typename C, typename R, typename F>
 Real
-ItoPlasmaGodunovStepper::advance(const Real a_dt)
+ItoPlasmaGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 {
   CH_TIME("ItoPlasmaGodunovStepper::advance");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::advance" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::advance" << endl;
   }
 
   // Special flag for telling the class that we have the necessary things in place for doing a regrid. This is
@@ -173,7 +185,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   m_timer = Timer("ItoPlasmaGodunovStepper::advance");
 
   if (m_gradientFix) {
-    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Voxel, m_toleranceEB);
+    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Voxel, this->m_toleranceEB);
   }
 
   // Previous time step is needed when regridding.
@@ -181,13 +193,13 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
 
   // Done only so we can plot the absorbed photons (advanceReactionNetwork absorbs them)
   m_timer.startEvent("Deposit photons");
-  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+  for (auto solverIt = (this->m_rte)->iterator(); solverIt.ok(); ++solverIt) {
     solverIt()->depositPhotons(solverIt()->getPhi(), solverIt()->getBulkPhotons(), DepositionType::NGP);
   }
   m_timer.stopEvent("Deposit photons");
 
   // Compute the number of particles per cell.
-  this->getPhysicalParticlesPerCell(m_oldPPC);
+  this->getPhysicalParticlesPerCell(this->m_oldPPC);
 
   // ====== BEGIN TRANSPORT STEP ======
   // Semi-implicitly advance the particles and the field.
@@ -214,7 +226,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   else {
     this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, true);
   }
-  this->getPhysicalParticlesPerCell(m_newPPC);
+  this->getPhysicalParticlesPerCell(this->m_newPPC);
   m_timer.stopEvent("EB/Particle intersection");
 
   // Remove the run-time configurable particle storage. It is no longer needed.
@@ -236,7 +248,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   // Sort the particles and photons per cell so we can call reaction algorithms
   this->barrier();
   m_timer.startEvent("Sort by cell");
-  m_ito->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
+  (this->m_ito)->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Source);
   m_timer.stopEvent("Sort by cell");
@@ -248,17 +260,17 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   m_timer.stopEvent("Reaction network");
 
   // Build superparticles.
-  if ((m_timeStep + 1) % m_mergeInterval == 0 && m_mergeInterval > 0) {
+  if ((this->m_timeStep + 1) % this->m_mergeInterval == 0 && this->m_mergeInterval > 0) {
     this->barrier();
     m_timer.startEvent("Super-particle management");
-    m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
+    (this->m_ito)->makeSuperparticles(ItoSolver::WhichContainer::Bulk, (this->m_particlesPerCell));
     m_timer.stopEvent("Super-particle management");
   }
 
   // Sort particles per patch.
   this->barrier();
   m_timer.startEvent("Sort by patch");
-  m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+  (this->m_ito)->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
   m_timer.stopEvent("Sort by patch");
@@ -267,15 +279,15 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   this->barrier();
   m_timer.startEvent("Remove covered");
   if (m_gradientFix) {
-    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Voxel, m_toleranceEB);
+    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Voxel, this->m_toleranceEB);
   }
   else {
-    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Discrete, m_toleranceEB);
+    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Discrete, this->m_toleranceEB);
   }
   m_timer.stopEvent("Remove covered");
 
   // Clear other data holders for now.
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     solverIt()->clear(ItoSolver::WhichContainer::EB);
     solverIt()->clear(ItoSolver::WhichContainer::Domain);
   }
@@ -293,10 +305,10 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
 
   this->barrier();
   m_timer.startEvent("Compute J");
-  this->computeCurrentDensity(m_currentDensity);
+  this->computeCurrentDensity(this->m_currentDensity);
   m_timer.stopEvent("Compute J");
 
-  if (m_profile) {
+  if ((this->m_profile)) {
     m_timer.eventReport(pout(), false);
   }
 
@@ -305,17 +317,18 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   return a_dt;
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
+ItoPlasmaGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLevel)
 {
   CH_TIME("ItoPlasmaGodunovStepper::preRegrid");
-  if (m_verbosity > 5) {
+  if (this->m_verbosity > 5) {
     pout() << "ItoPlasmaGodunovStepper::preRegrid" << endl;
   }
 
-  ItoPlasmaStepper::preRegrid(a_lmin, a_oldFinestLevel);
+  ItoPlasmaStepper<I, C, R, F>::preRegrid(a_lmin, a_oldFinestLevel);
 
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
     m_conductivityParticles[idx]->preRegrid(a_lmin);
@@ -323,11 +336,12 @@ ItoPlasmaGodunovStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   }
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
+ItoPlasmaGodunovStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
 {
   CH_TIME("ItoPlasmaGodunovStepper::regrid");
-  if (m_verbosity > 5) {
+  if (this->m_verbosity > 5) {
     pout() << "ItoPlasmaGodunovStepper::regrid" << endl;
   }
 
@@ -345,21 +359,20 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   }
 
   // Regrid solvers
-
   m_timer.startEvent("Regrid ItoSolver");
-  m_ito->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  (this->m_ito)->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_timer.stopEvent("Regrid ItoSolver");
 
   m_timer.startEvent("Regrid FieldSolver");
-  m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  (this->m_fieldSolver)->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_timer.stopEvent("Regrid FieldSolver");
 
   m_timer.startEvent("Regrid RTE");
-  m_rte->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  (this->m_rte)->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_timer.stopEvent("Regrid RTE");
 
   m_timer.startEvent("Regrid SurfaceODESolver");
-  m_sigmaSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  this->m_sigmaSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_timer.stopEvent("Regrid SurfaceODESolver");
 
   // Allocate internal memory for ItoPlasmaGodunovStepper now....
@@ -369,16 +382,16 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
 
   // We need to remap/regrid the stored particles as well.
   m_timer.startEvent("Remap algorithm-particles");
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
-    m_amr->remapToNewGrids(*m_rhoDaggerParticles[idx], a_lmin, a_newFinestLevel);
-    m_amr->remapToNewGrids(*m_conductivityParticles[idx], a_lmin, a_newFinestLevel);
+    (this->m_amr)->remapToNewGrids(*m_rhoDaggerParticles[idx], a_lmin, a_newFinestLevel);
+    (this->m_amr)->remapToNewGrids(*m_conductivityParticles[idx], a_lmin, a_newFinestLevel);
   }
   m_timer.stopEvent("Remap algorithm-particles");
 
   // Set up the field solver
   m_timer.startEvent("Setup field solver");
-  m_fieldSolver->setupSolver();
+  (this->m_fieldSolver)->setupSolver();
 
   // Recompute the conductivity and space charge densities.
   this->computeConductivities(m_conductivityParticles);
@@ -395,17 +408,17 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   m_timer.stopEvent("Solve Poisson");
 
   // Regrid superparticles.
-  if (m_regridSuperparticles) {
+  if (this->m_regridSuperparticles) {
     m_timer.startEvent("Make superparticles");
-    m_ito->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
-    m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
-    m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+    (this->m_ito)->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
+    (this->m_ito)->makeSuperparticles(ItoSolver::WhichContainer::Bulk, (this->m_particlesPerCell));
+    (this->m_ito)->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
     m_timer.stopEvent("Make superparticles");
   }
 
   // Now let Ihe ito solver deposit its actual particles... In the above it deposit m_rhoDaggerParticles.
   m_timer.startEvent("Deposit particles");
-  m_ito->depositParticles();
+  (this->m_ito)->depositParticles();
   m_timer.stopEvent("Deposit particles");
 
   // Recompute new velocities and diffusion coefficients
@@ -417,19 +430,20 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   m_timer.eventReport(pout(), false);
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::setOldPositions() noexcept
+ItoPlasmaGodunovStepper<I, C, R, F>::setOldPositions() noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::setOldPositions");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setOldPositions" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::setOldPositions" << endl;
   }
 
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>& solver = solverIt();
 
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout&   dbl       = m_amr->getGrids(m_particleRealm)[lvl];
+    for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout&   dbl       = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
       ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
       for (DataIterator dit(dbl); dit.ok(); ++dit) {
@@ -446,16 +460,18 @@ ItoPlasmaGodunovStepper::setOldPositions() noexcept
   }
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::remapPointParticles(Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
-                                             const SpeciesSubset                                      a_subset) noexcept
+ItoPlasmaGodunovStepper<I, C, R, F>::remapPointParticles(
+  Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
+  const SpeciesSubset                                      a_subset) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::remapPointParticles");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::remapPointParticles" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::remapPointParticles" << endl;
   }
 
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
@@ -550,17 +566,18 @@ ItoPlasmaGodunovStepper::remapPointParticles(Vector<RefCountedPtr<ParticleContai
   }
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::depositPointParticles(
+ItoPlasmaGodunovStepper<I, C, R, F>::depositPointParticles(
   const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
   const SpeciesSubset                                            a_subset) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::depositPointParticles");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::depositPointParticles" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::depositPointParticles" << endl;
   }
 
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
@@ -651,16 +668,18 @@ ItoPlasmaGodunovStepper::depositPointParticles(
   }
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::clearPointParticles(const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
-                                             const SpeciesSubset a_subset) noexcept
+ItoPlasmaGodunovStepper<I, C, R, F>::clearPointParticles(
+  const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
+  const SpeciesSubset                                            a_subset) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::clearPointParticles");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::clearPointParticles" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::clearPointParticles" << endl;
   }
 
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
@@ -755,34 +774,36 @@ ItoPlasmaGodunovStepper::clearPointParticles(const Vector<RefCountedPtr<Particle
   }
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::computeConductivities(
+ItoPlasmaGodunovStepper<I, C, R, F>::computeConductivities(
   const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::computeConductivities");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computeConductivities" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::computeConductivities" << endl;
   }
 
-  this->computeCellConductivity(m_conductivityCell, a_particles);
+  this->computeCellConductivity((this->m_conductivityCell), a_particles);
 
   // Now do the faces
   this->computeFaceConductivity();
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::computeCellConductivity(
+ItoPlasmaGodunovStepper<I, C, R, F>::computeCellConductivity(
   EBAMRCellData&                                                 a_conductivityCell,
   const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::computeCellConductivity(EBAMRCellData, PointParticle");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computeCellConductivity(EBAMRCellData, PointParticle)" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::computeCellConductivity(EBAMRCellData, PointParticle)" << endl;
   }
 
   DataOps::setValue(a_conductivityCell, 0.0);
 
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
@@ -791,12 +812,12 @@ ItoPlasmaGodunovStepper::computeCellConductivity(
 
     if (Z != 0 && solver->isMobile()) {
       // Deposit on the particle realm.
-      DataOps::setValue(m_particleScratch1, 0.0);
-      solver->depositParticles<PointParticle, &PointParticle::weight>(m_particleScratch1, *a_particles[idx]);
+      DataOps::setValue(this->m_particleScratch1, 0.0);
+      solver->depositParticles<PointParticle, &PointParticle::weight>(this->m_particleScratch1, *a_particles[idx]);
 
       // Copy to fluid realm and add to total conductivity.
-      m_fluidScratch1.copy(m_particleScratch1);
-      DataOps::incr(a_conductivityCell, m_fluidScratch1, 1.0 * std::abs(Z));
+      this->m_fluidScratch1.copy(this->m_particleScratch1);
+      DataOps::incr(a_conductivityCell, this->m_fluidScratch1, 1.0 * std::abs(Z));
     }
   }
 
@@ -804,22 +825,23 @@ ItoPlasmaGodunovStepper::computeCellConductivity(
   DataOps::scale(a_conductivityCell, Units::Qe);
 
   // Coarsen, update ghost cells and interpolate to centroids
-  m_amr->arithmeticAverage(a_conductivityCell, m_fluidRealm, m_plasmaPhase);
-  m_amr->interpGhostPwl(a_conductivityCell, m_fluidRealm, m_plasmaPhase);
+  (this->m_amr)->arithmeticAverage(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
+  (this->m_amr)->interpGhostPwl(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
 
-  m_amr->interpToCentroids(a_conductivityCell, m_fluidRealm, m_plasmaPhase);
+  (this->m_amr)->interpToCentroids(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::computeFaceConductivity() noexcept
+ItoPlasmaGodunovStepper<I, C, R, F>::computeFaceConductivity() noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::computeFaceConductivity");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computeFaceConductivity" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::computeFaceConductivity" << endl;
   }
 
-  DataOps::setValue(m_conductivityFace, 0.0);
-  DataOps::setValue(m_conductivityEB, 0.0);
+  DataOps::setValue((this->m_conductivityFace), 0.0);
+  DataOps::setValue((this->m_conductivityEB), 0.0);
 
   // Average the cell-centered conductivity to faces. Note that this includes one "ghost face", which we need
   // because the multigrid solver will interpolate face-centered conductivities to face centroids.
@@ -827,61 +849,63 @@ ItoPlasmaGodunovStepper::computeFaceConductivity() noexcept
   const int      tanGhost = 1;
   const Interval interv(0, 0);
 
-  DataOps::averageCellToFace(m_conductivityFace,
-                             m_conductivityCell,
-                             m_amr->getDomains(),
+  DataOps::averageCellToFace((this->m_conductivityFace),
+                             (this->m_conductivityCell),
+                             (this->m_amr)->getDomains(),
                              tanGhost,
                              interv,
                              interv,
                              average);
 
   // Set the EB conductivity.
-  DataOps::incr(m_conductivityEB, m_conductivityCell, 1.0);
+  DataOps::incr((this->m_conductivityEB), (this->m_conductivityCell), 1.0);
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::setupSemiImplicitPoisson(const Real a_dt) noexcept
+ItoPlasmaGodunovStepper<I, C, R, F>::setupSemiImplicitPoisson(const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::setupSemiImplicitPoisson");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setupSemiImplicitPoisson" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::setupSemiImplicitPoisson" << endl;
   }
 
   // Set coefficients as usual
-  m_fieldSolver->setPermittivities();
+  (this->m_fieldSolver)->setPermittivities();
 
   // Get the permittivities
   // Get the permittivities on the faces.
-  MFAMRCellData& permCell = m_fieldSolver->getPermittivityCell();
-  MFAMRFluxData& permFace = m_fieldSolver->getPermittivityFace();
-  MFAMRIVData&   permEB   = m_fieldSolver->getPermittivityEB();
+  MFAMRCellData& permCell = (this->m_fieldSolver)->getPermittivityCell();
+  MFAMRFluxData& permFace = (this->m_fieldSolver)->getPermittivityFace();
+  MFAMRIVData&   permEB   = (this->m_fieldSolver)->getPermittivityEB();
 
   // Get handles to the gas-phase permittivities.
-  EBAMRFluxData permFaceGas = m_amr->alias(m_plasmaPhase, permFace);
-  EBAMRIVData   permEBGas   = m_amr->alias(m_plasmaPhase, permEB);
+  EBAMRFluxData permFaceGas = (this->m_amr)->alias((this->m_plasmaPhase), permFace);
+  EBAMRIVData   permEBGas   = (this->m_amr)->alias((this->m_plasmaPhase), permEB);
 
   // Increment the field solver permittivities by a_factor*sigma. After this, the "permittivities" are
   // given by epsr + a_factor*sigma
-  DataOps::incr(permFaceGas, m_conductivityFace, a_dt / Units::eps0);
-  DataOps::incr(permEBGas, m_conductivityEB, a_dt / Units::eps0);
+  DataOps::incr(permFaceGas, (this->m_conductivityFace), a_dt / Units::eps0);
+  DataOps::incr(permEBGas, (this->m_conductivityEB), a_dt / Units::eps0);
 
   // Coarsen coefficients.
-  m_amr->arithmeticAverage(permFaceGas, m_fluidRealm, m_plasmaPhase);
-  m_amr->arithmeticAverage(permEBGas, m_fluidRealm, m_plasmaPhase);
+  (this->m_amr)->arithmeticAverage(permFaceGas, this->m_fluidRealm, (this->m_plasmaPhase));
+  (this->m_amr)->arithmeticAverage(permEBGas, this->m_fluidRealm, (this->m_plasmaPhase));
 
   // Set up the solver with the "permittivities"
-  m_fieldSolver->setSolverPermittivities(permCell, permFace, permEB);
+  (this->m_fieldSolver)->setSolverPermittivities(permCell, permFace, permEB);
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::removeCoveredPointParticles(
+ItoPlasmaGodunovStepper<I, C, R, F>::removeCoveredPointParticles(
   Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
   const EBRepresentation                                   a_representation,
   const Real                                               a_tolerance) const noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::removeCoveredPointParticles");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::removeCoveredPointParticles" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::removeCoveredPointParticles" << endl;
   }
 
   for (int i = 0; i < a_particles.size(); i++) {
@@ -890,17 +914,17 @@ ItoPlasmaGodunovStepper::removeCoveredPointParticles(
 
       switch (a_representation) {
       case EBRepresentation::Discrete: {
-        m_amr->removeCoveredParticlesDiscrete(particles, m_plasmaPhase, a_tolerance);
+        (this->m_amr)->removeCoveredParticlesDiscrete(particles, (this->m_plasmaPhase), a_tolerance);
 
         break;
       }
       case EBRepresentation::ImplicitFunction: {
-        m_amr->removeCoveredParticlesIF(particles, m_plasmaPhase, a_tolerance);
+        (this->m_amr)->removeCoveredParticlesIF(particles, (this->m_plasmaPhase), a_tolerance);
 
         break;
       }
       case EBRepresentation::Voxel: {
-        m_amr->removeCoveredParticlesVoxels(particles, m_plasmaPhase);
+        (this->m_amr)->removeCoveredParticlesVoxels(particles, (this->m_plasmaPhase));
 
         break;
       }
@@ -912,19 +936,20 @@ ItoPlasmaGodunovStepper::removeCoveredPointParticles(
   }
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::copyConductivityParticles(
+ItoPlasmaGodunovStepper<I, C, R, F>::copyConductivityParticles(
   Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_conductivityParticles) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::copyConductivityParticles");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::copyConductivityParticles" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::copyConductivityParticles" << endl;
   }
 
   // Clear particles first.
   this->clearPointParticles(a_conductivityParticles, SpeciesSubset::All);
 
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     const RefCountedPtr<ItoSolver>&  solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
@@ -934,8 +959,8 @@ ItoPlasmaGodunovStepper::copyConductivityParticles(
     if (Z != 0 && solver->isMobile()) {
       const ParticleContainer<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-        const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+      for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
 
         for (DataIterator dit(dbl); dit.ok(); ++dit) {
           const List<ItoParticle>& patchParticles = solverParticles[lvl][dit()].listItems();
@@ -956,12 +981,13 @@ ItoPlasmaGodunovStepper::copyConductivityParticles(
   }
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
+ItoPlasmaGodunovStepper<I, C, R, F>::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::advanceParticlesEulerMaruyama" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::advanceParticlesEulerMaruyama" << endl;
   }
 
   // Store X^k positions.
@@ -1007,7 +1033,7 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
   m_timer.startEvent("Step-compute v");
 #if 1 // This is what the algorithm says.
   this->setItoVelocityFunctions();
-  m_ito->interpolateVelocities();
+  (this->m_ito)->interpolateVelocities();
 #else // Have to use this for LEA - need to debug.
   this->computeItoVelocities();
 #endif
@@ -1021,19 +1047,20 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
   m_timer.stopEvent("Euler-Maruyama step");
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(
+ItoPlasmaGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
   Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_rhoDaggerParticles,
   const Real                                               a_dt) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::diffuseParticlesEulerMaruyama" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::diffuseParticlesEulerMaruyama" << endl;
   }
 
   this->clearPointParticles(a_rhoDaggerParticles, SpeciesSubset::All);
 
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
@@ -1042,8 +1069,8 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(
     const bool diffusive = solver->isDiffusive();
     const int  Z         = species->getChargeNumber();
 
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout&   dbl       = m_amr->getGrids(m_particleRealm)[lvl];
+    for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout&   dbl       = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
       ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
       for (DataIterator dit(dbl); dit.ok(); ++dit) {
@@ -1073,15 +1100,16 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(
   }
 }
 
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::stepEulerMaruyama(const Real a_dt) noexcept
+ItoPlasmaGodunovStepper<I, C, R, F>::stepEulerMaruyama(const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::stepEulerMaruyama");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::stepEulerMaruyama" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::stepEulerMaruyama" << endl;
   }
 
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>& solver = solverIt();
 
     const bool mobile    = solver->isMobile();
@@ -1091,8 +1119,8 @@ ItoPlasmaGodunovStepper::stepEulerMaruyama(const Real a_dt) noexcept
     const Real g = diffusive ? 1.0 : 0.0;
 
     if (mobile || diffusive) {
-      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-        const DisjointBoxLayout&   dbl       = m_amr->getGrids(m_particleRealm)[lvl];
+      for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout&   dbl       = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
         ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
         for (DataIterator dit(dbl); dit.ok(); ++dit) {
@@ -1112,12 +1140,13 @@ ItoPlasmaGodunovStepper::stepEulerMaruyama(const Real a_dt) noexcept
 }
 
 #ifdef CH_USE_HDF5
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::writeCheckpointHeader(HDF5HeaderData& a_header) const
+ItoPlasmaGodunovStepper<I, C, R, F>::writeCheckpointHeader(HDF5HeaderData& a_header) const
 {
   CH_TIME("ItoPlasmaGodunovStepper::writeCheckpointHeader");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::writeCheckpointHeader" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::writeCheckpointHeader" << endl;
   }
 
   a_header.m_real["prev_dt"]             = m_prevDt;
@@ -1126,12 +1155,13 @@ ItoPlasmaGodunovStepper::writeCheckpointHeader(HDF5HeaderData& a_header) const
 #endif
 
 #ifdef CH_USE_HDF5
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::readCheckpointHeader(HDF5HeaderData& a_header)
+ItoPlasmaGodunovStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header)
 {
   CH_TIME("ItoPlasmaGodunovStepper::readCheckpointHeader");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::readCheckpointHeader" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::readCheckpointHeader" << endl;
   }
 
   m_prevDt                  = a_header.m_real["prev_dt"];
@@ -1141,19 +1171,20 @@ ItoPlasmaGodunovStepper::readCheckpointHeader(HDF5HeaderData& a_header)
 #endif
 
 #ifdef CH_USE_HDF5
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const
+ItoPlasmaGodunovStepper<I, C, R, F>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const
 {
   CH_TIME("ItoPlasmaGodunovStepper::writeCheckpointData");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::writeCheckpointData" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::writeCheckpointData" << endl;
   }
 
-  ItoPlasmaStepper::writeCheckpointData(a_handle, a_lvl);
+  ItoPlasmaStepper<I, C, R, F>::writeCheckpointData(a_handle, a_lvl);
 
   // Write the point-particles.
   if (m_writeCheckpointParticles) {
-    for (int i = 0; i < m_physics->getNumPlasmaSpecies(); i++) {
+    for (int i = 0; i < (this->m_physics)->getNumItoSpecies(); i++) {
       const std::string identifierSigma = "ItoPlasmaGodunovStepper::conductivityParticles_" + std::to_string(i);
       const std::string identifierRho   = "ItoPlasmaGodunovStepper::spaceChargeParticles_" + std::to_string(i);
 
@@ -1168,19 +1199,20 @@ ItoPlasmaGodunovStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_l
 #endif
 
 #ifdef CH_USE_HDF5
+template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
+ItoPlasmaGodunovStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
 {
   CH_TIME("ItoPlasmaGodunovStepper::readCheckpointData");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::readCheckpointData" << endl;
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::readCheckpointData" << endl;
   }
 
-  ItoPlasmaStepper::readCheckpointData(a_handle, a_lvl);
+  ItoPlasmaStepper<I, C, R, F>::readCheckpointData(a_handle, a_lvl);
 
   // Write the point-particles.
   if (m_readCheckpointParticles) {
-    for (int i = 0; i < m_physics->getNumPlasmaSpecies(); i++) {
+    for (int i = 0; i < (this->m_physics)->getNumItoSpecies(); i++) {
       const std::string identifierSigma = "ItoPlasmaGodunovStepper::conductivityParticles_" + std::to_string(i);
       const std::string identifierRho   = "ItoPlasmaGodunovStepper::spaceChargeParticles_" + std::to_string(i);
 
@@ -1195,3 +1227,5 @@ ItoPlasmaGodunovStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lv
 #endif
 
 #include <CD_NamespaceFooter.H>
+
+#endif

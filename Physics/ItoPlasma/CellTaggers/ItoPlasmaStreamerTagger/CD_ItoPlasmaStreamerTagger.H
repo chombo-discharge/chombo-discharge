@@ -22,7 +22,8 @@ namespace Physics {
     /*!
       @brief Refinement class for morrow_stephens plasma model only
     */
-    class ItoPlasmaStreamerTagger : public ItoPlasmaFieldTagger
+    template <typename S>
+    class ItoPlasmaStreamerTagger : public ItoPlasmaFieldTagger<S>
     {
     public:
       /*!
@@ -34,7 +35,7 @@ namespace Physics {
 	@brief Constructor
       */
       ItoPlasmaStreamerTagger(const RefCountedPtr<ItoPlasmaPhysics>&      a_physics,
-                              const RefCountedPtr<ItoPlasmaStepper>&      a_timeStepper,
+                              const RefCountedPtr<S>&                     a_timeStepper,
                               const RefCountedPtr<AmrMesh>&               a_amr,
                               const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
@@ -121,5 +122,7 @@ namespace Physics {
 } // namespace Physics
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_ItoPlasmaStreamerTaggerImplem.H>
 
 #endif
