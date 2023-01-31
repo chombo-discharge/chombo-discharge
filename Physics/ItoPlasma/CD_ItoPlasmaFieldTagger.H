@@ -20,29 +20,30 @@ namespace Physics {
   namespace ItoPlasma {
 
     /*!
-      @brief Lightweight tagging class. Only tags cells based on electric field. 
-      @details This class fetches the point-wise electric field. The class is pure, so users must implement 
-      the actual tagging criterion themselves. 
+      @brief Lightweight tagging class. Only tags cells based on the electric field. 
+      @details This class fetches the point-wise electric field. The class is pure, so users must still implement 
+      the actual tagging criterion themselves. However, this class at the very least exposes the per-cell refinement/coarsening
+      in terms of the electric field only.
     */
     template <typename S>
     class ItoPlasmaFieldTagger : public ItoPlasmaTagger<S>
     {
     public:
       /*!
-	@brief Weak constructor, must subsequently call define
+	@brief Weak constructor. User MUST subsequently call define.
       */
-      ItoPlasmaFieldTagger();
+      ItoPlasmaFieldTagger() noexcept;
 
       /*!
 	@brief Destructor
       */
-      virtual ~ItoPlasmaFieldTagger();
+      virtual ~ItoPlasmaFieldTagger() noexcept;
 
       /*!
-	@brief Compute tracer fields
+	@brief Compute tagging fields. 
       */
       virtual void
-      computeTracers();
+      computeTagFields() const noexcept override;
 
       /*!
 	@brief Parse options
@@ -51,7 +52,7 @@ namespace Physics {
       parseOptions() = 0;
 
       /*!
-	@brief Parse options
+	@brief Parse run-time configurable options
       */
       virtual void
       parseRuntimeOptions() = 0;
@@ -60,71 +61,94 @@ namespace Physics {
       /*!
 	@brief Scratch storage
       */
-      EBAMRCellData m_scratch;
+      mutable EBAMRCellData m_scratch;
 
       /*!
-	@brief Storage for electric field
+	@brief Storage for the electric field E
       */
-      EBAMRCellData m_E;
+      mutable EBAMRCellData m_E;
 
       /*!
-	@brief Storage for electric field
+	@brief Storage for grad(|E|)
       */
-      EBAMRCellData m_grad_E;
+      mutable EBAMRCellData m_gradE;
 
       /*!
-	@brief Allocate memory
+	@brief Allocate memory for scratch, electric field, and gradient of electric field. 
       */
       virtual void
-      allocateStorage();
+      allocateStorage() const noexcept;
 
       /*!
 	@brief Deallocate memory
       */
       virtual void
-      deallocateStorage();
+      deallocateStorage() const noexcept;
 
       /*!
 	@brief Compute electric field
+	@param[out] a_E Electric field
+	@param[out] a_gradE Electric field gradient, i.e. grad(|E|)
       */
       virtual void
-      computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E);
+      computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_gradE) const noexcept;
 
       /*!
 	@brief Compute tracer field
+	@param[in] a_pos Physical coordinates
+	@param[in] a_time Current time
+	@param[in] a_dx Grid resolution
+	@param[in] a_E Electric field
+	@param[in] a_minE Lowest electric field in domain
+	@param[in] a_maxE Highest electric field in domain
+	@param[in] a_gradE Electric field gradient, i.e. grad(|E|)
+	@param[in] a_minGradE Lowest electric field gradient in domain
+	@param[in] a_maxGradE Highest electric field gradient in domain
       */
       virtual Vector<Real>
-      tracer(const RealVect a_pos,
-             const Real     a_time,
-             const Real     a_dx,
-             const RealVect a_E,
-             const Real     a_min_E,
-             const Real     a_max_E,
-             const RealVect a_grad_E,
-             const Real     a_min_grad_E,
-             const Real     a_max_grad_E) = 0;
+      computeTagFields(const RealVect a_pos,
+                       const Real     a_time,
+                       const Real     a_dx,
+                       const RealVect a_E,
+                       const Real     a_minE,
+                       const Real     a_maxE,
+                       const RealVect a_gradE,
+                       const Real     a_minGradE,
+                       const Real     a_maxGradE) const noexcept = 0;
 
       /*!
-	@brief Coarsen a cell based on a tracer field
+	@brief Determine if a particular cell should be coarsened or not. 
+	@param[in] a_pos Physical position. 
+	@param[in] a_time Current time
+	@param[in] a_dx Grid resolution
+	@param[in] a_lvl Grid level 
+	@param[in] a_tagFields Cell tagging fields
+	@param[in] a_gradTagFields Gradient of cell tagging fields
       */
       virtual bool
       coarsenCell(const RealVect         a_pos,
                   const Real             a_time,
                   const Real             a_dx,
                   const int              a_lvl,
-                  const Vector<Real>     a_tracer,
-                  const Vector<RealVect> a_grad_tracer) = 0;
+                  const Vector<Real>     a_tagFields,
+                  const Vector<RealVect> a_gradTagFields) const noexcept = 0;
 
       /*!
-	@brief Refine a cell based on a tracer field
+	@brief Determine if a particular cell should be refined or not. 
+	@param[in] a_pos Physical position. 
+	@param[in] a_time Current time
+	@param[in] a_dx Grid resolution
+	@param[in] a_lvl Grid level 
+	@param[in] a_tagFields Cell tagging fields
+	@param[in] a_gradTagFields Gradient of cell tagging fields
       */
       virtual bool
       refineCell(const RealVect         a_pos,
                  const Real             a_time,
                  const Real             a_dx,
                  const int              a_lvl,
-                 const Vector<Real>     a_tracer,
-                 const Vector<RealVect> a_grad_tracer) = 0;
+                 const Vector<Real>     a_tagFields,
+                 const Vector<RealVect> a_gradTagFields) const noexcept = 0;
     };
   } // namespace ItoPlasma
 } // namespace Physics

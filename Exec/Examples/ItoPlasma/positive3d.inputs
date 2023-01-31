@@ -274,6 +274,7 @@ ItoPlasmaAir3LFA.photoi_K2          = 1.5        # Converted to (mPa)^-1
 # ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS
 # ====================================================================================================
 ItoPlasmaStreamerTagger.verbosity         = -1           # Verbosity
+ItoPlasmaStreamerTagger.plot              = false        # Turn on/off plotting of input fields.
 ItoPlasmaStreamerTagger.num_tag_boxes     = 1            # Number of allowed tag boxes (0 = tags allowe everywhere)
 ItoPlasmaStreamerTagger.tag_box1_lo       = -1 -1 -1     # Only allow tags that fall between
 ItoPlasmaStreamerTagger.tag_box1_hi       =  1  1 2E-3   # these two corners

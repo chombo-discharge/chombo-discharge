@@ -22,48 +22,49 @@ namespace Physics {
   namespace ItoPlasma {
 
     /*!
-      @brief Class for tagging grid cells using the Ito-KMC-Poisson module. 
+      @brief Class for tagging grid cells using the Ito-KMC-Poisson module. Note that S is the time integrator
+      type that is used. 
     */
     template <typename S>
     class ItoPlasmaTagger : public CellTagger
     {
     public:
       /*!
-	@brief Weak constructor, must subsequently call define
+	@brief Weak constructor. User MUST subsequently call the define function. 
       */
       ItoPlasmaTagger();
 
       /*!
 	@brief Full constructor
+	@param[in] a_physics Physics implementation. 
+	@param[in] a_timeStepper Time integrator. 
+	@param[in] a_amr Reference to AmrMesh 
       */
-      ItoPlasmaTagger(const RefCountedPtr<ItoPlasmaPhysics>&      a_physics,
-                      const RefCountedPtr<S>&                     a_timeStepper,
-                      const RefCountedPtr<AmrMesh>&               a_amr,
-                      const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
+      ItoPlasmaTagger(const RefCountedPtr<ItoPlasmaPhysics>& a_physics,
+                      const RefCountedPtr<S>&                a_timeStepper,
+                      const RefCountedPtr<AmrMesh>&          a_amr) noexcept;
 
       /*!
-	@brief Destructor
+	@brief Destructor.
       */
-      virtual ~ItoPlasmaTagger();
+      virtual ~ItoPlasmaTagger() noexcept;
 
       /*!
 	@brief Define function
-	@param[in] a_physics     Plasma kinetics
-	@param[in] a_timeStepper Time stepper
-	@param[in] a_amr         AmrMesh instance
-	@param[in] a_computationalGeometry    Computational geometry
+	@param[in] a_physics Physics implementation. 
+	@param[in] a_timeStepper Time integrator. 
+	@param[in] a_amr Reference to AmrMesh 
       */
       virtual void
-      define(const RefCountedPtr<ItoPlasmaPhysics>&      a_physics,
-             const RefCountedPtr<S>&                     a_timeStepper,
-             const RefCountedPtr<AmrMesh>&               a_amr,
-             const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
+      define(const RefCountedPtr<ItoPlasmaPhysics>& a_physics,
+             const RefCountedPtr<S>&                a_timeStepper,
+             const RefCountedPtr<AmrMesh>&          a_amr) noexcept;
 
       /*!
-	@brief Compute tracer fields
+	@brief Compute tagging fields.
       */
       virtual void
-      computeTracers() = 0;
+      computeTagFields() const noexcept = 0;
 
       /*!
 	@brief Parse class options
@@ -72,60 +73,77 @@ namespace Physics {
       parseOptions() = 0;
 
       /*!
-	@brief Parse class options
+	@brief Parse run-time configurable class options
       */
       virtual void
       parseRuntimeOptions() = 0;
 
       /*!
-	@brief
+	@brief Get number of plot variables for plot files.
       */
       virtual int
-      getNumberOfPlotVariables();
+      getNumberOfPlotVariables() const noexcept override;
 
       /*!
-	@brief Regrid storage for tracer field
+	@brief Regrid this class. Note that there is no preRegrid method.
       */
       virtual void
-      regrid();
+      regrid() noexcept override;
 
       /*!
-	@brief Tag cells
+	@brief Tag cells for refinement and coarsening
+	@param[inout] a_tags Cell tags that become the new grids. 
       */
       virtual bool
-      tagCells(EBAMRTags& a_tags);
+      tagCells(EBAMRTags& a_tags) noexcept override;
 
       /*!
-	@brief Set phase
+	@brief Set the phase where we do the tagging.
+	@param[in] a_phase Phase
       */
       virtual void
-      setPhase(const phase::which_phase a_phase);
+      setPhase(const phase::which_phase a_phase) noexcept;
 
       /*!
-	@brief Tracer fields
+	@brief Get tag fields. This is data that live on the primal realm and specified input phase. 
       */
       virtual Vector<EBAMRCellData>&
-      getTracerFields();
+      getTagFields() noexcept;
 
       /*!
 	@brief Write plot data
+	@param[inout] a_output            Output data holder
+	@param[inout] a_plotVariableNames Plot variable names
+	@param[inout] a_icomp             Starting variable in a_output where we begin appending data.
       */
       virtual void
-      writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp);
+      writePlotData(EBAMRCellData&       a_output,
+                    Vector<std::string>& a_plotVariableNames,
+                    int&                 a_icomp) const noexcept override;
 
     protected:
       /*!
-	@brief Realm
+	@brief Defined or not
+      */
+      bool m_isDefined;
+
+      /*!
+	@brief Plot data or not
+      */
+      bool m_plotData;
+
+      /*!
+	@brief Realm where data is allocated.
       */
       std::string m_realm;
 
       /*!
-	@brief Phase
+	@brief Phase where data is allocated.
       */
       phase::which_phase m_phase;
 
       /*!
-	@brief Plasma kinetics. 
+	@brief Physics implementation. 
       */
       RefCountedPtr<ItoPlasmaPhysics> m_physics;
 
@@ -135,79 +153,85 @@ namespace Physics {
       RefCountedPtr<S> m_timeStepper;
 
       /*!
-	@brief AmrMesh. Needed for computing tracer stuff
+	@brief AmrMesh. Needed for allocating memory and things like that. 
       */
       RefCountedPtr<AmrMesh> m_amr;
 
       /*!
-	@brief Computational geometry. Needed for what exactly?
+	@brief Number of tagging fields. 
       */
-      RefCountedPtr<ComputationalGeometry> m_computationalGeometry;
+      int m_numTagFields;
 
       /*!
-	@brief Number of tracer fields
+	@brief Tagging fields. 
       */
-      int m_num_tracers;
+      mutable Vector<EBAMRCellData> m_tagFields;
 
       /*!
-	@brief Tracer fields
+	@brief Gradient of tagging fields
       */
-      Vector<EBAMRCellData> m_tracer;
+      mutable Vector<EBAMRCellData> m_gradTagFields;
 
       /*!
-	@brief Gradient of tracer fields
-      */
-      Vector<EBAMRCellData> m_grad_tracer;
-
-      /*!
-	@brief Per-box refinement tags
-      */
-      virtual void
-      refineCellsBox(DenseIntVectSet&          a_refined_tags,
-                     const Vector<EBCellFAB*>& a_tracers,
-                     const Vector<EBCellFAB*>& a_grad_tracers,
-                     const int                 a_lvl,
-                     const Box                 a_box,
-                     const EBISBox&            a_ebisbox,
-                     const Real                a_time,
-                     const Real                a_dx,
-                     const RealVect            a_origin);
-
-      /*!
-	@brief Per-box coarsen
+	@brief Per-box refinement tagging routine. 
+	@param[out] a_refinedCells Cells to be refined
+	@param[out] a_coarsenedCells Cells to be coarsened
+	@param[in] a_tagFields Tagging fields
+	@param[in] a_gradTagFields Gradient of tagging fields
+	@param[in] a_lvl Grid level
+	@param[in] a_dit Grid index
+	@param[in] a_box Cell-centered box
+	@param[in] a_ebisbox EBIS box
+	@param[in] a_time Current time
+	@param[in] a_dx Grid resolution
+	@param[in] a_probLo Lower-left corner of physical domain
       */
       virtual void
-      coarsenCellsBox(DenseIntVectSet&          a_refined_tags,
-                      const Vector<EBCellFAB*>& a_tracers,
-                      const Vector<EBCellFAB*>& a_grad_tracers,
-                      const int                 a_lvl,
-                      const Box                 a_box,
-                      const EBISBox&            a_ebisbox,
-                      const Real                a_time,
-                      const Real                a_dx,
-                      const RealVect            a_origin);
+      tagCellsBox(DenseIntVectSet&          a_refinedCells,
+                  DenseIntVectSet&          a_coarsenedCells,
+                  const Vector<EBCellFAB*>& a_tagFields,
+                  const Vector<EBCellFAB*>& a_gradTagFields,
+                  const int                 a_lvl,
+                  const DataIndex           a_dit,
+                  const Box                 a_box,
+                  const EBISBox&            a_ebisbox,
+                  const Real                a_time,
+                  const Real                a_dx,
+                  const RealVect            a_probLo) const noexcept;
 
       /*!
-	@brief Coarsen a cell based on a tracer field
+	@brief Determine if a particular cell should be coarsened or not. 
+	@param[in] a_pos Physical position. 
+	@param[in] a_time Current time
+	@param[in] a_dx Grid resolution
+	@param[in] a_lvl Grid level 
+	@param[in] a_tagFields Cell tagging fields
+	@param[in] a_gradTagFields Gradient of cell tagging fields
       */
       virtual bool
       coarsenCell(const RealVect         a_pos,
                   const Real             a_time,
                   const Real             a_dx,
                   const int              a_lvl,
-                  const Vector<Real>     a_tracer,
-                  const Vector<RealVect> a_grad_tracer) = 0;
+                  const Vector<Real>     a_tagFields,
+                  const Vector<RealVect> a_gradTagFields) const noexcept = 0;
 
       /*!
-	@brief Refine a cell based on a tracer field
+	@brief Determine if a particular cell should be refined or not. 
+	@param[in] a_pos Physical position. 
+	@param[in] a_time Current time
+	@param[in] a_dx Grid resolution
+	@param[in] a_lvl Grid level 
+	@param[in] a_tagFields Cell tagging fields
+	@param[in] a_gradTagFields Gradient of cell tagging fields
       */
       virtual bool
       refineCell(const RealVect         a_pos,
                  const Real             a_time,
                  const Real             a_dx,
                  const int              a_lvl,
-                 const Vector<Real>     a_tracer,
-                 const Vector<RealVect> a_grad_tracer) = 0;
+                 const Vector<Real>     a_tagFields,
+                 const Vector<RealVect> a_gradTagFields) const noexcept = 0;
     };
   } // namespace ItoPlasma
 } // namespace Physics
