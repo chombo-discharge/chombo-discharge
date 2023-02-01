@@ -118,6 +118,7 @@ ItoPlasmaStepper<I, C, R, F>::parseRuntimeOptions() noexcept
   this->parseParametersEB();
 
   m_ito->parseRuntimeOptions();
+  m_cdr->parseRuntimeOptions();
   m_fieldSolver->parseRuntimeOptions();
   m_rte->parseRuntimeOptions();
   m_sigmaSolver->parseRuntimeOptions();
@@ -399,7 +400,7 @@ ItoPlasmaStepper<I, C, R, F>::setupCdr() noexcept
   m_cdr->setAmr(m_amr);
   m_cdr->setPhase(m_plasmaPhase);
   m_cdr->setComputationalGeometry(m_computationalGeometry);
-  m_cdr->setRealm(m_particleRealm);
+  m_cdr->setRealm(m_fluidRealm);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -546,7 +547,14 @@ ItoPlasmaStepper<I, C, R, F>::initialData() noexcept
     pout() << m_name + "::initialData" << endl;
   }
 
+  CH_assert(!(m_cdr.isNull()));
+  CH_assert(!(m_ito.isNull()));
+  CH_assert(!(m_rte.isNull()));
+  CH_assert(!(m_sigmaSolver.isNull()));
+  CH_assert(!(m_fieldSolver.isNull()));
+
   m_ito->initialData();
+  m_cdr->initialData();
   m_rte->initialData();
   this->initialSigma();
 
@@ -706,6 +714,10 @@ ItoPlasmaStepper<I, C, R, F>::writeCheckpointData(HDF5Handle& a_handle, const in
     solverIt()->writeCheckpointLevel(a_handle, a_lvl);
   }
 
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    solverIt()->writeCheckpointLevel(a_handle, a_lvl);
+  }
+
   for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
     solverIt()->writeCheckpointLevel(a_handle, a_lvl);
   }
@@ -726,6 +738,10 @@ ItoPlasmaStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const int
   }
 
   for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    solverIt()->readCheckpointLevel(a_handle, a_lvl);
+  }
+
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     solverIt()->readCheckpointLevel(a_handle, a_lvl);
   }
 
@@ -1397,7 +1413,7 @@ ItoPlasmaStepper<I, C, R, F>::computeSpaceChargeDensity(MFAMRCellData&          
     const int                        Z       = species->getChargeNumber();
 
     if (Z != 0) {
-      DataOps::incr(rhoPhase, *a_cdrDensities[idx], 1.0 * Z);
+      //      DataOps::incr(rhoPhase, *a_cdrDensities[idx], 1.0 * Z);
     }
   }
 

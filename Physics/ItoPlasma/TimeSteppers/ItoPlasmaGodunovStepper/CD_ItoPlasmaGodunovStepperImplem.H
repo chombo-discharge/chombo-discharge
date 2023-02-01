@@ -358,6 +358,10 @@ ItoPlasmaGodunovStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFin
   (this->m_ito)->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_timer.stopEvent("Regrid ItoSolver");
 
+  m_timer.startEvent("Regrid CdrSolver");
+  (this->m_cdr)->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  m_timer.stopEvent("Regrid CdrSolver");  
+
   m_timer.startEvent("Regrid FieldSolver");
   (this->m_fieldSolver)->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_timer.stopEvent("Regrid FieldSolver");

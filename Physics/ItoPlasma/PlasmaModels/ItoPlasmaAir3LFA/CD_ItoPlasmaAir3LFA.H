@@ -31,6 +31,7 @@ namespace Physics {
       class Positive;
       class Negative;
       class PhotonZ;
+      class TestSpecies;
 
       /*!
 	@brief Full constructor. Initializes species and sets up reactions. 
@@ -336,6 +337,26 @@ namespace Physics {
 	@brief K2 factor
       */
       Real m_K2;
+    };
+
+    /*!
+      @brief Electron species
+    */
+    class ItoPlasmaAir3LFA::TestSpecies : public CdrSpecies
+    {
+    public:
+      /*!
+	@brief Constructor. Sets to mobile and diffusive
+      */
+      TestSpecies();
+
+      /*!
+	@brief Destructor. Does nothing
+      */
+      virtual ~TestSpecies();
+
+      Real
+      initialData(const RealVect a_pos, const Real a_time) const override;
     };
   } // namespace ItoPlasma
 } // namespace Physics

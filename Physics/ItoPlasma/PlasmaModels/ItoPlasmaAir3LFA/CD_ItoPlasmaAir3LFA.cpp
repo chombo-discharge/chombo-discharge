@@ -46,10 +46,12 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   // Set up species
   m_itoSpecies.resize(3);
   m_rtSpecies.resize(1);
+  m_cdrSpecies.resize(1);
 
   m_itoSpecies[0] = RefCountedPtr<ItoSpecies>(new Electron());
   m_itoSpecies[1] = RefCountedPtr<ItoSpecies>(new Positive());
   m_itoSpecies[2] = RefCountedPtr<ItoSpecies>(new Negative());
+  m_cdrSpecies[0] = RefCountedPtr<CdrSpecies>(new TestSpecies());
   m_rtSpecies[0]  = RefCountedPtr<RtSpecies>(new PhotonZ());
 
   List<ItoParticle>& electrons    = m_itoSpecies[0]->getInitialParticles();
@@ -429,6 +431,22 @@ ItoPlasmaAir3LFA::PhotonZ::getAbsorptionCoefficient(const RealVect a_pos) const
 
   // Return random absorption coefficient.
   return m_K1 * pow(m_K2 / m_K1, (f - m_f1) / (m_f2 - m_f1));
+}
+
+ItoPlasmaAir3LFA::TestSpecies::TestSpecies()
+{
+  CH_TIME("ItoPlasmaAir3LFA::TestSpecies::TestSpecies");
+
+  m_isMobile     = false;
+  m_isDiffusive  = false;
+  m_name         = "TestSpecies";
+  m_chargeNumber = -1;
+}
+
+ItoPlasmaAir3LFA::TestSpecies::~TestSpecies() { CH_TIME("ItoPlasmaAir3LFA::TestSpecies::TestSpecies"); }
+
+Real ItoPlasmaAir3LFA::TestSpecies::initialData(const RealVect a_pos, const Real a_time) const {
+  return 1.0;
 }
 
 #include <CD_NamespaceFooter.H>
