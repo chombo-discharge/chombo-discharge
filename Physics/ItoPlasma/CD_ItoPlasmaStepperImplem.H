@@ -766,6 +766,14 @@ ItoPlasmaStepper<I, C, R, F>::writePlotData(EBAMRCellData&       a_output,
     solver->writePlotData(a_output, a_icomp);
   }
 
+  // Cdr solvers output their data
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<CdrSolver>& solver = solverIt();
+
+    a_plotVariableNames.append(solver->getPlotVariableNames());
+    solver->writePlotData(a_output, a_icomp);
+  }
+
   // RTE solvers copy their output data
   for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<McPhoto>& solver = solverIt();
@@ -1227,40 +1235,45 @@ ItoPlasmaStepper<I, C, R, F>::getNumberOfPlotVariables() const noexcept
     pout() << m_name + "::getNumberOfPlotVariables" << endl;
   }
 
-  int ncomp = 0;
+  int numComp = 0;
 
   // Ito solver variables.
   for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    ncomp += solverIt()->getNumberOfPlotVariables();
+    numComp += solverIt()->getNumberOfPlotVariables();
+  }
+
+  // Cdr solver variables
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    numComp += solverIt()->getNumberOfPlotVariables();
   }
 
   // RTE solver variables.
   for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-    ncomp += solverIt()->getNumberOfPlotVariables();
+    numComp += solverIt()->getNumberOfPlotVariables();
   }
 
   // Field solver variables.
-  ncomp += m_fieldSolver->getNumberOfPlotVariables();
+  numComp += m_fieldSolver->getNumberOfPlotVariables();
 
   // Surface charge solver variables.
-  ncomp += m_sigmaSolver->getNumberOfPlotVariables();
+  numComp += m_sigmaSolver->getNumberOfPlotVariables();
 
   // Conductivity
   if (m_plotConductivity) {
-    ncomp += 1;
+    numComp += 1;
   }
 
   // Current density.
   if (m_plotCurrentDensity) {
-    ncomp += SpaceDim;
+    numComp += SpaceDim;
   }
 
   // Number of particles per patch
   if (m_plotParticlesPerPatch) {
-    ncomp += 1;
+    numComp += 1;
   }
 
-  return ncomp;
+  return numComp;
 }
 
 template <typename I, typename C, typename R, typename F>
