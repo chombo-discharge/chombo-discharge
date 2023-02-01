@@ -52,7 +52,7 @@ main(int argc, char* argv[])
   auto geocoarsen  = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
   auto physics     = RefCountedPtr<ItoPlasmaPhysics>(new ItoPlasmaAir3LFA());
   auto timestepper = RefCountedPtr<ItoPlasmaStepper<>>(new ItoPlasmaGodunovStepper<>(physics));
-  auto tagger      = RefCountedPtr<CellTagger>(new ItoPlasmaStreamerTagger(physics, timestepper, amr));
+  auto tagger      = RefCountedPtr<CellTagger>(new ItoPlasmaStreamerTagger<ItoPlasmaStepper<>>(physics, timestepper, amr));
 
   // Set potential
   timestepper->setVoltage(potential_curve);

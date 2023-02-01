@@ -145,7 +145,7 @@ Multi-physics applications
 
    Applications/CdrPlasmaModel
    Applications/StreamerInceptionModel
-   Applications/ItoPlasmaModel   
+   Applications/ItoKMC
 
 Single-solver applications
 **************************

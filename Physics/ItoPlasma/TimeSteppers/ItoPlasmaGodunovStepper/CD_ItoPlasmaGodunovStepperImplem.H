@@ -52,7 +52,7 @@ ItoPlasmaGodunovStepper<I, C, R, F>::~ItoPlasmaGodunovStepper()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper<I, C, R, F>::allocate()
+ItoPlasmaGodunovStepper<I, C, R, F>::allocate() noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::allocate");
   if (this->m_verbosity > 5) {
@@ -97,7 +97,7 @@ ItoPlasmaGodunovStepper<I, C, R, F>::barrier() const noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper<I, C, R, F>::parseOptions()
+ItoPlasmaGodunovStepper<I, C, R, F>::parseOptions() noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::parseOptions");
   if (this->m_verbosity > 5) {
@@ -112,7 +112,7 @@ ItoPlasmaGodunovStepper<I, C, R, F>::parseOptions()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper<I, C, R, F>::parseRuntimeOptions()
+ItoPlasmaGodunovStepper<I, C, R, F>::parseRuntimeOptions() noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::parseRuntimeOptions");
   if (this->m_verbosity > 5) {
@@ -123,11 +123,6 @@ ItoPlasmaGodunovStepper<I, C, R, F>::parseRuntimeOptions()
 
   this->parseAlgorithm();
   this->parseCheckpointParticles();
-
-  this->m_ito->parseRuntimeOptions();
-  this->m_fieldSolver->parseRuntimeOptions();
-  this->m_rte->parseRuntimeOptions();
-  this->m_sigmaSolver->parseRuntimeOptions();
 }
 
 template <typename I, typename C, typename R, typename F>

@@ -55,19 +55,19 @@ namespace Physics {
 	@brief Allocate storage required for advancing the equations
       */
       virtual void
-      allocate() override;
+      allocate() noexcept override;
 
       /*!
 	@brief Parse options
       */
       virtual void
-      parseOptions() override;
+      parseOptions() noexcept override;
 
       /*!
 	@brief Parse run-time options
       */
       virtual void
-      parseRuntimeOptions() override;
+      parseRuntimeOptions() noexcept override;
 
       /*!
 	@brief Perform pre-regrid operations.

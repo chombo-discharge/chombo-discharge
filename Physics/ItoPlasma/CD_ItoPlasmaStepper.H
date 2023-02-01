@@ -59,51 +59,50 @@ namespace Physics {
     class ItoPlasmaStepper : public TimeStepper
     {
     public:
+      static_assert(std::is_base_of<ItoSolver, I>::value, "I must derive from ItoSolver");
+      static_assert(std::is_base_of<CdrSolver, C>::value, "C must derive from CdrSolver");
+      static_assert(std::is_base_of<McPhoto, R>::value, "R must derive from McPhoto");
+      static_assert(std::is_base_of<FieldSolver, FieldSolverMultigrid>::value, "F must derive from FieldSolver");
+
       /*!
 	@brief Default constructor. Sets default options. 
       */
-      ItoPlasmaStepper();
+      ItoPlasmaStepper() noexcept;
 
       /*!
 	@brief Full constructor. Calls the other constructor
 	@param[in] a_physics Implementation of the Ito plasma physics model.
       */
-      ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics);
+      ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics) noexcept;
 
       /*!
 	@brief Destructor
       */
-      virtual ~ItoPlasmaStepper();
+      virtual ~ItoPlasmaStepper() noexcept;
 
       /*!
 	@brief Parse options
       */
       virtual void
-      parseOptions();
+      parseOptions() noexcept;
 
       /*!
 	@brief Parse runtime configurable options
       */
       virtual void
-      parseRuntimeOptions() override;
+      parseRuntimeOptions() noexcept override;
 
       /*!
 	@brief Allocate storage for solvers.
       */
       virtual void
-      allocate() override;
-
-      /*!
-	@brief Allocate "internal" storage.
-      */
-      virtual void
-      allocateInternals();
+      allocate() noexcept override;
 
       /*!
 	@brief Set up solvers.
       */
       virtual void
-      setupSolvers() override;
+      setupSolvers() noexcept override;
 
       /*!
 	@brief Fill solvers with initial data
@@ -652,34 +651,40 @@ namespace Physics {
       mutable EBAMRCellData m_particleScratchD;
 
       /*!
+	@brief Allocate "internal" storage.
+      */
+      virtual void
+      allocateInternals();
+
+      /*!
 	@brief Set up the Ito particle solvers.
       */
       virtual void
-      setupIto();
+      setupIto() noexcept;
 
       /*!
 	@brief Set up the CDR solvers.
       */
       virtual void
-      setupCdr();
-
-      /*!
-	@brief Set up the electrostatic field solver
-      */
-      virtual void
-      setupPoisson();
+      setupCdr() noexcept;
 
       /*!
 	@brief Set up the radiative transfer solver
       */
       virtual void
-      setupRadiativeTransfer();
+      setupRadiativeTransfer() noexcept;
+
+      /*!
+	@brief Set up the electrostatic field solver
+      */
+      virtual void
+      setupPoisson() noexcept;
 
       /*!
 	@brief Set up the surface charge solver
       */
       virtual void
-      setupSigma();
+      setupSigma() noexcept;
 
       /*!
 	@brief Intersect a subset of the particles with the domain and embedded boundary. 
@@ -1381,10 +1386,10 @@ namespace Physics {
       parseVerbosity() noexcept;
 
       /*!
-	@brief Parse abort on failure
+	@brief Parse exit on failure.
       */
       virtual void
-      parseAbort() noexcept;
+      parseExitOnFailure() noexcept;
 
       /*!
 	@brief Parse the desired number of particles per cell. 
@@ -1413,7 +1418,7 @@ namespace Physics {
       parseTimeStepRestrictions() noexcept;
 
       /*!
-	@brief Parse things related to the EB
+	@brief Parse parameters related to how we treat particle-EB interaction.
       */
       virtual void
       parseParametersEB() noexcept;

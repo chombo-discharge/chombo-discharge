@@ -32,7 +32,7 @@
 using namespace Physics::ItoPlasma;
 
 template <typename I, typename C, typename R, typename F>
-ItoPlasmaStepper<I, C, R, F>::ItoPlasmaStepper()
+ItoPlasmaStepper<I, C, R, F>::ItoPlasmaStepper() noexcept
 {
   CH_TIME("ItoPlasmaStepper::ItoPlasmaStepper");
 
@@ -57,7 +57,7 @@ ItoPlasmaStepper<I, C, R, F>::ItoPlasmaStepper()
 }
 
 template <typename I, typename C, typename R, typename F>
-ItoPlasmaStepper<I, C, R, F>::ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics) : ItoPlasmaStepper()
+ItoPlasmaStepper<I, C, R, F>::ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics) noexcept : ItoPlasmaStepper<I, C, R, F>()
 {
   CH_TIME("ItoPlasmaStepper::ItoPlasmaStepper(RefCountrPtr<ItoPlasmaPhysics>)");
 
@@ -65,14 +65,14 @@ ItoPlasmaStepper<I, C, R, F>::ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& 
 }
 
 template <typename I, typename C, typename R, typename F>
-ItoPlasmaStepper<I, C, R, F>::~ItoPlasmaStepper()
+ItoPlasmaStepper<I, C, R, F>::~ItoPlasmaStepper() noexcept
 {
   CH_TIME("ItoPlasmaStepper::~ItoPlasmaStepper");
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::parseOptions()
+ItoPlasmaStepper<I, C, R, F>::parseOptions() noexcept
 {
   CH_TIME("ItoPlasmaStepper::parseOptions");
   if (m_verbosity > 5) {
@@ -80,7 +80,7 @@ ItoPlasmaStepper<I, C, R, F>::parseOptions()
   }
 
   this->parseVerbosity();
-  this->parseAbort();
+  this->parseExitOnFailure();
   this->parsePlotVariables();
   this->parseSuperParticles();
   this->parseDualGrid();
@@ -91,7 +91,7 @@ ItoPlasmaStepper<I, C, R, F>::parseOptions()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::parseRuntimeOptions()
+ItoPlasmaStepper<I, C, R, F>::parseRuntimeOptions() noexcept
 {
   CH_TIME("ItoPlasmaStepper::parseRuntimeOptions");
   if (m_verbosity > 5) {
@@ -99,7 +99,7 @@ ItoPlasmaStepper<I, C, R, F>::parseRuntimeOptions()
   }
 
   this->parseVerbosity();
-  this->parseAbort();
+  this->parseExitOnFailure();
   this->parsePlotVariables();
   this->parseSuperParticles();
   this->parseLoadBalance();
@@ -131,11 +131,11 @@ ItoPlasmaStepper<I, C, R, F>::parseVerbosity() noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::parseAbort() noexcept
+ItoPlasmaStepper<I, C, R, F>::parseExitOnFailure() noexcept
 {
-  CH_TIME("ItoPlasmaStepper::parseAbort");
+  CH_TIME("ItoPlasmaStepper::parseExitOnFailure");
   if (m_verbosity > 5) {
-    pout() << m_name + "::parseAbort" << endl;
+    pout() << m_name + "::parseExitOnFailure" << endl;
   }
 
   ParmParse pp(m_name.c_str());
@@ -202,9 +202,7 @@ ItoPlasmaStepper<I, C, R, F>::parseSuperParticles() noexcept
     }
   }
 
-  if (m_mergeInterval <= 1) {
-    m_mergeInterval = 1;
-  }
+  m_mergeInterval = std::max(m_mergeInterval, 1);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -311,15 +309,15 @@ ItoPlasmaStepper<I, C, R, F>::parseTimeStepRestrictions() noexcept
   }
 
   if (m_advectionCFL <= 0.0) {
-    MayDay::Error("ItoPlasmaStepper::parseTimeStepRestrictions() - must have advection_cfl >= 0.0");
+    MayDay::Error("ItoPlasmaStepper::parseTimeStepRestrictions() - must have advection_cfl > 0.0");
   }
 
   if (m_diffusionCFL <= 0.0) {
-    MayDay::Error("ItoPlasmaStepper::parseTimeStepRestrictions() - must have diffusion_cfl >= 0.0");
+    MayDay::Error("ItoPlasmaStepper::parseTimeStepRestrictions() - must have diffusion_cfl > 0.0");
   }
 
   if (m_advectionDiffusionCFL <= 0.0) {
-    MayDay::Error("ItoPlasmaStepper::parseTimeStepRestrictions() - must have advection_diffusion_cfl >= 0.0");
+    MayDay::Error("ItoPlasmaStepper::parseTimeStepRestrictions() - must have advection_diffusion_cfl > 0.0");
   }
 }
 
@@ -341,30 +339,31 @@ ItoPlasmaStepper<I, C, R, F>::parseParametersEB() noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::setupSolvers()
+ItoPlasmaStepper<I, C, R, F>::setupSolvers() noexcept
 {
   CH_TIME("ItoPlasmaStepper::setupSolver");
   if (m_verbosity > 5) {
     pout() << m_name + "::setupSolvers" << endl;
   }
 
-  // Parse class options
+#if 0 // This was in here but I'm just not sure it's necessary???
   this->parseOptions();
+#endif
 
-  // Set up solvers
   this->setupIto();
   this->setupCdr();
   this->setupPoisson();
   this->setupRadiativeTransfer();
   this->setupSigma();
 
-  // Allocate internal stuff
+#if 0  // This was also in here - but why?
   this->allocateInternals();
+#endif
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::setupIto()
+ItoPlasmaStepper<I, C, R, F>::setupIto() noexcept
 {
   CH_TIME("ItoPlasmaStepper::setupIto");
   if (m_verbosity > 5) {
@@ -383,7 +382,7 @@ ItoPlasmaStepper<I, C, R, F>::setupIto()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::setupCdr()
+ItoPlasmaStepper<I, C, R, F>::setupCdr() noexcept
 {
   CH_TIME("ItoPlasmaStepper::setupCdr");
   if (m_verbosity > 5) {
@@ -402,7 +401,7 @@ ItoPlasmaStepper<I, C, R, F>::setupCdr()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::setupRadiativeTransfer()
+ItoPlasmaStepper<I, C, R, F>::setupRadiativeTransfer() noexcept
 {
   CH_TIME("ItoPlasmaStepper::setupRadiativeTransfer");
   if (m_verbosity > 5) {
@@ -422,7 +421,7 @@ ItoPlasmaStepper<I, C, R, F>::setupRadiativeTransfer()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::setupPoisson()
+ItoPlasmaStepper<I, C, R, F>::setupPoisson() noexcept
 {
   CH_TIME("ItoPlasmaStepper::setupPoisson");
   if (m_verbosity > 5) {
@@ -439,7 +438,7 @@ ItoPlasmaStepper<I, C, R, F>::setupPoisson()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::setupSigma()
+ItoPlasmaStepper<I, C, R, F>::setupSigma() noexcept
 {
   CH_TIME("ItoPlasmaStepper::setupSigma");
   if (m_verbosity > 5) {
@@ -456,7 +455,7 @@ ItoPlasmaStepper<I, C, R, F>::setupSigma()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::allocate()
+ItoPlasmaStepper<I, C, R, F>::allocate() noexcept
 {
   CH_TIME("ItoPlasmaStepper::allocate");
   if (m_verbosity > 5) {
