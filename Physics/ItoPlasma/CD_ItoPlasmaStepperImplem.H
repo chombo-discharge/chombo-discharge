@@ -64,14 +64,18 @@ ItoPlasmaStepper<I, C, R, F>::ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& 
 
   m_physics = a_physics;
 
-  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+  const int numItoSpecies    = m_physics->getNumItoSpecies();
+  const int numCdrSpecies    = m_physics->getNumCdrSpecies();
   const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
-  if (numPhotonSpecies <= 0) {
-    MayDay::Warning("ItoPlasmaStepper::ItoPlasmaStepper -- how to handle cases with no photon species?");
+  if (numItoSpecies == 0) {
+    MayDay::Warning("ItoPlasmaStepper::ItoPlasmaStepper -- how to handle cases with no Ito species?");
   }
-  if (numPlasmaSpecies <= 0) {
-    MayDay::Warning("ItoPlasmaStepper::ItoPlasmastepper -- how to handle cases with no plasma species?");
+  if (numCdrSpecies == 0) {
+    MayDay::Warning("ItoPlasmaStepper::ItoPlasmaStepper -- how to handle cases with no Cdr species?");
+  }
+  if (numPhotonSpecies <= 0) {
+    MayDay::Warning("ItoPlasmaStepper::ItoPlasmastepper -- how to handle cases with no Photon species?");
   }
 }
 
