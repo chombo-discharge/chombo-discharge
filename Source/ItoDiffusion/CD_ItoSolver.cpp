@@ -866,11 +866,11 @@ ItoSolver::setSpecies(const RefCountedPtr<ItoSpecies>& a_species)
 }
 
 void
-ItoSolver::allocateInternals()
+ItoSolver::allocate()
 {
-  CH_TIME("ItoSolver::allocateInternals");
+  CH_TIME("ItoSolver::allocate");
   if (m_verbosity > 5) {
-    pout() << m_name + "::allocateInternals" << endl;
+    pout() << m_name + "::allocate" << endl;
   }
 
   CH_assert(!m_species.isNull());

@@ -439,11 +439,11 @@ McPhoto::clear(AMRParticles<Photon>& a_photons)
 }
 
 void
-McPhoto::allocateInternals()
+McPhoto::allocate()
 {
-  CH_TIME("McPhoto::allocateInternals");
+  CH_TIME("McPhoto::allocate");
   if (m_verbosity > 5) {
-    pout() << m_name + "::allocateInternals" << endl;
+    pout() << m_name + "::allocate" << endl;
   }
 
   // Allocate mesh data
@@ -477,11 +477,11 @@ McPhoto::preRegrid(const int a_lmin, const int a_oldFinestLevel)
 }
 
 void
-McPhoto::deallocateInternals()
+McPhoto::deallocate()
 {
-  CH_TIME("McPhoto::deallocateInternals");
+  CH_TIME("McPhoto::deallocate");
   if (m_verbosity > 5) {
-    pout() << m_name + "::deallocateInternals" << endl;
+    pout() << m_name + "::deallocate" << endl;
   }
 }
 

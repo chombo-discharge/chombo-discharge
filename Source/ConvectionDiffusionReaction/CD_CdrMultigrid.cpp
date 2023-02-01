@@ -47,14 +47,14 @@ CdrMultigrid::registerOperators()
 }
 
 void
-CdrMultigrid::allocateInternals()
+CdrMultigrid::allocate()
 {
-  CH_TIME("CdrMultigrid::allocateInternals()");
+  CH_TIME("CdrMultigrid::allocate()");
   if (m_verbosity > 5) {
-    pout() << m_name + "::allocateInternals()" << endl;
+    pout() << m_name + "::allocate()" << endl;
   }
 
-  CdrSolver::allocateInternals();
+  CdrSolver::allocate();
 }
 
 void

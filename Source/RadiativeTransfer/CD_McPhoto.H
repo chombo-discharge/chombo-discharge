@@ -208,7 +208,7 @@ public:
     @brief Allocate internal storage
   */
   virtual void
-  allocateInternals() override;
+  allocate() override;
 
   /*!
     @brief preRegrid operations
@@ -222,7 +222,7 @@ public:
     @brief Deallocate internal storage
   */
   virtual void
-  deallocateInternals() override;
+  deallocate() override;
 
   /*!
     @brief Regrid function for this class

@@ -251,7 +251,7 @@ public:
     @note This deallocates a bunch of storage which is not needed (during regrids). It can be used to trim memory during Berger-Rigoutsous regrids (which EAT memory). 
   */
   virtual void
-  deallocateInternals();
+  deallocate();
 
   /*!
     @brief Register operators for AMR operations
@@ -266,6 +266,18 @@ public:
   */
   virtual void
   setRealm(const std::string a_realm);
+
+  /*!
+    @brief Get the CDR species
+  */
+  virtual
+  RefCountedPtr<CdrSpecies>& getSpecies() noexcept;
+
+  /*!
+    @brief Get the CDR species
+  */
+  virtual
+  const RefCountedPtr<CdrSpecies>& getSpecies() const noexcept;  
 
   /*!
     @brief Set species
@@ -412,7 +424,7 @@ public:
     @note This allocates a bunch of storage -- if the solver is not diffusive or mobile then we do our best to trim memory. 
   */
   virtual void
-  allocateInternals();
+  allocate();
 
   /*!
     @brief Write plot file

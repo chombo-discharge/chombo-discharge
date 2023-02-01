@@ -125,7 +125,7 @@ public:
     @note Storage for diffusion and advection fields are only allocate if the species is diffusive/mobile. 
   */
   virtual void
-  allocateInternals();
+  allocate();
 
   /*!
     @brief Clear a particle container -- this will delete all the particles in the input container. 

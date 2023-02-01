@@ -102,13 +102,13 @@ public:
     @brief Allocate internal storage for solvers
   */
   virtual void
-  allocateInternals();
+  allocate();
 
   /*!
     @brief Deallocate solver internals
   */
   virtual void
-  deallocateInternals();
+  deallocate();
 
   /*!
     @brief Call preRegrid(...) method for all the CdrSolvers

@@ -63,6 +63,16 @@ ItoPlasmaStepper<I, C, R, F>::ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& 
   CH_TIME("ItoPlasmaStepper::ItoPlasmaStepper(RefCountrPtr<ItoPlasmaPhysics>)");
 
   m_physics = a_physics;
+
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
+
+  if (numPhotonSpecies <= 0) {
+    MayDay::Warning("ItoPlasmaStepper::ItoPlasmaStepper -- how to handle cases with no photon species?");
+  }
+  if (numPlasmaSpecies <= 0) {
+    MayDay::Warning("ItoPlasmaStepper::ItoPlasmastepper -- how to handle cases with no plasma species?");
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -346,20 +356,12 @@ ItoPlasmaStepper<I, C, R, F>::setupSolvers() noexcept
   if (m_verbosity > 5) {
     pout() << m_name + "::setupSolvers" << endl;
   }
-
-#if 0 // This was in here but I'm just not sure it's necessary???
-  this->parseOptions();
-#endif
-
+  
   this->setupIto();
   this->setupCdr();
   this->setupPoisson();
   this->setupRadiativeTransfer();
   this->setupSigma();
-
-#if 0 // This was also in here - but why?
-  this->allocateInternals();
-#endif
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -463,12 +465,9 @@ ItoPlasmaStepper<I, C, R, F>::allocate() noexcept
     pout() << m_name + "::allocate" << endl;
   }
 
-  // TLDR: The difference between 'allocate' and 'allocateInternals' is that 'allocate' is used by Driver when setting up the simulation, while
-  //       'allocateInternals' is used by this class also during regrids.
-
-  // Solver allocation.
-  m_ito->allocateInternals();
-  m_rte->allocateInternals();
+  m_ito->allocate();
+  m_cdr->allocate();
+  m_rte->allocate();
   m_fieldSolver->allocate();
   m_sigmaSolver->allocate();
 
@@ -477,22 +476,17 @@ ItoPlasmaStepper<I, C, R, F>::allocate() noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::allocateInternals()
+ItoPlasmaStepper<I, C, R, F>::allocateInternals() noexcept
 {
   CH_TIME("ItoPlasmaStepper::allocateInternals");
   if (m_verbosity > 5) {
     pout() << m_name + "::allocateInternals" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numItoSpecies    = m_physics->getNumItoSpecies();
+  const int numCdrSpecies    = m_physics->getNumCdrSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
   const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
-
-  if (numPhotonSpecies <= 0) {
-    MayDay::Warning("ItoPlasmaStepper::allocate -- how to handle case with no photon species?");
-  }
-  if (numPlasmaSpecies <= 0) {
-    MayDay::Warning("ItoPlasmaStepper::allocate -- how to handle case with no plasma species?");
-  }
 
   // Scratch data.
   m_amr->allocate(m_fluidScratch1, m_fluidRealm, m_plasmaPhase, 1);
@@ -507,12 +501,12 @@ ItoPlasmaStepper<I, C, R, F>::allocateInternals()
     m_amr->allocate(m_energySources[i], m_particleRealm, m_plasmaPhase, 1);
   }
 
-  // Conductivity things. Defined on the fluid realm.
+  // Storage for conductiviies on cell, cell faces, and EB faces.
   m_amr->allocate(m_conductivityCell, m_fluidRealm, m_plasmaPhase, 1);
   m_amr->allocate(m_conductivityFace, m_fluidRealm, m_plasmaPhase, 1);
   m_amr->allocate(m_conductivityEB, m_fluidRealm, m_plasmaPhase, 1);
 
-  // Electric field data.
+  // Electric field data on both realms.
   m_amr->allocate(m_electricFieldParticle, m_particleRealm, m_plasmaPhase, SpaceDim);
   m_amr->allocate(m_electricFieldFluid, m_fluidRealm, m_plasmaPhase, SpaceDim);
 
@@ -535,7 +529,7 @@ ItoPlasmaStepper<I, C, R, F>::allocateInternals()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::postInitialize()
+ItoPlasmaStepper<I, C, R, F>::postInitialize() noexcept
 {
   CH_TIME("ItoPlasmaStepper::postInitialize");
   if (m_verbosity > 5) {
@@ -545,14 +539,13 @@ ItoPlasmaStepper<I, C, R, F>::postInitialize()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::initialData()
+ItoPlasmaStepper<I, C, R, F>::initialData() noexcept
 {
   CH_TIME("ItoPlasmaStepper::initialData");
   if (m_verbosity > 5) {
     pout() << m_name + "::initialData" << endl;
   }
 
-  m_fieldSolver->setPermittivities();
   m_ito->initialData();
   m_rte->initialData();
   this->initialSigma();
@@ -563,6 +556,7 @@ ItoPlasmaStepper<I, C, R, F>::initialData()
   m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
 
   // Solve Poisson equation and compute the E-field
+  m_fieldSolver->setPermittivities();
   this->solvePoisson();
 
   // Fill solvers with velocities and diffusion coefficients
@@ -572,7 +566,7 @@ ItoPlasmaStepper<I, C, R, F>::initialData()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::initialSigma()
+ItoPlasmaStepper<I, C, R, F>::initialSigma() noexcept
 {
   CH_TIME("ItoPlasmaStepper::initialSigma");
   if (m_verbosity > 5) {
@@ -615,7 +609,7 @@ ItoPlasmaStepper<I, C, R, F>::initialSigma()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::postCheckpointSetup()
+ItoPlasmaStepper<I, C, R, F>::postCheckpointSetup() noexcept
 {
   CH_TIME("ItoPlasmaStepper::postCheckpointSetup");
   if (m_verbosity > 5) {
@@ -637,7 +631,7 @@ ItoPlasmaStepper<I, C, R, F>::postCheckpointSetup()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::postCheckpointPoisson()
+ItoPlasmaStepper<I, C, R, F>::postCheckpointPoisson() noexcept
 {
   CH_TIME("ItoPlasmaStepper::postCheckpointPoisson");
   if (m_verbosity > 5) {
@@ -677,7 +671,7 @@ ItoPlasmaStepper<I, C, R, F>::postCheckpointPoisson()
 #ifdef CH_USE_HDF5
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::writeCheckpointHeader(HDF5HeaderData& a_header) const
+ItoPlasmaStepper<I, C, R, F>::writeCheckpointHeader(HDF5HeaderData& a_header) const noexcept
 {
   CH_TIME("ItoPlasmaStepper::writeCheckpointHeader");
   if (m_verbosity > 5) {
@@ -689,7 +683,7 @@ ItoPlasmaStepper<I, C, R, F>::writeCheckpointHeader(HDF5HeaderData& a_header) co
 #ifdef CH_USE_HDF5
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header)
+ItoPlasmaStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header) noexcept
 {
   CH_TIME("ItoPlasmaStepper::readCheckpointHeader");
   if (m_verbosity > 5) {
@@ -701,7 +695,7 @@ ItoPlasmaStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header)
 #ifdef CH_USE_HDF5
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const
+ItoPlasmaStepper<I, C, R, F>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const noexcept
 {
   CH_TIME("ItoPlasmaStepper::writeCheckpointData");
   if (m_verbosity > 5) {
@@ -724,7 +718,7 @@ ItoPlasmaStepper<I, C, R, F>::writeCheckpointData(HDF5Handle& a_handle, const in
 #ifdef CH_USE_HDF5
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
+ItoPlasmaStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl) noexcept
 {
   CH_TIME("ItoPlasmaStepper::readCheckpointData");
   if (m_verbosity > 5) {
@@ -748,7 +742,7 @@ template <typename I, typename C, typename R, typename F>
 void
 ItoPlasmaStepper<I, C, R, F>::writePlotData(EBAMRCellData&       a_output,
                                             Vector<std::string>& a_plotVariableNames,
-                                            int&                 a_icomp) const
+                                            int&                 a_icomp) const noexcept
 {
   CH_TIME("ItoPlasmaStepper::writePlotData");
   if (m_verbosity > 5) {
@@ -804,7 +798,7 @@ ItoPlasmaStepper<I, C, R, F>::writePlotData(EBAMRCellData&       a_output,
 
   // Write the number of particles per patch
   if (m_plotParticlesPerPatch) {
-    this->writeNumParticlesPerPatch(a_output, a_icomp);
+    this->writeNumberOfParticlesPerPatch(a_output, a_icomp);
     a_plotVariableNames.push_back("Particles per patch");
     a_icomp++;
   }
@@ -812,11 +806,11 @@ ItoPlasmaStepper<I, C, R, F>::writePlotData(EBAMRCellData&       a_output,
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::writeNumParticlesPerPatch(EBAMRCellData& a_output, int& a_icomp) const
+ItoPlasmaStepper<I, C, R, F>::writeNumberOfParticlesPerPatch(EBAMRCellData& a_output, int& a_icomp) const noexcept
 {
-  CH_TIME("ItoPlasmaStepper::writeNumParticlesPerPatch");
+  CH_TIME("ItoPlasmaStepper::writeNumberOfParticlesPerPatch");
   if (m_verbosity > 5) {
-    pout() << m_name + "::writeNumParticlesPerPatch" << endl;
+    pout() << m_name + "::writeNumberOfParticlesPerPatch" << endl;
   }
 
   DataOps::setValue(m_particleScratch1, 0.0);
@@ -838,7 +832,7 @@ ItoPlasmaStepper<I, C, R, F>::writeNumParticlesPerPatch(EBAMRCellData& a_output,
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt)
+ItoPlasmaStepper<I, C, R, F>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaStepper::synchronizeSolverTimes");
   if (m_verbosity > 5) {
@@ -857,7 +851,7 @@ ItoPlasmaStepper<I, C, R, F>::synchronizeSolverTimes(const int a_step, const Rea
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::printStepReport()
+ItoPlasmaStepper<I, C, R, F>::printStepReport() noexcept
 {
   CH_TIME("ItoPlasmaStepper::printStepReport");
   if (m_verbosity > 5) {
@@ -875,7 +869,6 @@ ItoPlasmaStepper<I, C, R, F>::printStepReport()
   const unsigned long long localParticlesSource  = m_ito->getNumParticles(ItoSolver::WhichContainer::Source, true);
   const unsigned long long globalParticlesSource = m_ito->getNumParticles(ItoSolver::WhichContainer::Source, false);
 
-  // Compute some global particle statistics
   Real avgParticles = 0.0;
   Real stdDev       = 0.0;
 
@@ -895,7 +888,6 @@ ItoPlasmaStepper<I, C, R, F>::printStepReport()
 
   this->getMaxMinItoDensity(maxDensity, minDensity, maxSolver, minSolver);
 
-  // How was the time step restricted
   std::string str;
   switch (m_timeCode) {
   case TimeCode::Physics: {
@@ -1109,7 +1101,7 @@ ItoPlasmaStepper<I, C, R, F>::computeDt()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::registerRealms()
+ItoPlasmaStepper<I, C, R, F>::registerRealms() noexcept
 {
   CH_TIME("ItoPlasmaStepper::registerRealms");
   if (m_verbosity > 5) {
@@ -1123,7 +1115,7 @@ ItoPlasmaStepper<I, C, R, F>::registerRealms()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::registerOperators()
+ItoPlasmaStepper<I, C, R, F>::registerOperators() noexcept
 {
   CH_TIME("ItoPlasmaStepper::registerOperators");
   if (m_verbosity > 5) {
@@ -1131,6 +1123,7 @@ ItoPlasmaStepper<I, C, R, F>::registerOperators()
   }
 
   m_ito->registerOperators();
+  m_cdr->registerOperators();
   m_fieldSolver->registerOperators();
   m_rte->registerOperators();
   m_sigmaSolver->registerOperators();
@@ -1138,18 +1131,15 @@ ItoPlasmaStepper<I, C, R, F>::registerOperators()
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLevel)
+ItoPlasmaStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLevel) noexcept
 {
   CH_TIME("ItoPlasmaStepper::preRegrid");
   if (m_verbosity > 5) {
     pout() << m_name + "::preRegrid" << endl;
   }
 
-  // We use the number of computational particles per grid cell as a load proxy, so
-  // allocate storage for that and compute the PPC.
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
-
-  // Allocate storage for holding the computational PPC on each grid cell.
+  // If we are load balancing then we need to store the number of particles per cell on the old grids. This
+  // will be used to estimate computational loads on the new grids.
   if (m_loadBalanceParticles) {
     Vector<RefCountedPtr<ItoSolver>> lbSolvers = this->getLoadBalanceSolvers();
 
@@ -1167,6 +1157,7 @@ ItoPlasmaStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestL
   }
 
   m_ito->preRegrid(a_lmin, a_oldFinestLevel);
+  m_cdr->preRegrid(a_lmin, a_oldFinestLevel);
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_rte->preRegrid(a_lmin, a_oldFinestLevel);
   m_sigmaSolver->preRegrid(a_lmin, a_oldFinestLevel);
@@ -1174,18 +1165,17 @@ ItoPlasmaStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestL
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
+ItoPlasmaStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) noexcept
 {
   CH_TIME("ItoPlasmaStepper::regrid");
   if (m_verbosity > 5) {
     pout() << m_name + "::regrid" << endl;
   }
 
-  // Allocate new memory
   this->allocateInternals();
 
-  // Regrid solvers
   m_ito->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  m_cdr->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_rte->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_sigmaSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
@@ -1196,10 +1186,9 @@ ItoPlasmaStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLeve
     m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   }
 
-  // Redeposit particles
+  // Redeposit particles and update the electric field on the new mesh.
   m_ito->depositParticles();
 
-  // Recompute the electric field
   const bool converged = this->solvePoisson();
   if (!converged) {
     const std::string err = "ItoPlasmaStepper::regrid - Poisson solve did not converge after regrid!!!";
@@ -1212,19 +1201,15 @@ ItoPlasmaStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLeve
     }
   }
 
-  // Recompute new velocities and diffusion coefficients
   this->computeItoVelocities();
   this->computeItoDiffusion();
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::postRegrid()
+ItoPlasmaStepper<I, C, R, F>::postRegrid() noexcept
 {
   CH_TIME("ItoPlasmaStepper::postRegrid");
-
-  // Release storage that we allocated for holding the PPC
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
 
   if (m_loadBalanceParticles) {
     for (int i = 0; i < m_loadBalancePPC.size(); i++) {
@@ -1235,7 +1220,7 @@ ItoPlasmaStepper<I, C, R, F>::postRegrid()
 
 template <typename I, typename C, typename R, typename F>
 int
-ItoPlasmaStepper<I, C, R, F>::getNumberOfPlotVariables() const
+ItoPlasmaStepper<I, C, R, F>::getNumberOfPlotVariables() const noexcept
 {
   CH_TIME("ItoPlasmaStepper::getNumberOfPlotVariables");
   if (m_verbosity > 5) {
@@ -1292,7 +1277,7 @@ ItoPlasmaStepper<I, C, R, F>::setVoltage(const std::function<Real(const Real a_t
 
 template <typename I, typename C, typename R, typename F>
 Real
-ItoPlasmaStepper<I, C, R, F>::computeMaxElectricField(const phase::which_phase a_phase) noexcept
+ItoPlasmaStepper<I, C, R, F>::computeMaxElectricField(const phase::which_phase a_phase) const noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeMaxElectricField");
   if (m_verbosity > 5) {
@@ -1354,30 +1339,31 @@ ItoPlasmaStepper<I, C, R, F>::computeSpaceChargeDensity() noexcept
     pout() << m_name + "::computeSpaceChargeDensity()" << endl;
   }
 
-  this->computeSpaceChargeDensity(m_fieldSolver->getRho(), m_ito->getDensities());
+  this->computeSpaceChargeDensity(m_fieldSolver->getRho(), m_ito->getDensities(), m_cdr->getPhis());
 }
 
 template <typename I, typename C, typename R, typename F>
 void
 ItoPlasmaStepper<I, C, R, F>::computeSpaceChargeDensity(MFAMRCellData&                a_rho,
-                                                        const Vector<EBAMRCellData*>& a_densities) noexcept
+                                                        const Vector<EBAMRCellData*>& a_itoDensities,
+                                                        const Vector<EBAMRCellData*>& a_cdrDensities) noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeSpaceChargeDensity(rho, densities)");
   if (m_verbosity > 5) {
     pout() << m_name + "::computeSpaceChargeDensity(rho, densities)" << endl;
   }
 
-  // TLDR: a_densities is from the Ito solvers so it is defined over the particle realm. This CAN be equal to
-  //       the same realm on which a_rho is defined, but not necessarily. So, we use m_fluidScratch1 as temporary
-  //       scratch storage.
+  CH_assert(a_rho.getRealm() == m_fluidRealm);
+  CH_assert(a_itoDensities[0]->getRealm() == m_particleRealm);
+  CH_assert(a_cdrDensities[0]->getRealm() == m_fluidRealm);
 
-  // Reset
+  // TLDR: a_itoDensities could be defined over the particle realm, so we use m_fluidScratch1 as a temporary storage.
+
   DataOps::setValue(a_rho, 0.0);
 
   // Alias for the plasma phase.
   EBAMRCellData rhoPhase = m_amr->alias(m_plasmaPhase, a_rho);
 
-  // Increment each solver
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     const RefCountedPtr<ItoSolver>&  solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
@@ -1385,8 +1371,20 @@ ItoPlasmaStepper<I, C, R, F>::computeSpaceChargeDensity(MFAMRCellData&          
     const int                        Z       = species->getChargeNumber();
 
     if (Z != 0) {
-      m_fluidScratch1.copy(*a_densities[idx]);
+      m_fluidScratch1.copy(*a_itoDensities[idx]);
+
       DataOps::incr(rhoPhase, m_fluidScratch1, 1.0 * Z);
+    }
+  }
+
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
+    const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
+    const int                        idx     = solverIt.index();
+    const int                        Z       = species->getChargeNumber();
+
+    if (Z != 0) {
+      DataOps::incr(rhoPhase, *a_cdrDensities[idx], 1.0 * Z);
     }
   }
 

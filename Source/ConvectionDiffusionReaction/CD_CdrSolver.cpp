@@ -41,6 +41,28 @@ CdrSolver::CdrSolver()
 
 CdrSolver::~CdrSolver() {}
 
+RefCountedPtr<CdrSpecies>&
+CdrSolver::getSpecies() noexcept
+{
+  CH_TIME("CdrSolver::getSpecies()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getSpecies()" << endl;
+  }
+
+  return m_species;
+}
+
+const RefCountedPtr<CdrSpecies>&
+CdrSolver::getSpecies() const noexcept
+{
+  CH_TIME("CdrSolver::getSpecies()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getSpecies()" << endl;
+  }
+
+  return m_species;
+}
+
 void
 CdrSolver::setDefaultDomainBC()
 {
@@ -243,11 +265,11 @@ CdrSolver::advanceCrankNicholson(EBAMRCellData& a_newPhi, const EBAMRCellData& a
 }
 
 void
-CdrSolver::allocateInternals()
+CdrSolver::allocate()
 {
-  CH_TIME("CdrSolver::allocateInternals()");
+  CH_TIME("CdrSolver::allocate()");
   if (m_verbosity > 5) {
-    pout() << m_name + "::allocateInternals()" << endl;
+    pout() << m_name + "::allocate()" << endl;
   }
 
   // TLDR: This allocates a number of fields for this solver. We wish to trim memory if we can, so we don't allocate
@@ -319,11 +341,11 @@ CdrSolver::allocateInternals()
 }
 
 void
-CdrSolver::deallocateInternals()
+CdrSolver::deallocate()
 {
-  CH_TIME("CdrSolver::deallocateInternals()");
+  CH_TIME("CdrSolver::deallocate()");
   if (m_verbosity > 5) {
-    pout() << m_name + "::deallocateInternals()" << endl;
+    pout() << m_name + "::deallocate()" << endl;
   }
 
   // TLDR: This deallocates a bunch of storage. This can be used during regrids to trim memory (because the Berger-Rigoutsous algorithm eats memory).
@@ -1648,7 +1670,7 @@ CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
 
   // Allocate internal storage. This will fill m_phi with invalid data, but preRegrid(...) should have been called
   // prior to this routine so the old m_phi (before the regrid) is stored in m_cachedPhi.
-  this->allocateInternals();
+  this->allocate();
 
   // Interpolate to the new grids.
   m_amr->interpToNewGrids(m_phi, m_cachePhi, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);

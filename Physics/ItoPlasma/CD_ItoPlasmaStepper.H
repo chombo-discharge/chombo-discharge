@@ -108,36 +108,20 @@ namespace Physics {
 	@brief Fill solvers with initial data
       */
       virtual void
-      initialData() override;
+      initialData() noexcept override;
 
       /*!
 	@brief Perform post-checkpoint operations
 	@details This allocates the internal storage, recomputes the electric field and recomputes the velocity and diffusion coefficients. 
       */
       virtual void
-      postCheckpointSetup() override;
-
-      /*!
-	@brief Do some post-checkpoint operations for the electrostatic part. 
-	@details This computes the electric field from the checkpointed potential and populates m_electricFieldFluid and m_electricFieldParticle.
-      */
-      virtual void
-      postCheckpointPoisson();
+      postCheckpointSetup() noexcept override;
 
       /*!
 	@brief Post-initialization operations. Default does nothing
       */
       virtual void
-      postInitialize() override;
-
-#ifdef CH_USE_HDF5
-      /*!
-	@brief Read header data from checkpoint file.
-	@param[inout] a_header HDF5 header.
-      */
-      virtual void
-      readCheckpointHeader(HDF5HeaderData& a_header);
-#endif
+      postInitialize() noexcept override;
 
 #ifdef CH_USE_HDF5
       /*!
@@ -145,7 +129,16 @@ namespace Physics {
 	@param[inout] a_header HDF5 header.
       */
       virtual void
-      writeCheckpointHeader(HDF5HeaderData& a_header) const override;
+      writeCheckpointHeader(HDF5HeaderData& a_header) const noexcept override;
+#endif
+
+#ifdef CH_USE_HDF5
+      /*!
+	@brief Read header data from checkpoint file.
+	@param[inout] a_header HDF5 header.
+      */
+      virtual void
+      readCheckpointHeader(HDF5HeaderData& a_header) noexcept override;
 #endif
 
 #ifdef CH_USE_HDF5
@@ -155,7 +148,7 @@ namespace Physics {
 	@param[in]    a_lvl    Grid level
       */
       virtual void
-      writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
+      writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const noexcept override;
 #endif
 
 #ifdef CH_USE_HDF5
@@ -165,7 +158,7 @@ namespace Physics {
 	@param[in]    a_lvl    Grid level
       */
       virtual void
-      readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+      readCheckpointData(HDF5Handle& a_handle, const int a_lvl) noexcept override;
 #endif
 
       /*!
@@ -175,13 +168,15 @@ namespace Physics {
 	@param[inout] a_icomp             Starting component in a_output to begin at. 
       */
       virtual void
-      writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
+      writePlotData(EBAMRCellData&       a_output,
+                    Vector<std::string>& a_plotVariableNames,
+                    int&                 a_icomp) const noexcept override;
 
       /*!
 	@brief Get number of plot variables for the output file
       */
       virtual int
-      getNumberOfPlotVariables() const override;
+      getNumberOfPlotVariables() const noexcept override;
 
       /*!
 	@brief Get computational loads to be checkpointed. 
@@ -216,34 +211,33 @@ namespace Physics {
 	@param[in] a_dt   Last time step used. 
       */
       virtual void
-      synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
+      synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) noexcept override;
 
       /*!
 	@brief Print a step report. Used by Driver for user monitoring of simulation.
       */
       virtual void
-      printStepReport() override;
+      printStepReport() noexcept override;
 
       /*!
 	@brief Register realms used for the simulation
       */
       virtual void
-      registerRealms() override;
+      registerRealms() noexcept override;
 
       /*!
 	@brief Register operators used for the simulation
       */
       virtual void
-      registerOperators() override;
+      registerOperators() noexcept override;
 
       /*!
-	@brief Perform pre-regrid operations.
-	@details This stores the particles and mesh data on the old grids. 
+	@brief Perform pre-regrid operations - storing relevant data from the old grids. 
 	@param[in] a_lmin           The coarsest level that changes
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
       */
       virtual void
-      preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
+      preRegrid(const int a_lmin, const int a_oldFinestLevel) noexcept override;
 
       /*!
 	@brief Regrid methods -- puts all data on the new mesh. 
@@ -252,13 +246,13 @@ namespace Physics {
 	@param[in] a_newFinestLevel The finest level after the regrid. 
       */
       virtual void
-      regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+      regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) noexcept override;
 
       /*!
-	@brief Perform post-regrid operations -- default implementation does nothing. 
+	@brief Perform post-regrid operations.
       */
       virtual void
-      postRegrid() override;
+      postRegrid() noexcept override;
 
       /*!
 	@brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids for the input realm. 
@@ -654,7 +648,7 @@ namespace Physics {
 	@brief Allocate "internal" storage.
       */
       virtual void
-      allocateInternals();
+      allocateInternals() noexcept;
 
       /*!
 	@brief Set up the Ito particle solvers.
@@ -776,7 +770,7 @@ namespace Physics {
 	@param[inout] a_icomp  Starting component in a_output to begin at. 
       */
       virtual void
-      writeNumParticlesPerPatch(EBAMRCellData& a_output, int& a_icomp) const;
+      writeNumberOfParticlesPerPatch(EBAMRCellData& a_output, int& a_icomp) const noexcept;
 
       /*!
 	@brief Get maximum density of the Ito species
@@ -854,11 +848,11 @@ namespace Physics {
 	@param[in] a_phase Phase where we compute the field. 
       */
       virtual Real
-      computeMaxElectricField(const phase::which_phase a_phase) noexcept;
+      computeMaxElectricField(const phase::which_phase a_phase) const noexcept;
 
       /*!
 	@brief Compute the space charge. Calls the other version. 
-	@note This runs through the ItoSolver densities -- user should remember to deposit before calling this routine. 
+	@note This runs through the ItoSolver and CdrSolver densities -- user should remember to update these before calling this routine. 
       */
       virtual void
       computeSpaceChargeDensity() noexcept;
@@ -866,10 +860,13 @@ namespace Physics {
       /*!
 	@brief Compute the space charge density (both phases)
 	@param[out] a_rho   Space cahrge density
-	@param[in]  a_phase Phase where we compute the space charge density      
+	@param[in]  a_itoDensities List of Ito solver species densities
+	@param[in]  a_cdrDensities List of Cdr solver species densities
       */
       virtual void
-      computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>& a_densities) noexcept;
+      computeSpaceChargeDensity(MFAMRCellData&                a_rho,
+                                const Vector<EBAMRCellData*>& a_itoDensities,
+                                const Vector<EBAMRCellData*>& a_cdrDensities) noexcept;
 
       /*!
 	@brief Compute the cell-centered conductiivty
@@ -1365,6 +1362,13 @@ namespace Physics {
       sortPhotonsByPatch(const McPhoto::WhichContainer a_which) noexcept;
 
       /*!
+	@brief Do some post-checkpoint operations for the electrostatic part. 
+	@details This computes the electric field from the checkpointed potential and populates m_electricFieldFluid and m_electricFieldParticle.
+      */
+      virtual void
+      postCheckpointPoisson() noexcept;
+
+      /*!
 	@brief Compute the energy source term for the various plasma species
 	@param[in] a_dt Time step during which the particles move. 
 	@note This fills m_EdotJ
@@ -1373,10 +1377,10 @@ namespace Physics {
       computeEdotJSource(const Real a_dt) noexcept;
 
       /*!
-	@brief Fill surface charge solver with initial data
+	@brief Fill surface charge solver with initial data taken from the physics interface.
       */
       virtual void
-      initialSigma();
+      initialSigma() noexcept;
 
       /*!
 	@brief Parse chattiness

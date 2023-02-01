@@ -314,7 +314,7 @@ ItoPlasmaGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLevel)
+ItoPlasmaGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLevel) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::preRegrid");
   if (this->m_verbosity > 5) {
@@ -333,7 +333,7 @@ ItoPlasmaGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_old
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
+ItoPlasmaGodunovStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::regrid");
   if (this->m_verbosity > 5) {
@@ -1137,7 +1137,7 @@ ItoPlasmaGodunovStepper<I, C, R, F>::stepEulerMaruyama(const Real a_dt) noexcept
 #ifdef CH_USE_HDF5
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper<I, C, R, F>::writeCheckpointHeader(HDF5HeaderData& a_header) const
+ItoPlasmaGodunovStepper<I, C, R, F>::writeCheckpointHeader(HDF5HeaderData& a_header) const noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::writeCheckpointHeader");
   if (this->m_verbosity > 5) {
@@ -1152,7 +1152,7 @@ ItoPlasmaGodunovStepper<I, C, R, F>::writeCheckpointHeader(HDF5HeaderData& a_hea
 #ifdef CH_USE_HDF5
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header)
+ItoPlasmaGodunovStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::readCheckpointHeader");
   if (this->m_verbosity > 5) {
@@ -1168,7 +1168,7 @@ ItoPlasmaGodunovStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_head
 #ifdef CH_USE_HDF5
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper<I, C, R, F>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const
+ItoPlasmaGodunovStepper<I, C, R, F>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::writeCheckpointData");
   if (this->m_verbosity > 5) {
@@ -1196,7 +1196,7 @@ ItoPlasmaGodunovStepper<I, C, R, F>::writeCheckpointData(HDF5Handle& a_handle, c
 #ifdef CH_USE_HDF5
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
+ItoPlasmaGodunovStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::readCheckpointData");
   if (this->m_verbosity > 5) {

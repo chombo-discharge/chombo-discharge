@@ -132,29 +132,29 @@ CdrLayout<T>::parseRuntimeOptions()
 
 template <class T>
 void
-CdrLayout<T>::allocateInternals()
+CdrLayout<T>::allocate()
 {
-  CH_TIME("CdrLayout<T>::allocateInternals()");
+  CH_TIME("CdrLayout<T>::allocate()");
   if (m_verbosity > 6) {
-    pout() << "CdrLayout<T>::allocateInternals()" << endl;
+    pout() << "CdrLayout<T>::allocate()" << endl;
   }
 
   for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it) {
-    solver_it()->allocateInternals();
+    solver_it()->allocate();
   }
 }
 
 template <class T>
 void
-CdrLayout<T>::deallocateInternals()
+CdrLayout<T>::deallocate()
 {
-  CH_TIME("CdrLayout<T>::deallocateInternals()");
+  CH_TIME("CdrLayout<T>::deallocate()");
   if (m_verbosity > 6) {
-    pout() << "CdrLayout<T>::deallocateInternals()" << endl;
+    pout() << "CdrLayout<T>::deallocate()" << endl;
   }
 
   for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it) {
-    solver_it()->deallocateInternals();
+    solver_it()->deallocate();
   }
 }
 

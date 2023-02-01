@@ -488,11 +488,11 @@ EddingtonSP1::preRegrid(const int a_base, const int a_oldFinestLevel)
 }
 
 void
-EddingtonSP1::allocateInternals()
+EddingtonSP1::allocate()
 {
-  CH_TIME("EddingtonSP1::allocateInternals");
+  CH_TIME("EddingtonSP1::allocate");
   if (m_verbosity > 5) {
-    pout() << m_name + "::allocateInternals" << endl;
+    pout() << m_name + "::allocate" << endl;
   }
 
   m_amr->allocate(m_helmAco, m_realm, m_phase, m_nComp);
@@ -514,7 +514,7 @@ EddingtonSP1::allocateInternals()
 }
 
 void
-EddingtonSP1::deallocateInternals()
+EddingtonSP1::deallocate()
 {
   m_amr->deallocate(m_helmAco);
   m_amr->deallocate(m_helmBco);
@@ -535,7 +535,7 @@ EddingtonSP1::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_n
   const Interval interv(m_comp, m_comp);
 
   // Allocate storage.
-  this->allocateInternals();
+  this->allocate();
 
   // Regrid phi and source
   m_amr->interpToNewGrids(m_phi, m_cachePhi, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);

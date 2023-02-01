@@ -77,7 +77,7 @@ namespace Physics {
 	@note This will store the "conductivity" and "rho dagger" particles. 
       */
       virtual void
-      preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
+      preRegrid(const int a_lmin, const int a_oldFinestLevel) noexcept override;
 
       /*!
 	@brief Regrid methods -- puts all data on the new mesh. 
@@ -86,25 +86,7 @@ namespace Physics {
 	@param[in] a_newFinestLevel The finest level after the regrid. 
       */
       virtual void
-      regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
-
-#ifdef CH_USE_HDF5
-      /*!
-	@brief Read header data from checkpoint file.
-	@param[inout] a_header HDF5 header.
-      */
-      virtual void
-      readCheckpointHeader(HDF5HeaderData& a_header) override;
-#endif
-
-#ifdef CH_USE_HDF5
-      /*!
-	@brief Write header data to checkpoint file.
-	@param[inout] a_header HDF5 header.
-      */
-      virtual void
-      writeCheckpointHeader(HDF5HeaderData& a_header) const override;
-#endif
+      regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) noexcept override;
 
 #ifdef CH_USE_HDF5
       /*!  
@@ -113,7 +95,25 @@ namespace Physics {
 	@param[in]    a_lvl    Grid level
       */
       virtual void
-      writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
+      writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const noexcept override;
+#endif      
+
+#ifdef CH_USE_HDF5
+      /*!
+	@brief Read header data from checkpoint file.
+	@param[inout] a_header HDF5 header.
+      */
+      virtual void
+      readCheckpointHeader(HDF5HeaderData& a_header) noexcept override;
+#endif
+
+#ifdef CH_USE_HDF5
+      /*!
+	@brief Write header data to checkpoint file.
+	@param[inout] a_header HDF5 header.
+      */
+      virtual void
+      writeCheckpointHeader(HDF5HeaderData& a_header) const noexcept override;
 #endif
 
 #ifdef CH_USE_HDF5
@@ -123,7 +123,7 @@ namespace Physics {
 	@param[in]    a_lvl    Grid level
       */
       virtual void
-      readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+      readCheckpointData(HDF5Handle& a_handle, const int a_lvl) noexcept override;
 #endif
 
     protected:
