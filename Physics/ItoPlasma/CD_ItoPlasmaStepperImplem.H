@@ -57,7 +57,8 @@ ItoPlasmaStepper<I, C, R, F>::ItoPlasmaStepper() noexcept
 }
 
 template <typename I, typename C, typename R, typename F>
-ItoPlasmaStepper<I, C, R, F>::ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics) noexcept : ItoPlasmaStepper<I, C, R, F>()
+ItoPlasmaStepper<I, C, R, F>::ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics) noexcept
+  : ItoPlasmaStepper<I, C, R, F>()
 {
   CH_TIME("ItoPlasmaStepper::ItoPlasmaStepper(RefCountrPtr<ItoPlasmaPhysics>)");
 
@@ -356,7 +357,7 @@ ItoPlasmaStepper<I, C, R, F>::setupSolvers() noexcept
   this->setupRadiativeTransfer();
   this->setupSigma();
 
-#if 0  // This was also in here - but why?
+#if 0 // This was also in here - but why?
   this->allocateInternals();
 #endif
 }
@@ -468,7 +469,7 @@ ItoPlasmaStepper<I, C, R, F>::allocate() noexcept
   // Solver allocation.
   m_ito->allocateInternals();
   m_rte->allocateInternals();
-  m_fieldSolver->allocateInternals();
+  m_fieldSolver->allocate();
   m_sigmaSolver->allocate();
 
   this->allocateInternals();
@@ -4094,7 +4095,7 @@ ItoPlasmaStepper<I, C, R, F>::loadBalanceFluidRealm(Vector<Vector<int>>&        
   m_amr->regridOperators(m_fluidRealm, a_lmin);
 
   // Field solver needs to allocate solver and set up the multigrid solver.
-  m_fieldSolver->allocateInternals();
+  m_fieldSolver->allocate();
   m_fieldSolver->setupSolver();
 
   // Field solver implementation gets the responsibility of computing loads on each level.

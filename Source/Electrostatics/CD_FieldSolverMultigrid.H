@@ -155,7 +155,7 @@ public:
     @brief Allocates internal storage. 
   */
   virtual void
-  allocateInternals() override;
+  allocate() override;
 
   /*!
     @brief Set up multigrid solver

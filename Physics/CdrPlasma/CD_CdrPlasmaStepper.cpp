@@ -3196,7 +3196,7 @@ CdrPlasmaStepper::deallocateSolverInternals()
 
   m_cdr->deallocateInternals();
   m_rte->deallocateInternals();
-  m_fieldSolver->deallocateInternals();
+  m_fieldSolver->deallocate();
   m_sigma->deallocate();
 }
 
@@ -3939,7 +3939,7 @@ CdrPlasmaStepper::allocate()
   }
 
   m_cdr->allocateInternals();
-  m_fieldSolver->allocateInternals();
+  m_fieldSolver->allocate();
   m_rte->allocateInternals();
   m_sigma->allocate();
 }

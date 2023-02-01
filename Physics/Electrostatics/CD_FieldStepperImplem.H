@@ -157,7 +157,7 @@ namespace Physics {
         pout() << "FieldStepper<T>::allocate" << endl;
       }
 
-      m_fieldSolver->allocateInternals();
+      m_fieldSolver->allocate();
       m_sigma->allocate();
     }
 
