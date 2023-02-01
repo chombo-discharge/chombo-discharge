@@ -111,6 +111,9 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   auto y1 = std::make_shared<ItoPlasmaPhotoReaction>(0, std::list<size_t>{0, 1});
   m_photoReactions.emplace_back(y1);
 
+  // Build internal representation of species
+  this->buildInternalRepresentation();
+
   // Define the KMC solver and read in transport data.
   this->defineKMC();
 
@@ -225,9 +228,9 @@ ItoPlasmaAir3LFA::computeAlpha(const RealVect a_E) const
 }
 
 Vector<Real>
-ItoPlasmaAir3LFA::computeItoMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept
+ItoPlasmaAir3LFA::computeMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept
 {
-  CH_TIME("ItoPlasmaAir3LFA::computeItoMobilities");
+  CH_TIME("ItoPlasmaAir3LFA::computeMobilities");
 
   Vector<Real> mobilities(3);
 

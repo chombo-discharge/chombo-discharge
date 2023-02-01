@@ -515,6 +515,12 @@ ItoPlasmaStepper<I, C, R, F>::allocateInternals() noexcept
   m_amr->allocate(m_electricFieldParticle, m_particleRealm, m_plasmaPhase, SpaceDim);
   m_amr->allocate(m_electricFieldFluid, m_fluidRealm, m_plasmaPhase, SpaceDim);
 
+  // Data for CDR-based solver mobilities
+  m_cdrMobilities.resize(numCdrSpecies);
+  for (int i = 0; i < numCdrSpecies; i++) {
+    m_amr->allocate(m_cdrMobilities[i], m_fluidRealm, m_plasmaPhase, 1);
+  }
+
   // Particles and photons per cell on the realms.
   m_amr->allocate(m_oldPPC, m_particleRealm, m_plasmaPhase, numPlasmaSpecies);
   m_amr->allocate(m_newPPC, m_particleRealm, m_plasmaPhase, numPlasmaSpecies);
@@ -572,7 +578,7 @@ ItoPlasmaStepper<I, C, R, F>::initialData() noexcept
   this->solvePoisson();
 
   // Fill solvers with velocities and diffusion coefficients
-  this->computeItoVelocities();
+  this->computeDriftVelocities();
   this->computeItoDiffusion();
 }
 
@@ -637,7 +643,7 @@ ItoPlasmaStepper<I, C, R, F>::postCheckpointSetup() noexcept
   this->postCheckpointPoisson();
 
   // Compute velocities and diffusion coefficients so we're prepared for the next time step.
-  this->computeItoVelocities();
+  this->computeDriftVelocities();
   this->computeItoDiffusion();
 }
 
@@ -1229,7 +1235,7 @@ ItoPlasmaStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLeve
     }
   }
 
-  this->computeItoVelocities();
+  this->computeDriftVelocities();
   this->computeItoDiffusion();
 }
 
@@ -2188,8 +2194,9 @@ ItoPlasmaStepper<I, C, R, F>::setItoVelocityFunctions() noexcept
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const int                        Z       = species->getChargeNumber();
 
-    if (solver->isMobile()) {
+    if (solver->isMobile() && Z != 0) {
       EBAMRCellData& velocityFunction = solver->getVelocityFunction();
       velocityFunction.copy(m_electricFieldParticle);
 
@@ -2197,9 +2204,6 @@ ItoPlasmaStepper<I, C, R, F>::setItoVelocityFunctions() noexcept
 
       if (Z < 0) {
         DataOps::scale(velocityFunction, -1.0);
-      }
-      else if (Z == 0) {
-        MayDay::Warning("ItoPlasmaStepper::setItoVelocityFunctions -- what to do about sign for neutral species?");
       }
 
       // Coarsen and update ghost cells.
@@ -2211,20 +2215,18 @@ ItoPlasmaStepper<I, C, R, F>::setItoVelocityFunctions() noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::computeItoVelocities() noexcept
+ItoPlasmaStepper<I, C, R, F>::computeDriftVelocities() noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeItoVelocities()");
+  CH_TIME("ItoPlasmaStepper::computeDriftVelocities()");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoVelocities()" << endl;
+    pout() << m_name + "::computeDriftVelocities()" << endl;
   }
 
   // Set the ItoSolver velocity functions.
   this->setItoVelocityFunctions();
 
-  // Compute mobilities.
-  this->computeItoMobilitiesLFA();
-
-  // Interpolate velocity function to particle position so that particles get velocity v = +/- mu*E
+  // Compute mobilities and then interpolate the mu*E to the particle positions.
+  this->computeMobilities();
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     solverIt()->interpolateVelocities();
   }
@@ -2232,65 +2234,61 @@ ItoPlasmaStepper<I, C, R, F>::computeItoVelocities() noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::computeItoDiffusion() noexcept
+ItoPlasmaStepper<I, C, R, F>::computeMobilities() noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeItoDiffusion()");
+  CH_TIME("ItoPlasmaStepper::computeMobilities()");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoDiffusion()" << endl;
+    pout() << m_name + "::computeMobilities()" << endl;
   }
 
-  this->computeItoDiffusionLFA();
+  Vector<EBAMRCellData*> itoMobilities = m_ito->getMobilityFunctions();
+
+  this->computeMobilities(itoMobilities, m_cdrMobilities, m_electricFieldFluid, m_time);
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::computeItoMobilitiesLFA() noexcept
+ItoPlasmaStepper<I, C, R, F>::computeMobilities(Vector<EBAMRCellData*>& a_itoMobilities,
+                                                Vector<EBAMRCellData>&  a_cdrMobilities,
+                                                const EBAMRCellData&    a_electricField,
+                                                const Real              a_time) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA()");
+  CH_TIME("ItoPlasmaStepper::computeMobilities(mobilities, E, time)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoMobilitiesLFA()" << endl;
+    pout() << m_name + "::computeMobilities(mobilities, E, time)" << endl;
   }
 
-  Vector<EBAMRCellData*> meshMobilities = m_ito->getMobilityFunctions();
-
-  this->computeItoMobilitiesLFA(meshMobilities, m_electricFieldFluid, m_time);
-}
-
-template <typename I, typename C, typename R, typename F>
-void
-ItoPlasmaStepper<I, C, R, F>::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobilities,
-                                                      const EBAMRCellData&    a_electricField,
-                                                      const Real              a_time) noexcept
-{
-  CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA(mobilities, E, time)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoMobilitiesLFA(mobilities, E, time)" << endl;
-  }
-
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numItoSpecies = m_physics->getNumItoSpecies();
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
   CH_assert(a_electricField.getRealm() == m_fluidRealm);
-  CH_assert(a_meshMobilities.size() == numPlasmaSpecies);
+  CH_assert(a_itoMobilities.size() == numItoSpecies);
+  CH_assert(a_cdrMobilities.size() == numCdrSpecies);
 
   // The mesh mobilities belong on the particle realm (they are the ItoSolver mobilities) but we need to run
   // the computation on the fluid realm. So, create some transient storage for that.
-  Vector<EBAMRCellData> fluidScratchMobilities(numPlasmaSpecies);
-  for (int i = 0; i < numPlasmaSpecies; i++) {
+  Vector<EBAMRCellData> fluidScratchMobilities(numItoSpecies);
+  for (int i = 0; i < numItoSpecies; i++) {
     m_amr->allocate(fluidScratchMobilities[i], m_fluidRealm, m_plasmaPhase, 1);
 
-    CH_assert(a_meshMobilities[i]->getRealm() == m_particleRealm);
+    CH_assert(a_itoMobilities[i]->getRealm() == m_particleRealm);
   }
 
   // Now run the computation on the fluid realm, computing the mobilities into fluidScratchMobilities
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    Vector<LevelData<EBCellFAB>*> mobilities(numPlasmaSpecies);
+    Vector<LevelData<EBCellFAB>*> itoMobilities(numItoSpecies);
+    Vector<LevelData<EBCellFAB>*> cdrMobilities(numCdrSpecies);
 
-    for (int i = 0; i < numPlasmaSpecies; i++) {
-      mobilities[i] = &(*(fluidScratchMobilities[i])[lvl]);
+    for (int i = 0; i < numItoSpecies; i++) {
+      itoMobilities[i] = &(*(fluidScratchMobilities[i])[lvl]);
+    }
+
+    for (int i = 0; i < numCdrSpecies; i++) {
+      cdrMobilities[i] = &(*(a_cdrMobilities[i])[lvl]);
     }
 
     // Run the level computation, which will fill mobilities aka fluidScratchMobilities.
-    this->computeItoMobilitiesLFA(mobilities, *a_electricField[lvl], lvl, a_time);
+    this->computeMobilities(itoMobilities, *a_electricField[lvl], lvl, a_time);
   }
 
   // Copy fluid realm data into particle realm and interpolate mobilities to the particle position.
@@ -2300,10 +2298,10 @@ ItoPlasmaStepper<I, C, R, F>::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_
     if (solver->isMobile()) {
       const int idx = solverIt.index();
 
-      a_meshMobilities[idx]->copy(fluidScratchMobilities[idx]);
+      a_itoMobilities[idx]->copy(fluidScratchMobilities[idx]);
 
-      m_amr->conservativeAverage(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);
-      m_amr->interpGhostPwl(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);
+      m_amr->conservativeAverage(*a_itoMobilities[idx], m_particleRealm, m_plasmaPhase);
+      m_amr->interpGhostPwl(*a_itoMobilities[idx], m_particleRealm, m_plasmaPhase);
 
       solver->interpolateMobilities();
     }
@@ -2312,14 +2310,14 @@ ItoPlasmaStepper<I, C, R, F>::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::computeItoMobilitiesLFA(Vector<LevelData<EBCellFAB>*>& a_meshMobilities,
-                                                      const LevelData<EBCellFAB>&    a_electricField,
-                                                      const int                      a_level,
-                                                      const Real                     a_time) noexcept
+ItoPlasmaStepper<I, C, R, F>::computeMobilities(Vector<LevelData<EBCellFAB>*>& a_itoMobilities,
+                                                const LevelData<EBCellFAB>&    a_electricField,
+                                                const int                      a_level,
+                                                const Real                     a_time) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA(mobilities, E, level, time)");
+  CH_TIME("ItoPlasmaStepper::computeMobilities(mobilities, E, level, time)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoMobilitiesLFA(mobilities, E, level, time)" << endl;
+    pout() << m_name + "::computeMobilities(mobilities, E, level, time)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
@@ -2329,30 +2327,33 @@ ItoPlasmaStepper<I, C, R, F>::computeItoMobilitiesLFA(Vector<LevelData<EBCellFAB
     const Box        cellBox = dbl[dit()];
 
     Vector<EBCellFAB*> meshMobilities;
-    for (int i = 0; i < a_meshMobilities.size(); i++) {
-      meshMobilities.push_back(&((*a_meshMobilities[i])[dit()]));
+    for (int i = 0; i < a_itoMobilities.size(); i++) {
+      meshMobilities.push_back(&((*a_itoMobilities[i])[dit()]));
     }
 
-    this->computeItoMobilitiesLFA(meshMobilities, E, a_level, dit(), cellBox, a_time);
+    this->computeMobilities(meshMobilities, E, a_level, dit(), cellBox, a_time);
   }
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
-                                                      const EBCellFAB&    a_electricField,
-                                                      const int           a_level,
-                                                      const DataIndex     a_dit,
-                                                      const Box           a_box,
-                                                      const Real          a_time) noexcept
+ItoPlasmaStepper<I, C, R, F>::computeMobilities(Vector<EBCellFAB*>& a_itoMobilities,
+                                                const EBCellFAB&    a_electricField,
+                                                const int           a_level,
+                                                const DataIndex     a_dit,
+                                                const Box           a_box,
+                                                const Real          a_time) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA(meshMobilities, E, level, dit, box, time)");
+  CH_TIME("ItoPlasmaStepper::computeMobilities(meshMobilities, E, level, dit, box, time)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoMobilitiesLFA(meshMobilities, E, level, dit, box, time)" << endl;
+    pout() << m_name + "::computeMobilities(meshMobilities, E, level, dit, box, time)" << endl;
   }
 
   // TLDR: We go through each and every cell and call the physics interface. This includes cells covered by a finer grid
   //       but data is coarsened later anyways.
+  const int numItoSpecies    = m_physics->getNumItoSpecies();
+  const int numCdrSpecies    = m_physics->getNumCdrSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   const Real     dx      = m_amr->getDx()[a_level];
   const RealVect probLo  = m_amr->getProbLo();
@@ -2361,8 +2362,8 @@ ItoPlasmaStepper<I, C, R, F>::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_mesh
   // Handle to regular data.
   const FArrayBox&   electricFieldReg = a_electricField.getFArrayBox();
   Vector<FArrayBox*> meshMobilitiesReg;
-  for (int i = 0; i < a_meshMobilities.size(); i++) {
-    meshMobilitiesReg.push_back(&(a_meshMobilities[i]->getFArrayBox()));
+  for (int i = 0; i < a_itoMobilities.size(); i++) {
+    meshMobilitiesReg.push_back(&(a_itoMobilities[i]->getFArrayBox()));
   }
 
   // Regular kernel
@@ -2371,7 +2372,9 @@ ItoPlasmaStepper<I, C, R, F>::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_mesh
     const RealVect E   = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
 
     // Call ito_physics and compute mobilities for each particle species
-    const Vector<Real> mobilities = m_physics->computeItoMobilities(a_time, pos, E);
+    const Vector<Real> mobilities = m_physics->computeMobilities(a_time, pos, E);
+
+    CH_assert(mobilities.size() == numPlasmaSpecies);
 
     // Put mobilities in appropriate data holder
     for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -2387,13 +2390,15 @@ ItoPlasmaStepper<I, C, R, F>::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_mesh
     const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
 
     // Compute diffusion
-    const Vector<Real> mobilities = m_physics->computeItoMobilities(a_time, pos, e);
+    const Vector<Real> mobilities = m_physics->computeMobilities(a_time, pos, e);
+
+    CH_assert(mobilities.size() == numPlasmaSpecies);
 
     // Put diffusion in the appropriate place.
     for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
 
-      (*a_meshMobilities[idx])(vof, 0) = mobilities[idx];
+      (*a_itoMobilities[idx])(vof, 0) = mobilities[idx];
     }
   };
 
@@ -2406,23 +2411,20 @@ ItoPlasmaStepper<I, C, R, F>::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_mesh
   // Covered is bogus.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
-    a_meshMobilities[idx]->setCoveredCellVal(0.0, 0);
+    a_itoMobilities[idx]->setCoveredCellVal(0.0, 0);
   }
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::computeItoMobilitiesLEA() noexcept
+ItoPlasmaStepper<I, C, R, F>::computeItoDiffusion() noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLEA()");
+  CH_TIME("ItoPlasmaStepper::computeItoDiffusion()");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoMobilitiesLEA()" << endl;
+    pout() << m_name + "::computeItoDiffusion()" << endl;
   }
 
-  // This is really simple because the solvers do this directly...
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->updateMobilities();
-  }
+  this->computeItoDiffusionLFA();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -2620,21 +2622,6 @@ ItoPlasmaStepper<I, C, R, F>::computeItoDiffusionLFA(Vector<EBCellFAB*>& a_diffu
 
       a_diffusionCoefficients[idx]->setCoveredCellVal(0.0, 0);
     }
-  }
-}
-
-template <typename I, typename C, typename R, typename F>
-void
-ItoPlasmaStepper<I, C, R, F>::computeItoDiffusionLEA() noexcept
-{
-  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLEA()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoDiffusionLEA()" << endl;
-  }
-
-  // This is really simple because the solvers do this directly... No monkeying with interpolations or anything.
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->updateDiffusion();
   }
 }
 

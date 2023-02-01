@@ -290,7 +290,7 @@ ItoPlasmaGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   // Prepare for the next time step
   this->barrier();
   m_timer.startEvent("Post-compute v");
-  this->computeItoVelocities();
+  this->computeDriftVelocities();
   m_timer.stopEvent("Post-compute v");
 
   this->barrier();
@@ -422,7 +422,7 @@ ItoPlasmaGodunovStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFin
 
   // Recompute new velocities and diffusion coefficients
   m_timer.startEvent("Prepare next step");
-  this->computeItoVelocities();
+  this->computeDriftVelocities();
   this->computeItoDiffusion();
   m_timer.stopEvent("Prepare next step");
 
@@ -1034,7 +1034,7 @@ ItoPlasmaGodunovStepper<I, C, R, F>::advanceParticlesEulerMaruyama(const Real a_
   this->setItoVelocityFunctions();
   (this->m_ito)->interpolateVelocities();
 #else // Have to use this for LEA - need to debug.
-  this->computeItoVelocities();
+  this->computeDriftVelocities();
 #endif
   m_timer.stopEvent("Step-compute v");
 

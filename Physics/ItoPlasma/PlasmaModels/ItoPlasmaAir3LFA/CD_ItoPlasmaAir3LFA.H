@@ -82,7 +82,7 @@ namespace Physics {
 	@param[in] a_E    Electric field
       */
       Vector<Real>
-      computeItoMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override;
+      computeMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override;
 
       /*!
 	@brief Compute the Ito solver diffusion coefficients

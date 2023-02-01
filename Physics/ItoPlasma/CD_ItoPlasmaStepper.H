@@ -521,6 +521,11 @@ namespace Physics {
       Vector<EBAMRCellData> m_loadBalancePPC;
 
       /*!
+	@brief For holding the mobilities for the CDR species
+      */
+      Vector<EBAMRCellData> m_cdrMobilities;
+
+      /*!
 	@brief Solver indices used when load-balancing the particle solvers.
       */
       Vector<int> m_loadBalanceIndices;
@@ -951,7 +956,7 @@ namespace Physics {
 	@details This will compute the mobilities and then interpolate mu*E to particle positions.  
       */
       virtual void
-      computeItoVelocities() noexcept;
+      computeDriftVelocities() noexcept;
 
       /*!
 	@brief Compute ItoSolver velocities.
@@ -965,18 +970,20 @@ namespace Physics {
 	@note Calls the other version with mesh mobilities taken from ItoSolver solvers. 
       */
       virtual void
-      computeItoMobilitiesLFA() noexcept;
+      computeMobilities() noexcept;
 
       /*!
 	@brief Compute mesh-based mobilities for LFA coupling
-	@param[out] a_meshMobilities Mesh-based mobilities. Must be defined on the particle realm. 
+	@param[out] a_itoMobilities  Mesh-based mobilities for Ito solvers. Must be defined on the particle realm. 
+	@param[out] a_cdrMobilities  Mesh-based mobilities for CDR solvers. Must be defined on the fluid realm. 
 	@param[in]  a_electricField  Electric field. Must be defined on the fluid realm. 
 	@param[in]  a_time           Time
       */
       virtual void
-      computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobilities,
-                              const EBAMRCellData&    a_electricField,
-                              const Real              a_time) noexcept;
+      computeMobilities(Vector<EBAMRCellData*>& a_itoMobilities,
+                        Vector<EBAMRCellData>&  a_cdrMobilities,
+                        const EBAMRCellData&    a_electricField,
+                        const Real              a_time) noexcept;
 
       /*!
 	@brief Level-routine when computing mesh-based mobilities for LFA coupling
@@ -986,7 +993,7 @@ namespace Physics {
 	@param[in]  a_time           Time
       */
       virtual void
-      computeItoMobilitiesLFA(Vector<LevelData<EBCellFAB>*>& a_meshMobilities,
+      computeMobilities(Vector<LevelData<EBCellFAB>*>& a_meshMobilities,
                               const LevelData<EBCellFAB>&    a_E,
                               const int                      a_level,
                               const Real                     a_time) noexcept;
@@ -1001,19 +1008,12 @@ namespace Physics {
 	@param[in]  a_time           Time      
       */
       virtual void
-      computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
-                              const EBCellFAB&    a_electricField,
-                              const int           a_level,
-                              const DataIndex     a_dit,
-                              const Box           a_cellBox,
-                              const Real          a_time) noexcept;
-
-      /*!
-	@brief Compute the IonSolver particle mobilities in the LEA coupling regime
-	@note This one is very simple because the solvers just update the mobilities from appropriate coupling functions. 
-      */
-      virtual void
-      computeItoMobilitiesLEA() noexcept;
+      computeMobilities(Vector<EBCellFAB*>& a_meshMobilities,
+                        const EBCellFAB&    a_electricField,
+                        const int           a_level,
+                        const DataIndex     a_dit,
+                        const Box           a_cellBox,
+                        const Real          a_time) noexcept;
 
       /*!
 	@brief Compute mesh-based diffusion coefficients for LFA coupling
@@ -1064,13 +1064,6 @@ namespace Physics {
                              const DataIndex     a_dit,
                              const Box           a_box,
                              const Real          a_time) noexcept;
-
-      /*!
-	@brief Compute the IonSolver particle diffusion coefficients in the LEA coupling regime
-	@note This one is very simple because the solvers just update the diffusion coefficients from appropriate coupling functions. 
-      */
-      virtual void
-      computeItoDiffusionLEA() noexcept;
 
       /*!
 	@brief Get the physical number of particles per cell.

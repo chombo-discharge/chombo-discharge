@@ -24,7 +24,7 @@
 
 using namespace Physics::ItoPlasma;
 
-inline ItoPlasmaPhysics::ItoPlasmaPhysics()
+inline ItoPlasmaPhysics::ItoPlasmaPhysics() noexcept
 {
   CH_TIME("ItoPlasmaPhysics::ItoPlasmaPhysics");
 
@@ -34,6 +34,7 @@ inline ItoPlasmaPhysics::ItoPlasmaPhysics()
   m_photoReactions.clear();
 
   // Some default settings in case user forgets to call the parsing algorithms.
+  m_isDefined         = false;
   m_debug             = true;
   m_maxNewParticles   = 32;
   m_maxNewPhotons     = 32;
@@ -55,12 +56,50 @@ inline ItoPlasmaPhysics::ItoPlasmaPhysics()
 #endif
 }
 
-inline ItoPlasmaPhysics::~ItoPlasmaPhysics() { CH_TIME("ItoPlasmaPhysics::~ItoPlasmaPhysics"); }
+inline ItoPlasmaPhysics::~ItoPlasmaPhysics() noexcept { CH_TIME("ItoPlasmaPhysics::~ItoPlasmaPhysics"); }
+
+inline void
+ItoPlasmaPhysics::buildInternalRepresentation() noexcept
+{
+  CH_TIME("ItoPlasmaPhysics::buildInternalRepresentation");
+
+  const int numItoSpecies = this->getNumItoSpecies();
+  const int numCdrSpecies = this->getNumCdrSpecies();
+
+  int species = 0;
+  for (int i = 0; i < numItoSpecies; i++, species++) {
+    m_itoMap.emplace(species, i);
+  }
+
+  for (int i = 0; i < numCdrSpecies; i++, species++) {
+    m_cdrMap.emplace(species, i);
+  }
+
+  m_isDefined = true;
+}
+
+inline std::map<int, int>
+ItoPlasmaPhysics::getItoMap() const noexcept
+{
+  CH_TIME("ItoPlasmaPhysics::getItoMap");
+
+  return m_itoMap;
+}
+
+inline std::map<int, int>
+ItoPlasmaPhysics::getCdrMap() const noexcept
+{
+  CH_TIME("ItoPlasmaPhysics::getCdrMap");
+
+  return m_cdrMap;
+}
 
 inline Real
 ItoPlasmaPhysics::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<FPR> a_numParticles) const noexcept
 {
   CH_TIME("ItoPlasmaPhysics::computeDt");
+
+  CH_assert(m_isDefined);
 
   return std::numeric_limits<Real>::max();
 }
@@ -69,6 +108,8 @@ inline void
 ItoPlasmaPhysics::defineKMC() noexcept
 {
   CH_TIME("ItoPlasmaPhysics::defineKMC");
+
+  CH_assert(m_isDefined);
 
   m_kmcState.define(m_itoSpecies.size(), m_rtSpecies.size());
 
@@ -199,6 +240,8 @@ ItoPlasmaPhysics::advanceKMC(Vector<FPR>&   a_numParticles,
 {
   CH_TIME("ItoPlasmaPhysics::advanceKMC");
 
+  CH_assert(m_isDefined);
+
   // Populate the KMC solver state.
   std::vector<FPR>& kmcParticles = m_kmcState.getReactiveState();
   std::vector<FPR>& kmcPhotons   = m_kmcState.getNonReactiveState();
@@ -249,6 +292,7 @@ ItoPlasmaPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
 {
   CH_TIME("ItoPlasmaPhysics::reconcileParticles(Vector<List<ItoParticle>*>, ...)");
 
+  CH_assert(m_isDefined);
   CH_assert(a_particles.size() == a_newNumParticles.size());
   CH_assert(a_oldNumParticles.size() == a_newNumParticles.size());
 
@@ -320,6 +364,7 @@ ItoPlasmaPhysics::removeParticles(List<ItoParticle>& a_particles, const long lon
 
   constexpr long long zero = 0LL;
 
+  CH_assert(m_isDefined);
   CH_assert(a_numParticlesToRemove >= zero);
 
   // Quick lambda for getting total particle weight. Used for debugging.
@@ -391,6 +436,8 @@ ItoPlasmaPhysics::reconcilePhotons(Vector<List<Photon>*>& a_newPhotons,
 {
   CH_TIME("ItoPlasmaPhysics::reconcilePhotons");
 
+  CH_assert(m_isDefined);
+
   for (int i = 0; i < a_newPhotons.size(); i++) {
     if (a_numNewPhotons[i] > 0LL) {
 
@@ -412,6 +459,8 @@ ItoPlasmaPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&  a_partic
                                            const Vector<List<Photon>*>& a_absorbedPhotons) const noexcept
 {
   CH_TIME("ItoPlasmaPhysics::reconcilePhotoionization");
+
+  CH_assert(m_isDefined);
 
   for (const auto& r : m_photoReactions) {
 

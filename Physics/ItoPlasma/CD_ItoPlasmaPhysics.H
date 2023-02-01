@@ -67,12 +67,12 @@ namespace Physics {
       /*!
 	@brief Constructor. Does nothing.
       */
-      inline ItoPlasmaPhysics();
+      inline ItoPlasmaPhysics() noexcept;
 
       /*!
 	@brief Destructor. Does nothing. 
       */
-      inline virtual ~ItoPlasmaPhysics();
+      inline virtual ~ItoPlasmaPhysics() noexcept;
 
       /*!
 	@brief Compute a time step to use. 
@@ -138,6 +138,18 @@ namespace Physics {
       getNumPhotonSpecies() const;
 
       /*!
+	@brief Get the internal mapping between plasma species and Ito solvers
+      */
+      inline std::map<int, int>
+      getItoMap() const noexcept;
+
+      /*!
+	@brief Get the internal mapping between plasma species and CDR solvers
+      */
+      inline std::map<int, int>
+      getCdrMap() const noexcept;
+
+      /*!
 	@brief Parse run-time options
       */
       inline virtual void
@@ -159,7 +171,7 @@ namespace Physics {
 	@return Must return a vector of non-negative mobility coefficients for the plasma species
       */
       virtual Vector<Real>
-      computeItoMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept = 0;
+      computeMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept = 0;
 
       /*!
 	@brief Compute the Ito solver diffusion coefficients
@@ -324,6 +336,16 @@ namespace Physics {
       ParticlePlacement m_particlePlacement;
 
       /*!
+	@brief Map for associating a plasma species with an Ito solver. 
+      */
+      std::map<int, int> m_itoMap;
+
+      /*!
+	@brief Map for associating a plasma species with a CDR solver.
+      */
+      std::map<int, int> m_cdrMap;      
+
+      /*!
 	@brief Class name. Used for options parsing
       */
       std::string m_className;
@@ -332,6 +354,11 @@ namespace Physics {
 	@brief Turn on/off debugging
       */
       bool m_debug;
+
+      /*!
+	@brief Is defined or not
+      */
+      bool m_isDefined;
 
       /*!
 	@brief Kinetic Monte Carlo state
@@ -401,6 +428,13 @@ namespace Physics {
 	@details Equal to the maximum permitted change in the relative propensity for non-critical reactions
       */
       Real m_eps;
+
+      /*!
+	@brief Build internal representation of how we distinguish the Ito and CDR solvers
+	@note This should ALWAYS be called after initializing the species since ItoPlasmaStepper will rely on it. 
+      */
+      inline void
+      buildInternalRepresentation() noexcept;
 
       /*!
 	@brief Define the KMC solver and state

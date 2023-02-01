@@ -48,12 +48,12 @@ Driver.initial_regrids                 = 2                # Number of initial re
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 20              # Maximum number of steps
+Driver.max_steps                       = 20               # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
 Driver.output_directory                = ./               # Output directory
-Driver.output_names                    = positive         # Simulation output names
+Driver.output_names                    = experimental     # Simulation output names
 Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
 Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
