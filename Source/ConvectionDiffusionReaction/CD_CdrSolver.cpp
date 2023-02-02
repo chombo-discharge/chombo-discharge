@@ -306,13 +306,16 @@ CdrSolver::allocate()
   // pass around pointers in case we need it. This might seem confusing but its easier to resize those vectors
   // and set nullpointers when we iterate through grid levels and patches.
   if (m_isDiffusive) {
+    m_amr->allocate(m_cellCenteredDiffusionCoefficient, m_realm, m_phase, m_nComp);
     m_amr->allocate(m_faceCenteredDiffusionCoefficient, m_realm, m_phase, m_nComp);
     m_amr->allocate(m_ebCenteredDiffusionCoefficient, m_realm, m_phase, m_nComp);
 
+    DataOps::setValue(m_cellCenteredDiffusionCoefficient, 0.0);
     DataOps::setValue(m_faceCenteredDiffusionCoefficient, 0.0);
     DataOps::setValue(m_ebCenteredDiffusionCoefficient, 0.0);
   }
   else {
+    m_amr->allocatePointer(m_cellCenteredDiffusionCoefficient, m_realm);
     m_amr->allocatePointer(m_faceCenteredDiffusionCoefficient, m_realm);
     m_amr->allocatePointer(m_ebCenteredDiffusionCoefficient, m_realm);
   }
@@ -354,6 +357,7 @@ CdrSolver::deallocate()
   m_amr->deallocate(m_faceVelocity);
   m_amr->deallocate(m_cellVelocity);
   m_amr->deallocate(m_ebFlux);
+  m_amr->deallocate(m_cellCenteredDiffusionCoefficient);
   m_amr->deallocate(m_faceCenteredDiffusionCoefficient);
   m_amr->deallocate(m_ebCenteredDiffusionCoefficient);
   m_amr->deallocate(m_scratch);
@@ -1794,9 +1798,11 @@ CdrSolver::setDiffusionCoefficient(const Real a_diffusionCoefficient)
     pout() << m_name + "::setDiffusionCoefficient(Real)" << endl;
   }
 
+  DataOps::setValue(m_cellCenteredDiffusionCoefficient, a_diffusionCoefficient);
   DataOps::setValue(m_faceCenteredDiffusionCoefficient, a_diffusionCoefficient);
   DataOps::setValue(m_ebCenteredDiffusionCoefficient, a_diffusionCoefficient);
 
+  m_amr->conservativeAverage(m_cellCenteredDiffusionCoefficient, m_realm, m_phase);
   m_amr->conservativeAverage(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
   m_amr->conservativeAverage(m_ebCenteredDiffusionCoefficient, m_realm, m_phase);
 }
@@ -1809,6 +1815,7 @@ CdrSolver::setDiffusionCoefficient(const std::function<Real(const RealVect a_pos
     pout() << m_name + "::setDiffusionCoefficient(std::function<Real(const RealVect a_position)>)" << endl;
   }
 
+  DataOps::setValue(m_cellCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
   DataOps::setValue(m_faceCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
   DataOps::setValue(m_ebCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
 }
@@ -2765,6 +2772,17 @@ CdrSolver::getEbCenteredVelocity()
   return m_ebVelocity;
 }
 
+EBAMRCellData&
+CdrSolver::getCellCenteredDiffusionCoefficient()
+{
+  CH_TIME("CdrSolver::getCellCenteredDiffusionCoefficient()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getCellCenteredDiffusionCoefficient()" << endl;
+  }
+
+  return m_cellCenteredDiffusionCoefficient;
+}
+
 EBAMRFluxData&
 CdrSolver::getFaceCenteredDiffusionCoefficient()
 {
@@ -3045,9 +3063,9 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
   // compute Div(G).
 
   if (m_isDiffusive) {
-    this
-      ->smoothHeavisideFaces(m_scratchFluxOne,
-                             a_cellPhi); // m_scratchFluxOne = phis on faces (smoothing as to avoid negative densities)
+
+    // m_scratchFluxOne = phis on faces (smoothing as to avoid negative densities)
+    this->smoothHeavisideFaces(m_scratchFluxOne, a_cellPhi);
     DataOps::multiply(m_scratchFluxOne, m_faceCenteredDiffusionCoefficient); // m_scratchFluxOne = D*phis
     DataOps::scale(m_scratchFluxOne, 2.0);                                   // m_scratchFluxOne = 2*D*phis
     DataOps::squareRoot(m_scratchFluxOne);                                   // m_scratchFluxOne = sqrt(2*D*phis)

@@ -945,6 +945,13 @@ namespace Physics {
       remapParticles(const SpeciesSubset a_speciesSubset, const ItoSolver::WhichContainer a_container) noexcept;
 
       /*!
+	@brief Compute ItoSolver velocities.
+	@details This will compute the mobilities and then interpolate mu*E to particle positions.  
+      */
+      virtual void
+      computeDriftVelocities() noexcept;
+
+      /*!
 	@brief Set the Ito velocity functions. This is sgn(charge) * E
 	@note This should be set before ItoSolver computes velocities. 
       */
@@ -963,20 +970,6 @@ namespace Physics {
       */
       virtual void
       multiplyCdrVelocitiesByMobilities() noexcept;
-
-      /*!
-	@brief Compute ItoSolver velocities.
-	@details This will compute the mobilities and then interpolate mu*E to particle positions.  
-      */
-      virtual void
-      computeDriftVelocities() noexcept;
-
-      /*!
-	@brief Compute ItoSolver velocities.
-	@details This will compute the diffusion coefficients (in the specified coupling regime)
-      */
-      virtual void
-      computeItoDiffusion() noexcept;
 
       /*!
 	@brief Compute mesh-based mobilities for LFA coupling
@@ -1035,53 +1028,65 @@ namespace Physics {
 
       /*!
 	@brief Compute mesh-based diffusion coefficients for LFA coupling
-	@note Calls the other version with diffusion coefficients taken from ItoSolver solvers. 
+	@note Calls the other version with diffusion coefficients taken from the solvers.
       */
       virtual void
-      computeItoDiffusionLFA() noexcept;
+      computeDiffusionCoefficients() noexcept;
 
       /*!
 	@brief Compute mesh-based diffusion coefficients for LFA coupling
-	@param[out] a_diffusionCoefficients Mesh-based diffusion coefficients. Must be defined on the particle realm. 
-	@param[in]  a_electricField         Electric field. Must be defined on the fluid realm. 
-	@param[in]  a_time                  Time
+	@param[out] a_itoDiffusionCoefficients Mesh-based diffusion coefficients for Ito solvers. Must be defined on the particle realm. 
+	@param[out] a_cdrDiffusionCoefficients Mesh-based diffusion coefficients for CDR solvers. Must be defined on the fluid realm. 
+	@param[in]  a_electricField            Electric field. Must be defined on the fluid realm. 
+	@param[in]  a_time                     Time
       */
       virtual void
-      computeItoDiffusionLFA(Vector<EBAMRCellData*>& a_diffusionCoefficient,
-                             const EBAMRCellData&    a_electricField,
-                             const Real              a_time) noexcept;
+      computeDiffusionCoefficients(Vector<EBAMRCellData*>& a_itoDiffusionCoefficients,
+                                   Vector<EBAMRCellData*>& a_cdrDiffusionCoefficients,
+                                   const EBAMRCellData&    a_electricField,
+                                   const Real              a_time) noexcept;
 
       /*!
 	@brief Level-routine when computing mesh-based mobilities for LFA coupling
-	@param[out] a_diffusionCoefficients Diffusion coefficients. Must be defined on the fluid realm. 
-	@param[in]  a_electricField         Electric field. Must be defined on the fluid realm. 
-	@param[in]  a_level                 Grid level
-	@param[in]  a_time                  Time
+	@param[out] a_itoDiffusionCoefficients Mesh-based diffusion coefficients for Ito solvers. Must be defined on the fluid realm. 
+	@param[out] a_cdrDiffusionCoefficients Mesh-based diffusion coefficients for CDR solvers. Must be defined on the fluid realm. 
+	@param[in]  a_electricField            Electric field. Must be defined on the fluid realm. 
+	@param[in]  a_level                    Grid level
+	@param[in]  a_time                     Time
       */
       virtual void
-      computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>& a_diffusionCoefficient,
-                             const LevelData<EBCellFAB>&    a_electricField,
-                             const int                      a_level,
-                             const Real                     a_time) noexcept;
+      computeDiffusionCoefficients(Vector<LevelData<EBCellFAB>*>& a_itoDiffusionCoefficients,
+                                   Vector<LevelData<EBCellFAB>*>& a_cdrDiffusionCoefficients,
+                                   const LevelData<EBCellFAB>&    a_electricField,
+                                   const int                      a_level,
+                                   const Real                     a_time) noexcept;
 
       /*!
 	@brief Patch-routine when computing mesh-based diffusion coefficients in the LFA coupling
-	@param[out] a_diffusionCoefficients Diffusion coefficients. Must be defined on the fluid realm. 
-	@param[in]  a_electricField         Electric field. Must be defined on the fluid realm. 
-	@param[in]  a_level                 Grid level
-	@param[in]  a_time                  Time
-	@param[in]  a_level                 Grid level
-	@param[in]  a_dit                   Grid index
-	@param[in]  a_cellBox               Computation box
-	@param[in]  a_time                  Time      
+	@param[out] a_itoDiffusionCoefficients Mesh-based diffusion coefficients for Ito solvers. Must be defined on the fluid realm. 
+	@param[out] a_cdrDiffusionCoefficients Mesh-based diffusion coefficients for CDR solvers. Must be defined on the fluid realm. 
+	@param[in]  a_electricField            Electric field. Must be defined on the fluid realm. 
+	@param[in]  a_level                    Grid level
+	@param[in]  a_time                     Time
+	@param[in]  a_level                    Grid level
+	@param[in]  a_dit                      Grid index
+	@param[in]  a_cellBox                  Computation box
+	@param[in]  a_time                     Time      
       */
       virtual void
-      computeItoDiffusionLFA(Vector<EBCellFAB*>& a_diffusionCoefficient,
-                             const EBCellFAB&    a_E,
-                             const int           a_level,
-                             const DataIndex     a_dit,
-                             const Box           a_box,
-                             const Real          a_time) noexcept;
+      computeDiffusionCoefficients(Vector<EBCellFAB*>& a_itoDiffusionCoefficients,
+                                   Vector<EBCellFAB*>& a_cdrDiffusionCoefficients,
+                                   const EBCellFAB&    a_E,
+                                   const int           a_level,
+                                   const DataIndex     a_dit,
+                                   const Box           a_box,
+                                   const Real          a_time) noexcept;
+
+      /*!
+	@brief Average cell-centered diffusion coefficient to faces
+      */
+      virtual void
+      averageDiffusionCoefficientsCellToFace() noexcept;
 
       /*!
 	@brief Get the physical number of particles per cell.

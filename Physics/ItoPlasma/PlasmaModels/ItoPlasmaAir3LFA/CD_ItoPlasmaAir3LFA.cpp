@@ -243,13 +243,16 @@ ItoPlasmaAir3LFA::computeMobilities(const Real a_time, const RealVect a_pos, con
 }
 
 Vector<Real>
-ItoPlasmaAir3LFA::computeDiffusionCoefficients(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept
+ItoPlasmaAir3LFA::computeDiffusionCoefficients(const Real     a_time,
+                                               const RealVect a_pos,
+                                               const RealVect a_E) const noexcept
 {
-  Vector<Real> D(3);
+  Vector<Real> D(4);
 
   D[0] = m_tables.at("diffco").getEntry<1>(a_E.vectorLength());
   D[1] = m_ionDiffCo;
   D[2] = m_ionDiffCo;
+  D[3] = 1.234567;
 
   return D;
 }
@@ -449,7 +452,9 @@ ItoPlasmaAir3LFA::TestSpecies::TestSpecies()
 
 ItoPlasmaAir3LFA::TestSpecies::~TestSpecies() { CH_TIME("ItoPlasmaAir3LFA::TestSpecies::TestSpecies"); }
 
-Real ItoPlasmaAir3LFA::TestSpecies::initialData(const RealVect a_pos, const Real a_time) const {
+Real
+ItoPlasmaAir3LFA::TestSpecies::initialData(const RealVect a_pos, const Real a_time) const
+{
   return 1.0;
 }
 

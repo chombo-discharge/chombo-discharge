@@ -72,7 +72,7 @@ ItoPlasmaPhysics::defineSpeciesMap() noexcept
   }
 
   for (int i = 0; i < numCdrSpecies; i++, species++) {
-    m_speciesMap.emplace(species, std::make_pair(SpeciesType::CDR,i));
+    m_speciesMap.emplace(species, std::make_pair(SpeciesType::CDR, i));
   }
 
   m_isDefined = true;

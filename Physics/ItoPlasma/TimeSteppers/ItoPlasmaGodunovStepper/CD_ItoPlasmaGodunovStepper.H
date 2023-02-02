@@ -96,7 +96,7 @@ namespace Physics {
       */
       virtual void
       writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const noexcept override;
-#endif      
+#endif
 
 #ifdef CH_USE_HDF5
       /*!

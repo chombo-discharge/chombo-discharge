@@ -440,6 +440,24 @@ CdrLayout<T>::getVelocities()
 }
 
 template <class T>
+Vector<EBAMRCellData*>
+CdrLayout<T>::getCellCenteredDiffusionCoefficients()
+{
+  CH_TIME("CdrLayout<T>::getCellCenteredDiffusionCoefficients()");
+  if (m_verbosity > 5) {
+    pout() << "CdrLayout<T>::getCellCenteredDiffusionCoefficients()" << endl;
+  }
+
+  Vector<EBAMRCellData*> diffCo;
+
+  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it) {
+    diffCo.push_back(&(solver_it()->getCellCenteredDiffusionCoefficient()));
+  }
+
+  return diffCo;
+}
+
+template <class T>
 Vector<EBAMRFluxData*>
 CdrLayout<T>::getFaceCenteredDiffusionCoefficient()
 {

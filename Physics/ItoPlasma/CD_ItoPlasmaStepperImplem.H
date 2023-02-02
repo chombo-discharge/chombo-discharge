@@ -361,7 +361,7 @@ ItoPlasmaStepper<I, C, R, F>::setupSolvers() noexcept
   if (m_verbosity > 5) {
     pout() << m_name + "::setupSolvers" << endl;
   }
-  
+
   this->setupIto();
   this->setupCdr();
   this->setupPoisson();
@@ -579,7 +579,7 @@ ItoPlasmaStepper<I, C, R, F>::initialData() noexcept
 
   // Fill solvers with velocities and diffusion coefficients
   this->computeDriftVelocities();
-  this->computeItoDiffusion();
+  this->computeDiffusionCoefficients();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -644,7 +644,7 @@ ItoPlasmaStepper<I, C, R, F>::postCheckpointSetup() noexcept
 
   // Compute velocities and diffusion coefficients so we're prepared for the next time step.
   this->computeDriftVelocities();
-  this->computeItoDiffusion();
+  this->computeDiffusionCoefficients();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1236,7 +1236,7 @@ ItoPlasmaStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLeve
   }
 
   this->computeDriftVelocities();
-  this->computeItoDiffusion();
+  this->computeDiffusionCoefficients();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -2375,7 +2375,7 @@ ItoPlasmaStepper<I, C, R, F>::computeMobilities(Vector<EBAMRCellData*>& a_itoMob
 template <typename I, typename C, typename R, typename F>
 void
 ItoPlasmaStepper<I, C, R, F>::computeMobilities(Vector<LevelData<EBCellFAB>*>& a_itoMobilities,
-						Vector<LevelData<EBCellFAB>*>& a_cdrMobilities,						
+                                                Vector<LevelData<EBCellFAB>*>& a_cdrMobilities,
                                                 const LevelData<EBCellFAB>&    a_electricField,
                                                 const int                      a_level,
                                                 const Real                     a_time) noexcept
@@ -2392,15 +2392,15 @@ ItoPlasmaStepper<I, C, R, F>::computeMobilities(Vector<LevelData<EBCellFAB>*>& a
     const Box        cellBox = dbl[dit()];
 
     Vector<EBCellFAB*> itoMobilities;
-    Vector<EBCellFAB*> cdrMobilities;    
-    
+    Vector<EBCellFAB*> cdrMobilities;
+
     for (int i = 0; i < a_itoMobilities.size(); i++) {
       itoMobilities.push_back(&((*a_itoMobilities[i])[dit()]));
     }
 
     for (int i = 0; i < a_cdrMobilities.size(); i++) {
       cdrMobilities.push_back(&((*a_cdrMobilities[i])[dit()]));
-    }    
+    }
 
     this->computeMobilities(itoMobilities, cdrMobilities, E, a_level, dit(), cellBox, a_time);
   }
@@ -2515,64 +2515,73 @@ ItoPlasmaStepper<I, C, R, F>::computeMobilities(Vector<EBCellFAB*>& a_itoMobilit
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::computeItoDiffusion() noexcept
+ItoPlasmaStepper<I, C, R, F>::computeDiffusionCoefficients() noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeItoDiffusion()");
+  CH_TIME("ItoPlasmaStepper::computeDiffusionCoefficients()");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoDiffusion()" << endl;
+    pout() << m_name + "::computeDiffusionCoefficients()" << endl;
   }
 
-  this->computeItoDiffusionLFA();
+  Vector<EBAMRCellData*> itoDiffusionCoefficients = m_ito->getDiffusionFunctions();
+  Vector<EBAMRCellData*> cdrDiffusionCoefficients = m_cdr->getCellCenteredDiffusionCoefficients();
+
+  this->computeDiffusionCoefficients(itoDiffusionCoefficients, cdrDiffusionCoefficients, m_electricFieldFluid, m_time);
+  this->averageDiffusionCoefficientsCellToFace();
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::computeItoDiffusionLFA() noexcept
+ItoPlasmaStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<EBAMRCellData*>& a_itoDiffusionCoefficients,
+                                                           Vector<EBAMRCellData*>& a_cdrDiffusionCoefficients,
+                                                           const EBAMRCellData&    a_electricField,
+                                                           const Real              a_time) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA()");
+  CH_TIME("ItoPlasmaStepper::computeDiffusionCoefficients(Vector<EBAMRCellData*>, EBAMRCellData, Real)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoDiffusionLFA()" << endl;
+    pout() << m_name + "::computeDiffusionCoefficients(Vector<EBAMRCellData*>, EBAMRCellData, Real)" << endl;
   }
 
-  Vector<EBAMRCellData*> diffusionCoefficients = m_ito->getDiffusionFunctions();
-
-  this->computeItoDiffusionLFA(diffusionCoefficients, m_electricFieldFluid, m_time);
-}
-
-template <typename I, typename C, typename R, typename F>
-void
-ItoPlasmaStepper<I, C, R, F>::computeItoDiffusionLFA(Vector<EBAMRCellData*>& a_diffusionCoefficients,
-                                                     const EBAMRCellData&    a_electricField,
-                                                     const Real              a_time) noexcept
-{
-  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>, EBAMRCellData, Real)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoDiffusionLFA(Vector<EBAMRCellData*>, EBAMRCellData, Real)" << endl;
-  }
-
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numItoSpecies = m_physics->getNumItoSpecies();
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
   CH_assert(a_electricField.getRealm() == m_fluidRealm);
-  CH_assert(a_diffusionCoefficients.size() == numPlasmaSpecies);
+  CH_assert(a_itoDiffusionCoefficients.size() == numItoSpecies);
+  CH_assert(a_cdrDiffusionCoefficients.size() == numCdrSpecies);
+
+  // Sanity check -- things need to be defined on the correct realms.
+  for (int i = 0; i < numItoSpecies; i++) {
+    CH_assert(a_itoDiffusionCoefficients[i]->getRealm() == m_particleRealm);
+  }
+  for (int i = 0; i < numCdrSpecies; i++) {
+    CH_assert(a_cdrDiffusionCoefficients[i]->getRealm() == m_fluidRealm);
+  }
 
   // The mesh diffusion coefficients belong on the particle realm (they are the ItoSolver diffusion coefficients) but we need to run
   // the computation on the fluid realm. So, create some transient storage for that.
-  Vector<EBAMRCellData> fluidScratchDiffusion(numPlasmaSpecies);
-  for (int i = 0; i < numPlasmaSpecies; i++) {
+  Vector<EBAMRCellData> fluidScratchDiffusion(numItoSpecies);
+  for (int i = 0; i < numItoSpecies; i++) {
     m_amr->allocate(fluidScratchDiffusion[i], m_fluidRealm, m_plasmaPhase, 1);
 
-    CH_assert(a_diffusionCoefficients[i]->getRealm() == m_particleRealm);
+    CH_assert(a_itoDiffusionCoefficients[i]->getRealm() == m_particleRealm);
   }
 
   // Compute mesh-based diffusion coefficients on the fluid realm.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    Vector<LevelData<EBCellFAB>*> diffusionCoefficients(numPlasmaSpecies);
+    Vector<LevelData<EBCellFAB>*> itoDiffusionCoefficients(numItoSpecies);
+    Vector<LevelData<EBCellFAB>*> cdrDiffusionCoefficients(numCdrSpecies);
 
-    for (int i = 0; i < numPlasmaSpecies; i++) {
-      diffusionCoefficients[i] = &(*(fluidScratchDiffusion[i])[lvl]);
+    for (int i = 0; i < numItoSpecies; i++) {
+      itoDiffusionCoefficients[i] = &(*(fluidScratchDiffusion[i])[lvl]);
+    }
+    for (int i = 0; i < numCdrSpecies; i++) {
+      cdrDiffusionCoefficients[i] = &(*(*a_cdrDiffusionCoefficients[i])[lvl]);
     }
 
-    this->computeItoDiffusionLFA(diffusionCoefficients, *a_electricField[lvl], lvl, a_time);
+    this->computeDiffusionCoefficients(itoDiffusionCoefficients,
+                                       cdrDiffusionCoefficients,
+                                       *a_electricField[lvl],
+                                       lvl,
+                                       a_time);
   }
 
   // Copy the fluid realm data over to the particle realm data and then coarsen and interpolate diffusion coefficients
@@ -2583,10 +2592,10 @@ ItoPlasmaStepper<I, C, R, F>::computeItoDiffusionLFA(Vector<EBAMRCellData*>& a_d
     if (solver->isDiffusive()) {
       const int idx = solverIt.index();
 
-      a_diffusionCoefficients[idx]->copy(fluidScratchDiffusion[idx]);
+      a_itoDiffusionCoefficients[idx]->copy(fluidScratchDiffusion[idx]);
 
-      m_amr->conservativeAverage(*a_diffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);
-      m_amr->interpGhostPwl(*a_diffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);
+      m_amr->conservativeAverage(*a_itoDiffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);
+      m_amr->interpGhostPwl(*a_itoDiffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);
 
       solver->interpolateDiffusion();
     }
@@ -2595,79 +2604,115 @@ ItoPlasmaStepper<I, C, R, F>::computeItoDiffusionLFA(Vector<EBAMRCellData*>& a_d
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>& a_diffusionCoefficients,
-                                                     const LevelData<EBCellFAB>&    a_electricField,
-                                                     const int                      a_level,
-                                                     const Real                     a_time) noexcept
+ItoPlasmaStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<LevelData<EBCellFAB>*>& a_itoDiffusionCoefficients,
+                                                           Vector<LevelData<EBCellFAB>*>& a_cdrDiffusionCoefficients,
+                                                           const LevelData<EBCellFAB>&    a_electricField,
+                                                           const int                      a_level,
+                                                           const Real                     a_time) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LD<EBCellFAB>*>, LD<EBCellFAB>, int, Real)");
+  CH_TIME("ItoPlasmaStepper::computeDiffusionCoefficients(Vector<LD<EBCellFAB>*>, LD<EBCellFAB>, int, Real)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoDiffusionLFA(Vector<LD<EBCellFAB>*>, LD<EBCellFAB>, int, Real)" << endl;
+    pout() << m_name + "::computeDiffusionCoefficients(Vector<LD<EBCellFAB>*>, LD<EBCellFAB>, int, Real)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numItoSpecies = m_physics->getNumItoSpecies();
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
-  CH_assert(a_diffusionCoefficients.size() == numPlasmaSpecies);
+  CH_assert(a_itoDiffusionCoefficients.size() == numItoSpecies);
+  CH_assert(a_cdrDiffusionCoefficients.size() == numCdrSpecies);
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
-
-    // Populate the patch data.
-    Vector<EBCellFAB*> diffusionCoefficients(numPlasmaSpecies);
+    Vector<EBCellFAB*> itoDiffusionCoefficients(numItoSpecies);
+    Vector<EBCellFAB*> cdrDiffusionCoefficients(numCdrSpecies);
 
     for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
 
       if (solverIt()->isDiffusive()) {
-        diffusionCoefficients[idx] = &(*a_diffusionCoefficients[idx])[dit()];
+        itoDiffusionCoefficients[idx] = &(*a_itoDiffusionCoefficients[idx])[dit()];
       }
       else {
-        diffusionCoefficients[idx] = nullptr;
+        itoDiffusionCoefficients[idx] = nullptr;
       }
     }
 
-    this->computeItoDiffusionLFA(diffusionCoefficients, a_electricField[dit()], a_level, dit(), dbl[dit()], a_time);
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx = solverIt.index();
+
+      if (solverIt()->isDiffusive()) {
+        cdrDiffusionCoefficients[idx] = &(*a_cdrDiffusionCoefficients[idx])[dit()];
+      }
+      else {
+        cdrDiffusionCoefficients[idx] = nullptr;
+      }
+    }
+
+    this->computeDiffusionCoefficients(itoDiffusionCoefficients,
+                                       cdrDiffusionCoefficients,
+                                       a_electricField[dit()],
+                                       a_level,
+                                       dit(),
+                                       dbl[dit()],
+                                       a_time);
   }
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::computeItoDiffusionLFA(Vector<EBCellFAB*>& a_diffusionCoefficients,
-                                                     const EBCellFAB&    a_electricField,
-                                                     const int           a_level,
-                                                     const DataIndex     a_dit,
-                                                     const Box           a_box,
-                                                     const Real          a_time) noexcept
+ItoPlasmaStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<EBCellFAB*>& a_itoDiffusionCoefficients,
+                                                           Vector<EBCellFAB*>& a_cdrDiffusionCoefficients,
+                                                           const EBCellFAB&    a_electricField,
+                                                           const int           a_level,
+                                                           const DataIndex     a_dit,
+                                                           const Box           a_box,
+                                                           const Real          a_time) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(Patch)");
+  CH_TIME("ItoPlasmaStepper::computeDiffusionCoefficients(Patch)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeItoDiffusionLFA(Patch)" << endl;
+    pout() << m_name + "::computeDiffusionCoefficients(Patch)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numItoSpecies    = m_physics->getNumItoSpecies();
+  const int numCdrSpecies    = m_physics->getNumCdrSpecies();
+  const int numPlasmaSpecies = m_physics->getNumCdrSpecies();
 
-  CH_assert(a_diffusionCoefficients.size() == numPlasmaSpecies);
   CH_assert(a_electricField.nComp() == SpaceDim);
+  CH_assert(a_itoDiffusionCoefficients.size() == numItoSpecies);
+  CH_assert(a_cdrDiffusionCoefficients.size() == numPlasmaSpecies);
 
   // Geometric information that we need.
   const Real     dx      = m_amr->getDx()[a_level];
   const RealVect probLo  = m_amr->getProbLo();
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_dit];
 
-  // Definition of single-valued aka regular data.
+  // Handle to single-valued data.
   const FArrayBox& electricFieldReg = a_electricField.getFArrayBox();
 
-  Vector<FArrayBox*> diffCoReg(numPlasmaSpecies);
+  Vector<FArrayBox*> itoDiffCoReg(numItoSpecies, nullptr);
+  Vector<FArrayBox*> cdrDiffCoReg(numCdrSpecies, nullptr);
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>& solver = solverIt();
 
     if (solver->isDiffusive()) {
-      const int i  = solverIt.index();
-      diffCoReg[i] = &(a_diffusionCoefficients[i]->getFArrayBox());
+      const int i     = solverIt.index();
+      itoDiffCoReg[i] = &(a_itoDiffusionCoefficients[i]->getFArrayBox());
     }
   }
+
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<CdrSolver>& solver = solverIt();
+
+    if (solver->isDiffusive()) {
+      const int i     = solverIt.index();
+      cdrDiffCoReg[i] = &(a_cdrDiffusionCoefficients[i]->getFArrayBox());
+    }
+  }
+
+  // Physics interface mapping -- this maps a global index from the returned vector to an Ito or CDR solver
+  const std::map<int, std::pair<SpeciesType, int>>& speciesMap = m_physics->getSpeciesMap();
 
   // Regular kernel definition.
   auto regularKernel = [&](const IntVect& iv) -> void {
@@ -2675,16 +2720,26 @@ ItoPlasmaStepper<I, C, R, F>::computeItoDiffusionLFA(Vector<EBCellFAB*>& a_diffu
     const RealVect E   = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
 
     // Compute diffusion coefficients.
-    const Vector<Real> diffusion = m_physics->computeDiffusionCoefficients(a_time, pos, E);
+    const Vector<Real> diffusionCoefficients = m_physics->computeDiffusionCoefficients(a_time, pos, E);
 
-    // Put diffusion coefficients into correct storage.
-    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      RefCountedPtr<ItoSolver>& solver = solverIt();
+    CH_assert(diffusion.size() == numPlasmaSpecies);
 
-      if (solver->isDiffusive()) {
-        const int idx = solverIt.index();
+    // Put the diffusion coefficients in the correct solver storage.
+    for (const auto& s : speciesMap) {
+      const int&         globalIndex = s.first;
+      const SpeciesType& type        = s.second.first;
+      const int&         localIndex  = s.second.second;
 
-        (*diffCoReg[idx])(iv, 0) = diffusion[idx];
+      // We need an explicit check to see if
+      if (type == SpeciesType::Ito) {
+        if (m_ito->getSolvers()[localIndex]->isDiffusive()) {
+          (*itoDiffCoReg[localIndex])(iv, 0) = diffusionCoefficients[globalIndex];
+        }
+      }
+      else if (type == SpeciesType::CDR) {
+        if (m_cdr->getSolvers()[localIndex]->isDiffusive()) {
+          (*cdrDiffCoReg[localIndex])(iv, 0) = diffusionCoefficients[globalIndex];
+        }
       }
     }
   };
@@ -2695,14 +2750,24 @@ ItoPlasmaStepper<I, C, R, F>::computeItoDiffusionLFA(Vector<EBCellFAB*>& a_diffu
     const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
 
     // Compute diffusion coefficients.
-    const Vector<Real> diffusion = m_physics->computeDiffusionCoefficients(a_time, pos, E);
+    const Vector<Real> diffusionCoefficients = m_physics->computeDiffusionCoefficients(a_time, pos, E);
 
-    // Put diffusion in the appropriate place.
-    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      if (solverIt()->isDiffusive()) {
-        const int idx = solverIt.index();
+    // Put the diffusion coefficients in the correct solver storage.
+    for (const auto& s : speciesMap) {
+      const int&         globalIndex = s.first;
+      const SpeciesType& type        = s.second.first;
+      const int&         localIndex  = s.second.second;
 
-        (*a_diffusionCoefficients[idx])(vof, 0) = diffusion[idx];
+      // We need an explicit check to see if
+      if (type == SpeciesType::Ito) {
+        if (m_ito->getSolvers()[localIndex]->isDiffusive()) {
+          (*a_itoDiffusionCoefficients[localIndex])(vof, 0) = diffusionCoefficients[globalIndex];
+        }
+      }
+      else if (type == SpeciesType::CDR) {
+        if (m_cdr->getSolvers()[localIndex]->isDiffusive()) {
+          (*a_cdrDiffusionCoefficients[localIndex])(vof, 0) = diffusionCoefficients[globalIndex];
+        }
       }
     }
   };
@@ -2716,9 +2781,55 @@ ItoPlasmaStepper<I, C, R, F>::computeItoDiffusionLFA(Vector<EBCellFAB*>& a_diffu
   // Covered is bogus.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     if (solverIt()->isDiffusive()) {
-      const int idx = solverIt.index();
+      a_itoDiffusionCoefficients[solverIt.index()]->setCoveredCellVal(0.0, 0);
+    }
+  }
 
-      a_diffusionCoefficients[idx]->setCoveredCellVal(0.0, 0);
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    if (solverIt()->isDiffusive()) {
+      a_cdrDiffusionCoefficients[solverIt.index()]->setCoveredCellVal(0.0, 0);
+    }
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoPlasmaStepper<I, C, R, F>::averageDiffusionCoefficientsCellToFace() noexcept
+{
+  CH_TIME("ItoPlasmaStepper::averageDiffusionCoefficientsCellToFace");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::averageDiffusionCoefficientsCellToFace" << endl;
+  }
+
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<CdrSolver>& solver = solverIt();
+
+    if (solver->isDiffusive()) {
+
+      EBAMRCellData& cellCenteredDiffusionCoefficient = solver->getCellCenteredDiffusionCoefficient();
+      EBAMRFluxData& faceCenteredDiffusionCoefficient = solver->getFaceCenteredDiffusionCoefficient();
+
+      CH_assert(cellCenteredDiffusionCoefficient.getRealm() == m_fluidRealm);
+      CH_assert(faceCenteredDiffusionCoefficient.getRealm() == m_fluidRealm);
+
+      DataOps::setValue(faceCenteredDiffusionCoefficient, std::numeric_limits<Real>::max());
+
+      // Coarsen the cell-centered diffusion coefficient before averaging to faces.
+      m_amr->arithmeticAverage(cellCenteredDiffusionCoefficient, m_fluidRealm, m_cdr->getPhase());
+      m_amr->interpGhostPwl(cellCenteredDiffusionCoefficient, m_fluidRealm, m_cdr->getPhase());
+
+      // Average to cell faces. Note that this call also includes one ghost face (required when there's an EBCF crossing).
+      const int      tanGhost = 1;
+      const Interval interv   = Interval(0, 0);
+      const Average  average  = Average::Arithmetic;
+
+      DataOps::averageCellToFace(faceCenteredDiffusionCoefficient,
+                                 cellCenteredDiffusionCoefficient,
+                                 m_amr->getDomains(),
+                                 tanGhost,
+                                 interv,
+                                 interv,
+                                 average);
     }
   }
 }

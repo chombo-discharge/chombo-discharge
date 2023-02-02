@@ -235,6 +235,12 @@ public:
   getVelocities();
 
   /*!
+    @brief Get all cell-centered diffusion coefficients. 
+  */
+  virtual Vector<EBAMRCellData*>
+  getCellCenteredDiffusionCoefficients();
+
+  /*!
     @brief Get all face-centered diffusion coefficients. 
   */
   virtual Vector<EBAMRFluxData*>

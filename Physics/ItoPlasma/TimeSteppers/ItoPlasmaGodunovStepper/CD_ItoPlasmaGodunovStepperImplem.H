@@ -295,7 +295,7 @@ ItoPlasmaGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 
   this->barrier();
   m_timer.startEvent("Post-compute D");
-  this->computeItoDiffusion();
+  this->computeDiffusionCoefficients();
   m_timer.stopEvent("Post-compute D");
 
   this->barrier();
@@ -333,7 +333,9 @@ ItoPlasmaGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_old
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaGodunovStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) noexcept
+ItoPlasmaGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
+                                            const int a_oldFinestLevel,
+                                            const int a_newFinestLevel) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::regrid");
   if (this->m_verbosity > 5) {
@@ -360,7 +362,7 @@ ItoPlasmaGodunovStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFin
 
   m_timer.startEvent("Regrid CdrSolver");
   (this->m_cdr)->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-  m_timer.stopEvent("Regrid CdrSolver");  
+  m_timer.stopEvent("Regrid CdrSolver");
 
   m_timer.startEvent("Regrid FieldSolver");
   (this->m_fieldSolver)->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
@@ -423,7 +425,7 @@ ItoPlasmaGodunovStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFin
   // Recompute new velocities and diffusion coefficients
   m_timer.startEvent("Prepare next step");
   this->computeDriftVelocities();
-  this->computeItoDiffusion();
+  this->computeDiffusionCoefficients();
   m_timer.stopEvent("Prepare next step");
 
   m_timer.eventReport(pout(), false);

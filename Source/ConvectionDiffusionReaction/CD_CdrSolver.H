@@ -270,14 +270,14 @@ public:
   /*!
     @brief Get the CDR species
   */
-  virtual
-  RefCountedPtr<CdrSpecies>& getSpecies() noexcept;
+  virtual RefCountedPtr<CdrSpecies>&
+  getSpecies() noexcept;
 
   /*!
     @brief Get the CDR species
   */
-  virtual
-  const RefCountedPtr<CdrSpecies>& getSpecies() const noexcept;  
+  virtual const RefCountedPtr<CdrSpecies>&
+  getSpecies() const noexcept;
 
   /*!
     @brief Set species
@@ -623,6 +623,12 @@ public:
   getEbCenteredVelocity();
 
   /*!
+    @brief Get the cell-centered diffusion coefficient
+  */
+  virtual EBAMRCellData&
+  getCellCenteredDiffusionCoefficient();
+
+  /*!
     @brief Get the face-centered diffusion coefficient
     @return m_faceCentereDiffusionCoefficient
   */
@@ -811,6 +817,11 @@ protected:
     @brief Domain flux
   */
   EBAMRIFData m_domainFlux;
+
+  /*!
+    @brief Diffusion coefficients on cell centers
+  */
+  EBAMRCellData m_cellCenteredDiffusionCoefficient;
 
   /*!
     @brief Diffusion coefficients on face centers
