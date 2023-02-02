@@ -185,7 +185,7 @@ namespace Physics {
 	@return Must return a vector of non-negative diffusion coefficients for the plasma species
       */
       virtual Vector<Real>
-      computeItoDiffusion(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept = 0;
+      computeDiffusionCoefficients(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept = 0;
 
       /*!
 	@brief Resolve particle and photon injection at the EB.

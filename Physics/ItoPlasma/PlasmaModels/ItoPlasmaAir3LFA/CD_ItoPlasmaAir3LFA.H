@@ -91,7 +91,7 @@ namespace Physics {
 	@param[in] a_E         Electric field
       */
       Vector<Real>
-      computeItoDiffusion(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override;
+      computeDiffusionCoefficients(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override;
 
       /*!
 	@brief Resolve particle and photon injection at the EB.
