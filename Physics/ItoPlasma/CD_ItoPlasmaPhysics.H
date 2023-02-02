@@ -57,6 +57,16 @@ namespace Physics {
     using KMCSolverType = KMCSolver<KMCReaction, KMCState, FPR>;
 
     /*!
+      @brief Map to species type
+      @details This is just for distinguishing between species that are treated with an Ito or CDR formalism
+    */
+    enum SpeciesType
+    {
+      Ito,
+      CDR
+    };
+
+    /*!
       @brief Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers. 
       @details When using this class, the user should populate m_kmcReactions with the appropriate reactions AND implement routines
       for computing the mobility/diffusion coefficeints. 
@@ -140,14 +150,8 @@ namespace Physics {
       /*!
 	@brief Get the internal mapping between plasma species and Ito solvers
       */
-      inline std::map<int, int>
-      getItoMap() const noexcept;
-
-      /*!
-	@brief Get the internal mapping between plasma species and CDR solvers
-      */
-      inline std::map<int, int>
-      getCdrMap() const noexcept;
+      inline const std::map<int, std::pair<SpeciesType, int>>&
+      getSpeciesMap() const noexcept;
 
       /*!
 	@brief Parse run-time options
@@ -338,12 +342,7 @@ namespace Physics {
       /*!
 	@brief Map for associating a plasma species with an Ito solver. 
       */
-      std::map<int, int> m_itoMap;
-
-      /*!
-	@brief Map for associating a plasma species with a CDR solver.
-      */
-      std::map<int, int> m_cdrMap;      
+      std::map<int, std::pair<SpeciesType, int>> m_speciesMap;
 
       /*!
 	@brief Class name. Used for options parsing
@@ -434,7 +433,7 @@ namespace Physics {
 	@note This should ALWAYS be called after initializing the species since ItoPlasmaStepper will rely on it. 
       */
       inline void
-      buildInternalRepresentation() noexcept;
+      defineSpeciesMap() noexcept;
 
       /*!
 	@brief Define the KMC solver and state

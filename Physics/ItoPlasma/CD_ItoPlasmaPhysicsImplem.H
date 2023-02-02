@@ -59,39 +59,31 @@ inline ItoPlasmaPhysics::ItoPlasmaPhysics() noexcept
 inline ItoPlasmaPhysics::~ItoPlasmaPhysics() noexcept { CH_TIME("ItoPlasmaPhysics::~ItoPlasmaPhysics"); }
 
 inline void
-ItoPlasmaPhysics::buildInternalRepresentation() noexcept
+ItoPlasmaPhysics::defineSpeciesMap() noexcept
 {
-  CH_TIME("ItoPlasmaPhysics::buildInternalRepresentation");
+  CH_TIME("ItoPlasmaPhysics::defineSpeciesMap");
 
   const int numItoSpecies = this->getNumItoSpecies();
   const int numCdrSpecies = this->getNumCdrSpecies();
 
   int species = 0;
   for (int i = 0; i < numItoSpecies; i++, species++) {
-    m_itoMap.emplace(species, i);
+    m_speciesMap.emplace(species, std::make_pair(SpeciesType::Ito, i));
   }
 
   for (int i = 0; i < numCdrSpecies; i++, species++) {
-    m_cdrMap.emplace(species, i);
+    m_speciesMap.emplace(species, std::make_pair(SpeciesType::CDR,i));
   }
 
   m_isDefined = true;
 }
 
-inline std::map<int, int>
-ItoPlasmaPhysics::getItoMap() const noexcept
+inline const std::map<int, std::pair<SpeciesType, int>>&
+ItoPlasmaPhysics::getSpeciesMap() const noexcept
 {
-  CH_TIME("ItoPlasmaPhysics::getItoMap");
+  CH_TIME("ItoPlasmaPhysics::getSpeciesMap");
 
-  return m_itoMap;
-}
-
-inline std::map<int, int>
-ItoPlasmaPhysics::getCdrMap() const noexcept
-{
-  CH_TIME("ItoPlasmaPhysics::getCdrMap");
-
-  return m_cdrMap;
+  return m_speciesMap;
 }
 
 inline Real

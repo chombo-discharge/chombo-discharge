@@ -112,7 +112,7 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   m_photoReactions.emplace_back(y1);
 
   // Build internal representation of species
-  this->buildInternalRepresentation();
+  this->defineSpeciesMap();
 
   // Define the KMC solver and read in transport data.
   this->defineKMC();
@@ -232,11 +232,12 @@ ItoPlasmaAir3LFA::computeMobilities(const Real a_time, const RealVect a_pos, con
 {
   CH_TIME("ItoPlasmaAir3LFA::computeMobilities");
 
-  Vector<Real> mobilities(3);
+  Vector<Real> mobilities(4);
 
   mobilities[0] = m_tables.at("mobility").getEntry<1>(a_E.vectorLength());
   mobilities[1] = m_ionMobility;
   mobilities[2] = m_ionMobility;
+  mobilities[3] = 1.E3;
 
   return mobilities;
 }
@@ -440,8 +441,8 @@ ItoPlasmaAir3LFA::TestSpecies::TestSpecies()
 {
   CH_TIME("ItoPlasmaAir3LFA::TestSpecies::TestSpecies");
 
-  m_isMobile     = false;
-  m_isDiffusive  = false;
+  m_isMobile     = true;
+  m_isDiffusive  = true;
   m_name         = "TestSpecies";
   m_chargeNumber = -1;
 }

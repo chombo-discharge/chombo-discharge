@@ -952,6 +952,19 @@ namespace Physics {
       setItoVelocityFunctions() noexcept;
 
       /*!
+	@brief Set the Cdr velocities to be sgn(charge) * E. 
+	@details To set the final drift velocity, mobilities should be computed and multiplied in with the drift velocities. 
+      */
+      virtual void
+      setCdrVelocityFunctions() noexcept;
+
+      /*!
+	@brief Multiply CDR solver velocities by mobilities
+      */
+      virtual void
+      multiplyCdrVelocitiesByMobilities() noexcept;
+
+      /*!
 	@brief Compute ItoSolver velocities.
 	@details This will compute the mobilities and then interpolate mu*E to particle positions.  
       */
@@ -967,6 +980,7 @@ namespace Physics {
 
       /*!
 	@brief Compute mesh-based mobilities for LFA coupling
+	@details This updates the mobilities in the Ito particle solvers AND m_cdrMobilities (not owned by solvers)
 	@note Calls the other version with mesh mobilities taken from ItoSolver solvers. 
       */
       virtual void
@@ -987,20 +1001,23 @@ namespace Physics {
 
       /*!
 	@brief Level-routine when computing mesh-based mobilities for LFA coupling
-	@param[out] a_meshMobilities Mesh-based mobilities. Must be defined on the fluid realm. 
+	@param[out] a_itoMobilities  Mesh-based mobilities for Ito solvers. Must be defined on the particle realm. 
+	@param[out] a_cdrMobilities  Mesh-based mobilities for CDR solvers. Must be defined on the fluid realm. 
 	@param[in]  a_electricField  Electric field. Must be defined on the fluid realm. 
 	@param[in]  a_level          Grid level
 	@param[in]  a_time           Time
       */
       virtual void
-      computeMobilities(Vector<LevelData<EBCellFAB>*>& a_meshMobilities,
-                              const LevelData<EBCellFAB>&    a_E,
-                              const int                      a_level,
-                              const Real                     a_time) noexcept;
+      computeMobilities(Vector<LevelData<EBCellFAB>*>& a_itoMobilities,
+                        Vector<LevelData<EBCellFAB>*>& a_cdrMobilities,
+                        const LevelData<EBCellFAB>&    a_E,
+                        const int                      a_level,
+                        const Real                     a_time) noexcept;
 
       /*!
 	@brief Patch-routine when computing mesh-based mobilities for LFA coupling
-	@param[out] a_meshMobilities Mesh-based mobilities. Must be defined on the fluid realm. 
+	@param[out] a_itoMobilities  Mesh-based mobilities for Ito solvers. Must be defined on the particle realm. 
+	@param[out] a_cdrMobilities  Mesh-based mobilities for CDR solvers. Must be defined on the fluid realm. 
 	@param[in]  a_electricField  Electric field. Must be defined on the fluid realm. 
 	@param[in]  a_level          Grid level
 	@param[in]  a_dit            Grid index
@@ -1008,7 +1025,8 @@ namespace Physics {
 	@param[in]  a_time           Time      
       */
       virtual void
-      computeMobilities(Vector<EBCellFAB*>& a_meshMobilities,
+      computeMobilities(Vector<EBCellFAB*>& a_itoMobilities,
+                        Vector<EBCellFAB*>& a_cdrMobilities,
                         const EBCellFAB&    a_electricField,
                         const int           a_level,
                         const DataIndex     a_dit,
