@@ -241,7 +241,9 @@ ItoPlasmaAir3LFA::computeMobilities(const Real a_time, const RealVect a_pos, con
   mobilities[0] = m_tables.at("mobility").getEntry<1>(a_E.vectorLength());
   mobilities[1] = m_ionMobility;
   mobilities[2] = m_ionMobility;
-  mobilities[3] = 1.E3;
+#if 1 // Test for CDR species
+  mobilities[3] = m_tables.at("mobility").getEntry<1>(a_E.vectorLength());
+#endif
 
   return mobilities;
 }
