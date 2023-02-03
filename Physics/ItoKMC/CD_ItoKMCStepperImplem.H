@@ -3341,6 +3341,8 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
     EBAMRCellData fluidCdrPPC = m_amr->slice(m_fluidCdrPPC, Interval(i, i));
 
     DataOps::incr(fluidCdrPPC, m_fluidScratch1, 1.0);
+
+    m_cdrPhotoiProducts[i].clearParticles();
   }
 
   this->reconcileCdrDensities(m_fluidCdrPPC, m_fluidOldCdrPPC, a_dt);
@@ -3414,8 +3416,6 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
   Vector<Physics::ItoKMC::FPR> newPhotons(numPhotonSpecies);
   Vector<Real>                 meanEnergies(numPlasmaSpecies);
   Vector<Real>                 energySources(numPlasmaSpecies);
-
-  const Real dV = std::pow(a_dx, SpaceDim);
 
   // Populate single-valued data.
   FArrayBox& particlesPerCellReg = a_particlesPerCell.getFArrayBox();
@@ -3697,7 +3697,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
                                   kappa);
 
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
-      //      m_physics->reconcilePhotoionization(itoParticles, bulkPhotons);
+      m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
     }
   };
 
@@ -3770,7 +3770,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
                                   kappa);
 
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
-      //      m_physics->reconcilePhotoionization(itoParticles, bulkPhotons);
+      m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
     }
   };
 

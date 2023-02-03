@@ -27,6 +27,7 @@
 #include <CD_RtSpecies.H>
 #include <CD_Photon.H>
 #include <CD_ItoParticle.H>
+#include <CD_PointParticle.H>
 #include <CD_ItoKMCPhotoReaction.H>
 #include <CD_KMCDualState.H>
 #include <CD_KMCDualStateReaction.H>
@@ -300,13 +301,15 @@ namespace Physics {
 
       /*!
 	@brief Reconcile photoionization reactions.
-	@param[inout] a_particles       Particle products. 
+	@param[inout] a_itoPrticles       Particle products placed in Ito solvers. 
+	@param[inout] a_cdrParticles      Particle products placed in CDR solvers. 
 	@param[in]    a_absorbedPhotons Photons absorbed on the mesh. 
 	@details This runs through the photo-reactions and associates photo-ionization products. 
       */
       inline void
-      reconcilePhotoionization(Vector<List<ItoParticle>*>&  a_particles,
-                               const Vector<List<Photon>*>& a_absorbedPhotons) const noexcept;
+      reconcilePhotoionization(Vector<List<ItoParticle>*>&   a_itoParticles,
+                               Vector<List<PointParticle>*>& a_cdrParticles,
+                               const Vector<List<Photon>*>&  a_absorbedPhotons) const noexcept;
 
     protected:
       /*!

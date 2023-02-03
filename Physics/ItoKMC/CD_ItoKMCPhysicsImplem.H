@@ -447,14 +447,15 @@ ItoKMCPhysics::reconcilePhotons(Vector<List<Photon>*>& a_newPhotons,
 }
 
 inline void
-ItoKMCPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&  a_particles,
-                                        const Vector<List<Photon>*>& a_absorbedPhotons) const noexcept
+ItoKMCPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&   a_itoParticles,
+                                        Vector<List<PointParticle>*>& a_cdrParticles,
+                                        const Vector<List<Photon>*>&  a_absorbedPhotons) const noexcept
 {
   CH_TIME("ItoKMCPhysics::reconcilePhotoionization");
 
-  MayDay::Warning("ItoKMCPhysics::reconcilePhotoionization -- needs to be adapted for mixed Ito/CDR");
-
   CH_assert(m_isDefined);
+  CH_assert(a_itoParticles.size() == m_itoSpecies.size());
+  CH_assert(a_cdrParticles.size() == m_cdrSpecies.size());
 
   for (const auto& r : m_photoReactions) {
 
@@ -467,7 +468,18 @@ ItoKMCPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&  a_particles
       const Real     w = lit().weight();
 
       for (const auto& t : targets) {
-        a_particles[t]->add(ItoParticle(w, x));
+        const SpeciesType& type       = m_speciesMap.at(t).first;
+        const int&         localIndex = m_speciesMap.at(t).second;
+
+        if (type == SpeciesType::Ito) {
+          a_itoParticles[localIndex]->add(ItoParticle(w, x));
+        }
+        else if (type == SpeciesType::CDR) {
+          a_cdrParticles[localIndex]->add(PointParticle(x, w));
+        }
+        else {
+          MayDay::Error("CD_ItoKMCPhysics.H - logic bust in reconcilePhotoionization");
+        }
       }
     }
   }
