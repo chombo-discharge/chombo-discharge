@@ -882,7 +882,7 @@ namespace Physics {
       /*!
 	@brief Compute the cell-centered conductiivty
 	@param[out] a_conductivity Cell-centered conductivity
-	@note Calls the other version. 
+	@note User should have updated the mobilities before calling this routine.
       */
       virtual void
       computeConductivityCell(EBAMRCellData& a_conductivity) noexcept;
@@ -891,7 +891,7 @@ namespace Physics {
 	@brief Compute the cell-centered conductiivty
 	@param[out] a_conductivity Cell-centered conductivity
 	@param[in]  a_particles    Ito particles.
-
+	@note User should have updated the mobilities before calling this routine.
       */
       virtual void
       computeConductivityCell(EBAMRCellData&                                 a_conductivity,

@@ -1474,11 +1474,9 @@ ItoPlasmaStepper<I, C, R, F>::computeConductivityCell(
     pout() << m_name + "::computeConductivityCell(EBAMRCellData, Particles)" << endl;
   }
 
-  // TLDR: This will deposit the particle conductivity on the mesh (onto m_particleScratch1) which is
-  //       then added to the total conductivity.
-
   DataOps::setValue(a_conductivity, 0.0);
 
+  // Add contribution from particle solvers
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
@@ -1491,6 +1489,24 @@ ItoPlasmaStepper<I, C, R, F>::computeConductivityCell(
 
       // Add to the fluid realm.
       m_fluidScratch1.copy(m_particleScratch1);
+      DataOps::incr(a_conductivity, m_fluidScratch1, 1.0 * std::abs(Z));
+    }
+  }
+
+  // Add contribution from CDR solvers
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
+    const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
+
+    const int idx = solverIt.index();
+    const int Z   = species->getChargeNumber();
+
+    if (Z != 0 && solver->isMobile()) {
+      const EBAMRCellData& phi      = solver->getPhi();
+      const EBAMRCellData& mobility = m_cdrMobilities[idx];
+
+      DataOps::copy(m_fluidScratch1, phi);
+      DataOps::multiplyScalar(m_fluidScratch1, mobility);
       DataOps::incr(a_conductivity, m_fluidScratch1, 1.0 * std::abs(Z));
     }
   }

@@ -101,16 +101,15 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   auto r4 = std::make_shared<KMCReaction>(std::list<size_t>{1, 2}, std::list<size_t>{}, std::list<size_t>{});
   auto r5 = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{0}, std::list<size_t>{0});
 
-
   m_kmcReactions.emplace_back(r1);
   m_kmcReactions.emplace_back(r2);
   m_kmcReactions.emplace_back(r3);
   m_kmcReactions.emplace_back(r4);
   m_kmcReactions.emplace_back(r5);
 #if 1 // Add a test reaction for cdr species
-  auto r6 = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{3}, std::list<size_t>{});
-  m_kmcReactions.emplace_back(r6);  
-#endif  
+  auto r6 = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{0, 3}, std::list<size_t>{});
+  m_kmcReactions.emplace_back(r6);
+#endif
 
   // Photo-reactions
   auto y1 = std::make_shared<ItoPlasmaPhotoReaction>(0, std::list<size_t>{0, 1});
