@@ -522,8 +522,16 @@ namespace Physics {
 
       /*!
 	@brief For holding the mobilities for the CDR species
+	@note Defined on the fluid realm. 
       */
       Vector<EBAMRCellData> m_cdrMobilities;
+
+      /*!
+	@brief Photoionization products to be put in the CDR equations
+	@note This is agglomerated with Ito particle photoionization functionality, and is
+	therefore defined on the particle realm. 
+      */
+      Vector<ParticleContainer<PointParticle>> m_cdrPhotoiProducts;
 
       /*!
 	@brief Solver indices used when load-balancing the particle solvers.

@@ -44,25 +44,20 @@ ItoKMCAir3LFA::ItoKMCAir3LFA()
   m_ionDiffCo = m_ionMobility * Units::kb * m_T / Units::Qe;
 
   // Set up species
-  m_itoSpecies.resize(3);
+  m_itoSpecies.resize(1);
+  m_cdrSpecies.resize(2);
   m_rtSpecies.resize(1);
-  m_cdrSpecies.resize(1);
 
   m_itoSpecies[0] = RefCountedPtr<ItoSpecies>(new Electron());
-  m_itoSpecies[1] = RefCountedPtr<ItoSpecies>(new Positive());
-  m_itoSpecies[2] = RefCountedPtr<ItoSpecies>(new Negative());
-  m_cdrSpecies[0] = RefCountedPtr<CdrSpecies>(new TestSpecies());
+  m_cdrSpecies[0] = RefCountedPtr<CdrSpecies>(new Positive());
+  m_cdrSpecies[1] = RefCountedPtr<CdrSpecies>(new Negative());
   m_rtSpecies[0]  = RefCountedPtr<RtSpecies>(new PhotonZ());
 
-  List<ItoParticle>& electrons    = m_itoSpecies[0]->getInitialParticles();
-  List<ItoParticle>& positiveIons = m_itoSpecies[1]->getInitialParticles();
-  List<ItoParticle>& negativeIons = m_itoSpecies[2]->getInitialParticles();
+  List<ItoParticle>& electrons = m_itoSpecies[0]->getInitialParticles();
 
   electrons.clear();
-  positiveIons.clear();
-  negativeIons.clear();
 
-  // Draw some initial electrons and add corresponding positive ions.
+  // Draw some initial electrons
   ParmParse pp("ItoKMCAir3LFA");
 
   int          initParticles;
@@ -78,14 +73,6 @@ ItoKMCAir3LFA::ItoKMCAir3LFA()
   blobCenter = RealVect(D_DECL(v[0], v[1], v[2]));
 
   ParticleManagement::drawSphereParticles(electrons, initParticles, blobCenter, blobRadius);
-
-  for (ListIterator<ItoParticle> lit(electrons); lit.ok(); ++lit) {
-    const RealVect& x = lit().position();
-
-    lit().weight() = initParticleWeight;
-
-    positiveIons.add(ItoParticle(initParticleWeight, x));
-  }
 
   // Add reactions. These are
   //
@@ -106,10 +93,6 @@ ItoKMCAir3LFA::ItoKMCAir3LFA()
   m_kmcReactions.emplace_back(r3);
   m_kmcReactions.emplace_back(r4);
   m_kmcReactions.emplace_back(r5);
-#if 1 // Add a test reaction for cdr species
-  auto r6 = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{0, 3}, std::list<size_t>{});
-  m_kmcReactions.emplace_back(r6);
-#endif
 
   // Photo-reactions
   auto y1 = std::make_shared<ItoKMCPhotoReaction>(0, std::list<size_t>{0, 1});
@@ -236,14 +219,11 @@ ItoKMCAir3LFA::computeMobilities(const Real a_time, const RealVect a_pos, const 
 {
   CH_TIME("ItoKMCAir3LFA::computeMobilities");
 
-  Vector<Real> mobilities(4);
+  Vector<Real> mobilities(3);
 
   mobilities[0] = m_tables.at("mobility").getEntry<1>(a_E.vectorLength());
   mobilities[1] = m_ionMobility;
   mobilities[2] = m_ionMobility;
-#if 1 // Test for CDR species
-  mobilities[3] = m_tables.at("mobility").getEntry<1>(a_E.vectorLength());
-#endif
 
   return mobilities;
 }
@@ -251,12 +231,11 @@ ItoKMCAir3LFA::computeMobilities(const Real a_time, const RealVect a_pos, const 
 Vector<Real>
 ItoKMCAir3LFA::computeDiffusionCoefficients(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept
 {
-  Vector<Real> D(4);
+  Vector<Real> D(3);
 
   D[0] = m_tables.at("diffco").getEntry<1>(a_E.vectorLength());
   D[1] = m_ionDiffCo;
   D[2] = m_ionDiffCo;
-  D[3] = 1.234567;
 
   return D;
 }
@@ -280,7 +259,7 @@ ItoKMCAir3LFA::injectParticlesEB(Vector<List<ItoParticle>>&       a_incomingPart
                                  const int                        a_matIndex) const noexcept
 {
   CH_TIME("ItoKMCAir3LFA::injectParticlesEB");
-
+#if 0
   List<ItoParticle>&       ingoingElectrons = a_incomingParticles[0];
   const List<ItoParticle>& outgoingIons     = a_outgoingParticles[1];
   const List<Photon>&      outgoingPhotons  = a_outgoingPhotons[0];
@@ -318,6 +297,7 @@ ItoKMCAir3LFA::injectParticlesEB(Vector<List<ItoParticle>>&       a_incomingPart
     else if (isAnode) {
     }
   }
+#endif
 }
 
 void
@@ -342,9 +322,6 @@ ItoKMCAir3LFA::updateReactionRates(const RealVect a_E, const Real a_dx, const Re
   m_kmcReactions[2]->rate() = bpe;
   m_kmcReactions[3]->rate() = bpn;
   m_kmcReactions[4]->rate() = alpha * velo * xfactor;
-#if 1 // Add test CDR species
-  m_kmcReactions[5]->rate() = alpha * velo;
-#endif
 }
 
 Real
@@ -398,6 +375,12 @@ ItoKMCAir3LFA::Positive::Positive()
 
 ItoKMCAir3LFA::Positive::~Positive() { CH_TIME("ItoKMCAir3LFA::Positive::~Positive"); }
 
+Real
+ItoKMCAir3LFA::Positive::initialData(const RealVect a_pos, const Real a_time) const
+{
+  return 0.0;
+}
+
 ItoKMCAir3LFA::Negative::Negative()
 {
   CH_TIME("ItoKMCAir3LFA::Negative::Negative");
@@ -413,6 +396,12 @@ ItoKMCAir3LFA::Negative::Negative()
 }
 
 ItoKMCAir3LFA::Negative::~Negative() { CH_TIME("ItoKMCAir3LFA::Negative::~Negative"); }
+
+Real
+ItoKMCAir3LFA::Negative::initialData(const RealVect a_pos, const Real a_time) const
+{
+  return 0.0;
+}
 
 ItoKMCAir3LFA::PhotonZ::PhotonZ()
 {
@@ -445,24 +434,6 @@ ItoKMCAir3LFA::PhotonZ::getAbsorptionCoefficient(const RealVect a_pos) const
 
   // Return random absorption coefficient.
   return m_K1 * pow(m_K2 / m_K1, (f - m_f1) / (m_f2 - m_f1));
-}
-
-ItoKMCAir3LFA::TestSpecies::TestSpecies()
-{
-  CH_TIME("ItoKMCAir3LFA::TestSpecies::TestSpecies");
-
-  m_isMobile     = true;
-  m_isDiffusive  = true;
-  m_name         = "TestSpecies";
-  m_chargeNumber = -1;
-}
-
-ItoKMCAir3LFA::TestSpecies::~TestSpecies() { CH_TIME("ItoKMCAir3LFA::TestSpecies::TestSpecies"); }
-
-Real
-ItoKMCAir3LFA::TestSpecies::initialData(const RealVect a_pos, const Real a_time) const
-{
-  return 1.0;
 }
 
 #include <CD_NamespaceFooter.H>

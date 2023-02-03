@@ -452,6 +452,8 @@ ItoKMCPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&  a_particles
 {
   CH_TIME("ItoKMCPhysics::reconcilePhotoionization");
 
+  MayDay::Warning("ItoKMCPhysics::reconcilePhotoionization -- needs to be adapted for mixed Ito/CDR");
+
   CH_assert(m_isDefined);
 
   for (const auto& r : m_photoReactions) {

@@ -269,7 +269,7 @@ namespace Physics {
     /*!
       @brief Positive ion species
     */
-    class ItoKMCAir3LFA::Positive : public ItoSpecies
+    class ItoKMCAir3LFA::Positive : public CdrSpecies
     {
     public:
       /*!
@@ -281,9 +281,15 @@ namespace Physics {
 	@brief Destructor. Does nothing
       */
       virtual ~Positive();
+
+      /*!
+	@brief Initial data
+      */
+      Real
+      initialData(const RealVect a_pos, const Real a_time) const override;      
     };
 
-    class ItoKMCAir3LFA::Negative : public ItoSpecies
+    class ItoKMCAir3LFA::Negative : public CdrSpecies
     {
     public:
       /*!
@@ -295,6 +301,12 @@ namespace Physics {
 	@brief Destructor. Does nothing
       */
       virtual ~Negative();
+
+      /*!
+	@brief Initial data
+      */      
+      Real
+      initialData(const RealVect a_pos, const Real a_time) const override;      
     };
 
     class ItoKMCAir3LFA::PhotonZ : public RtSpecies
@@ -337,26 +349,6 @@ namespace Physics {
 	@brief K2 factor
       */
       Real m_K2;
-    };
-
-    /*!
-      @brief Electron species
-    */
-    class ItoKMCAir3LFA::TestSpecies : public CdrSpecies
-    {
-    public:
-      /*!
-	@brief Constructor. Sets to mobile and diffusive
-      */
-      TestSpecies();
-
-      /*!
-	@brief Destructor. Does nothing
-      */
-      virtual ~TestSpecies();
-
-      Real
-      initialData(const RealVect a_pos, const Real a_time) const override;
     };
   } // namespace ItoKMC
 } // namespace Physics

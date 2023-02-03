@@ -511,8 +511,10 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
 
   // Data for CDR-based solver mobilities
   m_cdrMobilities.resize(numCdrSpecies);
+  m_cdrPhotoiProducts.resize(numCdrSpecies);
   for (int i = 0; i < numCdrSpecies; i++) {
     m_amr->allocate(m_cdrMobilities[i], m_fluidRealm, m_plasmaPhase, 1);
+    m_amr->allocate(m_cdrPhotoiProducts[i], m_particleRealm);
   }
 
   // Current density.
@@ -3310,9 +3312,37 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
     m_particleYPC.copy(m_fluidYPC);
   }
 
+  // If we have photoionization reactions and CDR solvers we need to put the resulting particles on the mesh first,
+  // and then add the result back into the CDR solvers.
+  for (int i = 0; i < m_cdrPhotoiProducts.size(); i++) {
+    m_cdrPhotoiProducts[i].clearParticles();
+    m_cdrPhotoiProducts[i].organizeParticlesByCell();
+  }
+
   // Reconcile the results -- for the discrete solvers we add/remove particles/photons and for the CDR solvers we update
   // the source terms.
   this->reconcileParticles(m_particleItoPPC, m_particleOldItoPPC, m_particleYPC);
+
+  // Deposited PointParticles on the mesh and add the result to m_fluidCdrPPC. This is a bit convoluted because
+  // the photoionization products are created in reconcileParticles and  deposited them on the particle realm, but
+  // the resulting products need to end up on in the correct data component in m_fluidCdrPPC.
+  for (int i = 0; i < m_cdrPhotoiProducts.size(); i++) {
+    m_cdrPhotoiProducts[i].organizeParticlesByPatch();
+
+    m_amr->depositParticles<PointParticle, &PointParticle::weight>(m_particleScratch1,
+                                                                   m_particleRealm,
+                                                                   m_plasmaPhase,
+                                                                   m_cdrPhotoiProducts[i],
+                                                                   DepositionType::NGP,
+                                                                   CoarseFineDeposition::Halo);
+
+    m_fluidScratch1.copy(m_particleScratch1);
+
+    EBAMRCellData fluidCdrPPC = m_amr->slice(m_fluidCdrPPC, Interval(i, i));
+
+    DataOps::incr(fluidCdrPPC, m_fluidScratch1, 1.0);
+  }
+
   this->reconcileCdrDensities(m_fluidCdrPPC, m_fluidOldCdrPPC, a_dt);
 }
 
@@ -3494,11 +3524,11 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const LevelData<EBCellFAB>& a_newP
     pout() << m_name + "::reconcileParticles(LevelData<EBCellFAB>x3, int)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numItoSpecies    = m_physics->getNumItoSpecies();
   const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
-  CH_assert(a_newParticlesPerCell.nComp() == numPlasmaSpecies);
-  CH_assert(a_oldParticlesPerCell.nComp() == numPlasmaSpecies);
+  CH_assert(a_newParticlesPerCell.nComp() == numItoSpecies);
+  CH_assert(a_oldParticlesPerCell.nComp() == numItoSpecies);
   CH_assert(a_newPhotonsPerCell.nComp() == numPhotonSpecies);
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
@@ -3534,11 +3564,12 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   //       the reconciliation routines from the physics interface, which takes the per-cell responsibility for that. The main
   //       work done in this routine is to expose the per-patch data to per-cell data that the physics interface can then use.
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numItoSpecies    = m_physics->getNumItoSpecies();
+  const int numCdrSpecies    = m_physics->getNumCdrSpecies();
   const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
-  CH_assert(a_newParticlesPerCell.nComp() == numPlasmaSpecies);
-  CH_assert(a_oldParticlesPerCell.nComp() == numPlasmaSpecies);
+  CH_assert(a_newParticlesPerCell.nComp() == numItoSpecies);
+  CH_assert(a_oldParticlesPerCell.nComp() == numItoSpecies);
   CH_assert(a_newPhotonsPerCell.nComp() == numPhotonSpecies);
 
   // Geometric information that we need.
@@ -3550,9 +3581,11 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
   // Pointers to cell-centered particle storages. Note that the BinFabs hold a list of particles/photons
   // on each grid cell. We will manipulate these lists.
-  Vector<BinFab<ItoParticle>*> particlesFAB(numPlasmaSpecies);
-  Vector<BinFab<Photon>*>      sourcePhotonsFAB(numPhotonSpecies);
-  Vector<BinFab<Photon>*>      bulkPhotonsFAB(numPhotonSpecies);
+
+  Vector<BinFab<ItoParticle>*>   itoParticlesFAB(numItoSpecies);
+  Vector<BinFab<PointParticle>*> cdrParticlesFAB(numCdrSpecies);
+  Vector<BinFab<Photon>*>        sourcePhotonsFAB(numPhotonSpecies);
+  Vector<BinFab<Photon>*>        bulkPhotonsFAB(numPhotonSpecies);
 
   // Get a handle to the cell-sorted particles from the Ito solvers.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -3562,7 +3595,16 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
     ParticleContainer<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-    particlesFAB[idx] = &(solverParticles.getCellParticles(a_level, a_dit));
+    itoParticlesFAB[idx] = &(solverParticles.getCellParticles(a_level, a_dit));
+  }
+
+  // Get a handle to the cell-sorted particles for CDR photoionization products
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    const int idx = solverIt.index();
+
+    ParticleContainer<PointParticle>& pointParticles = m_cdrPhotoiProducts[idx];
+
+    cdrParticlesFAB[idx] = &(pointParticles.getCellParticles(a_level, a_dit));
   }
 
   // Get a handle to the cell-sorted photons from the Monte Carlo photon solvers.
@@ -3581,15 +3623,16 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   // The physics interface takes the physical number of particles/photons as arguments
   // to the reconciliation routines. These need to be set from the input arguments; this is the
   // storage we use in the grid cells.
-  Vector<Physics::ItoKMC::FPR> numNewParticles(numPlasmaSpecies);
-  Vector<Physics::ItoKMC::FPR> numOldParticles(numPlasmaSpecies);
+  Vector<Physics::ItoKMC::FPR> numNewParticles(numItoSpecies);
+  Vector<Physics::ItoKMC::FPR> numOldParticles(numItoSpecies);
   Vector<Physics::ItoKMC::FPR> numNewPhotons(numPhotonSpecies);
 
   // The physics interface also takes the actual particles/photons as argument to its reconciliation routines. This
   // is the storage we use for these; note that it is repopulated in every grid cell.
-  Vector<List<ItoParticle>*> particles(numPlasmaSpecies);
-  Vector<List<Photon>*>      bulkPhotons(numPhotonSpecies);
-  Vector<List<Photon>*>      sourcePhotons(numPhotonSpecies);
+  Vector<List<ItoParticle>*>   itoParticles(numItoSpecies);
+  Vector<List<PointParticle>*> cdrParticles(numCdrSpecies);
+  Vector<List<Photon>*>        bulkPhotons(numPhotonSpecies);
+  Vector<List<Photon>*>        sourcePhotons(numPhotonSpecies);
 
   // Regular cells
   auto regularKernel = [&](const IntVect& iv) -> void {
@@ -3602,11 +3645,16 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       const RealVect bndryNormal   = RealVect::Zero;
       const Real     kappa         = 1.0;
 
-      // Populate the per-cell particle data.
-      for (int i = 0; i < numPlasmaSpecies; i++) {
-        particles[i]       = &((*particlesFAB[i])(iv, 0));
+      // Populate the per-cell Ito data
+      for (int i = 0; i < numItoSpecies; i++) {
+        itoParticles[i]    = &((*itoParticlesFAB[i])(iv, 0));
         numNewParticles[i] = (long long)(a_newParticlesPerCell.getSingleValuedFAB()(iv, i));
         numOldParticles[i] = (long long)(a_oldParticlesPerCell.getSingleValuedFAB()(iv, i));
+      }
+
+      // Populate the per-cell CDR data
+      for (int i = 0; i < numCdrSpecies; i++) {
+        cdrParticles[i] = &((*cdrParticlesFAB[i])(iv, 0));
       }
 
       // Populate the per-cell photon data.
@@ -3623,7 +3671,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Reconcile the ItoSolver particles -- this either removes weight from the original particles (if we lost physical particles)
       // or adds new particles (if we gained physical particles)
-      m_physics->reconcileParticles(particles,
+      m_physics->reconcileParticles(itoParticles,
                                     numNewParticles,
                                     numOldParticles,
                                     cellPos,
@@ -3649,7 +3697,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
                                   kappa);
 
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
-      m_physics->reconcilePhotoionization(particles, bulkPhotons);
+      //      m_physics->reconcilePhotoionization(itoParticles, bulkPhotons);
     }
   };
 
@@ -3671,10 +3719,15 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       }
 
       // Populate the per-cell particle data.
-      for (int i = 0; i < numPlasmaSpecies; i++) {
-        particles[i]       = &((*particlesFAB[i])(iv, 0));
+      for (int i = 0; i < numItoSpecies; i++) {
+        itoParticles[i]    = &((*itoParticlesFAB[i])(iv, 0));
         numNewParticles[i] = (long long)(a_newParticlesPerCell(vof, i));
         numOldParticles[i] = (long long)(a_oldParticlesPerCell(vof, i));
+      }
+
+      // Populate the per-cell CDR data
+      for (int i = 0; i < numCdrSpecies; i++) {
+        cdrParticles[i] = &((*cdrParticlesFAB[i])(iv, 0));
       }
 
       // Populate the per-cell photon data.
@@ -3691,7 +3744,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Reconcile the ItoSolver particles -- this either removes weight from the original particles (if we lost physical particles)
       // or adds new particles (if we gained physical particles)
-      m_physics->reconcileParticles(particles,
+      m_physics->reconcileParticles(itoParticles,
                                     numNewParticles,
                                     numOldParticles,
                                     cellPos,
@@ -3717,7 +3770,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
                                   kappa);
 
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
-      m_physics->reconcilePhotoionization(particles, bulkPhotons);
+      //      m_physics->reconcilePhotoionization(itoParticles, bulkPhotons);
     }
   };
 
@@ -3836,7 +3889,7 @@ ItoKMCStepper<I, C, R, F>::resolveParticlesEB(const Real a_dt) noexcept
   }
 
   // Get the intersected particles
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numItoSpecies = m_physics->getNumItoSpecies();
   const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
   Vector<ParticleContainer<ItoParticle>*> intersectedParticlesAMR;
