@@ -1172,20 +1172,17 @@ namespace Physics {
       /*!
 	@brief Chemistry advance over time a_dt. AMR version. 
 	@param[in] a_electricField Electric field. Must be defined on the fluid realm. 
-	@param[in] a_EdotJ         Source term EdotJ for each species. Must have same number of components as Ito layout and be defined on the fluid realm. 
 	@param[in] a_dt            Time step
 	@note This will call the level versions AND reconcileParticles. The kernel will only run over valid grid cells (not covered by a finer grid. 
       */
       virtual void
-      advanceReactionNetwork(const EBAMRCellData& a_E, const EBAMRCellData& a_EdotJ, const Real a_dt) noexcept;
+      advanceReactionNetwork(const EBAMRCellData& a_E, const Real a_dt) noexcept;
 
       /*!
 	@brief Chemistry advance over time a_dt. Level version. 
 	@param[inout] a_particlesPerCell      Number of particles per cell for each plasma species
 	@param[inout] a_newPhotonsPerCell     Number of physical photons to be generated for each photon species
-	@param[inout] a_meanParticleEnergies  Mean particle energies for each plasma species
 	@param[in]    a_electricField         Electric field. 
-	@param[in]    a_EdotJ                 EdotJ for each plasma species.
 	@param[in]    a_level                 Grid level
 	@param[in]    a_dt                    Time increment
 	@note This should be called through the AMR signature. All data should be defined on the fluid realm. The kernel will
@@ -1194,9 +1191,7 @@ namespace Physics {
       virtual void
       advanceReactionNetwork(LevelData<EBCellFAB>&       a_particlesPerCell,
                              LevelData<EBCellFAB>&       a_newPhotonsPerCell,
-                             LevelData<EBCellFAB>&       a_meanParticleEnergies,
                              const LevelData<EBCellFAB>& a_electricField,
-                             const LevelData<EBCellFAB>& a_EdotJ,
                              const int                   a_level,
                              const Real                  a_dt) noexcept;
 
@@ -1204,9 +1199,7 @@ namespace Physics {
 	@brief Chemistry advance over time a_dt. Patch version. 
 	@param[inout] a_particlesPerCell      Number of particles per cell for each plasma species
 	@param[inout] a_newPhotonsPerCell     Number of physical photons to be generated for each photon species
-	@param[inout] a_meanParticleEnergies  Mean particle energies for each plasma species
 	@param[in]    a_electricField         Electric field. 
-	@param[in]    a_EdotJ                 EdotJ for each plasma species.
 	@param[in]    a_level                 Grid level
 	@param[in]    a_dit                   Grid index.
 	@param[in]    a_box                   Grid box
@@ -1218,9 +1211,7 @@ namespace Physics {
       virtual void
       advanceReactionNetwork(EBCellFAB&       a_particlesPerCell,
                              EBCellFAB&       a_newPhotonsPerCell,
-                             EBCellFAB&       a_meanParticleEnergies,
                              const EBCellFAB& a_electricField,
-                             const EBCellFAB& a_EdotJ,
                              const int        a_level,
                              const DataIndex  a_dit,
                              const Box        a_box,
@@ -1231,21 +1222,18 @@ namespace Physics {
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
 	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
-	@param[in] a_meanParticleEnergies Mean particle energies after the chemistry advance. 
 	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance. 
 	@note All data should be defined on the particle realm since this is where the particle reconciliation takes place. 
       */
       virtual void
       reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
                          const EBAMRCellData& a_oldParticlesPerCell,
-                         const EBAMRCellData& a_meanParticleEnergies,
                          const EBAMRCellData& a_newPhotonsPerCell) noexcept;
 
       /*!
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
 	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
-	@param[in] a_meanParticleEnergies Mean particle energies after the chemistry advance. 
 	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance. 
 	@param[in] a_level                Grid level
 	@note All data should be defined on the particle realm since this is where the particle reconciliation takes place. 
@@ -1253,7 +1241,6 @@ namespace Physics {
       virtual void
       reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
                          const LevelData<EBCellFAB>& a_oldParticlesPerCell,
-                         const LevelData<EBCellFAB>& a_meanParticleEnergies,
                          const LevelData<EBCellFAB>& a_newPhotonsPerCell,
                          const int                   a_level) noexcept;
 
@@ -1261,7 +1248,6 @@ namespace Physics {
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
 	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
-	@param[in] a_meanParticleEnergies Mean particle energies after the chemistry advance. 
 	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance. 
 	@param[in] a_level                Grid level
 	@param[in] a_dit                  Grid index
@@ -1272,7 +1258,6 @@ namespace Physics {
       virtual void
       reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                          const EBCellFAB& a_oldParticlesPerCell,
-                         const EBCellFAB& a_meanParticleEnergies,
                          const EBCellFAB& a_newPhotonsPerCell,
                          const int        a_level,
                          const DataIndex  a_dit,
