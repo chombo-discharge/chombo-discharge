@@ -1101,7 +1101,7 @@ namespace Physics {
 	@note a_ppc Must be defined over the particle realm and have the same number of components as the number of plasma species involved in the simulation. 
       */
       virtual void
-      computeReactiveParticlesPerCell(EBAMRCellData& a_ppc) noexcept;
+      computeReactiveItoParticlesPerCell(EBAMRCellData& a_ppc) noexcept;
 
       /*!
 	@brief Compute the number of reactive particles per cell
@@ -1110,7 +1110,7 @@ namespace Physics {
 	@note a_ppc Must be defined over the particle realm and have the same number of components as the number of plasma species involved in the simulation. 
       */
       virtual void
-      computeReactiveParticlesPerCell(LevelData<EBCellFAB>& a_ppc, const int a_level) noexcept;
+      computeReactiveItoParticlesPerCell(LevelData<EBCellFAB>& a_ppc, const int a_level) noexcept;
 
       /*!
 	@brief Compute the number of reactive particles per cell
@@ -1122,11 +1122,11 @@ namespace Physics {
 	@note a_ppc Must be defined over the particle realm and have the same number of components as the number of plasma species involved in the simulation. 
       */
       virtual void
-      computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
-                                      const int       a_level,
-                                      const DataIndex a_dit,
-                                      const Box       a_box,
-                                      const EBISBox&  a_ebisbox) noexcept;
+      computeReactiveItoParticlesPerCell(EBCellFAB&      a_ppc,
+                                         const int       a_level,
+                                         const DataIndex a_dit,
+                                         const Box       a_box,
+                                         const EBISBox&  a_ebisbox) noexcept;
 
       /*!
 	@brief Compute the mean particle energy in all grid cells.

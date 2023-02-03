@@ -2861,11 +2861,11 @@ ItoPlasmaStepper<I, C, R, F>::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc) 
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::computeReactiveParticlesPerCell(EBAMRCellData& a_ppc) noexcept
+ItoPlasmaStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(EBAMRCellData& a_ppc) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(EBAMRCellData)");
+  CH_TIME("ItoPlasmaStepper::computeReactiveItoParticlesPerCell(EBAMRCellData)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeReactiveParticlesPerCell(EBAMRCellData)" << endl;
+    pout() << m_name + "::computeReactiveItoParticlesPerCell(EBAMRCellData)" << endl;
   }
 
   CH_assert(a_ppc.getRealm() == m_particleRealm);
@@ -2873,17 +2873,18 @@ ItoPlasmaStepper<I, C, R, F>::computeReactiveParticlesPerCell(EBAMRCellData& a_p
   DataOps::setValue(a_ppc, 0.0);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    this->computeReactiveParticlesPerCell(*a_ppc[lvl], lvl);
+    this->computeReactiveItoParticlesPerCell(*a_ppc[lvl], lvl);
   }
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::computeReactiveParticlesPerCell(LevelData<EBCellFAB>& a_ppc, const int a_level) noexcept
+ItoPlasmaStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(LevelData<EBCellFAB>& a_ppc,
+                                                                 const int             a_level) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(LD<EBCellFAB>, int)");
+  CH_TIME("ItoPlasmaStepper::computeReactiveItoParticlesPerCell(LD<EBCellFAB>, int)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeReactiveParticlesPerCell(LD<EBCellFAB>, int)" << endl;
+    pout() << m_name + "::computeReactiveItoParticlesPerCell(LD<EBCellFAB>, int)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
@@ -2897,21 +2898,21 @@ ItoPlasmaStepper<I, C, R, F>::computeReactiveParticlesPerCell(LevelData<EBCellFA
     const Box      box     = dbl[dit()];
     const EBISBox& ebisbox = ebisl[dit()];
 
-    this->computeReactiveParticlesPerCell(a_ppc[dit()], a_level, dit(), box, ebisbox);
+    this->computeReactiveItoParticlesPerCell(a_ppc[dit()], a_level, dit(), box, ebisbox);
   }
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoPlasmaStepper<I, C, R, F>::computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
-                                                              const int       a_level,
-                                                              const DataIndex a_dit,
-                                                              const Box       a_box,
-                                                              const EBISBox&  a_ebisbox) noexcept
+ItoPlasmaStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(EBCellFAB&      a_ppc,
+                                                                 const int       a_level,
+                                                                 const DataIndex a_dit,
+                                                                 const Box       a_box,
+                                                                 const EBISBox&  a_ebisbox) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB, int, DataIndex, Box, EBISBox)");
+  CH_TIME("ItoPlasmaStepper::computeReactiveItoParticlesPerCell(EBCellFAB, int, DataIndex, Box, EBISBox)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeReactiveParticlesPerCell(EBCellFAB, int, DataIndex, Box, EBISBox)" << endl;
+    pout() << m_name + "::computeReactiveItoParticlesPerCell(EBCellFAB, int, DataIndex, Box, EBISBox)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -3128,7 +3129,7 @@ ItoPlasmaStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_elec
   CH_assert(a_electricField.getRealm() == m_fluidRealm);
   CH_assert(a_dt > 0.0);
 
-  this->computeReactiveParticlesPerCell(m_particlePPC);
+  this->computeReactiveItoParticlesPerCell(m_particlePPC);
   m_fluidPPC.copy(m_particlePPC);
 
   // m_fluidYPC and m_particleYPC are the number of photons that will be generated -- need to initialize
@@ -3822,12 +3823,12 @@ ItoPlasmaStepper<I, C, R, F>::computePhysicsDt(const EBAMRCellData& a_electricFi
 
   // Compute the number of reactive particles per cell and put the result on the fluid realm.
   if (m_dualGrid) {
-    this->computeReactiveParticlesPerCell(m_particlePPC);
+    this->computeReactiveItoParticlesPerCell(m_particlePPC);
 
     m_fluidPPC.copy(m_particlePPC);
   }
   else {
-    this->computeReactiveParticlesPerCell(m_fluidPPC);
+    this->computeReactiveItoParticlesPerCell(m_fluidPPC);
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
