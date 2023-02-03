@@ -101,11 +101,16 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   auto r4 = std::make_shared<KMCReaction>(std::list<size_t>{1, 2}, std::list<size_t>{}, std::list<size_t>{});
   auto r5 = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{0}, std::list<size_t>{0});
 
+
   m_kmcReactions.emplace_back(r1);
   m_kmcReactions.emplace_back(r2);
   m_kmcReactions.emplace_back(r3);
   m_kmcReactions.emplace_back(r4);
   m_kmcReactions.emplace_back(r5);
+#if 1 // Add a test reaction for cdr species
+  auto r6 = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{3}, std::list<size_t>{});
+  m_kmcReactions.emplace_back(r6);  
+#endif  
 
   // Photo-reactions
   auto y1 = std::make_shared<ItoPlasmaPhotoReaction>(0, std::list<size_t>{0, 1});
@@ -338,6 +343,9 @@ ItoPlasmaAir3LFA::updateReactionRates(const RealVect a_E, const Real a_dx, const
   m_kmcReactions[2]->rate() = bpe;
   m_kmcReactions[3]->rate() = bpn;
   m_kmcReactions[4]->rate() = alpha * velo * xfactor;
+#if 1 // Add test CDR species
+  m_kmcReactions[5]->rate() = alpha * velo;
+#endif
 }
 
 Real

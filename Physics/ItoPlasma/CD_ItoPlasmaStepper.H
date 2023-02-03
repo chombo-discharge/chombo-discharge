@@ -567,10 +567,10 @@ namespace Physics {
       EBAMRCellData m_newPPC;
 
       /*!
-	@brief For holding the number of physical particles per cell for all species.
-	@note Defined on the particle realm with components = number of plasma species
+	@brief For holding the number of physical particles per cell for all Ito species.
+	@note Defined on the particle realm with components = number of Ito species
       */
-      EBAMRCellData m_particlePPC;
+      EBAMRCellData m_particleItoPPC;
 
       /*!
 	@brief For holding the number of generated photons per cell.
@@ -588,7 +588,19 @@ namespace Physics {
 	@brief For holding the previous number of particles per cell for all species
 	@note Defined on the particle realm with components = number of plasma species
       */
-      EBAMRCellData m_particleOldPPC;
+      EBAMRCellData m_particleOldItoPPC;
+
+      /*!
+	@brief For holding the number of physical particles per cell for all CDR species.
+	@note Defined on the fluid realm with components = number of CDr species
+      */
+      EBAMRCellData m_fluidCdrPPC;
+
+      /*!
+	@brief For holding the previous number of physical particles per cell for all CDR species.
+	@note Defined on the fluid realm with components = number of CDR species
+      */
+      EBAMRCellData m_fluidOldCdrPPC;
 
       /*!
 	@brief For holding the number of particles per cell for all species.
@@ -1291,6 +1303,52 @@ namespace Physics {
                          const DataIndex  a_dit,
                          const Box        a_box,
                          const Real       a_dx) noexcept;
+
+      /*!
+	@brief Reconcile the CDR densities after the reaction network. 
+	@details This adds the a_newPPC - a_oldPPC to the densities and sets the source term to (a_newPPC - a_oldPPC)/(vol * dt)
+	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
+	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
+	@param[in] a_dt                   Time step
+      */
+      virtual void
+      reconcileCdrDensities(const EBAMRCellData& a_newParticlesPerCell,
+                            const EBAMRCellData& a_oldParticlesPerCell,
+                            const Real           a_dt) noexcept;
+
+      /*!
+	@brief Reconcile the CDR densities after the reaction network. 
+	@details This adds the a_newPPC - a_oldPPC to the densities and sets the source term to (a_newPPC - a_oldPPC)/(vol * dt)
+	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
+	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
+	@param[in] a_level                Grid level
+	@param[in] a_dt                   Time step
+      */
+      virtual void
+      reconcileCdrDensities(const LevelData<EBCellFAB>& a_newParticlesPerCell,
+                            const LevelData<EBCellFAB>& a_oldParticlesPerCell,
+                            const int                   a_level,
+                            const Real                  a_dt) noexcept;
+
+      /*!
+	@brief Reconcile the CDR densities after the reaction network. 
+	@details This adds the a_newPPC - a_oldPPC to the densities and sets the source term to (a_newPPC - a_oldPPC)/(vol * dt)
+	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
+	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
+	@param[in] a_level                Grid level
+	@param[in] a_dit                  Grid index
+	@param[in] a_box                  Grid box
+	@param[in] a_dx                   Grid resolution. 
+	@param[in] a_dt                   Time step
+      */
+      virtual void
+      reconcileCdrDensities(const EBCellFAB& a_newParticlesPerCell,
+                            const EBCellFAB& a_oldParticlesPerCell,
+                            const int        a_level,
+                            const DataIndex  a_dit,
+                            const Box        a_box,
+                            const Real       a_dx,
+                            const Real       a_dt) noexcept;
 
       /*!
 	@brief Resolve particle injection at EBs.
