@@ -1313,6 +1313,15 @@ namespace Physics {
                          const Real       a_dx) noexcept;
 
       /*!
+	@brief Reconcile the results from photoionization reactions
+	@note This adds particles directly into the ItoSolver particle data holders and into m_cdrPhotoiProducts. 
+	@note This is not used (yet) -- it does a per-patch call to m_physics, which means that its done outside
+	of the cell-sorted requirement of advanceReactionNetwork.
+      */
+      virtual void
+      reconcilePhotoionization() noexcept;
+
+      /*!
 	@brief Reconcile the CDR densities after the reaction network. 
 	@details This adds the a_newPPC - a_oldPPC to the densities and sets the source term to (a_newPPC - a_oldPPC)/(vol * dt)
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 

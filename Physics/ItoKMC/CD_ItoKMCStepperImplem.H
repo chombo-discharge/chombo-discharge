@@ -3783,6 +3783,51 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
 template <typename I, typename C, typename R, typename F>
 void
+ItoKMCStepper<I, C, R, F>::reconcilePhotoionization() noexcept
+{
+  CH_TIME("ItoKMCStepper::reconcilePhotoionization()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::reconcilePhotoionization()" << endl;
+  }
+
+  const int numItoSpecies    = m_physics->getNumItoSpecies();
+  const int numCdrSpecies    = m_physics->getNumCdrSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+
+      Vector<List<ItoParticle>*>   itoParticles(numItoSpecies);
+      Vector<List<PointParticle>*> cdrParticles(numCdrSpecies);
+      Vector<List<Photon>*>        photonParticles(numPhotonSpecies);
+
+      for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+        ParticleContainer<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk);
+
+        itoParticles[solverIt.index()] = &(particles[lvl][dit()].listItems());
+      }
+
+      for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+        ParticleContainer<PointParticle>& particles = m_cdrPhotoiProducts[solverIt.index()];
+
+        cdrParticles[solverIt.index()] = &(particles[lvl][dit()].listItems());
+      }
+
+      for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+        ParticleContainer<Photon>& particles = solverIt()->getBulkPhotons();
+
+        photonParticles[solverIt.index()] = &(particles[lvl][dit()].listItems());
+      }
+
+      m_physics->reconcilePhotoionization(itoParticles, cdrParticles, photonParticles);
+    }
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
 ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_newParticlesPerCell,
                                                  const EBAMRCellData& a_oldParticlesPerCell,
                                                  const Real           a_dt) noexcept
@@ -3889,7 +3934,7 @@ ItoKMCStepper<I, C, R, F>::resolveParticlesEB(const Real a_dt) noexcept
   }
 
   // Get the intersected particles
-  const int numItoSpecies = m_physics->getNumItoSpecies();
+  const int numItoSpecies    = m_physics->getNumItoSpecies();
   const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
   Vector<ParticleContainer<ItoParticle>*> intersectedParticlesAMR;

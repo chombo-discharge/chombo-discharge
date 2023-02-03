@@ -286,7 +286,7 @@ namespace Physics {
 	@brief Initial data
       */
       Real
-      initialData(const RealVect a_pos, const Real a_time) const override;      
+      initialData(const RealVect a_pos, const Real a_time) const override;
     };
 
     class ItoKMCAir3LFA::Negative : public CdrSpecies
@@ -304,9 +304,9 @@ namespace Physics {
 
       /*!
 	@brief Initial data
-      */      
+      */
       Real
-      initialData(const RealVect a_pos, const Real a_time) const override;      
+      initialData(const RealVect a_pos, const Real a_time) const override;
     };
 
     class ItoKMCAir3LFA::PhotonZ : public RtSpecies
