@@ -500,12 +500,6 @@ ItoPlasmaStepper<I, C, R, F>::allocateInternals() noexcept
   m_amr->allocate(m_particleScratch1, m_particleRealm, m_plasmaPhase, 1);
   m_amr->allocate(m_particleScratchD, m_particleRealm, m_plasmaPhase, SpaceDim);
 
-  // Allocate for energy sources
-  m_energySources.resize(numPlasmaSpecies);
-  for (int i = 0; i < m_energySources.size(); i++) {
-    m_amr->allocate(m_energySources[i], m_particleRealm, m_plasmaPhase, 1);
-  }
-
   // Storage for conductiviies on cell, cell faces, and EB faces.
   m_amr->allocate(m_conductivityCell, m_fluidRealm, m_plasmaPhase, 1);
   m_amr->allocate(m_conductivityFace, m_fluidRealm, m_plasmaPhase, 1);
@@ -523,10 +517,10 @@ ItoPlasmaStepper<I, C, R, F>::allocateInternals() noexcept
 
   // Particles and photons per cell on the realms. Note that the PPC-related
   // holders on the particle realm have numItoSpecies components while the corresponding
-  // PPC data holders on the fluid realm have numPlasmaSpecies components. 
+  // PPC data holders on the fluid realm have numPlasmaSpecies components.
   m_amr->allocate(m_oldPPC, m_particleRealm, m_plasmaPhase, numPlasmaSpecies);
   m_amr->allocate(m_newPPC, m_particleRealm, m_plasmaPhase, numPlasmaSpecies);
-  
+
   m_amr->allocate(m_particlePPC, m_particleRealm, m_plasmaPhase, numPlasmaSpecies);
   m_amr->allocate(m_particleEPS, m_particleRealm, m_plasmaPhase, numPlasmaSpecies);
   m_amr->allocate(m_particleOldPPC, m_particleRealm, m_plasmaPhase, numPlasmaSpecies);
@@ -534,11 +528,9 @@ ItoPlasmaStepper<I, C, R, F>::allocateInternals() noexcept
 
   m_amr->allocate(m_fluidPPC, m_fluidRealm, m_plasmaPhase, numPlasmaSpecies);
   m_amr->allocate(m_fluidYPC, m_fluidRealm, m_plasmaPhase, numPhotonSpecies);
-  m_amr->allocate(m_fluidEPS, m_fluidRealm, m_plasmaPhase, numPlasmaSpecies);
 
-  // Aux things for current density, source energy source terms etc.
+  // Current density.
   m_amr->allocate(m_currentDensity, m_fluidRealm, m_plasmaPhase, SpaceDim);
-  m_amr->allocate(m_EdotJ, m_fluidRealm, m_plasmaPhase, numPlasmaSpecies);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -2976,6 +2968,110 @@ ItoPlasmaStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(EBCellFAB&     
 
 template <typename I, typename C, typename R, typename F>
 void
+ItoPlasmaStepper<I, C, R, F>::computeReactiveCdrParticlesPerCell(EBAMRCellData& a_ppc) noexcept
+{
+  CH_TIME("ItoPlasmaStepper::computeReactiveCdrParticlesPerCell(EBAMRCellData)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeReactiveCdrParticlesPerCell(EBAMRCellData)" << endl;
+  }
+
+  CH_assert(a_ppc.getRealm() == m_fluidRealm);
+
+  DataOps::setValue(a_ppc, 0.0);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    this->computeReactiveCdrParticlesPerCell(*a_ppc[lvl], lvl);
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoPlasmaStepper<I, C, R, F>::computeReactiveCdrParticlesPerCell(LevelData<EBCellFAB>& a_ppc,
+                                                                 const int             a_level) noexcept
+{
+  CH_TIME("ItoPlasmaStepper::computeReactiveCdrParticlesPerCell(LD<EBCellFAB>, int)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeReactiveCdrParticlesPerCell(LD<EBCellFAB>, int)" << endl;
+  }
+
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
+
+  CH_assert(a_ppc.nComp() == numCdrSpecies);
+
+  if (numCdrSpecies > 0) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_fluidRealm)[a_level];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const Box      box     = dbl[dit()];
+      const EBISBox& ebisbox = ebisl[dit()];
+
+      this->computeReactiveCdrParticlesPerCell(a_ppc[dit()], a_level, dit(), box, ebisbox);
+    }
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoPlasmaStepper<I, C, R, F>::computeReactiveCdrParticlesPerCell(EBCellFAB&      a_ppc,
+                                                                 const int       a_level,
+                                                                 const DataIndex a_dit,
+                                                                 const Box       a_box,
+                                                                 const EBISBox&  a_ebisbox) noexcept
+{
+  CH_TIME("ItoPlasmaStepper::computeReactiveCdrParticlesPerCell(EBCellFAB, int, DataIndex, Box, EBISBox)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeReactiveCdrParticlesPerCell(EBCellFAB, int, DataIndex, Box, EBISBox)" << endl;
+  }
+
+  constexpr Real zero = 0.0;
+
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
+
+  CH_assert(a_ppc.nComp() == numPlasmaSpecies);
+
+  const Real     dx     = m_amr->getDx()[a_level];
+  const Real     vol    = std::pow(dx, SpaceDim);
+  const RealVect probLo = m_amr->getProbLo();
+
+  // TLDR: We go through each solver and add the number of PHYSICAL particles per cell to a_ppc.
+  FArrayBox& ppcRegular = a_ppc.getFArrayBox();
+
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<CdrSolver>& solver = solverIt();
+    const int                 idx    = solverIt.index();
+
+    const EBCellFAB& phi    = (*(solver->getPhi())[a_level])[a_dit];
+    const FArrayBox& phiReg = phi.getFArrayBox();
+
+    FArrayBox& ppcRegular = a_ppc.getFArrayBox();
+
+    // Regular cells kernel.
+    auto regularKernel = [&](const IntVect& iv) -> void {
+      Real num = 0.0;
+
+      if (a_ebisbox.isRegular(iv)) {
+        ppcRegular(iv, idx) = std::max(zero, std::floor(phiReg(iv, 0) * vol));
+      }
+    };
+
+    // Irregular kernel -- note that only particles that lie inside the domain get to react.
+    auto irregularKernel = [&](const VolIndex& vof) -> void {
+      const Real kappa = a_ebisbox.volFrac(vof);
+
+      a_ppc(vof, idx) = std::max(zero, std::floor(kappa * vol * phi(vof, 0)));
+    };
+
+    // Run the kernels.
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_dit];
+
+    BoxLoops::loop(a_box, regularKernel);
+    BoxLoops::loop(vofit, irregularKernel);
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
 ItoPlasmaStepper<I, C, R, F>::computeReactiveMeanEnergiesPerCell(EBAMRCellData& a_meanEnergies) noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeReactiveMaeanEnergiesPerCell(EBAMRCellData)");
@@ -3132,8 +3228,6 @@ ItoPlasmaStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_elec
   this->computeReactiveItoParticlesPerCell(m_particlePPC);
   m_fluidPPC.copy(m_particlePPC);
 
-  // m_fluidYPC and m_particleYPC are the number of photons that will be generated -- need to initialize
-  // to zero here.
   DataOps::setValue(m_fluidYPC, 0.0);
   DataOps::setValue(m_particleYPC, 0.0);
 

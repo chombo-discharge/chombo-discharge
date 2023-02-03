@@ -603,12 +603,6 @@ namespace Physics {
       EBAMRCellData m_fluidYPC;
 
       /*!
-	@brief For holding the mean particle energy
-	@note Defined on the fluid realm with components = number of plasma species
-      */
-      EBAMRCellData m_fluidEPS;
-
-      /*!
 	@brief Storage for holding the plasma phase electric field on the fluid realm
       */
       EBAMRCellData m_electricFieldFluid;
@@ -1123,6 +1117,40 @@ namespace Physics {
       */
       virtual void
       computeReactiveItoParticlesPerCell(EBCellFAB&      a_ppc,
+                                         const int       a_level,
+                                         const DataIndex a_dit,
+                                         const Box       a_box,
+                                         const EBISBox&  a_ebisbox) noexcept;
+
+      /*!
+	@brief Compute the number of reactive particles per cell for the CDR solvers.
+	@details This truncates the number of particles in the cell. 
+	@param[out] a_ppc Number of physical particles per grid cell for all CDR species
+	@note a_ppc Must be defined over the fluid realm and have the same number of components as the number of CDR species involved in the simulation. 
+      */
+      virtual void
+      computeReactiveCdrParticlesPerCell(EBAMRCellData& a_ppc) noexcept;
+
+      /*!
+	@brief Compute the number of reactive particles per cell for the CDR solvers.
+	@param[out] a_ppc  Number of physical particles per grid cell for all CDR species
+	@param[in]  a_level Grid level
+	@note a_ppc Must be defined over the fluid realm and have the same number of components as the number of CDR species involved in the simulation. 
+      */
+      virtual void
+      computeReactiveCdrParticlesPerCell(LevelData<EBCellFAB>& a_ppc, const int a_level) noexcept;
+
+      /*!
+	@brief Compute the number of reactive particles per cell for the CDR solvers.
+	@param[out] a_ppc     Number of physical particles per grid cell for all CDR species
+	@param[in]  a_level   Grid level
+	@param[in]  a_dit     Grid index
+	@param[in]  a_box     Grid box
+	@param[in]  a_ebisbox EB grid box
+	@note a_ppc Must be defined over the fluid realm and have the same number of components as the number of CDR species involved in the simulation. 
+      */
+      virtual void
+      computeReactiveCdrParticlesPerCell(EBCellFAB&      a_ppc,
                                          const int       a_level,
                                          const DataIndex a_dit,
                                          const Box       a_box,
