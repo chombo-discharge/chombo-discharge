@@ -661,6 +661,16 @@ public:
     @details This does not use any slope limiting (derived classes might want to redo this routine). The returned flux
     is equal to -n.(phi * v) where n is the normal vector. This is constructed so that a positive eb flux yields an influx
     when doing an purely advective advance. 
+    @note Calls the other version with m_ebFlux as argument
+  */
+  virtual void
+  extrapolateAdvectiveFluxToEB() noexcept;
+
+  /*!
+    @brief Extrapolate advective flux to EB. 
+    @details This does not use any slope limiting (derived classes might want to redo this routine). The returned flux
+    is equal to -n.(phi * v) where n is the normal vector. This is constructed so that a positive eb flux yields an influx
+    when doing an purely advective advance. 
     @param[out] a_ebFlux Projected flux on the EB. 
   */
   virtual void

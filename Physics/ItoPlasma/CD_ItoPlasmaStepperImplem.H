@@ -76,9 +76,6 @@ ItoPlasmaStepper<I, C, R, F>::ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& 
   if (numItoSpecies == 0) {
     MayDay::Warning("ItoPlasmaStepper::ItoPlasmaStepper -- how to handle cases with no Ito species?");
   }
-  if (numCdrSpecies == 0) {
-    MayDay::Warning("ItoPlasmaStepper::ItoPlasmaStepper -- how to handle cases with no Cdr species?");
-  }
   if (numPhotonSpecies <= 0) {
     MayDay::Warning("ItoPlasmaStepper::ItoPlasmastepper -- how to handle cases with no Photon species?");
   }
@@ -3254,7 +3251,8 @@ ItoPlasmaStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_elec
   CH_assert(a_electricField.getRealm() == m_fluidRealm);
   CH_assert(a_dt > 0.0);
 
-  // Compute the number of reactive particles for both Ito and CDR species.
+  // Compute the number of reactive particles for both Ito and CDR species. Also do a backup of the initial number
+  // of particles per cell. This is required when reconciling the results lateron.
   if (numItoSpecies > 0) {
     this->computeReactiveItoParticlesPerCell(m_particleItoPPC);
 
@@ -3262,7 +3260,10 @@ ItoPlasmaStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_elec
     const Interval dstInterv(0, numItoSpecies - 1);
 
     m_fluidPPC.copy(srcInterv, m_particleItoPPC, dstInterv);
+
+    DataOps::copy(m_particleOldItoPPC, m_particleItoPPC);
   }
+
   if (numCdrSpecies > 0) {
     this->computeReactiveCdrParticlesPerCell(m_fluidCdrPPC);
 
@@ -3270,15 +3271,12 @@ ItoPlasmaStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_elec
     const Interval dstInterv(numItoSpecies, numItoSpecies + numCdrSpecies - 1);
 
     m_fluidPPC.copy(srcInterv, m_fluidCdrPPC, dstInterv);
+
+    DataOps::copy(m_fluidOldCdrPPC, m_fluidCdrPPC);
   }
 
   DataOps::setValue(m_fluidYPC, 0.0);
   DataOps::setValue(m_particleYPC, 0.0);
-
-  // Back up the old number of particles per cell -- this is required for the Ito solvers
-  // when reconciling the particle weights.
-  DataOps::copy(m_particleOldItoPPC, m_particleItoPPC);
-  DataOps::copy(m_fluidOldCdrPPC, m_fluidCdrPPC);
 
   // Advance the reaction network which gives us a new number of particles per cell, as well as the number of
   // photons that need to be generated per cell.
@@ -3732,12 +3730,16 @@ ItoPlasmaStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_newPa
     pout() << m_name + "::reconcileCdrDensities(EBAMRCellDatax2, Real)" << endl;
   }
 
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
+
   CH_assert(a_newParticlesPerCell.getRealm() == m_fluidRealm);
   CH_assert(a_oldParticlesPerCell.getRealm() == m_fluidRealm);
   CH_assert(a_dt > 0.0);
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    this->reconcileCdrDensities(*a_newParticlesPerCell[lvl], *a_oldParticlesPerCell[lvl], lvl, a_dt);
+  if (numCdrSpecies > 0) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      this->reconcileCdrDensities(*a_newParticlesPerCell[lvl], *a_oldParticlesPerCell[lvl], lvl, a_dt);
+    }
   }
 }
 

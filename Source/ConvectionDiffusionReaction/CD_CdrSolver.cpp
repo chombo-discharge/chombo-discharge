@@ -2828,11 +2828,22 @@ CdrSolver::getDomainFlux()
 }
 
 void
+CdrSolver::extrapolateAdvectiveFluxToEB() noexcept
+{
+  CH_TIME("CdrSolver::extrapolateAdvectiveFluxToEB()");
+  if (m_verbosity > 5) {
+    pout() << "ExtrapolateAdvectiveFluxToEB()" << endl;
+  }
+
+  this->extrapolateAdvectiveFluxToEB(m_ebFlux);
+}
+
+void
 CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
 {
-  CH_TIME("CdrSolver::extrapolateAdvectiveFluxToEB");
+  CH_TIME("CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData)");
   if (m_verbosity > 5) {
-    pout() << "ExtrapolateAdvectiveFluxToEB" << endl;
+    pout() << "ExtrapolateAdvectiveFluxToEB(EBAMRIVData)" << endl;
   }
 
   DataOps::setValue(a_ebFlux, 0.0);
