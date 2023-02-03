@@ -76,9 +76,6 @@ ItoPlasmaStepper<I, C, R, F>::ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& 
   if (numItoSpecies == 0) {
     MayDay::Warning("ItoPlasmaStepper::ItoPlasmaStepper -- how to handle cases with no Ito species?");
   }
-  if (numPhotonSpecies <= 0) {
-    MayDay::Warning("ItoPlasmaStepper::ItoPlasmastepper -- how to handle cases with no Photon species?");
-  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -550,8 +547,9 @@ ItoPlasmaStepper<I, C, R, F>::allocateInternals() noexcept
     m_amr->allocate(m_fluidYPC, m_fluidRealm, m_plasmaPhase, numPhotonSpecies);
   }
   else {
-    m_amr->allocatePointer(m_particleYPC, m_particleRealm);
-    m_amr->allocatePointer(m_fluidYPC, m_fluidRealm);
+    // Allocate some dummy data -- makes it easier. Trust me.
+    m_amr->allocate(m_particleYPC, m_particleRealm, m_plasmaPhase, 1);
+    m_amr->allocate(m_fluidYPC, m_fluidRealm, m_plasmaPhase, 1);
   }
 }
 
@@ -3263,7 +3261,6 @@ ItoPlasmaStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_elec
 
     DataOps::copy(m_particleOldItoPPC, m_particleItoPPC);
   }
-
   if (numCdrSpecies > 0) {
     this->computeReactiveCdrParticlesPerCell(m_fluidCdrPPC);
 
@@ -3862,15 +3859,15 @@ ItoPlasmaStepper<I, C, R, F>::resolveParticlesEB(Vector<ParticleContainer<ItoPar
     pout() << m_name + "::resolveParticlesEB(Vector<ParticleContainer>x2, Real)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numItoSpecies    = m_physics->getNumItoSpecies();
   const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
   CH_assert(a_electricField.getRealm() == m_particleRealm);
-  CH_assert(a_inOutParticles.size() == numPlasmaSpecies);
+  CH_assert(a_inOutParticles.size() == numItoSpecies);
   CH_assert(a_inOutPhotons.size() == numPhotonSpecies);
 
   // Sort incoming containers by celll
-  for (int i = 0; i < numPlasmaSpecies; i++) {
+  for (int i = 0; i < numItoSpecies; i++) {
     a_inOutParticles[i]->organizeParticlesByCell();
   }
   for (int i = 0; i < numPhotonSpecies; i++) {
@@ -3919,16 +3916,16 @@ ItoPlasmaStepper<I, C, R, F>::resolveParticlesEB(Vector<ParticleContainer<ItoPar
           const RealVect physPos       = cellCenter + bndryCentroid * dx;
           const Real     bndryArea     = ebisbox.bndryArea(vof);
 
-          Vector<FPR> oldNumParticles(numPlasmaSpecies, 0.0);
-          Vector<FPR> newNumParticles(numPlasmaSpecies, 0.0);
+          Vector<FPR> oldNumParticles(numItoSpecies, 0.0);
+          Vector<FPR> newNumParticles(numItoSpecies, 0.0);
 
-          Vector<List<ItoParticle>> outgoingParticles(numPlasmaSpecies);
-          Vector<List<ItoParticle>> incomingParticles(numPlasmaSpecies);
+          Vector<List<ItoParticle>> outgoingParticles(numItoSpecies);
+          Vector<List<ItoParticle>> incomingParticles(numItoSpecies);
 
           Vector<List<Photon>> outgoingPhotons(numPhotonSpecies);
           Vector<List<Photon>> incomingPhotons(numPhotonSpecies);
 
-          for (int i = 0; i < numPlasmaSpecies; i++) {
+          for (int i = 0; i < numItoSpecies; i++) {
             outgoingParticles[i] = (*cellParticles[i])(iv, 0);
 
             oldNumParticles[i] = oldPPC(vof, i);
@@ -3981,7 +3978,7 @@ ItoPlasmaStepper<I, C, R, F>::resolveParticlesEB(Vector<ParticleContainer<ItoPar
                                        matIndex);
 
           // Populate containers with incoming particles and photons
-          for (int i = 0; i < numPlasmaSpecies; i++) {
+          for (int i = 0; i < numItoSpecies; i++) {
             (*cellParticles[i])(iv, 0) = incomingParticles[i];
           }
 
@@ -3998,7 +3995,7 @@ ItoPlasmaStepper<I, C, R, F>::resolveParticlesEB(Vector<ParticleContainer<ItoPar
   }
 
   // Organize by patch
-  for (int i = 0; i < numPlasmaSpecies; i++) {
+  for (int i = 0; i < numItoSpecies; i++) {
     a_inOutParticles[i]->organizeParticlesByPatch();
   }
   for (int i = 0; i < numPhotonSpecies; i++) {
@@ -4032,12 +4029,12 @@ ItoPlasmaStepper<I, C, R, F>::injectParticlesEB(Vector<ParticleContainer<ItoPart
     pout() << m_name + "::injectParticlesEB(Vector<ParticleContainer<ItoParticle>*>x2)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numItoSpecies = m_physics->getNumItoSpecies();
 
-  CH_assert(a_bulkParticles.size() == numPlasmaSpecies);
-  CH_assert(a_injectedParticles.size() == numPlasmaSpecies);
+  CH_assert(a_bulkParticles.size() == numItoSpecies);
+  CH_assert(a_injectedParticles.size() == numItoSpecies);
 
-  for (int i = 0; i < numPlasmaSpecies; i++) {
+  for (int i = 0; i < numItoSpecies; i++) {
     a_bulkParticles[i]->transferParticles(*a_injectedParticles[i]);
   }
 }
@@ -4116,7 +4113,7 @@ ItoPlasmaStepper<I, C, R, F>::computePhysicsDt(const LevelData<EBCellFAB>& a_ele
     pout() << m_name + "::computePhysicsDt(LD<EBCellFAB>, LD<EBCellFAB>, int)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_particlesPerCell.nComp() == numPlasmaSpecies);
   CH_assert(a_electricField.nComp() == SpaceDim);
@@ -4150,7 +4147,7 @@ ItoPlasmaStepper<I, C, R, F>::computePhysicsDt(const EBCellFAB& a_electricField,
 
   Real minDt = std::numeric_limits<Real>::max();
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_electricField.nComp() == SpaceDim);
   CH_assert(a_particlesPerCell.nComp() == numPlasmaSpecies);
