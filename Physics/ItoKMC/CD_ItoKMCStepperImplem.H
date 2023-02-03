@@ -1439,7 +1439,7 @@ ItoKMCStepper<I, C, R, F>::computeSpaceChargeDensity(MFAMRCellData&             
     const int                        Z       = species->getChargeNumber();
 
     if (Z != 0) {
-      //      DataOps::incr(rhoPhase, *a_cdrDensities[idx], 1.0 * Z);
+      DataOps::incr(rhoPhase, *a_cdrDensities[idx], 1.0 * Z);
     }
   }
 
@@ -3337,6 +3337,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
                                                                    CoarseFineDeposition::Halo);
 
     m_fluidScratch1.copy(m_particleScratch1);
+    DataOps::volumeScale(m_fluidScratch1, m_amr->getDx());
 
     EBAMRCellData fluidCdrPPC = m_amr->slice(m_fluidCdrPPC, Interval(i, i));
 

@@ -342,6 +342,15 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
     pout() << "ItoKMCGodunovStepper::regrid" << endl;
   }
 
+
+  // Note to self:
+  //
+  // 1. Add equivalent to conductivityDagger and rhoDagger in preRegrid, but for CDR
+  // 2. Regrid said stuff during regrid and add to Poisson solve
+  // 3. Check said stuff as well. 
+  MayDay::Abort(
+    "ItoKMCGodunovStepper -- semi-implicit regrid currently not functional due to missing conductivity/space charge for CDR species");
+
   m_timer = Timer("ItoKMCGodunovStepper::regrid");
 
   // A special flag for aborting the simulation if the user did NOT put checkpoint particles in the checkpoint
