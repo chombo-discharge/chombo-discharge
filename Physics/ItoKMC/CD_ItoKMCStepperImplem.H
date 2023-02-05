@@ -1445,7 +1445,7 @@ ItoKMCStepper<I, C, R, F>::computeSpaceChargeDensity(MFAMRCellData&             
 
   DataOps::scale(a_rho, Units::Qe);
 
-  m_amr->conservativeAverage(a_rho, m_fluidRealm);
+  m_amr->arithmeticAverage(a_rho, m_fluidRealm);
   m_amr->interpGhostPwl(a_rho, m_fluidRealm);
 
   // Interpolate to centroids.
@@ -1580,9 +1580,6 @@ ItoKMCStepper<I, C, R, F>::solvePoisson() noexcept
   if (m_verbosity > 5) {
     pout() << m_name + "::solvePoisson()" << endl;
   }
-
-  // Compute the space charge density.
-  this->computeSpaceChargeDensity();
 
   // Solve the Poisson equation and compute the cell-centered electric field.
   MFAMRCellData& phi   = m_fieldSolver->getPotential();
@@ -2311,12 +2308,12 @@ ItoKMCStepper<I, C, R, F>::computeDriftVelocities() noexcept
     pout() << m_name + "::computeDriftVelocities()" << endl;
   }
 
-  // Compute mobilities for both Ito and CDR species.
-  this->computeMobilities();
-
   // Set velocities to be sgn(Z) * E
   this->setItoVelocityFunctions();
   this->setCdrVelocityFunctions();
+
+  // Compute mobilities for both Ito and CDR species.
+  this->computeMobilities();
 
   // Multiply sgn(Z) * E by the mobilities. For the CDR solvers this is just a multiplication, for the Ito solvers
   // we interpolate mu*E to the particle positions (in some form).
@@ -2464,15 +2461,15 @@ ItoKMCStepper<I, C, R, F>::computeMobilities(Vector<EBCellFAB*>& a_itoMobilities
 
   // Handles to regular data.
   const FArrayBox&   electricFieldReg = a_electricField.getFArrayBox();
-  Vector<FArrayBox*> itoMobilitiesReg;
-  Vector<FArrayBox*> cdrMobilitiesReg;
+  Vector<FArrayBox*> itoMobilitiesReg(numItoSpecies);
+  Vector<FArrayBox*> cdrMobilitiesReg(numCdrSpecies);
 
   for (int i = 0; i < a_itoMobilities.size(); i++) {
-    itoMobilitiesReg.push_back(&(a_itoMobilities[i]->getFArrayBox()));
+    itoMobilitiesReg[i] = (&(a_itoMobilities[i]->getFArrayBox()));
   }
 
   for (int i = 0; i < a_cdrMobilities.size(); i++) {
-    cdrMobilitiesReg.push_back(&(a_cdrMobilities[i]->getFArrayBox()));
+    cdrMobilitiesReg[i] = (&(a_cdrMobilities[i]->getFArrayBox()));
   }
 
   // Physics interface mapping -- this maps a global index from the returned vector to an Ito or CDR solver
@@ -3093,7 +3090,7 @@ ItoKMCStepper<I, C, R, F>::computeReactiveCdrParticlesPerCell(EBCellFAB&      a_
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const Real kappa = a_ebisbox.volFrac(vof);
 
-      a_ppc(vof, idx) = std::max(zero, std::floor(vol * phi(vof, 0)));
+      a_ppc(vof, idx) = std::max(zero, std::floor(kappa * phi(vof, 0) * vol));
     };
 
     // Run the kernels.
@@ -3848,6 +3845,8 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_newParti
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       this->reconcileCdrDensities(*a_newParticlesPerCell[lvl], *a_oldParticlesPerCell[lvl], lvl, a_dt);
     }
+
+    this->coarsenCdr();
   }
 }
 
@@ -3922,6 +3921,32 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBCellFAB& a_newParticles
 
     // Source = (newParticles - oldParticles)/(volume*dt)
     src /= a_dt;
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::coarsenCdr() noexcept
+{
+  CH_TIME("ItoKMCStepper::coarsenCdr");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::coarsenCdr" << endl;
+  }
+
+  for (auto solverIt = this->m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    auto& solver = solverIt();
+
+    EBAMRCellData& phi = solver->getPhi();
+    EBAMRCellData& src = solver->getSource();
+
+    this->m_amr->conservativeAverage(phi, phi.getRealm(), this->m_plasmaPhase);
+    this->m_amr->conservativeAverage(src, src.getRealm(), this->m_plasmaPhase);
+
+    this->m_amr->interpGhostPwl(phi, phi.getRealm(), this->m_plasmaPhase);
+    this->m_amr->interpGhostPwl(src, src.getRealm(), this->m_plasmaPhase);
+
+    DataOps::setCoveredValue(phi, 0.0);
+    DataOps::setCoveredValue(src, 0.0);
   }
 }
 

@@ -152,9 +152,9 @@ namespace Physics {
       bool m_canRegridOnRestart;
 
       /*!
-	@brief
+	@brief For achieving a slightly smoother gradient in the densities near the EB
       */
-      bool m_gradientFix;
+      bool m_smoothGradientEB;
 
       /*!
 	@brief Previous time step.
@@ -173,13 +173,52 @@ namespace Physics {
 
       /*!
 	@brief Storage for simplified particles that gave us sigma^k
+	@note Needed for regrids
       */
       Vector<RefCountedPtr<ParticleContainer<PointParticle>>> m_conductivityParticles;
 
       /*!
 	@brief Storage for particles that gave rho^dagger
+	@note Needed for regrids
       */
       Vector<RefCountedPtr<ParticleContainer<PointParticle>>> m_rhoDaggerParticles;
+
+      /*!
+	@brief Storage for CDR densities used during the semi-implicit solve. 
+	@note This is needed because the semi-implicit requires the space charge from
+	before the reaction step. 
+      */
+      EBAMRCellData m_semiImplicitRhoCDR;
+
+      /*!
+	@brief Storage for conductivity term due to mobile CDR species. 
+	@note This is needed because the semi-implicit requires the conductivity when solving
+	the Poisson equation.
+      */
+      EBAMRCellData m_semiImplicitConductivityCDR;
+
+      /*!
+	@brief Scratch storage for CDR contribution to space charge density.
+	@note Only used during regrids. 
+      */
+      EBAMRCellData m_scratchSemiImplicitRhoCDR;
+
+      /*!
+	@brief Scratch storage for CDR contribution to conductivity
+	@note Only used during regrids. 
+      */
+      EBAMRCellData m_scratchSemiImplicitConductivityCDR;
+
+      /*!
+	@brief Storage for the finite-volume approximation of div(D*grad(phi)) for the CDr equations.
+      */
+      Vector<EBAMRCellData> m_cdrDivD;
+
+      /*!
+	@brief Allocate "internal" storage.
+      */
+      virtual void
+      allocateInternals() noexcept override;
 
       /*!
 	@brief Parse advancement algorithm
@@ -237,7 +276,8 @@ namespace Physics {
       /*!
 	@brief Compute all conductivities (cell, face, and EB) from the input point particles
 	@param[in] a_particles Particles to deposit. Particle weights must hold the mobility*weight
-	@note This deposits the input particle weights onto m_conductivityCell, m_conductivityFace etc. 
+	@note This deposits the input particle weights onto m_conductivityCell, m_conductivityFace.
+	@note Also adds in the conductive contribution from the CDR solvers. 
       */
       virtual void
       computeConductivities(const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles) noexcept;
@@ -246,6 +286,7 @@ namespace Physics {
 	@brief Compute the cell-centered conductivity
 	@param[out] a_conductivityCell Cell-centered conductivity
 	@param[in]  a_particles        Particles to deposit. Particle weights must hold the mobility*weight
+	@note Also adds in the conductive contribution from the CDR solvers. 
       */
       virtual void
       computeCellConductivity(EBAMRCellData&                                                 a_conductivityCell,
@@ -257,6 +298,12 @@ namespace Physics {
       */
       virtual void
       computeFaceConductivity() noexcept;
+
+      /*!
+	@brief Set up the space charge density for the regrid operation
+      */
+      virtual void
+      computeSemiImplicitRho() noexcept;
 
       /*!
 	@brief Set up the semi-implicit Poisson solver
@@ -288,10 +335,10 @@ namespace Physics {
 	@param[in] a_dt Time step
       */
       virtual void
-      advanceParticlesEulerMaruyama(const Real a_dt) noexcept;
+      advanceEulerMaruyama(const Real a_dt) noexcept;
 
       /*!
-	@brief Perform the diffusive advance in the Euler-Maruyama step.
+	@brief Perform the diffusive Ito advance in the Euler-Maruyama step.
 	@details This computes the diffusion hop onto run-time enabled storage on the ItoParticles. We also store the
 	"rho dagger" particles which correspond to the position of the charged particles after the diffusionhop. 
       */
@@ -300,13 +347,30 @@ namespace Physics {
                                     const Real                                               a_dt) noexcept;
 
       /*!
+	@brief Compute the diffusion term for the CDR equations as well as the resulting CDR-contributions to 
+	the space charge density.
+	@details This does an explicit diffusion advance over a_dt for the diffusive CDR species. This also
+	stores the resultant space charge on m_semiImplicitRhoCDR.
+      */
+      virtual void
+      computeDiffusionTermCDR(EBAMRCellData& m_semiImplicitRhoCDR, const Real a_dt) noexcept;
+
+      /*!
 	@brief Step the particles according to the regular Euler-Maruyama scheme.
 	@param[in] a_dt Time step. 
 	@details This sets X^(k+1) = X^k + a_dt * V + sqrt(2*D*a_dt) * W
 	@note The hop MUST have been stored on the particle run-time storage 
       */
       virtual void
-      stepEulerMaruyama(const Real a_dt) noexcept;
+      stepEulerMaruyamaParticles(const Real a_dt) noexcept;
+
+      /*!
+	@brief Step the CDR equations according to the regular Euler-Maruyama scheme.
+	@param[in] a_dt Time step. 
+	@details This sets phi^(k+1) = phi^k - a_dt * div(v * phi) + a_dt * div(D*grad(phi))
+      */
+      virtual void
+      stepEulerMaruyamaCDR(const Real a_dt) noexcept;
     };
   } // namespace ItoKMC
 } // namespace Physics

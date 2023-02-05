@@ -2149,7 +2149,7 @@ ItoSolver::interpolateMobilities()
       DataOps::vectorLength(m_scratch, m_velocityFunction);
 
       m_amr->conservativeAverage(m_scratch, m_realm, m_phase);
-      m_amr->interpGhostMG(m_scratch, m_realm, m_phase);
+      m_amr->interpGhostPwl(m_scratch, m_realm, m_phase);
 
       break;
     }

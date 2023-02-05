@@ -780,10 +780,9 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
 
           // Regrid all levels, but restrict the addition to one at a time. As always, new grids on level l are generated through tags
           // on levels (l-1);
-          const int lmin =
-            0; // Coarsest grid level that can change. Base level can also change (due to run-time parameters or load balancing).
-          const int lmax = m_amr->getFinestLevel() +
-                           1; // This means that if we refine, we can only add one level at a time.
+          // This means that if we refine, we can only add one level at a time.
+          const int lmin = 0;
+          const int lmax = m_amr->getFinestLevel() + 1;
 
           if (m_writeRegridFiles) {
             this->writePreRegridFile();

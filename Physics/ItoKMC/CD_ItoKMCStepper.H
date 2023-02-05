@@ -877,8 +877,8 @@ namespace Physics {
       computeSpaceChargeDensity() noexcept;
 
       /*!
-	@brief Compute the space charge density (both phases)
-	@param[out] a_rho   Space cahrge density
+	@brief Compute the space charge density.
+	@param[out] a_rho          Space charge density
 	@param[in]  a_itoDensities List of Ito solver species densities
 	@param[in]  a_cdrDensities List of Cdr solver species densities
       */
@@ -1366,6 +1366,12 @@ namespace Physics {
                             const Box        a_box,
                             const Real       a_dx,
                             const Real       a_dt) noexcept;
+
+      /*!
+	@brief Coarsen data for CDR solvers
+      */
+      virtual void
+      coarsenCdr() noexcept;
 
       /*!
 	@brief Resolve particle injection at EBs.
