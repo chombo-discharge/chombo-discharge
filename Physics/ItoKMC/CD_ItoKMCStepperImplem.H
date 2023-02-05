@@ -71,10 +71,6 @@ ItoKMCStepper<I, C, R, F>::ItoKMCStepper(RefCountedPtr<ItoKMCPhysics>& a_physics
   if (numPlasmaSpecies == 0) {
     MayDay::Abort("ItoKMCStepper::ItoKMCStepper -- numPlasmaSpecies = 0, there's no problem to solve here!");
   }
-
-  if (numItoSpecies == 0) {
-    MayDay::Warning("ItoKMCStepper::ItoKMCStepper -- how to handle cases with no Ito species?");
-  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -530,8 +526,9 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
     m_amr->allocate(m_particleOldItoPPC, m_particleRealm, m_plasmaPhase, numItoSpecies);
   }
   else {
-    m_amr->allocatePointer(m_particleItoPPC, m_particleRealm);
-    m_amr->allocatePointer(m_particleOldItoPPC, m_particleRealm);
+    // Allocate some dummy data -- makes it easier. Trust me.
+    m_amr->allocate(m_particleItoPPC, m_particleRealm, m_plasmaPhase, 1);
+    m_amr->allocate(m_particleOldItoPPC, m_particleRealm, m_plasmaPhase, 1);
   }
 
   if (numCdrSpecies > 0) {
@@ -930,13 +927,14 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
 
   this->getParticleStatistics(avgParticles, stdDev, minParticles, maxParticles, minRank, maxRank);
 
-  Real maxDensity = 0.0;
-  Real minDensity = 0.0;
+  Real maxDensity = -std::numeric_limits<Real>::max();
+  Real minDensity = +std::numeric_limits<Real>::max();
 
   std::string maxSolver = "invalid solver";
   std::string minSolver = "invalid solver";
 
   this->getMaxMinItoDensity(maxDensity, minDensity, maxSolver, minSolver);
+  this->getMaxMinCDRDensity(maxDensity, minDensity, maxSolver, minSolver);
 
   std::string str;
   switch (m_timeCode) {
@@ -945,18 +943,23 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
 
     break;
   }
-  case TimeCode::Advection: {
+  case TimeCode::AdvectionIto: {
     str = "dt restricted by 'Advection'";
 
     break;
   }
-  case TimeCode::Diffusion: {
+  case TimeCode::DiffusionIto: {
     str = "dt restricted by 'Diffusion'";
 
     break;
   }
-  case TimeCode::AdvectionDiffusion: {
-    str = "dt restricted by 'AdvectionDiffusion'";
+  case TimeCode::AdvectionDiffusionIto: {
+    str = "dt restricted by 'AdvectionDiffusion (Ito)'";
+
+    break;
+  }
+  case TimeCode::AdvectionDiffusionCDR: {
+    str = "dt restricted by 'AdvectionDiffusion (CDR)'";
 
     break;
   }
@@ -984,7 +987,8 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
   pout() << "                                   " + str << endl;
   pout() << whitespace + "Emax        = " << Emax << endl
          << whitespace + "Max density = " << maxDensity << " (" << maxSolver << ")" << endl
-         << whitespace + "CFL         = " << m_dt / m_advectionDiffusionDt << endl
+         << whitespace + "CFL (Ito)   = " << m_dt / m_advectionDiffusionDt << endl
+         << whitespace + "CFL (CDR)   = " << m_dt / m_advectionDiffusionDtCDR << endl
          << whitespace + "Relax time  = " << m_dt / m_relaxationTime << endl
          << whitespace + "#Particles  = " << DischargeIO::numberFmt(localParticlesBulk) << " ("
          << DischargeIO::numberFmt(globalParticlesBulk) << ")" << endl
@@ -1013,16 +1017,42 @@ ItoKMCStepper<I, C, R, F>::getMaxMinItoDensity(Real&        a_maxDensity,
     pout() << m_name + "::getMaxMinDensity(Realx2, std::string2x)" << endl;
   }
 
-  // Need to initialize.
-  a_minDensity = std::numeric_limits<Real>::max();
-  a_maxDensity = -std::numeric_limits<Real>::max();
-
-  std::string maxSolver = "invalid solver";
-  std::string minSolver = "invalid solver";
-
   // Go through each solver and find the max/min values.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     const RefCountedPtr<ItoSolver>& solver = solverIt();
+
+    Real curMin = std::numeric_limits<Real>::max();
+    Real curMax = -std::numeric_limits<Real>::max();
+
+    DataOps::getMaxMin(curMax, curMin, solverIt()->getPhi(), 0);
+
+    if (curMax > a_maxDensity) {
+      a_maxDensity = curMax;
+      a_maxSolver  = solver->getName();
+    }
+
+    if (curMin < a_minDensity) {
+      a_minDensity = curMin;
+      a_minSolver  = solver->getName();
+    }
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::getMaxMinCDRDensity(Real&        a_maxDensity,
+                                               Real&        a_minDensity,
+                                               std::string& a_maxSolver,
+                                               std::string& a_minSolver) const noexcept
+{
+  CH_TIME("ItoKMCStepper::getMaxMinCDRDensity(Realx2, std::string2x)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getMaxMinCDRDensity(Realx2, std::string2x)" << endl;
+  }
+
+  // Go through each solver and find the max/min values.
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
 
     Real curMin = std::numeric_limits<Real>::max();
     Real curMax = -std::numeric_limits<Real>::max();
@@ -1087,17 +1117,21 @@ ItoKMCStepper<I, C, R, F>::computeDt()
   Real dt = std::numeric_limits<Real>::max();
 
   // Compute various time steps.
-  timer.startEvent("Advection");
+  timer.startEvent("Advection (Ito)");
   m_advectionDt = m_ito->computeAdvectiveDt();
-  timer.stopEvent("Advection");
+  timer.stopEvent("Advection (Ito)");
 
-  timer.startEvent("Diffusion");
+  timer.startEvent("Diffusion (Ito)");
   m_diffusionDt = m_ito->computeDiffusiveDt();
-  timer.stopEvent("Diffusion");
+  timer.stopEvent("Diffusion (Ito)");
 
-  timer.startEvent("AdvectionDiffusion");
+  timer.startEvent("AdvectionDiffusion (Ito)");
   m_advectionDiffusionDt = m_ito->computeDt();
-  timer.stopEvent("AdvectionDiffusion");
+  timer.stopEvent("AdvectionDiffusion (Ito)");
+
+  timer.startEvent("AdvectionDiffusion (CDR)");
+  m_advectionDiffusionDtCDR = m_cdr->computeAdvectionDiffusionDt();
+  timer.stopEvent("AdvectionDiffusion (CDR)");
 
   timer.startEvent("Physics");
   m_physicsDt = this->computePhysicsDt();
@@ -1109,22 +1143,27 @@ ItoKMCStepper<I, C, R, F>::computeDt()
 
   if (m_advectionCFL * m_advectionDt < dt) {
     dt         = m_advectionCFL * m_advectionDt;
-    m_timeCode = TimeCode::Advection;
+    m_timeCode = TimeCode::AdvectionIto;
+  }
+
+  if (m_diffusionCFL * m_diffusionDt < dt) {
+    dt         = m_diffusionCFL * m_diffusionDt;
+    m_timeCode = TimeCode::DiffusionIto;
+  }
+
+  if (m_advectionDiffusionCFL * m_advectionDiffusionDt < dt) {
+    dt         = m_advectionDiffusionCFL * m_advectionDiffusionDt;
+    m_timeCode = TimeCode::AdvectionDiffusionIto;
+  }
+
+  if (std::min(m_advectionDiffusionCFL, 0.9) * m_advectionDiffusionDtCDR < dt) {
+    dt         = std::min(m_advectionDiffusionCFL, 0.9) * m_advectionDiffusionDtCDR;
+    m_timeCode = TimeCode::AdvectionDiffusionCDR;
   }
 
   if (m_relaxTimeFactor * m_relaxationTime < dt) {
     dt         = m_relaxTimeFactor * m_relaxationTime;
     m_timeCode = TimeCode::RelaxationTime;
-  }
-
-  if (m_diffusionCFL * m_diffusionDt < dt) {
-    dt         = m_diffusionCFL * m_diffusionDt;
-    m_timeCode = TimeCode::Diffusion;
-  }
-
-  if (m_advectionDiffusionCFL * m_advectionDiffusionDt < dt) {
-    dt         = m_advectionDiffusionCFL * m_advectionDiffusionDt;
-    m_timeCode = TimeCode::AdvectionDiffusion;
   }
 
   if (m_physicsDt < dt) {
@@ -2268,6 +2307,9 @@ ItoKMCStepper<I, C, R, F>::setCdrVelocityFunctions() noexcept
       // Coarsen and update ghost cells.
       m_amr->conservativeAverage(velocity, m_fluidRealm, m_plasmaPhase);
       m_amr->interpGhostPwl(velocity, m_fluidRealm, m_plasmaPhase);
+    }
+    else if (solver->isMobile() && Z == 0) {
+      MayDay::Warning("ItoKMCStepper::setCdrVelocityFunctions -- how to handle mobile neutral species?");
     }
   }
 }

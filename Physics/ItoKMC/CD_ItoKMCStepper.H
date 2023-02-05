@@ -310,9 +310,10 @@ namespace Physics {
       */
       enum class TimeCode
       {
-        Advection,
-        Diffusion,
-        AdvectionDiffusion,
+        AdvectionIto,
+        DiffusionIto,
+        AdvectionDiffusionIto,
+        AdvectionDiffusionCDR,
         RelaxationTime,
         Hardcap,
         Physics
@@ -504,6 +505,11 @@ namespace Physics {
 	@brief The advection-diffusion time step (not multiplied by m_advectionDiffusionCFL)
       */
       Real m_advectionDiffusionDt;
+
+      /*!
+	@brief The advection-diffusion time step (not multiplied by m_advectionDiffusionCFL) for the CDR equations
+      */
+      Real m_advectionDiffusionDtCDR;
 
       /*!
 	@brief The relaxation time eps0/sigma
@@ -793,13 +799,26 @@ namespace Physics {
 
       /*!
 	@brief Get maximum density of the Ito species
-	@param[out] a_maxDensity Maximum mesh density
-	@param[out] a_minDensity Minium mesh density
-	@param[out] a_maxSolver  Solver with highest density
-	@param[out] a_minSolver  Solver with lowest density
+	@param[inout] a_maxDensity Maximum mesh density
+	@param[inout] a_minDensity Minium mesh density
+	@param[inout] a_maxSolver  Solver with highest density
+	@param[inout] a_minSolver  Solver with lowest density
       */
       virtual void
       getMaxMinItoDensity(Real&        a_maxDensity,
+                          Real&        a_minDensity,
+                          std::string& a_maxSolver,
+                          std::string& a_minSolver) const noexcept;
+
+      /*!
+	@brief Get maximum density of the CDr species
+	@param[inout] a_maxDensity Maximum mesh density
+	@param[inout] a_minDensity Minium mesh density
+	@param[inout] a_maxSolver  Solver with highest density
+	@param[inout] a_minSolver  Solver with lowest density
+      */
+      virtual void
+      getMaxMinCDRDensity(Real&        a_maxDensity,
                           Real&        a_minDensity,
                           std::string& a_maxSolver,
                           std::string& a_minSolver) const noexcept;

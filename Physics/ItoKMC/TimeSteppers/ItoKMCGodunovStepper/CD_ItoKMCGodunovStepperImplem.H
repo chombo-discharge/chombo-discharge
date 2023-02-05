@@ -1322,16 +1322,16 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaCDR(const Real a_dt) noexcept
 
     EBAMRCellData& phi = solver->getPhi();
 
+    this->m_amr->conservativeAverage(phi, this->m_fluidRealm, this->m_plasmaPhase);
+    this->m_amr->interpGhostPwl(phi, this->m_fluidRealm, this->m_plasmaPhase);
+
     // Add in the advective term.
     if (mobile) {
       EBAMRCellData& vel = solver->getCellCenteredVelocity();
 
-      this->m_amr->conservativeAverage(vel, this->m_fluidRealm, this->m_plasmaPhase);
-      this->m_amr->interpGhost(vel, this->m_fluidRealm, this->m_plasmaPhase);
-
       // Set an outflow flux.
       solver->extrapolateAdvectiveFluxToEB();
-      DataOps::roof(solver->getEbFlux(), 0.0);
+      DataOps::floor(solver->getEbFlux(), 0.0);
 
       // Compute the FV approximation to the advective term and do the Euler advance. If the underlying
       // CDR solver is a CTU solver, we also add in the transverse terms.
@@ -1344,6 +1344,8 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaCDR(const Real a_dt) noexcept
     if (solver->isDiffusive()) {
       DataOps::incr(phi, this->m_cdrDivD[index], a_dt);
     }
+
+    DataOps::floor(phi, 0.0);
   }
 
   this->coarsenCdr();
