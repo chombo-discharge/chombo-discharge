@@ -989,7 +989,7 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
          << whitespace + "Max density = " << maxDensity << " (" << maxSolver << ")" << endl
          << whitespace + "CFL (Ito)   = " << m_dt / m_advectionDiffusionDt << endl
          << whitespace + "CFL (CDR)   = " << m_dt / m_advectionDiffusionDtCDR << endl
-         << whitespace + "Relax time  = " << m_dt / m_relaxationTime << endl
+         << whitespace + "dt/dt_relax = " << m_dt / m_relaxationTime << endl
          << whitespace + "#Particles  = " << DischargeIO::numberFmt(localParticlesBulk) << " ("
          << DischargeIO::numberFmt(globalParticlesBulk) << ")" << endl
          << whitespace + "#EB part.   = " << DischargeIO::numberFmt(localParticlesEB) << " ("

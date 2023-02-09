@@ -502,34 +502,6 @@ ItoKMCPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&   a_itoParti
   CH_assert(a_itoParticles.size() == m_itoSpecies.size());
   CH_assert(a_cdrParticles.size() == m_cdrSpecies.size());
 
-#if 0
-  for (const auto& r : m_photoReactions) {
-
-    // Source and targets
-    const size_t&            src     = r->getSourcePhoton();
-    const std::list<size_t>& targets = r->getTargetSpecies();
-
-    for (ListIterator<Photon> lit(*a_absorbedPhotons[src]); lit.ok(); ++lit) {
-      const RealVect x = lit().position();
-      const Real     w = lit().weight();
-
-      for (const auto& t : targets) {
-        const SpeciesType& type       = m_speciesMap.at(t).first;
-        const int&         localIndex = m_speciesMap.at(t).second;
-
-        if (type == SpeciesType::Ito) {
-          a_itoParticles[localIndex]->add(ItoParticle(w, x));
-        }
-        else if (type == SpeciesType::CDR) {
-          a_cdrParticles[localIndex]->add(PointParticle(x, w));
-        }
-        else {
-          MayDay::Error("CD_ItoKMCPhysics.H - logic bust in reconcilePhotoionization");
-        }
-      }
-    }
-  }
-#else
   for (int i = 0; i < a_absorbedPhotons.size(); i++) {
     if (m_photoPathways.find(i) != m_photoPathways.end()) {
       std::discrete_distribution<int> d                = m_photoPathways.at(i).first;
@@ -563,7 +535,6 @@ ItoKMCPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&   a_itoParti
       }
     }
   }
-#endif
 }
 
 #include <CD_NamespaceFooter.H>
