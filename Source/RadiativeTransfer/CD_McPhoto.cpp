@@ -728,19 +728,19 @@ McPhoto::getPlotVariableNames() const
     plotVarNames.push_back(m_name + " source");
   }
   if (m_plotPhotons) {
-    plotVarNames.push_back(m_name + " photons");
+    plotVarNames.push_back(m_name + " active_photons");
   }
   if (m_plotBulkPhotons) {
-    plotVarNames.push_back(m_name + " bulkPhotons");
+    plotVarNames.push_back(m_name + " bulk_photons");
   }
   if (m_plotEBPhotons) {
-    plotVarNames.push_back(m_name + " ebPhotons");
+    plotVarNames.push_back(m_name + " eb_photons");
   }
   if (m_plotDomainPhotons) {
-    plotVarNames.push_back(m_name + " domainPhotons");
+    plotVarNames.push_back(m_name + " domain_photons");
   }
   if (m_plotSourcePhotons) {
-    plotVarNames.push_back(m_name + " sourcePhotons");
+    plotVarNames.push_back(m_name + " source_photons");
   }
 
   return plotVarNames;
