@@ -98,13 +98,10 @@ ItoKMCAir3LFA::ItoKMCAir3LFA()
   auto y1 = std::make_shared<ItoKMCPhotoReaction>(0, std::list<size_t>{0, 1});
   m_photoReactions.emplace_back(y1);
 
-  // Build internal representation of species
-  this->defineSpeciesMap();
+  // Run the rest of the define method.
+  this->define();
 
-  // Define the KMC solver and read in transport data.
-  this->defineKMC();
-
-  // Read in transport data.
+  // Read input data
   this->readTables();
 }
 

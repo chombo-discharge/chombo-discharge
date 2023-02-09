@@ -18,7 +18,9 @@
 
 using namespace Physics::ItoKMC;
 
-inline ItoKMCPhotoReaction::ItoKMCPhotoReaction(const size_t a_source, const std::list<size_t> a_targets) noexcept
+inline ItoKMCPhotoReaction::ItoKMCPhotoReaction(const size_t            a_source,
+                                                const std::list<size_t> a_targets,
+                                                const Real              a_efficiency) noexcept
 {
   this->define(a_source, a_targets);
 }
@@ -26,11 +28,18 @@ inline ItoKMCPhotoReaction::ItoKMCPhotoReaction(const size_t a_source, const std
 inline ItoKMCPhotoReaction::~ItoKMCPhotoReaction() noexcept {}
 
 inline void
-ItoKMCPhotoReaction::define(const size_t a_source, const std::list<size_t> a_targets) noexcept
+ItoKMCPhotoReaction::define(const size_t a_source, const std::list<size_t> a_targets, const Real a_efficiency) noexcept
 {
+  m_source     = a_source;
+  m_targets    = a_targets;
+  m_efficiency = a_efficiency;
 
-  m_source  = a_source;
-  m_targets = a_targets;
+  const std::string baseError = "CD_ItoKMCPhotoReactionImplem.H in function ";
+  if (m_efficiency < 0.0) {
+    const std::string derivError = "'ItoKMCPhotoReaction::define' - efficiency must be >= 0.0";
+
+    MayDay::Error((baseError + derivError).c_str());
+  }
 }
 
 inline const size_t&
@@ -43,6 +52,12 @@ inline const std::list<size_t>&
 ItoKMCPhotoReaction::getTargetSpecies() const noexcept
 {
   return m_targets;
+}
+
+inline const Real&
+ItoKMCPhotoReaction::getEfficiency() const noexcept
+{
+  return m_efficiency;
 }
 
 #include <CD_NamespaceFooter.H>

@@ -59,6 +59,18 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
 inline ItoKMCPhysics::~ItoKMCPhysics() noexcept { CH_TIME("ItoKMCPhysics::~ItoKMCPhysics"); }
 
 inline void
+ItoKMCPhysics::define() noexcept
+{
+  CH_TIME("ItoKMCPhysics::define");
+
+  this->defineSpeciesMap();
+  this->defineKMC();
+  this->definePhotoPathways();
+
+  m_isDefined = true;
+}
+
+inline void
 ItoKMCPhysics::defineSpeciesMap() noexcept
 {
   CH_TIME("ItoKMCPhysics::defineSpeciesMap");
@@ -74,8 +86,56 @@ ItoKMCPhysics::defineSpeciesMap() noexcept
   for (int i = 0; i < numCdrSpecies; i++, species++) {
     m_speciesMap.emplace(species, std::make_pair(SpeciesType::CDR, i));
   }
+}
 
-  m_isDefined = true;
+inline void
+ItoKMCPhysics::defineKMC() noexcept
+{
+  CH_TIME("ItoKMCPhysics::defineKMC");
+
+  CH_assert(m_isDefined);
+
+  m_kmcState.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
+
+  m_kmcSolver.define(m_kmcReactions);
+
+  // Define solver parameters in case they've been changed since last time.
+  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
+}
+
+inline void
+ItoKMCPhysics::definePhotoPathways() noexcept
+{
+  CH_TIME("ItoKMCPhysics::definePhotoPathways");
+
+  std::map<int, std::vector<std::pair<int, Real>>> pathways;
+
+  for (int i = 0; i < m_photoReactions.size(); i++) {
+    const ItoKMCPhotoReaction& r = *m_photoReactions[i];
+
+    const size_t& src        = r.getSourcePhoton();
+    const Real    efficiency = r.getEfficiency();
+
+    pathways[src].emplace_back(std::make_pair(i, efficiency));
+  }
+
+  // Define the reaction set.
+  for (const auto& p : pathways) {
+    const int                               photoSpecies             = p.first;
+    const std::vector<std::pair<int, Real>> reactionsAndEfficiencies = p.second;
+
+    std::map<int, int> localToGlobalMap;
+    std::list<double>  efficiencies;
+
+    for (int i = 0; i < reactionsAndEfficiencies.size(); i++) {
+      localToGlobalMap.emplace(i, reactionsAndEfficiencies[i].first);
+      efficiencies.emplace_back((double)reactionsAndEfficiencies[i].second);
+    }
+
+    std::discrete_distribution<int> distribution(efficiencies.begin(), efficiencies.end());
+
+    m_photoPathways.insert(std::make_pair((int)photoSpecies, std::make_pair(distribution, localToGlobalMap)));
+  }
 }
 
 inline const std::map<int, std::pair<SpeciesType, int>>&
@@ -94,21 +154,6 @@ ItoKMCPhysics::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<
   CH_assert(m_isDefined);
 
   return std::numeric_limits<Real>::max();
-}
-
-inline void
-ItoKMCPhysics::defineKMC() noexcept
-{
-  CH_TIME("ItoKMCPhysics::defineKMC");
-
-  CH_assert(m_isDefined);
-
-  m_kmcState.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
-
-  m_kmcSolver.define(m_kmcReactions);
-
-  // Define solver parameters in case they've been changed since last time.
-  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
 }
 
 inline void
@@ -457,6 +502,7 @@ ItoKMCPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&   a_itoParti
   CH_assert(a_itoParticles.size() == m_itoSpecies.size());
   CH_assert(a_cdrParticles.size() == m_cdrSpecies.size());
 
+#if 0
   for (const auto& r : m_photoReactions) {
 
     // Source and targets
@@ -483,6 +529,41 @@ ItoKMCPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&   a_itoParti
       }
     }
   }
+#else
+  for (int i = 0; i < a_absorbedPhotons.size(); i++) {
+    if (m_photoPathways.find(i) != m_photoPathways.end()) {
+      std::discrete_distribution<int> d                = m_photoPathways.at(i).first;
+      const std::map<int, int>&       localToGlobalMap = m_photoPathways.at(i).second;
+
+      for (ListIterator<Photon> lit(*a_absorbedPhotons[i]); lit.ok(); ++lit) {
+        const RealVect x = lit().position();
+        const Real     w = lit().weight();
+
+        // Determine the photo-reaction type.
+        const int localReaction  = Random::get(d);
+        const int globalReaction = localToGlobalMap.at(localReaction);
+
+        const ItoKMCPhotoReaction& photoReaction = *m_photoReactions[globalReaction];
+        const std::list<size_t>&   plasmaTargets = photoReaction.getTargetSpecies();
+
+        for (const auto& t : plasmaTargets) {
+          const SpeciesType& type       = m_speciesMap.at(t).first;
+          const int&         localIndex = m_speciesMap.at(t).second;
+
+          if (type == SpeciesType::Ito) {
+            a_itoParticles[localIndex]->add(ItoParticle(w, x));
+          }
+          else if (type == SpeciesType::CDR) {
+            a_cdrParticles[localIndex]->add(PointParticle(x, w));
+          }
+          else {
+            MayDay::Error("CD_ItoKMCPhysics.H - logic bust in reconcilePhotoionization");
+          }
+        }
+      }
+    }
+  }
+#endif
 }
 
 #include <CD_NamespaceFooter.H>

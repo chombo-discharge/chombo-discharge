@@ -383,6 +383,13 @@ namespace Physics {
       std::vector<std::shared_ptr<const ItoKMCPhotoReaction>> m_photoReactions;
 
       /*!
+	@brief Random number generators for photoionization pathways. 
+	@details The first index is the photon index, i.e. entry in m_photonSpecies. The second index in the
+	map is an RNG generator for selecting photo-reactions. 
+      */
+      std::map<int, std::pair<std::discrete_distribution<int>, std::map<int, int>>> m_photoPathways;
+
+      /*!
 	@brief List of solver-tracked particle drift-diffusion species. 
       */
       Vector<RefCountedPtr<ItoSpecies>> m_itoSpecies;
@@ -432,6 +439,12 @@ namespace Physics {
       Real m_eps;
 
       /*!
+	@brief Define method -- defines all the internal machinery
+      */
+      inline void
+      define() noexcept;
+
+      /*!
 	@brief Build internal representation of how we distinguish the Ito and CDR solvers
 	@note This should ALWAYS be called after initializing the species since ItoKMCStepper will rely on it. 
       */
@@ -443,6 +456,12 @@ namespace Physics {
       */
       inline void
       defineKMC() noexcept;
+
+      /*!
+	@brief Define pathways for photo-reactions
+      */
+      inline void
+      definePhotoPathways() noexcept;
 
       /*!
 	@brief Parse the maximum number of particles generated per cell
