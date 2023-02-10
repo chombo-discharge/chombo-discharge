@@ -955,7 +955,6 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
   for (auto solverIt = this->m_ito->iterator(); solverIt.ok(); ++solverIt) {
     const RefCountedPtr<ItoSolver>&  solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
-    const int                        idx     = solverIt.index();
     const int                        Z       = species->getChargeNumber();
 
     if (Z != 0) {
@@ -1315,9 +1314,6 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaCDR(const Real a_dt) noexcept
   for (auto solverIt = (this->m_cdr)->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<CdrSolver>& solver = solverIt();
 
-    const bool mobile    = solver->isMobile();
-    const bool diffusive = solver->isDiffusive();
-
     const int index = solverIt.index();
 
     EBAMRCellData& phi = solver->getPhi();
@@ -1326,9 +1322,7 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaCDR(const Real a_dt) noexcept
     this->m_amr->interpGhostPwl(phi, this->m_fluidRealm, this->m_plasmaPhase);
 
     // Add in the advective term.
-    if (mobile) {
-      EBAMRCellData& vel = solver->getCellCenteredVelocity();
-
+    if (solver->isMobile()) {
       // Set an outflow flux.
       solver->extrapolateAdvectiveFluxToEB();
       DataOps::floor(solver->getEbFlux(), 0.0);

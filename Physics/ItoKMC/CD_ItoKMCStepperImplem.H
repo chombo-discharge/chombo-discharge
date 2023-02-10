@@ -63,12 +63,7 @@ ItoKMCStepper<I, C, R, F>::ItoKMCStepper(RefCountedPtr<ItoKMCPhysics>& a_physics
 
   m_physics = a_physics;
 
-  const int numItoSpecies    = m_physics->getNumItoSpecies();
-  const int numCdrSpecies    = m_physics->getNumCdrSpecies();
-  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
-  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
-
-  if (numPlasmaSpecies == 0) {
+  if (m_physics->getNumPlasmaSpecies()) {
     MayDay::Abort("ItoKMCStepper::ItoKMCStepper -- numPlasmaSpecies = 0, there's no problem to solve here!");
   }
 }
@@ -2324,9 +2319,8 @@ ItoKMCStepper<I, C, R, F>::multiplyCdrVelocitiesByMobilities() noexcept
   }
 
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    RefCountedPtr<CdrSolver>&        solver  = solverIt();
-    const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
-    const int                        idx     = solverIt.index();
+    RefCountedPtr<CdrSolver>& solver = solverIt();
+    const int                 idx    = solverIt.index();
 
     if (solver->isMobile()) {
       EBAMRCellData&       velocity = solver->getCellCenteredVelocity();
@@ -2792,7 +2786,7 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<EBCellFAB*>& a_it
     // Compute diffusion coefficients.
     const Vector<Real> diffusionCoefficients = m_physics->computeDiffusionCoefficients(a_time, pos, E);
 
-    CH_assert(diffusion.size() == numPlasmaSpecies);
+    CH_assert(diffusionCoefficients.size() == numPlasmaSpecies);
 
     // Put the diffusion coefficients in the correct solver storage.
     for (const auto& s : speciesMap) {
@@ -3117,12 +3111,8 @@ ItoKMCStepper<I, C, R, F>::computeReactiveCdrParticlesPerCell(EBCellFAB&      a_
     const EBCellFAB& phi    = (*(solver->getPhi())[a_level])[a_dit];
     const FArrayBox& phiReg = phi.getFArrayBox();
 
-    FArrayBox& ppcRegular = a_ppc.getFArrayBox();
-
     // Regular cells kernel.
     auto regularKernel = [&](const IntVect& iv) -> void {
-      Real num = 0.0;
-
       if (a_ebisbox.isRegular(iv)) {
         ppcRegular(iv, idx) = std::max(zero, std::floor(phiReg(iv, 0) * vol));
       }
@@ -4001,10 +3991,6 @@ ItoKMCStepper<I, C, R, F>::resolveParticlesEB(const Real a_dt) noexcept
     pout() << m_name + "::resolveParticlesEB(Real)" << endl;
   }
 
-  // Get the intersected particles
-  const int numItoSpecies    = m_physics->getNumItoSpecies();
-  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
-
   Vector<ParticleContainer<ItoParticle>*> intersectedParticlesAMR;
   Vector<ParticleContainer<Photon>*>      intersectedPhotonsAMR;
 
@@ -4646,8 +4632,7 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
   // we need to map this to something we can load balance.
   Vector<Vector<long int>> loads(1 + a_finestLevel, 0L);
   for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
-    const DisjointBoxLayout&        dbl        = a_grids[lvl];
-    const LevelData<BaseFab<bool>>& validCells = *m_amr->getValidCells(m_particleRealm)[lvl];
+    const DisjointBoxLayout& dbl = a_grids[lvl];
 
     Vector<long int>& levelLoads = loads[lvl];
 

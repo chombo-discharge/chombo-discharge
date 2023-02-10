@@ -45,7 +45,7 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
   m_algorithm         = Algorithm::Hybrid;
   m_particlePlacement = ParticlePlacement::Random;
 
-  // Development code for switching to centroid for secondary emission. Will be removed. 
+  // Development code for switching to centroid for secondary emission. Will be removed.
 #if 0
   bool      useCentroid = false;
   ParmParse pp("ItoKMCPhysics");

@@ -99,7 +99,7 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
     pout() << this->m_name + "::computeTagFields" << endl;
   }
 
-  CH_assert(this->m_isDefined());
+  CH_assert(this->m_isDefined);
 
   this->allocateStorage();
   this->computeElectricField(m_E, m_gradE);
@@ -121,7 +121,6 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
       const Box&     box     = dbl[dit()];
       const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
 
       const EBCellFAB& electricField     = (*m_E[lvl])[dit()];
       const EBCellFAB& gradElectricField = (*m_gradE[lvl])[dit()];
