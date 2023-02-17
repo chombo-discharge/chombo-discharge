@@ -22,6 +22,26 @@
 #include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
+inline IntVect
+ParticleOps::getParticleCellIndex(const RealVect& a_particlePosition,
+                                  const RealVect& a_probLo,
+                                  const Real&     a_dx) noexcept
+{
+  return IntVect(D_DECL(std::floor((a_particlePosition[0] - a_probLo[0]) / a_dx),
+                        std::floor((a_particlePosition[1] - a_probLo[1]) / a_dx),
+                        std::floor((a_particlePosition[2] - a_probLo[2]) / a_dx)));
+}
+
+inline IntVect
+ParticleOps::getParticleCellIndex(const RealVect& a_particlePosition,
+                                  const RealVect& a_probLo,
+                                  const RealVect& a_dx) noexcept
+{
+  return IntVect(D_DECL(std::floor((a_particlePosition[0] - a_probLo[0]) / a_dx[0]),
+                        std::floor((a_particlePosition[1] - a_probLo[1]) / a_dx[1]),
+                        std::floor((a_particlePosition[2] - a_probLo[2]) / a_dx[2])));
+}
+
 template <typename P, const Real& (P::*weight)() const>
 inline void
 ParticleOps::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P>& a_src) noexcept

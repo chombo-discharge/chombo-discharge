@@ -2845,11 +2845,29 @@ AmrMesh::getParticleMesh(const std::string a_realm, const phase::which_phase a_p
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getLevelSet(string, phase::which_phase) - could not find realm '" + a_realm + "'";
+    const std::string str = "AmrMesh::getParticleMesh(string, phase::which_phase) - could not find realm '" + a_realm +
+                            "'";
     MayDay::Abort(str.c_str());
   }
 
   return m_realms[a_realm]->getParticleMesh(a_phase);
+}
+
+EBAMRSurfaceDeposition&
+AmrMesh::getSurfaceDeposition(const std::string a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getSurfaceDeposition(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getSurfaceDeposition(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getSurfaceDeposition(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getSurfaceDeposition(a_phase);
 }
 
 Vector<RefCountedPtr<EBCoarAve>>&

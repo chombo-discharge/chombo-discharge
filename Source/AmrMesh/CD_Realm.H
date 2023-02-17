@@ -296,6 +296,13 @@ public:
   getParticleMesh(const phase::which_phase a_phase);
 
   /*!
+    @brief Get the particle mesh operator
+    @param[in] a_phase Which phase
+  */
+  EBAMRSurfaceDeposition&
+  getSurfaceDeposition(const phase::which_phase a_phase);
+
+  /*!
     @brief Get gradient operator
     @param[in] a_phase Phase
   */

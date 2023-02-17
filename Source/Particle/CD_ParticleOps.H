@@ -29,6 +29,24 @@ class ParticleOps
 {
 public:
   /*!
+    @brief Get the cell index corresponding to the particle position
+    @param[in] a_particlePosition Particle position
+    @param[in] a_probLo Lower-left corner of computational domain
+    @param[in] a_dx Grid resolution
+  */
+  static inline IntVect
+  getParticleCellIndex(const RealVect& a_particlePosition, const RealVect& a_probLo, const Real& a_dx) noexcept;
+
+  /*!
+    @brief Get the cell index corresponding to the particle position
+    @param[in] a_particlePosition Particle position
+    @param[in] a_probLo Lower-left corner of computational domain
+    @param[in] a_dx Grid resolution
+  */
+  static inline IntVect
+  getParticleCellIndex(const RealVect& a_particlePosition, const RealVect& a_probLo, const RealVect& a_dx) noexcept;
+
+  /*!
     @brief Get the number of physical particles per cell
     @param[out] a_ppc Physical particles per cell
     @param[in]  a_src Particle source container. 

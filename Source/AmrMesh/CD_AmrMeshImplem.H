@@ -296,6 +296,40 @@ AmrMesh::depositParticles(EBAMRCellData&              a_meshData,
                                                a_forceIrregNGP);
 }
 
+template <class P, const Real& (P::*particleScalarField)() const>
+void
+AmrMesh::depositParticles(EBAMRIVData&                a_meshData,
+                          const std::string&          a_realm,
+                          const phase::which_phase&   a_phase,
+                          const ParticleContainer<P>& a_particles) const noexcept
+{
+  CH_TIME("AmrMesh::depositParticles(surface)");
+
+  CH_assert(a_meshData[0]->nComp() == 1);
+  CH_assert(a_meshData.getRrealm() == a_particles.getRealm());
+
+  EBAMRSurfaceDeposition& surfaceDeposition = this->getSurfaceDeposition(a_realm, a_phase);
+
+  surfaceDeposition.deposit<P, particleScalarField>(a_meshData, a_particles);
+}
+
+template <class P, Real (P::*particleScalarField)() const>
+void
+AmrMesh::depositParticles(EBAMRIVData&                a_meshData,
+                          const std::string&          a_realm,
+                          const phase::which_phase&   a_phase,
+                          const ParticleContainer<P>& a_particles) const noexcept
+{
+  CH_TIME("AmrMesh::depositParticles(surface)");
+
+  CH_assert(a_meshData[0]->nComp() == 1);
+  CH_assert(a_meshData.getRrealm() == a_particles.getRealm());
+
+  EBAMRSurfaceDeposition& surfaceDeposition = this->getSurfaceDeposition(a_realm, a_phase);
+
+  surfaceDeposition.deposit<P, particleScalarField>(a_meshData, a_particles);
+}
+
 template <class P, Real& (P::*particleScalarField)()>
 void
 AmrMesh::interpolateParticles(ParticleContainer<P>&     a_particles,

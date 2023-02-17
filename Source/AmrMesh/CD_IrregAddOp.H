@@ -1,49 +1,49 @@
 /* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
+ * Copyright © 2023 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
 /*!
-  @file   CD_EBAddOp.H
-  @brief  Declaration of a Copier class for making incrementation between LevelData<EBCellFAB> easier.
+  @file   CD_IrregAddOp.H
+  @brief  Declaration of a Copier class for making incrementation between LevelData<BaseIVFAB<Real>> easier.
   @author Robert Marskar
 */
 
-#ifndef CD_EBAddOp_H
-#define CD_EBAddOp_H
+#ifndef CD_IrregAddOp_H
+#define CD_IrregAddOp_H
 
 // Chombo includes
 #include <BoxLayoutData.H>
-#include <EBCellFAB.H>
+#include <BaseIVFAB.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief A Copier class for making copying between BoxLayoutData<EBCellFAB> easier. This increments EBCellFABs when calling copyTo (with the correct Copier).
+  @brief A Copier class for making copying between LevelData<BaseIVFAB<Real>> easier. This is an incrementation operator. 
 */
-class EBAddOp : public LDOperator<EBCellFAB>
+class IrregAddOp : public LDOperator<BaseIVFAB<Real>>
 {
 public:
   /*!
     @brief Constructor (does nothing)
   */
-  EBAddOp();
+  IrregAddOp() noexcept;
 
   /*!
     @brief Destructor (does nothing)
   */
-  ~EBAddOp();
+  virtual ~IrregAddOp() noexcept;
 
   /*!
     @brief Linearization function. We linearize the buffer onto arg, but since this is an addition operator we need to add the result.
     @param[inout] a_data   Data to be incremented with buffer
-    @param[inout] a_buffer Data buffer (this is another EBCellFAB)
+    @param[inout] a_buffer Data buffer (this is another BaseIVFAB<Real>)
     @param[in]    a_region Region
     @param[in]    a_comps  Components to do.
   */
   virtual void
-  linearIn(EBCellFAB& a_data, void* a_buffer, const Box& a_region, const Interval& a_comps) const override;
+  linearIn(BaseIVFAB<Real>& a_data, void* a_buffer, const Box& a_region, const Interval& a_comps) const override;
 
   /*!
     @brief Operator function. Increments data with source.
@@ -55,12 +55,12 @@ public:
     @param[in]    a_srcVars    Source variables
   */
   virtual void
-  op(EBCellFAB&       a_dst,
-     const Box&       a_regionFrom,
-     const Interval&  a_dstVars,
-     const Box&       a_regionTo,
-     const EBCellFAB& a_src,
-     const Interval&  a_srcVars) const;
+  op(BaseIVFAB<Real>&       a_dst,
+     const Box&             a_regionFrom,
+     const Interval&        a_dstVars,
+     const Box&             a_regionTo,
+     const BaseIVFAB<Real>& a_src,
+     const Interval&        a_srcVars) const;
 };
 
 #include <CD_NamespaceFooter.H>

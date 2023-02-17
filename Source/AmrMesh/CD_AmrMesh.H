@@ -936,6 +936,42 @@ public:
                    const bool                  a_forceIrregNGP = false);
 
   /*!
+    @brief Deposit scalar particle quantities on the mesh. 
+    @details Usage has signature depositParticles<P, &P::mass> (...)
+	
+    To deposit a different quantity, simply change the function pointer in the input parameter. 
+
+    @param[out] a_meshData   Mesh data. MUST have exactly one compnent. 
+    @param[in]  a_realm      Realm where data is registered.
+    @param[in]  a_phase      Phase where data is registered.
+    @param[in]  a_particles  Particle container. Must be in "usable state" for deposition.
+  */
+  template <class P, const Real& (P::*particleScalarField)() const>
+  void
+  depositParticles(EBAMRIVData&                a_meshData,
+                   const std::string&          a_realm,
+                   const phase::which_phase&   a_phase,
+                   const ParticleContainer<P>& a_particles) const noexcept;
+
+  /*!
+    @brief Deposit scalar particle quantities on the mesh. 
+    @details Usage has signature depositParticles<P, &P::mass> (...)
+	
+    To deposit a different quantity, simply change the function pointer in the input parameter. 
+
+    @param[out] a_meshData   Mesh data. MUST have exactly one compnent. 
+    @param[in]  a_realm      Realm where data is registered.
+    @param[in]  a_phase      Phase where data is registered.
+    @param[in]  a_particles  Particle container. Must be in "usable state" for deposition.
+  */
+  template <class P, Real (P::*particleScalarField)() const>
+  void
+  depositParticles(EBAMRIVData&                a_meshData,
+                   const std::string&          a_realm,
+                   const phase::which_phase&   a_phase,
+                   const ParticleContainer<P>& a_particles) const noexcept;
+
+  /*!
     @brief Interpolate a scalar field onto the particle position. 
     @details This is just like regular particle-mesh interpolation. The input field should have exactly one component and the
     the field will be interpolated onto the template parameter's input field. The template parameter 'particleScalarField' should be a pointer
@@ -1554,6 +1590,14 @@ public:
   */
   EBAMRParticleMesh&
   getParticleMesh(const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Get EBAMRSurfaceDeposition surface deposition operator
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)    
+  */
+  EBAMRSurfaceDeposition&
+  getSurfaceDeposition(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get the coarsening utility

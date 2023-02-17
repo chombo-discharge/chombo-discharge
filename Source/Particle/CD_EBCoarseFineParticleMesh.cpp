@@ -77,18 +77,20 @@ EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
   //
   // On the other hand, when we call define we are adding from the valid region in source to valid+ghost in the destination. These things
   // matter.
+
+  // valid+ghost -> valid
   m_copierCoFiToCoarIncludeGhosts.ghostDefine(m_eblgCoFi.getDBL(),
                                               m_eblgCoar.getDBL(),
                                               m_eblgCoar.getDomain(),
-                                              m_ghost); // valid+ghost -> valid
+                                              m_ghost);
+  // valid+ghost -> valid
   m_copierFiCoToFineIncludeGhosts.ghostDefine(m_eblgFiCo.getDBL(),
                                               m_eblgFine.getDBL(),
                                               m_eblgFine.getDomain(),
-                                              m_ghost); // valid+ghost -> valid
-  m_copierFiCoToFineNoGhosts.define(m_eblgFiCo.getDBL(),
-                                    m_eblgFine.getDBL(),
-                                    m_eblgFine.getDomain(),
-                                    m_ghost); // valid       -> valid+ghost
+                                              m_ghost);
+
+  // valid -> valid+ghost
+  m_copierFiCoToFineNoGhosts.define(m_eblgFiCo.getDBL(), m_eblgFine.getDBL(), m_eblgFine.getDomain(), m_ghost);
 
   // Define VoF iterators
   this->defineVoFIterators();

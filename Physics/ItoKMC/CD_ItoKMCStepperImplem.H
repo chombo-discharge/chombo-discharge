@@ -63,7 +63,7 @@ ItoKMCStepper<I, C, R, F>::ItoKMCStepper(RefCountedPtr<ItoKMCPhysics>& a_physics
 
   m_physics = a_physics;
 
-  if (m_physics->getNumPlasmaSpecies()) {
+  if (m_physics->getNumPlasmaSpecies() == 0) {
     MayDay::Abort("ItoKMCStepper::ItoKMCStepper -- numPlasmaSpecies = 0, there's no problem to solve here!");
   }
 }
