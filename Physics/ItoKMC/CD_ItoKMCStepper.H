@@ -1531,6 +1531,12 @@ namespace Physics {
                        const Box        a_box) noexcept;
 
       /*!
+	@brief Compute total charge
+      */
+      virtual Real
+      computeTotalCharge() const noexcept;
+
+      /*!
 	@brief Photon advancement routine
 	@param[in] a_dt Time step
       */

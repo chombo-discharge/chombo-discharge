@@ -70,7 +70,7 @@ EBAMRSurfaceDeposition::define(const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGri
   }
 
   m_debug                = false;
-  m_verbose              = true;
+  m_verbose              = false;
   m_ebGrids              = a_ebGrids;
   m_ebGridsCoarsenedFine = a_ebGridsCoarsenedFine;
   m_ebGridsRefinedCoar   = a_ebGridsRefinedCoar;
@@ -312,6 +312,7 @@ EBAMRSurfaceDeposition::defineDepositionStencils() noexcept
 
           for (int i = 0; i < vofs.size(); i++) {
             totalArea += ebisBox.bndryArea(vofs[i]) * std::pow(dx, SpaceDim - 1);
+
             stencilVoFs.push_back(vofs[i]);
           }
         }

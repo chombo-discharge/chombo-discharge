@@ -194,6 +194,13 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     pout() << this->m_name + "::advance" << endl;
   }
 
+#if 1 // Debug, print the total charge. Valid cells only.
+  const Real totalCharge = this->computeTotalCharge();
+  if (procID() == 0) {
+    std::cout << "totalCharge = " << totalCharge << "\n";
+  }
+#endif
+
   // Special flag for telling the class that we have the necessary things in place for doing a regrid. This is
   // an if-but-maybe situation where the user chose not to checkpoint the particles we need for regrids, yet tries
   // to restart a simulation and regrid without all the prerequisites being in place.
