@@ -194,12 +194,14 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     pout() << this->m_name + "::advance" << endl;
   }
 
-#if 1 // Debug, print the total charge. Valid cells only.
-  const Real totalCharge = this->computeTotalCharge();
-  if (procID() == 0) {
-    std::cout << "totalCharge = " << totalCharge << "\n";
-  }
-#endif
+  auto debugCharge = [this](const std::string a_message) -> void {
+    const Real Qtot = this->computeTotalCharge();
+    if (procID() == 0) {
+      std::cout << a_message << " = " << Qtot << "\n";
+    }
+  };
+
+  debugCharge("initial charge");
 
   // Special flag for telling the class that we have the necessary things in place for doing a regrid. This is
   // an if-but-maybe situation where the user chose not to checkpoint the particles we need for regrids, yet tries
@@ -208,9 +210,13 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 
   m_timer = Timer("ItoKMCGodunovStepper::advance");
 
+  MayDay::Warning("CD_ItoKMCGodunovStepper -- check particle intersection routines and conservation");
+
   if (m_smoothGradientEB) {
     this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Voxel, this->m_toleranceEB);
   }
+
+  debugCharge("after remove covered");
 
   // Previous time step is needed when regridding.
   m_prevDt = a_dt;
@@ -224,6 +230,8 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 
   // Compute the number of particles per cell.
   this->getPhysicalParticlesPerCell(this->m_oldPPC);
+
+  debugCharge("before transport");
 
   // ====== BEGIN TRANSPORT STEP ======
   // Semi-implicitly advance the particles and the field.
@@ -240,6 +248,8 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   }
   }
 
+  debugCharge("after transport");
+
   // Do intersection test and remove particles that struck the EB or domain. Transfer them to appropriate containers. Then recompute the number of particles per cell.
   //
   this->barrier();
@@ -253,6 +263,8 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->getPhysicalParticlesPerCell(this->m_newPPC);
   m_timer.stopEvent("EB/Particle intersection");
 
+  debugCharge("after intersection");
+
   // Remove the run-time configurable particle storage. It is no longer needed.
   // ====== END TRANSPORT STEP ======
 
@@ -262,16 +274,16 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->advancePhotons(a_dt);
   m_timer.stopEvent("Photon transport");
 
+  debugCharge("after photon transport");
+
   // Resolve injection at the EB.
   this->barrier();
   m_timer.startEvent("EB particle injection");
   this->fillSecondaryEmissionEB(a_dt);
-#if 0
-  this->injectParticlesEB();
-#else
+  debugCharge("after secondary emission fill");
   this->resolveSecondaryEmissionEB(a_dt);
-#endif
   m_timer.stopEvent("EB particle injection");
+  debugCharge("after secondary emission resolve");
 
   // Sort the particles and photons per cell so we can call reaction algorithms
   this->barrier();
@@ -303,6 +315,8 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
   m_timer.stopEvent("Sort by patch");
 
+  debugCharge("after reaction network");
+
   // Remove particles that are inside the EB. This depends on the algorithm.
   this->barrier();
   m_timer.startEvent("Remove covered");
@@ -313,6 +327,8 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Discrete, this->m_toleranceEB);
   }
   m_timer.stopEvent("Remove covered");
+
+  debugCharge("after covered removal");
 
   // Clear other data holders for now.
   for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
@@ -341,6 +357,11 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   }
 
   m_timer.clear();
+
+  debugCharge("end of step");
+  if (procID() == 0) {
+    std::cout << "\n";
+  }
 
   return a_dt;
 }
