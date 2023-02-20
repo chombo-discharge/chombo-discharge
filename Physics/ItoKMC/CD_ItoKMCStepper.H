@@ -383,6 +383,32 @@ namespace Physics {
       RefCountedPtr<SurfaceODESolver<1>> m_sigmaSolver;
 
       /*!
+	@brief List of secondary particles injected through the EB
+	@details This is used when injecting secondary particles through the EB.
+	@note Stored on the particle realm
+      */
+      Vector<ParticleContainer<ItoParticle>> m_secondaryParticles;
+
+      /*!
+	@brief List of secondary photons injected through the EB
+	@details This is used when injecting secondary photons through the EB.
+	@note Stored on the particle realm
+      */
+      Vector<ParticleContainer<Photon>> m_secondaryPhotons;
+
+      /*!
+	@brief CDR fluxes for CDR BCs.
+	@details There's a version of this inside the solvers, but we need this one because the EB coupling
+	takes place on the particle realm.
+      */
+      Vector<EBAMRIVData> m_cdrFluxes;
+
+      /*!
+	@brief Extrapolated CDR fluxes.
+      */
+      Vector<EBAMRIVData> m_cdrFluxesExtrap;
+
+      /*!
 	@brief Voltage curve on the electrodes used in the simulation.
       */
       std::function<Real(const Real a_time)> m_voltage;
@@ -668,6 +694,16 @@ namespace Physics {
 	@brief Scratch storage on the particle realm with SpaceDim components
       */
       mutable EBAMRCellData m_particleScratchD;
+
+      /*!
+	@brief Scratch storage for EB-only data on the fluid realm. One component. 
+      */
+      mutable EBAMRIVData m_fluidScratchEB;
+
+      /*!
+	@brief Scratch storage for EB-only data on the particle realm. One component. 
+      */
+      mutable EBAMRIVData m_particleScratchEB;
 
       /*!
 	@brief Allocate "internal" storage.
@@ -1390,7 +1426,7 @@ namespace Physics {
 	@brief Coarsen data for CDR solvers
       */
       virtual void
-      coarsenCdr() noexcept;
+      coarsenCDRSolvers() noexcept;
 
       /*!
 	@brief Resolve particle injection at EBs.
@@ -1398,31 +1434,56 @@ namespace Physics {
 	@note Calls the other version.
       */
       virtual void
-      resolveParticlesEB(const Real a_dt) noexcept;
+      fillSecondaryEmissionEB(const Real a_dt) noexcept;
 
       /*!
-	@brief Resolve particle injection at EBs.
-	@param[in] a_dt Time step
+	@brief Compute secondary emission at the EB.
+	@details This routine fills the input data holders using physics framework. It does NOT fill solvers.
+	@param[out] a_secondaryParticles   Secondary emitted (gained) particles at the EB
+	@param[out] a_cdrFluxes            CDR fluxes for BCs.
+	@param[out] a_secondaryPhotons     Secondary emitted photons at the EB
+	@param[in]  a_primaryParticles     Primary (lost) particles at the EB
+	@param[in]  a_cdrFluxesExtrap      Extrapolated CDR fluxes at the EB
+	@param[in]  a_primaryPhotons       Primary (lost) photons at the EB
+	@param[in]  a_electricField        Electric field at the EB.
+	@param[in]  a_dt                   Time step.
       */
       virtual void
-      resolveParticlesEB(Vector<ParticleContainer<ItoParticle>*>& a_inOutParticles,
-                         Vector<ParticleContainer<Photon>*>&      a_inOutPhotons,
-                         const EBAMRCellData&                     a_electricField,
-                         const Real                               a_dt) noexcept;
+      fillSecondaryEmissionEB(Vector<ParticleContainer<ItoParticle>>&  a_secondaryParticles,
+                              Vector<EBAMRIVData>&                     a_cdrFluxes,
+                              Vector<ParticleContainer<Photon>>&       a_secondaryPhotons,
+                              Vector<ParticleContainer<ItoParticle>*>& a_primaryParticles,
+                              Vector<EBAMRIVData>&                     a_cdrFluxesExtrap,
+                              Vector<ParticleContainer<Photon>*>&      a_primaryPhotons,
+                              const EBAMRCellData&                     a_electricField,
+                              const Real                               a_dt) noexcept;
 
       /*!
-	@brief Inject particles through the EB
-	@note Calls the other version with solver containers. 
+	@brief Resolve secondary emission at the EB.
+	@param[in] a_dt Time step.
+	@note Calls the other version. 
       */
       virtual void
-      injectParticlesEB() noexcept;
+      resolveSecondaryEmissionEB(const Real a_dt) noexcept;
 
-      /*!
-	@brief Inject particles through the EB
+      /*!      
+	@brief Resolve secondary emission at the EB.
+	@details This does three things: 
+	   1) It deposits the primary and second particles on the mesh and update the surface charge density.
+	   2) It removes the primary particles and adds the secondary particles to the Ito solvers. 
+	   3) It adds the CDR fluxes to the CDR solvers, and updates the surface charge density.
+	@param[out] a_secondaryParticles   Secondary emitted (gained) particles at the EB.
+	@param[out] a_cdrFluxes            CDR fluxes for BCs.
+	@param[in]  a_primaryParticles     Primary (lost) particles at the EB.
+	@param[in]  a_surfaceChargeDensity Surface charge density.
+	@param[in]  a_dt                   Time step.      
       */
       virtual void
-      injectParticlesEB(Vector<ParticleContainer<ItoParticle>*> a_bulkParticles,
-                        Vector<ParticleContainer<ItoParticle>*> a_injectedParticles) noexcept;
+      resolveSecondaryEmissionEB(Vector<ParticleContainer<ItoParticle>*>& a_secondaryParticles,
+                                 Vector<ParticleContainer<ItoParticle>*>& a_primaryParticles,
+                                 Vector<EBAMRIVData*>&                    a_cdrFluxes,
+                                 EBAMRIVData&                             a_surfaceChargeDensity,
+                                 const Real                               a_dt) noexcept;
 
       /*!
 	@brief Compute a maximum time step from the physics interface.

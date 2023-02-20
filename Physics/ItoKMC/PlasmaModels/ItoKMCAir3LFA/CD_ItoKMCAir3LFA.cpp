@@ -238,28 +238,28 @@ ItoKMCAir3LFA::computeDiffusionCoefficients(const Real a_time, const RealVect a_
 }
 
 void
-ItoKMCAir3LFA::injectParticlesEB(Vector<List<ItoParticle>>&       a_incomingParticles,
-                                 Vector<List<Photon>>&            a_incomingPhotons,
-                                 const Vector<List<ItoParticle>>& a_outgoingParticles,
-                                 const Vector<List<Photon>>&      a_outgoingPhotons,
-                                 const Vector<FPR>&               a_newNumParticles,
-                                 const Vector<FPR>&               a_oldNumParticles,
-                                 const RealVect&                  a_E,
-                                 const RealVect&                  a_cellCenter,
-                                 const RealVect&                  a_cellCentroid,
-                                 const RealVect&                  a_bndryCentroid,
-                                 const RealVect&                  a_bndryNormal,
-                                 const Real                       a_bndryArea,
-                                 const Real                       a_dx,
-                                 const Real                       a_dt,
-                                 const bool                       a_isDielectric,
-                                 const int                        a_matIndex) const noexcept
+ItoKMCAir3LFA::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryParticles,
+                                   Vector<Real>&                    a_cdrFluxes,
+                                   Vector<List<Photon>>&            a_secondaryPhotons,
+                                   const Vector<List<ItoParticle>>& a_primaryParticles,
+                                   const Vector<Real>&              a_extrapCDRFluxes,
+                                   const Vector<List<Photon>>&      a_primaryPhotons,
+                                   const RealVect&                  a_E,
+                                   const RealVect&                  a_cellCenter,
+                                   const RealVect&                  a_cellCentroid,
+                                   const RealVect&                  a_bndryCentroid,
+                                   const RealVect&                  a_bndryNormal,
+                                   const Real                       a_bndryArea,
+                                   const Real                       a_dx,
+                                   const Real                       a_dt,
+                                   const bool                       a_isDielectric,
+                                   const int                        a_matIndex) const noexcept
 {
   CH_TIME("ItoKMCAir3LFA::injectParticlesEB");
 #if 0
-  List<ItoParticle>&       ingoingElectrons = a_incomingParticles[0];
-  const List<ItoParticle>& outgoingIons     = a_outgoingParticles[1];
-  const List<Photon>&      outgoingPhotons  = a_outgoingPhotons[0];
+  List<ItoParticle>&       ingoingElectrons = a_secondaryParticles[0];
+  const List<ItoParticle>& outgoingIons     = a_primaryParticles[1];
+  const List<Photon>&      outgoingPhotons  = a_primaryPhotons[0];
 
   if (m_extrapBC) {
     const Real diff   = a_oldNumParticles[0] - a_newNumParticles[0];

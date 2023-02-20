@@ -487,9 +487,11 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   // Scratch data.
   m_amr->allocate(m_fluidScratch1, m_fluidRealm, m_plasmaPhase, 1);
   m_amr->allocate(m_fluidScratchD, m_fluidRealm, m_plasmaPhase, SpaceDim);
+  m_amr->allocate(m_fluidScratchEB, m_fluidRealm, m_plasmaPhase, 1);
 
   m_amr->allocate(m_particleScratch1, m_particleRealm, m_plasmaPhase, 1);
   m_amr->allocate(m_particleScratchD, m_particleRealm, m_plasmaPhase, SpaceDim);
+  m_amr->allocate(m_particleScratchEB, m_particleRealm, m_plasmaPhase, 1);
 
   // Storage for conductiviies on cell, cell faces, and EB faces.
   m_amr->allocate(m_conductivityCell, m_fluidRealm, m_plasmaPhase, 1);
@@ -506,6 +508,26 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   for (int i = 0; i < numCdrSpecies; i++) {
     m_amr->allocate(m_cdrMobilities[i], m_fluidRealm, m_plasmaPhase, 1);
     m_amr->allocate(m_cdrPhotoiProducts[i], m_particleRealm);
+  }
+
+  // Storage for secondary particle and photon emission
+  m_secondaryParticles.resize(numItoSpecies);
+  m_secondaryPhotons.resize(numPhotonSpecies);
+
+  m_cdrFluxes.resize(numCdrSpecies);
+  m_cdrFluxesExtrap.resize(numCdrSpecies);
+
+  for (int i = 0; i < numItoSpecies; i++) {
+    m_amr->allocate(m_secondaryParticles[i], m_particleRealm);
+  }
+
+  for (int i = 0; i < numPhotonSpecies; i++) {
+    m_amr->allocate(m_secondaryPhotons[i], m_particleRealm);
+  }
+
+  for (int i = 0; i < numCdrSpecies; i++) {
+    m_amr->allocate(m_cdrFluxes[i], m_particleRealm, m_plasmaPhase, 1);
+    m_amr->allocate(m_cdrFluxesExtrap[i], m_particleRealm, m_plasmaPhase, 1);
   }
 
   // Current density.
@@ -3878,7 +3900,7 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_newParti
       this->reconcileCdrDensities(*a_newParticlesPerCell[lvl], *a_oldParticlesPerCell[lvl], lvl, a_dt);
     }
 
-    this->coarsenCdr();
+    this->coarsenCDRSolvers();
   }
 }
 
@@ -3958,11 +3980,11 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBCellFAB& a_newParticles
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::coarsenCdr() noexcept
+ItoKMCStepper<I, C, R, F>::coarsenCDRSolvers() noexcept
 {
-  CH_TIME("ItoKMCStepper::coarsenCdr");
+  CH_TIME("ItoKMCStepper::coarsenCDRSolvers");
   if (m_verbosity > 5) {
-    pout() << m_name + "::coarsenCdr" << endl;
+    pout() << m_name + "::coarsenCDRSolvers" << endl;
   }
 
   for (auto solverIt = this->m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -3984,58 +4006,116 @@ ItoKMCStepper<I, C, R, F>::coarsenCdr() noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::resolveParticlesEB(const Real a_dt) noexcept
+ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(const Real a_dt) noexcept
 {
-  CH_TIME("ItoKMCStepper::resolveParticlesEB(Real)");
+  CH_TIME("ItoKMCStepper::fillSecondaryEmissionEB(Real)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::resolveParticlesEB(Real)" << endl;
+    pout() << m_name + "::fillSecondaryEmissionEB(Real)" << endl;
   }
 
-  Vector<ParticleContainer<ItoParticle>*> intersectedParticlesAMR;
-  Vector<ParticleContainer<Photon>*>      intersectedPhotonsAMR;
-
-  // Build list of particles and photons that hit the EB. We'll replace this list by incoming particles.
+  // Particles that left the domain
+  Vector<ParticleContainer<ItoParticle>*> primaryParticles;
   for (auto it = m_ito->iterator(); it.ok(); ++it) {
     ParticleContainer<ItoParticle>& intersectedParticles = it()->getParticles(ItoSolver::WhichContainer::EB);
 
-    intersectedParticlesAMR.push_back(&intersectedParticles);
+    primaryParticles.push_back(&intersectedParticles);
   }
 
+  // CDR solvers extrapolate their fluxes. We then copy the extrapolated fluxes to transient data holders (which are defined over the particle realm).
+  EBAMRIVData tmp;
+  m_amr->allocate(tmp, m_fluidRealm, m_plasmaPhase, 1);
+
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    const int                       idx    = solverIt.index();
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
+
+    EBAMRIVData& extrapFlux = m_cdrFluxesExtrap[idx];
+
+    if (solver->isMobile()) {
+      solver->extrapolateAdvectiveFluxToEB(tmp);
+
+      extrapFlux.copy(tmp);
+    }
+    else {
+      DataOps::setValue(extrapFlux, 0.0);
+    }
+  }
+
+  // Photons that left the domain
+  Vector<ParticleContainer<Photon>*> primaryPhotons;
   for (auto it = m_rte->iterator(); it.ok(); ++it) {
     ParticleContainer<Photon>& intersectedPhotons = it()->getEbPhotons();
 
-    intersectedPhotonsAMR.push_back(&intersectedPhotons);
+    primaryPhotons.push_back(&intersectedPhotons);
   }
 
   // Call the other version.
-  this->resolveParticlesEB(intersectedParticlesAMR, intersectedPhotonsAMR, m_electricFieldParticle, a_dt);
+  this->fillSecondaryEmissionEB(m_secondaryParticles,
+                                m_cdrFluxes,
+                                m_secondaryPhotons,
+                                primaryParticles,
+                                m_cdrFluxesExtrap,
+                                primaryPhotons,
+                                m_electricFieldParticle,
+                                a_dt);
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::resolveParticlesEB(Vector<ParticleContainer<ItoParticle>*>& a_inOutParticles,
-                                              Vector<ParticleContainer<Photon>*>&      a_inOutPhotons,
-                                              const EBAMRCellData&                     a_electricField,
-                                              const Real                               a_dt) noexcept
+ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(Vector<ParticleContainer<ItoParticle>>&  a_secondaryParticles,
+                                                   Vector<EBAMRIVData>&                     a_cdrFluxes,
+                                                   Vector<ParticleContainer<Photon>>&       a_secondaryPhotons,
+                                                   Vector<ParticleContainer<ItoParticle>*>& a_primaryParticles,
+                                                   Vector<EBAMRIVData>&                     a_cdrFluxesExtrap,
+                                                   Vector<ParticleContainer<Photon>*>&      a_primaryPhotons,
+                                                   const EBAMRCellData&                     a_electricField,
+                                                   const Real                               a_dt) noexcept
 {
-  CH_TIME("ItoKMCStepper::resolveParticlesEB(Vector<ParticleContainer>x2, Real)");
+  CH_TIME("ItoKMCStepper::fillSecondaryEmissionEB(full)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::resolveParticlesEB(Vector<ParticleContainer>x2, Real)" << endl;
+    pout() << m_name + "::fillSecondaryEmissionEB(full)" << endl;
   }
 
   const int numItoSpecies    = m_physics->getNumItoSpecies();
+  const int numCdrSpecies    = m_physics->getNumCdrSpecies();
   const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
+  CH_assert(a_secondaryParticles.size() == numItoSpecies);
+  CH_assert(a_cdrFluxes.size() == numCdrSpecies);
+  CH_assert(a_secondaryPhotons.size() == numPhotonSpecies);
+  CH_assert(a_primaryParticles.size() == numItoSpecies);
+  CH_assert(a_cdrFluxesExtrap.size() == numCdrSpecies);
+  CH_assert(a_primaryPhotons.size() == numPhotonSpecies);
   CH_assert(a_electricField.getRealm() == m_particleRealm);
-  CH_assert(a_inOutParticles.size() == numItoSpecies);
-  CH_assert(a_inOutPhotons.size() == numPhotonSpecies);
+  CH_assert(a_dt >= 0.0);
 
-  // Sort incoming containers by celll
+  // Incoming/outgoing particle containers must be sorted by cell.
   for (int i = 0; i < numItoSpecies; i++) {
-    a_inOutParticles[i]->organizeParticlesByCell();
+    CH_assert(a_secondaryParticles[i].getRealm() == m_particleRealm);
+    CH_assert(a_primaryParticles[i]->getRealm() == m_particleRealm);
+
+    a_secondaryParticles[i].clearParticles();
+    a_secondaryParticles[i].organizeParticlesByCell();
+
+    a_primaryParticles[i]->organizeParticlesByCell();
   }
+
+  for (int i = 0; i < numCdrSpecies; i++) {
+    CH_assert(a_cdrFluxes[i].getRealm() == m_particleRealm);
+    CH_assert(a_cdrFluxesExtrap[i].getRealm() == m_particleRealm);
+
+    DataOps::setValue(a_cdrFluxes[i], 0.0);
+  }
+
+  // Incoming/outgoing photon containers by be sorted by cell
   for (int i = 0; i < numPhotonSpecies; i++) {
-    a_inOutPhotons[i]->organizeParticlesByCell();
+    CH_assert(a_secondaryPhotons[i].getRealm() == m_particleRealm);
+    CH_assert(a_primaryPhotons[i]->getRealm() == m_particleRealm);
+
+    a_secondaryPhotons[i].clearParticles();
+
+    a_secondaryPhotons[i].organizeParticlesByCell();
+    a_primaryPhotons[i]->organizeParticlesByCell();
   }
 
   const RealVect probLo = m_amr->getProbLo();
@@ -4057,21 +4137,35 @@ ItoKMCStepper<I, C, R, F>::resolveParticlesEB(Vector<ParticleContainer<ItoPartic
       const EBCellFAB&     newPPC        = (*m_newPPC[lvl])[dit()];
       const BaseFab<bool>& validCells    = (*m_amr->getValidCells(m_particleRealm)[lvl])[dit()];
 
-      Vector<BinFab<ItoParticle>*> cellParticles;
-      Vector<BinFab<Photon>*>      cellPhotons;
+      Vector<BinFab<ItoParticle>*> secondaryParticlesFAB;
+      Vector<BinFab<ItoParticle>*> primaryParticlesFAB;
+
+      Vector<BinFab<Photon>*> secondaryPhotonsFAB;
+      Vector<BinFab<Photon>*> primaryPhotonsFAB;
+
+      Vector<BaseIVFAB<Real>*> cdrFluxesFAB;
+      Vector<BaseIVFAB<Real>*> cdrFluxesExtrapFAB;
 
       for (auto it = m_ito->iterator(); it.ok(); ++it) {
-        cellParticles.push_back(&(a_inOutParticles[it.index()]->getCellParticles(lvl)[dit()]));
+        secondaryParticlesFAB.push_back(&(a_secondaryParticles[it.index()].getCellParticles(lvl)[dit()]));
+        primaryParticlesFAB.push_back(&(a_primaryParticles[it.index()]->getCellParticles(lvl)[dit()]));
+      }
+
+      for (auto it = m_cdr->iterator(); it.ok(); ++it) {
+        cdrFluxesFAB.push_back(&((*(a_cdrFluxes[it.index()])[lvl])[dit()]));
+        cdrFluxesExtrapFAB.push_back(&((*(a_cdrFluxes[it.index()])[lvl])[dit()]));
       }
 
       for (auto it = m_rte->iterator(); it.ok(); ++it) {
-        cellPhotons.push_back(&(a_inOutPhotons[it.index()]->getCellParticles(lvl)[dit()]));
+        secondaryPhotonsFAB.push_back(&(a_secondaryPhotons[it.index()].getCellParticles(lvl)[dit()]));
+        primaryPhotonsFAB.push_back(&(a_primaryPhotons[it.index()]->getCellParticles(lvl)[dit()]));
       }
 
+      // Kernel definition.
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         const IntVect iv = vof.gridIndex();
 
-        if (validCells(iv, 0)) {
+        if (validCells(iv)) {
           const RealVect E = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
           const RealVect bndryNormal   = ebisbox.normal(vof);
           const RealVect bndryCentroid = ebisbox.bndryCentroid(vof);
@@ -4080,24 +4174,29 @@ ItoKMCStepper<I, C, R, F>::resolveParticlesEB(Vector<ParticleContainer<ItoPartic
           const RealVect physPos       = cellCenter + bndryCentroid * dx;
           const Real     bndryArea     = ebisbox.bndryArea(vof);
 
-          Vector<FPR> oldNumParticles(numItoSpecies, 0.0);
-          Vector<FPR> newNumParticles(numItoSpecies, 0.0);
+          Vector<List<ItoParticle>> secondaryParticles(numItoSpecies);
+          Vector<List<ItoParticle>> primaryParticles(numItoSpecies);
 
-          Vector<List<ItoParticle>> outgoingParticles(numItoSpecies);
-          Vector<List<ItoParticle>> incomingParticles(numItoSpecies);
+          Vector<Real> cdrFluxes(numCdrSpecies, 0.0);
+          Vector<Real> cdrFluxesExtrap(numCdrSpecies, 0.0);
 
-          Vector<List<Photon>> outgoingPhotons(numPhotonSpecies);
-          Vector<List<Photon>> incomingPhotons(numPhotonSpecies);
+          Vector<List<Photon>> secondaryPhotons(numPhotonSpecies);
+          Vector<List<Photon>> primaryPhotons(numPhotonSpecies);
 
           for (int i = 0; i < numItoSpecies; i++) {
-            outgoingParticles[i] = (*cellParticles[i])(iv, 0);
+            secondaryParticles[i] = (*secondaryParticlesFAB[i])(iv, 0);
+            primaryParticles[i]   = (*primaryParticlesFAB[i])(iv, 0);
+          }
 
-            oldNumParticles[i] = oldPPC(vof, i);
-            newNumParticles[i] = newPPC(vof, i);
+          // Populate CDR fluxes
+          for (int i = 0; i < numCdrSpecies; i++) {
+            cdrFluxes[i]       = 0.0;
+            cdrFluxesExtrap[i] = (*cdrFluxesExtrapFAB[i])(vof, 0);
           }
 
           for (int i = 0; i < numPhotonSpecies; i++) {
-            outgoingPhotons[i] = (*cellPhotons[i])(iv, 0);
+            secondaryPhotons[i] = (*secondaryPhotonsFAB[i])(iv, 0);
+            primaryPhotons[i]   = (*primaryPhotonsFAB[i])(iv, 0);
           }
 
           // Figure out which material we are dealing with.
@@ -4124,31 +4223,22 @@ ItoKMCStepper<I, C, R, F>::resolveParticlesEB(Vector<ParticleContainer<ItoPartic
           }
 
           // Call the physics framework.
-          m_physics->injectParticlesEB(incomingParticles,
-                                       incomingPhotons,
-                                       outgoingParticles,
-                                       outgoingPhotons,
-                                       newNumParticles,
-                                       oldNumParticles,
-                                       E,
-                                       cellCenter,
-                                       cellCentroid,
-                                       bndryCentroid,
-                                       bndryNormal,
-                                       bndryArea,
-                                       dx,
-                                       a_dt,
-                                       isDielectric,
-                                       matIndex);
-
-          // Populate containers with incoming particles and photons
-          for (int i = 0; i < numItoSpecies; i++) {
-            (*cellParticles[i])(iv, 0) = incomingParticles[i];
-          }
-
-          for (int i = 0; i < numPhotonSpecies; i++) {
-            (*cellPhotons[i])(iv, 0) = incomingPhotons[i];
-          }
+          m_physics->secondaryEmissionEB(secondaryParticles,
+                                         cdrFluxes,
+                                         secondaryPhotons,
+                                         primaryParticles,
+                                         cdrFluxesExtrap,
+                                         primaryPhotons,
+                                         E,
+                                         physPos,
+                                         cellCentroid,
+                                         bndryCentroid,
+                                         bndryNormal,
+                                         bndryArea,
+                                         dx,
+                                         a_dt,
+                                         isDielectric,
+                                         matIndex);
         }
       };
 
@@ -4158,48 +4248,157 @@ ItoKMCStepper<I, C, R, F>::resolveParticlesEB(Vector<ParticleContainer<ItoPartic
     }
   }
 
-  // Organize by patch
+  // Sort by patch
   for (int i = 0; i < numItoSpecies; i++) {
-    a_inOutParticles[i]->organizeParticlesByPatch();
+    a_secondaryParticles[i].organizeParticlesByPatch();
+    a_primaryParticles[i]->organizeParticlesByPatch();
   }
+
   for (int i = 0; i < numPhotonSpecies; i++) {
-    a_inOutPhotons[i]->organizeParticlesByPatch();
+    a_secondaryPhotons[i].organizeParticlesByPatch();
+    a_primaryPhotons[i]->organizeParticlesByPatch();
   }
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::injectParticlesEB() noexcept
+ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(const Real a_dt) noexcept
 {
-  CH_TIME("ItoKMCStepper::injectParticlesEB()");
+  CH_TIME("ItoKMCStepper::resolveSecondaryEmissionEB(short)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::injectParticlesEB()" << endl;
+    pout() << m_name + "::resolveSecondaryEmissionEB(short)" << endl;
   }
 
-  Vector<ParticleContainer<ItoParticle>*> bulkParticles = m_ito->getParticles(ItoSolver::WhichContainer::Bulk);
-  Vector<ParticleContainer<ItoParticle>*> ebParticles   = m_ito->getParticles(ItoSolver::WhichContainer::EB);
+  Vector<ParticleContainer<ItoParticle>*> secondaryParticles;
+  Vector<ParticleContainer<ItoParticle>*> primaryParticles;
 
-  // Transfer particles from the EB container to the bulk particle container.
-  this->injectParticlesEB(bulkParticles, ebParticles);
+  pout() << "doing particles" << endl;
+  for (auto it = m_ito->iterator(); it.ok(); ++it) {
+    const int idx = it.index();
+
+    primaryParticles.push_back(&(it()->getParticles(ItoSolver::WhichContainer::EB)));
+    secondaryParticles.push_back(&(m_secondaryParticles[idx]));
+  }
+
+  // Copy the CDR fluxes on the particle realm over to the fluid realm.
+  pout() << "doing fluxes" << endl;
+  Vector<EBAMRIVData*> cdrFluxes;
+  for (auto it = m_cdr->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<CdrSolver>& solver = it();
+    const int                       idx    = it.index();
+
+    EBAMRIVData& ebFlux = solver->getEbFlux();
+
+    ebFlux.copy(m_cdrFluxes[idx]);
+
+    m_amr->arithmeticAverage(ebFlux, m_fluidRealm, m_plasmaPhase);
+
+    cdrFluxes.push_back(&ebFlux);
+  }
+
+  // Handle to surface charge density.
+  EBAMRIVData& surfaceChargeDensity = m_sigmaSolver->getPhi();
+
+  this->resolveSecondaryEmissionEB(secondaryParticles, primaryParticles, cdrFluxes, surfaceChargeDensity, a_dt);
+
+  //  m_sigmaSolver->resetElectrodes(0.0);
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::injectParticlesEB(Vector<ParticleContainer<ItoParticle>*> a_bulkParticles,
-                                             Vector<ParticleContainer<ItoParticle>*> a_injectedParticles) noexcept
+ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<ItoParticle>*>& a_secondaryParticles,
+                                                      Vector<ParticleContainer<ItoParticle>*>& a_primaryParticles,
+                                                      Vector<EBAMRIVData*>&                    a_cdrFluxes,
+                                                      EBAMRIVData&                             a_surfaceChargeDensity,
+                                                      const Real                               a_dt) noexcept
 {
-  CH_TIME("ItoKMCStepper::injectParticlesEB(Vector<ParticleContainer<ItoParticle>*>x2)");
+  CH_TIME("ItoKMCStepper::resolveSecondaryEmissionEB(full)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::injectParticlesEB(Vector<ParticleContainer<ItoParticle>*>x2)" << endl;
+    pout() << m_name + "::resolveSecondaryEmissionEB(full)" << endl;
   }
 
   const int numItoSpecies = m_physics->getNumItoSpecies();
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
-  CH_assert(a_bulkParticles.size() == numItoSpecies);
-  CH_assert(a_injectedParticles.size() == numItoSpecies);
+  CH_assert(a_secondaryParticles.size() == numItoSpecies);
+  CH_assert(a_primaryParticles.size() == numItoSpecies);
+  CH_assert(a_cdrFluxes.size() == numCdrSpecies);
+  CH_assert(a_surfaceChargeDensity.getRealm() == m_fluidRealm);
 
   for (int i = 0; i < numItoSpecies; i++) {
-    a_bulkParticles[i]->transferParticles(*a_injectedParticles[i]);
+    CH_assert(a_secondaryParticles[i]->getRealm() == m_particleRealm);
+    CH_assert(a_primaryParticles[i]->getRealm() == m_particleRealm);
+  }
+
+  for (int i = 0; i < numCdrSpecies; i++) {
+    CH_assert(a_secondaryParticles[i]->getRealm() == m_particleRealm);
+    CH_assert(a_primaryParticles[i]->getRealm() == m_particleRealm);
+  }
+
+  // Deposit the incoming/outgoing particles on the surface and update the surface charge density.
+  for (auto it = m_ito->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<ItoSolver>&  solver  = it();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+
+    const int idx = it.index();
+    const int Z   = species->getChargeNumber();
+
+    if (Z != 0) {
+
+      // Add charge from primary particles
+      m_amr->depositParticles<ItoParticle, &ItoParticle::weight>(m_particleScratchEB,
+                                                                 m_particleRealm,
+                                                                 m_plasmaPhase,
+                                                                 *a_primaryParticles[idx]);
+
+      m_fluidScratchEB.copy(m_particleScratchEB);
+      DataOps::incr(a_surfaceChargeDensity, m_fluidScratchEB, 1.0);
+
+      // Subtract charge from secondary particles
+      m_amr->depositParticles<ItoParticle, &ItoParticle::weight>(m_particleScratchEB,
+                                                                 m_particleRealm,
+                                                                 m_plasmaPhase,
+                                                                 *a_secondaryParticles[idx]);
+
+      m_fluidScratchEB.copy(m_particleScratchEB);
+      DataOps::incr(a_surfaceChargeDensity, m_fluidScratchEB, -1.0);
+    }
+
+    // Add the secondary particles into the solvers and remove the primary particles.
+    ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+    particles.transferParticles(*a_secondaryParticles[idx]);
+    a_primaryParticles[idx]->clearParticles();
+  }
+
+  // Add CDR fluxes to the CDR solvers
+  for (auto it = m_cdr->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<CdrSolver>&  solver  = it();
+    const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
+
+    const int idx = it.index();
+    const int Z   = species->getChargeNumber();
+
+    if (Z != 0) {
+      DataOps::incr(a_surfaceChargeDensity, *a_cdrFluxes[idx], a_dt);
+    }
+
+    // Add mass to CDR solvers -- this is an inefficient way of doing it but I don't know if it'll be a performance bottleneck as well.
+    EBAMRCellData divG;
+    EBAMRFluxData G;
+
+    m_amr->allocate(divG, m_fluidRealm, m_plasmaPhase, 1);
+    m_amr->allocate(G, m_fluidRealm, m_plasmaPhase, 1);
+
+    DataOps::setValue(G, 0.0);
+
+    solver->computeDivG(divG, G, *a_cdrFluxes[idx], false);
+
+    EBAMRCellData& phi = solver->getPhi();
+    DataOps::incr(phi, divG, -a_dt);
+
+    m_amr->conservativeAverage(phi, m_fluidRealm, m_plasmaPhase);
+    m_amr->interpGhostPwl(phi, m_fluidRealm, m_plasmaPhase);
   }
 }
 

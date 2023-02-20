@@ -258,8 +258,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   // Resolve injection at the EB.
   this->barrier();
   m_timer.startEvent("EB particle injection");
-  this->resolveParticlesEB(a_dt);
+  this->fillSecondaryEmissionEB(a_dt);
+#if 0
   this->injectParticlesEB();
+#else
+  this->resolveSecondaryEmissionEB(a_dt);
+#endif
   m_timer.stopEvent("EB particle injection");
 
   // Sort the particles and photons per cell so we can call reaction algorithms
@@ -1321,11 +1325,9 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaCDR(const Real a_dt) noexcept
     this->m_amr->conservativeAverage(phi, this->m_fluidRealm, this->m_plasmaPhase);
     this->m_amr->interpGhostPwl(phi, this->m_fluidRealm, this->m_plasmaPhase);
 
-    // Add in the advective term.
+    // Add in the advective term -- BC comes later.
     if (solver->isMobile()) {
-      // Set an outflow flux.
-      solver->extrapolateAdvectiveFluxToEB();
-      DataOps::floor(solver->getEbFlux(), 0.0);
+      DataOps::setValue(solver->getEbFlux(), 0.0);
 
       // Compute the FV approximation to the advective term and do the Euler advance. If the underlying
       // CDR solver is a CTU solver, we also add in the transverse terms.
@@ -1342,7 +1344,7 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaCDR(const Real a_dt) noexcept
     DataOps::floor(phi, 0.0);
   }
 
-  this->coarsenCdr();
+  this->coarsenCDRSolvers();
 }
 
 #ifdef CH_USE_HDF5
