@@ -32,17 +32,6 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
     pout() << "EBAMRSurfaceDeposition::deposit<P, const Real& P::*func const>" << endl;
   }
 
-  bool doLevelExchange   = true;
-  bool doInvalidExchange = true;
-  bool doGhostExchange   = true;
-
-  ParmParse pp;
-  pp.query("level_exchange", doLevelExchange);
-  pp.query("invalid_exchange", doInvalidExchange);
-  pp.query("ghost_exchange", doGhostExchange);
-
-  MayDay::Warning("EBAMRSurfaceDeposition::deposit -- remove debug code");
-
   CH_assert(a_meshData.getRealm() == a_particles.getRealm());
 
   // Deposit on this level
@@ -66,6 +55,9 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
         const IntVect iv = ParticleOps::getParticleCellIndex(p.position(), m_probLo, m_dx[lvl]);
 
         // If this fails the particle is not in a valid cell.
+        if (!(cellBox.contains(iv))) {
+          MayDay::Error("CD_EBAMRSurfaceDeposition::deposit -- particle is not inside the box");
+        }
         if (!ebisbox.isIrregular(iv)) {
           MayDay::Error("CD_EBAMRSurfaceDeposition::deposit -- particle is not in a cut-cell!");
         }
@@ -83,19 +75,13 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
     }
 
     // Above, we will have deposited over patch boundaries. Add the deposted data into the neighboring patches.
-    if (doLevelExchange) {
-      m_data[lvl]->exchange(Interval(0, 0), m_copierLevel[lvl], IrregAddOp());
-    }
+    m_data[lvl]->exchange(Interval(0, 0), m_copierLevel[lvl], IrregAddOp());
   }
 
   // Ensure conservation across coarse-fine interface. This involves interpolation of the data going from
   // the coarse level to the fine level, and coarsening of the data from the fine level to coarse level.
-  if (doInvalidExchange) {
-    this->addInvalidCoarseDataToFineData();
-  }
-  if (doGhostExchange) {
-    this->addFineGhostDataToValidCoarData();
-  }
+  this->addInvalidCoarseDataToFineData();
+  this->addFineGhostDataToValidCoarData();
 
   // Finally, copy our buffers to the input data.
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -138,6 +124,9 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
         const IntVect iv = ParticleOps::getParticleCellIndex(p.position(), m_probLo, m_dx[lvl]);
 
         // If this fails the particle is not in a valid cell.
+        if (!(cellBox.contains(iv))) {
+          MayDay::Error("CD_EBAMRSurfaceDeposition::deposit -- particle is not inside the box");
+        }
         if (!ebisbox.isIrregular(iv)) {
           MayDay::Error("CD_EBAMRSurfaceDeposition::deposit -- particle is not in a cut-cell!");
         }

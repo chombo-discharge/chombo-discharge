@@ -311,9 +311,12 @@ EBAMRSurfaceDeposition::defineDepositionStencils() noexcept
           const Vector<VolIndex> vofs = ebisBox.getVoFs(iv);
 
           for (int i = 0; i < vofs.size(); i++) {
-            totalArea += ebisBox.bndryArea(vofs[i]) * std::pow(dx, SpaceDim - 1);
+            const Real areaEB = ebisBox.bndryArea(vofs[i]);
+            if (areaEB > std::numeric_limits<Real>::min()) {
+              totalArea += areaEB * std::pow(dx, SpaceDim - 1);
 
-            stencilVoFs.push_back(vofs[i]);
+              stencilVoFs.push_back(vofs[i]);
+            }
           }
         }
 
