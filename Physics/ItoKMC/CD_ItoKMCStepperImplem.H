@@ -4605,11 +4605,13 @@ ItoKMCStepper<I, C, R, F>::computeTotalCharge() const noexcept
       for (auto it = m_ito->iterator(); it.ok(); ++it) {
         const int Z = it()->getSpecies()->getChargeNumber();
 
-        const List<ItoParticle>& particles =
-          it()->getParticles(ItoSolver::WhichContainer::Bulk)[lvl][dit()].listItems();
+        if (Z != 0) {
+          const List<ItoParticle>& particles =
+            it()->getParticles(ItoSolver::WhichContainer::Bulk)[lvl][dit()].listItems();
 
-        for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit) {
-          totalCharge += Z * lit().weight();
+          for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit) {
+            totalCharge += Z * lit().weight();
+          }
         }
       }
     }
@@ -4635,9 +4637,11 @@ ItoKMCStepper<I, C, R, F>::computeTotalCharge() const noexcept
             }
           };
 
+          // Note doing kappa because advanceReactionNetwork uses the total number of particles.
           auto irregularKernel = [&](const VolIndex& vof) -> void {
-            if (validCells(vof.gridIndex())) {
-              totalCharge += Z * phi(vof, 0) * dxVol * ebisbox.volFrac(vof);
+            const IntVect iv = vof.gridIndex();
+            if (validCells(iv) && ebisbox.isIrregular(iv)) {
+              totalCharge += Z * phi(vof, 0) * dxVol; // * ebisbox.volFrac(vof);
             }
           };
 
