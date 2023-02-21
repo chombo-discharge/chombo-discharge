@@ -221,6 +221,9 @@ void
 AmrMesh::remapToNewGrids(ParticleContainer<P>& a_particles, const int a_lmin, const int a_newFinestLevel) const noexcept
 {
   CH_TIME("AmrMesh::remapToNewGrids");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::remapToNewGrids" << endl;
+  }
 
   const std::string realm = a_particles.getRealm();
 
@@ -244,6 +247,9 @@ AmrMesh::depositParticles(EBAMRCellData&              a_meshData,
                           const bool                  a_forceIrregNGP)
 {
   CH_TIME("AmrMesh::depositParticles");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::depositParticles" << endl;
+  }
 
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
@@ -265,6 +271,9 @@ AmrMesh::depositParticles(EBAMRCellData&              a_meshData,
                           const bool                  a_forceIrregNGP)
 {
   CH_TIME("AmrMesh::depositParticles");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::depositParticles" << endl;
+  }
 
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
@@ -286,6 +295,9 @@ AmrMesh::depositParticles(EBAMRCellData&              a_meshData,
                           const bool                  a_forceIrregNGP)
 {
   CH_TIME("AmrMesh::depositParticles");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::depositParticles" << endl;
+  }
 
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
@@ -304,6 +316,9 @@ AmrMesh::depositParticles(EBAMRIVData&                a_meshData,
                           const ParticleContainer<P>& a_particles) const noexcept
 {
   CH_TIME("AmrMesh::depositParticles(surface)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::depositParticles(surface)" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == 1);
   CH_assert(a_meshData.getRrealm() == a_particles.getRealm());
@@ -321,6 +336,9 @@ AmrMesh::depositParticles(EBAMRIVData&                a_meshData,
                           const ParticleContainer<P>& a_particles) const noexcept
 {
   CH_TIME("AmrMesh::depositParticles(surface)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::depositParticles(surface)" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == 1);
   CH_assert(a_meshData.getRrealm() == a_particles.getRealm());
@@ -340,6 +358,9 @@ AmrMesh::interpolateParticles(ParticleContainer<P>&     a_particles,
                               const bool                a_forceIrregNGP) const
 {
   CH_TIME("AmrMesh::interpolateParticles(scalar)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::interpolateParticles(scalar)" << endl;
+  }
 
   CH_assert(a_realm == a_particles.getRealm());
   CH_assert(a_realm == a_meshScalarField.getRealm());
@@ -359,6 +380,9 @@ AmrMesh::interpolateParticles(ParticleContainer<P>&     a_particles,
                               const bool                a_forceIrregNGP) const
 {
   CH_TIME("AmrMesh::interpolateParticles(vector)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::interpolateParticles(vector)" << endl;
+  }
 
   CH_assert(a_realm == a_particles.getRealm());
   CH_assert(a_realm == a_meshVectorField.getRealm());
@@ -375,6 +399,9 @@ AmrMesh::removeCoveredParticlesIF(ParticleContainer<P>&     a_particles,
                                   const Real                a_tolerance) const
 {
   CH_TIME("AmrMesh::removeCoveredParticlesIF");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::removeCoveredParticlesIF" << endl;
+  }
 
   CH_assert(!a_particles.isOrganizedByCell());
 
@@ -432,7 +459,10 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
                                         const phase::which_phase& a_phase,
                                         const Real                a_tolerance) const
 {
-  CH_TIME("AmrMesh::removeCoveredParticlesIF");
+  CH_TIME("AmrMesh::removeCoveredParticlesDiscrete");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::removeCoveredParticlesDiscrete" << endl;
+  }
 
   CH_assert(!a_particles.isOrganizedByCell());
 
@@ -464,8 +494,7 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
           const RealVect& pos      = particle.position();
 
           // Get the cell where the particle lives.
-          const RealVect rv = (pos - m_probLo) / dx;
-          const IntVect  iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
+          const IntVect iv = ParticleOps::getParticleCellIndex(pos, m_probLo, dx);
 
           CH_assert(region.contains(iv));
 
@@ -473,7 +502,9 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
             particles.remove(lit);
           }
           else if (ebisBox.isIrregular(iv)) {
-            // There could potentially be multiple degrees of freedom -- we check if the particle is inside at least one of the VoFs in the cell.
+
+            // There could potentially be multiple degrees of freedom -- we check if the particle is inside at least one
+            // of the VoFs in the cell.
 
             bool insideAtLeastOneVoF = false;
 
@@ -481,12 +512,13 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
             // value if the particle lies in the valid region.
             const std::vector<VolIndex> vofs = ebisBox.getVoFs(iv).stdVector();
             for (const auto& vof : vofs) {
-              const RealVect ebCentroid     = ebisBox.bndryCentroid(vof);
               const RealVect ebNormal       = ebisBox.normal(vof);
+              const RealVect ebCentroid     = m_probLo + Location::position(Location::Cell::Boundary, vof, ebisBox, dx);
               const Real     faceProjection = ebNormal.dotProduct(pos - ebCentroid);
 
-              if (faceProjection >= tol) {
+              if (faceProjection >= -tol) {
                 insideAtLeastOneVoF = true;
+
                 break;
               }
             }
@@ -512,6 +544,9 @@ void
 AmrMesh::removeCoveredParticlesVoxels(ParticleContainer<P>& a_particles, const phase::which_phase& a_phase) const
 {
   CH_TIME("AmrMesh::removeCoveredParticlesVoxels");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::removeCoveredParticlesVoxels" << endl;
+  }
 
   CH_assert(!a_particles.isOrganizedByCell());
 
@@ -567,6 +602,9 @@ AmrMesh::transferCoveredParticlesIF(ParticleContainer<P>&     a_particlesFrom,
                                     const Real                a_tolerance) const
 {
   CH_TIME("AmrMesh::transferCoveredParticlesIF");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::transferCoveredParticlesIF" << endl;
+  }
 
   CH_assert(!a_particlesFrom.isOrganizedByCell());
   CH_assert(!a_particlesTo.isOrganizedByCell());
@@ -634,6 +672,9 @@ AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesF
                                           const Real                a_tolerance) const
 {
   CH_TIME("AmrMesh::transferCoveredParticlesDiscrete");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::transferCoveredParticlesDiscrete" << endl;
+  }
 
   CH_assert(!a_particlesFrom.isOrganizedByCell());
   CH_assert(!a_particlesTo.isOrganizedByCell());
@@ -670,8 +711,7 @@ AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesF
           const RealVect& pos      = particle.position();
 
           // Get the cell where the particle lives.
-          const RealVect rv = (pos - m_probLo) / dx;
-          const IntVect  iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
+          const IntVect iv = ParticleOps::getParticleCellIndex(pos, m_probLo, dx);
 
           CH_assert(region.contains(iv));
 
@@ -687,12 +727,13 @@ AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesF
             // value if the particle lies in the valid region.
             const std::vector<VolIndex> vofs = ebisBox.getVoFs(iv).stdVector();
             for (const auto& vof : vofs) {
-              const RealVect ebCentroid     = ebisBox.bndryCentroid(vof);
+              const RealVect ebCentroid     = m_probLo + Location::position(Location::Cell::Boundary, vof, ebisBox, dx);
               const RealVect ebNormal       = ebisBox.normal(vof);
               const Real     faceProjection = ebNormal.dotProduct(pos - ebCentroid);
 
-              if (faceProjection >= tol) {
+              if (faceProjection >= -tol) {
                 insideAtLeastOneVoF = true;
+
                 break;
               }
             }
@@ -720,6 +761,9 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFro
                                         const phase::which_phase& a_phase) const
 {
   CH_TIME("AmrMesh::transferCoveredParticlesVoxels");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::transferCoveredParticlesVoxels" << endl;
+  }
 
   CH_assert(!a_particlesFrom.isOrganizedByCell());
   CH_assert(!a_particlesTo.isOrganizedByCell());
@@ -755,8 +799,7 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFro
           const RealVect& pos      = particle.position();
 
           // Get the cell where the particle lives.
-          const RealVect rv = (pos - m_probLo) / dx;
-          const IntVect  iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
+          const IntVect iv = ParticleOps::getParticleCellIndex(pos, m_probLo, dx);
 
           CH_assert(region.contains(iv));
 
