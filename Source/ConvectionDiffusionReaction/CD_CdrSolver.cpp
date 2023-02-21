@@ -2659,25 +2659,56 @@ CdrSolver::computeMass()
 }
 
 Real
-CdrSolver::computeMass(EBAMRCellData& a_phi)
+CdrSolver::computeMass(const EBAMRCellData& a_phi, const bool a_kappaScale)
 {
   CH_TIME("CdrSolver::computeMass(EBAMRCellData)");
   if (m_verbosity > 5) {
     pout() << m_name + "::computeMass(EBAMRCellData)" << endl;
   }
 
-  // TLDR: We have conservative coarsening so we just coarsen the solution and compute the mass on the coarsest level only.
+  CH_assert(a_phi[0]->nComp() == 1);
 
-  m_amr->conservativeAverage(a_phi, m_realm, m_phase);
+  Real mass = 0.0;
 
-  const Real dx = m_amr->getDx()[0];
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real               dx    = m_amr->getDx()[lvl];
+    const Real               dxVol = std::pow(dx, SpaceDim);
 
-  Real mass = 0.;
-  DataOps::kappaSum(mass, *a_phi[0]);
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const Box            cellbox    = dbl[dit()];
+      const EBISBox&       ebisbox    = ebisl[dit()];
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
 
-  mass *= pow(dx, SpaceDim);
+      const EBCellFAB& phi    = (*a_phi[lvl])[dit()];
+      const FArrayBox& phiReg = phi.getFArrayBox();
 
-  return mass;
+      // Kernel definitions.
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (validCells(iv) && ebisbox.isRegular(iv)) {
+          mass += phiReg(iv, 0) * dxVol;
+        }
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const IntVect iv = vof.gridIndex();
+	
+        if (validCells(iv)) {
+	  const Real volFrac = a_kappaScale ? ebisbox.volFrac(vof) : 1.0;
+	  
+          mass += phi(vof, 0) * dxVol * volFrac;
+        }
+      };
+
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      BoxLoops::loop(cellbox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+
+  return ParallelOps::sum(mass);
 }
 
 Real

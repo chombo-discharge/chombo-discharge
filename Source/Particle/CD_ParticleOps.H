@@ -151,6 +151,23 @@ public:
   template <typename P>
   static inline void
   copyDestructive(ParticleContainer<P>& a_dst, ParticleContainer<P>& a_src) noexcept;
+
+  /*!
+    @brief Perform a sum of some particle quantity
+    @param[in] a_particles Particles
+  */
+  template <typename P, const Real& (P::*scalarQuantity)() const>
+  static inline Real
+  sum(const ParticleContainer<P>& a_particles) noexcept;
+
+  /*!
+    @brief Perform a sum of some particle quantity
+    @param[in] a_particles Particles
+    @note Just like the other version, except that this one doesn't take a member function. 
+  */
+  template <typename P, Real (P::*scalarQuantity)()>
+  static inline Real
+  sum(const ParticleContainer<P>& a_particles) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

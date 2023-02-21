@@ -283,6 +283,48 @@ ParticleOps::copyDestructive(ParticleContainer<P>& a_dst, ParticleContainer<P>& 
   }
 }
 
+template <typename P, const Real& (P::*scalarQuantity)() const>
+inline Real
+ParticleOps::sum(const ParticleContainer<P>& a_particles) noexcept
+{
+  CH_TIME("ParticleOps::sum(ParticleContainer<P>)");
+
+  Real particleSum = 0.0;
+
+  for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
+    for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
+      const List<P>& particles = a_particles[lvl][dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        particleSum += (lit().*scalarQuantity)();
+      }
+    }
+  }
+
+  return ParallelOps::sum(particleSum);
+}
+
+template <typename P, Real (P::*scalarQuantity)()>
+inline Real
+ParticleOps::sum(const ParticleContainer<P>& a_particles) noexcept
+{
+  CH_TIME("ParticleOps::sum(ParticleContainer<P>)");
+
+  Real particleSum = 0.0;
+
+  for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
+    for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
+      const List<P>& particles = a_particles[lvl][dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        particleSum += (lit().*scalarQuantity)();
+      }
+    }
+  }
+
+  return ParallelOps::sum(particleSum);
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif

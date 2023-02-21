@@ -563,10 +563,11 @@ public:
   /*!
     @brief Compute the "physical mass" in the input argument. 
     @details This conservatively coarsens the solution and computes on the coarsest level only
-    @param[in] a_phi Cell-centered data. 
+    @param[in] a_phi        Cell-centered data. 
+    @param[in] a_kappaScale Multiply by kappa in irregular cells.
   */
   virtual Real
-  computeMass(EBAMRCellData& a_phi);
+  computeMass(const EBAMRCellData& a_phi, const bool a_kappaScale = true);
 
   /*!
     @brief Compute the total charge in m_phi

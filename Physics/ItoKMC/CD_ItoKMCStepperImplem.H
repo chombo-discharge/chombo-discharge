@@ -1790,6 +1790,75 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset             a_
       break;
     }
     }
+
+    // Get the particles and check if we have someone inside the EB
+    Real numCovered = 0;
+
+    ParticleContainer<ItoParticle>& bulkContainer = solver->getParticles(a_containerBulk);
+    ParticleContainer<ItoParticle>& ebContainer   = solver->getParticles(a_containerEB);
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl    = m_amr->getGrids(m_particleRealm)[lvl];
+      const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[lvl];
+      const ProblemDomain&     domain = m_amr->getDomains()[lvl];
+      const RealVect           probLo = m_amr->getProbLo();
+      const Real               dx     = m_amr->getDx()[lvl];
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        const Box      cellBox = dbl[dit()];
+        const EBISBox& ebisbox = ebisl[dit()];
+
+        List<ItoParticle>& bulkParticles = bulkContainer[lvl][dit()].listItems();
+        List<ItoParticle>& ebParticles   = ebContainer[lvl][dit()].listItems();
+
+        for (ListIterator<ItoParticle> lit(bulkParticles); lit.ok();) {
+          ItoParticle& p = lit();
+
+          const IntVect iv = ParticleOps::getParticleCellIndex(p.position(), probLo, dx);
+
+          if (!(cellBox.contains(iv))) {
+            MayDay::Error("particle not in box");
+          }
+
+          if (ebisbox.isCovered(iv)) {
+            numCovered += p.weight();
+
+            ++lit;
+          }
+          else if (ebisbox.isIrregular(iv)) {
+            const VolIndex vof    = VolIndex(iv, 0);
+            const RealVect normal = ebisbox.normal(vof);
+
+            const RealVect ebPos = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
+
+            if ((p.position() - ebPos).dotProduct(normal) <= 0.0) {
+              p.position() = ebPos;
+
+              if (a_delete) {
+                ebParticles.transfer(lit);
+              }
+              else {
+                ebParticles.add(p);
+
+                ++lit;
+              }
+            }
+            else {
+              ++lit;
+            }
+          }
+          else {
+            ++lit;
+          }
+        }
+      }
+    }
+
+    numCovered = ParallelOps::sum(numCovered);
+
+    if (procID() == 0 && numCovered > 0.0) {
+      //      std::cout << numCovered << std::endl;
+    }
   }
 }
 
@@ -4299,7 +4368,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(const Real a_dt) noexcept
 
   this->resolveSecondaryEmissionEB(secondaryParticles, primaryParticles, cdrFluxes, surfaceChargeDensity, a_dt);
 
-#if 1
+#if 0
   pout() << "resolveSecondaryEmissionEB -- remember to reset electrodes!" << endl;
 #else
   m_sigmaSolver->resetElectrodes(0.0);
@@ -4590,7 +4659,37 @@ ItoKMCStepper<I, C, R, F>::computeTotalCharge() const noexcept
     pout() << m_name + "::computeTotalCharge()" << endl;
   }
 
+  const bool kappaScale = false;
+
   Real totalCharge = 0.0;
+
+  // Charge from Ito solvers.
+  for (auto it = m_ito->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<ItoSolver>&  solver  = it();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+
+    const int Z = species->getChargeNumber();
+
+    if (Z != 0.0) {
+      const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+      totalCharge += Z * ParticleOps::sum<ItoParticle, &ItoParticle::weight>(particles);
+    }
+  }
+
+  // Charge from CDR solvers
+  for (auto it = m_cdr->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<CdrSolver>&  solver  = it();
+    const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
+
+    const int Z = species->getChargeNumber();
+
+    if (Z != 0.0) {
+      const EBAMRCellData& phi = solver->getPhi();
+
+      totalCharge += Z * solver->computeMass(phi, kappaScale);
+    }
+  }
 
   for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& particleGrids = m_amr->getGrids(m_particleRealm)[lvl];
@@ -4601,58 +4700,58 @@ ItoKMCStepper<I, C, R, F>::computeTotalCharge() const noexcept
     const Real               dxVol         = std::pow(dx, SpaceDim);
 
     // Charged particles.
-    for (DataIterator dit(particleGrids); dit.ok(); ++dit) {
-      for (auto it = m_ito->iterator(); it.ok(); ++it) {
-        const int Z = it()->getSpecies()->getChargeNumber();
+    // for (DataIterator dit(particleGrids); dit.ok(); ++dit) {
+    //   for (auto it = m_ito->iterator(); it.ok(); ++it) {
+    //     const int Z = it()->getSpecies()->getChargeNumber();
 
-        if (Z != 0) {
-          const List<ItoParticle>& particles =
-            it()->getParticles(ItoSolver::WhichContainer::Bulk)[lvl][dit()].listItems();
+    //     if (Z != 0) {
+    //       const List<ItoParticle>& particles =
+    //         it()->getParticles(ItoSolver::WhichContainer::Bulk)[lvl][dit()].listItems();
 
-          for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit) {
-            totalCharge += Z * lit().weight();
-          }
-        }
-      }
-    }
+    //       for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit) {
+    //         //            totalCharge += Z * lit().weight();
+    //       }
+    //     }
+    //   }
+    // }
 
-    // Charged fluid species and surface charge.
-    for (DataIterator dit(fluidGrids); dit.ok(); ++dit) {
-      for (auto it = m_cdr->iterator(); it.ok(); ++it) {
-        const RefCountedPtr<CdrSolver>&  solver  = it();
-        const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
+    // // Charged fluid species and surface charge.
+    // for (DataIterator dit(fluidGrids); dit.ok(); ++dit) {
+    //   for (auto it = m_cdr->iterator(); it.ok(); ++it) {
+    //     const RefCountedPtr<CdrSolver>&  solver  = it();
+    //     const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
 
-        const int Z = species->getChargeNumber();
+    //     const int Z = species->getChargeNumber();
 
-        if (Z != 0) {
-          const EBCellFAB&     phi        = (*(it()->getPhi())[lvl])[dit()];
-          const FArrayBox&     phiReg     = phi.getFArrayBox();
-          const EBISBox&       ebisbox    = fluidEBISL[dit()];
-          const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[lvl])[dit()];
+    //     if (Z != 0) {
+    //       const EBCellFAB&     phi        = (*(it()->getPhi())[lvl])[dit()];
+    //       const FArrayBox&     phiReg     = phi.getFArrayBox();
+    //       const EBISBox&       ebisbox    = fluidEBISL[dit()];
+    //       const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[lvl])[dit()];
 
-          // Kernel for mass computations in regular and cut-cells.
-          auto regularKernel = [&](const IntVect iv) -> void {
-            if (validCells(iv) && ebisbox.isRegular(iv)) {
-              totalCharge += Z * phiReg(iv, 0) * dxVol;
-            }
-          };
+    //       // Kernel for mass computations in regular and cut-cells.
+    //       auto regularKernel = [&](const IntVect iv) -> void {
+    //         if (validCells(iv) && ebisbox.isRegular(iv)) {
+    //           totalCharge += Z * phiReg(iv, 0) * dxVol;
+    //         }
+    //       };
 
-          // Note doing kappa because advanceReactionNetwork uses the total number of particles.
-          auto irregularKernel = [&](const VolIndex& vof) -> void {
-            const IntVect iv = vof.gridIndex();
-            if (validCells(iv) && ebisbox.isIrregular(iv)) {
-              totalCharge += Z * phi(vof, 0) * dxVol; // * ebisbox.volFrac(vof);
-            }
-          };
+    //       // Note: Not using kappa here.
+    //       auto irregularKernel = [&](const VolIndex& vof) -> void {
+    //         const IntVect iv = vof.gridIndex();
+    //         if (validCells(iv) && ebisbox.isIrregular(iv)) {
+    //           totalCharge += Z * phi(vof, 0) * dxVol; // * ebisbox.volFrac(vof);
+    //         }
+    //       };
 
-          // Execute kernels.
-          VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[dit()];
+    //       // Execute kernels.
+    //       VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[dit()];
 
-          BoxLoops::loop(fluidGrids[dit()], regularKernel);
-          BoxLoops::loop(vofit, irregularKernel);
-        }
-      }
-    }
+    //       BoxLoops::loop(fluidGrids[dit()], regularKernel);
+    //       BoxLoops::loop(vofit, irregularKernel);
+    //     }
+    //   }
+    // }
 
     // Surface charge density.
     for (DataIterator dit(fluidGrids); dit.ok(); ++dit) {
