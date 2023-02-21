@@ -2693,10 +2693,10 @@ CdrSolver::computeMass(const EBAMRCellData& a_phi, const bool a_kappaScale)
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         const IntVect iv = vof.gridIndex();
-	
+
         if (validCells(iv)) {
-	  const Real volFrac = a_kappaScale ? ebisbox.volFrac(vof) : 1.0;
-	  
+          const Real volFrac = a_kappaScale ? ebisbox.volFrac(vof) : 1.0;
+
           mass += phi(vof, 0) * dxVol * volFrac;
         }
       };
