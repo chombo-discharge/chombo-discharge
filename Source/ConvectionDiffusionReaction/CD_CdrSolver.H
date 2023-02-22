@@ -677,6 +677,14 @@ public:
   virtual void
   extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept;
 
+  /*!
+    @brief Redistribute the mass differente into the data holder.
+    @param[inout] a_phi Cell data
+    @param[in]    a_delta Mass to be re-distributed.
+  */
+  virtual void
+  redistribute(EBAMRCellData& a_phi, const EBAMRIVData& a_delta) noexcept;
+
 protected:
   /*!
     @brief Redistribution method

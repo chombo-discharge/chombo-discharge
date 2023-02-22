@@ -2929,6 +2929,20 @@ CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
   }
 }
 
+void
+CdrSolver::redistribute(EBAMRCellData& a_phi, const EBAMRIVData& a_delta) noexcept
+{
+  CH_TIME("CdrSolver::redistribute");
+  if (m_verbosity > 5) {
+    pout() << "CdrSolver::redistribute" << endl;
+  }
+
+  this->incrementRedist(a_delta);
+  this->coarseFineIncrement(a_delta);
+  this->hyperbolicRedistribution(a_phi);
+  this->coarseFineRedistribution(a_phi);
+}
+
 std::string
 CdrSolver::makeBcString(const int a_dir, const Side::LoHiSide a_side) const
 {
