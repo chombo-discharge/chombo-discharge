@@ -211,6 +211,7 @@ ItoKMCGodunovStepper.checkpoint_particles    = false          # If true, regrid 
 ItoKMCGodunovStepper.verbosity               = -1             # Verbosity
 ItoKMCGodunovStepper.profile                 = true           # Turn on/off run-time profiling
 ItoKMCGodunovStepper.abort_on_failure        = false          # Turn on/off abort on Poisson failure
+ItoKMCGodunovStepper.redistribute_cdr        = true           # Turn on/off reactive redistribution
 ItoKMCGodunovStepper.plt_vars                = none           # 'conductivity', 'current_density', 'particles_per_patch'
 ItoKMCGodunovStepper.dual_grid               = true           # Turn on/off dual-grid functionality
 ItoKMCGodunovStepper.load_balance_fluid      = false          # Turn on/off fluid realm load balancing. 

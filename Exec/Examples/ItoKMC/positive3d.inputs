@@ -210,6 +210,7 @@ RodDielectric.sphere.radius             = 0.5           # Radius
 ItoKMCGodunovStepper.checkpoint_particles    = false          # If true, regrid on restart is supported (otherwise it's not)
 ItoKMCGodunovStepper.verbosity               = -1             # Verbosity
 ItoKMCGodunovStepper.abort_on_failure        = true           # Abort on failure or not
+ItoKMCGodunovStepper.redistribute_cdr        = true           # Turn on/off reactive redistribution
 ItoKMCGodunovStepper.profile                 = true           # Turn on/off run-time profiling
 ItoKMCGodunovStepper.plt_vars                = none           # 'conductivity', 'current_density', 'particles_per_patch'
 ItoKMCGodunovStepper.dual_grid               = true           # Turn on/off dual-grid functionality
