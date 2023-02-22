@@ -65,6 +65,26 @@ AmrMesh::slice(EBAMRCellData& a_original, const Interval a_variables) const noex
   return ret;
 }
 
+const EBAMRCellData
+AmrMesh::slice(const EBAMRCellData& a_original, const Interval a_variables) const noexcept
+{
+  CH_TIME("AmrMesh::alias(phase::which_phase, MFAMRCellData)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::alias(phase::which_phase, MFAMRCellData)" << endl;
+  }
+
+  EBAMRCellData ret;
+  this->allocatePointer(ret, a_original.getRealm(), a_original.size() - 1);
+
+  for (int i = 0; i < a_original.size(); i++) {
+    CH_assert(a_variables.end() < a_original[i]->nComp());
+
+    aliasLevelData<EBCellFAB>(*ret[i], &(*a_original[i]), a_variables);
+  }
+
+  return ret;
+}
+
 EBAMRCellData
 AmrMesh::alias(const phase::which_phase a_phase, const MFAMRCellData& a_mfdata) const
 {
