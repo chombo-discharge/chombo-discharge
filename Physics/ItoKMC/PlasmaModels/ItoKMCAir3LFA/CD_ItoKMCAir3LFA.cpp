@@ -73,6 +73,9 @@ ItoKMCAir3LFA::ItoKMCAir3LFA()
   blobCenter = RealVect(D_DECL(v[0], v[1], v[2]));
 
   ParticleManagement::drawSphereParticles(electrons, initParticles, blobCenter, blobRadius);
+  for (ListIterator<ItoParticle> lit(electrons); lit.ok(); ++lit) {
+    lit().weight() = initParticleWeight;
+  }
 
   // Add reactions. These are
   //
