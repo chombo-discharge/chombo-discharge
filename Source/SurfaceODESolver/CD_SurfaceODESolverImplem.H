@@ -270,6 +270,59 @@ SurfaceODESolver<N>::setTime(const int a_step, const Real a_time, const Real a_d
 
 template <int N>
 Real
+SurfaceODESolver<N>::computeMass(const int a_comp) const noexcept
+{
+  CH_TIME("SurfaceODESolver::computeMass(int)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeMass(int)" << endl;
+  }
+
+  return this->computeMass(m_phi, a_comp);
+}
+
+template <int N>
+Real
+SurfaceODESolver<N>::computeMass(const EBAMRIVData& a_data, const int a_comp) const noexcept
+{
+  CH_TIME("SurfaceODESolver::computeMass(EBAMRIVData, int)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeMass(EBAMRIVData, int)" << endl;
+  }
+
+  Real dataSum = 0.0;
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real               dx     = m_amr->getDx()[lvl];
+    const Real               dxArea = std::pow(dx, SpaceDim - 1);
+
+    CH_assert(a_data[lvl]->nComp() > a_comp);
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const EBISBox&         ebisbox    = ebisl[dit()];
+      const BaseFab<bool>&   validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
+      const BaseIVFAB<Real>& data       = (*a_data[lvl])[dit()];
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const IntVect iv = vof.gridIndex();
+
+        if (validCells(iv)) {
+          dataSum += data(vof, a_comp) * ebisbox.bndryArea(vof) * dxArea;
+        }
+      };
+
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+
+  return ParallelOps::sum(dataSum);
+}
+
+template <int N>
+int
 SurfaceODESolver<N>::getStep() const noexcept
 {
   CH_TIME("SurfaceODESolver::getStep");
