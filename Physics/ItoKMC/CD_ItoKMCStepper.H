@@ -419,6 +419,11 @@ namespace Physics {
       bool m_abortOnFailure;
 
       /*!
+	@brief Flag for abandoning simulation of Poisson solver fails
+      */
+      bool m_redistributeCDR;
+
+      /*!
 	@brief Using dual grid or not
       */
       bool m_dualGrid;
@@ -442,11 +447,6 @@ namespace Physics {
 	@brief Load balance fluid realm or not
       */
       bool m_loadBalanceFluid;
-
-      /*!
-	@brief For switching between the old and new reaction algorithms
-      */
-      bool m_useNewReactionAlgorithm;
 
       /*!
 	@brief Plot conductivity or not
@@ -1590,6 +1590,12 @@ namespace Physics {
       */
       virtual void
       parseExitOnFailure() noexcept;
+
+      /*!
+	@brief Parse CDR mass redistribution when assigning reactive products. 
+      */
+      virtual void
+      parseRedistributeCDR() noexcept;
 
       /*!
 	@brief Parse the desired number of particles per cell. 

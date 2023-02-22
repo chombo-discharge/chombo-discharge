@@ -201,6 +201,8 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     }
   };
 
+  MayDay::Warning("ItoKMCGodunovStepper -- figure out how to structure the 'covered' particles");
+
   // Special flag for telling the class that we have the necessary things in place for doing a regrid. This is
   // an if-but-maybe situation where the user chose not to checkpoint the particles we need for regrids, yet tries
   // to restart a simulation and regrid without all the prerequisites being in place. This flag is set to true
@@ -209,13 +211,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 
   m_timer = Timer("ItoKMCGodunovStepper::advance");
 
-  debugCharge("initial charge");
-
-  MayDay::Warning("check CDR conservation during regrids and fix covered particle conservation");
+  //  MayDay::Warning("check CDR conservation during regrids and fix covered particle conservation");
   if (m_smoothGradientEB) {
-
     this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Voxel, this->m_toleranceEB);
   }
+
+  debugCharge("advance");
 
   // Previous time step is needed when regridding.
   m_prevDt = a_dt;

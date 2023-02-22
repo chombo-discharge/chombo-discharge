@@ -36,24 +36,24 @@ ItoKMCStepper<I, C, R, F>::ItoKMCStepper() noexcept
 {
   CH_TIME("ItoKMCStepper::ItoKMCStepper");
 
-  m_verbosity               = -1;
-  m_profile                 = false;
-  m_name                    = "ItoKMCStepper";
-  m_plasmaPhase             = phase::gas;
-  m_dt                      = 0.0;
-  m_time                    = 0.0;
-  m_timeStep                = 0;
-  m_loadPerCell             = 1.0;
-  m_useNewReactionAlgorithm = true;
-  m_regridSuperparticles    = true;
-  m_fluidRealm              = Realm::Primal;
-  m_particleRealm           = Realm::Primal;
-  m_advectionCFL            = 1.0;
-  m_diffusionCFL            = std::numeric_limits<Real>::max();
-  m_advectionDiffusionCFL   = std::numeric_limits<Real>::max();
-  m_relaxTimeFactor         = std::numeric_limits<Real>::max();
-  m_minDt                   = std::numeric_limits<Real>::min();
-  m_maxDt                   = std::numeric_limits<Real>::max();
+  m_verbosity             = -1;
+  m_profile               = false;
+  m_name                  = "ItoKMCStepper";
+  m_plasmaPhase           = phase::gas;
+  m_dt                    = 0.0;
+  m_time                  = 0.0;
+  m_timeStep              = 0;
+  m_loadPerCell           = 1.0;
+  m_redistributeCDR       = true;
+  m_regridSuperparticles  = true;
+  m_fluidRealm            = Realm::Primal;
+  m_particleRealm         = Realm::Primal;
+  m_advectionCFL          = 1.0;
+  m_diffusionCFL          = std::numeric_limits<Real>::max();
+  m_advectionDiffusionCFL = std::numeric_limits<Real>::max();
+  m_relaxTimeFactor       = std::numeric_limits<Real>::max();
+  m_minDt                 = std::numeric_limits<Real>::min();
+  m_maxDt                 = std::numeric_limits<Real>::max();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -85,6 +85,7 @@ ItoKMCStepper<I, C, R, F>::parseOptions() noexcept
 
   this->parseVerbosity();
   this->parseExitOnFailure();
+  this->parseRedistributeCDR();
   this->parsePlotVariables();
   this->parseSuperParticles();
   this->parseDualGrid();
@@ -104,6 +105,7 @@ ItoKMCStepper<I, C, R, F>::parseRuntimeOptions() noexcept
 
   this->parseVerbosity();
   this->parseExitOnFailure();
+  this->parseRedistributeCDR();
   this->parsePlotVariables();
   this->parseSuperParticles();
   this->parseLoadBalance();
@@ -146,6 +148,20 @@ ItoKMCStepper<I, C, R, F>::parseExitOnFailure() noexcept
   ParmParse pp(m_name.c_str());
 
   pp.get("abort_on_failure", m_abortOnFailure);
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::parseRedistributeCDR() noexcept
+{
+  CH_TIME("ItoKMCStepper::parseRedistributeCDR");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::parseRedistributeCDR" << endl;
+  }
+
+  ParmParse pp(m_name.c_str());
+
+  pp.get("redistribute_cdr", m_redistributeCDR);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1791,9 +1807,9 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset             a_
     }
     }
 
-    // Get the particles and check if we have someone inside the EB
-    Real numCovered = 0;
-
+    // The above tests may fail since the discrete/implicit function disagree on where the EB is (every so slightly). This
+    // hook takes all the particles on the inside of the EB and puts them in the intersected particle container. Particles
+    // in covered cells are more difficult to deal with..
     ParticleContainer<ItoParticle>& bulkContainer = solver->getParticles(a_containerBulk);
     ParticleContainer<ItoParticle>& ebContainer   = solver->getParticles(a_containerEB);
 
@@ -1817,21 +1833,30 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset             a_
           const IntVect iv = ParticleOps::getParticleCellIndex(p.position(), probLo, dx);
 
           if (!(cellBox.contains(iv))) {
-            MayDay::Error("particle not in box");
+            MayDay::Error("CD_ItoKMCStepperImplem.H in routine 'intersectParticles' - particle not in box!");
           }
 
-          if (ebisbox.isCovered(iv)) {
-            numCovered += p.weight();
+          // If the particle is inside any vof, we keep it.
+          if (ebisbox.isIrregular(iv)) {
+            bool insideAnyVoF = false;
 
-            ++lit;
-          }
-          else if (ebisbox.isIrregular(iv)) {
-            const VolIndex vof    = VolIndex(iv, 0);
-            const RealVect normal = ebisbox.normal(vof);
+            const Vector<VolIndex> allVoFs = ebisbox.getVoFs(iv);
 
-            const RealVect ebPos = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
+            for (int i = 0; i < allVoFs.size(); i++) {
+              const VolIndex& vof    = allVoFs[i];
+              const RealVect  normal = ebisbox.normal(vof);
+              const RealVect  ebPos  = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
 
-            if ((p.position() - ebPos).dotProduct(normal) <= 0.0) {
+              if ((p.position() - ebPos).dotProduct(normal) > 0.0) {
+                insideAnyVoF = true;
+              }
+            }
+
+            if (!insideAnyVoF) {
+              const VolIndex& vof    = allVoFs[0];
+              const RealVect  normal = ebisbox.normal(vof);
+              const RealVect  ebPos  = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
+
               p.position() = ebPos;
 
               if (a_delete) {
@@ -1852,12 +1877,6 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset             a_
           }
         }
       }
-    }
-
-    numCovered = ParallelOps::sum(numCovered);
-
-    if (procID() == 0 && numCovered > 0.0) {
-      //      std::cout << numCovered << std::endl;
     }
   }
 }
@@ -3965,8 +3984,51 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_newParti
   CH_assert(a_dt > 0.0);
 
   if (numCdrSpecies > 0) {
+
+    // Increment, but don't divide by kappa.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       this->reconcileCdrDensities(*a_newParticlesPerCell[lvl], *a_oldParticlesPerCell[lvl], lvl, a_dt);
+    }
+
+    // Redistribute if user calls for it.
+    if (m_redistributeCDR) {
+      for (auto it = m_cdr->iterator(); it.ok(); ++it) {
+        const int idx = it.index();
+
+        const EBAMRCellData newPPC = m_amr->slice(a_newParticlesPerCell, Interval(idx, idx));
+        const EBAMRCellData oldPPC = m_amr->slice(a_oldParticlesPerCell, Interval(idx, idx));
+
+        for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+          const DisjointBoxLayout& dbl   = m_amr->getGrids(m_fluidRealm)[lvl];
+          const EBISLayout&        ebisl = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[lvl];
+          const Real               dx    = m_amr->getDx()[lvl];
+
+          for (DataIterator dit(dbl); dit.ok(); ++dit) {
+            const EBISBox& ebisbox = ebisl[dit()];
+
+            BaseIVFAB<Real>& deltaMass = (*m_fluidScratchEB[lvl])[dit()];
+
+            deltaMass.setVal(0.0);
+
+            const EBCellFAB& newPPC = (*a_newParticlesPerCell[lvl])[dit()];
+            const EBCellFAB& oldPPC = (*a_oldParticlesPerCell[lvl])[dit()];
+
+            auto kernel = [&](const VolIndex& vof) -> void {
+              const Real kappa = ebisbox.volFrac(vof);
+
+              deltaMass(vof, 0) = (newPPC(vof, idx) - oldPPC(vof, idx)) * (1.0 - kappa) / std::pow(dx, SpaceDim);
+            };
+
+            VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[dit()];
+
+            BoxLoops::loop(vofit, kernel);
+          }
+        }
+
+        const RefCountedPtr<CdrSolver>& solver = it();
+
+        solver->redistribute(solver->getPhi(), m_fluidScratchEB);
+      }
     }
 
     this->coarsenCDRSolvers();
@@ -4659,7 +4721,7 @@ ItoKMCStepper<I, C, R, F>::computeTotalCharge() const noexcept
     pout() << m_name + "::computeTotalCharge()" << endl;
   }
 
-  const bool kappaScale = false;
+  const bool kappaScale = true;
 
   Real totalCharge = 0.0;
 
@@ -4670,7 +4732,7 @@ ItoKMCStepper<I, C, R, F>::computeTotalCharge() const noexcept
 
     const int Z = species->getChargeNumber();
 
-    if (Z != 0.0) {
+    if (Z != 0) {
       const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
       totalCharge += Z * ParticleOps::sum<ItoParticle, &ItoParticle::weight>(particles);
@@ -4684,7 +4746,7 @@ ItoKMCStepper<I, C, R, F>::computeTotalCharge() const noexcept
 
     const int Z = species->getChargeNumber();
 
-    if (Z != 0.0) {
+    if (Z != 0) {
       const EBAMRCellData& phi = solver->getPhi();
 
       totalCharge += Z * solver->computeMass(phi, kappaScale);
