@@ -152,9 +152,9 @@ namespace Physics {
       bool m_canRegridOnRestart;
 
       /*!
-	@brief For achieving a slightly smoother gradient in the densities near the EB
+	@brief For achieving a slightly smoother gradient in the conductivity near the EB.
       */
-      bool m_smoothGradientEB;
+      bool m_smoothConductivityEB;
 
       /*!
 	@brief Previous time step.
@@ -176,6 +176,11 @@ namespace Physics {
 	@note Needed for regrids
       */
       Vector<RefCountedPtr<ParticleContainer<PointParticle>>> m_conductivityParticles;
+
+      /*!
+	@brief Storage for particles that fell inside the EB but should still contribute to the conductivity
+      */
+      Vector<RefCountedPtr<ParticleContainer<PointParticle>>> m_irregularParticles;
 
       /*!
 	@brief Storage for particles that gave rho^dagger

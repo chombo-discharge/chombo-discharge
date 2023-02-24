@@ -1864,6 +1864,12 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
       break;
     }
     }
+
+    // Fetch the irregular particles we lost.
+    ParticleContainer<ItoParticle>& ebParticles   = solver->getParticles(a_containerEB);
+    ParticleContainer<ItoParticle>& bulkParticles = solver->getParticles(a_containerBulk);
+
+    m_amr->transferIrregularParticles(ebParticles, bulkParticles, m_plasmaPhase);
   }
 }
 

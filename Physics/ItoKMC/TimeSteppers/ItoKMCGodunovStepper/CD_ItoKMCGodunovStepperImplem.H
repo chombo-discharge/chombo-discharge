@@ -35,7 +35,7 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
   this->m_prevDt                   = 0.0;
   this->m_writeCheckpointParticles = false;
   this->m_readCheckpointParticles  = false;
-  this->m_smoothGradientEB         = true;
+  this->m_smoothConductivityEB     = false;
   this->m_canRegridOnRestart       = true;
 
   this->parseOptions();
@@ -67,6 +67,7 @@ ItoKMCGodunovStepper<I, C, R, F>::allocate() noexcept
   const int numItoSpecies = this->m_physics->getNumItoSpecies();
 
   m_conductivityParticles.resize(numItoSpecies);
+  m_irregularParticles.resize(numItoSpecies);
   m_rhoDaggerParticles.resize(numItoSpecies);
 
   for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
@@ -74,9 +75,11 @@ ItoKMCGodunovStepper<I, C, R, F>::allocate() noexcept
 
     m_conductivityParticles[idx] = RefCountedPtr<ParticleContainer<PointParticle>>(
       new ParticleContainer<PointParticle>());
+    m_irregularParticles[idx] = RefCountedPtr<ParticleContainer<PointParticle>>(new ParticleContainer<PointParticle>());
     m_rhoDaggerParticles[idx] = RefCountedPtr<ParticleContainer<PointParticle>>(new ParticleContainer<PointParticle>());
 
     (this->m_amr)->allocate(*m_conductivityParticles[idx], this->m_particleRealm);
+    (this->m_amr)->allocate(*m_irregularParticles[idx], this->m_particleRealm);
     (this->m_amr)->allocate(*m_rhoDaggerParticles[idx], this->m_particleRealm);
   }
 }
@@ -159,7 +162,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseAlgorithm() noexcept
   ParmParse   pp(this->m_name.c_str());
   std::string str;
 
-  pp.query("smooth_gradient", m_smoothGradientEB);
+  pp.query("smooth_conductivity", m_smoothConductivityEB);
   pp.get("algorithm", str);
 
   // Get algorithm
@@ -194,14 +197,14 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     pout() << this->m_name + "::advance" << endl;
   }
 
+  MayDay::Warning("ItoKMCGodunovStepper::advance -- missing hard conservation for extended conductivity");
+
   auto debugCharge = [this](const std::string a_message) -> void {
     const Real Qtot = this->computeTotalCharge();
     if (procID() == 0) {
       std::cout << a_message << " = " << Qtot << "\n";
     }
   };
-
-  MayDay::Warning("ItoKMCGodunovStepper -- figure out how to structure the 'covered' particles");
 
   // Special flag for telling the class that we have the necessary things in place for doing a regrid. This is
   // an if-but-maybe situation where the user chose not to checkpoint the particles we need for regrids, yet tries
@@ -210,11 +213,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   m_canRegridOnRestart = true;
 
   m_timer = Timer("ItoKMCGodunovStepper::advance");
-
-  //  MayDay::Warning("check CDR conservation during regrids and fix covered particle conservation");
-  if (m_smoothGradientEB) {
-    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Voxel, this->m_toleranceEB);
-  }
 
   debugCharge("advance");
 
@@ -247,11 +245,76 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   }
 
   // Do intersection test and remove particles that struck the EB or domain. Transfer them to appropriate containers. Then recompute the number of particles per cell.
-  //
   this->barrier();
   m_timer.startEvent("EB/Particle intersection");
-  if (m_smoothGradientEB) {
-    this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, false);
+  if (m_smoothConductivityEB) {
+
+    // TLDR: This hook does a special intersection routine where instead of transferring the particles that were intersected, they
+    //       are put in a separate data container. We want to do this in order to reduce artificial gradients in the particle
+    //       densities near the EB.
+    auto setFlag = [](ItoParticle& p) -> void {
+      p.tmpReal() = 1.0;
+    };
+    auto nonDeletionModifier = [](ItoParticle& p) -> void {
+      p.tmpReal() = -1.0;
+    };
+    auto removeCrit = [](const ItoParticle& p) -> bool {
+      return p.tmpReal() < 0.0;
+    };
+
+    // Set flag for identifying which particles were intersected by not removed.
+    for (auto it = this->m_ito->iterator(); it.ok(); ++it) {
+      ParticleOps::setData<ItoParticle>(it()->getParticles(ItoSolver::WhichContainer::Bulk), setFlag);
+    }
+
+    // Intersect particles, but don't remove them.
+    this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive,
+                             EBIntersection::Bisection,
+                             false,
+                             nonDeletionModifier);
+
+    // Particles that were not removed are copied to a separate data container.
+    for (auto it = this->m_ito->iterator(); it.ok(); ++it) {
+      const RefCountedPtr<ItoSolver>&  solver  = it();
+      const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+
+      const int idx = it.index();
+      const int Z   = species->getChargeNumber();
+
+      ParticleContainer<PointParticle>&     irregParticles = *m_irregularParticles[idx];
+      const ParticleContainer<ItoParticle>& bulkParticles  = it()->getParticles(ItoSolver::WhichContainer::Bulk);
+
+      irregParticles.clearParticles();
+
+      if (Z != 0 && solver->isMobile()) {
+        for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
+          const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
+
+          for (DataIterator dit(dbl); dit.ok(); ++dit) {
+            List<PointParticle>&     pointParticles = irregParticles[lvl][dit()].listItems();
+            const List<ItoParticle>& patchParticles = bulkParticles[lvl][dit()].listItems();
+
+            for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
+              const ItoParticle& p = lit();
+
+              if (p.tmpReal() < 0.0) {
+                const RealVect& pos      = p.position();
+                const Real&     weight   = p.weight();
+                const Real&     mobility = p.mobility();
+
+                pointParticles.add(PointParticle(pos, weight * mobility));
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Finally, delete the original particles
+    for (auto it = this->m_ito->iterator(); it.ok(); ++it) {
+      ParticleContainer<ItoParticle>& bulkParticles = it()->getParticles(ItoSolver::WhichContainer::Bulk);
+      ParticleOps::removeParticles<ItoParticle>(bulkParticles, removeCrit);
+    }
   }
   else {
     this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, true);
@@ -305,22 +368,20 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
   m_timer.stopEvent("Sort by patch");
 
-  // Remove particles that are inside the EB. This depends on the algorithm.
+  // Remove particles that are inside the EB.
   this->barrier();
   m_timer.startEvent("Remove covered");
-  if (m_smoothGradientEB) {
-    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Voxel, this->m_toleranceEB);
-  }
-  else {
-    this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Discrete, this->m_toleranceEB);
-  }
+  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Discrete, this->m_toleranceEB);
   m_timer.stopEvent("Remove covered");
 
   // Clear other data holders for now.
+#if 1 // Figure out if this is necessary
+  pout() << "clearing boundary data holders but don't know if it is necesasry" << endl;
   for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     solverIt()->clear(ItoSolver::WhichContainer::EB);
     solverIt()->clear(ItoSolver::WhichContainer::Domain);
   }
+#endif
 
   // Prepare for the next time step
   this->barrier();
@@ -362,6 +423,7 @@ ItoKMCGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFin
     const int idx = solverIt.index();
 
     m_conductivityParticles[idx]->preRegrid(a_lmin);
+    m_irregularParticles[idx]->preRegrid(a_lmin);
     m_rhoDaggerParticles[idx]->preRegrid(a_lmin);
   }
 
@@ -428,6 +490,7 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
     const int idx = solverIt.index();
     (this->m_amr)->remapToNewGrids(*m_rhoDaggerParticles[idx], a_lmin, a_newFinestLevel);
     (this->m_amr)->remapToNewGrids(*m_conductivityParticles[idx], a_lmin, a_newFinestLevel);
+    (this->m_amr)->remapToNewGrids(*m_irregularParticles[idx], a_lmin, a_newFinestLevel);
   }
   m_timer.stopEvent("Remap algorithm-particles");
 
@@ -1092,6 +1155,7 @@ ItoKMCGodunovStepper<I, C, R, F>::copyConductivityParticles(
           const List<ItoParticle>& patchParticles = solverParticles[lvl][dit()].listItems();
 
           List<PointParticle>& pointParticles = (*a_conductivityParticles[idx])[lvl][dit()].listItems();
+          List<PointParticle>& irregParticles = (*m_irregularParticles[idx])[lvl][dit()].listItems();
 
           for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
             const ItoParticle& p        = lit();
@@ -1101,6 +1165,8 @@ ItoKMCGodunovStepper<I, C, R, F>::copyConductivityParticles(
 
             pointParticles.add(PointParticle(pos, weight * mobility));
           }
+
+          pointParticles.catenate(irregParticles);
         }
       }
     }
