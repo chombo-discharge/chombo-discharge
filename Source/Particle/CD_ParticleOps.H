@@ -168,6 +168,42 @@ public:
   template <typename P, Real (P::*scalarQuantity)()>
   static inline Real
   sum(const ParticleContainer<P>& a_particles) noexcept;
+
+  /*!
+    @brief Remove particles if they fulfil a certain removal criterion
+    @param[inout] a_particles       Particles
+    @param[in]    a_removeCriterion Removal criterion.
+  */
+  template <typename P>
+  static inline void
+  removeParticles(ParticleContainer<P>& a_particles, const std::function<bool(const P&)>& a_removeCriterion) noexcept;
+
+  /*!
+    @brief Set value function. Lets the user set particle parameters. 
+    @param[inout] a_particles Particles
+    @param[in]    a_functor   Lambda for setting particle values
+  */
+  template <typename P>
+  static inline void
+  setData(ParticleContainer<P>& a_particles, const std::function<void(P&)>& a_functor) noexcept;
+
+  /*!
+    @brief Set value function. Lets the user set scalar particle quantity. Use with e.g. setValue<P, &P::weight>(particles, 0.0) etc. 
+    @param[inout] a_particles Particles
+    @param[in]    a_value     Value to set
+  */
+  template <typename P, Real& (P::*particleScalarField)()>
+  static inline void
+  setValue(ParticleContainer<P>& a_particles, const Real a_value) noexcept;
+
+  /*!
+    @brief Set value function. Lets the user set scalar particle quantity. Use with e.g. setValue<P, &P::velocity>(particles, RealVect::Unit) etc. 
+    @param[inout] a_particles Particles
+    @param[in]    a_value     Value to set
+  */
+  template <typename P, RealVect& (P::*particleVectorField)()>
+  static inline void
+  setValue(ParticleContainer<P>& a_particles, const RealVect a_value) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
