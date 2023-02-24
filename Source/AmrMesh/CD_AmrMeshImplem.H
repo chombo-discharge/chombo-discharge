@@ -817,10 +817,10 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFro
 
 template <class P>
 void
-AmrMesh::transferIrregularParticlesDiscrete(ParticleContainer<P>&         a_dstParticles,
-                                            ParticleContainer<P>&         a_srcParticles,
-                                            const phase::which_phase      a_phase,
-                                            const std::function<void(P&)> a_transferModifier) const noexcept
+AmrMesh::transferIrregularParticles(ParticleContainer<P>&         a_dstParticles,
+                                    ParticleContainer<P>&         a_srcParticles,
+                                    const phase::which_phase      a_phase,
+                                    const std::function<void(P&)> a_transferModifier) const noexcept
 {
   CH_TIME("AmrMesh::transferIrregularParticles");
   if (m_verbosity > 5) {
@@ -865,17 +865,19 @@ AmrMesh::transferIrregularParticlesDiscrete(ParticleContainer<P>&         a_dstP
             const RealVect  normal = ebisbox.normal(vof);
             const RealVect  ebPos  = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
 
-            if ((p.position() - ebPos).dotProduct(normal) > 0.0) {
+            // Note: Can have normal = 0!
+            if ((p.position() - ebPos).dotProduct(normal) >= 0.0) {
               insideAnyVoF = true;
             }
           }
 
           if (!insideAnyVoF) {
-            const VolIndex& vof    = allVoFs[0];
-            const RealVect  normal = ebisbox.normal(vof);
-            const RealVect  ebPos  = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
+            const VolIndex& vof   = allVoFs[0];
+            const RealVect  ebPos = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
 
             p.position() = ebPos;
+
+            a_transferModifier(p);
 
             dstParticles.transfer(lit);
           }

@@ -1139,7 +1139,7 @@ public:
   */
   template <class P>
   void
-  transferIrregularParticlesDiscrete(
+  transferIrregularParticles(
     ParticleContainer<P>&         a_dstParticles,
     ParticleContainer<P>&         a_srcParticles,
     const phase::which_phase      a_phase,
