@@ -374,47 +374,63 @@ public:
     @brief Do boundary intersection tests.
     @details This will intersect the particles in the "bulk" particles data holder with the domain faces and EBs. If a particle crossed the EB it will
     be put into the "EB" particle data holder and likewise for the particles that crossed the domain side. 
-    @param[in] a_ebIntersection   Enum for switching between various types of intersection tests. 
-    @param[in] a_deleteParticles  If true, the origin particle will also be removed from the bulk particle data holder.
+    @param[in] a_ebIntersection      Enum for switching between various types of intersection tests. 
+    @param[in] a_deleteParticles     If true, the origin particle will also be removed from the bulk particle data holder.
+    @param[in] a_nonDeletionModifier Optional input argument for letting the user manipulate particles that were intersected but not deleted
     @note This will call the other version with WhichContainer::Bulk, WhichContainer::EB, and WhichContainer::Domain.
   */
   virtual void
-  intersectParticles(const EBIntersection a_ebIntersection, const bool a_deleteParticles);
+  intersectParticles(
+    const EBIntersection                    a_ebIntersection,
+    const bool                              a_deleteParticles,
+    const std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
+      return;
+    });
 
   /*!
     @brief Do boundary intersection tests.
     @details This will intersect the particles in the a_particles data holder with the domain faces and EBs. If a particle crossed the EB it will
     be put into the a_eb_particles particle data holder and likewise for the particles that crossed the domain side. 
-    @param[in] a_particles        Which particle container to use for the "active" particles
-    @param[in] a_ebParticles      Which particle container to put the EB particles
-    @param[in] a_domainParticles  Which particle container to put the domain particles
-    @param[in] a_ebIntersection   Enum for switching between various types of intersection tests. 
-    @param[in] a_deleteParticles  If true, the origin particle will also be removed from the bulk particle data holder.
+    @param[in] a_particles           Which particle container to use for the "active" particles
+    @param[in] a_ebParticles         Which particle container to put the EB particles
+    @param[in] a_domainParticles     Which particle container to put the domain particles
+    @param[in] a_ebIntersection      Enum for switching between various types of intersection tests. 
+    @param[in] a_deleteParticles     If true, the origin particle will also be removed from the bulk particle data holder.
+    @param[in] a_nonDeletionModifier Optional input argument for letting the user manipulate particles that were intersected but not deleted
     @note This will look up the ParticleContainer and call the other version.
   */
   virtual void
-  intersectParticles(const WhichContainer a_particles,
-                     const WhichContainer a_ebParticles,
-                     const WhichContainer a_domainParticles,
-                     const EBIntersection a_ebIntersection,
-                     const bool           a_deleteParticles);
+  intersectParticles(
+    const WhichContainer                    a_particles,
+    const WhichContainer                    a_ebParticles,
+    const WhichContainer                    a_domainParticles,
+    const EBIntersection                    a_ebIntersection,
+    const bool                              a_deleteParticles,
+    const std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
+      return;
+    });
 
   /*!
     @brief Do boundary intersection tests.
     @details This will intersect the particles in the a_particles data holder with the domain faces and EBs. If a particle crossed the EB it will
     be put into the a_eb_particles particle data holder and likewise for the particles that crossed the domain side. 
-    @param[in] a_particles        Which particle container to use for the "active" particles
-    @param[in] a_ebParticles      Which particle container to put the EB particles
-    @param[in] a_domainParticles  Which particle container to put the domain particles
-    @param[in] a_ebIntersection   Enum for switching between various types of intersection tests. 
-    @param[in] a_deleteParticles  If true, the origin particle will also be removed from the bulk particle data holder. 
+    @param[in] a_particles           Which particle container to use for the "active" particles
+    @param[in] a_ebParticles         Which particle container to put the EB particles
+    @param[in] a_domainParticles     Which particle container to put the domain particles
+    @param[in] a_ebIntersection      Enum for switching between various types of intersection tests. 
+    @param[in] a_deleteParticles     If true, the origin particle will also be removed from the bulk particle data holder. 
+    @param[in] a_nonDeletionModifier Optional input argument for letting the user manipulate particles that were intersected but not deleted
   */
   virtual void
-  intersectParticles(ParticleContainer<ItoParticle>& a_particles,
-                     ParticleContainer<ItoParticle>& a_ebParticles,
-                     ParticleContainer<ItoParticle>& a_domainParticles,
-                     const EBIntersection            a_ebIntersection,
-                     const bool                      a_deleteParticles);
+  intersectParticles(
+    ParticleContainer<ItoParticle>&         a_particles,
+    ParticleContainer<ItoParticle>&         a_ebParticles,
+    ParticleContainer<ItoParticle>&         a_domainParticles,
+    const EBIntersection                    a_ebIntersection,
+    const bool                              a_deleteParticles,
+    const std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
+      return;
+    });
 
   /*!
     @brief Compute particle load on a specific grid level -- this will compute the number of particles in each box in the input grids. 

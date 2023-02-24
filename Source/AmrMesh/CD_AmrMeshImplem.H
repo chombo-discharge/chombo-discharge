@@ -817,12 +817,13 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFro
 
 template <class P>
 void
-AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
-                                     ParticleContainer<P>&    a_ebParticles,
-                                     ParticleContainer<P>&    a_domainParticles,
-                                     const phase::which_phase a_phase,
-                                     const Real               a_tolerance,
-                                     const bool               a_deleteParticles) const
+AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&         a_activeParticles,
+                                     ParticleContainer<P>&         a_ebParticles,
+                                     ParticleContainer<P>&         a_domainParticles,
+                                     const phase::which_phase      a_phase,
+                                     const Real                    a_tolerance,
+                                     const bool                    a_deleteParticles,
+                                     const std::function<void(P&)> a_nonDeletionModifier) const noexcept
 {
   CH_TIME("AmrMesh::intersectParticlesRaycastIF");
   if (m_verbosity > 5) {
@@ -921,21 +922,23 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
           // Particle bumped into something.
           if (contactDomain || contactEB) {
             if (sEB <= sDomain) { // Crashed with EB "first".
-              const RealVect newPos = oldPos + sEB * path;
+              const RealVect intersectionPos = oldPos + sEB * path;
 
               // If we delete the original particles we can just transfer the one we have. Otherwise we create
               // a new particle.
               if (a_deleteParticles) {
-                particle.position() = newPos;
+                particle.position() = intersectionPos;
 
                 ebParticles.transfer(lit);
               }
               else {
                 P p = lit();
 
-                p.position() = newPos;
+                p.position() = intersectionPos;
 
                 ebParticles.add(p);
+
+                a_nonDeletionModifier(particle);
 
                 lit++;
               }
@@ -944,19 +947,21 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
               // Crashed with domain "first". Safety factor is to prevent particles falling off the high side of the domain
               const Real sSafety = std::max((Real)0.0, sDomain - safety);
 
-              const RealVect newPos = oldPos + sSafety * path;
+              const RealVect intersectionPos = oldPos + sSafety * path;
 
               if (a_deleteParticles) {
-                particle.position() = newPos;
+                particle.position() = intersectionPos;
 
                 domainParticles.transfer(lit);
               }
               else {
                 P p = lit();
 
-                p.position() = newPos;
+                p.position() = intersectionPos;
 
                 domainParticles.add(p);
+
+                a_nonDeletionModifier(particle);
 
                 ++lit;
               }
@@ -980,12 +985,13 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
 
 template <class P>
 void
-AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
-                                    ParticleContainer<P>&    a_ebParticles,
-                                    ParticleContainer<P>&    a_domainParticles,
-                                    const phase::which_phase a_phase,
-                                    const Real               a_bisectionStep,
-                                    const bool               a_deleteParticles) const
+AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&         a_activeParticles,
+                                    ParticleContainer<P>&         a_ebParticles,
+                                    ParticleContainer<P>&         a_domainParticles,
+                                    const phase::which_phase      a_phase,
+                                    const Real                    a_bisectionStep,
+                                    const bool                    a_deleteParticles,
+                                    const std::function<void(P&)> a_nonDeletionModifier) const noexcept
 {
   CH_TIME("AmrMesh::intersectParticlesBisectIF");
   if (m_verbosity > 5) {
@@ -1088,42 +1094,46 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
           if (contactDomain || contactEB) {
             if (sEB <= sDomain) {
               // Crashed with EB "first".
-              const RealVect newPos = oldPos + sEB * path;
+              const RealVect intersectionPos = oldPos + sEB * path;
 
               if (a_deleteParticles) {
-                particle.position() = newPos;
+                particle.position() = intersectionPos;
 
                 ebParticles.transfer(lit);
               }
               else {
                 P p = particle;
 
-                p.position() = newPos;
+                p.position() = intersectionPos;
 
                 ebParticles.add(p);
 
                 ++lit;
+
+                a_nonDeletionModifier(particle);
               }
             }
             else {
               // Crashed with domain "first".
               const Real sSafety = std::max((Real)0.0, sDomain - safety);
 
-              particle.position() = oldPos + sSafety * path;
+              const RealVect intersectionPos = oldPos + sSafety * path;
 
               if (a_deleteParticles) {
-                particle.position() = newPos;
+                particle.position() = intersectionPos;
 
                 domainParticles.transfer(lit);
               }
               else {
                 P p = particle;
 
-                p.position() = newPos;
+                p.position() = intersectionPos;
 
                 domainParticles.add(p);
 
                 ++lit;
+
+                a_nonDeletionModifier(particle);
               }
             }
           }
