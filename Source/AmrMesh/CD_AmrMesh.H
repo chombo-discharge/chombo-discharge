@@ -1131,6 +1131,23 @@ public:
                                  const phase::which_phase& a_phase) const;
 
   /*!
+    @brief Transfer particles that are on the wrong side of the EB to a different container.
+    @param[inout] a_dstParticles     Destination particle container
+    @param[inout] a_srcParticles     Source particle container
+    @param[in]    a_phase            Phase where the particles should live
+    @param[in]    a_transferModifier Optional input argument for letting the user manipulate particles that were transferred
+  */
+  template <class P>
+  void
+  transferIrregularParticlesDiscrete(
+    ParticleContainer<P>&         a_dstParticles,
+    ParticleContainer<P>&         a_srcParticles,
+    const phase::which_phase      a_phase,
+    const std::function<void(P&)> a_transferModifier = [](P&) -> void {
+      return;
+    }) const noexcept;
+
+  /*!
     @brief Particle intersection algorithm based on ray-casting.
     @details This routine will iterate through all the particles and check if they intersect the geometry. The template
     parameter indicates the particle type -- it MUST have const RealVec& position() const and  const RealVect& oldPosition() const 

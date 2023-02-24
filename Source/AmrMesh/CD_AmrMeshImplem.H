@@ -817,6 +817,82 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFro
 
 template <class P>
 void
+AmrMesh::transferIrregularParticlesDiscrete(ParticleContainer<P>&         a_dstParticles,
+                                            ParticleContainer<P>&         a_srcParticles,
+                                            const phase::which_phase      a_phase,
+                                            const std::function<void(P&)> a_transferModifier) const noexcept
+{
+  CH_TIME("AmrMesh::transferIrregularParticles");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::transferIrregularParticles" << endl;
+  }
+
+  CH_assert(a_dstParticles.getRealm() == a_srcParticles.getRealm());
+
+  const std::string realm = a_dstParticles.getRealm();
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl    = this->getGrids(realm)[lvl];
+    const EBISLayout&        ebisl  = this->getEBISLayout(realm, a_phase)[lvl];
+    const ProblemDomain&     domain = this->getDomains()[lvl];
+    const RealVect           probLo = this->getProbLo();
+    const Real               dx     = this->getDx()[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const Box      cellBox = dbl[dit()];
+      const EBISBox& ebisbox = ebisl[dit()];
+
+      List<P>& dstParticles = a_dstParticles[lvl][dit()].listItems();
+      List<P>& srcParticles = a_srcParticles[lvl][dit()].listItems();
+
+      for (ListIterator<P> lit(srcParticles); lit.ok();) {
+        P& p = lit();
+
+        const IntVect iv = ParticleOps::getParticleCellIndex(p.position(), probLo, dx);
+
+        if (!(cellBox.contains(iv))) {
+          MayDay::Error("CD_AmrMeshImplem.H in routine 'transferIrregularParticles' - particle not in box!");
+        }
+
+        // If the particle is inside any vof, we keep it.
+        if (ebisbox.isIrregular(iv)) {
+          bool insideAnyVoF = false;
+
+          const Vector<VolIndex> allVoFs = ebisbox.getVoFs(iv);
+
+          for (int i = 0; i < allVoFs.size(); i++) {
+            const VolIndex& vof    = allVoFs[i];
+            const RealVect  normal = ebisbox.normal(vof);
+            const RealVect  ebPos  = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
+
+            if ((p.position() - ebPos).dotProduct(normal) > 0.0) {
+              insideAnyVoF = true;
+            }
+          }
+
+          if (!insideAnyVoF) {
+            const VolIndex& vof    = allVoFs[0];
+            const RealVect  normal = ebisbox.normal(vof);
+            const RealVect  ebPos  = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
+
+            p.position() = ebPos;
+
+            dstParticles.transfer(lit);
+          }
+          else {
+            ++lit;
+          }
+        }
+        else {
+          ++lit;
+        }
+      }
+    }
+  }
+}
+
+template <class P>
+void
 AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&         a_activeParticles,
                                      ParticleContainer<P>&         a_ebParticles,
                                      ParticleContainer<P>&         a_domainParticles,
