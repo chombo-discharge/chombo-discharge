@@ -1685,9 +1685,10 @@ ItoKMCStepper<I, C, R, F>::solvePoisson() noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset  a_speciesSubset,
-                                              const EBIntersection a_intersectionAlg,
-                                              const bool           a_delete) noexcept
+ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset                     a_speciesSubset,
+                                              const EBIntersection                    a_intersectionAlg,
+                                              const bool                              a_delete,
+                                              const std::function<void(ItoParticle&)> a_nonDeletionModifier) noexcept
 {
   CH_TIME("ItoKMCStepper::intersectParticles(SpeciesSubset, EBRepresentation, bool)");
   if (m_verbosity > 5) {
@@ -1699,17 +1700,19 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset  a_speciesSubs
                            ItoSolver::WhichContainer::EB,
                            ItoSolver::WhichContainer::Domain,
                            a_intersectionAlg,
-                           a_delete);
+                           a_delete,
+                           a_nonDeletionModifier);
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset             a_speciesSubset,
-                                              const ItoSolver::WhichContainer a_containerBulk,
-                                              const ItoSolver::WhichContainer a_containerEB,
-                                              const ItoSolver::WhichContainer a_containerDomain,
-                                              const EBIntersection            a_intersectionAlg,
-                                              const bool                      a_delete) noexcept
+ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset                     a_speciesSubset,
+                                              const ItoSolver::WhichContainer         a_containerBulk,
+                                              const ItoSolver::WhichContainer         a_containerEB,
+                                              const ItoSolver::WhichContainer         a_containerDomain,
+                                              const EBIntersection                    a_intersectionAlg,
+                                              const bool                              a_delete,
+                                              const std::function<void(ItoParticle&)> a_nonDeletionModifier) noexcept
 {
   CH_TIME("ItoKMCStepper::intersectParticles(SpeciesSubset, Containerx3, EBRepresentation, bool)");
   if (m_verbosity > 5) {
@@ -1724,78 +1727,136 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset             a_
     const bool diffusive = solver->isDiffusive();
     const bool charged   = (species->getChargeNumber() != 0);
 
+    ParticleOps::setValue<ItoParticle, &ItoParticle::tmpReal>(solver->getParticles(ItoSolver::WhichContainer::Bulk),
+                                                              1.0);
+
     switch (a_speciesSubset) {
     case SpeciesSubset::All: {
-      solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
+      solver->intersectParticles(a_containerBulk,
+                                 a_containerEB,
+                                 a_containerDomain,
+                                 a_intersectionAlg,
+                                 a_delete,
+                                 a_nonDeletionModifier);
 
       break;
     }
     case SpeciesSubset::AllMobile: {
       if (mobile) {
-        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
+        solver->intersectParticles(a_containerBulk,
+                                   a_containerEB,
+                                   a_containerDomain,
+                                   a_intersectionAlg,
+                                   a_delete,
+                                   a_nonDeletionModifier);
       }
 
       break;
     }
     case SpeciesSubset::AllDiffusive: {
       if (diffusive) {
-        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
+        solver->intersectParticles(a_containerBulk,
+                                   a_containerEB,
+                                   a_containerDomain,
+                                   a_intersectionAlg,
+                                   a_delete,
+                                   a_nonDeletionModifier);
       }
 
       break;
     }
     case SpeciesSubset::AllMobileOrDiffusive: {
       if (mobile || diffusive) {
-        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
+        solver->intersectParticles(a_containerBulk,
+                                   a_containerEB,
+                                   a_containerDomain,
+                                   a_intersectionAlg,
+                                   a_delete,
+                                   a_nonDeletionModifier);
       }
 
       break;
     }
     case SpeciesSubset::AllMobileAndDiffusive: {
       if (mobile && diffusive) {
-        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
+        solver->intersectParticles(a_containerBulk,
+                                   a_containerEB,
+                                   a_containerDomain,
+                                   a_intersectionAlg,
+                                   a_delete,
+                                   a_nonDeletionModifier);
       }
 
       break;
     }
     case SpeciesSubset::Charged: {
       if (charged) {
-        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
+        solver->intersectParticles(a_containerBulk,
+                                   a_containerEB,
+                                   a_containerDomain,
+                                   a_intersectionAlg,
+                                   a_delete,
+                                   a_nonDeletionModifier);
       }
 
       break;
     }
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
-        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
+        solver->intersectParticles(a_containerBulk,
+                                   a_containerEB,
+                                   a_containerDomain,
+                                   a_intersectionAlg,
+                                   a_delete,
+                                   a_nonDeletionModifier);
       }
 
       break;
     }
     case SpeciesSubset::ChargedDiffusive: {
       if (charged && diffusive) {
-        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
+        solver->intersectParticles(a_containerBulk,
+                                   a_containerEB,
+                                   a_containerDomain,
+                                   a_intersectionAlg,
+                                   a_delete,
+                                   a_nonDeletionModifier);
       }
 
       break;
     }
     case SpeciesSubset::ChargedMobileOrDiffusive: {
       if (charged && (mobile || diffusive)) {
-        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
+        solver->intersectParticles(a_containerBulk,
+                                   a_containerEB,
+                                   a_containerDomain,
+                                   a_intersectionAlg,
+                                   a_delete,
+                                   a_nonDeletionModifier);
       }
 
       break;
     }
     case SpeciesSubset::ChargedMobileAndDiffusive: {
       if (charged && (mobile && diffusive)) {
-        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
+        solver->intersectParticles(a_containerBulk,
+                                   a_containerEB,
+                                   a_containerDomain,
+                                   a_intersectionAlg,
+                                   a_delete,
+                                   a_nonDeletionModifier);
       }
 
       break;
     }
     case SpeciesSubset::Stationary: {
       if (!mobile && !diffusive) {
-        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_intersectionAlg, a_delete);
+        solver->intersectParticles(a_containerBulk,
+                                   a_containerEB,
+                                   a_containerDomain,
+                                   a_intersectionAlg,
+                                   a_delete,
+                                   a_nonDeletionModifier);
       }
 
       break;

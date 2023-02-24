@@ -745,31 +745,41 @@ namespace Physics {
 	@brief Intersect a subset of the particles with the domain and embedded boundary. 
 	@details This calls the other version, intersecting the Ito bulk particles with the EB and placing the collided particles
 	in the appropriate particle containers (ItoSolver::WhichContainer::EB, for example). 
-	@param[in] a_speciesSubset   Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
-	@param[in] a_intersectionAlg Representation of the EB -- basically an algorithmic selection. 
-	@param[in] a_delete          Delete original particles. If this is left to false, the particles are copied into the other containers. 
+	@param[in] a_speciesSubset       Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
+	@param[in] a_intersectionAlg     Representation of the EB -- basically an algorithmic selection. 
+	@param[in] a_delete              Delete original particles. If this is left to false, the particles are copied into the other containers. 
+	@param[in] a_nonDeletionModifier Optional input argument for letting the user manipulate particles that were intersected but not deleted
       */
       virtual void
-      intersectParticles(const SpeciesSubset  a_speciesSubset,
-                         const EBIntersection a_interactionAlg,
-                         const bool           a_delete) noexcept;
+      intersectParticles(
+        const SpeciesSubset                     a_speciesSubset,
+        const EBIntersection                    a_interactionAlg,
+        const bool                              a_delete,
+        const std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
+          return;
+        }) noexcept;
 
       /*!
 	@brief Intersect a subset of the particles with the domain and embedded boundary. 
-	@param[in] a_speciesSubset   Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
-	@param[in] a_containerBulk   ItoSolver container for "bulk" particles, i.e. particles that will be intersected. 
-	@param[in] a_containerEB     ItoSolver container for EB particles. 
-	@param[in] a_containerDomain ItoSolver container for domain particles. 
-	@param[in] a_intersectionAlg EB intersection algorithm
-	@param[in] a_delete          Delete original particles. If this is left to false, the particles are copied into the other containers. 
+	@param[in] a_speciesSubset       Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
+	@param[in] a_containerBulk       ItoSolver container for "bulk" particles, i.e. particles that will be intersected. 
+	@param[in] a_containerEB         ItoSolver container for EB particles. 
+	@param[in] a_containerDomain     ItoSolver container for domain particles. 
+	@param[in] a_intersectionAlg     EB intersection algorithm
+	@param[in] a_delete              Delete original particles. If this is left to false, the particles are copied into the other containers. 
+	@param[in] a_nonDeletionModifier Optional input argument for letting the user manipulate particles that were intersected but not deleted
       */
       virtual void
-      intersectParticles(const SpeciesSubset             a_speciesSubset,
-                         const ItoSolver::WhichContainer a_containerBulk,
-                         const ItoSolver::WhichContainer a_containerEB,
-                         const ItoSolver::WhichContainer a_containerDomain,
-                         const EBIntersection            a_intersectionAlg,
-                         const bool                      a_delete) noexcept;
+      intersectParticles(
+        const SpeciesSubset                     a_speciesSubset,
+        const ItoSolver::WhichContainer         a_containerBulk,
+        const ItoSolver::WhichContainer         a_containerEB,
+        const ItoSolver::WhichContainer         a_containerDomain,
+        const EBIntersection                    a_intersectionAlg,
+        const bool                              a_delete,
+        const std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
+          return;
+        }) noexcept;
 
       /*!
 	@brief Remove covered particles (i.e., particles inside the EB)
