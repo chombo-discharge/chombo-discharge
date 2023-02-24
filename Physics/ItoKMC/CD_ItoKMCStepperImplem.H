@@ -1727,9 +1727,6 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
     const bool diffusive = solver->isDiffusive();
     const bool charged   = (species->getChargeNumber() != 0);
 
-    ParticleOps::setValue<ItoParticle, &ItoParticle::tmpReal>(solver->getParticles(ItoSolver::WhichContainer::Bulk),
-                                                              1.0);
-
     switch (a_speciesSubset) {
     case SpeciesSubset::All: {
       solver->intersectParticles(a_containerBulk,
@@ -1866,78 +1863,6 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
 
       break;
     }
-    }
-
-    // The above tests may fail since the discrete/implicit function disagree on where the EB is (every so slightly). This
-    // hook takes all the particles on the inside of the EB and puts them in the intersected particle container. Particles
-    // in covered cells are more difficult to deal with..
-    ParticleContainer<ItoParticle>& bulkContainer = solver->getParticles(a_containerBulk);
-    ParticleContainer<ItoParticle>& ebContainer   = solver->getParticles(a_containerEB);
-
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl    = m_amr->getGrids(m_particleRealm)[lvl];
-      const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[lvl];
-      const ProblemDomain&     domain = m_amr->getDomains()[lvl];
-      const RealVect           probLo = m_amr->getProbLo();
-      const Real               dx     = m_amr->getDx()[lvl];
-
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box      cellBox = dbl[dit()];
-        const EBISBox& ebisbox = ebisl[dit()];
-
-        List<ItoParticle>& bulkParticles = bulkContainer[lvl][dit()].listItems();
-        List<ItoParticle>& ebParticles   = ebContainer[lvl][dit()].listItems();
-
-        for (ListIterator<ItoParticle> lit(bulkParticles); lit.ok();) {
-          ItoParticle& p = lit();
-
-          const IntVect iv = ParticleOps::getParticleCellIndex(p.position(), probLo, dx);
-
-          if (!(cellBox.contains(iv))) {
-            MayDay::Error("CD_ItoKMCStepperImplem.H in routine 'intersectParticles' - particle not in box!");
-          }
-
-          // If the particle is inside any vof, we keep it.
-          if (ebisbox.isIrregular(iv)) {
-            bool insideAnyVoF = false;
-
-            const Vector<VolIndex> allVoFs = ebisbox.getVoFs(iv);
-
-            for (int i = 0; i < allVoFs.size(); i++) {
-              const VolIndex& vof    = allVoFs[i];
-              const RealVect  normal = ebisbox.normal(vof);
-              const RealVect  ebPos  = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
-
-              if ((p.position() - ebPos).dotProduct(normal) > 0.0) {
-                insideAnyVoF = true;
-              }
-            }
-
-            if (!insideAnyVoF) {
-              const VolIndex& vof    = allVoFs[0];
-              const RealVect  normal = ebisbox.normal(vof);
-              const RealVect  ebPos  = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
-
-              p.position() = ebPos;
-
-              if (a_delete) {
-                ebParticles.transfer(lit);
-              }
-              else {
-                ebParticles.add(p);
-
-                ++lit;
-              }
-            }
-            else {
-              ++lit;
-            }
-          }
-          else {
-            ++lit;
-          }
-        }
-      }
     }
   }
 }
