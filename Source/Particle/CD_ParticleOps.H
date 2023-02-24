@@ -170,13 +170,25 @@ public:
   sum(const ParticleContainer<P>& a_particles) noexcept;
 
   /*!
-    @brief Remove particles if they fulfil a certain removal criterion
+    @brief Remove particles if they fulfill certain removal criterion
     @param[inout] a_particles       Particles
     @param[in]    a_removeCriterion Removal criterion.
   */
   template <typename P>
   static inline void
   removeParticles(ParticleContainer<P>& a_particles, const std::function<bool(const P&)>& a_removeCriterion) noexcept;
+
+  /*!
+    @brief Transfer particles if they fulfill a certain removal criterion. Takes particles from a_srcParticles and puts them in a_dstParticles
+    @param[inout] a_dstParticles    Destination particle data holder
+    @param[inout] a_srcParticles    Source particle data holder
+    @param[in]    a_removeCriterion Removal criterion.
+  */
+  template <typename P>
+  static inline void
+  transferParticles(ParticleContainer<P>&                a_dstParticles,
+                    ParticleContainer<P>&                a_srcParticles,
+                    const std::function<bool(const P&)>& a_transferCrit) noexcept;
 
   /*!
     @brief Set value function. Lets the user set particle parameters. 

@@ -350,6 +350,35 @@ ParticleOps::removeParticles(ParticleContainer<P>&                a_particles,
 
 template <typename P>
 inline void
+ParticleOps::transferParticles(ParticleContainer<P>&                a_dstParticles,
+                               ParticleContainer<P>&                a_srcParticles,
+                               const std::function<bool(const P&)>& a_transferCrit) noexcept
+{
+  CH_TIME("ParticleOps::transferParticles(ParticleContainer<P>, ParticleContainer<P>& std::function<bool(const P&)>)");
+
+  CH_assert(a_dstParticles.getRealm() == a_srcParticles.getRealm());
+  CH_assert(a_dstParticles.getFinestLevel() == a_srcParticles.getFinestLevel());
+
+  for (int lvl = 0; lvl <= a_srcParticles.getFinestLevel(); lvl++) {
+    for (DataIterator dit(a_srcParticles.getGrids()[lvl]); dit.ok(); ++dit) {
+
+      List<P>& dstParticles = a_dstParticles[lvl][dit()].listItems();
+      List<P>& srcParticles = a_srcParticles[lvl][dit()].listItems();
+
+      for (ListIterator<P> lit(srcParticles); lit.ok();) {
+        if (a_transferCrit(lit())) {
+          dstParticles.transfer(lit);
+        }
+        else {
+          ++lit;
+        }
+      }
+    }
+  }
+}
+
+template <typename P>
+inline void
 ParticleOps::setData(ParticleContainer<P>& a_particles, const std::function<void(P&)>& a_functor) noexcept
 {
   CH_TIME("ParticleOps::setData(ParticleContainer<P>, std::function<void(P&)>)");
