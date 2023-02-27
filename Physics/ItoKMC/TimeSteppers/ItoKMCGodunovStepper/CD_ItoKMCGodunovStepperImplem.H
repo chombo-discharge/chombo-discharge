@@ -35,7 +35,8 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
   this->m_prevDt                   = 0.0;
   this->m_writeCheckpointParticles = false;
   this->m_readCheckpointParticles  = false;
-  this->m_smoothConductivityEB     = false;
+  this->m_extendConductivityEB     = false;
+  this->m_smoothConductivity       = false;
   this->m_canRegridOnRestart       = true;
 
   this->parseOptions();
@@ -162,7 +163,8 @@ ItoKMCGodunovStepper<I, C, R, F>::parseAlgorithm() noexcept
   ParmParse   pp(this->m_name.c_str());
   std::string str;
 
-  pp.query("smooth_conductivity", m_smoothConductivityEB);
+  pp.query("extend_conductivity", m_extendConductivityEB);
+  pp.query("smooth_conductivity", m_smoothConductivity);
   pp.get("algorithm", str);
 
   // Get algorithm
@@ -197,7 +199,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     pout() << this->m_name + "::advance" << endl;
   }
 
-  MayDay::Warning("ItoKMCGodunovStepper::advance -- missing hard conservation for extended conductivity");
+  //  MayDay::Warning("ItoKMCGodunovStepper::advance -- missing hard conservation for extended conductivity");
 
   auto debugCharge = [this](const std::string a_message) -> void {
     const Real Qtot = this->computeTotalCharge();
@@ -214,7 +216,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 
   m_timer = Timer("ItoKMCGodunovStepper::advance");
 
-  debugCharge("advance");
+  //  debugCharge("advance");
 
   // Previous time step is needed when regridding.
   m_prevDt = a_dt;
@@ -247,11 +249,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   // Do intersection test and remove particles that struck the EB or domain. Transfer them to appropriate containers. Then recompute the number of particles per cell.
   this->barrier();
   m_timer.startEvent("EB/Particle intersection");
-  if (m_smoothConductivityEB) {
+  if (m_extendConductivityEB) {
 
     // TLDR: This hook does a special intersection routine where instead of transferring the particles that were intersected, they
     //       are put in a separate data container. We want to do this in order to reduce artificial gradients in the particle
-    //       densities near the EB.
+    //       densities near the EB. The way we do this is that we flag the particles during the intersection; particles that are flagged
+    //       are transferred to a container which is added to the conductivity-related particles. The particles are later removed.
     auto setFlag = [](ItoParticle& p) -> void {
       p.tmpReal() = 1.0;
     };
@@ -268,9 +271,10 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     }
 
     // Intersect particles, but don't remove them.
+    const bool deleteParticles = false;
     this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive,
                              EBIntersection::Bisection,
-                             false,
+                             deleteParticles,
                              nonDeletionModifier);
 
     // Particles that were not removed are copied to a separate data container.
@@ -281,8 +285,9 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
       const int idx = it.index();
       const int Z   = species->getChargeNumber();
 
-      ParticleContainer<PointParticle>&     irregParticles = *m_irregularParticles[idx];
-      const ParticleContainer<ItoParticle>& bulkParticles  = it()->getParticles(ItoSolver::WhichContainer::Bulk);
+      ParticleContainer<PointParticle>& irregParticles = *m_irregularParticles[idx];
+      ParticleContainer<ItoParticle>&   ebParticles    = solver->getParticles(ItoSolver::WhichContainer::EB);
+      ParticleContainer<ItoParticle>&   bulkParticles  = it()->getParticles(ItoSolver::WhichContainer::Bulk);
 
       irregParticles.clearParticles();
 
@@ -319,6 +324,18 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   else {
     this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, true);
   }
+
+  // The intersection tests above may not have caught all particles -- do a cleanup sweep where particles on the wrong side of
+  // the EB are put on the EB.
+  for (auto it = this->m_ito->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<ItoSolver>& solver = it();
+
+    ParticleContainer<ItoParticle>& ebParticles   = solver->getParticles(ItoSolver::WhichContainer::EB);
+    ParticleContainer<ItoParticle>& bulkParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+    this->m_amr->transferIrregularParticles(ebParticles, bulkParticles, this->m_plasmaPhase);
+  }
+
   this->getPhysicalParticlesPerCell(this->m_newPPC);
   m_timer.stopEvent("EB/Particle intersection");
 
@@ -374,14 +391,11 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Discrete, this->m_toleranceEB);
   m_timer.stopEvent("Remove covered");
 
-  // Clear other data holders for now.
-#if 1 // Figure out if this is necessary
-  pout() << "clearing boundary data holders but don't know if it is necesasry" << endl;
+  // Clear BC data holders for now.
   for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     solverIt()->clear(ItoSolver::WhichContainer::EB);
     solverIt()->clear(ItoSolver::WhichContainer::Domain);
   }
-#endif
 
   // Prepare for the next time step
   this->barrier();
@@ -915,8 +929,6 @@ ItoKMCGodunovStepper<I, C, R, F>::computeConductivities(
   }
 
   this->computeCellConductivity((this->m_conductivityCell), a_particles);
-
-  // Now do the faces
   this->computeFaceConductivity();
 }
 
@@ -976,9 +988,18 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
   // Conductivity is mobility * weight * Q
   DataOps::scale(a_conductivityCell, Units::Qe);
 
-  // Coarsen, update ghost cells and interpolate to centroids
+  // Coarsen, update ghost cells and interpolate to centroids. User can ask for bi/tri-linear filtering.
   (this->m_amr)->arithmeticAverage(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
   (this->m_amr)->interpGhostPwl(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
+
+  if (this->m_smoothConductivity) {
+    MayDay::Abort("crap");
+
+    DataOps::filterSmooth(a_conductivityCell, 0.5, 1);
+
+    (this->m_amr)->arithmeticAverage(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
+    (this->m_amr)->interpGhostPwl(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
+  }
 
   (this->m_amr)->interpToCentroids(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
 }

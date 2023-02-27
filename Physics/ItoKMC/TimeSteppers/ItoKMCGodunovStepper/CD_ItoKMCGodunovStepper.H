@@ -154,7 +154,12 @@ namespace Physics {
       /*!
 	@brief For achieving a slightly smoother gradient in the conductivity near the EB.
       */
-      bool m_smoothConductivityEB;
+      bool m_extendConductivityEB;
+
+      /*!
+	@brief Smooth the conductivity or not.
+      */
+      bool m_smoothConductivity;
 
       /*!
 	@brief Previous time step.

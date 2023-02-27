@@ -1864,12 +1864,6 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
       break;
     }
     }
-
-    // Fetch the irregular particles we lost.
-    ParticleContainer<ItoParticle>& ebParticles   = solver->getParticles(a_containerEB);
-    ParticleContainer<ItoParticle>& bulkParticles = solver->getParticles(a_containerBulk);
-
-    m_amr->transferIrregularParticles(ebParticles, bulkParticles, m_plasmaPhase);
   }
 }
 
@@ -4422,11 +4416,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(const Real a_dt) noexcept
 
   this->resolveSecondaryEmissionEB(secondaryParticles, primaryParticles, cdrFluxes, surfaceChargeDensity, a_dt);
 
-#if 1
-  pout() << "resolveSecondaryEmissionEB -- remember to reset electrodes!" << endl;
-#else
   m_sigmaSolver->resetElectrodes(0.0);
-#endif
 }
 
 template <typename I, typename C, typename R, typename F>
