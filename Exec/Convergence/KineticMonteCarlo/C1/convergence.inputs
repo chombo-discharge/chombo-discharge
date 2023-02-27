@@ -4,7 +4,7 @@ nsteps =  40 80 160 320
 nruns = 10000
 ionization_rate = 2.0
 attachment_rate = 1.0
-initial_particles = 5000
+initial_particles = 50
 
 # Algorithm to be used
 algorithm = tau
