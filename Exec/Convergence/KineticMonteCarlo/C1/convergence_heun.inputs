@@ -1,6 +1,6 @@
 # Basic settings
 stop_time = 3.0
-nsteps =  20 40 80 160 320
+nsteps =  40 80 160 320
 nruns = 10000
 ionization_rate = 2.0
 attachment_rate = 1.0
