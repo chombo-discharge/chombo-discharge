@@ -28,7 +28,7 @@
 enum class KMCLeapPropagator
 {
   Tau,
-  Heun
+  Midpoint
 };
 
 /*!
@@ -265,40 +265,40 @@ public:
   advanceTau(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
 
   /*!
-    @brief Perform one leaping step using Heun's method for ALL reactions over a time step a_dt
+    @brief Perform one leaping step using the midpoint method for ALL reactions over a time step a_dt
     @param[inout] a_state State vector to be advanced
     @param[in]    a_dt    Time increment
     @note Calls the other version with m_reactions
   */
   inline void
-  stepHeun(State& a_state, const Real a_dt) const noexcept;
+  stepMidpoint(State& a_state, const Real a_dt) const noexcept;
 
   /*!
-    @brief Perform one leaping step using Heun's method for the input reactions over a time step a_dt
+    @brief Perform one leaping step using the midpoint method for the input reactions over a time step a_dt
     @param[inout] a_state        State vector to be advanced
     @param[in]    a_reactions    List of reactions to advance with
     @param[in]    a_dt           Time increment
   */
   inline void
-  stepHeun(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
+  stepMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
 
   /*!
-    @brief Perform one leaping step using Heun's method all reactions over a time step a_dt
+    @brief Perform one leaping step using the midpoint method all reactions over a time step a_dt
     @param[inout] a_state     State vector to be advanced
     @param[in]    a_dt        Time increment
     @note Calls the other version with m_reactions.
   */
   inline void
-  advanceHeun(State& a_state, const Real a_dt) const noexcept;
+  advanceMidpoint(State& a_state, const Real a_dt) const noexcept;
 
   /*!
-    @brief Perform one leaping step using Heun's method for the input reactions over a time step a_dt
+    @brief Perform one leaping step using the midpoint method for the input reactions over a time step a_dt
     @param[inout] a_state     State vector to be advanced
     @param[in]    a_reactions List of reactions to advance with
     @param[in]    a_dt        Time increment
   */
   inline void
-  advanceHeun(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
+  advanceMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
 
   /*!
     @brief Perform a single SSA step.
