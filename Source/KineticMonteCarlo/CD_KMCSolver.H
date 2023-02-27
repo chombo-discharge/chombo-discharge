@@ -23,6 +23,15 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
+    @brief Supported propagators for hybrid tau leaping. 
+  */
+enum class KMCLeapPropagator
+{
+  Tau,
+  Heun
+};
+
+/*!
   @brief Class for running Kinetic Monte-Carlo simulations. 
   @details The template parameter State is the underlying state type that KMC operators on. There are no required member functions on the State parameter,
   but the reaction type (template parameter R) MUST be able to operate on the state through the following functions:
@@ -337,21 +346,43 @@ public:
 
   /*!
     @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.
-    @param[inout] a_state State vector to advance
-    @param[in]    a_dt    Time increment
+    @param[inout] a_state          State vector to advance
+    @param[in]    a_dt             Time increment
+    @param[in]    a_leapPropagator Which leap propagator to use. 
     @note Calls the other version with m_reactions
   */
   inline void
-  advanceHybrid(State& a_state, const Real a_dt) const noexcept;
+  advanceHybrid(State&                   a_state,
+                const Real               a_dt,
+                const KMCLeapPropagator& a_leapPropagator = KMCLeapPropagator::Tau) const noexcept;
 
   /*!
     @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.
-    @param[inout] a_state     State vector to advance
-    @param[in]    a_reactions Reactions to advance with
-    @param[in]    a_dt        Time increment
+    @param[inout] a_state          State vector to advance.
+    @param[in]    a_reactions      Reactions to advance. 
+    @param[in]    a_dt             Time increment.
+    @param[in]    a_leapPropagator Which leap propagator to use. 
+    @note Calls the other version with stepTau as the leap propagator. 
   */
   inline void
-  advanceHybrid(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
+  advanceHybrid(State&                   a_state,
+                const ReactionList&      a_reactions,
+                const Real               a_dt,
+                const KMCLeapPropagator& a_leapPropagator = KMCLeapPropagator::Tau) const noexcept;
+
+  /*!
+    @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping. 
+    @param[inout] a_state          State vector to advance
+    @param[in]    a_reactions      Reactions to advance with
+    @param[in]    a_dt             Time increment
+    @param[in]    a_leapPropagator Leaping propagator
+  */
+  inline void
+  advanceHybrid(
+    State&                                                                               a_state,
+    const ReactionList&                                                                  a_reactions,
+    const Real                                                                           a_dt,
+    const std::function<void(State&, const ReactionList& a_reactions, const Real a_dt)>& a_propagator) const noexcept;
 
 protected:
   /*!

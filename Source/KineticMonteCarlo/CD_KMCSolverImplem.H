@@ -611,18 +611,54 @@ KMCSolver<R, State, T>::advanceSSA(State& a_state, const ReactionList& a_reactio
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::advanceHybrid(State& a_state, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::advanceHybrid(State&                   a_state,
+                                      const Real               a_dt,
+                                      const KMCLeapPropagator& a_leapPropagator) const noexcept
 {
-  CH_TIME("KMCSolver::advanceHybrid(State, Real)");
+  CH_TIME("KMCSolver::advanceHybrid(State, Real, KMCLeapPropagator)");
 
-  this->advanceHybrid(a_state, m_reactions, a_dt);
+  this->advanceHybrid(a_state, m_reactions, a_dt, a_leapPropagator);
 }
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::advanceHybrid(State&                   a_state,
+                                      const ReactionList&      a_reactions,
+                                      const Real               a_dt,
+                                      const KMCLeapPropagator& a_leapPropagator) const noexcept
 {
-  CH_TIME("KMCSolver::advanceHybrid(State, ReactionList, Real)");
+  CH_TIME("KMCSolver::advanceHybrid(State, ReactionList, Real, KMCLeapPropagator)");
+
+  switch (a_leapPropagator) {
+  case KMCLeapPropagator::Tau: {
+    this->advanceHybrid(a_state, a_reactions, a_dt, [this](State& s, const ReactionList& r, const Real dt) {
+      this->stepTau(s, r, dt);
+    });
+
+    break;
+  }
+  case KMCLeapPropagator::Heun: {
+    this->advanceHybrid(a_state, a_reactions, a_dt, [this](State& s, const ReactionList& r, const Real dt) {
+      this->stepHeun(s, r, dt);
+    });
+
+    break;
+  }
+  default: {
+    MayDay::Error("KMCSolver::advanceHybrid - unknown leap proapgator requested");
+  }
+  }
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::advanceHybrid(
+  State&                                                                               a_state,
+  const ReactionList&                                                                  a_reactions,
+  const Real                                                                           a_dt,
+  const std::function<void(State&, const ReactionList& a_reactions, const Real a_dt)>& a_propagator) const noexcept
+{
+  CH_TIME("KMCSolver::advanceHybrid(State, ReactionList, Real, std::function)");
 
   constexpr T one = (T)1;
 
@@ -705,7 +741,8 @@ KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reac
           curTime += dtSSA;
         }
         else {
-          this->stepTau(state, nonCriticalReactions, propensitiesNonCrit, curDt);
+          // Do the tau-leaping.
+          a_propagator(state, nonCriticalReactions, curDt);
 
           // Check if we need to reject the state and rather try again with a smaller non-critical time step.
           validStep = state.isValidState();
@@ -724,7 +761,9 @@ KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reac
         // TLDR: Here, one critical reaction fired. We advance the critical reaction using the SSA and the rest of the reactions
         //       using tau-leaping.
         this->stepSSA(state, criticalReactions, propensitiesCrit);
-        this->stepTau(state, nonCriticalReactions, propensitiesNonCrit, curDt);
+
+        // Do the tau-leaping over the non-critical reactions.
+        a_propagator(state, nonCriticalReactions, curDt);
 
         // Check if we need to reject the state and rather try again with a smaller non-critical time step.
         validStep = state.isValidState();

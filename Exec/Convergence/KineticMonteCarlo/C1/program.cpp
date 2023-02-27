@@ -109,10 +109,15 @@ main(int argc, char* argv[])
 
           kmcSolver.advanceHeun(state, nextDt);
         }
-        else if (alg == "hybrid") {
+        else if (alg == "hybrid_tau") {
           nextDt = std::min(stopTime - curTime, stopTime / (numSteps[istep] - 1));
 
-          kmcSolver.advanceHybrid(state, nextDt);
+          kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::Tau);
+        }
+        else if (alg == "hybrid_heun") {
+          nextDt = std::min(stopTime - curTime, stopTime / (numSteps[istep] - 1));
+
+          kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::Heun);
         }
         else {
           const std::string err = "Expected algorithm to be 'ssa', 'tau', 'heun', or 'hybrid' but got '" + alg + "'";
