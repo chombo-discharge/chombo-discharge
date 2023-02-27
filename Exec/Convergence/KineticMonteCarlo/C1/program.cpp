@@ -72,13 +72,62 @@ main(int argc, char* argv[])
 
   const Real effRate = ionizationRate - attachmentRate;
 
-  Vector<Real> mean(numSteps.size(), 0.0);
-
   Random::setRandomSeed();
 
-  // Advance problem using different step sizes and population samples
+  // First, generate solutions using the SSA.
+  Vector<Real> ssaSoln;
+  Real         ssaMean;
+  Real         ssaVar;
+  for (int irun = 0; irun < numRuns; irun++) {
+    state[0] = (long long)initVal;
+
+    Real curTime = 0.0;
+
+    while (curTime < stopTime) {
+      Real nextDt = kmcSolver.getCriticalTimeStep(state);
+
+      if (nextDt < stopTime - curTime) {
+        kmcSolver.stepSSA(state);
+      }
+      else {
+        nextDt = stopTime - curTime;
+      }
+
+      curTime += nextDt;
+    }
+
+    ssaSoln.push_back(1.0 * state[0]);
+  }
+
+  // Compute the mean value.
+  ssaMean = 0.0;
+  for (int irun = 0; irun < numRuns; irun++) {
+    ssaMean += ssaSoln[irun];
+  }
+#if CH_MPI
+  ssaMean = ParallelOps::sum(ssaMean);
+  ssaMean /= (numProc() * numRuns);
+#else
+  ssaMean /= numRuns;
+#endif
+
+  // Compute the variance.
+  for (int irun = 0; irun < numRuns; irun++) {
+    ssaVar += std::pow(ssaSoln[irun] - ssaMean, 2);
+  }
+#if CH_MPI
+  ssaVar = ParallelOps::sum(ssaVar);
+  ssaVar /= (numProc() * numRuns);
+#else
+  ssaVar /= numRuns;
+#endif
+  ssaVar = sqrt(ssaVar);
+
+  // Now advance problem using non-exact sampling algorithms.
+  Vector<Real> algMean(numSteps.size(), 0.0);
+  Vector<Real> algVar(numSteps.size(), 0.0);
   for (int istep = 0; istep < numSteps.size(); istep++) {
-    mean[istep] = 0.0;
+    Vector<Real> algSoln;
 
     for (int irun = 0; irun < numRuns; irun++) {
       state[0] = (long long)initVal;
@@ -95,29 +144,29 @@ main(int argc, char* argv[])
         Real nextDt = std::numeric_limits<Real>::max();
 
         if (alg == "ssa") {
-          nextDt = std::min(stopTime - curTime, kmcSolver.getCriticalTimeStep(state));
+          nextDt = kmcSolver.getCriticalTimeStep(state);
 
-          kmcSolver.stepSSA(state);
+          if (nextDt < stopTime - curTime) {
+            kmcSolver.stepSSA(state);
+          }
+          else {
+            nextDt = stopTime - curTime;
+          }
         }
         else if (alg == "tau") {
-          nextDt = std::min(stopTime - curTime, stopTime / (numSteps[istep] - 1));
+          nextDt = stopTime / numSteps[istep];
 
           kmcSolver.advanceTau(state, nextDt);
         }
-        else if (alg == "heun") {
-          nextDt = std::min(stopTime - curTime, stopTime / (numSteps[istep] - 1));
+        else if (alg == "midpoint") {
+          nextDt = stopTime / numSteps[istep];
 
-          kmcSolver.advanceHeun(state, nextDt);
+          kmcSolver.advanceMidpoint(state, nextDt);
         }
-        else if (alg == "hybrid_tau") {
-          nextDt = std::min(stopTime - curTime, stopTime / (numSteps[istep] - 1));
+        else if (alg == "hybrid") {
+          nextDt = stopTime / numSteps[istep];
 
-          kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::Tau);
-        }
-        else if (alg == "hybrid_heun") {
-          nextDt = std::min(stopTime - curTime, stopTime / (numSteps[istep] - 1));
-
-          kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::Heun);
+          kmcSolver.advanceHybrid(state, nextDt)
         }
         else {
           const std::string err = "Expected algorithm to be 'ssa', 'tau', 'heun', or 'hybrid' but got '" + alg + "'";
@@ -132,41 +181,78 @@ main(int argc, char* argv[])
         pout() << curTime << "\t" << state[0] << "\t" << 1.0 * initVal * exp(effRate * curTime) << endl;
       }
 
-      mean[istep] += state[0];
+      algSoln.push_back(1.0 * state[0]);
     }
 
+    // Compute the mean value.
+    algMean[istep] = 0.0;
+    for (int irun = 0; irun < numRuns; irun++) {
+      algMean[istep] += algSoln[irun];
+    }
 #if CH_MPI
-    mean[istep] = ParallelOps::sum(mean[istep]);
-    mean[istep] /= (numProc() * numRuns);
+    algMean[istep] = ParallelOps::sum(algMean[istep]);
+    algMean[istep] /= (numProc() * numRuns);
 #else
-    mean[istep] /= numRuns;
+    algMean[istep] /= numRuns;
 #endif
+
+    // Compute the variance.
+    algVar[istep] = 0.0;
+    for (int irun = 0; irun < numRuns; irun++) {
+      algVar[istep] += std::pow(algSoln[irun] - algMean[istep], 2);
+    }
+#if CH_MPI
+    algVar[istep] = ParallelOps::sum(algVar[istep]);
+    algVar[istep] /= (numProc() * numRuns);
+#else
+    algVar[istep] /= numRuns;
+#endif
+    algVar[istep] = sqrt(algVar[istep]);
   }
 
   // Print the mean solution error and convergence rate. Oh, and this only makes sense for non-SSA runs
   // since the SSA algorithm does the time steps differently.
-  if (procID() == 0 && alg != "ssa" && numSteps.size() > 1) {
-    const Real exactSoln = 1.0 * initVal * exp(effRate * stopTime);
-
-    std::cout << std::left << std::setw(15) << "dt" << std::left << std::setw(15) << "Rel. error" << std::left
-              << std::setw(15) << "Richardson p" << std::endl;
+  if (procID() == 0 && alg != "ssa") {
+    // clang-format off
+    std::cout << std::left << std::setw(20) << "# dt"
+	      << std::left << std::setw(20) << "Mean error"
+	      << std::left << std::setw(20) << "Std error"
+	      << std::left << std::setw(20) << "Mean conv. order"
+	      << std::left << std::setw(20) << "Var conv. order"
+	      << "\n";
+    // clang-format on
 
     for (int istep = 0; istep < numSteps.size(); istep++) {
-      const Real curDt  = stopTime / (numSteps[istep] - 1);
-      const Real curErr = std::abs(mean[istep] - exactSoln);
+      const Real curDt   = stopTime / numSteps[istep];
+      const Real meanErr = std::abs(algMean[istep] - ssaMean);
+      const Real varErr  = std::abs(algVar[istep] - ssaVar);
 
       if (istep < numSteps.size() - 1) {
-        const Real finerDt  = stopTime / (numSteps[istep + 1] - 1);
-        const Real finerErr = std::abs(mean[istep + 1] - exactSoln);
-        const Real p        = log(curErr / finerErr) / log(curDt / finerDt);
 
-        std::cout << std::left << std::setw(15) << curDt << std::left << std::setw(15) << curErr / exactSoln
-                  << std::left << std::setw(15) << p << "\n";
+        const Real finerErr = std::abs(algMean[istep + 1] - ssaMean);
+        const Real finerVar = std::abs(algVar[istep + 1] - ssaVar);
+        const Real finerDt  = stopTime / numSteps[istep + 1];
+        const Real meanConv = log(meanErr / finerErr) / log(curDt / finerDt);
+        const Real varConv  = log(meanErr / finerVar) / log(curDt / finerDt);
+
+        // clang-format off
+	std::cout << std::left << std::setw(20) << curDt
+		  << std::left << std::setw(20) << meanErr
+		  << std::left << std::setw(20) << varErr
+		  << std::left << std::setw(20) << meanConv
+		  << std::left << std::setw(20) << varConv
+		  << "\n";
+        // clang-format on
       }
       else {
-        std::cout << std::left << std::setw(15) << curDt << std::left << std::setw(15) << curErr / exactSoln
-                  << std::left << std::setw(15) << "*"
-                  << "\n";
+        // clang-format off
+	std::cout << std::left << std::setw(20) << curDt
+		  << std::left << std::setw(20) << meanErr
+		  << std::left << std::setw(20) << varErr
+		  << std::left << std::setw(20) << "*"
+		  << std::left << std::setw(20) << "*"	  
+		  << "\n";
+        // clang-format on
       }
     }
   }
