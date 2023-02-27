@@ -163,10 +163,15 @@ main(int argc, char* argv[])
 
           kmcSolver.advanceMidpoint(state, nextDt);
         }
-        else if (alg == "hybrid") {
+        else if (alg == "hybrid_tau") {
           nextDt = stopTime / numSteps[istep];
 
-          kmcSolver.advanceHybrid(state, nextDt)
+          kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::Tau);
+        }
+        else if (alg == "hybrid_midpoint") {
+          nextDt = stopTime / numSteps[istep];
+
+          kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::Midpoint);
         }
         else {
           const std::string err = "Expected algorithm to be 'ssa', 'tau', 'heun', or 'hybrid' but got '" + alg + "'";
@@ -233,7 +238,7 @@ main(int argc, char* argv[])
         const Real finerVar = std::abs(algVar[istep + 1] - ssaVar);
         const Real finerDt  = stopTime / numSteps[istep + 1];
         const Real meanConv = log(meanErr / finerErr) / log(curDt / finerDt);
-        const Real varConv  = log(meanErr / finerVar) / log(curDt / finerDt);
+        const Real varConv  = log(varErr / finerVar) / log(curDt / finerDt);
 
         // clang-format off
 	std::cout << std::left << std::setw(20) << curDt
