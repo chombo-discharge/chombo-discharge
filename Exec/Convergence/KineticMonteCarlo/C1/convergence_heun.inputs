@@ -1,13 +1,13 @@
 # Basic settings
-stop_time = 5.0
-nsteps =  100
-nruns = 1
+stop_time = 3.0
+nsteps =  20 40 80 160 320
+nruns = 10000
 ionization_rate = 2.0
 attachment_rate = 1.0
-initial_particles = 5
+initial_particles = 500000
 
 # Algorithm to be used
-algorithm = hybrid
+algorithm = heun
 
 # Settings for hybrid SSA/tau algoriuhm (i.e., the Cao algorithm)
 num_crit = 5

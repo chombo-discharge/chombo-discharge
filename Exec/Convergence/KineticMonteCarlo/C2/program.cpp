@@ -102,6 +102,11 @@ main(int argc, char* argv[])
 
       kmcSolver.advanceTau(state, nextDt);
     }
+    else if (alg == "heun") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceHeun(state, nextDt);
+    }
     else if (alg == "hybrid") {
       nextDt = stopTime / numSteps;
 

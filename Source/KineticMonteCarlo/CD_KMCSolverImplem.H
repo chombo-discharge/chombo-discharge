@@ -405,6 +405,108 @@ KMCSolver<R, State, T>::advanceTau(State& a_state, const ReactionList& a_reactio
 
 template <typename R, typename State, typename T>
 inline void
+KMCSolver<R, State, T>::stepHeun(State& a_state, const Real a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::stepHeun(State&, const Real)");
+
+  this->stepHeun(a_state, m_reactions, a_dt);
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::stepHeun(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::stepHeun(State&, const ReactionList&, const Real)");
+
+  if (a_reactions.size() > 0) {
+
+    const int numReactions = a_reactions.size();
+
+    std::vector<Real> propensitiesXk0(numReactions, 0.0);
+    std::vector<Real> propensitiesXk1(numReactions, 0.0);
+
+    std::vector<T> fk0(numReactions, (T)0);
+    std::vector<T> fk1(numReactions, (T)0);
+
+    // First stage.
+    propensitiesXk0 = this->propensities(a_state, a_reactions);
+
+    State Xdagger = a_state;
+    for (size_t i = 0; i < numReactions; i++) {
+      fk0[i] = (T)Random::getPoisson<long long>(propensitiesXk0[i] * a_dt);
+
+      a_reactions[i]->advanceState(Xdagger, fk0[i]);
+    }
+
+    // Second stage.
+    if (Xdagger.isValidState()) {
+      propensitiesXk1 = this->propensities(Xdagger, a_reactions);
+
+      for (size_t i = 0; i < numReactions; i++) {
+        fk1[i] = (T)Random::getPoisson<long long>(propensitiesXk1[i] * a_dt);
+
+        a_reactions[i]->advanceState(a_state, std::max((T)0, (fk0[i] + fk1[i]) / (T)2));
+      }
+    }
+    else {
+      // Return an invalid state so that we may reject the step later.
+      a_state = Xdagger;
+    }
+  }
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::advanceHeun(State& a_state, const Real a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::advanceHeun(State&, const Real)");
+
+  this->advanceHeun(a_state, m_reactions, a_dt);
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::advanceHeun(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::advanceHeun(State&, const ReactionList&, const Real)");
+
+  if (a_reactions.size() > 0) {
+    Real curTime = 0.0;
+    Real curDt   = a_dt;
+
+    while (curTime < a_dt) {
+
+      // Try big time step first.
+      curDt = a_dt - curTime;
+
+      bool valid = false;
+
+      // Substepping so we end up with a valid state.
+      while (!valid) {
+
+        State state = a_state;
+
+        // Do a tau-leaping step.
+        this->stepHeun(state, a_reactions, curDt);
+
+        // If this was a valid step, accept it. Else reduce dt.
+        valid = state.isValidState();
+
+        if (valid) {
+          a_state = state;
+
+          curTime += curDt;
+        }
+        else {
+          curDt *= 0.5;
+        }
+      }
+    }
+  }
+}
+
+template <typename R, typename State, typename T>
+inline void
 KMCSolver<R, State, T>::stepSSA(State& a_state) const noexcept
 {
   CH_TIME("KMCSolver::stepSSA(State, Real)");
