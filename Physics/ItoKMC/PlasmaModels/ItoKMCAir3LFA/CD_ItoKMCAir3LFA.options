@@ -1,39 +1,39 @@
 # ====================================================================================================
 # ItoKMCAir3LFA class options
 # ====================================================================================================
-ItoKMCAir3LFA.debug     = true                # Turn on/off debugging
-ItoKMCAir3LFA.extrap_bc = true                # Use extrapolated BC or not
+ItoKMCAir3LFA.debug     = true                   # Turn on/off debugging
+ItoKMCAir3LFA.extrap_bc = true                   # Use extrapolated BC or not
 
 # Initial data
-ItoKMCAir3LFA.init_particles  = 10            # Number of initial particles
-ItoKMCAir3LFA.init_weights    = 1             # Initial particle weights
-ItoKMCAir3LFA.init_center     = 0 0 0         # Blob center
-ItoKMCAir3LFA.init_radius     = 200E-6        # Blob radius
+ItoKMCAir3LFA.init_particles  = 10               # Number of initial particles
+ItoKMCAir3LFA.init_weights    = 1                # Initial particle weights
+ItoKMCAir3LFA.init_center     = 0 0 0            # Blob center
+ItoKMCAir3LFA.init_radius     = 200E-6           # Blob radius
 
 # For controlling the time step
-ItoKMCAir3LFA.dX              = 2.0           # Maximum relative change Xnew/Xold during one time step.
+ItoKMCAir3LFA.dX              = 2.0              # Maximum relative change Xnew/Xold during one time step.
 
 # Ion transport settings. 
-ItoKMCAir3LFA.ion_transport   = false         # By default, stationary ions. 
-ItoKMCAir3LFA.ion_mobility    = 2E-4          # Turn on/off ion mobility
+ItoKMCAir3LFA.ion_transport   = false            # By default, stationary ions. 
+ItoKMCAir3LFA.ion_mobility    = 2E-4             # Turn on/off ion mobility
 
 # Kinetic Monte Carlo solver settings. 
-ItoKMCAir3LFA.max_new_particles = 128         # Maximum number of computational particles to produce in reaction step
-ItoKMCAir3LFA.max_new_photons   = 128         # Maximum number of computational photons to produce in reaction step	
-ItoKMCAir3LFA.Ncrit             = 5           # How many firings away from a Negative particle number?
-ItoKMCAir3LFA.prop_eps          = 0.1         # Maximum relative change in propensity function
-ItoKMCAir3LFA.NSSA              = 10          # How many SSA steps to run when tau-leaping is inefficient
-ItoKMCAir3LFA.SSAlim            = 1.0         # When to enter SSA instead of tau-leaping
-ItoKMCAir3LFA.algorithm         = hybrid      # 'tau', 'ssa', or 'hybrid'
+ItoKMCAir3LFA.max_new_particles = 128            # Maximum number of computational particles to produce in reaction step
+ItoKMCAir3LFA.max_new_photons   = 128            # Maximum number of computational photons to produce in reaction step	
+ItoKMCAir3LFA.Ncrit             = 5              # How many firings away from a Negative particle number?
+ItoKMCAir3LFA.prop_eps          = 0.1            # Maximum relative change in propensity function
+ItoKMCAir3LFA.NSSA              = 10             # How many SSA steps to run when tau-leaping is inefficient
+ItoKMCAir3LFA.SSAlim            = 1.0            # When to enter SSA instead of tau-leaping
+ItoKMCAir3LFA.algorithm         = hybrid_plain   # 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
 
 # Secondary emission
-ItoKMCAir3LFA.impact_efficiency  = 0.00       # Impact efficiency
-ItoKMCAir3LFA.quantum_efficiency = 0.00       # Quantum efficiency
+ItoKMCAir3LFA.impact_efficiency  = 0.00          # Impact efficiency
+ItoKMCAir3LFA.quantum_efficiency = 0.00          # Quantum efficiency
 
 # Photoionization parameters
-ItoKMCAir3LFA.quenching_pressure = 0.03947    # Quenching pressure for photo-emission (atm)
-ItoKMCAir3LFA.photoi_factor      = 1.0        # Photoionization factor
-ItoKMCAir3LFA.photoi_f1          = 2.925E15   # Lower frequency
-ItoKMCAir3LFA.photoi_f2          = 3.059E15   # High frequency
-ItoKMCAir3LFA.photoi_K1          = 2.65E-2    # Converted to (mPa)^-1
-ItoKMCAir3LFA.photoi_K2          = 1.5        # Converted to (mPa)^-1
+ItoKMCAir3LFA.quenching_pressure = 0.03947       # Quenching pressure for photo-emission (atm)
+ItoKMCAir3LFA.photoi_factor      = 1.0           # Photoionization factor
+ItoKMCAir3LFA.photoi_f1          = 2.925E15      # Lower frequency
+ItoKMCAir3LFA.photoi_f2          = 3.059E15      # High frequency
+ItoKMCAir3LFA.photoi_K1          = 2.65E-2       # Converted to (mPa)^-1
+ItoKMCAir3LFA.photoi_K2          = 1.5           # Converted to (mPa)^-1

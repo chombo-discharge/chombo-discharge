@@ -321,8 +321,10 @@ namespace Physics {
       enum class Algorithm
       {
         SSA,
-        Tau,
-        Hybrid
+        TauPlain,
+        TauMidpoint,
+        HybridPlain,
+        HybridMidpoint,
       };
 
       /*!

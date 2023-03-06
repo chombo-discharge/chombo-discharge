@@ -42,7 +42,7 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
   m_eps               = 0.1;
   m_NSSA              = 10;
   m_SSAlim            = 5.0;
-  m_algorithm         = Algorithm::Hybrid;
+  m_algorithm         = Algorithm::TauPlain;
   m_particlePlacement = ParticlePlacement::Random;
 
   // Development code for switching to centroid for secondary emission. Will be removed.
@@ -205,14 +205,20 @@ ItoKMCPhysics::parseAlgorithm() noexcept
   pp.get("prop_eps", m_eps);
   pp.get("SSAlim", m_SSAlim);
 
-  if (str == "hybrid") {
-    m_algorithm = Algorithm::Hybrid;
-  }
-  else if (str == "tau") {
-    m_algorithm = Algorithm::Tau;
-  }
-  else if (str == "ssa") {
+  if (str == "ssa") {
     m_algorithm = Algorithm::SSA;
+  }
+  else if (str == "tau_plain") {
+    m_algorithm = Algorithm::TauPlain;
+  }
+  else if (str == "tau_midpoint") {
+    m_algorithm = Algorithm::TauMidpoint;
+  }
+  else if (str == "hybrid_plain") {
+    m_algorithm = Algorithm::HybridPlain;
+  }
+  else if (str == "hybrid_midpoint") {
+    m_algorithm = Algorithm::HybridMidpoint;
   }
   else {
     MayDay::Error("ItoKMCPhysics::parseAlgorithm - unknown algorithm requested");
@@ -295,14 +301,35 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&   a_numParticles,
   this->updateReactionRates(a_E, a_dx, a_kappa);
 
   // // Which algorithm?
-  if (m_algorithm == Algorithm::SSA) {
+  switch (m_algorithm) {
+  case Algorithm::SSA: {
     m_kmcSolver.advanceSSA(m_kmcState, a_dt);
+
+    break;
   }
-  else if (m_algorithm == Algorithm::Tau) {
-    m_kmcSolver.advanceTau(m_kmcState, a_dt);
+  case Algorithm::TauPlain: {
+    m_kmcSolver.advanceTauPlain(m_kmcState, a_dt);
+
+    break;
   }
-  else if (m_algorithm == Algorithm::Hybrid) {
-    m_kmcSolver.advanceHybrid(m_kmcState, a_dt);
+  case Algorithm::TauMidpoint: {
+    m_kmcSolver.advanceTauMidpoint(m_kmcState, a_dt);
+
+    break;
+  }
+  case Algorithm::HybridPlain: {
+    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauPlain);
+
+    break;
+  }
+  case Algorithm::HybridMidpoint: {
+    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauMidpoint);
+
+    break;
+  }
+  default: {
+    MayDay::Error("ItoKMCPhysics::advanceKMC - logic bust");
+  }
   }
 
   // Put KMC back into ItoKMC

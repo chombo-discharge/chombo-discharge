@@ -1,5 +1,5 @@
 # Algorithm to be used
-algorithm = hybrid
+algorithm = tau_plain
 
 # Number of steps
 nsteps = 100

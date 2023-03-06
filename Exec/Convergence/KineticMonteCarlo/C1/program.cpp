@@ -153,25 +153,25 @@ main(int argc, char* argv[])
             nextDt = stopTime - curTime;
           }
         }
-        else if (alg == "tau") {
+        else if (alg == "tau_plain") {
           nextDt = stopTime / numSteps[istep];
 
-          kmcSolver.advanceTau(state, nextDt);
+          kmcSolver.advanceTauPlain(state, nextDt);
         }
-        else if (alg == "midpoint") {
+        else if (alg == "tau_midpoint") {
           nextDt = stopTime / numSteps[istep];
 
-          kmcSolver.advanceMidpoint(state, nextDt);
+          kmcSolver.advanceTauMidpoint(state, nextDt);
         }
         else if (alg == "hybrid_tau") {
           nextDt = stopTime / numSteps[istep];
 
-          kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::Tau);
+          kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::TauPlain);
         }
         else if (alg == "hybrid_midpoint") {
           nextDt = stopTime / numSteps[istep];
 
-          kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::Midpoint);
+          kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::TauMidpoint);
         }
         else {
           const std::string err = "Expected algorithm to be 'ssa', 'tau', 'heun', or 'hybrid' but got '" + alg + "'";
