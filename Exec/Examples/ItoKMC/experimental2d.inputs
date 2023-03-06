@@ -11,7 +11,7 @@ AmrMesh.lo_corner        = -5E-2 -5E-2 # Low corner of problem domain
 AmrMesh.hi_corner        =  5E-2  5E-2 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 128     # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 8           # Maximum amr depth
+AmrMesh.max_amr_depth    = 9           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -39,8 +39,8 @@ Driver.verbosity                       = 2                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
-Driver.plot_interval                   = 1                # Plot interval
-Driver.checkpoint_interval             = 10               # Checkpoint interval
+Driver.plot_interval                   = 10               # Plot interval
+Driver.checkpoint_interval             = 50               # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = true             # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
@@ -48,7 +48,7 @@ Driver.initial_regrids                 = 2                # Number of initial re
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 100              # Maximum number of steps
+Driver.max_steps                       = 1000              # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
@@ -256,7 +256,7 @@ ItoKMCGodunovStepper.advection_cfl           = 100.0          # Advective time s
 ItoKMCGodunovStepper.diffusion_cfl           = 100.0          # Diffusive time step CFL restriction
 ItoKMCGodunovStepper.advection_diffusion_cfl = 100.0          # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.relax_dt_factor         = 1000.          # Relaxation time step restriction. 
-ItoKMCGodunovStepper.min_dt                  = 20E-12         # Minimum permitted time step
+ItoKMCGodunovStepper.min_dt                  = 50E-12          # Minimum permitted time step
 ItoKMCGodunovStepper.max_dt                  = 1.E99          # Maximum permitted time step
 ItoKMCGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
 ItoKMCGodunovStepper.algorithm               = euler_maruyama # Integration algorithm. 'euler_maruyama' or 'trapezoidal'
@@ -274,20 +274,20 @@ ItoKMCAir3LFA.init_center     = 0 0 0         # Blob center
 ItoKMCAir3LFA.init_radius     = 500E-6        # Blob radius
 
 # For controlling the time step
-ItoKMCAir3LFA.dX              = 100.0         # Maximum relative change Xnew/Xold during one time step.
+ItoKMCAir3LFA.dX              = 10.0         # Maximum relative change Xnew/Xold during one time step.
 
-# Ion transport settings. 
+# Ion transport settings.     
 ItoKMCAir3LFA.ion_transport   = false         # By default, stationary ions. 
 ItoKMCAir3LFA.ion_mobility    = 2E-4          # Turn on/off ion mobility
 
 # Kinetic Monte Carlo solver settings.
-ItoKMCAir3LFA.max_new_particles = 32          # Maximum number of computational particles to produce in reaction step
-ItoKMCAir3LFA.max_new_photons   = 64          # Maximum number of computational photons to produce in reaction step	
+ItoKMCAir3LFA.max_new_particles = 16          # Maximum number of computational particles to produce in reaction step
+ItoKMCAir3LFA.max_new_photons   = 32         # Maximum number of computational photons to produce in reaction step	
 ItoKMCAir3LFA.Ncrit          = 10             # How many firings away from a Negative particle number?
-ItoKMCAir3LFA.prop_eps       = 1.E99            # Maximum relative change in propensity function
+ItoKMCAir3LFA.prop_eps       = 1.E99          # Maximum relative change in propensity function
 ItoKMCAir3LFA.NSSA           = 10             # How many SSA steps to run when tau-leaping is inefficient
 ItoKMCAir3LFA.SSAlim         = 10.0           # When to enter SSA instead of tau-leaping
-ItoKMCAir3LFA.algorithm      = hybrid_plain   # 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
+ItoKMCAir3LFA.algorithm      = hybrid_plain      # 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
 
 # Secondary emission
 ItoKMCAir3LFA.impact_efficiency  = 0.00       # Impact efficiency
@@ -309,10 +309,10 @@ ItoKMCStreamerTagger.plot              = false        # Turn on/off plotting of 
 ItoKMCStreamerTagger.num_tag_boxes     = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
 ItoKMCStreamerTagger.tag_box1_lo       = 0.0 0.0 0.0  # Only allow tags that fall between
 ItoKMCStreamerTagger.tag_box1_hi       = 0.0 0.0 0.0  # these two corners
-ItoKMCStreamerTagger.buffer            = 8           # Grow tagged cells
+ItoKMCStreamerTagger.buffer            = 8            # Grow tagged cells
 
 ItoKMCStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
 ItoKMCStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
-ItoKMCStreamerTagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
-ItoKMCStreamerTagger.coarsen_alpha     = 0.2          # Set alpha coarsening. Higher => Less mesh
-ItoKMCStreamerTagger.max_coarsen_lvl   = 3            # Set max coarsening depth
+ItoKMCStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
+ItoKMCStreamerTagger.coarsen_alpha     = 0.25         # Set alpha coarsening. Higher => Less mesh
+ItoKMCStreamerTagger.max_coarsen_lvl   = 4            # Set max coarsening depth
