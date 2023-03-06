@@ -993,9 +993,10 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
   (this->m_amr)->interpGhostPwl(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
 
   if (this->m_smoothConductivity) {
-    MayDay::Abort("crap");
+    const Real alpha  = 0.5;
+    const int  stride = 1;
 
-    DataOps::filterSmooth(a_conductivityCell, 0.5, 1);
+    DataOps::filterSmooth(a_conductivityCell, alpha, stride);
 
     (this->m_amr)->arithmeticAverage(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
     (this->m_amr)->interpGhostPwl(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));

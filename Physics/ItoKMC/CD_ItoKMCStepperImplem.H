@@ -1585,7 +1585,7 @@ ItoKMCStepper<I, C, R, F>::computeConductivityCell(EBAMRCellData&               
 
   DataOps::scale(a_conductivity, Units::Qe);
 
-  m_amr->conservativeAverage(a_conductivity, m_fluidRealm, m_plasmaPhase);
+  m_amr->arithmeticAverage(a_conductivity, m_fluidRealm, m_plasmaPhase);
   m_amr->interpGhostPwl(a_conductivity, m_fluidRealm, m_plasmaPhase);
 
   // Interpolate to centroids.
@@ -4417,6 +4417,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(const Real a_dt) noexcept
   this->resolveSecondaryEmissionEB(secondaryParticles, primaryParticles, cdrFluxes, surfaceChargeDensity, a_dt);
 
   m_sigmaSolver->resetElectrodes(0.0);
+  m_amr->arithmeticAverage(surfaceChargeDensity, m_fluidRealm, m_plasmaPhase);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -4467,7 +4468,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
                                                                  *a_primaryParticles[idx]);
 
       m_fluidScratchEB.copy(m_particleScratchEB);
-      DataOps::incr(a_surfaceChargeDensity, m_fluidScratchEB, 1.0 * Z);
+      DataOps::incr(a_surfaceChargeDensity, m_fluidScratchEB, 1.0 * Z * Units::Qe);
 
       // Subtract charge from secondary particles
       m_amr->depositParticles<ItoParticle, &ItoParticle::weight>(m_particleScratchEB,
@@ -4476,7 +4477,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
                                                                  *a_secondaryParticles[idx]);
 
       m_fluidScratchEB.copy(m_particleScratchEB);
-      DataOps::incr(a_surfaceChargeDensity, m_fluidScratchEB, -1.0 * Z);
+      DataOps::incr(a_surfaceChargeDensity, m_fluidScratchEB, -1.0 * Z * Units::Qe);
     }
 
     // Add the secondary particles into the solvers and remove the primary particles.
@@ -4495,7 +4496,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
     const int Z   = species->getChargeNumber();
 
     if (Z != 0) {
-      DataOps::incr(a_surfaceChargeDensity, *a_cdrFluxes[idx], Z * a_dt);
+      DataOps::incr(a_surfaceChargeDensity, *a_cdrFluxes[idx], Z * a_dt * Units::Qe);
     }
 
     // Add mass to CDR solvers -- this is an inefficient way of doing it but I don't know if it'll be a performance bottleneck as well.
