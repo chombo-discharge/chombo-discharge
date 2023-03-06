@@ -93,9 +93,9 @@ FieldSolverMultigrid.gmg_exit_hang     = 0.2               # Solver hang
 FieldSolverMultigrid.gmg_min_cells     = 16                 # Bottom drop
 FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2                 # Boundary condition order for multigrid
-FieldSolverMultigrid.gmg_bc_weight     = 2                 # Boundary condition weights (for least squares)
+FieldSolverMultigrid.gmg_bc_weight     = 1                 # Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order    = 2                 # Boundary condition order for jump conditions
-FieldSolverMultigrid.gmg_jump_weight   = 2                 # Boundary condition weight for jump conditions (for least squares)
+FieldSolverMultigrid.gmg_jump_weight   = 1                 # Boundary condition weight for jump conditions (for least squares)
 FieldSolverMultigrid.gmg_bottom_solver = bicgstab          # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverMultigrid.gmg_cycle         = vcycle            # Cycle type. Only 'vcycle' supported for now. 
 FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
@@ -287,7 +287,7 @@ ItoKMCAir3LFA.Ncrit          = 10             # How many firings away from a Neg
 ItoKMCAir3LFA.prop_eps       = 1.0            # Maximum relative change in propensity function
 ItoKMCAir3LFA.NSSA           = 10             # How many SSA steps to run when tau-leaping is inefficient
 ItoKMCAir3LFA.SSAlim         = 10.0           # When to enter SSA instead of tau-leaping
-ItoKMCAir3LFA.algorithm      = hybrid         # 'tau', 'ssa', or 'hybrid'
+ItoKMCAir3LFA.algorithm      = hybrid_plain   #
 
 # Secondary emission
 ItoKMCAir3LFA.impact_efficiency  = 0.00       # Impact efficiency
