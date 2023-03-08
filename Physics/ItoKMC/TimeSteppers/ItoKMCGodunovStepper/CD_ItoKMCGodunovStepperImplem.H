@@ -272,9 +272,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 
     // Intersect particles, but don't remove them.
     const bool deleteParticles = false;
-    this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive,
-                             deleteParticles,
-                             nonDeletionModifier);
+    this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, deleteParticles, nonDeletionModifier);
 
     // Particles that were not removed are copied to a separate data container.
     for (auto it = this->m_ito->iterator(); it.ok(); ++it) {
@@ -322,7 +320,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   }
   else {
     const bool deleteParticles = true;
-    
+
     this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, deleteParticles);
   }
 

@@ -489,17 +489,22 @@ namespace Physics {
       /*!
 	@brief CFL-like time step for advection
       */
-      Real m_advectionCFL;
+      Real m_particleAdvectionCFL;
 
       /*!
 	@brief CFL-like time step for diffusion
       */
-      Real m_diffusionCFL;
+      Real m_particleDiffusionCFL;
 
       /*!
-	@brief CFL-like time step for advection-diffusion
+	@brief CFL-like time step for particle advection-diffusion
       */
-      Real m_advectionDiffusionCFL;
+      Real m_particleAdvectionDiffusionCFL;
+
+      /*!
+	@brief CFL-like time step for fluid advection-diffusion
+      */
+      Real m_fluidAdvectionDiffusionCFL;
 
       /*!
 	@brief Factor proportional to the dielectric relaxation time dtRelax = eps0/sigma
@@ -518,24 +523,24 @@ namespace Physics {
       Real m_maxDt;
 
       /*!
-	@brief The advective time step (not multiplied by m_advectionCFL)
+	@brief The particle advective time step (not multiplied by m_particleAdvectionCFL)
       */
-      Real m_advectionDt;
+      Real m_particleAdvectionDt;
 
       /*!
-	@brief The diffusive time step (not multiplied by m_diffusionCFL)
+	@brief The particle diffusive time step (not multiplied by m_particleDiffusionCFL)
       */
-      Real m_diffusionDt;
+      Real m_particleDiffusionDt;
 
       /*!
-	@brief The advection-diffusion time step (not multiplied by m_advectionDiffusionCFL)
+	@brief The advection-diffusion time step (not multiplied by m_particleAdvectionDiffusionCFL)
       */
-      Real m_advectionDiffusionDt;
+      Real m_particleAdvectionDiffusionDt;
 
       /*!
-	@brief The advection-diffusion time step (not multiplied by m_advectionDiffusionCFL) for the CDR equations
+	@brief The advection-diffusion time step (not multiplied by m_fluideAdvectionDiffusionCFL) for the CDR equations
       */
-      Real m_advectionDiffusionDtCDR;
+      Real m_fluidAdvectionDiffusionDt;
 
       /*!
 	@brief The relaxation time eps0/sigma

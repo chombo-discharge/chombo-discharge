@@ -319,7 +319,7 @@ ItoSolver::parseIntersectionEB()
   }
   else {
     MayDay::Error("ItoSolver::parseIntersectionEB -- logic bust");
-  }  
+  }
 }
 
 void
@@ -373,7 +373,8 @@ ItoSolver::parseCheckpointing()
 }
 
 EBIntersection
-ItoSolver::getIntersectionAlgorithm() const noexcept{
+ItoSolver::getIntersectionAlgorithm() const noexcept
+{
   CH_TIME("ItoSolver::getIntersectionAlgorithm");
   if (m_verbosity > 5) {
     pout() << m_name + "::getIntersectionAlgorithm" << endl;

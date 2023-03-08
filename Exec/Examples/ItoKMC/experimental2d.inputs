@@ -11,7 +11,7 @@ AmrMesh.lo_corner        =  -4E-2    0     # Low corner of problem domain
 AmrMesh.hi_corner        =  4E-2 4E-2  # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 64     # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 8           # Maximum amr depth
+AmrMesh.max_amr_depth    = 5           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -236,31 +236,32 @@ RodPlaneProfile.circle_radius = 974E-6
 # ==================================================================================================== 
 # ItoKMCGodunovStepper class options
 # ====================================================================================================
-ItoKMCGodunovStepper.checkpoint_particles    = true           # If true, regrid on restart is supported (otherwise it's not)
-ItoKMCGodunovStepper.verbosity               = -1             # Verbosity
-ItoKMCGodunovStepper.profile                 = true           # Turn on/off run-time profiling
-ItoKMCGodunovStepper.abort_on_failure        = true           # Turn on/off abort on Poisson failure
-ItoKMCGodunovStepper.redistribute_cdr        = true           # Turn on/off reactive redistribution
-ItoKMCGodunovStepper.plt_vars                = conductivity   # 'conductivity', 'current_density', 'particles_per_patch'
-ItoKMCGodunovStepper.dual_grid               = true           # Turn on/off dual-grid functionality
-ItoKMCGodunovStepper.load_balance_fluid      = false          # Turn on/off fluid realm load balancing. 
-ItoKMCGodunovStepper.load_balance_particles  = true           # Turn on/off particle load balancing
-ItoKMCGodunovStepper.load_indices            = -1             # Which particle containers to use for load balancing (-1 => all)
-ItoKMCGodunovStepper.load_per_cell           = 1.0            # Default load per grid cell.
-ItoKMCGodunovStepper.box_sorting             = morton         # Box sorting when load balancing
-ItoKMCGodunovStepper.particles_per_cell      = 16             # Max computational particles per cell
-ItoKMCGodunovStepper.merge_interval          = 1              # Time steps between superparticle merging
-ItoKMCGodunovStepper.regrid_superparticles   = false          # Make superparticles during regrids
-ItoKMCGodunovStepper.advection_cfl           = 2.0            # Advective time step CFL restriction
-ItoKMCGodunovStepper.diffusion_cfl           = 100.0          # Diffusive time step CFL restriction
-ItoKMCGodunovStepper.advection_diffusion_cfl = 100.0          # Advection-diffusion time step CFL restriction
-ItoKMCGodunovStepper.relax_dt_factor         = 1000.          # Relaxation time step restriction. 
-ItoKMCGodunovStepper.min_dt                  = 25E-12         # Minimum permitted time step
-ItoKMCGodunovStepper.max_dt                  = 1.E99          # Maximum permitted time step
-ItoKMCGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
-ItoKMCGodunovStepper.extend_conductivity     = true           # Permit particles to live outside the EB to avoid bad gradients near EB
-ItoKMCGodunovStepper.smooth_conductivity     = false          # Use bilinear smoothing on the conductivity.
-ItoKMCGodunovStepper.algorithm               = euler_maruyama # Integration algorithm. 'euler_maruyama' or 'trapezoidal'
+ItoKMCGodunovStepper.checkpoint_particles             = true           # If true, regrid on restart is supported (otherwise it's not)
+ItoKMCGodunovStepper.verbosity                        = -1             # Verbosity
+ItoKMCGodunovStepper.profile                          = true           # Turn on/off run-time profiling
+ItoKMCGodunovStepper.abort_on_failure                 = true           # Turn on/off abort on Poisson failure
+ItoKMCGodunovStepper.redistribute_cdr                 = true           # Turn on/off reactive redistribution
+ItoKMCGodunovStepper.plt_vars                         = conductivity   # 'conductivity', 'current_density', 'particles_per_patch'
+ItoKMCGodunovStepper.dual_grid                        = true           # Turn on/off dual-grid functionality
+ItoKMCGodunovStepper.load_balance_fluid               = false          # Turn on/off fluid realm load balancing. 
+ItoKMCGodunovStepper.load_balance_particles           = true           # Turn on/off particle load balancing
+ItoKMCGodunovStepper.load_indices                     = -1             # Which particle containers to use for load balancing (-1          => all)
+ItoKMCGodunovStepper.load_per_cell                    = 1.0            # Default load per grid cell.
+ItoKMCGodunovStepper.box_sorting                      = morton         # Box sorting when load balancing
+ItoKMCGodunovStepper.particles_per_cell               = 16             # Max computational particles per cell
+ItoKMCGodunovStepper.merge_interval                   = 1              # Time steps between superparticle merging
+ItoKMCGodunovStepper.regrid_superparticles            = false          # Make superparticles during regrids
+ItoKMCGodunovStepper.particle_advection_cfl           = 2.0            # Advective time step CFL restriction
+ItoKMCGodunovStepper.particle_diffusion_cfl           = 100.0            # Diffusive time step CFL restriction
+ItoKMCGodunovStepper.particle_advection_diffusion_cfl = 100.0            # Advection-diffusion time step CFL restriction
+ItoKMCGodunovStepper.fluid_advection_diffusion_cfl    = 0.5            # Advection-diffusion time step CFL restriction
+ItoKMCGodunovStepper.relax_dt_factor                  = 1000.          # Relaxation time step restriction. 
+ItoKMCGodunovStepper.min_dt                           = 50E-12         # Minimum permitted time step
+ItoKMCGodunovStepper.max_dt                           = 1.E99          # Maximum permitted time step
+ItoKMCGodunovStepper.eb_tolerance                     = 0.0            # EB intersection test tolerance
+ItoKMCGodunovStepper.extend_conductivity              = true           # Permit particles to live outside the EB to avoid bad gradients near EB
+ItoKMCGodunovStepper.smooth_conductivity              = false          # Use bilinear smoothing on the conductivity.
+ItoKMCGodunovStepper.algorithm                        = euler_maruyama # Integration algorithm. 'euler_maruyama' or 'trapezoidal'
 
 # ====================================================================================================
 # ItoKMCAir3LFA class options
