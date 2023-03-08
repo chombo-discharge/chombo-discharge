@@ -487,19 +487,34 @@ namespace Physics {
       Real m_toleranceEB;
 
       /*!
-	@brief CFL-like time step for advection
+	@brief Minimum CFL-like time step for particle advection
       */
-      Real m_particleAdvectionCFL;
+      Real m_minParticleAdvectionCFL;
 
       /*!
-	@brief CFL-like time step for diffusion
+	@brief Maximum CFL-like time step for particle advection
       */
-      Real m_particleDiffusionCFL;
+      Real m_maxParticleAdvectionCFL;
 
       /*!
-	@brief CFL-like time step for particle advection-diffusion
+	@brief Minium CFL-like time step for particle diffusion
       */
-      Real m_particleAdvectionDiffusionCFL;
+      Real m_minParticleDiffusionCFL;
+
+      /*!
+	@brief Maximum CFL-like time step for particle diffusion
+      */
+      Real m_maxParticleDiffusionCFL;
+
+      /*!
+	@brief Maximum CFL-like time step for particle advection-diffusion
+      */
+      Real m_minParticleAdvectionDiffusionCFL;
+
+      /*!
+	@brief Maximum CFL-like time step for particle advection-diffusion
+      */
+      Real m_maxParticleAdvectionDiffusionCFL;
 
       /*!
 	@brief CFL-like time step for fluid advection-diffusion
@@ -523,22 +538,22 @@ namespace Physics {
       Real m_maxDt;
 
       /*!
-	@brief The particle advective time step (not multiplied by m_particleAdvectionCFL)
+	@brief The particle advective time step
       */
       Real m_particleAdvectionDt;
 
       /*!
-	@brief The particle diffusive time step (not multiplied by m_particleDiffusionCFL)
+	@brief The particle diffusive time step
       */
       Real m_particleDiffusionDt;
 
       /*!
-	@brief The advection-diffusion time step (not multiplied by m_particleAdvectionDiffusionCFL)
+	@brief The advection-diffusion time step
       */
       Real m_particleAdvectionDiffusionDt;
 
       /*!
-	@brief The advection-diffusion time step (not multiplied by m_fluideAdvectionDiffusionCFL) for the CDR equations
+	@brief The advection-diffusion time step for the CDR equations
       */
       Real m_fluidAdvectionDiffusionDt;
 

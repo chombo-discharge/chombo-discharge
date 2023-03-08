@@ -36,25 +36,28 @@ ItoKMCStepper<I, C, R, F>::ItoKMCStepper() noexcept
 {
   CH_TIME("ItoKMCStepper::ItoKMCStepper");
 
-  m_verbosity                     = -1;
-  m_profile                       = false;
-  m_name                          = "ItoKMCStepper";
-  m_plasmaPhase                   = phase::gas;
-  m_dt                            = 0.0;
-  m_time                          = 0.0;
-  m_timeStep                      = 0;
-  m_loadPerCell                   = 1.0;
-  m_redistributeCDR               = true;
-  m_regridSuperparticles          = true;
-  m_fluidRealm                    = Realm::Primal;
-  m_particleRealm                 = Realm::Primal;
-  m_particleAdvectionCFL          = 1.0;
-  m_particleDiffusionCFL          = std::numeric_limits<Real>::max();
-  m_particleAdvectionDiffusionCFL = std::numeric_limits<Real>::max();
-  m_fluidAdvectionDiffusionCFL    = 0.5;
-  m_relaxTimeFactor               = std::numeric_limits<Real>::max();
-  m_minDt                         = std::numeric_limits<Real>::min();
-  m_maxDt                         = std::numeric_limits<Real>::max();
+  m_verbosity                        = -1;
+  m_profile                          = false;
+  m_name                             = "ItoKMCStepper";
+  m_plasmaPhase                      = phase::gas;
+  m_dt                               = 0.0;
+  m_time                             = 0.0;
+  m_timeStep                         = 0;
+  m_loadPerCell                      = 1.0;
+  m_redistributeCDR                  = true;
+  m_regridSuperparticles             = true;
+  m_fluidRealm                       = Realm::Primal;
+  m_particleRealm                    = Realm::Primal;
+  m_minParticleAdvectionCFL          = 0.0;
+  m_maxParticleAdvectionCFL          = 1.0;
+  m_minParticleDiffusionCFL          = 0.0;
+  m_maxParticleDiffusionCFL          = std::numeric_limits<Real>::max();
+  m_minParticleAdvectionDiffusionCFL = std::numeric_limits<Real>::max();
+  m_maxParticleAdvectionDiffusionCFL = std::numeric_limits<Real>::max();
+  m_fluidAdvectionDiffusionCFL       = 0.5;
+  m_relaxTimeFactor                  = std::numeric_limits<Real>::max();
+  m_minDt                            = std::numeric_limits<Real>::min();
+  m_maxDt                            = std::numeric_limits<Real>::max();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -311,9 +314,12 @@ ItoKMCStepper<I, C, R, F>::parseTimeStepRestrictions() noexcept
 
   ParmParse pp(m_name.c_str());
 
-  pp.get("particle_advection_cfl", m_particleAdvectionCFL);
-  pp.get("particle_diffusion_cfl", m_particleDiffusionCFL);
-  pp.get("particle_advection_diffusion_cfl", m_particleAdvectionDiffusionCFL);
+  pp.get("min_particle_advection_cfl", m_minParticleAdvectionCFL);
+  pp.get("max_particle_advection_cfl", m_maxParticleAdvectionCFL);
+  pp.get("min_particle_diffusion_cfl", m_minParticleDiffusionCFL);
+  pp.get("max_particle_diffusion_cfl", m_maxParticleDiffusionCFL);
+  pp.get("min_particle_advection_diffusion_cfl", m_minParticleAdvectionDiffusionCFL);
+  pp.get("max_particle_advection_diffusion_cfl", m_maxParticleAdvectionDiffusionCFL);
   pp.get("fluid_advection_diffusion_cfl", m_fluidAdvectionDiffusionCFL);
   pp.get("relax_dt_factor", m_relaxTimeFactor);
   pp.get("min_dt", m_minDt);
@@ -331,15 +337,15 @@ ItoKMCStepper<I, C, R, F>::parseTimeStepRestrictions() noexcept
     MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have max_dt >= 0.0");
   }
 
-  if (m_particleAdvectionCFL <= 0.0) {
-    MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have particle_advection_cfl > 0.0");
+  if (m_maxParticleAdvectionCFL <= 0.0 || m_minParticleAdvectionCFL <= 0.0) {
+    MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have max/min_particle_advection_cfl > 0.0");
   }
 
-  if (m_particleDiffusionCFL <= 0.0) {
+  if (m_maxParticleDiffusionCFL <= 0.0) {
     MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have particle_diffusion_cfl > 0.0");
   }
 
-  if (m_particleAdvectionDiffusionCFL <= 0.0) {
+  if (m_maxParticleAdvectionDiffusionCFL <= 0.0) {
     MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have particle_advection_diffusion_cfl > 0.0");
   }
 
@@ -983,12 +989,12 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
     break;
   }
   case TimeCode::AdvectionIto: {
-    str = "dt restricted by 'Advection'";
+    str = "dt restricted by 'Advection (Ito)'";
 
     break;
   }
   case TimeCode::DiffusionIto: {
-    str = "dt restricted by 'Diffusion'";
+    str = "dt restricted by 'Diffusion (Ito)'";
 
     break;
   }
@@ -1180,18 +1186,18 @@ ItoKMCStepper<I, C, R, F>::computeDt()
   m_relaxationTime = this->computeRelaxationTime();
   timer.stopEvent("Relaxation");
 
-  if (m_particleAdvectionCFL * m_particleAdvectionDt < dt) {
-    dt         = m_particleAdvectionCFL * m_particleAdvectionDt;
+  if (m_maxParticleAdvectionCFL * m_particleAdvectionDt < dt) {
+    dt         = m_maxParticleAdvectionCFL * m_particleAdvectionDt;
     m_timeCode = TimeCode::AdvectionIto;
   }
 
-  if (m_particleDiffusionCFL * m_particleDiffusionDt < dt) {
-    dt         = m_particleDiffusionCFL * m_particleDiffusionDt;
+  if (m_maxParticleDiffusionCFL * m_particleDiffusionDt < dt) {
+    dt         = m_maxParticleDiffusionCFL * m_particleDiffusionDt;
     m_timeCode = TimeCode::DiffusionIto;
   }
 
-  if (m_particleAdvectionDiffusionCFL * m_particleAdvectionDiffusionDt < dt) {
-    dt         = m_particleAdvectionDiffusionCFL * m_particleAdvectionDiffusionDt;
+  if (m_maxParticleAdvectionDiffusionCFL * m_particleAdvectionDiffusionDt < dt) {
+    dt         = m_maxParticleAdvectionDiffusionCFL * m_particleAdvectionDiffusionDt;
     m_timeCode = TimeCode::AdvectionDiffusionIto;
   }
 
@@ -1208,6 +1214,24 @@ ItoKMCStepper<I, C, R, F>::computeDt()
   if (m_physicsDt < dt) {
     dt         = m_physicsDt;
     m_timeCode = TimeCode::Physics;
+  }
+
+  if (dt < m_minParticleAdvectionCFL * m_particleAdvectionDt) {
+    dt = m_minParticleAdvectionCFL * m_particleAdvectionDt;
+
+    m_timeCode = TimeCode::AdvectionIto;
+  }
+
+  if (dt < m_minParticleDiffusionCFL * m_particleDiffusionDt) {
+    dt = m_minParticleDiffusionCFL * m_particleDiffusionDt;
+
+    m_timeCode = TimeCode::DiffusionIto;
+  }
+
+  if (dt < m_minParticleAdvectionDiffusionCFL * m_particleAdvectionDiffusionDt) {
+    dt = m_minParticleAdvectionDiffusionCFL * m_particleAdvectionDiffusionDt;
+
+    m_timeCode = TimeCode::AdvectionDiffusionIto;
   }
 
   if (m_minDt > dt) {
