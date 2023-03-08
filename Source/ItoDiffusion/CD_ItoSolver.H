@@ -104,6 +104,12 @@ public:
   getPlotVariableNames() const;
 
   /*!
+    @brief Get the EB-particle intersection algorithm
+  */
+  virtual EBIntersection
+  getIntersectionAlgorithm() const noexcept;
+
+  /*!
     @brief Set the initial data
     @details This will add the initial particles and deposit them. 
   */
@@ -1263,6 +1269,11 @@ protected:
   std::map<WhichContainer, ParticleContainer<ItoParticle>> m_particleContainers;
 
   /*!
+    @brief Algorithm for EB intersection
+  */
+  EBIntersection m_intersectionAlg;
+
+  /*!
     @brief Parse RNG options -- this parses the RNG seed and instantiates the distributions. 
   */
   void
@@ -1281,10 +1292,10 @@ protected:
   parseDeposition();
 
   /*!
-    @brief Parse bisection step
+    @brief Parse EB intersection algorithms
   */
   void
-  parseBisectStep();
+  parseIntersectionEB();
 
   /*!
     @brief Parse class verbosity

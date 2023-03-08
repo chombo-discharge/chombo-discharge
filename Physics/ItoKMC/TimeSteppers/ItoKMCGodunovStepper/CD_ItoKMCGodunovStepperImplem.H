@@ -273,7 +273,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     // Intersect particles, but don't remove them.
     const bool deleteParticles = false;
     this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive,
-                             EBIntersection::Bisection,
                              deleteParticles,
                              nonDeletionModifier);
 
@@ -322,7 +321,9 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     }
   }
   else {
-    this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, true);
+    const bool deleteParticles = true;
+    
+    this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, deleteParticles);
   }
 
   // The intersection tests above may not have caught all particles -- do a cleanup sweep where particles on the wrong side of

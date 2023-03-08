@@ -753,7 +753,6 @@ namespace Physics {
       virtual void
       intersectParticles(
         const SpeciesSubset                     a_speciesSubset,
-        const EBIntersection                    a_interactionAlg,
         const bool                              a_delete,
         const std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
           return;
@@ -775,7 +774,6 @@ namespace Physics {
         const ItoSolver::WhichContainer         a_containerBulk,
         const ItoSolver::WhichContainer         a_containerEB,
         const ItoSolver::WhichContainer         a_containerDomain,
-        const EBIntersection                    a_intersectionAlg,
         const bool                              a_delete,
         const std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
           return;

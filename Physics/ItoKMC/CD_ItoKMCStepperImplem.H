@@ -1686,20 +1686,18 @@ ItoKMCStepper<I, C, R, F>::solvePoisson() noexcept
 template <typename I, typename C, typename R, typename F>
 void
 ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset                     a_speciesSubset,
-                                              const EBIntersection                    a_intersectionAlg,
                                               const bool                              a_delete,
                                               const std::function<void(ItoParticle&)> a_nonDeletionModifier) noexcept
 {
-  CH_TIME("ItoKMCStepper::intersectParticles(SpeciesSubset, EBRepresentation, bool)");
+  CH_TIME("ItoKMCStepper::intersectParticles(SpeciesSubset, bool, std::function)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::intersectParticles(SpeciesSubset, EBRepresentation, bool)" << endl;
+    pout() << m_name + "::intersectParticles(SpeciesSubset, bool, std::function)" << endl;
   }
 
   this->intersectParticles(a_speciesSubset,
                            ItoSolver::WhichContainer::Bulk,
                            ItoSolver::WhichContainer::EB,
                            ItoSolver::WhichContainer::Domain,
-                           a_intersectionAlg,
                            a_delete,
                            a_nonDeletionModifier);
 }
@@ -1710,13 +1708,12 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
                                               const ItoSolver::WhichContainer         a_containerBulk,
                                               const ItoSolver::WhichContainer         a_containerEB,
                                               const ItoSolver::WhichContainer         a_containerDomain,
-                                              const EBIntersection                    a_intersectionAlg,
                                               const bool                              a_delete,
                                               const std::function<void(ItoParticle&)> a_nonDeletionModifier) noexcept
 {
-  CH_TIME("ItoKMCStepper::intersectParticles(SpeciesSubset, Containerx3, EBRepresentation, bool)");
+  CH_TIME("ItoKMCStepper::intersectParticles(SpeciesSubset, Containerx3, bool, std::function)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::intersectParticles(SpeciesSubset, Containerx3, EBRepresentation, bool)" << endl;
+    pout() << m_name + "::intersectParticles(SpeciesSubset, Containerx3, bool, std::function)" << endl;
   }
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -1727,12 +1724,14 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
     const bool diffusive = solver->isDiffusive();
     const bool charged   = (species->getChargeNumber() != 0);
 
+    const EBIntersection intersectionAlgorithm = solver->getIntersectionAlgorithm();
+
     switch (a_speciesSubset) {
     case SpeciesSubset::All: {
       solver->intersectParticles(a_containerBulk,
                                  a_containerEB,
                                  a_containerDomain,
-                                 a_intersectionAlg,
+                                 intersectionAlgorithm,
                                  a_delete,
                                  a_nonDeletionModifier);
 
@@ -1743,7 +1742,7 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
         solver->intersectParticles(a_containerBulk,
                                    a_containerEB,
                                    a_containerDomain,
-                                   a_intersectionAlg,
+                                   intersectionAlgorithm,
                                    a_delete,
                                    a_nonDeletionModifier);
       }
@@ -1755,7 +1754,7 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
         solver->intersectParticles(a_containerBulk,
                                    a_containerEB,
                                    a_containerDomain,
-                                   a_intersectionAlg,
+                                   intersectionAlgorithm,
                                    a_delete,
                                    a_nonDeletionModifier);
       }
@@ -1767,7 +1766,7 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
         solver->intersectParticles(a_containerBulk,
                                    a_containerEB,
                                    a_containerDomain,
-                                   a_intersectionAlg,
+                                   intersectionAlgorithm,
                                    a_delete,
                                    a_nonDeletionModifier);
       }
@@ -1779,7 +1778,7 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
         solver->intersectParticles(a_containerBulk,
                                    a_containerEB,
                                    a_containerDomain,
-                                   a_intersectionAlg,
+                                   intersectionAlgorithm,
                                    a_delete,
                                    a_nonDeletionModifier);
       }
@@ -1791,7 +1790,7 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
         solver->intersectParticles(a_containerBulk,
                                    a_containerEB,
                                    a_containerDomain,
-                                   a_intersectionAlg,
+                                   intersectionAlgorithm,
                                    a_delete,
                                    a_nonDeletionModifier);
       }
@@ -1803,7 +1802,7 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
         solver->intersectParticles(a_containerBulk,
                                    a_containerEB,
                                    a_containerDomain,
-                                   a_intersectionAlg,
+                                   intersectionAlgorithm,
                                    a_delete,
                                    a_nonDeletionModifier);
       }
@@ -1815,7 +1814,7 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
         solver->intersectParticles(a_containerBulk,
                                    a_containerEB,
                                    a_containerDomain,
-                                   a_intersectionAlg,
+                                   intersectionAlgorithm,
                                    a_delete,
                                    a_nonDeletionModifier);
       }
@@ -1827,7 +1826,7 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
         solver->intersectParticles(a_containerBulk,
                                    a_containerEB,
                                    a_containerDomain,
-                                   a_intersectionAlg,
+                                   intersectionAlgorithm,
                                    a_delete,
                                    a_nonDeletionModifier);
       }
@@ -1839,7 +1838,7 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
         solver->intersectParticles(a_containerBulk,
                                    a_containerEB,
                                    a_containerDomain,
-                                   a_intersectionAlg,
+                                   intersectionAlgorithm,
                                    a_delete,
                                    a_nonDeletionModifier);
       }
@@ -1851,7 +1850,7 @@ ItoKMCStepper<I, C, R, F>::intersectParticles(const SpeciesSubset               
         solver->intersectParticles(a_containerBulk,
                                    a_containerEB,
                                    a_containerDomain,
-                                   a_intersectionAlg,
+                                   intersectionAlgorithm,
                                    a_delete,
                                    a_nonDeletionModifier);
       }

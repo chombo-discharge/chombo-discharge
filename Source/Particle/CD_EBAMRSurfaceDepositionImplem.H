@@ -58,18 +58,17 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
         if (!(cellBox.contains(iv))) {
           MayDay::Error("CD_EBAMRSurfaceDeposition::deposit -- particle is not inside the box");
         }
-        if (!ebisbox.isIrregular(iv)) {
-          MayDay::Error("CD_EBAMRSurfaceDeposition::deposit -- particle is not in a cut-cell!");
-        }
 
-        const VoFStencil& stencil = stencils(VolIndex(iv, 0), 0);
+        if (ebisbox.isIrregular(iv)) {
+          const VoFStencil& stencil = stencils(VolIndex(iv, 0), 0);
 
-        for (int i = 0; i < stencil.size(); i++) {
-          const VolIndex& stencilVoF       = stencil.vof(i);
-          const Real&     stencilWeight    = stencil.weight(i);
-          const Real      depositionWeight = stencilWeight * (p.*particleScalarField)();
+          for (int i = 0; i < stencil.size(); i++) {
+            const VolIndex& stencilVoF       = stencil.vof(i);
+            const Real&     stencilWeight    = stencil.weight(i);
+            const Real      depositionWeight = stencilWeight * (p.*particleScalarField)();
 
-          meshData(stencilVoF, 0) += depositionWeight;
+            meshData(stencilVoF, 0) += depositionWeight;
+          }
         }
       }
     }
@@ -127,18 +126,17 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
         if (!(cellBox.contains(iv))) {
           MayDay::Error("CD_EBAMRSurfaceDeposition::deposit -- particle is not inside the box");
         }
-        if (!ebisbox.isIrregular(iv)) {
-          MayDay::Error("CD_EBAMRSurfaceDeposition::deposit -- particle is not in a cut-cell!");
-        }
 
-        const VoFStencil& stencil = stencils(VolIndex(iv, 0), 0);
+        if (ebisbox.isIrregular(iv)) {
+          const VoFStencil& stencil = stencils(VolIndex(iv, 0), 0);
 
-        for (int i = 0; i < stencil.size(); i++) {
-          const VolIndex& stencilVoF       = stencil.vof(i);
-          const Real&     stencilWeight    = stencil.weight(i);
-          const Real      depositionWeight = stencilWeight * (p.*particleScalarField)();
+          for (int i = 0; i < stencil.size(); i++) {
+            const VolIndex& stencilVoF       = stencil.vof(i);
+            const Real&     stencilWeight    = stencil.weight(i);
+            const Real      depositionWeight = stencilWeight * (p.*particleScalarField)();
 
-          meshData(stencilVoF, 0) += depositionWeight;
+            meshData(stencilVoF, 0) += depositionWeight;
+          }
         }
       }
     }

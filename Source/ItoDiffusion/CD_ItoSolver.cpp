@@ -103,7 +103,7 @@ ItoSolver::parseOptions()
   this->parseTruncation();
   this->parsePlotVariables();
   this->parseDeposition();
-  this->parseBisectStep();
+  this->parseIntersectionEB();
   this->parseRedistribution();
   this->parseDivergenceComputation();
   this->parseCheckpointing();
@@ -121,7 +121,7 @@ ItoSolver::parseRuntimeOptions()
   this->parsePlotVariables();
   this->parseTruncation();
   this->parseDeposition();
-  this->parseBisectStep();
+  this->parseIntersectionEB();
   this->parseRedistribution();
   this->parseDivergenceComputation();
   this->parseCheckpointing();
@@ -297,15 +297,29 @@ ItoSolver::parseDeposition()
 }
 
 void
-ItoSolver::parseBisectStep()
+ItoSolver::parseIntersectionEB()
 {
-  CH_TIME("ItoSolver::parseBisectStep");
+  CH_TIME("ItoSolver::parseIntersectionEB");
   if (m_verbosity > 5) {
-    pout() << m_name + "::parseBisectStep" << endl;
+    pout() << m_name + "::parseIntersectionEB" << endl;
   }
 
   ParmParse pp(m_className.c_str());
+
+  std::string str;
+
+  pp.get("intersection_alg", str);
   pp.get("bisect_step", m_bisectionStep);
+
+  if (str == "raycast") {
+    m_intersectionAlg = EBIntersection::Raycast;
+  }
+  else if (str == "bisection") {
+    m_intersectionAlg = EBIntersection::Bisection;
+  }
+  else {
+    MayDay::Error("ItoSolver::parseIntersectionEB -- logic bust");
+  }  
 }
 
 void
@@ -356,6 +370,16 @@ ItoSolver::parseCheckpointing()
   else {
     MayDay::Abort("ItoSolver::parseCheckpointing - unknown checkpointing method requested");
   }
+}
+
+EBIntersection
+ItoSolver::getIntersectionAlgorithm() const noexcept{
+  CH_TIME("ItoSolver::getIntersectionAlgorithm");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getIntersectionAlgorithm" << endl;
+  }
+
+  return m_intersectionAlg;
 }
 
 Vector<std::string>
