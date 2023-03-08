@@ -163,8 +163,8 @@ ItoKMCGodunovStepper<I, C, R, F>::parseAlgorithm() noexcept
   ParmParse   pp(this->m_name.c_str());
   std::string str;
 
-  pp.query("extend_conductivity", m_extendConductivityEB);
-  pp.query("smooth_conductivity", m_smoothConductivity);
+  pp.get("extend_conductivity", m_extendConductivityEB);
+  pp.get("smooth_conductivity", m_smoothConductivity);
   pp.get("algorithm", str);
 
   // Get algorithm
