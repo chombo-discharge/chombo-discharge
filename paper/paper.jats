@@ -18,7 +18,7 @@
 <article-id pub-id-type="publisher-id">0</article-id>
 <article-id pub-id-type="doi">N/A</article-id>
 <title-group>
-<article-title>chombo-discharge: An adaptive code for gas discharge
+<article-title>chombo-discharge: An AMR code for gas discharge
 simulations in complex geometries</article-title>
 </title-group>
 <contrib-group>
@@ -126,10 +126,9 @@ a Creative Commons Attribution 4.0 International License (CC BY
   AMR “core”, which can also use dual grids where e.g. fluid and
   particle kernels are load-balanced separately. Depending on their
   needs, users can therefore enter the framework at several levels. E.g.
-  they only need to learn interfaces when using existing applications
-  (e.g., streamer models); use C++ APIs if developing new physics
-  applications, or use the EB-AMR infrastructure if contributing with
-  new solvers.</p>
+  they need to learn interfaces when using existing applications (e.g.,
+  streamer models); use C++ APIs if developing new physics applications,
+  or use the EB-AMR infrastructure if contributing with new solvers.</p>
 </sec>
 <sec id="statement-of-need">
   <title>Statement of need</title>
@@ -169,7 +168,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
     <caption><p>2D Surface discharges over complex surfaces
     (<xref alt="Meyer et al., 2022" rid="ref-MeyerU003A2022" ref-type="bibr">Meyer
     et al., 2022</xref>). Top: Electrode (shaded region) and dielectric
-    (profiled surface). Bottom left panel: Electric field distribution.
+    (profiled surface). Bottom left panel: Electric field magnitude.
     Bottom right panel: Plasma density.
     <styled-content id="figU003Asurface"></styled-content></p></caption>
     <graphic mimetype="application" mime-subtype="pdf" xlink:href="media/figures/SquareEvolution.pdf" xlink:title="" />
