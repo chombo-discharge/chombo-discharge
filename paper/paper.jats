@@ -68,31 +68,31 @@ a Creative Commons Attribution 4.0 International License (CC BY
 <body>
 <sec id="summary">
   <title>Summary</title>
-  <p>chombo-discharge is a 2D and 3D adaptive code for simulating
-  low-temperature gas discharges in complex geometries. Such discharges
-  occur when electrons accelerate in strong electric fields and ionize
-  the gas, and further evolution is also determined by residual space
-  charge. Streamers, for example, are filamentary plasma dominated by
-  space charge effects. They are the natural precursors to leader,
-  sparks, and lightning.</p>
+  <p>chombo-discharge is a parallelized Cartesian 2D and 3D adaptive
+  code for simulating low-temperature gas discharges in complex
+  geometries. Such discharges occur when electrons accelerate in strong
+  electric fields and ionize the gas, and further evolution is affected
+  by residual space charges. Streamers, for example, are filamentary
+  plasma dominated by space charge effects. They are the natural
+  precursors to leader, sparks, and lightning.</p>
   <p>Gas discharge modeling involves simulations over multiple scales in
   time and space. chombo-discharge reduces the cost of such simulations
   by using Cartesian Adaptive Mesh Refinement (AMR). It also provides
   support for multi-material complex geometries (gas phase, electrodes,
   and solid dielectrics) through an embedded boundary (EB) formulation.
-  Geometries can be constructed using either constructive solid geometry
-  (CSG) or imported as surface meshes. The code uses a solver-centered
-  modular design where larger applications are developed by strongly or
-  weakly coupling numerical solvers shipped with the chombo-discharge
-  base code, using existing C++ interfaces. Several such applications
-  are included in the chombo-discharge code. Depending on their needs,
-  users can therefore enter the framework at several levels. E.g. they
-  only need to learn textual interfaces interfaces when using existing
-  applications; use solver C++ APIs when developing new applications, or
-  use the EB AMR infrastructure when contributing entirely new
-  solvers.</p>
-  <p>Several solvers exist in chombo-discharge, all of which are
-  parallelized and compatible with EBs and AMR:</p>
+  Geometries are represented as implicit functions, and can be created
+  using constructive solid geometry. Conversion of surface meshes to
+  implicit functions is also supported. Under the hood, chombo-discharge
+  uses Chombo
+  (<xref alt="Colella et al., n.d." rid="ref-ebchombo" ref-type="bibr">Colella
+  et al., n.d.</xref>) for the AMR and EB infrastructure, and is
+  parallelized using MPI. However, chombo-discharge supplies all
+  numerical solvers.</p>
+  <p>chombo-discharge uses a solver-centered modular design where larger
+  applications are developed by coupling numerical solvers in the
+  chombo-discharge base code, using C++ interfaces. Many solvers already
+  exist in chombo-discharge, all of which are parallelized and
+  compatible with EBs and AMR:</p>
   <list list-type="bullet">
     <list-item>
       <p>Advection-diffusion-reaction solvers.</p>
@@ -101,66 +101,70 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <p>Helmholtz equation solvers, using geometric multigrid.</p>
     </list-item>
     <list-item>
-      <p>Electrostatic solvers (with support for discontinuous
+      <p>An electrostatic solver (with support for discontinuous
       coefficients).</p>
     </list-item>
     <list-item>
-      <p>Kinetic Monte Carlo solvers.</p>
+      <p>Kinetic Monte Carlo chemistry solvers.</p>
     </list-item>
     <list-item>
-      <p>Radiative transfer solvers (continuum and Monte Carlo
-      solvers).</p>
+      <p>Radiative transfer solvers (continuum and Monte Carlo).</p>
     </list-item>
     <list-item>
       <p>Various particle solvers, e.g. for Monte Carlo radiative
-      transfer, tracer particles, Brownian walkers, or kinetic
-      Particle-In-Cell.</p>
+      transfer, tracer particles, and microscopic drift-diffusion.</p>
     </list-item>
     <list-item>
-      <p>Volumetric and cut-cell ODE solvers.</p>
+      <p>ODE solvers defined over volume or surface meshes.</p>
     </list-item>
   </list>
   <p>All solvers exist as stand-alone applications, and many of them are
   also coupled through more complex physics applications that aim at
   resolving different types of discharge phenomena (e.g. statistical
-  inception models or streamer discharges). The interaction of these
-  solvers occurs through a common AMR core, which can also use dual
-  grids where e.g. fluid and particle kernels are load-balanced
-  separately. chombo-discharge uses the Chombo infrastructure for the
-  AMR and EB infrastructure, and is parallelized using MPI. However,
-  chombo-discharge supplies most solver and infrastructure
-  discretizations.</p>
+  inception models, or particle and fluid models of streamer
+  discharges). The interaction of these solvers occurs through a common
+  AMR “core”, which can also use dual grids where e.g. fluid and
+  particle kernels are load-balanced separately. Depending on their
+  needs, users can therefore enter the framework at several levels. E.g.
+  they only need to learn interfaces when using existing applications
+  (e.g., streamer models); use C++ APIs if developing new physics
+  applications, or use the EB-AMR infrastructure if contributing with
+  new solvers.</p>
 </sec>
 <sec id="statement-of-need">
   <title>Statement of need</title>
   <p>There is already a number of discharge simulation codes currently
   available. Commercial codes used for simulating discharges include
-  COMSOL, ANSYS Fluent, PLASIMO, VSIM/VPIC, and Vizglow. Several
-  non-commerical codes also exist, such as Afivo-streamer
+  COMSOL (see e.g. Jovanović et al.
+  (<xref alt="2021" rid="ref-mcplas" ref-type="bibr">2021</xref>)),
+  ANSYS Fluent (see e.g. Niknezhad et al.
+  (<xref alt="2021" rid="ref-Niknezhad_2021" ref-type="bibr">2021</xref>)),
+  and PLASIMO
+  (<xref alt="Dijk et al., 2009" rid="ref-plasimo" ref-type="bibr">Dijk
+  et al., 2009</xref>). Another example is Afivo-streamer
   (<xref alt="Teunissen &amp; Ebert, 2017" rid="ref-TeunissenU003A2017" ref-type="bibr">Teunissen
   &amp; Ebert, 2017</xref>), which is also open source and uses
   Cartesian AMR.</p>
   <p>While chombo-discharge is not the only open-source discharge
   simulation code, it has a number of unique features. In particular,
   chombo-discharge supports complex geometries, and is therefore useful
-  in many discharge-related science applications. Lightning initiation
-  investigations (from hydrometeors), high-voltage technology, plasma
-  medicine, and plasma-assisted combustion are typical examples. The
+  in many discharge-related science applications. Support for AMR is
+  also important, as AMR is a virtual requirement in many 3D
+  applications (certainly the ones involving filamentary plasma). The
   code is also quite performant, and its design pattern permits a
   flexible and extensible approach to numerically solving various
-  discharge problems, even when these require many thousands of CPU
-  cores.</p>
-  <p>Originally, the code was written for studying pre-breakdown
-  phenomena in high-voltage equipment
+  discharge-related problems, even when these end up requiring many
+  thousands of CPU cores. Originally, the code was written for studying
+  pre-breakdown discharges in high-voltage equipment
   (<xref alt="Marskar, 2019" rid="ref-MarskarU003A2019" ref-type="bibr">Marskar,
-  2019</xref>), but over time it has been adapted to fit a wider
-  category of discharge problems. Some examples science examples are
+  2019</xref>), but over time it has been adapted in order to fit a
+  wider category of discharge-related problems. Two science examples are
   given in <xref alt="Figure 1" rid="figU003Asurface">Figure 1</xref>
-  (HV technology),
-  <xref alt="Figure 2" rid="figU003Acorona">Figure 2</xref> (nanosecond
-  pulsed discharges), and
-  <xref alt="Figure 3" rid="figU003Asprite">Figure 3</xref> (upper
-  atmospheric lightning).</p>
+  (HV technology) and
+  <xref alt="Figure 2" rid="figU003Acorona">Figure 2</xref> (pulsed
+  discharge). Lightning initiation investigations (from hydrometeors),
+  plasma medicine, and plasma-assisted combustion are other examples
+  where chombo-discharge could potentially be used.</p>
   <fig>
     <caption><p>2D Surface discharges over complex surfaces
     (<xref alt="Meyer et al., 2022" rid="ref-MeyerU003A2022" ref-type="bibr">Meyer
@@ -171,16 +175,11 @@ a Creative Commons Attribution 4.0 International License (CC BY
     <graphic mimetype="application" mime-subtype="pdf" xlink:href="media/figures/SquareEvolution.pdf" xlink:title="" />
   </fig>
   <fig>
-    <caption><p>Streamer corona in a nanosecond pulsed discharge in
-    atmospheric air. The two figures show the same discharge, viewed
+    <caption><p>Streamer discharge tree simulation in full 3D using
+    Kinetic Monte Carlo. The two figures show the same discharge, viewed
     from the side and from the bottom.
     <styled-content id="figU003Acorona"></styled-content></p></caption>
     <graphic mimetype="application" mime-subtype="pdf" xlink:href="media/figures/ItoKMC.pdf" xlink:title="" />
-  </fig>
-  <fig>
-    <caption><p>Sprite discharges in the upper
-    atmosphere.<styled-content id="figU003Asprite"></styled-content></p></caption>
-    <graphic mimetype="image" mime-subtype="png" xlink:href="media/figures/sprite3d_3.png" xlink:title="" />
   </fig>
 </sec>
 <sec id="acknowledgements">
@@ -201,6 +200,65 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <source>Journal of Computational Physics</source>
       <year iso-8601-date="2019">2019</year>
       <uri>https://doi.org/10.1016/j.jcp.2019.03.036</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-plasimo">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Dijk</surname><given-names>Jan van</given-names></name>
+        <name><surname>Peerenboom</surname><given-names>Kim</given-names></name>
+        <name><surname>Jimenez</surname><given-names>Manuel</given-names></name>
+        <name><surname>Mihailova</surname><given-names>Diana</given-names></name>
+        <name><surname>Mullen</surname><given-names>Joost van der</given-names></name>
+      </person-group>
+      <article-title>The plasma modelling toolkit plasimo</article-title>
+      <source>Journal of Physics D: Applied Physics</source>
+      <year iso-8601-date="2009-09">2009</year><month>09</month>
+      <volume>42</volume>
+      <issue>19</issue>
+      <uri>https://dx.doi.org/10.1088/0022-3727/42/19/194012</uri>
+      <pub-id pub-id-type="doi">10.1088/0022-3727/42/19/194012</pub-id>
+      <fpage>194012</fpage>
+      <lpage></lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Niknezhad_2021">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Niknezhad</surname><given-names>M</given-names></name>
+        <name><surname>Chanrion</surname><given-names>O</given-names></name>
+        <name><surname>Köhn</surname><given-names>C</given-names></name>
+        <name><surname>Holbøll</surname><given-names>J</given-names></name>
+        <name><surname>Neubert</surname><given-names>T</given-names></name>
+      </person-group>
+      <article-title>A three-dimensional model of streamer discharges in unsteady airflow</article-title>
+      <source>Plasma Sources Science and Technology</source>
+      <publisher-name>IOP Publishing</publisher-name>
+      <year iso-8601-date="2021-04">2021</year><month>04</month>
+      <volume>30</volume>
+      <issue>4</issue>
+      <uri>https://dx.doi.org/10.1088/1361-6595/abefa6</uri>
+      <pub-id pub-id-type="doi">10.1088/1361-6595/abefa6</pub-id>
+      <fpage>045012</fpage>
+      <lpage></lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-mcplas">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Jovanović</surname><given-names>Aleksandar P.</given-names></name>
+        <name><surname>Stankov</surname><given-names>Marjan N.</given-names></name>
+        <name><surname>Loffhagen</surname><given-names>Detlef</given-names></name>
+        <name><surname>Becker</surname><given-names>Markus M.</given-names></name>
+      </person-group>
+      <article-title>Automated fluid model generation and numerical analysis of dielectric barrier discharges using comsol</article-title>
+      <source>IEEE Transactions on Plasma Science</source>
+      <year iso-8601-date="2021">2021</year>
+      <volume>49</volume>
+      <issue>11</issue>
+      <pub-id pub-id-type="doi">10.1109/TPS.2021.3120507</pub-id>
+      <fpage>3710</fpage>
+      <lpage>3718</lpage>
     </element-citation>
   </ref>
   <ref id="ref-TeunissenU003A2017">
@@ -232,6 +290,24 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <uri>https://doi.org/10.1088/1361-6595/aca0be</uri>
       <fpage>114006</fpage>
       <lpage></lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-ebchombo">
+    <element-citation>
+      <person-group person-group-type="author">
+        <name><surname>Colella</surname><given-names>P</given-names></name>
+        <name><surname>Graves</surname><given-names>D T</given-names></name>
+        <name><surname>Ligocki</surname><given-names>T J</given-names></name>
+        <name><surname>Miller</surname><given-names>G H</given-names></name>
+        <name><surname>Modiano</surname><given-names>D</given-names></name>
+        <name><surname>Schwartz</surname><given-names>P O</given-names></name>
+        <name><surname>Van Straalen</surname><given-names>B</given-names></name>
+        <name><surname>Pillod</surname><given-names>J</given-names></name>
+        <name><surname>Trebotich</surname><given-names>D</given-names></name>
+        <name><surname>Barad</surname><given-names>M</given-names></name>
+      </person-group>
+      <article-title>EBChombo software package for cartesian grid, embedded boundary applications (LBNL-6615E)</article-title>
+      <publisher-name>Lawrence Berkelely National Laboratory</publisher-name>
     </element-citation>
   </ref>
 </ref-list>
