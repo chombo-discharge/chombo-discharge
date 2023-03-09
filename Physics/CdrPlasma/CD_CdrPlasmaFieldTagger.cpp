@@ -123,7 +123,6 @@ CdrPlasmaFieldTagger::computeTracers() const
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
       const Box&     box     = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
 
       // Expose the AMR data per patch, both full data and the single-valued data.
       const EBCellFAB& electricField     = (*m_electricField[lvl])[dit()];

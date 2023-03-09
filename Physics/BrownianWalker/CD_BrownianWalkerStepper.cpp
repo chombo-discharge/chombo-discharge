@@ -470,7 +470,7 @@ BrownianWalkerStepper::advance(const Real a_dt)
   m_solver->remap();
 
   // 3. Particles that strike the EB are absorbed on it, and removed from the simulation.
-  m_solver->removeCoveredParticles(EbRepresentation::ImplicitFunction, 0.0);
+  m_solver->removeCoveredParticles(EBRepresentation::ImplicitFunction, 0.0);
 
   // 4. Make new super-particles.
   this->makeSuperParticles();
@@ -532,9 +532,9 @@ BrownianWalkerStepper::makeSuperParticles()
   //       need to call cell/patch sorting methods.
 
   if (m_ppc > 0) {
-    m_solver->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
+    m_solver->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
     m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
-    m_solver->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+    m_solver->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   }
 }
 

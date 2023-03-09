@@ -28,6 +28,8 @@ SurfaceODESolver<N>::SurfaceODESolver()
 
   m_className = "SurfaceODESolver";
 
+  m_verbosity = -1;
+
   this->setVerbosity(-1);
   this->setRealm(Realm::Primal);
   this->setPhase(phase::gas);

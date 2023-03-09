@@ -43,7 +43,7 @@ public:
   /*!
     @brief Destructor (does nothing).
   */
-  ~ItoLayout();
+  virtual ~ItoLayout();
 
   /*!
     @brief Return phase where the solvers are defined. 
@@ -88,20 +88,6 @@ public:
   */
   virtual void
   parseRuntimeOptions();
-
-  /*!
-    @brief Set PVR buffer for all solvers
-    @param[in] a_buffer Width of the PVR buffer region (see ParticleContainer for documentatino)
-  */
-  virtual void
-  setPVRBuffer(const int a_pvrBuffer);
-
-  /*!
-    @brief Set the halo buffer
-    @param[in] a_buffer Width of the halo buffer region (see ParticleContainer for documentatino)
-  */
-  virtual void
-  setHaloBuffer(const int a_haloBuffer);
 
   /*!
     @brief Allocate internals for all solvers
@@ -226,14 +212,14 @@ public:
     @param[in] a_whichContainer Which ItoSolver container to sort by cell. 
   */
   virtual void
-  sortParticlesByCell(const ItoSolver::WhichContainer a_whichContainer);
+  organizeParticlesByCell(const ItoSolver::WhichContainer a_whichContainer);
 
   /*!
     @brief Sort ItoSolver particles by patch -- this is done for all solvers. 
     @param[in] a_whichContainer Which ItoSolver container to sort by cell. 
   */
   virtual void
-  sortParticlesByPatch(const ItoSolver::WhichContainer a_whichContainer);
+  organizeParticlesByPatch(const ItoSolver::WhichContainer a_whichContainer);
 
   /*!
     @brief Rearrange the input container particle into new superparticles -- this is done for all solvers. 
@@ -242,6 +228,13 @@ public:
   */
   virtual void
   makeSuperparticles(const ItoSolver::WhichContainer a_whichContainer, const int a_ppc);
+  /*!
+    @brief Rearrange the input container particle into new superparticles -- this is done for all solvers. 
+    @param[in] a_whichContainer Which ItoSolver container to sort by cell. 
+    @param[in] a_ppc            Target particle-per-cell (ppc) per level
+  */
+  virtual void
+  makeSuperparticles(const ItoSolver::WhichContainer a_whichContainer, const Vector<int> a_ppc);
 
   /*!
     @brief Compute smallest possible time step. 
@@ -266,23 +259,6 @@ public:
   */
   virtual Real
   computeHopDt(const Real a_maxCellsToMove);
-
-  /*!
-    @brief Get largest possible time step for advection part.
-    @details This computes computeMinDriftDt for each solver and minimizes the result over the solvers.
-    @param[in] a_maxCellsToMove Maximum number of cells to move (due to advection only)
-  */
-  virtual Real
-  computeMinDriftDt(const Real a_maxCellsToMove);
-
-  /*!
-    @brief Get largest possible time step for diffusion part
-    @details This computes computeMinDiffusionDt for each solver and minimizes the result over the solvers. As with computeHopDt, the result of this function will
-    depend on the restriction of the normal distribution (which controls the diffusion hop).
-    @param[in] a_maxCellsToMove Maximum number of cells to move (due to diffusion only)
-  */
-  virtual Real
-  computeMinDiffusionDt(const Real a_maxCellsToMove);
 
   /*!
     @brief Compute the classical diffusive time step dt = dx*dx/(2*D) where D is the diffusion coefficient (not dimensional dependence here)

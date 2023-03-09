@@ -16,6 +16,7 @@
 #include <random>
 #include <memory>
 #include <mutex>
+#include <type_traits>
 
 // Chombo includes
 #include <REAL.H>
@@ -51,7 +52,7 @@ public:
   Random(const Random&& a_other) = delete;
 
   /*!
-    @brief Disallowed copy assignemtn. 
+    @brief Disallowed copy assignment. 
     @param[in] a_other Other RNG engine. 
   */
   Random&
@@ -66,10 +67,20 @@ public:
 
   /*!
     @brief Get Poisson distributed number
+    @param[in] a_mean Poisson mean value (inverse rate)
   */
-  template <typename T>
+  template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   inline static T
   getPoisson(const Real a_mean);
+
+  /*!
+    @brief Get Poisson distributed number. 
+    @param[in] a_N Number of trials
+    @param[in] a_p The usual success probability in binomial distributions
+  */
+  template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+  inline static T
+  getBinomial(const T a_N, const Real a_p) noexcept;
 
   /*!
     @brief Get a uniform real number on the interval [0,1]
@@ -109,6 +120,20 @@ public:
   */
   inline static void
   seed();
+
+  /*!
+    @brief Set the RNG seed.
+    @details If using MPI, the seed is set to a_seed + procID().
+    @param[in] a_seed Seed to use for RNG.
+  */
+  inline static void
+  setSeed(const int a_seed);
+
+  /*!
+    @brief Set a random RNG seed
+  */
+  inline static void
+  setRandomSeed();
 
   /*!
     @brief Return a random position in the cube (a_lo, a_hi);
@@ -178,20 +203,6 @@ private:
     @brief Normal distribution centered at zero with standard deviation of one
   */
   static std::normal_distribution<Real> s_normal01;
-
-  /*!
-    @brief Set the RNG seed.
-    @details If using MPI, the seed is set to a_seed + procID().
-    @param[in] a_seed Seed to use for RNG.
-  */
-  inline static void
-  setSeed(const int a_seed);
-
-  /*!
-    @brief Set a random RNG seed
-  */
-  inline static void
-  setRandomSeed();
 };
 
 #include <CD_NamespaceFooter.H>

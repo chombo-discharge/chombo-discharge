@@ -115,6 +115,8 @@ Note that the resulting is an implicit function but is *not* an SDF.
 However, the union typically approximates the signed distance field quite well near the surface.
 ``Chombo`` natively supports many ways of performing CSG.
 
+.. _Chap:EBGeometry:
+
 EBGeometry
 ^^^^^^^^^^
 
@@ -193,7 +195,12 @@ The above load balancing strategy is very simple, and it reduces the original :m
 The strategy works for all SDFs although, strictly speaking, an SDF is not fundamentally needed.
 If a well-behaved Taylor series can be found for an implicit function, the bounds on the series can also be used to infer the location of the cut-cells, and the same algorithm can be used.
 For example, generating compound objects with CSG are typically sufficiently well behaved (provided that the components are SDFs). 
-However, implicit functions like :math:`d\left(\mathbf{x}\right) = R^2 - \mathbf{x}\cdot\mathbf{x}` must be used with caution. 
+However, implicit functions like :math:`d\left(\mathbf{x}\right) = R^2 - \mathbf{x}\cdot\mathbf{x}` must be used with caution.
+
+When polygonal surfaces are involved the above process might lead to load imbalance if the input grids to :ref:`Chap:EBGeometry` do not produce well-balanced bounding volume hierarchies (which is often the case).
+In this case it might be beneficial to shuffle the cut-cell boxes among the ranks by specifying ``ScanShop.box_sorting = shuffle``, which will normally lead to well-balanced cut-cell grid generation.
+Other options are ``ScanShop.box_sorting = morton`` and ``ScanShop.box_sorting = std``.
+The default behavior is to use a Morton space-filling curve for organizing the cut-cell patches among the ranks. 
 
 .. _Chap:MeshGeneration:
 

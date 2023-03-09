@@ -9,7 +9,7 @@ def write_template(args):
     
     # Write plasma kinetics options
     optf.write("# ====================================================================================================\n")
-    optf.write('# POTENTIAL CURVE\n')
+    optf.write('# Voltage curve\n')
     optf.write("# ====================================================================================================\n")
     optf.write(args.app_name + ".potential = 1\n")
     optf.write(args.app_name + ".basename  = pout\n")
@@ -17,16 +17,16 @@ def write_template(args):
 
     options_files = [args.discharge_home + "/Source/AmrMesh/CD_AmrMesh.options", \
                      args.discharge_home + "/Source/Driver/CD_Driver.options", \
-                     args.discharge_home + "//Source/Electrostatics/CD_" + args.field_solver + ".options",\
-                     args.discharge_home + "/Source/ItoDiffusion/CD_" + args.ItoSolver + ".options",\
+                     args.discharge_home + "/Source/Electrostatics/CD_" + args.field_solver + ".options",\
+                     args.discharge_home + "/Source/ItoDiffusion/CD_ItoSolver.options",\
                      args.discharge_home + "/Source/RadiativeTransfer/CD_McPhoto.options",\
                      args.discharge_home + "/Source/Geometry/CD_GeoCoarsener.options", \
                      args.discharge_home + "/Geometries/" + args.geometry + "/CD_" + args.geometry + ".options", \
-                     args.discharge_home + "/Physics/ItoPlasma/TimeSteppers/" + args.TimeStepper + "/CD_" + args.TimeStepper + ".options", \
+                     args.discharge_home + "/Physics/ItoPlasma/TimeSteppers/" + args.time_stepper + "/CD_" + args.time_stepper + ".options", \
                      args.discharge_home + "/Physics/ItoPlasma/PlasmaModels/" + args.physics + "/CD_" + args.physics + ".options"]
 
-    if not args.CellTagger == "none":
-        options_files.append(args.discharge_home + "/Physics/ItoPlasma/CellTaggers/" + args.CellTagger + "/CD_" + args.CellTagger + ".options")
+    if not args.cell_tagger == "none":
+        options_files.append(args.discharge_home + "/Physics/ItoPlasma/CellTaggers/" + args.cell_tagger + "/CD_" + args.cell_tagger + ".options")
         
     for opt in options_files:
         if os.path.exists(opt):
@@ -36,5 +36,5 @@ def write_template(args):
             optf.write('\n\n')
             f.close()
         else:
-            print 'Could not find options file (this _may_ be normal behavior) ' + opt
+            print('Could not find options file (this _may_ be normal behavior) ' + opt)
     optf.close()

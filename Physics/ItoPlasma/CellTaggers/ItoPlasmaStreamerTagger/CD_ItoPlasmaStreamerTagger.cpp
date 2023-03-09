@@ -39,9 +39,10 @@ ItoPlasmaStreamerTagger::ItoPlasmaStreamerTagger(const RefCountedPtr<ItoPlasmaPh
 void
 ItoPlasmaStreamerTagger::parseOptions()
 {
-  parseVerbosity();
-  parseBoxes();
-  parseBuffer();
+  this->parseVerbosity();
+  this->parseTagBoxes();
+  this->parseRefinementBoxes();
+  this->parseBuffer();
 
   ParmParse pp(m_name.c_str());
   pp.get("coarsen_curvature", m_coar_curv);
@@ -54,9 +55,10 @@ ItoPlasmaStreamerTagger::parseOptions()
 void
 ItoPlasmaStreamerTagger::parseRuntimeOptions()
 {
-  parseVerbosity();
-  parseBoxes();
-  parseBuffer();
+  this->parseVerbosity();
+  this->parseTagBoxes();
+  this->parseRefinementBoxes();
+  this->parseBuffer();
 
   ParmParse pp(m_name.c_str());
   pp.get("coarsen_curvature", m_coar_curv);

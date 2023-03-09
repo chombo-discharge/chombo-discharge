@@ -584,11 +584,10 @@ EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
   // TLDR: Run through each patch and interpolate to the particle positions.
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const EBLevelGrid&       eblg   = *m_eblgs[lvl];
-    const DisjointBoxLayout& dbl    = eblg.getDBL();
-    const ProblemDomain&     domain = eblg.getDomain();
-    const EBISLayout&        ebisl  = eblg.getEBISL();
-    const Real&              dx     = m_dx[lvl];
+    const EBLevelGrid&       eblg = *m_eblgs[lvl];
+    const DisjointBoxLayout& dbl  = eblg.getDBL();
+
+    const EBISLayout& ebisl = eblg.getEBISL();
 
     CH_assert(a_meshScalarField[lvl]->nComp() == 1);
 

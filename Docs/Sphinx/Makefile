@@ -49,12 +49,6 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 
-github:
-	@make clean html
-	@cp -a $(BUILDDIR)/html/. ../
-	@make clean
-	rmdir $(BUILDDIR)
-
 github-tex:
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo "Running LaTeX files through pdflatex..."

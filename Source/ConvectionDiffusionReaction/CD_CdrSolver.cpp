@@ -275,9 +275,9 @@ CdrSolver::allocateInternals()
     DataOps::setValue(m_faceStates, 0.0);
   }
   else {
-    m_amr->allocatePointer(m_faceVelocity);
-    m_amr->allocatePointer(m_cellVelocity);
-    m_amr->allocatePointer(m_faceStates);
+    m_amr->allocatePointer(m_faceVelocity, m_realm);
+    m_amr->allocatePointer(m_cellVelocity, m_realm);
+    m_amr->allocatePointer(m_faceStates, m_realm);
   }
 
   // Only allocate memory for diffusion coefficients if we need it. Otherwise, allocate a NULL pointer that we can
@@ -291,8 +291,8 @@ CdrSolver::allocateInternals()
     DataOps::setValue(m_ebCenteredDiffusionCoefficient, 0.0);
   }
   else {
-    m_amr->allocatePointer(m_faceCenteredDiffusionCoefficient);
-    m_amr->allocatePointer(m_ebCenteredDiffusionCoefficient);
+    m_amr->allocatePointer(m_faceCenteredDiffusionCoefficient, m_realm);
+    m_amr->allocatePointer(m_ebCenteredDiffusionCoefficient, m_realm);
   }
 
   // Allocate stuff for holding fluxes -- this data is used when computing advection and diffusion fluxes.
@@ -577,15 +577,9 @@ CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
   CH_assert(a_facePhi.nComp() == 1);
   CH_assert(a_faceVelocity.nComp() == 1);
 
-  const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_lvl];
-  const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
-  const ProblemDomain&     domain = m_amr->getDomains()[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box      cellBox = dbl[dit()];
-    const EBISBox& ebisbox = ebisl[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-
     for (int dir = 0; dir < SpaceDim; dir++) {
       EBFaceFAB&       flux = a_flux[dit()][dir];
       const EBFaceFAB& phi  = a_facePhi[dit()][dir];
@@ -738,8 +732,6 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
 
         // Regular grid data.
         BaseFab<Real>&       regFluxFace = fluxFace.getSingleValuedFAB();
-        const BaseFab<Real>& regPhiFace  = phiFace.getSingleValuedFAB();
-        const BaseFab<Real>& regVelFace  = velFace.getSingleValuedFAB();
         const BaseFab<Real>& regDcoFace  = dcoFace.getSingleValuedFAB();
 
         // Compute advective flux
@@ -777,7 +769,6 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
           const VolIndex hiVoF = face.getVoF(Side::Hi);
           const VolIndex loVoF = face.getVoF(Side::Lo);
 
-          Real&       faceFlux  = fluxFace(face, m_comp);
           const Real& cellPhiLo = phiCell(loVoF, m_comp);
           const Real& cellPhiHi = phiCell(hiVoF, m_comp);
           const Real& faceDco   = dcoFace(face, m_comp);
@@ -956,7 +947,7 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
                 flux(face, m_comp) += areaFrac * flux(f, m_comp);
               }
 
-              flux(face, m_comp) = sign(sit()) * std::max(0.0, sign(sit()) * flux(face, m_comp)) / sumArea;
+              flux(face, m_comp) = sign(sit()) * std::max((Real)0.0, sign(sit()) * flux(face, m_comp)) / sumArea;
             }
 
             break;
@@ -1223,14 +1214,10 @@ CdrSolver::initialData()
   // deposit particles (with an NGP scheme) on the mesh. This function does both -- first particles if we have them and
   // then we increment with the function.
 
-  const bool depositParticles = m_species->getInitialParticles().length() > 0;
-
   DataOps::setValue(m_phi, 0.0);
 
   // Deposit particles if we have them.
-  if (depositParticles) {
-    this->initialDataParticles();
-  }
+  this->initialDataParticles();
 
   // Increment with function values if this is also called for. Note that this increments,
   // why is why initialDataParticles is called first!
@@ -1279,7 +1266,9 @@ CdrSolver::initialDataParticles()
 
   const List<PointParticle>& initialParticles = m_species->getInitialParticles();
 
-  if (initialParticles.length() > 0) {
+  const long long numParticles = (long long)initialParticles.length();
+
+  if (ParallelOps::sum(numParticles) > 0LL) {
 
     // Make a ParticleContainer<T> and redistribute particles over the AMR hierarchy.
     ParticleContainer<PointParticle> particles;
@@ -1310,11 +1299,6 @@ CdrSolver::initialDataParticles()
                                                               DepositionType::NGP,
                                                               forceIrregNGP);
       }
-
-#if CH_SPACEDIM == \
-  2 // Scale for 2D Cartesian. We do this because the 2D deposition object will normalize by 1/(dx*dx), but we want 1/(dx*dx*dx) in both 2D and 3D
-      DataOps::scale(*m_phi[lvl], 1. / dx[0]);
-#endif
     }
   }
 }
@@ -3159,8 +3143,8 @@ CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a
           const VolIndex loVof = face.getVoF(Side::Lo);
           const VolIndex hiVof = face.getVoF(Side::Hi);
 
-          const Real loVal = std::max(0.0, cellPhi(loVof, m_comp));
-          const Real hiVal = std::max(0.0, cellPhi(hiVof, m_comp));
+          const Real loVal = std::max((Real)0.0, cellPhi(loVof, m_comp));
+          const Real hiVal = std::max((Real)0.0, cellPhi(hiVof, m_comp));
 
           Real Hlo = 0.0;
           Real Hhi = 0.0;

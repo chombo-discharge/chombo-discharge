@@ -112,7 +112,6 @@ protected:
     @brief Number of solvers
   */
   int m_numSolvers;
-  ;
 
   /*!
     @brief Defined or not

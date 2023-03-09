@@ -35,7 +35,6 @@ NoisePlane::NoisePlane()
     std::string orientation;
     std::string material;
 
-    int normal;
     int noiseOctaves;
 
     RealVect point;

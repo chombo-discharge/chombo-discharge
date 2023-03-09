@@ -12,6 +12,9 @@
 #ifndef CD_DischargeIO_H
 #define CD_DischargeIO_H
 
+// Std includes
+#include <string>
+
 // Chombo includes
 #include <REAL.H>
 #include <RealVect.H>
@@ -31,6 +34,21 @@
   @brief Namespace which encapsulates chombo-discharge IO functionality. 
 */
 namespace DischargeIO {
+  /*!
+    @brief Number formatting method -- writes big numbers using an input separator. E.g. the number 123456 is written as 123,456
+    @param[in] a_number Number to format as string with separator
+    @param[in] a_sep    Separator
+  */
+  std::string
+  numberFmt(const long long a_number, char a_sep = ',') noexcept;
+
+  /*!
+    @brief Number formatting game. This just prints the number 123456 as 123,456
+    @param[in] a_numbers Numbers to format as string with separator
+    @param[in] a_sep     Separator
+  */
+  Vector<std::string>
+  numberFmt(const Vector<long long> a_numbers, char a_sep = ',') noexcept;
 
   /*!
     @brief A shameless copy of Chombo's writeEBHDF5 but including the lower-left corner of the physical domain as well.

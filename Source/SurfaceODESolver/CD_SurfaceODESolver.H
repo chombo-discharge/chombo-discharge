@@ -24,7 +24,7 @@ template <int N = 1>
 class SurfaceODESolver
 {
 public:
-  static_assert(N > 0);
+  static_assert(N > 0, "SurfaceODESolver<N> must have N > 0");
 
   /*!
     @brief Default constructor. Must subsequently set AmrMesh.

@@ -6,7 +6,12 @@ This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for disc
 A modified version of ``Chombo`` is distributed together with this code.
 ``chombo-discharge`` only uses ``Chombo``; it is not affiliated nor endorsed by LBNL.
 
-Click [here](https://chombo-discharge.github.io/chombo-discharge/Base/Installation.html) for installation instructions.
+<img src="./Docs/Sphinx/source/_static/figures/BranchingAir.gif" width="100%">
+
+Installation
+------------
+
+See https://chombo-discharge.github.io/chombo-discharge/Base/Installation.html for installation instructions.
 
 Documentation
 -------------

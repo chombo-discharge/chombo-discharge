@@ -26,6 +26,7 @@ RtSolver::RtSolver()
   CH_TIME("RtSolver::RtSolver");
 
   // Default settings
+  m_verbosity = -1;
   m_name      = "RtSolver";
   m_className = "RtSolver";
 }
@@ -396,6 +397,19 @@ RefCountedPtr<RtSpecies>&
 RtSolver::getSpecies()
 {
   return m_rtSpecies;
+}
+
+void
+RtSolver::parseVerbosity() noexcept
+{
+  CH_TIME("RtSolver::parseVerbosity");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::parseVerbosity" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("verbosity", m_verbosity);
 }
 
 #include <CD_NamespaceFooter.H>

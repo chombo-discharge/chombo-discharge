@@ -20,7 +20,7 @@
 #include <BinFab.H>
 #include <ProblemDomain.H>
 #include <DisjointBoxLayout.H>
-#include "BaseEBCellFAB.H"
+#include <BaseEBCellFAB.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
@@ -163,6 +163,12 @@ public:
   transferMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask);
 
   /*!
+    @brief Sort particles according to the < operator in the particle.
+  */
+  void
+  sortParticles() noexcept;
+
+  /*!
     @brief Clear all particles
   */
   void
@@ -191,7 +197,7 @@ public:
     @brief Is cell-sorted or not
   */
   bool
-  isCellSorted() const;
+  isOrganizedByCell() const;
 
   /*!
     @brief Get finest AMR level
@@ -252,6 +258,20 @@ public:
   */
   const Vector<DisjointBoxLayout>&
   getGrids() const;
+
+  /*!
+    @brief Get lower-left corner
+    @return m_probLo
+  */
+  const RealVect
+  getProbLo() const noexcept;
+
+  /*!
+    @brief Get grid resolutions
+    @return m_dx
+  */
+  const Vector<RealVect>
+  getDx() const noexcept;
 
   /*!
     @brief Get particle data on a level
@@ -340,14 +360,14 @@ public:
     @details This will fill m_cellSortedParticles and destroy the patch-sorted particles. 
   */
   void
-  sortParticlesByCell();
+  organizeParticlesByCell();
 
   /*!
     @brief Sort particles by cell
     @details This will fill m_particles from m_cellSortedParticles and destroy the cell-sorted particles. 
   */
   void
-  sortParticlesByPatch();
+  organizeParticlesByPatch();
 
   /*!
     @brief Add particles to container
@@ -473,37 +493,37 @@ public:
   /*!
     @brief Get local number of particles
   */
-  size_t
+  unsigned long long
   getNumberOfValidParticlesLocal() const;
 
   /*!
     @brief Get global number of particles
   */
-  size_t
+  unsigned long long
   getNumberOfValidParticlesGlobal() const;
 
   /*!
     @brief Get local number of particles
   */
-  size_t
+  unsigned long long
   getNumberOfOutcastParticlesLocal() const;
 
   /*!
     @brief Get global number of particles
   */
-  size_t
+  unsigned long long
   getNumberOfOutcastParticlesGlobal() const;
 
   /*!
     @brief Get the number particles in the halo cells. 
   */
-  size_t
+  unsigned long long
   getNumberOfMaskParticlesLocal() const;
 
   /*!
     @brief Get the number particles in the halo cells. 
   */
-  size_t
+  unsigned long long
   getNumberOfMaskParticlesGlobal() const;
 
 protected:
@@ -535,7 +555,7 @@ protected:
   /*!
     @brief Check if particle container is "cell sorted". 
   */
-  bool m_isCellSorted;
+  bool m_isOrganizedByCell;
 
   /*!
     @brief Profile or not
@@ -596,6 +616,12 @@ protected:
     refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
   */
   mutable AMRParticles<P> m_maskParticles;
+
+  /*!
+    @brief Cache particles. Use during pre-regrid operations, and for transferring particles between coarse and fine before
+    deposition steps. 
+  */
+  Vector<List<P>> m_cacheParticles;
 
   /*!
     @brief Particles stored on the old grid. 

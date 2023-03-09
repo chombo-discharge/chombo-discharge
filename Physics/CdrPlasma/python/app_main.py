@@ -59,7 +59,8 @@ def write_template(args):
     mainf.write("\n")
     mainf.write("  // Build class options from input script and command line options\n")
     mainf.write("  const std::string input_file = argv[1];\n")
-    mainf.write("  ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());")
+    mainf.write("  ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());\n")
+    mainf.write("  Random::seed();\n")
     mainf.write("\n")
 
     mainf.write("\n")

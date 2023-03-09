@@ -478,22 +478,6 @@ protected:
   void
   gridReport();
 
-  /*!
-    @brief Number formatting method -- writes big numbers using an input separator. E.g. the number 123456 is written as 123,456
-    @param[in] a_number Number to format as string with separator
-    @param[in] a_sep    Separator
-  */
-  std::string
-  numberFmt(const long long a_number, char a_sep = ',') const;
-
-  /*!
-    @brief Number formatting game. This just prints the number 123456 as 123,456
-    @param[in] a_numbers Numbers to format as string with separator
-    @param[in] a_sep     Separator
-  */
-  Vector<std::string>
-  numberFmt(const Vector<long long> a_numbers, char a_sep = ',') const;
-
 #ifdef CH_USE_HDF5
   /*!
     @brief Read checkpoint file

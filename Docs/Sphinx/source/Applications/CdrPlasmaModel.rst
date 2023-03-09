@@ -1,7 +1,7 @@
 .. _Chap:CdrPlasmaModel:
 
-CDR plasma
-**********
+CDR plasma model
+****************
 
 The CDR plasma model resides in :file:`/Physics/CdrPlasma` and describes plasmas in the drift-diffusion approximation.
 This physics model also includes the following subfolders:
@@ -45,7 +45,7 @@ The coupling that is (currently) available in ``chombo-discharge`` is
 .. math::
    :label: CdrPlasmaCoupling
 
-   \epsilon_r =& \epsilon_r(\mathbf{x}), (\textrm{can additionally be discontinuous}), \\
+   \epsilon_r =& \epsilon_r(\mathbf{x}),\\
    \mathbf{v} =& \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right),\\
    D =& \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right),\\
    S =& S\left(t, \mathbf{x}, \mathbf{E}, \nabla\mathbf{E}, n, \nabla n, \Psi\right),\\
@@ -56,6 +56,44 @@ The coupling that is (currently) available in ``chombo-discharge`` is
 where :math:`F` is the boundary flux on insulators or electrodes (which must be separately implemented).
 
 ``chombo-discharge`` works by embedding the equations above into an abstract C++ framework (see :ref:`Chap:CdrPlasmaPhysics`) that the user must implement or reuse existing pieces of, and then compile into an executable.
+
+.. _Chap:CdrPlasmaNewProblem:
+
+Simulation quick start
+======================
+
+New problems that use the ``CdrPlasma`` physics model are best set up by using the Python tools provided with the module.
+Navigate to :file:`$DISCHARGE_HOME/Physics/CdrPlasma`` and set up the problem with.
+To see the list of available options type
+
+.. code-block:: bash
+
+   cd $DISCHARGE_HOME/Physics/CdrPlasma
+   ./setup.py --help
+
+The following options are helpful for setting up the problem:
+
+* ``base_dir`` The base directory where the application will be placed.
+  Defaults to :file:`$DISCHARGE_HOME/MyApplications`. 
+* ``app_name`` The application name.
+  The application will be put in :file:`base_dir/app_name`.
+* ``geometry`` The geometry to be used.
+  The geometry must be one of the ones provided in :file:`$DISCHARGE_HOME/Geometries` (users can also provide their own models).
+* ``physics`` The plasma physics model.
+  This must be one of the folders/class in :file:`$DISCHARGE_HOME/Physics/CdrPlasma/PlasmaModel` (users can also provide their own models).
+  Defaults to ``CdrPlasmaJSON`` (see :ref:`Chap:CdrPlasmaJSON`). 
+* ``time_stepper`` Time integrator.
+  This must derive from ``CdrPlasmaStepper`` and must be one of the time steppers in :file:`$DISCHARGE_HOME/Physics/CdrPlasma/TimeSteppers`.
+  The default integrator is ``CdrPlasmaGodunovStepper``. 
+* ``cell_tagger`` Cell tagger
+  This must derive from ``CdrPlasmaTagger`` and must be one of the cell taggers in :file:`$DISCHARGE_HOME/Physics/CdrPlasma/CellTaggers`.
+
+For example, to set up a geometry-less that does not use AMR, do
+
+.. code-block:: bash
+
+   cd $DISCHARGE_HOME
+   ./setup.py -app_name=MyApplication
 
 Solvers
 =======
@@ -474,7 +512,7 @@ The basic time step limitations for the Godunov integrator are:
 * The dielectric relaxation time.
 
 The user is responsible for setting these when running the simulation.
-Note when the the semi-implicit scheme is used, it is not necessary to restrict the time step by the dielectric relaxation time. 
+Note when the semi-implicit scheme is used, it is not necessary to restrict the time step by the dielectric relaxation time. 
 
 .. _Chap:SISDC:
 
@@ -689,7 +727,7 @@ For an introduction to the particle radiative transfer solver, see :ref:`Chap:Mo
 
 The user must use one of the following:
 
-#. Set the following class options:
+* Set the following class options:
 
    .. code-block:: text
 		   
@@ -698,11 +736,11 @@ The user must use one of the following:
       McPhoto.photon_generation = deterministic
       McPhoto.source_type       = number
 
-   When specifying ``CdrPlasmaJSON.discrete_photons=true``, ``CdrPlasmaJSON`` will do a Poisson sampling of the number of photons that are generated in each cell and put this in the radiative transfer solvers' source terms.
+   When specifying ``CdrPlasmaJSON.discrete_photons = true``, ``CdrPlasmaJSON`` will do a Poisson sampling of the number of photons that are generated in each cell and put this in the radiative transfer solvers' source terms.
    This means that the radiative transfer solver source terms *contain the physical number of photons generated in one time step*. 
    To turn off sampling inside the radiative transfer solver, we specify ``McPhoto.photon_generation = stochastic`` and set ``McPhoto.source_type = number`` to let the solver know that the source contains the number of physical photons. 
 
-#. Set the following class options:
+* Alternatively, set the following class options:
    
    .. code-block:: text
 		   
@@ -714,7 +752,7 @@ The user must use one of the following:
    In this case the ``CdrPlasmaJSON`` class will fill the solver source terms with the volumetric rate, i.e. the number of photons produced per unit volume and time.
    When ``McPhoto`` generates the photons it will compute the number of photons generated in a cell through Poisson sampling :math:`n = P\left(S_\gamma\Delta V\Delta t\right)` where :math:`P` indicates a Poisson sampling operator.
 
-Fundamentally, the two approaches differ only in where the the Poisson sampling is performed.
+Fundamentally, the two approaches differ only in where the Poisson sampling is performed.
 With the first approach, plotting the radiative transfer solver source terms will show the number of physical photons generated.
 In the second approach, the source terms will show the volume photo-generation rate. 
 
@@ -724,7 +762,7 @@ Gas law and neutral background
 General functionality
 _____________________
 
-To include the gas law and neutral species, include a JSON object ``gas`` with the the field ``law`` specified.
+To include the gas law and neutral species, include a JSON object ``gas`` with the field ``law`` specified.
 Currently, ``law`` can be either ``ideal``, ``troposphere``, or ``table``.
 
 The purpose of the gas law is to set the temperature, pressure, and neutral density of the background gas.
@@ -915,6 +953,14 @@ For example, a minimum version would look like
 Initial data
 ____________
 
+Initial data can be provided with
+
+* Function based densities.
+* Computational particles (deposited using a nearest-grid-point scheme).
+
+Density functions
+^^^^^^^^^^^^^^^^^
+
 To provide initial data one include ``initial data`` for each species.
 Currently, the following fields are supported:
 
@@ -958,9 +1004,112 @@ Currently, the following fields are supported:
 
 .. note::
 
-   When multiple initial data fields are specified, ``chombo-discharge`` takes the superposition of all of them. 
+   When multiple initial data fields are specified, ``chombo-discharge`` takes the superposition of all of them.
 
-For example, a species with complex initial data can look like:
+Initial particles
+^^^^^^^^^^^^^^^^^
+
+Initial particles can be included with the ``initial particles`` field.
+The current implementation supports
+
+* ``uniform`` For drawing initial particles randomly distributed inside a box.
+  The user must specify the two corners ``lo corner`` and ``hi corner`` that indicate the spatial extents of the box, and the ``number`` of computational particles to draw.
+  The weight is specified by a field ``weight``.
+  For example:
+  
+  .. code-block:: json
+
+   {"plasma species":
+     [
+       {
+         "name": "e",
+         "Z":  -1,
+	 "mobile": true,
+	 "diffusive": true,
+	 "initial particles": {
+	   "uniform": {
+	     "lo corner": [0,0,0],
+	     "hi corner": [1,1,1],
+	     "number": 100,
+	     "weight": 1.0
+	   }
+	 }
+       }
+     ]
+   }
+
+
+* ``sphere`` For drawing initial particles randomly distributed inside a sphere.
+  Mandatory fields are
+
+  * ``center`` for specifying the sphere center.
+  * ``radius`` for specifying the sphere radius.
+  * ``number`` for the number of computational particles.
+  * ``weight`` for the initial particle weight.
+
+  .. code-block:: json
+
+   {"plasma species":
+     [
+       {
+         "name": "e",
+         "Z":  -1,
+	 "mobile": true,
+	 "diffusive": true,
+	 "initial particles": {
+	   "sphere": {
+	     "center": [0,0,0],
+	     "radius": 1.0,
+	     "number": 100,
+	     "weight": 1.0
+	   }
+	 }
+       }
+     ]
+   }
+
+* ``copy`` For using an already initialized particle distribution.
+  The only mandatory fields is ``copy``, e.g.
+
+  .. code-block:: json  
+   {"plasma species":
+     [
+       {
+         "name": "e",
+         "Z":  -1,
+	 "mobile": true,
+	 "diffusive": true,
+	 "initial particles": {
+	   "sphere": {
+	     "center": [0,0,0],
+	     "radius": 1.0,
+	     "number": 100,
+	     "weight": 1.0
+	   }
+	 }
+       },
+       {
+         "name": O2+,
+         "Z": 1,
+	 "mobile": true,
+	 "diffusive": true,
+	 "initial particles": {
+	    "copy": "e"
+	 }
+     ]
+   }
+
+   This will copy the particles from the species ``e`` to the species ``O2+``.
+
+   .. warning::
+
+      The species one copies from must be defined *before* the species one copies *to*.
+
+
+Complex example
+^^^^^^^^^^^^^^^
+
+For example, a species with complex initial data that combines density functions with initial particles can look like:
 
 .. code-block:: json
 
@@ -1009,7 +1158,15 @@ For example, a species with complex initial data can look like:
 	      "scale height": 100,
 	      "scale density": 1E6   
 	    }
-	 }
+	 },
+	 "initial particles": {
+	   "sphere": {
+	     "center": [0,0,0],
+	     "radius": 1.0,
+	     "number": 100,
+	     "weight": 1.0
+	   }
+	 }	 
        }
      ]
    }
@@ -1502,47 +1659,14 @@ The above code will add two reactions to the reaction set: :math:`N_2 + N_2 + N_
 It is not possible to set different reaction rates for the two reactions. 
 
 
-Plotting reactions
-__________________
 
-It is possible to have ``CdrPlasmaJSON`` include the reaction rates in the HDF5 output files by including a field ``plot`` as follows:
 
-.. code-block:: json
 
-   {"plasma reactions":
-     [
-       {
-         "reaction": "e + O2 -> e + e + O2+",
-	 "plot": true,
-	 "lookup": "constant",
-	 "rate": 1E-30,
-       }
-     ]
-   }
-
-Plotting the reaction rate can be useful for debugging or analysis.
-Note that it is, by extension, also possible to add useful data to the I/O files from reactions that otherwise do not contribute to the discharge evolution.
-For example, if we know the rate :math:`k` for excitation of nitrogen to a specific excited state, but do not otherwise care about tracking the excited state, we can add the reaction as follows:
-
-.. code-block:: json
-
-   {"plasma reactions":
-     [
-       {
-         "reaction": "e + N2 -> e + N2",
-	 "plot": true,	 
-	 "lookup": "constant",
-	 "rate": 1E-30,
-       }
-     ]
-   }
-
-This reaction is a dud in terms of the discharge evolution (the left and right hand sides are the same), but it can be useful for plotting the excitation rate. 
-
-.. note:: This functionality should be used with care because each reaction increases the I/O load.
+Specifying reaction rates
+_________________________
 
 Constant reaction rates
-_______________________
+^^^^^^^^^^^^^^^^^^^^^^^
 
 To set a constant reaction rate for a reaction, set the field ``lookup`` to ``"constant"`` and specify the rate.
 For example:
@@ -1559,10 +1683,36 @@ For example:
      ]
    }
 
-Function based rates
-____________________
+Single-temperature rates
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-* To set a rate dependent on two species temperature in the form :math:`k(T_1, T_2) = c_1\left(T_1/T_2\right)^{c_2}`, set ``lookup`` to ``functionT1T2 A``.
+* ``functionT A``
+  To set a rate dependent on a single species temperature in the form :math:`k(T) = c_1T^{c_2}`, set ``lookup`` to ``functionT A``.
+  The user must specify the species from which we compute the temperature :math:`T` by including a field ``T``.
+  The constants :math:`c_1` and :math:`c_2` must also be included.
+
+  For example, in order to add a reaction :math:`e + \textrm{O}_2 \rightarrow \varnothing` with rate :math:`k = 1.138\times 10^{-11}T_{\textrm{e}}^{-0.7}` we can add the following:
+
+    .. code-block:: json
+
+     {"plasma reactions":
+       [
+         {
+           "reaction": "e + M+ ->",
+	   "lookup": "functionT A",
+	   "T": "e",
+	   "c1": 1.138
+	   "c2": -0.7
+         }
+       ]
+     } 
+  
+
+Two-temperature rates
+^^^^^^^^^^^^^^^^^^^^^
+
+* ``functionT1T2 A``
+  To set a rate dependent on two species temperature in the form :math:`k(T_1, T_2) = c_1\left(T_1/T_2\right)^{c_2}`, set ``lookup`` to ``functionT1T2 A``.
   The user must specify which temperatures are involved by specifying the fields ``T1``, ``T2``, as well as the constants through fields ``c1`` and ``c2``.
   For example, to include the reaction :math:`e + \textrm{O}_2 + \textrm{O}_2 \rightarrow \textrm{O}_2^- + O2` in the set, with this reaction having a rate
 
@@ -1585,10 +1735,39 @@ ____________________
 	   "c2": 1
          }
        ]
-     } 
+     }
+
+Townsend ionization and attachment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To set standard Townsend ionization and attachment reactions, set ``lookup`` to ``alpha*v`` and ``eta*v``, respectively.
+This will compute the rate constant :math:`k = \alpha \left|\mathbf{v}\right|` where :math:`\mathbf{v}` is the drift velocity of some species.
+To specify the species one includes the field ``species``.
+
+For example, to include the reactions :math:`e \rightarrow e + e + M^+` and :math:`e \rightarrow M^-` one can specify the reactions as
+
+.. code-block:: json
+
+     {"plasma reactions":
+       [
+         {
+           "reaction": "e -> e + e + M+",
+	   "lookup": "alpha*v",
+	   "species": "e"
+         },
+         {
+           "reaction": "e -> M-",
+	   "lookup": "eta*v",
+	   "species": "e"
+         }	 
+       ]
+     }
+
+
+
 
 Tabulated rates
-_______________
+^^^^^^^^^^^^^^^
 
 To set a tabulated rate with :math:`k = k(E,N)`, set the field ``lookup`` to ``table E/N`` and specify the file, header, and data format to be used.
 For example:
@@ -1622,9 +1801,11 @@ The final fields ``min E/N``, ``max E/N``, and ``points`` are formatting fields 
 As with the mobilities (see :ref:`Chap:CdrPlasmaJSONMobility`), the ``spacing`` argument determines whether or not the internal interpolation table uses uniform or exponential grid point spacing.
 Finally, the ``dump`` argument will tell ``chombo-discharge`` to dump the table to file, which is useful for debugging or quality assurance of the tabulated data.
 
+Modifying reactions
+___________________
 
 Collisional quenching
-_____________________
+^^^^^^^^^^^^^^^^^^^^^
 
 To quench a reaction, include a field ``qenching_pressure`` and specify the *quenching pressure* (in atmospheres).
 When computing reaction rates, the rate for the reaction will be modified as
@@ -1662,7 +1843,7 @@ For example:
    }
 
 Reaction efficiencies
-_____________________
+^^^^^^^^^^^^^^^^^^^^^
 
 To modify a reaction efficiency, include a field ``efficiency`` and specify it.
 This will modify the reaction rate as
@@ -1695,13 +1876,13 @@ For example:
    }
 
 Scaling reactions
-_________________
+^^^^^^^^^^^^^^^^^
 
 Reactions can be scaled by including a ``scale`` argument to the reaction.
 This works exactly like the ``efficiency`` field outlined above.
 
 Energy correction
-_________________
+^^^^^^^^^^^^^^^^^
 
 Occasionally, it can be necessary to incorporate an energy correction to models, accounting e.g. for electron energy loss near strong gradients.
 The JSON interface supports the correction in :cite:t:`Soloviev2009`.
@@ -1744,7 +1925,46 @@ Note that this correction makes sense when rates are dependent only on the elect
 
 .. note::
 
-   When using the energy correction, the specifies species must be both mobile and diffusive. 
+   When using the energy correction, the specifies species must be both mobile and diffusive.
+
+Plotting reactions
+__________________
+
+It is possible to have ``CdrPlasmaJSON`` include the reaction rates in the HDF5 output files by including a field ``plot`` as follows:
+
+.. code-block:: json
+
+   {"plasma reactions":
+     [
+       {
+         "reaction": "e + O2 -> e + e + O2+",
+	 "plot": true,
+	 "lookup": "constant",
+	 "rate": 1E-30,
+       }
+     ]
+   }
+
+Plotting the reaction rate can be useful for debugging or analysis.
+Note that it is, by extension, also possible to add useful data to the I/O files from reactions that otherwise do not contribute to the discharge evolution.
+For example, if we know the rate :math:`k` for excitation of nitrogen to a specific excited state, but do not otherwise care about tracking the excited state, we can add the reaction as follows:
+
+.. code-block:: json
+
+   {"plasma reactions":
+     [
+       {
+         "reaction": "e + N2 -> e + N2",
+	 "plot": true,	 
+	 "lookup": "constant",
+	 "rate": 1E-30,
+       }
+     ]
+   }
+
+This reaction is a dud in terms of the discharge evolution (the left and right hand sides are the same), but it can be useful for plotting the excitation rate. 
+
+.. note:: This functionality should be used with care because each reaction increases the I/O load.   
 
 .. _Chap:PhotoReactionsJSON:
 
@@ -1900,40 +2120,4 @@ TODO.
 
 
 
-.. _Chap:CdrPlasmaNewProblem:
 
-Simulation quick start
-======================
-
-New problems that use the ``CdrPlasma`` physics model are best set up by using the Python tools provided with the module.
-Navigate to :file:`$DISCHARGE_HOME/Physics/CdrPlasma`` and set up the problem with.
-To see the list of available options type
-
-.. code-block:: bash
-
-   cd $DISCHARGE_HOME/Physics/CdrPlasma
-   ./setup.py --help
-
-The following options are helpful for setting up the problem:
-
-* ``base_dir`` The base directory where the application will be placed.
-  Defaults to :file:`$DISCHARGE_HOME/MyApplications`. 
-* ``app_name`` The application name.
-  The application will be put in :file:`base_dir/app_name`.
-* ``geometry`` The geometry to be used.
-  The geometry must be one of the ones provided in :file:`$DISCHARGE_HOME/Geometries` (users can also provide their own models).
-* ``physics`` The plasma physics model.
-  This must be one of the folders/class in :file:`$DISCHARGE_HOME/Physics/CdrPlasma/PlasmaModel` (users can also provide their own models).
-  Defaults to ``CdrPlasmaJSON`` (see :ref:`Chap:CdrPlasmaJSON`). 
-* ``time_stepper`` Time integrator.
-  This must derive from ``CdrPlasmaStepper`` and must be one of the time steppers in :file:`$DISCHARGE_HOME/Physics/CdrPlasma/TimeSteppers`.
-  The default integrator is ``CdrPlasmaGodunovStepper``. 
-* ``cell_tagger`` Cell tagger
-  This must derive from ``CdrPlasmaTagger`` and must be one of the cell taggers in :file:`$DISCHARGE_HOME/Physics/CdrPlasma/CellTaggers`.
-
-For example, to set up a geometry-less that does not use AMR, do
-
-.. code-block:: bash
-
-   cd $DISCHARGE_HOME
-   ./setup.py -app_name=MyApplication

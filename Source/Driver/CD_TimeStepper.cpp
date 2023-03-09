@@ -120,4 +120,16 @@ TimeStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
   }
 }
 
+#ifdef CH_USE_HDF5
+void
+TimeStepper::readCheckpointHeader(HDF5HeaderData& a_header)
+{}
+#endif
+
+#ifdef CH_USE_HDF5
+void
+TimeStepper::writeCheckpointHeader(HDF5HeaderData& a_header) const
+{}
+#endif
+
 #include <CD_NamespaceFooter.H>

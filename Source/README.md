@@ -11,9 +11,10 @@ The folder is organized as follows:
 * Geometry Contains source code for geometries. Includes declaration of an abstract geometry class (which the user can use in application codes), as well as support for polygon surfaces.
 * ImplicitFunctions Contains source for for various useful implicit and signed distance functions.
 * ItoDiffusion Contains source code for implementing drift-diffusion Brownian walkers (i.e., a particle code).
+* KineticMonteCarlo Contains source code for Kinetic Monte Carlo solvers.
 * Multifluid Contains source code for multifluid functionality.
 * Particle Contains source code for using particles with EBs and AMR.
 * RadiativeTransfer Contains source code for various radiative transfer solvers.
 * SigmaSolver Contains source code for a surface charge solver.
 * TracerParticles Contains source code for the tracer particle solver. 
-* Utilities Contains various source code for useful utilities used in chombo-discharge source and application codes. 
+* Utilities Contains various source code for useful utilities used in chombo-discharge source and application codes.

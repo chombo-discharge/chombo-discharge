@@ -190,26 +190,30 @@ AmrMesh::allocatePointer(Vector<RefCountedPtr<T>>& a_data, const int a_finestLev
 
 template <typename T>
 void
-AmrMesh::allocatePointer(EBAMRData<T>& a_data) const
+AmrMesh::allocatePointer(EBAMRData<T>& a_data, const std::string a_realm) const
 {
-  CH_TIME("AmrMesh::allocatePointer(EBAMRData<T>)");
+  CH_TIME("AmrMesh::allocatePointer(EBAMRData<T>, std::string)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::allocatePointer(EBAMRData<T>)" << endl;
+    pout() << "AmrMesh::allocatePointer(EBAMRData<T>, std::string)" << endl;
   }
 
-  return this->allocatePointer(a_data.getData());
+  this->allocatePointer(a_data.getData());
+
+  a_data.setRealm(a_realm);
 }
 
 template <typename T>
 void
-AmrMesh::allocatePointer(EBAMRData<T>& a_data, const int a_finestLevel) const
+AmrMesh::allocatePointer(EBAMRData<T>& a_data, const std::string a_realm, const int a_finestLevel) const
 {
-  CH_TIME("AmrMesh::allocatePointer(EBAMRData<T>, int)");
+  CH_TIME("AmrMesh::allocatePointer(EBAMRData<T>, std::string, int)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::allocatePointer(EBAMRData<T>, int)" << endl;
+    pout() << "AmrMesh::allocatePointer(EBAMRData<T>, std::string, int)" << endl;
   }
 
-  return this->allocatePointer(a_data.getData(), a_finestLevel);
+  this->allocatePointer(a_data.getData(), a_finestLevel);
+
+  a_data.setRealm(a_realm);
 }
 
 template <class P>
@@ -338,7 +342,7 @@ AmrMesh::removeCoveredParticlesIF(ParticleContainer<P>&     a_particles,
 {
   CH_TIME("AmrMesh::removeCoveredParticlesIF");
 
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   // Figure out the implicit function
   RefCountedPtr<BaseIF> implicitFunction;
@@ -372,13 +376,16 @@ AmrMesh::removeCoveredParticlesIF(ParticleContainer<P>&     a_particles,
       List<P>& particles = a_particles[lvl][dit()].listItems();
 
       // Check if particles are outside the implicit function.
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+      for (ListIterator<P> lit(particles); lit.ok();) {
         const RealVect& pos = lit().position();
 
         const Real f = implicitFunction->value(pos);
 
         if (f > tol) {
-          particles.remove(lit());
+          particles.remove(lit);
+        }
+        else {
+          lit++;
         }
       }
     }
@@ -393,7 +400,7 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
 {
   CH_TIME("AmrMesh::removeCoveredParticlesIF");
 
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   // Get the realm where the particles live.
   const std::string whichRealm = a_particles.getRealm();
@@ -418,7 +425,7 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
         particles.clear();
       }
       else if (isIrregular) {
-        for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        for (ListIterator<P> lit(particles); lit.ok();) {
           const P&        particle = lit();
           const RealVect& pos      = particle.position();
 
@@ -429,7 +436,7 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
           CH_assert(region.contains(iv));
 
           if (ebisBox.isCovered(iv)) {
-            particles.remove(lit());
+            particles.remove(lit);
           }
           else if (ebisBox.isIrregular(iv)) {
             // There could potentially be multiple degrees of freedom -- we check if the particle is inside at least one of the VoFs in the cell.
@@ -451,8 +458,14 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
             }
 
             if (!insideAtLeastOneVoF) {
-              particles.remove(lit());
+              particles.remove(lit);
             }
+            else {
+              ++lit;
+            }
+          }
+          else {
+            ++lit;
           }
         }
       }
@@ -466,7 +479,7 @@ AmrMesh::removeCoveredParticlesVoxels(ParticleContainer<P>& a_particles, const p
 {
   CH_TIME("AmrMesh::removeCoveredParticlesVoxels");
 
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   // Get the realm where the particles live.
   const std::string whichRealm = a_particles.getRealm();
@@ -490,7 +503,7 @@ AmrMesh::removeCoveredParticlesVoxels(ParticleContainer<P>& a_particles, const p
         particles.clear();
       }
       else if (isIrregular) {
-        for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        for (ListIterator<P> lit(particles); lit.ok();) {
           const P&        particle = lit();
           const RealVect& pos      = particle.position();
 
@@ -501,7 +514,10 @@ AmrMesh::removeCoveredParticlesVoxels(ParticleContainer<P>& a_particles, const p
           CH_assert(region.contains(iv));
 
           if (ebisBox.isCovered(iv)) {
-            particles.remove(lit());
+            particles.remove(lit);
+          }
+          else {
+            ++lit;
           }
         }
       }
@@ -518,8 +534,8 @@ AmrMesh::transferCoveredParticlesIF(ParticleContainer<P>&     a_particlesFrom,
 {
   CH_TIME("AmrMesh::transferCoveredParticlesIF");
 
-  CH_assert(!a_particlesFrom.isCellSorted());
-  CH_assert(!a_particlesTo.isCellSorted());
+  CH_assert(!a_particlesFrom.isOrganizedByCell());
+  CH_assert(!a_particlesTo.isOrganizedByCell());
 
   // Figure out the implicit function
   RefCountedPtr<BaseIF> implicitFunction;
@@ -560,13 +576,16 @@ AmrMesh::transferCoveredParticlesIF(ParticleContainer<P>&     a_particlesFrom,
       List<P>& particlesTo   = a_particlesTo[lvl][dit()].listItems();
 
       // Check if particles are outside the implicit function.
-      for (ListIterator<P> lit(particlesFrom); lit.ok(); ++lit) {
+      for (ListIterator<P> lit(particlesFrom); lit.ok();) {
         const RealVect& pos = lit().position();
 
         const Real f = implicitFunction->value(pos);
 
         if (f > tol) {
           particlesTo.transfer(lit);
+        }
+        else {
+          ++lit;
         }
       }
     }
@@ -582,8 +601,8 @@ AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesF
 {
   CH_TIME("AmrMesh::transferCoveredParticlesDiscrete");
 
-  CH_assert(!a_particlesFrom.isCellSorted());
-  CH_assert(!a_particlesTo.isCellSorted());
+  CH_assert(!a_particlesFrom.isOrganizedByCell());
+  CH_assert(!a_particlesTo.isOrganizedByCell());
 
   // Get the realm where the particles live.
   const std::string realmFrom = a_particlesFrom.getRealm();
@@ -612,7 +631,7 @@ AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesF
         particlesTo.catenate(particlesFrom);
       }
       else if (isIrregular) {
-        for (ListIterator<P> lit(particlesFrom); lit.ok(); ++lit) {
+        for (ListIterator<P> lit(particlesFrom); lit.ok();) {
           const P&        particle = lit();
           const RealVect& pos      = particle.position();
 
@@ -647,6 +666,12 @@ AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesF
             if (!insideAtLeastOneVoF) {
               particlesTo.transfer(lit);
             }
+            else {
+              ++lit;
+            }
+          }
+          else {
+            ++lit;
           }
         }
       }
@@ -662,8 +687,8 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFro
 {
   CH_TIME("AmrMesh::transferCoveredParticlesVoxels");
 
-  CH_assert(!a_particlesFrom.isCellSorted());
-  CH_assert(!a_particlesTo.isCellSorted());
+  CH_assert(!a_particlesFrom.isOrganizedByCell());
+  CH_assert(!a_particlesTo.isOrganizedByCell());
 
   // Get the realm where the particles live.
   const std::string realmFrom = a_particlesFrom.getRealm();
@@ -691,7 +716,7 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFro
         particlesTo.catenate(particlesFrom);
       }
       else if (isIrregular) {
-        for (ListIterator<P> lit(particlesFrom); lit.ok(); ++lit) {
+        for (ListIterator<P> lit(particlesFrom); lit.ok();) {
           const P&        particle = lit();
           const RealVect& pos      = particle.position();
 
@@ -703,6 +728,9 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFro
 
           if (ebisBox.isCovered(iv)) {
             particlesTo.transfer(lit);
+          }
+          else {
+            ++lit;
           }
         }
       }
@@ -768,7 +796,7 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
       List<P>& ebParticles     = a_ebParticles[lvl][dit()].listItems();
       List<P>& domainParticles = a_domainParticles[lvl][dit()].listItems();
 
-      for (ListIterator<P> lit(activeParticles); lit.ok(); ++lit) {
+      for (ListIterator<P> lit(activeParticles); lit.ok();) {
         P& particle = lit();
 
         const RealVect newPos = particle.position();
@@ -816,29 +844,53 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
           // Particle bumped into something.
           if (contactDomain || contactEB) {
             if (sEB <= sDomain) { // Crashed with EB "first".
-              particle.position() = oldPos + sEB * path;
+              const RealVect newPos = oldPos + sEB * path;
 
+              // If we delete the original particles we can just transfer the one we have. Otherwise we create
+              // a new particle.
               if (a_deleteParticles) {
+                particle.position() = newPos;
+
                 ebParticles.transfer(lit);
               }
               else {
-                ebParticles.add(lit());
+                P p = lit();
+
+                p.position() = newPos;
+
+                ebParticles.add(p);
+
+                lit++;
               }
             }
             else {
               // Crashed with domain "first". Safety factor is to prevent particles falling off the high side of the domain
-              const Real sSafety = std::max(0.0, sDomain - safety);
+              const Real sSafety = std::max((Real)0.0, sDomain - safety);
 
-              particle.position() = oldPos + sSafety * path;
+              const RealVect newPos = oldPos + sSafety * path;
 
               if (a_deleteParticles) {
+                particle.position() = newPos;
+
                 domainParticles.transfer(lit);
               }
               else {
-                domainParticles.add(lit());
+                P p = lit();
+
+                p.position() = newPos;
+
+                domainParticles.add(p);
+
+                ++lit;
               }
             }
           }
+          else {
+            ++lit;
+          }
+        }
+        else {
+          ++lit;
         }
       }
     }
@@ -910,7 +962,7 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
       List<P>& ebParticles     = a_ebParticles[lvl][dit()].listItems();
       List<P>& domainParticles = a_domainParticles[lvl][dit()].listItems();
 
-      for (ListIterator<P> lit(activeParticles); lit.ok(); ++lit) {
+      for (ListIterator<P> lit(activeParticles); lit.ok();) {
         P& particle = lit();
 
         const RealVect newPos = particle.position();
@@ -957,31 +1009,53 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
 
           // Particle bumped into something.
           if (contactDomain || contactEB) {
-            if (sEB <= sDomain) { // Crashed with EB "first".
-              particle.position() = oldPos + sEB * path;
+            if (sEB <= sDomain) {
+              // Crashed with EB "first".
+              const RealVect newPos = oldPos + sEB * path;
 
               if (a_deleteParticles) {
+                particle.position() = newPos;
+
                 ebParticles.transfer(lit);
               }
               else {
-                ebParticles.add(lit());
+                P p = particle;
+
+                p.position() = newPos;
+
+                ebParticles.add(p);
+
+                ++lit;
               }
             }
-            else { // Crashed with domain "first".
-              const Real sSafety = std::max(0.0,
-                                            sDomain -
-                                              safety); // To prevent particles falling off the high side of the domain
+            else {
+              // Crashed with domain "first".
+              const Real sSafety = std::max((Real)0.0, sDomain - safety);
 
               particle.position() = oldPos + sSafety * path;
 
               if (a_deleteParticles) {
+                particle.position() = newPos;
+
                 domainParticles.transfer(lit);
               }
               else {
-                domainParticles.add(lit());
+                P p = particle;
+
+                p.position() = newPos;
+
+                domainParticles.add(p);
+
+                ++lit;
               }
             }
           }
+          else {
+            ++lit;
+          }
+        }
+        else {
+          ++lit;
         }
       }
     }

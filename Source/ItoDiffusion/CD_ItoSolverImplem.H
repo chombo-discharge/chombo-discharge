@@ -70,6 +70,18 @@ ItoSolver::addParticles(ListBox<ItoParticle>& a_inputParticles,
 
 template <class P, const Real& (P::*particleScalarField)() const>
 void
+ItoSolver::depositParticles(EBAMRCellData& a_phi, ParticleContainer<P>& a_particles) const
+{
+  CH_TIME("ItoSolver::depositParticles");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::depositParticles" << endl;
+  }
+
+  this->depositParticles<P, particleScalarField>(a_phi, a_particles, m_deposition, m_coarseFineDeposition);
+}
+
+template <class P, const Real& (P::*particleScalarField)() const>
+void
 ItoSolver::depositParticles(EBAMRCellData&             a_phi,
                             ParticleContainer<P>&      a_particles,
                             const DepositionType       a_deposition,
@@ -81,7 +93,7 @@ ItoSolver::depositParticles(EBAMRCellData&             a_phi,
   }
 
   CH_assert(a_phi[0]->nComp() == 1);
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   // TLDR: First, deposit onto the mesh as usual (as if the EB wasn't there). If the user asks for it, he can redistribute mass in order to
   //       conserve total mass (if that is important). But the corresponding scheme will be O(1) accurate.
@@ -108,7 +120,7 @@ ItoSolver::depositParticles(EBAMRCellData&             a_phi,
   }
 
   CH_assert(a_phi[0]->nComp() == 1);
-  CH_assert(!a_particles.isCellSorted());
+  CH_assert(!a_particles.isOrganizedByCell());
 
   // TLDR: First, deposit onto the mesh as usual (as if the EB wasn't there). If the user asks for it, he can redistribute mass in order to
   //       conserve total mass (if that is important). But the corresponding scheme will be O(1) accurate.

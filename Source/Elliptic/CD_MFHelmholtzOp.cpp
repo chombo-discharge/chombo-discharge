@@ -542,7 +542,9 @@ MFHelmholtzOp::computeOperatorLoads(LevelData<MFCellFAB>& a_phi, TimedDataIterat
     }
 
     // Matching time
-    m_jumpBC->matchBC((*m_jump)[a_timeDit()], a_phi[a_timeDit()], true, a_timeDit());
+    if (m_multifluid) {
+      m_jumpBC->matchBC((*m_jump)[a_timeDit()], a_phi[a_timeDit()], true, a_timeDit());
+    }
 
     // Apply operator application
     for (auto& op : m_helmOps) {
@@ -601,8 +603,8 @@ MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi,
   //       was written so that we avoid calling Multifluid::aliasMF, since that tends to be expensive to call during every smoothing step.
 
   if (m_hasCoar) {
-    if (
-      a_homogeneousCF) { // The homogeneous version will be called on every relaxation so we use a format which avoid having to alias data (which can be expensive).
+    if (a_homogeneousCF) {
+      // The homogeneous version will be called on every relaxation so we use a format which avoid having to alias data (which can be expensive).
       for (DataIterator dit = a_phi.dataIterator(); dit.ok(); ++dit) {
         for (auto& op : m_helmOps) {
           const int iphase = op.first;
@@ -923,9 +925,16 @@ MFHelmholtzOp::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
     MultifluidAlias::aliasMF(correction, op.first, a_correction);
     MultifluidAlias::aliasMF(coarseCorrection, op.first, a_coarseCorrection);
 
-    //    op.second->turnOffCFInterp(); // Don't need to interpolate ghost cells again.
+    // Don't need to update ghost cells or exchange again.
+    op.second->turnOffCFInterp();
+    op.second->turnOffCoarsening();
+    op.second->turnOffExchange();
+
     op.second->AMRUpdateResidual(residual, correction, coarseCorrection);
-    //    op.second->turnOnCFInterp();
+
+    op.second->turnOnCFInterp();
+    op.second->turnOnCoarsening();
+    op.second->turnOnExchange();
   }
 }
 
@@ -956,7 +965,16 @@ MFHelmholtzOp::AMRRestrict(LevelData<MFCellFAB>&       a_residualCoarse,
     MultifluidAlias::aliasMF(correction, op.first, a_correction);
     MultifluidAlias::aliasMF(coarseCorrection, op.first, a_coarseCorrection);
 
+    // Don't need to update ghost cells or exchange again.
+    op.second->turnOffCFInterp();
+    op.second->turnOffCoarsening();
+    op.second->turnOffExchange();
+
     op.second->AMRRestrict(residualCoarse, residual, correction, coarseCorrection, a_skip_res);
+
+    op.second->turnOnCFInterp();
+    op.second->turnOnCoarsening();
+    op.second->turnOnExchange();
   }
 }
 
@@ -1058,9 +1076,9 @@ MFHelmholtzOp::AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
 
     op.second->AMROperatorNF(Lphi, phi, phiCoar, a_homogeneousPhysBC);
 
-    op.second->turnOffCFInterp();
-    op.second->turnOffCoarsening();
-    op.second->turnOffExchange();
+    op.second->turnOnCFInterp();
+    op.second->turnOnCoarsening();
+    op.second->turnOnExchange();
   }
 }
 

@@ -26,25 +26,25 @@
 inline void
 Random::seed()
 {
+  if (!s_seeded) {
+    ParmParse pp("Random");
 
-  // Set the RNG seed.
-  ParmParse pp("Random");
-
-  if (pp.contains("seed")) {
-    int seed;
-    pp.get("seed", seed);
-    if (seed < 0) {
-      Random::setRandomSeed();
+    if (pp.contains("seed")) {
+      int seed;
+      pp.get("seed", seed);
+      if (seed < 0) {
+        Random::setRandomSeed();
+      }
+      else {
+        Random::setSeed(seed);
+      }
     }
     else {
-      Random::setSeed(seed);
+      Random::setSeed(0);
     }
-  }
-  else {
-    Random::setSeed(0);
-  }
 
-  s_seeded = true;
+    s_seeded = true;
+  }
 }
 
 inline void
@@ -81,15 +81,13 @@ Random::setRandomSeed()
   s_seeded = true;
 }
 
-template <typename T>
+template <typename T, typename>
 inline T
 Random::getPoisson(const Real a_mean)
 {
   CH_assert(s_seeded);
 
-  constexpr T zero = T(0);
-
-  T ret = 0;
+  T ret = (T)0;
 
   if (a_mean < 250.0) {
     std::poisson_distribution<T> poisson(a_mean);
@@ -99,9 +97,33 @@ Random::getPoisson(const Real a_mean)
   else {
     std::normal_distribution<Real> normal(a_mean, sqrt(a_mean));
 
-    ret = T(normal(s_rng));
+    ret = (T)std::max(normal(s_rng), (Real)0.0);
+  }
 
-    ret = std::max(zero, ret);
+  return ret;
+}
+
+template <typename T, typename>
+inline T
+Random::getBinomial(const T a_N, const Real a_p) noexcept
+{
+  CH_assert(s_seeded);
+
+  T ret = 0;
+
+  const bool useNormalApprox = (a_N > (T)9.0 * ((1.0 - a_p) / a_p)) && (a_N > (T)9.0 * a_p / (1.0 - a_p));
+
+  if (useNormalApprox) {
+    const Real mean = a_N * a_p;
+
+    std::normal_distribution<Real> normalDist(mean, mean * (1.0 - a_p));
+
+    ret = (T)std::max(normalDist(s_rng), (Real)0.0);
+  }
+  else {
+    std::binomial_distribution<T> binomDist(a_N, a_p);
+
+    ret = binomDist(s_rng);
   }
 
   return ret;

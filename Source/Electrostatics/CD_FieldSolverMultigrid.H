@@ -253,6 +253,11 @@ protected:
   bool m_isSolverSetup;
 
   /*!
+    @brief Filter smoothing.
+  */
+  int m_numFilterSmooth;
+
+  /*!
     @brief Verbosity for geometric multigrid
   */
   int m_multigridVerbosity;
@@ -385,6 +390,12 @@ protected:
   */
   virtual void
   parseKappaSource();
+
+  /*!
+    @brief Parse solution filtering
+  */
+  virtual void
+  parseFiltering();
 
   /*!
     @brief Parse JumpBC type

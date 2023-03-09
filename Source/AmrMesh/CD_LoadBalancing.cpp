@@ -41,14 +41,9 @@ LoadBalancing::sort(Vector<Box>& a_boxes, const BoxSorting a_which)
   CH_TIME("LoadBalancing::sort");
 
   // The LoadBalancing::sort routines takes pairs of boxes/loads. Just use dummy loads here.
-  if (a_which == BoxSorting::Morton) {
-    mortonOrdering(a_boxes);
-  }
-  else { // Call chombo-discharge code
-    Vector<int> dummy(a_boxes.size(), 0);
+  Vector<int> dummy(a_boxes.size(), 0);
 
-    LoadBalancing::sort(a_boxes, dummy, a_which);
-  }
+  LoadBalancing::sort(a_boxes, dummy, a_which);
 }
 
 void
@@ -180,8 +175,10 @@ LoadBalancing::gatherLoads(Vector<Real>& a_loads)
     a_loads[i] = recv_buffer[i];
   }
 
-  delete recv_buffer;
-  delete send_buffer;
+  delete[] recv_buffer;
+  delete[] offsets;
+  delete[] allSendCount;
+  delete[] send_buffer;
 #endif
 }
 
@@ -229,8 +226,10 @@ LoadBalancing::gatherLoads(Vector<long>& a_loads)
     a_loads[i] = recv_buffer[i];
   }
 
-  delete recv_buffer;
-  delete send_buffer;
+  delete[] offsets;
+  delete[] allSendCount;
+  delete[] recv_buffer;
+  delete[] send_buffer;
 #endif
 }
 
@@ -278,8 +277,10 @@ LoadBalancing::gatherLoads(Vector<int>& a_loads)
     a_loads[i] = recv_buffer[i];
   }
 
-  delete recv_buffer;
-  delete send_buffer;
+  delete[] recv_buffer;
+  delete[] send_buffer;
+  delete[] offsets;
+  delete[] allSendCount;
 #endif
 }
 
@@ -310,10 +311,11 @@ LoadBalancing::maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::ite
   }
   int bits;
   for (bits = 8 * sizeof(int) - 2; bits > 0; bits--) {
-    const int N   = (1 << bits);
-    int       rem = maxSize / N;
-    if (rem > 0)
+    const int N = (1 << bits);
+
+    if (maxSize / N > 0) {
       break;
+    }
   }
   bits++;
   return bits;

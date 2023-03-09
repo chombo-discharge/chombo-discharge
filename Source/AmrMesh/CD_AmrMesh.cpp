@@ -46,6 +46,26 @@ AmrMesh::AmrMesh()
 AmrMesh::~AmrMesh() {}
 
 EBAMRCellData
+AmrMesh::slice(EBAMRCellData& a_original, const Interval a_variables) const noexcept
+{
+  CH_TIME("AmrMesh::alias(phase::which_phase, MFAMRCellData)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::alias(phase::which_phase, MFAMRCellData)" << endl;
+  }
+
+  EBAMRCellData ret;
+  this->allocatePointer(ret, a_original.getRealm(), a_original.size() - 1);
+
+  for (int i = 0; i < a_original.size(); i++) {
+    CH_assert(a_variables.end() < a_original[i]->nComp());
+
+    aliasLevelData<EBCellFAB>(*ret[i], &(*a_original[i]), a_variables);
+  }
+
+  return ret;
+}
+
+EBAMRCellData
 AmrMesh::alias(const phase::which_phase a_phase, const MFAMRCellData& a_mfdata) const
 {
   CH_TIME("AmrMesh::alias(phase::which_phase, MFAMRCellData)");
@@ -57,7 +77,7 @@ AmrMesh::alias(const phase::which_phase a_phase, const MFAMRCellData& a_mfdata) 
 
   const int finestLevel = a_mfdata.size() - 1;
 
-  this->allocatePointer(ret, finestLevel);
+  this->allocatePointer(ret, a_mfdata.getRealm(), finestLevel);
 
   this->alias(ret, a_phase, a_mfdata, finestLevel);
 
@@ -78,7 +98,7 @@ AmrMesh::alias(const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata) 
 
   const int finestLevel = a_mfdata.size() - 1;
 
-  this->allocatePointer(ret, finestLevel);
+  this->allocatePointer(ret, a_mfdata.getRealm(), finestLevel);
 
   this->alias(ret, a_phase, a_mfdata, finestLevel);
 
@@ -97,7 +117,7 @@ AmrMesh::alias(const phase::which_phase a_phase, const MFAMRIVData& a_mfdata) co
 
   EBAMRIVData ret;
 
-  this->allocatePointer(ret);
+  this->allocatePointer(ret, a_mfdata.getRealm());
 
   this->alias(ret, a_phase, a_mfdata);
 
@@ -958,8 +978,24 @@ AmrMesh::regridOperators(const int a_lmin)
   }
 
   for (auto& r : m_realms) {
-    r.second->regridOperators(a_lmin);
+    this->regridOperators(r.first, a_lmin);
   }
+}
+
+void
+AmrMesh::regridOperators(const std::string a_realm, const int a_lmin)
+{
+  CH_TIME("AmrMesh::regridOperators(string, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::regridOperators(string, int)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::regridOperators(string, int) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  m_realms[a_realm]->regridOperators(a_lmin);
 }
 
 void

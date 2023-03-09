@@ -148,7 +148,7 @@ public:
 
   /*!
     @brief Allocate pointer but not any memory blocks. 
-    @param[out] a_data Data structure for which pointers will be constructed. 
+    @param[out] a_data  Data structure for which pointers will be constructed. 
     @details This sets all the elements in the vector to be RefCountedPtr<T>(nullptr)
   */
   template <typename T>
@@ -158,7 +158,7 @@ public:
   /*!
     @brief Allocate pointer but not any memory blocks. 
     @param[out] a_data       Data structure for which pointers will be constructed. 
-    @param[in] a_finestLevel Finest grid level on which a_data will be defined. 
+    @param[in]  a_finestLevel Finest grid level on which a_data will be defined. 
     @details This sets all the elements in the vector to be RefCountedPtr<T>(nullptr)
   */
   template <typename T>
@@ -168,21 +168,32 @@ public:
   /*!
     @brief Allocate pointer but not any memory blocks. 
     @param[out] a_data Data structure for which pointers will be constructed. 
+    @param[in]  a_realm Realm associated with the data
     @details This sets all the elements in a_data to be RefCountedPtr<T>(nullptr)
   */
   template <typename T>
   void
-  allocatePointer(EBAMRData<T>& a_data) const;
+  allocatePointer(EBAMRData<T>& a_data, const std::string a_realm) const;
 
   /*!
     @brief Allocate pointer but not any memory.
-    @param[out] a_data       Data structure for which pointers will be constructed. 
-    @param[in] a_finestLevel Finest grid level on which a_data will be defined. 
+    @param[out] a_data        Data structure for which pointers will be constructed. 
+    @param[in]  a_realm       Realm associated with the data
+    @param[in]  a_finestLevel Finest grid level on which a_data will be defined. 
     @details This sets all the elements in the vector to be RefCountedPtr<T>(nullptr)
   */
   template <typename T>
   void
-  allocatePointer(EBAMRData<T>& a_data, const int a_finestLevel) const;
+  allocatePointer(EBAMRData<T>& a_data, const std::string a_realm, const int a_finestLevel) const;
+
+  /*!
+    @brief Slice cell-centered data in order to fetch a subset of components
+    @param[in] a_other Original data
+    @param[in] a_variables Variables
+    @return Subset of variables. The first component in the returned data holder corresponds to a_variables.begin(), the last to a_variables.end()
+  */
+  EBAMRCellData
+  slice(EBAMRCellData& a_original, const Interval a_variables) const noexcept;
 
   /*!
     @brief Parse options. Called during the constructor. 
@@ -1328,6 +1339,14 @@ public:
   */
   void
   regridOperators(const int a_lmin);
+
+  /*!
+    @brief Regrid AMR operators. This is done for a specific realm.
+    @param[in] a_realm Realm
+    @param[in] a_lmin  Coarsest grid level that changes. 
+  */
+  void
+  regridOperators(const std::string a_realm, const int a_lmin);
 
   /*!
     @brief Do a sanity check to make sure everything is set up correctly

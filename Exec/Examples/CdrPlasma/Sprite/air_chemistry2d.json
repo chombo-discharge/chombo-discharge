@@ -1,0 +1,281 @@
+{"gas":
+ {
+     "law": "table",
+     "file": "ENMSIS_Atmosphere.dat",
+     "molar mass": 27,
+     "height": 0,
+     "temperature": 2,
+     "pressure": 3,
+     "density": 1,
+     "min height": 0,
+     "max height": 250000,
+     "res height": 1000,
+     "plot": true,
+     "neutral species":
+     [
+	 {
+	     "name": " O2 ",
+	     "molar fraction": 0.2
+	 },
+	 {
+	     "name": "N2",
+	     "molar fraction": 0.8
+	 }
+     ]
+ },
+ "plasma species":
+ [
+     {
+	 "name": "TC+",
+	 "Z": 1,
+	 "mobile": false,
+	 "diffusive": false,
+	 "initial data": {
+	     "gauss4":
+	     [
+		 {
+		     "radius": 10E3,
+		     "amplitude": 0.7E7,
+		     "position": [0, 10E3, 0]
+		 }
+	     ]
+	 }	 
+     },
+     {
+	 "name": "TC-",
+	 "Z": -1,
+	 "mobile": false,
+	 "diffusive": false,
+	 "initial data": {
+	     "gauss4":
+	     [
+		 {
+		     "radius": 10E3,
+		     "amplitude": 0.7E7,
+		     "position": [0, 10E3, 0]
+		 }
+	     ]
+	 }	 
+     },     
+     {
+	 "name": "e",
+	 "Z": -1,
+	 "mobile": true,
+	 "diffusive": true,
+	 "mobility": {
+	     "lookup" : "table E/N",
+	     "value": 0.02,
+	     "file": "bolsig_air.dat",
+	     "header": "E/N (Td)\tMobility *N (1/m/V/s)",
+	     "E/N": 0,
+	     "mu*N": 1,
+	     "min E/N": 10,
+	     "max E/N": 2E6,
+	     "spacing": "exponential",
+	     "points": 1000
+	 },
+	 "diffusion": {
+	     "lookup": "table E/N",
+	     "file": "bolsig_air.dat",
+	     "header": "E/N (Td)\tDiffusion coefficient *N (1/m/s)",
+	     "E/N": 0,
+	     "D*N": 1,
+	     "min E/N": 10,
+	     "max E/N": 2E6,
+	     "spacing": "exponential",
+	     "points": 1000
+	 },
+	 "initial data": {
+	     "uniform": 0.0E0,
+	     "height profile": {
+		 "file": "tanh.dat",
+		 "height": 0,
+		 "density": 1,
+		 "min height": 0,
+		 "max height": 400,
+		 "res height": 0.01,
+		 "scale height": 1000,
+		 "scale density": 1.0
+	     }
+	 },
+	 "temperature": {
+	     "lookup": "table E/N",
+	     "file": "bolsig_air.dat",
+	     "header": "E/N (Td)\tMean energy (eV)",
+	     "E/N": 0,
+	     "eV": 1,
+	     "min E/N": 10,
+	     "max E/N": 2E6,
+	     "spacing": "exponential",
+	     "points": 1000
+	 }
+     },
+     {
+	 "name": "N2+",
+	 "Z":  1,
+	 "mobile": false,
+	 "diffusive": false,
+	 "initial data": {
+	     "uniform": 0.0E0,
+	     "height profile": {
+		 "file": "tanh.dat",
+		 "height": 0,
+		 "density": 1,
+		 "min height": 0,
+		 "max height": 400,
+		 "res height": 0.01,
+		 "scale height": 1000,
+		 "scale density": 0.8
+	     }
+	 }	 
+     },
+     {
+	 "name": "O2+",
+	 "Z":  1,
+	 "mobile": false,
+	 "diffusive": false,
+	 "initial data": {
+	     "uniform": 0.0E0,
+	     "height profile": {
+		 "file": "tanh.dat",
+		 "height": 0,
+		 "density": 1,
+		 "min height": 0,
+		 "max height": 400,
+		 "res height": 0.01,
+		 "scale height": 1000,
+		 "scale density": 0.2
+	     }
+	 }	 
+     },
+     {"name": "O2-", "Z": -1, "mobile": false, "diffusive": false},
+     {"name": "O-", "Z": -1, "mobile": false, "diffusive": false}     
+ ],
+ "photon species":
+ [
+     {
+	 "name": "Y",
+	 "kappa": "stochastic A",
+	 "neutral": "O2",
+	 "f1":   2.91E15,
+	 "f2":   3.06E15,
+	 "chi min": 2.625E-2,
+	 "chi max": 1.5
+     }
+ ],
+ "sigma": {
+     "initial density": 0.0
+ },
+ "alpha": {
+     "lookup": "table E/N",
+     "file" : "bolsig_air.dat",
+     "header": "E/N (Td)\tTownsend ioniz. coef. alpha/N (m2)",
+     "E/N": 0,
+     "alpha/N": 1,	  
+     "min E/N": 1,
+     "max E/N": 2E6,
+     "spacing": "exponential",
+     "points": 1000,
+     "plot": true
+ },
+ "eta": {
+     "lookup": "table E/N",
+     "file" : "bolsig_air.dat",
+     "header": "E/N (Td)\tTownsend attach. coef. eta/N (m2)",
+     "E/N": 0,
+     "eta/N": 1,	  
+     "min E/N": 1,
+     "max E/N": 2E6,
+     "spacing": "exponential",     
+     "points": 1000,
+     "plot": true
+ }, 
+ "plasma reactions": 
+ [
+     {
+	 "reaction": "e + O2 -> e + e + O2+",
+	 "lookup": "table E/N",
+	 "description": "O2 ionization 12.06 eV",
+	 "file" : "bolsig_air.dat",
+	 "header": "C42   O2    Ionization    12.06 eV",
+	 "E/N": 0,
+	 "rate": 1,
+	 "min E/N": 1,
+	 "max E/N": 2E6,
+	 "spacing": "exponential",  
+	 "points": 1000,
+	 "scale": 1.0,
+	 "plot": true,
+	 "soloviev" : {
+	     "correction": false,
+	     "species": "e"
+	 }
+     },
+     {
+	 "reaction": "e + N2 -> e + e + N2+",
+	 "description": "N2 ionization 15.60 eV",	  
+	 "lookup": "table E/N",
+	 "file" : "bolsig_air.dat",
+	 "header": "C25   N2    Ionization    15.60 eV",
+	 "E/N": 0,
+	 "rate": 1,	  
+	 "min E/N": 1,
+	 "max E/N": 2E6,
+	 "spacing": "exponential",     
+	 "points": 1000,	 
+	 "plot": true,
+	 "scale": 1.0,
+	 "soloviev" : {
+	     "correction": false,
+	     "species": "e"
+	 }
+     },
+     {
+	 "reaction": "e + O2 -> O-",
+	 "description": "O2 dissociative attachment",
+	 "lookup": "table E/N",
+	 "file" : "bolsig_air.dat",
+	 "header": "C27   O2    Attachment",
+	 "E/N": 0,
+	 "rate": 1,	  
+	 "min E/N": 1,
+	 "max E/N": 2E6,
+	 "spacing": "exponential",     
+	 "points": 1000,	 	 
+	 "plot": true,
+	 "scale": 1.0
+     },
+     {
+	 "reaction": "e + N2 -> e + N2 + Y",
+	 "lookup": "table E/N",
+	 "file" : "bolsig_air.dat",
+	 "header": "C25   N2    Ionization    15.60 eV",
+	 "E/N": 0,
+	 "rate": 1,	  
+	 "min E/N": 1,
+	 "max E/N": 2E6,
+	 "spacing": "exponential",     
+	 "points": 1000,	 	 	 
+	 "quenching pressure": 4000,
+	 "scale": 0.06
+     },
+     {
+	 "reaction": "TC+ -> ",
+	 "lookup": "constant",
+	 "rate" : 1E3
+     }     
+ ],
+ "photo reactions":
+ [
+     {
+	 "reaction": "Y -> e + O2+"
+     }
+ ],
+ "domain reactions":
+ [
+     {"reaction": "e -> extrap",
+      "side": ["x_lo", "x_hi", "y_lo","y_hi"]
+     }
+ ] 
+}
+

@@ -54,6 +54,7 @@ FieldSolverMultigrid::parseOptions()
   this->parseKappaSource();
   this->parseJumpBC();
   this->parseRegridSlopes();
+  this->parseFiltering();
 }
 
 void
@@ -69,6 +70,20 @@ FieldSolverMultigrid::parseRuntimeOptions()
   this->parseKappaSource();
   this->parsePlotVariables();
   this->parseRegridSlopes();
+  this->parseFiltering();
+}
+
+void
+FieldSolverMultigrid::parseFiltering()
+{
+  CH_TIME("FieldSolverMultigrid::parseFiltering()");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolverMultigrid::parseFiltering()" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("filter", m_numFilterSmooth);
 }
 
 void
@@ -81,7 +96,6 @@ FieldSolverMultigrid::parseKappaSource()
 
   ParmParse pp(m_className.c_str());
 
-  std::string str;
   pp.get("kappa_source", m_kappaSource);
 }
 
@@ -322,6 +336,34 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 
   m_multigridSolver.revert(phi, rhs, finestLevel, 0);
 
+  if (m_numFilterSmooth > 0) {
+    for (int i = 0; i < m_numFilterSmooth; i++) {
+
+      // Must do the piecewise linear interpolator rather than the MG interpolator (which only does one layer across the CF, except near the EB)
+      m_amr->conservativeAverage(a_phi, m_realm);
+      m_amr->interpGhostPwl(a_phi, m_realm);
+
+      const Real alpha  = 0.5;
+      const int  stride = 1;
+
+      // Filter both phases.
+      const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+      const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+
+      if (!ebisGas.isNull()) {
+        EBAMRCellData phi = m_amr->alias(phase::gas, a_phi);
+
+        DataOps::filterSmooth(phi, alpha, stride);
+      }
+      if (!ebisSol.isNull()) {
+        EBAMRCellData phi = m_amr->alias(phase::solid, a_phi);
+
+        DataOps::filterSmooth(phi, alpha, stride);
+      }
+    }
+  }
+
+  // Coarsen/update ghosts before computing the field.
   m_amr->conservativeAverage(a_phi, m_realm);
   m_amr->interpGhostMG(a_phi, m_realm);
 
@@ -866,7 +908,7 @@ FieldSolverMultigrid::computeElectricField(EBAMRCellData&           a_electricFi
   EBAMRCellData scratch;
   EBAMRCellData potentialPhase;
 
-  m_amr->allocatePointer(potentialPhase);
+  m_amr->allocatePointer(potentialPhase, m_realm);
   m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
   m_amr->alias(potentialPhase, a_phase, a_potential);
 
@@ -901,7 +943,7 @@ FieldSolverMultigrid::computeElectricField(EBAMRFluxData&           a_electricFi
   EBAMRCellData scratch;
   EBAMRCellData potentialPhase;
 
-  m_amr->allocatePointer(potentialPhase);
+  m_amr->allocatePointer(potentialPhase, m_realm);
   m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
   m_amr->alias(potentialPhase, a_phase, a_potential);
 

@@ -19,7 +19,77 @@
 // Our includes
 #include <CD_ParticleOps.H>
 #include <CD_PolyUtils.H>
+#include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
+
+template <typename P, const Real& (P::*weight)() const>
+inline void
+ParticleOps::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P>& a_src) noexcept
+{
+  CH_TIME("ParticleOps::getPhysicalParticlesPerCell");
+
+  const RealVect probLo = a_src.getProbLo();
+
+  for (int lvl = 0; lvl <= a_src.getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = a_src.getGrids()[lvl];
+    const RealVect           dx  = a_src.getDx()[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const List<P>& particles = a_src[lvl][dit()].listItems();
+
+      FArrayBox& ppc = (*a_ppc[lvl])[dit()].getFArrayBox();
+      ppc.setVal(0.0);
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        const P&       p  = lit();
+        const RealVect x  = p.position();
+        const Real     w  = (p.*weight)();
+        const IntVect  iv = ParticleOps::getParticleGridCell(x, probLo, dx);
+
+        ppc(iv, 0) += w;
+      }
+    }
+  }
+}
+
+template <typename P>
+inline void
+ParticleOps::getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P>& a_src) noexcept
+{
+  CH_TIME("ParticleOps::getComputationalParticlesPerCell");
+
+  const RealVect probLo = a_src.getProbLo();
+
+  for (int lvl = 0; lvl <= a_src.getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = a_src.getGrids()[lvl];
+    const RealVect           dx  = a_src.getDx()[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const List<P>& particles = a_src[lvl][dit()].listItems();
+
+      FArrayBox& ppc = (*a_ppc[lvl])[dit()].getFArrayBox();
+      ppc.setVal(0.0);
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        const P&       p  = lit();
+        const RealVect x  = p.position();
+        const IntVect  iv = ParticleOps::getParticleGridCell(x, probLo, dx);
+
+        ppc(iv, 0) += 1.0;
+      }
+    }
+  }
+}
+
+inline IntVect
+ParticleOps::getParticleGridCell(const RealVect& a_particlePosition,
+                                 const RealVect& a_probLo,
+                                 const RealVect& a_dx) noexcept
+{
+  return IntVect(D_DECL(std::floor((a_particlePosition[0] - a_probLo[0]) / a_dx[0]),
+                        std::floor((a_particlePosition[1] - a_probLo[1]) / a_dx[1]),
+                        std::floor((a_particlePosition[2] - a_probLo[2]) / a_dx[2])));
+}
 
 inline bool
 ParticleOps::domainIntersection(const RealVect& a_oldPos,
@@ -159,65 +229,6 @@ ParticleOps::ebIntersectionRaycast(const RefCountedPtr<BaseIF>& a_impFunc,
   }
 
   return ret;
-}
-
-inline void
-ParticleOps::computeParticleWeights(unsigned long long&      a_weight,
-                                    unsigned long long&      a_num,
-                                    unsigned long long&      a_remainder,
-                                    const unsigned long long a_numPhysicalParticles,
-                                    const int                a_ppc)
-{
-  if (a_numPhysicalParticles <= a_ppc) {
-    a_weight    = 1;
-    a_remainder = 0;
-    a_num       = a_numPhysicalParticles;
-  }
-  else { // Add superparticles
-    a_weight    = a_numPhysicalParticles / a_ppc;
-    a_remainder = a_numPhysicalParticles % a_ppc;
-    a_num       = (a_remainder == 0) ? a_ppc : a_ppc - 1;
-  }
-}
-
-template <typename T>
-inline T
-ParticleOps::partitionParticles(const T a_numParticles)
-{
-#ifdef CH_MPI
-  const T numProcs  = T(numProc());
-  const T quotient  = a_numParticles / numProc();
-  const T remainder = a_numParticles % numProc();
-
-  Vector<T> particlesPerRank(numProc(), quotient);
-
-  for (int i = 0; i < remainder; i++) {
-    particlesPerRank[i]++;
-  }
-
-  return particlesPerRank[procID()];
-#else
-  return a_numParticles;
-#endif
-}
-
-template <typename P, typename T>
-inline void
-ParticleOps::drawRandomParticles(List<P>&                         a_particles,
-                                 const T                          a_numParticles,
-                                 const std::function<RealVect()>& a_distribution)
-{
-
-  a_particles.clear();
-
-  const T numParticles = ParticleOps::partitionParticles(a_numParticles);
-
-  for (T t = 0; t < numParticles; t++) {
-    P p;
-    p.position() = a_distribution();
-
-    a_particles.add(p);
-  }
 }
 
 template <typename P>

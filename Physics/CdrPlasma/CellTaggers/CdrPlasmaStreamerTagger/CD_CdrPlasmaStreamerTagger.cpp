@@ -52,7 +52,8 @@ CdrPlasmaStreamerTagger::parseOptions()
   }
 
   this->parseVerbosity();
-  this->parseBoxes();
+  this->parseTagBoxes();
+  this->parseRefinementBoxes();
   this->parseBuffer();
 
   // Parse class options.
@@ -132,8 +133,9 @@ CdrPlasmaStreamerTagger::refineCell(const RealVect         a_pos,
 
   const bool refine1 = a_gradTracers[0].vectorLength() * a_dx / a_tracers[0] > m_refiCurv;
   const bool refine2 = a_tracers[1] * a_dx > m_refiAlpha;
+  const bool refine3 = a_lvl < this->getManualRefinementLevel(a_pos);
 
-  return refine1 || refine2;
+  return refine1 || refine2 || refine3;
 }
 
 #include <CD_NamespaceFooter.H>
