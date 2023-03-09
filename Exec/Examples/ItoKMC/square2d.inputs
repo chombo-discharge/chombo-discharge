@@ -1,17 +1,17 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = 10E3
+ItoKMC.potential = 20E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
 # AmrMesh class options
 # ====================================================================================================
-AmrMesh.lo_corner        = -1E-2 -1E-2 -1E-2 # Low corner of problem domain
-AmrMesh.hi_corner        =  1E-2  1E-2  1E-2 # High corner of problem domain
+AmrMesh.lo_corner        =  -4E-2    0     # Low corner of problem domain
+AmrMesh.hi_corner        =  4E-2 4E-2  # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 64 64 64    # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 3           # Maximum amr depth
+AmrMesh.coarsest_domain  = 128 64     # Number of cells on coarsest domain
+AmrMesh.max_amr_depth    = 5           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -40,20 +40,20 @@ Driver.geometry_generation             = chombo-discharge # Grid generation meth
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
 Driver.plot_interval                   = 10               # Plot interval
-Driver.checkpoint_interval             = 10               # Checkpoint interval
-Driver.regrid_interval                 = 10               # Regrid interval
-Driver.write_regrid_files              = false            # Write regrid files or not.
+Driver.checkpoint_interval             = 50               # Checkpoint interval
+Driver.regrid_interval                 = 5                # Regrid interval
+Driver.write_regrid_files              = true             # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 2                # Number of initial regrids
+Driver.initial_regrids                 = 4                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 20               # Maximum number of steps
+Driver.max_steps                       = 1000              # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
 Driver.output_directory                = ./               # Output directory
-Driver.output_names                    = experimental     # Simulation output names
+Driver.output_names                    = square           # Simulation output names
 Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
 Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
@@ -61,9 +61,9 @@ Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 15.              # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = 3                # Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics              = 0                # Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.refine_angles                   = 60.              # Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes               = 2                # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics              = 1                # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
 # ====================================================================================================
@@ -71,12 +71,12 @@ Driver.refine_dielectrics              = 0                # Refine dielectric su
 # ====================================================================================================
 FieldSolverMultigrid.verbosity         = -1                # Class verbosity
 FieldSolverMultigrid.jump_bc           = natural           # Jump BC type ('natural' or 'saturation_charge')
-FieldSolverMultigrid.bc.x.lo           = neumann 0.0       # Bc type (see docs)
-FieldSolverMultigrid.bc.x.hi           = neumann 0.0       # Bc type (see docs)
-FieldSolverMultigrid.bc.y.lo           = neumann 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.y.hi           = neumann 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.x.lo           = dirichlet 0.0       # Bc type (see docs)
+FieldSolverMultigrid.bc.x.hi           = dirichlet 0.0       # Bc type (see docs)
+FieldSolverMultigrid.bc.y.lo           = dirichlet 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.y.hi           = neumann   0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.z.lo           = dirichlet 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.z.hi           = dirichlet 1.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.z.hi           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E perm         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
@@ -90,12 +90,12 @@ FieldSolverMultigrid.gmg_min_iter      = 5                 # Minimum number of i
 FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2               # Solver hang
-FieldSolverMultigrid.gmg_min_cells     = 16                 # Bottom drop
+FieldSolverMultigrid.gmg_min_cells     = 16                  # Bottom drop
 FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2                 # Boundary condition order for multigrid
-FieldSolverMultigrid.gmg_bc_weight     = 1                 # Boundary condition weights (for least squares)
+FieldSolverMultigrid.gmg_bc_weight     = 2                 # Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order    = 2                 # Boundary condition order for jump conditions
-FieldSolverMultigrid.gmg_jump_weight   = 1                 # Boundary condition weight for jump conditions (for least squares)
+FieldSolverMultigrid.gmg_jump_weight   = 2                 # Boundary condition weight for jump conditions (for least squares)
 FieldSolverMultigrid.gmg_bottom_solver = bicgstab          # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverMultigrid.gmg_cycle         = vcycle            # Cycle type. Only 'vcycle' supported for now. 
 FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
@@ -113,7 +113,7 @@ ItoSolver.redistribute        = false         # Turn on/off redistribution.
 ItoSolver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
 ItoSolver.checkpointing       = particles     # 'particles' or 'numbers'
 ItoSolver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
-ItoSolver.irr_ngp_deposition  = true          # Force irregular deposition in cut cells or not
+ItoSolver.irr_ngp_deposition  = false          # Force irregular deposition in cut cells or not
 ItoSolver.irr_ngp_interp      = true          # Force irregular interpolation in cut cells or not
 ItoSolver.mobility_interp     = direct        # How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
 ItoSolver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
@@ -161,7 +161,7 @@ McPhoto.blend_conservation = false         # Switch for blending with the noncon
 McPhoto.random_kappa       = true          # Randomize absorption length (taken from Photon implementation)
 McPhoto.plt_vars           = phi src_phot  # Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot', 'src_phot'
 McPhoto.plot_deposition    = cic           # Cloud-in-cell for plotting particles. 
-McPhoto.intersection_alg   = bisection     # EB intersection algorithm. Supported are: 'raycast' 'bisection'
+McPhoto.intersection_alg   = raycast     # EB intersection algorithm. Supported are: 'raycast' 'bisection'
 McPhoto.bisect_step        = 1.E-4         # Bisection step length for intersection tests
 McPhoto.seed               = 0             # Seed for RNG
 McPhoto.bc_x_low           = outflow       # Boundary condition. 'outflow', 'symmetry', or 'wall'
@@ -199,68 +199,76 @@ GeoCoarsener.box1_lvl    = 2            # up to this level
 GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
-# RodDielectric geometry class options
+# RodPlaneProfile geometry class options
+#
+# This class described a rod-plane geometry with holes on the dielectric plane. The plane_point
+# argument determines the point on the plane (oriented along the y axis), and acts as a reference
+# for where the "holes" are placed.
+#
+# Arguments 'profile_num_left' and 'profile_num_right' sets the number of holes to the left and right
+# of this point. You can shift the holes vertically with 'profile_offset', and increase the distance
+# between the holes with 'profile_dist'. The 'profile_shift' argument shifts all holes to the left
+# or right along the x-axis. The 'profile_curv' arguments sets the radius of curvature. 
 # ====================================================================================================
-RodDielectric.electrode.on              = true          # Use electrode or not
-RodDielectric.electrode.endpoint1       = 0 0 0           # One endpoint
-RodDielectric.electrode.endpoint2       = 0 0 1           # Other endpoint
-RodDielectric.electrode.radius          = 250E-6        # Electrode radius
-RodDielectric.electrode.live            = true          # Live or not
+RodPlaneProfile.turn_on_rod       = true          # Turn on/off electrode
+RodPlaneProfile.turn_on_plane     = true          # Turn on/off dielectric
+RodPlaneProfile.rod_live          = true          # Live electrode or not
+RodPlaneProfile.rod_radius        = 500.E-6       # Electrode inner radius
+RodPlaneProfile.rod_center1       = 0.0 7.5E-3    # Center 1
+RodPlaneProfile.rod_center2       = 0.0 1         # Center 2
+RodPlaneProfile.plane_width       = 7.200123E-2   # Plane width	
+RodPlaneProfile.plane_normal      = 0.0 1.0       # Plane normal. Not used, oriented along +y only 
+RodPlaneProfile.plane_point       = 0.0 5.001E-3      # Center point on plane
+RodPlaneProfile.plane_eps         = 3.0           # Plane permittivity
+RodPlaneProfile.profile_num_left  = 36            # Number of holes to the left
+RodPlaneProfile.profile_num_right = 35            # Number of holes to the left
+RodPlaneProfile.profile_dist      = 1015E-6       # Distance between each hole
+RodPlaneProfile.profile_xshift    = 507.5E-6           # Horizontal offset
+RodPlaneProfile.profile_yshift    = 0.0           # Vertical offset
+RodPlaneProfile.profile_curv      = 250E-6        # Rounding radius
 
-RodDielectric.dielectric.on             = false         # Use dielectric or not
-RodDielectric.dielectric.shape          = perlin_box    # 'plane', 'box', 'perlin_box', 'sphere'
-RodDielectric.dielectric.permittivity   = 4             # Dielectric permittivity
+# Shape set. Can use 'circle' or 'square'
+RodPlaneProfile.profile       = square
 
-# Subsettings for 'plane'
-RodDielectric.plane.point               = 0 0 0         # Plane point
-RodDielectric.plane.normal              = 0 0 1         # Plane normal vector (outward)
+# Circle specific parameters
+RodPlaneProfile.circle_radius = 1.031E-3
 
-# Subsettings for 'box'
-RodDielectric.box.lo_corner             = 0 0 0         # Low corner
-RodDielectric.box.hi_corner             = 1 1 1         # Hi corner
-RodDielectric.box.curvature             = 0.1
-
-# Subsettings for 'perlin_box'
-RodDielectric.perlin_box.point          = 0  0 -0.5     # Slab center-point (side with roughness)
-RodDielectric.perlin_box.normal         = 0  0  1       # Slab normal
-RodDielectric.perlin_box.curvature      = 0.1           # Slab rounding radius
-RodDielectric.perlin_box.dimensions     = 1  1  1       # Slab dimensions
-RodDielectric.perlin_box.noise_amp      = 0.1           # Noise amplitude
-RodDielectric.perlin_box.noise_octaves  = 1             # Noise octaves
-RodDielectric.perlin_box.noise_persist  = 0.5           # Octave persistence
-RodDielectric.perlin_box.noise_freq     = 1 1 1         # Noise frequency
-RodDielectric.perlin_box.noise_reseed   = false         # Reseed noise or not
-
-# Subsettings for sphere
-RodDielectric.sphere.center             = 0 0 0         # Low corner
-RodDielectric.sphere.radius             = 0.5           # Radius
+# Square specific parameters
+RodPlaneProfile.square_depth = 546.0123123E-6
+RodPlaneProfile.square_width = 491.0123123E-6
 
 # ==================================================================================================== 
 # ItoKMCGodunovStepper class options
 # ====================================================================================================
-ItoKMCGodunovStepper.checkpoint_particles    = true           # If true, regrid on restart is supported (otherwise it's not)
-ItoKMCGodunovStepper.verbosity               = -1             # Verbosity
-ItoKMCGodunovStepper.profile                 = true           # Turn on/off run-time profiling
-ItoKMCGodunovStepper.abort_on_failure        = false          # Turn on/off abort on Poisson failure
-ItoKMCGodunovStepper.redistribute_cdr        = true           # Turn on/off reactive redistribution
-ItoKMCGodunovStepper.plt_vars                = conductivity   # 'conductivity', 'current_density', 'particles_per_patch'
-ItoKMCGodunovStepper.dual_grid               = true           # Turn on/off dual-grid functionality
-ItoKMCGodunovStepper.load_balance_fluid      = false          # Turn on/off fluid realm load balancing. 
-ItoKMCGodunovStepper.load_balance_particles  = true           # Turn on/off particle load balancing
-ItoKMCGodunovStepper.load_indices            = -1             # Which particle containers to use for load balancing (-1 => all)
-ItoKMCGodunovStepper.load_per_cell           = 1.0            # Default load per grid cell.
-ItoKMCGodunovStepper.box_sorting             = morton         # Box sorting when load balancing
-ItoKMCGodunovStepper.particles_per_cell      = 16             # Max computational particles per cell
-ItoKMCGodunovStepper.merge_interval          = 1              # Time steps between superparticle merging
-ItoKMCGodunovStepper.regrid_superparticles   = false          # Make superparticles during regrids
-ItoKMCGodunovStepper.advection_cfl           = 100.0          # Advective time step CFL restriction
-ItoKMCGodunovStepper.diffusion_cfl           = 100.0          # Diffusive time step CFL restriction
-ItoKMCGodunovStepper.advection_diffusion_cfl = 100.0          # Advection-diffusion time step CFL restriction
-ItoKMCGodunovStepper.relax_dt_factor         = 1000.          # Relaxation time step restriction. 
-ItoKMCGodunovStepper.min_dt                  = 0.0            # Minimum permitted time step
-ItoKMCGodunovStepper.max_dt                  = 1.E99          # Maximum permitted time step
-ItoKMCGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
-ItoKMCGodunovStepper.algorithm               = euler_maruyama # Integration algorithm. 'euler_maruyama' or 'trapezoidal'
+ItoKMCGodunovStepper.checkpoint_particles                  = true           # If true, regrid on restart is supported (otherwise it's not)
+ItoKMCGodunovStepper.verbosity                             = -1             # Verbosity
+ItoKMCGodunovStepper.abort_on_failure                      = true           # Abort on Poisson solver failure or not
+ItoKMCGodunovStepper.redistribute_cdr                      = true           # Turn on/off reactive redistribution
+ItoKMCGodunovStepper.profile                               = true           # Turn on/off run-time profiling
+ItoKMCGodunovStepper.plt_vars                              = none           # 'conductivity', 'current_density', 'particles_per_patch'
+ItoKMCGodunovStepper.dual_grid                             = true           # Turn on/off dual-grid functionality
+ItoKMCGodunovStepper.load_balance_fluid                    = false          # Turn on/off fluid realm load balancing. 
+ItoKMCGodunovStepper.load_balance_particles                = true           # Turn on/off particle load balancing
+ItoKMCGodunovStepper.load_indices                          = -1             # Which particle containers to use for load balancing (-1 => all)
+ItoKMCGodunovStepper.load_per_cell                         = 1.0            # Default load per grid cell.
+ItoKMCGodunovStepper.box_sorting                           = morton         # Box sorting when load balancing
+ItoKMCGodunovStepper.particles_per_cell                    = 32             # Max computational particles per cell
+ItoKMCGodunovStepper.merge_interval                        = 1              # Time steps between superparticle merging
+ItoKMCGodunovStepper.regrid_superparticles                 = false          # Make superparticles during regrids
+ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0            # Advective time step CFL restriction
+ItoKMCGodunovStepper.max_particle_advection_cfl            = 1.0            # Advective time step CFL restriction
+ItoKMCGodunovStepper.min_particle_diffusion_cfl            = 0.0            # Diffusive time step CFL restriction
+ItoKMCGodunovStepper.max_particle_diffusion_cfl            = 1.E99          # Diffusive time step CFL restriction
+ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl  = 0.0            # Advection-diffusion time step CFL restriction
+ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl  = 1.E99          # Advection-diffusion time step CFL restriction
+ItoKMCGodunovStepper.fluid_advection_diffusion_cfl         = 0.5            # Advection-diffusion time step CFL restriction
+ItoKMCGodunovStepper.relax_dt_factor                       = 100.0          # Relaxation time step restriction. 
+ItoKMCGodunovStepper.min_dt                                = 25.E-12        # Minimum permitted time step
+ItoKMCGodunovStepper.max_dt                                = 1.E99          # Maximum permitted time step
+ItoKMCGodunovStepper.extend_conductivity                   = true           # Permit particles to live outside the EB to avoid bad gradients near EB
+ItoKMCGodunovStepper.smooth_conductivity                   = false          # Use bilinear smoothing on the conductivity.
+ItoKMCGodunovStepper.eb_tolerance                          = 0.0            # EB intersection test tolerance
+ItoKMCGodunovStepper.algorithm                             = euler_maruyama # Integration algorithm. 'euler_maruyama' or 'trapezoidal'
 
 # ====================================================================================================
 # ItoKMCAir3LFA class options
@@ -269,15 +277,15 @@ ItoKMCAir3LFA.debug     = true                # Turn on/off debugging
 ItoKMCAir3LFA.extrap_bc = false               # Use extrapolated BC or not
 
 # Initial data
-ItoKMCAir3LFA.init_particles  = 10000         # Number of initial particles
+ItoKMCAir3LFA.init_particles  = 10            # Number of initial particles
 ItoKMCAir3LFA.init_weights    = 1.0           # Initial particle weights
-ItoKMCAir3LFA.init_center     = 0 0 0         # Blob center
+ItoKMCAir3LFA.init_center     = 0.0 7.5E-3    # Blob center
 ItoKMCAir3LFA.init_radius     = 500E-6        # Blob radius
 
 # For controlling the time step
-ItoKMCAir3LFA.dX              = 100.0         # Maximum relative change Xnew/Xold during one time step.
+ItoKMCAir3LFA.dX              = 2.0         # Maximum relative change Xnew/Xold during one time step.
 
-# Ion transport settings. 
+# Ion transport settings.     
 ItoKMCAir3LFA.ion_transport   = false         # By default, stationary ions. 
 ItoKMCAir3LFA.ion_mobility    = 2E-4          # Turn on/off ion mobility
 
@@ -285,10 +293,10 @@ ItoKMCAir3LFA.ion_mobility    = 2E-4          # Turn on/off ion mobility
 ItoKMCAir3LFA.max_new_particles = 16          # Maximum number of computational particles to produce in reaction step
 ItoKMCAir3LFA.max_new_photons   = 16          # Maximum number of computational photons to produce in reaction step	
 ItoKMCAir3LFA.Ncrit          = 10             # How many firings away from a Negative particle number?
-ItoKMCAir3LFA.prop_eps       = 1.0            # Maximum relative change in propensity function
+ItoKMCAir3LFA.prop_eps       = 1.E99          # Maximum relative change in propensity function
 ItoKMCAir3LFA.NSSA           = 10             # How many SSA steps to run when tau-leaping is inefficient
 ItoKMCAir3LFA.SSAlim         = 10.0           # When to enter SSA instead of tau-leaping
-ItoKMCAir3LFA.algorithm      = hybrid_plain   #
+ItoKMCAir3LFA.algorithm      = hybrid_plain   # 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
 
 # Secondary emission
 ItoKMCAir3LFA.impact_efficiency  = 0.00       # Impact efficiency
@@ -310,10 +318,10 @@ ItoKMCStreamerTagger.plot              = false        # Turn on/off plotting of 
 ItoKMCStreamerTagger.num_tag_boxes     = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
 ItoKMCStreamerTagger.tag_box1_lo       = 0.0 0.0 0.0  # Only allow tags that fall between
 ItoKMCStreamerTagger.tag_box1_hi       = 0.0 0.0 0.0  # these two corners
-ItoKMCStreamerTagger.buffer            = 0           # Grow tagged cells
+ItoKMCStreamerTagger.buffer            = 0            # Grow tagged cells
 
 ItoKMCStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
 ItoKMCStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
-ItoKMCStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
-ItoKMCStreamerTagger.coarsen_alpha     = 0.2          # Set alpha coarsening. Higher => Less mesh
+ItoKMCStreamerTagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
+ItoKMCStreamerTagger.coarsen_alpha     = 0.5         # Set alpha coarsening. Higher => Less mesh
 ItoKMCStreamerTagger.max_coarsen_lvl   = 3            # Set max coarsening depth

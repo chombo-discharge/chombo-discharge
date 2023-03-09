@@ -337,16 +337,28 @@ ItoKMCStepper<I, C, R, F>::parseTimeStepRestrictions() noexcept
     MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have max_dt >= 0.0");
   }
 
-  if (m_maxParticleAdvectionCFL <= 0.0 || m_minParticleAdvectionCFL <= 0.0) {
-    MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have max/min_particle_advection_cfl > 0.0");
+  if (m_maxParticleAdvectionCFL <= 0.0) {
+    MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have max_particle_advection_cfl > 0.0");
+  }
+
+  if (m_minParticleAdvectionCFL < 0.0) {
+    MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have min_particle_advection_cfl >= 0.0");
   }
 
   if (m_maxParticleDiffusionCFL <= 0.0) {
     MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have particle_diffusion_cfl > 0.0");
   }
 
+  if (m_minParticleDiffusionCFL < 0.0) {
+    MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have particle_diffusion_cfl >= 0.0");
+  }
+
   if (m_maxParticleAdvectionDiffusionCFL <= 0.0) {
     MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have particle_advection_diffusion_cfl > 0.0");
+  }
+
+  if (m_minParticleAdvectionDiffusionCFL < 0.0) {
+    MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have particle_advection_diffusion_cfl >= 0.0");
   }
 
   if (m_fluidAdvectionDiffusionCFL <= 0.0) {
