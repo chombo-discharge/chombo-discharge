@@ -60,9 +60,9 @@ Cylinder::Cylinder()
     const EBGeometry::Vec3T<Real> v1(c1[0], c1[1], c1[2]);
     const EBGeometry::Vec3T<Real> v2(c2[0], c2[1], c2[2]);
 
-    auto cylinder = std::make_shared<EBGeometry::CylinderSDF<Real>>(v1, v2, radius, false);
+    auto cylinder = std::make_shared<EBGeometry::CylinderSDF<Real>>(v1, v2, radius);
 
-    RefCountedPtr<BaseIF> baseIF = RefCountedPtr<BaseIF>(new EBGeometryIF(cylinder, fluidOutside, zCoord));
+    RefCountedPtr<BaseIF> baseIF = RefCountedPtr<BaseIF>(new EBGeometryIF<Real>(cylinder, fluidOutside, zCoord));
 
     if (isElectrode) {
       m_electrodes.push_back(Electrode(baseIF, isLive));
