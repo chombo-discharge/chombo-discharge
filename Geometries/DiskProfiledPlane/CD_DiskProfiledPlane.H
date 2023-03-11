@@ -50,4 +50,3 @@ protected:
 #include <CD_NamespaceFooter.H>
 
 #endif
-
