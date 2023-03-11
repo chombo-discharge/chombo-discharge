@@ -291,7 +291,9 @@ ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize)
     }
     m_timer.stopEvent("Fine from coar");
 
+    m_timer.startEvent("Define level");
     this->defineLevel(coveredBoxes, regularBoxes, cutCellBoxes, fineLvl);
+    m_timer.stopEvent("Define level");
 
     m_hasThisLevel[fineLvl] = true;
 
