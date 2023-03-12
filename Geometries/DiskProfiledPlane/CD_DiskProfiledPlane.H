@@ -18,7 +18,9 @@
 
 /*!
   @brief Geometry class for disk electrode and profiled surface experiments. 
-  @details The orientation is along the y-axis in 2D and along the z-axis in 3D.
+  @details This geometry consists of a disk electrode oriented along +y (user can shift it), and a profiled
+  plane with specified profiles: squares or square channels, spheres, or cylinders. Profiled are organized
+  along a user-specified lattice (coinciding with the coordinate directions), and can be shifted. 
 */
 class DiskProfiledPlane : public ComputationalGeometry
 {

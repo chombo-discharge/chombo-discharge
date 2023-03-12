@@ -40,18 +40,14 @@ DiskProfiledPlane::DiskProfiledPlane() noexcept
   pp.get("use_electrode", useElectrode);
   pp.get("use_dielectric", useDielectric);
 
+  m_electrodes.resize(0);
+  m_dielectrics.resize(0);
+
   if (useElectrode) {
     this->defineElectrode();
   }
-  else {
-    m_electrodes.resize(0);
-  }
-
   if (useDielectric) {
     this->defineDielectric();
-  }
-  else {
-    m_dielectrics.resize(0);
   }
 }
 
@@ -152,13 +148,8 @@ DiskProfiledPlane::defineDielectric() noexcept
                        squareDimensions[2] - 2 * boxCurvature);
 
   // Basic rounded box.
-#if 1 // Why does this impact performance...? We want the rounded box but wtf? Probably a Chombo thing...?
-  MayDay::Warning("Why does curvature affect the implicit function evaluation...?");
   std::shared_ptr<ImpFunc> roundedBox = std::make_shared<RoundedBoxSDF<Real>>(boxDims, boxCurvature);
-#else
-  std::shared_ptr<ImpFunc> roundedBox = std::make_shared<BoxSDF<Real>>(-0.5 * boxDims, 0.5 * boxDims);
-#endif
-  roundedBox = Translate<Real>(roundedBox, -0.5 * boxDimensions[1] * Vec3::unit(1));
+  roundedBox                          = Translate<Real>(roundedBox, -0.5 * boxDimensions[1] * Vec3::unit(1));
 
   // Determine the requested profile type.
   std::shared_ptr<ImpFunc> profile;
