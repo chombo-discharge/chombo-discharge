@@ -160,27 +160,31 @@ DiskProfiledPlane::defineDielectric() noexcept
     profile = std::make_shared<SphereSDF<Real>>(Vec3::zero(), sphereRadius);
   }
   else if (str == "cylinder_x") {
-    profile = std::make_shared<SphereSDF<Real>>(Vec3::zero(), sphereRadius);
+    profile = std::make_shared<SphereSDF<Real>>(Vec3::zero(), cylinderRadius);
     profile = Elongate<Real>(profile, std::numeric_limits<Real>::max() * Vec3::unit(0));
   }
   else if (str == "cylinder_y") {
-    profile = std::make_shared<SphereSDF<Real>>(Vec3::zero(), sphereRadius);
+    profile = std::make_shared<SphereSDF<Real>>(Vec3::zero(), cylinderRadius);
     profile = Elongate<Real>(profile, std::numeric_limits<Real>::max() * Vec3::unit(1));
   }
   else if (str == "cylinder_z") {
-    profile = std::make_shared<SphereSDF<Real>>(Vec3::zero(), sphereRadius);
+    profile = std::make_shared<SphereSDF<Real>>(Vec3::zero(), cylinderRadius);
     profile = Elongate<Real>(profile, std::numeric_limits<Real>::max() * Vec3::unit(2));
+  }
+  else if (str == "none") {
   }
   else {
     MayDay::Abort("DiskProfiledPlane::defineDielectric - unsupported profile type requested");
   }
 
-  // Translate and repeat the profiles.
-  profile = Translate<Real>(profile, profileTra);
-  profile = FiniteRepetition<Real>(profile, profilePer, profileRepLo, profileRepHi);
+  // Translate and repeat the profiles. Then do a smooth union
+  if (str != "none") {
+    profile    = Translate<Real>(profile, profileTra);
+    profile    = FiniteRepetition<Real>(profile, profilePer, profileRepLo, profileRepHi);
+    roundedBox = SmoothDifference<Real>(roundedBox, profile, boxCurvature);
+  }
 
-  // // Subtract the square(s) and/or profiles and then translate the box to where the user wants it.
-  roundedBox = SmoothDifference<Real>(roundedBox, profile, boxCurvature);
+  // Translate box into place.
   roundedBox = Translate<Real>(roundedBox, Vec3(boxTranslation[0], boxTranslation[1], boxTranslation[2]));
 
   if (SpaceDim == 2) {

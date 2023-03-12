@@ -10,10 +10,10 @@ The source files consist of the following:
 To set up a new problem, use the Python script. For example:
 
 ```shell
-./setup.py -base_dir=myApplications -app_name=myElectrostatics -dim=2 -geometry=CoaxialCable
+./setup.py -base_dir=MyApplications -app_name=MyElectrostatics -geometry=CoaxialCable
 ```
 
-The application will be installed to $DISCHARGE_HOME/myApplications/myElectrostatics.
+The application will be installed to $DISCHARGE_HOME/MyApplications/MyElectrostatics.
 The user will need to modify the geometry and set the initial conditions through the inputs file. 
 
 ## Modifying the application
