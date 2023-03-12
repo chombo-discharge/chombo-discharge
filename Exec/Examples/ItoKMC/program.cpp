@@ -10,7 +10,7 @@
 #include <CD_McPhoto.H>
 #include <CD_ItoKMCAir3LFA.H>
 #include <CD_CdrCTU.H>
-#include <CD_RodPlaneProfile.H>
+#include <CD_DiskProfiledPlane.H>
 #include <CD_ItoKMCGodunovStepper.H>
 #include <CD_ItoKMCStreamerTagger.H>
 
@@ -47,7 +47,7 @@ main(int argc, char* argv[])
     setPoutBaseName(basename);
   }
 
-  auto geometry    = RefCountedPtr<ComputationalGeometry>(new RodPlaneProfile());
+  auto geometry    = RefCountedPtr<ComputationalGeometry>(new DiskProfiledPlane());
   auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
   auto geocoarsen  = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
   auto physics     = RefCountedPtr<ItoKMCPhysics>(new ItoKMCAir3LFA());
