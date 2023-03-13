@@ -130,7 +130,7 @@ DiskProfiledPlane.profile_type          = cylinder_z         # Profile type. 'sq
 DiskProfiledPlane.profile_translate     = 0 250E-6 0          # Profile translation
 DiskProfiledPlane.profile_repetition_lo = 100 0 0         # Repetition pattern in low coordinate direction
 DiskProfiledPlane.profile_repetition_hi = 100 0 0         # Repetition pattern in high coordinate direction
-DiskProfiledPlane.profile_period        = 2E-3 1 1       # Repetition period
+DiskProfiledPlane.profile_period        = 4E-3 1 1       # Repetition period
 
 DiskProfiledPlane.square_dimensions     = 2E-3 4E-2 10  # Dimensions for squares/square channels
 DiskProfiledPlane.sphere_radius         = 1E-3               # Radius for sphere profiles
