@@ -119,7 +119,7 @@ DiskProfiledPlane.wheel_live            = true          # Live electrode or not
 DiskProfiledPlane.wheel_radius          = 3E-2          # Wheel radius
 DiskProfiledPlane.wheel_center          = 0 3.7E-2 0   # Wheel center
 DiskProfiledPlane.wheel_curvature       = 500E-6        # Wheel curvature (thickness)
-DiskProfiledPlane.wheel_stem_radius     = -1
+DiskProfiledPlane.wheel_stem_radius     = -1		
 DiskProfiledPlane.wheel_smooth = 1E-3
 DiskProfiledPlane.wheel_extra_thickness = 0.0           # Extra wheel thickness
 
