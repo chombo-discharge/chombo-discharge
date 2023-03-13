@@ -55,7 +55,7 @@ Driver.restart                         = 0             # Restart step (less or e
 Driver.allow_coarsening                = true          # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 0             # How much to grow tags when using geometry-based refinement. 
 Driver.refine_angles                   = 15.           # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = 0            # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_electrodes               = 2            # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = 0            # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
@@ -116,9 +116,11 @@ DiskProfiledPlane.use_electrode         = true          # Turn on/off electrode
 DiskProfiledPlane.use_dielectric        = true          # Turn on/off dielectric
 
 DiskProfiledPlane.wheel_live            = true          # Live electrode or not
-DiskProfiledPlane.wheel_radius          = 5E-2          # Wheel radius
-DiskProfiledPlane.wheel_center          = 0 5.75E-2 0   # Wheel center
+DiskProfiledPlane.wheel_radius          = 3E-2          # Wheel radius
+DiskProfiledPlane.wheel_center          = 0 3.7E-2 0   # Wheel center
 DiskProfiledPlane.wheel_curvature       = 500E-6        # Wheel curvature (thickness)
+DiskProfiledPlane.wheel_stem_radius     = -1
+DiskProfiledPlane.wheel_smooth = 1E-3
 DiskProfiledPlane.wheel_extra_thickness = 0.0           # Extra wheel thickness
 
 DiskProfiledPlane.box_dimensions        = 7.2000123E-2 0.020012 1 # Box dimensions

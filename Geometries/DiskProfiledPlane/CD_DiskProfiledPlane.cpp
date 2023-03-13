@@ -60,6 +60,8 @@ DiskProfiledPlane::defineElectrode() noexcept
   Real wheelThickness = 0.0;
   Real wheelRadius    = 0.0;
   Real wheelCurvature = 0.0;
+  Real stemRadius     = 0.0;
+  Real wheelSmooth    = 0.0;
 
   Vector<Real> v(3, 0.0);
 
@@ -70,17 +72,24 @@ DiskProfiledPlane::defineElectrode() noexcept
   pp.get("wheel_extra_thickness", wheelThickness);
   pp.get("wheel_radius", wheelRadius);
   pp.get("wheel_curvature", wheelCurvature);
+  pp.get("wheel_stem_radius", stemRadius);
+  pp.get("wheel_smooth", wheelSmooth);
   pp.getarr("wheel_center", v, 0, SpaceDim);
 
   // Create disk electrode using EBGeometry. This is an elongation of the union of a torus and a cylinder. Created
   // in the xy-plane and then put into place later.
+
   auto torus    = std::make_shared<TorusSDF<Real>>(Vec3::zero(), wheelRadius, wheelCurvature);
   auto cylinder = std::make_shared<CylinderSDF<Real>>(Vec3::unit(2) * wheelCurvature,
                                                       -Vec3::unit(2) * wheelCurvature,
                                                       wheelRadius);
 
-  // Make union and rotate and put into place.
+  // Make smooth union and put into place.
   auto wheel = Union<Real>(torus, cylinder);
+  if (stemRadius > 0.0) {
+    auto holder = std::make_shared<CapsuleSDF<Real>>(Vec3::zero(), 1.E10 * Vec3::unit(1), stemRadius);
+    wheel       = SmoothUnion<Real>(wheel, holder, wheelSmooth);
+  }
   if (wheelThickness > 0.0) {
     wheel = Elongate<Real>(wheel, 0.5 * wheelThickness * Vec3::unit(2));
   }
