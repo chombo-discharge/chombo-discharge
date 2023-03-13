@@ -41,7 +41,7 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
 
   this->parseOptions();
 
-  MayDay::Warning("ItoKMCGodunovStepper -- something is broken with initial regrids. Also check covered cells in EBHelmholtzOp");
+  MayDay::Warning("ItoKMCGodunovStepper -- something is broken with initial regrids. ");
 }
 
 template <typename I, typename C, typename R, typename F>

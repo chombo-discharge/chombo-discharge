@@ -214,7 +214,7 @@ namespace Physics {
       const bool converged = m_fieldSolver->solve(phi, rho, sigma);
 
       if (!converged) {
-        MayDay::Error("FieldStepper<T>::solvePoisson - did not converge");
+        MayDay::Warning("FieldStepper<T>::solvePoisson - did not converge");
       }
 
       // Compute the electric field.
