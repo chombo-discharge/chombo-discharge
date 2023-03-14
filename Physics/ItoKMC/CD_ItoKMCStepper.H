@@ -579,6 +579,18 @@ namespace Physics {
       Vector<EBAMRCellData> m_cdrMobilities;
 
       /*!
+	@brief For holding the gradient of all CDR species densities
+	@note Defined on the fluid realm
+      */
+      Vector<EBAMRCellData> m_fluidGradPhiCDR;
+
+      /*!
+	@brief For holding the gradient of all Ito species densities
+	@note Defined on the fluid realm
+      */
+      Vector<EBAMRCellData> m_fluidGradPhiIto;      
+
+      /*!
 	@brief Photoionization products to be put in the CDR equations
 	@note This is agglomerated with Ito particle photoionization functionality, and is
 	therefore defined on the particle realm. 
@@ -987,6 +999,14 @@ namespace Physics {
       virtual void
       computeConductivityCell(EBAMRCellData&                                 a_conductivity,
                               const Vector<ParticleContainer<ItoParticle>*>& a_particles) noexcept;
+
+      /*!
+	@brief Compute grad(phi) for both CDR and Ito species. 
+	@details This will compute the gradients using the results in the solvers. The user should make sure he/she deposits
+	the Ito particles before calling this routine. The results are put in m_fluidGradPhiCDR and and m_fluidGradPhiito
+       */
+      virtual void
+      computeDensityGradients() noexcept;
 
       /*!
 	@brief Compute the current density. 

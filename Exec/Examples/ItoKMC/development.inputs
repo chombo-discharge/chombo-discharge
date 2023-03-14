@@ -336,6 +336,8 @@ DiskProfiledPlane.wheel_live            = true          # Live electrode or not
 DiskProfiledPlane.wheel_radius          = 5E-2           # Wheel radius
 DiskProfiledPlane.wheel_center          = 0 5.80E-2 0         # Wheel center
 DiskProfiledPlane.wheel_curvature       = 500E-6        # Wheel curvature (thickness)
+DiskProfiledPlane.wheel_stem_radius     = -1.0          # Wheel stem radius (< 0 => turn off this part)
+DiskProfiledPlane.wheel_smooth          = 1E-3          # Smoothing distance for CSG union
 DiskProfiledPlane.wheel_extra_thickness = 0.0           # Extra wheel thickness
 
 DiskProfiledPlane.box_dimensions        = 7.2000123E-2 0.020012 1 # Box dimensions

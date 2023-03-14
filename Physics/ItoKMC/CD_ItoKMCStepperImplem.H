@@ -550,6 +550,16 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
     m_amr->allocate(m_cdrPhotoiProducts[i], m_particleRealm);
   }
 
+  // Storage for the density gradients
+  m_fluidGradPhiCDR.resize(numCdrSpecies);
+  m_fluidGradPhiIto.resize(numItoSpecies);
+  for (int i = 0; i < numCdrSpecies; i++) {
+    m_amr->allocate(m_fluidGradPhiCDR[i], m_fluidRealm, m_plasmaPhase, SpaceDim);
+  }
+  for (int i = 0; i < numItoSpecies; i++) {
+    m_amr->allocate(m_fluidGradPhiIto[i], m_fluidRealm, m_plasmaPhase, SpaceDim);
+  }  
+
   // Storage for secondary particle and photon emission
   m_secondaryParticles.resize(numItoSpecies);
   m_secondaryPhotons.resize(numPhotonSpecies);
@@ -1632,6 +1642,46 @@ ItoKMCStepper<I, C, R, F>::computeConductivityCell(EBAMRCellData&               
 
   // Interpolate to centroids.
   m_amr->interpToCentroids(a_conductivity, m_fluidRealm, m_plasmaPhase);
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::computeDensityGradients() noexcept
+{
+  CH_TIME("ItoKMCStepper::computeDensityGradients()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeDensityGradients()" << endl;
+  }
+
+  // Compute gradients for the CDR species.
+  for (auto it = m_cdr->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<CdrSolver>& solver = it();
+
+    const int idx = it.index();
+
+    // Update ghost cells and coarsenings. Then compute the gradient.
+    m_fluidScratch1.copy(solver->getPhi());
+
+    m_amr->arithmeticAverage(m_fluidScratch1, m_fluidRealm, m_plasmaPhase);
+    m_amr->interpGhostPwl(m_fluidScratch1, m_fluidRealm, m_plasmaPhase);
+
+    m_amr->computeGradient(m_fluidGradPhiCDR[idx], m_fluidScratch1, m_fluidRealm, m_plasmaPhase);
+  }
+
+  // Do the same for the Ito species.
+  for (auto it = m_ito->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<ItoSolver>& solver = it();
+
+    const int idx = it.index();
+
+    // Update ghost cells and coarsenings. Then compute the gradient.
+    m_fluidScratch1.copy(solver->getPhi());
+
+    m_amr->arithmeticAverage(m_fluidScratch1, m_fluidRealm, m_plasmaPhase);
+    m_amr->interpGhostPwl(m_fluidScratch1, m_fluidRealm, m_plasmaPhase);
+
+    m_amr->computeGradient(m_fluidGradPhiIto[idx], m_fluidScratch1, m_fluidRealm, m_plasmaPhase);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -3565,6 +3615,8 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
     pout() << m_name + "::advanceReactionNetwork(EBCellFABx3, int, DataIndex, Box, Realx2)" << endl;
   }
 
+  const int numCdrSpecies    = m_physics->getNumCdrSpecies();
+  const int numItoSpecies    = m_physics->getNumItoSpecies();
   const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
   const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
@@ -3583,10 +3635,28 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
   Vector<Physics::ItoKMC::FPR> newPhotons(numPhotonSpecies);
   Vector<Real>                 meanEnergies(numPlasmaSpecies);
   Vector<Real>                 energySources(numPlasmaSpecies);
+  Vector<RealVect>             densityGradients(numPlasmaSpecies, RealVect::Zero);
 
   // Populate single-valued data.
   FArrayBox& particlesPerCellReg = a_particlesPerCell.getFArrayBox();
   FArrayBox& newPhotonsReg       = a_newPhotonsPerCell.getFArrayBox();
+
+  // Handle to density gradients for CDR and Ito species.
+  Vector<EBCellFAB*> densityGradientsCDR(numCdrSpecies);
+  Vector<EBCellFAB*> densityGradientsIto(numItoSpecies);
+
+  Vector<FArrayBox*> densityGradientsCDRReg(numCdrSpecies);
+  Vector<FArrayBox*> densityGradientsItoReg(numItoSpecies);
+
+  for (int i = 0; i < numCdrSpecies; i++) {
+    densityGradientsCDR[i]    = &(*m_fluidGradPhiCDR[i][a_level])[a_dit];
+    densityGradientsCDRReg[i] = &(densityGradientsCDR[i]->getFArrayBox());
+  }
+
+  for (int i = 0; i < numItoSpecies; i++) {
+    densityGradientsIto[i]    = &(*m_fluidGradPhiIto[i][a_level])[a_dit];
+    densityGradientsItoReg[i] = &(densityGradientsIto[i]->getFArrayBox());
+  }
 
   // Handle to valid grid cells.
   const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[a_level])[a_dit];
@@ -3604,6 +3674,18 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
 
       for (int i = 0; i < numPhotonSpecies; i++) {
         newPhotons[i] = 0LL;
+      }
+
+      // Populate gradients.
+      for (int i = 0; i < numItoSpecies; i++) {
+        densityGradients[i] = RealVect(D_DECL((*densityGradientsItoReg[i])(iv, 0),
+                                              (*densityGradientsItoReg[i])(iv, 1),
+                                              (*densityGradientsItoReg[i])(iv, 2)));
+      }
+      for (int i = 0; i < numCdrSpecies; i++) {
+        densityGradients[numItoSpecies + i] = RealVect(D_DECL((*densityGradientsCDRReg[i])(iv, 0),
+                                                              (*densityGradientsCDRReg[i])(iv, 1),
+                                                              (*densityGradientsCDRReg[i])(iv, 2)));
       }
 
       // Do the physics advance.
@@ -3636,6 +3718,18 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
 
       for (int i = 0; i < numPhotonSpecies; i++) {
         newPhotons[i] = 0LL;
+      }
+
+      // Populate gradients.
+      for (int i = 0; i < numItoSpecies; i++) {
+        densityGradients[i] = RealVect(D_DECL((*densityGradientsIto[i])(vof, 0),
+                                              (*densityGradientsIto[i])(vof, 1),
+                                              (*densityGradientsIto[i])(vof, 2)));
+      }
+      for (int i = 0; i < numCdrSpecies; i++) {
+        densityGradients[numItoSpecies + i] = RealVect(D_DECL((*densityGradientsCDR[i])(vof, 0),
+                                                              (*densityGradientsCDR[i])(vof, 1),
+                                                              (*densityGradientsCDR[i])(vof, 2)));
       }
 
       // Do the physics advance
