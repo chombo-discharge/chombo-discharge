@@ -312,20 +312,26 @@ ItoKMCAir3LFA::updateReactionRates(const RealVect          a_E,
   // Compute the reaction rates.
   const Real dV      = pow(a_dx, SpaceDim);
   const Real E       = a_E.vectorLength();
-  const Real alpha   = m_tables.at("alpha").getEntry<1>(E);
-  const Real eta     = m_tables.at("eta").getEntry<1>(E);
   const Real Te      = m_tables.at("Te").getEntry<1>(E);
   const Real mu      = m_tables.at("mobility").getEntry<1>(E);
+  const Real D       = m_tables.at("diffco").getEntry<1>(E);
   const Real velo    = mu * E;
   const Real xfactor = (m_pq / (m_p + m_pq)) * excitationRates(E) * sergeyFactor(m_O2frac) * m_photoIonizationFactor;
   const Real bpn     = 2E-13 * sqrt(300 / m_T) / dV;
   const Real bpe     = 1.138E-11 * pow(Te, -0.7) / dV;
+  const Real alpha   = m_tables.at("alpha").getEntry<1>(E) * fcorr;
+  const Real eta     = m_tables.at("eta").getEntry<1>(E);    
 
-  m_kmcReactions[0]->rate() = alpha * velo;
+  // Soloviev correction factor. 
+  Real fcorr   = 1.0 + a_E.dotProduct(D * a_gradPhi[0])/(1.0 + a_phi[0] * mu * a_E.dotProduct(a_E));
+  fcorr = std::max(fcorr, 0.0);
+  fcorr = std::min(fcorr, 1.0);
+
+  m_kmcReactions[0]->rate() = alpha * velo * fcorr;
   m_kmcReactions[1]->rate() = eta * velo;
   m_kmcReactions[2]->rate() = bpe;
   m_kmcReactions[3]->rate() = bpn;
-  m_kmcReactions[4]->rate() = alpha * velo * xfactor;
+  m_kmcReactions[4]->rate() = alpha * velo * xfactor * fcorr;
 }
 
 Real
