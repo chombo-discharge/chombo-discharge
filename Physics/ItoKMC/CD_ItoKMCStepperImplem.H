@@ -3643,27 +3643,15 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
   FArrayBox& newPhotonsReg       = a_newPhotonsPerCell.getFArrayBox();
 
   // Handle to densities and density gradients for CDR and Ito species.
+  Vector<const EBCellFAB*> densitiesIto(numItoSpecies);  
   Vector<const EBCellFAB*> densitiesCDR(numCdrSpecies);
-  Vector<const EBCellFAB*> densitiesIto(numItoSpecies);
-  Vector<const EBCellFAB*> densityGradientsCDR(numCdrSpecies);
   Vector<const EBCellFAB*> densityGradientsIto(numItoSpecies);
+  Vector<const EBCellFAB*> densityGradientsCDR(numCdrSpecies);
 
+  Vector<const FArrayBox*> densitiesItoReg(numItoSpecies);  
   Vector<const FArrayBox*> densitiesCDRReg(numCdrSpecies);
-  Vector<const FArrayBox*> densitiesItoReg(numItoSpecies);
-  Vector<const FArrayBox*> densityGradientsCDRReg(numCdrSpecies);
   Vector<const FArrayBox*> densityGradientsItoReg(numItoSpecies);
-
-  for (auto it = m_cdr->iterator(); it.ok(); ++it) {
-    const RefCountedPtr<CdrSolver>& solver = it();
-    const EBAMRCellData&            phi    = solver->getPhi();
-
-    const int i = it.index();
-
-    densitiesCDR[i]           = &(*phi[a_level])[a_dit];
-    densitiesCDRReg[i]        = &(densitiesCDR[i]->getFArrayBox());
-    densityGradientsCDR[i]    = &(*m_fluidGradPhiCDR[i][a_level])[a_dit];
-    densityGradientsCDRReg[i] = &(densityGradientsCDR[i]->getFArrayBox());
-  }
+  Vector<const FArrayBox*> densityGradientsCDRReg(numCdrSpecies);
 
   for (auto it = m_ito->iterator(); it.ok(); ++it) {
     const RefCountedPtr<ItoSolver>& solver = it();
@@ -3675,6 +3663,18 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
     densitiesItoReg[i]        = &(densitiesIto[i]->getFArrayBox());
     densityGradientsIto[i]    = &(*m_fluidGradPhiIto[i][a_level])[a_dit];
     densityGradientsItoReg[i] = &(densityGradientsIto[i]->getFArrayBox());
+  }  
+
+  for (auto it = m_cdr->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<CdrSolver>& solver = it();
+    const EBAMRCellData&            phi    = solver->getPhi();
+
+    const int i = it.index();
+
+    densitiesCDR[i]           = &(*phi[a_level])[a_dit];
+    densitiesCDRReg[i]        = &(densitiesCDR[i]->getFArrayBox());
+    densityGradientsCDR[i]    = &(*m_fluidGradPhiCDR[i][a_level])[a_dit];
+    densityGradientsCDRReg[i] = &(densityGradientsCDR[i]->getFArrayBox());
   }
 
   // Handle to valid grid cells.
@@ -3702,7 +3702,8 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
                                               (*densityGradientsItoReg[i])(iv, 1),
                                               (*densityGradientsItoReg[i])(iv, 2)));
       }
-      for (int i = 0; i < numCdrSpecies; i++) {
+      
+      // for (int i = 0; i < numCdrSpecies; i++) {
         densities[numItoSpecies + i]        = (*densitiesCDRReg[i])(iv, 0);
         densityGradients[numItoSpecies + i] = RealVect(D_DECL((*densityGradientsCDRReg[i])(iv, 0),
                                                               (*densityGradientsCDRReg[i])(iv, 1),
@@ -3748,8 +3749,9 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
                                               (*densityGradientsIto[i])(vof, 1),
                                               (*densityGradientsIto[i])(vof, 2)));
       }
-      for (int i = 0; i < numCdrSpecies; i++) {
-        densities[numItoSpecies + i]        = (*densitiesCdr[i])(vof, 0);
+      
+      // for (int i = 0; i < numCdrSpecies; i++) {
+        densities[numItoSpecies + i]        = (*densitiesCDR[i])(vof, 0);
         densityGradients[numItoSpecies + i] = RealVect(D_DECL((*densityGradientsCDR[i])(vof, 0),
                                                               (*densityGradientsCDR[i])(vof, 1),
                                                               (*densityGradientsCDR[i])(vof, 2)));
