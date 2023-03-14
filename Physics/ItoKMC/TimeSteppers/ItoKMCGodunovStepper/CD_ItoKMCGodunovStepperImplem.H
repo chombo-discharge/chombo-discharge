@@ -43,7 +43,8 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
 
   MayDay::Warning("ItoKMCGodunovStepper -- something is broken with initial regrids. ");
   MayDay::Warning("ItoKMCGodunovStepper -- check that CDR fluxes are properly added to surface charge");
-  MayDay::Warning("ItoKMCGodunovStepper -- should supported density gradients in advanceReactionNetwork for Soloviev factor");
+  MayDay::Warning(
+    "ItoKMCGodunovStepper -- should supported density gradients in advanceReactionNetwork for Soloviev factor");
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -360,10 +361,9 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 
   // Compute the gradients of the various species densities - this is used in the KMC kernels.
   m_timer.startEvent("Gradient calculation");
-  (this->m_ito)->depositParticles();    
+  (this->m_ito)->depositParticles();
   this->computeDensityGradients();
-  m_timer.stopEvent("Gradient calculation");  
-
+  m_timer.stopEvent("Gradient calculation");
 
   // Sort the particles and photons per cell so we can call reaction algorithms
   this->barrier();

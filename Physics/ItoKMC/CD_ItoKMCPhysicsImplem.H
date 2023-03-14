@@ -274,12 +274,14 @@ ItoKMCPhysics::initialSigma(const Real a_time, const RealVect a_pos) const
 }
 
 inline void
-ItoKMCPhysics::advanceKMC(Vector<FPR>&   a_numParticles,
-                          Vector<FPR>&   a_numNewPhotons,
-                          const Real     a_dt,
-                          const RealVect a_E,
-                          const Real     a_dx,
-                          const Real     a_kappa) const
+ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
+                          Vector<FPR>&            a_numNewPhotons,
+                          const Vector<Real>&     a_phi,
+                          const Vector<RealVect>& a_gradPhi,
+                          const Real              a_dt,
+                          const RealVect          a_E,
+                          const Real              a_dx,
+                          const Real              a_kappa) const
 {
   CH_TIME("ItoKMCPhysics::advanceKMC");
 
@@ -298,7 +300,7 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&   a_numParticles,
   }
 
   // Update the reaction rates and run the KMC solver.
-  this->updateReactionRates(a_E, a_dx, a_kappa);
+  this->updateReactionRates(a_E, a_phi, a_gradPhi, a_dx, a_kappa);
 
   // // Which algorithm?
   switch (m_algorithm) {

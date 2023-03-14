@@ -558,7 +558,7 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   }
   for (int i = 0; i < numItoSpecies; i++) {
     m_amr->allocate(m_fluidGradPhiIto[i], m_fluidRealm, m_plasmaPhase, SpaceDim);
-  }  
+  }
 
   // Storage for secondary particle and photon emission
   m_secondaryParticles.resize(numItoSpecies);
@@ -3635,25 +3635,44 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
   Vector<Physics::ItoKMC::FPR> newPhotons(numPhotonSpecies);
   Vector<Real>                 meanEnergies(numPlasmaSpecies);
   Vector<Real>                 energySources(numPlasmaSpecies);
+  Vector<Real>                 densities(numPlasmaSpecies, 0.0);
   Vector<RealVect>             densityGradients(numPlasmaSpecies, RealVect::Zero);
 
   // Populate single-valued data.
   FArrayBox& particlesPerCellReg = a_particlesPerCell.getFArrayBox();
   FArrayBox& newPhotonsReg       = a_newPhotonsPerCell.getFArrayBox();
 
-  // Handle to density gradients for CDR and Ito species.
-  Vector<EBCellFAB*> densityGradientsCDR(numCdrSpecies);
-  Vector<EBCellFAB*> densityGradientsIto(numItoSpecies);
+  // Handle to densities and density gradients for CDR and Ito species.
+  Vector<const EBCellFAB*> densitiesCDR(numCdrSpecies);
+  Vector<const EBCellFAB*> densitiesIto(numItoSpecies);
+  Vector<const EBCellFAB*> densityGradientsCDR(numCdrSpecies);
+  Vector<const EBCellFAB*> densityGradientsIto(numItoSpecies);
 
-  Vector<FArrayBox*> densityGradientsCDRReg(numCdrSpecies);
-  Vector<FArrayBox*> densityGradientsItoReg(numItoSpecies);
+  Vector<const FArrayBox*> densitiesCDRReg(numCdrSpecies);
+  Vector<const FArrayBox*> densitiesItoReg(numItoSpecies);
+  Vector<const FArrayBox*> densityGradientsCDRReg(numCdrSpecies);
+  Vector<const FArrayBox*> densityGradientsItoReg(numItoSpecies);
 
-  for (int i = 0; i < numCdrSpecies; i++) {
+  for (auto it = m_cdr->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<CdrSolver>& solver = it();
+    const EBAMRCellData&            phi    = solver->getPhi();
+
+    const int i = it.index();
+
+    densitiesCDR[i]           = &(*phi[a_level])[a_dit];
+    densitiesCDRReg[i]        = &(densitiesCDR[i]->getFArrayBox());
     densityGradientsCDR[i]    = &(*m_fluidGradPhiCDR[i][a_level])[a_dit];
     densityGradientsCDRReg[i] = &(densityGradientsCDR[i]->getFArrayBox());
   }
 
-  for (int i = 0; i < numItoSpecies; i++) {
+  for (auto it = m_ito->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<ItoSolver>& solver = it();
+    const EBAMRCellData&            phi    = solver->getPhi();
+
+    const int i = it.index();
+
+    densitiesIto[i]           = &(*phi[a_level])[a_dit];
+    densitiesItoReg[i]        = &(densitiesIto[i]->getFArrayBox());
     densityGradientsIto[i]    = &(*m_fluidGradPhiIto[i][a_level])[a_dit];
     densityGradientsItoReg[i] = &(densityGradientsIto[i]->getFArrayBox());
   }
@@ -3678,18 +3697,20 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
 
       // Populate gradients.
       for (int i = 0; i < numItoSpecies; i++) {
+        densities[i]        = (*densitiesItoReg[i])(iv, 0);
         densityGradients[i] = RealVect(D_DECL((*densityGradientsItoReg[i])(iv, 0),
                                               (*densityGradientsItoReg[i])(iv, 1),
                                               (*densityGradientsItoReg[i])(iv, 2)));
       }
       for (int i = 0; i < numCdrSpecies; i++) {
+        densities[numItoSpecies + i]        = (*densitiesCDRReg[i])(iv, 0);
         densityGradients[numItoSpecies + i] = RealVect(D_DECL((*densityGradientsCDRReg[i])(iv, 0),
                                                               (*densityGradientsCDRReg[i])(iv, 1),
                                                               (*densityGradientsCDRReg[i])(iv, 2)));
       }
 
       // Do the physics advance.
-      m_physics->advanceKMC(particles, newPhotons, a_dt, E, a_dx, 1.0);
+      m_physics->advanceKMC(particles, newPhotons, densities, densityGradients, a_dt, E, a_dx, 1.0);
 
       // Repopulate the input data holders with the new number of particles/photons per cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {
@@ -3722,18 +3743,20 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
 
       // Populate gradients.
       for (int i = 0; i < numItoSpecies; i++) {
+        densities[i]        = (*densitiesIto[i])(vof, 0);
         densityGradients[i] = RealVect(D_DECL((*densityGradientsIto[i])(vof, 0),
                                               (*densityGradientsIto[i])(vof, 1),
                                               (*densityGradientsIto[i])(vof, 2)));
       }
       for (int i = 0; i < numCdrSpecies; i++) {
+        densities[numItoSpecies + i]        = (*densitiesCdr[i])(vof, 0);
         densityGradients[numItoSpecies + i] = RealVect(D_DECL((*densityGradientsCDR[i])(vof, 0),
                                                               (*densityGradientsCDR[i])(vof, 1),
                                                               (*densityGradientsCDR[i])(vof, 2)));
       }
 
       // Do the physics advance
-      m_physics->advanceKMC(particles, newPhotons, a_dt, E, a_dx, kappa);
+      m_physics->advanceKMC(particles, newPhotons, densities, densityGradients, a_dt, E, a_dx, kappa);
 
       // Repopulate the input data holders with the new number of particles/photons per cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {

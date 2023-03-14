@@ -68,12 +68,18 @@ namespace Physics {
 
       /*!
 	@brief Update reaction rates
-	@param[in] a_E     Electric field
-	@param[in] a_dx    Grid resolution
-	@param[in] a_kappa Cut-cell volume fraction
+	@param[in] a_E       Electric field
+	@param[in] a_phi     Plasma species densities
+	@param[in] a_gradPhi Density gradients for plasma species. 
+	@param[in] a_dx      Grid resolution
+	@param[in] a_kappa   Cut-cell volume fraction
       */
       virtual void
-      updateReactionRates(const RealVect a_E, const Real a_dx, const Real a_kappa) const noexcept override;
+      updateReactionRates(const RealVect          a_E,
+                          const Vector<Real>&     a_phi,
+                          const Vector<RealVect>& a_gradPhi,
+                          const Real              a_dx,
+                          const Real              a_kappa) const noexcept override;
 
       /*!
 	@brief Compute the Ito solver mobilities.

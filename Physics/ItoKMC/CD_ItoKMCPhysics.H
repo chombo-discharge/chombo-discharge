@@ -232,18 +232,22 @@ namespace Physics {
 	@brief Advance particles. 
 	@param[inout] a_numParticles  Number of physical particles
 	@param[out]   a_numNewPhotons Number of new physical photons to generate (of each type)
+	@param[in]    a_phi           Plasma species densities. 
+	@param[in]    a_gradPhi       Plasma species density gradients. 
 	@param[in]    a_dt            Time step
 	@param[in]    a_E             Electric field
 	@param[in]    a_dx            Grid resolution
 	@param[in]    a_kappa         Cut-cell volume fraction. 
       */
       inline void
-      advanceKMC(Vector<FPR>&   a_numParticles,
-                 Vector<FPR>&   a_numNewPhotons,
-                 const Real     a_dt,
-                 const RealVect a_E,
-                 const Real     a_dx,
-                 const Real     a_kappa) const;
+      advanceKMC(Vector<FPR>&            a_numParticles,
+                 Vector<FPR>&            a_numNewPhotons,
+                 const Vector<Real>&     a_phi,
+                 const Vector<RealVect>& a_gradPhi,
+                 const Real              a_dt,
+                 const RealVect          a_E,
+                 const Real              a_dx,
+                 const Real              a_kappa) const;
 
       /*!
 	@brief Reconcile the number of particles.
@@ -487,13 +491,19 @@ namespace Physics {
 
       /*!
 	@brief Update reaction rates
-	@param[in] a_E     Electric field
-	@param[in] a_dx    Grid resolution
-	@param[in] a_kappa Cut-cell volume fraction
+	@param[in] a_E       Electric field
+	@param[in] a_phi     Plasma species densities
+	@param[in] a_gradPhi Density gradients for plasma species. 
+	@param[in] a_dx      Grid resolution
+	@param[in] a_kappa   Cut-cell volume fraction
 	@note Must be implemented by the user.
       */
       virtual void
-      updateReactionRates(const RealVect a_E, const Real a_dx, const Real a_kappa) const noexcept = 0;
+      updateReactionRates(const RealVect          a_E,
+                          const Vector<Real>&     a_phi,
+                          const Vector<RealVect>& a_gradPhi,
+                          const Real              a_dx,
+                          const Real              a_kappa) const noexcept = 0;
 
       /*!
 	@brief Remove particles from the input list.

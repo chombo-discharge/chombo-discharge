@@ -588,7 +588,7 @@ namespace Physics {
 	@brief For holding the gradient of all Ito species densities
 	@note Defined on the fluid realm
       */
-      Vector<EBAMRCellData> m_fluidGradPhiIto;      
+      Vector<EBAMRCellData> m_fluidGradPhiIto;
 
       /*!
 	@brief Photoionization products to be put in the CDR equations

@@ -301,7 +301,11 @@ ItoKMCAir3LFA::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryP
 }
 
 void
-ItoKMCAir3LFA::updateReactionRates(const RealVect a_E, const Real a_dx, const Real a_kappa) const noexcept
+ItoKMCAir3LFA::updateReactionRates(const RealVect          a_E,
+                                   const Vector<Real>&     a_phi,
+                                   const Vector<RealVect>& a_gradPhi,
+                                   const Real              a_dx,
+                                   const Real              a_kappa) const noexcept
 {
   CH_TIME("ItoKMCAir3LFA::updateReactionRates");
 
