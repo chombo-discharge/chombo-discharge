@@ -591,6 +591,11 @@ namespace Physics {
       Vector<EBAMRCellData> m_fluidGradPhiIto;
 
       /*!
+	@brief For holding the Ito species densities on the fluid realm
+      */
+      Vector<EBAMRCellData> m_fluidPhiIto;
+
+      /*!
 	@brief Photoionization products to be put in the CDR equations
 	@note This is agglomerated with Ito particle photoionization functionality, and is
 	therefore defined on the particle realm. 
@@ -1001,7 +1006,7 @@ namespace Physics {
                               const Vector<ParticleContainer<ItoParticle>*>& a_particles) noexcept;
 
       /*!
-	@brief Compute grad(phi) for both CDR and Ito species. 
+	@brief Compute grad(phi) and phi for both CDR and Ito species and put the result on the fluid realm. 
 	@details This will compute the gradients using the results in the solvers. The user should make sure he/she deposits
 	the Ito particles before calling this routine. The results are put in m_fluidGradPhiCDR and and m_fluidGradPhiito
        */
