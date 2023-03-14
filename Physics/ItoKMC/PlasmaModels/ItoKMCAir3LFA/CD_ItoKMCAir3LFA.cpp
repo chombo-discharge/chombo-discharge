@@ -319,7 +319,7 @@ ItoKMCAir3LFA::updateReactionRates(const RealVect          a_E,
   const Real xfactor = (m_pq / (m_p + m_pq)) * excitationRates(E) * sergeyFactor(m_O2frac) * m_photoIonizationFactor;
   const Real bpn     = 2E-13 * sqrt(300 / m_T) / dV;
   const Real bpe     = 1.138E-11 * pow(Te, -0.7) / dV;
-  const Real alpha   = m_tables.at("alpha").getEntry<1>(E) * fcorr;
+  const Real alpha   = m_tables.at("alpha").getEntry<1>(E);
   const Real eta     = m_tables.at("eta").getEntry<1>(E);    
 
   // Soloviev correction factor. 
