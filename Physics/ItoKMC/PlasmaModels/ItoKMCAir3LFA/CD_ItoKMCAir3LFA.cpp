@@ -259,26 +259,19 @@ ItoKMCAir3LFA::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryP
                                    const int                        a_matIndex) const noexcept
 {
   CH_TIME("ItoKMCAir3LFA::injectParticlesEB");
-#if 0
-  List<ItoParticle>&       ingoingElectrons = a_secondaryParticles[0];
-  const List<ItoParticle>& outgoingIons     = a_primaryParticles[1];
-  const List<Photon>&      outgoingPhotons  = a_primaryPhotons[0];
 
-  if (m_extrapBC) {
-    const Real diff   = a_oldNumParticles[0] - a_newNumParticles[0];
-    const Real diffLL = (long long)diff;
-    if (diffLL > 0LL) {
-      ingoingElectrons.add(ItoParticle(diff, a_cellCenter + a_cellCentroid * a_dx));
-    }
+  for (int i = 0; i < a_cdrFluxes.size(); i++) {
+    // Positive flux is an inflow.
+    a_cdrFluxes[i] = std::max(a_extrapCDRFluxes[i], 0.0);
   }
-  else {
-    const bool isCathode = a_E.dotProduct(a_bndryNormal) < 0.0;
-    const bool isAnode   = a_E.dotProduct(a_bndryNormal) > 0.0;
-
-    const RealVect bndryPos = a_cellCenter + a_dx * a_bndryCentroid;
-
-    if (isCathode) {
-      // SEE from ion impact
+#if 0
+  const bool isCathode = a_E.dotProduct(a_bndryNormal) < 0.0;
+  const bool isAnode   = a_E.dotProduct(a_bndryNormal) > 0.0;
+  
+  const RealVect bndryPos = a_cellCenter + a_dx * a_bndryCentroid;
+  
+  if (isCathode) {
+    // SEE from ion impact
       for (ListIterator<ItoParticle> lit(outgoingIons); lit.ok(); ++lit) {
         const long long success = Random::getBinomial<long long>(llround(lit().weight()), m_ionImpactEfficiency);
         if (success > 0LL) {
@@ -296,7 +289,6 @@ ItoKMCAir3LFA::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryP
     }
     else if (isAnode) {
     }
-  }
 #endif
 }
 
