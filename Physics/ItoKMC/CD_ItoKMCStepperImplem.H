@@ -4431,7 +4431,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(Vector<ParticleContainer<ItoP
 
       for (auto it = m_cdr->iterator(); it.ok(); ++it) {
         cdrFluxesFAB.push_back(&((*(a_cdrFluxes[it.index()])[lvl])[dit()]));
-        cdrFluxesExtrapFAB.push_back(&((*(a_cdrFluxes[it.index()])[lvl])[dit()]));
+        cdrFluxesExtrapFAB.push_back(&((*(a_cdrFluxesExtrap[it.index()])[lvl])[dit()]));
       }
 
       for (auto it = m_rte->iterator(); it.ok(); ++it) {
@@ -4517,6 +4517,12 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(Vector<ParticleContainer<ItoP
                                          a_dt,
                                          isDielectric,
                                          matIndex);
+
+	  // Secondary particles and photons are filled directly because the containers are cell-sorted, but the CDR fluxes are not. Put them
+	  // in the correct place now.
+	  for (int i = 0; i < numCdrSpecies; i++) {
+	    (*cdrFluxesFAB[i])(vof, 0) = cdrFluxes[i];
+	  }
         }
       };
 
@@ -4676,6 +4682,9 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
 
     m_amr->conservativeAverage(phi, m_fluidRealm, m_plasmaPhase);
     m_amr->interpGhostPwl(phi, m_fluidRealm, m_plasmaPhase);
+
+    // Really don't want negative densities.
+    DataOps::floor(phi, 0.0);
   }
 
   // Conservatively coarsen the surface charge density.
