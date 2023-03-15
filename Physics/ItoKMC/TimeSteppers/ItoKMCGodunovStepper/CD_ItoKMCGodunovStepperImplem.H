@@ -43,8 +43,6 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
 
   MayDay::Warning("ItoKMCGodunovStepper -- something is broken with initial regrids. ");
   MayDay::Warning("ItoKMCGodunovStepper -- check that CDR fluxes are properly added to surface charge");
-  MayDay::Warning(
-    "ItoKMCGodunovStepper -- should supported density gradients in advanceReactionNetwork for Soloviev factor");
 }
 
 template <typename I, typename C, typename R, typename F>
