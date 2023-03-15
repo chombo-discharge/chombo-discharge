@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = 20E3
+ItoKMC.potential = 15E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
@@ -53,7 +53,7 @@ Driver.geometry_only                   = false            # Special option that 
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
 Driver.output_directory                = ./               # Output directory
-Driver.output_names                    = square           # Simulation output names
+Driver.output_names                    = development           # Simulation output names
 Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
 Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
@@ -286,7 +286,7 @@ ItoKMCAir3LFA.init_radius     = 500E-6        # Blob radius
 ItoKMCAir3LFA.dX              = 2.0         # Maximum relative change Xnew/Xold during one time step.
 
 # Ion transport settings.     
-ItoKMCAir3LFA.ion_transport   = false         # By default, stationary ions. 
+ItoKMCAir3LFA.ion_transport   = true         # By default, stationary ions. 
 ItoKMCAir3LFA.ion_mobility    = 2E-4          # Turn on/off ion mobility
 
 # Kinetic Monte Carlo solver settings.
@@ -345,7 +345,7 @@ DiskProfiledPlane.box_translate         = 0 5.0123E-3 0          # Box translati
 DiskProfiledPlane.box_permittivity      = 4.0            # Dielectric box permittivity
 DiskProfiledPlane.box_curvature         = 100E-6         # Corner curvatures
 
-DiskProfiledPlane.profile_type          = square         # Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'
+DiskProfiledPlane.profile_type          = none         # Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'
 DiskProfiledPlane.profile_translate     = 0 0 0          # Profile translation
 DiskProfiledPlane.profile_repetition_lo = 36 0 0         # Repetition pattern in low coordinate direction
 DiskProfiledPlane.profile_repetition_hi = 36 0 0         # Repetition pattern in high coordinate direction
