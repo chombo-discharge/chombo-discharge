@@ -312,12 +312,12 @@ ItoKMCAir3LFA::updateReactionRates(const RealVect          a_E,
   const Real bpn     = 2E-13 * sqrt(300 / m_T) / dV;
   const Real bpe     = 1.138E-11 * pow(Te, -0.7) / dV;
   const Real alpha   = m_tables.at("alpha").getEntry<1>(E);
-  const Real eta     = m_tables.at("eta").getEntry<1>(E);    
+  const Real eta     = m_tables.at("eta").getEntry<1>(E);
 
-  // Soloviev correction factor. 
-  Real fcorr   = 1.0 + a_E.dotProduct(D * a_gradPhi[0])/(1.0 + a_phi[0] * mu * a_E.dotProduct(a_E));
-  fcorr = std::max(fcorr, 0.0);
-  fcorr = std::min(fcorr, 1.0);
+  // Soloviev correction factor.
+  Real fcorr = 1.0 + a_E.dotProduct(D * a_gradPhi[0]) / (1.0 + a_phi[0] * mu * a_E.dotProduct(a_E));
+  fcorr      = std::max(fcorr, 0.0);
+  fcorr      = std::min(fcorr, 1.0);
 
   m_kmcReactions[0]->rate() = alpha * velo * fcorr;
   m_kmcReactions[1]->rate() = eta * velo;

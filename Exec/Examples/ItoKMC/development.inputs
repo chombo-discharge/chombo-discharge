@@ -296,7 +296,7 @@ ItoKMCAir3LFA.Ncrit          = 10             # How many firings away from a Neg
 ItoKMCAir3LFA.prop_eps       = 1.E99          # Maximum relative change in propensity function
 ItoKMCAir3LFA.NSSA           = 10             # How many SSA steps to run when tau-leaping is inefficient
 ItoKMCAir3LFA.SSAlim         = 10.0           # When to enter SSA instead of tau-leaping
-ItoKMCAir3LFA.algorithm      = hybrid_plain   # 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
+ItoKMCAir3LFA.algorithm      = hybrid_midpoint   # 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
 
 # Secondary emission
 ItoKMCAir3LFA.impact_efficiency  = 0.00       # Impact efficiency
