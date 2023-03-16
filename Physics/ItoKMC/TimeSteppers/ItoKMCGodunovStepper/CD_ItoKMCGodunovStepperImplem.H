@@ -40,9 +40,6 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
   this->m_canRegridOnRestart       = true;
 
   this->parseOptions();
-
-  MayDay::Warning("ItoKMCGodunovStepper -- something is broken with initial regrids. ");
-  MayDay::Warning("ItoKMCGodunovStepper -- check that CDR fluxes are properly added to surface charge");
 }
 
 template <typename I, typename C, typename R, typename F>
