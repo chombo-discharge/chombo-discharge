@@ -2,12 +2,11 @@ chombo-discharge
 ----------------
 
 This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for discharge simulations with adaptive mesh refinement (AMR) on embedded boundary grids.
-
 A modified version of ``Chombo`` is distributed together with this code.
-``chombo-discharge`` only uses ``Chombo``; it is not affiliated nor endorsed by LBNL.
 
-<img src="./Docs/Sphinx/source/_static/figures/BranchingAir.gif" width="75%">
-
+<p align="center">
+   <img src="./Docs/Sphinx/source/_static/figures/BranchingAir.gif" width="75%">
+</p align="center">
 
 Installation
 ------------
