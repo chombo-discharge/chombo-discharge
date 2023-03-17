@@ -5,9 +5,4 @@
 
 .. warning::
 
-   This is a work-in-progress.
-
-* Superparticles - can specify per level
-* Exit on failure
-* Dual grid
-* Species, CDR vs Ito
+   Documentation is pending.
