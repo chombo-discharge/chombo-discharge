@@ -5,7 +5,7 @@ This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for disc
 A modified version of ``Chombo`` is distributed together with this code.
 
 <p align="center">
-   <img src="./Docs/Sphinx/source/_static/figures/BranchingAir.gif" width="75%">
+   <img src="./Docs/Sphinx/source/_static/figures/BranchingAir.gif" width="50%">
 </p align="center">
 
 Installation
