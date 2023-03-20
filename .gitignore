@@ -49,3 +49,7 @@ Docs/*
 !Docs/README.md
 Docs/Sphinx/build
 Docs/**/*.dat
+
+paper/paper.pdf
+paper/media/*
+paper/paper.jats
