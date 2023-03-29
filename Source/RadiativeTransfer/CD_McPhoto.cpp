@@ -99,6 +99,7 @@ McPhoto::parseOptions()
   m_haloBuffer = 1;
 
   this->parseVerbosity();
+  this->parseTransparentBoundaries();
   this->parsePseudoPhotons();
   this->parsePhotoGeneration();
   this->parseSourceType();
@@ -118,6 +119,7 @@ McPhoto::parseRuntimeOptions()
   }
 
   this->parseVerbosity();
+  this->parseTransparentBoundaries();
   this->parsePseudoPhotons();
   this->parsePhotoGeneration();
   this->parseSourceType();
