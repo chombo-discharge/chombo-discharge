@@ -129,6 +129,19 @@ McPhoto::parseRuntimeOptions()
 }
 
 void
+McPhoto::parseTransparentBoundaries()
+{
+  CH_TIME("McPhoto::parseTransparentBoundaries");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::parseTransparentBoundaries" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("transparent_eb", m_transparentEB);
+}
+
+void
 McPhoto::parseDivergenceComputation()
 {
   CH_TIME("McPhoto::parseDivergenceComputation");
@@ -1309,7 +1322,9 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
           }
         }
 
-        if (!checkEB && !checkDom) { // No intersection test necessary, photons is guaranteed to end up on the mesh.
+        if (!checkEB && !checkDom || m_transparentEB) {
+
+          // No intersection test necessary, photons is guaranteed to end up on the mesh.
           p.position() = newPos;
           bulkPhotons.add(p);
         }
@@ -1531,8 +1546,8 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
           }
         }
 
-        const bool absorb = absorbedBulk || absorbedEB ||
-                            absorbedDomain; // True if the photon was absorbed (on anything) and false otherwise.
+        // True if the photon was absorbed (on anything) and false otherwise.
+        const bool absorb = absorbedBulk || absorbedEB || absorbedDomain;
 
         if (!absorb) {
           p.position() = newPos;
