@@ -64,7 +64,7 @@ EBHelmholtzEBBC::define(const Location::Cell a_dataLocation,
       MayDay::Error("EBHelmholtzEBBC::define - logic bust. Should be an MG level (2)");
     }
     if (!m_hasFineAMRLevel) {
-      MayDay::Error("EBHelmholtzEBBC::define - logic bust. Should have an AMR level")
+      MayDay::Error("EBHelmholtzEBBC::define - logic bust. Should have an AMR level");
     }
   }
 
