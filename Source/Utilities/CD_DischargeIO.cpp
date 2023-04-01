@@ -309,9 +309,7 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
   header.m_string["filetype"]    = "VanillaAMRFileType";
   header.m_int["num_levels"]     = a_numLevels;
   header.m_int["num_components"] = numCompTotal;
-#if 0 // Uncommenting this because although VisIt uses the attribute, slice operators tend to break. 
-  header.m_realvect["prob_lo"]        = a_probLo;
-#endif
+  header.m_realvect["prob_lo"]   = a_probLo;
 
   for (int comp = 0; comp < numCompTotal; comp++) {
     char labelString[100];

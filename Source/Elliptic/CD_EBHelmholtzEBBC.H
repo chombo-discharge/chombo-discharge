@@ -51,17 +51,23 @@ public:
 
   /*!
     @brief Define function that is called by EBHelmholtzOp
-    @param[in] a_dataLocation Specification of data centering
-    @param[in] a_eblg         Grid where this object is defined. 
-    @param[in] a_probLo       Lower-left corner of computational domain. Required if BC objects needs physical position. 
-    @param[in] a_dx           Grid resolution. 
-    @param[in] a_ghostCF      Number of ghost cells that are filled across CF interface. 
+    @param[in] a_dataLocation    Specification of data centering
+    @param[in] a_eblg            Grid where this object is defined. 
+    @param[in] a_eblgFine        Finer grid. 
+    @param[in] a_probLo          Lower-left corner of computational domain. Required if BC objects needs physical position. 
+    @param[in] a_hasFineAMRLevel Has a finer AMR level or not. False if it doesn't, or if this level is an MG level
+    @param[in] a_dx              Grid resolution. 
+    @param[in] a_refToFine       Refinement factor to fine level.
+    @param[in] a_ghostCF         Number of ghost cells that are filled across CF interface. 
   */
   void
   define(const Location::Cell a_dataLocation,
          const EBLevelGrid&   a_eblg,
+         const EBLevelGrid&   a_eblgFine,
          const RealVect&      a_probLo,
          const Real&          a_dx,
+         const bool           a_hasFineAMRLevel,
+         const int            a_refToFine,
          const int            a_ghostCF);
 
   /*!
@@ -110,7 +116,20 @@ protected:
   Location::Cell m_dataLocation;
 
   /*!
+    @brief Has finer AMR level or not. This is false for all deeper multigrid levels. 
+  */
+  bool m_hasFineAMRLevel;
+
+  /*!
+    @brief Refinement factor to fine level (if there is one)
+    @details This is used when constructing stencils for the EB fluxes, which should not reach into invalid cells.
+  */
+  int m_refToFine;
+
+  /*!
     @brief Number of ghost cells that were filled across CF interface
+    @details This is passed in from the operator, who knows how many ghost cells were filled by the interpolator. This
+    is used so that the stencil-defining objects don't create stencils that reach into invalid ghost cells. Very useful.
   */
   int m_ghostCF;
 
@@ -128,6 +147,11 @@ protected:
     @brief Level grid
   */
   EBLevelGrid m_eblg;
+
+  /*!
+    @brief Level grid
+  */
+  EBLevelGrid m_eblgFine;
 
   /*!
     @brief Stencils for computing the flux on a single level. This is a single-level object. 

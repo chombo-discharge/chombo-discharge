@@ -101,7 +101,7 @@ public:
                        const Real&             a_alpha,
                        const Real&             a_beta,
                        const RealVect&         a_probLo,
-		       const AMRMask&          a_amrValidCells,
+                       const AMRMask&          a_amrValidCells,
                        const AmrLevelGrids&    a_amrLevelGrids,
                        const AmrInterpolators& a_amrInterpolators,
                        const AmrFluxRegisters& a_amrFluxRegisters,

@@ -43,6 +43,7 @@ public:
   // Various alias for cutting down on typing.
   using Smoother = EBHelmholtzOp::Smoother;
 
+  using AMRMask          = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
   using AmrLevelGrids    = Vector<RefCountedPtr<EBLevelGrid>>;
   using AmrInterpolators = Vector<RefCountedPtr<EBMultigridInterpolator>>;
   using AmrFluxRegisters = Vector<RefCountedPtr<EBFluxRegister>>;
@@ -79,6 +80,8 @@ public:
     @param[in] a_alpha            alpha-coefficient in Helmholtz operator.
     @param[in] a_beta             beta-coefficient in Helmholtz operator.
     @param[in] a_probLo           Lower-left corner of domain
+    @param[in] a_amrValidCells    Valid grid cells (true for cells not covered by a finer level)
+    @param[in] a_amrLevelGrid     AMR grids
     @param[in] a_amrInterpolators Interpolator objects between AMR levels. 
     @param[in] a_amrCoarseners    Conservative coarseners between AMR levels. 
     @param[in] a_amrFluxRegisters Flux registers between AMR levels. 
@@ -102,6 +105,7 @@ public:
                        const Real&             a_alpha,
                        const Real&             a_beta,
                        const RealVect&         a_probLo,
+                       const AMRMask&          a_amrValidCells,
                        const AmrLevelGrids&    a_amrLevelGrids,
                        const AmrInterpolators& a_amrInterpolators,
                        const AmrFluxRegisters& a_amrFluxRegisters,
@@ -123,7 +127,7 @@ public:
   /*!
     @brief Destructor. Does nothing.
   */
-  ~EBHelmholtzOpFactory();
+  virtual ~EBHelmholtzOpFactory();
 
   /*!
     @brief Disallowed assignment operator
@@ -216,6 +220,11 @@ protected:
     @brief Lower-left corner of computational domain
   */
   RealVect m_probLo;
+
+  /*!
+    @brief Mask of cells that are valid on the AMR levels
+  */
+  AMRMask m_amrValidCells;
 
   // Things that pertain to AMR levels. The first entry corresponds to the coarsest AMR level.
   /*!
