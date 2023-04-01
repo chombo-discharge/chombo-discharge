@@ -395,6 +395,11 @@ protected:
   int m_finestLevel;
 
   /*!
+    @brief Number of ghost cells
+  */
+  int m_numGhost;
+
+  /*!
     @brief Physical coordinates of lower-left corner in simulation domain
   */
   RealVect m_probLo;

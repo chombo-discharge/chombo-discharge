@@ -67,6 +67,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
   m_dx                   = a_dx;
   m_probLo               = a_probLo;
   m_finestLevel          = a_finestLevel;
+  m_numGhost = a_numGhost;
   m_baseif               = a_baseif;
   m_multifluidIndexSpace = a_mfis;
 
@@ -366,7 +367,7 @@ Realm::defineValidCells()
     const bool hasFine = lvl < m_finestLevel;
 
     m_validCells[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
-      new LevelData<BaseFab<bool>>(m_grids[lvl], numComp, numGhost * IntVect::Unit));
+      new LevelData<BaseFab<bool>>(m_grids[lvl], numComp, m_numGhost * IntVect::Unit));
     for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
       BaseFab<bool>& validCells = (*m_validCells[lvl])[dit()];
       validCells.setVal(true);
@@ -384,8 +385,8 @@ Realm::defineValidCells()
       coarsen(dblCoFi, dblFine, m_refinementRatios[lvl]);
 
       // Create some data = 1 on the fine grid and = 0 on the coarse grid
-      LevelData<FArrayBox> coFiData(dblCoFi, numComp, numGhost * IntVect::Unit);
-      LevelData<FArrayBox> coarData(dblCoar, numComp, numGhost * IntVect::Unit);
+      LevelData<FArrayBox> coFiData(dblCoFi, numComp, 0 * IntVect::Unit);
+      LevelData<FArrayBox> coarData(dblCoar, numComp, m_numGhost * IntVect::Unit);
 
       for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
         coFiData[dit()].setVal(1.0);
@@ -397,6 +398,7 @@ Realm::defineValidCells()
 
       // Copy from fine to coarse.
       coFiData.copyTo(coarData);
+      coarData.exchange();
 
       // Go through the coarse grid -- wherever we find a value of 1 there is also a fine grid.
       for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
@@ -411,7 +413,7 @@ Realm::defineValidCells()
           }
         };
 
-        BoxLoops::loop(cellBox, kernel);
+        BoxLoops::loop(fabMask.box(), kernel);
       }
     }
   }
