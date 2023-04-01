@@ -81,6 +81,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
     m_BcoefIrreg(a_BcoefIrreg)
 {
 
+  MayDay::Warning("EBHelmholtzOp and MFHelmholtzOp -- need to pass in valid cells!");
   CH_TIME("EBHelmholtzOp::EBHelmholtzOp(...)");
 
   CH_assert(!a_Acoef.isNull());

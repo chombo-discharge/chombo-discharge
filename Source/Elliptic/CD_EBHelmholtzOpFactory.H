@@ -56,7 +56,7 @@ public:
   using AmrResolutions = Vector<Real>;
   using AmrRefRatios   = Vector<int>;
 
-  using DomainBCFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>; // Will be replaced with better BC class...
+  using DomainBCFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>;
   using EBBCFactory     = RefCountedPtr<EBHelmholtzEBBCFactory>;
 
   /*!
