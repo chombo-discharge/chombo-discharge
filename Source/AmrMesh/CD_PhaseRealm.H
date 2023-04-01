@@ -238,6 +238,22 @@ public:
   getEBLevelGrid() const;
 
   /*!
+    @brief Get coarsened fine grids.
+    @details m_eblgCoFi[lvl] holds the grids on level lvl that are a coarsening of the grids on lvl+1
+    @return m_eblgCoFi
+  */
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGridCoFi() const;
+
+  /*!
+    @brief Get refined coarse grid.
+    @details m_eblgFiCo[lvl] holds the refinement of the grids on level lvl-1
+    @return m_eblgFiCo
+  */
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGridFiCo() const;
+
+  /*!
     @brief Get neighbor boxes to grid boxes
     @return Immutable m_neighbors
   */

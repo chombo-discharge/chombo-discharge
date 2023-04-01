@@ -26,6 +26,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                              const MFLevelGrid&                               a_mflgFine,
                              const MFLevelGrid&                               a_mflg,
                              const MFLevelGrid&                               a_mflgCoFi,
+                             const MFLevelGrid&                               a_mflgFiCo,
                              const MFLevelGrid&                               a_mflgCoar,
                              const MFLevelGrid&                               a_mflgCoarMG,
                              const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_amrValidCells,
@@ -79,7 +80,8 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
   }
 
   if (m_hasFine) {
-    m_coarAve = a_coarAve;
+    m_coarAve  = a_coarAve;
+    m_mflgFiCo = a_mflgFiCo;
   }
 
   m_interpolator = a_interpolator;
@@ -101,6 +103,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
     EBLevelGrid dummy;
     EBLevelGrid eblgFine   = a_hasFine ? a_mflgFine.getEBLevelGrid(iphase) : dummy;
     EBLevelGrid eblgCoFi   = a_hasCoar ? a_mflgCoFi.getEBLevelGrid(iphase) : dummy;
+    EBLevelGrid eblgFiCo   = a_hasFine ? a_mflgFiCo.getEBLevelGrid(iphase) : dummy;
     EBLevelGrid eblgCoar   = a_hasCoar ? a_mflgCoar.getEBLevelGrid(iphase) : dummy;
     EBLevelGrid eblgCoarMG = a_hasMGObjects ? a_mflgCoarMG.getEBLevelGrid(iphase) : dummy;
 
@@ -165,6 +168,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                                                                                        eblgFine,
                                                                                        eblg,
                                                                                        eblgCoFi,
+                                                                                       eblgFiCo,
                                                                                        eblgCoar,
                                                                                        eblgCoarMG,
                                                                                        amrValidCells,

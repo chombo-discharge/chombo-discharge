@@ -20,28 +20,29 @@
 #include <CD_EBHelmholtzOpFactory.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell    a_dataLocation,
-                                           const Real&             a_alpha,
-                                           const Real&             a_beta,
-                                           const RealVect&         a_probLo,
-                                           const AMRMask&          a_amrValidCells,
-                                           const AmrLevelGrids&    a_amrLevelGrids,
-                                           const AmrInterpolators& a_amrInterpolators,
-                                           const AmrFluxRegisters& a_amrFluxRegisters,
-                                           const AmrCoarseners&    a_amrCoarseners,
-                                           const AmrRefRatios&     a_amrRefRatios,
-                                           const AmrResolutions&   a_amrResolutions,
-                                           const AmrCellData&      a_amrAcoef,
-                                           const AmrFluxData&      a_amrBcoef,
-                                           const AmrIrreData&      a_amrBcoefIrreg,
-                                           const DomainBCFactory&  a_domainBcFactory,
-                                           const EBBCFactory&      a_ebbcFactory,
-                                           const IntVect&          a_ghostPhi,
-                                           const IntVect&          a_ghostRhs,
-                                           const Smoother&         a_smoother,
-                                           const ProblemDomain&    a_bottomDomain,
-                                           const int&              a_mgBlockingFactor,
-                                           const AmrLevelGrids&    a_deeperLevelGrids)
+EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell                      a_dataLocation,
+                                           const Real&                               a_alpha,
+                                           const Real&                               a_beta,
+                                           const RealVect&                           a_probLo,
+                                           const AMRMask&                            a_amrValidCells,
+                                           const AmrLevelGrids&                      a_amrLevelGrids,
+                                           const Vector<RefCountedPtr<EBLevelGrid>>& a_amrLevelGridsFiCo,
+                                           const AmrInterpolators&                   a_amrInterpolators,
+                                           const AmrFluxRegisters&                   a_amrFluxRegisters,
+                                           const AmrCoarseners&                      a_amrCoarseners,
+                                           const AmrRefRatios&                       a_amrRefRatios,
+                                           const AmrResolutions&                     a_amrResolutions,
+                                           const AmrCellData&                        a_amrAcoef,
+                                           const AmrFluxData&                        a_amrBcoef,
+                                           const AmrIrreData&                        a_amrBcoefIrreg,
+                                           const DomainBCFactory&                    a_domainBcFactory,
+                                           const EBBCFactory&                        a_ebbcFactory,
+                                           const IntVect&                            a_ghostPhi,
+                                           const IntVect&                            a_ghostRhs,
+                                           const Smoother&                           a_smoother,
+                                           const ProblemDomain&                      a_bottomDomain,
+                                           const int&                                a_mgBlockingFactor,
+                                           const AmrLevelGrids&                      a_deeperLevelGrids)
 {
   CH_TIME("EBHelmholtzOpFactory::EBHelmholtzOpFactory(...)");
 
@@ -52,13 +53,14 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell    a_dataLocatio
 
   m_probLo = a_probLo;
 
-  m_amrValidCells    = a_amrValidCells;
-  m_amrLevelGrids    = a_amrLevelGrids;
-  m_amrInterpolators = a_amrInterpolators;
-  m_amrFluxRegisters = a_amrFluxRegisters;
-  m_amrCoarseners    = a_amrCoarseners;
-  m_amrResolutions   = a_amrResolutions;
-  m_amrRefRatios     = a_amrRefRatios;
+  m_amrValidCells     = a_amrValidCells;
+  m_amrLevelGrids     = a_amrLevelGrids;
+  m_amrLevelGridsFiCo = a_amrLevelGridsFiCo;
+  m_amrInterpolators  = a_amrInterpolators;
+  m_amrFluxRegisters  = a_amrFluxRegisters;
+  m_amrCoarseners     = a_amrCoarseners;
+  m_amrResolutions    = a_amrResolutions;
+  m_amrRefRatios      = a_amrRefRatios;
 
   m_amrAcoef      = a_amrAcoef;
   m_amrBcoef      = a_amrBcoef;
@@ -514,6 +516,7 @@ EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
                              EBLevelGrid(), // Multigrid operator, so no fine.
                              eblg,
                              EBLevelGrid(), // Multigrid operator, so no cofi.
+                             EBLevelGrid(), // No refinement either
                              EBLevelGrid(), // Multigrid operator, so no coarse.
                              eblgMgCoar,
                              RefCountedPtr<LevelData<BaseFab<bool>>>(),
@@ -558,6 +561,7 @@ EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
   EBLevelGrid eblgFine;
   EBLevelGrid eblg;
   EBLevelGrid eblgCoFi;
+  EBLevelGrid eblgFiCo;
   EBLevelGrid eblgCoar;
   EBLevelGrid eblgCoarMG;
 
@@ -576,6 +580,7 @@ EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
 
   if (hasFine) {
     eblgFine  = *m_amrLevelGrids[amrLevel + 1];
+    eblgFiCo  = *m_amrLevelGridsFiCo[amrLevel + 1];
     refToFine = m_amrRefRatios[amrLevel];
   }
 
@@ -597,6 +602,7 @@ EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
                          eblgFine,
                          eblg,
                          eblgCoFi,
+                         eblgFiCo,
                          eblgCoar,
                          eblgCoarMG,
                          m_amrValidCells[amrLevel],

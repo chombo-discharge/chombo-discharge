@@ -53,7 +53,7 @@ public:
     @brief Define function that is called by EBHelmholtzOp
     @param[in] a_dataLocation    Specification of data centering
     @param[in] a_eblg            Grid where this object is defined. 
-    @param[in] a_eblgFine        Finer grid. 
+    @param[in] a_eblgFiCo        Refinement of this grid.
     @param[in] a_probLo          Lower-left corner of computational domain. Required if BC objects needs physical position. 
     @param[in] a_hasFineAMRLevel Has a finer AMR level or not. False if it doesn't, or if this level is an MG level
     @param[in] a_isMGLevel       Is a multigrid level or not. 
@@ -64,7 +64,7 @@ public:
   void
   define(const Location::Cell a_dataLocation,
          const EBLevelGrid&   a_eblg,
-         const EBLevelGrid&   a_eblgFine,
+         const EBLevelGrid&   a_eblgFiCo,
          const RealVect&      a_probLo,
          const Real&          a_dx,
          const bool           a_hasFineAMRLevel,
@@ -99,7 +99,7 @@ public:
     @note    Multiplication by beta is done in the operator.
   */
   const LayoutData<BaseIVFAB<VoFStencil>>&
-  getGradPhiStencils() const;
+  getGradPhiRelaxStencils() const;
 
 protected:
   /*!
@@ -156,14 +156,28 @@ protected:
   EBLevelGrid m_eblg;
 
   /*!
-    @brief Level grid
+    @brief Refinement of m_eblg 
+    @details This should be define donly if m_hasFineAMRLevel and !m_isMGLevel. 
   */
-  EBLevelGrid m_eblgFine;
+  EBLevelGrid m_eblgFiCo;
 
   /*!
-    @brief Stencils for computing the flux on a single level. This is a single-level object. 
+    @brief Stencils for computing the flux on a single level. This is a single-level object used for 
+    the multigrid relaxation stage. 
   */
   LayoutData<BaseIVFAB<VoFStencil>> m_gradPhiStencils;
+
+  /*!
+    @brief Stencils for computing the flux through the EB. This is this the part of the stencil that reaches
+    into this level.
+  */
+  LayoutData<BaseIVFAB<VoFStencil>> m_gradPhiAMRStencils;
+
+  /*!
+    @brief Stencils for computing the flux through the EB for AMR calculations. This is this the part of the 
+    stencil that reaches into the fine level.
+  */
+  LayoutData<BaseIVFAB<VoFStencil>> m_gradPhiAMRStencilsFine;
 
   /*!
     @brief User define function. 

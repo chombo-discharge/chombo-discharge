@@ -101,28 +101,29 @@ public:
     provide an option for using aggregation. The first entry a_deeperLevelGrids[0] should be a a factor 2 coarsening of the coarsest AMR level. 
     @note This operator is for time-independent a- and b-coefficients. 
   */
-  EBHelmholtzOpFactory(const Location::Cell    a_dataLocation,
-                       const Real&             a_alpha,
-                       const Real&             a_beta,
-                       const RealVect&         a_probLo,
-                       const AMRMask&          a_amrValidCells,
-                       const AmrLevelGrids&    a_amrLevelGrids,
-                       const AmrInterpolators& a_amrInterpolators,
-                       const AmrFluxRegisters& a_amrFluxRegisters,
-                       const AmrCoarseners&    a_amrCoarseners,
-                       const AmrRefRatios&     a_amrRefRatios,
-                       const AmrResolutions&   a_amrResolutions,
-                       const AmrCellData&      a_amrAcoef,
-                       const AmrFluxData&      a_amrBcoef,
-                       const AmrIrreData&      a_amrBcoefIrreg,
-                       const DomainBCFactory&  a_domainBcFactory,
-                       const EBBCFactory&      a_ebbcFactory,
-                       const IntVect&          a_ghostPhi,
-                       const IntVect&          a_ghostRHS,
-                       const Smoother&         a_relaxationMethod,
-                       const ProblemDomain&    a_bottomDomain,
-                       const int&              a_mgBlockingFactor,
-                       const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
+  EBHelmholtzOpFactory(const Location::Cell                      a_dataLocation,
+                       const Real&                               a_alpha,
+                       const Real&                               a_beta,
+                       const RealVect&                           a_probLo,
+                       const AMRMask&                            a_amrValidCells,
+                       const AmrLevelGrids&                      a_amrLevelGrids,
+                       const Vector<RefCountedPtr<EBLevelGrid>>& a_amrLevelGridsFiCo,
+                       const AmrInterpolators&                   a_amrInterpolators,
+                       const AmrFluxRegisters&                   a_amrFluxRegisters,
+                       const AmrCoarseners&                      a_amrCoarseners,
+                       const AmrRefRatios&                       a_amrRefRatios,
+                       const AmrResolutions&                     a_amrResolutions,
+                       const AmrCellData&                        a_amrAcoef,
+                       const AmrFluxData&                        a_amrBcoef,
+                       const AmrIrreData&                        a_amrBcoefIrreg,
+                       const DomainBCFactory&                    a_domainBcFactory,
+                       const EBBCFactory&                        a_ebbcFactory,
+                       const IntVect&                            a_ghostPhi,
+                       const IntVect&                            a_ghostRHS,
+                       const Smoother&                           a_relaxationMethod,
+                       const ProblemDomain&                      a_bottomDomain,
+                       const int&                                a_mgBlockingFactor,
+                       const AmrLevelGrids&                      a_deeperLevelGrids = AmrLevelGrids());
 
   /*!
     @brief Destructor. Does nothing.
@@ -231,6 +232,11 @@ protected:
     @brief AMR grids
   */
   AmrLevelGrids m_amrLevelGrids;
+
+  /*!
+    @brief AMR grids
+  */
+  Vector<RefCountedPtr<EBLevelGrid>> m_amrLevelGridsFiCo;
 
   /*!
     @brief Ghost cell interpolations

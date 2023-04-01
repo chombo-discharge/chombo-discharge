@@ -30,6 +30,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                              const EBLevelGrid&                               a_eblgFine,
                              const EBLevelGrid&                               a_eblg,
                              const EBLevelGrid&                               a_eblgCoFi,
+                             const EBLevelGrid&                               a_eblgFiCo,
                              const EBLevelGrid&                               a_eblgCoar,
                              const EBLevelGrid&                               a_eblgCoarMG,
                              const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_amrValidCells,
@@ -109,6 +110,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
 
   if (m_hasFine) {
     m_eblgFine = a_eblgFine;
+    m_eblgFiCo = a_eblgFiCo;
   }
 
   m_isMGOperator = a_isMGOperator;
@@ -144,7 +146,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
   // Define BC objects.
   const int ghostCF = m_hasCoar ? m_interpolator->getGhostCF() : 99;
   m_domainBc->define(m_dataLocation, m_eblg, m_probLo, m_dx);
-  m_ebBc->define(m_dataLocation, m_eblg, m_eblgFine, m_probLo, m_dx, m_hasFine, m_isMGOperator, m_refToFine, ghostCF);
+  m_ebBc->define(m_dataLocation, m_eblg, m_eblgFiCo, m_probLo, m_dx, m_hasFine, m_isMGOperator, m_refToFine, ghostCF);
 
   // Define stencils and compute relaxation terms.
   this->defineStencils();
@@ -281,7 +283,7 @@ EBHelmholtzOp::defineStencils()
   }
 
   // This contains the part of the eb flux that contains interior cells.
-  const LayoutData<BaseIVFAB<VoFStencil>>& ebFluxStencil = m_ebBc->getGradPhiStencils();
+  const LayoutData<BaseIVFAB<VoFStencil>>& ebFluxStencil = m_ebBc->getGradPhiRelaxStencils();
 
   // Define everything
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit) {
@@ -694,6 +696,8 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
     fineOp->coarsen((LevelData<EBCellFAB>&)a_phi, a_phiFine);
   }
 
+  MayDay::Warning("EBHelmholtzOp::refluxFreeAMROperator - not yet adapted to two-level EB flux stencils!");
+
   // Make sure this level has updated ghost cells. The guards around these calls
   // are there because MFHelmholtzOp might decide to update ghost cells for us, in
   // which case we won't redo them.
@@ -745,7 +749,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
     const EBFluxFAB& flux = m_flux[dit()];
 
     const BaseIVFAB<Real>&       BcoIrreg      = (*m_BcoefIrreg)[dit()];
-    const BaseIVFAB<VoFStencil>& ebFluxStencil = m_ebBc->getGradPhiStencils()[dit()];
+    const BaseIVFAB<VoFStencil>& ebFluxStencil = m_ebBc->getGradPhiRelaxStencils()[dit()];
     const BaseIVFAB<Real>&       alphaDiag     = m_alphaDiagWeight[dit()];
 
     // Add alpha-term.

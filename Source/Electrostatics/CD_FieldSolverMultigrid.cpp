@@ -665,6 +665,7 @@ FieldSolverMultigrid::setupHelmholtzFactory()
                              m_amr->getProbLo(),
                              m_amr->getValidCells(m_realm),
                              mflg,
+                             m_amr->getMFLevelGridFiCo(m_realm),
                              mfInterp,
                              mfFluxReg,
                              mfCoarAve,

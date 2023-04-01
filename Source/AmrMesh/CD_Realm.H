@@ -219,6 +219,22 @@ public:
   getMFLevelGrid();
 
   /*!
+    @brief Get coarsened (of overlying level) MFLevelGrids
+    @details Returns this where level lvl is a coarsening of level lvl+1
+    @return Return coarsened fine grid.
+  */
+  Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGridCoFi();
+
+  /*!
+    @brief Get refined (of underlying level) MFLevelGrids
+    @details Returns this where level lvl is a refinement of level lvl-1
+    @return Return refined coarse grid
+  */
+  Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGridFiCo();
+
+  /*!
     @brief Get EBIndexSpace for particular phase
     @param[in] a_phase Phase
   */
@@ -232,12 +248,28 @@ public:
   const Vector<EBISLayout>&
   getEBISLayout(const phase::which_phase a_phase) const;
 
-  /*!
+  /*!  
     @brief Get EBLevelGrid for particular phase
     @param[in] a_phase Phase
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGrid(const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Get EBLevelGrid for particular phase
+    @details Returns a coarsening of the overlying fine level.
+    @param[in] a_phase Phase
+  */
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGridCoFi(const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Get EBLevelGrid for particular phase. 
+    @details Returns a refinement of the underlying coarse level.
+    @param[in] a_phase Phase
+  */
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGridFiCo(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get neighbors for particular phase
@@ -428,6 +460,18 @@ protected:
     @brief MFLevelGrids
   */
   Vector<RefCountedPtr<MFLevelGrid>> m_mflg;
+
+  /*!
+    @brief Refined coarse grids.
+    @details m_mflgCoFi[lvl] holds the grids on level lvl that are a coarsening of the grids on lvl+1
+  */
+  Vector<RefCountedPtr<MFLevelGrid>> m_mflgCoFi;
+
+  /*!
+    @brief Coarsened fine grids. 
+    @details m_eblgFiCo[lvl] holds the refinement of the grids on level lvl-1
+  */
+  Vector<RefCountedPtr<MFLevelGrid>> m_mflgFiCo;
 
   /*!
     @brief Index spaces

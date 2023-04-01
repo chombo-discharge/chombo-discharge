@@ -27,7 +27,7 @@ EBHelmholtzEBBC::~EBHelmholtzEBBC() { CH_TIME("EBHelmholtzEBBC::~EBHelmholtzEBBC
 void
 EBHelmholtzEBBC::define(const Location::Cell a_dataLocation,
                         const EBLevelGrid&   a_eblg,
-                        const EBLevelGrid&   a_eblgFine,
+                        const EBLevelGrid&   a_eblgFiCo,
                         const RealVect&      a_probLo,
                         const Real&          a_dx,
                         const bool           a_hasFineAMRLevel,
@@ -43,7 +43,7 @@ EBHelmholtzEBBC::define(const Location::Cell a_dataLocation,
 
   m_dataLocation    = a_dataLocation;
   m_eblg            = a_eblg;
-  m_eblgFine        = a_eblgFine;
+  m_eblgFiCo        = a_eblgFiCo;
   m_probLo          = a_probLo;
   m_dx              = a_dx;
   m_hasFineAMRLevel = a_hasFineAMRLevel;
@@ -51,13 +51,30 @@ EBHelmholtzEBBC::define(const Location::Cell a_dataLocation,
   m_refToFine       = a_refToFine;
   m_ghostCF         = a_ghostCF;
 
+  if (a_hasFineAMRLevel) {
+    if (!(a_eblgFiCo.isDefined())) {
+      MayDay::Error("EBHelmholtzEBBC::define - logic bust. Should have defined the refined grids");
+    }
+    if (a_isMGLevel) {
+      MayDay::Error("EBHelmholtzEBBC::define - logic bust. Should not be an MG level (1)");
+    }
+  }
+  if (a_eblgFiCo.isDefined()) {
+    if (m_isMGLevel) {
+      MayDay::Error("EBHelmholtzEBBC::define - logic bust. Should be an MG level (2)");
+    }
+    if (!m_hasFineAMRLevel) {
+      MayDay::Error("EBHelmholtzEBBC::define - logic bust. Should have an AMR level")
+    }
+  }
+
   this->define();
 }
 
 const LayoutData<BaseIVFAB<VoFStencil>>&
-EBHelmholtzEBBC::getGradPhiStencils() const
+EBHelmholtzEBBC::getGradPhiRelaxStencils() const
 {
-  CH_TIME("EBHelmholtzEBBC::getGradPhiStencils()");
+  CH_TIME("EBHelmholtzEBBC::getGradPhiRelaxStencils()");
 
   return m_gradPhiStencils;
 }

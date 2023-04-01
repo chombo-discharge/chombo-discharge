@@ -1583,6 +1583,24 @@ public:
   getEBLevelGrid(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
+    @brief Get the EBLevelGrid for a realm and phase
+    @details This version returns grids on level lvl that are a coarsening of the grids on level lvl+1
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+  */
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGridCoFi(const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Get the EBLevelGrid for a realm and phase
+    @details This version returns grids on level lvl that are a refinement of the grids on level lvl-1
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+  */
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGridFiCo(const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
     @brief Get EBISLayouts for a Realm and phase
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
@@ -1591,11 +1609,27 @@ public:
   getEBISLayout(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get EBISLayouts for a Realm
+    @brief Get multifluid grids for a realm. 
     @param[in] a_realm Realm name
   */
   const Vector<RefCountedPtr<MFLevelGrid>>&
   getMFLevelGrid(const std::string a_realm) const;
+
+  /*!
+    @brief Get multifluid grids for a realm. 
+    @details This version returns grids on level lvl that are a coarsening of the grids on level lvl+1
+    @param[in] a_realm Realm name
+  */
+  const Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGridCoFi(const std::string a_realm) const;
+
+  /*!
+    @brief Get multifluid grids for a realm. 
+    @details This version returns grids on level lvl that are a refinement of the grids on level lvl-1
+    @param[in] a_realm Realm name
+  */
+  const Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGridFiCo(const std::string a_realm) const;
 
   /*!
     @brief Get vof iterators for a Realm and phase. This has the capability of iterating through cut-cells. 

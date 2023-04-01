@@ -74,6 +74,7 @@ public:
     @param[in] a_eblgFine      Fine grids
     @param[in] a_eblg          Grids on this level
     @param[in] a_eblgCoFi      Coarsening of fine level grids
+    @param[in] a_eblgFico      Refinement of grids on this level (only if AMR level)
     @param[in] a_eblgCoar      Coarse grids
     @param[in] a_eblgCoarMG    Multigrid-grids
     @param[in] a_amrValidCells Valid AMR cells (undefined if this is an MG operator)
@@ -103,6 +104,7 @@ public:
                 const EBLevelGrid&                               a_eblgFine,
                 const EBLevelGrid&                               a_eblg,
                 const EBLevelGrid&                               a_eblgCoFi,
+                const EBLevelGrid&                               a_eblgFiCo,
                 const EBLevelGrid&                               a_eblgCoar,
                 const EBLevelGrid&                               a_eblgCoarMG,
                 const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_amrValidCells,
@@ -905,6 +907,11 @@ protected:
     @brief Coarsened of m_eblg
   */
   EBLevelGrid m_eblgCoFi;
+
+  /*!
+    @brief Refinement of m_eblg
+  */
+  EBLevelGrid m_eblgFiCo;
 
   /*!
     @brief Coarse level grid (if the operator has a coarse level)

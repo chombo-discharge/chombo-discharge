@@ -326,6 +326,7 @@ CdrMultigrid::setupHelmholtzFactory()
                              m_amr->getProbLo(),
                              m_amr->getValidCells(m_realm),
                              levelGrids,
+                             m_amr->getEBLevelGridFiCo(m_realm, m_phase),
                              interpolator,
                              fluxReg,
                              coarAve,

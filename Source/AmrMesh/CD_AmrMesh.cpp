@@ -2823,6 +2823,40 @@ AmrMesh::getEBLevelGrid(const std::string a_realm, const phase::which_phase a_ph
   return m_realms[a_realm]->getEBLevelGrid(a_phase);
 }
 
+const Vector<RefCountedPtr<EBLevelGrid>>&
+AmrMesh::getEBLevelGridCoFi(const std::string a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getEBLevelGridCoFi(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getEBLevelGridCoFi(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getEBLevelGrid(string, phase::which_phase) - could not find realm '" + a_realm +
+                            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getEBLevelGridCoFi(a_phase);
+}
+
+const Vector<RefCountedPtr<EBLevelGrid>>&
+AmrMesh::getEBLevelGridFiCo(const std::string a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getEBLevelGridFiCo(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getEBLevelGridFiCo(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getEBLevelGrid(string, phase::which_phase) - could not find realm '" + a_realm +
+                            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getEBLevelGridFiCo(a_phase);
+}
+
 const Vector<RefCountedPtr<MFLevelGrid>>&
 AmrMesh::getMFLevelGrid(const std::string a_realm) const
 {
@@ -2838,6 +2872,40 @@ AmrMesh::getMFLevelGrid(const std::string a_realm) const
   }
 
   return m_realms[a_realm]->getMFLevelGrid();
+}
+
+const Vector<RefCountedPtr<MFLevelGrid>>&
+AmrMesh::getMFLevelGridCoFi(const std::string a_realm) const
+{
+  CH_TIME("AmrMesh::getMFLevelGridCoFi(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMFLevelGridCoFi(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getMFLevelGridCoFi(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMFLevelGridCoFi();
+}
+
+const Vector<RefCountedPtr<MFLevelGrid>>&
+AmrMesh::getMFLevelGridFiCo(const std::string a_realm) const
+{
+  CH_TIME("AmrMesh::getMFLevelGridFiCo(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMFLevelGridFiCo(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getMFLevelGridFiCo(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMFLevelGridFiCo();
 }
 
 const EBAMRFAB&

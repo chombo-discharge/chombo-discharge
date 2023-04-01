@@ -920,6 +920,18 @@ PhaseRealm::getEBLevelGrid() const
   return m_eblg;
 }
 
+const Vector<RefCountedPtr<EBLevelGrid>>&
+PhaseRealm::getEBLevelGridCoFi() const
+{
+  return m_eblgCoFi;
+}
+
+const Vector<RefCountedPtr<EBLevelGrid>>&
+PhaseRealm::getEBLevelGridFiCo() const
+{
+  return m_eblgFiCo;
+}
+
 const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>>&
 PhaseRealm::getNeighbors() const
 {

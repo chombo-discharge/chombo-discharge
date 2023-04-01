@@ -876,27 +876,29 @@ EddingtonSP1::setupHelmholtzFactory()
   }
 
   // Set up the operator
-  m_helmholtzOpFactory = RefCountedPtr<EBHelmholtzOpFactory>(new EBHelmholtzOpFactory(m_dataLocation,
-                                                                                      m_alpha,
-                                                                                      m_beta,
-                                                                                      m_amr->getProbLo(),
-                                                                                      m_amr->getValidCells(m_realm),
-                                                                                      levelGrids,
-                                                                                      interpolator,
-                                                                                      fluxReg,
-                                                                                      coarAve,
-                                                                                      m_amr->getRefinementRatios(),
-                                                                                      m_amr->getDx(),
-                                                                                      m_helmAco.getData(),
-                                                                                      m_helmBco.getData(),
-                                                                                      m_helmBcoIrreg.getData(),
-                                                                                      domainBcFactory,
-                                                                                      ebbcFactory,
-                                                                                      ghostPhi,
-                                                                                      ghostRhs,
-                                                                                      m_multigridRelaxMethod,
-                                                                                      bottomDomain,
-                                                                                      m_amr->getMaxBoxSize()));
+  m_helmholtzOpFactory = RefCountedPtr<EBHelmholtzOpFactory>(
+    new EBHelmholtzOpFactory(m_dataLocation,
+                             m_alpha,
+                             m_beta,
+                             m_amr->getProbLo(),
+                             m_amr->getValidCells(m_realm),
+                             levelGrids,
+                             m_amr->getEBLevelGridFiCo(m_realm, m_phase),
+                             interpolator,
+                             fluxReg,
+                             coarAve,
+                             m_amr->getRefinementRatios(),
+                             m_amr->getDx(),
+                             m_helmAco.getData(),
+                             m_helmBco.getData(),
+                             m_helmBcoIrreg.getData(),
+                             domainBcFactory,
+                             ebbcFactory,
+                             ghostPhi,
+                             ghostRhs,
+                             m_multigridRelaxMethod,
+                             bottomDomain,
+                             m_amr->getMaxBoxSize()));
 }
 
 void

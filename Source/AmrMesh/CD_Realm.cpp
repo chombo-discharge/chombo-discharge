@@ -67,7 +67,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
   m_dx                   = a_dx;
   m_probLo               = a_probLo;
   m_finestLevel          = a_finestLevel;
-  m_numGhost = a_numGhost;
+  m_numGhost             = a_numGhost;
   m_baseif               = a_baseif;
   m_multifluidIndexSpace = a_mfis;
 
@@ -177,6 +177,8 @@ Realm::defineMFLevelGrid(const int a_lmin)
   }
 
   m_mflg.resize(1 + m_finestLevel);
+  m_mflgCoFi.resize(1 + m_finestLevel);
+  m_mflgFiCo.resize(1 + m_finestLevel);
 
   PhaseRealm& gas = this->getRealm(phase::gas);
   PhaseRealm& sol = this->getRealm(phase::solid);
@@ -186,13 +188,39 @@ Realm::defineMFLevelGrid(const int a_lmin)
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     Vector<EBLevelGrid> eblgs;
+    Vector<EBLevelGrid> eblgsCoFi;
+    Vector<EBLevelGrid> eblgsFiCo;
 
-    if (!ebis_gas.isNull())
+    if (!ebis_gas.isNull()) {
       eblgs.push_back(*(gas.getEBLevelGrid()[lvl]));
-    if (!ebis_sol.isNull())
+
+      if (lvl > 0) {
+        eblgsCoFi.push_back(*(gas.getEBLevelGridCoFi()[lvl - 1]));
+      }
+      if (lvl < m_finestLevel) {
+        eblgsFiCo.push_back(*(gas.getEBLevelGridFiCo()[lvl + 1]));
+      }
+    }
+    if (!ebis_sol.isNull()) {
       eblgs.push_back(*(sol.getEBLevelGrid()[lvl]));
 
+      if (lvl > 0) {
+        eblgsCoFi.push_back(*(sol.getEBLevelGridCoFi()[lvl - 1]));
+      }
+      if (lvl < m_finestLevel) {
+        eblgsFiCo.push_back(*(sol.getEBLevelGridFiCo()[lvl + 1]));
+      }
+    }
+
     m_mflg[lvl] = RefCountedPtr<MFLevelGrid>(new MFLevelGrid(m_multifluidIndexSpace, eblgs));
+
+    if (lvl > 0) {
+      m_mflgCoFi[lvl - 1] = RefCountedPtr<MFLevelGrid>(new MFLevelGrid(m_multifluidIndexSpace, eblgsCoFi));
+    }
+
+    if (lvl < m_finestLevel) {
+      m_mflgFiCo[lvl + 1] = RefCountedPtr<MFLevelGrid>(new MFLevelGrid(m_multifluidIndexSpace, eblgsFiCo));
+    }
   }
 }
 
@@ -508,6 +536,18 @@ Realm::getMFLevelGrid()
   return m_mflg;
 }
 
+Vector<RefCountedPtr<MFLevelGrid>>&
+Realm::getMFLevelGridCoFi()
+{
+  return m_mflgCoFi;
+}
+
+Vector<RefCountedPtr<MFLevelGrid>>&
+Realm::getMFLevelGridFiCo()
+{
+  return m_mflgFiCo;
+}
+
 const RefCountedPtr<EBIndexSpace>&
 Realm::getEBIndexSpace(const phase::which_phase a_phase) const
 {
@@ -524,6 +564,18 @@ const Vector<RefCountedPtr<EBLevelGrid>>&
 Realm::getEBLevelGrid(const phase::which_phase a_phase) const
 {
   return m_realms[a_phase]->getEBLevelGrid();
+}
+
+const Vector<RefCountedPtr<EBLevelGrid>>&
+Realm::getEBLevelGridCoFi(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getEBLevelGridCoFi();
+}
+
+const Vector<RefCountedPtr<EBLevelGrid>>&
+Realm::getEBLevelGridFiCo(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getEBLevelGridFiCo();
 }
 
 const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>>&

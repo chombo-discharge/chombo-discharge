@@ -72,6 +72,7 @@ public:
     @param[in] a_mflgFine      Fine grids
     @param[in] a_mflg          Grids on this level
     @param[in] a_mflgCoFi      Coarsening of fine level grids
+    @param[in] a_mflgFiCo      Refinement of the coarse grids. 
     @param[in] a_mflgCoar      Coarse grids
     @param[in] a_mflgCoarMG    Multigrid-grids
     @πaram[in] a_amrValidCells Valid AMR cells (undefined if this is an MG operator)
@@ -104,9 +105,10 @@ public:
                 const MFLevelGrid&                               a_mflgFine,
                 const MFLevelGrid&                               a_mflg,
                 const MFLevelGrid&                               a_mflgCoFi,
+                const MFLevelGrid&                               a_mflgFiCo,
                 const MFLevelGrid&                               a_mflgCoar,
                 const MFLevelGrid&                               a_mflgCoarMG,
-		const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_amrValidCells,		
+                const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_amrValidCells,
                 const MFMultigridInterpolator&                   a_interpolator,
                 const MFFluxReg&                                 a_fluxReg,
                 const MFCoarAve&                                 a_coarAve,
@@ -602,6 +604,11 @@ protected:
     @brief Coarsened version of this grid
   */
   MFLevelGrid m_mflgCoFi;
+
+  /*!
+    @brief Refined version of this grid
+  */
+  MFLevelGrid m_mflgFiCo;
 
   /*!
     @brief Coarse multigrid-grid
