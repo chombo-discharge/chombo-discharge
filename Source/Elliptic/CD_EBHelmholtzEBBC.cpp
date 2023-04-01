@@ -31,6 +31,7 @@ EBHelmholtzEBBC::define(const Location::Cell a_dataLocation,
                         const RealVect&      a_probLo,
                         const Real&          a_dx,
                         const bool           a_hasFineAMRLevel,
+                        const bool           a_isMGLevel,
                         const int            a_refToFine,
                         const int            a_ghostCF)
 {
@@ -46,6 +47,7 @@ EBHelmholtzEBBC::define(const Location::Cell a_dataLocation,
   m_probLo          = a_probLo;
   m_dx              = a_dx;
   m_hasFineAMRLevel = a_hasFineAMRLevel;
+  m_isMGLevel       = a_isMGLevel;
   m_refToFine       = a_refToFine;
   m_ghostCF         = a_ghostCF;
 

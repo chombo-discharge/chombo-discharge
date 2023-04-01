@@ -76,6 +76,7 @@ public:
     @param[in] a_eblgCoFi      Coarsening of fine level grids
     @param[in] a_eblgCoar      Coarse grids
     @param[in] a_eblgCoarMG    Multigrid-grids
+    @param[in] a_amrValidCells Valid AMR cells (undefined if this is an MG operator)
     @param[in] a_interpolator  Interpolator
     @param[in] a_fluxReg       Flux register
     @param[in] a_coarAve       Coarsener
@@ -88,6 +89,7 @@ public:
     @param[in] a_hasFine       Has fine level or not
     @param[in] a_hasCoar       Has coarse level or not
     @param[in] a_hasMGObjects  Has multigrid-objects (special objects between AMR levels, or below the AMR levels)
+    @param[in] a_isMGOperator  Is MG operator or not
     @param[in] a_alpha         Operator alpha
     @param[in] a_beta          Operator beta
     @param[in] a_Acoef         Operator A-coefficient
@@ -103,6 +105,7 @@ public:
                 const EBLevelGrid&                               a_eblgCoFi,
                 const EBLevelGrid&                               a_eblgCoar,
                 const EBLevelGrid&                               a_eblgCoarMG,
+                const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_amrValidCells,
                 const RefCountedPtr<EBMultigridInterpolator>&    a_interpolator,
                 const RefCountedPtr<EBFluxRegister>&             a_fluxReg,
                 const RefCountedPtr<EBCoarAve>&                  a_coarAve,
@@ -114,6 +117,7 @@ public:
                 const int&                                       a_refToCoar,
                 const bool&                                      a_hasFine,
                 const bool&                                      a_hasCoar,
+                const bool&                                      a_isMGOperator,
                 const bool&                                      a_hasMGObjects,
                 const Real&                                      a_alpha,
                 const Real&                                      a_beta,
@@ -820,6 +824,11 @@ protected:
   bool m_hasCoar;
 
   /*!
+    @brief Is an MG operator or not
+  */
+  bool m_isMGOperator;
+
+  /*!
     @brief Refinement factor to coarse level
   */
   int m_refToCoar;
@@ -906,6 +915,11 @@ protected:
     @brief Coarser grids (multigrid level)
   */
   EBLevelGrid m_eblgCoarMG;
+
+  /*!
+    @brief Valid cells on this level
+  */
+  RefCountedPtr<LevelData<BaseFab<bool>>> m_validCells;
 
   /*!
     @brief Restriction operator for AMR levels.

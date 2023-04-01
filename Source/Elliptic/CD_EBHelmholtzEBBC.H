@@ -56,6 +56,7 @@ public:
     @param[in] a_eblgFine        Finer grid. 
     @param[in] a_probLo          Lower-left corner of computational domain. Required if BC objects needs physical position. 
     @param[in] a_hasFineAMRLevel Has a finer AMR level or not. False if it doesn't, or if this level is an MG level
+    @param[in] a_isMGLevel       Is a multigrid level or not. 
     @param[in] a_dx              Grid resolution. 
     @param[in] a_refToFine       Refinement factor to fine level.
     @param[in] a_ghostCF         Number of ghost cells that are filled across CF interface. 
@@ -67,6 +68,7 @@ public:
          const RealVect&      a_probLo,
          const Real&          a_dx,
          const bool           a_hasFineAMRLevel,
+         const bool           a_isMGLevel,
          const int            a_refToFine,
          const int            a_ghostCF);
 
@@ -119,6 +121,11 @@ protected:
     @brief Has finer AMR level or not. This is false for all deeper multigrid levels. 
   */
   bool m_hasFineAMRLevel;
+
+  /*!
+    @brief If false, this level is an AMR level and fluxes might need stencils on the fine level also. 
+  */
+  bool m_isMGLevel;
 
   /*!
     @brief Refinement factor to fine level (if there is one)

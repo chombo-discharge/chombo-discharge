@@ -32,6 +32,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                              const EBLevelGrid&                               a_eblgCoFi,
                              const EBLevelGrid&                               a_eblgCoar,
                              const EBLevelGrid&                               a_eblgCoarMG,
+                             const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_amrValidCells,
                              const RefCountedPtr<EBMultigridInterpolator>&    a_interpolator,
                              const RefCountedPtr<EBFluxRegister>&             a_fluxReg,
                              const RefCountedPtr<EBCoarAve>&                  a_coarAve,
@@ -44,6 +45,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                              const bool&                                      a_hasFine,
                              const bool&                                      a_hasCoar,
                              const bool&                                      a_hasMGObjects,
+                             const bool&                                      a_isMGOperator,
                              const Real&                                      a_alpha,
                              const Real&                                      a_beta,
                              const RefCountedPtr<LevelData<EBCellFAB>>&       a_Acoef,
@@ -80,8 +82,6 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
     m_Bcoef(a_Bcoef),
     m_BcoefIrreg(a_BcoefIrreg)
 {
-
-  MayDay::Warning("EBHelmholtzOp and MFHelmholtzOp -- need to pass in valid cells!");
   CH_TIME("EBHelmholtzOp::EBHelmholtzOp(...)");
 
   CH_assert(!a_Acoef.isNull());
@@ -110,6 +110,8 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
   if (m_hasFine) {
     m_eblgFine = a_eblgFine;
   }
+
+  m_isMGOperator = a_isMGOperator;
 
   // If we are using a centroid discretization we must interpolate three ghost cells in the general case. Issue a warning if the
   // interpolator doesn't fill enough ghost cells.
@@ -142,7 +144,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
   // Define BC objects.
   const int ghostCF = m_hasCoar ? m_interpolator->getGhostCF() : 99;
   m_domainBc->define(m_dataLocation, m_eblg, m_probLo, m_dx);
-  m_ebBc->define(m_dataLocation, m_eblg, m_eblgFine, m_probLo, m_dx, m_hasFine, m_refToFine, ghostCF);
+  m_ebBc->define(m_dataLocation, m_eblg, m_eblgFine, m_probLo, m_dx, m_hasFine, m_isMGOperator, m_refToFine, ghostCF);
 
   // Define stencils and compute relaxation terms.
   this->defineStencils();

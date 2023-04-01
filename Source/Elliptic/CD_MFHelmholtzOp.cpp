@@ -28,6 +28,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                              const MFLevelGrid&                               a_mflgCoFi,
                              const MFLevelGrid&                               a_mflgCoar,
                              const MFLevelGrid&                               a_mflgCoarMG,
+                             const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_amrValidCells,
                              const MFMultigridInterpolator&                   a_interpolator,
                              const MFFluxReg&                                 a_fluxReg,
                              const MFCoarAve&                                 a_coarAve,
@@ -103,9 +104,10 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
     EBLevelGrid eblgCoar   = a_hasCoar ? a_mflgCoar.getEBLevelGrid(iphase) : dummy;
     EBLevelGrid eblgCoarMG = a_hasMGObjects ? a_mflgCoarMG.getEBLevelGrid(iphase) : dummy;
 
-    RefCountedPtr<EBMultigridInterpolator> interpolator = RefCountedPtr<EBMultigridInterpolator>(nullptr);
-    RefCountedPtr<EBFluxRegister>          fluxRegister = RefCountedPtr<EBFluxRegister>(nullptr);
-    RefCountedPtr<EBCoarAve>               coarsener    = RefCountedPtr<EBCoarAve>(nullptr);
+    RefCountedPtr<LevelData<BaseFab<bool>>> amrValidCells = RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr);
+    RefCountedPtr<EBMultigridInterpolator>  interpolator  = RefCountedPtr<EBMultigridInterpolator>(nullptr);
+    RefCountedPtr<EBFluxRegister>           fluxRegister  = RefCountedPtr<EBFluxRegister>(nullptr);
+    RefCountedPtr<EBCoarAve>                coarsener     = RefCountedPtr<EBCoarAve>(nullptr);
 
     if (!a_isMGOperator) {
       if (a_hasFine) {
@@ -117,6 +119,8 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
       if (a_hasCoar) {
         interpolator = a_interpolator.getInterpolator(iphase);
       }
+
+      amrValidCells = a_amrValidCells;
     }
 
     auto domainBC = a_domainBcFactory->create(iphase);
@@ -163,6 +167,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                                                                                        eblgCoFi,
                                                                                        eblgCoar,
                                                                                        eblgCoarMG,
+                                                                                       amrValidCells,
                                                                                        interpolator,
                                                                                        fluxRegister,
                                                                                        coarsener,
@@ -175,6 +180,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                                                                                        a_hasFine,
                                                                                        a_hasCoar,
                                                                                        a_hasMGObjects,
+                                                                                       a_isMGOperator,
                                                                                        a_alpha,
                                                                                        a_beta,
                                                                                        Acoef,

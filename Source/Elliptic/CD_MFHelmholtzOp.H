@@ -74,6 +74,7 @@ public:
     @param[in] a_mflgCoFi      Coarsening of fine level grids
     @param[in] a_mflgCoar      Coarse grids
     @param[in] a_mflgCoarMG    Multigrid-grids
+    @πaram[in] a_amrValidCells Valid AMR cells (undefined if this is an MG operator)
     @param[in] a_interpolator  Interpolator
     @param[in] a_fluxReg       Flux register
     @param[in] a_coarAve       Coarsener
@@ -105,6 +106,7 @@ public:
                 const MFLevelGrid&                               a_mflgCoFi,
                 const MFLevelGrid&                               a_mflgCoar,
                 const MFLevelGrid&                               a_mflgCoarMG,
+		const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_amrValidCells,		
                 const MFMultigridInterpolator&                   a_interpolator,
                 const MFFluxReg&                                 a_fluxReg,
                 const MFCoarAve&                                 a_coarAve,
@@ -133,7 +135,7 @@ public:
   /*!
     @brief Destructor. 
   */
-  ~MFHelmholtzOp();
+  virtual ~MFHelmholtzOp();
 
   /*!
     @brief No copy assigment allowed

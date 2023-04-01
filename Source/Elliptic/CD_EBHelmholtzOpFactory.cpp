@@ -516,6 +516,7 @@ EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
                              EBLevelGrid(), // Multigrid operator, so no cofi.
                              EBLevelGrid(), // Multigrid operator, so no coarse.
                              eblgMgCoar,
+                             RefCountedPtr<LevelData<BaseFab<bool>>>(),
                              interpolator, // Defined if an amr level
                              fluxReg,      // Defined if an amr level
                              coarsener,    // Defined if an amr level
@@ -528,6 +529,7 @@ EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
                              false, // Multigrid operator, so false.
                              false, // Multigrid operator, so false.
                              hasMGObjects,
+                             true,
                              m_alpha,
                              m_beta,
                              Acoef,
@@ -597,6 +599,7 @@ EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
                          eblgCoFi,
                          eblgCoar,
                          eblgCoarMG,
+                         m_amrValidCells[amrLevel],
                          m_amrInterpolators[amrLevel],
                          m_amrFluxRegisters[amrLevel],
                          m_amrCoarseners[amrLevel],
@@ -609,6 +612,7 @@ EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
                          hasFine,
                          hasCoar,
                          hasMGObjects,
+                         false,
                          m_alpha,
                          m_beta,
                          m_amrAcoef[amrLevel],
