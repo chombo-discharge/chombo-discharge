@@ -412,7 +412,7 @@ BrownianWalkerStepper::allocate()
   CH_TIME("BrownianWalkerStepper::allocate");
 
   // Allocate solver storage -- it knows what to do.
-  m_solver->allocateInternals();
+  m_solver->allocate();
 }
 
 Real

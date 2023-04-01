@@ -207,13 +207,13 @@ public:
     @brief Allocate internal storage
   */
   virtual void
-  allocateInternals() = 0;
+  allocate() = 0;
 
   /*!
     @brief Deallocate internal storage
   */
   virtual void
-  deallocateInternals() = 0;
+  deallocate() = 0;
 
   /*!
     @brief Perform pre-regrid operations. 

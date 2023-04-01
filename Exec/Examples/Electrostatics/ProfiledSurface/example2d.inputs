@@ -55,7 +55,7 @@ Driver.restart                         = 0             # Restart step (less or e
 Driver.allow_coarsening                = true          # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 0             # How much to grow tags when using geometry-based refinement. 
 Driver.refine_angles                   = 15.           # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = 0            # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_electrodes               = 2            # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = 0            # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
@@ -110,44 +110,33 @@ GeoCoarsener.box1_lvl    = 0            # up to this level
 GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
-# ROD_PLANE_PROFILE_PROFILE CLASS OPTIONS
-#
-# This class described a rod-plane geometry with holes on the dielectric plane. The plane_point
-# argument determines the point on the plane (oriented along the y axis), and acts as a reference
-# for where the "holes" are placed.
-#
-# Arguments 'profile_num_left' and 'profile_num_right' sets the number of holes to the left and right
-# of this point. You can shift the holes vertically with 'profile_yshift', and increase the distance
-# between the holes with 'profile_dist'. The 'profile_xshift' argument shifts all holes to the left
-# or right along the x-axis. The 'profile_curv' arguments sets the radius of curvature. Use the sub-
-# settings to select which profile you want. 
+# DiskProfiledPlane class options
 # ====================================================================================================
-RodPlaneProfile.turn_on_rod       = true          # Turn on/off electrode
-RodPlaneProfile.turn_on_plane     = true          # Turn on/off dielectric
-RodPlaneProfile.rod_live          = true          # Live electrode or not
-RodPlaneProfile.rod_radius        = 500E-6        # Electrode inner radius
-RodPlaneProfile.rod_center1       = 0.0 1E-2      # Center 1
-RodPlaneProfile.rod_center2       = 0.0 1.0       # Center 2
-RodPlaneProfile.plane_width       = 7.2E-2        # Plane width. 
-RodPlaneProfile.plane_normal      = 0.0 1.0       # Plane normal. Not used, oriented along +y only 
-RodPlaneProfile.plane_point       = 0.0 5E-3      # Center point on plane
-RodPlaneProfile.plane_eps         = 4.0           # Plane permittivity
-RodPlaneProfile.profile_num_left  = 19            # Number of holes to the left
-RodPlaneProfile.profile_num_right = 19            # Number of holes to the left
-RodPlaneProfile.profile_dist      = 2.06E-3       # Distance between each hole
-RodPlaneProfile.profile_xshift    = 0.0           # Horizontal offset
-RodPlaneProfile.profile_yshift    = 0.5E-3        # Vertical offset
-RodPlaneProfile.profile_curv      = 50E-6         # Rounding radius
+DiskProfiledPlane.use_electrode         = true          # Turn on/off electrode
+DiskProfiledPlane.use_dielectric        = true          # Turn on/off dielectric
 
-# Shape set. Can use 'circle' or 'square' for now. 
-RodPlaneProfile.profile       = circle
+DiskProfiledPlane.wheel_live            = true          # Live electrode or not
+DiskProfiledPlane.wheel_radius          = 3E-2          # Wheel radius
+DiskProfiledPlane.wheel_center          = 0 3.7E-2 0   # Wheel center
+DiskProfiledPlane.wheel_curvature       = 500E-6        # Wheel curvature (thickness)
+DiskProfiledPlane.wheel_stem_radius     = -1		
+DiskProfiledPlane.wheel_smooth = 1E-3
+DiskProfiledPlane.wheel_extra_thickness = 0.0           # Extra wheel thickness
 
-# Circle specific settings
-RodPlaneProfile.circle_radius = 1.031E-3
+DiskProfiledPlane.box_dimensions        = 7.2000123E-2 0.020012 1 # Box dimensions
+DiskProfiledPlane.box_translate         = 0 5.0123E-3 0          # Box translation
+DiskProfiledPlane.box_permittivity      = 3.0            # Dielectric box permittivity
+DiskProfiledPlane.box_curvature         = 50E-6          # Corner curvatures
 
-# Square specific settings
-RodPlaneProfile.square_width = 2.00012356E-3
-RodPlaneProfile.square_depth = 3.0001235E-3
+DiskProfiledPlane.profile_type          = square         # Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'
+DiskProfiledPlane.profile_translate     = 0 0 0          # Profile translation
+DiskProfiledPlane.profile_repetition_lo = 100 0 0         # Repetition pattern in low coordinate direction
+DiskProfiledPlane.profile_repetition_hi = 100 0 0         # Repetition pattern in high coordinate direction
+DiskProfiledPlane.profile_period        = 500E-6 1 1       # Repetition period
+
+DiskProfiledPlane.square_dimensions     = 251E-6 502E-6 10  # Dimensions for squares/square channels
+DiskProfiledPlane.sphere_radius         = 1E-3               # Radius for sphere profiles
+DiskProfiledPlane.cylinder_radius       = 1E-3               # Radius for cylinder profiles
 
 # ====================================================================================================
 # FIELD_STEPPER CLASS OPTIONS

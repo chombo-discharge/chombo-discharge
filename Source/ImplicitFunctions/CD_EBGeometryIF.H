@@ -28,7 +28,9 @@
 /*!
   @brief Shallow binding of EBGeometry signed distance functions to Chombo. 
   @details Since EBGeometry is inherently 3D and chombo-discharge is both 2D and 3D, the object will be sliced through a specified z-coordinate doing 2D simulations. 
+  @note T is the precision used in EBGeometry.
 */
+template <typename T = Real>
 class EBGeometryIF : public BaseIF
 {
 public:
@@ -39,13 +41,13 @@ public:
 
   /*!
     @brief Full constructor
-    @param[in] a_sdf        EBGeometry signed distance function. 
+    @param[in] a_impFunc    EBGeometry implicit function
     @param[in] a_flipInside Hook for making inside -> outside.
     @param[in] a_zCoord     z-coordinate through which the object is sliced. 
   */
-  EBGeometryIF(const std::shared_ptr<EBGeometry::SignedDistanceFunction<Real>>& a_sdf,
-               const bool                                                       a_flipInside,
-               const Real                                                       a_zCoord = 0.0);
+  EBGeometryIF(const std::shared_ptr<EBGeometry::ImplicitFunction<T>>& a_sdf,
+               const bool                                              a_flipInside,
+               const Real                                              a_zCoord = 0.0);
 
   /*!
     @brief Copy constructor
@@ -75,7 +77,7 @@ protected:
   /*!
     @brief Signed distance function
   */
-  std::shared_ptr<const EBGeometry::SignedDistanceFunction<Real>> m_sdf;
+  std::shared_ptr<const EBGeometry::ImplicitFunction<T>> m_sdf;
 
   /*!
     @brief Hook for making outside -> inside
@@ -89,5 +91,7 @@ protected:
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_EBGeometryIFImplem.H>
 
 #endif

@@ -85,7 +85,7 @@ RadiativeTransferStepper<T>::allocate()
 {
   CH_TIME("RadiativeTransferStepper::allocate");
 
-  m_solver->allocateInternals();
+  m_solver->allocate();
 }
 
 template <typename T>

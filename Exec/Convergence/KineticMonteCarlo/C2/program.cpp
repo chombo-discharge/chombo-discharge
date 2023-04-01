@@ -97,15 +97,25 @@ main(int argc, char* argv[])
 
       kmcSolver.stepSSA(state);
     }
-    else if (alg == "tau") {
+    else if (alg == "tau_plain") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceTau(state, nextDt);
+      kmcSolver.advanceTauPlain(state, nextDt);
     }
-    else if (alg == "hybrid") {
+    else if (alg == "tau_midpoint") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceHybrid(state, nextDt);
+      kmcSolver.advanceTauMidpoint(state, nextDt);
+    }
+    else if (alg == "hybrid_plain") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::TauPlain);
+    }
+    else if (alg == "hybrid_midpoint") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::TauMidpoint);
     }
     else {
       const std::string err = "Expected algorithm to be 'ssa', 'tau', or 'hybrid' but got '" + alg + "'";

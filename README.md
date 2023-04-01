@@ -2,16 +2,18 @@ chombo-discharge
 ----------------
 
 This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for discharge simulations with adaptive mesh refinement (AMR) on embedded boundary grids.
-
 A modified version of ``Chombo`` is distributed together with this code.
-``chombo-discharge`` only uses ``Chombo``; it is not affiliated nor endorsed by LBNL.
 
-<img src="./Docs/Sphinx/source/_static/figures/BranchingAir.gif" width="100%">
+<p align="center">
+   <img src="./Docs/Sphinx/source/_static/figures/BranchingAir.gif" width="50%">
+</p align="center">
 
 Installation
 ------------
 
-See https://chombo-discharge.github.io/chombo-discharge/Base/Installation.html for installation instructions.
+A serial build quickstart is given below. 
+For complete installation instructions, see https://chombo-discharge.github.io/chombo-discharge/Base/Installation.html
+
 
 Documentation
 -------------
@@ -24,10 +26,17 @@ License
 
 See LICENSE and Copyright.txt for redistribution rights.
 
+
 Serial build quickstart
 -----------------------
 
-For doing a quick test-build of ``chombo-discharge`` without HDF5 capabilities, execute the following steps:
+For doing a quick clone and test build of ``chombo-discharge`` without HDF5 capabilities, execute the following steps:
+
+1. Clone chombo-discharge, including third-party dependencies
+
+   ```
+   git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git
+   ```
 
 1. Install the LAPACK, BLAS, and GCC dependencies:
 
@@ -57,17 +66,25 @@ For doing a quick test-build of ``chombo-discharge`` without HDF5 capabilities, 
    make -s -j4
    ```
 
-5. Run an example program
+5. Run a simple example program
 
    ```
    cd $DISCHARGE_HOME/Exec/Examples/AdvectionDiffusion/DiagonalFlowNoEB
    make -s -j4
    ./*.ex example.inputs
-   ```		
+   ```
 
+6. Run an advanced example program
+
+   ```
+   cd $DISCHARGE_HOME/Exec/Examples/CdrPlasma/StochasticAir
+   make -s -j4
+   ./*.ex positive2d.inputs
+   ```		
 
 Contributing
 ------------
+
 We welcome feedback, bug reports, or code contributions.
 
 1. Create a branch for the new feature.

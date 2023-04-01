@@ -145,10 +145,27 @@ public:
   setTime(const int a_step, const Real a_time, const Real a_dt) noexcept;
 
   /*!
+    @brief Compute the total mass for component a_comp in m_phi
+    @param[in] a_comp Component
+    @note Computation runs only over the valid cells.
+  */
+  virtual Real
+  computeMass(const int a_comp = 0) const noexcept;
+
+  /*!
+    @brief Compute the total mass in a_phi
+    @param[in] a_phi  Input data
+    @param[in] a_comp Component
+    @note Computation runs only over the valid cells.
+  */
+  virtual Real
+  computeMass(const EBAMRIVData& a_data, const int a_comp = 0) const noexcept;
+
+  /*!
     @brief Get current time step
     @return m_step
   */
-  virtual Real
+  virtual int
   getStep() const noexcept;
 
   /*!

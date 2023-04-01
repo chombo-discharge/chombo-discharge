@@ -100,6 +100,8 @@ EBFineInterp::defineWeights() noexcept
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
   const EBISLayout& ebislCoar = m_coarsenedFineEBISL;
 
+  const Real areaFactor = std::pow(m_refRat, SpaceDim - 1);
+
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
     const EBISBox& ebisBoxFine = ebislFine[dit()];
     const EBISBox& ebisBoxCoar = ebislCoar[dit()];
@@ -117,15 +119,20 @@ EBFineInterp::defineWeights() noexcept
       Real coarArea = ebisBoxCoar.bndryArea(coarVoF);
 
       for (int i = 0; i < refCoarVoFs.size(); i++) {
-        fineArea += ebisBoxFine.bndryArea(refCoarVoFs[i]);
+        if (ebisBoxFine.isIrregular(refCoarVoFs[i].gridIndex())) {
+          fineArea += ebisBoxFine.bndryArea(refCoarVoFs[i]);
+        }
       }
-
-      weights(fineVoF, 0) = 0.0;
 
       if (fineArea > 0.0) {
-        weights(fineVoF, 0) = std::pow(m_refRat, SpaceDim - 1) * coarArea / fineArea;
+        weights(fineVoF, 0) = areaFactor * coarArea / fineArea;
+      }
+      else {
+        weights(fineVoF, 0) = 0.0;
       }
     };
+
+    BoxLoops::loop(m_fineVoFs[dit()], kernel);
   }
 }
 
@@ -156,6 +163,8 @@ EBFineInterp::regridNoSlopes(EBCellFAB&       a_fineData,
   const Box coarBox = m_coarsenedFineGrids[a_dit];
   const Box refiBox = Box(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
 
+  const Real volFactor = std::pow(m_refRat, SpaceDim);
+
   FArrayBox&       fineDataReg = a_fineData.getFArrayBox();
   const FArrayBox& coarDataReg = a_coarData.getFArrayBox();
 
@@ -169,7 +178,8 @@ EBFineInterp::regridNoSlopes(EBCellFAB&       a_fineData,
       const Real& coarVal = coarDataReg(coarIV, ivar);
 
       for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
-        const IntVect& fineIV     = m_refRat * coarIV + bit();
+        const IntVect& fineIV = m_refRat * coarIV + bit();
+
         fineDataReg(fineIV, ivar) = coarVal;
       }
     };
@@ -189,6 +199,8 @@ EBFineInterp::regridNoSlopes(EBCellFAB&       a_fineData,
       else {
         kappaFactor = 1.0;
       }
+
+      kappaFactor *= volFactor;
 
       // Initialize irregular data.
       for (int i = 0; i < fineVoFs.size(); i++) {

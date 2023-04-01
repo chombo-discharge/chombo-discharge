@@ -91,10 +91,10 @@ public:
 
   /*!
     @brief Allocate internals for all solvers
-    @details This will call allocateInternals for each ItoSolver. 
+    @details This will call allocate for each ItoSolver. 
   */
   virtual void
-  allocateInternals();
+  allocate();
 
   /*!
     @brief Add solver to the list of solvers.

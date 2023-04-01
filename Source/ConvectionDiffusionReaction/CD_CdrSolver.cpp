@@ -41,6 +41,28 @@ CdrSolver::CdrSolver()
 
 CdrSolver::~CdrSolver() {}
 
+RefCountedPtr<CdrSpecies>&
+CdrSolver::getSpecies() noexcept
+{
+  CH_TIME("CdrSolver::getSpecies()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getSpecies()" << endl;
+  }
+
+  return m_species;
+}
+
+const RefCountedPtr<CdrSpecies>&
+CdrSolver::getSpecies() const noexcept
+{
+  CH_TIME("CdrSolver::getSpecies()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getSpecies()" << endl;
+  }
+
+  return m_species;
+}
+
 void
 CdrSolver::setDefaultDomainBC()
 {
@@ -243,11 +265,11 @@ CdrSolver::advanceCrankNicholson(EBAMRCellData& a_newPhi, const EBAMRCellData& a
 }
 
 void
-CdrSolver::allocateInternals()
+CdrSolver::allocate()
 {
-  CH_TIME("CdrSolver::allocateInternals()");
+  CH_TIME("CdrSolver::allocate()");
   if (m_verbosity > 5) {
-    pout() << m_name + "::allocateInternals()" << endl;
+    pout() << m_name + "::allocate()" << endl;
   }
 
   // TLDR: This allocates a number of fields for this solver. We wish to trim memory if we can, so we don't allocate
@@ -284,13 +306,16 @@ CdrSolver::allocateInternals()
   // pass around pointers in case we need it. This might seem confusing but its easier to resize those vectors
   // and set nullpointers when we iterate through grid levels and patches.
   if (m_isDiffusive) {
+    m_amr->allocate(m_cellCenteredDiffusionCoefficient, m_realm, m_phase, m_nComp);
     m_amr->allocate(m_faceCenteredDiffusionCoefficient, m_realm, m_phase, m_nComp);
     m_amr->allocate(m_ebCenteredDiffusionCoefficient, m_realm, m_phase, m_nComp);
 
+    DataOps::setValue(m_cellCenteredDiffusionCoefficient, 0.0);
     DataOps::setValue(m_faceCenteredDiffusionCoefficient, 0.0);
     DataOps::setValue(m_ebCenteredDiffusionCoefficient, 0.0);
   }
   else {
+    m_amr->allocatePointer(m_cellCenteredDiffusionCoefficient, m_realm);
     m_amr->allocatePointer(m_faceCenteredDiffusionCoefficient, m_realm);
     m_amr->allocatePointer(m_ebCenteredDiffusionCoefficient, m_realm);
   }
@@ -319,11 +344,11 @@ CdrSolver::allocateInternals()
 }
 
 void
-CdrSolver::deallocateInternals()
+CdrSolver::deallocate()
 {
-  CH_TIME("CdrSolver::deallocateInternals()");
+  CH_TIME("CdrSolver::deallocate()");
   if (m_verbosity > 5) {
-    pout() << m_name + "::deallocateInternals()" << endl;
+    pout() << m_name + "::deallocate()" << endl;
   }
 
   // TLDR: This deallocates a bunch of storage. This can be used during regrids to trim memory (because the Berger-Rigoutsous algorithm eats memory).
@@ -332,6 +357,7 @@ CdrSolver::deallocateInternals()
   m_amr->deallocate(m_faceVelocity);
   m_amr->deallocate(m_cellVelocity);
   m_amr->deallocate(m_ebFlux);
+  m_amr->deallocate(m_cellCenteredDiffusionCoefficient);
   m_amr->deallocate(m_faceCenteredDiffusionCoefficient);
   m_amr->deallocate(m_ebCenteredDiffusionCoefficient);
   m_amr->deallocate(m_scratch);
@@ -1648,7 +1674,7 @@ CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
 
   // Allocate internal storage. This will fill m_phi with invalid data, but preRegrid(...) should have been called
   // prior to this routine so the old m_phi (before the regrid) is stored in m_cachedPhi.
-  this->allocateInternals();
+  this->allocate();
 
   // Interpolate to the new grids.
   m_amr->interpToNewGrids(m_phi, m_cachePhi, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
@@ -1772,9 +1798,11 @@ CdrSolver::setDiffusionCoefficient(const Real a_diffusionCoefficient)
     pout() << m_name + "::setDiffusionCoefficient(Real)" << endl;
   }
 
+  DataOps::setValue(m_cellCenteredDiffusionCoefficient, a_diffusionCoefficient);
   DataOps::setValue(m_faceCenteredDiffusionCoefficient, a_diffusionCoefficient);
   DataOps::setValue(m_ebCenteredDiffusionCoefficient, a_diffusionCoefficient);
 
+  m_amr->conservativeAverage(m_cellCenteredDiffusionCoefficient, m_realm, m_phase);
   m_amr->conservativeAverage(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
   m_amr->conservativeAverage(m_ebCenteredDiffusionCoefficient, m_realm, m_phase);
 }
@@ -1787,6 +1815,7 @@ CdrSolver::setDiffusionCoefficient(const std::function<Real(const RealVect a_pos
     pout() << m_name + "::setDiffusionCoefficient(std::function<Real(const RealVect a_position)>)" << endl;
   }
 
+  DataOps::setValue(m_cellCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
   DataOps::setValue(m_faceCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
   DataOps::setValue(m_ebCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
 }
@@ -2630,25 +2659,56 @@ CdrSolver::computeMass()
 }
 
 Real
-CdrSolver::computeMass(EBAMRCellData& a_phi)
+CdrSolver::computeMass(const EBAMRCellData& a_phi, const bool a_kappaScale)
 {
   CH_TIME("CdrSolver::computeMass(EBAMRCellData)");
   if (m_verbosity > 5) {
     pout() << m_name + "::computeMass(EBAMRCellData)" << endl;
   }
 
-  // TLDR: We have conservative coarsening so we just coarsen the solution and compute the mass on the coarsest level only.
+  CH_assert(a_phi[0]->nComp() == 1);
 
-  m_amr->conservativeAverage(a_phi, m_realm, m_phase);
+  Real mass = 0.0;
 
-  const Real dx = m_amr->getDx()[0];
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real               dx    = m_amr->getDx()[lvl];
+    const Real               dxVol = std::pow(dx, SpaceDim);
 
-  Real mass = 0.;
-  DataOps::kappaSum(mass, *a_phi[0]);
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const Box            cellbox    = dbl[dit()];
+      const EBISBox&       ebisbox    = ebisl[dit()];
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
 
-  mass *= pow(dx, SpaceDim);
+      const EBCellFAB& phi    = (*a_phi[lvl])[dit()];
+      const FArrayBox& phiReg = phi.getFArrayBox();
 
-  return mass;
+      // Kernel definitions.
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (validCells(iv) && ebisbox.isRegular(iv)) {
+          mass += phiReg(iv, 0) * dxVol;
+        }
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const IntVect iv = vof.gridIndex();
+
+        if (validCells(iv)) {
+          const Real volFrac = a_kappaScale ? ebisbox.volFrac(vof) : 1.0;
+
+          mass += phi(vof, 0) * dxVol * volFrac;
+        }
+      };
+
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      BoxLoops::loop(cellbox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+
+  return ParallelOps::sum(mass);
 }
 
 Real
@@ -2743,6 +2803,17 @@ CdrSolver::getEbCenteredVelocity()
   return m_ebVelocity;
 }
 
+EBAMRCellData&
+CdrSolver::getCellCenteredDiffusionCoefficient()
+{
+  CH_TIME("CdrSolver::getCellCenteredDiffusionCoefficient()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getCellCenteredDiffusionCoefficient()" << endl;
+  }
+
+  return m_cellCenteredDiffusionCoefficient;
+}
+
 EBAMRFluxData&
 CdrSolver::getFaceCenteredDiffusionCoefficient()
 {
@@ -2788,11 +2859,22 @@ CdrSolver::getDomainFlux()
 }
 
 void
+CdrSolver::extrapolateAdvectiveFluxToEB() noexcept
+{
+  CH_TIME("CdrSolver::extrapolateAdvectiveFluxToEB()");
+  if (m_verbosity > 5) {
+    pout() << "ExtrapolateAdvectiveFluxToEB()" << endl;
+  }
+
+  this->extrapolateAdvectiveFluxToEB(m_ebFlux);
+}
+
+void
 CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
 {
-  CH_TIME("CdrSolver::extrapolateAdvectiveFluxToEB");
+  CH_TIME("CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData)");
   if (m_verbosity > 5) {
-    pout() << "ExtrapolateAdvectiveFluxToEB" << endl;
+    pout() << "ExtrapolateAdvectiveFluxToEB(EBAMRIVData)" << endl;
   }
 
   DataOps::setValue(a_ebFlux, 0.0);
@@ -2845,6 +2927,20 @@ CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
       }
     }
   }
+}
+
+void
+CdrSolver::redistribute(EBAMRCellData& a_phi, const EBAMRIVData& a_delta) noexcept
+{
+  CH_TIME("CdrSolver::redistribute");
+  if (m_verbosity > 5) {
+    pout() << "CdrSolver::redistribute" << endl;
+  }
+
+  this->incrementRedist(a_delta);
+  this->coarseFineIncrement(a_delta);
+  this->hyperbolicRedistribution(a_phi);
+  this->coarseFineRedistribution(a_phi);
 }
 
 std::string
@@ -3023,9 +3119,9 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
   // compute Div(G).
 
   if (m_isDiffusive) {
-    this
-      ->smoothHeavisideFaces(m_scratchFluxOne,
-                             a_cellPhi); // m_scratchFluxOne = phis on faces (smoothing as to avoid negative densities)
+
+    // m_scratchFluxOne = phis on faces (smoothing as to avoid negative densities)
+    this->smoothHeavisideFaces(m_scratchFluxOne, a_cellPhi);
     DataOps::multiply(m_scratchFluxOne, m_faceCenteredDiffusionCoefficient); // m_scratchFluxOne = D*phis
     DataOps::scale(m_scratchFluxOne, 2.0);                                   // m_scratchFluxOne = 2*D*phis
     DataOps::squareRoot(m_scratchFluxOne);                                   // m_scratchFluxOne = sqrt(2*D*phis)

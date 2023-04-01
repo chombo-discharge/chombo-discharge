@@ -1,6 +1,7 @@
 /* chombo-discharge
  * Copyright © 2022 NTNU.
  * Copyright © 2022 Fanny Skirbekk. 
+ * Copyright © 2023 Robert Marskar
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
@@ -8,6 +9,7 @@
   @file   CD_NeedleIF.cpp
   @brief  Implementation of CD_NeedleIF.H
   @author Fanny Skirbekk
+  @author Robert Marskar
 */
 
 // Chombo includes
@@ -49,12 +51,15 @@ NeedleIF::NeedleIF(const Real& a_length,
 
   // flipinside=true for cone since EBGeometry and Chombo has opposing sign conventions/logic regarding the flipinside..
   // the center of the needle tip is set to origo in order for the rotation to work more easily
-  auto cone = std::make_shared<EBGeometry::ConeSDF<Real>>(centerT, tipLength, a_angle, true);
-
   // Cone rotation will only work as expected if the cone tip is placed in origo.
-  cone->rotate(90, 0);
+  std::shared_ptr<EBGeometry::ImplicitFunction<Real>> cone = std::make_shared<EBGeometry::ConeSDF<Real>>(centerT,
+                                                                                                         tipLength,
+                                                                                                         a_angle);
 
-  isects.push_back(static_cast<BaseIF*>(new EBGeometryIF(cone, false)));
+  cone = EBGeometry::Complement<Real>(cone);
+  cone = EBGeometry::Rotate<Real>(cone, 90.0, 0);
+
+  isects.push_back(static_cast<BaseIF*>(new EBGeometryIF<Real>(cone, false)));
 
   // Build the needle
   m_baseif = RefCountedPtr<BaseIF>(new SmoothIntersection(isects, a_cornerCurve));

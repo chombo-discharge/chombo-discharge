@@ -103,7 +103,7 @@ ItoSolver::parseOptions()
   this->parseTruncation();
   this->parsePlotVariables();
   this->parseDeposition();
-  this->parseBisectStep();
+  this->parseIntersectionEB();
   this->parseRedistribution();
   this->parseDivergenceComputation();
   this->parseCheckpointing();
@@ -121,7 +121,7 @@ ItoSolver::parseRuntimeOptions()
   this->parsePlotVariables();
   this->parseTruncation();
   this->parseDeposition();
-  this->parseBisectStep();
+  this->parseIntersectionEB();
   this->parseRedistribution();
   this->parseDivergenceComputation();
   this->parseCheckpointing();
@@ -297,15 +297,29 @@ ItoSolver::parseDeposition()
 }
 
 void
-ItoSolver::parseBisectStep()
+ItoSolver::parseIntersectionEB()
 {
-  CH_TIME("ItoSolver::parseBisectStep");
+  CH_TIME("ItoSolver::parseIntersectionEB");
   if (m_verbosity > 5) {
-    pout() << m_name + "::parseBisectStep" << endl;
+    pout() << m_name + "::parseIntersectionEB" << endl;
   }
 
   ParmParse pp(m_className.c_str());
+
+  std::string str;
+
+  pp.get("intersection_alg", str);
   pp.get("bisect_step", m_bisectionStep);
+
+  if (str == "raycast") {
+    m_intersectionAlg = EBIntersection::Raycast;
+  }
+  else if (str == "bisection") {
+    m_intersectionAlg = EBIntersection::Bisection;
+  }
+  else {
+    MayDay::Error("ItoSolver::parseIntersectionEB -- logic bust");
+  }
 }
 
 void
@@ -356,6 +370,17 @@ ItoSolver::parseCheckpointing()
   else {
     MayDay::Abort("ItoSolver::parseCheckpointing - unknown checkpointing method requested");
   }
+}
+
+EBIntersection
+ItoSolver::getIntersectionAlgorithm() const noexcept
+{
+  CH_TIME("ItoSolver::getIntersectionAlgorithm");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getIntersectionAlgorithm" << endl;
+  }
+
+  return m_intersectionAlg;
 }
 
 Vector<std::string>
@@ -727,7 +752,9 @@ ItoSolver::transferCoveredParticles(ParticleContainer<ItoParticle>& a_particlesF
 }
 
 void
-ItoSolver::intersectParticles(const EBIntersection a_ebIntersection, const bool a_deleteParticles)
+ItoSolver::intersectParticles(const EBIntersection                    a_ebIntersection,
+                              const bool                              a_deleteParticles,
+                              const std::function<void(ItoParticle&)> a_nonDeletionModifier)
 {
   CH_TIME("ItoSolver::intersectParticles(EBIntersection, bool)");
   if (m_verbosity > 5) {
@@ -738,15 +765,17 @@ ItoSolver::intersectParticles(const EBIntersection a_ebIntersection, const bool 
                            WhichContainer::EB,
                            WhichContainer::Domain,
                            a_ebIntersection,
-                           a_deleteParticles);
+                           a_deleteParticles,
+                           a_nonDeletionModifier);
 }
 
 void
-ItoSolver::intersectParticles(const WhichContainer a_particles,
-                              const WhichContainer a_ebParticles,
-                              const WhichContainer a_domainParticles,
-                              const EBIntersection a_ebIntersection,
-                              const bool           a_deleteParticles)
+ItoSolver::intersectParticles(const WhichContainer                    a_particles,
+                              const WhichContainer                    a_ebParticles,
+                              const WhichContainer                    a_domainParticles,
+                              const EBIntersection                    a_ebIntersection,
+                              const bool                              a_deleteParticles,
+                              const std::function<void(ItoParticle&)> a_nonDeletionModifier)
 {
   CH_TIME("ItoSolver::intersectParticles(WhichContainerx3, EBIntersection, bool)");
   if (m_verbosity > 5) {
@@ -757,15 +786,21 @@ ItoSolver::intersectParticles(const WhichContainer a_particles,
   ParticleContainer<ItoParticle>& ebParticles     = this->getParticles(a_ebParticles);
   ParticleContainer<ItoParticle>& domainParticles = this->getParticles(a_domainParticles);
 
-  this->intersectParticles(particles, ebParticles, domainParticles, a_ebIntersection, a_deleteParticles);
+  this->intersectParticles(particles,
+                           ebParticles,
+                           domainParticles,
+                           a_ebIntersection,
+                           a_deleteParticles,
+                           a_nonDeletionModifier);
 }
 
 void
-ItoSolver::intersectParticles(ParticleContainer<ItoParticle>& a_particles,
-                              ParticleContainer<ItoParticle>& a_ebParticles,
-                              ParticleContainer<ItoParticle>& a_domainParticles,
-                              const EBIntersection            a_ebIntersection,
-                              const bool                      a_deleteParticles)
+ItoSolver::intersectParticles(ParticleContainer<ItoParticle>&         a_particles,
+                              ParticleContainer<ItoParticle>&         a_ebParticles,
+                              ParticleContainer<ItoParticle>&         a_domainParticles,
+                              const EBIntersection                    a_ebIntersection,
+                              const bool                              a_deleteParticles,
+                              const std::function<void(ItoParticle&)> a_nonDeletionModifier)
 {
   CH_TIME("ItoSolver::intersectParticles(ParticleContainerx3, EBIntersection, bool)");
   if (m_verbosity > 5) {
@@ -785,7 +820,8 @@ ItoSolver::intersectParticles(ParticleContainer<ItoParticle>& a_particles,
                                        a_domainParticles,
                                        m_phase,
                                        tolerance,
-                                       a_deleteParticles);
+                                       a_deleteParticles,
+                                       a_nonDeletionModifier);
 
     break;
   }
@@ -795,7 +831,8 @@ ItoSolver::intersectParticles(ParticleContainer<ItoParticle>& a_particles,
                                       a_domainParticles,
                                       m_phase,
                                       m_bisectionStep,
-                                      a_deleteParticles);
+                                      a_deleteParticles,
+                                      a_nonDeletionModifier);
 
     break;
   }
@@ -866,11 +903,11 @@ ItoSolver::setSpecies(const RefCountedPtr<ItoSpecies>& a_species)
 }
 
 void
-ItoSolver::allocateInternals()
+ItoSolver::allocate()
 {
-  CH_TIME("ItoSolver::allocateInternals");
+  CH_TIME("ItoSolver::allocate");
   if (m_verbosity > 5) {
-    pout() << m_name + "::allocateInternals" << endl;
+    pout() << m_name + "::allocate" << endl;
   }
 
   CH_assert(!m_species.isNull());
@@ -2149,7 +2186,7 @@ ItoSolver::interpolateMobilities()
       DataOps::vectorLength(m_scratch, m_velocityFunction);
 
       m_amr->conservativeAverage(m_scratch, m_realm, m_phase);
-      m_amr->interpGhostMG(m_scratch, m_realm, m_phase);
+      m_amr->interpGhostPwl(m_scratch, m_realm, m_phase);
 
       break;
     }

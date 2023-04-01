@@ -1,0 +1,32 @@
+# ==================================================================================================== 
+# ItoKMCGodunovStepper class options
+# ====================================================================================================
+ItoKMCGodunovStepper.checkpoint_particles                  = true           # If true, regrid on restart is supported (otherwise it's not)
+ItoKMCGodunovStepper.verbosity                             = -1             # Verbosity
+ItoKMCGodunovStepper.abort_on_failure                      = true           # Abort on Poisson solver failure or not
+ItoKMCGodunovStepper.redistribute_cdr                      = true           # Turn on/off reactive redistribution
+ItoKMCGodunovStepper.profile                               = false          # Turn on/off run-time profiling
+ItoKMCGodunovStepper.plt_vars                              = none           # 'conductivity', 'current_density', 'particles_per_patch'
+ItoKMCGodunovStepper.dual_grid                             = true           # Turn on/off dual-grid functionality
+ItoKMCGodunovStepper.load_balance_fluid                    = false          # Turn on/off fluid realm load balancing. 
+ItoKMCGodunovStepper.load_balance_particles                = true           # Turn on/off particle load balancing
+ItoKMCGodunovStepper.load_indices                          = -1             # Which particle containers to use for load balancing (-1 => all)
+ItoKMCGodunovStepper.load_per_cell                         = 1.0            # Default load per grid cell.
+ItoKMCGodunovStepper.box_sorting                           = morton         # Box sorting when load balancing
+ItoKMCGodunovStepper.particles_per_cell                    = 64             # Max computational particles per cell
+ItoKMCGodunovStepper.merge_interval                        = 1              # Time steps between superparticle merging
+ItoKMCGodunovStepper.regrid_superparticles                 = false          # Make superparticles during regrids
+ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0            # Advective time step CFL restriction
+ItoKMCGodunovStepper.max_particle_advection_cfl            = 1.0            # Advective time step CFL restriction
+ItoKMCGodunovStepper.min_particle_diffusion_cfl            = 0.0            # Diffusive time step CFL restriction
+ItoKMCGodunovStepper.max_particle_diffusion_cfl            = 1.E99          # Diffusive time step CFL restriction
+ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl  = 0.0            # Advection-diffusion time step CFL restriction
+ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl  = 1.E99          # Advection-diffusion time step CFL restriction
+ItoKMCGodunovStepper.fluid_advection_diffusion_cfl         = 0.5            # Advection-diffusion time step CFL restriction
+ItoKMCGodunovStepper.relax_dt_factor                       = 100.0          # Relaxation time step restriction. 
+ItoKMCGodunovStepper.min_dt                                = 0.0            # Minimum permitted time step
+ItoKMCGodunovStepper.max_dt                                = 1.E99          # Maximum permitted time step
+ItoKMCGodunovStepper.extend_conductivity                   = true           # Permit particles to live outside the EB to avoid bad gradients near EB
+ItoKMCGodunovStepper.smooth_conductivity                   = false          # Use bilinear smoothing on the conductivity.
+ItoKMCGodunovStepper.eb_tolerance                          = 0.0            # EB intersection test tolerance
+ItoKMCGodunovStepper.algorithm                             = euler_maruyama # Integration algorithm. 'euler_maruyama' or 'trapezoidal'

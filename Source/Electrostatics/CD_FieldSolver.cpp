@@ -135,11 +135,11 @@ FieldSolver::computeElectricField()
 }
 
 void
-FieldSolver::allocateInternals()
+FieldSolver::allocate()
 {
-  CH_TIME("FieldSolver::allocateInternals()");
+  CH_TIME("FieldSolver::allocate()");
   if (m_verbosity > 5) {
-    pout() << "FieldSolver::allocateInternals()" << endl;
+    pout() << "FieldSolver::allocate()" << endl;
   }
 
   m_amr->allocate(m_potential, m_realm, m_nComp);
@@ -370,11 +370,11 @@ FieldSolver::computeCapacitance()
 }
 
 void
-FieldSolver::deallocateInternals()
+FieldSolver::deallocate()
 {
-  CH_TIME("FieldSolver::deallocateInternals()");
+  CH_TIME("FieldSolver::deallocate()");
   if (m_verbosity > 5) {
-    pout() << "FieldSolver::deallocateInternals()" << endl;
+    pout() << "FieldSolver::deallocate()" << endl;
   }
 
   m_amr->deallocate(m_potential);
@@ -394,7 +394,7 @@ FieldSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_ne
   const Interval interv(m_comp, m_comp);
 
   // Reallocate internals
-  this->allocateInternals();
+  this->allocate();
 
   // Regrid potential data holder
   m_amr->interpToNewGrids(m_potential, m_cache, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);

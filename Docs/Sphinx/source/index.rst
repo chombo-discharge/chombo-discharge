@@ -145,7 +145,7 @@ Multi-physics applications
 
    Applications/CdrPlasmaModel
    Applications/StreamerInceptionModel
-   Applications/ItoPlasmaModel   
+   Applications/ItoKMC
 
 Single-solver applications
 **************************
@@ -164,15 +164,16 @@ Single-solver applications
    Applications/TracerParticleModel
 
 
-Tutorial
-********
+..
+   Tutorial
+   ********
 
-.. toctree::
-   :maxdepth: 3
-   :caption: Tutorial
-   :hidden:	     
+   .. toctree::
+      :maxdepth: 3
+      :caption: Tutorial
+      :hidden:	     
 
-   Tutorials/Tutorial
+      Tutorials/Tutorial
       
 Utilities
 *********  

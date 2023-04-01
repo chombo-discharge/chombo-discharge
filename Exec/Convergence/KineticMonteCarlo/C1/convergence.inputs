@@ -1,0 +1,16 @@
+# Basic settings
+stop_time = 5.0
+nsteps = 5 10 20 40 80 160
+nruns = 1000
+ionization_rate = 2.0
+attachment_rate = 1.0
+initial_particles = 20
+
+# Algorithm to be used
+algorithm = tau_plain
+
+# Settings for hybrid SSA/tau algoriuhm (i.e., the Cao algorithm)
+num_crit = 5
+eps = 0.15
+num_ssa = 10
+ssa_lim = 5.0

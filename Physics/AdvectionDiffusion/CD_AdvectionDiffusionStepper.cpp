@@ -193,7 +193,7 @@ AdvectionDiffusionStepper::allocate()
     pout() << "AdvectionDiffusionStepper::allocate" << endl;
   }
 
-  m_solver->allocateInternals();
+  m_solver->allocate();
 }
 
 void

@@ -177,7 +177,7 @@ public:
     @brief Allocates internal storage for FieldSolver. Derived classes may want to overwrite. 
   */
   virtual void
-  allocateInternals();
+  allocate();
 
   /*!
     @brief Cache state before regridding
@@ -200,7 +200,7 @@ public:
     @brief Deallocate internal storage
   */
   virtual void
-  deallocateInternals();
+  deallocate();
 
   /*!
     @brief Regrid method. 

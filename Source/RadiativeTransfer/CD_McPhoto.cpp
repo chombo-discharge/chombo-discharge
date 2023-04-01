@@ -439,11 +439,11 @@ McPhoto::clear(AMRParticles<Photon>& a_photons)
 }
 
 void
-McPhoto::allocateInternals()
+McPhoto::allocate()
 {
-  CH_TIME("McPhoto::allocateInternals");
+  CH_TIME("McPhoto::allocate");
   if (m_verbosity > 5) {
-    pout() << m_name + "::allocateInternals" << endl;
+    pout() << m_name + "::allocate" << endl;
   }
 
   // Allocate mesh data
@@ -477,11 +477,11 @@ McPhoto::preRegrid(const int a_lmin, const int a_oldFinestLevel)
 }
 
 void
-McPhoto::deallocateInternals()
+McPhoto::deallocate()
 {
-  CH_TIME("McPhoto::deallocateInternals");
+  CH_TIME("McPhoto::deallocate");
   if (m_verbosity > 5) {
-    pout() << m_name + "::deallocateInternals" << endl;
+    pout() << m_name + "::deallocate" << endl;
   }
 }
 
@@ -728,19 +728,19 @@ McPhoto::getPlotVariableNames() const
     plotVarNames.push_back(m_name + " source");
   }
   if (m_plotPhotons) {
-    plotVarNames.push_back(m_name + " photons");
+    plotVarNames.push_back(m_name + " active_photons");
   }
   if (m_plotBulkPhotons) {
-    plotVarNames.push_back(m_name + " bulkPhotons");
+    plotVarNames.push_back(m_name + " bulk_photons");
   }
   if (m_plotEBPhotons) {
-    plotVarNames.push_back(m_name + " ebPhotons");
+    plotVarNames.push_back(m_name + " eb_photons");
   }
   if (m_plotDomainPhotons) {
-    plotVarNames.push_back(m_name + " domainPhotons");
+    plotVarNames.push_back(m_name + " domain_photons");
   }
   if (m_plotSourcePhotons) {
-    plotVarNames.push_back(m_name + " sourcePhotons");
+    plotVarNames.push_back(m_name + " source_photons");
   }
 
   return plotVarNames;

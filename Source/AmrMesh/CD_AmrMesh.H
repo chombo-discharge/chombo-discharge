@@ -196,6 +196,15 @@ public:
   slice(EBAMRCellData& a_original, const Interval a_variables) const noexcept;
 
   /*!
+    @brief Slice cell-centered data in order to fetch a subset of components
+    @param[in] a_other Original data
+    @param[in] a_variables Variables
+    @return Subset of variables. The first component in the returned data holder corresponds to a_variables.begin(), the last to a_variables.end()
+  */
+  const EBAMRCellData
+  slice(const EBAMRCellData& a_original, const Interval a_variables) const noexcept;
+
+  /*!
     @brief Parse options. Called during the constructor. 
   */
   void
@@ -936,6 +945,42 @@ public:
                    const bool                  a_forceIrregNGP = false);
 
   /*!
+    @brief Deposit scalar particle quantities on the mesh. 
+    @details Usage has signature depositParticles<P, &P::mass> (...)
+	
+    To deposit a different quantity, simply change the function pointer in the input parameter. 
+
+    @param[out] a_meshData   Mesh data. MUST have exactly one compnent. 
+    @param[in]  a_realm      Realm where data is registered.
+    @param[in]  a_phase      Phase where data is registered.
+    @param[in]  a_particles  Particle container. Must be in "usable state" for deposition.
+  */
+  template <class P, const Real& (P::*particleScalarField)() const>
+  void
+  depositParticles(EBAMRIVData&                a_meshData,
+                   const std::string&          a_realm,
+                   const phase::which_phase&   a_phase,
+                   const ParticleContainer<P>& a_particles) const noexcept;
+
+  /*!
+    @brief Deposit scalar particle quantities on the mesh. 
+    @details Usage has signature depositParticles<P, &P::mass> (...)
+	
+    To deposit a different quantity, simply change the function pointer in the input parameter. 
+
+    @param[out] a_meshData   Mesh data. MUST have exactly one compnent. 
+    @param[in]  a_realm      Realm where data is registered.
+    @param[in]  a_phase      Phase where data is registered.
+    @param[in]  a_particles  Particle container. Must be in "usable state" for deposition.
+  */
+  template <class P, Real (P::*particleScalarField)() const>
+  void
+  depositParticles(EBAMRIVData&                a_meshData,
+                   const std::string&          a_realm,
+                   const phase::which_phase&   a_phase,
+                   const ParticleContainer<P>& a_particles) const noexcept;
+
+  /*!
     @brief Interpolate a scalar field onto the particle position. 
     @details This is just like regular particle-mesh interpolation. The input field should have exactly one component and the
     the field will be interpolated onto the template parameter's input field. The template parameter 'particleScalarField' should be a pointer
@@ -1086,6 +1131,23 @@ public:
                                  const phase::which_phase& a_phase) const;
 
   /*!
+    @brief Transfer particles that are on the wrong side of the EB to a different container.
+    @param[inout] a_dstParticles     Destination particle container
+    @param[inout] a_srcParticles     Source particle container
+    @param[in]    a_phase            Phase where the particles should live
+    @param[in]    a_transferModifier Optional input argument for letting the user manipulate particles that were transferred
+  */
+  template <class P>
+  void
+  transferIrregularParticles(
+    ParticleContainer<P>&         a_dstParticles,
+    ParticleContainer<P>&         a_srcParticles,
+    const phase::which_phase      a_phase,
+    const std::function<void(P&)> a_transferModifier = [](P&) -> void {
+      return;
+    }) const noexcept;
+
+  /*!
     @brief Particle intersection algorithm based on ray-casting.
     @details This routine will iterate through all the particles and check if they intersect the geometry. The template
     parameter indicates the particle type -- it MUST have const RealVec& position() const and  const RealVect& oldPosition() const 
@@ -1096,21 +1158,26 @@ public:
     (assuming that the implicit function is a signed distance function). Particles are then moved that
     distance along their trajectory and we then update the new distance to the EB. This is done recursively until the particles
     have either moved the entire length or been absorbed by the EB or domain side. 
-    @param[inout] a_activeParticles Particles to be intersected with geometry
-    @param[out]   a_ebParticles     Particles that intersected with the EB
-    @param[out]   a_domainParticles Particles that intersected with the domain faces
-    @param[in]    a_phase           Phase where the input particles live
-    @param[in]    a_tolerance       Tolerance
-    @param[in]    a_deleteParticles If true, particles will be removed from a_activeParticles if they intersect the geometry.
+    @param[inout] a_activeParticles     Particles to be intersected with geometry
+    @param[out]   a_ebParticles         Particles that intersected with the EB
+    @param[out]   a_domainParticles     Particles that intersected with the domain faces
+    @param[in]    a_phase               Phase where the input particles live
+    @param[in]    a_bisectionStep       Length of the bisection step
+    @param[in]    a_deleteParticles     If true, particles will be removed from a_activeParticles if they intersect the geometry.
+    @param[in]    a_nonDeletionModifier Optional input argument for letting the user manipulate particles that were intersected but not deleted
   */
   template <class P>
   void
-  intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
-                              ParticleContainer<P>&    a_ebParticles,
-                              ParticleContainer<P>&    a_domainParticles,
-                              const phase::which_phase a_phase,
-                              const Real               a_tolerance,
-                              const bool               a_deleteParticles) const;
+  intersectParticlesRaycastIF(
+    ParticleContainer<P>&         a_activeParticles,
+    ParticleContainer<P>&         a_ebParticles,
+    ParticleContainer<P>&         a_domainParticles,
+    const phase::which_phase      a_phase,
+    const Real                    a_tolerance,
+    const bool                    a_deleteParticles,
+    const std::function<void(P&)> a_nonDeletionModifier = [](P&) -> void {
+      return;
+    }) const noexcept;
 
   /*!
     @brief Particle intersection algorithm based on bisection. 
@@ -1119,21 +1186,27 @@ public:
     functions that determine the start and stop position of the particle trajectory. This routine uses a bisection method
     to check for intersections with the EB (the domain side is much easier). Their position are updated and they are placed
     in the a_ebParticles argument. 
-    @param[inout] a_activeParticles Particles to be intersected with geometry
-    @param[out]   a_ebParticles     Particles that intersected with the EB
-    @param[out]   a_domainParticles Particles that intersected with the domain faces
-    @param[in]    a_phase           Phase where the input particles live
-    @param[in]    a_bisectionStep   Length of the bisection step
-    @param[in]    a_deleteParticles If true, particles will be removed from a_activeParticles if they intersect the geometry.
+    @param[inout] a_activeParticles     Particles to be intersected with geometry
+    @param[out]   a_ebParticles         Particles that intersected with the EB
+    @param[out]   a_domainParticles     Particles that intersected with the domain faces
+    @param[in]    a_phase               Phase where the input particles live
+    @param[in]    a_bisectionStep       Length of the bisection step
+    @param[in]    a_deleteParticles     If true, particles will be removed from a_activeParticles if they intersect the geometry.
+    @param[in]    a_nonDeletionModifier Optional input argument for letting the user manipulate particles that were intersected but not deleted
   */
   template <class P>
   void
-  intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
-                             ParticleContainer<P>&    a_ebParticles,
-                             ParticleContainer<P>&    a_domainParticles,
-                             const phase::which_phase a_phase,
-                             const Real               a_bisectionStep,
-                             const bool               a_deleteParticles) const;
+  intersectParticlesBisectIF(
+    ParticleContainer<P>&         a_activeParticles,
+    ParticleContainer<P>&         a_ebParticles,
+    ParticleContainer<P>&         a_domainParticles,
+    const phase::which_phase      a_phase,
+    const Real                    a_bisectionStep,
+    const bool                    a_deleteParticles,
+    const std::function<void(P&)> a_nonDeletionModifier = [](P&) -> void {
+      return;
+    }) const noexcept;
+
   /*!
     @brief Interpolate ghost vectors over a realm, using the default ghost cell interpolation method. 
     @param[inout] a_data  Data to be interpolated.
@@ -1554,6 +1627,14 @@ public:
   */
   EBAMRParticleMesh&
   getParticleMesh(const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Get EBAMRSurfaceDeposition surface deposition operator
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)    
+  */
+  EBAMRSurfaceDeposition&
+  getSurfaceDeposition(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get the coarsening utility

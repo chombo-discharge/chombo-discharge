@@ -95,12 +95,12 @@ protected:
   /*!
     @brief Standard union ala Chombo
   */
-  std::shared_ptr<EBGeometry::Union<Real, Sphere>> m_slowUnion;
+  std::shared_ptr<EBGeometry::ImplicitFunction<Real>> m_slowUnion;
 
   /*!
     @brief Union that uses bounding volume hierarchy acceleration
   */
-  std::shared_ptr<EBGeometry::UnionBVH<Real, Sphere, AABB, K>> m_fastUnion;
+  std::shared_ptr<EBGeometry::ImplicitFunction<Real>> m_fastUnion;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -271,6 +271,7 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
 
   m_eblg.resize(1 + m_finestLevel);
   m_eblgCoFi.resize(1 + m_finestLevel);
+  m_eblgFiCo.resize(1 + m_finestLevel);
   m_ebisl.resize(1 + m_finestLevel);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
@@ -292,13 +293,22 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
 
     // Define the coarsened grids.
     if (lvl > 0) {
-      m_eblgCoFi[lvl] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
+      m_eblgCoFi[lvl - 1] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
 
-      coarsen(*m_eblgCoFi[lvl], *m_eblg[lvl], m_refinementRatios[lvl - 1]);
-      m_eblgCoFi[lvl]->getEBISL().setMaxRefinementRatio(m_refinementRatios[lvl - 1], m_eblg[lvl]->getEBIS());
+      coarsen(*m_eblgCoFi[lvl - 1], *m_eblg[lvl], m_refinementRatios[lvl - 1]);
+      m_eblgCoFi[lvl - 1]->getEBISL().setMaxRefinementRatio(m_refinementRatios[lvl - 1], m_eblg[lvl]->getEBIS());
+    }
+
+    // Define the refined grids. Here m_eblgFiCo contains grids on level lvl
+    if (lvl < m_finestLevel) {
+      m_eblgFiCo[lvl + 1] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
+
+      refine(*m_eblgFiCo[lvl + 1], *m_eblg[lvl], m_refinementRatios[lvl]);
+      m_eblgFiCo[lvl + 1]->getEBISL().setMaxCoarseningRatio(m_refinementRatios[lvl], m_eblg[lvl]->getEBIS());
     }
   }
 }
+
 void
 PhaseRealm::defineVofIterator(const int a_lmin)
 {
@@ -427,7 +437,7 @@ PhaseRealm::defineEBCoarAve(const int a_lmin)
 
       if (hasCoar) {
         m_coarAve[lvl] = RefCountedPtr<EBCoarAve>(
-          new EBCoarAve(*m_eblg[lvl], *m_eblg[lvl - 1], *m_eblgCoFi[lvl], m_refinementRatios[lvl - 1]));
+          new EBCoarAve(*m_eblg[lvl], *m_eblg[lvl - 1], *m_eblgCoFi[lvl - 1], m_refinementRatios[lvl - 1]));
       }
     }
   }
@@ -757,6 +767,7 @@ PhaseRealm::defineParticleMesh()
   }
 
   m_particleMesh.define(m_eblg, m_refinementRatios, m_dx, m_probLo, m_numGhostCells * IntVect::Unit, 99, m_finestLevel);
+  m_surfaceDeposition.define(m_eblg, m_eblgCoFi, m_eblgFiCo, m_refinementRatios, m_dx, m_probLo, m_finestLevel, 1);
 }
 
 void
@@ -1050,6 +1061,16 @@ PhaseRealm::getParticleMesh() const
   }
 
   return m_particleMesh;
+}
+
+EBAMRSurfaceDeposition&
+PhaseRealm::getSurfaceDeposition() const
+{
+  if (!this->queryOperator(s_particle_mesh)) {
+    MayDay::Error("PhaseRealm::getSurfaceDepostion - operator not registered!");
+  }
+
+  return m_surfaceDeposition;
 }
 
 const EBAMRFAB&

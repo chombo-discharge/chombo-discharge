@@ -29,6 +29,24 @@ class ParticleOps
 {
 public:
   /*!
+    @brief Get the cell index corresponding to the particle position
+    @param[in] a_particlePosition Particle position
+    @param[in] a_probLo Lower-left corner of computational domain
+    @param[in] a_dx Grid resolution
+  */
+  static inline IntVect
+  getParticleCellIndex(const RealVect& a_particlePosition, const RealVect& a_probLo, const Real& a_dx) noexcept;
+
+  /*!
+    @brief Get the cell index corresponding to the particle position
+    @param[in] a_particlePosition Particle position
+    @param[in] a_probLo Lower-left corner of computational domain
+    @param[in] a_dx Grid resolution
+  */
+  static inline IntVect
+  getParticleCellIndex(const RealVect& a_particlePosition, const RealVect& a_probLo, const RealVect& a_dx) noexcept;
+
+  /*!
     @brief Get the number of physical particles per cell
     @param[out] a_ppc Physical particles per cell
     @param[in]  a_src Particle source container. 
@@ -133,6 +151,71 @@ public:
   template <typename P>
   static inline void
   copyDestructive(ParticleContainer<P>& a_dst, ParticleContainer<P>& a_src) noexcept;
+
+  /*!
+    @brief Perform a sum of some particle quantity
+    @param[in] a_particles Particles
+  */
+  template <typename P, const Real& (P::*scalarQuantity)() const>
+  static inline Real
+  sum(const ParticleContainer<P>& a_particles) noexcept;
+
+  /*!
+    @brief Perform a sum of some particle quantity
+    @param[in] a_particles Particles
+    @note Just like the other version, except that this one doesn't take a member function. 
+  */
+  template <typename P, Real (P::*scalarQuantity)()>
+  static inline Real
+  sum(const ParticleContainer<P>& a_particles) noexcept;
+
+  /*!
+    @brief Remove particles if they fulfill certain removal criterion
+    @param[inout] a_particles       Particles
+    @param[in]    a_removeCriterion Removal criterion.
+  */
+  template <typename P>
+  static inline void
+  removeParticles(ParticleContainer<P>& a_particles, const std::function<bool(const P&)>& a_removeCriterion) noexcept;
+
+  /*!
+    @brief Transfer particles if they fulfill a certain removal criterion. Takes particles from a_srcParticles and puts them in a_dstParticles
+    @param[inout] a_dstParticles    Destination particle data holder
+    @param[inout] a_srcParticles    Source particle data holder
+    @param[in]    a_removeCriterion Removal criterion.
+  */
+  template <typename P>
+  static inline void
+  transferParticles(ParticleContainer<P>&                a_dstParticles,
+                    ParticleContainer<P>&                a_srcParticles,
+                    const std::function<bool(const P&)>& a_transferCrit) noexcept;
+
+  /*!
+    @brief Set value function. Lets the user set particle parameters. 
+    @param[inout] a_particles Particles
+    @param[in]    a_functor   Lambda for setting particle values
+  */
+  template <typename P>
+  static inline void
+  setData(ParticleContainer<P>& a_particles, const std::function<void(P&)>& a_functor) noexcept;
+
+  /*!
+    @brief Set value function. Lets the user set scalar particle quantity. Use with e.g. setValue<P, &P::weight>(particles, 0.0) etc. 
+    @param[inout] a_particles Particles
+    @param[in]    a_value     Value to set
+  */
+  template <typename P, Real& (P::*particleScalarField)()>
+  static inline void
+  setValue(ParticleContainer<P>& a_particles, const Real a_value) noexcept;
+
+  /*!
+    @brief Set value function. Lets the user set scalar particle quantity. Use with e.g. setValue<P, &P::velocity>(particles, RealVect::Unit) etc. 
+    @param[inout] a_particles Particles
+    @param[in]    a_value     Value to set
+  */
+  template <typename P, RealVect& (P::*particleVectorField)()>
+  static inline void
+  setValue(ParticleContainer<P>& a_particles, const RealVect a_value) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
