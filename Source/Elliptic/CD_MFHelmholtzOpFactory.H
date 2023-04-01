@@ -41,6 +41,7 @@ class MFHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<MFCellFAB>>
 public:
   // Various alias for cutting down on typing.
   using MFIS             = RefCountedPtr<MultiFluidIndexSpace>;
+  using AMRMask          = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
   using AmrLevelGrids    = Vector<MFLevelGrid>;
   using AmrInterpolators = Vector<MFMultigridInterpolator>;
   using AmrFluxRegisters = Vector<MFFluxReg>;
@@ -75,6 +76,8 @@ public:
     @param[in] a_alpha            alpha-coefficient in Helmholtz operator.
     @param[in] a_beta             beta-coefficient in Helmholtz operator.
     @param[in] a_probLo           Lower-left corner of domain
+    @param[in] a_amrValidCells    Valid grid cells (true for cells not covered by a finer level)
+    @param[in] a_amrLevelGrid     AMR grids
     @param[in] a_amrInterpolators Interpolator objects between AMR levels. 
     @param[in] a_amrCoarseners    Conservative coarseners between AMR levels. 
     @param[in] a_amrFluxRegisters Flux registers between AMR levels. 
@@ -98,6 +101,7 @@ public:
                        const Real&             a_alpha,
                        const Real&             a_beta,
                        const RealVect&         a_probLo,
+		       const AMRMask&          a_amrValidCells,
                        const AmrLevelGrids&    a_amrLevelGrids,
                        const AmrInterpolators& a_amrInterpolators,
                        const AmrFluxRegisters& a_amrFluxRegisters,
@@ -234,6 +238,11 @@ protected:
     @brief Lower-left corner of computational domain
   */
   RealVect m_probLo;
+
+  /*!
+    @brief Mask of cells that are valid on the AMR levels
+  */
+  AMRMask m_amrValidCells;
 
   /*!
     @brief AMR grids

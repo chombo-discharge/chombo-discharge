@@ -32,6 +32,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
                                            const Real&             a_alpha,
                                            const Real&             a_beta,
                                            const RealVect&         a_probLo,
+                                           const AMRMask&          a_amrValidCells,
                                            const AmrLevelGrids&    a_amrLevelGrids,
                                            const AmrInterpolators& a_amrInterpolators,
                                            const AmrFluxRegisters& a_amrFluxRegisters,
@@ -62,6 +63,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
   m_beta   = a_beta;
   m_probLo = a_probLo;
 
+  m_amrValidCells    = a_amrValidCells;
   m_amrLevelGrids    = a_amrLevelGrids;
   m_amrInterpolators = a_amrInterpolators;
   m_amrFluxRegisters = a_amrFluxRegisters;

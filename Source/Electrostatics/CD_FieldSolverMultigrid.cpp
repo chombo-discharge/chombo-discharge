@@ -663,6 +663,7 @@ FieldSolverMultigrid::setupHelmholtzFactory()
                              m_alpha,
                              m_beta,
                              m_amr->getProbLo(),
+			     m_amr->getValidCells(m_realm),
                              mflg,
                              mfInterp,
                              mfFluxReg,
