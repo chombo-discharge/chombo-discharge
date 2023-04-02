@@ -242,7 +242,7 @@ protected:
   /*!
     @brief Raw stencils for dphi/dn
   */
-  LayoutData<MFInterfaceFAB<VoFStencil>> m_gradPhiStencils;
+  LayoutData<MFInterfaceFAB<VoFStencil>> m_gradPhiRelaxStencils;
 
   /*!
     @brief Raw weights for dphi/dn

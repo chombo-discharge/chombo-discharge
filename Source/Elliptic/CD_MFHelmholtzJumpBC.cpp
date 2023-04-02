@@ -114,7 +114,7 @@ MFHelmholtzJumpBC::defineStencils()
   if (m_multiPhase) {
     const DisjointBoxLayout& dbl = m_mflg.getGrids();
 
-    m_gradPhiStencils.define(dbl);
+    m_gradPhiRelaxStencils.define(dbl);
     m_gradPhiWeights.define(dbl);
     m_boundaryPhi.define(dbl);
     m_avgStencils.define(dbl);
@@ -124,7 +124,7 @@ MFHelmholtzJumpBC::defineStencils()
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
       const Box box = dbl[dit()];
 
-      m_gradPhiStencils[dit()].define(m_mflg, dit());
+      m_gradPhiRelaxStencils[dit()].define(m_mflg, dit());
       m_gradPhiWeights[dit()].define(m_mflg, dit());
       m_boundaryPhi[dit()].define(m_mflg, dit());
       m_avgStencils[dit()].define(m_mflg, dit());
@@ -144,8 +144,8 @@ MFHelmholtzJumpBC::defineStencils()
         const IntVectSet& ivs     = m_ivs[dit()];
 
         // Build stencils like we always do
-        BaseIVFAB<VoFStencil>& gradStencils = m_gradPhiStencils[dit()].getIVFAB(iphase); //(ivs, ebgraph, m_nComp);
-        BaseIVFAB<Real>&       bndryWeights = m_gradPhiWeights[dit()].getIVFAB(iphase);  //(ivs, ebgraph, m_nComp);
+        BaseIVFAB<VoFStencil>& gradStencils = m_gradPhiRelaxStencils[dit()].getIVFAB(iphase); //(ivs, ebgraph, m_nComp);
+        BaseIVFAB<Real>&       bndryWeights = m_gradPhiWeights[dit()].getIVFAB(iphase);       //(ivs, ebgraph, m_nComp);
 
         // Iteration space for kernel
         VoFIterator vofit(ivs, ebgraph);
@@ -222,7 +222,7 @@ MFHelmholtzJumpBC::buildAverageStencils()
       const EBISBox&    ebisbox = ebisl[dit()];
       const IntVectSet& ivs     = m_ivs[dit()];
 
-      const BaseIVFAB<VoFStencil>& gradStencils = m_gradPhiStencils[dit()].getIVFAB(iphase);
+      const BaseIVFAB<VoFStencil>& gradStencils = m_gradPhiRelaxStencils[dit()].getIVFAB(iphase);
       const BaseIVFAB<Real>&       bndryWeights = m_gradPhiWeights[dit()].getIVFAB(iphase);
 
       // Build the average stencils. Only matters if the cell is a multi-valued cell.

@@ -55,7 +55,7 @@ MFHelmholtzEBBC::defineMultiPhase()
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
 
   m_boundaryWeights.define(dbl);
-  m_gradPhiStencils.define(dbl);
+  m_gradPhiRelaxStencils.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box         box     = dbl[dit()];
@@ -65,10 +65,10 @@ MFHelmholtzEBBC::defineMultiPhase()
 
     // These are used to reconstruct gradients at the EB. They are left undefined for single-phase cells.
     m_boundaryWeights[dit()].define(ivs, ebgraph, m_nComp);
-    m_gradPhiStencils[dit()].define(ivs, ebgraph, m_nComp);
+    m_gradPhiRelaxStencils[dit()].define(ivs, ebgraph, m_nComp);
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiRelaxStencils[dit()];
 
     VoFIterator& multiPhaseVofs = m_jumpBC->getMultiPhaseVofs(m_phase, dit());
 

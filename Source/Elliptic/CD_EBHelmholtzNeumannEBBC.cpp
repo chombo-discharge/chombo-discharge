@@ -89,14 +89,14 @@ EBHelmholtzNeumannEBBC::define()
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
 
   // Reset the stencil everywhere.
-  m_gradPhiStencils.define(dbl);
+  m_gradPhiRelaxStencils.define(dbl);
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box         box     = dbl[dit()];
     const EBISBox&    ebisbox = m_eblg.getEBISL()[dit()];
     const EBGraph&    ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
-    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiRelaxStencils[dit()];
 
     stencils.define(ivs, ebgraph, m_nComp);
 

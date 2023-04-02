@@ -113,7 +113,7 @@ EBHelmholtzDirichletEBBC::define()
   }
 
   m_boundaryWeightsRelax.define(dbl);
-  m_gradPhiStencils.define(dbl);
+  m_gradPhiRelaxStencils.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box         box     = dbl[dit()];
@@ -122,7 +122,7 @@ EBHelmholtzDirichletEBBC::define()
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeightsRelax[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiRelaxStencils[dit()];
 
     weights.define(ivs, ebgraph, m_nComp);
     stencils.define(ivs, ebgraph, m_nComp);
@@ -198,17 +198,17 @@ EBHelmholtzDirichletEBBC::defineResidualStencils() noexcept
   const ProblemDomain& domainFine = m_eblgFiCo.getDomain();
 
   m_boundaryWeightsResid.define(dbl);
-  m_gradPhiAMRStencils.define(dbl);
-  m_gradPhiAMRStencilsFine.define(dbl);
+  m_gradPhiResidStencils.define(dbl);
+  m_gradPhiResidStencilsFine.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
 
     if (m_hasFineAMRLevel && !m_isMGLevel) {
       BaseIVFAB<Real>&             gradPhiAMRWeight       = m_boundaryWeightsResid[dit()];
-      BaseIVFAB<VoFStencil>&       gradPhiAMRStencils     = m_gradPhiAMRStencils[dit()];
-      BaseIVFAB<VoFStencil>&       gradPhiAMRStencilsFine = m_gradPhiAMRStencilsFine[dit()];
+      BaseIVFAB<VoFStencil>&       gradPhiAMRStencils     = m_gradPhiResidStencils[dit()];
+      BaseIVFAB<VoFStencil>&       gradPhiAMRStencilsFine = m_gradPhiResidStencilsFine[dit()];
       const BaseIVFAB<Real>&       gradPhiRelaxWeight     = m_boundaryWeightsRelax[dit()];
-      const BaseIVFAB<VoFStencil>& gradPhiRelaxStencil    = m_gradPhiStencils[dit()];
+      const BaseIVFAB<VoFStencil>& gradPhiRelaxStencil    = m_gradPhiRelaxStencils[dit()];
       const BaseFab<bool>&         validCells             = (*m_amrValidCells)[dit()];
 
       // Where to define our residual stencils.

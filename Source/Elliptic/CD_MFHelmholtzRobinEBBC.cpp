@@ -124,7 +124,7 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
     const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiRelaxStencils[dit()];
 
     // Build interpolation stencils.
     VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());

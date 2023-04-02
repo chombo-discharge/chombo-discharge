@@ -172,19 +172,21 @@ protected:
     @brief Stencils for computing the flux on a single level. This is a single-level object used for 
     the multigrid relaxation stage. 
   */
-  LayoutData<BaseIVFAB<VoFStencil>> m_gradPhiStencils;
+  LayoutData<BaseIVFAB<VoFStencil>> m_gradPhiRelaxStencils;
 
   /*!
-    @brief Stencils for computing the flux through the EB. This is this the part of the stencil that reaches
-    into this level.
+    @brief Stencils for computing the flux through the EB for the residual. This is this the part of the stencil that reaches
+    into this level. 
+    @note Differs from m_gradPhiRelaxStencils only when there's a coarse-fine interface near the cut-cell. 
   */
-  LayoutData<BaseIVFAB<VoFStencil>> m_gradPhiAMRStencils;
+  LayoutData<BaseIVFAB<VoFStencil>> m_gradPhiResidStencils;
 
   /*!
-    @brief Stencils for computing the flux through the EB for AMR calculations. This is this the part of the 
+    @brief Stencils for computing the flux through the EB for the residual. This is this the part of the 
     stencil that reaches into the fine level.
+    @note Differs from m_gradPhiRelaxStencils only when there's a coarse-fine interface near the cut-cell. 
   */
-  LayoutData<BaseIVFAB<VoFStencil>> m_gradPhiAMRStencilsFine;
+  LayoutData<BaseIVFAB<VoFStencil>> m_gradPhiResidStencilsFine;
 
   /*!
     @brief User define function. 

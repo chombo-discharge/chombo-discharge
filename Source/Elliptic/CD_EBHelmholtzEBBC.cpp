@@ -78,7 +78,7 @@ EBHelmholtzEBBC::getGradPhiRelaxStencils() const noexcept
 {
   CH_TIME("EBHelmholtzEBBC::getGradPhiRelaxStencils()");
 
-  return m_gradPhiStencils;
+  return m_gradPhiRelaxStencils;
 }
 
 #include <CD_NamespaceFooter.H>
