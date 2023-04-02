@@ -207,11 +207,23 @@ EBHelmholtzDirichletEBBC::defineResidualStencils() noexcept
       BaseIVFAB<VoFStencil>&       gradPhiAMRStencils     = m_gradPhiAMRStencils[dit()];
       BaseIVFAB<VoFStencil>&       gradPhiAMRStencilsFine = m_gradPhiAMRStencilsFine[dit()];
       const BaseIVFAB<VoFStencil>& gradPhiRelaxStencil    = m_gradPhiStencils[dit()];
+      const BaseFab<bool>&         validCells             = (*m_amrValidCells)[dit()];
 
       // Go through the relaxation stencils. If it reaches into an invalid cell (which can happen near EBCF),
       // recompute a better stencil for the AMR residual.
       auto kernel = [&](const VolIndex& vof) -> void {
+        const IntVect iv = vof.gridIndex();
 
+        if (validCells(iv)) {
+          const VoFStencil& relaxStencil = gradPhiRelaxStencil(vof, 0);
+
+          for (int i = 0; i < relaxStencil.size(); i++) {
+            const VolIndex& ivof = relaxStencil.vof(i);
+            if (!(validCells(ivof.gridIndex(), 0))) {
+              MayDay::Warning("Got invalid cell in stencil");
+            }
+          }
+        }
       };
 
       // Iteration space for kernel
