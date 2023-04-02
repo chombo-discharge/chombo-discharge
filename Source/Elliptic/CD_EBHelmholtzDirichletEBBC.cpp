@@ -204,9 +204,9 @@ EBHelmholtzDirichletEBBC::defineResidualStencils() noexcept
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
 
     if (m_hasFineAMRLevel && !m_isMGLevel) {
-      BaseIVFAB<Real>&             gradPhiAMRWeight       = m_boundaryWeightsResid[dit()];
-      BaseIVFAB<VoFStencil>&       gradPhiAMRStencils     = m_gradPhiResidStencils[dit()];
-      BaseIVFAB<VoFStencil>&       gradPhiAMRStencilsFine = m_gradPhiResidStencilsFine[dit()];
+      BaseIVFAB<Real>&             gradPhiResidWeight       = m_boundaryWeightsResid[dit()];
+      BaseIVFAB<VoFStencil>&       gradPhiResidStencils     = m_gradPhiResidStencils[dit()];
+      BaseIVFAB<VoFStencil>&       gradPhiResidStencilsFine = m_gradPhiResidStencilsFine[dit()];
       const BaseIVFAB<Real>&       gradPhiRelaxWeight     = m_boundaryWeightsRelax[dit()];
       const BaseIVFAB<VoFStencil>& gradPhiRelaxStencil    = m_gradPhiRelaxStencils[dit()];
       const BaseFab<bool>&         validCells             = (*m_amrValidCells)[dit()];
@@ -215,9 +215,9 @@ EBHelmholtzDirichletEBBC::defineResidualStencils() noexcept
       const IntVectSet& ivs     = gradPhiRelaxStencil.getIVS();
       const EBGraph&    ebgraph = ebisl[dit()].getEBGraph();
 
-      gradPhiAMRWeight.define(ivs, ebgraph, m_nComp);
-      gradPhiAMRStencils.define(ivs, ebgraph, m_nComp);
-      gradPhiAMRStencilsFine.define(ivs, ebgraph, m_nComp);
+      gradPhiResidWeight.define(ivs, ebgraph, m_nComp);
+      gradPhiResidStencils.define(ivs, ebgraph, m_nComp);
+      gradPhiResidStencilsFine.define(ivs, ebgraph, m_nComp);
 
       // Go through the relaxation stencils. If it reaches into an invalid cell (which can happen near EBCF),
       // recompute a better stencil for the AMR residual.
@@ -249,16 +249,16 @@ EBHelmholtzDirichletEBBC::defineResidualStencils() noexcept
           // We need to compute a new stencil for the finite volume flux, which also uses cells on
           // the fine level.
 #if 1 // This is just placeholder code to make things run while we adjust stencils
-          gradPhiAMRWeight(vof, m_comp)   = gradPhiRelaxWeight(vof, m_comp);
-          gradPhiAMRStencils(vof, m_comp) = gradPhiRelaxStencil(vof, m_comp);
+          gradPhiResidWeight(vof, m_comp)   = gradPhiRelaxWeight(vof, m_comp);
+          gradPhiResidStencils(vof, m_comp) = gradPhiRelaxStencil(vof, m_comp);
 
           std::cout << "need new stencil for vof = " << vof << std::endl;
 #endif
         }
         else {
           // In this case we can just use the relaxation stencil for the residual.
-          gradPhiAMRWeight(vof, m_comp)   = gradPhiRelaxWeight(vof, m_comp);
-          gradPhiAMRStencils(vof, m_comp) = gradPhiRelaxStencil(vof, m_comp);
+          gradPhiResidWeight(vof, m_comp)   = gradPhiRelaxWeight(vof, m_comp);
+          gradPhiResidStencils(vof, m_comp) = gradPhiRelaxStencil(vof, m_comp);
         }
       };
 
