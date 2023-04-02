@@ -42,8 +42,6 @@ EBHelmholtzEBBC::define(const Location::Cell                           a_dataLoc
   CH_assert(a_dx > 0.0);
   CH_assert(a_ghostCF >= 0);
 
-  MayDay::Warning("EBHelmholtzEBBC::define -- need to initate work on AMR-aware flux stencils now");
-
   m_dataLocation    = a_dataLocation;
   m_eblg            = a_eblg;
   m_eblgFiCo        = a_eblgFiCo;
@@ -81,22 +79,6 @@ EBHelmholtzEBBC::getGradPhiRelaxStencils() const noexcept
   CH_TIME("EBHelmholtzEBBC::getGradPhiRelaxStencils()");
 
   return m_gradPhiStencils;
-}
-
-const LayoutData<BaseIVFAB<VoFStencil>>&
-EBHelmholtzEBBC::getGradPhiAMRStencils() const noexcept
-{
-  CH_TIME("EBHelmholtzEBBC::getGradPhiAMRStencils()");
-
-  return m_gradPhiAMRStencils;
-}
-
-const LayoutData<BaseIVFAB<VoFStencil>>&
-EBHelmholtzEBBC::getGradPhiAMRStencilsFine() const noexcept
-{
-  CH_TIME("EBHelmholtzEBBC::EBHelmholtzEBBC::getGradPhiAMRStencilsFine()");
-
-  return m_gradPhiAMRStencilsFine;
 }
 
 #include <CD_NamespaceFooter.H>

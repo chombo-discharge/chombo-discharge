@@ -204,31 +204,63 @@ EBHelmholtzDirichletEBBC::defineResidualStencils() noexcept
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
 
     if (m_hasFineAMRLevel && !m_isMGLevel) {
+      BaseIVFAB<Real>&             gradPhiAMRWeight       = m_boundaryWeightsResid[dit()];
       BaseIVFAB<VoFStencil>&       gradPhiAMRStencils     = m_gradPhiAMRStencils[dit()];
       BaseIVFAB<VoFStencil>&       gradPhiAMRStencilsFine = m_gradPhiAMRStencilsFine[dit()];
+      const BaseIVFAB<Real>&       gradPhiRelaxWeight     = m_boundaryWeightsRelax[dit()];
       const BaseIVFAB<VoFStencil>& gradPhiRelaxStencil    = m_gradPhiStencils[dit()];
       const BaseFab<bool>&         validCells             = (*m_amrValidCells)[dit()];
+
+      // Where to define our residual stencils.
+      const IntVectSet& ivs     = gradPhiRelaxStencil.getIVS();
+      const EBGraph&    ebgraph = ebisl[dit()].getEBGraph();
+
+      gradPhiAMRWeight.define(ivs, ebgraph, m_nComp);
+      gradPhiAMRStencils.define(ivs, ebgraph, m_nComp);
+      gradPhiAMRStencilsFine.define(ivs, ebgraph, m_nComp);
 
       // Go through the relaxation stencils. If it reaches into an invalid cell (which can happen near EBCF),
       // recompute a better stencil for the AMR residual.
       auto kernel = [&](const VolIndex& vof) -> void {
         const IntVect iv = vof.gridIndex();
 
+        bool useRelaxStencil = true;
+
+        Vector<VolIndex> validVoFs;
+        Vector<VolIndex> invalidVoFs;
+
+        // Check if we need a new stencil.
         if (validCells(iv)) {
           const VoFStencil& relaxStencil = gradPhiRelaxStencil(vof, 0);
 
+          // Go through the stencil and find the VoFs that are involved.
           for (int i = 0; i < relaxStencil.size(); i++) {
             const VolIndex& ivof = relaxStencil.vof(i);
-            if (!(validCells(ivof.gridIndex(), 0))) {
-              MayDay::Warning("Got invalid cell in stencil");
+            if (validCells(ivof.gridIndex())) {
+              validVoFs.push_back(ivof);
+            }
+            else {
+              invalidVoFs.push_back(ivof);
             }
           }
         }
-      };
 
-      // Iteration space for kernel
-      const IntVectSet& ivs     = gradPhiRelaxStencil.getIVS();
-      const EBGraph&    ebgraph = ebisl[dit()].getEBGraph();
+        if (invalidVoFs.size() > 0) {
+          // We need to compute a new stencil for the finite volume flux, which also uses cells on
+          // the fine level.
+#if 1 // This is just placeholder code to make things run while we adjust stencils
+          gradPhiAMRWeight(vof, m_comp)   = gradPhiRelaxWeight(vof, m_comp);
+          gradPhiAMRStencils(vof, m_comp) = gradPhiRelaxStencil(vof, m_comp);
+
+          std::cout << "need new stencil for vof = " << vof << std::endl;
+#endif
+        }
+        else {
+          // In this case we can just use the relaxation stencil for the residual.
+          gradPhiAMRWeight(vof, m_comp)   = gradPhiRelaxWeight(vof, m_comp);
+          gradPhiAMRStencils(vof, m_comp) = gradPhiRelaxStencil(vof, m_comp);
+        }
+      };
 
       VoFIterator vofit(ivs, ebgraph);
       BoxLoops::loop(vofit, kernel);

@@ -102,26 +102,6 @@ public:
   const LayoutData<BaseIVFAB<VoFStencil>>&
   getGradPhiRelaxStencils() const noexcept;
 
-  /*!
-    @brief Get the stencil for computing the finite-volume approximation to kappa*Div(F). This is the AMR version used for the residual. Contains this level.
-    @details The finite volume approximation to kappa*Div(F) is sum(Fluxes)/dx. This routine should return the flux on the EB, i.e. (B*dphi/dn)/dx. The derivative
-             can be written dphi/dn = w0*phi0 + sum(wi*phi(i)) where phi0 is a boundary weight and phi(i) are grid points. This routine should return the stencil
-	     B*wi*phi(i).
-    @note    Multiplication by b and beta is done in the operator.
-  */
-  const LayoutData<BaseIVFAB<VoFStencil>>&
-  getGradPhiAMRStencils() const noexcept;
-
-  /*!
-    @brief Get the stencil for computing the finite-volume approximation to kappa*Div(F). This is the AMR version used for the residual. Contains the fine level. 
-    @details The finite volume approximation to kappa*Div(F) is sum(Fluxes)/dx. This routine should return the flux on the EB, i.e. (B*dphi/dn)/dx. The derivative
-             can be written dphi/dn = w0*phi0 + sum(wi*phi(i)) where phi0 is a boundary weight and phi(i) are grid points. This routine should return the stencil
-	     B*wi*phi(i).
-    @note    Multiplication by b and beta is done in the operator.
-  */
-  const LayoutData<BaseIVFAB<VoFStencil>>&
-  getGradPhiAMRStencilsFine() const noexcept;
-
 protected:
   /*!
     @brief Component that everything is defined for. Always have m_comp = 0
