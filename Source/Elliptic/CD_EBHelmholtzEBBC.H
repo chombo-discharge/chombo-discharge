@@ -62,15 +62,16 @@ public:
     @param[in] a_ghostCF         Number of ghost cells that are filled across CF interface. 
   */
   void
-  define(const Location::Cell a_dataLocation,
-         const EBLevelGrid&   a_eblg,
-         const EBLevelGrid&   a_eblgFiCo,
-         const RealVect&      a_probLo,
-         const Real&          a_dx,
-         const bool           a_hasFineAMRLevel,
-         const bool           a_isMGLevel,
-         const int            a_refToFine,
-         const int            a_ghostCF);
+  define(const Location::Cell                           a_dataLocation,
+         const EBLevelGrid&                             a_eblg,
+         const EBLevelGrid&                             a_eblgFiCo,
+         const RefCountedPtr<LevelData<BaseFab<bool>>>& a_amrValidCells,
+         const RealVect&                                a_probLo,
+         const Real&                                    a_dx,
+         const bool                                     a_hasFineAMRLevel,
+         const bool                                     a_isMGLevel,
+         const int                                      a_refToFine,
+         const int                                      a_ghostCF);
 
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
@@ -92,14 +93,34 @@ public:
               const bool&            a_homogeneousPhysBC) const = 0;
 
   /*!
-    @brief Get the stencil for computing the finite-volume approximation to kappa*Div(F). 
+    @brief Get the stencil for computing the finite-volume approximation to kappa*Div(F) on this grid level. 
     @details The finite volume approximation to kappa*Div(F) is sum(Fluxes)/dx. This routine should return the flux on the EB, i.e. (B*dphi/dn)/dx. The derivative
              can be written dphi/dn = w0*phi0 + sum(wi*phi(i)) where phi0 is a boundary weight and phi(i) are grid points. This routine should return the stencil
 	     B*wi*phi(i).
     @note    Multiplication by beta is done in the operator.
   */
   const LayoutData<BaseIVFAB<VoFStencil>>&
-  getGradPhiRelaxStencils() const;
+  getGradPhiRelaxStencils() const noexcept;
+
+  /*!
+    @brief Get the stencil for computing the finite-volume approximation to kappa*Div(F). This is the AMR version used for the residual. Contains this level.
+    @details The finite volume approximation to kappa*Div(F) is sum(Fluxes)/dx. This routine should return the flux on the EB, i.e. (B*dphi/dn)/dx. The derivative
+             can be written dphi/dn = w0*phi0 + sum(wi*phi(i)) where phi0 is a boundary weight and phi(i) are grid points. This routine should return the stencil
+	     B*wi*phi(i).
+    @note    Multiplication by b and beta is done in the operator.
+  */
+  const LayoutData<BaseIVFAB<VoFStencil>>&
+  getGradPhiAMRStencils() const noexcept;
+
+  /*!
+    @brief Get the stencil for computing the finite-volume approximation to kappa*Div(F). This is the AMR version used for the residual. Contains the fine level. 
+    @details The finite volume approximation to kappa*Div(F) is sum(Fluxes)/dx. This routine should return the flux on the EB, i.e. (B*dphi/dn)/dx. The derivative
+             can be written dphi/dn = w0*phi0 + sum(wi*phi(i)) where phi0 is a boundary weight and phi(i) are grid points. This routine should return the stencil
+	     B*wi*phi(i).
+    @note    Multiplication by b and beta is done in the operator.
+  */
+  const LayoutData<BaseIVFAB<VoFStencil>>&
+  getGradPhiAMRStencilsFine() const noexcept;
 
 protected:
   /*!
@@ -160,6 +181,12 @@ protected:
     @details This should be define donly if m_hasFineAMRLevel and !m_isMGLevel. 
   */
   EBLevelGrid m_eblgFiCo;
+
+  /*!
+    @brief If this is an actual AMR level, this contains a list of the cells on this level that are not 
+    covered by a finer level (true if not covered, false if covered).
+  */
+  RefCountedPtr<LevelData<BaseFab<bool>>> m_amrValidCells;
 
   /*!
     @brief Stencils for computing the flux on a single level. This is a single-level object used for 

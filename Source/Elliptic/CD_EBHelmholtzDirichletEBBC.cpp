@@ -112,7 +112,7 @@ EBHelmholtzDirichletEBBC::define()
     }
   }
 
-  m_boundaryWeights.define(dbl);
+  m_boundaryWeightsRelax.define(dbl);
   m_gradPhiStencils.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
@@ -121,7 +121,7 @@ EBHelmholtzDirichletEBBC::define()
     const EBGraph&    ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
-    BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
+    BaseIVFAB<Real>&       weights  = m_boundaryWeightsRelax[dit()];
     BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
 
     weights.define(ivs, ebgraph, m_nComp);
@@ -179,6 +179,49 @@ EBHelmholtzDirichletEBBC::define()
 
     BoxLoops::loop(vofit, kernel);
   }
+
+  this->defineResidualStencils();
+}
+
+void
+EBHelmholtzDirichletEBBC::defineResidualStencils() noexcept
+{
+  CH_TIME("EBHelmholtzDirichletEBBC::defineResidualStencils");
+
+  const DisjointBoxLayout& dbl     = m_eblg.getDBL();
+  const DisjointBoxLayout& dblFine = m_eblgFiCo.getDBL();
+
+  const EBISLayout& ebisl     = m_eblg.getEBISL();
+  const EBISLayout& ebislFine = m_eblgFiCo.getEBISL();
+
+  const ProblemDomain& domain     = m_eblg.getDomain();
+  const ProblemDomain& domainFine = m_eblgFiCo.getDomain();
+
+  m_boundaryWeightsResid.define(dbl);
+  m_gradPhiAMRStencils.define(dbl);
+  m_gradPhiAMRStencilsFine.define(dbl);
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+
+    if (m_hasFineAMRLevel && !m_isMGLevel) {
+      BaseIVFAB<VoFStencil>&       gradPhiAMRStencils     = m_gradPhiAMRStencils[dit()];
+      BaseIVFAB<VoFStencil>&       gradPhiAMRStencilsFine = m_gradPhiAMRStencilsFine[dit()];
+      const BaseIVFAB<VoFStencil>& gradPhiRelaxStencil    = m_gradPhiStencils[dit()];
+
+      // Go through the relaxation stencils. If it reaches into an invalid cell (which can happen near EBCF),
+      // recompute a better stencil for the AMR residual.
+      auto kernel = [&](const VolIndex& vof) -> void {
+
+      };
+
+      // Iteration space for kernel
+      const IntVectSet& ivs     = gradPhiRelaxStencil.getIVS();
+      const EBGraph&    ebgraph = ebisl[dit()].getEBGraph();
+
+      VoFIterator vofit(ivs, ebgraph);
+      BoxLoops::loop(vofit, kernel);
+    }
+  }
 }
 
 void
@@ -214,7 +257,7 @@ EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&           a_vofit,
 
       // Area fraction, and division by dx (from Div(F)) already a part of the boundary weights, but
       // beta and Bcoef are not.
-      a_Lphi(vof, m_comp) += a_beta * B * value * m_boundaryWeights[a_dit](vof, m_comp);
+      a_Lphi(vof, m_comp) += a_beta * B * value * m_boundaryWeightsRelax[a_dit](vof, m_comp);
     };
 
     BoxLoops::loop(a_vofit, kernel);

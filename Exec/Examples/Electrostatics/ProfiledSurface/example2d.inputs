@@ -5,7 +5,7 @@ AmrMesh.lo_corner       = -0.04  0.
 AmrMesh.hi_corner       =  0.04  0.04
 AmrMesh.verbosity       = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain = 32 16      # Number of cells on coarsest domain
-AmrMesh.max_amr_depth   = 6          # Maximum amr depth
+AmrMesh.max_amr_depth   = 8          # Maximum amr depth
 AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
 AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size     = 1           # Number of cells between grid levels
@@ -20,7 +20,7 @@ AmrMesh.lsf_ghost       = 0           # Number of ghost cells when writing level
 AmrMesh.eb_ghost        = 2           # Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
 AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
-AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
+AmrMesh.mg_interp_weight = 1           # Multigrid interpolation weight (for least squares)
 AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
@@ -54,7 +54,7 @@ Driver.plt_vars                        = levelset mpi_rank             # 'tags',
 Driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true          # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 0             # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 10.          # Refine cells if angle between elements exceed this value.
+Driver.refine_angles                   = 1.          # Refine cells if angle between elements exceed this value.
 Driver.refine_electrodes               = 2            # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = 0            # Refine dielectric surfaces. -1 => equal to refine_geometry
 
@@ -113,7 +113,7 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # DiskProfiledPlane class options
 # ====================================================================================================
 DiskProfiledPlane.use_electrode         = true          # Turn on/off electrode
-DiskProfiledPlane.use_dielectric        = true          # Turn on/off dielectric
+DiskProfiledPlane.use_dielectric        = false          # Turn on/off dielectric
 
 DiskProfiledPlane.wheel_live            = true          # Live electrode or not
 DiskProfiledPlane.wheel_radius          = 3E-2          # Wheel radius

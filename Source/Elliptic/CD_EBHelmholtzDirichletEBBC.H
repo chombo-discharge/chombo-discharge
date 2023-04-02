@@ -128,9 +128,14 @@ protected:
   std::function<Real(const RealVect& a_pos)> m_functionValue;
 
   /*!
-    @brief Boundary weights
+    @brief Boundary weights for relaxation step.
   */
-  LayoutData<BaseIVFAB<Real>> m_boundaryWeights;
+  LayoutData<BaseIVFAB<Real>> m_boundaryWeightsRelax;
+
+  /*!
+    @brief Boundary weights for residual calculation.
+  */
+  LayoutData<BaseIVFAB<Real>> m_boundaryWeightsResid;
 
   /*!
     @brief User define function. 
@@ -179,6 +184,12 @@ protected:
   */
   virtual bool
   getChomboLsqStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Define the AMR stencils required for the operator residual.
+  */
+  virtual void
+  defineResidualStencils() noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

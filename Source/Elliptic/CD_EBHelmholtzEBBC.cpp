@@ -25,15 +25,16 @@ EBHelmholtzEBBC::EBHelmholtzEBBC() { CH_TIME("EBHelmholtzEBBC::EBHelmholtzEBBC()
 EBHelmholtzEBBC::~EBHelmholtzEBBC() { CH_TIME("EBHelmholtzEBBC::~EBHelmholtzEBBC()"); }
 
 void
-EBHelmholtzEBBC::define(const Location::Cell a_dataLocation,
-                        const EBLevelGrid&   a_eblg,
-                        const EBLevelGrid&   a_eblgFiCo,
-                        const RealVect&      a_probLo,
-                        const Real&          a_dx,
-                        const bool           a_hasFineAMRLevel,
-                        const bool           a_isMGLevel,
-                        const int            a_refToFine,
-                        const int            a_ghostCF)
+EBHelmholtzEBBC::define(const Location::Cell                           a_dataLocation,
+                        const EBLevelGrid&                             a_eblg,
+                        const EBLevelGrid&                             a_eblgFiCo,
+                        const RefCountedPtr<LevelData<BaseFab<bool>>>& a_amrValidCells,
+                        const RealVect&                                a_probLo,
+                        const Real&                                    a_dx,
+                        const bool                                     a_hasFineAMRLevel,
+                        const bool                                     a_isMGLevel,
+                        const int                                      a_refToFine,
+                        const int                                      a_ghostCF)
 {
   CH_TIME(
     "EBHelmholtzEBBC::define(Location::Cell, EBLevelGrid, RefCountedPtr<LD<BaseIVFAB<Real> > >, RealVect, Real, int)");
@@ -41,11 +42,14 @@ EBHelmholtzEBBC::define(const Location::Cell a_dataLocation,
   CH_assert(a_dx > 0.0);
   CH_assert(a_ghostCF >= 0);
 
+  MayDay::Warning("EBHelmholtzEBBC::define -- need to initate work on AMR-aware flux stencils now");
+
   m_dataLocation    = a_dataLocation;
   m_eblg            = a_eblg;
   m_eblgFiCo        = a_eblgFiCo;
   m_probLo          = a_probLo;
   m_dx              = a_dx;
+  m_amrValidCells   = a_amrValidCells;
   m_hasFineAMRLevel = a_hasFineAMRLevel;
   m_isMGLevel       = a_isMGLevel;
   m_refToFine       = a_refToFine;
@@ -72,11 +76,27 @@ EBHelmholtzEBBC::define(const Location::Cell a_dataLocation,
 }
 
 const LayoutData<BaseIVFAB<VoFStencil>>&
-EBHelmholtzEBBC::getGradPhiRelaxStencils() const
+EBHelmholtzEBBC::getGradPhiRelaxStencils() const noexcept
 {
   CH_TIME("EBHelmholtzEBBC::getGradPhiRelaxStencils()");
 
   return m_gradPhiStencils;
+}
+
+const LayoutData<BaseIVFAB<VoFStencil>>&
+EBHelmholtzEBBC::getGradPhiAMRStencils() const noexcept
+{
+  CH_TIME("EBHelmholtzEBBC::getGradPhiAMRStencils()");
+
+  return m_gradPhiAMRStencils;
+}
+
+const LayoutData<BaseIVFAB<VoFStencil>>&
+EBHelmholtzEBBC::getGradPhiAMRStencilsFine() const noexcept
+{
+  CH_TIME("EBHelmholtzEBBC::EBHelmholtzEBBC::getGradPhiAMRStencilsFine()");
+
+  return m_gradPhiAMRStencilsFine;
 }
 
 #include <CD_NamespaceFooter.H>

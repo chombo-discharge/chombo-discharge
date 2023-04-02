@@ -125,6 +125,9 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
     }
   }
 
+  // Handle for passing the valid cells to the BC-defining objects.
+  RefCountedPtr<LevelData<BaseFab<bool>>> amrValidCells;
+
   // Define restriction and prolongation operators.
   if (m_hasCoar) {
     m_eblgCoFi = a_eblgCoFi;
@@ -132,6 +135,10 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
 
     m_restrictOp.define(m_eblg, m_eblgCoar, m_refToCoar);
     m_prolongOp.define(m_eblg, m_eblgCoar, m_refToCoar);
+  }
+
+  if (m_hasFine && !m_isMGOperator) {
+    amrValidCells = a_amrValidCells;
   }
 
   if (m_hasMGObjects) {
@@ -146,7 +153,16 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
   // Define BC objects.
   const int ghostCF = m_hasCoar ? m_interpolator->getGhostCF() : 99;
   m_domainBc->define(m_dataLocation, m_eblg, m_probLo, m_dx);
-  m_ebBc->define(m_dataLocation, m_eblg, m_eblgFiCo, m_probLo, m_dx, m_hasFine, m_isMGOperator, m_refToFine, ghostCF);
+  m_ebBc->define(m_dataLocation,
+                 m_eblg,
+                 m_eblgFiCo,
+                 amrValidCells,
+                 m_probLo,
+                 m_dx,
+                 m_hasFine,
+                 m_isMGOperator,
+                 m_refToFine,
+                 ghostCF);
 
   // Define stencils and compute relaxation terms.
   this->defineStencils();
