@@ -141,7 +141,7 @@ EBHelmholtzDirichletEBBC::define()
       // Try quadrants first.
       order = m_order;
       while (!foundStencil && order > 0) {
-        foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, dit(), order);
+        foundStencil = this->getGradStencilSingleLevel(pairSten, vof, VofUtils::Neighborhood::Quadrant, dit(), order);
         order--;
 
         // Check if stencil reaches too far across CF
@@ -153,7 +153,7 @@ EBHelmholtzDirichletEBBC::define()
       // If we couldn't find in a quadrant, try a larger neighborhood
       order = m_order;
       while (!foundStencil && order > 0) {
-        foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order);
+        foundStencil = this->getGradStencilSingleLevel(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order);
         order--;
 
         // Check if stencil reaches too far across CF
@@ -207,9 +207,9 @@ EBHelmholtzDirichletEBBC::defineResidualStencils() noexcept
       BaseIVFAB<Real>&             gradPhiResidWeight       = m_boundaryWeightsResid[dit()];
       BaseIVFAB<VoFStencil>&       gradPhiResidStencils     = m_gradPhiResidStencils[dit()];
       BaseIVFAB<VoFStencil>&       gradPhiResidStencilsFine = m_gradPhiResidStencilsFine[dit()];
-      const BaseIVFAB<Real>&       gradPhiRelaxWeight     = m_boundaryWeightsRelax[dit()];
-      const BaseIVFAB<VoFStencil>& gradPhiRelaxStencil    = m_gradPhiRelaxStencils[dit()];
-      const BaseFab<bool>&         validCells             = (*m_amrValidCells)[dit()];
+      const BaseIVFAB<Real>&       gradPhiRelaxWeight       = m_boundaryWeightsRelax[dit()];
+      const BaseIVFAB<VoFStencil>& gradPhiRelaxStencil      = m_gradPhiRelaxStencils[dit()];
+      const BaseFab<bool>&         validCells               = (*m_amrValidCells)[dit()];
 
       // Where to define our residual stencils.
       const IntVectSet& ivs     = gradPhiRelaxStencil.getIVS();
@@ -223,8 +223,6 @@ EBHelmholtzDirichletEBBC::defineResidualStencils() noexcept
       // recompute a better stencil for the AMR residual.
       auto kernel = [&](const VolIndex& vof) -> void {
         const IntVect iv = vof.gridIndex();
-
-        bool useRelaxStencil = true;
 
         Vector<VolIndex> validVoFs;
         Vector<VolIndex> invalidVoFs;
@@ -248,12 +246,40 @@ EBHelmholtzDirichletEBBC::defineResidualStencils() noexcept
         if (invalidVoFs.size() > 0) {
           // We need to compute a new stencil for the finite volume flux, which also uses cells on
           // the fine level.
-#if 1 // This is just placeholder code to make things run while we adjust stencils
-          gradPhiResidWeight(vof, m_comp)   = gradPhiRelaxWeight(vof, m_comp);
-          gradPhiResidStencils(vof, m_comp) = gradPhiRelaxStencil(vof, m_comp);
 
-          std::cout << "need new stencil for vof = " << vof << std::endl;
-#endif
+          // Recompute a two-level stencil, replacing the invalid vofs with corresponding fine-level vofs
+          Vector<VolIndex> fineVoFs;
+          for (int i = 0; i < invalidVoFs.size(); i++) {
+            fineVoFs.append(ebisl.refine(invalidVoFs[i], m_refToFine, dit()));
+          }
+
+          // Try to find a new stencil which does not reach into invalid cells.
+          bool foundStencil = false;
+          int  order        = m_order;
+
+          std::tuple<Real, VoFStencil, VoFStencil> stencil;
+          while (!foundStencil && order > 0) {
+            foundStencil = this->getGradStencilDualLevel(stencil, vof, validVoFs, fineVoFs, dit(), order);
+            order--;
+
+            // Check if stencil reaches too far across CF
+            if (foundStencil) {
+              foundStencil = this->isStencilValidCF(std::get<1>(stencil), dit());
+            }
+          }
+
+          // If we couldn't find a stencil, just default to the relaxation stencil.
+          if (foundStencil) {
+            gradPhiResidWeight(vof, m_comp)       = std::get<0>(stencil);
+            gradPhiResidStencils(vof, m_comp)     = std::get<1>(stencil);
+            gradPhiResidStencilsFine(vof, m_comp) = std::get<2>(stencil);
+          }
+          else {
+            pout() << "EBHelmholtzDirichletEBBC - could not compute AMR stencil for vof = " << vof << endl;
+
+            gradPhiResidWeight(vof, m_comp)   = gradPhiRelaxWeight(vof, m_comp);
+            gradPhiResidStencils(vof, m_comp) = gradPhiRelaxStencil(vof, m_comp);
+          }
         }
         else {
           // In this case we can just use the relaxation stencil for the residual.
@@ -311,14 +337,13 @@ EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&           a_vofit,
 }
 
 bool
-EBHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_stencil,
-                                                 const VolIndex&              a_vof,
-                                                 const VofUtils::Neighborhood a_neighborhood,
-                                                 const DataIndex&             a_dit,
-                                                 const int                    a_order) const
+EBHelmholtzDirichletEBBC::getGradStencilSingleLevel(std::pair<Real, VoFStencil>& a_stencil,
+                                                    const VolIndex&              a_vof,
+                                                    const VofUtils::Neighborhood a_neighborhood,
+                                                    const DataIndex&             a_dit,
+                                                    const int                    a_order) const
 {
-  CH_TIME(
-    "EBHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil>, VolIndex, VofUtils::Neighborhood, DataIndex, int)");
+  CH_TIME("EBHelmholtzDirichletEBBC::getGradStencilSingleLevel");
 
   CH_assert(m_order > 0);
   CH_assert(m_weight >= 0);
@@ -348,6 +373,71 @@ EBHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_
     a_stencil = std::make_pair(boundaryWeight, DphiDnStencil);
 
     foundStencil = true;
+  }
+
+  return foundStencil;
+}
+
+bool
+EBHelmholtzDirichletEBBC::getGradStencilDualLevel(std::tuple<Real, VoFStencil, VoFStencil>& a_stencil,
+                                                  const VolIndex&                           a_vof,
+                                                  const Vector<VolIndex>&                   a_coarVoFs,
+                                                  const Vector<VolIndex>&                   a_fineVoFs,
+                                                  const DataIndex&                          a_dit,
+                                                  const int                                 a_order) const
+{
+  CH_TIME("EBHelmholtz::getGradStencilDualLevel");
+
+  bool foundStencil = false;
+
+  // Compute the displacement vectors from the input vof to the coar vofs and fine vofs.
+  const EBISBox& ebisBox     = m_eblg.getEBISL()[a_dit];
+  const EBISBox& ebisBoxFine = m_eblgFiCo.getEBISL()[a_dit];
+
+  const Real dx     = m_dx;
+  const Real dxFine = m_dx / m_refToFine;
+
+  const RealVect normal = ebisBox.normal(a_vof);
+
+  if (normal != RealVect::Zero) {
+
+    // Compute the least squares approximation to the gradient. This version of getGradSten returns separate fine and coarse
+    // stencils. We also prune the boundary value from the equations, so we need to reconstruct the weight for that.
+    IntVectSet knownTerms;
+    knownTerms |= IntVect::Zero;
+
+    const std::pair<VoFStencil, VoFStencil> stencils = LeastSquares::getGradSten(a_vof,
+                                                                                 Location::Cell::Boundary,
+                                                                                 m_dataLocation,
+                                                                                 a_fineVoFs,
+                                                                                 a_coarVoFs,
+                                                                                 ebisBoxFine,
+                                                                                 ebisBox,
+                                                                                 dxFine,
+                                                                                 dx,
+                                                                                 m_weight,
+                                                                                 a_order,
+                                                                                 knownTerms);
+
+    const VoFStencil& fineSten = stencils.first;
+    const VoFStencil& coarSten = stencils.second;
+
+    if (fineSten.size() == 0 && coarSten.size() == 0) {
+      foundStencil = false;
+    }
+    else {
+      foundStencil = true;
+
+      Real boundaryWeight = 0.0;
+
+      const VoFStencil fineDphiDnStencil = LeastSquares::projectGradSten(fineSten, -normal);
+      const VoFStencil coarDphiDnStencil = LeastSquares::projectGradSten(coarSten, -normal);
+
+      boundaryWeight += LeastSquares::sumAllWeights(fineDphiDnStencil);
+      boundaryWeight += LeastSquares::sumAllWeights(coarDphiDnStencil);
+
+      a_stencil = std::make_tuple(boundaryWeight, coarDphiDnStencil, fineDphiDnStencil);
+    }
   }
 
   return foundStencil;

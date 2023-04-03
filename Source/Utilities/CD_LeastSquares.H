@@ -118,6 +118,38 @@ public:
               const IntVectSet   a_knownTerms = IntVectSet());
 
   /*!
+    @brief Compute a least squares gradient stencil on the EB centroid with specified order. This version reaches into the fine level.
+    @return The first entry in the return stencil is part of the gradient stencil for the fine-grid data, second entry is
+    the coarse-grid data. Note that the derivative direction is encoded in the VoFStencil variable. If this routine couldn't find
+    a stencil, the returned VoFStencils will both be empty. 
+    @param[in] a_inputCoarVoF     Input vof on the coarse grid. 
+    @param[in] a_inputVoFLocation Data location for the input VoF
+    @param[in] a_otherVoFLocation Data location for the other VoFs
+    @param[in] a_fineVoFs         Fine-grid cells
+    @param[in] a_coarVoFs         Coarse-grid cells
+    @param[in] a_ebisBoxFine      Fine-grid EB data
+    @param[in] a_ebisBoxCoar      Coarse-grid EB data
+    @param[in] a_dxFine           Fine-grid resolution
+    @param[in] a_dxCoar           Coarse-grid resolution
+    @param[in] a_p                Weighting factor
+    @param[in] a_order            Desired truncation order. 
+    @param[in] a_knownTerms       Known terms in the Taylor expansion. 
+  */
+  static std::pair<VoFStencil, VoFStencil>
+  getGradSten(const VolIndex&         a_inputCoarVoF,
+              const CellLocation&     a_inputVoFLocation,
+              const CellLocation&     a_otherVoFLocation,
+              const Vector<VolIndex>& a_fineVoFs,
+              const Vector<VolIndex>& a_coarVoFs,
+              const EBISBox&          a_ebisBoxFine,
+              const EBISBox&          a_ebisBoxCoar,
+              const Real&             a_dxFine,
+              const Real&             a_dxCoar,
+              const int&              a_p,
+              const int&              a_order,
+              const IntVectSet&       a_knownTerms = IntVectSet()) noexcept;
+
+  /*!
     @brief Compute a least squares gradient stencil on the EB centroid with specified order. 
     @details This routine eliminates the value on the boundary and the user will have to fetch the weight for this point from the returned stencil. 
     @param[in]  a_vof            Input vof

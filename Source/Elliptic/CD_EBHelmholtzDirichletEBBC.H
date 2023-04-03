@@ -144,21 +144,41 @@ protected:
   define() override;
 
   /*!
-    @brief Get stencil with specified order. 
+    @brief Get a single-level stencil for the normal derivative at the EB with specified order. 
     @param[out] a_stencil      Weight and stencil
-    @param[out] a_vof          Grid cell
-    @param[out] a_neighborhood Neighboorhood specifier
+    @param[in]  a_vof          Grid cell
+    @param[in]  a_neighborhood Neighboorhood specifier
     @param[in]  a_dit          Data index
     @param[in]  a_order        Attempted order for stencil. This is also the stencil radius. 
     @return If this returns true, a_stencil contains a valid stencil and weight. 
     @note Stencils are computed using weighted least squares with squared inverse distance weighting. 
   */
   virtual bool
-  getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_stencil,
-                         const VolIndex&              a_vof,
-                         const VofUtils::Neighborhood a_neighborhood,
-                         const DataIndex&             a_dit,
-                         const int                    a_order) const;
+  getGradStencilSingleLevel(std::pair<Real, VoFStencil>& a_stencil,
+                            const VolIndex&              a_vof,
+                            const VofUtils::Neighborhood a_neighborhood,
+                            const DataIndex&             a_dit,
+                            const int                    a_order) const;
+
+  /*!
+    @brief Get a single-level stencil for the normal derivative at the EB with specified order. This version
+    can compute the least squares approximation over two level. 
+    @param[out] a_stencil      Weight and stencil. Order by 'weight', 'coarse stencil', 'fine stencil'
+    @param[in]  a_vof          Grid cell
+    @param[in]  a_coarVoFs     Coarse-grid vofs (i.e., THIS level)
+    @param[in]  a_fineVoFs     fine-grid vofs (i.e., the finer level)
+    @param[in]  a_dit          Data index
+    @param[in]  a_order        Attempted order for stencil. This is also the stencil radius. 
+    @return If this returns true, a_stencil contains a valid stencil and weight. 
+    @note Stencils are computed using weighted least squares with squared inverse distance weighting. 
+  */
+  virtual bool
+  getGradStencilDualLevel(std::tuple<Real, VoFStencil, VoFStencil>& a_stencil,
+                          const VolIndex&                           a_vof,
+                          const Vector<VolIndex>&                   a_coarVoFs,
+                          const Vector<VolIndex>&                   a_fineVoFs,
+                          const DataIndex&                          a_dit,
+                          const int                                 a_order) const;
 
   /*!
     @brief Get johansen stencil with specified order. Not used but exists for backward compatibility testing and debugging. 

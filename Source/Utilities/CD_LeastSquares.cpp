@@ -186,6 +186,94 @@ LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
   return bndrySten;
 }
 
+std::pair<VoFStencil, VoFStencil>
+LeastSquares::getGradSten(const VolIndex&         a_inputCoarVoF,
+                          const CellLocation&     a_inputVoFLocation,
+                          const CellLocation&     a_otherVoFLocation,
+                          const Vector<VolIndex>& a_fineVoFs,
+                          const Vector<VolIndex>& a_coarVoFs,
+                          const EBISBox&          a_ebisBoxFine,
+                          const EBISBox&          a_ebisBoxCoar,
+                          const Real&             a_dxFine,
+                          const Real&             a_dxCoar,
+                          const int&              a_p,
+                          const int&              a_order,
+                          const IntVectSet&       a_knownTerms) noexcept
+{
+  std::pair<VoFStencil, VoFStencil> ret;
+
+  CH_assert(a_p >= 0);
+  CH_assert(a_order >= 1);
+
+  Vector<RealVect> fineDisplacements;
+  Vector<RealVect> coarDisplacements;
+
+  for (int i = 0; i < a_coarVoFs.size(); i++) {
+    coarDisplacements.push_back(LeastSquares::displacement(a_inputVoFLocation,
+                                                           a_otherVoFLocation,
+                                                           a_inputCoarVoF,
+                                                           a_coarVoFs[i],
+                                                           a_ebisBoxCoar,
+                                                           a_dxCoar));
+  }
+  for (int i = 0; i < a_fineVoFs.size(); i++) {
+    fineDisplacements.push_back(LeastSquares::displacement(a_inputVoFLocation,
+                                                           a_otherVoFLocation,
+                                                           a_inputCoarVoF,
+                                                           a_fineVoFs[i],
+                                                           a_ebisBoxCoar,
+                                                           a_ebisBoxFine,
+                                                           a_dxCoar,
+                                                           a_dxFine));
+  }
+
+  // Only want the gradient.
+  IntVectSet derivs;
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    derivs |= BASISV(dir);
+  }
+
+  // Compute the least squares approximation. Note that this returns all terms in the Taylor approximation. Here,
+  // IntVect(1,0,0) is d/dx, IntVect(0,1,0) is d/dy, and so so. Every stencil has a single component.
+  const auto stencils = LeastSquares::computeDualLevelStencils<Real>(derivs,
+                                                                     a_knownTerms,
+                                                                     a_fineVoFs,
+                                                                     a_coarVoFs,
+                                                                     fineDisplacements,
+                                                                     coarDisplacements,
+                                                                     a_p,
+                                                                     a_order);
+
+  // Gather partial derivatives on the fine and coarse levels.
+  VoFStencil fineGradSten;
+  VoFStencil coarGradSten;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    const VoFStencil& fineGradStenDir = stencils.at(BASISV(dir)).first;
+    const VoFStencil& coarGradStenDir = stencils.at(BASISV(dir)).second;
+
+    for (int i = 0; i < fineGradStenDir.size(); i++) {
+      const VolIndex& fineVoF    = fineGradStenDir.vof(i);
+      const Real&     fineWeight = fineGradStenDir.weight(i);
+
+      fineGradSten.add(fineVoF, fineWeight, dir);
+    }
+
+    for (int i = 0; i < coarGradStenDir.size(); i++) {
+      const VolIndex& coarVoF    = coarGradStenDir.vof(i);
+      const Real&     coarWeight = coarGradStenDir.weight(i);
+
+      coarGradSten.add(coarVoF, coarWeight, dir);
+    }
+  }
+
+  if (fineGradSten.size() > 0 && coarGradSten.size() > 0) {
+    ret = std::make_pair(fineGradSten, coarGradSten);
+  }
+
+  return ret;
+}
+
 RealVect
 LeastSquares::displacement(const CellLocation a_from,
                            const CellLocation a_to,
