@@ -118,7 +118,7 @@ public:
               const IntVectSet   a_knownTerms = IntVectSet());
 
   /*!
-    @brief Compute a least squares gradient stencil on the EB centroid with specified order. This version reaches into the fine level.
+    @brief Compute a least squares gradient stencil on the EB centroid with specified order. This version reaches into the fine level. The user specifies data centering, weighting, order, and any known terms in the Taylor series. 
     @return The first entry in the return stencil is part of the gradient stencil for the fine-grid data, second entry is
     the coarse-grid data. Note that the derivative direction is encoded in the VoFStencil variable. If this routine couldn't find
     a stencil, the returned VoFStencils will both be empty. 

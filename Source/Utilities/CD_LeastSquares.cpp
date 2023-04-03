@@ -200,11 +200,16 @@ LeastSquares::getGradSten(const VolIndex&         a_inputCoarVoF,
                           const int&              a_order,
                           const IntVectSet&       a_knownTerms) noexcept
 {
+  // TLDR: This routine lets the user compute an approximation to grad(phi) at specified location in the input vof. The user
+  //       also specified the centering of the other grid cells. Separate has been done into a "coarse" and "fine" level, and
+  //       stencils are returned as such. The user can pass in a list of terms that are known that will be pruned from the
+  //       calculation.
   std::pair<VoFStencil, VoFStencil> ret;
 
   CH_assert(a_p >= 0);
   CH_assert(a_order >= 1);
 
+  // Build a list of displacement vectors from the input vof to the other vofs.
   Vector<RealVect> fineDisplacements;
   Vector<RealVect> coarDisplacements;
 
@@ -227,7 +232,7 @@ LeastSquares::getGradSten(const VolIndex&         a_inputCoarVoF,
                                                            a_dxFine));
   }
 
-  // Only want the gradient.
+  // Specify which terms we want out of the least squares approximation.
   IntVectSet derivs;
   for (int dir = 0; dir < SpaceDim; dir++) {
     derivs |= BASISV(dir);
@@ -244,7 +249,18 @@ LeastSquares::getGradSten(const VolIndex&         a_inputCoarVoF,
                                                                      a_p,
                                                                      a_order);
 
-  // Gather partial derivatives on the fine and coarse levels.
+  // Gather partial derivatives on the fine and coarse levels. Note that computeDualLevelStencils returns
+  // stencils per Taylor-term, and the stencils therefore only have one "component". We want to represent
+  // the stencils in a more sensible way, so we pack the coordinate direction onto the VoFStencil variable
+  // instead.
+  //
+  // To clarify further, computeDualLevelStencils can return something like
+  //
+  // IntVect(0,0) -> VoFStencil for interpolating phi
+  // IntVect(1,0) -> VoFStencil for dphi/dx and has a single variable
+  // IntVect(0,1) -> VoFStencil for dphi/dy and has a single variable
+  //
+  // But since we want a single stencil for dphi/dx, dphi/dx, we just pack it different.
   VoFStencil fineGradSten;
   VoFStencil coarGradSten;
 
