@@ -322,6 +322,7 @@ EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&           a_vofit,
       }
       else {
         value = 0.0;
+
         MayDay::Error("EBHelmholtzDirichletEBBC::applyEBFlux -- logic bust");
       }
 
