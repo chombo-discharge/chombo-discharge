@@ -1,0 +1,30 @@
+name: Continuous integration
+
+on:
+  pull_request:
+    branches : main
+    types: [push, opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.head_ref }}-ci
+  cancel-in-progress: true
+
+jobs:
+  Formatting:
+    name: Format source
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        directory: [Source, Physics, Geometries, Exec]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run clang-format
+        uses: jidicula/clang-format-action@v4.10.1
+        with:
+          clang-format-version: '10'
+          check-path: ${{ matrix.directory }}        
+
