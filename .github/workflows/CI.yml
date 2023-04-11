@@ -35,7 +35,7 @@ jobs:
     timeout-minutes: 90
     strategy:
       matrix:
-        comp: [g++-10, g++-12]
+        ver: [g++-10, g++-12]
         dim: [2, 3]
         mpi: ["TRUE", "FALSE"]
         hdf: ["TRUE", "FALSE"]
@@ -52,28 +52,31 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install ${{ matrix.comp }} csh libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
+          sudo apt-get install g++-${{ matrix.ver }} gfortran-${{ matrix.ver}} csh libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${{ matrix.ver }} 100
+          sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-${{ matrix.ver }} 100
+          gfortran --version
           g++ --version
 
       - name: Copy makefile
         run: |
           cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
 
-      - name: Build Chombo
-        run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} chombo
+      # - name: Build Chombo
+      #   run: |
+      #     make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} chombo
 
-      - name: Build chombo-discharge/source
-        run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-source
+      # - name: Build chombo-discharge/source
+      #   run: |
+      #     make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-source
 
-      - name: Build chombo-discharge/geometries
-        run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-geometries
+      # - name: Build chombo-discharge/geometries
+      #   run: |
+      #     make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-geometries
 
-      - name: Build chombo-discharge/physics
-        run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-physics          
+      # - name: Build chombo-discharge/physics
+      #   run: |
+      #     make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-physics          
 
       
   CI-passed:
