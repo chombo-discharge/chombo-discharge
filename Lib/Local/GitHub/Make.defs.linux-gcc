@@ -2,13 +2,13 @@
 
 DIM            = 2
 DEBUG          = TRUE
-OPT            = TRUE
+OPT            = FALSE
 PRECISION      = DOUBLE
 PROFILE        = FALSE
 CXX            = g++
 FC             = gfortran
 MPI            = FALSE
-#MPICXX        =
+MPICXX         = mpicxx
 CXXSTD         = 14
 USE_EB         = TRUE
 USE_MF         = TRUE

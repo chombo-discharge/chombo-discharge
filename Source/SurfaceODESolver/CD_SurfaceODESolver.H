@@ -12,6 +12,9 @@
 #ifndef CD_SurfaceODESolver_H
 #define CD_SurfaceODESolver_H
 
+// Std includes
+#include <array>
+
 // Our includes
 #include <CD_AmrMesh.H>
 #include <CD_NamespaceHeader.H>

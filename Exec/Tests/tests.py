@@ -23,13 +23,15 @@ parser.add_argument('--silent',               help="Turn off unnecessary output.
 parser.add_argument('--clean',                help="Do a clean compile.",            action='store_true')
 parser.add_argument('--benchmark',            help="Generate benchmark files only.", action='store_true')
 parser.add_argument('--no_exec',              help="Do not run executables.",        action='store_true')
-parser.add_argument('--no_compare',           help="Turn off HDF5 comparisons",      action='store_true')
-parser.add_argument('--parallel',             help="Run in parallel or not",         action='store_true')
-parser.add_argument('-exec_mpi',              help="MPI run command.", type=str, default="mpirun")
+parser.add_argument('--compare',              help="Turn off HDF5 comparisons",      action='store_true')
+parser.add_argument('-mpi',                   help="Use MPI or not",  type=str, default="FALSE", required=False)
+parser.add_argument('-hdf',                   help="Use HDF5 or not", type=str, default="FALSE", required=False)
+parser.add_argument('-dim',                   help="Test dimensionality", type=int, default=-1, required=False)
 parser.add_argument('-cores',                 help="Number of cores to use", type=int, default=2)
+parser.add_argument('-exec_mpi',              help="MPI run command.", type=str, default="mpirun")
 parser.add_argument('-suites',                help="Test suite (e.g. 'geometry' or 'field')", nargs='+', default="all")
 parser.add_argument('-tests',                 help="Individual tests in test suite.", nargs='+', required=False)
-parser.add_argument('-dim',                   help="Test dimensionality", type=int, default=-1, required=False)
+
 
 args = parser.parse_args()
 
@@ -88,7 +90,7 @@ def pre_check(silent):
 # --------------------------------------------------
 # Function that compiles a test
 # --------------------------------------------------
-def compile_test(silent, build_procs, dim, clean, main):
+def compile_test(silent, build_procs, dim, mpi, hdf, clean, main):
     """ Set up and run a compilation of the target test. """
 
     makeCommand = "make "
@@ -96,6 +98,8 @@ def compile_test(silent, build_procs, dim, clean, main):
         makeCommand += "-s "
     makeCommand += "-j" + str(build_procs) + " "
     makeCommand += "DIM=" + str(dim) + " "
+    makeCommand += "MPI=" + str(mpi).upper() + " "
+    makeCommand += "USE_HDF=" + str(hdf).upper() + " "        
     if clean:
         makeCommand += "clean "
     makeCommand += str(config[str(test)]['exec'])        
@@ -214,6 +218,8 @@ for test in config.sections():
             compile_code = compile_test(silent=args.silent,
                                         build_procs=args.cores,
                                         dim=dim,
+                                        mpi=args.mpi,
+                                        hdf=args.hdf,
                                         clean=args.clean,
                                         main = str(config[str(test)]['exec']))
             if compile_code != 0:
@@ -231,7 +237,7 @@ for test in config.sections():
                 # --------------------------------------------------
                 # Set up the run command
                 # --------------------------------------------------
-                if args.parallel:
+                if str(args.mpi).upper() == "TRUE":
                     runCommand = args.exec_mpi   + " -np " + str(args.cores) + " ./" + executable + " " + input
                 else:
                     runCommand = "./" + executable + " " + input                
@@ -268,7 +274,7 @@ for test in config.sections():
                     # --------------------------------------------------
                     if args.benchmark:
                         print("\t Regression test '" + str(test) + "' has generated benchmark files.")
-                    elif not args.benchmark and not args.no_compare:
+                    elif not args.benchmark and args.compare and str(args.hdf).upper == "TRUE":
                         # --------------------------------------------------
                         # Loop through all files that were generated and
                         # compare them with h5diff. Print an error message

@@ -321,7 +321,7 @@ AmrMesh::depositParticles(EBAMRIVData&                a_meshData,
   }
 
   CH_assert(a_meshData[0]->nComp() == 1);
-  CH_assert(a_meshData.getRrealm() == a_particles.getRealm());
+  CH_assert(a_meshData.getRealm() == a_particles.getRealm());
 
   EBAMRSurfaceDeposition& surfaceDeposition = this->getSurfaceDeposition(a_realm, a_phase);
 
@@ -341,7 +341,7 @@ AmrMesh::depositParticles(EBAMRIVData&                a_meshData,
   }
 
   CH_assert(a_meshData[0]->nComp() == 1);
-  CH_assert(a_meshData.getRrealm() == a_particles.getRealm());
+  CH_assert(a_meshData.getRealm() == a_particles.getRealm());
 
   EBAMRSurfaceDeposition& surfaceDeposition = this->getSurfaceDeposition(a_realm, a_phase);
 
