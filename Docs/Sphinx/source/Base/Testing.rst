@@ -26,6 +26,7 @@ To do a clean compile and run of all tests, navigate to ``$DISCHARGE_HOME/Exec/T
    python3 tests.py --compile --clean --silent --no_exec -cores X
 
 where ``X`` is the number of cores to use when compiling.
+By default, this will compile without MPI and HDF5 support.
 
 
 Advanced configuration
@@ -48,19 +49,19 @@ The following options are available for running the various tests:
 
 For example, to compile with MPI and HDF5 enabled:
 
-.. code-block:: bash
+.. code-block:: text
 
    python3 tests.py --compile --clean --silent --no_exec -mpi=true -hdf=true -cores 8
 
 If one only wants to compile a specified test suite:
 
-.. code-block:: bash
+.. code-block:: text
 
    python3 tests.py --compile --clean --silent --no_exec -mpi=true -hdf=true -cores 8 -suites Electrostatics
 
 One can also restrict the tests to specific dimensionality, e.g.
 
-.. code-block:: bash
+.. code-block:: text
 
    python3 tests.py --compile --clean --silent --no_exec -mpi=true -hdf=true -cores 8 -suites Electrostatics -dim=2
 

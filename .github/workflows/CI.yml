@@ -205,7 +205,7 @@ jobs:
           rm -rf Sphinx/build          
         
   CI-passed:
-    needs: [Linux-GNU, Build-documentation]
+    needs: [Linux-GNU, Linux-Intel, Build-documentation]
     runs-on: ubuntu-latest
     steps:
       - name: Do nothing
