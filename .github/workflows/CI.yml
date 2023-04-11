@@ -130,22 +130,27 @@ jobs:
 
       - name: Copy makefile
         run: |
+          source /opt/intel/oneapi/setvars.sh                    
           cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-intel $CHOMBO_HOME/mk/Make.defs.local
 
       - name: Build Chombo
         run: |
+          source /opt/intel/oneapi/setvars.sh                    
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} chombo
 
       - name: Build chombo-discharge/source
         run: |
+          source /opt/intel/oneapi/setvars.sh                    
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-source
 
       - name: Build chombo-discharge/geometries
         run: |
+          source /opt/intel/oneapi/setvars.sh                    
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-geometries
 
       - name: Build chombo-discharge/physics
         run: |
+          source /opt/intel/oneapi/setvars.sh                    
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-physics
 
       - name: Compile tests
