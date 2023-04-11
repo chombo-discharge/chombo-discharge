@@ -135,6 +135,7 @@ McPhoto.verbosity          = -1            # Solver verbosity
 McPhoto.instantaneous      = true          # Instantaneous transport or not
 McPhoto.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical photons)
 McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
+McPhoto.transparent_eb     = false         # Turn on/off transparent boundaries. Only for instantaneous=true
 McPhoto.random_kappa       = true          # Randomize absorption length (taken from Photon implementation)
 McPhoto.plt_vars           = phi src       # Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot', 'src_phot'
 McPhoto.plot_deposition    = cic           # Cloud-in-cell for plotting particles. 

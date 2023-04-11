@@ -433,6 +433,11 @@ protected:
   };
 
   /*!
+    @brief Turn on/off transparent boundaries
+  */
+  bool m_transparentEB;
+
+  /*!
     @brief Instantaneous transport or not
   */
   bool m_instantaneous;
@@ -651,10 +656,10 @@ protected:
   coarseFineRedistribution(EBAMRCellData& a_phi);
 
   /*!
-    @brief Parse RNG options
+    @brief Turn on/off transparent boundaries
   */
   void
-  parseRNG();
+  parseTransparentBoundaries();
 
   /*!
     @brief Parse the divergence computation, i.e. if we blend with non-conservative divergence or not
