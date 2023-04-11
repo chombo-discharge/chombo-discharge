@@ -3,7 +3,7 @@ name: Continuous integration
 on:
   pull_request:
     branches : main
-    types: [push, opened, synchronize, reopened, ready_for_review]
+#    types: [push, opened, synchronize, reopened, ready_for_review]
 
 concurrency:
   group: ${{ github.ref }}-${{ github.head_ref }}-ci
@@ -26,5 +26,35 @@ jobs:
         uses: jidicula/clang-format-action@v4.10.1
         with:
           clang-format-version: '10'
-          check-path: ${{ matrix.directory }}        
+          check-path: ${{ matrix.directory }}
 
+  Linux-GNU:
+    needs: Formatting
+    name: Linux-GNU
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      matrix:
+        comp: [g++-10, g++-12]
+        dim: [2, 3]
+        parallel: [TRUE, FALSE]
+        mpi: [TRUE, FALSE]
+        
+    env:
+      DISCHARGE_HOME: ${{github.workspace}}
+      CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
+      CORES: 2
+
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get ${{ matrix.comp }} libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
+
+      
+  CI-passed:
+    needs: [Linux-GNU]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Do nothing
+        run: |          
