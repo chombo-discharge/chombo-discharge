@@ -35,7 +35,7 @@ jobs:
     timeout-minutes: 90
     strategy:
       matrix:
-        ver: [g++-10, g++-12]
+        ver: [10,12]
         dim: [2, 3]
         mpi: ["TRUE", "FALSE"]
         hdf: ["TRUE", "FALSE"]
