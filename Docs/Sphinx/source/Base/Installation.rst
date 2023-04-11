@@ -325,7 +325,11 @@ To run the application do:
 
    mpirun -np 8 program2d.<bunch_of_options>.ex positive2d.inputs   
 
-If the user also compiled with HDF5, plot files will appear in the subfolder ``plt``. 
+If the user also compiled with HDF5, plot files will appear in the subfolder ``plt``.
+
+.. tip::
+
+   One can track the simulation progress through the :file:`pout.*` files, see :ref:`Chap:pout`.
 
 .. _Chap:TroubleShooting:
 

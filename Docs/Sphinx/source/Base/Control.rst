@@ -166,12 +166,20 @@ If you only want to plot the density, then you should put ``CdrGodunov.plt_vars 
 An empty entry like ``CdrGodunov.plt_vars =`` may lead to run-time errors, so if you do not want a class to provide plot data you may put ``CdrGodunov.plt_vars = none``. 
 
 
+.. _Chap:pout:
+
 Controlling parallel processor verbosity
 ----------------------------------------
 
 By default, ``Chombo`` will write a process output file *per MPI process* and this file will be named :file:`pout.n` where ``n`` is the MPI rank.
 These files are written in the directory where you executed your application, and are *not* related to plot files or checkpoint files.
 However, ``chombo-discharge`` prints information to these files as simulations advance (for example by displaying information of the current time step, or convergence rates for multigrid solvers).
+To see information regarding the latest time steps, simply print a few lines in these files, e.g.
+
+.. code-block:: bash
+
+   tail -200 pout.0
+
 While it is possible to monitor the evolution of ``chombo-discharge`` for each MPI rank, most of these files contain redundant information.
 To adjust the number of files that will be written, ``Chombo`` can read an environment variable ``CH_OUTPUT_INTERVAL`` that determines which MPI ranks write :file:`pout.n` files. 
 For example, if you only want the master MPI rank to write :file:`pout.0`, you would do
