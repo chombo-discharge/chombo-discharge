@@ -77,7 +77,7 @@ This consists of the following steps:
 
 #. *Before* making changes to ``chombo-discharge``, generate benchmark files with
 
-   .. code-block:: bash
+   .. code-block:: text
 
       python3 tests.py --compile --clean --silent --benchmark -mpi=true -hdf=true -cores X		   
 
@@ -85,11 +85,11 @@ This consists of the following steps:
 
 #. Run the test suite again, and compare benchmark and output files as follows:
 
-   .. code-block:: bash
+   .. code-block:: text
 
       python3 tests.py --compile --clean --silent --compare -mpi=true -hdf=true -cores X		   
 
-When running the tests this way, the output files are bit-wise compared and a warning is issued if the files not exactly match. 
+When running the tests this way, the output files are bit-wise compared and a warning is issued if the files do not exactly match. 
 
 .. _Chap:AutomatedTests:      
 
