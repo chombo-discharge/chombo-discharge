@@ -37,9 +37,8 @@ jobs:
       matrix:
         comp: [g++-10, g++-12]
         dim: [2, 3]
-        parallel: [TRUE, FALSE]
-        mpi: [TRUE, FALSE]
-        hdf: [TRUE, FALSE]
+        mpi: ["TRUE", "FALSE"]
+        hdf: ["TRUE", "FALSE"]
         
     env:
       DISCHARGE_HOME: ${{github.workspace}}
