@@ -53,6 +53,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install ${{ matrix.comp }} csh libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
+          g++ --version
 
       - name: Copy makefile
         run: |
