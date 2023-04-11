@@ -62,9 +62,9 @@ jobs:
         run: |
           cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
 
-      # - name: Build Chombo
-      #   run: |
-      #     make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} chombo
+      - name: Build Chombo
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} chombo
 
       # - name: Build chombo-discharge/source
       #   run: |
