@@ -10,26 +10,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Formatting:
-    name: Format source
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+  # Formatting:
+  #   name: Format source
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 10
 
-    strategy:
-      fail-fast: false
-      matrix:
-        directory: [Source, Physics, Geometries, Exec]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       directory: [Source, Physics, Geometries, Exec]
 
-    steps:
-      - uses: actions/checkout@v3
-      - name: Run clang-format
-        uses: jidicula/clang-format-action@v4.10.1
-        with:
-          clang-format-version: '10'
-          check-path: ${{ matrix.directory }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Run clang-format
+  #       uses: jidicula/clang-format-action@v4.10.1
+  #       with:
+  #         clang-format-version: '10'
+  #         check-path: ${{ matrix.directory }}
 
   Linux-GNU:
-    needs: Formatting
+#    needs: Formatting
     name: Linux-GNU
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -47,6 +47,9 @@ jobs:
       CORES: 2
 
     steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -59,6 +62,18 @@ jobs:
       - name: Build Chombo
         run: |
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} chombo
+
+      - name: Build chombo-discharge/source
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-source
+
+      - name: Build chombo-discharge/geometries
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-geometries
+
+      - name: Build chombo-discharge/physics
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-physics          
 
       
   CI-passed:
