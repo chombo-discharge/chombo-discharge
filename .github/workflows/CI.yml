@@ -62,21 +62,35 @@ jobs:
         run: |
           cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
 
-      # - name: Build Chombo
-      #   run: |
-      #     make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} chombo
+      - name: Build Chombo
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} chombo
 
-      # - name: Build chombo-discharge/source
-      #   run: |
-      #     make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-source
+      - name: Build chombo-discharge/source
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-source
 
-      # - name: Build chombo-discharge/geometries
-      #   run: |
-      #     make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-geometries
+      - name: Build chombo-discharge/geometries
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-geometries
 
-      # - name: Build chombo-discharge/physics
-      #   run: |
-      #     make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-physics          
+      - name: Build chombo-discharge/physics
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-physics
+
+      - name: Compile tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
+        if: always()        
+        run: |
+          python3 tests.py --compile --clean --no_exec -cores ${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=$ {{ matrix.hdf }}
+          if [[ $? == 0 ]]; then exit 0; else exit 1; fi
+
+      - name: Run tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
+        if: always()        
+        run: |
+          python3 tests.py-cores ${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }}
+          if [[ $? == 0 ]]; then exit 0; else exit 1; fi                                        
 
   Build-documentation:
     needs: Formatting
