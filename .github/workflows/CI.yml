@@ -3,7 +3,7 @@ name: Continuous integration
 on:
   pull_request:
     branches : main
-#    types: [push, opened, synchronize, reopened, ready_for_review]
+    types: [push, opened, synchronize, reopened, ready_for_review]
 
 concurrency:
   group: ${{ github.ref }}-${{ github.head_ref }}-ci
