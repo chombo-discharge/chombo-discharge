@@ -39,6 +39,7 @@ jobs:
         dim: [2, 3]
         parallel: [TRUE, FALSE]
         mpi: [TRUE, FALSE]
+        hdf: [TRUE, FALSE]
         
     env:
       DISCHARGE_HOME: ${{github.workspace}}
@@ -49,7 +50,15 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get ${{ matrix.comp }} libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
+          sudo apt-get install ${{ matrix.comp }} libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
+
+      - name: Copy makefile
+        run: |
+          cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
+
+      - name: Build Chombo
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} chombo
 
       
   CI-passed:
