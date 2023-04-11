@@ -23,36 +23,46 @@ To do a clean compile and run of all tests, navigate to ``$DISCHARGE_HOME/Exec/T
 
 .. code-block:: bash
 
-   python3 tests.py --compile --clean --silent --no_compare --parallel -cores X
+   python3 tests.py --compile --clean --silent --no_exec -cores X
 
-where ``X`` is the number of cores to use when compiling and running.
-If the tests should be run in serial, omit the ``--parallel -cores X`` flag.
+where ``X`` is the number of cores to use when compiling.
 
-.. tip::
-   Run the test suite with ``DEBUG=TRUE`` to catch assertion errors. 
 
 Advanced configuration
 ______________________
 
 The following options are available for running the various tests:
 
-* ``--compile`` Re-compile the test.
-* ``--clean`` Do a clean recompilation of the test.
-* ``--silent`` Turn off unecessary output.
+* ``--compile`` Compile all tests. 
+* ``--clean`` Do a clean recompilation.
+* ``--silent`` Turn off terminal output.
 * ``--benchmark`` Generate benchmark files.
 * ``--no_exec`` Compile, but do not run the test.
-* ``--no_compare`` Do not compare with benchmark files.
-* ``--parallel`` Use MPI or not
+* ``--compare`` Run, and compare with benchmark files.
+* ``-dim <number>`` Run only the specified 2D or 3D tests.  
+* ``-mpi <true/false>`` Use MPI or not.
+* ``-hdf <true/false>`` Use HDF5 or not.  
 * ``-cores <number>`` Run with specified number of cores.
 * ``-suites <string>`` Run a specific application test suite.
 * ``-tests <string`` Run a specific test.
-* ``-dim <number>`` Run only the specified 2D or 3D tests.
 
-For example, to only run the two-dimensional radiative transfer tests, without comparison with benchmark files, one would run
+For example, to compile with MPI and HDF5 enabled:
 
 .. code-block:: bash
 
-   python3 tests.py --compile --clean --silent --no_compare --parallel -cores 4 -suites RadiativeTransfer -dim 2
+   python3 tests.py --compile --clean --silent --no_exec -mpi=true -hdf=true -cores 8
+
+If one only wants to compile a specified test suite:
+
+.. code-block:: bash
+
+   python3 tests.py --compile --clean --silent --no_exec -mpi=true -hdf=true -cores 8 -suites Electrostatics
+
+One can also restrict the tests to specific dimensionality, e.g.
+
+.. code-block:: bash
+
+   python3 tests.py --compile --clean --silent --no_exec -mpi=true -hdf=true -cores 8 -suites Electrostatics -dim=2
 
 Using benchmark files
 _____________________
@@ -68,7 +78,7 @@ This consists of the following steps:
 
    .. code-block:: bash
 
-      python3 tests.py --compile --clean --silent --parallel -cores X --benchmark
+      python3 tests.py --compile --clean --silent --benchmark -mpi=true -hdf=true -cores X		   
 
 #. Make the required changes to the ``chombo-discharge`` code.
 
@@ -76,7 +86,7 @@ This consists of the following steps:
 
    .. code-block:: bash
 
-      python3 tests.py --compile --clean --silent --parallel -cores X
+      python3 tests.py --compile --clean --silent --compare -mpi=true -hdf=true -cores X		   
 
 When running the tests this way, the output files are bit-wise compared and a warning is issued if the files not exactly match. 
 
