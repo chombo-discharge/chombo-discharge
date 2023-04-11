@@ -5,6 +5,28 @@ Controlling ``chombo-discharge``
 
 In this chapter we give a brief overview of how to run a ``chombo-discharge`` simulation and control its behavior through input scripts or command line options.
 
+Organization
+------------
+
+The ``chombo-discharge`` source files are organized as follows:
+
+.. list-table:: Code organization.
+   :widths: 10 50
+   :header-rows: 1
+
+   * - Folder
+     - Explanation
+   * - :file:`Source`
+     -  Source files for the AMR core, solvers, and various utilities.
+   * - :file:`Physics`
+     - Various implementations that can run the ``chombo-discharge`` source code.
+   * - :file:`Geometries`
+     - Various geometries.
+   * - :file:`Submodules`
+     - Git submodule dependencies.
+   * - :file:`Exec`
+     - Various executable applications. 
+
 Compiling and running
 ---------------------
 
@@ -200,4 +222,15 @@ This is useful when your simulation waited 5 days in the queue on a cluster befo
 The new options are parsed by the core classes ``Driver``, ``TimeStepper``, ``AmrMesh``, and ``CellTagger`` through special routines ``parseRuntimeOptions()``.
 Note that not all input configurations are suitable for run-time configuration.
 For example, increasing the size of the simulation domain does not make sense but changing the blocking factor, refinement criteria, or plot intervals do.
-To see which options are run-time configurable, see :ref:`Chap:Driver`, :ref:`Chap:AmrMesh`, or the :ref:`Chap:TimeStepper` and :ref:`Chap:CellTagger` that you use. 
+To see which options are run-time configurable, see :ref:`Chap:Driver`, :ref:`Chap:AmrMesh`, or the :ref:`Chap:TimeStepper` and :ref:`Chap:CellTagger` that you use.
+
+.. _Chap:Visualization:
+
+Visualization
+-------------
+
+``chombo-discharge`` output files are always written to HDF5.
+The plot files will reside in the ``plt`` subfolder where the application was run.
+
+Currently, we have only used `VisIt <https://visit-dav.github.io/visit-website/>`_ for visualizing the plot files.
+Learning how to use VisIt is not a part of this documentation; there are great tutorials on the `VisIt website <https://visit-dav.github.io/visit-website/>`_.
