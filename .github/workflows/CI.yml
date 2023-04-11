@@ -55,8 +55,6 @@ jobs:
           sudo apt-get install g++-${{ matrix.ver }} gfortran-${{ matrix.ver}} csh libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${{ matrix.ver }} 100
           sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-${{ matrix.ver }} 100
-          gfortran --version
-          g++ --version
 
       - name: Copy makefile
         run: |
@@ -90,7 +88,79 @@ jobs:
         if: always()        
         run: |
           python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }}
-          if [[ $? == 0 ]]; then exit 0; else exit 1; fi                                        
+          if [[ $? == 0 ]]; then exit 0; else exit 1; fi
+
+  Linux-Intel:
+    needs: Formatting
+    name: Linux-Intel
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      matrix:
+        dim: [2, 3]
+        mpi: ["TRUE", "FALSE"]
+        hdf: ["FALSE"]
+        
+    env:
+      DISCHARGE_HOME: ${{github.workspace}}
+      CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
+      CORES: 2
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -y --no-install-recommends install csh libgetopt-complete-perl
+
+      - name: Install Intel compilers/MPI
+        working-directory: /tmp        
+        run: |
+          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+          sudo add-apt-repository "deb https://apt.repos.intel.com/oneapi all main"
+          sudo apt-get -y install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic intel-oneapi-compiler-fortran intel-oneapi-mkl intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-openmp
+      
+      - name: Setup compilers
+        run: |
+          source /opt/intel/oneapi/setvars.sh          
+
+      - name: Copy makefile
+        run: |
+          cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-intel $CHOMBO_HOME/mk/Make.defs.local
+
+      - name: Build Chombo
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} chombo
+
+      - name: Build chombo-discharge/source
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-source
+
+      - name: Build chombo-discharge/geometries
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-geometries
+
+      - name: Build chombo-discharge/physics
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-physics
+
+      - name: Compile tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
+        if: always()        
+        run: |
+          python3 tests.py --compile --clean --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=$ {{ matrix.hdf }}
+          if [[ $? == 0 ]]; then exit 0; else exit 1; fi
+
+      - name: Run tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
+        if: always()        
+        run: |
+          python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }}
+          if [[ $? == 0 ]]; then exit 0; else exit 1; fi                                                  
 
   Build-documentation:
     needs: Formatting
