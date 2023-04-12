@@ -1,9 +1,9 @@
 <map id="CdrSolver" name="CdrSolver">
 <area shape="rect" id="node1" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="888,187,973,213"/>
 <area shape="rect" id="node2" href="$classCdrDomainBC.html" title="Class for encapsulating possible domain boundary conditions for CdrSolver." alt="" coords="421,23,534,49"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="385,145,569,186"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,275,144,301"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="355,220,600,247"/>
-<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="379,303,575,329"/>
-<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="378,380,577,407"/>
+<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="385,149,569,190"/>
+<area shape="rect" id="node4" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,301,144,328"/>
+<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="355,229,600,256"/>
+<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="379,331,575,357"/>
+<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="378,408,577,435"/>
 </map>

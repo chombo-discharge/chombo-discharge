@@ -1,0 +1,8 @@
+<map id="Physics::ItoKMC::ItoKMCStreamerTagger&lt; S &gt;" name="Physics::ItoKMC::ItoKMCStreamerTagger&lt; S &gt;">
+<area shape="rect" id="node1" title="Cell tagging class for streamers." alt="" coords="141,304,383,345"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1ItoKMC_1_1ItoKMCFieldTagger.html" title="Lightweight tagging class. Only tags cells based on the electric field." alt="" coords="156,213,368,255"/>
+<area shape="rect" id="node3" href="$classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html" title="Class for tagging grid cells using the Ito&#45;KMC&#45;Poisson module. Note that S is the time integrator typ..." alt="" coords="5,95,268,121"/>
+<area shape="rect" id="node4" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="91,5,182,32"/>
+<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="292,95,488,121"/>
+<area shape="rect" id="node6" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="321,5,459,32"/>
+</map>

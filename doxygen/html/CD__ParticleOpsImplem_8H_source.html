@@ -94,264 +94,443 @@ $(function() {
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="CD__Random_8H.html">CD_Random.H</a>&gt;</span></div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160; </div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, const Real&amp; (P::*weight)() const&gt;</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="classParticleOps.html#ab8e55b59ec9d5532dc2d090820a1d28f">   27</a></span>&#160;<a class="code" href="classParticleOps.html#ab8e55b59ec9d5532dc2d090820a1d28f">ParticleOps::getPhysicalParticlesPerCell</a>(<a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_ppc, <span class="keyword">const</span> <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_src) noexcept</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;{</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;  CH_TIME(<span class="stringliteral">&quot;ParticleOps::getPhysicalParticlesPerCell&quot;</span>);</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  <span class="keyword">const</span> RealVect probLo = a_src.getProbLo();</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_src.getFinestLevel(); lvl++) {</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = a_src.getGrids()[lvl];</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="keyword">const</span> RealVect           dx  = a_src.getDx()[lvl];</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(dbl); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;      <span class="keyword">const</span> List&lt;P&gt;&amp; particles = a_src[lvl][dit()].listItems();</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;      FArrayBox&amp; ppc = (*a_ppc[lvl])[dit()].getFArrayBox();</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;      ppc.setVal(0.0);</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        <span class="keyword">const</span> P&amp;       p  = lit();</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        <span class="keyword">const</span> RealVect x  = p.position();</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        <span class="keyword">const</span> Real     w  = (p.*weight)();</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        <span class="keyword">const</span> IntVect  iv = <a class="code" href="classParticleOps.html#ae2f084f6030a789894959618b7e59554">ParticleOps::getParticleGridCell</a>(x, probLo, dx);</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160; </div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        ppc(iv, 0) += w;</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;      }</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    }</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;  }</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;}</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00057"></a><span class="lineno"><a class="line" href="classParticleOps.html#a0a443dbb080b8dec662004c68043ec36">   57</a></span>&#160;<a class="code" href="classParticleOps.html#a0a443dbb080b8dec662004c68043ec36">ParticleOps::getComputationalParticlesPerCell</a>(<a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_ppc, <span class="keyword">const</span> <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_src) noexcept</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;{</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  CH_TIME(<span class="stringliteral">&quot;ParticleOps::getComputationalParticlesPerCell&quot;</span>);</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  <span class="keyword">const</span> RealVect probLo = a_src.getProbLo();</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keyword">inline</span> IntVect</div>
+<div class="line"><a name="l00026"></a><span class="lineno"><a class="line" href="classParticleOps.html#aeaf3f380db95aa0395d8985da86fc547">   26</a></span>&#160;<a class="code" href="classParticleOps.html#aeaf3f380db95aa0395d8985da86fc547">ParticleOps::getParticleCellIndex</a>(<span class="keyword">const</span> RealVect&amp; a_particlePosition,</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;                                  <span class="keyword">const</span> RealVect&amp; a_probLo,</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;                                  <span class="keyword">const</span> Real&amp;     a_dx) noexcept</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;{</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  <span class="keywordflow">return</span> IntVect(D_DECL(std::floor((a_particlePosition[0] - a_probLo[0]) / a_dx),</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;                        std::floor((a_particlePosition[1] - a_probLo[1]) / a_dx),</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;                        std::floor((a_particlePosition[2] - a_probLo[2]) / a_dx)));</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;}</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="keyword">inline</span> IntVect</div>
+<div class="line"><a name="l00036"></a><span class="lineno"><a class="line" href="classParticleOps.html#a917088a727edfeeb891490f04da74b15">   36</a></span>&#160;<a class="code" href="classParticleOps.html#aeaf3f380db95aa0395d8985da86fc547">ParticleOps::getParticleCellIndex</a>(<span class="keyword">const</span> RealVect&amp; a_particlePosition,</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;                                  <span class="keyword">const</span> RealVect&amp; a_probLo,</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;                                  <span class="keyword">const</span> RealVect&amp; a_dx) noexcept</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  <span class="keywordflow">return</span> IntVect(D_DECL(std::floor((a_particlePosition[0] - a_probLo[0]) / a_dx[0]),</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;                        std::floor((a_particlePosition[1] - a_probLo[1]) / a_dx[1]),</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;                        std::floor((a_particlePosition[2] - a_probLo[2]) / a_dx[2])));</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;}</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, const Real&amp; (P::*weight)() const&gt;</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno"><a class="line" href="classParticleOps.html#ab8e55b59ec9d5532dc2d090820a1d28f">   47</a></span>&#160;<a class="code" href="classParticleOps.html#ab8e55b59ec9d5532dc2d090820a1d28f">ParticleOps::getPhysicalParticlesPerCell</a>(<a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_ppc, <span class="keyword">const</span> <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_src) noexcept</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;{</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;  CH_TIME(<span class="stringliteral">&quot;ParticleOps::getPhysicalParticlesPerCell&quot;</span>);</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160; </div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  <span class="keyword">const</span> RealVect probLo = a_src.getProbLo();</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_src.getFinestLevel(); lvl++) {</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = a_src.getGrids()[lvl];</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="keyword">const</span> RealVect           dx  = a_src.getDx()[lvl];</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(dbl); dit.ok(); ++dit) {</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;      <span class="keyword">const</span> List&lt;P&gt;&amp; particles = a_src[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;      FArrayBox&amp; ppc = (*a_ppc[lvl])[dit()].getFArrayBox();</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;      ppc.setVal(0.0);</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_src.getFinestLevel(); lvl++) {</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = a_src.getGrids()[lvl];</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    <span class="keyword">const</span> RealVect           dx  = a_src.getDx()[lvl];</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(dbl); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;      <span class="keyword">const</span> List&lt;P&gt;&amp; particles = a_src[lvl][dit()].listItems();</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;      FArrayBox&amp; ppc = (*a_ppc[lvl])[dit()].getFArrayBox();</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;      ppc.setVal(0.0);</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160; </div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        <span class="keyword">const</span> P&amp;       p  = lit();</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <span class="keyword">const</span> RealVect x  = p.position();</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        <span class="keyword">const</span> IntVect  iv = <a class="code" href="classParticleOps.html#ae2f084f6030a789894959618b7e59554">ParticleOps::getParticleGridCell</a>(x, probLo, dx);</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;        ppc(iv, 0) += 1.0;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;      }</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    }</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;  }</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;}</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160; </div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="keyword">inline</span> IntVect</div>
-<div class="line"><a name="l00085"></a><span class="lineno"><a class="line" href="classParticleOps.html#ae2f084f6030a789894959618b7e59554">   85</a></span>&#160;<a class="code" href="classParticleOps.html#ae2f084f6030a789894959618b7e59554">ParticleOps::getParticleGridCell</a>(<span class="keyword">const</span> RealVect&amp; a_particlePosition,</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                                 <span class="keyword">const</span> RealVect&amp; a_probLo,</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                                 <span class="keyword">const</span> RealVect&amp; a_dx) noexcept</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;{</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  <span class="keywordflow">return</span> IntVect(D_DECL(std::floor((a_particlePosition[0] - a_probLo[0]) / a_dx[0]),</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;                        std::floor((a_particlePosition[1] - a_probLo[1]) / a_dx[1]),</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                        std::floor((a_particlePosition[2] - a_probLo[2]) / a_dx[2])));</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;}</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">bool</span></div>
-<div class="line"><a name="l00095"></a><span class="lineno"><a class="line" href="classParticleOps.html#afc924720c8332e493951fec08881ef3d">   95</a></span>&#160;<a class="code" href="classParticleOps.html#afc924720c8332e493951fec08881ef3d">ParticleOps::domainIntersection</a>(<span class="keyword">const</span> RealVect&amp; a_oldPos,</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;                                <span class="keyword">const</span> RealVect&amp; a_newPos,</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;                                <span class="keyword">const</span> RealVect&amp; a_probLo,</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;                                <span class="keyword">const</span> RealVect&amp; a_probHi,</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;                                Real&amp;           a_s)</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;{</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160; </div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;  <span class="comment">// TLDR: This code does a boundary intersection test and returns where on the interval [oldPos, newPos] the intersection</span></div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;  <span class="comment">//       happened. We do this by checking if the particle moves towards a particular domain side and ends up outside of it.</span></div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160; </div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;  a_s = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::numeric_limits&lt;Real&gt;::max</a>();</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160; </div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;  <span class="keywordtype">bool</span> crossedDomainBoundary = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160; </div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;  <span class="keyword">const</span> RealVect path = a_newPos - a_oldPos;</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160; </div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    <span class="keywordflow">for</span> (SideIterator sit; sit.ok(); ++sit) {</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;      <span class="keyword">const</span> Side::LoHiSide side      = sit();</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;      <span class="keyword">const</span> RealVect       wallPoint = (side == Side::Lo) ? a_probLo : a_probHi; <span class="comment">// A point on the domain side</span></div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;      <span class="keyword">const</span> RealVect       n0        = sign(side) *</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                          RealVect(</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;                            BASISV(dir)); <span class="comment">// Normal vector pointing OUT of the domain on side sit and direction dir.</span></div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;      <span class="keyword">const</span> Real normPath = PolyGeom::dot(n0, path); <span class="comment">// Component of the path that is normal to the domain edge/face.</span></div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160; </div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;      <span class="comment">// If normPath &gt; 0 then the particle trajectory points towards the domain edge/face and we can have an intersection.</span></div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;      <span class="keywordflow">if</span> (normPath &gt; 0.0) {</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160; </div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;        <span class="comment">// s determines the intersection point between the particle path and the plane corresponding to the domain edge/face. Note that</span></div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;        <span class="comment">// we consider the edge/face to be an infinite plane and we just compute the intersection point between each edge/face and select the</span></div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;        <span class="comment">// closest intersection point.</span></div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;        <span class="keyword">const</span> Real s = PolyGeom::dot(wallPoint - a_oldPos, n0) / normPath;</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;        <span class="keywordflow">if</span> (s &gt;= 0.0 &amp;&amp; s &lt;= 1.0) {</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;          crossedDomainBoundary = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;          <span class="keywordflow">if</span> (s &lt; a_s) {</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;            a_s = s;</div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;          }</div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;        }</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;      }</div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;    }</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;  }</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160; </div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;  <span class="keywordflow">return</span> crossedDomainBoundary;</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;}</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="keyword">const</span> P&amp;       p  = lit();</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="keyword">const</span> RealVect x  = p.position();</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        <span class="keyword">const</span> Real     w  = (p.*weight)();</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <span class="keyword">const</span> IntVect  iv = <a class="code" href="classParticleOps.html#ae2f084f6030a789894959618b7e59554">ParticleOps::getParticleGridCell</a>(x, probLo, dx);</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        ppc(iv, 0) += w;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;      }</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    }</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  }</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;}</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno"><a class="line" href="classParticleOps.html#a0a443dbb080b8dec662004c68043ec36">   77</a></span>&#160;<a class="code" href="classParticleOps.html#a0a443dbb080b8dec662004c68043ec36">ParticleOps::getComputationalParticlesPerCell</a>(<a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_ppc, <span class="keyword">const</span> <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_src) noexcept</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;{</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  CH_TIME(<span class="stringliteral">&quot;ParticleOps::getComputationalParticlesPerCell&quot;</span>);</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;  <span class="keyword">const</span> RealVect probLo = a_src.getProbLo();</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_src.getFinestLevel(); lvl++) {</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = a_src.getGrids()[lvl];</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <span class="keyword">const</span> RealVect           dx  = a_src.getDx()[lvl];</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(dbl); dit.ok(); ++dit) {</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;      <span class="keyword">const</span> List&lt;P&gt;&amp; particles = a_src[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160; </div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;      FArrayBox&amp; ppc = (*a_ppc[lvl])[dit()].getFArrayBox();</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;      ppc.setVal(0.0);</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        <span class="keyword">const</span> P&amp;       p  = lit();</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        <span class="keyword">const</span> RealVect x  = p.position();</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        <span class="keyword">const</span> IntVect  iv = <a class="code" href="classParticleOps.html#ae2f084f6030a789894959618b7e59554">ParticleOps::getParticleGridCell</a>(x, probLo, dx);</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160; </div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        ppc(iv, 0) += 1.0;</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;      }</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    }</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;  }</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;}</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160; </div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="keyword">inline</span> IntVect</div>
+<div class="line"><a name="l00105"></a><span class="lineno"><a class="line" href="classParticleOps.html#ae2f084f6030a789894959618b7e59554">  105</a></span>&#160;<a class="code" href="classParticleOps.html#ae2f084f6030a789894959618b7e59554">ParticleOps::getParticleGridCell</a>(<span class="keyword">const</span> RealVect&amp; a_particlePosition,</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;                                 <span class="keyword">const</span> RealVect&amp; a_probLo,</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                                 <span class="keyword">const</span> RealVect&amp; a_dx) noexcept</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;{</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;  <span class="keywordflow">return</span> IntVect(D_DECL(std::floor((a_particlePosition[0] - a_probLo[0]) / a_dx[0]),</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;                        std::floor((a_particlePosition[1] - a_probLo[1]) / a_dx[1]),</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;                        std::floor((a_particlePosition[2] - a_probLo[2]) / a_dx[2])));</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;}</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160; </div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00115"></a><span class="lineno"><a class="line" href="classParticleOps.html#afc924720c8332e493951fec08881ef3d">  115</a></span>&#160;<a class="code" href="classParticleOps.html#afc924720c8332e493951fec08881ef3d">ParticleOps::domainIntersection</a>(<span class="keyword">const</span> RealVect&amp; a_oldPos,</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                                <span class="keyword">const</span> RealVect&amp; a_newPos,</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;                                <span class="keyword">const</span> RealVect&amp; a_probLo,</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;                                <span class="keyword">const</span> RealVect&amp; a_probHi,</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;                                Real&amp;           a_s)</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;{</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160; </div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  <span class="comment">// TLDR: This code does a boundary intersection test and returns where on the interval [oldPos, newPos] the intersection</span></div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;  <span class="comment">//       happened. We do this by checking if the particle moves towards a particular domain side and ends up outside of it.</span></div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160; </div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;  a_s = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::numeric_limits&lt;Real&gt;::max</a>();</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160; </div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;  <span class="keywordtype">bool</span> crossedDomainBoundary = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160; </div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;  <span class="keyword">const</span> RealVect path = a_newPos - a_oldPos;</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160; </div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    <span class="keywordflow">for</span> (SideIterator sit; sit.ok(); ++sit) {</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;      <span class="keyword">const</span> Side::LoHiSide side      = sit();</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;      <span class="keyword">const</span> RealVect       wallPoint = (side == Side::Lo) ? a_probLo : a_probHi; <span class="comment">// A point on the domain side</span></div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;      <span class="keyword">const</span> RealVect       n0        = sign(side) *</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;                          RealVect(</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;                            BASISV(dir)); <span class="comment">// Normal vector pointing OUT of the domain on side sit and direction dir.</span></div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;      <span class="keyword">const</span> Real normPath = PolyGeom::dot(n0, path); <span class="comment">// Component of the path that is normal to the domain edge/face.</span></div>
 <div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160; </div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">bool</span></div>
-<div class="line"><a name="l00141"></a><span class="lineno"><a class="line" href="classParticleOps.html#a4f2914cd2dc872d5ec05a7d250a677ff">  141</a></span>&#160;<a class="code" href="classParticleOps.html#a4f2914cd2dc872d5ec05a7d250a677ff">ParticleOps::ebIntersectionBisect</a>(<span class="keyword">const</span> RefCountedPtr&lt;BaseIF&gt;&amp; a_impFunc,</div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;                                  <span class="keyword">const</span> RealVect&amp;              a_oldPos,</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;                                  <span class="keyword">const</span> RealVect&amp;              a_newPos,</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;                                  <span class="keyword">const</span> Real&amp;                  a_bisectStep,</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;                                  Real&amp;                        a_s)</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;{</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160; </div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;  <span class="comment">// TLDR: We compute the intersection point using a bisection algorithm. We divide the full path into intervals and check if an interval</span></div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;  <span class="comment">//       has a root. If it does, we compute it using Brent&#39;s algorithm.</span></div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160; </div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;  a_s = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::numeric_limits&lt;Real&gt;::max</a>();</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160; </div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;  <span class="keywordtype">bool</span> crossedEB = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160; </div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;  <span class="keyword">const</span> Real     pathLen = (a_newPos - a_oldPos).vectorLength(); <span class="comment">// Total path len</span></div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;  <span class="keyword">const</span> <span class="keywordtype">int</span>      nsteps  = ceil(pathLen / a_bisectStep);         <span class="comment">// Number of bisection intervals</span></div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;  <span class="keyword">const</span> RealVect dxStep  = (a_newPos - a_oldPos) / nsteps;       <span class="comment">// Physical length of each bisection interval</span></div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160; </div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;  <span class="comment">// Check each interval</span></div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;  RealVect curPos = a_oldPos;</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> istep = 0; istep &lt; nsteps; istep++) {</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;    <span class="keyword">const</span> Real fa = a_impFunc-&gt;value(curPos); <span class="comment">// Value of the implicit function at the start of the bisection interval</span></div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;    <span class="keyword">const</span> Real fb = a_impFunc-&gt;value(curPos +</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;                                     dxStep); <span class="comment">// Value of the implicit function at the end of the bisection interval</span></div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160; </div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;    <span class="keywordflow">if</span> (fa * fb &lt;= 0.0) {</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;      <span class="comment">// If normPath &gt; 0 then the particle trajectory points towards the domain edge/face and we can have an intersection.</span></div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;      <span class="keywordflow">if</span> (normPath &gt; 0.0) {</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160; </div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;        <span class="comment">// s determines the intersection point between the particle path and the plane corresponding to the domain edge/face. Note that</span></div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;        <span class="comment">// we consider the edge/face to be an infinite plane and we just compute the intersection point between each edge/face and select the</span></div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;        <span class="comment">// closest intersection point.</span></div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;        <span class="keyword">const</span> Real s = PolyGeom::dot(wallPoint - a_oldPos, n0) / normPath;</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;        <span class="keywordflow">if</span> (s &gt;= 0.0 &amp;&amp; s &lt;= 1.0) {</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;          crossedDomainBoundary = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;          <span class="keywordflow">if</span> (s &lt; a_s) {</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;            a_s = s;</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;          }</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;        }</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;      }</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;    }</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;  }</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160; </div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;  <span class="keywordflow">return</span> crossedDomainBoundary;</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;}</div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160; </div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00161"></a><span class="lineno"><a class="line" href="classParticleOps.html#a4f2914cd2dc872d5ec05a7d250a677ff">  161</a></span>&#160;<a class="code" href="classParticleOps.html#a4f2914cd2dc872d5ec05a7d250a677ff">ParticleOps::ebIntersectionBisect</a>(<span class="keyword">const</span> RefCountedPtr&lt;BaseIF&gt;&amp; a_impFunc,</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;                                  <span class="keyword">const</span> RealVect&amp;              a_oldPos,</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;                                  <span class="keyword">const</span> RealVect&amp;              a_newPos,</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;                                  <span class="keyword">const</span> Real&amp;                  a_bisectStep,</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;                                  Real&amp;                        a_s)</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;{</div>
 <div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160; </div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;      <span class="comment">// If this triggered we happen to know that f(pos+dxStep) &gt; 0.0 and f(pos) &lt; 0.0 and so we must have a root on the interval. We now compute the precise location</span></div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;      <span class="comment">// where the particle crossed the EB. For that we use a Brent root finder on the interval [pos, pos+dxStep]. This is a 1D problem.</span></div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;      <span class="keyword">const</span> RealVect intersectionPos = <a class="code" href="namespacePolyUtils.html#a554dcb29bb180400d8d3f7a9c4db57a5">PolyUtils::brentRootFinder</a>(a_impFunc, curPos, curPos + dxStep);</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;      a_s                            = (intersectionPos - a_oldPos).vectorLength() / pathLen;</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;      crossedEB                      = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160; </div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;      <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;    }</div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    <span class="keywordflow">else</span> { <span class="comment">// Move to next interval</span></div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;      curPos += dxStep;</div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;    }</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;  }</div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160; </div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;  <span class="keywordflow">return</span> crossedEB;</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;}</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160; </div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">bool</span></div>
-<div class="line"><a name="l00185"></a><span class="lineno"><a class="line" href="classParticleOps.html#a3e95a39f57c9272a20ef9411efdff221">  185</a></span>&#160;<a class="code" href="classParticleOps.html#a3e95a39f57c9272a20ef9411efdff221">ParticleOps::ebIntersectionRaycast</a>(<span class="keyword">const</span> RefCountedPtr&lt;BaseIF&gt;&amp; a_impFunc,</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;                                   <span class="keyword">const</span> RealVect&amp;              a_oldPos,</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;                                   <span class="keyword">const</span> RealVect&amp;              a_newPos,</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;                                   <span class="keyword">const</span> Real&amp;                  a_tolerance,</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;                                   Real&amp;                        a_s)</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;{</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160; </div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;  a_s = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::numeric_limits&lt;Real&gt;::max</a>();</div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;  <span class="comment">// TLDR: We compute the intersection point using a bisection algorithm. We divide the full path into intervals and check if an interval</span></div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;  <span class="comment">//       has a root. If it does, we compute it using Brent&#39;s algorithm.</span></div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160; </div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;  a_s = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::numeric_limits&lt;Real&gt;::max</a>();</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160; </div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;  <span class="keywordtype">bool</span> crossedEB = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160; </div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;  <span class="keyword">const</span> Real     pathLen = (a_newPos - a_oldPos).vectorLength(); <span class="comment">// Total path len</span></div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;  <span class="keyword">const</span> <span class="keywordtype">int</span>      nsteps  = ceil(pathLen / a_bisectStep);         <span class="comment">// Number of bisection intervals</span></div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;  <span class="keyword">const</span> RealVect dxStep  = (a_newPos - a_oldPos) / nsteps;       <span class="comment">// Physical length of each bisection interval</span></div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160; </div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;  <span class="comment">// Check each interval</span></div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;  RealVect curPos = a_oldPos;</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> istep = 0; istep &lt; nsteps; istep++) {</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;    <span class="keyword">const</span> Real fa = a_impFunc-&gt;value(curPos); <span class="comment">// Value of the implicit function at the start of the bisection interval</span></div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;    <span class="keyword">const</span> Real fb = a_impFunc-&gt;value(curPos +</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;                                     dxStep); <span class="comment">// Value of the implicit function at the end of the bisection interval</span></div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160; </div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;    <span class="keywordflow">if</span> (fa * fb &lt;= 0.0) {</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160; </div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;      <span class="comment">// If this triggered we happen to know that f(pos+dxStep) &gt; 0.0 and f(pos) &lt; 0.0 and so we must have a root on the interval. We now compute the precise location</span></div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;      <span class="comment">// where the particle crossed the EB. For that we use a Brent root finder on the interval [pos, pos+dxStep]. This is a 1D problem.</span></div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;      <span class="keyword">const</span> RealVect intersectionPos = <a class="code" href="namespacePolyUtils.html#a554dcb29bb180400d8d3f7a9c4db57a5">PolyUtils::brentRootFinder</a>(a_impFunc, curPos, curPos + dxStep);</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;      a_s                            = (intersectionPos - a_oldPos).vectorLength() / pathLen;</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;      crossedEB                      = <span class="keyword">true</span>;</div>
 <div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160; </div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;  <span class="keywordtype">bool</span> ret = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160; </div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;  <span class="comment">// Absolute distance to EB.</span></div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;  <span class="keyword">auto</span> dist = [&amp;](<span class="keyword">const</span> RealVect&amp; x) -&gt; Real {</div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    <span class="keywordflow">return</span> std::abs(a_impFunc-&gt;value(x));</div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;  };</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;      <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;    }</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;    <span class="keywordflow">else</span> { <span class="comment">// Move to next interval</span></div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;      curPos += dxStep;</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    }</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;  }</div>
 <div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160; </div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;  <span class="keyword">const</span> Real D  = (a_newPos - a_oldPos).vectorLength(); <span class="comment">// Total particle path length</span></div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;  <span class="keyword">const</span> Real D0 = dist(a_oldPos);                       <span class="comment">// Distance to EB from starting position</span></div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;  <span class="keywordflow">return</span> crossedEB;</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;}</div>
 <div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160; </div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;  <span class="comment">// If the distance to the EB from the starting position is smaller than the total path length, we need to check for intersections.</span></div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;  <span class="keywordflow">if</span> (D &gt; D0) {</div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160; </div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    <span class="keyword">const</span> RealVect t = (a_newPos - a_oldPos) / D; <span class="comment">// Particle trajectory.</span></div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160; </div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;    <span class="comment">// Move a_oldPos along +t. If we end up too close to the boundary the particle has intersected the BC. Note that this does NOT check for whether or not</span></div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;    <span class="comment">// the particle moves tangential to the EB surface. The length of each step is the distance to the EB, so if the particle is close to the EB but moves</span></div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;    <span class="comment">// tangentially to it, this routine will be EXTREMELY slow.</span></div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;    RealVect xa = a_oldPos;</div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;    Real     r  = D;</div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;    Real     d  = dist(xa);</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00205"></a><span class="lineno"><a class="line" href="classParticleOps.html#a3e95a39f57c9272a20ef9411efdff221">  205</a></span>&#160;<a class="code" href="classParticleOps.html#a3e95a39f57c9272a20ef9411efdff221">ParticleOps::ebIntersectionRaycast</a>(<span class="keyword">const</span> RefCountedPtr&lt;BaseIF&gt;&amp; a_impFunc,</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;                                   <span class="keyword">const</span> RealVect&amp;              a_oldPos,</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;                                   <span class="keyword">const</span> RealVect&amp;              a_newPos,</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;                                   <span class="keyword">const</span> Real&amp;                  a_tolerance,</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;                                   Real&amp;                        a_s)</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;{</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160; </div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;  a_s = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::numeric_limits&lt;Real&gt;::max</a>();</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160; </div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;  <span class="keywordtype">bool</span> ret = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160; </div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;    <span class="keywordflow">while</span> (d &lt; r) {</div>
-<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160; </div>
-<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;      <span class="keywordflow">if</span> (d &lt; a_tolerance) { <span class="comment">// We collided.</span></div>
-<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;        a_s = (xa - a_oldPos).vectorLength() / D;</div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;        ret = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;        <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;      }</div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;      <span class="keywordflow">else</span> { <span class="comment">// We did not collide.</span></div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;        xa += t * d;</div>
-<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;        r -= d;</div>
-<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;        d = dist(xa);</div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;      }</div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;    }</div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;  }</div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160; </div>
-<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;  <span class="keywordflow">return</span> ret;</div>
-<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;}</div>
-<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160; </div>
-<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00236"></a><span class="lineno"><a class="line" href="classParticleOps.html#a00dce5482fe701bd31fb8730e9059912">  236</a></span>&#160;<a class="code" href="classParticleOps.html#a00dce5482fe701bd31fb8730e9059912">ParticleOps::copy</a>(<a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_dst, <span class="keyword">const</span> <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_src) noexcept</div>
-<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;{</div>
-<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;  CH_TIME(<span class="stringliteral">&quot;ParticleOps::copy(ParticleContainer&lt;P&gt; x2)&quot;</span>);</div>
-<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160; </div>
-<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;  CH_assert(a_dst.getRealm() == a_src.getRealm());</div>
-<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160; </div>
-<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_dst.getFinestLevel(); lvl++) {</div>
-<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(a_dst.getGrids()[lvl]); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;      a_dst[lvl][dit()].listItems() = a_src[lvl][dit()].listItems();</div>
-<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;    }</div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;  }</div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;}</div>
-<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160; </div>
-<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
-<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00251"></a><span class="lineno"><a class="line" href="classParticleOps.html#adb8401ec7984ffada29e4c3382abebda">  251</a></span>&#160;<a class="code" href="classParticleOps.html#adb8401ec7984ffada29e4c3382abebda">ParticleOps::copyDestructive</a>(<a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_dst, <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_src) noexcept</div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;{</div>
-<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;  CH_TIME(<span class="stringliteral">&quot;ParticleOps::copyDestructive(ParticleContainer&lt;P&gt; x2)&quot;</span>);</div>
-<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160; </div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;  CH_assert(a_dst.getRealm() == a_src.getRealm());</div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160; </div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_dst.getFinestLevel(); lvl++) {</div>
-<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(a_dst.getGrids()[lvl]); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;      a_dst[lvl][dit()].listItems() = a_src[lvl][dit()].listItems();</div>
-<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160; </div>
-<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;      a_src[lvl][dit()].listItems().clear();</div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;    }</div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;  }</div>
-<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;}</div>
-<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160; </div>
-<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160; </div>
-<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;  <span class="comment">// Absolute distance to EB.</span></div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;  <span class="keyword">auto</span> dist = [&amp;](<span class="keyword">const</span> RealVect&amp; x) -&gt; Real {</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;    <span class="keywordflow">return</span> std::abs(a_impFunc-&gt;value(x));</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;  };</div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160; </div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;  <span class="keyword">const</span> Real D  = (a_newPos - a_oldPos).vectorLength(); <span class="comment">// Total particle path length</span></div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;  <span class="keyword">const</span> Real D0 = dist(a_oldPos);                       <span class="comment">// Distance to EB from starting position</span></div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160; </div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;  <span class="comment">// If the distance to the EB from the starting position is smaller than the total path length, we need to check for intersections.</span></div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;  <span class="keywordflow">if</span> (D &gt; D0) {</div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160; </div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;    <span class="keyword">const</span> RealVect t = (a_newPos - a_oldPos) / D; <span class="comment">// Particle trajectory.</span></div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160; </div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;    <span class="comment">// Move a_oldPos along +t. If we end up too close to the boundary the particle has intersected the BC. Note that this does NOT check for whether or not</span></div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;    <span class="comment">// the particle moves tangential to the EB surface. The length of each step is the distance to the EB, so if the particle is close to the EB but moves</span></div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;    <span class="comment">// tangentially to it, this routine will be EXTREMELY slow.</span></div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;    RealVect xa = a_oldPos;</div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;    Real     r  = D;</div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;    Real     d  = dist(xa);</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160; </div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;    <span class="keywordflow">while</span> (d &lt; r) {</div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160; </div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;      <span class="keywordflow">if</span> (d &lt; a_tolerance) { <span class="comment">// We collided.</span></div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;        a_s = (xa - a_oldPos).vectorLength() / D;</div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;        ret = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;        <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;      }</div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;      <span class="keywordflow">else</span> { <span class="comment">// We did not collide.</span></div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;        xa += t * d;</div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;        r -= d;</div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;        d = dist(xa);</div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;      }</div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;    }</div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;  }</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160; </div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;  <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;}</div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160; </div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00256"></a><span class="lineno"><a class="line" href="classParticleOps.html#a00dce5482fe701bd31fb8730e9059912">  256</a></span>&#160;<a class="code" href="classParticleOps.html#a00dce5482fe701bd31fb8730e9059912">ParticleOps::copy</a>(<a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_dst, <span class="keyword">const</span> <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_src) noexcept</div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;{</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;  CH_TIME(<span class="stringliteral">&quot;ParticleOps::copy(ParticleContainer&lt;P&gt; x2)&quot;</span>);</div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160; </div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;  CH_assert(a_dst.getRealm() == a_src.getRealm());</div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160; </div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_dst.getFinestLevel(); lvl++) {</div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(a_dst.getGrids()[lvl]); dit.ok(); ++dit) {</div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;      a_dst[lvl][dit()].listItems() = a_src[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;    }</div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;  }</div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;}</div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160; </div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00271"></a><span class="lineno"><a class="line" href="classParticleOps.html#adb8401ec7984ffada29e4c3382abebda">  271</a></span>&#160;<a class="code" href="classParticleOps.html#adb8401ec7984ffada29e4c3382abebda">ParticleOps::copyDestructive</a>(<a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_dst, <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_src) noexcept</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;{</div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;  CH_TIME(<span class="stringliteral">&quot;ParticleOps::copyDestructive(ParticleContainer&lt;P&gt; x2)&quot;</span>);</div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160; </div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;  CH_assert(a_dst.getRealm() == a_src.getRealm());</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160; </div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_dst.getFinestLevel(); lvl++) {</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(a_dst.getGrids()[lvl]); dit.ok(); ++dit) {</div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;      a_dst[lvl][dit()].listItems() = a_src[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160; </div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;      a_src[lvl][dit()].listItems().clear();</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;    }</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;  }</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;}</div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160; </div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, const Real&amp; (P::*scalarQuantity)() const&gt;</div>
+<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;<span class="keyword">inline</span> Real</div>
+<div class="line"><a name="l00288"></a><span class="lineno"><a class="line" href="classParticleOps.html#a07bc82adb33e81cf6f821a0f82da99e3">  288</a></span>&#160;<a class="code" href="classParticleOps.html#a07bc82adb33e81cf6f821a0f82da99e3">ParticleOps::sum</a>(<span class="keyword">const</span> <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_particles) noexcept</div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;{</div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;  CH_TIME(<span class="stringliteral">&quot;ParticleOps::sum(ParticleContainer&lt;P&gt;)&quot;</span>);</div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160; </div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;  Real particleSum = 0.0;</div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160; </div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_particles.getFinestLevel(); lvl++) {</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {</div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;      <span class="keyword">const</span> List&lt;P&gt;&amp; particles = a_particles[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160; </div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;        particleSum += (lit().*scalarQuantity)();</div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;      }</div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;    }</div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;  }</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160; </div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="namespaceParallelOps.html#acee1ea4f1dc471622d322bef1c3e9028">ParallelOps::sum</a>(particleSum);</div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;}</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160; </div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, Real (P::*scalarQuantity)()&gt;</div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;<span class="keyword">inline</span> Real</div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;<a class="code" href="classParticleOps.html#a07bc82adb33e81cf6f821a0f82da99e3">ParticleOps::sum</a>(<span class="keyword">const</span> <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_particles) noexcept</div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;{</div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;  CH_TIME(<span class="stringliteral">&quot;ParticleOps::sum(ParticleContainer&lt;P&gt;)&quot;</span>);</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160; </div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;  Real particleSum = 0.0;</div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160; </div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_particles.getFinestLevel(); lvl++) {</div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {</div>
+<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;      <span class="keyword">const</span> List&lt;P&gt;&amp; particles = a_particles[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160; </div>
+<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;        particleSum += (lit().*scalarQuantity)();</div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;      }</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;    }</div>
+<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;  }</div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160; </div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="namespaceParallelOps.html#acee1ea4f1dc471622d322bef1c3e9028">ParallelOps::sum</a>(particleSum);</div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;}</div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160; </div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00330"></a><span class="lineno"><a class="line" href="classParticleOps.html#a95e3a93c6d9e2dacd917643cf939f76d">  330</a></span>&#160;<a class="code" href="classParticleOps.html#a95e3a93c6d9e2dacd917643cf939f76d">ParticleOps::removeParticles</a>(<a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;                a_particles,</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;                             <span class="keyword">const</span> std::function&lt;<span class="keywordtype">bool</span>(<span class="keyword">const</span> P&amp;)&gt;&amp; a_removeCriterion) noexcept</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;{</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;  CH_TIME(<span class="stringliteral">&quot;ParticleOps::removeParticles(ParticleContainer&lt;P&gt;, std::function&lt;bool(const P&amp;)&gt;)&quot;</span>);</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160; </div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_particles.<a class="code" href="classParticleContainer.html#a9c8f6bc7c36f3dc9747eda42ed75a40b">getFinestLevel</a>(); lvl++) {</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(a_particles.<a class="code" href="classParticleContainer.html#a66e2eae5f9d8d54deb9e7ada73903538">getGrids</a>()[lvl]); dit.ok(); ++dit) {</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;      List&lt;P&gt;&amp; particles = a_particles[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160; </div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok();) {</div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;        <span class="keywordflow">if</span> (a_removeCriterion(lit())) {</div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;          particles.remove(lit);</div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;        }</div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;        <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;          ++lit;</div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;        }</div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;      }</div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;    }</div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;  }</div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;}</div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160; </div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00353"></a><span class="lineno"><a class="line" href="classParticleOps.html#a183221916135c4a5eceb341f1e40094d">  353</a></span>&#160;<a class="code" href="classParticleOps.html#a183221916135c4a5eceb341f1e40094d">ParticleOps::transferParticles</a>(<a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;                a_dstParticles,</div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;                               <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;                a_srcParticles,</div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;                               <span class="keyword">const</span> std::function&lt;<span class="keywordtype">bool</span>(<span class="keyword">const</span> P&amp;)&gt;&amp; a_transferCrit) noexcept</div>
+<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;{</div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;  CH_TIME(<span class="stringliteral">&quot;ParticleOps::transferParticles(ParticleContainer&lt;P&gt;, ParticleContainer&lt;P&gt;&amp; std::function&lt;bool(const P&amp;)&gt;)&quot;</span>);</div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160; </div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;  CH_assert(a_dstParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>() == a_srcParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>());</div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;  CH_assert(a_dstParticles.<a class="code" href="classParticleContainer.html#a9c8f6bc7c36f3dc9747eda42ed75a40b">getFinestLevel</a>() == a_srcParticles.<a class="code" href="classParticleContainer.html#a9c8f6bc7c36f3dc9747eda42ed75a40b">getFinestLevel</a>());</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160; </div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_srcParticles.<a class="code" href="classParticleContainer.html#a9c8f6bc7c36f3dc9747eda42ed75a40b">getFinestLevel</a>(); lvl++) {</div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(a_srcParticles.<a class="code" href="classParticleContainer.html#a66e2eae5f9d8d54deb9e7ada73903538">getGrids</a>()[lvl]); dit.ok(); ++dit) {</div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160; </div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;      List&lt;P&gt;&amp; dstParticles = a_dstParticles[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;      List&lt;P&gt;&amp; srcParticles = a_srcParticles[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160; </div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(srcParticles); lit.ok();) {</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;        <span class="keywordflow">if</span> (a_transferCrit(lit())) {</div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;          dstParticles.transfer(lit);</div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;        }</div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;        <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;          ++lit;</div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;        }</div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;      }</div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;    }</div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;  }</div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;}</div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160; </div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00382"></a><span class="lineno"><a class="line" href="classParticleOps.html#af8433f51eea802cb6d52a9f3dd259e67">  382</a></span>&#160;<a class="code" href="classParticleOps.html#af8433f51eea802cb6d52a9f3dd259e67">ParticleOps::setData</a>(<a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_particles, <span class="keyword">const</span> std::function&lt;<span class="keywordtype">void</span>(P&amp;)&gt;&amp; a_functor) noexcept</div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;{</div>
+<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;  CH_TIME(<span class="stringliteral">&quot;ParticleOps::setData(ParticleContainer&lt;P&gt;, std::function&lt;void(P&amp;)&gt;)&quot;</span>);</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160; </div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_particles.<a class="code" href="classParticleContainer.html#a9c8f6bc7c36f3dc9747eda42ed75a40b">getFinestLevel</a>(); lvl++) {</div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(a_particles.<a class="code" href="classParticleContainer.html#a66e2eae5f9d8d54deb9e7ada73903538">getGrids</a>()[lvl]); dit.ok(); ++dit) {</div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;      List&lt;P&gt;&amp; particles = a_particles[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160; </div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;        a_functor(lit());</div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;      }</div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;    }</div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;  }</div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;}</div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160; </div>
+<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, Real&amp; (P::*particleScalarField)()&gt;</div>
+<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00399"></a><span class="lineno"><a class="line" href="classParticleOps.html#a541054c4e9518af591ba06a7894dd0a7">  399</a></span>&#160;<a class="code" href="classParticleOps.html#a541054c4e9518af591ba06a7894dd0a7">ParticleOps::setValue</a>(<a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_particles, <span class="keyword">const</span> Real a_value) noexcept</div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;{</div>
+<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;  CH_TIME(<span class="stringliteral">&quot;ParticleOps::setValue(ParticleContainer&lt;P&gt;, Real&quot;</span>);</div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160; </div>
+<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_particles.<a class="code" href="classParticleContainer.html#a9c8f6bc7c36f3dc9747eda42ed75a40b">getFinestLevel</a>(); lvl++) {</div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(a_particles.<a class="code" href="classParticleContainer.html#a66e2eae5f9d8d54deb9e7ada73903538">getGrids</a>()[lvl]); dit.ok(); ++dit) {</div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;      List&lt;P&gt;&amp; particles = a_particles[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160; </div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;        P&amp; p = lit();</div>
+<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160; </div>
+<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;        (p.*particleScalarField)() = a_value;</div>
+<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;      }</div>
+<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;    }</div>
+<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;  }</div>
+<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;}</div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160; </div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, RealVect&amp; (P::*particleVectorField)()&gt;</div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00418"></a><span class="lineno"><a class="line" href="classParticleOps.html#a12bd07ddb35d108d646f87083adce63e">  418</a></span>&#160;<a class="code" href="classParticleOps.html#a541054c4e9518af591ba06a7894dd0a7">ParticleOps::setValue</a>(<a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_particles, <span class="keyword">const</span> RealVect a_value) noexcept</div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;{</div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;  CH_TIME(<span class="stringliteral">&quot;ParticleOps::setValue(ParticleContainer&lt;P&gt;, RealVect&quot;</span>);</div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160; </div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_particles.<a class="code" href="classParticleContainer.html#a9c8f6bc7c36f3dc9747eda42ed75a40b">getFinestLevel</a>(); lvl++) {</div>
+<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(a_particles.<a class="code" href="classParticleContainer.html#a66e2eae5f9d8d54deb9e7ada73903538">getGrids</a>()[lvl]); dit.ok(); ++dit) {</div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;      List&lt;P&gt;&amp; particles = a_particles[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160; </div>
+<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
+<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;        P&amp; p = lit();</div>
+<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160; </div>
+<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;        (p.*particleVectorField)() = a_value;</div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;      }</div>
+<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;    }</div>
+<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;  }</div>
+<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;}</div>
+<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160; </div>
+<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160; </div>
+<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__ParticleOps_8H_html"><div class="ttname"><a href="CD__ParticleOps_8H.html">CD_ParticleOps.H</a></div><div class="ttdoc">Declaration of a static class containing some common useful particle routines that would otherwise be...</div></div>
 <div class="ttc" id="aCD__PolyUtils_8H_html"><div class="ttname"><a href="CD__PolyUtils_8H.html">CD_PolyUtils.H</a></div><div class="ttdoc">Agglomeration of some useful algebraic/polynomial routines.</div></div>
 <div class="ttc" id="aCD__Random_8H_html"><div class="ttname"><a href="CD__Random_8H.html">CD_Random.H</a></div><div class="ttdoc">File containing some useful static methods related to random number generation.</div></div>
 <div class="ttc" id="aclassEBAMRData_html"><div class="ttname"><a href="classEBAMRData.html">EBAMRData&lt; EBCellFAB &gt;</a></div></div>
 <div class="ttc" id="aclassParticleContainer_html"><div class="ttname"><a href="classParticleContainer.html">ParticleContainer</a></div><div class="ttdoc">Templated class for holding particles on an AMR hierarchy with particle remapping.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainer.H:48</div></div>
-<div class="ttc" id="aclassParticleOps_html_a00dce5482fe701bd31fb8730e9059912"><div class="ttname"><a href="classParticleOps.html#a00dce5482fe701bd31fb8730e9059912">ParticleOps::copy</a></div><div class="ttdeci">static void copy(ParticleContainer&lt; P &gt; &amp;a_dst, const ParticleContainer&lt; P &gt; &amp;a_src) noexcept</div><div class="ttdoc">Copy all the particles from the a_src to a_dst.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:236</div></div>
-<div class="ttc" id="aclassParticleOps_html_a0a443dbb080b8dec662004c68043ec36"><div class="ttname"><a href="classParticleOps.html#a0a443dbb080b8dec662004c68043ec36">ParticleOps::getComputationalParticlesPerCell</a></div><div class="ttdeci">static void getComputationalParticlesPerCell(EBAMRCellData &amp;a_ppc, const ParticleContainer&lt; P &gt; &amp;a_src) noexcept</div><div class="ttdoc">Get the number of computational particles per cell.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:57</div></div>
-<div class="ttc" id="aclassParticleOps_html_a3e95a39f57c9272a20ef9411efdff221"><div class="ttname"><a href="classParticleOps.html#a3e95a39f57c9272a20ef9411efdff221">ParticleOps::ebIntersectionRaycast</a></div><div class="ttdeci">static bool ebIntersectionRaycast(const RefCountedPtr&lt; BaseIF &gt; &amp;a_impFunc, const RealVect &amp;a_oldPos, const RealVect &amp;a_newPos, const Real &amp;a_tolerance, Real &amp;a_s)</div><div class="ttdoc">Compute the intersection point between a particle path and an implicit function using a ray-casting a...</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:185</div></div>
-<div class="ttc" id="aclassParticleOps_html_a4f2914cd2dc872d5ec05a7d250a677ff"><div class="ttname"><a href="classParticleOps.html#a4f2914cd2dc872d5ec05a7d250a677ff">ParticleOps::ebIntersectionBisect</a></div><div class="ttdeci">static bool ebIntersectionBisect(const RefCountedPtr&lt; BaseIF &gt; &amp;a_impFunc, const RealVect &amp;a_oldPos, const RealVect &amp;a_newPos, const Real &amp;a_bisectStep, Real &amp;a_s)</div><div class="ttdoc">Compute the intersection point between a particle path and an implicit function using a bisection alg...</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:141</div></div>
-<div class="ttc" id="aclassParticleOps_html_ab8e55b59ec9d5532dc2d090820a1d28f"><div class="ttname"><a href="classParticleOps.html#ab8e55b59ec9d5532dc2d090820a1d28f">ParticleOps::getPhysicalParticlesPerCell</a></div><div class="ttdeci">static void getPhysicalParticlesPerCell(EBAMRCellData &amp;a_ppc, const ParticleContainer&lt; P &gt; &amp;a_src) noexcept</div><div class="ttdoc">Get the number of physical particles per cell.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:27</div></div>
-<div class="ttc" id="aclassParticleOps_html_adb8401ec7984ffada29e4c3382abebda"><div class="ttname"><a href="classParticleOps.html#adb8401ec7984ffada29e4c3382abebda">ParticleOps::copyDestructive</a></div><div class="ttdeci">static void copyDestructive(ParticleContainer&lt; P &gt; &amp;a_dst, ParticleContainer&lt; P &gt; &amp;a_src) noexcept</div><div class="ttdoc">Copy all the particles from the a_src to a_dst. This destroys the source particles.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:251</div></div>
-<div class="ttc" id="aclassParticleOps_html_ae2f084f6030a789894959618b7e59554"><div class="ttname"><a href="classParticleOps.html#ae2f084f6030a789894959618b7e59554">ParticleOps::getParticleGridCell</a></div><div class="ttdeci">static IntVect getParticleGridCell(const RealVect &amp;a_particlePosition, const RealVect &amp;a_probLo, const RealVect &amp;a_dx) noexcept</div><div class="ttdoc">Get the grid cell where the particle lives.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:85</div></div>
-<div class="ttc" id="aclassParticleOps_html_afc924720c8332e493951fec08881ef3d"><div class="ttname"><a href="classParticleOps.html#afc924720c8332e493951fec08881ef3d">ParticleOps::domainIntersection</a></div><div class="ttdeci">static bool domainIntersection(const RealVect &amp;a_oldPos, const RealVect &amp;a_newPos, const RealVect &amp;a_probLo, const RealVect &amp;a_probHi, Real &amp;a_s)</div><div class="ttdoc">Compute the intersection point between a particle path and a domain side.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:95</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a66e2eae5f9d8d54deb9e7ada73903538"><div class="ttname"><a href="classParticleContainer.html#a66e2eae5f9d8d54deb9e7ada73903538">ParticleContainer::getGrids</a></div><div class="ttdeci">const Vector&lt; DisjointBoxLayout &gt; &amp; getGrids() const</div><div class="ttdoc">Get the AMR grids.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:208</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a9c8f6bc7c36f3dc9747eda42ed75a40b"><div class="ttname"><a href="classParticleContainer.html#a9c8f6bc7c36f3dc9747eda42ed75a40b">ParticleContainer::getFinestLevel</a></div><div class="ttdeci">int getFinestLevel() const</div><div class="ttdoc">Get finest AMR level.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:190</div></div>
+<div class="ttc" id="aclassParticleContainer_html_ab0548dcb2f569be06bbd5c760a87d36f"><div class="ttname"><a href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">ParticleContainer::getRealm</a></div><div class="ttdeci">const std::string getRealm() const</div><div class="ttdoc">Get the realm where this ParticleContainer lives.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:199</div></div>
+<div class="ttc" id="aclassParticleOps_html_a00dce5482fe701bd31fb8730e9059912"><div class="ttname"><a href="classParticleOps.html#a00dce5482fe701bd31fb8730e9059912">ParticleOps::copy</a></div><div class="ttdeci">static void copy(ParticleContainer&lt; P &gt; &amp;a_dst, const ParticleContainer&lt; P &gt; &amp;a_src) noexcept</div><div class="ttdoc">Copy all the particles from the a_src to a_dst.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:256</div></div>
+<div class="ttc" id="aclassParticleOps_html_a07bc82adb33e81cf6f821a0f82da99e3"><div class="ttname"><a href="classParticleOps.html#a07bc82adb33e81cf6f821a0f82da99e3">ParticleOps::sum</a></div><div class="ttdeci">static Real sum(const ParticleContainer&lt; P &gt; &amp;a_particles) noexcept</div><div class="ttdoc">Perform a sum of some particle quantity.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:288</div></div>
+<div class="ttc" id="aclassParticleOps_html_a0a443dbb080b8dec662004c68043ec36"><div class="ttname"><a href="classParticleOps.html#a0a443dbb080b8dec662004c68043ec36">ParticleOps::getComputationalParticlesPerCell</a></div><div class="ttdeci">static void getComputationalParticlesPerCell(EBAMRCellData &amp;a_ppc, const ParticleContainer&lt; P &gt; &amp;a_src) noexcept</div><div class="ttdoc">Get the number of computational particles per cell.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:77</div></div>
+<div class="ttc" id="aclassParticleOps_html_a183221916135c4a5eceb341f1e40094d"><div class="ttname"><a href="classParticleOps.html#a183221916135c4a5eceb341f1e40094d">ParticleOps::transferParticles</a></div><div class="ttdeci">static void transferParticles(ParticleContainer&lt; P &gt; &amp;a_dstParticles, ParticleContainer&lt; P &gt; &amp;a_srcParticles, const std::function&lt; bool(const P &amp;)&gt; &amp;a_transferCrit) noexcept</div><div class="ttdoc">Transfer particles if they fulfill a certain removal criterion. Takes particles from a_srcParticles a...</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:353</div></div>
+<div class="ttc" id="aclassParticleOps_html_a3e95a39f57c9272a20ef9411efdff221"><div class="ttname"><a href="classParticleOps.html#a3e95a39f57c9272a20ef9411efdff221">ParticleOps::ebIntersectionRaycast</a></div><div class="ttdeci">static bool ebIntersectionRaycast(const RefCountedPtr&lt; BaseIF &gt; &amp;a_impFunc, const RealVect &amp;a_oldPos, const RealVect &amp;a_newPos, const Real &amp;a_tolerance, Real &amp;a_s)</div><div class="ttdoc">Compute the intersection point between a particle path and an implicit function using a ray-casting a...</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:205</div></div>
+<div class="ttc" id="aclassParticleOps_html_a4f2914cd2dc872d5ec05a7d250a677ff"><div class="ttname"><a href="classParticleOps.html#a4f2914cd2dc872d5ec05a7d250a677ff">ParticleOps::ebIntersectionBisect</a></div><div class="ttdeci">static bool ebIntersectionBisect(const RefCountedPtr&lt; BaseIF &gt; &amp;a_impFunc, const RealVect &amp;a_oldPos, const RealVect &amp;a_newPos, const Real &amp;a_bisectStep, Real &amp;a_s)</div><div class="ttdoc">Compute the intersection point between a particle path and an implicit function using a bisection alg...</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:161</div></div>
+<div class="ttc" id="aclassParticleOps_html_a541054c4e9518af591ba06a7894dd0a7"><div class="ttname"><a href="classParticleOps.html#a541054c4e9518af591ba06a7894dd0a7">ParticleOps::setValue</a></div><div class="ttdeci">static void setValue(ParticleContainer&lt; P &gt; &amp;a_particles, const Real a_value) noexcept</div><div class="ttdoc">Set value function. Lets the user set scalar particle quantity. Use with e.g. setValue&lt;P,...</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:399</div></div>
+<div class="ttc" id="aclassParticleOps_html_a95e3a93c6d9e2dacd917643cf939f76d"><div class="ttname"><a href="classParticleOps.html#a95e3a93c6d9e2dacd917643cf939f76d">ParticleOps::removeParticles</a></div><div class="ttdeci">static void removeParticles(ParticleContainer&lt; P &gt; &amp;a_particles, const std::function&lt; bool(const P &amp;)&gt; &amp;a_removeCriterion) noexcept</div><div class="ttdoc">Remove particles if they fulfill certain removal criterion.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:330</div></div>
+<div class="ttc" id="aclassParticleOps_html_ab8e55b59ec9d5532dc2d090820a1d28f"><div class="ttname"><a href="classParticleOps.html#ab8e55b59ec9d5532dc2d090820a1d28f">ParticleOps::getPhysicalParticlesPerCell</a></div><div class="ttdeci">static void getPhysicalParticlesPerCell(EBAMRCellData &amp;a_ppc, const ParticleContainer&lt; P &gt; &amp;a_src) noexcept</div><div class="ttdoc">Get the number of physical particles per cell.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:47</div></div>
+<div class="ttc" id="aclassParticleOps_html_adb8401ec7984ffada29e4c3382abebda"><div class="ttname"><a href="classParticleOps.html#adb8401ec7984ffada29e4c3382abebda">ParticleOps::copyDestructive</a></div><div class="ttdeci">static void copyDestructive(ParticleContainer&lt; P &gt; &amp;a_dst, ParticleContainer&lt; P &gt; &amp;a_src) noexcept</div><div class="ttdoc">Copy all the particles from the a_src to a_dst. This destroys the source particles.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:271</div></div>
+<div class="ttc" id="aclassParticleOps_html_ae2f084f6030a789894959618b7e59554"><div class="ttname"><a href="classParticleOps.html#ae2f084f6030a789894959618b7e59554">ParticleOps::getParticleGridCell</a></div><div class="ttdeci">static IntVect getParticleGridCell(const RealVect &amp;a_particlePosition, const RealVect &amp;a_probLo, const RealVect &amp;a_dx) noexcept</div><div class="ttdoc">Get the grid cell where the particle lives.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:105</div></div>
+<div class="ttc" id="aclassParticleOps_html_aeaf3f380db95aa0395d8985da86fc547"><div class="ttname"><a href="classParticleOps.html#aeaf3f380db95aa0395d8985da86fc547">ParticleOps::getParticleCellIndex</a></div><div class="ttdeci">static IntVect getParticleCellIndex(const RealVect &amp;a_particlePosition, const RealVect &amp;a_probLo, const Real &amp;a_dx) noexcept</div><div class="ttdoc">Get the cell index corresponding to the particle position.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:26</div></div>
+<div class="ttc" id="aclassParticleOps_html_af8433f51eea802cb6d52a9f3dd259e67"><div class="ttname"><a href="classParticleOps.html#af8433f51eea802cb6d52a9f3dd259e67">ParticleOps::setData</a></div><div class="ttdeci">static void setData(ParticleContainer&lt; P &gt; &amp;a_particles, const std::function&lt; void(P &amp;)&gt; &amp;a_functor) noexcept</div><div class="ttdoc">Set value function. Lets the user set particle parameters.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:382</div></div>
+<div class="ttc" id="aclassParticleOps_html_afc924720c8332e493951fec08881ef3d"><div class="ttname"><a href="classParticleOps.html#afc924720c8332e493951fec08881ef3d">ParticleOps::domainIntersection</a></div><div class="ttdeci">static bool domainIntersection(const RealVect &amp;a_oldPos, const RealVect &amp;a_newPos, const RealVect &amp;a_probLo, const RealVect &amp;a_probHi, Real &amp;a_s)</div><div class="ttdoc">Compute the intersection point between a particle path and a domain side.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:115</div></div>
 <div class="ttc" id="anamespaceParallelOps_html_a1e1c7f162c522c6fecace086d6cdd10d"><div class="ttname"><a href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">ParallelOps::max</a></div><div class="ttdeci">Real max(const Real &amp;a_input) noexcept</div><div class="ttdoc">Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)</div><div class="ttdef"><b>Definition:</b> CD_ParallelOpsImplem.H:142</div></div>
+<div class="ttc" id="anamespaceParallelOps_html_acee1ea4f1dc471622d322bef1c3e9028"><div class="ttname"><a href="namespaceParallelOps.html#acee1ea4f1dc471622d322bef1c3e9028">ParallelOps::sum</a></div><div class="ttdeci">Real sum(const Real &amp;a_value) noexcept</div><div class="ttdoc">Compute the sum across all MPI ranks.</div><div class="ttdef"><b>Definition:</b> CD_ParallelOpsImplem.H:287</div></div>
 <div class="ttc" id="anamespacePolyUtils_html_a554dcb29bb180400d8d3f7a9c4db57a5"><div class="ttname"><a href="namespacePolyUtils.html#a554dcb29bb180400d8d3f7a9c4db57a5">PolyUtils::brentRootFinder</a></div><div class="ttdeci">RealVect brentRootFinder(const RefCountedPtr&lt; BaseIF &gt; &amp;a_impFunc, const RealVect &amp;a_point1, const RealVect &amp;a_point2)</div><div class="ttdoc">Compute the root of a function between two points. This is a 1D problem along the line.</div><div class="ttdef"><b>Definition:</b> CD_PolyUtils.cpp:20</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

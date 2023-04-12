@@ -1,15 +1,25 @@
 <map id="Source/Elliptic/CD_EBHelmholtzOpFactory.H" name="Source/Elliptic/CD_EBHelmholtzOpFactory.H">
-<area shape="rect" id="node1" title="Declaration of a factory class for making Poisson operators for multigrid." alt="" coords="576,5,767,47"/>
-<area shape="rect" id="node2" href="$CD__CdrMultigrid_8H.html" title="Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves." alt="" coords="341,95,543,136"/>
-<area shape="rect" id="node11" href="$CD__EBHelmholtzOpFactory_8cpp.html" title="Implementation of CD_EBHelmholtzOpFactory.H." alt="" coords="570,95,773,136"/>
-<area shape="rect" id="node12" href="$CD__EddingtonSP1_8H.html" title="Declaration of a first order Eddington solver for radiative transfer." alt="" coords="798,95,982,136"/>
-<area shape="rect" id="node3" href="$CD__CdrCTU_8H.html" title="Declaration of a class which implements CdrMultigrid using MUSCL for advection." alt="" coords="127,281,328,322"/>
-<area shape="rect" id="node7" href="$CD__CdrGodunov_8H.html" title="Declaration of a class which implements CdrMultigrid using Godunov&#45;type advection." alt="" coords="334,184,537,225"/>
-<area shape="rect" id="node10" href="$CD__CdrMultigrid_8cpp.html" title="Implementation of CD_CdrMultigrid.H." alt="" coords="561,184,777,225"/>
-<area shape="rect" id="node4" href="$CD__CdrCTU_8cpp.html" title="Implementation of CD_CdrCTU.H." alt="" coords="5,377,207,419"/>
-<area shape="rect" id="node5" href="$CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="231,377,466,419"/>
-<area shape="rect" id="node6" href="$CD__StreamerInceptionStepperImplem_8H.html" title="Implementation of CD_StreamerInceptionStepper.H." alt="" coords="205,467,492,508"/>
-<area shape="rect" id="node8" href="$CD__CdrGodunov_8cpp.html" title="Implementation of CD_CdrGodunov.H." alt="" coords="352,281,567,322"/>
-<area shape="rect" id="node9" href="$CD__CdrPlasmaImExSdcStepper_8cpp.html" title="Implementation of CD_CdrPlasmaImExSdcStepper.H." alt="" coords="591,273,829,329"/>
-<area shape="rect" id="node13" href="$CD__EddingtonSP1_8cpp.html" title="Implementation of CD_EddingtonSP1.H." alt="" coords="801,184,985,225"/>
+<area shape="rect" id="node1" title="Declaration of a factory class for making Poisson operators for multigrid." alt="" coords="755,5,945,47"/>
+<area shape="rect" id="node2" href="$CD__CdrMultigrid_8H.html" title="Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves." alt="" coords="519,95,722,136"/>
+<area shape="rect" id="node21" href="$CD__EBHelmholtzOpFactory_8cpp.html" title="Implementation of CD_EBHelmholtzOpFactory.H." alt="" coords="749,95,951,136"/>
+<area shape="rect" id="node22" href="$CD__EddingtonSP1_8H.html" title="Declaration of a first order Eddington solver for radiative transfer." alt="" coords="977,95,1161,136"/>
+<area shape="rect" id="node3" href="$CD__CdrCTU_8H.html" title="Declaration of a class which implements CdrMultigrid using MUSCL for advection." alt="" coords="305,281,507,322"/>
+<area shape="rect" id="node17" href="$CD__CdrGodunov_8H.html" title="Declaration of a class which implements CdrMultigrid using Godunov&#45;type advection." alt="" coords="513,184,715,225"/>
+<area shape="rect" id="node20" href="$CD__CdrMultigrid_8cpp.html" title="Implementation of CD_CdrMultigrid.H." alt="" coords="739,184,955,225"/>
+<area shape="rect" id="node4" href="$CD__CdrCTU_8cpp.html" title="Implementation of CD_CdrCTU.H." alt="" coords="49,377,251,419"/>
+<area shape="rect" id="node5" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="275,385,537,411"/>
+<area shape="rect" id="node15" href="$CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="830,377,1065,419"/>
+<area shape="rect" id="node6" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="5,474,255,515"/>
+<area shape="rect" id="node7" href="$CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="279,481,533,508"/>
+<area shape="rect" id="node13" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="563,467,779,523"/>
+<area shape="rect" id="node8" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="29,578,260,619"/>
+<area shape="rect" id="node12" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="285,578,527,619"/>
+<area shape="rect" id="node9" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="29,682,260,723"/>
+<area shape="rect" id="node10" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="284,675,485,731"/>
+<area shape="rect" id="node11" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="263,779,506,835"/>
+<area shape="rect" id="node14" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="551,571,799,627"/>
+<area shape="rect" id="node16" href="$CD__StreamerInceptionStepperImplem_8H.html" title="Implementation of CD_StreamerInceptionStepper.H." alt="" coords="804,474,1091,515"/>
+<area shape="rect" id="node18" href="$CD__CdrGodunov_8cpp.html" title="Implementation of CD_CdrGodunov.H." alt="" coords="531,281,745,322"/>
+<area shape="rect" id="node19" href="$CD__CdrPlasmaImExSdcStepper_8cpp.html" title="Implementation of CD_CdrPlasmaImExSdcStepper.H." alt="" coords="769,273,1008,329"/>
+<area shape="rect" id="node23" href="$CD__EddingtonSP1_8cpp.html" title="Implementation of CD_EddingtonSP1.H." alt="" coords="979,184,1163,225"/>
 </map>

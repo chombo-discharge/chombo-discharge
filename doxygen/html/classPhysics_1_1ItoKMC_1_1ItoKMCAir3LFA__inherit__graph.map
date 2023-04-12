@@ -1,0 +1,4 @@
+<map id="Physics::ItoKMC::ItoKMCAir3LFA" name="Physics::ItoKMC::ItoKMCAir3LFA">
+<area shape="rect" id="node1" title="Hard&#45;coded implementation of ItoKMCPhysics for simplified discharges in STP air. @detail Transport da..." alt="" coords="6,80,235,107"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="5,5,236,32"/>
+</map>

@@ -1,16 +1,17 @@
 <map id="TimeStepper" name="TimeStepper">
-<area shape="rect" id="node1" title="Base class for advancing equations." alt="" coords="5,307,111,334"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html" title="Implementation of TimeStepper which runs a single advection&#45;diffusion&#45;reaction solver." alt="" coords="209,5,411,47"/>
-<area shape="rect" id="node3" href="$classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html" title="Implementation of TimeStepper which advances an ItoSolver." alt="" coords="217,71,403,112"/>
-<area shape="rect" id="node4" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract class for evolving the minimal plasma model in time." alt="" coords="235,136,385,177"/>
-<area shape="rect" id="node7" href="$classPhysics_1_1Electrostatics_1_1FieldStepper.html" title="Implementation of TimeStepper for solving electrostatic problems. The template parameter is the Field..." alt="" coords="227,201,393,243"/>
-<area shape="rect" id="node8" href="$classPhysics_1_1Geometry_1_1GeometryStepper.html" title="This implementation does absolutely nothing – it instantiates a TimeStepper with empty functionality." alt="" coords="235,267,385,308"/>
-<area shape="rect" id="node9" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html" title="Base time stepper class that advances the Ito&#45;Poisson system of equations." alt="" coords="237,332,383,373"/>
-<area shape="rect" id="node11" href="$classPhysics_1_1MeshODE_1_1MeshODEStepper.html" title="Implementation of TimeStepper for solving an ODE on a mesh. N is the number of variables." alt="" coords="159,398,461,425"/>
-<area shape="rect" id="node12" href="$classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html" title="Implementation of TimeStepper for solving for a single radiative transfer species...." alt="" coords="194,449,426,491"/>
-<area shape="rect" id="node13" href="$classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html" title="Class for streamer inception integral evaluations." alt="" coords="210,515,410,571"/>
-<area shape="rect" id="node14" href="$classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html" title="Implementation of TimeStepper for advancing tracer particles in a fixed velocity field." alt="" coords="207,596,413,637"/>
-<area shape="rect" id="node5" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html" title="Class for evolving plasma equations using a split step Godunov method." alt="" coords="509,104,717,145"/>
-<area shape="rect" id="node6" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html" title="Class for evolving plasma equations using implicit&#45;explicit spectral deferred corrections." alt="" coords="510,169,717,211"/>
-<area shape="rect" id="node10" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaGodunovStepper.html" title="Implementation of ItoPlasmaStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the I..." alt="" coords="512,332,715,373"/>
+<area shape="rect" id="node1" title="Base class for advancing equations." alt="" coords="5,365,111,391"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title=" " alt="" coords="724,59,955,115"/>
+<area shape="rect" id="node4" href="$classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html" title="Implementation of TimeStepper which runs a single advection&#45;diffusion&#45;reaction solver." alt="" coords="210,161,413,203"/>
+<area shape="rect" id="node5" href="$classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html" title="Implementation of TimeStepper which advances an ItoSolver." alt="" coords="219,227,404,268"/>
+<area shape="rect" id="node6" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract class for evolving the minimal plasma model in time." alt="" coords="236,292,387,333"/>
+<area shape="rect" id="node9" href="$classPhysics_1_1Electrostatics_1_1FieldStepper.html" title="Implementation of TimeStepper for solving electrostatic problems. The template parameter is the Field..." alt="" coords="228,357,395,399"/>
+<area shape="rect" id="node10" href="$classPhysics_1_1Geometry_1_1GeometryStepper.html" title="This implementation does absolutely nothing – it instantiates a TimeStepper with empty functionality." alt="" coords="236,423,387,464"/>
+<area shape="rect" id="node11" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Base time stepper class that advances the Ito&#45;KMC&#45;Poisson system of equations. If you want a differen..." alt="" coords="196,96,427,137"/>
+<area shape="rect" id="node12" href="$classPhysics_1_1MeshODE_1_1MeshODEStepper.html" title="Implementation of TimeStepper for solving an ODE on a mesh. N is the number of variables." alt="" coords="160,489,463,515"/>
+<area shape="rect" id="node13" href="$classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html" title="Implementation of TimeStepper for solving for a single radiative transfer species...." alt="" coords="195,540,427,581"/>
+<area shape="rect" id="node14" href="$classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html" title="Class for streamer inception integral evaluations." alt="" coords="211,606,411,662"/>
+<area shape="rect" id="node15" href="$classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html" title="Implementation of TimeStepper for advancing tracer particles in a fixed velocity field." alt="" coords="209,687,414,728"/>
+<area shape="rect" id="node3" href="$classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html" title="Implementation of ItoKMCStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the Ito&#45;..." alt="" coords="1004,67,1243,108"/>
+<area shape="rect" id="node7" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html" title="Class for evolving plasma equations using a split step Godunov method." alt="" coords="735,260,943,301"/>
+<area shape="rect" id="node8" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html" title="Class for evolving plasma equations using implicit&#45;explicit spectral deferred corrections." alt="" coords="736,325,943,367"/>
 </map>

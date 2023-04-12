@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Code testing &mdash; chombo-discharge  documentation</title>
@@ -30,11 +30,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> chombo-discharge
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            chombo-discharge
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -45,7 +49,6 @@
 <li class="toctree-l1"><a class="reference internal" href="Documentation.html">Using this documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="Examples.html">Examples</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Code testing</a><ul>
@@ -97,7 +100,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/ItoPlasmaModel.html">Îto-KMC plasma model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ItoKMC.html">Îto-KMC plasma model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
 <ul>
@@ -108,12 +111,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Applications/MeshODEModel.html">Mesh ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/TracerParticleModel.html">Tracer particle model</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
@@ -144,7 +141,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Code testing</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/Base/Testing.rst.txt" rel="nofollow"> View page source</a>
@@ -169,34 +166,39 @@ The tests are defined in <code class="file docutils literal notranslate"><span c
 <section id="running-the-test-suite">
 <h3>Running the test suite<a class="headerlink" href="#running-the-test-suite" title="Permalink to this heading"></a></h3>
 <p>To do a clean compile and run of all tests, navigate to <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Tests</span></code> and execute the following:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --no_compare --parallel -cores X
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --no_exec -cores X
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">X</span></code> is the number of cores to use when compiling and running.
-If the tests should be run in serial, omit the <code class="docutils literal notranslate"><span class="pre">--parallel</span> <span class="pre">-cores</span> <span class="pre">X</span></code> flag.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>Run the test suite with <code class="docutils literal notranslate"><span class="pre">DEBUG=TRUE</span></code> to catch assertion errors.</p>
-</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">X</span></code> is the number of cores to use when compiling.
+By default, this will compile without MPI and HDF5 support.</p>
 </section>
 <section id="advanced-configuration">
 <h3>Advanced configuration<a class="headerlink" href="#advanced-configuration" title="Permalink to this heading"></a></h3>
 <p>The following options are available for running the various tests:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">--compile</span></code> Re-compile the test.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--clean</span></code> Do a clean recompilation of the test.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--silent</span></code> Turn off unecessary output.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--compile</span></code> Compile all tests.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--clean</span></code> Do a clean recompilation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--silent</span></code> Turn off terminal output.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--benchmark</span></code> Generate benchmark files.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--no_exec</span></code> Compile, but do not run the test.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--no_compare</span></code> Do not compare with benchmark files.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--parallel</span></code> Use MPI or not</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--compare</span></code> Run, and compare with benchmark files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-dim</span> <span class="pre">&lt;number&gt;</span></code> Run only the specified 2D or 3D tests.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-mpi</span> <span class="pre">&lt;true/false&gt;</span></code> Use MPI or not.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-hdf</span> <span class="pre">&lt;true/false&gt;</span></code> Use HDF5 or not.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-cores</span> <span class="pre">&lt;number&gt;</span></code> Run with specified number of cores.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-suites</span> <span class="pre">&lt;string&gt;</span></code> Run a specific application test suite.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-tests</span> <span class="pre">&lt;string</span></code> Run a specific test.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">-dim</span> <span class="pre">&lt;number&gt;</span></code> Run only the specified 2D or 3D tests.</p></li>
 </ul>
-<p>For example, to only run the two-dimensional radiative transfer tests, without comparison with benchmark files, one would run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --no_compare --parallel -cores <span class="m">4</span> -suites RadiativeTransfer -dim <span class="m">2</span>
+<p>For example, to compile with MPI and HDF5 enabled:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --no_exec -mpi=true -hdf=true -cores 8
+</pre></div>
+</div>
+<p>If one only wants to compile a specified test suite:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --no_exec -mpi=true -hdf=true -cores 8 -suites Electrostatics
+</pre></div>
+</div>
+<p>One can also restrict the tests to specific dimensionality, e.g.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --no_exec -mpi=true -hdf=true -cores 8 -suites Electrostatics -dim=2
 </pre></div>
 </div>
 </section>
@@ -209,18 +211,18 @@ Once the code development is completed, the benchmark files can later be bit-wis
 <p>This consists of the following steps:</p>
 <ol class="arabic">
 <li><p><em>Before</em> making changes to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, generate benchmark files with</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --parallel -cores X --benchmark
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --benchmark -mpi=true -hdf=true -cores X
 </pre></div>
 </div>
 </li>
 <li><p>Make the required changes to the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> code.</p></li>
 <li><p>Run the test suite again, and compare benchmark and output files as follows:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --parallel -cores X
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --compare -mpi=true -hdf=true -cores X
 </pre></div>
 </div>
 </li>
 </ol>
-<p>When running the tests this way, the output files are bit-wise compared and a warning is issued if the files not exactly match.</p>
+<p>When running the tests this way, the output files are bit-wise compared and a warning is issued if the files do not exactly match.</p>
 </section>
 </section>
 <section id="automated-testing">

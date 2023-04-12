@@ -3,7 +3,7 @@
 <area shape="rect" id="node2" href="$CD__SurfaceODESolverImplem_8H.html" title="Implementation of CD_SurfaceODESolver.H." alt="" coords="598,95,833,136"/>
 <area shape="rect" id="node3" href="$CD__CdrPlasmaStepper_8H.html" title="Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time." alt="" coords="857,95,1025,136"/>
 <area shape="rect" id="node19" href="$CD__FieldStepper_8H.html" title="TimeStepper class for only solving the Poisson equation (with surface charge)" alt="" coords="1318,95,1481,136"/>
-<area shape="rect" id="node22" href="$CD__ItoPlasmaStepper_8H.html" title="Abstract class for integrating the Ito plasma equations." alt="" coords="1723,95,1886,136"/>
+<area shape="rect" id="node22" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="1619,102,1881,129"/>
 <area shape="rect" id="node4" href="$CD__CdrPlasmaStepper_8cpp.html" title="Implementation of CD_CdrPlasmaStepper.H." alt="" coords="273,191,448,233"/>
 <area shape="rect" id="node5" href="$CD__CdrPlasmaTagger_8H.html" title="Declearation of an abstract class for tagging cells in a Physics/CdrPlasma context." alt="" coords="473,191,641,233"/>
 <area shape="rect" id="node11" href="$CD__CdrPlasmaGodunovStepper_8H.html" title="Declaration of the Godunov time stepper method." alt="" coords="691,184,929,240"/>
@@ -21,13 +21,13 @@
 <area shape="rect" id="node18" href="$CD__CdrPlasmaImExSdcStorage_8H.html" title="Declaration of scratch storage for CdrPlasmaImExSdcStepper." alt="" coords="1111,288,1349,344"/>
 <area shape="rect" id="node20" href="$CD__FieldStepper_8cpp.html" title="Implementation of CD_FieldStepper.H." alt="" coords="1217,191,1379,233"/>
 <area shape="rect" id="node21" href="$CD__FieldStepperImplem_8H.html" title="Implementation of CD_FieldStepper.H." alt="" coords="1403,191,1601,233"/>
-<area shape="rect" id="node23" href="$CD__ItoPlasmaStepper_8cpp.html" title="Implementation of CD_ItoPlasmaStepper.H." alt="" coords="1625,191,1795,233"/>
-<area shape="rect" id="node24" href="$CD__ItoPlasmaTagger_8H.html" title="Parent tagger class for ItoPlasma." alt="" coords="1819,191,1982,233"/>
-<area shape="rect" id="node30" href="$CD__ItoPlasmaGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="2006,184,2241,240"/>
-<area shape="rect" id="node25" href="$CD__ItoPlasmaFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="1614,295,1795,337"/>
-<area shape="rect" id="node29" href="$CD__ItoPlasmaTagger_8cpp.html" title="Implementation of CD_ItoPlasmaTagger.H." alt="" coords="1819,295,1982,337"/>
-<area shape="rect" id="node26" href="$CD__ItoPlasmaFieldTagger_8cpp.html" title="Implementation of CD_ItoPlasmaFieldTagger.H." alt="" coords="1590,399,1785,441"/>
-<area shape="rect" id="node27" href="$CD__ItoPlasmaStreamerTagger_8H.html" title="Implementation ItoPlasmaTagger which tags on alpha and curvature of field." alt="" coords="1809,392,2043,448"/>
-<area shape="rect" id="node28" href="$CD__ItoPlasmaStreamerTagger_8cpp.html" title="Implementation CD_ItoPlasmaStreamerTagger.H." alt="" coords="1803,496,2049,552"/>
-<area shape="rect" id="node31" href="$CD__ItoPlasmaGodunovStepper_8cpp.html" title="Implementation of CD_ItoPlasmaGodunovStepper.H." alt="" coords="2006,288,2241,344"/>
+<area shape="rect" id="node23" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="1625,191,1875,233"/>
+<area shape="rect" id="node24" href="$CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="1899,199,2153,225"/>
+<area shape="rect" id="node30" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="2187,184,2403,240"/>
+<area shape="rect" id="node25" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="1649,295,1880,337"/>
+<area shape="rect" id="node29" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="1905,295,2147,337"/>
+<area shape="rect" id="node26" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="1649,399,1880,441"/>
+<area shape="rect" id="node27" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="1904,392,2105,448"/>
+<area shape="rect" id="node28" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="1883,496,2126,552"/>
+<area shape="rect" id="node31" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="2171,288,2419,344"/>
 </map>

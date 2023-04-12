@@ -192,17 +192,17 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aa865ee4d5775f1edf1e3fcc252acf53d">parseRuntimeOptions</a> () override</td></tr>
 <tr class="memdesc:aa865ee4d5775f1edf1e3fcc252acf53d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse runtime options. <br /></td></tr>
 <tr class="separator:aa865ee4d5775f1edf1e3fcc252acf53d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0a72aa04fea05224f22bf53e5479da0d"><td class="memItemLeft" align="right" valign="top"><a id="a0a72aa04fea05224f22bf53e5479da0d"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a0a72aa04fea05224f22bf53e5479da0d">allocateInternals</a> () override</td></tr>
-<tr class="memdesc:a0a72aa04fea05224f22bf53e5479da0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage. <br /></td></tr>
-<tr class="separator:a0a72aa04fea05224f22bf53e5479da0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84732e26e5cdbbbbf795e3753d0caf58"><td class="memItemLeft" align="right" valign="top"><a id="a84732e26e5cdbbbbf795e3753d0caf58"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a84732e26e5cdbbbbf795e3753d0caf58">allocate</a> () override</td></tr>
+<tr class="memdesc:a84732e26e5cdbbbbf795e3753d0caf58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage. <br /></td></tr>
+<tr class="separator:a84732e26e5cdbbbbf795e3753d0caf58"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1ca87608627761f39fb02ec898ce2af5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a1ca87608627761f39fb02ec898ce2af5">preRegrid</a> (const int a_base, const int a_oldFinestLevel) override</td></tr>
 <tr class="memdesc:a1ca87608627761f39fb02ec898ce2af5"><td class="mdescLeft">&#160;</td><td class="mdescRight">preRegrid operations  <a href="classMcPhoto.html#a1ca87608627761f39fb02ec898ce2af5">More...</a><br /></td></tr>
 <tr class="separator:a1ca87608627761f39fb02ec898ce2af5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6ed001e000dda6b1f3ce2c2ffbeffbc1"><td class="memItemLeft" align="right" valign="top"><a id="a6ed001e000dda6b1f3ce2c2ffbeffbc1"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a6ed001e000dda6b1f3ce2c2ffbeffbc1">deallocateInternals</a> () override</td></tr>
-<tr class="memdesc:a6ed001e000dda6b1f3ce2c2ffbeffbc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate internal storage. <br /></td></tr>
-<tr class="separator:a6ed001e000dda6b1f3ce2c2ffbeffbc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a3d69f4dc5c298d453aaae79413e0f0"><td class="memItemLeft" align="right" valign="top"><a id="a7a3d69f4dc5c298d453aaae79413e0f0"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a7a3d69f4dc5c298d453aaae79413e0f0">deallocate</a> () override</td></tr>
+<tr class="memdesc:a7a3d69f4dc5c298d453aaae79413e0f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate internal storage. <br /></td></tr>
+<tr class="separator:a7a3d69f4dc5c298d453aaae79413e0f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1edfc9d2176da3818632cee7ea9abb6d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a1edfc9d2176da3818632cee7ea9abb6d">regrid</a> (const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override</td></tr>
 <tr class="memdesc:a1edfc9d2176da3818632cee7ea9abb6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid function for this class.  <a href="classMcPhoto.html#a1edfc9d2176da3818632cee7ea9abb6d">More...</a><br /></td></tr>
 <tr class="separator:a1edfc9d2176da3818632cee7ea9abb6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -413,10 +413,10 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:ab0f8cabb352c05c351cb53c6a6514eb0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ab0f8cabb352c05c351cb53c6a6514eb0">coarseFineRedistribution</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi)</td></tr>
 <tr class="memdesc:ab0f8cabb352c05c351cb53c6a6514eb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do coarse-fine redistribution.  <a href="classMcPhoto.html#ab0f8cabb352c05c351cb53c6a6514eb0">More...</a><br /></td></tr>
 <tr class="separator:ab0f8cabb352c05c351cb53c6a6514eb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4f5e632ccd3515ba7527ccb4b2fccbbf"><td class="memItemLeft" align="right" valign="top"><a id="a4f5e632ccd3515ba7527ccb4b2fccbbf"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a4f5e632ccd3515ba7527ccb4b2fccbbf">parseRNG</a> ()</td></tr>
-<tr class="memdesc:a4f5e632ccd3515ba7527ccb4b2fccbbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse RNG options. <br /></td></tr>
-<tr class="separator:a4f5e632ccd3515ba7527ccb4b2fccbbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65acbf58522501756e8e944ca006ff45"><td class="memItemLeft" align="right" valign="top"><a id="a65acbf58522501756e8e944ca006ff45"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a65acbf58522501756e8e944ca006ff45">parseTransparentBoundaries</a> ()</td></tr>
+<tr class="memdesc:a65acbf58522501756e8e944ca006ff45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn on/off transparent boundaries. <br /></td></tr>
+<tr class="separator:a65acbf58522501756e8e944ca006ff45"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aabe821e56c23eb4620e576b2c042f805"><td class="memItemLeft" align="right" valign="top"><a id="aabe821e56c23eb4620e576b2c042f805"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aabe821e56c23eb4620e576b2c042f805">parseDivergenceComputation</a> ()</td></tr>
 <tr class="memdesc:aabe821e56c23eb4620e576b2c042f805"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the divergence computation, i.e. if we blend with non-conservative divergence or not. <br /></td></tr>
@@ -461,6 +461,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
+<tr class="memitem:a0c47fbbd89427c9988ecd328f7dd1c55"><td class="memItemLeft" align="right" valign="top"><a id="a0c47fbbd89427c9988ecd328f7dd1c55"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a0c47fbbd89427c9988ecd328f7dd1c55">m_transparentEB</a></td></tr>
+<tr class="memdesc:a0c47fbbd89427c9988ecd328f7dd1c55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn on/off transparent boundaries. <br /></td></tr>
+<tr class="separator:a0c47fbbd89427c9988ecd328f7dd1c55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6cf70cf85ebb75002fad55455ef77957"><td class="memItemLeft" align="right" valign="top"><a id="a6cf70cf85ebb75002fad55455ef77957"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a6cf70cf85ebb75002fad55455ef77957">m_instantaneous</a></td></tr>
 <tr class="memdesc:a6cf70cf85ebb75002fad55455ef77957"><td class="mdescLeft">&#160;</td><td class="mdescRight">Instantaneous transport or not. <br /></td></tr>

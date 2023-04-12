@@ -1,0 +1,4 @@
+<map id="Physics::ItoKMC::ItoKMCTagger&lt; S &gt;" name="Physics::ItoKMC::ItoKMCTagger&lt; S &gt;">
+<area shape="rect" id="node1" title="Class for tagging grid cells using the Ito&#45;KMC&#45;Poisson module. Note that S is the time integrator typ..." alt="" coords="5,80,268,107"/>
+<area shape="rect" id="node2" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="91,5,182,32"/>
+</map>

@@ -87,10 +87,12 @@ Collaboration diagram for PhaseRealm:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPhaseRealm__coll__graph.png" border="0" usemap="#aPhaseRealm_coll__map" alt="Collaboration graph"/></div>
 <map name="aPhaseRealm_coll__map" id="aPhaseRealm_coll__map">
-<area shape="rect" title="Class that holds important things for doing AMR over a specific phase and processor distribution." alt="" coords="151,184,253,211"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="5,95,201,121"/>
-<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="34,5,173,32"/>
-<area shape="rect" href="classEBAMRParticleMesh.html" title="Class for handling particle&#45;mesh operations with AMR." alt="" coords="226,95,378,121"/>
+<area shape="rect" title="Class that holds important things for doing AMR over a specific phase and processor distribution." alt="" coords="268,317,371,344"/>
+<area shape="rect" href="classEBAMRSurfaceDeposition.html" title="class for handling surface deposition of particles with EB and AMR." alt="" coords="5,228,193,255"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="15,95,199,136"/>
+<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="149,5,287,32"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="233,169,429,195"/>
+<area shape="rect" href="classEBAMRParticleMesh.html" title="Class for handling particle&#45;mesh operations with AMR." alt="" coords="421,228,573,255"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -182,6 +184,10 @@ const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBGradient.html">EBG
 <a class="el" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a46b9348f5c53157c5f090e7986c365d1">getParticleMesh</a> () const</td></tr>
 <tr class="memdesc:a46b9348f5c53157c5f090e7986c365d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get particle-mesh operator. <br /></td></tr>
 <tr class="separator:a46b9348f5c53157c5f090e7986c365d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7290bfa8bbeffe6455591d1828dde3b8"><td class="memItemLeft" align="right" valign="top"><a id="a7290bfa8bbeffe6455591d1828dde3b8"></a>
+<a class="el" href="classEBAMRSurfaceDeposition.html">EBAMRSurfaceDeposition</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a7290bfa8bbeffe6455591d1828dde3b8">getSurfaceDeposition</a> () const</td></tr>
+<tr class="memdesc:a7290bfa8bbeffe6455591d1828dde3b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the surface deposition operator. <br /></td></tr>
+<tr class="separator:a7290bfa8bbeffe6455591d1828dde3b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a109beac91ba05315ddbc61c68d1f6f"><td class="memItemLeft" align="right" valign="top"><a id="a3a109beac91ba05315ddbc61c68d1f6f"></a>
 Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a3a109beac91ba05315ddbc61c68d1f6f">getCoarseAverage</a> () const</td></tr>
 <tr class="memdesc:a3a109beac91ba05315ddbc61c68d1f6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get coarsening operators. <br /></td></tr>
@@ -386,6 +392,9 @@ Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt;&#160;</td><td class="memItemR
 <tr class="memitem:a18918564d9538c935b1c3686bcab9e09"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a18918564d9538c935b1c3686bcab9e09">m_eblgCoFi</a></td></tr>
 <tr class="memdesc:a18918564d9538c935b1c3686bcab9e09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsened fine-level EB grids.  <a href="classPhaseRealm.html#a18918564d9538c935b1c3686bcab9e09">More...</a><br /></td></tr>
 <tr class="separator:a18918564d9538c935b1c3686bcab9e09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03464ade19278214a5e4c672d552eaba"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a03464ade19278214a5e4c672d552eaba">m_eblgFiCo</a></td></tr>
+<tr class="memdesc:a03464ade19278214a5e4c672d552eaba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsened fine-level EB grids.  <a href="classPhaseRealm.html#a03464ade19278214a5e4c672d552eaba">More...</a><br /></td></tr>
+<tr class="separator:a03464ade19278214a5e4c672d552eaba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a261481b00f4bacf8f3006ea74ed3685d"><td class="memItemLeft" align="right" valign="top"><a id="a261481b00f4bacf8f3006ea74ed3685d"></a>
 Vector&lt; RefCountedPtr&lt; LayoutData&lt; Vector&lt; LayoutIndex &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a261481b00f4bacf8f3006ea74ed3685d">m_neighbors</a></td></tr>
 <tr class="memdesc:a261481b00f4bacf8f3006ea74ed3685d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weird but true thing that indexces neighboring boxes. <br /></td></tr>
@@ -442,6 +451,10 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBGradient.html">EBGradien
 <a class="el" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a85e62f95019cf966d379a660e2daaeda">m_particleMesh</a></td></tr>
 <tr class="memdesc:a85e62f95019cf966d379a660e2daaeda"><td class="mdescLeft">&#160;</td><td class="mdescRight">For doing particle-mesh operations. <br /></td></tr>
 <tr class="separator:a85e62f95019cf966d379a660e2daaeda"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b06e99090f42c9ab754c9611cab6fa3"><td class="memItemLeft" align="right" valign="top"><a id="a0b06e99090f42c9ab754c9611cab6fa3"></a>
+<a class="el" href="classEBAMRSurfaceDeposition.html">EBAMRSurfaceDeposition</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a0b06e99090f42c9ab754c9611cab6fa3">m_surfaceDeposition</a></td></tr>
+<tr class="memdesc:a0b06e99090f42c9ab754c9611cab6fa3"><td class="mdescLeft">&#160;</td><td class="mdescRight">For doing particle deposition onto surfaces. <br /></td></tr>
+<tr class="separator:a0b06e99090f42c9ab754c9611cab6fa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae50a509cf42a4c89af419e44f22751ff"><td class="memItemLeft" align="right" valign="top"><a id="ae50a509cf42a4c89af419e44f22751ff"></a>
 RefCountedPtr&lt; <a class="el" href="classIrregAmrStencil.html">IrregAmrStencil</a>&lt; <a class="el" href="classCentroidInterpolationStencil.html">CentroidInterpolationStencil</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#ae50a509cf42a4c89af419e44f22751ff">m_centroidInterpolationStencil</a></td></tr>
 <tr class="memdesc:ae50a509cf42a4c89af419e44f22751ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data recentering utility (center to centroid) <br /></td></tr>
@@ -1704,7 +1717,32 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 </div><div class="memdoc">
 
 <p>Coarsened fine-level EB grids. </p>
-<p>m_eblgCoFi[1] holds the coarsening of m_eblg[1]. </p>
+<p>m_eblgCoFi[lvl] holds the grids on level lvl that are a coarsening of the grids on lvl+1 </p>
+
+</div>
+</div>
+<a id="a03464ade19278214a5e4c672d552eaba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03464ade19278214a5e4c672d552eaba">&#9670;&nbsp;</a></span>m_eblgFiCo</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;RefCountedPtr&lt;EBLevelGrid&gt; &gt; PhaseRealm::m_eblgFiCo</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Coarsened fine-level EB grids. </p>
+<p>m_eblgFiCo[lvl] holds the refinement of the grids on level lvl-1 </p>
 
 </div>
 </div>

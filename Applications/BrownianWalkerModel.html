@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Brownian walker &mdash; chombo-discharge  documentation</title>
@@ -18,6 +18,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -30,11 +31,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> chombo-discharge
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            chombo-discharge
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -45,7 +50,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
@@ -87,23 +91,20 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="CdrPlasmaModel.html">CDR plasma model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="StreamerInceptionModel.html">Streamer inception model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ItoPlasmaModel.html">Îto-KMC plasma model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ItoKMC.html">Îto-KMC plasma model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Brownian walker</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Brownian walker</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#solvers">Solvers</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="ElectrostaticsModel.html">Electrostatics model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GeometryModel.html">Geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshODEModel.html">Mesh ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RadiativeTransferModel.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TracerParticleModel.html">Tracer particle model</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
@@ -134,7 +135,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Brownian walker</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/Applications/BrownianWalkerModel.rst.txt" rel="nofollow"> View page source</a>
@@ -147,6 +148,27 @@
              
   <section id="brownian-walker">
 <span id="chap-brownianwalkermodel"></span><h1>Brownian walker<a class="headerlink" href="#brownian-walker" title="Permalink to this heading"></a></h1>
+<p>The Brownian walker model runs a single microscropic drift-diffusion using the <a class="reference internal" href="../Solvers/Ito.html#chap-itosolver"><span class="std std-ref">ItoSolver</span></a>, solving</p>
+<div class="math notranslate nohighlight">
+\[\Delta\mathbf{X} = \mathbf{V}\Delta t + \sqrt{2D\Delta t}\mathbf{W}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{X}\)</span> is the spatial position of a particle <span class="math notranslate nohighlight">\(\mathbf{V}\)</span> is the drift velocity and <span class="math notranslate nohighlight">\(D\)</span> is the diffusion coefficient <em>in the continuum limit</em>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Source code is located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/BrownianWalker</span></code>.</p>
+</div>
+<p>The model consists of the following implementation files:</p>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">CD_BrownianWalkerStepper.H/cpp</span></code> which implements the integration routines.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">CD_BrownianWalkerSpecies.H/cpp</span></code> which implements initial conditions.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">CD_BrownianWalkerTagger.H/cpp</span></code> which implements mesh refinement and de-refinement criteria.</p></li>
+</ul>
+<section id="solvers">
+<h2>Solvers<a class="headerlink" href="#solvers" title="Permalink to this heading"></a></h2>
+<p>This application uses the following solvers:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../Solvers/Ito.html#chap-itosolver"><span class="std std-ref">ItoSolver</span></a>.</p></li>
+</ul>
+</section>
 </section>
 
 

@@ -80,8 +80,14 @@ $(function() {
 <li>addFiCoDataToFine()
 : <a class="el" href="classEBCoarseFineParticleMesh.html#af93cfd62846ed73d8fc8c7cab48aa38f">EBCoarseFineParticleMesh</a>
 </li>
+<li>addFineGhostDataToValidCoarData()
+: <a class="el" href="classEBAMRSurfaceDeposition.html#a8dcbfaf3deda03ba30bc093bc2521c9c">EBAMRSurfaceDeposition</a>
+</li>
 <li>addFineGhostsToCoarse()
 : <a class="el" href="classEBCoarseFineParticleMesh.html#a4136a727ffdaf513ee37d9eca4cd1dfc">EBCoarseFineParticleMesh</a>
+</li>
+<li>addInvalidCoarseDataToFineData()
+: <a class="el" href="classEBAMRSurfaceDeposition.html#aba71610b9a93dd3b5f034ca938375425">EBAMRSurfaceDeposition</a>
 </li>
 <li>addInvalidCoarseToFine()
 : <a class="el" href="classEBCoarseFineParticleMesh.html#a281dd813bb440fb9f825178c1cc37967">EBCoarseFineParticleMesh</a>
@@ -102,7 +108,7 @@ $(function() {
 , <a class="el" href="classRtLayout.html#a86a586281b0cec34cb46b4077a651254">RtLayout&lt; T &gt;</a>
 </li>
 <li>addTable()
-: <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaAir3LFA.html#afd15c44477a85a08f5d61de8cce43c8e">Physics::ItoPlasma::ItoPlasmaAir3LFA</a>
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#ab4b9625dfc3624249d2527be60891af3">Physics::ItoKMC::ItoKMCAir3LFA</a>
 </li>
 <li>admitValidParticles()
 : <a class="el" href="classParticleContainer.html#a2ec234df7a81b4ccb91f3be90d17cd99">ParticleContainer&lt; P &gt;</a>
@@ -117,8 +123,8 @@ $(function() {
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#af78c0374aed9bf00440f5c0ff2841d00">Physics::CdrPlasma::CdrPlasmaStepper</a>
 , <a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aee9984c17bdf54130c755612073b2ddd">Physics::Electrostatics::FieldStepper&lt; T &gt;</a>
 , <a class="el" href="classPhysics_1_1Geometry_1_1GeometryStepper.html#a9c2374396c1bdeb7135f002b6665259d">Physics::Geometry::GeometryStepper</a>
-, <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaGodunovStepper.html#a6111df5b12b93fb3e0fe054bbfced4d9">Physics::ItoPlasma::ItoPlasmaGodunovStepper</a>
-, <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a14729a13fc332765a54640f0f04aa8ae">Physics::ItoPlasma::ItoPlasmaStepper</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a121c97e6fdf60ab42e6d1985c5bfdfca">Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad12f0eb6ee61b6d102747368a0b75667">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
 , <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a1a06df878801cf23189547818a26daa3">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>
 , <a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a6be891e4077d9946373e3229d1e14a89">Physics::RadiativeTransfer::RadiativeTransferStepper&lt; T &gt;</a>
 , <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aea3b431fb6d97817c4eda38b9b208c04">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
@@ -136,23 +142,23 @@ $(function() {
 </li>
 <li>advanceEuler()
 : <a class="el" href="classCdrMultigrid.html#a09626f2c30134864d8ef00a273b5bcd7">CdrMultigrid</a>
-, <a class="el" href="classCdrSolver.html#aa9595227430c85146057dcdbbe073f82">CdrSolver</a>
+, <a class="el" href="classCdrSolver.html#a5f137bc464c9241b0ab868f0dcdd4c28">CdrSolver</a>
 , <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a04178ed9a8b1a146905950b210254f8d">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>
 </li>
+<li>advanceEulerMaruyama()
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#ac25558a7ebeac507bd8982dc504020d7">Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;</a>
+</li>
 <li>advanceHybrid()
-: <a class="el" href="classKMCSolver.html#a3e46902d126e21ce27d196f0a88ae8a6">KMCSolver&lt; R, State, T &gt;</a>
+: <a class="el" href="classKMCSolver.html#aeca883466991e8f74229f503be3ce1a7">KMCSolver&lt; R, State, T &gt;</a>
 </li>
 <li>advanceIons()
 : <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aec32020086de6de53ee3a0f1313c21b4">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>advanceKMC()
-: <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#ac1a2a01a8f7052627009013049e3ae82">Physics::ItoPlasma::ItoPlasmaPhysics</a>
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#abd35ee897c202a51c1208953d3cf6793">Physics::ItoKMC::ItoKMCPhysics</a>
 </li>
 <li>advanceParticlesEuler()
 : <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a4bf1114363b1526c06e1a2d55ad8491b">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
-</li>
-<li>advanceParticlesEulerMaruyama()
-: <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaGodunovStepper.html#a6992e11304afc73aedf3c8dccdaa2ae2">Physics::ItoPlasma::ItoPlasmaGodunovStepper</a>
 </li>
 <li>advanceParticlesRK2()
 : <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#aaf7ad061949d03bb5ca3795ccaeade86">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
@@ -161,7 +167,7 @@ $(function() {
 : <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#acb54de8d6c35cc2d1e98cb87bf705269">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
 </li>
 <li>advancePhotons()
-: <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#aef2517140df43cf94cf3202e6dc0857f">Physics::ItoPlasma::ItoPlasmaStepper</a>
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a74960f928b3ef23eaf19bd9ee0b1ab0f">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
 </li>
 <li>advancePhotonsInstantaneous()
 : <a class="el" href="classMcPhoto.html#ac417c104ce1b2ded82dba7d55910237b">McPhoto</a>
@@ -175,8 +181,8 @@ $(function() {
 <li>advanceReactionNetwork()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a8e67d54426124de2c25fb2659ba5e29f">Physics::CdrPlasma::CdrPlasmaJSON</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html#abc4e0c717e12d18ffea46e06d3f64b44">Physics::CdrPlasma::CdrPlasmaPhysics</a>
-, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a10f804a12388c95ba577425762c30bce">Physics::CdrPlasma::CdrPlasmaStepper</a>
-, <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a21efa9ab503adc8618f6fcd8461af6ff">Physics::ItoPlasma::ItoPlasmaStepper</a>
+, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a9d87d3287ab431fc57c8f3d900ecef5f">Physics::CdrPlasma::CdrPlasmaStepper</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a36907acbc61c507c48ae84b3d06249a4">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
 </li>
 <li>advanceReactionNetworkIrreg()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a3cf0113e11a56dd76d5e422876581d34">Physics::CdrPlasma::CdrPlasmaStepper</a>
@@ -206,8 +212,11 @@ $(function() {
 : <a class="el" href="classKMCDualStateReaction.html#ab85e7504b09135b3727f5a024b84f225">KMCDualStateReaction&lt; State, T &gt;</a>
 , <a class="el" href="classKMCSingleStateReaction.html#aefb2a4d5f0cd8f79f34c690b96c2db1a">KMCSingleStateReaction&lt; State, T &gt;</a>
 </li>
-<li>advanceTau()
-: <a class="el" href="classKMCSolver.html#a2b7f8bb50ded4f0b6fbf1a0cac0e6685">KMCSolver&lt; R, State, T &gt;</a>
+<li>advanceTauMidpoint()
+: <a class="el" href="classKMCSolver.html#a2f4aa4fa6d4587ca67b6611ee633df9f">KMCSolver&lt; R, State, T &gt;</a>
+</li>
+<li>advanceTauPlain()
+: <a class="el" href="classKMCSolver.html#ad6486ff58965dc00d2ac7961420cb010">KMCSolver&lt; R, State, T &gt;</a>
 </li>
 <li>advanceTransport()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a8d284ef17993aaf2bb340fa7dfdc8c8b">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
@@ -240,7 +249,7 @@ $(function() {
 : <a class="el" href="classAerosol.html#ac4f50c92399bdb732daa26edfb0fe6a3">Aerosol</a>
 </li>
 <li>Algorithm
-: <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#a3602dfe0b7f421addde9dd6c6b86683c">Physics::ItoPlasma::ItoPlasmaPhysics</a>
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6b">Physics::ItoKMC::ItoKMCPhysics</a>
 </li>
 <li>alias()
 : <a class="el" href="classAmrMesh.html#ae1420f5b9c853b5e09334f15966a36f6">AmrMesh</a>
@@ -252,41 +261,42 @@ $(function() {
 : <a class="el" href="classDataOps.html#ac21f9cca03ec5e975a05e304584acb7e">DataOps</a>
 </li>
 <li>allocate()
-: <a class="el" href="classAmrMesh.html#ad7fffb758e5b66b09bed3d194d99d94c">AmrMesh</a>
+: <a class="el" href="classAmrMesh.html#a74ebef713ce593b19fe2ffbbba9ce2ea">AmrMesh</a>
+, <a class="el" href="classCdrGodunov.html#afc8940528450c901de9ae6164df0c95f">CdrGodunov</a>
+, <a class="el" href="classCdrLayout.html#aaa27e1400b95ac34bda3c6ae885accce">CdrLayout&lt; T &gt;</a>
+, <a class="el" href="classCdrMultigrid.html#aac65554f8fac228c7bd492208f99346c">CdrMultigrid</a>
+, <a class="el" href="classCdrSolver.html#a3b70fb8fe36c6cb24ada15621cdab508">CdrSolver</a>
+, <a class="el" href="classEddingtonSP1.html#ae1709fddcff0a4d2e0fba2037f0414e3">EddingtonSP1</a>
+, <a class="el" href="classFieldSolver.html#a88261a81363faa8bc73a3579cf186f13">FieldSolver</a>
+, <a class="el" href="classFieldSolverMultigrid.html#ace0d457cee4716aa77ed4770b3901071">FieldSolverMultigrid</a>
+, <a class="el" href="classItoLayout.html#a0eee7349cccb3dd9122338054760a836">ItoLayout&lt; T &gt;</a>
+, <a class="el" href="classItoSolver.html#aa6f2c8ad146edca5e4d248349fda2afb">ItoSolver</a>
+, <a class="el" href="classMcPhoto.html#a84732e26e5cdbbbbf795e3753d0caf58">McPhoto</a>
 , <a class="el" href="classMeshODESolver.html#ad88998487cf2298d72c04812331d64c8">MeshODESolver&lt; N &gt;</a>
 , <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#ae0d0a87a1b65f9fe6c954d50dbf08f61">Physics::AdvectionDiffusion::AdvectionDiffusionStepper</a>
 , <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a9df4616304002f0515cbe28d8916f381">Physics::BrownianWalker::BrownianWalkerStepper</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a2becf6736a716f5c84a7e3d151cb05eb">Physics::CdrPlasma::CdrPlasmaStepper</a>
 , <a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a9aef1ddbf3a3e5e63d7bbc1e649bc20f">Physics::Electrostatics::FieldStepper&lt; T &gt;</a>
 , <a class="el" href="classPhysics_1_1Geometry_1_1GeometryStepper.html#a53ba11d4f71d6723a7905d92e7ee6b74">Physics::Geometry::GeometryStepper</a>
-, <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaGodunovStepper.html#aa7da60f34b01aa42845c72bd8769dbe8">Physics::ItoPlasma::ItoPlasmaGodunovStepper</a>
-, <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#add0e7d43a32806593356768af8707578">Physics::ItoPlasma::ItoPlasmaStepper</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a09b6469f2fd04c0cb0fdf2d7df1875d7">Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ac138d18b550ff4c25b9dbcfcb5d39f5a">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
 , <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7d467b80cd6a1a9db4aa8b1d2dfb595d">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>
 , <a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a1252d9617d6a2e44a9eae08c9bc51b4a">Physics::RadiativeTransfer::RadiativeTransferStepper&lt; T &gt;</a>
 , <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ade94995127b8697052bf75df61fda42c">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 , <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a557e207a4231c33c66c32c4ce5562d78">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
+, <a class="el" href="classRtLayout.html#af960e61714a495b5850f1df2b84b0f86">RtLayout&lt; T &gt;</a>
+, <a class="el" href="classRtSolver.html#a5880ce9b6efcbcca377c476b0c298c84">RtSolver</a>
 , <a class="el" href="classSurfaceODESolver.html#a6977f8469d3b7793f2243bb61602bba4">SurfaceODESolver&lt; N &gt;</a>
 , <a class="el" href="classTimeStepper.html#aa8b780a17bd0f0dfeeecefdbc7fc67b3">TimeStepper</a>
 , <a class="el" href="classTracerParticleSolver.html#acdd23de1ca19916167cb532cc1c44c15">TracerParticleSolver&lt; P &gt;</a>
 </li>
 <li>allocateInternals()
-: <a class="el" href="classCdrGodunov.html#aa9aba1f157d2eea3268e07451f3e923b">CdrGodunov</a>
-, <a class="el" href="classCdrLayout.html#acad19a98ddee4012eff38e27069d939e">CdrLayout&lt; T &gt;</a>
-, <a class="el" href="classCdrMultigrid.html#ab73b4a0b28827832b032b7e4e032f56a">CdrMultigrid</a>
-, <a class="el" href="classCdrSolver.html#a7026663cd47dbf767cb969a7c0601020">CdrSolver</a>
-, <a class="el" href="classDriver.html#a32b646c38ca923ddf9112fa4922b260d">Driver</a>
-, <a class="el" href="classEddingtonSP1.html#a0a006003f063773bc8ba76566879b0b0">EddingtonSP1</a>
-, <a class="el" href="classFieldSolver.html#a34970a08b48dd4b2c1558d5c6a6cd91b">FieldSolver</a>
-, <a class="el" href="classFieldSolverMultigrid.html#af5b4ecd0dfcc945cd8a30157669ecb8a">FieldSolverMultigrid</a>
-, <a class="el" href="classItoLayout.html#af55b151326ed1d05776b89c308e6c595">ItoLayout&lt; T &gt;</a>
-, <a class="el" href="classItoSolver.html#ad53e954337a6c4fdb8a84ce9f71760c0">ItoSolver</a>
-, <a class="el" href="classMcPhoto.html#a0a72aa04fea05224f22bf53e5479da0d">McPhoto</a>
+: <a class="el" href="classDriver.html#a32b646c38ca923ddf9112fa4922b260d">Driver</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#ad7c184e7721bac7200172dde8006b8ff">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html#aea4d5681a932418c831997faea4e912d">Physics::CdrPlasma::CdrPlasmaImExSdcStepper</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#adf044da433791d634a9f4543e43b4812">Physics::CdrPlasma::CdrPlasmaStepper</a>
-, <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a5c6c3f0e1d2ee7080799b9ed2aaff1fd">Physics::ItoPlasma::ItoPlasmaStepper</a>
-, <a class="el" href="classRtLayout.html#a8f6fb162bd2de34a8e8fd82bf868b07c">RtLayout&lt; T &gt;</a>
-, <a class="el" href="classRtSolver.html#a6a21a8bc817e2dc763b015ca2d6e18e4">RtSolver</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a1b1b4b4596c7d401e7350d23a599002e">Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#aa40ad3e3a2ca7bac52e1ddeefce94c4a">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
 </li>
 <li>allocatePointer()
 : <a class="el" href="classAmrMesh.html#ac4c266b32bccaf75389e17bb093f35e0">AmrMesh</a>
@@ -297,7 +307,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1FieldStorage.html#a347820326eb29e898ab0c3f7f64b3c71">Physics::CdrPlasma::CdrPlasmaGodunovStepper::FieldStorage</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1RtStorage.html#a923b6c2f03253a1fd0e90c8a6cd9b8d1">Physics::CdrPlasma::CdrPlasmaGodunovStepper::RtStorage</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1SigmaStorage.html#aa3817165702336baf2742ac547e5c92c">Physics::CdrPlasma::CdrPlasmaGodunovStepper::SigmaStorage</a>
-, <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaFieldTagger.html#ab5935db8100a809474d05955a725e1e1">Physics::ItoPlasma::ItoPlasmaFieldTagger</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCFieldTagger.html#aa36e8929d9cb1087b20c4ad6a1a602aa">Physics::ItoKMC::ItoKMCFieldTagger&lt; S &gt;</a>
 </li>
 <li>AmrMesh()
 : <a class="el" href="classAmrMesh.html#aaf2154348b6e3f8c7691e4aed716961b">AmrMesh</a>
@@ -403,6 +413,9 @@ $(function() {
 </li>
 <li>averageData()
 : <a class="el" href="classEBCoarAve.html#a321f632ceff0644214e7d8498db45205">EBCoarAve</a>
+</li>
+<li>averageDiffusionCoefficientsCellToFace()
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a4627b5f53b8e7c84cbefdc0953f130d9">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
 </li>
 <li>averageFaceToCell()
 : <a class="el" href="classDataOps.html#a0c8a8a9e9723b81eb87b5a4a952ca9de">DataOps</a>

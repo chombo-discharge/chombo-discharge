@@ -1,22 +1,32 @@
 <map id="Source/ConvectionDiffusionReaction/CD_CdrIteratorImplem.H" name="Source/ConvectionDiffusionReaction/CD_CdrIteratorImplem.H">
-<area shape="rect" id="node1" title="Implementation of CdrIterator.H." alt="" coords="525,5,767,47"/>
-<area shape="rect" id="node2" href="$CD__CdrIterator_8H.html" title="Declaration of an iterator class for CdrLayout (for iterating through subsets of solvers)." alt="" coords="545,95,747,136"/>
-<area shape="rect" id="node3" href="$CD__CdrLayoutImplem_8H.html" title="Implementation of CD_CdrLayout.H." alt="" coords="527,184,765,225"/>
-<area shape="rect" id="node6" href="$CD__CdrPlasmaStepper_8cpp.html" title="Implementation of CD_CdrPlasmaStepper.H." alt="" coords="292,459,467,501"/>
-<area shape="rect" id="node13" href="$CD__CdrPlasmaGodunovStepper_8H.html" title="Declaration of the Godunov time stepper method." alt="" coords="684,452,923,508"/>
-<area shape="rect" id="node17" href="$CD__CdrPlasmaImExSdcStepper_8H.html" title="Declaration of a semi&#45;implicit spectral deferred correction class for Physics/CdrPlasma." alt="" coords="960,452,1199,508"/>
-<area shape="rect" id="node4" href="$CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="545,273,747,315"/>
-<area shape="rect" id="node5" href="$CD__CdrPlasmaStepper_8H.html" title="Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time." alt="" coords="562,363,730,404"/>
-<area shape="rect" id="node7" href="$CD__CdrPlasmaTagger_8H.html" title="Declearation of an abstract class for tagging cells in a Physics/CdrPlasma context." alt="" coords="491,459,659,501"/>
-<area shape="rect" id="node8" href="$CD__CdrPlasmaFieldTagger_8H.html" title="Cell tagger class for Physics/CdrPlasma." alt="" coords="230,563,417,605"/>
-<area shape="rect" id="node12" href="$CD__CdrPlasmaTagger_8cpp.html" title="Implementation of CD_CdrPlasmaTagger.H." alt="" coords="441,563,609,605"/>
-<area shape="rect" id="node9" href="$CD__CdrPlasmaFieldTagger_8cpp.html" title="Implementation of CD_CdrPlasmaFieldTagger.H." alt="" coords="5,667,204,709"/>
-<area shape="rect" id="node10" href="$CD__CdrPlasmaStreamerTagger_8H.html" title="Implementation of CellTagger that tags cells based on field evaluations or the Townsend coefficient." alt="" coords="228,660,467,716"/>
-<area shape="rect" id="node11" href="$CD__CdrPlasmaStreamerTagger_8cpp.html" title="Implementation CD_CdrPlasmaStreamerTagger.H." alt="" coords="222,764,473,820"/>
-<area shape="rect" id="node14" href="$CD__CdrPlasmaGodunovStepper_8cpp.html" title="Implementation of CD_CdrPlasmaGodunovStepper.H." alt="" coords="783,660,1021,716"/>
-<area shape="rect" id="node15" href="$CD__CdrPlasmaGodunovStorage_8cpp.html" title="Implementation of CdrPlasmaGodunovStepper_storage.H." alt="" coords="520,660,759,716"/>
-<area shape="rect" id="node16" href="$CD__CdrPlasmaGodunovStorage_8H.html" title="Declaration of scratch storage for CdrPlasmaGodunovStepper." alt="" coords="684,556,923,612"/>
-<area shape="rect" id="node18" href="$CD__CdrPlasmaImExSdcStepper_8cpp.html" title="Implementation of CD_CdrPlasmaImExSdcStepper.H." alt="" coords="1308,660,1547,716"/>
-<area shape="rect" id="node19" href="$CD__CdrPlasmaImExSdcStorage_8cpp.html" title="Implementation of CD_CdrPlasmaImExSdcStorage.H." alt="" coords="1045,660,1284,716"/>
-<area shape="rect" id="node20" href="$CD__CdrPlasmaImExSdcStorage_8H.html" title="Declaration of scratch storage for CdrPlasmaImExSdcStepper." alt="" coords="1117,556,1356,612"/>
+<area shape="rect" id="node1" title="Implementation of CdrIterator.H." alt="" coords="1115,5,1358,47"/>
+<area shape="rect" id="node2" href="$CD__CdrIterator_8H.html" title="Declaration of an iterator class for CdrLayout (for iterating through subsets of solvers)." alt="" coords="1136,95,1337,136"/>
+<area shape="rect" id="node3" href="$CD__CdrLayoutImplem_8H.html" title="Implementation of CD_CdrLayout.H." alt="" coords="1117,184,1356,225"/>
+<area shape="rect" id="node6" href="$CD__CdrPlasmaStepper_8cpp.html" title="Implementation of CD_CdrPlasmaStepper.H." alt="" coords="905,459,1080,501"/>
+<area shape="rect" id="node13" href="$CD__CdrPlasmaGodunovStepper_8H.html" title="Declaration of the Godunov time stepper method." alt="" coords="1297,452,1536,508"/>
+<area shape="rect" id="node17" href="$CD__CdrPlasmaImExSdcStepper_8H.html" title="Declaration of a semi&#45;implicit spectral deferred correction class for Physics/CdrPlasma." alt="" coords="1628,452,1867,508"/>
+<area shape="rect" id="node4" href="$CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="1108,273,1309,315"/>
+<area shape="rect" id="node5" href="$CD__CdrPlasmaStepper_8H.html" title="Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time." alt="" coords="1125,363,1293,404"/>
+<area shape="rect" id="node21" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="275,370,537,397"/>
+<area shape="rect" id="node7" href="$CD__CdrPlasmaTagger_8H.html" title="Declearation of an abstract class for tagging cells in a Physics/CdrPlasma context." alt="" coords="1105,459,1273,501"/>
+<area shape="rect" id="node8" href="$CD__CdrPlasmaFieldTagger_8H.html" title="Cell tagger class for Physics/CdrPlasma." alt="" coords="1054,563,1241,605"/>
+<area shape="rect" id="node12" href="$CD__CdrPlasmaTagger_8cpp.html" title="Implementation of CD_CdrPlasmaTagger.H." alt="" coords="862,563,1030,605"/>
+<area shape="rect" id="node9" href="$CD__CdrPlasmaFieldTagger_8cpp.html" title="Implementation of CD_CdrPlasmaFieldTagger.H." alt="" coords="748,667,947,709"/>
+<area shape="rect" id="node10" href="$CD__CdrPlasmaStreamerTagger_8H.html" title="Implementation of CellTagger that tags cells based on field evaluations or the Townsend coefficient." alt="" coords="971,660,1209,716"/>
+<area shape="rect" id="node11" href="$CD__CdrPlasmaStreamerTagger_8cpp.html" title="Implementation CD_CdrPlasmaStreamerTagger.H." alt="" coords="965,764,1215,820"/>
+<area shape="rect" id="node14" href="$CD__CdrPlasmaGodunovStepper_8cpp.html" title="Implementation of CD_CdrPlasmaGodunovStepper.H." alt="" coords="1496,660,1735,716"/>
+<area shape="rect" id="node15" href="$CD__CdrPlasmaGodunovStorage_8cpp.html" title="Implementation of CdrPlasmaGodunovStepper_storage.H." alt="" coords="1233,660,1472,716"/>
+<area shape="rect" id="node16" href="$CD__CdrPlasmaGodunovStorage_8H.html" title="Declaration of scratch storage for CdrPlasmaGodunovStepper." alt="" coords="1339,556,1577,612"/>
+<area shape="rect" id="node18" href="$CD__CdrPlasmaImExSdcStepper_8cpp.html" title="Implementation of CD_CdrPlasmaImExSdcStepper.H." alt="" coords="2021,660,2260,716"/>
+<area shape="rect" id="node19" href="$CD__CdrPlasmaImExSdcStorage_8cpp.html" title="Implementation of CD_CdrPlasmaImExSdcStorage.H." alt="" coords="1759,660,1997,716"/>
+<area shape="rect" id="node20" href="$CD__CdrPlasmaImExSdcStorage_8H.html" title="Declaration of scratch storage for CdrPlasmaImExSdcStepper." alt="" coords="1785,556,2024,612"/>
+<area shape="rect" id="node22" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="5,459,255,501"/>
+<area shape="rect" id="node23" href="$CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="279,467,533,493"/>
+<area shape="rect" id="node29" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="562,452,778,508"/>
+<area shape="rect" id="node24" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="291,563,521,605"/>
+<area shape="rect" id="node28" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="23,563,266,605"/>
+<area shape="rect" id="node25" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="268,667,499,709"/>
+<area shape="rect" id="node26" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="523,660,724,716"/>
+<area shape="rect" id="node27" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="502,764,745,820"/>
+<area shape="rect" id="node30" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="546,556,794,612"/>
 </map>

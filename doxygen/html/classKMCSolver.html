@@ -172,21 +172,33 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:aa6fad69b415e6b0ac2fb6c24104fbb77"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#aa6fad69b415e6b0ac2fb6c24104fbb77">getNonCriticalTimeStep</a> (const State &amp;a_state, const ReactionList &amp;a_nonCriticalReactions, const std::vector&lt; Real &gt; &amp;a_nonCriticalPropensities) const noexcept</td></tr>
 <tr class="memdesc:aa6fad69b415e6b0ac2fb6c24104fbb77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the non-critical time step.  <a href="classKMCSolver.html#aa6fad69b415e6b0ac2fb6c24104fbb77">More...</a><br /></td></tr>
 <tr class="separator:aa6fad69b415e6b0ac2fb6c24104fbb77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a32b2ce97d3201161c03a85217d936df3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a32b2ce97d3201161c03a85217d936df3">stepTau</a> (State &amp;a_state, const Real a_dt) const noexcept</td></tr>
-<tr class="memdesc:a32b2ce97d3201161c03a85217d936df3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform one tau-leaping step using ALL reactions.  <a href="classKMCSolver.html#a32b2ce97d3201161c03a85217d936df3">More...</a><br /></td></tr>
-<tr class="separator:a32b2ce97d3201161c03a85217d936df3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5c994d86be0bf1cb5c07e0a23fdd3e22"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a5c994d86be0bf1cb5c07e0a23fdd3e22">stepTau</a> (State &amp;a_state, const ReactionList &amp;a_reactions, const Real a_dt) const noexcept</td></tr>
-<tr class="memdesc:a5c994d86be0bf1cb5c07e0a23fdd3e22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform one tau-leaping step over the input reactions using a time step a_dt.  <a href="classKMCSolver.html#a5c994d86be0bf1cb5c07e0a23fdd3e22">More...</a><br /></td></tr>
-<tr class="separator:a5c994d86be0bf1cb5c07e0a23fdd3e22"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53ff8e48a820f3262b611ba4234caa3d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a53ff8e48a820f3262b611ba4234caa3d">stepTau</a> (State &amp;a_state, const ReactionList &amp;a_reactions, const std::vector&lt; Real &gt; &amp;a_propensities, const Real a_dt) const noexcept</td></tr>
-<tr class="memdesc:a53ff8e48a820f3262b611ba4234caa3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform one tau-leaping step over the input reactions using a time step a_dt.  <a href="classKMCSolver.html#a53ff8e48a820f3262b611ba4234caa3d">More...</a><br /></td></tr>
-<tr class="separator:a53ff8e48a820f3262b611ba4234caa3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2b7f8bb50ded4f0b6fbf1a0cac0e6685"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a2b7f8bb50ded4f0b6fbf1a0cac0e6685">advanceTau</a> (State &amp;a_state, const Real a_dt) const noexcept</td></tr>
-<tr class="memdesc:a2b7f8bb50ded4f0b6fbf1a0cac0e6685"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance with tau-leaping step over the input time. This can end up using substepping.  <a href="classKMCSolver.html#a2b7f8bb50ded4f0b6fbf1a0cac0e6685">More...</a><br /></td></tr>
-<tr class="separator:a2b7f8bb50ded4f0b6fbf1a0cac0e6685"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5ead80c3ed2ed523d93fc91a367be8d8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a5ead80c3ed2ed523d93fc91a367be8d8">advanceTau</a> (State &amp;a_state, const ReactionList &amp;a_reactions, const Real a_dt) const noexcept</td></tr>
-<tr class="memdesc:a5ead80c3ed2ed523d93fc91a367be8d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance with tau-leaping step over the input time. This can end up using substepping.  <a href="classKMCSolver.html#a5ead80c3ed2ed523d93fc91a367be8d8">More...</a><br /></td></tr>
-<tr class="separator:a5ead80c3ed2ed523d93fc91a367be8d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8832b49ec3a015d6c8779ebadf5d376c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a8832b49ec3a015d6c8779ebadf5d376c">stepTauPlain</a> (State &amp;a_state, const Real a_dt) const noexcept</td></tr>
+<tr class="memdesc:a8832b49ec3a015d6c8779ebadf5d376c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform one plain tau-leaping step using ALL reactions.  <a href="classKMCSolver.html#a8832b49ec3a015d6c8779ebadf5d376c">More...</a><br /></td></tr>
+<tr class="separator:a8832b49ec3a015d6c8779ebadf5d376c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b6b265a02e9fd8f7970cec25918639b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a3b6b265a02e9fd8f7970cec25918639b">stepTauPlain</a> (State &amp;a_state, const ReactionList &amp;a_reactions, const Real a_dt) const noexcept</td></tr>
+<tr class="memdesc:a3b6b265a02e9fd8f7970cec25918639b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform one plain tau-leaping step over the input reactions using a time step a_dt.  <a href="classKMCSolver.html#a3b6b265a02e9fd8f7970cec25918639b">More...</a><br /></td></tr>
+<tr class="separator:a3b6b265a02e9fd8f7970cec25918639b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24f279d2694edf6d9eb8cb5fbfce395b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a24f279d2694edf6d9eb8cb5fbfce395b">stepTauPlain</a> (State &amp;a_state, const ReactionList &amp;a_reactions, const std::vector&lt; Real &gt; &amp;a_propensities, const Real a_dt) const noexcept</td></tr>
+<tr class="memdesc:a24f279d2694edf6d9eb8cb5fbfce395b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform one plain tau-leaping step over the input reactions using a time step a_dt.  <a href="classKMCSolver.html#a24f279d2694edf6d9eb8cb5fbfce395b">More...</a><br /></td></tr>
+<tr class="separator:a24f279d2694edf6d9eb8cb5fbfce395b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6486ff58965dc00d2ac7961420cb010"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#ad6486ff58965dc00d2ac7961420cb010">advanceTauPlain</a> (State &amp;a_state, const Real a_dt) const noexcept</td></tr>
+<tr class="memdesc:ad6486ff58965dc00d2ac7961420cb010"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance with plain tau-leaping step over the input time. This can end up using substepping.  <a href="classKMCSolver.html#ad6486ff58965dc00d2ac7961420cb010">More...</a><br /></td></tr>
+<tr class="separator:ad6486ff58965dc00d2ac7961420cb010"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac745cadc8e5c09043e7656e07fa43c75"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#ac745cadc8e5c09043e7656e07fa43c75">advanceTauPlain</a> (State &amp;a_state, const ReactionList &amp;a_reactions, const Real a_dt) const noexcept</td></tr>
+<tr class="memdesc:ac745cadc8e5c09043e7656e07fa43c75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance with plain tau-leaping step over the input time. This can end up using substepping.  <a href="classKMCSolver.html#ac745cadc8e5c09043e7656e07fa43c75">More...</a><br /></td></tr>
+<tr class="separator:ac745cadc8e5c09043e7656e07fa43c75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83c174d89e7538f40a7b0084091309a8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a83c174d89e7538f40a7b0084091309a8">stepTauMidpoint</a> (State &amp;a_state, const Real a_dt) const noexcept</td></tr>
+<tr class="memdesc:a83c174d89e7538f40a7b0084091309a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform one leaping step using the midpoint method for ALL reactions over a time step a_dt.  <a href="classKMCSolver.html#a83c174d89e7538f40a7b0084091309a8">More...</a><br /></td></tr>
+<tr class="separator:a83c174d89e7538f40a7b0084091309a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4e2b1976b91cc440edf7f1ccbbfae7d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#ac4e2b1976b91cc440edf7f1ccbbfae7d">stepTauMidpoint</a> (State &amp;a_state, const ReactionList &amp;a_reactions, const Real a_dt) const noexcept</td></tr>
+<tr class="memdesc:ac4e2b1976b91cc440edf7f1ccbbfae7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform one leaping step using the midpoint method for the input reactions over a time step a_dt.  <a href="classKMCSolver.html#ac4e2b1976b91cc440edf7f1ccbbfae7d">More...</a><br /></td></tr>
+<tr class="separator:ac4e2b1976b91cc440edf7f1ccbbfae7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f4aa4fa6d4587ca67b6611ee633df9f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a2f4aa4fa6d4587ca67b6611ee633df9f">advanceTauMidpoint</a> (State &amp;a_state, const Real a_dt) const noexcept</td></tr>
+<tr class="memdesc:a2f4aa4fa6d4587ca67b6611ee633df9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform one leaping step using the midpoint method all reactions over a time step a_dt.  <a href="classKMCSolver.html#a2f4aa4fa6d4587ca67b6611ee633df9f">More...</a><br /></td></tr>
+<tr class="separator:a2f4aa4fa6d4587ca67b6611ee633df9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae386caf93bc250b4f84b1b7ac2a9e889"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#ae386caf93bc250b4f84b1b7ac2a9e889">advanceTauMidpoint</a> (State &amp;a_state, const ReactionList &amp;a_reactions, const Real a_dt) const noexcept</td></tr>
+<tr class="memdesc:ae386caf93bc250b4f84b1b7ac2a9e889"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform one leaping step using the midpoint method for the input reactions over a time step a_dt.  <a href="classKMCSolver.html#ae386caf93bc250b4f84b1b7ac2a9e889">More...</a><br /></td></tr>
+<tr class="separator:ae386caf93bc250b4f84b1b7ac2a9e889"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:addabdc39cccabc68c1de01c7576f4030"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#addabdc39cccabc68c1de01c7576f4030">stepSSA</a> (State &amp;a_state) const noexcept</td></tr>
 <tr class="memdesc:addabdc39cccabc68c1de01c7576f4030"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform a single SSA step.  <a href="classKMCSolver.html#addabdc39cccabc68c1de01c7576f4030">More...</a><br /></td></tr>
 <tr class="separator:addabdc39cccabc68c1de01c7576f4030"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -202,12 +214,15 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a3d545a4df72ac4cacfafe6af242d5cca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a3d545a4df72ac4cacfafe6af242d5cca">advanceSSA</a> (State &amp;a_state, const ReactionList &amp;a_reactions, const Real a_dt) const noexcept</td></tr>
 <tr class="memdesc:a3d545a4df72ac4cacfafe6af242d5cca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance with the SSA over the input time. This can end up using substepping.  <a href="classKMCSolver.html#a3d545a4df72ac4cacfafe6af242d5cca">More...</a><br /></td></tr>
 <tr class="separator:a3d545a4df72ac4cacfafe6af242d5cca"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3e46902d126e21ce27d196f0a88ae8a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a3e46902d126e21ce27d196f0a88ae8a6">advanceHybrid</a> (State &amp;a_state, const Real a_dt) const noexcept</td></tr>
-<tr class="memdesc:a3e46902d126e21ce27d196f0a88ae8a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.  <a href="classKMCSolver.html#a3e46902d126e21ce27d196f0a88ae8a6">More...</a><br /></td></tr>
-<tr class="separator:a3e46902d126e21ce27d196f0a88ae8a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0e23ef51de16adeceecf6d18459652fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a0e23ef51de16adeceecf6d18459652fb">advanceHybrid</a> (State &amp;a_state, const ReactionList &amp;a_reactions, const Real a_dt) const noexcept</td></tr>
-<tr class="memdesc:a0e23ef51de16adeceecf6d18459652fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.  <a href="classKMCSolver.html#a0e23ef51de16adeceecf6d18459652fb">More...</a><br /></td></tr>
-<tr class="separator:a0e23ef51de16adeceecf6d18459652fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeca883466991e8f74229f503be3ce1a7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#aeca883466991e8f74229f503be3ce1a7">advanceHybrid</a> (State &amp;a_state, const Real a_dt, const <a class="el" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a> &amp;a_leapPropagator=KMCLeapPropagator::TauPlain) const noexcept</td></tr>
+<tr class="memdesc:aeca883466991e8f74229f503be3ce1a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.  <a href="classKMCSolver.html#aeca883466991e8f74229f503be3ce1a7">More...</a><br /></td></tr>
+<tr class="separator:aeca883466991e8f74229f503be3ce1a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2bf18bfb3169dfaea2a9152e1dfaeda"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#ab2bf18bfb3169dfaea2a9152e1dfaeda">advanceHybrid</a> (State &amp;a_state, const ReactionList &amp;a_reactions, const Real a_dt, const <a class="el" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a> &amp;a_leapPropagator=KMCLeapPropagator::TauPlain) const noexcept</td></tr>
+<tr class="memdesc:ab2bf18bfb3169dfaea2a9152e1dfaeda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.  <a href="classKMCSolver.html#ab2bf18bfb3169dfaea2a9152e1dfaeda">More...</a><br /></td></tr>
+<tr class="separator:ab2bf18bfb3169dfaea2a9152e1dfaeda"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00ee227e36b3bd63ee3541e5a3662b54"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a00ee227e36b3bd63ee3541e5a3662b54">advanceHybrid</a> (State &amp;a_state, const ReactionList &amp;a_reactions, const Real a_dt, const std::function&lt; void(State &amp;, const ReactionList &amp;a_reactions, const Real a_dt)&gt; &amp;a_propagator) const noexcept</td></tr>
+<tr class="memdesc:a00ee227e36b3bd63ee3541e5a3662b54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.  <a href="classKMCSolver.html#a00ee227e36b3bd63ee3541e5a3662b54">More...</a><br /></td></tr>
+<tr class="separator:a00ee227e36b3bd63ee3541e5a3662b54"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -283,8 +298,8 @@ template&lt;typename R , typename State , typename T &gt; </div>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a0e23ef51de16adeceecf6d18459652fb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0e23ef51de16adeceecf6d18459652fb">&#9670;&nbsp;</a></span>advanceHybrid() <span class="overload">[1/2]</span></h2>
+<a id="ab2bf18bfb3169dfaea2a9152e1dfaeda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2bf18bfb3169dfaea2a9152e1dfaeda">&#9670;&nbsp;</a></span>advanceHybrid() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -310,7 +325,75 @@ template&lt;typename R , typename State , typename T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_dt</em>&#160;</td>
+          <td class="paramname"><em>a_dt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_leapPropagator</em> = <code>KMCLeapPropagator::TauPlain</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_state</td><td>State vector to advance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_reactions</td><td>Reactions to advance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time increment. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_leapPropagator</td><td>Which leap propagator to use. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Calls the other version with stepTau as the leap propagator. </dd></dl>
+
+</div>
+</div>
+<a id="a00ee227e36b3bd63ee3541e5a3662b54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00ee227e36b3bd63ee3541e5a3662b54">&#9670;&nbsp;</a></span>advanceHybrid() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename R , typename State , typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::advanceHybrid </td>
+          <td>(</td>
+          <td class="paramtype">State &amp;&#160;</td>
+          <td class="paramname"><em>a_state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ReactionList &amp;&#160;</td>
+          <td class="paramname"><em>a_reactions</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_dt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::function&lt; void(State &amp;, const ReactionList &amp;a_reactions, const Real a_dt)&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_propagator</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -331,14 +414,15 @@ template&lt;typename R , typename State , typename T &gt; </div>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_state</td><td>State vector to advance </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_reactions</td><td>Reactions to advance with </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time increment </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_leapPropagator</td><td>Leaping propagator </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a3e46902d126e21ce27d196f0a88ae8a6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3e46902d126e21ce27d196f0a88ae8a6">&#9670;&nbsp;</a></span>advanceHybrid() <span class="overload">[2/2]</span></h2>
+<a id="aeca883466991e8f74229f503be3ce1a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeca883466991e8f74229f503be3ce1a7">&#9670;&nbsp;</a></span>advanceHybrid() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -358,7 +442,13 @@ template&lt;typename R , typename State , typename T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_dt</em>&#160;</td>
+          <td class="paramname"><em>a_dt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_leapPropagator</em> = <code>KMCLeapPropagator::TauPlain</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -378,6 +468,7 @@ template&lt;typename R , typename State , typename T &gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_state</td><td>State vector to advance </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time increment </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_leapPropagator</td><td>Which leap propagator to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -487,8 +578,8 @@ template&lt;typename R , typename State , typename T &gt; </div>
 
 </div>
 </div>
-<a id="a5ead80c3ed2ed523d93fc91a367be8d8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5ead80c3ed2ed523d93fc91a367be8d8">&#9670;&nbsp;</a></span>advanceTau() <span class="overload">[1/2]</span></h2>
+<a id="ae386caf93bc250b4f84b1b7ac2a9e889"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae386caf93bc250b4f84b1b7ac2a9e889">&#9670;&nbsp;</a></span>advanceTauMidpoint() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -499,7 +590,7 @@ template&lt;typename R , typename State , typename T &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::advanceTau </td>
+          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::advanceTauMidpoint </td>
           <td>(</td>
           <td class="paramtype">State &amp;&#160;</td>
           <td class="paramname"><em>a_state</em>, </td>
@@ -529,7 +620,7 @@ template&lt;typename R , typename State , typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Advance with tau-leaping step over the input time. This can end up using substepping. </p>
+<p>Perform one leaping step using the midpoint method for the input reactions over a time step a_dt. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_state</td><td>State vector to be advanced </td></tr>
@@ -541,8 +632,8 @@ template&lt;typename R , typename State , typename T &gt; </div>
 
 </div>
 </div>
-<a id="a2b7f8bb50ded4f0b6fbf1a0cac0e6685"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2b7f8bb50ded4f0b6fbf1a0cac0e6685">&#9670;&nbsp;</a></span>advanceTau() <span class="overload">[2/2]</span></h2>
+<a id="a2f4aa4fa6d4587ca67b6611ee633df9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f4aa4fa6d4587ca67b6611ee633df9f">&#9670;&nbsp;</a></span>advanceTauMidpoint() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -553,7 +644,7 @@ template&lt;typename R , typename State , typename T &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::advanceTau </td>
+          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::advanceTauMidpoint </td>
           <td>(</td>
           <td class="paramtype">State &amp;&#160;</td>
           <td class="paramname"><em>a_state</em>, </td>
@@ -577,7 +668,109 @@ template&lt;typename R , typename State , typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Advance with tau-leaping step over the input time. This can end up using substepping. </p>
+<p>Perform one leaping step using the midpoint method all reactions over a time step a_dt. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_state</td><td>State vector to be advanced </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time increment </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Calls the other version with m_reactions. </dd></dl>
+
+</div>
+</div>
+<a id="ac745cadc8e5c09043e7656e07fa43c75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac745cadc8e5c09043e7656e07fa43c75">&#9670;&nbsp;</a></span>advanceTauPlain() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename R , typename State , typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::advanceTauPlain </td>
+          <td>(</td>
+          <td class="paramtype">State &amp;&#160;</td>
+          <td class="paramname"><em>a_state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ReactionList &amp;&#160;</td>
+          <td class="paramname"><em>a_reactions</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_dt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Advance with plain tau-leaping step over the input time. This can end up using substepping. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_state</td><td>State vector to be advanced </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_reactions</td><td>List of reactions to advance with </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time increment </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad6486ff58965dc00d2ac7961420cb010"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6486ff58965dc00d2ac7961420cb010">&#9670;&nbsp;</a></span>advanceTauPlain() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename R , typename State , typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::advanceTauPlain </td>
+          <td>(</td>
+          <td class="paramtype">State &amp;&#160;</td>
+          <td class="paramname"><em>a_state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_dt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Advance with plain tau-leaping step over the input time. This can end up using substepping. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_state</td><td>State vector to be advanced </td></tr>
@@ -1289,8 +1482,8 @@ template&lt;typename R , typename State , typename T &gt; </div>
 
 </div>
 </div>
-<a id="a5c994d86be0bf1cb5c07e0a23fdd3e22"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5c994d86be0bf1cb5c07e0a23fdd3e22">&#9670;&nbsp;</a></span>stepTau() <span class="overload">[1/3]</span></h2>
+<a id="ac4e2b1976b91cc440edf7f1ccbbfae7d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4e2b1976b91cc440edf7f1ccbbfae7d">&#9670;&nbsp;</a></span>stepTauMidpoint() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1301,7 +1494,7 @@ template&lt;typename R , typename State , typename T &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::stepTau </td>
+          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::stepTauMidpoint </td>
           <td>(</td>
           <td class="paramtype">State &amp;&#160;</td>
           <td class="paramname"><em>a_state</em>, </td>
@@ -1331,7 +1524,109 @@ template&lt;typename R , typename State , typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Perform one tau-leaping step over the input reactions using a time step a_dt. </p>
+<p>Perform one leaping step using the midpoint method for the input reactions over a time step a_dt. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_state</td><td>State vector to be advanced </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_reactions</td><td>List of reactions to advance with </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time increment </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a83c174d89e7538f40a7b0084091309a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83c174d89e7538f40a7b0084091309a8">&#9670;&nbsp;</a></span>stepTauMidpoint() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename R , typename State , typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::stepTauMidpoint </td>
+          <td>(</td>
+          <td class="paramtype">State &amp;&#160;</td>
+          <td class="paramname"><em>a_state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_dt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Perform one leaping step using the midpoint method for ALL reactions over a time step a_dt. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_state</td><td>State vector to be advanced </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time increment </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Calls the other version with m_reactions </dd></dl>
+
+</div>
+</div>
+<a id="a3b6b265a02e9fd8f7970cec25918639b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b6b265a02e9fd8f7970cec25918639b">&#9670;&nbsp;</a></span>stepTauPlain() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename R , typename State , typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::stepTauPlain </td>
+          <td>(</td>
+          <td class="paramtype">State &amp;&#160;</td>
+          <td class="paramname"><em>a_state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ReactionList &amp;&#160;</td>
+          <td class="paramname"><em>a_reactions</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_dt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Perform one plain tau-leaping step over the input reactions using a time step a_dt. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_state</td><td>State vector to be advanced </td></tr>
@@ -1344,8 +1639,8 @@ template&lt;typename R , typename State , typename T &gt; </div>
 
 </div>
 </div>
-<a id="a53ff8e48a820f3262b611ba4234caa3d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a53ff8e48a820f3262b611ba4234caa3d">&#9670;&nbsp;</a></span>stepTau() <span class="overload">[2/3]</span></h2>
+<a id="a24f279d2694edf6d9eb8cb5fbfce395b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24f279d2694edf6d9eb8cb5fbfce395b">&#9670;&nbsp;</a></span>stepTauPlain() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1356,7 +1651,7 @@ template&lt;typename R , typename State , typename T &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::stepTau </td>
+          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::stepTauPlain </td>
           <td>(</td>
           <td class="paramtype">State &amp;&#160;</td>
           <td class="paramname"><em>a_state</em>, </td>
@@ -1392,7 +1687,7 @@ template&lt;typename R , typename State , typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Perform one tau-leaping step over the input reactions using a time step a_dt. </p>
+<p>Perform one plain tau-leaping step over the input reactions using a time step a_dt. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_state</td><td>State vector to be advanced </td></tr>
@@ -1405,8 +1700,8 @@ template&lt;typename R , typename State , typename T &gt; </div>
 
 </div>
 </div>
-<a id="a32b2ce97d3201161c03a85217d936df3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a32b2ce97d3201161c03a85217d936df3">&#9670;&nbsp;</a></span>stepTau() <span class="overload">[3/3]</span></h2>
+<a id="a8832b49ec3a015d6c8779ebadf5d376c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8832b49ec3a015d6c8779ebadf5d376c">&#9670;&nbsp;</a></span>stepTauPlain() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1417,7 +1712,7 @@ template&lt;typename R , typename State , typename T &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::stepTau </td>
+          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::stepTauPlain </td>
           <td>(</td>
           <td class="paramtype">State &amp;&#160;</td>
           <td class="paramname"><em>a_state</em>, </td>
@@ -1441,7 +1736,7 @@ template&lt;typename R , typename State , typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Perform one tau-leaping step using ALL reactions. </p>
+<p>Perform one plain tau-leaping step using ALL reactions. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_state</td><td>State vector to be advanced </td></tr>

@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['mode_6703',['Mode',['../CD__StreamerInceptionStepper_8H.html#af655f05a634af7f120b02f162dc8fa8f',1,'Physics::StreamerInception']]],
-  ['multigridtype_6704',['MultigridType',['../classCdrMultigrid.html#a004b5dca8c7ba07c58383012460132b8',1,'CdrMultigrid::MultigridType()'],['../classFieldSolverMultigrid.html#aaf89c3ef8e19504afb28976473f2b797',1,'FieldSolverMultigrid::MultigridType()'],['../classEddingtonSP1.html#af23167e2e38a68e6c3016045fe2c8a9d',1,'EddingtonSP1::MultigridType()']]]
+  ['limiter_6888',['Limiter',['../classCdrCTU.html#a3d5082e026542171ce2a335d88418b9d',1,'CdrCTU']]],
+  ['loadbalancingmethod_6889',['LoadBalancingMethod',['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a5bfa40eb12c5b1edf05afe9edc8818f3',1,'Physics::BrownianWalker::BrownianWalkerStepper']]],
+  ['lookupmethod_6890',['LookupMethod',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a65eac49748ad3f35790dfe288650b882',1,'Physics::CdrPlasma::CdrPlasmaJSON']]]
 ];

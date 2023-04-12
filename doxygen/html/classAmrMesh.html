@@ -153,6 +153,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab607b773c624e394f178e7f09446a656"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ab607b773c624e394f178e7f09446a656">slice</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_original, const Interval a_variables) const noexcept</td></tr>
 <tr class="memdesc:ab607b773c624e394f178e7f09446a656"><td class="mdescLeft">&#160;</td><td class="mdescRight">Slice cell-centered data in order to fetch a subset of components.  <a href="classAmrMesh.html#ab607b773c624e394f178e7f09446a656">More...</a><br /></td></tr>
 <tr class="separator:ab607b773c624e394f178e7f09446a656"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8bdab30ee7155984c3e75bcf25e50dc3"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a8bdab30ee7155984c3e75bcf25e50dc3">slice</a> (const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_original, const Interval a_variables) const noexcept</td></tr>
+<tr class="memdesc:a8bdab30ee7155984c3e75bcf25e50dc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Slice cell-centered data in order to fetch a subset of components.  <a href="classAmrMesh.html#a8bdab30ee7155984c3e75bcf25e50dc3">More...</a><br /></td></tr>
+<tr class="separator:a8bdab30ee7155984c3e75bcf25e50dc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c63a0de47e3bbe424ae5231cab2a963"><td class="memItemLeft" align="right" valign="top"><a id="a7c63a0de47e3bbe424ae5231cab2a963"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a7c63a0de47e3bbe424ae5231cab2a963">parseOptions</a> ()</td></tr>
 <tr class="memdesc:a7c63a0de47e3bbe424ae5231cab2a963"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse options. Called during the constructor. <br /></td></tr>
@@ -358,6 +361,14 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a5032e0accfccfbc5c77cd8d4e6bbe578"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a5032e0accfccfbc5c77cd8d4e6bbe578">depositParticles</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_meshData, const std::string &amp;a_realm, const phase::which_phase &amp;a_phase, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const bool a_forceIrregNGP=false)</td></tr>
 <tr class="memdesc:a5032e0accfccfbc5c77cd8d4e6bbe578"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit vector particle quantities on the mesh.  <a href="classAmrMesh.html#a5032e0accfccfbc5c77cd8d4e6bbe578">More...</a><br /></td></tr>
 <tr class="separator:a5032e0accfccfbc5c77cd8d4e6bbe578"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9d10979cb476e42f07f59f8473110d7"><td class="memTemplParams" colspan="2">template&lt;class P , const Real &amp;(P::*)() const particleScalarField&gt; </td></tr>
+<tr class="memitem:ac9d10979cb476e42f07f59f8473110d7"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ac9d10979cb476e42f07f59f8473110d7">depositParticles</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_meshData, const std::string &amp;a_realm, const phase::which_phase &amp;a_phase, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles) const noexcept</td></tr>
+<tr class="memdesc:ac9d10979cb476e42f07f59f8473110d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit scalar particle quantities on the mesh.  <a href="classAmrMesh.html#ac9d10979cb476e42f07f59f8473110d7">More...</a><br /></td></tr>
+<tr class="separator:ac9d10979cb476e42f07f59f8473110d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9d10979cb476e42f07f59f8473110d7"><td class="memTemplParams" colspan="2">template&lt;class P , Real(P::*)() const particleScalarField&gt; </td></tr>
+<tr class="memitem:ac9d10979cb476e42f07f59f8473110d7"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ac9d10979cb476e42f07f59f8473110d7">depositParticles</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_meshData, const std::string &amp;a_realm, const phase::which_phase &amp;a_phase, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles) const noexcept</td></tr>
+<tr class="memdesc:ac9d10979cb476e42f07f59f8473110d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit scalar particle quantities on the mesh.  <a href="classAmrMesh.html#ac9d10979cb476e42f07f59f8473110d7">More...</a><br /></td></tr>
+<tr class="separator:ac9d10979cb476e42f07f59f8473110d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa07d5998e160d5430c49bc238e819e77"><td class="memTemplParams" colspan="2">template&lt;class P , Real &amp;(P::*)() particleScalarField&gt; </td></tr>
 <tr class="memitem:aa07d5998e160d5430c49bc238e819e77"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aa07d5998e160d5430c49bc238e819e77">interpolateParticles</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const std::string &amp;a_realm, const phase::which_phase &amp;a_phase, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_meshScalarField, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_interpType, const bool a_forceIrregNGP=false) const</td></tr>
 <tr class="memdesc:aa07d5998e160d5430c49bc238e819e77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate a scalar field onto the particle position.  <a href="classAmrMesh.html#aa07d5998e160d5430c49bc238e819e77">More...</a><br /></td></tr>
@@ -390,14 +401,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:adccc54b19b8398a8c48c4ef8b2ea026c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#adccc54b19b8398a8c48c4ef8b2ea026c">transferCoveredParticlesVoxels</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particlesFrom, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particlesTo, const phase::which_phase &amp;a_phase) const</td></tr>
 <tr class="memdesc:adccc54b19b8398a8c48c4ef8b2ea026c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which transferse particles from one particle container to another if they fall inside the EB.  <a href="classAmrMesh.html#adccc54b19b8398a8c48c4ef8b2ea026c">More...</a><br /></td></tr>
 <tr class="separator:adccc54b19b8398a8c48c4ef8b2ea026c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa5ada016124b15d40ea5c6661c8f60f4"><td class="memTemplParams" colspan="2">template&lt;class P &gt; </td></tr>
-<tr class="memitem:aa5ada016124b15d40ea5c6661c8f60f4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aa5ada016124b15d40ea5c6661c8f60f4">intersectParticlesRaycastIF</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_activeParticles, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_ebParticles, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_domainParticles, const phase::which_phase a_phase, const Real a_tolerance, const bool a_deleteParticles) const</td></tr>
-<tr class="memdesc:aa5ada016124b15d40ea5c6661c8f60f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle intersection algorithm based on ray-casting.  <a href="classAmrMesh.html#aa5ada016124b15d40ea5c6661c8f60f4">More...</a><br /></td></tr>
-<tr class="separator:aa5ada016124b15d40ea5c6661c8f60f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff0f00c083961d5921ba325b971838db"><td class="memTemplParams" colspan="2">template&lt;class P &gt; </td></tr>
-<tr class="memitem:aff0f00c083961d5921ba325b971838db"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aff0f00c083961d5921ba325b971838db">intersectParticlesBisectIF</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_activeParticles, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_ebParticles, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_domainParticles, const phase::which_phase a_phase, const Real a_bisectionStep, const bool a_deleteParticles) const</td></tr>
-<tr class="memdesc:aff0f00c083961d5921ba325b971838db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle intersection algorithm based on bisection.  <a href="classAmrMesh.html#aff0f00c083961d5921ba325b971838db">More...</a><br /></td></tr>
-<tr class="separator:aff0f00c083961d5921ba325b971838db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ef231600b61769b61c6fb4e07db725c"><td class="memTemplParams" colspan="2">template&lt;class P &gt; </td></tr>
+<tr class="memitem:a3ef231600b61769b61c6fb4e07db725c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a3ef231600b61769b61c6fb4e07db725c">transferIrregularParticles</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_dstParticles, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_srcParticles, const phase::which_phase a_phase, const std::function&lt; void(P &amp;)&gt; a_transferModifier=[](P &amp;) -&gt; void { return;}) const noexcept</td></tr>
+<tr class="memdesc:a3ef231600b61769b61c6fb4e07db725c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transfer particles that are on the wrong side of the EB to a different container.  <a href="classAmrMesh.html#a3ef231600b61769b61c6fb4e07db725c">More...</a><br /></td></tr>
+<tr class="separator:a3ef231600b61769b61c6fb4e07db725c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60a68b7e8b0a7d9062db13f1b002cc39"><td class="memTemplParams" colspan="2">template&lt;class P &gt; </td></tr>
+<tr class="memitem:a60a68b7e8b0a7d9062db13f1b002cc39"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a60a68b7e8b0a7d9062db13f1b002cc39">intersectParticlesRaycastIF</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_activeParticles, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_ebParticles, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_domainParticles, const phase::which_phase a_phase, const Real a_tolerance, const bool a_deleteParticles, const std::function&lt; void(P &amp;)&gt; a_nonDeletionModifier=[](P &amp;) -&gt; void { return;}) const noexcept</td></tr>
+<tr class="memdesc:a60a68b7e8b0a7d9062db13f1b002cc39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle intersection algorithm based on ray-casting.  <a href="classAmrMesh.html#a60a68b7e8b0a7d9062db13f1b002cc39">More...</a><br /></td></tr>
+<tr class="separator:a60a68b7e8b0a7d9062db13f1b002cc39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a785050ce35bae77bac1d1bfa3358a7cb"><td class="memTemplParams" colspan="2">template&lt;class P &gt; </td></tr>
+<tr class="memitem:a785050ce35bae77bac1d1bfa3358a7cb"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a785050ce35bae77bac1d1bfa3358a7cb">intersectParticlesBisectIF</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_activeParticles, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_ebParticles, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_domainParticles, const phase::which_phase a_phase, const Real a_bisectionStep, const bool a_deleteParticles, const std::function&lt; void(P &amp;)&gt; a_nonDeletionModifier=[](P &amp;) -&gt; void { return;}) const noexcept</td></tr>
+<tr class="memdesc:a785050ce35bae77bac1d1bfa3358a7cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle intersection algorithm based on bisection.  <a href="classAmrMesh.html#a785050ce35bae77bac1d1bfa3358a7cb">More...</a><br /></td></tr>
+<tr class="separator:a785050ce35bae77bac1d1bfa3358a7cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a980ef520e5d9c3a2977a6c43d432b523"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a980ef520e5d9c3a2977a6c43d432b523">interpGhost</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a980ef520e5d9c3a2977a6c43d432b523"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate ghost vectors over a realm, using the default ghost cell interpolation method.  <a href="classAmrMesh.html#a980ef520e5d9c3a2977a6c43d432b523">More...</a><br /></td></tr>
 <tr class="separator:a980ef520e5d9c3a2977a6c43d432b523"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -568,6 +583,9 @@ const Vector&lt; ProblemDomain &gt; &amp;&#160;</td><td class="memItemRight" val
 <tr class="memitem:ae01ad6d63e8fed8c1615a06a9ccb534a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ae01ad6d63e8fed8c1615a06a9ccb534a">getParticleMesh</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:ae01ad6d63e8fed8c1615a06a9ccb534a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get <a class="el" href="classEBAMRParticleMesh.html" title="Class for handling particle-mesh operations with AMR.">EBAMRParticleMesh</a> operator.  <a href="classAmrMesh.html#ae01ad6d63e8fed8c1615a06a9ccb534a">More...</a><br /></td></tr>
 <tr class="separator:ae01ad6d63e8fed8c1615a06a9ccb534a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc021d3b64ddaabdc982230621e254c4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRSurfaceDeposition.html">EBAMRSurfaceDeposition</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#acc021d3b64ddaabdc982230621e254c4">getSurfaceDeposition</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:acc021d3b64ddaabdc982230621e254c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get <a class="el" href="classEBAMRSurfaceDeposition.html" title="class for handling surface deposition of particles with EB and AMR.">EBAMRSurfaceDeposition</a> surface deposition operator.  <a href="classAmrMesh.html#acc021d3b64ddaabdc982230621e254c4">More...</a><br /></td></tr>
+<tr class="separator:acc021d3b64ddaabdc982230621e254c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab04c32d16bc55edc5fe1147eb32bda67"><td class="memItemLeft" align="right" valign="top"><a id="ab04c32d16bc55edc5fe1147eb32bda67"></a>
 Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ab04c32d16bc55edc5fe1147eb32bda67">getCoarseAverage</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:ab04c32d16bc55edc5fe1147eb32bda67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the coarsening utility. <br /></td></tr>
@@ -3255,7 +3273,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a5032e0accfccfbc5c77cd8d4e6bbe578"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5032e0accfccfbc5c77cd8d4e6bbe578">&#9670;&nbsp;</a></span>depositParticles() <span class="overload">[1/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5032e0accfccfbc5c77cd8d4e6bbe578">&#9670;&nbsp;</a></span>depositParticles() <span class="overload">[1/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3332,7 +3350,7 @@ template&lt;class P , const RealVect &amp;(P::*)() const particleVectorField&gt;
 </div>
 </div>
 <a id="a5032e0accfccfbc5c77cd8d4e6bbe578"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5032e0accfccfbc5c77cd8d4e6bbe578">&#9670;&nbsp;</a></span>depositParticles() <span class="overload">[2/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5032e0accfccfbc5c77cd8d4e6bbe578">&#9670;&nbsp;</a></span>depositParticles() <span class="overload">[2/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3406,7 +3424,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 </div>
 </div>
 <a id="a5032e0accfccfbc5c77cd8d4e6bbe578"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5032e0accfccfbc5c77cd8d4e6bbe578">&#9670;&nbsp;</a></span>depositParticles() <span class="overload">[3/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5032e0accfccfbc5c77cd8d4e6bbe578">&#9670;&nbsp;</a></span>depositParticles() <span class="overload">[3/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3483,7 +3501,7 @@ template&lt;class P , const RealVect &amp;(P::*)() const particleVectorField&gt;
 </div>
 </div>
 <a id="a5032e0accfccfbc5c77cd8d4e6bbe578"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5032e0accfccfbc5c77cd8d4e6bbe578">&#9670;&nbsp;</a></span>depositParticles() <span class="overload">[4/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5032e0accfccfbc5c77cd8d4e6bbe578">&#9670;&nbsp;</a></span>depositParticles() <span class="overload">[4/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3550,6 +3568,132 @@ template&lt;class P , RealVect(P::*)() const particleVectorField&gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Specification of deposition kernel (e.g., CIC) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Specification of handling of coarse-fine boundaries. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_forceIrregNGP</td><td>Force NGP deposition in irregular cells or not. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac9d10979cb476e42f07f59f8473110d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9d10979cb476e42f07f59f8473110d7">&#9670;&nbsp;</a></span>depositParticles() <span class="overload">[5/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::depositParticles </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_meshData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase &amp;&#160;</td>
+          <td class="paramname"><em>a_phase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Deposit scalar particle quantities on the mesh. </p>
+<p>Usage has signature <a class="el" href="classAmrMesh.html#a5032e0accfccfbc5c77cd8d4e6bbe578" title="Deposit scalar particle quantities on the mesh.">depositParticles&lt;P, &amp;P::mass&gt;</a> (...)</p>
+<p>To deposit a different quantity, simply change the function pointer in the input parameter.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_meshData</td><td>Mesh data. MUST have exactly one compnent. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where data is registered. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase where data is registered. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particle container. Must be in "usable state" for deposition. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac9d10979cb476e42f07f59f8473110d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9d10979cb476e42f07f59f8473110d7">&#9670;&nbsp;</a></span>depositParticles() <span class="overload">[6/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::depositParticles </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_meshData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase &amp;&#160;</td>
+          <td class="paramname"><em>a_phase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Deposit scalar particle quantities on the mesh. </p>
+<p>Usage has signature <a class="el" href="classAmrMesh.html#a5032e0accfccfbc5c77cd8d4e6bbe578" title="Deposit scalar particle quantities on the mesh.">depositParticles&lt;P, &amp;P::mass&gt;</a> (...)</p>
+<p>To deposit a different quantity, simply change the function pointer in the input parameter.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_meshData</td><td>Mesh data. MUST have exactly one compnent. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where data is registered. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase where data is registered. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particle container. Must be in "usable state" for deposition. </td></tr>
   </table>
   </dd>
 </dl>
@@ -4394,6 +4538,44 @@ template&lt;class P , RealVect(P::*)() const particleVectorField&gt; </div>
   </dd>
 </dl>
 <p>This will work correctly in reverse as well. </p>
+
+</div>
+</div>
+<a id="acc021d3b64ddaabdc982230621e254c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc021d3b64ddaabdc982230621e254c4">&#9670;&nbsp;</a></span>getSurfaceDeposition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEBAMRSurfaceDeposition.html">EBAMRSurfaceDeposition</a> &amp; AmrMesh::getSurfaceDeposition </td>
+          <td>(</td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get <a class="el" href="classEBAMRSurfaceDeposition.html" title="class for handling surface deposition of particles with EB and AMR.">EBAMRSurfaceDeposition</a> surface deposition operator. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) <br  />
+ </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -5406,13 +5588,16 @@ template&lt;class P , RealVect &amp;(P::*)() particleVectorField&gt; </div>
 
 </div>
 </div>
-<a id="aff0f00c083961d5921ba325b971838db"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aff0f00c083961d5921ba325b971838db">&#9670;&nbsp;</a></span>intersectParticlesBisectIF()</h2>
+<a id="a785050ce35bae77bac1d1bfa3358a7cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a785050ce35bae77bac1d1bfa3358a7cb">&#9670;&nbsp;</a></span>intersectParticlesBisectIF()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;class P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void AmrMesh::intersectParticlesBisectIF </td>
@@ -5448,7 +5633,13 @@ template&lt;class P &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const bool&#160;</td>
-          <td class="paramname"><em>a_deleteParticles</em>&#160;</td>
+          <td class="paramname"><em>a_deleteParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::function&lt; void(P &amp;)&gt;&#160;</td>
+          <td class="paramname"><em>a_nonDeletionModifier</em> = <code>[](P&amp;)&#160;-&gt;&#160;void&#160;{&#160;return;&#160;}</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -5456,6 +5647,11 @@ template&lt;class P &gt; </div>
           <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Particle intersection algorithm based on bisection. </p>
@@ -5467,19 +5663,23 @@ template&lt;class P &gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase where the input particles live </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_bisectionStep</td><td>Length of the bisection step </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deleteParticles</td><td>If true, particles will be removed from a_activeParticles if they intersect the geometry. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_nonDeletionModifier</td><td>Optional input argument for letting the user manipulate particles that were intersected but not deleted </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="aa5ada016124b15d40ea5c6661c8f60f4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa5ada016124b15d40ea5c6661c8f60f4">&#9670;&nbsp;</a></span>intersectParticlesRaycastIF()</h2>
+<a id="a60a68b7e8b0a7d9062db13f1b002cc39"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60a68b7e8b0a7d9062db13f1b002cc39">&#9670;&nbsp;</a></span>intersectParticlesRaycastIF()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;class P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void AmrMesh::intersectParticlesRaycastIF </td>
@@ -5515,7 +5715,13 @@ template&lt;class P &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const bool&#160;</td>
-          <td class="paramname"><em>a_deleteParticles</em>&#160;</td>
+          <td class="paramname"><em>a_deleteParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::function&lt; void(P &amp;)&gt;&#160;</td>
+          <td class="paramname"><em>a_nonDeletionModifier</em> = <code>[](P&amp;)&#160;-&gt;&#160;void&#160;{&#160;return;&#160;}</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -5523,6 +5729,11 @@ template&lt;class P &gt; </div>
           <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Particle intersection algorithm based on ray-casting. </p>
@@ -5532,8 +5743,9 @@ template&lt;class P &gt; </div>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_ebParticles</td><td>Particles that intersected with the EB </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_domainParticles</td><td>Particles that intersected with the domain faces </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase where the input particles live </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_tolerance</td><td>Tolerance </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bisectionStep</td><td>Length of the bisection step </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deleteParticles</td><td>If true, particles will be removed from a_activeParticles if they intersect the geometry. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_nonDeletionModifier</td><td>Optional input argument for letting the user manipulate particles that were intersected but not deleted </td></tr>
   </table>
   </dd>
 </dl>
@@ -6639,8 +6851,54 @@ template&lt;class P &gt; </div>
 
 </div>
 </div>
+<a id="a8bdab30ee7155984c3e75bcf25e50dc3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8bdab30ee7155984c3e75bcf25e50dc3">&#9670;&nbsp;</a></span>slice() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> AmrMesh::slice </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_original</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval&#160;</td>
+          <td class="paramname"><em>a_variables</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Slice cell-centered data in order to fetch a subset of components. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Original data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_variables</td><td>Variables </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Subset of variables. The first component in the returned data holder corresponds to a_variables.begin(), the last to a_variables.end() </dd></dl>
+
+</div>
+</div>
 <a id="ab607b773c624e394f178e7f09446a656"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab607b773c624e394f178e7f09446a656">&#9670;&nbsp;</a></span>slice()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ab607b773c624e394f178e7f09446a656">&#9670;&nbsp;</a></span>slice() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -6841,6 +7099,67 @@ template&lt;class P &gt; </div>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This function will only work if the particles are mapped to the correct EBISBox. </dd></dl>
+
+</div>
+</div>
+<a id="a3ef231600b61769b61c6fb4e07db725c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ef231600b61769b61c6fb4e07db725c">&#9670;&nbsp;</a></span>transferIrregularParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::transferIrregularParticles </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_dstParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_srcParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::function&lt; void(P &amp;)&gt;&#160;</td>
+          <td class="paramname"><em>a_transferModifier</em> = <code>[](P&amp;)&#160;-&gt;&#160;void&#160;{&#160;return;&#160;}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Transfer particles that are on the wrong side of the EB to a different container. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_dstParticles</td><td>Destination particle container </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_srcParticles</td><td>Source particle container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase where the particles should live </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_transferModifier</td><td>Optional input argument for letting the user manipulate particles that were transferred </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

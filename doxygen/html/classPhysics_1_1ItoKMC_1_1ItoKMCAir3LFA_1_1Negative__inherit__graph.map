@@ -1,0 +1,4 @@
+<map id="Physics::ItoKMC::ItoKMCAir3LFA::Negative" name="Physics::ItoKMC::ItoKMCAir3LFA::Negative">
+<area shape="rect" id="node1" title=" " alt="" coords="5,80,212,121"/>
+<area shape="rect" id="node2" href="$classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="61,5,156,32"/>
+</map>

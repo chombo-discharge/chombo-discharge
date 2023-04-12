@@ -5,6 +5,28 @@ Controlling ``chombo-discharge``
 
 In this chapter we give a brief overview of how to run a ``chombo-discharge`` simulation and control its behavior through input scripts or command line options.
 
+Organization
+------------
+
+The ``chombo-discharge`` source files are organized as follows:
+
+.. list-table:: Code organization.
+   :widths: 10 50
+   :header-rows: 1
+
+   * - Folder
+     - Explanation
+   * - :file:`Source`
+     -  Source files for the AMR core, solvers, and various utilities.
+   * - :file:`Physics`
+     - Various implementations that can run the ``chombo-discharge`` source code.
+   * - :file:`Geometries`
+     - Various geometries.
+   * - :file:`Submodules`
+     - Git submodule dependencies.
+   * - :file:`Exec`
+     - Various executable applications. 
+
 Compiling and running
 ---------------------
 
@@ -144,12 +166,20 @@ If you only want to plot the density, then you should put ``CdrGodunov.plt_vars 
 An empty entry like ``CdrGodunov.plt_vars =`` may lead to run-time errors, so if you do not want a class to provide plot data you may put ``CdrGodunov.plt_vars = none``. 
 
 
+.. _Chap:pout:
+
 Controlling parallel processor verbosity
 ----------------------------------------
 
 By default, ``Chombo`` will write a process output file *per MPI process* and this file will be named :file:`pout.n` where ``n`` is the MPI rank.
 These files are written in the directory where you executed your application, and are *not* related to plot files or checkpoint files.
 However, ``chombo-discharge`` prints information to these files as simulations advance (for example by displaying information of the current time step, or convergence rates for multigrid solvers).
+To see information regarding the latest time steps, simply print a few lines in these files, e.g.
+
+.. code-block:: bash
+
+   tail -200 pout.0
+
 While it is possible to monitor the evolution of ``chombo-discharge`` for each MPI rank, most of these files contain redundant information.
 To adjust the number of files that will be written, ``Chombo`` can read an environment variable ``CH_OUTPUT_INTERVAL`` that determines which MPI ranks write :file:`pout.n` files. 
 For example, if you only want the master MPI rank to write :file:`pout.0`, you would do
@@ -200,4 +230,15 @@ This is useful when your simulation waited 5 days in the queue on a cluster befo
 The new options are parsed by the core classes ``Driver``, ``TimeStepper``, ``AmrMesh``, and ``CellTagger`` through special routines ``parseRuntimeOptions()``.
 Note that not all input configurations are suitable for run-time configuration.
 For example, increasing the size of the simulation domain does not make sense but changing the blocking factor, refinement criteria, or plot intervals do.
-To see which options are run-time configurable, see :ref:`Chap:Driver`, :ref:`Chap:AmrMesh`, or the :ref:`Chap:TimeStepper` and :ref:`Chap:CellTagger` that you use. 
+To see which options are run-time configurable, see :ref:`Chap:Driver`, :ref:`Chap:AmrMesh`, or the :ref:`Chap:TimeStepper` and :ref:`Chap:CellTagger` that you use.
+
+.. _Chap:Visualization:
+
+Visualization
+-------------
+
+``chombo-discharge`` output files are always written to HDF5.
+The plot files will reside in the ``plt`` subfolder where the application was run.
+
+Currently, we have only used `VisIt <https://visit-dav.github.io/visit-website/>`_ for visualizing the plot files.
+Learning how to use VisIt is not a part of this documentation; there are great tutorials on the `VisIt website <https://visit-dav.github.io/visit-website/>`_.

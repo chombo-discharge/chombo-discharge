@@ -121,9 +121,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoLayout.html#a13a2b671fbfb2399ad54664ae89d2fd7">parseRuntimeOptions</a> ()</td></tr>
 <tr class="memdesc:a13a2b671fbfb2399ad54664ae89d2fd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function &ndash; parse runtime options for all solvers. <br /></td></tr>
 <tr class="separator:a13a2b671fbfb2399ad54664ae89d2fd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af55b151326ed1d05776b89c308e6c595"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoLayout.html#af55b151326ed1d05776b89c308e6c595">allocateInternals</a> ()</td></tr>
-<tr class="memdesc:af55b151326ed1d05776b89c308e6c595"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internals for all solvers.  <a href="classItoLayout.html#af55b151326ed1d05776b89c308e6c595">More...</a><br /></td></tr>
-<tr class="separator:af55b151326ed1d05776b89c308e6c595"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0eee7349cccb3dd9122338054760a836"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoLayout.html#a0eee7349cccb3dd9122338054760a836">allocate</a> ()</td></tr>
+<tr class="memdesc:a0eee7349cccb3dd9122338054760a836"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internals for all solvers.  <a href="classItoLayout.html#a0eee7349cccb3dd9122338054760a836">More...</a><br /></td></tr>
+<tr class="separator:a0eee7349cccb3dd9122338054760a836"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1715149114a9ae478e9de51f965313f9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoLayout.html#a1715149114a9ae478e9de51f965313f9">addSolver</a> (RefCountedPtr&lt; T &gt; &amp;a_solver)</td></tr>
 <tr class="memdesc:a1715149114a9ae478e9de51f965313f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add solver to the list of solvers.  <a href="classItoLayout.html#a1715149114a9ae478e9de51f965313f9">More...</a><br /></td></tr>
 <tr class="separator:a1715149114a9ae478e9de51f965313f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -322,8 +322,8 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
-<a id="af55b151326ed1d05776b89c308e6c595"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af55b151326ed1d05776b89c308e6c595">&#9670;&nbsp;</a></span>allocateInternals()</h2>
+<a id="a0eee7349cccb3dd9122338054760a836"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0eee7349cccb3dd9122338054760a836">&#9670;&nbsp;</a></span>allocate()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -334,7 +334,7 @@ template&lt;class T &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classItoLayout.html">ItoLayout</a>&lt; T &gt;::allocateInternals</td>
+          <td class="memname">void <a class="el" href="classItoLayout.html">ItoLayout</a>&lt; T &gt;::allocate</td>
         </tr>
       </table>
   </td>
@@ -345,7 +345,7 @@ template&lt;class T &gt; </div>
 </div><div class="memdoc">
 
 <p>Allocate internals for all solvers. </p>
-<p>This will call allocateInternals for each <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a>. </p>
+<p>This will call allocate for each <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a>. </p>
 
 </div>
 </div>

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>chombo-discharge: EBGeometryIF Class Reference</title>
+<title>chombo-discharge: EBGeometryIF&lt; T &gt; Class Template Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -73,7 +73,7 @@ $(function() {
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="classEBGeometryIF-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">EBGeometryIF Class Reference</div>  </div>
+<div class="title">EBGeometryIF&lt; T &gt; Class Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
@@ -82,77 +82,82 @@ $(function() {
 
 <p><code>#include &lt;<a class="el" href="CD__EBGeometryIF_8H_source.html">CD_EBGeometryIF.H</a>&gt;</code></p>
 <div class="dynheader">
-Inheritance diagram for EBGeometryIF:</div>
+Inheritance diagram for EBGeometryIF&lt; T &gt;:</div>
 <div class="dyncontent">
-<div class="center"><img src="classEBGeometryIF__inherit__graph.png" border="0" usemap="#aEBGeometryIF_inherit__map" alt="Inheritance graph"/></div>
-<map name="aEBGeometryIF_inherit__map" id="aEBGeometryIF_inherit__map">
-<area shape="rect" title="Shallow binding of EBGeometry signed distance functions to Chombo." alt="" coords="5,80,121,107"/>
-<area shape="rect" title=" " alt="" coords="30,5,97,32"/>
+<div class="center"><img src="classEBGeometryIF__inherit__graph.png" border="0" usemap="#aEBGeometryIF_3_01T_01_4_inherit__map" alt="Inheritance graph"/></div>
+<map name="aEBGeometryIF_3_01T_01_4_inherit__map" id="aEBGeometryIF_3_01T_01_4_inherit__map">
+<area shape="rect" title="Shallow binding of EBGeometry signed distance functions to Chombo." alt="" coords="5,80,160,107"/>
+<area shape="rect" title=" " alt="" coords="49,5,116,32"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
-Collaboration diagram for EBGeometryIF:</div>
+Collaboration diagram for EBGeometryIF&lt; T &gt;:</div>
 <div class="dyncontent">
-<div class="center"><img src="classEBGeometryIF__coll__graph.png" border="0" usemap="#aEBGeometryIF_coll__map" alt="Collaboration graph"/></div>
-<map name="aEBGeometryIF_coll__map" id="aEBGeometryIF_coll__map">
-<area shape="rect" title="Shallow binding of EBGeometry signed distance functions to Chombo." alt="" coords="5,80,121,107"/>
-<area shape="rect" title=" " alt="" coords="30,5,97,32"/>
+<div class="center"><img src="classEBGeometryIF__coll__graph.png" border="0" usemap="#aEBGeometryIF_3_01T_01_4_coll__map" alt="Collaboration graph"/></div>
+<map name="aEBGeometryIF_3_01T_01_4_coll__map" id="aEBGeometryIF_3_01T_01_4_coll__map">
+<area shape="rect" title="Shallow binding of EBGeometry signed distance functions to Chombo." alt="" coords="5,80,160,107"/>
+<area shape="rect" title=" " alt="" coords="49,5,116,32"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a74e379c606a4eea327975117748b72d7"><td class="memItemLeft" align="right" valign="top"><a id="a74e379c606a4eea327975117748b72d7"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a74e379c606a4eea327975117748b72d7">EBGeometryIF</a> ()</td></tr>
-<tr class="memdesc:a74e379c606a4eea327975117748b72d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Sets shape to nullptr. <br /></td></tr>
-<tr class="separator:a74e379c606a4eea327975117748b72d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a443bc87eb67774498a6d1c2d761abf2d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a443bc87eb67774498a6d1c2d761abf2d">EBGeometryIF</a> (const std::shared_ptr&lt; EBGeometry::SignedDistanceFunction&lt; Real &gt;&gt; &amp;a_sdf, const bool a_flipInside, const Real a_zCoord=0.0)</td></tr>
-<tr class="memdesc:a443bc87eb67774498a6d1c2d761abf2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <a href="classEBGeometryIF.html#a443bc87eb67774498a6d1c2d761abf2d">More...</a><br /></td></tr>
-<tr class="separator:a443bc87eb67774498a6d1c2d761abf2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ba553c6da91793cad6b9c196cce86c9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a7ba553c6da91793cad6b9c196cce86c9">EBGeometryIF</a> (const <a class="el" href="classEBGeometryIF.html">EBGeometryIF</a> &amp;a_inputIF)</td></tr>
-<tr class="memdesc:a7ba553c6da91793cad6b9c196cce86c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor.  <a href="classEBGeometryIF.html#a7ba553c6da91793cad6b9c196cce86c9">More...</a><br /></td></tr>
-<tr class="separator:a7ba553c6da91793cad6b9c196cce86c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a881322bb980fed032406e0477a7d259e"><td class="memItemLeft" align="right" valign="top"><a id="a881322bb980fed032406e0477a7d259e"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a881322bb980fed032406e0477a7d259e">~EBGeometryIF</a> ()</td></tr>
-<tr class="memdesc:a881322bb980fed032406e0477a7d259e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. Does nothing. <br /></td></tr>
-<tr class="separator:a881322bb980fed032406e0477a7d259e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aad58dae0f17a0eb992d75336dd6aafaa"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#aad58dae0f17a0eb992d75336dd6aafaa">value</a> (const RealVect &amp;a_point) const override</td></tr>
-<tr class="memdesc:aad58dae0f17a0eb992d75336dd6aafaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value function. Returns distance to object.  <a href="classEBGeometryIF.html#aad58dae0f17a0eb992d75336dd6aafaa">More...</a><br /></td></tr>
-<tr class="separator:aad58dae0f17a0eb992d75336dd6aafaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ee9d7866f2c8aaaef19d4fcfab34a71"><td class="memItemLeft" align="right" valign="top"><a id="a7ee9d7866f2c8aaaef19d4fcfab34a71"></a>
-virtual BaseIF *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a7ee9d7866f2c8aaaef19d4fcfab34a71">newImplicitFunction</a> () const override</td></tr>
-<tr class="memdesc:a7ee9d7866f2c8aaaef19d4fcfab34a71"><td class="mdescLeft">&#160;</td><td class="mdescRight">IF factory method. <br /></td></tr>
-<tr class="separator:a7ee9d7866f2c8aaaef19d4fcfab34a71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b871eafdbc6aa90e4e0922b29edc23d"><td class="memItemLeft" align="right" valign="top"><a id="a6b871eafdbc6aa90e4e0922b29edc23d"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a6b871eafdbc6aa90e4e0922b29edc23d">EBGeometryIF</a> ()</td></tr>
+<tr class="memdesc:a6b871eafdbc6aa90e4e0922b29edc23d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Sets shape to nullptr. <br /></td></tr>
+<tr class="separator:a6b871eafdbc6aa90e4e0922b29edc23d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a144d3dd9d7d50b5633cd81c59b8d170f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a144d3dd9d7d50b5633cd81c59b8d170f">EBGeometryIF</a> (const std::shared_ptr&lt; EBGeometry::ImplicitFunction&lt; T &gt;&gt; &amp;a_sdf, const bool a_flipInside, const Real a_zCoord=0.0)</td></tr>
+<tr class="memdesc:a144d3dd9d7d50b5633cd81c59b8d170f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <a href="classEBGeometryIF.html#a144d3dd9d7d50b5633cd81c59b8d170f">More...</a><br /></td></tr>
+<tr class="separator:a144d3dd9d7d50b5633cd81c59b8d170f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c24e562fb932033d76e10db03263398"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a1c24e562fb932033d76e10db03263398">EBGeometryIF</a> (const <a class="el" href="classEBGeometryIF.html">EBGeometryIF</a> &amp;a_inputIF)</td></tr>
+<tr class="memdesc:a1c24e562fb932033d76e10db03263398"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor.  <a href="classEBGeometryIF.html#a1c24e562fb932033d76e10db03263398">More...</a><br /></td></tr>
+<tr class="separator:a1c24e562fb932033d76e10db03263398"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a020737b78f1a337d9b90ef788cd8eb9f"><td class="memItemLeft" align="right" valign="top"><a id="a020737b78f1a337d9b90ef788cd8eb9f"></a>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a020737b78f1a337d9b90ef788cd8eb9f">~EBGeometryIF</a> ()</td></tr>
+<tr class="memdesc:a020737b78f1a337d9b90ef788cd8eb9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. Does nothing. <br /></td></tr>
+<tr class="separator:a020737b78f1a337d9b90ef788cd8eb9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6b4fec5d4d1c753dfb4c441a3fc8643"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#aa6b4fec5d4d1c753dfb4c441a3fc8643">value</a> (const RealVect &amp;a_point) const override</td></tr>
+<tr class="memdesc:aa6b4fec5d4d1c753dfb4c441a3fc8643"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value function. Returns distance to object.  <a href="classEBGeometryIF.html#aa6b4fec5d4d1c753dfb4c441a3fc8643">More...</a><br /></td></tr>
+<tr class="separator:aa6b4fec5d4d1c753dfb4c441a3fc8643"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ccc89aeab23871fa611845c26b0506b"><td class="memItemLeft" align="right" valign="top"><a id="a6ccc89aeab23871fa611845c26b0506b"></a>
+virtual BaseIF *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a6ccc89aeab23871fa611845c26b0506b">newImplicitFunction</a> () const override</td></tr>
+<tr class="memdesc:a6ccc89aeab23871fa611845c26b0506b"><td class="mdescLeft">&#160;</td><td class="mdescRight">IF factory method. <br /></td></tr>
+<tr class="separator:a6ccc89aeab23871fa611845c26b0506b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:a4072a590fdf85e25ebeec4279a011642"><td class="memItemLeft" align="right" valign="top"><a id="a4072a590fdf85e25ebeec4279a011642"></a>
-std::shared_ptr&lt; const EBGeometry::SignedDistanceFunction&lt; Real &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a4072a590fdf85e25ebeec4279a011642">m_sdf</a></td></tr>
-<tr class="memdesc:a4072a590fdf85e25ebeec4279a011642"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signed distance function. <br /></td></tr>
-<tr class="separator:a4072a590fdf85e25ebeec4279a011642"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9a93e32b83f542b94e5d41a67f2d6bfb"><td class="memItemLeft" align="right" valign="top"><a id="a9a93e32b83f542b94e5d41a67f2d6bfb"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a9a93e32b83f542b94e5d41a67f2d6bfb">m_flipInside</a></td></tr>
-<tr class="memdesc:a9a93e32b83f542b94e5d41a67f2d6bfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook for making outside -&gt; inside. <br /></td></tr>
-<tr class="separator:a9a93e32b83f542b94e5d41a67f2d6bfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a528dbb315b8579c1311aacda6d9ba79a"><td class="memItemLeft" align="right" valign="top"><a id="a528dbb315b8579c1311aacda6d9ba79a"></a>
-Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a528dbb315b8579c1311aacda6d9ba79a">m_zCoord</a></td></tr>
-<tr class="memdesc:a528dbb315b8579c1311aacda6d9ba79a"><td class="mdescLeft">&#160;</td><td class="mdescRight">z-coordinate through which the object is sliced. <br /></td></tr>
-<tr class="separator:a528dbb315b8579c1311aacda6d9ba79a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a020df2ebd7e50904444afdfc1dcf7d05"><td class="memItemLeft" align="right" valign="top"><a id="a020df2ebd7e50904444afdfc1dcf7d05"></a>
+std::shared_ptr&lt; const EBGeometry::ImplicitFunction&lt; T &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a020df2ebd7e50904444afdfc1dcf7d05">m_sdf</a></td></tr>
+<tr class="memdesc:a020df2ebd7e50904444afdfc1dcf7d05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signed distance function. <br /></td></tr>
+<tr class="separator:a020df2ebd7e50904444afdfc1dcf7d05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb799c8aa4b8ed4f447e76ca4f05dc7f"><td class="memItemLeft" align="right" valign="top"><a id="afb799c8aa4b8ed4f447e76ca4f05dc7f"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#afb799c8aa4b8ed4f447e76ca4f05dc7f">m_flipInside</a></td></tr>
+<tr class="memdesc:afb799c8aa4b8ed4f447e76ca4f05dc7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook for making outside -&gt; inside. <br /></td></tr>
+<tr class="separator:afb799c8aa4b8ed4f447e76ca4f05dc7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa396aa2ffee6ca26127135902750da00"><td class="memItemLeft" align="right" valign="top"><a id="aa396aa2ffee6ca26127135902750da00"></a>
+Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#aa396aa2ffee6ca26127135902750da00">m_zCoord</a></td></tr>
+<tr class="memdesc:aa396aa2ffee6ca26127135902750da00"><td class="mdescLeft">&#160;</td><td class="mdescRight">z-coordinate through which the object is sliced. <br /></td></tr>
+<tr class="separator:aa396aa2ffee6ca26127135902750da00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Shallow binding of EBGeometry signed distance functions to Chombo. </p>
-<p>Since EBGeometry is inherently 3D and chombo-discharge is both 2D and 3D, the object will be sliced through a specified z-coordinate doing 2D simulations. </p>
+<div class="textblock"><h3>template&lt;typename T = Real&gt;<br />
+class EBGeometryIF&lt; T &gt;</h3>
+
+<p>Shallow binding of EBGeometry signed distance functions to Chombo. </p>
+<p>Since EBGeometry is inherently 3D and chombo-discharge is both 2D and 3D, the object will be sliced through a specified z-coordinate doing 2D simulations. </p><dl class="section note"><dt>Note</dt><dd>T is the precision used in EBGeometry. </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a443bc87eb67774498a6d1c2d761abf2d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a443bc87eb67774498a6d1c2d761abf2d">&#9670;&nbsp;</a></span>EBGeometryIF() <span class="overload">[1/2]</span></h2>
+<a id="a144d3dd9d7d50b5633cd81c59b8d170f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a144d3dd9d7d50b5633cd81c59b8d170f">&#9670;&nbsp;</a></span>EBGeometryIF() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">EBGeometryIF::EBGeometryIF </td>
+          <td class="memname"><a class="el" href="classEBGeometryIF.html">EBGeometryIF</a>&lt; T &gt;::<a class="el" href="classEBGeometryIF.html">EBGeometryIF</a> </td>
           <td>(</td>
-          <td class="paramtype">const std::shared_ptr&lt; EBGeometry::SignedDistanceFunction&lt; Real &gt;&gt; &amp;&#160;</td>
+          <td class="paramtype">const std::shared_ptr&lt; EBGeometry::ImplicitFunction&lt; T &gt;&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_sdf</em>, </td>
         </tr>
         <tr>
@@ -178,7 +183,7 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <p>Full constructor. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_sdf</td><td>EBGeometry signed distance function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_impFunc</td><td>EBGeometry implicit function </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_flipInside</td><td>Hook for making inside -&gt; outside. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_zCoord</td><td>z-coordinate through which the object is sliced. </td></tr>
   </table>
@@ -187,16 +192,18 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 
 </div>
 </div>
-<a id="a7ba553c6da91793cad6b9c196cce86c9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7ba553c6da91793cad6b9c196cce86c9">&#9670;&nbsp;</a></span>EBGeometryIF() <span class="overload">[2/2]</span></h2>
+<a id="a1c24e562fb932033d76e10db03263398"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c24e562fb932033d76e10db03263398">&#9670;&nbsp;</a></span>EBGeometryIF() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">EBGeometryIF::EBGeometryIF </td>
+          <td class="memname"><a class="el" href="classEBGeometryIF.html">EBGeometryIF</a>&lt; T &gt;::<a class="el" href="classEBGeometryIF.html">EBGeometryIF</a> </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="classEBGeometryIF.html">EBGeometryIF</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classEBGeometryIF.html">EBGeometryIF</a>&lt; T &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_inputIF</em></td><td>)</td>
           <td></td>
         </tr>
@@ -214,17 +221,19 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="aad58dae0f17a0eb992d75336dd6aafaa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aad58dae0f17a0eb992d75336dd6aafaa">&#9670;&nbsp;</a></span>value()</h2>
+<a id="aa6b4fec5d4d1c753dfb4c441a3fc8643"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6b4fec5d4d1c753dfb4c441a3fc8643">&#9670;&nbsp;</a></span>value()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Real EBGeometryIF::value </td>
+          <td class="memname">Real <a class="el" href="classEBGeometryIF.html">EBGeometryIF</a>&lt; T &gt;::value </td>
           <td>(</td>
           <td class="paramtype">const RealVect &amp;&#160;</td>
           <td class="paramname"><em>a_point</em></td><td>)</td>
@@ -250,7 +259,7 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>Source/ImplicitFunctions/<a class="el" href="CD__EBGeometryIF_8H_source.html">CD_EBGeometryIF.H</a></li>
-<li>Source/ImplicitFunctions/<a class="el" href="CD__EBGeometryIF_8cpp.html">CD_EBGeometryIF.cpp</a></li>
+<li>Source/ImplicitFunctions/<a class="el" href="CD__EBGeometryIFImplem_8H_source.html">CD_EBGeometryIFImplem.H</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

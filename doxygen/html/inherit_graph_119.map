@@ -1,4 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" title=" " alt="" coords="5,5,124,32"/>
-<area shape="rect" id="node2" href="$classScanShop.html" title="Derived version of GeometryShop that load balances based on the cut cells themselves." alt="" coords="172,5,257,32"/>
+<area shape="rect" id="node1" href="$classRtSpecies.html" title="Declaration of a class that defines an interface to radiative transfer solvers, i...." alt="" coords="5,78,92,105"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html" title="Encapsulation of radiative transfer species for usage with CdrPlasmaJSON." alt="" coords="169,5,318,47"/>
+<area shape="rect" id="node3" href="$classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA_1_1PhotonZ.html" title=" " alt="" coords="140,71,347,112"/>
+<area shape="rect" id="node4" href="$classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferSpecies.html" title="Implementation of RtSpecies for usage in RadiativeTransfer module." alt="" coords="146,136,341,177"/>
 </map>

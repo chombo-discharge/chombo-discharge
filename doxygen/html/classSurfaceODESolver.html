@@ -156,9 +156,15 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:af2257a0a74c725058fe2ce72c8f7493a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSurfaceODESolver.html#af2257a0a74c725058fe2ce72c8f7493a">setTime</a> (const int a_step, const Real a_time, const Real a_dt) noexcept</td></tr>
 <tr class="memdesc:af2257a0a74c725058fe2ce72c8f7493a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the time.  <a href="classSurfaceODESolver.html#af2257a0a74c725058fe2ce72c8f7493a">More...</a><br /></td></tr>
 <tr class="separator:af2257a0a74c725058fe2ce72c8f7493a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3e976be73bd964c9fe356a564a7cc925"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSurfaceODESolver.html#a3e976be73bd964c9fe356a564a7cc925">getStep</a> () const noexcept</td></tr>
-<tr class="memdesc:a3e976be73bd964c9fe356a564a7cc925"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current time step.  <a href="classSurfaceODESolver.html#a3e976be73bd964c9fe356a564a7cc925">More...</a><br /></td></tr>
-<tr class="separator:a3e976be73bd964c9fe356a564a7cc925"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa82d7383ac29b6009017dfc0a8d02271"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSurfaceODESolver.html#aa82d7383ac29b6009017dfc0a8d02271">computeMass</a> (const int a_comp=0) const noexcept</td></tr>
+<tr class="memdesc:aa82d7383ac29b6009017dfc0a8d02271"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the total mass for component a_comp in m_phi.  <a href="classSurfaceODESolver.html#aa82d7383ac29b6009017dfc0a8d02271">More...</a><br /></td></tr>
+<tr class="separator:aa82d7383ac29b6009017dfc0a8d02271"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a317e8ab81d939766d4f8a3a815d3e499"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSurfaceODESolver.html#a317e8ab81d939766d4f8a3a815d3e499">computeMass</a> (const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_data, const int a_comp=0) const noexcept</td></tr>
+<tr class="memdesc:a317e8ab81d939766d4f8a3a815d3e499"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the total mass in a_phi.  <a href="classSurfaceODESolver.html#a317e8ab81d939766d4f8a3a815d3e499">More...</a><br /></td></tr>
+<tr class="separator:a317e8ab81d939766d4f8a3a815d3e499"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e49e12924876744b384f84667a7a211"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSurfaceODESolver.html#a3e49e12924876744b384f84667a7a211">getStep</a> () const noexcept</td></tr>
+<tr class="memdesc:a3e49e12924876744b384f84667a7a211"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current time step.  <a href="classSurfaceODESolver.html#a3e49e12924876744b384f84667a7a211">More...</a><br /></td></tr>
+<tr class="separator:a3e49e12924876744b384f84667a7a211"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9040c209c3d50d6c32d9b740e8c14ed7"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSurfaceODESolver.html#a9040c209c3d50d6c32d9b740e8c14ed7">getTime</a> () const noexcept</td></tr>
 <tr class="memdesc:a9040c209c3d50d6c32d9b740e8c14ed7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current time.  <a href="classSurfaceODESolver.html#a9040c209c3d50d6c32d9b740e8c14ed7">More...</a><br /></td></tr>
 <tr class="separator:a9040c209c3d50d6c32d9b740e8c14ed7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -414,6 +420,91 @@ template&lt;int N&gt; </div>
 
 </div>
 </div>
+<a id="a317e8ab81d939766d4f8a3a815d3e499"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a317e8ab81d939766d4f8a3a815d3e499">&#9670;&nbsp;</a></span>computeMass() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;int N&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real <a class="el" href="classSurfaceODESolver.html">SurfaceODESolver</a>&lt; N &gt;::computeMass </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_comp</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the total mass in a_phi. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Input data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_comp</td><td>Component </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Computation runs only over the valid cells. </dd></dl>
+
+</div>
+</div>
+<a id="aa82d7383ac29b6009017dfc0a8d02271"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa82d7383ac29b6009017dfc0a8d02271">&#9670;&nbsp;</a></span>computeMass() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;int N&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real <a class="el" href="classSurfaceODESolver.html">SurfaceODESolver</a>&lt; N &gt;::computeMass </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_comp</em> = <code>0</code></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the total mass for component a_comp in m_phi. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_comp</td><td>Component </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Computation runs only over the valid cells. </dd></dl>
+
+</div>
+</div>
 <a id="a6bb3f625faf563df0af3ad3e512ae5ec"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6bb3f625faf563df0af3ad3e512ae5ec">&#9670;&nbsp;</a></span>getDt()</h2>
 
@@ -630,8 +721,8 @@ template&lt;int N&gt; </div>
 
 </div>
 </div>
-<a id="a3e976be73bd964c9fe356a564a7cc925"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3e976be73bd964c9fe356a564a7cc925">&#9670;&nbsp;</a></span>getStep()</h2>
+<a id="a3e49e12924876744b384f84667a7a211"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e49e12924876744b384f84667a7a211">&#9670;&nbsp;</a></span>getStep()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -642,7 +733,7 @@ template&lt;int N&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Real <a class="el" href="classSurfaceODESolver.html">SurfaceODESolver</a>&lt; N &gt;::getStep</td>
+          <td class="memname">int <a class="el" href="classSurfaceODESolver.html">SurfaceODESolver</a>&lt; N &gt;::getStep</td>
         </tr>
       </table>
   </td>

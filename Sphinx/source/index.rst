@@ -5,7 +5,7 @@
 
 .. important::
 
-   **This is an beta release. Development is still in progress, and various bugs may be present. Minor changes to the user interface can still occur.**
+   **This is a beta release. Development is still in progress, and various bugs may be present. Minor changes to the user interface can still occur.**
 
 Welcome to ``chombo-discharge``'s user documentation
 ****************************************************
@@ -79,7 +79,6 @@ Introduction
    Base/Documentation
    Base/Overview
    Base/Installation
-   Base/Visualization
    Base/Control
    Base/Examples
    Base/Testing
@@ -145,7 +144,7 @@ Multi-physics applications
 
    Applications/CdrPlasmaModel
    Applications/StreamerInceptionModel
-   Applications/ItoPlasmaModel   
+   Applications/ItoKMC
 
 Single-solver applications
 **************************
@@ -164,15 +163,16 @@ Single-solver applications
    Applications/TracerParticleModel
 
 
-Tutorial
-********
+..
+   Tutorial
+   ********
 
-.. toctree::
-   :maxdepth: 3
-   :caption: Tutorial
-   :hidden:	     
+   .. toctree::
+      :maxdepth: 3
+      :caption: Tutorial
+      :hidden:	     
 
-   Tutorials/Tutorial
+      Tutorials/Tutorial
       
 Utilities
 *********  

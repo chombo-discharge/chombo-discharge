@@ -1,6 +1,16 @@
 <map id="Source/ConvectionDiffusionReaction/CD_CdrCTU.H" name="Source/ConvectionDiffusionReaction/CD_CdrCTU.H">
-<area shape="rect" id="node1" title="Declaration of a class which implements CdrMultigrid using MUSCL for advection." alt="" coords="127,5,328,47"/>
-<area shape="rect" id="node2" href="$CD__CdrCTU_8cpp.html" title="Implementation of CD_CdrCTU.H." alt="" coords="5,95,207,136"/>
-<area shape="rect" id="node3" href="$CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="231,95,466,136"/>
-<area shape="rect" id="node4" href="$CD__StreamerInceptionStepperImplem_8H.html" title="Implementation of CD_StreamerInceptionStepper.H." alt="" coords="205,184,492,225"/>
+<area shape="rect" id="node1" title="Declaration of a class which implements CdrMultigrid using MUSCL for advection." alt="" coords="305,5,507,47"/>
+<area shape="rect" id="node2" href="$CD__CdrCTU_8cpp.html" title="Implementation of CD_CdrCTU.H." alt="" coords="49,95,251,136"/>
+<area shape="rect" id="node3" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="275,102,537,129"/>
+<area shape="rect" id="node13" href="$CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="829,95,1063,136"/>
+<area shape="rect" id="node4" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="5,191,255,233"/>
+<area shape="rect" id="node5" href="$CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="279,199,533,225"/>
+<area shape="rect" id="node11" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="562,184,778,240"/>
+<area shape="rect" id="node6" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="29,295,260,337"/>
+<area shape="rect" id="node10" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="285,295,527,337"/>
+<area shape="rect" id="node7" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="29,399,260,441"/>
+<area shape="rect" id="node8" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="284,392,485,448"/>
+<area shape="rect" id="node9" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="263,496,506,552"/>
+<area shape="rect" id="node12" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="551,288,799,344"/>
+<area shape="rect" id="node14" href="$CD__StreamerInceptionStepperImplem_8H.html" title="Implementation of CD_StreamerInceptionStepper.H." alt="" coords="803,191,1089,233"/>
 </map>

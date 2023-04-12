@@ -99,13 +99,13 @@ Collaboration diagram for CdrMultigrid:</div>
 <div class="dyncontent">
 <div class="center"><img src="classCdrMultigrid__coll__graph.png" border="0" usemap="#aCdrMultigrid_coll__map" alt="Collaboration graph"/></div>
 <map name="aCdrMultigrid_coll__map" id="aCdrMultigrid_coll__map">
-<area shape="rect" title="Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic di..." alt="" coords="1032,416,1135,443"/>
+<area shape="rect" title="Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic di..." alt="" coords="1032,437,1135,464"/>
 <area shape="rect" href="classCdrSolver.html" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="893,279,978,305"/>
 <area shape="rect" href="classCdrDomainBC.html" title="Class for encapsulating possible domain boundary conditions for CdrSolver." alt="" coords="421,139,534,165"/>
 <area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="385,242,569,283"/>
 <area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,283,144,309"/>
 <area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="355,308,600,335"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="379,420,575,447"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="379,449,575,476"/>
 <area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="378,88,577,115"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
@@ -132,10 +132,10 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a0034a5ef2613e6f829834db1376f2685">registerOperators</a> () override</td></tr>
 <tr class="memdesc:a0034a5ef2613e6f829834db1376f2685"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register operator. <br /></td></tr>
 <tr class="separator:a0034a5ef2613e6f829834db1376f2685"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab73b4a0b28827832b032b7e4e032f56a"><td class="memItemLeft" align="right" valign="top"><a id="ab73b4a0b28827832b032b7e4e032f56a"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#ab73b4a0b28827832b032b7e4e032f56a">allocateInternals</a> () override</td></tr>
-<tr class="memdesc:ab73b4a0b28827832b032b7e4e032f56a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage. <br /></td></tr>
-<tr class="separator:ab73b4a0b28827832b032b7e4e032f56a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac65554f8fac228c7bd492208f99346c"><td class="memItemLeft" align="right" valign="top"><a id="aac65554f8fac228c7bd492208f99346c"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#aac65554f8fac228c7bd492208f99346c">allocate</a> () override</td></tr>
+<tr class="memdesc:aac65554f8fac228c7bd492208f99346c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage. <br /></td></tr>
+<tr class="separator:aac65554f8fac228c7bd492208f99346c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad87773680e2ab4d91afb8ef735a143eb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#ad87773680e2ab4d91afb8ef735a143eb">computeDivJ</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_divJ, <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const Real a_extrapDt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
 <tr class="memdesc:ad87773680e2ab4d91afb8ef735a143eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(J) explicitly, where J = nV - D*grad(n)  <a href="classCdrMultigrid.html#ad87773680e2ab4d91afb8ef735a143eb">More...</a><br /></td></tr>
 <tr class="separator:ad87773680e2ab4d91afb8ef735a143eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -198,12 +198,20 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:ab55aa8718586ff2316626acc3698e49a inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ab55aa8718586ff2316626acc3698e49a">preRegrid</a> (const int a_lbase, const int a_oldFinestLevel)</td></tr>
 <tr class="memdesc:ab55aa8718586ff2316626acc3698e49a inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform pre-regrid operations.  <a href="classCdrSolver.html#ab55aa8718586ff2316626acc3698e49a">More...</a><br /></td></tr>
 <tr class="separator:ab55aa8718586ff2316626acc3698e49a inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a12b063a50d44a687080682587ff2597c inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a12b063a50d44a687080682587ff2597c">deallocateInternals</a> ()</td></tr>
-<tr class="memdesc:a12b063a50d44a687080682587ff2597c inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate internal storage.  <a href="classCdrSolver.html#a12b063a50d44a687080682587ff2597c">More...</a><br /></td></tr>
-<tr class="separator:a12b063a50d44a687080682587ff2597c inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9393d5d9ccd070b555b7bff640ee6d8e inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a9393d5d9ccd070b555b7bff640ee6d8e">deallocate</a> ()</td></tr>
+<tr class="memdesc:a9393d5d9ccd070b555b7bff640ee6d8e inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate internal storage.  <a href="classCdrSolver.html#a9393d5d9ccd070b555b7bff640ee6d8e">More...</a><br /></td></tr>
+<tr class="separator:a9393d5d9ccd070b555b7bff640ee6d8e inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f44081662d2076d55dace1dc1a19491 inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a2f44081662d2076d55dace1dc1a19491">setRealm</a> (const std::string a_realm)</td></tr>
 <tr class="memdesc:a2f44081662d2076d55dace1dc1a19491 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the realm for this solver.  <a href="classCdrSolver.html#a2f44081662d2076d55dace1dc1a19491">More...</a><br /></td></tr>
 <tr class="separator:a2f44081662d2076d55dace1dc1a19491 inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0aaaebaac930d472b6988681508942bb inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top"><a id="a0aaaebaac930d472b6988681508942bb"></a>
+virtual RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a0aaaebaac930d472b6988681508942bb">getSpecies</a> () noexcept</td></tr>
+<tr class="memdesc:a0aaaebaac930d472b6988681508942bb inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the CDR species. <br /></td></tr>
+<tr class="separator:a0aaaebaac930d472b6988681508942bb inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36af1eb9f71568210b73b65b93676657 inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top"><a id="a36af1eb9f71568210b73b65b93676657"></a>
+virtual const RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a36af1eb9f71568210b73b65b93676657">getSpecies</a> () const noexcept</td></tr>
+<tr class="memdesc:a36af1eb9f71568210b73b65b93676657 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the CDR species. <br /></td></tr>
+<tr class="separator:a36af1eb9f71568210b73b65b93676657 inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad83bc3b914b50dbd90f86987ad46a645 inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ad83bc3b914b50dbd90f86987ad46a645">setSpecies</a> (const RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt; &amp;a_species)</td></tr>
 <tr class="memdesc:ad83bc3b914b50dbd90f86987ad46a645 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set species.  <a href="classCdrSolver.html#ad83bc3b914b50dbd90f86987ad46a645">More...</a><br /></td></tr>
 <tr class="separator:ad83bc3b914b50dbd90f86987ad46a645 inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -297,9 +305,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:ab130ea207184190aeb72bcb7e4f60810 inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ab130ea207184190aeb72bcb7e4f60810">computeMass</a> ()</td></tr>
 <tr class="memdesc:ab130ea207184190aeb72bcb7e4f60810 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the "physical mass" in m_phi.  <a href="classCdrSolver.html#ab130ea207184190aeb72bcb7e4f60810">More...</a><br /></td></tr>
 <tr class="separator:ab130ea207184190aeb72bcb7e4f60810 inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac7f01b3499d164a753030edb07a506e8 inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ac7f01b3499d164a753030edb07a506e8">computeMass</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi)</td></tr>
-<tr class="memdesc:ac7f01b3499d164a753030edb07a506e8 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the "physical mass" in the input argument.  <a href="classCdrSolver.html#ac7f01b3499d164a753030edb07a506e8">More...</a><br /></td></tr>
-<tr class="separator:ac7f01b3499d164a753030edb07a506e8 inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac008547572544913e41aaa1b25ba4708 inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ac008547572544913e41aaa1b25ba4708">computeMass</a> (const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const bool a_kappaScale=true)</td></tr>
+<tr class="memdesc:ac008547572544913e41aaa1b25ba4708 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the "physical mass" in the input argument.  <a href="classCdrSolver.html#ac008547572544913e41aaa1b25ba4708">More...</a><br /></td></tr>
+<tr class="separator:ac008547572544913e41aaa1b25ba4708 inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8829af72cf17208473dcef2eebb44b55 inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a8829af72cf17208473dcef2eebb44b55">computeCharge</a> ()</td></tr>
 <tr class="memdesc:a8829af72cf17208473dcef2eebb44b55 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the total charge in m_phi.  <a href="classCdrSolver.html#a8829af72cf17208473dcef2eebb44b55">More...</a><br /></td></tr>
 <tr class="separator:a8829af72cf17208473dcef2eebb44b55 inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -326,6 +334,10 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a1a080b3433328e7b74b9207d324f77cd inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a1a080b3433328e7b74b9207d324f77cd">getEbCenteredVelocity</a> ()</td></tr>
 <tr class="memdesc:a1a080b3433328e7b74b9207d324f77cd inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the eb-centered velocities.  <a href="classCdrSolver.html#a1a080b3433328e7b74b9207d324f77cd">More...</a><br /></td></tr>
 <tr class="separator:a1a080b3433328e7b74b9207d324f77cd inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3b068a314070067e574bc92acfcccc7 inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top"><a id="af3b068a314070067e574bc92acfcccc7"></a>
+virtual <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#af3b068a314070067e574bc92acfcccc7">getCellCenteredDiffusionCoefficient</a> ()</td></tr>
+<tr class="memdesc:af3b068a314070067e574bc92acfcccc7 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the cell-centered diffusion coefficient. <br /></td></tr>
+<tr class="separator:af3b068a314070067e574bc92acfcccc7 inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a41f174f15a7402f961c5f370e739f092 inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a41f174f15a7402f961c5f370e739f092">getFaceCenteredDiffusionCoefficient</a> ()</td></tr>
 <tr class="memdesc:a41f174f15a7402f961c5f370e739f092 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the face-centered diffusion coefficient.  <a href="classCdrSolver.html#a41f174f15a7402f961c5f370e739f092">More...</a><br /></td></tr>
 <tr class="separator:a41f174f15a7402f961c5f370e739f092 inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -338,9 +350,15 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a6520f8f8ef319640e1bc32c7c61a5181 inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classEBAMRData.html">EBAMRIFData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a6520f8f8ef319640e1bc32c7c61a5181">getDomainFlux</a> ()</td></tr>
 <tr class="memdesc:a6520f8f8ef319640e1bc32c7c61a5181 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the domain flux data holder.  <a href="classCdrSolver.html#a6520f8f8ef319640e1bc32c7c61a5181">More...</a><br /></td></tr>
 <tr class="separator:a6520f8f8ef319640e1bc32c7c61a5181 inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef1152a75a721eb4004b7e709c387788 inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#aef1152a75a721eb4004b7e709c387788">extrapolateAdvectiveFluxToEB</a> () noexcept</td></tr>
+<tr class="memdesc:aef1152a75a721eb4004b7e709c387788 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extrapolate advective flux to EB.  <a href="classCdrSolver.html#aef1152a75a721eb4004b7e709c387788">More...</a><br /></td></tr>
+<tr class="separator:aef1152a75a721eb4004b7e709c387788 inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8022eea83998f3d752797efd45d372ba inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a8022eea83998f3d752797efd45d372ba">extrapolateAdvectiveFluxToEB</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_ebFlux) const noexcept</td></tr>
 <tr class="memdesc:a8022eea83998f3d752797efd45d372ba inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extrapolate advective flux to EB.  <a href="classCdrSolver.html#a8022eea83998f3d752797efd45d372ba">More...</a><br /></td></tr>
 <tr class="separator:a8022eea83998f3d752797efd45d372ba inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae361afb82d90aff52cf8a55e8a005436 inherit pub_methods_classCdrSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ae361afb82d90aff52cf8a55e8a005436">redistribute</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_delta) noexcept</td></tr>
+<tr class="memdesc:ae361afb82d90aff52cf8a55e8a005436 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribute the mass differente into the data holder.  <a href="classCdrSolver.html#ae361afb82d90aff52cf8a55e8a005436">More...</a><br /></td></tr>
+<tr class="separator:ae361afb82d90aff52cf8a55e8a005436 inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-types"></a>
 Protected Types</h2></td></tr>
@@ -706,6 +724,10 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <a class="el" href="classEBAMRData.html">EBAMRIFData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ad2fb9302465592fc1a65491a5b9d6ae9">m_domainFlux</a></td></tr>
 <tr class="memdesc:ad2fb9302465592fc1a65491a5b9d6ae9 inherit pro_attribs_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain flux. <br /></td></tr>
 <tr class="separator:ad2fb9302465592fc1a65491a5b9d6ae9 inherit pro_attribs_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8db79ebe9dc8c4e9cef90a0eebcff564 inherit pro_attribs_classCdrSolver"><td class="memItemLeft" align="right" valign="top"><a id="a8db79ebe9dc8c4e9cef90a0eebcff564"></a>
+<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a8db79ebe9dc8c4e9cef90a0eebcff564">m_cellCenteredDiffusionCoefficient</a></td></tr>
+<tr class="memdesc:a8db79ebe9dc8c4e9cef90a0eebcff564 inherit pro_attribs_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion coefficients on cell centers. <br /></td></tr>
+<tr class="separator:a8db79ebe9dc8c4e9cef90a0eebcff564 inherit pro_attribs_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a297ba2dee22bc598e880686e353faeb5 inherit pro_attribs_classCdrSolver"><td class="memItemLeft" align="right" valign="top"><a id="a297ba2dee22bc598e880686e353faeb5"></a>
 <a class="el" href="classEBAMRData.html">EBAMRFluxData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a297ba2dee22bc598e880686e353faeb5">m_faceCenteredDiffusionCoefficient</a></td></tr>
 <tr class="memdesc:a297ba2dee22bc598e880686e353faeb5 inherit pro_attribs_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion coefficients on face centers. <br /></td></tr>

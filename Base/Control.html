@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Controlling chombo-discharge &mdash; chombo-discharge  documentation</title>
@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Examples" href="Examples.html" />
-    <link rel="prev" title="Visualization" href="Visualization.html" /> 
+    <link rel="prev" title="Installation" href="Installation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -30,11 +30,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> chombo-discharge
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            chombo-discharge
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -45,8 +49,8 @@
 <li class="toctree-l1"><a class="reference internal" href="Documentation.html">Using this documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Visualization.html">Visualization</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#organization">Organization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#compiling-and-running">Compiling and running</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#compilation-options">Compilation options</a></li>
 </ul>
@@ -61,6 +65,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#controlling-parallel-processor-verbosity">Controlling parallel processor verbosity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#restarting-simulations">Restarting simulations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#run-time-configurations">Run-time configurations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#visualization">Visualization</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Examples.html">Examples</a></li>
@@ -103,7 +108,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/ItoPlasmaModel.html">Îto-KMC plasma model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ItoKMC.html">Îto-KMC plasma model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
 <ul>
@@ -114,12 +119,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Applications/MeshODEModel.html">Mesh ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/TracerParticleModel.html">Tracer particle model</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
@@ -150,7 +149,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/Base/Control.rst.txt" rel="nofollow"> View page source</a>
@@ -164,6 +163,39 @@
   <section id="controlling-chombo-discharge">
 <span id="chap-control"></span><h1>Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code><a class="headerlink" href="#controlling-chombo-discharge" title="Permalink to this heading"></a></h1>
 <p>In this chapter we give a brief overview of how to run a <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulation and control its behavior through input scripts or command line options.</p>
+<section id="organization">
+<h2>Organization<a class="headerlink" href="#organization" title="Permalink to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> source files are organized as follows:</p>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-number">Table 2 </span><span class="caption-text">Code organization.</span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 83%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Folder</p></th>
+<th class="head"><p>Explanation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">Source</span></code></p></td>
+<td><p>Source files for the AMR core, solvers, and various utilities.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">Physics</span></code></p></td>
+<td><p>Various implementations that can run the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> source code.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">Geometries</span></code></p></td>
+<td><p>Various geometries.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">Submodules</span></code></p></td>
+<td><p>Git submodule dependencies.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">Exec</span></code></p></td>
+<td><p>Various executable applications.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 <section id="compiling-and-running">
 <h2>Compiling and running<a class="headerlink" href="#compiling-and-running" title="Permalink to this heading"></a></h2>
 <p>To run simulations, the user must first compile his application.
@@ -236,8 +268,8 @@ Through the <a class="reference internal" href="../Source/Driver.html#chap-drive
 This directory is relative to the location where the application is run.
 If this directory does not exist, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> will create it.
 It will also create the following subdirectories given in <a class="reference internal" href="#tab-outputdirectories"><span class="std std-ref">Simulation output organization.</span></a>.</p>
-<span id="tab-outputdirectories"></span><table class="colwidths-given docutils align-default" id="id1">
-<caption><span class="caption-number">Table 3 </span><span class="caption-text">Simulation output organization.</span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
+<span id="tab-outputdirectories"></span><table class="docutils align-default" id="id2">
+<caption><span class="caption-number">Table 3 </span><span class="caption-text">Simulation output organization.</span><a class="headerlink" href="#id2" title="Permalink to this table"></a></caption>
 <colgroup>
 <col style="width: 13%" />
 <col style="width: 88%" />
@@ -288,11 +320,15 @@ If you only want to plot the density, then you should put <code class="docutils 
 An empty entry like <code class="docutils literal notranslate"><span class="pre">CdrGodunov.plt_vars</span> <span class="pre">=</span></code> may lead to run-time errors, so if you do not want a class to provide plot data you may put <code class="docutils literal notranslate"><span class="pre">CdrGodunov.plt_vars</span> <span class="pre">=</span> <span class="pre">none</span></code>.</p>
 </section>
 <section id="controlling-parallel-processor-verbosity">
-<h2>Controlling parallel processor verbosity<a class="headerlink" href="#controlling-parallel-processor-verbosity" title="Permalink to this heading"></a></h2>
+<span id="chap-pout"></span><h2>Controlling parallel processor verbosity<a class="headerlink" href="#controlling-parallel-processor-verbosity" title="Permalink to this heading"></a></h2>
 <p>By default, <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> will write a process output file <em>per MPI process</em> and this file will be named <code class="file docutils literal notranslate"><span class="pre">pout.n</span></code> where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the MPI rank.
 These files are written in the directory where you executed your application, and are <em>not</em> related to plot files or checkpoint files.
 However, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> prints information to these files as simulations advance (for example by displaying information of the current time step, or convergence rates for multigrid solvers).
-While it is possible to monitor the evolution of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> for each MPI rank, most of these files contain redundant information.
+To see information regarding the latest time steps, simply print a few lines in these files, e.g.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tail -200 pout.0
+</pre></div>
+</div>
+<p>While it is possible to monitor the evolution of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> for each MPI rank, most of these files contain redundant information.
 To adjust the number of files that will be written, <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> can read an environment variable <code class="docutils literal notranslate"><span class="pre">CH_OUTPUT_INTERVAL</span></code> that determines which MPI ranks write <code class="file docutils literal notranslate"><span class="pre">pout.n</span></code> files.
 For example, if you only want the master MPI rank to write <code class="file docutils literal notranslate"><span class="pre">pout.0</span></code>, you would do</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">CH_OUTPUT_INTERVAL</span><span class="o">=</span><span class="m">999999999</span>
@@ -332,13 +368,20 @@ Note that not all input configurations are suitable for run-time configuration.
 For example, increasing the size of the simulation domain does not make sense but changing the blocking factor, refinement criteria, or plot intervals do.
 To see which options are run-time configurable, see <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>, <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>, or the <a class="reference internal" href="../Source/TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> and <a class="reference internal" href="../Source/CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a> that you use.</p>
 </section>
+<section id="visualization">
+<span id="chap-visualization"></span><h2>Visualization<a class="headerlink" href="#visualization" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> output files are always written to HDF5.
+The plot files will reside in the <code class="docutils literal notranslate"><span class="pre">plt</span></code> subfolder where the application was run.</p>
+<p>Currently, we have only used <a class="reference external" href="https://visit-dav.github.io/visit-website/">VisIt</a> for visualizing the plot files.
+Learning how to use VisIt is not a part of this documentation; there are great tutorials on the <a class="reference external" href="https://visit-dav.github.io/visit-website/">VisIt website</a>.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Visualization.html" class="btn btn-neutral float-left" title="Visualization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

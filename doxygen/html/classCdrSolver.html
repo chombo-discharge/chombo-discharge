@@ -102,11 +102,11 @@ Collaboration diagram for CdrSolver:</div>
 <map name="aCdrSolver_coll__map" id="aCdrSolver_coll__map">
 <area shape="rect" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="888,187,973,213"/>
 <area shape="rect" href="classCdrDomainBC.html" title="Class for encapsulating possible domain boundary conditions for CdrSolver." alt="" coords="421,23,534,49"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="385,145,569,186"/>
-<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,275,144,301"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="355,220,600,247"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="379,303,575,329"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="378,380,577,407"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="385,149,569,190"/>
+<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,301,144,328"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="355,229,600,256"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="379,331,575,357"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="378,408,577,435"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -181,15 +181,23 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:ab55aa8718586ff2316626acc3698e49a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ab55aa8718586ff2316626acc3698e49a">preRegrid</a> (const int a_lbase, const int a_oldFinestLevel)</td></tr>
 <tr class="memdesc:ab55aa8718586ff2316626acc3698e49a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform pre-regrid operations.  <a href="classCdrSolver.html#ab55aa8718586ff2316626acc3698e49a">More...</a><br /></td></tr>
 <tr class="separator:ab55aa8718586ff2316626acc3698e49a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a12b063a50d44a687080682587ff2597c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a12b063a50d44a687080682587ff2597c">deallocateInternals</a> ()</td></tr>
-<tr class="memdesc:a12b063a50d44a687080682587ff2597c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate internal storage.  <a href="classCdrSolver.html#a12b063a50d44a687080682587ff2597c">More...</a><br /></td></tr>
-<tr class="separator:a12b063a50d44a687080682587ff2597c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9393d5d9ccd070b555b7bff640ee6d8e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a9393d5d9ccd070b555b7bff640ee6d8e">deallocate</a> ()</td></tr>
+<tr class="memdesc:a9393d5d9ccd070b555b7bff640ee6d8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate internal storage.  <a href="classCdrSolver.html#a9393d5d9ccd070b555b7bff640ee6d8e">More...</a><br /></td></tr>
+<tr class="separator:a9393d5d9ccd070b555b7bff640ee6d8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a441dc4214ab75b3c56190e0572ec95e3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a441dc4214ab75b3c56190e0572ec95e3">registerOperators</a> ()</td></tr>
 <tr class="memdesc:a441dc4214ab75b3c56190e0572ec95e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register operators for AMR operations.  <a href="classCdrSolver.html#a441dc4214ab75b3c56190e0572ec95e3">More...</a><br /></td></tr>
 <tr class="separator:a441dc4214ab75b3c56190e0572ec95e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f44081662d2076d55dace1dc1a19491"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a2f44081662d2076d55dace1dc1a19491">setRealm</a> (const std::string a_realm)</td></tr>
 <tr class="memdesc:a2f44081662d2076d55dace1dc1a19491"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the realm for this solver.  <a href="classCdrSolver.html#a2f44081662d2076d55dace1dc1a19491">More...</a><br /></td></tr>
 <tr class="separator:a2f44081662d2076d55dace1dc1a19491"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0aaaebaac930d472b6988681508942bb"><td class="memItemLeft" align="right" valign="top"><a id="a0aaaebaac930d472b6988681508942bb"></a>
+virtual RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a0aaaebaac930d472b6988681508942bb">getSpecies</a> () noexcept</td></tr>
+<tr class="memdesc:a0aaaebaac930d472b6988681508942bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the CDR species. <br /></td></tr>
+<tr class="separator:a0aaaebaac930d472b6988681508942bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36af1eb9f71568210b73b65b93676657"><td class="memItemLeft" align="right" valign="top"><a id="a36af1eb9f71568210b73b65b93676657"></a>
+virtual const RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a36af1eb9f71568210b73b65b93676657">getSpecies</a> () const noexcept</td></tr>
+<tr class="memdesc:a36af1eb9f71568210b73b65b93676657"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the CDR species. <br /></td></tr>
+<tr class="separator:a36af1eb9f71568210b73b65b93676657"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad83bc3b914b50dbd90f86987ad46a645"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ad83bc3b914b50dbd90f86987ad46a645">setSpecies</a> (const RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt; &amp;a_species)</td></tr>
 <tr class="memdesc:ad83bc3b914b50dbd90f86987ad46a645"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set species.  <a href="classCdrSolver.html#ad83bc3b914b50dbd90f86987ad46a645">More...</a><br /></td></tr>
 <tr class="separator:ad83bc3b914b50dbd90f86987ad46a645"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -244,9 +252,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a6eaf110ad3bb144212cfd15564dc43dd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a6eaf110ad3bb144212cfd15564dc43dd">initialData</a> ()</td></tr>
 <tr class="memdesc:a6eaf110ad3bb144212cfd15564dc43dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill m_phi state with initial data from m_species.  <a href="classCdrSolver.html#a6eaf110ad3bb144212cfd15564dc43dd">More...</a><br /></td></tr>
 <tr class="separator:a6eaf110ad3bb144212cfd15564dc43dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7026663cd47dbf767cb969a7c0601020"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a7026663cd47dbf767cb969a7c0601020">allocateInternals</a> ()</td></tr>
-<tr class="memdesc:a7026663cd47dbf767cb969a7c0601020"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage.  <a href="classCdrSolver.html#a7026663cd47dbf767cb969a7c0601020">More...</a><br /></td></tr>
-<tr class="separator:a7026663cd47dbf767cb969a7c0601020"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b70fb8fe36c6cb24ada15621cdab508"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a3b70fb8fe36c6cb24ada15621cdab508">allocate</a> ()</td></tr>
+<tr class="memdesc:a3b70fb8fe36c6cb24ada15621cdab508"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage.  <a href="classCdrSolver.html#a3b70fb8fe36c6cb24ada15621cdab508">More...</a><br /></td></tr>
+<tr class="separator:a3b70fb8fe36c6cb24ada15621cdab508"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae5ff5275be09e06043378eae81f89267"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ae5ff5275be09e06043378eae81f89267">writePlotFile</a> ()</td></tr>
 <tr class="memdesc:ae5ff5275be09e06043378eae81f89267"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot file.  <a href="classCdrSolver.html#ae5ff5275be09e06043378eae81f89267">More...</a><br /></td></tr>
 <tr class="separator:ae5ff5275be09e06043378eae81f89267"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -289,9 +297,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:ab130ea207184190aeb72bcb7e4f60810"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ab130ea207184190aeb72bcb7e4f60810">computeMass</a> ()</td></tr>
 <tr class="memdesc:ab130ea207184190aeb72bcb7e4f60810"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the "physical mass" in m_phi.  <a href="classCdrSolver.html#ab130ea207184190aeb72bcb7e4f60810">More...</a><br /></td></tr>
 <tr class="separator:ab130ea207184190aeb72bcb7e4f60810"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac7f01b3499d164a753030edb07a506e8"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ac7f01b3499d164a753030edb07a506e8">computeMass</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi)</td></tr>
-<tr class="memdesc:ac7f01b3499d164a753030edb07a506e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the "physical mass" in the input argument.  <a href="classCdrSolver.html#ac7f01b3499d164a753030edb07a506e8">More...</a><br /></td></tr>
-<tr class="separator:ac7f01b3499d164a753030edb07a506e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac008547572544913e41aaa1b25ba4708"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ac008547572544913e41aaa1b25ba4708">computeMass</a> (const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const bool a_kappaScale=true)</td></tr>
+<tr class="memdesc:ac008547572544913e41aaa1b25ba4708"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the "physical mass" in the input argument.  <a href="classCdrSolver.html#ac008547572544913e41aaa1b25ba4708">More...</a><br /></td></tr>
+<tr class="separator:ac008547572544913e41aaa1b25ba4708"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8829af72cf17208473dcef2eebb44b55"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a8829af72cf17208473dcef2eebb44b55">computeCharge</a> ()</td></tr>
 <tr class="memdesc:a8829af72cf17208473dcef2eebb44b55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the total charge in m_phi.  <a href="classCdrSolver.html#a8829af72cf17208473dcef2eebb44b55">More...</a><br /></td></tr>
 <tr class="separator:a8829af72cf17208473dcef2eebb44b55"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -318,6 +326,10 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a1a080b3433328e7b74b9207d324f77cd"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a1a080b3433328e7b74b9207d324f77cd">getEbCenteredVelocity</a> ()</td></tr>
 <tr class="memdesc:a1a080b3433328e7b74b9207d324f77cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the eb-centered velocities.  <a href="classCdrSolver.html#a1a080b3433328e7b74b9207d324f77cd">More...</a><br /></td></tr>
 <tr class="separator:a1a080b3433328e7b74b9207d324f77cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3b068a314070067e574bc92acfcccc7"><td class="memItemLeft" align="right" valign="top"><a id="af3b068a314070067e574bc92acfcccc7"></a>
+virtual <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#af3b068a314070067e574bc92acfcccc7">getCellCenteredDiffusionCoefficient</a> ()</td></tr>
+<tr class="memdesc:af3b068a314070067e574bc92acfcccc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the cell-centered diffusion coefficient. <br /></td></tr>
+<tr class="separator:af3b068a314070067e574bc92acfcccc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a41f174f15a7402f961c5f370e739f092"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a41f174f15a7402f961c5f370e739f092">getFaceCenteredDiffusionCoefficient</a> ()</td></tr>
 <tr class="memdesc:a41f174f15a7402f961c5f370e739f092"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the face-centered diffusion coefficient.  <a href="classCdrSolver.html#a41f174f15a7402f961c5f370e739f092">More...</a><br /></td></tr>
 <tr class="separator:a41f174f15a7402f961c5f370e739f092"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -330,9 +342,15 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a6520f8f8ef319640e1bc32c7c61a5181"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classEBAMRData.html">EBAMRIFData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a6520f8f8ef319640e1bc32c7c61a5181">getDomainFlux</a> ()</td></tr>
 <tr class="memdesc:a6520f8f8ef319640e1bc32c7c61a5181"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the domain flux data holder.  <a href="classCdrSolver.html#a6520f8f8ef319640e1bc32c7c61a5181">More...</a><br /></td></tr>
 <tr class="separator:a6520f8f8ef319640e1bc32c7c61a5181"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef1152a75a721eb4004b7e709c387788"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#aef1152a75a721eb4004b7e709c387788">extrapolateAdvectiveFluxToEB</a> () noexcept</td></tr>
+<tr class="memdesc:aef1152a75a721eb4004b7e709c387788"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extrapolate advective flux to EB.  <a href="classCdrSolver.html#aef1152a75a721eb4004b7e709c387788">More...</a><br /></td></tr>
+<tr class="separator:aef1152a75a721eb4004b7e709c387788"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8022eea83998f3d752797efd45d372ba"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a8022eea83998f3d752797efd45d372ba">extrapolateAdvectiveFluxToEB</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_ebFlux) const noexcept</td></tr>
 <tr class="memdesc:a8022eea83998f3d752797efd45d372ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extrapolate advective flux to EB.  <a href="classCdrSolver.html#a8022eea83998f3d752797efd45d372ba">More...</a><br /></td></tr>
 <tr class="separator:a8022eea83998f3d752797efd45d372ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae361afb82d90aff52cf8a55e8a005436"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ae361afb82d90aff52cf8a55e8a005436">redistribute</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_delta) noexcept</td></tr>
+<tr class="memdesc:ae361afb82d90aff52cf8a55e8a005436"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribute the mass differente into the data holder.  <a href="classCdrSolver.html#ae361afb82d90aff52cf8a55e8a005436">More...</a><br /></td></tr>
+<tr class="separator:ae361afb82d90aff52cf8a55e8a005436"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-types"></a>
 Protected Types</h2></td></tr>
@@ -574,6 +592,10 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <a class="el" href="classEBAMRData.html">EBAMRIFData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ad2fb9302465592fc1a65491a5b9d6ae9">m_domainFlux</a></td></tr>
 <tr class="memdesc:ad2fb9302465592fc1a65491a5b9d6ae9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain flux. <br /></td></tr>
 <tr class="separator:ad2fb9302465592fc1a65491a5b9d6ae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8db79ebe9dc8c4e9cef90a0eebcff564"><td class="memItemLeft" align="right" valign="top"><a id="a8db79ebe9dc8c4e9cef90a0eebcff564"></a>
+<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a8db79ebe9dc8c4e9cef90a0eebcff564">m_cellCenteredDiffusionCoefficient</a></td></tr>
+<tr class="memdesc:a8db79ebe9dc8c4e9cef90a0eebcff564"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion coefficients on cell centers. <br /></td></tr>
+<tr class="separator:a8db79ebe9dc8c4e9cef90a0eebcff564"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a297ba2dee22bc598e880686e353faeb5"><td class="memItemLeft" align="right" valign="top"><a id="a297ba2dee22bc598e880686e353faeb5"></a>
 <a class="el" href="classEBAMRData.html">EBAMRFluxData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a297ba2dee22bc598e880686e353faeb5">m_faceCenteredDiffusionCoefficient</a></td></tr>
 <tr class="memdesc:a297ba2dee22bc598e880686e353faeb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion coefficients on face centers. <br /></td></tr>
@@ -1038,8 +1060,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a7026663cd47dbf767cb969a7c0601020"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7026663cd47dbf767cb969a7c0601020">&#9670;&nbsp;</a></span>allocateInternals()</h2>
+<a id="a3b70fb8fe36c6cb24ada15621cdab508"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b70fb8fe36c6cb24ada15621cdab508">&#9670;&nbsp;</a></span>allocate()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1048,7 +1070,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void CdrSolver::allocateInternals </td>
+          <td class="memname">void CdrSolver::allocate </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -1064,7 +1086,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <p>Allocate internal storage. </p>
 <dl class="section note"><dt>Note</dt><dd>This allocates a bunch of storage &ndash; if the solver is not diffusive or mobile then we do our best to trim memory. </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classCdrMultigrid.html#ab73b4a0b28827832b032b7e4e032f56a">CdrMultigrid</a>, and <a class="el" href="classCdrGodunov.html#aa9aba1f157d2eea3268e07451f3e923b">CdrGodunov</a>.</p>
+<p>Reimplemented in <a class="el" href="classCdrMultigrid.html#aac65554f8fac228c7bd492208f99346c">CdrMultigrid</a>, and <a class="el" href="classCdrGodunov.html#afc8940528450c901de9ae6164df0c95f">CdrGodunov</a>.</p>
 
 </div>
 </div>
@@ -1999,8 +2021,8 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 
 </div>
 </div>
-<a id="ac7f01b3499d164a753030edb07a506e8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac7f01b3499d164a753030edb07a506e8">&#9670;&nbsp;</a></span>computeMass() <span class="overload">[2/2]</span></h2>
+<a id="ac008547572544913e41aaa1b25ba4708"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac008547572544913e41aaa1b25ba4708">&#9670;&nbsp;</a></span>computeMass() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2011,9 +2033,19 @@ Virtual because some solvers might want to do this differently. </dd></dl>
         <tr>
           <td class="memname">Real CdrSolver::computeMass </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_phi</em></td><td>)</td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_phi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_kappaScale</em> = <code>true</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -2027,6 +2059,7 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 <p>This conservatively coarsens the solution and computes on the coarsest level only </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Cell-centered data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_kappaScale</td><td>Multiply by kappa in irregular cells. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2185,8 +2218,8 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 
 </div>
 </div>
-<a id="a12b063a50d44a687080682587ff2597c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a12b063a50d44a687080682587ff2597c">&#9670;&nbsp;</a></span>deallocateInternals()</h2>
+<a id="a9393d5d9ccd070b555b7bff640ee6d8e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9393d5d9ccd070b555b7bff640ee6d8e">&#9670;&nbsp;</a></span>deallocate()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2195,7 +2228,7 @@ Virtual because some solvers might want to do this differently. </dd></dl>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void CdrSolver::deallocateInternals </td>
+          <td class="memname">void CdrSolver::deallocate </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -2241,8 +2274,36 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 
 </div>
 </div>
+<a id="aef1152a75a721eb4004b7e709c387788"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef1152a75a721eb4004b7e709c387788">&#9670;&nbsp;</a></span>extrapolateAdvectiveFluxToEB() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CdrSolver::extrapolateAdvectiveFluxToEB </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Extrapolate advective flux to EB. </p>
+<p>This does not use any slope limiting (derived classes might want to redo this routine). The returned flux is equal to -n.(phi * v) where n is the normal vector pointing into the solution domain. </p><dl class="section note"><dt>Note</dt><dd>Calls the other version with m_ebFlux as argument </dd></dl>
+
+</div>
+</div>
 <a id="a8022eea83998f3d752797efd45d372ba"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8022eea83998f3d752797efd45d372ba">&#9670;&nbsp;</a></span>extrapolateAdvectiveFluxToEB()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a8022eea83998f3d752797efd45d372ba">&#9670;&nbsp;</a></span>extrapolateAdvectiveFluxToEB() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2266,7 +2327,7 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 </div><div class="memdoc">
 
 <p>Extrapolate advective flux to EB. </p>
-<p>This does not use any slope limiting (derived classes might want to redo this routine). The returned flux is equal to -n.(phi * v) where n is the normal vector. This is constructed so that a positive eb flux yields an influx when doing an purely advective advance. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>This does not use any slope limiting (derived classes might want to redo this routine). The returned flux is equal to -n.(phi * v) where n is the normal vector pointing into the solution domain. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_ebFlux</td><td>Projected flux on the EB. </td></tr>
   </table>
@@ -3420,6 +3481,51 @@ Virtual because some solvers might want to do this differently. </dd></dl>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This stores m_phi and m_source. </dd></dl>
+
+</div>
+</div>
+<a id="ae361afb82d90aff52cf8a55e8a005436"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae361afb82d90aff52cf8a55e8a005436">&#9670;&nbsp;</a></span>redistribute()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CdrSolver::redistribute </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_phi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_delta</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Redistribute the mass differente into the data holder. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Cell data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_delta</td><td>Mass to be re-distributed. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

@@ -1,9 +1,10 @@
 <map id="Source/ImplicitFunctions/CD_EBGeometryIF.H" name="Source/ImplicitFunctions/CD_EBGeometryIF.H">
-<area shape="rect" id="node1" title="Binding of EBGeometry signed distance functions to Chombo objcts." alt="" coords="256,5,437,47"/>
+<area shape="rect" id="node1" title="Binding of EBGeometry signed distance functions to Chombo objcts." alt="" coords="383,5,564,47"/>
 <area shape="rect" id="node2" title=" " alt="" coords="5,95,83,121"/>
 <area shape="rect" id="node3" title=" " alt="" coords="107,95,186,121"/>
 <area shape="rect" id="node4" title=" " alt="" coords="211,95,333,121"/>
 <area shape="rect" id="node5" title=" " alt="" coords="357,95,488,121"/>
-<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="513,95,698,121"/>
-<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="723,95,901,121"/>
+<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="470,169,655,196"/>
+<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="699,169,877,196"/>
+<area shape="rect" id="node8" href="$CD__EBGeometryIFImplem_8H.html" title="Implementation of CD_EBGeometryIF.H." alt="" coords="563,95,770,121"/>
 </map>

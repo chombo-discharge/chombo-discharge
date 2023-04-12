@@ -1,0 +1,6 @@
+<map id="Physics/ItoKMC/CD_ItoKMCFieldTagger.H" name="Physics/ItoKMC/CD_ItoKMCFieldTagger.H">
+<area shape="rect" id="node1" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="5,5,236,47"/>
+<area shape="rect" id="node2" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="5,102,236,143"/>
+<area shape="rect" id="node3" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="260,95,461,151"/>
+<area shape="rect" id="node4" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="239,199,482,255"/>
+</map>

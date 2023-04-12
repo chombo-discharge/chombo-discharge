@@ -1,6 +1,8 @@
 <map id="PhaseRealm" name="PhaseRealm">
-<area shape="rect" id="node1" title="Class that holds important things for doing AMR over a specific phase and processor distribution." alt="" coords="151,184,253,211"/>
-<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="5,95,201,121"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="34,5,173,32"/>
-<area shape="rect" id="node4" href="$classEBAMRParticleMesh.html" title="Class for handling particle&#45;mesh operations with AMR." alt="" coords="226,95,378,121"/>
+<area shape="rect" id="node1" title="Class that holds important things for doing AMR over a specific phase and processor distribution." alt="" coords="268,317,371,344"/>
+<area shape="rect" id="node2" href="$classEBAMRSurfaceDeposition.html" title="class for handling surface deposition of particles with EB and AMR." alt="" coords="5,228,193,255"/>
+<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="15,95,199,136"/>
+<area shape="rect" id="node4" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="149,5,287,32"/>
+<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="233,169,429,195"/>
+<area shape="rect" id="node6" href="$classEBAMRParticleMesh.html" title="Class for handling particle&#45;mesh operations with AMR." alt="" coords="421,228,573,255"/>
 </map>

@@ -204,29 +204,29 @@ $(function() {
 <div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160; </div>
 <div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
 <div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00135"></a><span class="lineno"><a class="line" href="classCdrLayout.html#acad19a98ddee4012eff38e27069d939e">  135</a></span>&#160;<a class="code" href="classCdrLayout.html#acad19a98ddee4012eff38e27069d939e">CdrLayout&lt;T&gt;::allocateInternals</a>()</div>
+<div class="line"><a name="l00135"></a><span class="lineno"><a class="line" href="classCdrLayout.html#aaa27e1400b95ac34bda3c6ae885accce">  135</a></span>&#160;<a class="code" href="classCdrLayout.html#aaa27e1400b95ac34bda3c6ae885accce">CdrLayout&lt;T&gt;::allocate</a>()</div>
 <div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;{</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrLayout&lt;T&gt;::allocateInternals()&quot;</span>);</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrLayout&lt;T&gt;::allocate()&quot;</span>);</div>
 <div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 6) {</div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;CdrLayout&lt;T&gt;::allocateInternals()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;CdrLayout&lt;T&gt;::allocate()&quot;</span> &lt;&lt; endl;</div>
 <div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;  }</div>
 <div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160; </div>
 <div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;  <span class="keywordflow">for</span> (<a class="code" href="classCdrIterator.html">CdrIterator&lt;T&gt;</a> solver_it = this-&gt;iterator(); solver_it.<a class="code" href="classCdrIterator.html#a411502952b4a0ae90bec3dd816106bf1">ok</a>(); ++solver_it) {</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;    solver_it()-&gt;allocateInternals();</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;    solver_it()-&gt;allocate();</div>
 <div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;  }</div>
 <div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;}</div>
 <div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160; </div>
 <div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
 <div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00149"></a><span class="lineno"><a class="line" href="classCdrLayout.html#a526bb9462cc769de8e5ea97a9ed5667f">  149</a></span>&#160;<a class="code" href="classCdrLayout.html#a526bb9462cc769de8e5ea97a9ed5667f">CdrLayout&lt;T&gt;::deallocateInternals</a>()</div>
+<div class="line"><a name="l00149"></a><span class="lineno"><a class="line" href="classCdrLayout.html#afd96ca2e529ee4194ee26d28ddd98cbc">  149</a></span>&#160;<a class="code" href="classCdrLayout.html#afd96ca2e529ee4194ee26d28ddd98cbc">CdrLayout&lt;T&gt;::deallocate</a>()</div>
 <div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;{</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrLayout&lt;T&gt;::deallocateInternals()&quot;</span>);</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrLayout&lt;T&gt;::deallocate()&quot;</span>);</div>
 <div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 6) {</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;CdrLayout&lt;T&gt;::deallocateInternals()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;CdrLayout&lt;T&gt;::deallocate()&quot;</span> &lt;&lt; endl;</div>
 <div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;  }</div>
 <div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160; </div>
 <div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;  <span class="keywordflow">for</span> (<a class="code" href="classCdrIterator.html">CdrIterator&lt;T&gt;</a> solver_it = this-&gt;iterator(); solver_it.<a class="code" href="classCdrIterator.html#a411502952b4a0ae90bec3dd816106bf1">ok</a>(); ++solver_it) {</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;    solver_it()-&gt;deallocateInternals();</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;    solver_it()-&gt;deallocate();</div>
 <div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;  }</div>
 <div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;}</div>
 <div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160; </div>
@@ -512,36 +512,36 @@ $(function() {
 <div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;}</div>
 <div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160; </div>
 <div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;Vector&lt;EBAMRFluxData*&gt;</div>
-<div class="line"><a name="l00444"></a><span class="lineno"><a class="line" href="classCdrLayout.html#a884c8e772479db09eed8901de0e292c4">  444</a></span>&#160;<a class="code" href="classCdrLayout.html#a884c8e772479db09eed8901de0e292c4">CdrLayout&lt;T&gt;::getFaceCenteredDiffusionCoefficient</a>()</div>
+<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;Vector&lt;EBAMRCellData*&gt;</div>
+<div class="line"><a name="l00444"></a><span class="lineno"><a class="line" href="classCdrLayout.html#aa99bfefe6ce9088b563bdc50f5627f2d">  444</a></span>&#160;<a class="code" href="classCdrLayout.html#aa99bfefe6ce9088b563bdc50f5627f2d">CdrLayout&lt;T&gt;::getCellCenteredDiffusionCoefficients</a>()</div>
 <div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;{</div>
-<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getFaceCenteredDiffusionCoefficient()&quot;</span>);</div>
+<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getCellCenteredDiffusionCoefficients()&quot;</span>);</div>
 <div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getFaceCenteredDiffusionCoefficient()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getCellCenteredDiffusionCoefficients()&quot;</span> &lt;&lt; endl;</div>
 <div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;  }</div>
 <div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160; </div>
-<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;  Vector&lt;EBAMRFluxData*&gt; diffCo;</div>
+<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;  Vector&lt;EBAMRCellData*&gt; diffCo;</div>
 <div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160; </div>
 <div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;  <span class="keywordflow">for</span> (<a class="code" href="classCdrIterator.html">CdrIterator&lt;T&gt;</a> solver_it = this-&gt;iterator(); solver_it.<a class="code" href="classCdrIterator.html#a411502952b4a0ae90bec3dd816106bf1">ok</a>(); ++solver_it) {</div>
-<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;    diffCo.push_back(&amp;(solver_it()-&gt;getFaceCenteredDiffusionCoefficient()));</div>
+<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;    diffCo.push_back(&amp;(solver_it()-&gt;getCellCenteredDiffusionCoefficient()));</div>
 <div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;  }</div>
 <div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160; </div>
 <div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;  <span class="keywordflow">return</span> diffCo;</div>
 <div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;}</div>
 <div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160; </div>
 <div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;Vector&lt;EBAMRIVData*&gt;</div>
-<div class="line"><a name="l00462"></a><span class="lineno"><a class="line" href="classCdrLayout.html#a6a6408194fe2e825efe16a5909636aff">  462</a></span>&#160;<a class="code" href="classCdrLayout.html#a6a6408194fe2e825efe16a5909636aff">CdrLayout&lt;T&gt;::getEbCenteredDiffusionCoefficient</a>()</div>
+<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;Vector&lt;EBAMRFluxData*&gt;</div>
+<div class="line"><a name="l00462"></a><span class="lineno"><a class="line" href="classCdrLayout.html#a884c8e772479db09eed8901de0e292c4">  462</a></span>&#160;<a class="code" href="classCdrLayout.html#a884c8e772479db09eed8901de0e292c4">CdrLayout&lt;T&gt;::getFaceCenteredDiffusionCoefficient</a>()</div>
 <div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;{</div>
-<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getEbCenteredDiffusionCoefficient&quot;</span>);</div>
+<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getFaceCenteredDiffusionCoefficient()&quot;</span>);</div>
 <div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getEbCenteredDiffusionCoefficient&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getFaceCenteredDiffusionCoefficient()&quot;</span> &lt;&lt; endl;</div>
 <div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;  }</div>
 <div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160; </div>
-<div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160;  Vector&lt;EBAMRIVData*&gt; diffCo;</div>
+<div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160;  Vector&lt;EBAMRFluxData*&gt; diffCo;</div>
 <div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160; </div>
 <div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160;  <span class="keywordflow">for</span> (<a class="code" href="classCdrIterator.html">CdrIterator&lt;T&gt;</a> solver_it = this-&gt;iterator(); solver_it.<a class="code" href="classCdrIterator.html#a411502952b4a0ae90bec3dd816106bf1">ok</a>(); ++solver_it) {</div>
-<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;    diffCo.push_back(&amp;(solver_it()-&gt;getEbCenteredDiffusionCoefficient()));</div>
+<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;    diffCo.push_back(&amp;(solver_it()-&gt;getFaceCenteredDiffusionCoefficient()));</div>
 <div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160;  }</div>
 <div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160; </div>
 <div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;  <span class="keywordflow">return</span> diffCo;</div>
@@ -549,86 +549,104 @@ $(function() {
 <div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160; </div>
 <div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
 <div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;Vector&lt;EBAMRIVData*&gt;</div>
-<div class="line"><a name="l00480"></a><span class="lineno"><a class="line" href="classCdrLayout.html#a257b22a0a00d0cc9b07ee3d86edc008a">  480</a></span>&#160;<a class="code" href="classCdrLayout.html#a257b22a0a00d0cc9b07ee3d86edc008a">CdrLayout&lt;T&gt;::getEbFlux</a>()</div>
+<div class="line"><a name="l00480"></a><span class="lineno"><a class="line" href="classCdrLayout.html#a6a6408194fe2e825efe16a5909636aff">  480</a></span>&#160;<a class="code" href="classCdrLayout.html#a6a6408194fe2e825efe16a5909636aff">CdrLayout&lt;T&gt;::getEbCenteredDiffusionCoefficient</a>()</div>
 <div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160;{</div>
-<div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getEbFlux()&quot;</span>);</div>
+<div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getEbCenteredDiffusionCoefficient&quot;</span>);</div>
 <div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getEbFlux()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getEbCenteredDiffusionCoefficient&quot;</span> &lt;&lt; endl;</div>
 <div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;  }</div>
 <div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160; </div>
-<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;  Vector&lt;EBAMRIVData*&gt; ebFlux;</div>
+<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;  Vector&lt;EBAMRIVData*&gt; diffCo;</div>
 <div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160; </div>
 <div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160;  <span class="keywordflow">for</span> (<a class="code" href="classCdrIterator.html">CdrIterator&lt;T&gt;</a> solver_it = this-&gt;iterator(); solver_it.<a class="code" href="classCdrIterator.html#a411502952b4a0ae90bec3dd816106bf1">ok</a>(); ++solver_it) {</div>
-<div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;    ebFlux.push_back(&amp;(solver_it()-&gt;getEbFlux()));</div>
+<div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;    diffCo.push_back(&amp;(solver_it()-&gt;getEbCenteredDiffusionCoefficient()));</div>
 <div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;  }</div>
 <div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160; </div>
-<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;  <span class="keywordflow">return</span> ebFlux;</div>
+<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;  <span class="keywordflow">return</span> diffCo;</div>
 <div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160;}</div>
 <div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160; </div>
 <div class="line"><a name="l00496"></a><span class="lineno">  496</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00497"></a><span class="lineno">  497</span>&#160;Vector&lt;EBAMRIFData*&gt;</div>
-<div class="line"><a name="l00498"></a><span class="lineno"><a class="line" href="classCdrLayout.html#a4a160d6198fbf5cb70b06b9d01ea40a4">  498</a></span>&#160;<a class="code" href="classCdrLayout.html#a4a160d6198fbf5cb70b06b9d01ea40a4">CdrLayout&lt;T&gt;::getDomainFlux</a>()</div>
+<div class="line"><a name="l00497"></a><span class="lineno">  497</span>&#160;Vector&lt;EBAMRIVData*&gt;</div>
+<div class="line"><a name="l00498"></a><span class="lineno"><a class="line" href="classCdrLayout.html#a257b22a0a00d0cc9b07ee3d86edc008a">  498</a></span>&#160;<a class="code" href="classCdrLayout.html#a257b22a0a00d0cc9b07ee3d86edc008a">CdrLayout&lt;T&gt;::getEbFlux</a>()</div>
 <div class="line"><a name="l00499"></a><span class="lineno">  499</span>&#160;{</div>
-<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getDomainFlux()&quot;</span>);</div>
+<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getEbFlux()&quot;</span>);</div>
 <div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getDomainFlux()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getEbFlux()&quot;</span> &lt;&lt; endl;</div>
 <div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160;  }</div>
 <div class="line"><a name="l00504"></a><span class="lineno">  504</span>&#160; </div>
-<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160;  Vector&lt;EBAMRIFData*&gt; domainFlux;</div>
+<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160;  Vector&lt;EBAMRIVData*&gt; ebFlux;</div>
 <div class="line"><a name="l00506"></a><span class="lineno">  506</span>&#160; </div>
 <div class="line"><a name="l00507"></a><span class="lineno">  507</span>&#160;  <span class="keywordflow">for</span> (<a class="code" href="classCdrIterator.html">CdrIterator&lt;T&gt;</a> solver_it = this-&gt;iterator(); solver_it.<a class="code" href="classCdrIterator.html#a411502952b4a0ae90bec3dd816106bf1">ok</a>(); ++solver_it) {</div>
-<div class="line"><a name="l00508"></a><span class="lineno">  508</span>&#160;    domainFlux.push_back(&amp;(solver_it()-&gt;getDomainFlux()));</div>
+<div class="line"><a name="l00508"></a><span class="lineno">  508</span>&#160;    ebFlux.push_back(&amp;(solver_it()-&gt;getEbFlux()));</div>
 <div class="line"><a name="l00509"></a><span class="lineno">  509</span>&#160;  }</div>
 <div class="line"><a name="l00510"></a><span class="lineno">  510</span>&#160; </div>
-<div class="line"><a name="l00511"></a><span class="lineno">  511</span>&#160;  <span class="keywordflow">return</span> domainFlux;</div>
+<div class="line"><a name="l00511"></a><span class="lineno">  511</span>&#160;  <span class="keywordflow">return</span> ebFlux;</div>
 <div class="line"><a name="l00512"></a><span class="lineno">  512</span>&#160;}</div>
 <div class="line"><a name="l00513"></a><span class="lineno">  513</span>&#160; </div>
-<div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> S&gt;</div>
-<div class="line"><a name="l00515"></a><span class="lineno"><a class="line" href="classCdrFactory.html#a042e37c1d3c7e9812516c47444074f04">  515</a></span>&#160;<a class="code" href="classCdrFactory.html#a042e37c1d3c7e9812516c47444074f04">CdrFactory&lt;T, S&gt;::CdrFactory</a>()</div>
-<div class="line"><a name="l00516"></a><span class="lineno">  516</span>&#160;{</div>
-<div class="line"><a name="l00517"></a><span class="lineno">  517</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrFactory&lt;T, S&gt;::CdrFactory()&quot;</span>);</div>
-<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160;}</div>
-<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160; </div>
-<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> S&gt;</div>
-<div class="line"><a name="l00521"></a><span class="lineno"><a class="line" href="classCdrFactory.html#a6630154acb5e8b255ed6a6c3328d47c6">  521</a></span>&#160;<a class="code" href="classCdrFactory.html#a6630154acb5e8b255ed6a6c3328d47c6">CdrFactory&lt;T, S&gt;::~CdrFactory</a>()</div>
-<div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160;{</div>
-<div class="line"><a name="l00523"></a><span class="lineno">  523</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrFactory&lt;T, S&gt;::~CdrFactory()&quot;</span>);</div>
-<div class="line"><a name="l00524"></a><span class="lineno">  524</span>&#160;}</div>
-<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160; </div>
-<div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> S&gt;</div>
-<div class="line"><a name="l00527"></a><span class="lineno">  527</span>&#160;RefCountedPtr&lt;CdrLayout&lt;T&gt;&gt;</div>
-<div class="line"><a name="l00528"></a><span class="lineno"><a class="line" href="classCdrFactory.html#a0adb5580f5720dc2969e7f7ef8a942ad">  528</a></span>&#160;<a class="code" href="classCdrFactory.html#a0adb5580f5720dc2969e7f7ef8a942ad">CdrFactory&lt;T, S&gt;::newLayout</a>(<span class="keyword">const</span> Vector&lt;RefCountedPtr&lt;CdrSpecies&gt;&gt;&amp; a_species)<span class="keyword"> const</span></div>
-<div class="line"><a name="l00529"></a><span class="lineno">  529</span>&#160;<span class="keyword"></span>{</div>
-<div class="line"><a name="l00530"></a><span class="lineno">  530</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrFactory&lt;T, S&gt;::newLayout(Vector&lt;RefCountedPtr&lt;CdrSpecies&gt; &gt;)&quot;</span>);</div>
+<div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160;Vector&lt;EBAMRIFData*&gt;</div>
+<div class="line"><a name="l00516"></a><span class="lineno"><a class="line" href="classCdrLayout.html#a4a160d6198fbf5cb70b06b9d01ea40a4">  516</a></span>&#160;<a class="code" href="classCdrLayout.html#a4a160d6198fbf5cb70b06b9d01ea40a4">CdrLayout&lt;T&gt;::getDomainFlux</a>()</div>
+<div class="line"><a name="l00517"></a><span class="lineno">  517</span>&#160;{</div>
+<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getDomainFlux()&quot;</span>);</div>
+<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;CdrLayout&lt;T&gt;::getDomainFlux()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160;  }</div>
+<div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160; </div>
+<div class="line"><a name="l00523"></a><span class="lineno">  523</span>&#160;  Vector&lt;EBAMRIFData*&gt; domainFlux;</div>
+<div class="line"><a name="l00524"></a><span class="lineno">  524</span>&#160; </div>
+<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160;  <span class="keywordflow">for</span> (<a class="code" href="classCdrIterator.html">CdrIterator&lt;T&gt;</a> solver_it = this-&gt;iterator(); solver_it.<a class="code" href="classCdrIterator.html#a411502952b4a0ae90bec3dd816106bf1">ok</a>(); ++solver_it) {</div>
+<div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160;    domainFlux.push_back(&amp;(solver_it()-&gt;getDomainFlux()));</div>
+<div class="line"><a name="l00527"></a><span class="lineno">  527</span>&#160;  }</div>
+<div class="line"><a name="l00528"></a><span class="lineno">  528</span>&#160; </div>
+<div class="line"><a name="l00529"></a><span class="lineno">  529</span>&#160;  <span class="keywordflow">return</span> domainFlux;</div>
+<div class="line"><a name="l00530"></a><span class="lineno">  530</span>&#160;}</div>
 <div class="line"><a name="l00531"></a><span class="lineno">  531</span>&#160; </div>
-<div class="line"><a name="l00532"></a><span class="lineno">  532</span>&#160;  <span class="comment">// Instatiate the return CdrLayout object first.</span></div>
-<div class="line"><a name="l00533"></a><span class="lineno">  533</span>&#160;  <span class="keyword">auto</span> cdr = RefCountedPtr&lt;CdrLayout&lt;T&gt;&gt;(<span class="keyword">new</span> <a class="code" href="classCdrLayout.html">CdrLayout&lt;T&gt;</a>(a_species));</div>
-<div class="line"><a name="l00534"></a><span class="lineno">  534</span>&#160; </div>
-<div class="line"><a name="l00535"></a><span class="lineno">  535</span>&#160;  <span class="comment">// Cast solvers and instantiate them</span></div>
-<div class="line"><a name="l00536"></a><span class="lineno">  536</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; a_species.size(); i++) {</div>
+<div class="line"><a name="l00532"></a><span class="lineno">  532</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> S&gt;</div>
+<div class="line"><a name="l00533"></a><span class="lineno"><a class="line" href="classCdrFactory.html#a042e37c1d3c7e9812516c47444074f04">  533</a></span>&#160;<a class="code" href="classCdrFactory.html#a042e37c1d3c7e9812516c47444074f04">CdrFactory&lt;T, S&gt;::CdrFactory</a>()</div>
+<div class="line"><a name="l00534"></a><span class="lineno">  534</span>&#160;{</div>
+<div class="line"><a name="l00535"></a><span class="lineno">  535</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrFactory&lt;T, S&gt;::CdrFactory()&quot;</span>);</div>
+<div class="line"><a name="l00536"></a><span class="lineno">  536</span>&#160;}</div>
 <div class="line"><a name="l00537"></a><span class="lineno">  537</span>&#160; </div>
-<div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160;    <span class="keyword">auto</span> solver = RefCountedPtr&lt;T&gt;(<span class="keyword">static_cast&lt;</span>T*<span class="keyword">&gt;</span>(<span class="keyword">new</span> S()));</div>
-<div class="line"><a name="l00539"></a><span class="lineno">  539</span>&#160; </div>
-<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160;    solver-&gt;setSpecies(a_species[i]);</div>
-<div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;    solver-&gt;setPhase(phase::gas);</div>
-<div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160;    solver-&gt;setVerbosity(-1);</div>
+<div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> S&gt;</div>
+<div class="line"><a name="l00539"></a><span class="lineno"><a class="line" href="classCdrFactory.html#a6630154acb5e8b255ed6a6c3328d47c6">  539</a></span>&#160;<a class="code" href="classCdrFactory.html#a6630154acb5e8b255ed6a6c3328d47c6">CdrFactory&lt;T, S&gt;::~CdrFactory</a>()</div>
+<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160;{</div>
+<div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrFactory&lt;T, S&gt;::~CdrFactory()&quot;</span>);</div>
+<div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160;}</div>
 <div class="line"><a name="l00543"></a><span class="lineno">  543</span>&#160; </div>
-<div class="line"><a name="l00544"></a><span class="lineno">  544</span>&#160;    cdr-&gt;addSolver(solver);</div>
-<div class="line"><a name="l00545"></a><span class="lineno">  545</span>&#160;  }</div>
-<div class="line"><a name="l00546"></a><span class="lineno">  546</span>&#160; </div>
-<div class="line"><a name="l00547"></a><span class="lineno">  547</span>&#160;  <span class="keywordflow">return</span> cdr;</div>
-<div class="line"><a name="l00548"></a><span class="lineno">  548</span>&#160;}</div>
+<div class="line"><a name="l00544"></a><span class="lineno">  544</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> S&gt;</div>
+<div class="line"><a name="l00545"></a><span class="lineno">  545</span>&#160;RefCountedPtr&lt;CdrLayout&lt;T&gt;&gt;</div>
+<div class="line"><a name="l00546"></a><span class="lineno"><a class="line" href="classCdrFactory.html#a0adb5580f5720dc2969e7f7ef8a942ad">  546</a></span>&#160;<a class="code" href="classCdrFactory.html#a0adb5580f5720dc2969e7f7ef8a942ad">CdrFactory&lt;T, S&gt;::newLayout</a>(<span class="keyword">const</span> Vector&lt;RefCountedPtr&lt;CdrSpecies&gt;&gt;&amp; a_species)<span class="keyword"> const</span></div>
+<div class="line"><a name="l00547"></a><span class="lineno">  547</span>&#160;<span class="keyword"></span>{</div>
+<div class="line"><a name="l00548"></a><span class="lineno">  548</span>&#160;  CH_TIME(<span class="stringliteral">&quot;CdrFactory&lt;T, S&gt;::newLayout(Vector&lt;RefCountedPtr&lt;CdrSpecies&gt; &gt;)&quot;</span>);</div>
 <div class="line"><a name="l00549"></a><span class="lineno">  549</span>&#160; </div>
-<div class="line"><a name="l00550"></a><span class="lineno">  550</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00551"></a><span class="lineno">  551</span>&#160; </div>
-<div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00550"></a><span class="lineno">  550</span>&#160;  <span class="comment">// Instatiate the return CdrLayout object first.</span></div>
+<div class="line"><a name="l00551"></a><span class="lineno">  551</span>&#160;  <span class="keyword">auto</span> cdr = RefCountedPtr&lt;CdrLayout&lt;T&gt;&gt;(<span class="keyword">new</span> <a class="code" href="classCdrLayout.html">CdrLayout&lt;T&gt;</a>(a_species));</div>
+<div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160; </div>
+<div class="line"><a name="l00553"></a><span class="lineno">  553</span>&#160;  <span class="comment">// Cast solvers and instantiate them</span></div>
+<div class="line"><a name="l00554"></a><span class="lineno">  554</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; a_species.size(); i++) {</div>
+<div class="line"><a name="l00555"></a><span class="lineno">  555</span>&#160; </div>
+<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160;    <span class="keyword">auto</span> solver = RefCountedPtr&lt;T&gt;(<span class="keyword">static_cast&lt;</span>T*<span class="keyword">&gt;</span>(<span class="keyword">new</span> S()));</div>
+<div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160; </div>
+<div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160;    solver-&gt;setSpecies(a_species[i]);</div>
+<div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;    solver-&gt;setPhase(phase::gas);</div>
+<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;    solver-&gt;setVerbosity(-1);</div>
+<div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160; </div>
+<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;    cdr-&gt;addSolver(solver);</div>
+<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;  }</div>
+<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160; </div>
+<div class="line"><a name="l00565"></a><span class="lineno">  565</span>&#160;  <span class="keywordflow">return</span> cdr;</div>
+<div class="line"><a name="l00566"></a><span class="lineno">  566</span>&#160;}</div>
+<div class="line"><a name="l00567"></a><span class="lineno">  567</span>&#160; </div>
+<div class="line"><a name="l00568"></a><span class="lineno">  568</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00569"></a><span class="lineno">  569</span>&#160; </div>
+<div class="line"><a name="l00570"></a><span class="lineno">  570</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__CdrIterator_8H_html"><div class="ttname"><a href="CD__CdrIterator_8H.html">CD_CdrIterator.H</a></div><div class="ttdoc">Declaration of an iterator class for CdrLayout (for iterating through subsets of solvers).</div></div>
 <div class="ttc" id="aCD__CdrLayout_8H_html"><div class="ttname"><a href="CD__CdrLayout_8H.html">CD_CdrLayout.H</a></div><div class="ttdoc">Declaration of a class that holds a set of CdrSolvers (to cut down on typing).</div></div>
 <div class="ttc" id="aCD__DataOps_8H_html"><div class="ttname"><a href="CD__DataOps_8H.html">CD_DataOps.H</a></div><div class="ttdoc">Agglomeration of useful data operations.</div></div>
 <div class="ttc" id="aCD__Units_8H_html"><div class="ttname"><a href="CD__Units_8H.html">CD_Units.H</a></div><div class="ttdoc">Declaration of various useful units.</div></div>
-<div class="ttc" id="aclassCdrFactory_html_a042e37c1d3c7e9812516c47444074f04"><div class="ttname"><a href="classCdrFactory.html#a042e37c1d3c7e9812516c47444074f04">CdrFactory::CdrFactory</a></div><div class="ttdeci">CdrFactory()</div><div class="ttdoc">Default constructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:515</div></div>
-<div class="ttc" id="aclassCdrFactory_html_a0adb5580f5720dc2969e7f7ef8a942ad"><div class="ttname"><a href="classCdrFactory.html#a0adb5580f5720dc2969e7f7ef8a942ad">CdrFactory::newLayout</a></div><div class="ttdeci">RefCountedPtr&lt; CdrLayout&lt; T &gt; &gt; newLayout(const Vector&lt; RefCountedPtr&lt; CdrSpecies &gt;&gt; &amp;a_species) const</div><div class="ttdoc">Factory method, create a new CdrLayout.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:528</div></div>
-<div class="ttc" id="aclassCdrFactory_html_a6630154acb5e8b255ed6a6c3328d47c6"><div class="ttname"><a href="classCdrFactory.html#a6630154acb5e8b255ed6a6c3328d47c6">CdrFactory::~CdrFactory</a></div><div class="ttdeci">~CdrFactory()</div><div class="ttdoc">Default constructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:521</div></div>
+<div class="ttc" id="aclassCdrFactory_html_a042e37c1d3c7e9812516c47444074f04"><div class="ttname"><a href="classCdrFactory.html#a042e37c1d3c7e9812516c47444074f04">CdrFactory::CdrFactory</a></div><div class="ttdeci">CdrFactory()</div><div class="ttdoc">Default constructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:533</div></div>
+<div class="ttc" id="aclassCdrFactory_html_a0adb5580f5720dc2969e7f7ef8a942ad"><div class="ttname"><a href="classCdrFactory.html#a0adb5580f5720dc2969e7f7ef8a942ad">CdrFactory::newLayout</a></div><div class="ttdeci">RefCountedPtr&lt; CdrLayout&lt; T &gt; &gt; newLayout(const Vector&lt; RefCountedPtr&lt; CdrSpecies &gt;&gt; &amp;a_species) const</div><div class="ttdoc">Factory method, create a new CdrLayout.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:546</div></div>
+<div class="ttc" id="aclassCdrFactory_html_a6630154acb5e8b255ed6a6c3328d47c6"><div class="ttname"><a href="classCdrFactory.html#a6630154acb5e8b255ed6a6c3328d47c6">CdrFactory::~CdrFactory</a></div><div class="ttdeci">~CdrFactory()</div><div class="ttdoc">Default constructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:539</div></div>
 <div class="ttc" id="aclassCdrIterator_html"><div class="ttname"><a href="classCdrIterator.html">CdrIterator</a></div><div class="ttdoc">Iterator class for CdrLayout. This allows iteration through solvers (or subsets of solvers).</div><div class="ttdef"><b>Definition:</b> CD_CdrIterator.H:27</div></div>
 <div class="ttc" id="aclassCdrIterator_html_a411502952b4a0ae90bec3dd816106bf1"><div class="ttname"><a href="classCdrIterator.html#a411502952b4a0ae90bec3dd816106bf1">CdrIterator::ok</a></div><div class="ttdeci">virtual bool ok() const</div><div class="ttdoc">Ok or not.</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:76</div></div>
 <div class="ttc" id="aclassCdrLayout_html"><div class="ttname"><a href="classCdrLayout.html">CdrLayout</a></div><div class="ttdoc">Class for holding a set of CdrSolvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayout.H:37</div></div>
@@ -637,34 +655,35 @@ $(function() {
 <div class="ttc" id="aclassCdrLayout_html_a09fe1dc821081db79e5009368d2e05a8"><div class="ttname"><a href="classCdrLayout.html#a09fe1dc821081db79e5009368d2e05a8">CdrLayout::parseOptions</a></div><div class="ttdeci">virtual void parseOptions()</div><div class="ttdoc">Parse class options.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:107</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a1e8b502b82f1133062d7cdbd6d75e831"><div class="ttname"><a href="classCdrLayout.html#a1e8b502b82f1133062d7cdbd6d75e831">CdrLayout::parseRuntimeOptions</a></div><div class="ttdeci">virtual void parseRuntimeOptions()</div><div class="ttdoc">Parse runtime options.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:121</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a20e53e3c1aef68ef4cbc35fcaa4a90d9"><div class="ttname"><a href="classCdrLayout.html#a20e53e3c1aef68ef4cbc35fcaa4a90d9">CdrLayout::getPhis</a></div><div class="ttdeci">virtual Vector&lt; EBAMRCellData * &gt; getPhis()</div><div class="ttdoc">Get all cell-centered states.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:390</div></div>
-<div class="ttc" id="aclassCdrLayout_html_a257b22a0a00d0cc9b07ee3d86edc008a"><div class="ttname"><a href="classCdrLayout.html#a257b22a0a00d0cc9b07ee3d86edc008a">CdrLayout::getEbFlux</a></div><div class="ttdeci">virtual Vector&lt; EBAMRIVData * &gt; getEbFlux()</div><div class="ttdoc">Get all EB flux data holders.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:480</div></div>
+<div class="ttc" id="aclassCdrLayout_html_a257b22a0a00d0cc9b07ee3d86edc008a"><div class="ttname"><a href="classCdrLayout.html#a257b22a0a00d0cc9b07ee3d86edc008a">CdrLayout::getEbFlux</a></div><div class="ttdeci">virtual Vector&lt; EBAMRIVData * &gt; getEbFlux()</div><div class="ttdoc">Get all EB flux data holders.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:498</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a37ef23d3979fcc8aca528cd684240eb2"><div class="ttname"><a href="classCdrLayout.html#a37ef23d3979fcc8aca528cd684240eb2">CdrLayout::getSources</a></div><div class="ttdeci">virtual Vector&lt; EBAMRCellData * &gt; getSources()</div><div class="ttdoc">Get all source terms.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:408</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a45621c68ad6c0c08e8e7716befa53636"><div class="ttname"><a href="classCdrLayout.html#a45621c68ad6c0c08e8e7716befa53636">CdrLayout::getPhase</a></div><div class="ttdeci">virtual phase::which_phase getPhase() const</div><div class="ttdoc">Get phase.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:43</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a4908c2e1adfd6fe5f3d9df85f026a67e"><div class="ttname"><a href="classCdrLayout.html#a4908c2e1adfd6fe5f3d9df85f026a67e">CdrLayout::preRegrid</a></div><div class="ttdeci">virtual void preRegrid(const int a_lbase, const int a_oldFinestLevel)</div><div class="ttdoc">Call preRegrid(...) method for all the CdrSolvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:163</div></div>
-<div class="ttc" id="aclassCdrLayout_html_a4a160d6198fbf5cb70b06b9d01ea40a4"><div class="ttname"><a href="classCdrLayout.html#a4a160d6198fbf5cb70b06b9d01ea40a4">CdrLayout::getDomainFlux</a></div><div class="ttdeci">virtual Vector&lt; EBAMRIFData * &gt; getDomainFlux()</div><div class="ttdoc">Get domain flux data holders.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:498</div></div>
+<div class="ttc" id="aclassCdrLayout_html_a4a160d6198fbf5cb70b06b9d01ea40a4"><div class="ttname"><a href="classCdrLayout.html#a4a160d6198fbf5cb70b06b9d01ea40a4">CdrLayout::getDomainFlux</a></div><div class="ttdeci">virtual Vector&lt; EBAMRIFData * &gt; getDomainFlux()</div><div class="ttdoc">Get domain flux data holders.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:516</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a4b27c13db2959f0a634411e13dccce72"><div class="ttname"><a href="classCdrLayout.html#a4b27c13db2959f0a634411e13dccce72">CdrLayout::getVelocities</a></div><div class="ttdeci">virtual Vector&lt; EBAMRCellData * &gt; getVelocities()</div><div class="ttdoc">Get all cell-centered velocities.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:426</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a4d955bc712614fb2c71acbc2b2745114"><div class="ttname"><a href="classCdrLayout.html#a4d955bc712614fb2c71acbc2b2745114">CdrLayout::writePlotFile</a></div><div class="ttdeci">virtual void writePlotFile()</div><div class="ttdoc">Convenience function. All solvers write plot files (for debugging purposes)</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:292</div></div>
-<div class="ttc" id="aclassCdrLayout_html_a526bb9462cc769de8e5ea97a9ed5667f"><div class="ttname"><a href="classCdrLayout.html#a526bb9462cc769de8e5ea97a9ed5667f">CdrLayout::deallocateInternals</a></div><div class="ttdeci">virtual void deallocateInternals()</div><div class="ttdoc">Deallocate solver internals.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:149</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a5330d6dd4c5d7ac228ed45d2a4cda4b6"><div class="ttname"><a href="classCdrLayout.html#a5330d6dd4c5d7ac228ed45d2a4cda4b6">CdrLayout::setComputationalGeometry</a></div><div class="ttdeci">virtual void setComputationalGeometry(const RefCountedPtr&lt; ComputationalGeometry &gt; &amp;a_computationalGeometry)</div><div class="ttdoc">Set the computational geometry for all CdrSolvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:233</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a588a89043801f17e78c540c8644b7196"><div class="ttname"><a href="classCdrLayout.html#a588a89043801f17e78c540c8644b7196">CdrLayout::setAmr</a></div><div class="ttdeci">virtual void setAmr(const RefCountedPtr&lt; AmrMesh &gt; &amp;a_amrMesh)</div><div class="ttdoc">Set AmrMesh for all CdrSolvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:219</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a59aed56b70fec40430c16c6aee0dc67d"><div class="ttname"><a href="classCdrLayout.html#a59aed56b70fec40430c16c6aee0dc67d">CdrLayout::computeDiffusionDt</a></div><div class="ttdeci">virtual Real computeDiffusionDt()</div><div class="ttdoc">Get time step for explicit diffusion.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:326</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a62f6e7cacc700113387f8838db8c6619"><div class="ttname"><a href="classCdrLayout.html#a62f6e7cacc700113387f8838db8c6619">CdrLayout::~CdrLayout</a></div><div class="ttdeci">virtual ~CdrLayout()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:36</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a644eba44a7209fd5539f0383f47a356c"><div class="ttname"><a href="classCdrLayout.html#a644eba44a7209fd5539f0383f47a356c">CdrLayout::addSolver</a></div><div class="ttdeci">virtual void addSolver(RefCountedPtr&lt; T &gt; &amp;a_solver)</div><div class="ttdoc">Add solver. This appends a_solver to m_solvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:95</div></div>
-<div class="ttc" id="aclassCdrLayout_html_a6a6408194fe2e825efe16a5909636aff"><div class="ttname"><a href="classCdrLayout.html#a6a6408194fe2e825efe16a5909636aff">CdrLayout::getEbCenteredDiffusionCoefficient</a></div><div class="ttdeci">virtual Vector&lt; EBAMRIVData * &gt; getEbCenteredDiffusionCoefficient()</div><div class="ttdoc">Get all EB-centered diffusion coefficients.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:462</div></div>
+<div class="ttc" id="aclassCdrLayout_html_a6a6408194fe2e825efe16a5909636aff"><div class="ttname"><a href="classCdrLayout.html#a6a6408194fe2e825efe16a5909636aff">CdrLayout::getEbCenteredDiffusionCoefficient</a></div><div class="ttdeci">virtual Vector&lt; EBAMRIVData * &gt; getEbCenteredDiffusionCoefficient()</div><div class="ttdoc">Get all EB-centered diffusion coefficients.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:480</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a7bd9f61bb5cff5cf134ad6ff89cdb9d8"><div class="ttname"><a href="classCdrLayout.html#a7bd9f61bb5cff5cf134ad6ff89cdb9d8">CdrLayout::setTime</a></div><div class="ttdeci">virtual void setTime(const int a_step, const Real a_time, const Real a_dt)</div><div class="ttdoc">Set time.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:278</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a7dfd49144876143917fc52d4af9d57aa"><div class="ttname"><a href="classCdrLayout.html#a7dfd49144876143917fc52d4af9d57aa">CdrLayout::computeAdvectionDiffusionDt</a></div><div class="ttdeci">virtual Real computeAdvectionDiffusionDt()</div><div class="ttdoc">Get the time step for explicit advection-diffusion.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:346</div></div>
-<div class="ttc" id="aclassCdrLayout_html_a884c8e772479db09eed8901de0e292c4"><div class="ttname"><a href="classCdrLayout.html#a884c8e772479db09eed8901de0e292c4">CdrLayout::getFaceCenteredDiffusionCoefficient</a></div><div class="ttdeci">virtual Vector&lt; EBAMRFluxData * &gt; getFaceCenteredDiffusionCoefficient()</div><div class="ttdoc">Get all face-centered diffusion coefficients.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:444</div></div>
+<div class="ttc" id="aclassCdrLayout_html_a884c8e772479db09eed8901de0e292c4"><div class="ttname"><a href="classCdrLayout.html#a884c8e772479db09eed8901de0e292c4">CdrLayout::getFaceCenteredDiffusionCoefficient</a></div><div class="ttdeci">virtual Vector&lt; EBAMRFluxData * &gt; getFaceCenteredDiffusionCoefficient()</div><div class="ttdoc">Get all face-centered diffusion coefficients.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:462</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a8b8ee320c2f59c525bfc5d2e1517fdbf"><div class="ttname"><a href="classCdrLayout.html#a8b8ee320c2f59c525bfc5d2e1517fdbf">CdrLayout::setVerbosity</a></div><div class="ttdeci">virtual void setVerbosity(const int a_verbosity)</div><div class="ttdoc">Set verbosity for all CdrSolvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:263</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a91194f8a55a84636cd7382fd17396af2"><div class="ttname"><a href="classCdrLayout.html#a91194f8a55a84636cd7382fd17396af2">CdrLayout::registerOperators</a></div><div class="ttdeci">virtual void registerOperators()</div><div class="ttdoc">Register operators.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:205</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a9976590cd47c25d23ac23a256d6aaa98"><div class="ttname"><a href="classCdrLayout.html#a9976590cd47c25d23ac23a256d6aaa98">CdrLayout::CdrLayout</a></div><div class="ttdeci">CdrLayout()=delete</div><div class="ttdoc">Disallowed weak constructor. Use the full constructor.</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a9f509c2a1005af199192b0533ba02ec9"><div class="ttname"><a href="classCdrLayout.html#a9f509c2a1005af199192b0533ba02ec9">CdrLayout::getSolvers</a></div><div class="ttdeci">virtual Vector&lt; RefCountedPtr&lt; T &gt; &gt; &amp; getSolvers()</div><div class="ttdoc">Get solvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:366</div></div>
 <div class="ttc" id="aclassCdrLayout_html_a9f8b5d1b65a614aabe1015f14fb95505"><div class="ttname"><a href="classCdrLayout.html#a9f8b5d1b65a614aabe1015f14fb95505">CdrLayout::regrid</a></div><div class="ttdeci">virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)</div><div class="ttdoc">Regrid method. Calls regrid(...) for every CdrSolver.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:191</div></div>
+<div class="ttc" id="aclassCdrLayout_html_aa99bfefe6ce9088b563bdc50f5627f2d"><div class="ttname"><a href="classCdrLayout.html#aa99bfefe6ce9088b563bdc50f5627f2d">CdrLayout::getCellCenteredDiffusionCoefficients</a></div><div class="ttdeci">virtual Vector&lt; EBAMRCellData * &gt; getCellCenteredDiffusionCoefficients()</div><div class="ttdoc">Get all cell-centered diffusion coefficients.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:444</div></div>
+<div class="ttc" id="aclassCdrLayout_html_aaa27e1400b95ac34bda3c6ae885accce"><div class="ttname"><a href="classCdrLayout.html#aaa27e1400b95ac34bda3c6ae885accce">CdrLayout::allocate</a></div><div class="ttdeci">virtual void allocate()</div><div class="ttdoc">Allocate internal storage for solvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:135</div></div>
 <div class="ttc" id="aclassCdrLayout_html_aaeccdf4e27761ed2b0847c132c3b9233"><div class="ttname"><a href="classCdrLayout.html#aaeccdf4e27761ed2b0847c132c3b9233">CdrLayout::initialData</a></div><div class="ttdeci">virtual void initialData()</div><div class="ttdoc">Initial data. Fill all solvers with initial data.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:177</div></div>
 <div class="ttc" id="aclassCdrLayout_html_abd80ea8b5761890a67b85fc14abf1c03"><div class="ttname"><a href="classCdrLayout.html#abd80ea8b5761890a67b85fc14abf1c03">CdrLayout::getSpecies</a></div><div class="ttdeci">virtual Vector&lt; RefCountedPtr&lt; CdrSpecies &gt; &gt; &amp; getSpecies()</div><div class="ttdoc">Get species.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:378</div></div>
-<div class="ttc" id="aclassCdrLayout_html_acad19a98ddee4012eff38e27069d939e"><div class="ttname"><a href="classCdrLayout.html#acad19a98ddee4012eff38e27069d939e">CdrLayout::allocateInternals</a></div><div class="ttdeci">virtual void allocateInternals()</div><div class="ttdoc">Allocate internal storage for solvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:135</div></div>
 <div class="ttc" id="aclassCdrLayout_html_ade6f9a53b757ab17d451b108e3045cc1"><div class="ttname"><a href="classCdrLayout.html#ade6f9a53b757ab17d451b108e3045cc1">CdrLayout::iterator</a></div><div class="ttdeci">virtual CdrIterator&lt; T &gt; iterator()</div><div class="ttdoc">Get an iterator which can iterate through the various Cdr solvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:55</div></div>
 <div class="ttc" id="aclassCdrLayout_html_ae4279e478cbda525d5bf30dab941f463"><div class="ttname"><a href="classCdrLayout.html#ae4279e478cbda525d5bf30dab941f463">CdrLayout::computeAdvectionDt</a></div><div class="ttdeci">virtual Real computeAdvectionDt()</div><div class="ttdoc">Get CFL time for advection.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:306</div></div>
 <div class="ttc" id="aclassCdrLayout_html_ae4b5a2382969bb76af23280eb86e1347"><div class="ttname"><a href="classCdrLayout.html#ae4b5a2382969bb76af23280eb86e1347">CdrLayout::setRealm</a></div><div class="ttdeci">virtual void setRealm(const std::string a_realm)</div><div class="ttdoc">Set realm for all CdrSolvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:79</div></div>
+<div class="ttc" id="aclassCdrLayout_html_afd96ca2e529ee4194ee26d28ddd98cbc"><div class="ttname"><a href="classCdrLayout.html#afd96ca2e529ee4194ee26d28ddd98cbc">CdrLayout::deallocate</a></div><div class="ttdeci">virtual void deallocate()</div><div class="ttdoc">Deallocate solver internals.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayoutImplem.H:149</div></div>
 <div class="ttc" id="aclassRealm_html_ae7b66527325a72d0b3aa2db67d34078e"><div class="ttname"><a href="classRealm.html#ae7b66527325a72d0b3aa2db67d34078e">Realm::Primal</a></div><div class="ttdeci">static const std::string Primal</div><div class="ttdoc">Identifier for perimal realm.</div><div class="ttdef"><b>Definition:</b> CD_Realm.H:46</div></div>
 <div class="ttc" id="anamespaceParallelOps_html_a1e1c7f162c522c6fecace086d6cdd10d"><div class="ttname"><a href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">ParallelOps::max</a></div><div class="ttdeci">Real max(const Real &amp;a_input) noexcept</div><div class="ttdoc">Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)</div><div class="ttdef"><b>Definition:</b> CD_ParallelOpsImplem.H:142</div></div>
 <div class="ttc" id="anamespaceParallelOps_html_ac16673e77130f572bc01154b59829fd2"><div class="ttname"><a href="namespaceParallelOps.html#ac16673e77130f572bc01154b59829fd2">ParallelOps::min</a></div><div class="ttdeci">Real min(const Real &amp;a_input) noexcept</div><div class="ttdoc">Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)</div><div class="ttdef"><b>Definition:</b> CD_ParallelOpsImplem.H:54</div></div>

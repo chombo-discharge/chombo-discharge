@@ -1,0 +1,5 @@
+<map id="EBAMRSurfaceDeposition" name="EBAMRSurfaceDeposition">
+<area shape="rect" id="node1" title="class for handling surface deposition of particles with EB and AMR." alt="" coords="5,228,193,255"/>
+<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="7,95,191,136"/>
+<area shape="rect" id="node3" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="30,5,169,32"/>
+</map>

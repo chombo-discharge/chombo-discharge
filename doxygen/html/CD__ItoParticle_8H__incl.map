@@ -1,13 +1,14 @@
 <map id="Source/ItoDiffusion/CD_ItoParticle.H" name="Source/ItoDiffusion/CD_ItoParticle.H">
-<area shape="rect" id="node1" title="Declaration of a particle class for Ito diffusion." alt="" coords="221,5,367,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="47,169,106,196"/>
-<area shape="rect" id="node3" title=" " alt="" coords="181,169,257,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="282,169,343,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="368,169,431,196"/>
-<area shape="rect" id="node6" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="433,95,593,121"/>
-<area shape="rect" id="node8" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="648,244,833,271"/>
-<area shape="rect" id="node9" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="247,244,426,271"/>
-<area shape="rect" id="node11" href="$CD__ItoParticleImplem_8H.html" title="Implementation of CD_ItoParticle.H." alt="" coords="55,95,232,121"/>
-<area shape="rect" id="node7" title=" " alt="" coords="741,169,834,196"/>
-<area shape="rect" id="node10" href="$CD__GenericParticleImplem_8H.html" title="Implementation of CD_GenericParticle.H." alt="" coords="506,169,717,196"/>
+<area shape="rect" id="node1" title="Declaration of a particle class for Ito diffusion." alt="" coords="163,5,308,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="32,169,90,196"/>
+<area shape="rect" id="node3" title=" " alt="" coords="115,169,191,196"/>
+<area shape="rect" id="node4" title=" " alt="" coords="317,169,378,196"/>
+<area shape="rect" id="node5" title=" " alt="" coords="403,169,466,196"/>
+<area shape="rect" id="node6" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="474,95,634,121"/>
+<area shape="rect" id="node9" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="326,244,511,271"/>
+<area shape="rect" id="node10" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="641,244,820,271"/>
+<area shape="rect" id="node12" href="$CD__ItoParticleImplem_8H.html" title="Implementation of CD_ItoParticle.H." alt="" coords="147,95,324,121"/>
+<area shape="rect" id="node7" title=" " alt="" coords="944,169,1000,196"/>
+<area shape="rect" id="node8" title=" " alt="" coords="776,169,869,196"/>
+<area shape="rect" id="node11" href="$CD__GenericParticleImplem_8H.html" title="Implementation of CD_GenericParticle.H." alt="" coords="541,169,752,196"/>
 </map>

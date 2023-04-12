@@ -119,14 +119,14 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a644eba44a7209fd5539f0383f47a356c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrLayout.html#a644eba44a7209fd5539f0383f47a356c">addSolver</a> (RefCountedPtr&lt; T &gt; &amp;a_solver)</td></tr>
 <tr class="memdesc:a644eba44a7209fd5539f0383f47a356c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add solver. This appends a_solver to m_solvers.  <a href="classCdrLayout.html#a644eba44a7209fd5539f0383f47a356c">More...</a><br /></td></tr>
 <tr class="separator:a644eba44a7209fd5539f0383f47a356c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acad19a98ddee4012eff38e27069d939e"><td class="memItemLeft" align="right" valign="top"><a id="acad19a98ddee4012eff38e27069d939e"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrLayout.html#acad19a98ddee4012eff38e27069d939e">allocateInternals</a> ()</td></tr>
-<tr class="memdesc:acad19a98ddee4012eff38e27069d939e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage for solvers. <br /></td></tr>
-<tr class="separator:acad19a98ddee4012eff38e27069d939e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a526bb9462cc769de8e5ea97a9ed5667f"><td class="memItemLeft" align="right" valign="top"><a id="a526bb9462cc769de8e5ea97a9ed5667f"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrLayout.html#a526bb9462cc769de8e5ea97a9ed5667f">deallocateInternals</a> ()</td></tr>
-<tr class="memdesc:a526bb9462cc769de8e5ea97a9ed5667f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate solver internals. <br /></td></tr>
-<tr class="separator:a526bb9462cc769de8e5ea97a9ed5667f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa27e1400b95ac34bda3c6ae885accce"><td class="memItemLeft" align="right" valign="top"><a id="aaa27e1400b95ac34bda3c6ae885accce"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrLayout.html#aaa27e1400b95ac34bda3c6ae885accce">allocate</a> ()</td></tr>
+<tr class="memdesc:aaa27e1400b95ac34bda3c6ae885accce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage for solvers. <br /></td></tr>
+<tr class="separator:aaa27e1400b95ac34bda3c6ae885accce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd96ca2e529ee4194ee26d28ddd98cbc"><td class="memItemLeft" align="right" valign="top"><a id="afd96ca2e529ee4194ee26d28ddd98cbc"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrLayout.html#afd96ca2e529ee4194ee26d28ddd98cbc">deallocate</a> ()</td></tr>
+<tr class="memdesc:afd96ca2e529ee4194ee26d28ddd98cbc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate solver internals. <br /></td></tr>
+<tr class="separator:afd96ca2e529ee4194ee26d28ddd98cbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4908c2e1adfd6fe5f3d9df85f026a67e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrLayout.html#a4908c2e1adfd6fe5f3d9df85f026a67e">preRegrid</a> (const int a_lbase, const int a_oldFinestLevel)</td></tr>
 <tr class="memdesc:a4908c2e1adfd6fe5f3d9df85f026a67e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call preRegrid(...) method for all the CdrSolvers.  <a href="classCdrLayout.html#a4908c2e1adfd6fe5f3d9df85f026a67e">More...</a><br /></td></tr>
 <tr class="separator:a4908c2e1adfd6fe5f3d9df85f026a67e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -188,6 +188,10 @@ virtual Vector&lt; <a class="el" href="classEBAMRData.html">EBAMRCellData</a> * 
 virtual Vector&lt; <a class="el" href="classEBAMRData.html">EBAMRCellData</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrLayout.html#a4b27c13db2959f0a634411e13dccce72">getVelocities</a> ()</td></tr>
 <tr class="memdesc:a4b27c13db2959f0a634411e13dccce72"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all cell-centered velocities. <br /></td></tr>
 <tr class="separator:a4b27c13db2959f0a634411e13dccce72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa99bfefe6ce9088b563bdc50f5627f2d"><td class="memItemLeft" align="right" valign="top"><a id="aa99bfefe6ce9088b563bdc50f5627f2d"></a>
+virtual Vector&lt; <a class="el" href="classEBAMRData.html">EBAMRCellData</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrLayout.html#aa99bfefe6ce9088b563bdc50f5627f2d">getCellCenteredDiffusionCoefficients</a> ()</td></tr>
+<tr class="memdesc:aa99bfefe6ce9088b563bdc50f5627f2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all cell-centered diffusion coefficients. <br /></td></tr>
+<tr class="separator:aa99bfefe6ce9088b563bdc50f5627f2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a884c8e772479db09eed8901de0e292c4"><td class="memItemLeft" align="right" valign="top"><a id="a884c8e772479db09eed8901de0e292c4"></a>
 virtual Vector&lt; <a class="el" href="classEBAMRData.html">EBAMRFluxData</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrLayout.html#a884c8e772479db09eed8901de0e292c4">getFaceCenteredDiffusionCoefficient</a> ()</td></tr>
 <tr class="memdesc:a884c8e772479db09eed8901de0e292c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all face-centered diffusion coefficients. <br /></td></tr>

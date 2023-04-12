@@ -84,8 +84,7 @@ $(function() {
 <div class="textblock"><code>#include &lt;ParmParse.H&gt;</code><br />
 <code>#include &lt;EBGeometry.hpp&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__Tesselation_8H_source.html">CD_Tesselation.H</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="CD__SignedDistanceBVH_8H_source.html">CD_SignedDistanceBVH.H</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="CD__SignedDistanceDCEL_8H_source.html">CD_SignedDistanceDCEL.H</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__EBGeometryIF_8H_source.html">CD_EBGeometryIF.H</a>&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
@@ -93,55 +92,38 @@ Include dependency graph for CD_Tesselation.cpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__Tesselation_8cpp__incl.png" border="0" usemap="#aGeometries_2Tesselation_2CD__Tesselation_8cpp" alt=""/></div>
 <map name="aGeometries_2Tesselation_2CD__Tesselation_8cpp" id="aGeometries_2Tesselation_2CD__Tesselation_8cpp">
-<area shape="rect" title="Implementation of CD_Tesselation.H." alt="" coords="1218,5,1393,47"/>
-<area shape="rect" title=" " alt="" coords="905,95,1009,121"/>
-<area shape="rect" title=" " alt="" coords="1916,244,2047,271"/>
-<area shape="rect" href="CD__Tesselation_8H.html" title="Geometry for surface tesselation." alt="" coords="1034,95,1169,121"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1213,319,1398,345"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1009,319,1188,345"/>
-<area shape="rect" href="CD__SignedDistanceBVH_8H.html" title="Declaration of an signe distance function class that gets its value function from a DCEL surface Tess..." alt="" coords="2039,169,2230,196"/>
-<area shape="rect" href="CD__SignedDistanceDCEL_8H.html" title="Declaration of an implicit&#45;function class that gets its value function from a DCEL surface Tesselatio..." alt="" coords="1484,169,1681,196"/>
-<area shape="rect" href="CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="597,169,819,196"/>
-<area shape="rect" title=" " alt="" coords="1637,319,1715,345"/>
+<area shape="rect" title="Implementation of CD_Tesselation.H." alt="" coords="1185,5,1359,47"/>
+<area shape="rect" title=" " alt="" coords="723,95,827,121"/>
+<area shape="rect" title=" " alt="" coords="1481,244,1612,271"/>
+<area shape="rect" href="CD__Tesselation_8H.html" title="Geometry for surface tesselation." alt="" coords="851,95,986,121"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1457,319,1642,345"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="887,319,1065,345"/>
+<area shape="rect" href="CD__EBGeometryIF_8H.html" title="Binding of EBGeometry signed distance functions to Chombo objcts." alt="" coords="1663,169,1817,196"/>
+<area shape="rect" href="CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="653,169,875,196"/>
+<area shape="rect" title=" " alt="" coords="1354,319,1433,345"/>
 <area shape="rect" title=" " alt="" coords="5,319,136,345"/>
-<area shape="rect" title=" " alt="" coords="616,319,677,345"/>
+<area shape="rect" title=" " alt="" coords="603,319,664,345"/>
 <area shape="rect" title=" " alt="" coords="485,319,579,345"/>
-<area shape="rect" title=" " alt="" coords="108,244,249,271"/>
-<area shape="rect" href="CD__Dielectric_8H.html" title="Dielectric class." alt="" coords="794,244,918,271"/>
-<area shape="rect" href="CD__Electrode_8H.html" title="Declaration of an electrode class." alt="" coords="943,244,1065,271"/>
-<area shape="rect" href="CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="273,244,476,271"/>
-<area shape="rect" href="CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="602,244,718,271"/>
-<area shape="rect" title=" " alt="" coords="745,319,831,345"/>
-<area shape="rect" title=" " alt="" coords="855,319,985,345"/>
-<area shape="rect" title=" " alt="" coords="160,319,309,345"/>
-<area shape="rect" title=" " alt="" coords="333,319,461,345"/>
-<area shape="rect" title=" " alt="" coords="1815,244,1892,271"/>
-<area shape="rect" title=" " alt="" coords="2364,319,2431,345"/>
-<area shape="rect" href="CD__SignedDistanceBVHImplem_8H.html" title="Implementation of CD_SignedDistanceBVH.H." alt="" coords="2173,244,2414,271"/>
-<area shape="rect" href="CD__SignedDistanceDCELImplem_8H.html" title="Implementation of CD_SignedDistanceDCEL.H." alt="" coords="1393,244,1639,271"/>
+<area shape="rect" title=" " alt="" coords="767,244,908,271"/>
+<area shape="rect" href="CD__Dielectric_8H.html" title="Dielectric class." alt="" coords="1085,244,1209,271"/>
+<area shape="rect" href="CD__Electrode_8H.html" title="Declaration of an electrode class." alt="" coords="1233,244,1356,271"/>
+<area shape="rect" href="CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="247,244,449,271"/>
+<area shape="rect" href="CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="575,244,691,271"/>
+<area shape="rect" title=" " alt="" coords="1090,319,1177,345"/>
+<area shape="rect" title=" " alt="" coords="1201,319,1330,345"/>
+<area shape="rect" title=" " alt="" coords="312,319,461,345"/>
+<area shape="rect" title=" " alt="" coords="160,319,288,345"/>
+<area shape="rect" title=" " alt="" coords="2116,244,2193,271"/>
+<area shape="rect" title=" " alt="" coords="1919,244,2041,271"/>
+<area shape="rect" href="CD__EBGeometryIFImplem_8H.html" title="Implementation of CD_EBGeometryIF.H." alt="" coords="1637,244,1843,271"/>
 </map>
 </div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:ac069327bb146bedf8a7e2d82d53e2ea6"><td class="memItemLeft" align="right" valign="top"><a id="ac069327bb146bedf8a7e2d82d53e2ea6"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>precision</b> = float</td></tr>
-<tr class="separator:ac069327bb146bedf8a7e2d82d53e2ea6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a375b88521c99dec4873b70bc5f1fe86d"><td class="memItemLeft" align="right" valign="top"><a id="a375b88521c99dec4873b70bc5f1fe86d"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>Face</b> = EBGeometry::DCEL::FaceT&lt; precision &gt;</td></tr>
-<tr class="separator:a375b88521c99dec4873b70bc5f1fe86d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d96dfd7c71c047d4a672b67ff67d0f4"><td class="memItemLeft" align="right" valign="top"><a id="a1d96dfd7c71c047d4a672b67ff67d0f4"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>Mesh</b> = EBGeometry::DCEL::MeshT&lt; precision &gt;</td></tr>
-<tr class="separator:a1d96dfd7c71c047d4a672b67ff67d0f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab31785d305ac7da5399d66d8c43e12e6"><td class="memItemLeft" align="right" valign="top"><a id="ab31785d305ac7da5399d66d8c43e12e6"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>AABB</b> = EBGeometry::BoundingVolumes::AABBT&lt; precision &gt;</td></tr>
-<tr class="separator:ab31785d305ac7da5399d66d8c43e12e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad3c96c34595911deda236483023e7144"><td class="memItemLeft" align="right" valign="top"><a id="ad3c96c34595911deda236483023e7144"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>Sphere</b> = EBGeometry::BoundingVolumes::BoundingSphereT&lt; precision &gt;</td></tr>
-<tr class="separator:ad3c96c34595911deda236483023e7144"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a62093f39b3436936873a8d615963a5cc"><td class="memItemLeft" align="right" valign="top"><a id="a62093f39b3436936873a8d615963a5cc"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>BV</b> = AABB</td></tr>
-<tr class="separator:a62093f39b3436936873a8d615963a5cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac068134415d867fc146cd4daf31e3f82"><td class="memItemLeft" align="right" valign="top"><a id="ac068134415d867fc146cd4daf31e3f82"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>T</b> = float</td></tr>
+<tr class="separator:ac068134415d867fc146cd4daf31e3f82"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Implementation of <a class="el" href="CD__Tesselation_8H.html" title="Geometry for surface tesselation.">CD_Tesselation.H</a>. </p>

@@ -116,4 +116,24 @@ It is nonetheless still possible to do this by growing the final generated tags 
 		
    MyCellTagger.buffer = 4 # Add a buffer region around the tagged cells
 
-Just before passing the flags into ``AmrMesh`` grid generation routines, the tagged cells are put in a different data holder (``IntVectSet``) and this data holder *can* contain cells that are outside the patch boundaries. 
+Just before passing the flags into ``AmrMesh`` grid generation routines, the tagged cells are put in a different data holder (``IntVectSet``) and this data holder *can* contain cells that are outside the patch boundaries.
+
+Manual refinement
+-----------------
+
+The user can add manual refinement by specifying Cartesian spatial regions to be refined down to some grid level, by specifying the physical corners and the refinement level.
+For example:
+
+.. code-block:: text
+
+   MyCellTagger.num_ref_boxes = 2
+   
+   MyCellTagger.ref_box1_lo   = 0 0 0
+   MyCellTagger.ref_box1_hi   = 1 1 1
+   MyCellTagger.ref_box1_lvl  = 2
+   
+   MyCellTagger.ref_box2_lo   = 1 1 1
+   MyCellTagger.ref_box2_hi   = 2 2 2
+   MyCellTagger.ref_box2_lvl  = 3
+
+Any number of boxes can be specified using this format. 

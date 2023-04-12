@@ -169,20 +169,20 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a258c337b852ae717725dba8d1f47d6cc">parseRuntimeOptions</a> ()=0</td></tr>
 <tr class="memdesc:a258c337b852ae717725dba8d1f47d6cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse runtime options (for derived class) <br /></td></tr>
 <tr class="separator:a258c337b852ae717725dba8d1f47d6cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a34970a08b48dd4b2c1558d5c6a6cd91b"><td class="memItemLeft" align="right" valign="top"><a id="a34970a08b48dd4b2c1558d5c6a6cd91b"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a34970a08b48dd4b2c1558d5c6a6cd91b">allocateInternals</a> ()</td></tr>
-<tr class="memdesc:a34970a08b48dd4b2c1558d5c6a6cd91b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates internal storage for <a class="el" href="classFieldSolver.html" title="Base class for electrostatic solvers.">FieldSolver</a>. Derived classes may want to overwrite. <br /></td></tr>
-<tr class="separator:a34970a08b48dd4b2c1558d5c6a6cd91b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88261a81363faa8bc73a3579cf186f13"><td class="memItemLeft" align="right" valign="top"><a id="a88261a81363faa8bc73a3579cf186f13"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a88261a81363faa8bc73a3579cf186f13">allocate</a> ()</td></tr>
+<tr class="memdesc:a88261a81363faa8bc73a3579cf186f13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates internal storage for <a class="el" href="classFieldSolver.html" title="Base class for electrostatic solvers.">FieldSolver</a>. Derived classes may want to overwrite. <br /></td></tr>
+<tr class="separator:a88261a81363faa8bc73a3579cf186f13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae194783b6c35a2f5c647bf9af6e7fefc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ae194783b6c35a2f5c647bf9af6e7fefc">preRegrid</a> (const int a_lbase, const int a_oldFinestLevel)</td></tr>
 <tr class="memdesc:ae194783b6c35a2f5c647bf9af6e7fefc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache state before regridding.  <a href="classFieldSolver.html#ae194783b6c35a2f5c647bf9af6e7fefc">More...</a><br /></td></tr>
 <tr class="separator:ae194783b6c35a2f5c647bf9af6e7fefc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8791d9db454d7c84ecf65d44db8bcfe3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a8791d9db454d7c84ecf65d44db8bcfe3">computeDisplacementField</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_displacementField, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_electricField)</td></tr>
 <tr class="memdesc:a8791d9db454d7c84ecf65d44db8bcfe3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute displacement field from the electric field.  <a href="classFieldSolver.html#a8791d9db454d7c84ecf65d44db8bcfe3">More...</a><br /></td></tr>
 <tr class="separator:a8791d9db454d7c84ecf65d44db8bcfe3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeb793e9b019047e20dd3819f9abb40ae"><td class="memItemLeft" align="right" valign="top"><a id="aeb793e9b019047e20dd3819f9abb40ae"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#aeb793e9b019047e20dd3819f9abb40ae">deallocateInternals</a> ()</td></tr>
-<tr class="memdesc:aeb793e9b019047e20dd3819f9abb40ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate internal storage. <br /></td></tr>
-<tr class="separator:aeb793e9b019047e20dd3819f9abb40ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5aa41113ebe05f15294c7899d3adc707"><td class="memItemLeft" align="right" valign="top"><a id="a5aa41113ebe05f15294c7899d3adc707"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a5aa41113ebe05f15294c7899d3adc707">deallocate</a> ()</td></tr>
+<tr class="memdesc:a5aa41113ebe05f15294c7899d3adc707"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate internal storage. <br /></td></tr>
+<tr class="separator:a5aa41113ebe05f15294c7899d3adc707"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3dc5a56250e5391f959a67e55e854b97"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a3dc5a56250e5391f959a67e55e854b97">regrid</a> (const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)</td></tr>
 <tr class="memdesc:a3dc5a56250e5391f959a67e55e854b97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid method.  <a href="classFieldSolver.html#a3dc5a56250e5391f959a67e55e854b97">More...</a><br /></td></tr>
 <tr class="separator:a3dc5a56250e5391f959a67e55e854b97"><td class="memSeparator" colspan="2">&#160;</td></tr>
