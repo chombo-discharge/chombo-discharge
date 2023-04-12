@@ -29,6 +29,7 @@ jobs:
           check-path: ${{ matrix.directory }}
 
   Linux-GNU:
+    if: github.event.pull_request.draft == false    
     needs: Formatting
     name: Linux-GNU
     runs-on: ubuntu-latest
@@ -91,6 +92,7 @@ jobs:
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
   Linux-Intel:
+    if: github.event.pull_request.draft == false    
     needs: Formatting
     name: Linux-Intel
     runs-on: ubuntu-latest
