@@ -25,8 +25,9 @@ ScanShop::isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) c
 
   for (BoxIterator bit(a_box); bit.ok(); ++bit) {
     const RealVect a_point = a_probLo + a_dx * (0.5 * RealVect::Unit + RealVect(bit()));
-    if (m_baseIF->value(a_point) >= -0.5 * a_dx) {
+    if (m_baseIF->value(a_point) >= -0.5 * a_dx * sqrt(SpaceDim)) {
       ret = false;
+
       break;
     }
   }
@@ -43,8 +44,9 @@ ScanShop::isCovered(const Box a_box, const RealVect a_probLo, const Real a_dx) c
 
   for (BoxIterator bit(a_box); bit.ok(); ++bit) {
     const RealVect a_point = a_probLo + a_dx * (0.5 * RealVect::Unit + RealVect(bit()));
-    if (m_baseIF->value(a_point) <= 0.5 * a_dx) {
+    if (m_baseIF->value(a_point) <= 0.5 * a_dx * sqrt(SpaceDim)) {
       ret = false;
+
       break;
     }
   }

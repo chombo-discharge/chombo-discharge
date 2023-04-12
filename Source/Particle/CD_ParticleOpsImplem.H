@@ -22,6 +22,26 @@
 #include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
+inline IntVect
+ParticleOps::getParticleCellIndex(const RealVect& a_particlePosition,
+                                  const RealVect& a_probLo,
+                                  const Real&     a_dx) noexcept
+{
+  return IntVect(D_DECL(std::floor((a_particlePosition[0] - a_probLo[0]) / a_dx),
+                        std::floor((a_particlePosition[1] - a_probLo[1]) / a_dx),
+                        std::floor((a_particlePosition[2] - a_probLo[2]) / a_dx)));
+}
+
+inline IntVect
+ParticleOps::getParticleCellIndex(const RealVect& a_particlePosition,
+                                  const RealVect& a_probLo,
+                                  const RealVect& a_dx) noexcept
+{
+  return IntVect(D_DECL(std::floor((a_particlePosition[0] - a_probLo[0]) / a_dx[0]),
+                        std::floor((a_particlePosition[1] - a_probLo[1]) / a_dx[1]),
+                        std::floor((a_particlePosition[2] - a_probLo[2]) / a_dx[2])));
+}
+
 template <typename P, const Real& (P::*weight)() const>
 inline void
 ParticleOps::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P>& a_src) noexcept
@@ -259,6 +279,155 @@ ParticleOps::copyDestructive(ParticleContainer<P>& a_dst, ParticleContainer<P>& 
       a_dst[lvl][dit()].listItems() = a_src[lvl][dit()].listItems();
 
       a_src[lvl][dit()].listItems().clear();
+    }
+  }
+}
+
+template <typename P, const Real& (P::*scalarQuantity)() const>
+inline Real
+ParticleOps::sum(const ParticleContainer<P>& a_particles) noexcept
+{
+  CH_TIME("ParticleOps::sum(ParticleContainer<P>)");
+
+  Real particleSum = 0.0;
+
+  for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
+    for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
+      const List<P>& particles = a_particles[lvl][dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        particleSum += (lit().*scalarQuantity)();
+      }
+    }
+  }
+
+  return ParallelOps::sum(particleSum);
+}
+
+template <typename P, Real (P::*scalarQuantity)()>
+inline Real
+ParticleOps::sum(const ParticleContainer<P>& a_particles) noexcept
+{
+  CH_TIME("ParticleOps::sum(ParticleContainer<P>)");
+
+  Real particleSum = 0.0;
+
+  for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
+    for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
+      const List<P>& particles = a_particles[lvl][dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        particleSum += (lit().*scalarQuantity)();
+      }
+    }
+  }
+
+  return ParallelOps::sum(particleSum);
+}
+
+template <typename P>
+inline void
+ParticleOps::removeParticles(ParticleContainer<P>&                a_particles,
+                             const std::function<bool(const P&)>& a_removeCriterion) noexcept
+{
+  CH_TIME("ParticleOps::removeParticles(ParticleContainer<P>, std::function<bool(const P&)>)");
+
+  for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
+    for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
+      List<P>& particles = a_particles[lvl][dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok();) {
+        if (a_removeCriterion(lit())) {
+          particles.remove(lit);
+        }
+        else {
+          ++lit;
+        }
+      }
+    }
+  }
+}
+
+template <typename P>
+inline void
+ParticleOps::transferParticles(ParticleContainer<P>&                a_dstParticles,
+                               ParticleContainer<P>&                a_srcParticles,
+                               const std::function<bool(const P&)>& a_transferCrit) noexcept
+{
+  CH_TIME("ParticleOps::transferParticles(ParticleContainer<P>, ParticleContainer<P>& std::function<bool(const P&)>)");
+
+  CH_assert(a_dstParticles.getRealm() == a_srcParticles.getRealm());
+  CH_assert(a_dstParticles.getFinestLevel() == a_srcParticles.getFinestLevel());
+
+  for (int lvl = 0; lvl <= a_srcParticles.getFinestLevel(); lvl++) {
+    for (DataIterator dit(a_srcParticles.getGrids()[lvl]); dit.ok(); ++dit) {
+
+      List<P>& dstParticles = a_dstParticles[lvl][dit()].listItems();
+      List<P>& srcParticles = a_srcParticles[lvl][dit()].listItems();
+
+      for (ListIterator<P> lit(srcParticles); lit.ok();) {
+        if (a_transferCrit(lit())) {
+          dstParticles.transfer(lit);
+        }
+        else {
+          ++lit;
+        }
+      }
+    }
+  }
+}
+
+template <typename P>
+inline void
+ParticleOps::setData(ParticleContainer<P>& a_particles, const std::function<void(P&)>& a_functor) noexcept
+{
+  CH_TIME("ParticleOps::setData(ParticleContainer<P>, std::function<void(P&)>)");
+
+  for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
+    for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
+      List<P>& particles = a_particles[lvl][dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        a_functor(lit());
+      }
+    }
+  }
+}
+
+template <typename P, Real& (P::*particleScalarField)()>
+inline void
+ParticleOps::setValue(ParticleContainer<P>& a_particles, const Real a_value) noexcept
+{
+  CH_TIME("ParticleOps::setValue(ParticleContainer<P>, Real");
+
+  for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
+    for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
+      List<P>& particles = a_particles[lvl][dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
+
+        (p.*particleScalarField)() = a_value;
+      }
+    }
+  }
+}
+
+template <typename P, RealVect& (P::*particleVectorField)()>
+inline void
+ParticleOps::setValue(ParticleContainer<P>& a_particles, const RealVect a_value) noexcept
+{
+  CH_TIME("ParticleOps::setValue(ParticleContainer<P>, RealVect");
+
+  for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
+    for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
+      List<P>& particles = a_particles[lvl][dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
+
+        (p.*particleVectorField)() = a_value;
+      }
     }
   }
 }

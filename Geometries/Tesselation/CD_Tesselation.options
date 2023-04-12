@@ -2,6 +2,5 @@
 # Tesselation geometry class options
 # ====================================================================================================
 Tesselation.mesh_file   = myFile.stl    # STL file
-Tesselation.partitioner = default       # Partitioner. Valid options are 'default' and 'overlap'
-Tesselation.use_bvh     = true          # Use bounding volume hierarchy for accelerating search
+Tesselation.flip_inside = false         # Flip inside/outside
 Tesselation.z_coord     = 0.0           # z-coordinate for 2D slicing this object

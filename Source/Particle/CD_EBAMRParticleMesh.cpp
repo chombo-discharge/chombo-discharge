@@ -81,12 +81,11 @@ EBAMRParticleMesh::defineLevelMotion()
     // Define Copier. Note that the below code is basically the same as ghostDefine().
     const bool doExchange = true;
 
-    m_levelCopiers[lvl].define(dbl,
-                               dbl,
-                               domain,
-                               m_ghost,
-                               doExchange); // Define Copier as going from valid       -> valid+ghost.
-    m_levelCopiers[lvl].reverse();          // Define Copier as going from valid+ghost -> valid.
+    // Define Copier as going from valid -> valid+ghost.
+    m_levelCopiers[lvl].define(dbl, dbl, domain, m_ghost, doExchange);
+
+    // Define Copier as going from valid+ghost -> valid.
+    m_levelCopiers[lvl].reverse();
   }
 }
 

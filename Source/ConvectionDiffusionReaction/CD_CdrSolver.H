@@ -251,7 +251,7 @@ public:
     @note This deallocates a bunch of storage which is not needed (during regrids). It can be used to trim memory during Berger-Rigoutsous regrids (which EAT memory). 
   */
   virtual void
-  deallocateInternals();
+  deallocate();
 
   /*!
     @brief Register operators for AMR operations
@@ -266,6 +266,18 @@ public:
   */
   virtual void
   setRealm(const std::string a_realm);
+
+  /*!
+    @brief Get the CDR species
+  */
+  virtual RefCountedPtr<CdrSpecies>&
+  getSpecies() noexcept;
+
+  /*!
+    @brief Get the CDR species
+  */
+  virtual const RefCountedPtr<CdrSpecies>&
+  getSpecies() const noexcept;
 
   /*!
     @brief Set species
@@ -412,7 +424,7 @@ public:
     @note This allocates a bunch of storage -- if the solver is not diffusive or mobile then we do our best to trim memory. 
   */
   virtual void
-  allocateInternals();
+  allocate();
 
   /*!
     @brief Write plot file
@@ -551,10 +563,11 @@ public:
   /*!
     @brief Compute the "physical mass" in the input argument. 
     @details This conservatively coarsens the solution and computes on the coarsest level only
-    @param[in] a_phi Cell-centered data. 
+    @param[in] a_phi        Cell-centered data. 
+    @param[in] a_kappaScale Multiply by kappa in irregular cells.
   */
   virtual Real
-  computeMass(EBAMRCellData& a_phi);
+  computeMass(const EBAMRCellData& a_phi, const bool a_kappaScale = true);
 
   /*!
     @brief Compute the total charge in m_phi
@@ -611,6 +624,12 @@ public:
   getEbCenteredVelocity();
 
   /*!
+    @brief Get the cell-centered diffusion coefficient
+  */
+  virtual EBAMRCellData&
+  getCellCenteredDiffusionCoefficient();
+
+  /*!
     @brief Get the face-centered diffusion coefficient
     @return m_faceCentereDiffusionCoefficient
   */
@@ -641,12 +660,28 @@ public:
   /*!
     @brief Extrapolate advective flux to EB. 
     @details This does not use any slope limiting (derived classes might want to redo this routine). The returned flux
-    is equal to -n.(phi * v) where n is the normal vector. This is constructed so that a positive eb flux yields an influx
-    when doing an purely advective advance. 
+    is equal to -n.(phi * v) where n is the normal vector pointing into the solution domain.
+    @note Calls the other version with m_ebFlux as argument
+  */
+  virtual void
+  extrapolateAdvectiveFluxToEB() noexcept;
+
+  /*!
+    @brief Extrapolate advective flux to EB. 
+    @details This does not use any slope limiting (derived classes might want to redo this routine). The returned flux
+    is equal to -n.(phi * v) where n is the normal vector pointing into the solution domain.
     @param[out] a_ebFlux Projected flux on the EB. 
   */
   virtual void
   extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept;
+
+  /*!
+    @brief Redistribute the mass differente into the data holder.
+    @param[inout] a_phi Cell data
+    @param[in]    a_delta Mass to be re-distributed.
+  */
+  virtual void
+  redistribute(EBAMRCellData& a_phi, const EBAMRIVData& a_delta) noexcept;
 
 protected:
   /*!
@@ -799,6 +834,11 @@ protected:
     @brief Domain flux
   */
   EBAMRIFData m_domainFlux;
+
+  /*!
+    @brief Diffusion coefficients on cell centers
+  */
+  EBAMRCellData m_cellCenteredDiffusionCoefficient;
 
   /*!
     @brief Diffusion coefficients on face centers

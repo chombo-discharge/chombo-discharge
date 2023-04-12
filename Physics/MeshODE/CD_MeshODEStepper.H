@@ -12,6 +12,9 @@
 #ifndef CD_MeshODEStepper_H
 #define CD_MeshODEStepper_H
 
+// Std includes
+#include <array>
+
 // Our includes
 #include <CD_TimeStepper.H>
 #include <CD_MeshODESolver.H>

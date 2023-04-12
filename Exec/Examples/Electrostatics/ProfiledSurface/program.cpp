@@ -1,6 +1,6 @@
 #include <CD_Driver.H>
 #include <CD_FieldSolverMultigrid.H>
-#include <CD_RodPlaneProfile.H>
+#include <CD_DiskProfiledPlane.H>
 #include <CD_FieldStepper.H>
 #include <ParmParse.H>
 
@@ -20,7 +20,7 @@ main(int argc, char* argv[])
   ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
 
   // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodPlaneProfile());
+  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new DiskProfiledPlane());
   RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
   RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
   RefCountedPtr<CellTagger>            tagger     = RefCountedPtr<CellTagger>(NULL);

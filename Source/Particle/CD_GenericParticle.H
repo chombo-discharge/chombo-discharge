@@ -17,6 +17,7 @@
 #include <typeinfo>
 #include <cstdio>
 #include <cmath>
+#include <array>
 
 // Chombo includes
 #include <RealVect.H>

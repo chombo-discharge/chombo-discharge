@@ -39,6 +39,7 @@
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBGradient.H>
 #include <CD_EBAMRParticleMesh.H>
+#include <CD_EBAMRSurfaceDeposition.H>
 #include <CD_EBFineInterp.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_EbCentroidInterpolationStencil.H>
@@ -281,6 +282,12 @@ public:
   getParticleMesh() const;
 
   /*!
+    @brief Get the surface deposition operator
+  */
+  EBAMRSurfaceDeposition&
+  getSurfaceDeposition() const;
+
+  /*!
     @brief Get coarsening operators
   */
   Vector<RefCountedPtr<EBCoarAve>>&
@@ -469,9 +476,15 @@ protected:
 
   /*!
     @brief Coarsened fine-level EB grids. 
-    @details m_eblgCoFi[1] holds the coarsening of m_eblg[1].
+    @details m_eblgCoFi[lvl] holds the grids on level lvl that are a coarsening of the grids on lvl+1
   */
   Vector<RefCountedPtr<EBLevelGrid>> m_eblgCoFi;
+
+  /*!
+    @brief Coarsened fine-level EB grids. 
+    @details m_eblgFiCo[lvl] holds the refinement of the grids on level lvl-1
+  */
+  Vector<RefCountedPtr<EBLevelGrid>> m_eblgFiCo;
 
   /*!
     @brief Weird but true thing that indexces neighboring boxes
@@ -542,6 +555,11 @@ protected:
     @brief For doing particle-mesh operations
   */
   mutable EBAMRParticleMesh m_particleMesh;
+
+  /*!
+    @brief For doing particle deposition onto surfaces
+  */
+  mutable EBAMRSurfaceDeposition m_surfaceDeposition;
 
   /*!
     @brief Data recentering utility (center to centroid)

@@ -62,6 +62,7 @@ Driver.refine_dielectrics              = -1            # Refine dielectric surfa
 # ITO_SOLVER CLASS OPTIONS
 # ====================================================================================================
 ItoSolver.plt_vars          = phi           # Currently available is 'phi' only
+ItoSolver.intersection_alg    = bisection     # Intersection algorithm for EB-particle intersections.
 ItoSolver.bisect_step       = 1.E-4         # Bisection step length for intersection tests
 ItoSolver.seed              = 0             # Seed for RNG
 ItoSolver.redistribute        = true          # Turn on/off redistribution. 

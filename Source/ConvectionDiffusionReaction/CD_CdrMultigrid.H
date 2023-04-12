@@ -86,7 +86,7 @@ public:
     @brief Allocate internal storage
   */
   virtual void
-  allocateInternals() override;
+  allocate() override;
 
   /*!
     @brief Compute div(J) explicitly, where J = nV - D*grad(n)

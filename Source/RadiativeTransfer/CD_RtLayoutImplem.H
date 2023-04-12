@@ -101,16 +101,16 @@ RtLayout<T>::parseRuntimeOptions()
 
 template <class T>
 void
-RtLayout<T>::allocateInternals()
+RtLayout<T>::allocate()
 {
-  CH_TIME("RtLayout<T>::allocateInternals");
+  CH_TIME("RtLayout<T>::allocate");
   if (m_verbosity > 6) {
-    pout() << "RtLayout<T>::allocateInternals" << endl;
+    pout() << "RtLayout<T>::allocate" << endl;
   }
 
   for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it) {
     RefCountedPtr<T>& solver = solver_it();
-    solver->allocateInternals();
+    solver->allocate();
   }
 }
 
@@ -131,16 +131,16 @@ RtLayout<T>::preRegrid(const int a_base, const int a_finestLevel)
 
 template <class T>
 void
-RtLayout<T>::deallocateInternals()
+RtLayout<T>::deallocate()
 {
-  CH_TIME("RtLayout<T>::deallocateInternals");
+  CH_TIME("RtLayout<T>::deallocate");
   if (m_verbosity > 6) {
-    pout() << "RtLayout<T>::deallocateInternals" << endl;
+    pout() << "RtLayout<T>::deallocate" << endl;
   }
 
   for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it) {
     RefCountedPtr<T>& solver = solver_it();
-    solver->deallocateInternals();
+    solver->deallocate();
   }
 }
 

@@ -164,15 +164,15 @@ CdrGodunov::parseSlopeLimiter()
 }
 
 void
-CdrGodunov::allocateInternals()
+CdrGodunov::allocate()
 {
-  CH_TIME("CdrSolver::allocateInternals()");
+  CH_TIME("CdrSolver::allocate()");
   if (m_verbosity > 5) {
-    pout() << m_name + "::allocateInternals()" << endl;
+    pout() << m_name + "::allocate()" << endl;
   }
 
   // CdrMultigrid allocates everything except storage needed for the advection object.
-  CdrMultigrid::allocateInternals();
+  CdrMultigrid::allocate();
 
   // Allocate levelAdvect only if the solver is mobile. See Chombo design docs for how the EBAdvectLevelIntegrator operates.
   if (m_isMobile) {

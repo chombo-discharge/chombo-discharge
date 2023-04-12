@@ -72,7 +72,7 @@ public:
   /*!
     @brief Destructor (does nothing)
   */
-  ~EBAMRParticleMesh();
+  virtual ~EBAMRParticleMesh();
 
   /*!
     @brief Define function

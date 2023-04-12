@@ -99,6 +99,7 @@ McPhoto::parseOptions()
   m_haloBuffer = 1;
 
   this->parseVerbosity();
+  this->parseTransparentBoundaries();
   this->parsePseudoPhotons();
   this->parsePhotoGeneration();
   this->parseSourceType();
@@ -118,6 +119,7 @@ McPhoto::parseRuntimeOptions()
   }
 
   this->parseVerbosity();
+  this->parseTransparentBoundaries();
   this->parsePseudoPhotons();
   this->parsePhotoGeneration();
   this->parseSourceType();
@@ -126,6 +128,19 @@ McPhoto::parseRuntimeOptions()
   this->parsePlotVariables();
   this->parseInstantaneous();
   this->parseDivergenceComputation();
+}
+
+void
+McPhoto::parseTransparentBoundaries()
+{
+  CH_TIME("McPhoto::parseTransparentBoundaries");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::parseTransparentBoundaries" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("transparent_eb", m_transparentEB);
 }
 
 void
@@ -439,11 +454,11 @@ McPhoto::clear(AMRParticles<Photon>& a_photons)
 }
 
 void
-McPhoto::allocateInternals()
+McPhoto::allocate()
 {
-  CH_TIME("McPhoto::allocateInternals");
+  CH_TIME("McPhoto::allocate");
   if (m_verbosity > 5) {
-    pout() << m_name + "::allocateInternals" << endl;
+    pout() << m_name + "::allocate" << endl;
   }
 
   // Allocate mesh data
@@ -477,11 +492,11 @@ McPhoto::preRegrid(const int a_lmin, const int a_oldFinestLevel)
 }
 
 void
-McPhoto::deallocateInternals()
+McPhoto::deallocate()
 {
-  CH_TIME("McPhoto::deallocateInternals");
+  CH_TIME("McPhoto::deallocate");
   if (m_verbosity > 5) {
-    pout() << m_name + "::deallocateInternals" << endl;
+    pout() << m_name + "::deallocate" << endl;
   }
 }
 
@@ -728,19 +743,19 @@ McPhoto::getPlotVariableNames() const
     plotVarNames.push_back(m_name + " source");
   }
   if (m_plotPhotons) {
-    plotVarNames.push_back(m_name + " photons");
+    plotVarNames.push_back(m_name + " active_photons");
   }
   if (m_plotBulkPhotons) {
-    plotVarNames.push_back(m_name + " bulkPhotons");
+    plotVarNames.push_back(m_name + " bulk_photons");
   }
   if (m_plotEBPhotons) {
-    plotVarNames.push_back(m_name + " ebPhotons");
+    plotVarNames.push_back(m_name + " eb_photons");
   }
   if (m_plotDomainPhotons) {
-    plotVarNames.push_back(m_name + " domainPhotons");
+    plotVarNames.push_back(m_name + " domain_photons");
   }
   if (m_plotSourcePhotons) {
-    plotVarNames.push_back(m_name + " sourcePhotons");
+    plotVarNames.push_back(m_name + " source_photons");
   }
 
   return plotVarNames;
@@ -1309,7 +1324,9 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
           }
         }
 
-        if (!checkEB && !checkDom) { // No intersection test necessary, photons is guaranteed to end up on the mesh.
+        if (!checkEB && !checkDom || m_transparentEB) {
+
+          // No intersection test necessary, photons is guaranteed to end up on the mesh.
           p.position() = newPos;
           bulkPhotons.add(p);
         }
@@ -1531,8 +1548,8 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
           }
         }
 
-        const bool absorb = absorbedBulk || absorbedEB ||
-                            absorbedDomain; // True if the photon was absorbed (on anything) and false otherwise.
+        // True if the photon was absorbed (on anything) and false otherwise.
+        const bool absorb = absorbedBulk || absorbedEB || absorbedDomain;
 
         if (!absorb) {
           p.position() = newPos;

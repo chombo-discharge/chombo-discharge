@@ -83,10 +83,10 @@ ItoLayout<T>::parseRuntimeOptions()
 
 template <class T>
 void
-ItoLayout<T>::allocateInternals()
+ItoLayout<T>::allocate()
 {
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
-    iter()->allocateInternals();
+    iter()->allocate();
   }
 }
 

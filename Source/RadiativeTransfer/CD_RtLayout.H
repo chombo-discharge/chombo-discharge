@@ -80,7 +80,7 @@ public:
     @brief Allocate internal storage for solvers
   */
   virtual void
-  allocateInternals();
+  allocate();
 
   /*!
     @brief Pre regrid stuff
@@ -94,7 +94,7 @@ public:
     @brief Deallocate internal storage for solvers
   */
   virtual void
-  deallocateInternals();
+  deallocate();
 
   /*!
     @brief Regrid all solvers.

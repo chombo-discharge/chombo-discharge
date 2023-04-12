@@ -20,7 +20,6 @@
 // EBGeometry aliases
 using AABB   = EBGeometry::BoundingVolumes::AABBT<Real>;
 using Vec3   = EBGeometry::Vec3T<Real>;
-using SDF    = EBGeometry::SignedDistanceFunction<Real>;
 using Sphere = EBGeometry::SphereSDF<Real>;
 
 constexpr size_t SphereArray::K;
@@ -36,7 +35,8 @@ SphereArray::SphereArray(const Real     a_radius,
   CH_TIME("SphereArray::SphereArray(full)");
 
   // Make a sphere array
-  std::vector<std::shared_ptr<SDF>> spheres;
+  std::vector<std::shared_ptr<Sphere>> spheres;
+  std::vector<AABB>                    boundingVolumes;
 
   for (size_t i = 0; i < a_numSpheres[0]; i++) {
     for (size_t j = 0; j < a_numSpheres[1]; j++) {
@@ -54,36 +54,17 @@ SphereArray::SphereArray(const Real     a_radius,
 
         const Vec3 center(x, y, z);
 
-        spheres.emplace_back(std::make_shared<Sphere>(center, a_radius, false));
+        spheres.emplace_back(std::make_shared<Sphere>(center, a_radius));
+        boundingVolumes.emplace_back(AABB(center - a_radius * Vec3::one(), center + a_radius * Vec3::one()));
 #if CH_SPACEDIM == 3
       }
 #endif
     }
   }
 
-  // Make a fast union. To do this we must have the SDF objects (our vector of
-  // spheres) as well as a way for enclosing these objects. We need to define
-  // ourselves a lambda that creates an appropriate bounding volumes for each
-  // SDF.
-  EBGeometry::BVH::BVConstructorT<SDF, AABB> aabbConstructor = [](const std::shared_ptr<const SDF>& a_prim) {
-    const Sphere& sph = static_cast<const Sphere&>(*a_prim);
-
-    const Vec3& c = sph.getCenter();
-    const Real& r = sph.getRadius();
-
-    const Vec3 lo = c - r * Vec3::one();
-    const Vec3 hi = c + r * Vec3::one();
-
-    return AABB(lo, hi);
-  };
-
   // Make the slow and fast unions.
-  m_slowUnion = std::make_shared<EBGeometry::Union<Real, Sphere>>((const std::vector<std::shared_ptr<Sphere>>&)spheres,
-                                                                  false);
-  m_fastUnion = std::make_shared<
-    EBGeometry::UnionBVH<Real, Sphere, AABB, SphereArray::K>>((const std::vector<std::shared_ptr<Sphere>>&)spheres,
-                                                              false,
-                                                              aabbConstructor);
+  m_slowUnion  = EBGeometry::Union<Real>(spheres);
+  m_fastUnion  = EBGeometry::FastUnion<Real, Sphere, AABB, K>(spheres, boundingVolumes);
   m_useFast    = a_useFast;
   m_flipInside = a_flipInside;
 }

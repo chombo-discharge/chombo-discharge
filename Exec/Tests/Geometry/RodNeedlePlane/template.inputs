@@ -31,7 +31,7 @@ AmrMesh.redist_radius    = 1           # Redistribution radius for hyperbolic co
 # ====================================================================================================
 Driver.verbosity                       = 2                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
-Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
+Driver.geometry_scan_level             = 2                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
 Driver.plot_interval                   = 10               # Plot interval
 Driver.checkpoint_interval             = 100              # Checkpoint interval
@@ -51,12 +51,12 @@ Driver.output_names                    = simulation       # Simulation output na
 Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
 Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
-Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
+Driver.plt_vars                        = levelset         # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
 Driver.refine_angles                   = 15.              # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = 0                # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_electrodes               = 2                # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = 0                # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
@@ -80,8 +80,8 @@ RodNeedlePlane.rod.live			= true			# Live or not
 
 RodNeedlePlane.needle.on		= true 			# Use needle or not
 RodNeedlePlane.needle.length		= 0.9			# Length of the needle
-RodNeedlePlane.needle.radius		= 0.0005		# Needle radius
-RodNeedlePlane.needle.tipRadius		= 0.0002		# Needle tip radius (curve radius of the tip)
+RodNeedlePlane.needle.radius		= 0.005		# Needle radius
+RodNeedlePlane.needle.tipRadius		= 0.002		# Needle tip radius (curve radius of the tip)
 RodNeedlePlane.needle.angle		= 30			# Opening angle of needle tip (in degrees) (NB! Opening of "entire" tip)
 RodNeedlePlane.needle.cornerCurve	= 0.000001		# Corner curve between rod and needle
 RodNeedlePlane.needle.live		= true			# Live or not

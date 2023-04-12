@@ -56,7 +56,7 @@ public:
     @brief Allocate internal data holders in class object. 
   */
   virtual void
-  allocateInternals() override;
+  allocate() override;
 
   /*!
     @brief Compute the largest possible advective time step (for explicit methods)

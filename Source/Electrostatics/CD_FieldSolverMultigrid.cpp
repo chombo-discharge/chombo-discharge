@@ -227,14 +227,14 @@ FieldSolverMultigrid::parseJumpBC()
 }
 
 void
-FieldSolverMultigrid::allocateInternals()
+FieldSolverMultigrid::allocate()
 {
-  CH_TIME("FieldSolverMultigrid::allocateInternals()");
+  CH_TIME("FieldSolverMultigrid::allocate()");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::allocateInternals()" << endl;
+    pout() << "FieldSolverMultigrid::allocate()" << endl;
   }
 
-  FieldSolver::allocateInternals();
+  FieldSolver::allocate();
 
   m_amr->allocate(m_zero, m_realm, m_nComp);
   m_amr->allocate(m_kappaRhoByEps0, m_realm, m_nComp);

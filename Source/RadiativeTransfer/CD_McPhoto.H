@@ -208,7 +208,7 @@ public:
     @brief Allocate internal storage
   */
   virtual void
-  allocateInternals() override;
+  allocate() override;
 
   /*!
     @brief preRegrid operations
@@ -222,7 +222,7 @@ public:
     @brief Deallocate internal storage
   */
   virtual void
-  deallocateInternals() override;
+  deallocate() override;
 
   /*!
     @brief Regrid function for this class
@@ -431,6 +431,11 @@ protected:
     Raycast,
     Bisection,
   };
+
+  /*!
+    @brief Turn on/off transparent boundaries
+  */
+  bool m_transparentEB;
 
   /*!
     @brief Instantaneous transport or not
@@ -651,10 +656,10 @@ protected:
   coarseFineRedistribution(EBAMRCellData& a_phi);
 
   /*!
-    @brief Parse RNG options
+    @brief Turn on/off transparent boundaries
   */
   void
-  parseRNG();
+  parseTransparentBoundaries();
 
   /*!
     @brief Parse the divergence computation, i.e. if we blend with non-conservative divergence or not

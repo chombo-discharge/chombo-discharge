@@ -515,6 +515,8 @@ namespace ParticleManagement {
         }
       }
 
+      x += a_center;
+
       a_particles.add(p);
     }
   }

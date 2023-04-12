@@ -102,13 +102,13 @@ public:
     @brief Allocate internal storage for solvers
   */
   virtual void
-  allocateInternals();
+  allocate();
 
   /*!
     @brief Deallocate solver internals
   */
   virtual void
-  deallocateInternals();
+  deallocate();
 
   /*!
     @brief Call preRegrid(...) method for all the CdrSolvers
@@ -233,6 +233,12 @@ public:
   */
   virtual Vector<EBAMRCellData*>
   getVelocities();
+
+  /*!
+    @brief Get all cell-centered diffusion coefficients. 
+  */
+  virtual Vector<EBAMRCellData*>
+  getCellCenteredDiffusionCoefficients();
 
   /*!
     @brief Get all face-centered diffusion coefficients. 

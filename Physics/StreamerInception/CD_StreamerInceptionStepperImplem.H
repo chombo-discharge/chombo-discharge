@@ -153,9 +153,9 @@ StreamerInceptionStepper<P, F, C>::allocate()
     pout() << "StreamerInceptionStepper::allocate" << endl;
   }
 
-  m_fieldSolver->allocateInternals();
+  m_fieldSolver->allocate();
   m_tracerParticleSolver->allocate();
-  m_ionSolver->allocateInternals();
+  m_ionSolver->allocate();
 
   // Needed for all modes.
   m_amr->allocate(m_electricFieldPlus, m_realm, m_phase, SpaceDim);
