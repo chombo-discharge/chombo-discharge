@@ -21,7 +21,7 @@ AmrMesh.num_ghost       = 2           # Number of ghost cells. Default is 3
 AmrMesh.eb_ghost        = 2           # Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
 AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
-AmrMesh.mg_interp_weight = 1           # Multigrid interpolation weight (for least squares)
+AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
 AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
@@ -81,7 +81,7 @@ EddingtonSP1.gmg_exit_hang       = 0.2       # Solver hang
 EddingtonSP1.gmg_min_cells       = 2         # Bottom drop
 EddingtonSP1.gmg_bottom_solver   = bicgstab     # Bottom solver type. Valid options are 'simple <number>' and 'bicgstab'
 EddingtonSP1.gmg_cycle           = vcycle    # Cycle type. Only 'vcycle' supported for now
-EddingtonSP1.gmg_ebbc_weight     = 1            # EBBC weight (only for Dirichlet)
+EddingtonSP1.gmg_ebbc_weight     = 2            # EBBC weight (only for Dirichlet)
 EddingtonSP1.gmg_ebbc_order      = 2            # EBBC order (only for Dirichlet)
 EddingtonSP1.gmg_smoother        = red_black    # Relaxation type. 'jacobi', 'red_black', or 'multi_color'
 EddingtonSP1.ebbc                = dirichlet 1.0 # Bc on embedded boundaries. 
@@ -95,7 +95,7 @@ EddingtonSP1.bc.z.hi             = dirichlet 0.0 # Bc on domain side. 'dirichlet
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
+GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
 GeoCoarsener.box1_lo     = -1 -0.1         # Remove irregular cell tags 
 GeoCoarsener.box1_hi     =  1 2         # between these two corners
 GeoCoarsener.box1_lvl    = 0            # up to this level

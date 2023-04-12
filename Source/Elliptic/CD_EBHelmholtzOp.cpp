@@ -23,8 +23,6 @@
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
-#define USE_OLD_FLUX 0
-
 constexpr int EBHelmholtzOp::m_nComp;
 constexpr int EBHelmholtzOp::m_comp;
 
@@ -678,12 +676,117 @@ EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&             a_Lphi,
     // If we have a finer level, there is a chance that the stencils from the EB will reach under it, in which case
     // it might fetch potentially bogus data. A clunky way of handling this is to coarsen the data on the fine level
     // first. The best solution would probably be to have the EB flux stencil reach directly into the fine level.
+#if 0
+    // TLDR: This is the original code which does not use the two-sided stencil. 
     if (m_hasFine && m_doCoarsen) {
       EBHelmholtzOp* fineOp = (EBHelmholtzOp*)a_finerOp;
       fineOp->coarsen((LevelData<EBCellFAB>&)a_phi, a_phiFine);
     }
 
     this->applyOp(a_Lphi, a_phi, &a_phiCoar, a_homogeneousPhysBC, false);
+#else
+    // TLDR: This is the new code which uses flux stencils reaching into the fine level also.
+    LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>&)a_phi;
+
+    if (m_hasFine && m_doCoarsen) {
+      EBHelmholtzOp* fineOp = (EBHelmholtzOp*)a_finerOp;
+      fineOp->coarsen((LevelData<EBCellFAB>&)a_phi, a_phiFine);
+    }
+
+    if (m_doExchange) {
+      phi.exchange();
+    }
+
+    if (m_hasCoar && m_doInterpCF) {
+      this->interpolateCF(phi, &a_phiCoar, false);
+    }
+
+    if (m_hasFine) {
+      a_phiFine.copyTo(m_phiFine);
+    }
+
+    // Apply operator in each kernel.
+    const DisjointBoxLayout& dbl = a_Lphi.disjointBoxLayout();
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const Box&     cellBox = m_eblg.getDBL()[dit()];
+      const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
+
+      EBCellFAB& Lphi = a_Lphi[dit()];
+
+      if (!ebisbox.isAllCovered()) {
+        this->applyOpRegular(Lphi, phi[dit()], cellBox, dit(), a_homogeneousPhysBC);
+
+        VoFIterator& vofit = m_vofIterStenc[dit()];
+        for (vofit.reset(); vofit.ok(); ++vofit) {
+          const VolIndex& vof = vofit();
+
+          // Finite volume stencil representation of Int[B*grad(phi)]dA
+          const VoFStencil& stenc = m_relaxStencils[dit()](vof, m_comp);
+
+          // kappa * alpha * aco (m_alphaDiagWeight holds kappa* aco)
+          const Real& alphaDiag = m_alpha * m_alphaDiagWeight[dit()](vof, m_comp);
+
+          a_Lphi[dit()](vof, m_comp) = alphaDiag * a_phi[dit()](vof, m_comp);
+
+          // Add the term corresponding to kappa*div(b*grad(phi)), excluding contributions from domain faces.
+          for (int i = 0; i < stenc.size(); i++) {
+            const VolIndex& ivof    = stenc.vof(i);
+            const Real&     iweight = stenc.weight(i);
+
+            // Note that bco is a part of the stencil weight.
+            a_Lphi[dit()](vof, m_comp) += m_beta * iweight * a_phi[dit()](ivof, m_comp);
+          }
+        }
+
+        const EBCellFAB* phiFine = m_hasFine ? &m_phiFine[dit()] : nullptr;
+#if 0
+        m_ebBc->applyEBFluxResid(m_vofIterIrreg[dit()],
+                                 a_Lphi[dit()],
+                                 phi[dit()],
+                                 phiFine,
+                                 (*m_BcoefIrreg)[dit()],
+                                 dit(),
+                                 m_beta,
+                                 a_homogeneousPhysBC);
+#else
+        m_ebBc->applyEBFluxRelax(m_vofIterIrreg[dit()],
+                                 a_Lphi[dit()],
+                                 phi[dit()],
+                                 (*m_BcoefIrreg)[dit()],
+                                 dit(),
+                                 m_beta,
+                                 a_homogeneousPhysBC);
+#endif
+
+        // Do irregular faces on domain sides. This was not included in the stencils above. m_domainBc should give the centroid-centered flux so we don't do interpolations here.
+        for (int dir = 0; dir < SpaceDim; dir++) {
+
+          // Iterators for high and low sides.
+          VoFIterator& vofitLo = m_vofIterDomLo[dir][dit()];
+          VoFIterator& vofitHi = m_vofIterDomHi[dir][dit()];
+
+          const EBFaceFAB& Bcoef = (*m_Bcoef)[dit()][dir];
+
+          // Kernels for high and low sides.
+          auto kernelLo = [&](const VolIndex& vof) -> void {
+            const Real flux =
+              m_domainBc->getFaceFlux(vof, a_phi[dit()], Bcoef, dir, Side::Lo, dit(), a_homogeneousPhysBC);
+            a_Lphi[dit()](vof, m_comp) -= flux * m_beta / m_dx;
+          };
+
+          auto kernelHi = [&](const VolIndex& vof) -> void {
+            const Real flux =
+              m_domainBc->getFaceFlux(vof, a_phi[dit()], Bcoef, dir, Side::Hi, dit(), a_homogeneousPhysBC);
+            a_Lphi[dit()](vof, m_comp) += flux * m_beta / m_dx;
+          };
+
+          // Execute kernels on lo and hi side
+          BoxLoops::loop(vofitLo, kernelLo);
+          BoxLoops::loop(vofitHi, kernelHi);
+        }
+      }
+    }
+#endif
 
     if (m_hasFine) {
       this->reflux(a_Lphi, a_phiFine, a_phi, *a_finerOp);
@@ -838,24 +941,17 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
       // Add in the flux from the EB face. After this the only term missing the inhomogeneous
       // flux from the EB. I.e. when dphi/dn = w_b * phi_b + sum(w_i * phi(i)) then we are
       // missing only the term w_b * phi_b. This is added by the EBBC object.
-#if USE_OLD_FLUX
       for (int i = 0; i < ebFluxSten.size(); i++) {
         const Real      weight = ebFluxSten.weight(i);
         const VolIndex& ivof   = ebFluxSten.vof(i);
 
 	Lphi(vof, m_comp) += m_beta * BcoIrreg(vof, m_comp) * weight * phi(ivof, m_comp);
       }
-#endif
     };
     BoxLoops::loop(m_vofIterIrreg[dit()], irregularKernel);
 
     // Finally, add in the inhomogeneous EB flux.
-#if USE_OLD_FLUX
     m_ebBc->applyEBFluxRelax(m_vofIterIrreg[dit()], Lphi, phi, BcoIrreg, dit(), m_beta, a_homogeneousPhysBC);    
-#else
-    EBCellFAB* phiFine = m_hasFine ? &(m_phiFine[dit()]) : nullptr; 
-    m_ebBc->applyEBFluxResid(m_vofIterIrreg[dit()], Lphi, phi, phiFine, BcoIrreg, dit(), m_beta, a_homogeneousPhysBC);    
-#endif
   }
 }
 
@@ -1270,7 +1366,13 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&       a_Lphi,
       a_Lphi(vof, m_comp) += m_beta * iweight * a_phi(ivof, m_comp); // Note that bco is a part of the stencil weight.
     }
   }
-  m_ebBc->applyEBFluxRelax(m_vofIterIrreg[a_dit], a_Lphi, a_phi, (*m_BcoefIrreg)[a_dit], a_dit, m_beta, a_homogeneousPhysBC);
+  m_ebBc->applyEBFluxRelax(m_vofIterIrreg[a_dit],
+                           a_Lphi,
+                           a_phi,
+                           (*m_BcoefIrreg)[a_dit],
+                           a_dit,
+                           m_beta,
+                           a_homogeneousPhysBC);
 #else // New code that uses AggStencil.
   constexpr bool incrementOnly = false;
 
