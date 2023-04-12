@@ -104,7 +104,8 @@ public:
                    const EBCellFAB* const a_phiFine,
                    const BaseIVFAB<Real>& a_Bcoef,
                    const DataIndex&       a_dit,
-                   const Real&            a_beta) const;
+                   const Real&            a_beta,
+                   const bool&            a_homogeneousPhysBC) const;
 
   /*!
     @brief Get the stencil for computing the finite-volume approximation to kappa*Div(F) on this grid level. 

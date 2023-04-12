@@ -10,18 +10,18 @@ AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
 AmrMesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
 AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
-AmrMesh.grid_algorithm  = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+AmrMesh.grid_algorithm  = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting     = morton      # Morton sorting
 AmrMesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
 AmrMesh.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
-AmrMesh.lsf_ghost       = 3           # Number of ghost cells when writing level-set to grid
-AmrMesh.num_ghost       = 3           # Number of ghost cells. Default is 3
-AmrMesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
+AmrMesh.lsf_ghost       = 2           # Number of ghost cells when writing level-set to grid
+AmrMesh.num_ghost       = 2           # Number of ghost cells. Default is 3
+AmrMesh.eb_ghost        = 2           # Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
-AmrMesh.mg_interp_radius = 3           # Multigrid interpolation radius
-AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
+AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
+AmrMesh.mg_interp_weight = 1           # Multigrid interpolation weight (for least squares)
 AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
@@ -55,7 +55,7 @@ Driver.num_plot_ghost                  = 1             # Number of ghost cells t
 Driver.plt_vars                        = 0             # 'tags', 'mpi_rank'
 Driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true          # Allows removal of grid levels according to CellTagger
-Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
+Driver.grow_geo_tags                   = 0                # How much to grow tags when using geometry-based refinement. 
 Driver.refine_angles                   = 30.              # Refine cells if angle between elements exceed this value.
 Driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -71,17 +71,17 @@ EddingtonSP1.kappa_scale         = true      # Kappa scale source or not (depend
 EddingtonSP1.plt_vars            = phi src   # Plot variables. Available are 'phi' and 'src'
 EddingtonSP1.use_regrid_slopes   = true         # Slopes on/off when regridding
 EddingtonSP1.gmg_verbosity       = 10        # GMG verbosity
-EddingtonSP1.gmg_pre_smooth      = 16         # Number of relaxations in downsweep
-EddingtonSP1.gmg_post_smooth     = 16         # Number of relaxations in upsweep
-EddingtonSP1.gmg_bott_smooth     = 16         # NUmber of relaxations before dropping to bottom solver
+EddingtonSP1.gmg_pre_smooth      = 8         # Number of relaxations in downsweep
+EddingtonSP1.gmg_post_smooth     = 8         # Number of relaxations in upsweep
+EddingtonSP1.gmg_bott_smooth     = 8         # NUmber of relaxations before dropping to bottom solver
 EddingtonSP1.gmg_min_iter        = 5         # Minimum number of iterations
 EddingtonSP1.gmg_max_iter        = 32        # Maximum number of iterations
 EddingtonSP1.gmg_exit_tol        = 1.E-6     # Residue tolerance
 EddingtonSP1.gmg_exit_hang       = 0.2       # Solver hang
-EddingtonSP1.gmg_min_cells       = 8         # Bottom drop
+EddingtonSP1.gmg_min_cells       = 2         # Bottom drop
 EddingtonSP1.gmg_bottom_solver   = bicgstab     # Bottom solver type. Valid options are 'simple <number>' and 'bicgstab'
 EddingtonSP1.gmg_cycle           = vcycle    # Cycle type. Only 'vcycle' supported for now
-EddingtonSP1.gmg_ebbc_weight     = 2            # EBBC weight (only for Dirichlet)
+EddingtonSP1.gmg_ebbc_weight     = 1            # EBBC weight (only for Dirichlet)
 EddingtonSP1.gmg_ebbc_order      = 2            # EBBC order (only for Dirichlet)
 EddingtonSP1.gmg_smoother        = red_black    # Relaxation type. 'jacobi', 'red_black', or 'multi_color'
 EddingtonSP1.ebbc                = dirichlet 1.0 # Bc on embedded boundaries. 
@@ -95,7 +95,7 @@ EddingtonSP1.bc.z.hi             = dirichlet 0.0 # Bc on domain side. 'dirichlet
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
+GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
 GeoCoarsener.box1_lo     = -1 -0.1         # Remove irregular cell tags 
 GeoCoarsener.box1_hi     =  1 2         # between these two corners
 GeoCoarsener.box1_lvl    = 0            # up to this level
@@ -125,6 +125,6 @@ RadiativeTransferStepper.verbosity      = -1      # Verbosity
 RadiativeTransferStepper.realm          = primal  # Realm 
 RadiativeTransferStepper.kappa          = 0.1     # Inverse absorption coefficient
 RadiativeTransferStepper.dt             = 1.E-10  # Time step
-RadiativeTransferStepper.blob_amplitude = 1E2     # Blob amplitude
+RadiativeTransferStepper.blob_amplitude = 1.0     # Blob amplitude
 RadiativeTransferStepper.blob_radius    = 0.05    # Blob radius
-RadiativeTransferStepper.blob_center    = 0.5 0.5 # Blob center
+RadiativeTransferStepper.blob_center    = 0.15 0.0 # Blob center

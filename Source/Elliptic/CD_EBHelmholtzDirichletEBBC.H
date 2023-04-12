@@ -98,7 +98,8 @@ public:
                    const EBCellFAB* const a_phiFine,
                    const BaseIVFAB<Real>& a_Bcoef,
                    const DataIndex&       a_dit,
-                   const Real&            a_beta) const override;
+                   const Real&            a_beta,
+                   const bool&            a_homogeneousPhysBC) const override;
 
 protected:
   /*!

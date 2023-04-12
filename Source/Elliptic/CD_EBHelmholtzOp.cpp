@@ -23,6 +23,8 @@
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
+#define USE_OLD_FLUX 0
+
 constexpr int EBHelmholtzOp::m_nComp;
 constexpr int EBHelmholtzOp::m_comp;
 
@@ -286,7 +288,7 @@ EBHelmholtzOp::defineStencils()
   }
 
   // Define refined data. Needed for proper AMR-aware EB fluxes.
-  if (m_hasFine) {
+  if (m_hasFine && !m_isMGOperator) {
     m_phiFine.define(m_eblgFiCo.getDBL(), m_nComp, IntVect::Zero, EBCellFactory(m_eblgFiCo.getEBISL()));
   }
 
@@ -717,8 +719,6 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
     fineOp->coarsen((LevelData<EBCellFAB>&)a_phi, a_phiFine);
   }
 
-  MayDay::Warning("EBHelmholtzOp::refluxFreeAMROperator - not yet adapted to two-level EB flux stencils!");
-
   // Make sure this level has updated ghost cells. The guards around these calls
   // are there because MFHelmholtzOp might decide to update ghost cells for us, in
   // which case we won't redo them.
@@ -747,6 +747,9 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
 
     fineOp->computeFlux(a_phiFine);
     fineOp->coarsen(m_flux, fineOp->getFlux());
+
+    // Copy the fine data to the buffer data
+    phiFine.copyTo(m_phiFine);
   }
 
   // Fill the domain fluxes.
@@ -835,17 +838,24 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
       // Add in the flux from the EB face. After this the only term missing the inhomogeneous
       // flux from the EB. I.e. when dphi/dn = w_b * phi_b + sum(w_i * phi(i)) then we are
       // missing only the term w_b * phi_b. This is added by the EBBC object.
+#if USE_OLD_FLUX
       for (int i = 0; i < ebFluxSten.size(); i++) {
         const Real      weight = ebFluxSten.weight(i);
         const VolIndex& ivof   = ebFluxSten.vof(i);
 
-        Lphi(vof, m_comp) += m_beta * BcoIrreg(vof, m_comp) * weight * phi(ivof, m_comp);
+	Lphi(vof, m_comp) += m_beta * BcoIrreg(vof, m_comp) * weight * phi(ivof, m_comp);
       }
+#endif
     };
     BoxLoops::loop(m_vofIterIrreg[dit()], irregularKernel);
 
     // Finally, add in the inhomogeneous EB flux.
-    m_ebBc->applyEBFluxRelax(m_vofIterIrreg[dit()], Lphi, phi, BcoIrreg, dit(), m_beta, a_homogeneousPhysBC);
+#if USE_OLD_FLUX
+    m_ebBc->applyEBFluxRelax(m_vofIterIrreg[dit()], Lphi, phi, BcoIrreg, dit(), m_beta, a_homogeneousPhysBC);    
+#else
+    EBCellFAB* phiFine = m_hasFine ? &(m_phiFine[dit()]) : nullptr; 
+    m_ebBc->applyEBFluxResid(m_vofIterIrreg[dit()], Lphi, phi, phiFine, BcoIrreg, dit(), m_beta, a_homogeneousPhysBC);    
+#endif
   }
 }
 

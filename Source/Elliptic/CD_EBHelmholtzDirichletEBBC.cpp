@@ -203,25 +203,41 @@ EBHelmholtzDirichletEBBC::defineResidualStencils() noexcept
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
 
+    BaseIVFAB<Real>&             gradPhiResidWeight       = m_boundaryWeightsResid[dit()];
+    BaseIVFAB<VoFStencil>&       gradPhiResidStencils     = m_gradPhiResidStencils[dit()];
+    BaseIVFAB<VoFStencil>&       gradPhiResidStencilsFine = m_gradPhiResidStencilsFine[dit()];
+    const BaseIVFAB<Real>&       gradPhiRelaxWeight       = m_boundaryWeightsRelax[dit()];
+    const BaseIVFAB<VoFStencil>& gradPhiRelaxStencil      = m_gradPhiRelaxStencils[dit()];
+
+    // Where to define our residual stencils.
+    const IntVectSet& ivs     = gradPhiRelaxStencil.getIVS();
+    const EBISBox&    ebisbox = ebisl[dit()];
+    const EBGraph&    ebgraph = ebisbox.getEBGraph();
+    VoFIterator       vofit(ivs, ebgraph);
+
+    gradPhiResidWeight.define(ivs, ebgraph, m_nComp);
+    gradPhiResidStencils.define(ivs, ebgraph, m_nComp);
+    gradPhiResidStencilsFine.define(ivs, ebgraph, m_nComp);
+
+    // Set default values.
+    auto defaultValues = [&](const VolIndex& vof) -> void {
+      gradPhiResidWeight(vof, m_comp)   = gradPhiRelaxWeight(vof, m_comp);
+      gradPhiResidStencils(vof, m_comp) = gradPhiRelaxStencil(vof, m_comp);
+      gradPhiResidStencilsFine(vof, m_comp).clear();
+    };
+
+    BoxLoops::loop(vofit, defaultValues);
+
     if (m_hasFineAMRLevel && !m_isMGLevel) {
-      BaseIVFAB<Real>&             gradPhiResidWeight       = m_boundaryWeightsResid[dit()];
-      BaseIVFAB<VoFStencil>&       gradPhiResidStencils     = m_gradPhiResidStencils[dit()];
-      BaseIVFAB<VoFStencil>&       gradPhiResidStencilsFine = m_gradPhiResidStencilsFine[dit()];
-      const BaseIVFAB<Real>&       gradPhiRelaxWeight       = m_boundaryWeightsRelax[dit()];
-      const BaseIVFAB<VoFStencil>& gradPhiRelaxStencil      = m_gradPhiRelaxStencils[dit()];
-      const BaseFab<bool>&         validCells               = (*m_amrValidCells)[dit()];
-
-      // Where to define our residual stencils.
-      const IntVectSet& ivs     = gradPhiRelaxStencil.getIVS();
-      const EBGraph&    ebgraph = ebisl[dit()].getEBGraph();
-
-      gradPhiResidWeight.define(ivs, ebgraph, m_nComp);
-      gradPhiResidStencils.define(ivs, ebgraph, m_nComp);
-      gradPhiResidStencilsFine.define(ivs, ebgraph, m_nComp);
+      const BaseFab<bool>& validCells = (*m_amrValidCells)[dit()];
 
       // Go through the relaxation stencils. If it reaches into an invalid cell (which can happen near EBCF),
       // recompute a better stencil for the AMR residual.
       auto kernel = [&](const VolIndex& vof) -> void {
+        gradPhiResidWeight(vof, m_comp)   = gradPhiRelaxWeight(vof, m_comp);
+        gradPhiResidStencils(vof, m_comp) = gradPhiRelaxStencil(vof, m_comp);
+        gradPhiResidStencilsFine(vof, m_comp).clear();
+
         const IntVect iv = vof.gridIndex();
 
         Vector<VolIndex> validVoFs;
@@ -244,6 +260,8 @@ EBHelmholtzDirichletEBBC::defineResidualStencils() noexcept
         }
 
         if (invalidVoFs.size() > 0) {
+          const Real areaFrac = ebisbox.bndryArea(vof);
+
           // We need to compute a new stencil for the finite volume flux, which also uses cells on
           // the fine level.
 
@@ -273,22 +291,18 @@ EBHelmholtzDirichletEBBC::defineResidualStencils() noexcept
             gradPhiResidWeight(vof, m_comp)       = std::get<0>(stencil);
             gradPhiResidStencils(vof, m_comp)     = std::get<1>(stencil);
             gradPhiResidStencilsFine(vof, m_comp) = std::get<2>(stencil);
+
+            // Need to scale.
+            gradPhiResidWeight(vof, m_comp) *= areaFrac / m_dx;
+            gradPhiResidStencils(vof, m_comp) *= areaFrac / m_dx;
+            gradPhiResidStencilsFine(vof, m_comp) *= areaFrac / m_dx;
           }
           else {
             pout() << "EBHelmholtzDirichletEBBC - could not compute AMR stencil for vof = " << vof << endl;
-
-            gradPhiResidWeight(vof, m_comp)   = gradPhiRelaxWeight(vof, m_comp);
-            gradPhiResidStencils(vof, m_comp) = gradPhiRelaxStencil(vof, m_comp);
           }
-        }
-        else {
-          // In this case we can just use the relaxation stencil for the residual.
-          gradPhiResidWeight(vof, m_comp)   = gradPhiRelaxWeight(vof, m_comp);
-          gradPhiResidStencils(vof, m_comp) = gradPhiRelaxStencil(vof, m_comp);
         }
       };
 
-      VoFIterator vofit(ivs, ebgraph);
       BoxLoops::loop(vofit, kernel);
     }
   }
@@ -344,7 +358,8 @@ EBHelmholtzDirichletEBBC::applyEBFluxResid(VoFIterator&           a_vofit,
                                            const EBCellFAB* const a_phiFine,
                                            const BaseIVFAB<Real>& a_Bcoef,
                                            const DataIndex&       a_dit,
-                                           const Real&            a_beta) const
+                                           const Real&            a_beta,
+                                           const bool&            a_homogeneousPhysBC) const
 {
   CH_TIME("EBHelmholtzDirichletEBBC::getGradStencilSingleLevel");
 
@@ -352,17 +367,19 @@ EBHelmholtzDirichletEBBC::applyEBFluxResid(VoFIterator&           a_vofit,
     // Value of phi on the boundary
     Real value = 0.0;
 
-    if (m_useConstant) {
-      value = m_constantValue;
-    }
-    else if (m_useFunction) {
-      const RealVect pos = this->getBoundaryPosition(vof, a_dit);
-      value              = m_functionValue(pos);
-    }
-    else {
-      value = 0.0;
+    if (!a_homogeneousPhysBC) {
+      if (m_useConstant) {
+        value = m_constantValue;
+      }
+      else if (m_useFunction) {
+        const RealVect pos = this->getBoundaryPosition(vof, a_dit);
+        value              = m_functionValue(pos);
+      }
+      else {
+        value = 0.0;
 
-      MayDay::Error("EBHelmholtzDirichletEBBC::applyEBFluxRelax -- logic bust");
+        MayDay::Error("EBHelmholtzDirichletEBBC::applyEBFluxRelax -- logic bust");
+      }
     }
 
     Real DphiDn = value * m_boundaryWeightsResid[a_dit](vof, m_comp);
@@ -376,8 +393,7 @@ EBHelmholtzDirichletEBBC::applyEBFluxResid(VoFIterator&           a_vofit,
       DphiDn += iweight * a_phi(ivof, m_comp);
     }
 
-    // Apply stencil on this level.
-    if (m_hasFineAMRLevel) {
+    if (m_hasFineAMRLevel && !m_isMGLevel) {
       const EBCellFAB& phiFine = *a_phiFine;
 
       const VoFStencil& stencil = m_gradPhiResidStencilsFine[a_dit](vof, m_comp);
@@ -389,8 +405,10 @@ EBHelmholtzDirichletEBBC::applyEBFluxResid(VoFIterator&           a_vofit,
       }
     }
 
-    a_Lphi += a_beta * a_Bcoef(vof, m_comp) * DphiDn;
+    a_Lphi(vof, m_comp) += a_beta * a_Bcoef(vof, m_comp) * DphiDn;
   };
+
+  BoxLoops::loop(a_vofit, kernel);
 }
 
 bool
@@ -490,8 +508,8 @@ EBHelmholtzDirichletEBBC::getGradStencilDualLevel(std::tuple<Real, VoFStencil, V
       const VoFStencil fineDphiDnStencil = LeastSquares::projectGradSten(fineSten, -normal);
       const VoFStencil coarDphiDnStencil = LeastSquares::projectGradSten(coarSten, -normal);
 
-      boundaryWeight += LeastSquares::sumAllWeights(fineDphiDnStencil);
-      boundaryWeight += LeastSquares::sumAllWeights(coarDphiDnStencil);
+      boundaryWeight -= LeastSquares::sumAllWeights(fineDphiDnStencil);
+      boundaryWeight -= LeastSquares::sumAllWeights(coarDphiDnStencil);
 
       a_stencil = std::make_tuple(boundaryWeight, coarDphiDnStencil, fineDphiDnStencil);
     }
