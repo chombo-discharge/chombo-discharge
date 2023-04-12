@@ -295,15 +295,15 @@ EBHelmholtzDirichletEBBC::defineResidualStencils() noexcept
 }
 
 void
-EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&           a_vofit,
-                                      EBCellFAB&             a_Lphi,
-                                      const EBCellFAB&       a_phi,
-                                      const BaseIVFAB<Real>& a_Bcoef,
-                                      const DataIndex&       a_dit,
-                                      const Real&            a_beta,
-                                      const bool&            a_homogeneousPhysBC) const
+EBHelmholtzDirichletEBBC::applyEBFluxRelax(VoFIterator&           a_vofit,
+                                           EBCellFAB&             a_Lphi,
+                                           const EBCellFAB&       a_phi,
+                                           const BaseIVFAB<Real>& a_Bcoef,
+                                           const DataIndex&       a_dit,
+                                           const Real&            a_beta,
+                                           const bool&            a_homogeneousPhysBC) const
 {
-  CH_TIME("EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
+  CH_TIME("EBHelmholtzDirichletEBBC::applyEBFluxRelax(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
   CH_assert(m_useConstant || m_useFunction);
 
@@ -323,7 +323,7 @@ EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&           a_vofit,
       else {
         value = 0.0;
 
-        MayDay::Error("EBHelmholtzDirichletEBBC::applyEBFlux -- logic bust");
+        MayDay::Error("EBHelmholtzDirichletEBBC::applyEBFluxRelax -- logic bust");
       }
 
       // Area fraction, and division by dx (from Div(F)) already a part of the boundary weights, but
@@ -335,6 +335,62 @@ EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&           a_vofit,
   }
 
   return;
+}
+
+void
+EBHelmholtzDirichletEBBC::applyEBFluxResid(VoFIterator&           a_vofit,
+                                           EBCellFAB&             a_Lphi,
+                                           const EBCellFAB&       a_phi,
+                                           const EBCellFAB* const a_phiFine,
+                                           const BaseIVFAB<Real>& a_Bcoef,
+                                           const DataIndex&       a_dit,
+                                           const Real&            a_beta) const
+{
+  CH_TIME("EBHelmholtzDirichletEBBC::getGradStencilSingleLevel");
+
+  auto kernel = [&](const VolIndex& vof) -> void {
+    // Value of phi on the boundary
+    Real value = 0.0;
+
+    if (m_useConstant) {
+      value = m_constantValue;
+    }
+    else if (m_useFunction) {
+      const RealVect pos = this->getBoundaryPosition(vof, a_dit);
+      value              = m_functionValue(pos);
+    }
+    else {
+      value = 0.0;
+
+      MayDay::Error("EBHelmholtzDirichletEBBC::applyEBFluxRelax -- logic bust");
+    }
+
+    Real DphiDn = value * m_boundaryWeightsResid[a_dit](vof, m_comp);
+
+    // Apply stencils on this level.
+    const VoFStencil& stencil = m_gradPhiResidStencils[a_dit](vof, m_comp);
+    for (int i = 0; i < stencil.size(); i++) {
+      const VolIndex& ivof    = stencil.vof(i);
+      const Real&     iweight = stencil.weight(i);
+
+      DphiDn += iweight * a_phi(ivof, m_comp);
+    }
+
+    // Apply stencil on this level.
+    if (m_hasFineAMRLevel) {
+      const EBCellFAB& phiFine = *a_phiFine;
+
+      const VoFStencil& stencil = m_gradPhiResidStencilsFine[a_dit](vof, m_comp);
+      for (int i = 0; i < stencil.size(); i++) {
+        const VolIndex& ivof    = stencil.vof(i);
+        const Real&     iweight = stencil.weight(i);
+
+        DphiDn += iweight * phiFine(ivof, m_comp);
+      }
+    }
+
+    a_Lphi += a_beta * a_Bcoef(vof, m_comp) * DphiDn;
+  };
 }
 
 bool

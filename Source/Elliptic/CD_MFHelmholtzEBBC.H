@@ -58,13 +58,13 @@ public:
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
   virtual void
-  applyEBFlux(VoFIterator&           a_vofit,
-              EBCellFAB&             a_Lphi,
-              const EBCellFAB&       a_phi,
-              const BaseIVFAB<Real>& a_Bcoef,
-              const DataIndex&       a_dit,
-              const Real&            a_beta,
-              const bool&            a_homogeneousPhysBC) const override;
+  applyEBFluxRelax(VoFIterator&           a_vofit,
+                   EBCellFAB&             a_Lphi,
+                   const EBCellFAB&       a_phi,
+                   const BaseIVFAB<Real>& a_Bcoef,
+                   const DataIndex&       a_dit,
+                   const Real&            a_beta,
+                   const bool&            a_homogeneousPhysBC) const override;
 
 protected:
   /*!
@@ -111,13 +111,13 @@ protected:
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
   virtual void
-  applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
-                         EBCellFAB&             a_Lphi,
-                         const EBCellFAB&       a_phi,
-                         const BaseIVFAB<Real>& a_Bcoef,
-                         const DataIndex&       a_dit,
-                         const Real&            a_beta,
-                         const bool&            a_homogeneousPhysBC) const = 0;
+  applyEBFluxRelaxSinglePhase(VoFIterator&           a_singlePhaseVofs,
+                              EBCellFAB&             a_Lphi,
+                              const EBCellFAB&       a_phi,
+                              const BaseIVFAB<Real>& a_Bcoef,
+                              const DataIndex&       a_dit,
+                              const Real&            a_beta,
+                              const bool&            a_homogeneousPhysBC) const = 0;
 
   /*!
     @brief Apply flux in multiphase cells.
@@ -130,13 +130,13 @@ protected:
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
   void
-  applyEBFluxMultiPhase(VoFIterator&           a_multiPhaseVofs,
-                        EBCellFAB&             a_Lphi,
-                        const EBCellFAB&       a_phi,
-                        const BaseIVFAB<Real>& a_Bcoef,
-                        const DataIndex&       a_dit,
-                        const Real&            a_beta,
-                        const bool&            a_homogeneousPhysBC) const;
+  applyEBFluxRelaxMultiPhase(VoFIterator&           a_multiPhaseVofs,
+                             EBCellFAB&             a_Lphi,
+                             const EBCellFAB&       a_phi,
+                             const BaseIVFAB<Real>& a_Bcoef,
+                             const DataIndex&       a_dit,
+                             const Real&            a_beta,
+                             const bool&            a_homogeneousPhysBC) const;
 
   /*!
     @brief Get stencil with specified order. 

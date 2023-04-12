@@ -135,35 +135,35 @@ MFHelmholtzEBBC::defineMultiPhase()
 }
 
 void
-MFHelmholtzEBBC::applyEBFlux(VoFIterator&           a_vofit,
-                             EBCellFAB&             a_Lphi,
-                             const EBCellFAB&       a_phi,
-                             const BaseIVFAB<Real>& a_Bcoef,
-                             const DataIndex&       a_dit,
-                             const Real&            a_beta,
-                             const bool&            a_homogeneousPhysBC) const
+MFHelmholtzEBBC::applyEBFluxRelax(VoFIterator&           a_vofit,
+                                  EBCellFAB&             a_Lphi,
+                                  const EBCellFAB&       a_phi,
+                                  const BaseIVFAB<Real>& a_Bcoef,
+                                  const DataIndex&       a_dit,
+                                  const Real&            a_beta,
+                                  const bool&            a_homogeneousPhysBC) const
 {
-  CH_TIME("MFHelmholtzEBBC::applyEBFlux(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
+  CH_TIME("MFHelmholtzEBBC::applyEBFluxRelax(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
   // TLDR: This is the function that is called by EBHelmholtzOp. We first do the single-phase cells and then the multi-phase cells.
 
   VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, a_dit);
   VoFIterator& multiPhaseVofs  = m_jumpBC->getMultiPhaseVofs(m_phase, a_dit);
 
-  this->applyEBFluxSinglePhase(singlePhaseVofs, a_Lphi, a_phi, a_Bcoef, a_dit, a_beta, a_homogeneousPhysBC);
-  this->applyEBFluxMultiPhase(multiPhaseVofs, a_Lphi, a_phi, a_Bcoef, a_dit, a_beta, a_homogeneousPhysBC);
+  this->applyEBFluxRelaxSinglePhase(singlePhaseVofs, a_Lphi, a_phi, a_Bcoef, a_dit, a_beta, a_homogeneousPhysBC);
+  this->applyEBFluxRelaxMultiPhase(multiPhaseVofs, a_Lphi, a_phi, a_Bcoef, a_dit, a_beta, a_homogeneousPhysBC);
 }
 
 void
-MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator&           a_multiPhaseVofs,
-                                       EBCellFAB&             a_Lphi,
-                                       const EBCellFAB&       a_phi,
-                                       const BaseIVFAB<Real>& a_Bcoef,
-                                       const DataIndex&       a_dit,
-                                       const Real&            a_beta,
-                                       const bool&            a_homogeneousPhysBC) const
+MFHelmholtzEBBC::applyEBFluxRelaxMultiPhase(VoFIterator&           a_multiPhaseVofs,
+                                            EBCellFAB&             a_Lphi,
+                                            const EBCellFAB&       a_phi,
+                                            const BaseIVFAB<Real>& a_Bcoef,
+                                            const DataIndex&       a_dit,
+                                            const Real&            a_beta,
+                                            const bool&            a_homogeneousPhysBC) const
 {
-  CH_TIME("MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
+  CH_TIME("MFHelmholtzEBBC::applyEBFluxRelaxMultiPhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.

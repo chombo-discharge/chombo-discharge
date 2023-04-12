@@ -112,15 +112,15 @@ EBHelmholtzNeumannEBBC::define()
 }
 
 void
-EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator&           a_vofit,
-                                    EBCellFAB&             a_Lphi,
-                                    const EBCellFAB&       a_phi,
-                                    const BaseIVFAB<Real>& a_Bcoef,
-                                    const DataIndex&       a_dit,
-                                    const Real&            a_beta,
-                                    const bool&            a_homogeneousPhysBC) const
+EBHelmholtzNeumannEBBC::applyEBFluxRelax(VoFIterator&           a_vofit,
+                                         EBCellFAB&             a_Lphi,
+                                         const EBCellFAB&       a_phi,
+                                         const BaseIVFAB<Real>& a_Bcoef,
+                                         const DataIndex&       a_dit,
+                                         const Real&            a_beta,
+                                         const bool&            a_homogeneousPhysBC) const
 {
-  CH_TIME("EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
+  CH_TIME("EBHelmholtzNeumannEBBC::applyEBFluxRelax(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
   CH_assert(m_useConstant || m_useFunction);
 
@@ -138,7 +138,7 @@ EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator&           a_vofit,
       }
       else {
         value = 0.0;
-        MayDay::Error("EBHelmholtzNeumannEBBC::applyEBFlux - logic bust");
+        MayDay::Error("EBHelmholtzNeumannEBBC::applyEBFluxRelax - logic bust");
       }
 
       // B-coefficient, area fraction, and division by dx (from Div(F)) already a part of the boundary weights, but

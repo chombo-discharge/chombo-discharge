@@ -152,16 +152,16 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
-                                                     EBCellFAB&             a_Lphi,
-                                                     const EBCellFAB&       a_phi,
-                                                     const BaseIVFAB<Real>& a_Bcoef,
-                                                     const DataIndex&       a_dit,
-                                                     const Real&            a_beta,
-                                                     const bool&            a_homogeneousPhysBC) const
+MFHelmholtzElectrostaticEBBC::applyEBFluxRelaxSinglePhase(VoFIterator&           a_singlePhaseVofs,
+                                                          EBCellFAB&             a_Lphi,
+                                                          const EBCellFAB&       a_phi,
+                                                          const BaseIVFAB<Real>& a_Bcoef,
+                                                          const DataIndex&       a_dit,
+                                                          const Real&            a_beta,
+                                                          const bool&            a_homogeneousPhysBC) const
 {
   CH_TIME(
-    "MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
+    "MFHelmholtzElectrostaticEBBC::applyEBFluxRelaxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.

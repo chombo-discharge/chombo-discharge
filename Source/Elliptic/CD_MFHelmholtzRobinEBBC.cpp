@@ -204,13 +204,13 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
-                                             EBCellFAB&             a_Lphi,
-                                             const EBCellFAB&       a_phi,
-                                             const BaseIVFAB<Real>& a_Bcoef,
-                                             const DataIndex&       a_dit,
-                                             const Real&            a_beta,
-                                             const bool&            a_homogeneousPhysBC) const
+MFHelmholtzRobinEBBC::applyEBFluxRelaxSinglePhase(VoFIterator&           a_singlePhaseVofs,
+                                                  EBCellFAB&             a_Lphi,
+                                                  const EBCellFAB&       a_phi,
+                                                  const BaseIVFAB<Real>& a_Bcoef,
+                                                  const DataIndex&       a_dit,
+                                                  const Real&            a_beta,
+                                                  const bool&            a_homogeneousPhysBC) const
 {
 
   // TLDR: For Robin, the flux is b*dphi/dn = beta*b*A*phi/B - beta*b*C/B and we have stored
@@ -233,7 +233,7 @@ MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhas
         B = 0.0;
         C = 0.0;
 
-        MayDay::Error("MFHelmholtzRobinEBBC::applyEBFluxSinglePhase - logic bust");
+        MayDay::Error("MFHelmholtzRobinEBBC::applyEBFluxRelaxSinglePhase - logic bust");
       }
 
       const EBISBox& ebisbox   = m_eblg.getEBISL()[a_dit];

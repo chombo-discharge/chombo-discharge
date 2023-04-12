@@ -235,15 +235,15 @@ EBHelmholtzRobinEBBC::define()
 }
 
 void
-EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator&           a_vofit,
-                                  EBCellFAB&             a_Lphi,
-                                  const EBCellFAB&       a_phi,
-                                  const BaseIVFAB<Real>& a_Bcoef,
-                                  const DataIndex&       a_dit,
-                                  const Real&            a_beta,
-                                  const bool&            a_homogeneousPhysBC) const
+EBHelmholtzRobinEBBC::applyEBFluxRelax(VoFIterator&           a_vofit,
+                                       EBCellFAB&             a_Lphi,
+                                       const EBCellFAB&       a_phi,
+                                       const BaseIVFAB<Real>& a_Bcoef,
+                                       const DataIndex&       a_dit,
+                                       const Real&            a_beta,
+                                       const bool&            a_homogeneousPhysBC) const
 {
-  CH_TIME("EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
+  CH_TIME("EBHelmholtzRobinEBBC::applyEBFluxRelax(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
   CH_assert(m_useFunction || m_useConstant);
 
@@ -267,7 +267,7 @@ EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator&           a_vofit,
       else {
         B = 0.0;
         C = 0.0;
-        MayDay::Error("EBHelmholtzRobinEBBC::applyEBFlux - logic bust");
+        MayDay::Error("EBHelmholtzRobinEBBC::applyEBFluxRelax - logic bust");
       }
 
       const EBISBox& ebisbox   = m_eblg.getEBISL()[a_dit];

@@ -999,6 +999,11 @@ protected:
   mutable LevelData<EBFluxFAB> m_flux;
 
   /*!
+    @brief Refinement of phi on this level. 
+  */
+  mutable LevelData<EBCellFAB> m_phiFine;
+
+  /*!
     @brief Interpolant for when we want centroid fluxes
   */
   LayoutData<BaseIFFAB<Real>> m_interpolant[SpaceDim];

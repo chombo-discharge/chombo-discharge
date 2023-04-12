@@ -75,6 +75,8 @@ public:
 
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
+    @note The EB flux can be represented by dphi/dn = wb * phi_b + sum (wi * phi_i). 
+    should input the part of dphi/dn that doesn't use the interior points. 
     @param[inout] a_vofit             Iterator for cut-cells
     @param[in]    a_Lphi              Operator kappa*L(phi)
     @param[in]    a_phi               Phi, cell-centered. 
@@ -84,13 +86,25 @@ public:
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
   virtual void
-  applyEBFlux(VoFIterator&           a_vofit,
-              EBCellFAB&             a_Lphi,
-              const EBCellFAB&       a_phi,
-              const BaseIVFAB<Real>& a_Bcoef,
-              const DataIndex&       a_dit,
-              const Real&            a_beta,
-              const bool&            a_homogeneousPhysBC) const = 0;
+  applyEBFluxRelax(VoFIterator&           a_vofit,
+                   EBCellFAB&             a_Lphi,
+                   const EBCellFAB&       a_phi,
+                   const BaseIVFAB<Real>& a_Bcoef,
+                   const DataIndex&       a_dit,
+                   const Real&            a_beta,
+                   const bool&            a_homogeneousPhysBC) const = 0;
+
+  /*!
+    @brief Apply full flux through the EB
+  */
+  virtual void
+  applyEBFluxResid(VoFIterator&           a_vofit,
+                   EBCellFAB&             a_Lphi,
+                   const EBCellFAB&       a_phi,
+                   const EBCellFAB* const a_phiFine,
+                   const BaseIVFAB<Real>& a_Bcoef,
+                   const DataIndex&       a_dit,
+                   const Real&            a_beta) const;
 
   /*!
     @brief Get the stencil for computing the finite-volume approximation to kappa*Div(F) on this grid level. 
@@ -173,20 +187,6 @@ protected:
     the multigrid relaxation stage. 
   */
   LayoutData<BaseIVFAB<VoFStencil>> m_gradPhiRelaxStencils;
-
-  /*!
-    @brief Stencils for computing the flux through the EB for the residual. This is this the part of the stencil that reaches
-    into this level. 
-    @note Differs from m_gradPhiRelaxStencils only when there's a coarse-fine interface near the cut-cell. 
-  */
-  LayoutData<BaseIVFAB<VoFStencil>> m_gradPhiResidStencils;
-
-  /*!
-    @brief Stencils for computing the flux through the EB for the residual. This is this the part of the 
-    stencil that reaches into the fine level.
-    @note Differs from m_gradPhiRelaxStencils only when there's a coarse-fine interface near the cut-cell. 
-  */
-  LayoutData<BaseIVFAB<VoFStencil>> m_gradPhiResidStencilsFine;
 
   /*!
     @brief User define function. 

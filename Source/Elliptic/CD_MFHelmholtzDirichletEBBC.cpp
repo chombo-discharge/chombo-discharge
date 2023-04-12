@@ -185,15 +185,16 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
-                                                 EBCellFAB&             a_Lphi,
-                                                 const EBCellFAB&       a_phi,
-                                                 const BaseIVFAB<Real>& a_Bcoef,
-                                                 const DataIndex&       a_dit,
-                                                 const Real&            a_beta,
-                                                 const bool&            a_homogeneousPhysBC) const
+MFHelmholtzDirichletEBBC::applyEBFluxRelaxSinglePhase(VoFIterator&           a_singlePhaseVofs,
+                                                      EBCellFAB&             a_Lphi,
+                                                      const EBCellFAB&       a_phi,
+                                                      const BaseIVFAB<Real>& a_Bcoef,
+                                                      const DataIndex&       a_dit,
+                                                      const Real&            a_beta,
+                                                      const bool&            a_homogeneousPhysBC) const
 {
-  CH_TIME("MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
+  CH_TIME(
+    "MFHelmholtzDirichletEBBC::applyEBFluxRelaxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
@@ -215,7 +216,7 @@ MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&           a_single
       }
       else {
         value = 0.0;
-        MayDay::Error("MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase - logic bust");
+        MayDay::Error("MFHelmholtzDirichletEBBC::applyEBFluxRelaxSinglePhase - logic bust");
       }
 
       a_Lphi(vof, m_comp) += a_beta * B * value * m_boundaryWeights[a_dit](vof, m_comp);

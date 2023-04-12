@@ -151,13 +151,13 @@ protected:
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
   virtual void
-  applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
-                         EBCellFAB&             a_Lphi,
-                         const EBCellFAB&       a_phi,
-                         const BaseIVFAB<Real>& a_Bcoef,
-                         const DataIndex&       a_dit,
-                         const Real&            a_beta,
-                         const bool&            a_homogeneousPhysBC) const override;
+  applyEBFluxRelaxSinglePhase(VoFIterator&           a_singlePhaseVofs,
+                              EBCellFAB&             a_Lphi,
+                              const EBCellFAB&       a_phi,
+                              const BaseIVFAB<Real>& a_Bcoef,
+                              const DataIndex&       a_dit,
+                              const Real&            a_beta,
+                              const bool&            a_homogeneousPhysBC) const override;
 
   /*!
     @brief Get a least-squares based interpolation stencil 

@@ -83,4 +83,16 @@ EBHelmholtzEBBC::getGradPhiRelaxStencils() const noexcept
   return m_gradPhiRelaxStencils;
 }
 
+void
+EBHelmholtzEBBC::applyEBFluxResid(VoFIterator&           a_vofit,
+                                  EBCellFAB&             a_Lphi,
+                                  const EBCellFAB&       a_phi,
+                                  const EBCellFAB* const a_phiFine,
+                                  const BaseIVFAB<Real>& a_Bcoef,
+                                  const DataIndex&       a_dit,
+                                  const Real&            a_beta) const
+{
+  CH_TIME("EBHelmholtzEBBC::applyEBFluxResid");
+}
+
 #include <CD_NamespaceFooter.H>

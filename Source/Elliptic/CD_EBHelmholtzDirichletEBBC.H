@@ -83,13 +83,22 @@ public:
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
   virtual void
-  applyEBFlux(VoFIterator&           a_vofit,
-              EBCellFAB&             a_Lphi,
-              const EBCellFAB&       a_phi,
-              const BaseIVFAB<Real>& a_Bcoef,
-              const DataIndex&       a_dit,
-              const Real&            a_beta,
-              const bool&            a_homogeneousPhysBC) const override;
+  applyEBFluxRelax(VoFIterator&           a_vofit,
+                   EBCellFAB&             a_Lphi,
+                   const EBCellFAB&       a_phi,
+                   const BaseIVFAB<Real>& a_Bcoef,
+                   const DataIndex&       a_dit,
+                   const Real&            a_beta,
+                   const bool&            a_homogeneousPhysBC) const override;
+
+  virtual void
+  applyEBFluxResid(VoFIterator&           a_vofit,
+                   EBCellFAB&             a_Lphi,
+                   const EBCellFAB&       a_phi,
+                   const EBCellFAB* const a_phiFine,
+                   const BaseIVFAB<Real>& a_Bcoef,
+                   const DataIndex&       a_dit,
+                   const Real&            a_beta) const override;
 
 protected:
   /*!
@@ -136,6 +145,20 @@ protected:
     @brief Boundary weights for residual calculation.
   */
   LayoutData<BaseIVFAB<Real>> m_boundaryWeightsResid;
+
+  /*!
+    @brief Stencils for computing the flux through the EB for the residual. This is this the part of the stencil that reaches
+    into this level. 
+    @note Differs from m_gradPhiRelaxStencils only when there's a coarse-fine interface near the cut-cell. 
+  */
+  LayoutData<BaseIVFAB<VoFStencil>> m_gradPhiResidStencils;
+
+  /*!
+    @brief Stencils for computing the flux through the EB for the residual. This is this the part of the 
+    stencil that reaches into the fine level.
+    @note Differs from m_gradPhiRelaxStencils only when there's a coarse-fine interface near the cut-cell. 
+  */
+  LayoutData<BaseIVFAB<VoFStencil>> m_gradPhiResidStencilsFine;
 
   /*!
     @brief User define function. 

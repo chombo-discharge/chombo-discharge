@@ -86,15 +86,16 @@ MFHelmholtzNeumannEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
-                                               EBCellFAB&             a_Lphi,
-                                               const EBCellFAB&       a_phi,
-                                               const BaseIVFAB<Real>& a_Bcoef,
-                                               const DataIndex&       a_dit,
-                                               const Real&            a_beta,
-                                               const bool&            a_homogeneousPhysBC) const
+MFHelmholtzNeumannEBBC::applyEBFluxRelaxSinglePhase(VoFIterator&           a_singlePhaseVofs,
+                                                    EBCellFAB&             a_Lphi,
+                                                    const EBCellFAB&       a_phi,
+                                                    const BaseIVFAB<Real>& a_Bcoef,
+                                                    const DataIndex&       a_dit,
+                                                    const Real&            a_beta,
+                                                    const bool&            a_homogeneousPhysBC) const
 {
-  CH_TIME("MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
+  CH_TIME(
+    "MFHelmholtzNeumannEBBC::applyEBFluxRelaxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
   // TLDR: For Neumann, we want to add the flux beta*bco*area*(dphi/dn)/dx where the
   //       dx comes from the fact that the term we are computing will be added to kappa*div(F)

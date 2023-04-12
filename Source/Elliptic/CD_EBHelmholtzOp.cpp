@@ -285,6 +285,11 @@ EBHelmholtzOp::defineStencils()
     m_centroidFluxStencil[dir].define(m_eblg.getDBL());
   }
 
+  // Define refined data. Needed for proper AMR-aware EB fluxes.
+  if (m_hasFine) {
+    m_phiFine.define(m_eblgFiCo.getDBL(), m_nComp, IntVect::Zero, EBCellFactory(m_eblgFiCo.getEBISL()));
+  }
+
   // Get the "colors" for multi-colored relaxation.
   EBArith::getMultiColors(m_colors);
 
@@ -840,7 +845,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
     BoxLoops::loop(m_vofIterIrreg[dit()], irregularKernel);
 
     // Finally, add in the inhomogeneous EB flux.
-    m_ebBc->applyEBFlux(m_vofIterIrreg[dit()], Lphi, phi, BcoIrreg, dit(), m_beta, a_homogeneousPhysBC);
+    m_ebBc->applyEBFluxRelax(m_vofIterIrreg[dit()], Lphi, phi, BcoIrreg, dit(), m_beta, a_homogeneousPhysBC);
   }
 }
 
@@ -852,7 +857,8 @@ EBHelmholtzOp::AMROperatorNF(LevelData<EBCellFAB>&       a_Lphi,
 {
   CH_TIME("EBHelmholtzOp::AMROperatorNF(3xLD<EBCellFAB>, bool)");
 
-  this->applyOp(a_Lphi, a_phi, &a_phiCoar, a_homogeneousPhysBC, false);
+  LevelData<EBCellFAB> phiFine; // Should be safe because it is never accessed.
+  this->AMROperator(a_Lphi, phiFine, a_phi, a_phiCoar, a_homogeneousPhysBC, nullptr);
 }
 
 void
@@ -864,7 +870,7 @@ EBHelmholtzOp::AMROperatorNC(LevelData<EBCellFAB>&             a_Lphi,
 {
   CH_TIME("EBHelmholtzOp::AMROperatorNC(3xLD<EBCellFAB>, bool, AMRLevelOp<LD<EBCellFAB> >)");
 
-  LevelData<EBCellFAB> phiCoar; // Should be safe on the bottom AMR level because only multigrid levels exist below.
+  LevelData<EBCellFAB> phiCoar; // Should be safe because it is never accessed.
   this->AMROperator(a_Lphi, a_phiFine, a_phi, phiCoar, a_homogeneousPhysBC, a_finerOp);
 }
 
@@ -1254,12 +1260,18 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&       a_Lphi,
       a_Lphi(vof, m_comp) += m_beta * iweight * a_phi(ivof, m_comp); // Note that bco is a part of the stencil weight.
     }
   }
-  m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, (*m_BcoefIrreg)[a_dit], a_dit, m_beta, a_homogeneousPhysBC);
+  m_ebBc->applyEBFluxRelax(m_vofIterIrreg[a_dit], a_Lphi, a_phi, (*m_BcoefIrreg)[a_dit], a_dit, m_beta, a_homogeneousPhysBC);
 #else // New code that uses AggStencil.
   constexpr bool incrementOnly = false;
 
   m_aggRelaxStencil[a_dit]->apply(a_Lphi, a_phi, m_alphaDiagWeight[a_dit], m_alpha, m_beta, m_comp, incrementOnly);
-  m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, (*m_BcoefIrreg)[a_dit], a_dit, m_beta, a_homogeneousPhysBC);
+  m_ebBc->applyEBFluxRelax(m_vofIterIrreg[a_dit],
+                           a_Lphi,
+                           a_phi,
+                           (*m_BcoefIrreg)[a_dit],
+                           a_dit,
+                           m_beta,
+                           a_homogeneousPhysBC);
 #endif
 
   // Do irregular faces on domain sides. This was not included in the stencils above. m_domainBc should give the centroid-centered flux so we don't do interpolations here.

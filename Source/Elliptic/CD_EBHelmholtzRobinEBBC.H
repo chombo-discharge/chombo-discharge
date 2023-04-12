@@ -114,13 +114,13 @@ public:
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
   virtual void
-  applyEBFlux(VoFIterator&           a_vofit,
-              EBCellFAB&             a_Lphi,
-              const EBCellFAB&       a_phi,
-              const BaseIVFAB<Real>& a_Bcoef,
-              const DataIndex&       a_dit,
-              const Real&            a_beta,
-              const bool&            a_homogeneousPhysBC) const override;
+  applyEBFluxRelax(VoFIterator&           a_vofit,
+                   EBCellFAB&             a_Lphi,
+                   const EBCellFAB&       a_phi,
+                   const BaseIVFAB<Real>& a_Bcoef,
+                   const DataIndex&       a_dit,
+                   const Real&            a_beta,
+                   const bool&            a_homogeneousPhysBC) const override;
 
 protected:
   /*!
