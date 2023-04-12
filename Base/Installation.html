@@ -51,7 +51,6 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#obtaining-chombo-discharge">Obtaining <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cloning-chombo-discharge">Cloning <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#setting-up-the-environment">Setting up the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#test-build">Test build</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#full-configuration">Full configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#main-settings">Main settings</a></li>
@@ -200,13 +199,6 @@ It will not compile with other versions of <code class="docutils literal notrans
 </section>
 <section id="cloning-chombo-discharge">
 <h2>Cloning <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code><a class="headerlink" href="#cloning-chombo-discharge" title="Permalink to this heading"></a></h2>
-<p>To obtain <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, the simplest approach is to clone it and recursively fetch the submodules:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git
-</pre></div>
-</div>
-</section>
-<section id="setting-up-the-environment">
-<h2>Setting up the environment<a class="headerlink" href="#setting-up-the-environment" title="Permalink to this heading"></a></h2>
 <p>When compiling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, makefiles must be able to find both <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> and <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>.
 In our makefiles the paths to these are supplied through the environment variables</p>
 <ul class="simple">
@@ -222,6 +214,13 @@ When cloning with submodules, both <code class="docutils literal notranslate"><s
 <span class="nb">export</span> <span class="nv">CHOMBO_HOME</span><span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/Submodules/Chombo-3.3/lib
 
 git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git <span class="si">${</span><span class="nv">DISCHARGE_HOME</span><span class="si">}</span>
+</pre></div>
+</div>
+<p>Alternatively, if cloning using https:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">DISCHARGE_HOME</span><span class="o">=</span>/home/foo/chombo-discharge
+<span class="nb">export</span> <span class="nv">CHOMBO_HOME</span><span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/Submodules/Chombo-3.3/lib
+
+git clone --recursive https://github.com/chombo-discharge/chombo-discharge.git <span class="si">${</span><span class="nv">DISCHARGE_HOME</span><span class="si">}</span>
 </pre></div>
 </div>
 </div>
