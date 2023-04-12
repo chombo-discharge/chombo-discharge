@@ -30,13 +30,7 @@ See LICENSE and Copyright.txt for redistribution rights.
 Serial build quickstart
 -----------------------
 
-For doing a quick clone and test build of ``chombo-discharge`` without HDF5 capabilities, execute the following steps:
-
-1. Clone chombo-discharge, including third-party dependencies
-
-   ```
-   git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git
-   ```
+For doing a quick clone and test build of ``chombo-discharge`` without HDF5 or MPI capabilities, execute the following steps:
 
 1. Install the LAPACK, BLAS, and GCC dependencies:
 
@@ -51,6 +45,15 @@ For doing a quick clone and test build of ``chombo-discharge`` without HDF5 capa
    export CHOMBO_HOME=$DISCHARGE_HOME/Submodules/Chombo-3.3/lib
 		
    git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}   
+   ```
+
+   Alternatively, if cloning over https:
+
+   ```
+   export DISCHARGE_HOME=/home/foo/chombo-discharge		
+   export CHOMBO_HOME=$DISCHARGE_HOME/Submodules/Chombo-3.3/lib
+		
+   git clone --recursive https://github.com/chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}   
    ```
 
 3. Copy the GNU compiler makefile to it's appropriate location

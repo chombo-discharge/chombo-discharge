@@ -31,15 +31,6 @@ Optional packages are
 Cloning ``chombo-discharge``
 ----------------------------
 
-To obtain ``chombo-discharge``, the simplest approach is to clone it and recursively fetch the submodules:
-
-.. code-block:: bash
-
-   git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git
-
-Setting up the environment
---------------------------
-
 When compiling ``chombo-discharge``, makefiles must be able to find both ``chombo-discharge`` and ``Chombo``.
 In our makefiles the paths to these are supplied through the environment variables
 
@@ -59,6 +50,15 @@ When cloning with submodules, both ``Chombo`` and ``nlohmann/json`` will be plac
       export CHOMBO_HOME=$DISCHARGE_HOME/Submodules/Chombo-3.3/lib
 		
       git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}
+
+   Alternatively, if cloning using https:
+
+   .. code-block:: bash
+
+      export DISCHARGE_HOME=/home/foo/chombo-discharge
+      export CHOMBO_HOME=$DISCHARGE_HOME/Submodules/Chombo-3.3/lib
+		
+      git clone --recursive https://github.com/chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}   
 
 ``chombo-discharge`` is built using a configuration file supplied to ``Chombo``.
 This file must reside in ``$CHOMBO_HOME/mk``.
