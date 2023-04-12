@@ -287,7 +287,7 @@ EBHelmholtzOp::defineStencils()
 
   // Define refined data. Needed for proper AMR-aware EB fluxes.
   if (m_hasFine && !m_isMGOperator) {
-    m_phiFine.define(m_eblgFiCo.getDBL(), m_nComp, IntVect::Zero, EBCellFactory(m_eblgFiCo.getEBISL()));
+    m_phiFine.define(m_eblgFiCo.getDBL(), m_nComp, IntVect::Unit, EBCellFactory(m_eblgFiCo.getEBISL()));
   }
 
   // Get the "colors" for multi-colored relaxation.
@@ -677,7 +677,7 @@ EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&             a_Lphi,
     // it might fetch potentially bogus data. A clunky way of handling this is to coarsen the data on the fine level
     // first. The best solution would probably be to have the EB flux stencil reach directly into the fine level.
 #if 0
-    // TLDR: This is the original code which does not use the two-sided stencil. 
+    // TLDR: This is the original code which does not use the two-sided stencil.
     if (m_hasFine && m_doCoarsen) {
       EBHelmholtzOp* fineOp = (EBHelmholtzOp*)a_finerOp;
       fineOp->coarsen((LevelData<EBCellFAB>&)a_phi, a_phiFine);
@@ -739,7 +739,7 @@ EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&             a_Lphi,
         }
 
         const EBCellFAB* phiFine = m_hasFine ? &m_phiFine[dit()] : nullptr;
-#if 0
+#if 1
         m_ebBc->applyEBFluxResid(m_vofIterIrreg[dit()],
                                  a_Lphi[dit()],
                                  phi[dit()],
@@ -945,13 +945,13 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
         const Real      weight = ebFluxSten.weight(i);
         const VolIndex& ivof   = ebFluxSten.vof(i);
 
-	Lphi(vof, m_comp) += m_beta * BcoIrreg(vof, m_comp) * weight * phi(ivof, m_comp);
+        Lphi(vof, m_comp) += m_beta * BcoIrreg(vof, m_comp) * weight * phi(ivof, m_comp);
       }
     };
     BoxLoops::loop(m_vofIterIrreg[dit()], irregularKernel);
 
     // Finally, add in the inhomogeneous EB flux.
-    m_ebBc->applyEBFluxRelax(m_vofIterIrreg[dit()], Lphi, phi, BcoIrreg, dit(), m_beta, a_homogeneousPhysBC);    
+    m_ebBc->applyEBFluxRelax(m_vofIterIrreg[dit()], Lphi, phi, BcoIrreg, dit(), m_beta, a_homogeneousPhysBC);
   }
 }
 
@@ -1047,7 +1047,7 @@ EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
   this->create(resThisLevel, a_residual);
 
   constexpr bool homogeneousPhysBC = true;
-  constexpr bool homogeneousCFBC   = false;
+  constexpr bool homogeneousCFBC   = true;
 
   // We should average a_residual - L(correction, coarCorrection).
   this->applyOp(resThisLevel, a_correction, &a_coarseCorrection, homogeneousPhysBC, homogeneousCFBC);
