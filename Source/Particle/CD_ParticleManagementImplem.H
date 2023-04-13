@@ -421,7 +421,7 @@ namespace ParticleManagement {
 
   template <typename T, typename>
   inline std::vector<T>
-  ParticleManagement::partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept
+  partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept
   {
     std::vector<T> ret(0);
 
@@ -452,7 +452,7 @@ namespace ParticleManagement {
 
   template <typename T, typename>
   inline T
-  ParticleManagement::partitionParticles(const T a_numParticles)
+  partitionParticles(const T a_numParticles)
   {
 #ifdef CH_MPI
     const T quotient  = a_numParticles / numProc();
@@ -472,9 +472,7 @@ namespace ParticleManagement {
 
   template <typename P, typename T, typename>
   inline void
-  ParticleManagement::drawRandomParticles(List<P>&                         a_particles,
-                                          const T                          a_numParticles,
-                                          const std::function<RealVect()>& a_distribution)
+  drawRandomParticles(List<P>& a_particles, const T a_numParticles, const std::function<RealVect()>& a_distribution)
   {
 
     a_particles.clear();
@@ -491,10 +489,10 @@ namespace ParticleManagement {
 
   template <typename P, typename T, typename>
   inline void
-  ParticleManagement::drawSphereParticles(List<P>&       a_particles,
-                                          const T        a_numParticles,
-                                          const RealVect a_center,
-                                          const Real     a_radius) noexcept
+  drawSphereParticles(List<P>&       a_particles,
+                      const T        a_numParticles,
+                      const RealVect a_center,
+                      const Real     a_radius) noexcept
   {
     CH_TIME("ParticleManagement::drawSphereParticles");
 
@@ -523,10 +521,10 @@ namespace ParticleManagement {
 
   template <typename P, typename T, typename>
   inline void
-  ParticleManagement::drawBoxParticles(List<P>&       a_particles,
-                                       const T        a_numParticles,
-                                       const RealVect a_loCorner,
-                                       const RealVect a_hiCorner) noexcept
+  drawBoxParticles(List<P>&       a_particles,
+                   const T        a_numParticles,
+                   const RealVect a_loCorner,
+                   const RealVect a_hiCorner) noexcept
   {
     CH_TIME("ParticleManagement::drawBoxParticles");
 
@@ -543,10 +541,10 @@ namespace ParticleManagement {
 
   template <typename P, typename T, typename>
   inline void
-  ParticleManagement::drawGaussianParticles(List<P>&       a_particles,
-                                            const T        a_numParticles,
-                                            const RealVect a_center,
-                                            const Real     a_radius) noexcept
+  drawGaussianParticles(List<P>&       a_particles,
+                        const T        a_numParticles,
+                        const RealVect a_center,
+                        const Real     a_radius) noexcept
   {
     CH_TIME("ParticleManagement::drawGaussianParticles");
 
