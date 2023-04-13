@@ -19,3 +19,5 @@ StreamerInceptionStepper.transport_alg = heun                          # Transpo
 StreamerInceptionStepper.cfl           = 0.8                           # CFL time step for dynamic mode
 StreamerInceptionStepper.min_dt        = 0.0                           # Minimum permitted time step
 StreamerInceptionStepper.max_dt        = 1E99                          # Maximum permitted time step
+StreamerInceptionStepper.delta_v_percent = 0.01                        # Value between 0 and 1. The maximum deviation from V(t) in percent, i.e. deltaVPercent=deltaV/V
+StreamerInceptionStepper.end_time        = 0.000169                    # Time at the end of the input voltage curve

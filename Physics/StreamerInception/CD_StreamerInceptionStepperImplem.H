@@ -1,5 +1,7 @@
 /* chombo-discharge
  * Copyright © 2022 SINTEF Energy Research.
+ * Copyright © 2022 NTNU.
+ * Copyright © 2022 Fanny Skirbekk. 
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
@@ -8,6 +10,7 @@
   @brief  Implementation of CD_StreamerInceptionStepper.H
   @author Robert Marskar
   @author Rasmus Hoholm
+  @author Fanny Skirbekk
 */
 
 #ifndef CD_StreamerInceptionStepperImplem_H
@@ -449,6 +452,8 @@ StreamerInceptionStepper<P, F, C>::parseTransportAlgorithm() noexcept
   pp.get("cfl", m_cfl);
   pp.get("max_dt", m_maxDt);
   pp.get("min_dt", m_minDt);
+  pp.get("delta_v_percent", m_deltaVPercent);
+  pp.get("end_time", m_endTime);
 
   m_minDt = std::max(m_minDt, 0.0);
 
@@ -1052,7 +1057,22 @@ StreamerInceptionStepper<P, F, C>::computeDt()
       break;
     }
     }
-
+    auto computeGradient = [this](const Real & a_timeStep){
+			     return (m_voltageCurve(m_time+a_timeStep)-m_voltageCurve(m_time))/ a_timeStep;
+			   };
+    Real prevDt = m_minDt;
+    Real currDt = 2*m_minDt;
+    Real currGradient = computeGradient(currDt);
+    const Real currVoltage = m_voltageCurve(m_time);
+    Real deltaV = currGradient*currDt;
+    while(std::abs(deltaV) <= std::abs(m_deltaVPercent*currVoltage) && (m_time+currDt) < m_endTime){
+      prevDt = currDt;
+      currDt += m_minDt;
+      currGradient = computeGradient(currDt);
+      deltaV = currGradient*currDt;
+    }
+    dt = prevDt;
+    
     dt = std::min(dt, m_maxDt);
     dt = std::max(dt, m_minDt);
   }

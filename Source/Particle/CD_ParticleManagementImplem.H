@@ -421,7 +421,7 @@ namespace ParticleManagement {
 
   template <typename T, typename>
   inline std::vector<T>
-  ParticleManagement::partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept
+  partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept
   {
     std::vector<T> ret(0);
 
@@ -452,7 +452,7 @@ namespace ParticleManagement {
 
   template <typename T, typename>
   inline T
-  ParticleManagement::partitionParticles(const T a_numParticles)
+  partitionParticles(const T a_numParticles)
   {
 #ifdef CH_MPI
     const T quotient  = a_numParticles / numProc();
@@ -472,14 +472,14 @@ namespace ParticleManagement {
 
   template <typename P, typename T, typename>
   inline void
-  ParticleManagement::drawRandomParticles(List<P>&                         a_particles,
+  drawRandomParticles(List<P>&                         a_particles,
                                           const T                          a_numParticles,
                                           const std::function<RealVect()>& a_distribution)
   {
 
     a_particles.clear();
 
-    const T numParticles = ParticleManagement::partitionParticles(a_numParticles);
+    const T numParticles = partitionParticles(a_numParticles);
 
     for (T t = 0; t < numParticles; t++) {
       P p;
@@ -491,7 +491,7 @@ namespace ParticleManagement {
 
   template <typename P, typename T, typename>
   inline void
-  ParticleManagement::drawSphereParticles(List<P>&       a_particles,
+  drawSphereParticles(List<P>&       a_particles,
                                           const T        a_numParticles,
                                           const RealVect a_center,
                                           const Real     a_radius) noexcept
@@ -500,7 +500,7 @@ namespace ParticleManagement {
 
     a_particles.clear();
 
-    const T numParticles = ParticleManagement::partitionParticles(a_numParticles);
+    const T numParticles = partitionParticles(a_numParticles);
 
     for (T t = 0; t < numParticles; t++) {
       P p;
@@ -523,7 +523,7 @@ namespace ParticleManagement {
 
   template <typename P, typename T, typename>
   inline void
-  ParticleManagement::drawBoxParticles(List<P>&       a_particles,
+  drawBoxParticles(List<P>&       a_particles,
                                        const T        a_numParticles,
                                        const RealVect a_loCorner,
                                        const RealVect a_hiCorner) noexcept
@@ -538,12 +538,12 @@ namespace ParticleManagement {
                              a_loCorner[2] + (a_hiCorner[2] - a_loCorner[2]) * Random::getUniformReal01()));
     };
 
-    ParticleManagement::drawRandomParticles(a_particles, a_numParticles, ranBox);
+    drawRandomParticles(a_particles, a_numParticles, ranBox);
   }
 
   template <typename P, typename T, typename>
   inline void
-  ParticleManagement::drawGaussianParticles(List<P>&       a_particles,
+  drawGaussianParticles(List<P>&       a_particles,
                                             const T        a_numParticles,
                                             const RealVect a_center,
                                             const Real     a_radius) noexcept
@@ -556,7 +556,7 @@ namespace ParticleManagement {
       return a_center + Random::get(gauss) * Random::getDirection();
     };
 
-    ParticleManagement::drawRandomParticles(a_particles, a_numParticles, ranGauss);
+    drawRandomParticles(a_particles, a_numParticles, ranGauss);
   }
 } // namespace ParticleManagement
 

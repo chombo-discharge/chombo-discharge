@@ -1,5 +1,7 @@
 /* chombo-discharge
  * Copyright © 2022 SINTEF Energy Research.
+ * Copyright © 2022 NTNU.       
+ * Copyright © 2022 Fanny Skirbekk.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
@@ -8,6 +10,7 @@
   @brief  TimeStepper class for evaluating the streamer inception criterion.
   @author Robert Marskar
   @author Rasmus Hoholm
+  @author Fanny Skirbekk
 */
 
 #ifndef CD_StreamerInceptionStepper_H
@@ -528,6 +531,14 @@ namespace Physics {
 	@brief Minimum permitted time step.
       */
       Real m_minDt;
+      /*!
+	@brief Value between 0 and 1. The maximum deviation from V(t) in percent, i.e. deltaVPercent=deltaV/V
+      */
+      Real m_deltaVPercent;
+      /*!
+	@brief Time at the end of the input voltage curve
+      */
+      Real m_endTime;
 
       /*!
 	@brief Variable step size for K-integration algorithm (factor of dx)
