@@ -96,6 +96,30 @@ Functions</h2></td></tr>
 <tr class="memitem:a03181d038c45abb4e5ba0d78be9d830c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a03181d038c45abb4e5ba0d78be9d830c">deleteParticles</a> (List&lt; P &gt; &amp;a_particles, const Real a_weightThresh) noexcept</td></tr>
 <tr class="memdesc:a03181d038c45abb4e5ba0d78be9d830c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove particles if their weight is below the input weight.  <a href="namespaceParticleManagement.html#a03181d038c45abb4e5ba0d78be9d830c">More...</a><br /></td></tr>
 <tr class="separator:a03181d038c45abb4e5ba0d78be9d830c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81f6b1e86c8bf2b35f97f8965aca4d61"><td class="memTemplParams" colspan="2">template&lt;typename T , typename &gt; </td></tr>
+<tr class="memitem:a81f6b1e86c8bf2b35f97f8965aca4d61"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a81f6b1e86c8bf2b35f97f8965aca4d61">partitionParticleWeights</a> (const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept</td></tr>
+<tr class="memdesc:a81f6b1e86c8bf2b35f97f8965aca4d61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Partition particle weights among a number of computational particles.  <a href="namespaceParticleManagement.html#a81f6b1e86c8bf2b35f97f8965aca4d61">More...</a><br /></td></tr>
+<tr class="separator:a81f6b1e86c8bf2b35f97f8965aca4d61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb2e3437fa68515105d33f9a5b30b6aa"><td class="memTemplParams" colspan="2">template&lt;typename T , typename &gt; </td></tr>
+<tr class="memitem:adb2e3437fa68515105d33f9a5b30b6aa"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#adb2e3437fa68515105d33f9a5b30b6aa">partitionParticles</a> (const T a_numParticles)</td></tr>
+<tr class="memdesc:adb2e3437fa68515105d33f9a5b30b6aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Partition particles so that all MPI rank draw a cumulative number of particles equal to a_numParticles.  <a href="namespaceParticleManagement.html#adb2e3437fa68515105d33f9a5b30b6aa">More...</a><br /></td></tr>
+<tr class="separator:adb2e3437fa68515105d33f9a5b30b6aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af75f56fb901f696511a835668c2f0aed"><td class="memTemplParams" colspan="2">template&lt;typename P , typename T , typename &gt; </td></tr>
+<tr class="memitem:af75f56fb901f696511a835668c2f0aed"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#af75f56fb901f696511a835668c2f0aed">drawRandomParticles</a> (List&lt; P &gt; &amp;a_particles, const T a_numParticles, const std::function&lt; RealVect()&gt; &amp;a_distribution)</td></tr>
+<tr class="memdesc:af75f56fb901f696511a835668c2f0aed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a specified number of random particles distributed according to a predefined distribution.  <a href="namespaceParticleManagement.html#af75f56fb901f696511a835668c2f0aed">More...</a><br /></td></tr>
+<tr class="separator:af75f56fb901f696511a835668c2f0aed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab801d1419a184bb1a0beaa8acede5be0"><td class="memTemplParams" colspan="2">template&lt;typename P , typename T , typename &gt; </td></tr>
+<tr class="memitem:ab801d1419a184bb1a0beaa8acede5be0"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#ab801d1419a184bb1a0beaa8acede5be0">drawSphereParticles</a> (List&lt; P &gt; &amp;a_particles, const T a_numParticles, const RealVect a_center, const Real a_radius) noexcept</td></tr>
+<tr class="memdesc:ab801d1419a184bb1a0beaa8acede5be0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw particles in a sphere.  <a href="namespaceParticleManagement.html#ab801d1419a184bb1a0beaa8acede5be0">More...</a><br /></td></tr>
+<tr class="separator:ab801d1419a184bb1a0beaa8acede5be0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0b10c8404d6da6e59042fd4f7ff8312"><td class="memTemplParams" colspan="2">template&lt;typename P , typename T , typename &gt; </td></tr>
+<tr class="memitem:af0b10c8404d6da6e59042fd4f7ff8312"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#af0b10c8404d6da6e59042fd4f7ff8312">drawBoxParticles</a> (List&lt; P &gt; &amp;a_particles, const T a_numParticles, const RealVect a_loCorner, const RealVect a_hiCorner) noexcept</td></tr>
+<tr class="memdesc:af0b10c8404d6da6e59042fd4f7ff8312"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw particles in a box.  <a href="namespaceParticleManagement.html#af0b10c8404d6da6e59042fd4f7ff8312">More...</a><br /></td></tr>
+<tr class="separator:af0b10c8404d6da6e59042fd4f7ff8312"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a788d6de7f87c7d0126d8a8a8fadc4b8b"><td class="memTemplParams" colspan="2">template&lt;typename P , typename T , typename &gt; </td></tr>
+<tr class="memitem:a788d6de7f87c7d0126d8a8a8fadc4b8b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a788d6de7f87c7d0126d8a8a8fadc4b8b">drawGaussianParticles</a> (List&lt; P &gt; &amp;a_particles, const T a_numParticles, const RealVect a_center, const Real a_radius) noexcept</td></tr>
+<tr class="memdesc:a788d6de7f87c7d0126d8a8a8fadc4b8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw particles from a Gaussian distribution.  <a href="namespaceParticleManagement.html#a788d6de7f87c7d0126d8a8a8fadc4b8b">More...</a><br /></td></tr>
+<tr class="separator:a788d6de7f87c7d0126d8a8a8fadc4b8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
@@ -152,6 +176,327 @@ template&lt;typename P &gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Input list of particles. Must have a weight function. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_weightThresh</td><td>Weight threshold for removal </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af0b10c8404d6da6e59042fd4f7ff8312"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0b10c8404d6da6e59042fd4f7ff8312">&#9670;&nbsp;</a></span>drawBoxParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename T , typename &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleManagement::drawBoxParticles </td>
+          <td>(</td>
+          <td class="paramtype">List&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const T&#160;</td>
+          <td class="paramname"><em>a_numParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_loCorner</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_hiCorner</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Draw particles in a box. </p>
+<p>The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles. P is the particle type (must have a RealVect&amp; <a class="el" href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710" title="Compute the position (ignoring the &quot;origin) of a Vof.">position()</a> function) and T is an integer type. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_particles</td><td>Output particles (different for each rank) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticles</td><td>Number of particles </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_loCorner</td><td>Low corner of box </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_hiCorner</td><td>High corner of box </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a788d6de7f87c7d0126d8a8a8fadc4b8b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a788d6de7f87c7d0126d8a8a8fadc4b8b">&#9670;&nbsp;</a></span>drawGaussianParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename T , typename &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleManagement::drawGaussianParticles </td>
+          <td>(</td>
+          <td class="paramtype">List&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const T&#160;</td>
+          <td class="paramname"><em>a_numParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_center</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_radius</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Draw particles from a Gaussian distribution. </p>
+<p>The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles. P is the particle type (must have a RealVect&amp; <a class="el" href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710" title="Compute the position (ignoring the &quot;origin) of a Vof.">position()</a> function) and T is an integer type. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_particles</td><td>Output particles (different for each rank) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticles</td><td>Number of particles </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_center</td><td>Gaussian blob Center </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_radius</td><td>Gaussian blob radius </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af75f56fb901f696511a835668c2f0aed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af75f56fb901f696511a835668c2f0aed">&#9670;&nbsp;</a></span>drawRandomParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename T , typename &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleManagement::drawRandomParticles </td>
+          <td>(</td>
+          <td class="paramtype">List&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const T&#160;</td>
+          <td class="paramname"><em>a_numParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::function&lt; RealVect()&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_distribution</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Draw a specified number of random particles distributed according to a predefined distribution. </p>
+<p>The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles. P is the particle type (must derived from BinItem) and T is an integer type. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_particles</td><td>Output particles (different for each rank) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticles</td><td>Number of particles </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_distribution</td><td>Particle distribution. Must return a random position when calling the function. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab801d1419a184bb1a0beaa8acede5be0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab801d1419a184bb1a0beaa8acede5be0">&#9670;&nbsp;</a></span>drawSphereParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename T , typename &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleManagement::drawSphereParticles </td>
+          <td>(</td>
+          <td class="paramtype">List&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const T&#160;</td>
+          <td class="paramname"><em>a_numParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_center</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_radius</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Draw particles in a sphere. </p>
+<p>The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles. P is the particle type (must have a RealVect&amp; <a class="el" href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710" title="Compute the position (ignoring the &quot;origin) of a Vof.">position()</a> function) and T is an integer type. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_particles</td><td>Output particles (different for each rank) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticles</td><td>Number of particles </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_center</td><td>Sphere center </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_radius</td><td>Sphere radius </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="adb2e3437fa68515105d33f9a5b30b6aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb2e3437fa68515105d33f9a5b30b6aa">&#9670;&nbsp;</a></span>partitionParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , typename &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">T ParticleManagement::partitionParticles </td>
+          <td>(</td>
+          <td class="paramtype">const T&#160;</td>
+          <td class="paramname"><em>a_numParticles</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Partition particles so that all MPI rank draw a cumulative number of particles equal to a_numParticles. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticles</td><td>Total number of particles to be drawn. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns the number of particles drawn by each rank. </dd></dl>
+
+</div>
+</div>
+<a id="a81f6b1e86c8bf2b35f97f8965aca4d61"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81f6b1e86c8bf2b35f97f8965aca4d61">&#9670;&nbsp;</a></span>partitionParticleWeights()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , typename &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;T&gt; ParticleManagement::partitionParticleWeights </td>
+          <td>(</td>
+          <td class="paramtype">const T&#160;</td>
+          <td class="paramname"><em>a_numPhysicalParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const T&#160;</td>
+          <td class="paramname"><em>a_maxCompParticles</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Partition particle weights among a number of computational particles. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numPhysicalParticles</td><td>Number of physical particles. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxCompParticles</td><td>Maximum number of computational particles </td></tr>
   </table>
   </dd>
 </dl>
