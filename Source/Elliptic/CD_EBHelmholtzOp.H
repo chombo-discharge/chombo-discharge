@@ -1032,6 +1032,11 @@ protected:
   LayoutData<RefCountedPtr<VCAggStencil>> m_aggRelaxStencil;
 
   /*!
+    @brief The same as m_relaxStencils, but without the embedded boundary flux.
+  */
+  LayoutData<BaseIVFAB<VoFStencil>> m_opStencilsNoEB;
+
+  /*!
     @brief Weights of diagonal alpha terms
   */
   LayoutData<BaseIVFAB<Real>> m_alphaDiagWeight;

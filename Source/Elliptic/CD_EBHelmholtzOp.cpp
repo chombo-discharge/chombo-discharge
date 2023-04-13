@@ -263,7 +263,7 @@ EBHelmholtzOp::getFlux() const
 void
 EBHelmholtzOp::defineStencils()
 {
-  CH_TIME("EBHelmholtzOp::getFlux()");
+  CH_TIME("EBHelmholtzOp::defineStencils()");
 
   // Basic defines.
   EBCellFactory cellFact(m_eblg.getEBISL());
@@ -278,6 +278,7 @@ EBHelmholtzOp::defineStencils()
   m_alphaDiagWeight.define(m_eblg.getDBL());
   m_betaDiagWeight.define(m_eblg.getDBL());
   m_relaxStencils.define(m_eblg.getDBL());
+  m_opStencilsNoEB.define(m_eblg.getDBL());
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     m_vofIterDomLo[dir].define(m_eblg.getDBL());
@@ -360,6 +361,7 @@ EBHelmholtzOp::defineStencils()
 
     // Define data holders.
     m_relaxStencils[dit()].define(stencIVS, ebgraph, m_nComp);
+    m_opStencilsNoEB[dit()].define(stencIVS, ebgraph, m_nComp);
     m_alphaDiagWeight[dit()].define(stencIVS, ebgraph, m_nComp);
     m_betaDiagWeight[dit()].define(stencIVS, ebgraph, m_nComp);
 
@@ -401,12 +403,14 @@ EBHelmholtzOp::defineStencils()
     // Referring to the sketch above, we iterate through cells A, B, D, E and compute the face centroid fluxes for all these cells. This includes
     // e.g. the face connecting E and F. However, since F only has regular faces we don't store the stencil explicitly for that cell.
     //
-    BaseIVFAB<VoFStencil>& opStencil  = m_relaxStencils[dit()];
-    VoFIterator&           vofitStenc = m_vofIterStenc[dit()];
-    VoFIterator&           vofitIrreg = m_vofIterIrreg[dit()];
+    BaseIVFAB<VoFStencil>& relaxStencil  = m_relaxStencils[dit()];
+    BaseIVFAB<VoFStencil>& opStencilNoEB = m_opStencilsNoEB[dit()];
+    VoFIterator&           vofitStenc    = m_vofIterStenc[dit()];
+    VoFIterator&           vofitIrreg    = m_vofIterIrreg[dit()];
 
     BoxLoops::loop(vofitStenc, [&](const VolIndex& vof) -> void {
-      opStencil(vof, m_comp).clear();
+      relaxStencil(vof, m_comp).clear();
+      opStencilNoEB(vof, m_comp).clear();
     });
 
     for (int dir = 0; dir < SpaceDim; dir++) {
@@ -438,10 +442,12 @@ EBHelmholtzOp::defineStencils()
 
           // 4. Note that we prune storage here.
           if (stencIVS.contains(vofLo.gridIndex())) {
-            opStencil(vofLo, m_comp) += loKappaDivFSten;
+            relaxStencil(vofLo, m_comp) += loKappaDivFSten;
+            opStencilNoEB(vofLo, m_comp) += loKappaDivFSten;
           }
           if (stencIVS.contains(vofHi.gridIndex())) {
-            opStencil(vofHi, m_comp) += hiKappaDivFSten;
+            relaxStencil(vofHi, m_comp) += hiKappaDivFSten;
+            opStencilNoEB(vofHi, m_comp) += hiKappaDivFSten;
           }
         }
       };
@@ -455,7 +461,7 @@ EBHelmholtzOp::defineStencils()
 
       ebSten *= (*m_BcoefIrreg)[dit()](vof, m_comp);
 
-      opStencil(vof, m_comp) += ebSten;
+      relaxStencil(vof, m_comp) += ebSten;
     });
   }
 
@@ -702,6 +708,12 @@ EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&             a_Lphi,
     }
 
     if (m_hasFine) {
+      LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&)a_phiFine;
+      phiFine.exchange();
+
+      EBHelmholtzOp* finerOp = (EBHelmholtzOp*)(a_finerOp);
+      finerOp->inhomogeneousCFInterp(phiFine, a_phi);
+      
       a_phiFine.copyTo(m_phiFine);
     }
 
@@ -716,12 +728,13 @@ EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&             a_Lphi,
       if (!ebisbox.isAllCovered()) {
         this->applyOpRegular(Lphi, phi[dit()], cellBox, dit(), a_homogeneousPhysBC);
 
+        // Do the operator from the cut-cells.
         VoFIterator& vofit = m_vofIterStenc[dit()];
         for (vofit.reset(); vofit.ok(); ++vofit) {
           const VolIndex& vof = vofit();
 
           // Finite volume stencil representation of Int[B*grad(phi)]dA
-          const VoFStencil& stenc = m_relaxStencils[dit()](vof, m_comp);
+          const VoFStencil& stenc = m_opStencilsNoEB[dit()](vof, m_comp);
 
           // kappa * alpha * aco (m_alphaDiagWeight holds kappa* aco)
           const Real& alphaDiag = m_alpha * m_alphaDiagWeight[dit()](vof, m_comp);
@@ -739,8 +752,8 @@ EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&             a_Lphi,
         }
 
         const EBCellFAB* phiFine = m_hasFine ? &m_phiFine[dit()] : nullptr;
-#if 1
-        m_ebBc->applyEBFluxResid(m_vofIterIrreg[dit()],
+
+        m_ebBc->applyEBFluxResid(m_vofIterStenc[dit()],
                                  a_Lphi[dit()],
                                  phi[dit()],
                                  phiFine,
@@ -748,15 +761,6 @@ EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&             a_Lphi,
                                  dit(),
                                  m_beta,
                                  a_homogeneousPhysBC);
-#else
-        m_ebBc->applyEBFluxRelax(m_vofIterIrreg[dit()],
-                                 a_Lphi[dit()],
-                                 phi[dit()],
-                                 (*m_BcoefIrreg)[dit()],
-                                 dit(),
-                                 m_beta,
-                                 a_homogeneousPhysBC);
-#endif
 
         // Do irregular faces on domain sides. This was not included in the stencils above. m_domainBc should give the centroid-centered flux so we don't do interpolations here.
         for (int dir = 0; dir < SpaceDim; dir++) {

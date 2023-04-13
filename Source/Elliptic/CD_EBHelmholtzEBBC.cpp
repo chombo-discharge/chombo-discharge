@@ -94,6 +94,26 @@ EBHelmholtzEBBC::applyEBFluxResid(VoFIterator&           a_vofit,
                                   const bool&            a_homogeneousPhysBC) const
 {
   CH_TIME("EBHelmholtzEBBC::applyEBFluxResid");
+
+  for (a_vofit.reset(); a_vofit.ok(); ++a_vofit) {
+    const VolIndex&   vof     = a_vofit();
+    const VoFStencil& stencil = m_gradPhiRelaxStencils[a_dit](vof, m_comp);
+
+    // Apply the dphi/dn stencil. Constant terms come in through applyEBFluxRelax (depending on where we are in the
+    // multigrid algorithm).
+    Real ebFlux = 0.0;
+    for (int i = 0; i < stencil.size(); i++) {
+      const VolIndex& ivof    = stencil.vof(i);
+      const Real&     iweight = stencil.weight(i);
+
+      ebFlux += iweight * a_phi(ivof, m_comp);
+    }
+
+    a_Lphi(vof, m_comp) += a_beta * a_Bcoef(vof, m_comp) * ebFlux;
+  }
+
+  // Apply the inhomogeneous part.
+  this->applyEBFluxRelax(a_vofit, a_Lphi, a_phi, a_Bcoef, a_dit, a_beta, a_homogeneousPhysBC);
 }
 
 #include <CD_NamespaceFooter.H>

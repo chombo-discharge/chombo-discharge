@@ -234,9 +234,9 @@ EBHelmholtzDirichletEBBC::defineResidualStencils() noexcept
       // Go through the relaxation stencils. If it reaches into an invalid cell (which can happen near EBCF),
       // recompute a better stencil for the AMR residual.
       auto kernel = [&](const VolIndex& vof) -> void {
-        gradPhiResidWeight(vof, m_comp)   = gradPhiRelaxWeight(vof, m_comp);
-        gradPhiResidStencils(vof, m_comp) = gradPhiRelaxStencil(vof, m_comp);
-        gradPhiResidStencilsFine(vof, m_comp).clear();
+        // gradPhiResidWeight(vof, m_comp)   = gradPhiRelaxWeight(vof, m_comp);
+        // gradPhiResidStencils(vof, m_comp) = gradPhiRelaxStencil(vof, m_comp);
+        // gradPhiResidStencilsFine(vof, m_comp).clear();
 
         const IntVect iv = vof.gridIndex();
 
@@ -363,6 +363,8 @@ EBHelmholtzDirichletEBBC::applyEBFluxResid(VoFIterator&           a_vofit,
 {
   CH_TIME("EBHelmholtzDirichletEBBC::getGradStencilSingleLevel");
 
+  //  return EBHelmholtzEBBC::applyEBFluxResid(a_vofit, a_Lphi, a_phi, a_phiFine, a_Bcoef, a_dit, a_beta, a_homogeneousPhysBC);
+
   auto kernel = [&](const VolIndex& vof) -> void {
     // Value of phi on the boundary
     Real value = 0.0;
@@ -392,16 +394,6 @@ EBHelmholtzDirichletEBBC::applyEBFluxResid(VoFIterator&           a_vofit,
 
       DphiDn += iweight * a_phi(ivof, m_comp);
     }
-
-#if 1 // Temporary hack because of how EBHelmholtzOp stores the cut-cell divOp stencil
-    const VoFStencil& st2 = m_gradPhiRelaxStencils[a_dit](vof, m_comp);
-    for (int i = 0; i < st2.size(); i++) {
-      const VolIndex& ivof    = st2.vof(i);
-      const Real&     iweight = st2.weight(i);
-
-      DphiDn -= iweight * a_phi(ivof, m_comp);
-    }
-#endif
 
     if (m_hasFineAMRLevel && !m_isMGLevel) {
       const EBCellFAB& phiFine = *a_phiFine;
