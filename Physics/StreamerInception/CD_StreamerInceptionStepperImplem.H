@@ -2933,8 +2933,8 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
             const RealVect EEminu = RealVect(
               D_ECL(electricFieldRegMinu(iv, 0), electricFieldRegMinu(iv, 1), electricFieldRegMinu(iv, 2)));
 
-            const Real Eplus = std::abs(1 * EEplus.vectorLength()); // change 1 with the voltage
-            const Real Eminu = std::abs(1 * EEminu.vectorLength()); // change 1 with the voltage
+            const Real Eplus = std::abs(m_voltageSweeps[i] * EEplus.vectorLength());
+            const Real Eminu = std::abs(-m_voltageSweeps[i] * EEminu.vectorLength());
 
             const Real alphaPlus = m_alpha(Eplus);
             const Real alphaMinu = m_alpha(Eminu);
@@ -2957,8 +2957,8 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
             const RealVect EEminu = RealVect(
               D_ECL(electricFieldMinu(vof, 0), electricFieldMinu(vof, 1), electricFieldMinu(vof, 2)));
 
-            const Real Eplus = std::abs(1 * EEplus.vectorLength()); // change 1 with the voltage
-            const Real Eminu = std::abs(1 * EEminu.vectorLength()); // change 1 with the voltage
+            const Real Eplus = std::abs(m_voltageSweeps[i] * EEplus.vectorLength());
+            const Real Eminu = std::abs(-m_voltageSweeps[i] * EEminu.vectorLength());
 
             const Real alphaPlus = m_alpha(Eplus);
             const Real alphaMinu = m_alpha(Eminu);
@@ -2993,7 +2993,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
 
 template <typename P, typename F, typename C>
 Real
-StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient() const noexcept
+StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real& a_voltage) const noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeIonizationVolumeTransient");
   if (m_verbosity > 5) {
@@ -3022,7 +3022,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient() const noex
         if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
           const RealVect EE = RealVect(
             D_ECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-          const Real E = std::abs(1 * EE.vectorLength()); //change 1 to voltage
+          const Real E = std::abs(a_voltage * EE.vectorLength());
 
           const Real alpha = m_alpha(E);
           const Real eta   = m_eta(E);

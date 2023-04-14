@@ -848,7 +848,7 @@ namespace Physics {
 	@note For the transient method
       */
       virtual Real
-      computeIonizationVolumeTransient() const noexcept;
+      computeIonizationVolumeTransient(const Real& a_voltage) const noexcept;
 
       /*!
 	@brief Compute time to first critical electron.
