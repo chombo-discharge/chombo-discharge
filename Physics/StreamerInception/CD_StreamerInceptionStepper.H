@@ -476,9 +476,21 @@ namespace Physics {
 
       /*!
 	@brief Critical volumes of K values for each voltage
-	@note Stationary mode, positive polarity
+	@note Stationary mode, negative polarity
       */
       std::vector<Real> m_criticalVolumeMinu;
+
+      /*!
+	@brief Ionization volumes for each voltage
+	@note Stationary mode, positive polarity
+      */
+      std::vector<Real> m_ionizationVolumePlus;
+
+      /*!
+	@brief Ionization volumes for each voltage
+	@note Stationary mode, negative polarity
+      */
+      std::vector<Real> m_ionizationVolumeMinu;
 
       /*!
 	@brief Rate of appearance of first electron (in critical volume)
@@ -823,6 +835,20 @@ namespace Physics {
       */
       virtual Real
       computeCriticalVolumeTransient() const noexcept;
+
+      /*!
+	@brief Compute the ionization volume for each voltage
+	@note For the stationary method
+      */
+      virtual void
+      computeIonizationVolumeStationary() noexcept;
+
+      /*!
+	@brief Compute the ionization volume for each voltage
+	@note For the transient method
+      */
+      virtual Real
+      computeIonizationVolumeTransient() const noexcept;
 
       /*!
 	@brief Compute time to first critical electron.
