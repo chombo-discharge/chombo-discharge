@@ -2905,8 +2905,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
 
   // Solve ionization volume for each voltage
   for (size_t i = 0; i < m_voltageSweeps.size(); ++i) {
-    Real ionizationVolumePlus = 0.0;
-    Real ionizationVolumeMinu = 0.0;
+    Real ionizationVolume = 0.0;
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
@@ -2920,59 +2919,36 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
         const EBISBox&       ebisbox    = ebisl[dit()];
         const BaseFab<bool>& validCells = validCellsLD[dit()];
 
-        const EBCellFAB& electricFieldPlus = (*m_electricFieldPlus[lvl])[dit()];
-        const EBCellFAB& electricFieldMinu = (*m_electricFieldMinu[lvl])[dit()];
-
-        const FArrayBox& electricFieldRegPlus = electricFieldPlus.getFArrayBox();
-        const FArrayBox& electricFieldRegMinu = electricFieldMinu.getFArrayBox();
+        const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
+        const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
         auto regularKernel = [&](const IntVect& iv) -> void {
           if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
-            const RealVect EEplus = RealVect(
-              D_DECL(electricFieldRegPlus(iv, 0), electricFieldRegPlus(iv, 1), electricFieldRegPlus(iv, 2)));
-            const RealVect EEminu = RealVect(
-              D_DECL(electricFieldRegMinu(iv, 0), electricFieldRegMinu(iv, 1), electricFieldRegMinu(iv, 2)));
+            const RealVect EE = RealVect(
+              D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+            const Real E = std::abs(m_voltageSweeps[i] * EE.vectorLength());
 
-            const Real Eplus = std::abs(m_voltageSweeps[i] * EEplus.vectorLength());
-            const Real Eminu = std::abs(-m_voltageSweeps[i] * EEminu.vectorLength());
+            const Real alpha = m_alpha(E);
+            const Real eta   = m_eta(E);
 
-            const Real alphaPlus = m_alpha(Eplus);
-            const Real alphaMinu = m_alpha(Eminu);
-
-            const Real etaPlus = m_eta(Eplus);
-            const Real etaMinu = m_eta(Eminu);
-            if (alphaPlus >= etaPlus) {
-              ionizationVolumePlus += std::pow(dx, SpaceDim);
-            }
-            if (alphaMinu >= etaMinu) {
-              ionizationVolumeMinu += std::pow(dx, SpaceDim);
+            if (alpha >= eta) {
+              ionizationVolume += std::pow(dx, SpaceDim);
             }
           }
         };
 
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           if (validCells(vof.gridIndex())) {
-            const RealVect EEplus = RealVect(
-              D_DECL(electricFieldPlus(vof, 0), electricFieldPlus(vof, 1), electricFieldPlus(vof, 2)));
-            const RealVect EEminu = RealVect(
-              D_DECL(electricFieldMinu(vof, 0), electricFieldMinu(vof, 1), electricFieldMinu(vof, 2)));
+            const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+            const Real     E  = std::abs(m_voltageSweeps[i] * EE.vectorLength());
 
-            const Real Eplus = std::abs(m_voltageSweeps[i] * EEplus.vectorLength());
-            const Real Eminu = std::abs(m_voltageSweeps[i] * EEminu.vectorLength());
-
-            const Real alphaPlus = m_alpha(Eplus);
-            const Real alphaMinu = m_alpha(Eminu);
-
-            const Real etaPlus = m_eta(Eplus);
-            const Real etaMinu = m_eta(Eminu);
+            const Real alpha = m_alpha(E);
+            const Real eta   = m_eta(E);
 
             const Real kappa = ebisbox.volFrac(vof);
 
-            if (alphaPlus >= etaPlus) {
-              ionizationVolumePlus += kappa * std::pow(dx, SpaceDim);
-            }
-            if (alphaMinu >= etaMinu) {
-              ionizationVolumeMinu += kappa * std::pow(dx, SpaceDim);
+            if (alpha >= eta) {
+              ionizationVolume += kappa * std::pow(dx, SpaceDim);
             }
           }
         };
@@ -2986,8 +2962,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
       }
     }
 
-    m_ionizationVolumePlus.push_back(ParallelOps::sum(ionizationVolumePlus));
-    m_ionizationVolumeMinu.push_back(ParallelOps::sum(ionizationVolumeMinu));
+    m_ionizationVolume.push_back(ParallelOps::sum(ionizationVolume));
   }
 }
 
@@ -3035,7 +3010,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real& 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         if (validCells(vof.gridIndex())) {
           const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-          const Real     E  = std::abs(1 * EE.vectorLength()); //change 1 to voltage
+          const Real     E  = std::abs(a_voltage * EE.vectorLength());
 
           const Real alpha = m_alpha(E);
           const Real eta   = m_eta(E);
