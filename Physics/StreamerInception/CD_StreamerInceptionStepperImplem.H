@@ -3204,6 +3204,7 @@ StreamerInceptionStepper<P, F, C>::writeReportStationary() const noexcept
     output << left << setw(15) << setfill(' ') << "Max K(-)";
     output << left << setw(20) << setfill(' ') << "Crit. vol(+)";
     output << left << setw(20) << setfill(' ') << "Crit. vol(-)";
+    output << left << setw(20) << setfill(' ') << "Ionization vol.";
     output << left << setw(20) << setfill(' ') << "Rdot (+)";
     output << left << setw(20) << setfill(' ') << "Rdot (-)" << "\n";
     output << "# ==================================================================================================================================" << "\n";        
@@ -3214,6 +3215,7 @@ StreamerInceptionStepper<P, F, C>::writeReportStationary() const noexcept
       output << left << setw(15) << setfill(' ') << m_maxKMinu[i];
       output << left << setw(20) << setfill(' ') << m_criticalVolumePlus[i];
       output << left << setw(20) << setfill(' ') << m_criticalVolumeMinu[i];
+      output << left << setw(20) << setfill(' ') << m_ionizationVolume[i];
       output << left << setw(20) << setfill(' ') << m_RdotPlus[i];
       output << left << setw(20) << setfill(' ') << m_RdotMinu[i];
       output << endl;
