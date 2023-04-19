@@ -17,7 +17,7 @@ StreamerInceptionStepper.voltage_steps = 3                             # Number 
 StreamerInceptionStepper.ion_transport = true                          # Turn on/off ion transport
 StreamerInceptionStepper.transport_alg = heun                          # Transport algorithm.
 StreamerInceptionStepper.cfl           = 0.8                           # CFL time step for dynamic mode
-StreamerInceptionStepper.min_dt        = 0.0                           # Minimum permitted time step
-StreamerInceptionStepper.max_dt        = 1E99                          # Maximum permitted time step
-StreamerInceptionStepper.delta_v_percent = 0.01                        # Value between 0 and 1. The maximum deviation from V(t) in percent, i.e. deltaVPercent=deltaV/V
+StreamerInceptionStepper.min_dt        = 0.0001E-06                           # Minimum permitted time step
+StreamerInceptionStepper.max_dt        = 0.0001                          # Maximum permitted time step
+StreamerInceptionStepper.delta_v_percent = 0.1                        # Value between 0 and 1. The maximum deviation from V(t) in percent, i.e. deltaVPercent=deltaV/V
 StreamerInceptionStepper.end_time        = 0.000169                    # Time at the end of the input voltage curve
