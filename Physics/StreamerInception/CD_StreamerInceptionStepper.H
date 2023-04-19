@@ -524,6 +524,12 @@ namespace Physics {
       std::vector<std::pair<Real, Real>> m_criticalVolume;
 
       /*!
+	@brief Ionization volume at various time instances.
+	@details First parameter is time, second parameter is the ionization volume.
+      */
+      std::vector<std::pair<Real, Real>> m_ionizationVolumeTransient;
+
+      /*!
 	@brief CFL-step for negative ions.
       */
       Real m_cfl;

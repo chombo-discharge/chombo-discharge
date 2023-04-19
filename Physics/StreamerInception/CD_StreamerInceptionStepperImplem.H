@@ -1107,11 +1107,13 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
     this->seedIonizationParticles(curVoltage);
     this->computeInceptionIntegralTransient(curVoltage);
 
-    // Compute the critical volume and the electron appearance rate.
+    // Compute the critical volume, the ionization volume and the electron appearance rate.
     const Real Vcr  = this->computeCriticalVolumeTransient();
+    const Real Vion = this->computeIonizationVolumeTransient(curVoltage);
     const Real Rdot = this->computeRdot(curVoltage);
 
     m_criticalVolume.emplace_back(curTime, Vcr);
+    m_ionizationVolumeTransient.emplace_back(curTime, Vion);
     m_Rdot.emplace_back(curTime, Rdot);
 
     // Compute the inception probability using the trapezoidal rule.
@@ -1735,6 +1737,7 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
 
     m_Rdot.emplace_back(m_time, this->computeRdot(m_voltageCurve(m_time)));
     m_criticalVolume.emplace_back(m_time, this->computeCriticalVolumeTransient());
+    m_ionizationVolumeTransient.emplace_back(m_time, this->computeIonizationVolumeTransient(m_voltageCurve(m_time)));
     m_inceptionProbability.emplace_back(m_time, 0.0);
     m_maxK.emplace_back(m_time, maxK);
 
@@ -3246,6 +3249,7 @@ StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
     output << std::left << std::setw(15) << setfill(' ') << "V(t)";
     output << std::left << std::setw(15) << setfill(' ') << "max K(t)";
     output << std::left << std::setw(15) << setfill(' ') << "Vcr(t)";
+    output << std::left << std::setw(15) << setfill(' ') << "Vion(t)";
     output << std::left << std::setw(15) << setfill(' ') << "Rdot(t)";
     output << std::left << std::setw(15) << setfill(' ') << "P(t)";
     output << std::left << std::setw(15) << setfill(' ') << "dP(t, t+dt)";
@@ -3268,6 +3272,7 @@ StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
       output << std::left << std::setw(15) << m_voltageCurve(time);
       output << std::left << std::setw(15) << m_maxK[i].second;
       output << std::left << std::setw(15) << m_criticalVolume[i].second;
+      output << std::left << std::setw(15) << m_ionizationVolumeTransient[i].second;
       output << std::left << std::setw(15) << m_Rdot[i].second;
       output << std::left << std::setw(15) << m_inceptionProbability[i].second;
       output << std::left << std::setw(15) << dProb[i];
