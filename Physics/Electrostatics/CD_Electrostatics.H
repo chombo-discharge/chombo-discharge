@@ -16,7 +16,8 @@ namespace Physics {
   /*!
     @brief Namespace for encapsulating physics code for electrostatic problems
   */
-  namespace Electrostatics {}
+  namespace Electrostatics {
+  }
 
 } // namespace Physics
 

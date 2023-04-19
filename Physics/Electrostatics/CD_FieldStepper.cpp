@@ -15,7 +15,8 @@
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
-  namespace Electrostatics {}
+  namespace Electrostatics {
+  }
 } // namespace Physics
 
 #include <CD_NamespaceFooter.H>

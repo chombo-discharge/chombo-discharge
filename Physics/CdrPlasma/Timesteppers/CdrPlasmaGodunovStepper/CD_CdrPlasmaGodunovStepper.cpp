@@ -768,7 +768,7 @@ CdrPlasmaGodunovStepper::extrapolateCdrToEB()
   //       will later fetch these quantities and pass them into our boundary condition routines.
 
   Vector<EBAMRCellData*>
-    cdrDensities; // Cell-centered densities used when extrapolating to EBs and domains when parsing boundary conditions.
+                         cdrDensities; // Cell-centered densities used when extrapolating to EBs and domains when parsing boundary conditions.
   Vector<EBAMRCellData*> cdrGradients;   // Gradient of cell-centered densities
   Vector<EBAMRIVData*>   cdrDensitiesEB; // Extrapolation of cdrDensities to the EB
   Vector<EBAMRIVData*>   cdrGradientsEB; // Extrapolation of cdrGradients to the EB
