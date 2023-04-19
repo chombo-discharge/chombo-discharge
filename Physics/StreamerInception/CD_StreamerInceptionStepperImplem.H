@@ -1698,6 +1698,7 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
     this->computeInceptionIntegralStationary();
     this->computeInceptionVoltageVolume();
     this->computeCriticalVolumeStationary();
+    this->computeIonizationVolumeStationary();
     this->computeRdotStationary();
 
     // Compute background ionization and field emission on the mesh. Mostly for plotting.
