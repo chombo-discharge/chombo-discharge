@@ -553,6 +553,11 @@ namespace Physics {
       Real m_endTime;
 
       /*!
+	@brief previous time step
+      */
+      Real m_prevDt{0.0};
+
+      /*!
 	@brief Variable step size for K-integration algorithm (factor of dx)
       */
       Real m_relativeInceptionStep;

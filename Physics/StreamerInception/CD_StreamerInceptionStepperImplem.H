@@ -1060,23 +1060,21 @@ StreamerInceptionStepper<P, F, C>::computeDt()
     auto computeGradient = [this](const Real& a_timeStep) {
       return (m_voltageCurve(m_time + a_timeStep) - m_voltageCurve(m_time)) / a_timeStep;
     };
-    Real       prevDt       = m_minDt;
-    Real       currDt       = 2 * m_minDt;
-    Real       currGradient = computeGradient(currDt);
-    const Real currVoltage  = m_voltageCurve(m_time);
-    Real       deltaV       = currGradient * currDt;
-    while (std::abs(deltaV) <= std::abs(m_deltaVPercent * currVoltage) && (m_time + currDt) < m_endTime) {
-      prevDt = currDt;
-      currDt += m_minDt;
-      currGradient = computeGradient(currDt);
-      deltaV       = currGradient * currDt;
+    Real       currGradient = computeGradient(m_prevDt);
+    while(currGradient == 0){
+      m_prevDt += m_minDt;
+      currGradient = computeGradient(m_prevDt);
     }
-    dt = prevDt;
-
+    Real currVoltage  = m_voltageCurve(m_time);
+    if(currVoltage == 0){
+      currVoltage = m_voltageCurve(m_time+m_prevDt);
+    }
+    dt = std::abs(m_deltaVPercent*currVoltage/currGradient);
+    
     dt = std::min(dt, m_maxDt);
     dt = std::max(dt, m_minDt);
   }
-
+  m_prevDt = dt;
   return dt;
 }
 
