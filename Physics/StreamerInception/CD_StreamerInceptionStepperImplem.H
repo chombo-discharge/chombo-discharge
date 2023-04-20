@@ -1060,6 +1060,9 @@ StreamerInceptionStepper<P, F, C>::computeDt()
     auto computeGradient = [this](const Real& a_timeStep) {
       return (m_voltageCurve(m_time + a_timeStep) - m_voltageCurve(m_time)) / a_timeStep;
     };
+    if(m_prevDt == 0){
+      m_prevDt = m_minDt;
+    }
     Real       currGradient = computeGradient(m_prevDt);
     while(currGradient == 0){
       m_prevDt += m_minDt;
