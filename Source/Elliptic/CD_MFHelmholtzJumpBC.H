@@ -153,6 +153,18 @@ public:
   getMultiPhaseVofs(const int a_phase, const DataIndex& a_dit) const;
 
   /*!
+    @brief Get stencils for computing dphi/dn at the boundary
+  */
+  virtual const LayoutData<MFInterfaceFAB<VoFStencil>>&
+  getGradPhiStencils() const noexcept;
+
+  /*!
+    @brief Get constant weights involved when computing dphi/dn at the boundary
+  */
+  virtual const LayoutData<MFInterfaceFAB<Real>>&
+  getGradPhiWeights() const noexcept;
+
+  /*!
     @brief Set everything to zero. This is a debugging function.
   */
   virtual void

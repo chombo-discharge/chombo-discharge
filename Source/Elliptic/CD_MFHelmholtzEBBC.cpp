@@ -76,58 +76,19 @@ MFHelmholtzEBBC::defineMultiPhase()
     weights.define(ivs, ebgraph, m_nComp);
     stencils.define(ivs, ebgraph, m_nComp);
 
+    const BaseIVFAB<VoFStencil>& jumpStencils = (m_jumpBC->getGradPhiStencils())[dit()].getIVFAB(m_phase);
+    const BaseIVFAB<Real>&       jumpWeights  = (m_jumpBC->getGradPhiWeights())[dit()].getIVFAB(m_phase);
+
     // Build stencils for each vof. The order for the multiphase VoFs should follow the order for jumpBC, I think.
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
       const int  weight   = m_jumpBC->getWeight();
 
-      int                         order;
-      bool                        foundStencil = false;
-      std::pair<Real, VoFStencil> pairSten;
+      weights(vof, m_comp)  = jumpWeights(vof, m_comp);
+      stencils(vof, m_comp) = jumpStencils(vof, m_comp);
 
-      // Try quadrants first.
-      order = m_jumpBC->getOrder();
-      while (!foundStencil && order > 0) {
-        foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
-                                                                vof,
-                                                                VofUtils::Neighborhood::Quadrant,
-                                                                dit(),
-                                                                order,
-                                                                weight);
-        order--;
-
-        // Check if stencil reaches too far across CF
-        if (foundStencil) {
-          foundStencil = this->isStencilValidCF(pairSten.second, dit());
-        }
-      }
-
-      // If we couldn't find in a quadrant, try a larger neighborhood
-      order = m_jumpBC->getOrder();
-      while (!foundStencil && order > 0) {
-        foundStencil =
-          this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order, weight);
-        order--;
-
-        // Check if stencil reaches too far across CF
-        if (foundStencil) {
-          foundStencil = this->isStencilValidCF(pairSten.second, dit());
-        }
-      }
-
-      if (foundStencil) {
-        weights(vof, m_comp)  = pairSten.first;
-        stencils(vof, m_comp) = pairSten.second;
-
-        // Stencil and weight must also be scaled by the B-coefficient, dx (because it's used in kappa*Div(F)) and the area fraction.
-        weights(vof, m_comp) *= areaFrac / m_dx;
-        stencils(vof, m_comp) *= areaFrac / m_dx;
-      }
-      else {
-        // Dead cell. No flux.
-        weights(vof, m_comp) = 0.0;
-        stencils(vof, m_comp).clear();
-      }
+      weights(vof, m_comp) *= areaFrac / m_dx;
+      stencils(vof, m_comp) *= areaFrac / m_dx;
     };
 
     BoxLoops::loop(multiPhaseVofs, kernel);
@@ -163,11 +124,10 @@ MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator&           a_multiPhaseVofs,
                                        const Real&            a_beta,
                                        const bool&            a_homogeneousPhysBC) const
 {
-  CH_TIME("MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
+  CH_TIME("MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFtIerator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
-
   auto kernel = [&](const VolIndex& vof) -> void {
     // Homogeneous contribution
     const Real phiB  = m_jumpBC->getBndryPhi(m_phase, a_dit)(vof, m_comp);

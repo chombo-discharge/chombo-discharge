@@ -87,6 +87,18 @@ MFHelmholtzJumpBC::getMultiPhaseVofs(const int a_phase, const DataIndex& a_dit) 
   return (*m_multiPhaseVofs.at(a_phase))[a_dit];
 }
 
+const LayoutData<MFInterfaceFAB<VoFStencil>>&
+MFHelmholtzJumpBC::getGradPhiStencils() const noexcept
+{
+  return m_gradPhiStencils;
+}
+
+const LayoutData<MFInterfaceFAB<Real>>&
+MFHelmholtzJumpBC::getGradPhiWeights() const noexcept
+{
+  return m_gradPhiWeights;
+}
+
 void
 MFHelmholtzJumpBC::setBco(const RefCountedPtr<LevelData<MFBaseIVFAB>>& a_Bcoef)
 {
