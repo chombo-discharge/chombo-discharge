@@ -1108,12 +1108,14 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
     this->seedIonizationParticles(curVoltage);
     this->computeInceptionIntegralTransient(curVoltage);
 
-    // Compute the critical volume, the ionization volume and the electron appearance rate.
+    // Compute the critical volume, critical area, the ionization volume and the electron appearance rate.
     const Real Vcr  = this->computeCriticalVolumeTransient();
+    const Real Acr = this->computeCriticalAreaTransient();
     const Real Vion = this->computeIonizationVolumeTransient(curVoltage);
     const Real Rdot = this->computeRdot(curVoltage);
 
     m_criticalVolume.emplace_back(curTime, Vcr);
+    m_criticalArea.emplace_back(curTime, Acr);
     m_ionizationVolumeTransient.emplace_back(curTime, Vion);
     m_Rdot.emplace_back(curTime, Rdot);
 
@@ -1701,6 +1703,7 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
     this->computeInceptionIntegralStationary();
     this->computeInceptionVoltageVolume();
     this->computeCriticalVolumeStationary();
+    this->computeCriticalAreaStationary();
     this->computeIonizationVolumeStationary();
     this->computeRdotStationary();
 
@@ -1738,6 +1741,7 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
 
     m_Rdot.emplace_back(m_time, this->computeRdot(m_voltageCurve(m_time)));
     m_criticalVolume.emplace_back(m_time, this->computeCriticalVolumeTransient());
+    m_criticalArea.emplace_back(m_time, this->computeCriticalAreaTransient());
     m_ionizationVolumeTransient.emplace_back(m_time, this->computeIonizationVolumeTransient(m_voltageCurve(m_time)));
     m_inceptionProbability.emplace_back(m_time, 0.0);
     m_maxK.emplace_back(m_time, maxK);
@@ -2899,6 +2903,126 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeTransient() const noexce
   return ParallelOps::sum(Vcr);
 }
 
+template<typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::computeCriticalAreaStationary() noexcept {
+  CH_TIME("StreamerInceptionStepper::computeCriticalAreaStationary");
+  if(m_verbosity > 5){
+    pout() << "StreamerInceptionStepper::computeCriticalAreaStationary" << endl;
+  }
+
+  // Solve critical area of K values for each voltage
+  for (size_t i = 0; i < m_voltageSweeps.size(); ++i){
+    Real criticalAreaPlus = 0.0;
+    Real criticalAreaMinu = 0.0;
+
+    for(int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl){
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+
+      const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
+
+      const Real dx = m_amr->getDx()[lvl];
+
+      for(DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const EBISBox& ebisbox = ebisl[dit()];
+	const BaseFab<bool>& validCells = validCellsLD[dit()];
+
+	const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
+	const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
+
+	const FArrayBox& inceptionIntegralPlusReg = inceptionIntegralPlus.getFArrayBox();
+	const FArrayBox& inceptionIntegralMinuReg = inceptionIntegralMinu.getFArrayBox();
+
+	auto regularKernel = [&] (const IntVect& iv) -> void{
+	  if(validCells(iv, 0) && ebisbox.isRegular(iv)){
+	    if(inceptionIntegralPlusReg(iv, i) >= m_inceptionK){
+	      criticalAreaPlus += std::pow(dx, SpaceDim-1);
+	    }
+	    if(inceptionIntegralMinuReg(iv, i) >=m_inceptionK){
+	      criticalAreaMinu += std::pow(dx, SpaceDim-1);
+	    }
+	  }
+	};
+
+	auto irregularKernel = [&] (const VolIndex& vof) -> void{
+	  if(validCells(vof.gridIndex())){
+	    const Real kappa = ebisbox.volFrac(vof);
+
+	    if(inceptionIntegralPlus(vof, i) >= m_inceptionK){
+	      criticalAreaPlus += kappa * std::pow(dx, SpaceDim-1);
+	    }
+	    if(inceptionIntegralMinu(vof, i) >= m_inceptionK){
+	      criticalAreaMinu += kappa * std::pow(dx, SpaceDim-1);
+	    }
+	  }
+	};
+
+	// Kernel regions.
+	const Box cellBox = dbl[dit()];
+	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+	BoxLoops::loop(cellBox, regularKernel);
+	BoxLoops::loop(vofit, irregularKernel);
+      }
+    }
+
+    m_criticalAreaPlus.push_back(ParallelOps::sum(criticalAreaPlus));
+    m_criticalAreaMinu.push_back(ParallelOps::sum(criticalAreaMinu));
+  }
+}
+
+template <typename P, typename F, typename C>
+Real
+StreamerInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcept{
+  CH_TIME("StreamerInceptionStepper::computeCriticalAreaTransient");
+  if(m_verbosity > 5){
+    pout() << "StreamerInceptionStepper::computeCriticalAreaTransient" << endl;
+  }
+  
+  Real Acr = 0.0;
+
+  for(int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+
+    const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
+
+    const Real dx = m_amr->getDx()[lvl];
+    const Real area = std::pow(dx, SpaceDim-1);
+
+    for(DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const EBISBox& ebisbox = ebisl[dit()];
+      const BaseFab<bool>& validCells = validCellsLD[dit()];
+
+      const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[dit()];
+      const FArrayBox& inceptionIntegralReg = inceptionIntegral.getFArrayBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void{
+	if(validCells(iv, 0) && ebisbox.isRegular(iv)){
+	  if(inceptionIntegralReg(iv, 0) >= m_inceptionK){
+	    Acr += area;
+	  }
+	}
+      };
+      auto irregularKernel = [&] (const VolIndex& vof) -> void{
+	if(validCells(vof.gridIndex()) && inceptionIntegral(vof, 0) >= m_inceptionK){
+	  Acr += ebisbox.volFrac(vof) * area;
+	}
+      };
+
+      // Kernel regions.
+      const Box cellBox = dbl[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+  
+  return ParallelOps::sum(Acr);
+}
+
 template <typename P, typename F, typename C>
 void
 StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
@@ -3209,6 +3333,8 @@ StreamerInceptionStepper<P, F, C>::writeReportStationary() const noexcept
     output << left << setw(15) << setfill(' ') << "Max K(-)";
     output << left << setw(20) << setfill(' ') << "Crit. vol(+)";
     output << left << setw(20) << setfill(' ') << "Crit. vol(-)";
+    output << left << setw(20) << setfill(' ') << "Crit. area(+)";
+    output << left << setw(20) << setfill(' ') << "Crit. area(-)";
     output << left << setw(20) << setfill(' ') << "Ionization vol.";
     output << left << setw(20) << setfill(' ') << "Rdot (+)";
     output << left << setw(20) << setfill(' ') << "Rdot (-)" << "\n";
@@ -3220,6 +3346,8 @@ StreamerInceptionStepper<P, F, C>::writeReportStationary() const noexcept
       output << left << setw(15) << setfill(' ') << m_maxKMinu[i];
       output << left << setw(20) << setfill(' ') << m_criticalVolumePlus[i];
       output << left << setw(20) << setfill(' ') << m_criticalVolumeMinu[i];
+      output << left << setw(20) << setfill(' ') << m_criticalAreaPlus[i];
+      output << left << setw(20) << setfill(' ') << m_criticalAreaMinu[i];
       output << left << setw(20) << setfill(' ') << m_ionizationVolume[i];
       output << left << setw(20) << setfill(' ') << m_RdotPlus[i];
       output << left << setw(20) << setfill(' ') << m_RdotMinu[i];
@@ -3250,6 +3378,7 @@ StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
     output << std::left << std::setw(15) << setfill(' ') << "V(t)";
     output << std::left << std::setw(15) << setfill(' ') << "max K(t)";
     output << std::left << std::setw(15) << setfill(' ') << "Vcr(t)";
+    output << std::left << std::setw(15) << setfill(' ') << "Acr(t)";
     output << std::left << std::setw(15) << setfill(' ') << "Vion(t)";
     output << std::left << std::setw(15) << setfill(' ') << "Rdot(t)";
     output << std::left << std::setw(15) << setfill(' ') << "P(t)";
@@ -3273,6 +3402,7 @@ StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
       output << std::left << std::setw(15) << m_voltageCurve(time);
       output << std::left << std::setw(15) << m_maxK[i].second;
       output << std::left << std::setw(15) << m_criticalVolume[i].second;
+      output << std::left << std::setw(15) << m_criticalArea[i].second;
       output << std::left << std::setw(15) << m_ionizationVolumeTransient[i].second;
       output << std::left << std::setw(15) << m_Rdot[i].second;
       output << std::left << std::setw(15) << m_inceptionProbability[i].second;

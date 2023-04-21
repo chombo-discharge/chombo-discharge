@@ -481,6 +481,18 @@ namespace Physics {
       std::vector<Real> m_criticalVolumeMinu;
 
       /*!
+	@brief Critical area of K values for each voltage
+	@note Stationary mode, positive polarity
+      */
+      std::vector<Real> m_criticalAreaPlus;
+
+      /*!
+	@brief Critical area of K values for each voltage
+	@note Stationary mode, negative polarity
+      */
+      std::vector<Real> m_criticalAreaMinu;
+
+      /*!
 	@brief Ionization volumes for each voltage
 	@note Stationary mode
       */
@@ -522,6 +534,12 @@ namespace Physics {
 	@details First parameter is time, second parameter is the critical volume. 
       */
       std::vector<std::pair<Real, Real>> m_criticalVolume;
+
+      /*!
+	@brief Critical area at various time instances. 
+	@details First parameter is time, second parameter is the critical area. 
+      */
+      std::vector<std::pair<Real, Real>> m_criticalArea;
 
       /*!
 	@brief Ionization volume at various time instances.
@@ -841,6 +859,20 @@ namespace Physics {
       virtual Real
       computeCriticalVolumeTransient() const noexcept;
 
+      /*!
+	@brief Compute the critical area of the K values for each voltage
+	@note For the stationary method
+      */
+      virtual void
+      computeCriticalAreaStationary() noexcept;
+
+      /*!
+	@brief Compute the critical area of the K values for each voltage
+	@note For the transient method
+      */
+      virtual Real
+      computeCriticalAreaTransient() const noexcept;
+      
       /*!
 	@brief Compute the ionization volume for each voltage
 	@note For the stationary method
