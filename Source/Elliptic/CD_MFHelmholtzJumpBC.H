@@ -228,6 +228,11 @@ protected:
   int m_numPhases;
 
   /*!
+    @brief Number of ghost cells in phi (must be exact match in order to use AggStencil)
+  */
+  IntVect m_ghostPhi;
+
+  /*!
     @brief Multiphase or not
   */
   bool m_multiPhase;

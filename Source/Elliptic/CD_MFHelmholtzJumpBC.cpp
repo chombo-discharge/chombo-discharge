@@ -49,6 +49,9 @@ MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
   m_numPhases    = m_mflg.numPhases();
   m_multiPhase   = m_numPhases > 1;
 
+  m_ghostPhi = 2 * IntVect::Unit;
+  MayDay::Warning("MFHelmholtzJumpBC -- must get number of ghost cells for using AggStencil properly");
+
   this->defineIterators();
   this->defineStencils();
 }
@@ -317,11 +320,7 @@ MFHelmholtzJumpBC::buildAverageStencils()
     aggStencils.define(dbl);
 
     // Some dummy data for the stencils.
-    EBCellFactory       cellFact(ebisl);
-    BaseIVFactory<Real> irregFact(ebisl);
-
-    LevelData<EBCellFAB>       phiProxy(dbl, 1, 2 * IntVect::Unit, cellFact);
-    LevelData<BaseIVFAB<Real>> jumpProxy(dbl, 1, IntVect::Zero, irregFact);
+    LevelData<EBCellFAB> phiProxy(dbl, 1, m_ghostPhi, EBCellFactory(ebisl));
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
       const EBISBox& ebisbox = ebisl[dit()];
@@ -342,7 +341,7 @@ MFHelmholtzJumpBC::buildAverageStencils()
       BoxLoops::loop(vofit, kernel);
 
       aggStencils[dit()] = RefCountedPtr<AggStencil<EBCellFAB, BaseIVFAB<Real>>>(
-        new AggStencil(dstBaseIndex, dstBaseStencil, phiProxy[dit()], jumpProxy[dit()]));
+        new AggStencil(dstBaseIndex, dstBaseStencil, phiProxy[dit()], m_boundaryPhi[dit()].getIVFAB(iphase)));
     }
   }
 }
@@ -472,11 +471,11 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
   CH_assert(m_multiPhase);
 
   CH_TIMERS("MFHelmholtzJumpBC::matchBC(patch)");
-  CH_TIMER("one", t1);
-  CH_TIMER("two", t2);
-  CH_TIMER("three", t3);
-  CH_TIMER("four", t4);
-  CH_TIMER("five", t5);
+  CH_TIMER("Setup", t1);
+  CH_TIMER("Apply stencils", t2);
+  CH_TIMER("Get vofs", t3);
+  CH_TIMER("Compute jump", t4);
+  CH_TIMER("Compute phiBndry", t5);
 
   // TLDR: This routine computes the boundary value of phi from an expression b1*dphi/dn1 + b2*dphi/dn2 = sigma, where dphi/dn can be represented as
   //
@@ -487,7 +486,7 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
   //           phiB = sigma/(b1*w1 + b2*w2) - b1*sum[w1(i) * phi1(i)]/(b1*w1 + b2*w2) - b2*sum[w2(i) * phi2(i)]/(b1*w1 + b2*w2).
   //
   //       Because I'm not crazy, I have stored the term 1/(b1*w1 + b2*w2) in m_denom so we can just multiply it in when we need it. Moreover,
-  //       this term has already been multiplied into the stencil weights, which is the reason why we only do applyStencil below (without dividing
+  //       this term has already been multiplied into the stencil weights, which is the reason why we only do the stencil apply below (without dividing
   //       by the above factor).
 
   CH_START(t1);
@@ -509,26 +508,28 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
 
   const BaseIVFAB<Real>& denomFactorPhase0 = m_denom[a_dit].getIVFAB(firstPhase);
   const BaseIVFAB<Real>& denomFactorPhase1 = m_denom[a_dit].getIVFAB(secondPhase);
+
+  const AggStencil<EBCellFAB, BaseIVFAB<Real>>& aggSten0 = *m_aggStencils[firstPhase][a_dit];
+  const AggStencil<EBCellFAB, BaseIVFAB<Real>>& aggSten1 = *m_aggStencils[secondPhase][a_dit];
   CH_STOP(t1);
 
-  for (IVSIterator ivsIt(m_ivs[a_dit]); ivsIt.ok(); ++ivsIt) {
-    CH_START(t2);
-    const IntVect iv = ivsIt();
+  CH_START(t2);
+  aggSten0.apply(bndryPhiPhase0, phiPhase0, 0, false);
+  aggSten1.apply(bndryPhiPhase1, phiPhase1, 0, false);
+  CH_STOP(t2);
 
+  for (IVSIterator ivsIt(m_ivs[a_dit]); ivsIt.ok(); ++ivsIt) {
+    CH_START(t3);
+    const IntVect  iv   = ivsIt();
     const VolIndex vof0 = VolIndex(iv, vofComp);
 
     Vector<VolIndex> vofsPhase0 = ebisBoxPhase0.getVoFs(iv);
     Vector<VolIndex> vofsPhase1 = ebisBoxPhase1.getVoFs(iv);
 
-    const VoFStencil& derivStenPhase0 = avgStencilsPhase0(vof0, vofComp);
-    const VoFStencil& derivStenPhase1 = avgStencilsPhase1(vof0, vofComp);
-
     const Real& denomPhase0 = denomFactorPhase0(vof0, vofComp);
-    const Real& denomPhase1 = denomFactorPhase1(vof0, vofComp);
-    CH_STOP(t2);
+    CH_STOP(t3);
 
-    // Compute the average jump.
-    CH_START(t3);
+    CH_START(t4);
     Real jump = 0.0;
     if (!a_homogeneousPhysBC) {
       for (const auto& v : vofsPhase0.stdVector()) {
@@ -536,22 +537,25 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
       }
       jump *= 1. / vofsPhase0.size();
     }
-    CH_START(t3);
-
-    // Do the matching
-    CH_START(t4);
-    const Real contribPhase0 = this->applyStencil(derivStenPhase0, phiPhase0);
-    const Real contribPhase1 = this->applyStencil(derivStenPhase1, phiPhase1);
-    const Real phiBndry      = denomPhase0 * jump - (contribPhase0 + contribPhase1);
     CH_STOP(t4);
 
     CH_START(t5);
     for (const auto& v : vofsPhase0.stdVector()) {
-      bndryPhiPhase0(v, m_comp) = phiBndry;
+      bndryPhiPhase0(v, m_comp) += bndryPhiPhase1(vof0, m_comp);
     }
     for (const auto& v : vofsPhase1.stdVector()) {
-      bndryPhiPhase1(v, m_comp) = phiBndry;
+      bndryPhiPhase1(v, m_comp) = bndryPhiPhase0(vof0, m_comp);
     }
+
+    for (const auto& v : vofsPhase0.stdVector()) {
+      bndryPhiPhase0(v, m_comp) *= -1.0;
+      bndryPhiPhase0(v, m_comp) += denomPhase0 * jump;
+    }
+    for (const auto& v : vofsPhase1.stdVector()) {
+      bndryPhiPhase1(v, m_comp) *= -1.0;
+      bndryPhiPhase1(v, m_comp) += denomPhase0 * jump;
+    }
+
     CH_STOP(t5);
   }
 }
