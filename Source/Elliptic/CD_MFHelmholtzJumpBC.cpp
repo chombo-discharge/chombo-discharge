@@ -51,9 +51,6 @@ MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
   m_multiPhase   = m_numPhases > 1;
   m_ghostPhi     = a_ghostPhi;
 
-  MayDay::Warning("MFHelmholtzJumpBC -- should store target vofs for average jump calc");
-  MayDay::Warning("MFHelmholtzJumpBC -- check if we can trim exchange operation");
-
   this->defineIterators();
   this->defineStencils();
 }
