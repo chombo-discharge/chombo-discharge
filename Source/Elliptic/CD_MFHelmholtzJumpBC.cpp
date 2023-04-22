@@ -30,7 +30,8 @@ MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
                                      const int            a_order,
                                      const int            a_weight,
                                      const int            a_radius,
-                                     const int            a_ghostCF)
+                                     const int            a_ghostCF,
+                                     const IntVect        a_ghostPhi)
 {
   CH_TIME("MFHelmholtzJumpBC::MFHelmholtzJumpBC");
 
@@ -48,9 +49,8 @@ MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
   m_ghostCF      = a_ghostCF;
   m_numPhases    = m_mflg.numPhases();
   m_multiPhase   = m_numPhases > 1;
+  m_ghostPhi     = a_ghostPhi;
 
-  m_ghostPhi = 2 * IntVect::Unit;
-  MayDay::Warning("MFHelmholtzJumpBC -- must get number of ghost cells for using AggStencil properly");
   MayDay::Warning("MFHelmholtzJumpBC -- should store target vofs for average jump calc");
   MayDay::Warning("MFHelmholtzJumpBC -- check if we can trim exchange operation");
 
@@ -140,6 +140,7 @@ MFHelmholtzJumpBC::defineStencils()
     m_boundaryPhi.define(dbl);
     m_avgStencils.define(dbl);
     m_avgWeights.define(dbl);
+    m_avgVoFs.define(dbl);
     m_denom.define(dbl);
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
@@ -151,6 +152,7 @@ MFHelmholtzJumpBC::defineStencils()
       m_avgStencils[dit()].define(m_mflg, dit());
       m_avgWeights[dit()].define(m_mflg, dit());
       m_denom[dit()].define(m_mflg, dit());
+      m_avgVoFs[dit()].define(m_mflg, dit());
     }
 
     // Build stencils and weights for each phase.
@@ -165,8 +167,8 @@ MFHelmholtzJumpBC::defineStencils()
         const IntVectSet& ivs     = m_ivs[dit()];
 
         // Build stencils like we always do
-        BaseIVFAB<VoFStencil>& gradStencils = m_gradPhiStencils[dit()].getIVFAB(iphase); //(ivs, ebgraph, m_nComp);
-        BaseIVFAB<Real>&       bndryWeights = m_gradPhiWeights[dit()].getIVFAB(iphase);  //(ivs, ebgraph, m_nComp);
+        BaseIVFAB<VoFStencil>& gradStencils = m_gradPhiStencils[dit()].getIVFAB(iphase);
+        BaseIVFAB<Real>&       bndryWeights = m_gradPhiWeights[dit()].getIVFAB(iphase);
 
         // Iteration space for kernel
         VoFIterator vofit(ivs, ebgraph);
@@ -247,9 +249,10 @@ MFHelmholtzJumpBC::buildAverageStencils()
       const BaseIVFAB<Real>&       bndryWeights = m_gradPhiWeights[dit()].getIVFAB(iphase);
 
       // Build the average stencils. Only matters if the cell is a multi-valued cell.
-      BaseIVFAB<VoFStencil>& avgStencils = m_avgStencils[dit()].getIVFAB(iphase);
-      BaseIVFAB<Real>&       avgWeights  = m_avgWeights[dit()].getIVFAB(iphase);
-      const BaseIVFAB<Real>& Bcoef       = (*m_Bcoef)[dit()].getIVFAB(iphase);
+      BaseIVFAB<VoFStencil>&       avgStencils = m_avgStencils[dit()].getIVFAB(iphase);
+      BaseIVFAB<Real>&             avgWeights  = m_avgWeights[dit()].getIVFAB(iphase);
+      BaseIVFAB<Vector<VolIndex>>& avgVoFs     = m_avgVoFs[dit()].getIVFAB(iphase);
+      const BaseIVFAB<Real>&       Bcoef       = (*m_Bcoef)[dit()].getIVFAB(iphase);
 
       for (IVSIterator ivsIt(ivs); ivsIt.ok(); ++ivsIt) {
         const IntVect iv = ivsIt();
@@ -257,11 +260,13 @@ MFHelmholtzJumpBC::buildAverageStencils()
         const VolIndex         curVof(iv, 0);
         const Vector<VolIndex> allVofs = ebisbox.getVoFs(iv);
 
-        Real&       curWeight  = avgWeights(curVof, m_comp);
-        VoFStencil& curStencil = avgStencils(curVof, m_comp);
+        Real&             curWeight  = avgWeights(curVof, m_comp);
+        VoFStencil&       curStencil = avgStencils(curVof, m_comp);
+        Vector<VolIndex>& curVoFs    = avgVoFs(curVof, m_comp);
 
         curWeight = 0.0;
         curStencil.clear();
+        curVoFs = allVofs;
 
         Real avgBco = 0.0;
         for (int ivof = 0; ivof < allVofs.size(); ivof++) {
@@ -511,6 +516,9 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
   const BaseIVFAB<Real>& denomFactorPhase0 = m_denom[a_dit].getIVFAB(firstPhase);
   const BaseIVFAB<Real>& denomFactorPhase1 = m_denom[a_dit].getIVFAB(secondPhase);
 
+  const BaseIVFAB<Vector<VolIndex>>& avgVoFsPhase0 = m_avgVoFs[a_dit].getIVFAB(firstPhase);
+  const BaseIVFAB<Vector<VolIndex>>& avgVoFsPhase1 = m_avgVoFs[a_dit].getIVFAB(secondPhase);
+
   const AggStencil<EBCellFAB, BaseIVFAB<Real>>& aggSten0 = *m_aggStencils[firstPhase][a_dit];
   const AggStencil<EBCellFAB, BaseIVFAB<Real>>& aggSten1 = *m_aggStencils[secondPhase][a_dit];
   CH_STOP(t1);
@@ -525,13 +533,12 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
     const IntVect  iv   = ivsIt();
     const VolIndex vof0 = VolIndex(iv, vofComp);
 
-    Vector<VolIndex> vofsPhase0 = ebisBoxPhase0.getVoFs(iv);
-    Vector<VolIndex> vofsPhase1 = ebisBoxPhase1.getVoFs(iv);
+    const Vector<VolIndex>& vofsPhase0 = avgVoFsPhase0(vof0, vofComp);
+    const Vector<VolIndex>& vofsPhase1 = avgVoFsPhase1(vof0, vofComp);
     CH_STOP(t3);
 
     CH_START(t4);
     const Real& denomPhase0 = denomFactorPhase0(vof0, vofComp);
-
 
     Real jump = 0.0;
     if (!a_homogeneousPhysBC) {
@@ -543,20 +550,20 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
     CH_STOP(t4);
 
     CH_START(t5);
-    for (const auto& v : vofsPhase0.stdVector()) {
-      bndryPhiPhase0(v, m_comp) += bndryPhiPhase1(vof0, m_comp);
+    for (int i = 0; i < vofsPhase0.size(); i++) {
+      bndryPhiPhase0(vofsPhase0[i], m_comp) += bndryPhiPhase1(vof0, m_comp);
     }
-    for (const auto& v : vofsPhase1.stdVector()) {
-      bndryPhiPhase1(v, m_comp) = bndryPhiPhase0(vof0, m_comp);
+    for (int i = 0; i < vofsPhase1.size(); i++) {
+      bndryPhiPhase1(vofsPhase1[i], m_comp) = bndryPhiPhase0(vof0, m_comp);
     }
 
-    for (const auto& v : vofsPhase0.stdVector()) {
-      bndryPhiPhase0(v, m_comp) *= -1.0;
-      bndryPhiPhase0(v, m_comp) += denomPhase0 * jump;
+    for (int i = 0; i < vofsPhase0.size(); i++) {
+      bndryPhiPhase0(vofsPhase0[i], m_comp) *= -1.0;
+      bndryPhiPhase0(vofsPhase0[i], m_comp) += denomPhase0 * jump;
     }
-    for (const auto& v : vofsPhase1.stdVector()) {
-      bndryPhiPhase1(v, m_comp) *= -1.0;
-      bndryPhiPhase1(v, m_comp) += denomPhase0 * jump;
+    for (int i = 0; i < vofsPhase1.size(); i++) {
+      bndryPhiPhase1(vofsPhase1[i], m_comp) *= -1.0;
+      bndryPhiPhase1(vofsPhase1[i], m_comp) += denomPhase0 * jump;
     }
 
     CH_STOP(t5);

@@ -59,6 +59,7 @@ public:
     @param[in] a_weight       Weighting factor for least squares
     @param[in] a_radius       Stencil radius
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
+    @param[in] a_ghostPhi     Number of ghost cells in phi (needed for AggStencil)
   */
   MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
                     const MFLevelGrid&   a_mflg,
@@ -67,7 +68,8 @@ public:
                     const int            a_order,
                     const int            a_weight,
                     const int            a_radius,
-                    const int            a_ghostCF);
+                    const int            a_ghostCF,
+                    const IntVect        a_ghostPhi);
 
   /*!
     @brief Disallowed copy constructor
@@ -271,6 +273,11 @@ protected:
     @brief Average stencil
   */
   LayoutData<MFInterfaceFAB<VoFStencil>> m_avgStencils;
+
+  /*!
+    @brief Target vofs for average stencils
+  */
+  LayoutData<MFInterfaceFAB<Vector<VolIndex>>> m_avgVoFs;
 
   /*!
     @brief Denominator 1/(bp*wp + bq*wq) for all interface cells. 

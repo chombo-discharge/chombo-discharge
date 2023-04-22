@@ -91,8 +91,9 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 
   // Instantiate jump bc object.
   const int ghostCF = a_hasCoar ? a_interpolator.getGhostCF() : 1;
-  m_jumpBC          = a_jumpBcFactory
-               ->create(m_dataLocation, m_mflg, a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpWeight, a_jumpOrder, ghostCF);
+  m_jumpBC =
+    a_jumpBcFactory
+      ->create(m_dataLocation, m_mflg, a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpWeight, a_jumpOrder, ghostCF, a_ghostPhi);
 
   // Make the operators on eachphase.
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
