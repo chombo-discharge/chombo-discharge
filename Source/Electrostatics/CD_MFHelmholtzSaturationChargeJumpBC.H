@@ -48,7 +48,7 @@ public:
                                     const int                a_weight,
                                     const int                a_radius,
                                     const int                a_ghostCF,
-				    const IntVect            a_ghostPhi);
+                                    const IntVect            a_ghostPhi);
 
   /*!
     @brief Destructor (does nothing)
