@@ -51,6 +51,8 @@ MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
 
   m_ghostPhi = 2 * IntVect::Unit;
   MayDay::Warning("MFHelmholtzJumpBC -- must get number of ghost cells for using AggStencil properly");
+  MayDay::Warning("MFHelmholtzJumpBC -- should store target vofs for average jump calc");
+  MayDay::Warning("MFHelmholtzJumpBC -- check if we can trim exchange operation");
 
   this->defineIterators();
   this->defineStencils();
@@ -525,11 +527,12 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
 
     Vector<VolIndex> vofsPhase0 = ebisBoxPhase0.getVoFs(iv);
     Vector<VolIndex> vofsPhase1 = ebisBoxPhase1.getVoFs(iv);
-
-    const Real& denomPhase0 = denomFactorPhase0(vof0, vofComp);
     CH_STOP(t3);
 
     CH_START(t4);
+    const Real& denomPhase0 = denomFactorPhase0(vof0, vofComp);
+
+
     Real jump = 0.0;
     if (!a_homogeneousPhysBC) {
       for (const auto& v : vofsPhase0.stdVector()) {

@@ -1203,7 +1203,10 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&       a_Lphi,
                                 const DataIndex& a_dit,
                                 const bool       a_homogeneousPhysBC)
 {
-  CH_TIME("EBHelmholtzOp::applyOpIrregular(EBCellFAB, EBCellFAB, Box, DataIndex, bool)");
+  CH_TIMERS("EBHelmholtzOp::applyOpIrregular");
+  CH_TIMER("AggStencil", t1);  
+  CH_TIMER("EB flux", t2);
+  CH_TIMER("Boundary flux",t3);  
 
   // This routine computes L(phi) in a grid patch. This includes the cut-cell itself. Note that such cells can include cells that have both
   // an EB face and a domain face. This routine handles both.
@@ -1233,13 +1236,18 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&       a_Lphi,
   }
   m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, (*m_BcoefIrreg)[a_dit], a_dit, m_beta, a_homogeneousPhysBC);
 #else // New code that uses AggStencil.
+  CH_START(t1);
   constexpr bool incrementOnly = false;
 
   m_aggRelaxStencil[a_dit]->apply(a_Lphi, a_phi, m_alphaDiagWeight[a_dit], m_alpha, m_beta, m_comp, incrementOnly);
+  CH_STOP(t1);
+  CH_START(t2);
   m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, (*m_BcoefIrreg)[a_dit], a_dit, m_beta, a_homogeneousPhysBC);
+  CH_STOP(t2);  
 #endif
 
   // Do irregular faces on domain sides. This was not included in the stencils above. m_domainBc should give the centroid-centered flux so we don't do interpolations here.
+  CH_START(t3);
   for (int dir = 0; dir < SpaceDim; dir++) {
 
     // Iterators for high and low sides.
@@ -1263,6 +1271,7 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&       a_Lphi,
     BoxLoops::loop(vofitLo, kernelLo);
     BoxLoops::loop(vofitHi, kernelHi);
   }
+  CH_STOP(t3);  
 }
 
 void
