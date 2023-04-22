@@ -17,6 +17,7 @@
 #include <EBISBox.H>
 #include <LayoutData.H>
 #include <Stencils.H>
+#include <AggStencil.H>
 
 // Our includes
 #include <CD_Location.H>
@@ -275,6 +276,11 @@ protected:
     @brief Average weights
   */
   LayoutData<MFInterfaceFAB<Real>> m_avgWeights;
+
+  /*!
+    @brief Agg stencils for making matching go faster
+  */
+  LayoutData<RefCountedPtr<AggStencil<EBCellFAB, BaseIVFAB<Real>>>> m_aggStencils[2];
 
   /*!
     @brief Define function. Builds stencils. 

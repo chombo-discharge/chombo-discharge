@@ -9,6 +9,10 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <EBCellFactory.H>
+#include <BaseIVFactory.H>
+
 // Our includes
 #include <CD_MFHelmholtzJumpBC.H>
 #include <CD_VofUtils.H>
@@ -301,6 +305,44 @@ MFHelmholtzJumpBC::buildAverageStencils()
 
       derivStenPhase0 *= denom;
       derivStenPhase1 *= denom;
+    }
+  }
+
+  // Build the aggregate stencils for performance.
+  for (int iphase = 0; iphase < m_numPhases; iphase++) {
+    const EBLevelGrid& eblg  = m_mflg.getEBLevelGrid(iphase);
+    const EBISLayout&  ebisl = eblg.getEBISL();
+
+    LayoutData<RefCountedPtr<AggStencil<EBCellFAB, BaseIVFAB<Real>>>>& aggStencils = m_aggStencils[iphase];
+    aggStencils.define(dbl);
+
+    // Some dummy data for the stencils.
+    EBCellFactory       cellFact(ebisl);
+    BaseIVFactory<Real> irregFact(ebisl);
+
+    LevelData<EBCellFAB>       phiProxy(dbl, 1, 2 * IntVect::Unit, cellFact);
+    LevelData<BaseIVFAB<Real>> jumpProxy(dbl, 1, IntVect::Zero, irregFact);
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+      Vector<RefCountedPtr<BaseIndex>>   dstBaseIndex;
+      Vector<RefCountedPtr<BaseStencil>> dstBaseStencil;
+
+      auto kernel = [&](const VolIndex& vof) -> void {
+        const VoFStencil& stencil = (m_avgStencils[dit()].getIVFAB(iphase))(VolIndex(vof.gridIndex(), 0), 0);
+
+        dstBaseIndex.push_back(RefCountedPtr<BaseIndex>(new VolIndex(vof)));
+        dstBaseStencil.push_back(RefCountedPtr<BaseStencil>(new VoFStencil(stencil)));
+      };
+
+      VoFIterator vofit(m_ivs[dit()], ebgraph);
+
+      BoxLoops::loop(vofit, kernel);
+
+      aggStencils[dit()] = RefCountedPtr<AggStencil<EBCellFAB, BaseIVFAB<Real>>>(
+        new AggStencil(dstBaseIndex, dstBaseStencil, phiProxy[dit()], jumpProxy[dit()]));
     }
   }
 }
