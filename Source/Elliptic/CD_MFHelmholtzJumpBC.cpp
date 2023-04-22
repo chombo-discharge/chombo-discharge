@@ -345,7 +345,10 @@ MFHelmholtzJumpBC::buildAverageStencils()
       BoxLoops::loop(vofit, kernel);
 
       aggStencils[dit()] = RefCountedPtr<AggStencil<EBCellFAB, BaseIVFAB<Real>>>(
-        new AggStencil(dstBaseIndex, dstBaseStencil, phiProxy[dit()], m_boundaryPhi[dit()].getIVFAB(iphase)));
+        new AggStencil<EBCellFAB, BaseIVFAB<Real>>(dstBaseIndex,
+                                                   dstBaseStencil,
+                                                   phiProxy[dit()],
+                                                   m_boundaryPhi[dit()].getIVFAB(iphase)));
     }
   }
 }

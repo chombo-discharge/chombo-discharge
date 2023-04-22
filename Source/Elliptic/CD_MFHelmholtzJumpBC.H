@@ -18,6 +18,8 @@
 #include <LayoutData.H>
 #include <Stencils.H>
 #include <AggStencil.H>
+#include <EBCellFAB.H>
+#include <BaseIVFAB.H>
 
 // Our includes
 #include <CD_Location.H>
