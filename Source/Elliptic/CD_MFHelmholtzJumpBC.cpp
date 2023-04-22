@@ -542,8 +542,8 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
 
     Real jump = 0.0;
     if (!a_homogeneousPhysBC) {
-      for (const auto& v : vofsPhase0.stdVector()) {
-        jump += a_jump(v, m_comp);
+      for (int i = 0; i < vofsPhase0.size(); i++) {
+        jump += a_jump(vofsPhase0[i], m_comp);
       }
       jump *= 1. / vofsPhase0.size();
     }
@@ -552,18 +552,19 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
     CH_START(t5);
     for (int i = 0; i < vofsPhase0.size(); i++) {
       bndryPhiPhase0(vofsPhase0[i], m_comp) += bndryPhiPhase1(vof0, m_comp);
+      bndryPhiPhase0(vofsPhase0[i], m_comp) *= -1.0;
     }
     for (int i = 0; i < vofsPhase1.size(); i++) {
       bndryPhiPhase1(vofsPhase1[i], m_comp) = bndryPhiPhase0(vof0, m_comp);
     }
 
-    for (int i = 0; i < vofsPhase0.size(); i++) {
-      bndryPhiPhase0(vofsPhase0[i], m_comp) *= -1.0;
-      bndryPhiPhase0(vofsPhase0[i], m_comp) += denomPhase0 * jump;
-    }
-    for (int i = 0; i < vofsPhase1.size(); i++) {
-      bndryPhiPhase1(vofsPhase1[i], m_comp) *= -1.0;
-      bndryPhiPhase1(vofsPhase1[i], m_comp) += denomPhase0 * jump;
+    if (!a_homogeneousPhysBC) {
+      for (int i = 0; i < vofsPhase0.size(); i++) {
+        bndryPhiPhase0(vofsPhase0[i], m_comp) += denomPhase0 * jump;
+      }
+      for (int i = 0; i < vofsPhase1.size(); i++) {
+        bndryPhiPhase1(vofsPhase1[i], m_comp) += denomPhase0 * jump;
+      }
     }
 
     CH_STOP(t5);
