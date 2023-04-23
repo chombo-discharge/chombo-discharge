@@ -109,9 +109,9 @@ Public Member Functions</h2></td></tr>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBCFactory.html#a978d5770c56293d5c81c18900c9ca5fa">~MFHelmholtzJumpBCFactory</a> ()</td></tr>
 <tr class="memdesc:a978d5770c56293d5c81c18900c9ca5fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. <br /></td></tr>
 <tr class="separator:a978d5770c56293d5c81c18900c9ca5fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a066e450719c8b66916bc98e038439df0"><td class="memItemLeft" align="right" valign="top">virtual RefCountedPtr&lt; <a class="el" href="classMFHelmholtzJumpBC.html">MFHelmholtzJumpBC</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBCFactory.html#a066e450719c8b66916bc98e038439df0">create</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflg, const <a class="el" href="classMFHelmholtzJumpBCFactory.html#a6850045e2e7821d844989ef19ce9cf05">BcoefPtr</a> &amp;a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius, const int a_ghostCF)</td></tr>
-<tr class="memdesc:a066e450719c8b66916bc98e038439df0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory method for creating <a class="el" href="classMFHelmholtzJumpBC.html" title="Class for computing &quot;jump interface&quot; boundary conditions for multifluid code.">MFHelmholtzJumpBC</a> objects.  <a href="classMFHelmholtzJumpBCFactory.html#a066e450719c8b66916bc98e038439df0">More...</a><br /></td></tr>
-<tr class="separator:a066e450719c8b66916bc98e038439df0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bddf944d66be1b1be567c79d4e20f7d"><td class="memItemLeft" align="right" valign="top">virtual RefCountedPtr&lt; <a class="el" href="classMFHelmholtzJumpBC.html">MFHelmholtzJumpBC</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBCFactory.html#a1bddf944d66be1b1be567c79d4e20f7d">create</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflg, const <a class="el" href="classMFHelmholtzJumpBCFactory.html#a6850045e2e7821d844989ef19ce9cf05">BcoefPtr</a> &amp;a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius, const int a_ghostCF, const IntVect a_ghostPhi)</td></tr>
+<tr class="memdesc:a1bddf944d66be1b1be567c79d4e20f7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory method for creating <a class="el" href="classMFHelmholtzJumpBC.html" title="Class for computing &quot;jump interface&quot; boundary conditions for multifluid code.">MFHelmholtzJumpBC</a> objects.  <a href="classMFHelmholtzJumpBCFactory.html#a1bddf944d66be1b1be567c79d4e20f7d">More...</a><br /></td></tr>
+<tr class="separator:a1bddf944d66be1b1be567c79d4e20f7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab5615c25221efb81f32b78e598089e03"><td class="memItemLeft" align="right" valign="top"><a id="ab5615c25221efb81f32b78e598089e03"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBCFactory.html#ab5615c25221efb81f32b78e598089e03">setDomainDropOrder</a> (const int a_domainSize)</td></tr>
 <tr class="memdesc:ab5615c25221efb81f32b78e598089e03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this. <br /></td></tr>
@@ -127,8 +127,8 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Factory class for making jump boundary condition objects in a multifluid <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> context. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a066e450719c8b66916bc98e038439df0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a066e450719c8b66916bc98e038439df0">&#9670;&nbsp;</a></span>create()</h2>
+<a id="a1bddf944d66be1b1be567c79d4e20f7d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1bddf944d66be1b1be567c79d4e20f7d">&#9670;&nbsp;</a></span>create()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -182,7 +182,13 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_ghostCF</em>&#160;</td>
+          <td class="paramname"><em>a_ghostCF</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect&#160;</td>
+          <td class="paramname"><em>a_ghostPhi</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -208,11 +214,12 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
     <tr><td class="paramdir">[in]</td><td class="paramname">a_weight</td><td>Weighting factor for least squares </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_radius</td><td>Stencil radius </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostCF</td><td>Number of grid cells that were filled across the CF. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostPhi</td><td>Number of ghost cells in phi </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Reimplemented in <a class="el" href="classMFHelmholtzSaturationChargeJumpBCFactory.html#a76aaba173760ffb6868d7770435815a3">MFHelmholtzSaturationChargeJumpBCFactory</a>.</p>
+<p>Reimplemented in <a class="el" href="classMFHelmholtzSaturationChargeJumpBCFactory.html#a511e2486aeea331853fd91b0f2b06af5">MFHelmholtzSaturationChargeJumpBCFactory</a>.</p>
 
 </div>
 </div>

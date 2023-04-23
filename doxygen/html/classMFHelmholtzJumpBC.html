@@ -116,9 +116,9 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#a75a1cede969a2feac7f9b70d30510c12">MFHelmholtzJumpBC</a> ()=delete</td></tr>
 <tr class="memdesc:a75a1cede969a2feac7f9b70d30510c12"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed weak construction. <br /></td></tr>
 <tr class="separator:a75a1cede969a2feac7f9b70d30510c12"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2dd6c6857b9f8fc5b9b4ec30ca0db0d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#ae2dd6c6857b9f8fc5b9b4ec30ca0db0d">MFHelmholtzJumpBC</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflg, const <a class="el" href="classMFHelmholtzJumpBC.html#a61156d11a5b573946d13dd03f82e03d9">BcoefPtr</a> &amp;a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius, const int a_ghostCF)</td></tr>
-<tr class="memdesc:ae2dd6c6857b9f8fc5b9b4ec30ca0db0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defining constructor.  <a href="classMFHelmholtzJumpBC.html#ae2dd6c6857b9f8fc5b9b4ec30ca0db0d">More...</a><br /></td></tr>
-<tr class="separator:ae2dd6c6857b9f8fc5b9b4ec30ca0db0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a500202a5ae9962035f20149d541b42ac"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#a500202a5ae9962035f20149d541b42ac">MFHelmholtzJumpBC</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflg, const <a class="el" href="classMFHelmholtzJumpBC.html#a61156d11a5b573946d13dd03f82e03d9">BcoefPtr</a> &amp;a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius, const int a_ghostCF, const IntVect a_ghostPhi)</td></tr>
+<tr class="memdesc:a500202a5ae9962035f20149d541b42ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defining constructor.  <a href="classMFHelmholtzJumpBC.html#a500202a5ae9962035f20149d541b42ac">More...</a><br /></td></tr>
+<tr class="separator:a500202a5ae9962035f20149d541b42ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64b722f12762dd9ed825d6376221a09b"><td class="memItemLeft" align="right" valign="top"><a id="a64b722f12762dd9ed825d6376221a09b"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#a64b722f12762dd9ed825d6376221a09b">MFHelmholtzJumpBC</a> (const <a class="el" href="classMFHelmholtzJumpBC.html">MFHelmholtzJumpBC</a> &amp;a_other)=delete</td></tr>
 <tr class="memdesc:a64b722f12762dd9ed825d6376221a09b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed copy constructor. <br /></td></tr>
@@ -134,6 +134,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a9dfdadb393f28750e43025011bacecb3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#a9dfdadb393f28750e43025011bacecb3">setBco</a> (const RefCountedPtr&lt; LevelData&lt; <a class="el" href="classMFBaseIVFAB.html">MFBaseIVFAB</a> &gt;&gt; &amp;a_Bcoef)</td></tr>
 <tr class="memdesc:a9dfdadb393f28750e43025011bacecb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set B-coefficient. This updates the stencils.  <a href="classMFHelmholtzJumpBC.html#a9dfdadb393f28750e43025011bacecb3">More...</a><br /></td></tr>
 <tr class="separator:a9dfdadb393f28750e43025011bacecb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4243e6944b63fa5a2aecb94113e72dd0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#a4243e6944b63fa5a2aecb94113e72dd0">isMultiPhase</a> () const noexcept</td></tr>
+<tr class="memdesc:a4243e6944b63fa5a2aecb94113e72dd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is multiphase or not.  <a href="classMFHelmholtzJumpBC.html#a4243e6944b63fa5a2aecb94113e72dd0">More...</a><br /></td></tr>
+<tr class="separator:a4243e6944b63fa5a2aecb94113e72dd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adfac19d1e908b565470347954ed6b00f"><td class="memItemLeft" align="right" valign="top"><a id="adfac19d1e908b565470347954ed6b00f"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#adfac19d1e908b565470347954ed6b00f">getOrder</a> () const</td></tr>
 <tr class="memdesc:adfac19d1e908b565470347954ed6b00f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return stencil order. <br /></td></tr>
@@ -163,6 +166,14 @@ virtual VoFIterator &amp;&#160;</td><td class="memItemRight" valign="bottom"><a 
 virtual VoFIterator &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#ae84ecdea6becab36dba07c6bc99be08e">getMultiPhaseVofs</a> (const int a_phase, const DataIndex &amp;a_dit) const</td></tr>
 <tr class="memdesc:ae84ecdea6becab36dba07c6bc99be08e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return vof iterator which iterates over multi-phase cells on a specified phase and box. <br /></td></tr>
 <tr class="separator:ae84ecdea6becab36dba07c6bc99be08e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50ce5810cbbc0cad51a1fc0bba430745"><td class="memItemLeft" align="right" valign="top"><a id="a50ce5810cbbc0cad51a1fc0bba430745"></a>
+virtual const LayoutData&lt; <a class="el" href="classMFInterfaceFAB.html">MFInterfaceFAB</a>&lt; VoFStencil &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#a50ce5810cbbc0cad51a1fc0bba430745">getGradPhiStencils</a> () const noexcept</td></tr>
+<tr class="memdesc:a50ce5810cbbc0cad51a1fc0bba430745"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get stencils for computing dphi/dn at the boundary. <br /></td></tr>
+<tr class="separator:a50ce5810cbbc0cad51a1fc0bba430745"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35ba4359c3d2e0c257641e7877f1e425"><td class="memItemLeft" align="right" valign="top"><a id="a35ba4359c3d2e0c257641e7877f1e425"></a>
+virtual const LayoutData&lt; <a class="el" href="classMFInterfaceFAB.html">MFInterfaceFAB</a>&lt; Real &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#a35ba4359c3d2e0c257641e7877f1e425">getGradPhiWeights</a> () const noexcept</td></tr>
+<tr class="memdesc:a35ba4359c3d2e0c257641e7877f1e425"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get constant weights involved when computing dphi/dn at the boundary. <br /></td></tr>
+<tr class="separator:a35ba4359c3d2e0c257641e7877f1e425"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d00ecfd9e54efe428a6ff87565e2201"><td class="memItemLeft" align="right" valign="top"><a id="a9d00ecfd9e54efe428a6ff87565e2201"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#a9d00ecfd9e54efe428a6ff87565e2201">resetBC</a> () const</td></tr>
 <tr class="memdesc:a9d00ecfd9e54efe428a6ff87565e2201"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set everything to zero. This is a debugging function. <br /></td></tr>
@@ -230,6 +241,10 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#a427ce0769dd4d98c8a7ed75ae66301c1">m_numPhases</a></td></tr>
 <tr class="memdesc:a427ce0769dd4d98c8a7ed75ae66301c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of phases. <br /></td></tr>
 <tr class="separator:a427ce0769dd4d98c8a7ed75ae66301c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7faa25a75570b01dcab80f2aaa6c6e58"><td class="memItemLeft" align="right" valign="top"><a id="a7faa25a75570b01dcab80f2aaa6c6e58"></a>
+IntVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#a7faa25a75570b01dcab80f2aaa6c6e58">m_ghostPhi</a></td></tr>
+<tr class="memdesc:a7faa25a75570b01dcab80f2aaa6c6e58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of ghost cells in phi (must be exact match in order to use AggStencil) <br /></td></tr>
+<tr class="separator:a7faa25a75570b01dcab80f2aaa6c6e58"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee7bf1a84d45eb83e40cbb826670ccba"><td class="memItemLeft" align="right" valign="top"><a id="aee7bf1a84d45eb83e40cbb826670ccba"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#aee7bf1a84d45eb83e40cbb826670ccba">m_multiPhase</a></td></tr>
 <tr class="memdesc:aee7bf1a84d45eb83e40cbb826670ccba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multiphase or not. <br /></td></tr>
@@ -262,6 +277,10 @@ LayoutData&lt; <a class="el" href="classMFInterfaceFAB.html">MFInterfaceFAB</a>&
 LayoutData&lt; <a class="el" href="classMFInterfaceFAB.html">MFInterfaceFAB</a>&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#a157e2bc114c8a288d9963fbde6cfc6cd">m_avgStencils</a></td></tr>
 <tr class="memdesc:a157e2bc114c8a288d9963fbde6cfc6cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average stencil. <br /></td></tr>
 <tr class="separator:a157e2bc114c8a288d9963fbde6cfc6cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6765adaf98a0cb781b34f6db8e114db"><td class="memItemLeft" align="right" valign="top"><a id="ae6765adaf98a0cb781b34f6db8e114db"></a>
+LayoutData&lt; <a class="el" href="classMFInterfaceFAB.html">MFInterfaceFAB</a>&lt; Vector&lt; VolIndex &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#ae6765adaf98a0cb781b34f6db8e114db">m_avgVoFs</a></td></tr>
+<tr class="memdesc:ae6765adaf98a0cb781b34f6db8e114db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target vofs for average stencils. <br /></td></tr>
+<tr class="separator:ae6765adaf98a0cb781b34f6db8e114db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a32857bcc75225143e2b7b951a1d75c"><td class="memItemLeft" align="right" valign="top"><a id="a1a32857bcc75225143e2b7b951a1d75c"></a>
 LayoutData&lt; <a class="el" href="classMFInterfaceFAB.html">MFInterfaceFAB</a>&lt; Real &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#a1a32857bcc75225143e2b7b951a1d75c">m_denom</a></td></tr>
 <tr class="memdesc:a1a32857bcc75225143e2b7b951a1d75c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Denominator 1/(bp*wp + bq*wq) for all interface cells. <br /></td></tr>
@@ -270,6 +289,10 @@ LayoutData&lt; <a class="el" href="classMFInterfaceFAB.html">MFInterfaceFAB</a>&
 LayoutData&lt; <a class="el" href="classMFInterfaceFAB.html">MFInterfaceFAB</a>&lt; Real &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#a66ff15e4b90e73f32e05bbb119656672">m_avgWeights</a></td></tr>
 <tr class="memdesc:a66ff15e4b90e73f32e05bbb119656672"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average weights. <br /></td></tr>
 <tr class="separator:a66ff15e4b90e73f32e05bbb119656672"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ab748062544cb996088c4933bd8b83a"><td class="memItemLeft" align="right" valign="top"><a id="a4ab748062544cb996088c4933bd8b83a"></a>
+LayoutData&lt; RefCountedPtr&lt; AggStencil&lt; EBCellFAB, BaseIVFAB&lt; Real &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBC.html#a4ab748062544cb996088c4933bd8b83a">m_aggStencils</a> [2]</td></tr>
+<tr class="memdesc:a4ab748062544cb996088c4933bd8b83a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Agg stencils for making matching go faster. <br /></td></tr>
+<tr class="separator:a4ab748062544cb996088c4933bd8b83a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
@@ -287,8 +310,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <p>This class creates stencils for approximating the normal derivative on each side. It uses those stencil to compute a value on the boundary which fulfills the discrete version of dphi/dn1 + dphi/dn2 = sigma. This value is used by <a class="el" href="classMFHelmholtzEBBC.html" title="Class for making boundary conditions on the EB in a multifluid context.">MFHelmholtzEBBC</a> to compute the fluxes into the cut-cells on each side.</p>
 <p>When multi-valued cells are involved we use an "average" formulation such that we obtain the surface potential which is equal on all multi-cut surfaces. For this reason we store the bare stencils AND the averaged stencils (which are used in the matching). When stencil coefficients are updated then we use the raw stencils for recomputing the average stencils. This is done by calling setBco. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ae2dd6c6857b9f8fc5b9b4ec30ca0db0d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae2dd6c6857b9f8fc5b9b4ec30ca0db0d">&#9670;&nbsp;</a></span>MFHelmholtzJumpBC()</h2>
+<a id="a500202a5ae9962035f20149d541b42ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a500202a5ae9962035f20149d541b42ac">&#9670;&nbsp;</a></span>MFHelmholtzJumpBC()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -339,7 +362,13 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_ghostCF</em>&#160;</td>
+          <td class="paramname"><em>a_ghostCF</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect&#160;</td>
+          <td class="paramname"><em>a_ghostPhi</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -360,6 +389,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
     <tr><td class="paramdir">[in]</td><td class="paramname">a_weight</td><td>Weighting factor for least squares </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_radius</td><td>Stencil radius </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostCF</td><td>Number of grid cells that were filled across the CF. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostPhi</td><td>Number of ghost cells in phi (needed for AggStencil) </td></tr>
   </table>
   </dd>
 </dl>
@@ -524,6 +554,34 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>If this returns true, a_stencil contains a valid stencil and weight. </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>Stencils are computed using weighted least squares with squared inverse distance weighting. </dd></dl>
+
+</div>
+</div>
+<a id="a4243e6944b63fa5a2aecb94113e72dd0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4243e6944b63fa5a2aecb94113e72dd0">&#9670;&nbsp;</a></span>isMultiPhase()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool MFHelmholtzJumpBC::isMultiPhase </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Is multiphase or not. </p>
+<dl class="section return"><dt>Returns</dt><dd>m_multiPhase </dd></dl>
 
 </div>
 </div>
