@@ -97,6 +97,13 @@ public:
   setBco(const RefCountedPtr<LevelData<MFBaseIVFAB>>& a_Bcoef);
 
   /*!
+    @brief Is multiphase or not
+    @return m_multiPhase
+  */
+  bool
+  isMultiPhase() const noexcept;
+
+  /*!
     @brief Return stencil order
   */
   int

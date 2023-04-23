@@ -116,6 +116,13 @@ MFHelmholtzJumpBC::setBco(const RefCountedPtr<LevelData<MFBaseIVFAB>>& a_Bcoef)
     this->buildAverageStencils();
   }
 }
+bool
+MFHelmholtzJumpBC::isMultiPhase() const noexcept
+{
+  CH_TIME("MFHelmholtzJumpBC::isMultiPhase");
+
+  return m_multiPhase;
+}
 
 void
 MFHelmholtzJumpBC::defineStencils()

@@ -51,7 +51,6 @@ MFHelmholtzEBBC::defineMultiPhase()
   // TLDR: We happen to have an object m_jumpBC which will hold phi on the cut-cells separating the two phases. This is an "almost-Dirichlet" type of boundary condition
   //       where we need to use that value to compute the flux into the cut-cell. The below code computes stencils for that flux, using the value on the boundary as
   //       a known term in the expansion.
-
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
 
   m_boundaryWeights.define(dbl);
@@ -70,28 +69,31 @@ MFHelmholtzEBBC::defineMultiPhase()
     BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
     BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
 
-    VoFIterator& multiPhaseVofs = m_jumpBC->getMultiPhaseVofs(m_phase, dit());
-
     // Define over the full ivs but only fill on multi-phase cells.
     weights.define(ivs, ebgraph, m_nComp);
     stencils.define(ivs, ebgraph, m_nComp);
 
-    const BaseIVFAB<VoFStencil>& jumpStencils = (m_jumpBC->getGradPhiStencils())[dit()].getIVFAB(m_phase);
-    const BaseIVFAB<Real>&       jumpWeights  = (m_jumpBC->getGradPhiWeights())[dit()].getIVFAB(m_phase);
+    // Safety hook becase jumpBC might not have defined the data holders if we're not doing multiphase.
+    if (m_jumpBC->isMultiPhase()) {
 
-    // Build stencils for each vof. The order for the multiphase VoFs should follow the order for jumpBC, I think.
-    auto kernel = [&](const VolIndex& vof) -> void {
-      const Real areaFrac = ebisbox.bndryArea(vof);
-      const int  weight   = m_jumpBC->getWeight();
+      VoFIterator& multiPhaseVofs = m_jumpBC->getMultiPhaseVofs(m_phase, dit());
 
-      weights(vof, m_comp)  = jumpWeights(vof, m_comp);
-      stencils(vof, m_comp) = jumpStencils(vof, m_comp);
+      const BaseIVFAB<VoFStencil>& jumpStencils = (m_jumpBC->getGradPhiStencils())[dit()].getIVFAB(m_phase);
+      const BaseIVFAB<Real>&       jumpWeights  = (m_jumpBC->getGradPhiWeights())[dit()].getIVFAB(m_phase);
 
-      weights(vof, m_comp) *= areaFrac / m_dx;
-      stencils(vof, m_comp) *= areaFrac / m_dx;
-    };
+      // Build stencils for each vof. The order for the multiphase VoFs should follow the order for jumpBC, I think.
+      auto kernel = [&](const VolIndex& vof) -> void {
+        const Real areaFrac = ebisbox.bndryArea(vof);
 
-    BoxLoops::loop(multiPhaseVofs, kernel);
+        weights(vof, m_comp)  = jumpWeights(vof, m_comp);
+        stencils(vof, m_comp) = jumpStencils(vof, m_comp);
+
+        weights(vof, m_comp) *= areaFrac / m_dx;
+        stencils(vof, m_comp) *= areaFrac / m_dx;
+      };
+
+      BoxLoops::loop(multiPhaseVofs, kernel);
+    }
   }
 }
 
