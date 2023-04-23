@@ -17,6 +17,9 @@
 #include <EBISBox.H>
 #include <LayoutData.H>
 #include <Stencils.H>
+#include <AggStencil.H>
+#include <EBCellFAB.H>
+#include <BaseIVFAB.H>
 
 // Our includes
 #include <CD_Location.H>
@@ -58,6 +61,7 @@ public:
     @param[in] a_weight       Weighting factor for least squares
     @param[in] a_radius       Stencil radius
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
+    @param[in] a_ghostPhi     Number of ghost cells in phi (needed for AggStencil)
   */
   MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
                     const MFLevelGrid&   a_mflg,
@@ -66,7 +70,8 @@ public:
                     const int            a_order,
                     const int            a_weight,
                     const int            a_radius,
-                    const int            a_ghostCF);
+                    const int            a_ghostCF,
+                    const IntVect        a_ghostPhi);
 
   /*!
     @brief Disallowed copy constructor
@@ -90,6 +95,13 @@ public:
   */
   void
   setBco(const RefCountedPtr<LevelData<MFBaseIVFAB>>& a_Bcoef);
+
+  /*!
+    @brief Is multiphase or not
+    @return m_multiPhase
+  */
+  bool
+  isMultiPhase() const noexcept;
 
   /*!
     @brief Return stencil order
@@ -151,6 +163,18 @@ public:
   */
   virtual VoFIterator&
   getMultiPhaseVofs(const int a_phase, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Get stencils for computing dphi/dn at the boundary
+  */
+  virtual const LayoutData<MFInterfaceFAB<VoFStencil>>&
+  getGradPhiStencils() const noexcept;
+
+  /*!
+    @brief Get constant weights involved when computing dphi/dn at the boundary
+  */
+  virtual const LayoutData<MFInterfaceFAB<Real>>&
+  getGradPhiWeights() const noexcept;
 
   /*!
     @brief Set everything to zero. This is a debugging function.
@@ -215,6 +239,11 @@ protected:
   int m_numPhases;
 
   /*!
+    @brief Number of ghost cells in phi (must be exact match in order to use AggStencil)
+  */
+  IntVect m_ghostPhi;
+
+  /*!
     @brief Multiphase or not
   */
   bool m_multiPhase;
@@ -255,6 +284,11 @@ protected:
   LayoutData<MFInterfaceFAB<VoFStencil>> m_avgStencils;
 
   /*!
+    @brief Target vofs for average stencils
+  */
+  LayoutData<MFInterfaceFAB<Vector<VolIndex>>> m_avgVoFs;
+
+  /*!
     @brief Denominator 1/(bp*wp + bq*wq) for all interface cells. 
   */
   LayoutData<MFInterfaceFAB<Real>> m_denom;
@@ -263,6 +297,11 @@ protected:
     @brief Average weights
   */
   LayoutData<MFInterfaceFAB<Real>> m_avgWeights;
+
+  /*!
+    @brief Agg stencils for making matching go faster
+  */
+  LayoutData<RefCountedPtr<AggStencil<EBCellFAB, BaseIVFAB<Real>>>> m_aggStencils[2];
 
   /*!
     @brief Define function. Builds stencils. 

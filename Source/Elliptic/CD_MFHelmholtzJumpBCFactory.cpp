@@ -42,7 +42,8 @@ MFHelmholtzJumpBCFactory::create(const Location::Cell a_dataLocation,
                                  const int            a_order,
                                  const int            a_weight,
                                  const int            a_radius,
-                                 const int            a_ghostCF)
+                                 const int            a_ghostCF,
+                                 const IntVect        a_ghostPhi)
 {
   int order = a_order;
 
@@ -54,7 +55,7 @@ MFHelmholtzJumpBCFactory::create(const Location::Cell a_dataLocation,
   }
 
   return RefCountedPtr<MFHelmholtzJumpBC>(
-    new MFHelmholtzJumpBC(a_dataLocation, a_mflg, a_Bcoef, a_dx, order, a_weight, a_radius, a_ghostCF));
+    new MFHelmholtzJumpBC(a_dataLocation, a_mflg, a_Bcoef, a_dx, order, a_weight, a_radius, a_ghostCF, a_ghostPhi));
 }
 
 #include <CD_NamespaceFooter.H>
