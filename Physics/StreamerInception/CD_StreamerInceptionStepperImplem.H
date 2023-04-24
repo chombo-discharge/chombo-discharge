@@ -2931,38 +2931,22 @@ StreamerInceptionStepper<P, F, C>::computeCriticalAreaStationary() noexcept {
 	const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
 	const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
 
-	const FArrayBox& inceptionIntegralPlusReg = inceptionIntegralPlus.getFArrayBox();
-	const FArrayBox& inceptionIntegralMinuReg = inceptionIntegralMinu.getFArrayBox();
-
-	auto regularKernel = [&] (const IntVect& iv) -> void{
-	  if(validCells(iv, 0) && ebisbox.isRegular(iv)){
-	    if(inceptionIntegralPlusReg(iv, i) >= m_inceptionK){
-	      criticalAreaPlus += std::pow(dx, SpaceDim-1);
-	    }
-	    if(inceptionIntegralMinuReg(iv, i) >=m_inceptionK){
-	      criticalAreaMinu += std::pow(dx, SpaceDim-1);
-	    }
-	  }
-	};
-
 	auto irregularKernel = [&] (const VolIndex& vof) -> void{
 	  if(validCells(vof.gridIndex())){
-	    const Real kappa = ebisbox.volFrac(vof);
+	    const Real boundaryArea = ebisbox.bndryArea(vof);
 
 	    if(inceptionIntegralPlus(vof, i) >= m_inceptionK){
-	      criticalAreaPlus += kappa * std::pow(dx, SpaceDim-1);
+	      criticalAreaPlus += boundaryArea * std::pow(dx, SpaceDim-1);
 	    }
 	    if(inceptionIntegralMinu(vof, i) >= m_inceptionK){
-	      criticalAreaMinu += kappa * std::pow(dx, SpaceDim-1);
+	      criticalAreaMinu += boundaryArea * std::pow(dx, SpaceDim-1);
 	    }
 	  }
 	};
 
 	// Kernel regions.
-	const Box cellBox = dbl[dit()];
 	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 
-	BoxLoops::loop(cellBox, regularKernel);
 	BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -2996,26 +2980,16 @@ StreamerInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcept
       const BaseFab<bool>& validCells = validCellsLD[dit()];
 
       const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[dit()];
-      const FArrayBox& inceptionIntegralReg = inceptionIntegral.getFArrayBox();
-
-      auto regularKernel = [&](const IntVect& iv) -> void{
-	if(validCells(iv, 0) && ebisbox.isRegular(iv)){
-	  if(inceptionIntegralReg(iv, 0) >= m_inceptionK){
-	    Acr += area;
-	  }
-	}
-      };
+      
       auto irregularKernel = [&] (const VolIndex& vof) -> void{
 	if(validCells(vof.gridIndex()) && inceptionIntegral(vof, 0) >= m_inceptionK){
-	  Acr += ebisbox.volFrac(vof) * area;
+	  Acr += ebisbox.bndryArea(vof) * area;
 	}
       };
 
       // Kernel regions.
-      const Box cellBox = dbl[dit()];
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 
-      BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
