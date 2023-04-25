@@ -164,6 +164,11 @@ PhaseRealm::regridOperators(const int a_lmin)
     this->defineEBCoarAve(a_lmin);
     timer.stopEvent("EBCoarAve");
 
+    MayDay::Warning("Must redo operators below here");
+    timer.startEvent("Multigrid interpolator");
+    this->defineEBMultigrid(a_lmin);
+    timer.stopEvent("Multigrid interpolator");
+
     timer.startEvent("Ghost interp");
     this->defineFillPatch(a_lmin);
     timer.stopEvent("Ghost interp");
@@ -211,10 +216,6 @@ PhaseRealm::regridOperators(const int a_lmin)
     timer.startEvent("Levelset");
     this->defineLevelSet(a_lmin, m_numLsfGhostCells);
     timer.stopEvent("Levelset");
-
-    timer.startEvent("Multigrid interpolator");
-    this->defineEBMultigrid(a_lmin);
-    timer.stopEvent("Multigrid interpolator");
 
     if (m_profile) {
       timer.eventReport(pout());
@@ -513,10 +514,12 @@ PhaseRealm::defineEBMultigrid(const int a_lmin)
       // Interpolator for ghost cells on level l is stored on level l.
       if (hasCoar) {
         const EBLevelGrid& eblgFine = *m_eblg[lvl];
+        const EBLevelGrid& eblgCoFi = *m_eblgCoFi[lvl - 1];
         const EBLevelGrid& eblgCoar = *m_eblg[lvl - 1];
 
         m_multigridInterpolator[lvl] = RefCountedPtr<EBMultigridInterpolator>(
           new EBLeastSquaresMultigridInterpolator(eblgFine,
+                                                  eblgCoFi,
                                                   eblgCoar,
                                                   Location::Cell::Center,
                                                   m_numGhostCells * IntVect::Unit,

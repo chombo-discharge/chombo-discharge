@@ -33,21 +33,28 @@ constexpr int EBLeastSquaresMultigridInterpolator::m_numStenComp;
 constexpr int EBLeastSquaresMultigridInterpolator::m_comp;
 
 EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const EBLevelGrid& a_eblgFine,
+                                                                         const EBLevelGrid& a_eblgCoFi,
                                                                          const EBLevelGrid& a_eblgCoar,
                                                                          const CellLocation a_dataLocation,
                                                                          const IntVect&     a_ghostVector,
                                                                          const int          a_refRat,
                                                                          const int          a_ghostCF,
                                                                          const int          a_order,
-                                                                         const int          a_weighting)
+                                                                         const int          a_weighting) noexcept
 {
-  CH_TIME("EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator");
+  CH_TIMERS("EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator");
+  CH_TIMER("define_regular", t1);
+  CH_TIMER("define_irregular", t2);
 
   CH_assert(a_ghostCF > 0);
   CH_assert(a_refRat % 2 == 0);
+  CH_assert(a_eblgFine.getGhost() >= a_ghostVector.max());
 
-  const DisjointBoxLayout& gridsFine = a_eblgFine.getDBL();
-  const DisjointBoxLayout& gridsCoar = a_eblgCoar.getDBL();
+  // Not enough ghost cells in input eblg. I don't know why anyone would do that, but make sure we abort if it happens. This is a more
+  // transparent error message than the assertion.
+  if (a_eblgFine.getGhost() < a_ghostVector.max()) {
+    MayDay::Error("EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator - not enough ghost cells!");
+  }
 
   // Build the regular stencil objects for regular-grid interpolation. For now, we use QuadCFInterp for this. I also leave
   // a timer in place until performance and scalability has been investigated. To check performance, add
@@ -60,19 +67,22 @@ EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const E
   m_ghostVector  = a_ghostVector;
   m_dataLocation = a_dataLocation;
   m_weight       = a_weighting;
+  m_eblgFine     = a_eblgFine;
+  m_eblgCoFi     = a_eblgCoFi;
+  m_eblgCoar     = a_eblgCoar;
 
+  // Build the regular stencil objects for regular-grid interpolation. Use QuadCFInterp for this (might change this later)
+  CH_START(t1);
   timer.startEvent("Define QuadCFInterp");
-  //  QuadCFInterp::define(gridsFine, &gridsCoar, 1.0, a_refRat, 1, a_eblgFine.getDomain());
-  m_scalarInterpolator = RefCountedPtr<QuadCFInterp>(
+  const DisjointBoxLayout& gridsFine = a_eblgFine.getDBL();
+  const DisjointBoxLayout& gridsCoar = a_eblgCoar.getDBL();
+
+  m_quadCFInterp = RefCountedPtr<QuadCFInterp>(
     new QuadCFInterp(gridsFine, &gridsCoar, 1.0, a_refRat, 1, a_eblgFine.getDomain()));
-  m_vectorInterpolator = RefCountedPtr<QuadCFInterp>(
-    new QuadCFInterp(gridsFine, &gridsCoar, 1.0, a_refRat, SpaceDim, a_eblgFine.getDomain()));
   timer.stopEvent("Define QuadCFInterp");
+  CH_STOP(t1);
 
-  timer.startEvent("Define grids");
-  this->defineGrids(a_eblgFine, a_eblgCoar);
-  timer.stopEvent("Define grids");
-
+  CH_START(t2);
   timer.startEvent("Define ghost regions");
   this->defineGhostRegions();
   timer.stopEvent("Define ghost regions");
@@ -84,12 +94,7 @@ EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const E
   timer.startEvent("Define stencils");
   this->defineStencilsEBCF();
   timer.stopEvent("Define stencils");
-
-  timer.startEvent("Set coarsening ratio");
-  if (m_eblgFine.getMaxCoarseningRatio() < m_refRat) {
-    m_eblgFine.setMaxCoarseningRatio(m_refRat, m_eblgFine.getEBIS());
-  }
-  timer.stopEvent("Set coarsening ratio");
+  CH_STOP(t2);
 
   ParmParse pp("EBLeastSquaresMultigridInterpolator");
   bool      profile = false;
@@ -100,12 +105,12 @@ EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const E
 }
 
 int
-EBLeastSquaresMultigridInterpolator::getGhostCF() const
+EBLeastSquaresMultigridInterpolator::getGhostCF() const noexcept
 {
   return m_ghostCF;
 }
 
-EBLeastSquaresMultigridInterpolator::~EBLeastSquaresMultigridInterpolator()
+EBLeastSquaresMultigridInterpolator::~EBLeastSquaresMultigridInterpolator() noexcept
 {
   CH_TIME("EBLeastSquaresMultigridInterpolator::~EBLeastSquaresMultigridInterpolator");
 }
@@ -113,47 +118,51 @@ EBLeastSquaresMultigridInterpolator::~EBLeastSquaresMultigridInterpolator()
 void
 EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&       a_phiFine,
                                                       const LevelData<EBCellFAB>& a_phiCoar,
-                                                      const Interval              a_variables)
+                                                      const Interval              a_variables) const noexcept
 {
-  CH_TIME("EBLeastSquaresMultigridInterpolator::coarseFineInterp");
+  CH_TIMERS("EBLeastSquaresMultigridInterpolator::coarseFineInterp");
+  CH_TIMER("regular_interp", t1);
+  CH_TIMER("copyTo", t2);
+  CH_TIMER("irregular_interp", t3);
 
   CH_assert(m_ghostCF * IntVect::Unit <= a_phiFine.ghostVect());
+  CH_assert(a_phiFine.nComp() > a_variables.end());
+  CH_assert(a_phiCoar.nComp() > a_variables.end());
 
   if (a_phiFine.ghostVect() != m_ghostVector) {
     MayDay::Error("EBLeastSquaresMultigridInterpolator::coarseFineInterp -- number of ghost cells do not match!");
   }
 
-  // TLDR: This routine does the inhomogeneous coarse-fine interpolation, i.e. the coarse data is not set to zero.
-
-  // Do the regular interpolation -- let QuadCFInterp take care of that.
-  LevelData<FArrayBox> fineAlias;
-  LevelData<FArrayBox> coarAlias;
-
-  aliasEB(fineAlias, (LevelData<EBCellFAB>&)a_phiFine);
-  aliasEB(coarAlias, (LevelData<EBCellFAB>&)a_phiCoar);
-
-  //  QuadCFInterp::coarseFineInterp(fineAlias, coarAlias);
-  RefCountedPtr<QuadCFInterp> interpolator;
-  if (a_variables == Interval(0, 0)) {
-    interpolator = m_scalarInterpolator;
-  }
-  else if (a_variables == Interval(0, SpaceDim - 1)) {
-    interpolator = m_vectorInterpolator;
-  }
-  interpolator->coarseFineInterp(fineAlias, coarAlias);
-
   // Interpolate all variables near the EB. We will copy a_phiCoar to m_grownCoarData which holds the data on the coarse grid cells around each fine-grid
   // patch. Note that m_grownCoarData provides a LOCAL view of the coarse grid around each fine-level patch, so we can apply the stencils directly.
   for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++) {
+    // Do the regular interpolation as if the EB is not there.
+    CH_START(t1);
+    LevelData<FArrayBox> fineAlias;
+    LevelData<FArrayBox> coarAlias;
+    LevelData<FArrayBox> fineAliasOneComp;
+    LevelData<FArrayBox> coarAliasOneComp;
 
-    // Copy data to scratch data holders. We need the coarse-data to be accessible by the fine data (through the same iterators), so we can't
+    aliasEB(fineAlias, (LevelData<EBCellFAB>&)a_phiFine);
+    aliasEB(coarAlias, (LevelData<EBCellFAB>&)a_phiCoar);
+
+    aliasLevelData(fineAliasOneComp, &fineAlias, Interval(icomp, icomp));
+    aliasLevelData(coarAliasOneComp, &coarAlias, Interval(icomp, icomp));
+
+    m_quadCFInterp->coarseFineInterp(fineAliasOneComp, coarAliasOneComp);
+    CH_STOP(t1);
+
+    // Now do the EB. Copy data to scratch data holders. We need the coarse-data to be accessible by the fine data (through the same iterators), so we can't
     // get away from a copy here (I think).
+    CH_START(t2);
     const Interval srcInterv = Interval(icomp, icomp);
     const Interval dstInterv = Interval(m_comp, m_comp);
     a_phiCoar.copyTo(srcInterv, m_grownCoarData, dstInterv);
+    CH_STOP(t2);
 
     // Go through each grid patch and the to-be-interpolated ghost cells across the refinement boundary. We simply
     // apply the stencils here.
+    CH_START(t3);
     for (DataIterator dit = a_phiFine.dataIterator(); dit.ok(); ++dit) {
       EBCellFAB&       dstFine = a_phiFine[dit()];
       const EBCellFAB& srcFine = a_phiFine[dit()];
@@ -174,12 +183,13 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
                                       numComp,
                                       true); // true/false => increment/not increment
     }
+    CH_STOP(t3);
   }
 }
 
 void
 EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine,
-                                                       const Interval        a_variables) const
+                                                       const Interval        a_variables) const noexcept
 {
   CH_TIME("EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LD<EBCellFAB>, Interval)");
 
@@ -198,7 +208,7 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_p
 void
 EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
                                                        const Interval   a_variables,
-                                                       const DataIndex& a_dit) const
+                                                       const DataIndex& a_dit) const noexcept
 {
   CH_TIME("EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LD<EBCellFAB>, Interval, DataIndex)");
 
@@ -245,7 +255,7 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
 }
 
 void
-EBLeastSquaresMultigridInterpolator::defineGhostRegions()
+EBLeastSquaresMultigridInterpolator::defineGhostRegions() noexcept
 {
   CH_TIME("EBLeastSquaresMultigridInterpolator::defineGhostRegions");
 
@@ -309,33 +319,6 @@ EBLeastSquaresMultigridInterpolator::defineGhostRegions()
       m_ghostCells[dit()] &= irreg;
     }
   }
-}
-
-void
-EBLeastSquaresMultigridInterpolator::defineGrids(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar)
-{
-  CH_TIME("EBLeastSquaresMultigridInterpolator::defineGrids");
-
-  // Define the fine level grids. Use a shallow copy if we can. Otherwise, if the user has asked for too many ghost cells to be filled
-  // then we need to fill in the data again.
-  const int ebisGhostFine = a_eblgFine.getGhost();
-
-  if (
-    ebisGhostFine >=
-    m_ghostVector
-      .max()) { // Not enough ghost cells in input eblg. I don't know why anyone would do that, but here's a hook for safety.
-    m_eblgFine = a_eblgFine;
-  }
-  else { // Need to define from scratch
-    m_eblgFine = EBLevelGrid(a_eblgFine.getDBL(), a_eblgFine.getDomain(), m_ghostVector.max(), a_eblgFine.getEBIS());
-  }
-
-  // Coarse is just a copy.
-  m_eblgCoar = a_eblgCoar;
-
-  // Define the coarsened fine grids -- needs same number of ghost cells as m_eblgFine.
-  coarsen(m_eblgCoFi, m_eblgFine, m_refRat);
-  m_eblgCoFi.setMaxRefinementRatio(m_refRat);
 }
 
 void

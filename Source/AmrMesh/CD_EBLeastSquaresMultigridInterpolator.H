@@ -66,6 +66,7 @@ public:
   /*!
     @brief Full constructor. 
     @param[in] a_eblgFine     Fine grids
+    @param[in] a_eblgCoFi     Coarsened fine grids
     @param[in] a_eblgCoar     Coarse grids
     @param[in] a_dataLocation Interpration of data centering. Either on the cell center or the cell centroid. 
     @param[in] a_ghostVector  (Minimum) number of ghost cells in input/output data. 
@@ -75,24 +76,25 @@ public:
     @param[in] a_weighting    Weighting factor least squares. 
   */
   EBLeastSquaresMultigridInterpolator(const EBLevelGrid& a_eblgFine,
+				      const EBLevelGrid& a_eblgCoFi,
                                       const EBLevelGrid& a_eblgCoar,
                                       const CellLocation a_dataLocation,
                                       const IntVect&     a_ghostVector,
                                       const int          a_refRat,
                                       const int          a_ghostCF,
                                       const int          a_order,
-                                      const int          a_weighting = 0);
+                                      const int          a_weighting = 0) noexcept;
 
   /*!
     @brief Destructor (does nothing)
   */
-  virtual ~EBLeastSquaresMultigridInterpolator();
+  virtual ~EBLeastSquaresMultigridInterpolator() noexcept;
 
   /*!
     @brief Return number of ghost cells across CF interface.
   */
-  int
-  getGhostCF() const override;
+  virtual int
+  getGhostCF() const noexcept override;
 
   /*!
     @brief Do inhomogeneous interpolation
@@ -100,18 +102,18 @@ public:
     @param[in]    a_phiCoar   Coarse phi
     @param[in]    a_variables Variables to interpolate
   */
-  void
+  virtual void
   coarseFineInterp(LevelData<EBCellFAB>&       a_phiFine,
                    const LevelData<EBCellFAB>& a_phiCoar,
-                   const Interval              a_variables) override;
+                   const Interval              a_variables) const noexcept override;
 
   /*!
     @brief Do homogeneous interpolation
     @param[in] a_phiFine   Fine phi
     @param[in] a_variables Variables to interpolate
   */
-  void
-  coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const override;
+  virtual void
+  coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const noexcept override;
 
   /*!
     @brief Do homogeneous coarse-fine interpolation on a grid patch
@@ -122,8 +124,8 @@ public:
     the direct kernel version which is public because multigrid operators might need it for performance reasons. This routine does NOT warn against input data that do not
     contain enough ghost cells. 
   */
-  void
-  coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit) const;
+  virtual void
+  coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit) const noexcept;
 
 protected:
   /*!
@@ -144,12 +146,7 @@ protected:
   /*!
     @brief For regular interpolation of scalar quantities
   */
-  RefCountedPtr<QuadCFInterp> m_scalarInterpolator;
-
-  /*!
-    @brief For regular interpolation of vector quantities
-  */
-  RefCountedPtr<QuadCFInterp> m_vectorInterpolator;
+  RefCountedPtr<QuadCFInterp> m_quadCFInterp;
 
   /*!
     @brief How to interpret data locations. 
@@ -248,16 +245,8 @@ protected:
   /*!
     @brief Define ghost cells to be filled in range m_ghostCF from each cut-cell. 
   */
-  void
-  defineGhostRegions();
-
-  /*!
-    @brief Define grids
-    @param[in] a_eblgFine Fine grid
-    @param[in] a_eblgCoar Coarse grid
-  */
-  void
-  defineGrids(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar);
+  virtual void
+  defineGhostRegions() noexcept;
 
   /*!
     @brief Define data holders. 
