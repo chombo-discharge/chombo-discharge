@@ -582,7 +582,6 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
     Vector<RealVect> fineDisplacements;
     Vector<RealVect> coarDisplacements;
 
-    //timer.startEvent("dist");
     for (const auto& fineVof : fineVofs.stdVector()) {
       fineDisplacements.push_back(
         LeastSquares::displacement(a_dataLocation, a_dataLocation, a_ghostVofFine, fineVof, a_ebisboxFine, a_dxFine));
