@@ -94,8 +94,8 @@ EBCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
                        const Average&              a_average) const noexcept
 {
   CH_TIMERS("EBCoarAve::averageData(ebcellfab_no_buffer)");
-  CH_TIMER("define_buffer", t1);
-  CH_TIMER("averageData", t2);
+  CH_TIMER("EBCoarAve::define_buffer", t1);
+  CH_TIMER("EBCoarAve::averageData", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_fineData.nComp() > a_variables.end());
@@ -120,8 +120,8 @@ EBCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
                        const Average&              a_average) const noexcept
 {
   CH_TIMERS("EBCoarAve::averageData(LD<EBCellFAB>)");
-  CH_TIMER("average", t1);
-  CH_TIMER("copyTo", t2);
+  CH_TIMER("EBCoarAve::average", t1);
+  CH_TIMER("EBCoarAve::copyTo", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_fineData.nComp() > a_variables.end());
@@ -178,8 +178,8 @@ EBCoarAve::arithmeticAverage(EBCellFAB&       a_coarData,
                              const int&       a_fineVar) const noexcept
 {
   CH_TIMERS("EBCoarAve::arithmeticAverage(EBCellFAB)");
-  CH_TIMER("regular_cells", t1);
-  CH_TIMER("irregular_cells", t2);
+  CH_TIMER("EBCoarAve::regular_cells", t1);
+  CH_TIMER("EBCoarAve::irregular_cells", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() > a_coarVar);
@@ -242,8 +242,8 @@ EBCoarAve::harmonicAverage(EBCellFAB&       a_coarData,
 
 {
   CH_TIMERS("EBCoarAve::harmonicAverage(EBCellFAB)");
-  CH_TIMER("regular_cells", t1);
-  CH_TIMER("irregular_cells", t2);
+  CH_TIMER("EBCoarAve::regular_cells", t1);
+  CH_TIMER("EBCoarAve::irregular_cells", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() > a_coarVar);
@@ -303,8 +303,8 @@ EBCoarAve::conservativeAverage(EBCellFAB&       a_coarData,
                                const int&       a_fineVar) const noexcept
 {
   CH_TIMERS("EBCoarAve::conservativeAverage(EBCellFAB)");
-  CH_TIMER("regular_cells", t1);
-  CH_TIMER("irregular_cells", t2);
+  CH_TIMER("EBCoarAve::regular_cells", t1);
+  CH_TIMER("EBCoarAve::irregular_cells", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() > a_coarVar);
@@ -378,8 +378,8 @@ EBCoarAve::averageData(LevelData<EBFluxFAB>&       a_coarData,
                        const Average&              a_average) const noexcept
 {
   CH_TIMERS("EBCoarAve::averageData(ebfluxfab_no_buffer)");
-  CH_TIMER("define_buffer", t1);
-  CH_TIMER("averageData", t2);
+  CH_TIMER("EBCoarAve::define_buffer", t1);
+  CH_TIMER("EBCoarAve::averageData", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() > a_variables.end());
@@ -404,8 +404,8 @@ EBCoarAve::averageData(LevelData<EBFluxFAB>&       a_coarData,
                        const Average&              a_average) const noexcept
 {
   CH_TIMERS("EBCoarAve::averageData(LD<EBFluxFAB>)");
-  CH_TIMER("average", t1);
-  CH_TIMER("copyTo", t2);
+  CH_TIMER("EBCoarAve::average", t1);
+  CH_TIMER("EBCoarAve::copyTo", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() > a_variables.end());
@@ -464,8 +464,8 @@ EBCoarAve::arithmeticAverage(EBFaceFAB&       a_coarData,
                              const int&       a_dir) const noexcept
 {
   CH_TIMERS("EBCoarAve::arithmeticAverage(EBFaceFAB)");
-  CH_TIMER("regular_cells", t1);
-  CH_TIMER("irregular_cells", t2);
+  CH_TIMER("EBCoarAve::regular_cells", t1);
+  CH_TIMER("EBCoarAve::irregular_cells", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() > a_coarVar);
@@ -543,8 +543,8 @@ EBCoarAve::harmonicAverage(EBFaceFAB&       a_coarData,
                            const int&       a_dir) const noexcept
 {
   CH_TIMERS("EBCoarAve::harmonicAverage(EBFaceFAB)");
-  CH_TIMER("regular_cells", t1);
-  CH_TIMER("irregular_cells", t2);
+  CH_TIMER("EBCoarAve::regular_cells", t1);
+  CH_TIMER("EBCoarAve::irregular_cells", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() > a_coarVar);
@@ -623,8 +623,8 @@ EBCoarAve::conservativeAverage(EBFaceFAB&       a_coarData,
                                const int&       a_dir) const noexcept
 {
   CH_TIMERS("EBCoarAve::conservativeAverage(EBFaceFAB)");
-  CH_TIMER("regular_cells", t1);
-  CH_TIMER("irregular_cells", t2);
+  CH_TIMER("EBCoarAve::regular_cells", t1);
+  CH_TIMER("EBCoarAve::irregular_cells", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() > a_coarVar);
@@ -717,8 +717,8 @@ EBCoarAve::averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
                        const Average&                    a_average) const noexcept
 {
   CH_TIMERS("EBCoarAve::averageData(baseivfab_no_buffer)");
-  CH_TIMER("define_buffer", t1);
-  CH_TIMER("averageData", t2);
+  CH_TIMER("EBCoarAve::define_buffer", t1);
+  CH_TIMER("EBCoarAve::averageData", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() > a_variables.end());
@@ -743,8 +743,8 @@ EBCoarAve::averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
                        const Average&                    a_average) const noexcept
 {
   CH_TIMERS("EBCoarAve::averageData(LD<BaseIVFAB>)");
-  CH_TIMER("average", t1);
-  CH_TIMER("copyTo", t2);
+  CH_TIMER("EBCoarAve::average", t1);
+  CH_TIMER("EBCoarAve::copyTo", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() > a_variables.end());

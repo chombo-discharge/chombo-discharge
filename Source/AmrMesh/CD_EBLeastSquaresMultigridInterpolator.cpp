@@ -42,8 +42,8 @@ EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const E
                                                                          const int          a_weighting) noexcept
 {
   CH_TIMERS("EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator");
-  CH_TIMER("define_regular", t1);
-  CH_TIMER("define_irregular", t2);
+  CH_TIMER("EBLeastSquaresMultigridInterpolator::define_regular", t1);
+  CH_TIMER("EBLeastSquaresMultigridInterpolator::define_irregular", t2);
 
   CH_assert(a_ghostCF > 0);
   CH_assert(a_refRat % 2 == 0);
@@ -102,9 +102,9 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
                                                       const Interval              a_variables) const noexcept
 {
   CH_TIMERS("EBLeastSquaresMultigridInterpolator::coarseFineInterp");
-  CH_TIMER("regular_interp", t1);
-  CH_TIMER("copyTo", t2);
-  CH_TIMER("irregular_interp", t3);
+  CH_TIMER("EBLeastSquaresMultigridInterpolator::regular_interp", t1);
+  CH_TIMER("EBLeastSquaresMultigridInterpolator::copyTo", t2);
+  CH_TIMER("EBLeastSquaresMultigridInterpolator::irregular_interp", t3);
 
   CH_assert(m_ghostCF * IntVect::Unit <= a_phiFine.ghostVect());
   CH_assert(a_phiFine.nComp() > a_variables.end());
@@ -156,13 +156,13 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
                                       m_comp,
                                       icomp,
                                       numComp,
-                                      false); // true/false => increment/not increment
+                                      false);
       m_aggFineStencils[dit()]->apply(dstFine,
                                       srcFine,
                                       icomp,
                                       icomp,
                                       numComp,
-                                      true); // true/false => increment/not increment
+                                      true); 
     }
     CH_STOP(t3);
   }
@@ -193,8 +193,8 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
                                                        const DataIndex& a_dit) const noexcept
 {
   CH_TIMERS("EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LD<EBCellFAB>)");
-  CH_TIMER("regular_interp", t1);
-  CH_TIMER("irregular_interp", t2);
+  CH_TIMER("EBLeastSquaresMultigridInterpolator::regular_interp", t1);
+  CH_TIMER("EBLeastSquaresMultigridInterpolator::irregular_interp", t2);
 
   CH_assert(a_phi.nComp() > a_variables.end());
 
@@ -304,7 +304,7 @@ EBLeastSquaresMultigridInterpolator::defineGhostRegions() noexcept
 
       // 2. Only include ghost cells that are within range m_ghostCF of an irregular grid cell
       IntVectSet irreg = ebisbox.getIrregIVS(cellBox);
-      irreg.grow(2 * m_refRat);
+      irreg.grow(m_ghostCF);
       m_ghostCells[dit()] &= irreg;
     }
   }
@@ -332,11 +332,11 @@ void
 EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
 {
   CH_TIMERS("EBLeastSquaresMultigridInterpolator::defineStencilsEBCF");
-  CH_TIMER("define_grids", t1);
-  CH_TIMER("define_intvectsets", t2);
-  CH_TIMER("neighbor_loop", t3);
-  CH_TIMER("define_structures", t4);
-  CH_TIMER("compute_stencils", t5);
+  CH_TIMER("EBLeastSquaresMultigridInterpolator::define_grids", t1);
+  CH_TIMER("EBLeastSquaresMultigridInterpolator::define_intvectsets", t2);
+  CH_TIMER("EBLeastSquaresMultigridInterpolator::neighbor_loop", t3);
+  CH_TIMER("EBLeastSquaresMultigridInterpolator::define_structures", t4);
+  CH_TIMER("EBLeastSquaresMultigridInterpolator::compute_stencils", t5);
 
   // This routine defines stencils for all the ghost cells we need to fill across the EBCF boundary.
   const int comp = 0;
@@ -374,7 +374,7 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
     Box coarsenedFineBox = origFineBox;
     coarsenedFineBox.coarsen(m_refRat);
     validCoarCells -= coarsenedFineBox;
-    CH_START(t2);
+    CH_STOP(t2);
 
     // Same for parts of the current (grown) patch that overlaps with neighboring boxes.
     CH_START(t3);
@@ -400,7 +400,7 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
     // Restrict to domain
     validFineCells &= domFine;
     validCoarCells &= domCoar;
-    CH_START(t3);
+    CH_STOP(t3);
 
     // Now go through each ghost cell and get an interpolation stencil to specified order.
     CH_START(t4);
@@ -412,7 +412,7 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
     m_fineStencils[dit()].define(m_ghostCells[dit()], fineGraph, m_numStenComp);
     m_coarStencils[dit()].define(m_ghostCells[dit()], fineGraph, m_numStenComp);
     m_ghostIterFine[dit()].define(m_ghostCells[dit()], fineGraph);
-    CH_START(t4);
+    CH_STOP(t4);
 
     // Build stencils.
     CH_START(t5);
@@ -465,7 +465,7 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
     };
 
     BoxLoops::loop(vofit, kernel);
-    CH_START(t5);
+    CH_STOP(t5);
   }
 
   // We now have all the stencils we need. Make them into an AggStencil for performance
