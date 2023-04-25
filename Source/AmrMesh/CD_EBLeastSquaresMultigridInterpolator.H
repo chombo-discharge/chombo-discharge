@@ -76,7 +76,7 @@ public:
     @param[in] a_weighting    Weighting factor least squares. 
   */
   EBLeastSquaresMultigridInterpolator(const EBLevelGrid& a_eblgFine,
-				      const EBLevelGrid& a_eblgCoFi,
+                                      const EBLevelGrid& a_eblgCoFi,
                                       const EBLevelGrid& a_eblgCoar,
                                       const CellLocation a_dataLocation,
                                       const IntVect&     a_ghostVector,
@@ -176,7 +176,7 @@ protected:
   /*!
     @brief Iterator over ghost cells
   */
-  mutable LayoutData<VoFIterator> m_vofIterFine;
+  mutable LayoutData<VoFIterator> m_ghostIterFine;
 
   /*!
     @brief Minimum number of ghost cells in input data. 
@@ -251,20 +251,20 @@ protected:
   /*!
     @brief Define data holders. 
   */
-  void
-  defineBuffers();
+  virtual void
+  defineBuffers() noexcept;
 
   /*!
     @brief Define stencils for interpolation across the EBCF refinement boundary. 
   */
-  void
-  defineStencilsEBCF();
+  virtual void
+  defineStencilsEBCF() noexcept;
 
   /*!
     @brief Build the AggStencil objects for faster stencil aggregation
   */
-  void
-  makeAggStencils();
+  virtual void
+  makeAggStencils() noexcept;
 
   /*!
     @brief Build an interpolation stencil
@@ -283,7 +283,7 @@ protected:
     @param[in]  a_weight         Equation weighting for least squares reconstruction. 
     @return Returns true if a stencil was found, in which case it is defined in a_stencilFine and a_stencilCoar. 
   */
-  bool
+  virtual bool
   getStencil(VoFStencil&            a_stencilFine,
              VoFStencil&            a_stencilCoar,
              const CellLocation&    a_dataLocation,
@@ -296,7 +296,7 @@ protected:
              const Real&            a_dxFine,
              const Real&            a_dxCoar,
              const int&             a_order,
-             const int&             a_weight);
+             const int&             a_weight) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

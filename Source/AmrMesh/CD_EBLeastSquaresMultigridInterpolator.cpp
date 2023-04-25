@@ -152,8 +152,8 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
     m_quadCFInterp->coarseFineInterp(fineAliasOneComp, coarAliasOneComp);
     CH_STOP(t1);
 
-    // Now do the EB. Copy data to scratch data holders. We need the coarse-data to be accessible by the fine data (through the same iterators), so we can't
-    // get away from a copy here (I think).
+    // Now do the EB. Copy data to scratch data holders. We need the coarse-data to be accessible by the
+    // fine data (through the same iterators), so we can't  get away from a copy here (I think).
     CH_START(t2);
     const Interval srcInterv = Interval(icomp, icomp);
     const Interval dstInterv = Interval(m_comp, m_comp);
@@ -168,7 +168,7 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
       const EBCellFAB& srcFine = a_phiFine[dit()];
       const EBCellFAB& srcCoar = m_grownCoarData[dit()];
 
-      // Apply the coarse stencil
+      // Apply the coarse and fine stencils
       constexpr int numComp = 1;
       m_aggCoarStencils[dit()]->apply(dstFine,
                                       srcCoar,
@@ -194,6 +194,7 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_p
   CH_TIME("EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LD<EBCellFAB>, Interval)");
 
   CH_assert(m_ghostCF * IntVect::Unit <= a_phiFine.ghostVect());
+  CH_assert(a_phiFine.nComp() > a_variables.end());
 
   if (a_phiFine.ghostVect() != m_ghostVector) {
     MayDay::Error("EBLeastSquaresMultigridInterpolator::coarseFineInterp -- number of ghost cells do not match!");
@@ -210,19 +211,27 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
                                                        const Interval   a_variables,
                                                        const DataIndex& a_dit) const noexcept
 {
-  CH_TIME("EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LD<EBCellFAB>, Interval, DataIndex)");
+  CH_TIMERS("EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LD<EBCellFAB>)");
+  CH_TIMER("regular_interp", t1);
+  CH_TIMER("irregular_interp", t2);
+
+  CH_assert(a_phi.nComp() > a_variables.end());
 
   // TLDR: This routine does the coarse-fine interpolation with the coarse-grid data set to zero. This is the kernel version,
   //       operating on a grid patch. It first does a direct kernel for regular data, and then does the interpolation near the
   //       EB after that.
   const Real dxFine = 1.0;
   const Real dxCoar = 1.0 * m_refRat;
+  const Real c1     = 2 * (dxCoar - dxFine) / (dxCoar + dxFine);
+  const Real c2     = -(dxCoar - dxFine) / (dxCoar + 3 * dxFine);
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
 
     // Do the regular interp on all sides of the current patch.
+    CH_START(t1);
     for (int dir = 0; dir < SpaceDim; dir++) {
       for (SideIterator sit; sit.ok(); ++sit) {
+        const IntVect shift = sign(sit()) * BASISV(dir);
 
         // Regular homogeneous interpolation on side sit() in direction dir
         const Box ghostBox = m_cfivs[a_dit].at(std::make_pair(dir, sit()));
@@ -232,10 +241,6 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
 
           // C++ kernel for homogeneous interpolation along a line, assumning that coarse-grid
           // data is zero.
-          const Real    c1    = 2 * (dxCoar - dxFine) / (dxCoar + dxFine);
-          const Real    c2    = -(dxCoar - dxFine) / (dxCoar + 3 * dxFine);
-          const IntVect shift = sign(sit()) * BASISV(dir);
-
           auto interpHomo = [&](const IntVect& iv) -> void {
             phiReg(iv, ivar) = c1 * phiReg(iv - shift, ivar) + c2 * phiReg(iv - 2 * shift, ivar);
           };
@@ -245,12 +250,15 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
         }
       }
     }
+    CH_STOP(t1);
 
     // Apply fine stencil near the EB. It might look weird that we apply the stencil to a_phi AND put the result in a_phi. This
     // is because the stencils are defined in the ghost cells we will fill, but the stencils only reach into valid data. So, we
     // are, in fact, not writing to data that is used by the other stencils
+    CH_START(t2);
     constexpr int numComp = 1;
     m_aggFineStencils[a_dit]->apply(a_phi, a_phi, ivar, ivar, numComp, false);
+    CH_STOP(t2);
   }
 }
 
@@ -322,7 +330,7 @@ EBLeastSquaresMultigridInterpolator::defineGhostRegions() noexcept
 }
 
 void
-EBLeastSquaresMultigridInterpolator::defineBuffers()
+EBLeastSquaresMultigridInterpolator::defineBuffers() noexcept
 {
   CH_TIME("EBLeastSquaresMultigridInterpolator::defineBuffers()");
 
@@ -340,9 +348,14 @@ EBLeastSquaresMultigridInterpolator::defineBuffers()
 }
 
 void
-EBLeastSquaresMultigridInterpolator::defineStencilsEBCF()
+EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
 {
-  CH_TIME("EBLeastSquaresMultigridInterpolator::defineStencilsEBCF");
+  CH_TIMERS("EBLeastSquaresMultigridInterpolator::defineStencilsEBCF");
+  CH_TIMER("define_grids", t1);
+  CH_TIMER("define_intvectsets", t2);
+  CH_TIMER("neighbor_loop", t3);
+  CH_TIMER("define_structures", t4);
+  CH_TIMER("compute_stencils", t5);
 
   // This routine defines stencils for all the ghost cells we need to fill across the EBCF boundary.
   const int comp = 0;
@@ -359,9 +372,11 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF()
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
+  CH_START(t1);
   m_fineStencils.define(dblFine);
   m_coarStencils.define(dblFine);
-  m_vofIterFine.define(dblFine);
+  m_ghostIterFine.define(dblFine);
+  CH_STOP(t1);
 
   for (DataIterator dit(dblFine); dit.ok(); ++dit) {
     const Box origFineBox    = dblFine[dit()];
@@ -370,17 +385,18 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF()
 
     // Define the valid regions such that the interpolation does not include coarse grid cells that fall beneath the fine level,
     // and no fine cells outside the CF.
-    DenseIntVectSet validFineCells(
-      origFineBox,
-      true); // Original patch. We will this patch's ghost cells if those ghost cells overlap with other patches on this level.
-    DenseIntVectSet validCoarCells(grownCoarBox, true); //
+    CH_START(t2);
+    DenseIntVectSet validFineCells(origFineBox, true);
+    DenseIntVectSet validCoarCells(grownCoarBox, true);
 
     // Subtract the coarse cells under the fine box.
     Box coarsenedFineBox = origFineBox;
     coarsenedFineBox.coarsen(m_refRat);
     validCoarCells -= coarsenedFineBox;
+    CH_START(t2);
 
     // Same for parts of the current (grown) patch that overlaps with neighboring boxes.
+    CH_START(t3);
     NeighborIterator nit(dblFine);
     for (nit.begin(dit()); nit.ok(); ++nit) {
       const Box neighborBoxFine = dblFine
@@ -403,8 +419,10 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF()
     // Restrict to domain
     validFineCells &= domFine;
     validCoarCells &= domCoar;
+    CH_START(t3);
 
     // Now go through each ghost cell and get an interpolation stencil to specified order.
+    CH_START(t4);
     const EBISBox& ebisboxFine = m_eblgFine.getEBISL()[dit()];
     const EBISBox& ebisboxCoar = m_eblgCoFi.getEBISL()[dit()];
 
@@ -412,10 +430,12 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF()
 
     m_fineStencils[dit()].define(m_ghostCells[dit()], fineGraph, m_numStenComp);
     m_coarStencils[dit()].define(m_ghostCells[dit()], fineGraph, m_numStenComp);
-    m_vofIterFine[dit()].define(m_ghostCells[dit()], fineGraph);
+    m_ghostIterFine[dit()].define(m_ghostCells[dit()], fineGraph);
+    CH_START(t4);
 
     // Build stencils.
-    VoFIterator& vofit = m_vofIterFine[dit()];
+    CH_START(t5);
+    VoFIterator& vofit = m_ghostIterFine[dit()];
 
     auto kernel = [&](const VolIndex& ghostVofFine) -> void {
       const VolIndex& ghostVofCoar = ebislFine.coarsen(ghostVofFine, m_refRat, dit());
@@ -428,7 +448,6 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF()
 
       // Try to fine a two-level stencil for this ghost cell. Drop order if we can't find it (and print a warning).
       while (order > 0 && !foundStencil) {
-
         foundStencil = this->getStencil(fineSten,
                                         coarSten,
                                         m_dataLocation,
@@ -465,6 +484,7 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF()
     };
 
     BoxLoops::loop(vofit, kernel);
+    CH_START(t5);
   }
 
   // We now have all the stencils we need. Make them into an AggStencil for performance
@@ -485,20 +505,23 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
                                                 const Real&            a_dxFine,
                                                 const Real&            a_dxCoar,
                                                 const int&             a_order,
-                                                const int&             a_weight)
+                                                const int&             a_weight) const noexcept
 {
-  CH_TIME("EBLeastSquaresMultigridInterpolator::getStencil");
+  CH_TIMERS("EBLeastSquaresMultigridInterpolator::getStencil");
+  CH_TIMER("get_vofs", t1);
+  CH_TIMER("trim_vofs", t2);
+  CH_TIMER("compute_displacements", t3);
+  CH_TIMER("compute_stencil", t4);
 
   // On input, we know which ghost cell we want to interpolate to, and we happen to have a map of valid cells in a_validFineCells and a_validCoarCells. We use
   // that information to build an overdetermined linear system of equations that interpolate to a_ghostVofFine to order a_order. If we don't have enough equations,
   // this routine will return false, and will not create stencils.
 
-  //Timer timer("EBLeastSquaresMultigridInterpolator::getStencil");
-
   bool foundStencil = true;
 
   // I think these radii are good -- but there's no hard limit here. Increase the radii if you
   // see that the stencil drops order.
+  CH_START(t1);
   const int fineRadius = std::max(2, a_order);
   const int coarRadius = std::max(2, fineRadius / m_refRat);
 
@@ -506,32 +529,24 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
   Vector<VolIndex> coarVofs;
 
   // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells or in a_validCoarCells.
-  //timer.startEvent("Get Vofs");
   fineVofs =
     VofUtils::getVofsInRadius(a_ghostVofFine, a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, false);
   coarVofs =
     VofUtils::getVofsInRadius(a_ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, true);
-  //timer.stopEvent("Get Vofs");
 
-  //  const int sizeBefore = fineVofs.size();
-  //timer.startEvent("include cells");
   VofUtils::includeCells(fineVofs, a_validFineCells);
   VofUtils::includeCells(coarVofs, a_validCoarCells);
-  //timer.stopEvent("include cells");
-
-  //  const int sizeAfter = fineVofs.size();
-
-  //  std::cout << sizeBefore << "\t" << sizeAfter << std::endl;
 
   const int numEquations = coarVofs.size() + fineVofs.size();
   const int numUnknowns  = LeastSquares::getTaylorExpansionSize(a_order);
+  CH_STOP(t1);
 
   if (numEquations >= numUnknowns) { // We have enough equations to get a stencil.
-    //timer.startEvent("sort");
     // In many cases we will have WAY too many equations for the specified order. This is particularly true in 3D
     // because the number of coar vofs included in a radius r from the ghost vof can be (1 + 2*r)^3. So for r = 2
     // this = 125 cells, not counting the fine cells. Since singular value decomposition scales like O(n^3), the
     // penalty for including too may equations can be quite severe.
+    CH_START(t2);
     std::vector<VolIndex>& fineVofsTrimmedSize = fineVofs.stdVector();
     std::vector<VolIndex>& coarVofsTrimmedSize = coarVofs.stdVector();
 
@@ -578,9 +593,10 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
 
     fineVofsTrimmedSize.resize(std::min(2 * numUnknowns, curFineSize));
     coarVofsTrimmedSize.resize(std::min(2 * numUnknowns, curCoarSize));
-    //timer.stopEvent("sort");
+    CH_STOP(t2);
 
     // Build displacement vectors
+    CH_START(t3);
     Vector<RealVect> fineDisplacements;
     Vector<RealVect> coarDisplacements;
 
@@ -600,36 +616,34 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
                                                              a_dxFine,
                                                              a_dxCoar));
     }
-    //timer.stopEvent("dist");
+    CH_STOP(t3);
 
     // LeastSquares computes all unknown terms in a Taylor expansion up to specified order. We want the 0th order term, i.e. the interpolated value,
     // which in multi-index notation is the term (0,0), i.e. IntVect::Zero. The format of the two-level least squares routine is such that the
     // fine stencil lies on the first index. This can be confusing, but the LeastSquares uses a very compact notation.
+    CH_START(t4);
     IntVect    interpStenIndex = IntVect::Zero;
     IntVectSet derivs          = IntVectSet(interpStenIndex);
     IntVectSet knownTerms      = IntVectSet();
 
-    //timer.startEvent("stencil");
     std::map<IntVect, std::pair<VoFStencil, VoFStencil>> stencils = LeastSquares::computeDualLevelStencils<
       float>(derivs, knownTerms, fineVofs, coarVofs, fineDisplacements, coarDisplacements, a_weight, a_order);
 
     a_stencilFine = stencils.at(interpStenIndex).first;
     a_stencilCoar = stencils.at(interpStenIndex).second;
-    //timer.stopEvent("stencil");
 
     foundStencil = true;
+    CH_STOP(t4);
   }
   else {
     foundStencil = false;
   }
 
-  //timer.eventReport(true);
-
   return foundStencil;
 }
 
 void
-EBLeastSquaresMultigridInterpolator::makeAggStencils()
+EBLeastSquaresMultigridInterpolator::makeAggStencils() noexcept
 {
   CH_TIME("EBLeastSquaresMultigridInterpolator::makeAggStencils");
 
@@ -646,7 +660,7 @@ EBLeastSquaresMultigridInterpolator::makeAggStencils()
     Vector<RefCountedPtr<BaseStencil>> dstBaseStencilFine;
     Vector<RefCountedPtr<BaseStencil>> dstBaseStencilCoar;
 
-    VoFIterator& vofit = m_vofIterFine[dit()];
+    VoFIterator& vofit = m_ghostIterFine[dit()];
 
     auto kernel = [&](const VolIndex& vofFine) -> void {
       const VoFStencil& stencilFine = m_fineStencils[dit()](vofFine, m_stenComp);
