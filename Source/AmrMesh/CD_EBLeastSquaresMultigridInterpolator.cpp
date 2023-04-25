@@ -380,8 +380,9 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
     CH_START(t3);
     NeighborIterator nit(dblFine);
     for (nit.begin(dit()); nit.ok(); ++nit) {
-      const Box neighborBoxFine = dblFine
-        [nit()]; // = neighboring grid patch on the fine level. Use it's cells if they are also ghost cells in the current patch
+
+      // = neighboring grid patch on the fine level. Use it's cells if they are also ghost cells in the current patch
+      const Box neighborBoxFine = dblFine[nit()];
 
       // Overlapping region between the ghosted box and a neighboring patch (with only valid cells). We are
       // allowed to use these cells.
