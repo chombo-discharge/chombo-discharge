@@ -21,7 +21,6 @@
 #include <ParmParse.H>
 
 // Our includes
-#include <CD_Timer.H>
 #include <CD_EBLeastSquaresMultigridInterpolator.H>
 #include <CD_VofUtils.H>
 #include <CD_LeastSquares.H>
@@ -59,7 +58,6 @@ EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const E
   // Build the regular stencil objects for regular-grid interpolation. For now, we use QuadCFInterp for this. I also leave
   // a timer in place until performance and scalability has been investigated. To check performance, add
   // EBLeastSquaresMultigridInterpolator.profile=true to your input script.
-  Timer timer("EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator");
 
   m_refRat       = a_refRat;
   m_ghostCF      = a_ghostCF;
@@ -73,35 +71,18 @@ EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const E
 
   // Build the regular stencil objects for regular-grid interpolation. Use QuadCFInterp for this (might change this later)
   CH_START(t1);
-  timer.startEvent("Define QuadCFInterp");
   const DisjointBoxLayout& gridsFine = a_eblgFine.getDBL();
   const DisjointBoxLayout& gridsCoar = a_eblgCoar.getDBL();
 
   m_quadCFInterp = RefCountedPtr<QuadCFInterp>(
     new QuadCFInterp(gridsFine, &gridsCoar, 1.0, a_refRat, 1, a_eblgFine.getDomain()));
-  timer.stopEvent("Define QuadCFInterp");
   CH_STOP(t1);
 
   CH_START(t2);
-  timer.startEvent("Define ghost regions");
   this->defineGhostRegions();
-  timer.stopEvent("Define ghost regions");
-
-  timer.startEvent("Define buffers");
   this->defineBuffers();
-  timer.stopEvent("Define buffers");
-
-  timer.startEvent("Define stencils");
   this->defineStencilsEBCF();
-  timer.stopEvent("Define stencils");
   CH_STOP(t2);
-
-  ParmParse pp("EBLeastSquaresMultigridInterpolator");
-  bool      profile = false;
-  pp.query("profile", profile);
-  if (profile) {
-    timer.eventReport(pout());
-  }
 }
 
 int
