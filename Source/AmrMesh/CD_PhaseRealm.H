@@ -107,7 +107,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~PhaseRealm();
+  virtual ~PhaseRealm();
 
   /*!
     @brief Full define function
@@ -353,6 +353,24 @@ public:
   const EBAMRFAB&
   getLevelset() const;
 
+  /*!
+    @brief Get buffer data on the coarsened fine grids. 
+  */
+  EBAMRCellData&
+  getCoFiBufferCell() const noexcept;
+
+  /*!
+    @brief Get buffer data on the coarsened fine grids. 
+  */
+  EBAMRFluxData&
+  getCoFiBufferFlux() const noexcept;
+
+  /*!
+    @brief Get buffer data on the coarsened fine grids. 
+  */
+  EBAMRIVData&
+  getCoFiBufferEB() const noexcept;
+
 protected:
   /*!
     @brief True if things on this phase can be defined. False otherwise. Only used internally. 
@@ -496,6 +514,21 @@ protected:
   */
   EBAMRFAB m_levelset;
 
+  /*!
+    @brief Buffer data which is a coarsening of the fine grid data.
+  */
+  mutable EBAMRCellData m_coFiBufferCell;
+
+  /*!
+    @brief Buffer data which is a coarsening of the fine grid data.
+  */
+  mutable EBAMRFluxData m_coFiBufferFlux;
+
+  /*!
+    @brief Buffer data which is a coarsening of the fine grid data.
+  */
+  mutable EBAMRIVData m_coFiBufferEB;
+
   /*! 
     @brief Cut-cell iterator
   */
@@ -596,6 +629,12 @@ protected:
   */
   void
   defineNeighbors(const int a_lmin);
+
+  /*!
+    @brief Define data buffers used by EB operators
+  */
+  void
+  defineBuffers(const int a_lmin) noexcept;
 
   /*!
     @brief Define coarsening utility

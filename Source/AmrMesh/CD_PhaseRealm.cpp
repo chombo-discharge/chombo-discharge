@@ -12,6 +12,9 @@
 // Chombo includes
 #include <EBArith.H>
 #include <ParmParse.H>
+#include <BaseIVFactory.H>
+#include <EBCellFactory.H>
+#include <EBFluxFactory.H>
 
 // Our includes
 #include <CD_PhaseRealm.H>
@@ -152,6 +155,10 @@ PhaseRealm::regridOperators(const int a_lmin)
   if (m_isDefined) {
 
     Timer timer("PhaseRealm::regridOperators(int)");
+
+    timer.startEvent("Define buffers");
+    this->defineBuffers(a_lmin);
+    timer.stopEvent("Define buffers");
 
     timer.startEvent("EBCoarAve");
     this->defineEBCoarAve(a_lmin);
@@ -414,6 +421,48 @@ PhaseRealm::defineLevelSet(const int a_lmin, const int a_numGhost)
           fab.setVal(minVal, comp);
         }
       }
+    }
+  }
+}
+
+void
+PhaseRealm::defineBuffers(const int a_lmin) noexcept
+{
+  CH_TIME("PhaseRealm::defineBuffers");
+  if (m_verbose) {
+    pout() << "PhaseRealm::defineBuffers" << endl;
+  }
+
+  m_coFiBufferCell.resize(1 + m_finestLevel);
+  m_coFiBufferFlux.resize(1 + m_finestLevel);
+  m_coFiBufferEB.resize(1 + m_finestLevel);
+
+  for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
+    const bool hasFine = lvl < m_finestLevel;
+    const bool hasCoar = lvl > 0;
+
+    if (hasFine) {
+      CH_assert(!m_eblgCoFi.isNull());
+
+      const DisjointBoxLayout& coFiDBL   = m_eblgCoFi[lvl]->getDBL();
+      const EBISLayout&        coFiEBISL = m_eblgCoFi[lvl]->getEBISL();
+
+      // Define coarsened fine data.
+      LayoutData<IntVectSet> irregSetsCoFi(coFiDBL);
+      for (DataIterator dit(coFiDBL); dit.ok(); ++dit) {
+        irregSetsCoFi[dit()] = coFiEBISL[dit()].getIrregIVS(coFiDBL[dit()]);
+      }
+
+      BaseIVFactory<Real> ebFactory(coFiEBISL, irregSetsCoFi);
+
+      m_coFiBufferCell[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(
+        new LevelData<EBCellFAB>(coFiDBL, 1, IntVect::Zero, EBCellFactory(coFiEBISL)));
+
+      m_coFiBufferFlux[lvl] = RefCountedPtr<LevelData<EBFluxFAB>>(
+        new LevelData<EBFluxFAB>(coFiDBL, 1, IntVect::Zero, EBFluxFactory(coFiEBISL)));
+
+      m_coFiBufferEB[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real>>>(
+        new LevelData<BaseIVFAB<Real>>(coFiDBL, 1, IntVect::Zero, BaseIVFactory<Real>(coFiEBISL, irregSetsCoFi)));
     }
   }
 }
@@ -1081,6 +1130,24 @@ PhaseRealm::getLevelset() const
   }
 
   return m_levelset;
+}
+
+EBAMRCellData&
+PhaseRealm::getCoFiBufferCell() const noexcept
+{
+  return this->m_coFiBufferCell;
+}
+
+EBAMRFluxData&
+PhaseRealm::getCoFiBufferFlux() const noexcept
+{
+  return this->m_coFiBufferFlux;
+}
+
+EBAMRIVData&
+PhaseRealm::getCoFiBufferEB() const noexcept
+{
+  return this->m_coFiBufferEB;
 }
 
 #include <CD_NamespaceFooter.H>

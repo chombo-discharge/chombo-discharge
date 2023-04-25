@@ -491,10 +491,8 @@ EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
       BcoefIrreg = mgBcoefIrreg[mgLevel];
       eblg       = *mgLevelGrids[mgLevel];
 
-      hasMGObjects =
-        (mgLevel <
-         mgLevelGrids.size() -
-           1); // This just means that mgLevel was not the last entry in mgLevelGrids so there's even coarser stuff below.
+      // This just means that mgLevel was not the last entry in mgLevelGrids so there's even coarser stuff below.
+      hasMGObjects = (mgLevel < mgLevelGrids.size() - 1);
       if (hasMGObjects) {
         eblgMgCoar = *mgLevelGrids[mgLevel + 1];
       }
