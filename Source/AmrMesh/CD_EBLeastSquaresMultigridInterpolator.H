@@ -297,6 +297,19 @@ protected:
              const Real&            a_dxCoar,
              const int&             a_order,
              const int&             a_weight) const noexcept;
+
+  /*!
+    @brief Do regular coarse-fine interpolation as if the EB is not there.
+    @param[inout] a_finePhi Fine-level data.
+    @param[in] a_coarPhi Coarse-grid data.
+    @param[in] a_fineVar Fine variable
+    @param[in] a_coarVar Coarse variables
+  */
+  virtual void
+  regularCoarseFineInterp(LevelData<FArrayBox>&       a_finePhi,
+                          const LevelData<FArrayBox>& a_coarPhi,
+                          const int                   a_fineVar,
+                          const int                   a_coarVar) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
