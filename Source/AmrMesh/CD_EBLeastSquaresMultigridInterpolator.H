@@ -44,7 +44,7 @@
   
   will have a coarse and and a fine grid stencil, but the fine stencil does not reach out of the ghosted fine-grid patch. The fine-grid part of the stencil is thus
   allowed to use the ghost cells in the patch that are filled from neighboring patches. 
-  @note This class should work with data holders have exactly one component or SpaceDim components. 
+  @note This class includes, as an option, usage of Chombos QuadCFInterp for doing the regular interpolation. To enable that, pass EBLeastSquaresMultigridInterpolator.use_quad_cfi = true in your input script. 
 */
 class EBLeastSquaresMultigridInterpolator : public EBMultigridInterpolator
 {
@@ -146,6 +146,8 @@ protected:
 
   /*!
     @brief For regular interpolation of scalar quantities
+    @note By default this is discontinued, but supported by adding EBLeastSquaresMultigridInterpolator.use_quad_cfi = true to
+    your input script. 
   */
   RefCountedPtr<QuadCFInterp> m_quadCFInterp;
 

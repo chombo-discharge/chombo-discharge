@@ -326,8 +326,8 @@ CoarseInterpQuadCF::computeMixedDeriv(const FArrayBox& a_coarPhi,
 
     mixedDeriv += 0.25 * a_coarPhi(a_ivCoar + tanDir1 + tanDir2, a_coarVar);
     mixedDeriv += 0.25 * a_coarPhi(a_ivCoar - tanDir1 - tanDir2, a_coarVar);
-    mixedDeriv += 0.25 * a_coarPhi(a_ivCoar + tanDir1 - tanDir2, a_coarVar);
-    mixedDeriv += 0.25 * a_coarPhi(a_ivCoar - tanDir1 + tanDir2, a_coarVar);
+    mixedDeriv -= 0.25 * a_coarPhi(a_ivCoar + tanDir1 - tanDir2, a_coarVar);
+    mixedDeriv -= 0.25 * a_coarPhi(a_ivCoar - tanDir1 + tanDir2, a_coarVar);
 
     break;
   }

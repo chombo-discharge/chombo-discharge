@@ -28,8 +28,6 @@
 
   @details This should be defined over the fine grid. It will store stencils for computing the various required terms in the 
   Taylor series, and the user can call various functions for getting those terms. 
-
-  @todo This class stores all stencils explicitly. We might want to consider a "default case" (e.g., centered differencing) for compressing memory.
 */
 class CoarseInterpQuadCF
 {

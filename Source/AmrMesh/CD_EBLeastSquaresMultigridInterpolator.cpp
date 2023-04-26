@@ -142,19 +142,17 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
     LevelData<FArrayBox> coarAliasOneComp;
 
     aliasEB(fineAlias, (LevelData<EBCellFAB>&)a_phiFine);
-    aliasEB(coarAlias, (LevelData<EBCellFAB>&)a_phiCoar);
+    aliasEB(coarAlias, (LevelData<EBCellFAB>&)m_grownCoarData);
 
     aliasLevelData(fineAliasOneComp, &fineAlias, Interval(icomp, icomp));
-    aliasLevelData(coarAliasOneComp, &coarAlias, Interval(icomp, icomp));
+    aliasLevelData(coarAliasOneComp, &coarAlias, Interval(0, 0));
 
     if (m_useQuadCFI) {
+      aliasEB(coarAlias, (LevelData<EBCellFAB>&)a_phiCoar);
+      aliasLevelData(coarAliasOneComp, &coarAlias, Interval(icomp, icomp));
       m_quadCFInterp->coarseFineInterp(fineAliasOneComp, coarAliasOneComp);
     }
     else {
-      // Use our new way of doing it.
-      aliasEB(coarAlias, (LevelData<EBCellFAB>&)m_grownCoarData);
-      aliasLevelData(coarAliasOneComp, &coarAlias, Interval(0, 0));
-
       this->regularCoarseFineInterp(fineAliasOneComp, coarAliasOneComp, icomp, 0);
     }
     CH_STOP(t2);
@@ -704,6 +702,8 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<FArrayBox
                                                              const int                   a_coarVar) const noexcept
 {
   CH_TIMERS("EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp");
+  CH_TIMER("EBLeastSquaresMultigridInterpolator::coarse_interp", t1);
+  CH_TIMER("EBLeastSquaresMultigridInterpolator::fine_interp", t2);
 
   // We are interpolating the first layer of ghost cells to O(h^3). To do this, we must first do an interpolation on the
   // coarse grid, and then cubic interpolation on the fine grid.
@@ -747,7 +747,8 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<FArrayBox
 
           finePhi(fineIV, a_fineVar) = coarPhi(coarIV, a_coarVar);
 
-          // Displacement vector from coarse-grid cell to fine-grid ghost cell.
+          // Displacement vector from coarse-grid cell to fine-grid ghost cell. Note that this is normalized by
+          // the coarse grid cell size.
           const RealVect delta = (RealVect(fineIV) - m_refRat * RealVect(coarIV) + 0.5 * (1.0 - m_refRat)) / m_refRat;
 
           // Add contributions from first and second derivatives.
@@ -768,7 +769,7 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<FArrayBox
               mixedDeriv *= delta[d];
             }
           }
-          finePhi(fineIV, a_fineVar) += 0.5 * mixedDeriv;
+          finePhi(fineIV, a_fineVar) += mixedDeriv;
 #endif
         };
 
@@ -782,8 +783,12 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<FArrayBox
           finePhi(fineIV, a_fineVar) = phi0 * L0 + phi1 * L1 + phi2 * L2;
         };
 
+        CH_START(t1);
         BoxLoops::loop(interpBox, applyDerivs);
+        CH_STOP(t1);
+        CH_START(t2);
         BoxLoops::loop(interpBox, interpOnFine);
+        CH_STOP(t2);
       }
     }
   }
