@@ -15,8 +15,6 @@
 // Chombo includes
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>
-#include <CD_EBCoarAve.H>
-#include <EBFluxRegister.H>
 #include <EBFluxRegister.H>
 #include <EBLevelRedist.H>
 #include <EBCoarToFineRedist.H>

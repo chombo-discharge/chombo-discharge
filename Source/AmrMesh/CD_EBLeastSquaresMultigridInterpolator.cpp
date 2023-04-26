@@ -133,28 +133,13 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
     LevelData<FArrayBox> fineAliasOneComp;
     LevelData<FArrayBox> coarAliasOneComp;
 
-    bool      newCFI = false;
-    ParmParse pp;
-    pp.query("new_cfi", newCFI);
+    aliasEB(fineAlias, (LevelData<EBCellFAB>&)a_phiFine);
+    aliasEB(coarAlias, (LevelData<EBCellFAB>&)a_phiCoar);
 
-    if (newCFI) {
-      aliasEB(fineAlias, (LevelData<EBCellFAB>&)a_phiFine);
-      aliasEB(coarAlias, (LevelData<EBCellFAB>&)m_grownCoarData);
+    aliasLevelData(fineAliasOneComp, &fineAlias, Interval(icomp, icomp));
+    aliasLevelData(coarAliasOneComp, &coarAlias, Interval(icomp, icomp));
 
-      aliasLevelData(fineAliasOneComp, &fineAlias, Interval(icomp, icomp));
-      aliasLevelData(coarAliasOneComp, &coarAlias, Interval(0, 0));
-
-      this->regularCoarseFineInterp(fineAliasOneComp, coarAliasOneComp, icomp, 0);
-    }
-    else {
-      aliasEB(fineAlias, (LevelData<EBCellFAB>&)a_phiFine);
-      aliasEB(coarAlias, (LevelData<EBCellFAB>&)a_phiCoar);
-
-      aliasLevelData(fineAliasOneComp, &fineAlias, Interval(icomp, icomp));
-      aliasLevelData(coarAliasOneComp, &coarAlias, Interval(icomp, icomp));
-
-      m_quadCFInterp->coarseFineInterp(fineAliasOneComp, coarAliasOneComp);
-    }
+    m_quadCFInterp->coarseFineInterp(fineAliasOneComp, coarAliasOneComp);
     CH_STOP(t2);
 
     // Go through each grid patch and the to-be-interpolated ghost cells across the refinement boundary. We simply
@@ -674,7 +659,61 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<FArrayBox
                                                              const int                   a_fineVar,
                                                              const int                   a_coarVar) const noexcept
 {
-  CH_TIMERS("EBLeastSquaresMultigridInterpolator::regularCoarseFineInterps");
+  CH_TIMERS("EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp");
+
+  // We are interpolating the first layer of ghost cells to O(h^3). To do this, we must first do an interpolation on the
+  // coarse grid, and then cubic interpolation on the fine grid.
+
+  MayDay::Abort("EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp - not implemented yet!");
+
+  CH_assert(a_finePhi.nComp() > a_fineVar);
+  CH_assert(a_coarPhi.nComp() > a_coarVar);
+
+  // Compute Lagrangian polynomial interpolant for fine interpolation. For the fine interpolation we assume that
+  // the ghost cell has "coordinate" x = 0, and we compute the Lagrangian interpolant L0(x), L1(x), etc. The other
+  // cells that are involved have positions as follows:
+  const Real x0 = -0.5 * (m_refRat - 1);
+  const Real xi = 0.0;
+  const Real x1 = 1.0;
+  const Real x2 = 2.0;
+
+  const Real L0 = (xi - x1) * (xi - x2) / ((x0 - x1) * (x0 - x2));
+  const Real L1 = (xi - x0) * (xi - x2) / ((x1 - x0) * (x1 - x2));
+  const Real L2 = (xi - x0) * (xi - x1) / ((x2 - x0) * (x2 - x1));
+
+  const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL();
+  const ProblemDomain&     domainCoar = m_eblgCoFi.getDomain();
+
+  for (DataIterator dit(dblFine); dit.ok(); ++dit) {
+    const Box fineBox = dblFine[dit()];
+
+    FArrayBox&       finePhi = a_finePhi[dit()];
+    const FArrayBox& coarPhi = a_coarPhi[dit()];
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        const int iHiLo     = sign(sit());
+        const Box interpBox = m_cfivs[dit()].at(std::make_pair(dir, sit()));
+
+        auto applyCoarseStencil = [&](const IntVect& fineIV) -> void {
+          finePhi(fineIV, a_fineVar) = coarPhi(coarsen(fineIV, m_refRat), a_coarVar);
+        };
+
+        // We've put the coarse-grid interpolation into finePhi(fineIV, a_fineVar). Now use that value
+        // when doing cubic interpolation with the additional fine-grid data.
+        auto interpOnFine = [&](const IntVect& fineIV) -> void {
+          const Real phi0 = finePhi(fineIV, a_fineVar);
+          const Real phi1 = finePhi(fineIV - iHiLo * BASISV(dir), a_fineVar);
+          const Real phi2 = finePhi(fineIV - 2 * iHiLo * BASISV(dir), a_fineVar);
+
+          finePhi(fineIV, a_fineVar) = phi0 * L0 + phi1 * L1 + phi2 * L2;
+        };
+
+        BoxLoops::loop(interpBox, applyCoarseStencil);
+        BoxLoops::loop(interpBox, interpOnFine);
+      }
+    }
+  }
 }
 
 #include <CD_NamespaceFooter.H>

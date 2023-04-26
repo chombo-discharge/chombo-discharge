@@ -164,7 +164,6 @@ PhaseRealm::regridOperators(const int a_lmin)
     this->defineEBCoarAve(a_lmin);
     timer.stopEvent("EBCoarAve");
 
-    MayDay::Warning("Must redo operators below here");
     timer.startEvent("Multigrid interpolator");
     this->defineEBMultigrid(a_lmin);
     timer.stopEvent("Multigrid interpolator");
@@ -443,7 +442,7 @@ PhaseRealm::defineBuffers(const int a_lmin) noexcept
     const bool hasCoar = lvl > 0;
 
     if (hasFine) {
-      CH_assert(!m_eblgCoFi.isNull());
+      CH_assert(!m_eblgCoFi[lvl].isNull());
 
       const DisjointBoxLayout& coFiDBL   = m_eblgCoFi[lvl]->getDBL();
       const EBISLayout&        coFiEBISL = m_eblgCoFi[lvl]->getEBISL();
