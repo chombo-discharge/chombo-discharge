@@ -111,13 +111,22 @@ protected:
   };
 
   /*!
-    @brief Simple enum for holding stencil types for the first derivative
+    @brief Simple enum for holding stencil types for the second derivative
   */
   enum class SecondDerivStencil : unsigned short
   {
     Centered2,
     Backward1,
     Forward1
+  };
+
+  /*!
+    @brief Simple enum for holding stencil types for the mixed derivative
+  */
+  enum class MixedDerivStencil : unsigned short
+  {
+    Standard,
+    Explicit
   };
 
   /*!
@@ -146,6 +155,16 @@ protected:
   int m_ignoreDir;
 
   /*!
+    @brief One tangential direction
+  */
+  int m_tanDir1;
+
+  /*!
+    @brief One tangential direction
+  */
+  int m_tanDir2;
+
+  /*!
     @brief Refinement factor to coarse. 
   */
   int m_refRat;
@@ -167,9 +186,14 @@ protected:
   BaseFab<SecondDerivStencil> m_secondDerivStencils[SpaceDim];
 
   /*!
+    @brief Identifier for whether or not we should use a standard or explicit mixed derivative stencil
+  */
+  BaseFab<MixedDerivStencil> m_mixedDerivStencils;
+
+  /*!
     @brief Mixed-derivative stencil. Only defined in 3D.
   */
-  BaseFab<DerivStencil> m_mixedDerivStencils;
+  BaseFab<DerivStencil> m_explicitMixedDerivStencils;
 
   /*!
     @brief Compute all first-derivative stencils in the coarse grid cells.

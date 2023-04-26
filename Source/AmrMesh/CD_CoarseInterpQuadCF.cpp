@@ -44,6 +44,20 @@ CoarseInterpQuadCF::define(const DisjointBoxLayout& a_dblFine,
   m_ignoreDir  = a_ignoreDir;
   m_stencilBox = coarsen(a_fineGhostCells, m_refRat);
 
+  // Store the coordinates tangential to ignoreDir. Needed for mix-deriv stencil.
+  if (m_ignoreDir == 0) {
+    m_tanDir1 = 1;
+    m_tanDir2 = 2;
+  }
+  else if (m_ignoreDir == 1) {
+    m_tanDir1 = 0;
+    m_tanDir2 = 2;
+  }
+  else if (m_ignoreDir == 2) {
+    m_tanDir1 = 0;
+    m_tanDir2 = 1;
+  }
+
   // Define stencil objects.
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (dir != a_ignoreDir) {
@@ -53,6 +67,7 @@ CoarseInterpQuadCF::define(const DisjointBoxLayout& a_dblFine,
   }
 #if CH_SPACEDIM == 3
   m_mixedDerivStencils.define(m_stencilBox, 1);
+  m_explicitMixedDerivStencils.define(m_stencilBox, 1);
 #endif
 
   // Compute stencils.
@@ -132,55 +147,55 @@ CoarseInterpQuadCF::defineMixedDerivStencils() noexcept
   }
   validCells &= m_domainCoar;
 
+  constexpr Real factor = 1. / 16.;
+
   // Go through the cells and compute finite difference approximations to the mixed derivative. We do this ala Chombo
   // and average the mixed-derivative stencils on edges of the cell since some of the cells we otherwise would need
   // might be covered by the fine grid.
   for (BoxIterator bit(m_stencilBox); bit.ok(); ++bit) {
     const IntVect ivCoar = bit();
 
-    DerivStencil& derivSten = m_mixedDerivStencils(ivCoar, 0);
-    derivSten.clear();
-
-    int dir1 = -1;
-    int dir2 = -1;
-
-    if (m_ignoreDir == 0) {
-      dir1 = 1;
-      dir2 = 2;
+    if (validCells.contains(grow(Box(ivCoar, ivCoar), 1))) {
+      m_mixedDerivStencils(ivCoar, 0) = MixedDerivStencil::Standard;
     }
-    else if (m_ignoreDir == 1) {
-      dir1 = 0;
-      dir2 = 2;
-    }
-    else if (m_ignoreDir == 2) {
-      dir1 = 0;
-      dir2 = 1;
-    }
+    else {
+      m_mixedDerivStencils(ivCoar, 0) = MixedDerivStencil::Explicit;
 
-    // Quadrant which may or may not be available.
-    Vector<Box> quadrants;
+      DerivStencil& derivSten = m_explicitMixedDerivStencils(ivCoar, 0);
+      derivSten.clear();
 
-    quadrants.push_back(Box(ivCoar, ivCoar + BASISV(dir1) + BASISV(dir2)));
-    quadrants.push_back(Box(ivCoar - BASISV(dir1), ivCoar + BASISV(dir2)));
-    quadrants.push_back(Box(ivCoar - BASISV(dir1) - BASISV(dir2), ivCoar));
-    quadrants.push_back(Box(ivCoar - BASISV(dir2), ivCoar + BASISV(dir1)));
+      // Quadrant which may or may not be available.
+      int numQuadrants = 0;
 
-    int numQuadrants;
+      const Box baseQuadrant(ivCoar, ivCoar + BASISV(m_tanDir1) + BASISV(m_tanDir2));
 
-    for (int i = 0; i < quadrants.size(); i++) {
-      const Box quad = quadrants[i];
+      Vector<IntVect> shifts;
+      shifts.push_back(IntVect::Zero);
+      shifts.push_back(-BASISV(m_tanDir1));
+      shifts.push_back(-BASISV(m_tanDir1) - BASISV(m_tanDir2));
+      shifts.push_back(-BASISV(m_tanDir2));
+      for (int i = 0; i < shifts.size(); i++) {
+        Box shiftedBox = baseQuadrant;
+        shiftedBox.shift(shifts[i]);
 
-      if (validCells.contains(quad)) {
-        numQuadrants++;
+        if (validCells.contains(shiftedBox)) {
+          numQuadrants++;
 
-        for (BoxIterator bit(quad); bit.ok(); ++bit) {
-          derivSten.accumulate(bit(), 0.25);
+          // Standard mixed-derivative stencil. The true stencil is
+          // d^2f/dxdx = (f(i+1,j+1) + f(i-1,j-1) - f(i+1,j-1) - f(i-1,j+1))/(4*dx*dx).
+          // But we are computing on the edge between cells, so we're actually using dx = dxCoar/2, which is
+          // why factor is 1./16 instead of 1/4
+          derivSten.accumulate(ivCoar + shifts[i], factor);
+          derivSten.accumulate(ivCoar + shifts[i] + BASISV(m_tanDir1) + BASISV(m_tanDir2), factor);
+          derivSten.accumulate(ivCoar + shifts[i] + BASISV(m_tanDir1), -factor);
+          derivSten.accumulate(ivCoar + shifts[i] + BASISV(m_tanDir2), -factor);
         }
       }
-    }
 
-    if (numQuadrants > 0) {
-      derivSten *= 1.0 / numQuadrants;
+      // Do the average over all the mixed-deriv stencils we found in the available quadrants
+      if (numQuadrants > 0) {
+        derivSten *= 1.0 / numQuadrants;
+      }
     }
   }
 #endif
@@ -255,16 +270,6 @@ CoarseInterpQuadCF::computeSecondDeriv(const FArrayBox& a_coarPhi,
   CH_assert(a_dir != m_ignoreDir);
   CH_assert(m_stencilBox.contains(a_ivCoar));
 
-#if 0
-  const DerivStencil& stencil = m_secondDerivStencils[a_dir](a_ivCoar, 0);
-
-  Real secondDeriv = 0.0;
-  for (int i = 0; i < stencil.size(); i++) {
-    secondDeriv += stencil.getWeight(i) * a_coarPhi(stencil.getIndex(i), a_coarVar);
-  }
-
-  return secondDeriv;
-#else
   Real secondDeriv = 0.0;
 
   const IntVect unitDir = BASISV(a_dir);
@@ -299,7 +304,6 @@ CoarseInterpQuadCF::computeSecondDeriv(const FArrayBox& a_coarPhi,
   }
 
   return secondDeriv;
-#endif
 }
 
 Real
@@ -312,12 +316,37 @@ CoarseInterpQuadCF::computeMixedDeriv(const FArrayBox& a_coarPhi,
   CH_assert(m_stencilBox.contains(a_ivCoar));
 
   Real mixedDeriv = 0.0;
-#if CH_SPACEDIM == 3
-  const DerivStencil& stencil = m_mixedDerivStencils(a_ivCoar, 0);
 
-  for (int i = 0; i < stencil.size(); i++) {
-    mixedDeriv += stencil.getWeight(i) * a_coarPhi(stencil.getIndex(i), a_coarVar);
+#if CH_SPACEDIM == 3
+  switch (m_mixedDerivStencils(a_ivCoar, 0)) {
+  case MixedDerivStencil::Standard: {
+
+    const IntVect tanDir1 = BASISV(m_tanDir1);
+    const IntVect tanDir2 = BASISV(m_tanDir2);
+
+    mixedDeriv += 0.25 * a_coarPhi(a_ivCoar + tanDir1 + tanDir2, a_coarVar);
+    mixedDeriv += 0.25 * a_coarPhi(a_ivCoar - tanDir1 - tanDir2, a_coarVar);
+    mixedDeriv += 0.25 * a_coarPhi(a_ivCoar + tanDir1 - tanDir2, a_coarVar);
+    mixedDeriv += 0.25 * a_coarPhi(a_ivCoar - tanDir1 + tanDir2, a_coarVar);
+
+    break;
   }
+  case MixedDerivStencil::Explicit: {
+    const DerivStencil& stencil = m_explicitMixedDerivStencils(a_ivCoar, 0);
+
+    for (int i = 0; i < stencil.size(); i++) {
+      mixedDeriv += stencil.getWeight(i) * a_coarPhi(stencil.getIndex(i), a_coarVar);
+    }
+
+    break;
+  }
+  default: {
+    mixedDeriv = 0.0;
+
+    break;
+  }
+  }
+
 #endif
 
   return mixedDeriv;
