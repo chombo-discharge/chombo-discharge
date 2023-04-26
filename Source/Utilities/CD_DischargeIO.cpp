@@ -130,10 +130,34 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
 
   variableNamesHDF5[indexDist] = distName;
 
-  // Done with variables. Now set up some storage for Chombo data on each level.
-  Vector<LevelData<FArrayBox>*> chomboData(a_numLevels, nullptr);
+  // Write header.
+#ifdef CH_MPI
+  MPI_Barrier(Chombo_MPI::comm);
+#endif
+  HDF5Handle handle(a_filename.c_str(), HDF5Handle::CREATE);
 
-  // set things up for each level
+  // Write the header to file.
+  HDF5HeaderData header;
+
+  header.m_string["filetype"]    = "VanillaAMRFileType";
+  header.m_int["num_levels"]     = a_numLevels;
+  header.m_int["num_components"] = numCompTotal;
+#if 0 // Uncommenting this because although VisIt uses the attribute, slice operators tend to break. 
+  header.m_realvect["prob_lo"]        = a_probLo;
+#endif
+
+  for (int comp = 0; comp < numCompTotal; comp++) {
+    char labelString[100];
+    sprintf(labelString, "component_%d", comp);
+
+    std::string label(labelString);
+
+    header.m_string[label] = variableNamesHDF5[comp];
+  }
+
+  header.writeToFile(handle);
+
+  // Set things up for each level
   for (int lvl = 0; lvl < a_numLevels; lvl++) {
     const DisjointBoxLayout& dbl = a_grids[lvl];
 
@@ -142,14 +166,12 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
     const ProblemDomain domain = a_domains[lvl];
 
     // Allocate the Chombo FArrayBox data.
-    chomboData[lvl] = new LevelData<FArrayBox>(dbl, numCompTotal, a_numGhost * IntVect::Unit);
-
-    LevelData<FArrayBox>& fabData = *chomboData[lvl];
+    LevelData<FArrayBox> levelData(dbl, numCompTotal, a_numGhost * IntVect::Unit);
 
     // Go through all the grids on this level
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
       // Handle to single-valued data.
-      FArrayBox& currentFab = fabData[dit()];
+      FArrayBox& currentFab = levelData[dit()];
 
       // Grid information and user input variables.
       const EBCellFAB& data    = (*a_data[lvl])[dit()];
@@ -295,46 +317,11 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
         }
       }
     } // End grid patch loop.
-  }   // End of level loop.
 
-  // Now write the data to HDF5.
-#ifdef CH_MPI
-  MPI_Barrier(Chombo_MPI::comm);
-#endif
-  HDF5Handle handle(a_filename.c_str(), HDF5Handle::CREATE);
-
-  // Write the header to file.
-  HDF5HeaderData header;
-
-  header.m_string["filetype"]    = "VanillaAMRFileType";
-  header.m_int["num_levels"]     = a_numLevels;
-  header.m_int["num_components"] = numCompTotal;
-#if 0 // Uncommenting this because although VisIt uses the attribute, slice operators tend to break. 
-  header.m_realvect["prob_lo"]        = a_probLo;
-#endif
-
-  for (int comp = 0; comp < numCompTotal; comp++) {
-    char labelString[100];
-    sprintf(labelString, "component_%d", comp);
-
-    std::string label(labelString);
-
-    header.m_string[label] = variableNamesHDF5[comp];
-  }
-
-  header.writeToFile(handle);
-
-  // Go through each grid level and write it to file.
-  for (int lvl = 0; lvl < a_numLevels; lvl++) {
-    int refRatio = 1;
-
-    if (lvl != a_numLevels - 1) {
-      refRatio = a_refinementRatios[lvl];
-    }
-
-    const int success = writeLevel(handle,
+    const int refRatio = (lvl < a_numLevels) ? a_refinementRatios[lvl] : 1;
+    const int success  = writeLevel(handle,
                                    lvl,
-                                   *chomboData[lvl],
+                                   levelData,
                                    a_dx[lvl],
                                    a_dt,
                                    a_time,
@@ -352,11 +339,6 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
   MPI_Barrier(Chombo_MPI::comm);
 #endif
   handle.close();
-
-  // Clean up memory.
-  for (int lvl = 0; lvl < a_numLevels; lvl++) {
-    delete chomboData[lvl];
-  }
 }
 #endif
 

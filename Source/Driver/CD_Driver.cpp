@@ -2260,12 +2260,15 @@ Driver::writePlotData(EBAMRCellData& a_output, int& a_comp)
     pout() << "Driver::writePlotData(EBAMRCellData, int)" << endl;
   }
 
-  if (m_plotTags)
+  if (m_plotTags) {
     this->writeTags(a_output, a_comp);
-  if (m_plotRanks)
+  }
+  if (m_plotRanks) {
     this->writeRanks(a_output, a_comp);
-  if (m_plotLevelset)
+  }
+  if (m_plotLevelset) {
     this->writeLevelset(a_output, a_comp);
+  }
 }
 
 void
