@@ -133,21 +133,25 @@ Realm::regridBase(const int a_lmin)
   if (m_verbosity > 5) {
     pout() << "Realm::regridBase" << endl;
   }
-  pout() << "before base regrid" << endl;
+  pout() << "before/after base regrid" << endl;
   MemoryReport::getMaxMinMemoryUsage();
   for (auto& r : m_realms) {
     r.second->regridBase(a_lmin);
   }
-  pout() << "after base regrid" << endl;  
-  pout() << "before mflevelgrid" << endl;  
+  MemoryReport::getMaxMinMemoryUsage();
+  pout() << endl;
+
+  pout() << "before/after mflevelgrid" << endl;  
   MemoryReport::getMaxMinMemoryUsage();
   this->defineMFLevelGrid(a_lmin);
-  pout() << "after mflevelgrid" << endl;      
-  pout() << "before validcells" << endl;    
+  MemoryReport::getMaxMinMemoryUsage();
+  pout() << endl;  
+
+  pout() << "before/after validcells" << endl;    
   MemoryReport::getMaxMinMemoryUsage();  
   this->defineValidCells();
   MemoryReport::getMaxMinMemoryUsage();    
-  pout() << "after validcells" << endl;      
+  pout() << endl;
 }
 
 void

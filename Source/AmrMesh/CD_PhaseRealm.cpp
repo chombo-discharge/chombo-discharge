@@ -20,6 +20,7 @@
 #include <CD_PhaseRealm.H>
 #include <CD_Timer.H>
 #include <CD_LoadBalancing.H>
+#include <CD_MemoryReport.H>
 #include <CD_EbFastFineToCoarRedist.H>
 #include <CD_EbFastCoarToFineRedist.H>
 #include <CD_EbFastCoarToCoarRedist.H>
@@ -126,17 +127,29 @@ PhaseRealm::regridBase(const int a_lmin)
 
     Timer timer("PhaseRealm::regridBase(int)");
 
+    pout() << "before/after levelgrid define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Define EBLevelGrid");
     this->defineEBLevelGrid(a_lmin);
     timer.stopEvent("Define EBLevelGrid");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after neighbor define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Define neighbors");
     this->defineNeighbors(a_lmin);
     timer.stopEvent("Define neighbors");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after vofit define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Define VoFIterators");
     this->defineVofIterator(a_lmin);
     timer.stopEvent("Define VoFIterators");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
     if (m_profile) {
       timer.eventReport(pout());
@@ -156,65 +169,125 @@ PhaseRealm::regridOperators(const int a_lmin)
 
     Timer timer("PhaseRealm::regridOperators(int)");
 
+    pout() << "before/after buffer define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Define buffers");
     this->defineBuffers(a_lmin);
     timer.stopEvent("Define buffers");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after coarave define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("EBCoarAve");
     this->defineEBCoarAve(a_lmin);
     timer.stopEvent("EBCoarAve");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after mg define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Multigrid interpolator");
     this->defineEBMultigrid(a_lmin);
     timer.stopEvent("Multigrid interpolator");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after fillpatch define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Ghost interp");
     this->defineFillPatch(a_lmin);
     timer.stopEvent("Ghost interp");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after pwlinterp define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("PWL interp");
     this->defineEBFineInterp(a_lmin);
     timer.stopEvent("PWL interp");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after fluxreg define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Flux register");
     this->defineFluxReg(a_lmin, 1);
     timer.stopEvent("Flux register");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after levelredist define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Level redist");
     this->defineRedistOper(a_lmin, 1);
     timer.stopEvent("Level redist");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after fine2coar levelredist define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Fine-to-coar redist");
     this->defineFineToCoarRedistOper(a_lmin, 1);
     timer.stopEvent("Fine-to-coar redist");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after coar2fine levelredist define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Coar-to-fine redist");
     this->defineCoarToFineRedistOper(a_lmin, 1);
     timer.stopEvent("Coar-to-fine redist");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after coar2coar levelredist define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Coar-to-coar redist");
     this->defineCoarToCoarRedistOper(a_lmin, 1);
     timer.stopEvent("Coar-to-coar redist");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after gradsten define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Gradient stencil");
     this->defineGradSten(a_lmin);
     timer.stopEvent("Gradient stencil");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after irregsten define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Irreg stencil");
     this->defineIrregSten();
     timer.stopEvent("Irreg stencil");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after nonconsdivsten define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Non-conservative stencil");
     this->defineNonConsDivSten();
     timer.stopEvent("Non-conservative stencil");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after particlemesh define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Particle-mesh");
     this->defineParticleMesh();
     timer.stopEvent("Particle-mesh");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
+    pout() << "before/after levelset define" << endl;
+    MemoryReport::getMaxMinMemoryUsage();
     timer.startEvent("Levelset");
     this->defineLevelSet(a_lmin, m_numLsfGhostCells);
     timer.stopEvent("Levelset");
+    MemoryReport::getMaxMinMemoryUsage();
+    pout() << endl;
 
     if (m_profile) {
       timer.eventReport(pout());
