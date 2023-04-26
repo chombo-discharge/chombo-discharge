@@ -148,12 +148,7 @@ protected:
   /*!
     @brief Stencil types for first derivative
   */
-  BaseFab<FirstDerivStencil> m_whichFirstDerivStencils[SpaceDim];
-
-  /*!
-    @brief First-derivative stencils (in all directions except m_dir)
-  */
-  BaseFab<DerivStencil> m_firstDerivStencils[SpaceDim];
+  BaseFab<FirstDerivStencil> m_firstDerivStencils[SpaceDim];
 
   /*!
     @brief Second-derivative stencils (in all directions except m_dir)

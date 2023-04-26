@@ -47,7 +47,6 @@ CoarseInterpQuadCF::define(const DisjointBoxLayout& a_dblFine,
   // Define stencil objects.
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (dir != a_ignoreDir) {
-      m_whichFirstDerivStencils[dir].define(m_stencilBox, 1);
       m_firstDerivStencils[dir].define(m_stencilBox, 1);
       m_secondDerivStencils[dir].define(m_stencilBox, 1);
     }
@@ -78,16 +77,11 @@ CoarseInterpQuadCF::defineFirstDerivStencils() noexcept
   }
   validCells &= m_domainCoar;
 
-  // Go through the cells and compute finite difference approximations.
+  // Go through the cells and figure out which FD approximation we will use.
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (dir != m_ignoreDir) {
-      BaseFab<DerivStencil>& derivStencilsDir = m_firstDerivStencils[dir];
-
       for (BoxIterator bit(m_stencilBox); bit.ok(); ++bit) {
         const IntVect ivCoar = bit();
-
-        DerivStencil& derivSten = derivStencilsDir(ivCoar, 0);
-        derivSten.clear();
 
         const IntVect ivLoLo = ivCoar - 2 * BASISV(dir);
         const IntVect ivLo   = ivCoar - BASISV(dir);
@@ -102,41 +96,19 @@ CoarseInterpQuadCF::defineFirstDerivStencils() noexcept
         // Switch between differencing formulas. We want to use second order differencing if we can, but use
         // first order if we must.
         if (useLo && useHi) {
-          // Centered differencing. No need to store stencil.
-          derivSten.accumulate(ivLo, -0.5);
-          derivSten.accumulate(ivHi, 0.5);
-
-          m_whichFirstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Centered2;
+          m_firstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Centered2;
         }
         else if (useLo && useLoLo) {
-          // 2nd order backward difference
-          derivSten.accumulate(ivCoar, 1.5);
-          derivSten.accumulate(ivLo, -2.0);
-          derivSten.accumulate(ivLoLo, 0.5);
-
-          m_whichFirstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Backward2;
+          m_firstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Backward2;
         }
         else if (useHi && useHiHi) {
-          // 2nd order forward difference
-          derivSten.accumulate(ivCoar, -1.5);
-          derivSten.accumulate(ivHi, 2.0);
-          derivSten.accumulate(ivHiHi, -0.5);
-
-          m_whichFirstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Forward2;
-        }
-        else if (!useLo && useHi) {
-          // First order forward difference
-          derivSten.accumulate(ivHi, 1.0);
-          derivSten.accumulate(ivCoar, -1.0);
-
-          m_whichFirstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Forward1;
+          m_firstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Forward2;
         }
         else if (useLo && !useHi) {
-          // First order backward difference
-          derivSten.accumulate(ivCoar, 1.0);
-          derivSten.accumulate(ivLo, -1.0);
-
-          m_whichFirstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Backward1;
+          m_firstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Backward1;
+        }
+        else if (!useLo && useHi) {
+          m_firstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Forward1;
         }
       }
     }
@@ -284,10 +256,10 @@ CoarseInterpQuadCF::computeFirstDeriv(const FArrayBox& a_coarPhi,
   CH_assert(m_stencilBox.contains(a_ivCoar));
 
   Real firstDeriv = 0.0;
-#if 1
+
   const IntVect unitDir = BASISV(a_dir);
 
-  switch (m_whichFirstDerivStencils[a_dir](a_ivCoar, 0)) {
+  switch (m_firstDerivStencils[a_dir](a_ivCoar, 0)) {
   case FirstDerivStencil::Centered2: {
     firstDeriv += 0.5 * a_coarPhi(a_ivCoar + unitDir, a_coarVar);
     firstDeriv -= 0.5 * a_coarPhi(a_ivCoar - unitDir, a_coarVar);
@@ -326,13 +298,6 @@ CoarseInterpQuadCF::computeFirstDeriv(const FArrayBox& a_coarPhi,
     break;
   }
   }
-#else
-  const DerivStencil& stencil = m_firstDerivStencils[a_dir](a_ivCoar, 0);
-
-  for (int i = 0; i < stencil.size(); i++) {
-    firstDeriv += stencil.getWeight(i) * a_coarPhi(stencil.getIndex(i), a_coarVar);
-  }
-#endif
 
   return firstDeriv;
 }
