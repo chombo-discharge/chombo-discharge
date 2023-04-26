@@ -101,7 +101,7 @@ protected:
   /*!
     @brief Simple enum for holding stencil types for the first derivative
   */
-  enum class FirstDerivStencil : short
+  enum class FirstDerivStencil : unsigned short
   {
     Centered2,
     Backward2,
@@ -109,6 +109,17 @@ protected:
     Backward1,
     Forward1,
   };
+
+  /*!
+    @brief Simple enum for holding stencil types for the first derivative
+  */
+  enum class SecondDerivStencil : unsigned short
+  {
+    Centered2,
+    Backward1,
+    Forward1
+  };
+
   /*!
     @brief Is defined or not
   */
