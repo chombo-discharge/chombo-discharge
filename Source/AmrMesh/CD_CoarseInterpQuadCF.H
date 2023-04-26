@@ -164,7 +164,7 @@ protected:
   /*!
     @brief Second-derivative stencils (in all directions except m_dir)
   */
-  BaseFab<DerivStencil> m_secondDerivStencils[SpaceDim];
+  BaseFab<SecondDerivStencil> m_secondDerivStencils[SpaceDim];
 
   /*!
     @brief Mixed-derivative stencil. Only defined in 3D.
@@ -176,14 +176,7 @@ protected:
     @note Must be accurate to O(h^2).
   */
   virtual void
-  defineFirstDerivStencils() noexcept;
-
-  /*!
-    @brief Compute all second-derivative stencils in the coarse grid cells. 
-    @details This only needs to accurate to O(h).
-  */
-  virtual void
-  defineSecondDerivStencils() noexcept;
+  defineStencils() noexcept;
 
   /*!
     @brief Compute all second-derivative stencils in the coarse grid cells. 

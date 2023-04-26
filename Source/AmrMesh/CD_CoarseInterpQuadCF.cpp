@@ -56,17 +56,16 @@ CoarseInterpQuadCF::define(const DisjointBoxLayout& a_dblFine,
 #endif
 
   // Compute stencils.
-  this->defineFirstDerivStencils();
-  this->defineSecondDerivStencils();
+  this->defineStencils();
   this->defineMixedDerivStencils();
 
   m_isDefined = true;
 }
 
 void
-CoarseInterpQuadCF::defineFirstDerivStencils() noexcept
+CoarseInterpQuadCF::defineStencils() noexcept
 {
-  CH_TIME("CoarseInterpQuadCF::defineFirstDerivStencils");
+  CH_TIME("CoarseInterpQuadCF::defineStencils");
 
   // Stencils will have a radius of 2, so figure out which cells we are allowed to use.
   DenseIntVectSet validCells(grow(m_stencilBox, 2), true);
@@ -96,79 +95,22 @@ CoarseInterpQuadCF::defineFirstDerivStencils() noexcept
         // Switch between differencing formulas. We want to use second order differencing if we can, but use
         // first order if we must.
         if (useLo && useHi) {
-          m_firstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Centered2;
+          m_firstDerivStencils[dir](ivCoar, 0)  = FirstDerivStencil::Centered2;
+          m_secondDerivStencils[dir](ivCoar, 0) = SecondDerivStencil::Centered2;
         }
         else if (useLo && useLoLo) {
-          m_firstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Backward2;
+          m_firstDerivStencils[dir](ivCoar, 0)  = FirstDerivStencil::Backward2;
+          m_secondDerivStencils[dir](ivCoar, 0) = SecondDerivStencil::Backward1;
         }
         else if (useHi && useHiHi) {
-          m_firstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Forward2;
+          m_firstDerivStencils[dir](ivCoar, 0)  = FirstDerivStencil::Forward2;
+          m_secondDerivStencils[dir](ivCoar, 0) = SecondDerivStencil::Forward1;
         }
         else if (useLo && !useHi) {
           m_firstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Backward1;
         }
         else if (!useLo && useHi) {
           m_firstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Forward1;
-        }
-      }
-    }
-  }
-}
-
-void
-CoarseInterpQuadCF::defineSecondDerivStencils() noexcept
-{
-  CH_TIME("CoarseInterpQuadCF::defineSecondDerivStencils");
-
-  // Stencils will have a radius of 2, so figure out which cells we are allowed to use.
-  DenseIntVectSet validCells(grow(m_stencilBox, 2), true);
-  validCells -= m_dblFine[m_dit];
-  NeighborIterator nit(m_dblFine);
-  for (nit.begin(m_dit); nit.ok(); ++nit) {
-    validCells -= m_dblFine[nit()];
-  }
-  validCells &= m_domainCoar;
-
-  // Go through the cells and compute finite difference approximations.
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    if (dir != m_ignoreDir) {
-      BaseFab<DerivStencil>& derivStencilsDir = m_secondDerivStencils[dir];
-
-      for (BoxIterator bit(m_stencilBox); bit.ok(); ++bit) {
-        const IntVect ivCoar = bit();
-
-        DerivStencil& derivSten = derivStencilsDir(ivCoar, 0);
-        derivSten.clear();
-
-        const IntVect ivLoLo = ivCoar - 2 * BASISV(dir);
-        const IntVect ivLo   = ivCoar - BASISV(dir);
-        const IntVect ivHi   = ivCoar + BASISV(dir);
-        const IntVect ivHiHi = ivCoar + 2 * BASISV(dir);
-
-        const bool useLoLo = validCells[ivLoLo];
-        const bool useLo   = validCells[ivLo];
-        const bool useHi   = validCells[ivHi];
-        const bool useHiHi = validCells[ivHiHi];
-
-        // Switch between differencing formulas. We want to use second order differencing if we can, but use
-        // first order if we must.
-        if (useLo && useHi) {
-          // Centered differencing, which is second order accurate.
-          derivSten.accumulate(ivLo, 1.0);
-          derivSten.accumulate(ivCoar, -2.0);
-          derivSten.accumulate(ivHi, 1.0);
-        }
-        else if (useLo && useLoLo) {
-          // 2nd order backward differencing.
-          derivSten.accumulate(ivLoLo, 1.0);
-          derivSten.accumulate(ivLo, -2.0);
-          derivSten.accumulate(ivCoar, 1.0);
-        }
-        else if (useHi && useHiHi) {
-          // Forward differenceing
-          derivSten.accumulate(ivCoar, 1.0);
-          derivSten.accumulate(ivHi, -2.0);
-          derivSten.accumulate(ivHiHi, 1.0);
         }
       }
     }
@@ -313,6 +255,7 @@ CoarseInterpQuadCF::computeSecondDeriv(const FArrayBox& a_coarPhi,
   CH_assert(a_dir != m_ignoreDir);
   CH_assert(m_stencilBox.contains(a_ivCoar));
 
+#if 0
   const DerivStencil& stencil = m_secondDerivStencils[a_dir](a_ivCoar, 0);
 
   Real secondDeriv = 0.0;
@@ -321,6 +264,42 @@ CoarseInterpQuadCF::computeSecondDeriv(const FArrayBox& a_coarPhi,
   }
 
   return secondDeriv;
+#else
+  Real secondDeriv = 0.0;
+
+  const IntVect unitDir = BASISV(a_dir);
+
+  switch (m_secondDerivStencils[a_dir](a_ivCoar, 0)) {
+  case SecondDerivStencil::Centered2: {
+    secondDeriv += a_coarPhi(a_ivCoar - unitDir, a_coarVar);
+    secondDeriv -= 2. * a_coarPhi(a_ivCoar, a_coarVar);
+    secondDeriv += a_coarPhi(a_ivCoar + unitDir, a_coarVar);
+
+    break;
+  }
+  case SecondDerivStencil::Backward1: {
+    secondDeriv += a_coarPhi(a_ivCoar - 2 * unitDir, a_coarVar);
+    secondDeriv -= 2. * a_coarPhi(a_ivCoar - unitDir, a_coarVar);
+    secondDeriv += a_coarPhi(a_ivCoar, a_coarVar);
+
+    break;
+  }
+  case SecondDerivStencil::Forward1: {
+    secondDeriv += a_coarPhi(a_ivCoar, a_coarVar);
+    secondDeriv -= 2. * a_coarPhi(a_ivCoar + unitDir, a_coarVar);
+    secondDeriv += a_coarPhi(a_ivCoar + 2 * unitDir, a_coarVar);
+
+    break;
+  }
+  default: {
+    secondDeriv = 0.0;
+
+    break;
+  }
+  }
+
+  return secondDeriv;
+#endif
 }
 
 Real
