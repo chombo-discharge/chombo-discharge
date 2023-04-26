@@ -24,6 +24,7 @@
 // Our includes
 #include <CD_Location.H>
 #include <CD_EBMultigridInterpolator.H>
+#include <CD_CoarseInterpQuadCF.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -179,6 +180,16 @@ protected:
   mutable LayoutData<VoFIterator> m_ghostIterFine;
 
   /*!
+    @brief Is defined or not
+  */
+  bool m_isDefined;
+
+  /*!
+    @brief If true, will use QuadCFInterp for interpolating ghost cells. Default is false
+  */
+  bool m_useQuadCFI;
+
+  /*!
     @brief Minimum number of ghost cells in input data. 
   */
   IntVect m_ghostVector;
@@ -243,6 +254,16 @@ protected:
   LayoutData<std::map<std::pair<int, Side::LoHiSide>, Box>> m_cfivs;
 
   /*!
+    @brief For doing the coarse-side interpolation near the AMR interface
+  */
+  LayoutData<CoarseInterpQuadCF> m_loCoarseInterpCF[SpaceDim];
+
+  /*!
+    @brief For doing the coarse-side interpolation near the AMR interface
+  */
+  LayoutData<CoarseInterpQuadCF> m_hiCoarseInterpCF[SpaceDim];
+
+  /*!
     @brief Define ghost cells to be filled in range m_ghostCF from each cut-cell. 
   */
   virtual void
@@ -253,6 +274,12 @@ protected:
   */
   virtual void
   defineBuffers() noexcept;
+
+  /*!
+    @brief Define the coarse-sided interpolation stencils for doing the orthogonal derivatives. 
+  */
+  virtual void
+  defineCoarseInterp() noexcept;
 
   /*!
     @brief Define stencils for interpolation across the EBCF refinement boundary. 
