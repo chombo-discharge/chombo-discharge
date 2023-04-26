@@ -16,6 +16,7 @@
 // Our includes
 #include <CD_Realm.H>
 #include <CD_BoxLoops.H>
+#include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
 const std::string Realm::Primal = "primal";
@@ -132,12 +133,21 @@ Realm::regridBase(const int a_lmin)
   if (m_verbosity > 5) {
     pout() << "Realm::regridBase" << endl;
   }
-
+  pout() << "before base regrid" << endl;
+  MemoryReport::getMaxMinMemoryUsage();
   for (auto& r : m_realms) {
     r.second->regridBase(a_lmin);
   }
+  pout() << "after base regrid" << endl;  
+  pout() << "before mflevelgrid" << endl;  
+  MemoryReport::getMaxMinMemoryUsage();
   this->defineMFLevelGrid(a_lmin);
+  pout() << "after mflevelgrid" << endl;      
+  pout() << "before validcells" << endl;    
+  MemoryReport::getMaxMinMemoryUsage();  
   this->defineValidCells();
+  MemoryReport::getMaxMinMemoryUsage();    
+  pout() << "after validcells" << endl;      
 }
 
 void

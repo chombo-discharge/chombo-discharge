@@ -20,6 +20,7 @@
 #include <BaseIVFactory.H>
 
 // Our includes
+#include <CD_MemoryReport.H>
 #include <CD_AmrMesh.H>
 #include <CD_MultifluidAlias.H>
 #include <CD_LoadBalancing.H>
@@ -978,15 +979,19 @@ AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags, const int a_lmin, const int
 
   // TLDR: This is the version that reads boxes. AmrMesh makes the grids from the tags and load balances them
   //       by using the patch volume. Those grids are then sent to the various Realms.
-
+  MemoryReport::getMaxMinMemoryUsage();
   Vector<IntVectSet> tags = a_tags; // buildGrids destroys tags, so we actually have to copy them.
 
+  MemoryReport::getMaxMinMemoryUsage();  
   this->buildGrids(tags, a_lmin, a_hardcap); // Build AMR grids -- the realm grids are defined with these grids.
+  MemoryReport::getMaxMinMemoryUsage();  
   this->defineRealms();                      // Define Realms with the new grids and redo the Realm stuff
+  MemoryReport::getMaxMinMemoryUsage();  
 
   for (auto& r : m_realms) {
     r.second->regridBase(a_lmin);
   }
+  MemoryReport::getMaxMinMemoryUsage();  
 }
 
 void

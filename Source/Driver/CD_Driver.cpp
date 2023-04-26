@@ -1481,19 +1481,37 @@ Driver::setupFresh(const int a_initialRegrids)
   this->allocateInternals();
 
   // Provide TimeStepper with geometry in case it needs it.
+  pout() << "before set comp geom" << endl;
+  MemoryReport::getMaxMinMemoryUsage();
   m_timeStepper->setComputationalGeometry(m_computationalGeometry);
 
   // TimeStepper setup. This instantiatse solvers (but does not necessarily fill them with data).
+  pout() << "before setup solvers" << endl;
+  MemoryReport::getMaxMinMemoryUsage();    
   m_timeStepper->setupSolvers();
   m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);
 
   // Set up the AMR operators
   m_timeStepper->registerOperators();
+  pout() << "before regrid opers" << endl;
+  MemoryReport::getMaxMinMemoryUsage();    
   m_amr->regridOperators(lmin);
+  pout() << "after regrid opers" << endl;
+  MemoryReport::getMaxMinMemoryUsage();      
+
 
   // Fill solves with initial data
+  pout() << "before ts alloc" << endl;
+  MemoryReport::getMaxMinMemoryUsage();    
   m_timeStepper->allocate();
+  pout() << "after ts alloc" << endl;  
+  pout() << "before init data" << endl;
+  MemoryReport::getMaxMinMemoryUsage();    
   m_timeStepper->initialData();
+  pout() << "after init data" << endl;
+  MemoryReport::getMaxMinMemoryUsage();      
+
+  
 
   // If called for -- we can perform a
   if (m_doInitLoadBalancing) {
