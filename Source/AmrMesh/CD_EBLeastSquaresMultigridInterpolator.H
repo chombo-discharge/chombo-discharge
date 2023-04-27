@@ -174,7 +174,7 @@ protected:
   /*!
     @brief Coarsened data
   */
-  mutable LevelData<EBCellFAB> m_grownCoarData;
+  mutable LevelData<EBCellFAB>* m_grownCoarData;
 
   /*!
     @brief Iterator over ghost cells
@@ -272,10 +272,16 @@ protected:
   defineGhostRegions() noexcept;
 
   /*!
-    @brief Define data holders. 
+    @brief Define buffer data holder. 
   */
   virtual void
-  defineBuffers() noexcept;
+  defineBuffers() const noexcept;
+
+  /*!
+    @brief Define buffer data holder. 
+  */
+  virtual void
+  undefineBuffers() const noexcept;  
 
   /*!
     @brief Define the coarse-sided interpolation stencils for doing the orthogonal derivatives. 
