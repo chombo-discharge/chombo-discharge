@@ -19,7 +19,7 @@
 #include <ParmParse.H>
 
 // Our includes
-#include <CD_EBFineInterp.H>
+#include <CD_EBCoarseToFineInterp.H>
 #include <CD_ItoKMCStepper.H>
 #include <CD_ParticleOps.H>
 #include <CD_DataOps.H>
@@ -5122,9 +5122,9 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
   DataOps::setValue(totalPPC, 0.0);
   DataOps::setValue(speciesPPC, 0.0);
 
-  // 2. EBFineInterp is not a part of the registry for ItoSolver so we just define it here ourselves. Note that
+  // 2. EBCoarseToFineInterp is not a part of the registry for ItoSolver so we just define it here ourselves. Note that
   // it is stored on the same level that we interpolate to.
-  Vector<RefCountedPtr<EBFineInterp>> interpOp(1 + a_finestLevel);
+  Vector<RefCountedPtr<EBCoarseToFineInterp>> interpOp(1 + a_finestLevel);
   for (int lvl = 1; lvl <= a_finestLevel; lvl++) {
     const EBLevelGrid& eblgFine = *m_amr->getEBLevelGrid(m_particleRealm, m_plasmaPhase)[lvl];
     const EBLevelGrid& eblgCoFi = *m_amr->getEBLevelGridCoFi(m_particleRealm, m_plasmaPhase)[lvl-1];
@@ -5132,8 +5132,8 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
     const int          refRat   = m_amr->getRefinementRatios()[lvl - 1];
     const int          nComp    = 1;
 
-    interpOp[lvl] = RefCountedPtr<EBFineInterp>(
-      new EBFineInterp(eblgFine, eblgCoFi, eblgCoar, refRat, nComp, eblgFine.getEBIS()));
+    interpOp[lvl] = RefCountedPtr<EBCoarseToFineInterp>(
+      new EBCoarseToFineInterp(eblgFine, eblgCoFi, eblgCoar, refRat, nComp, eblgFine.getEBIS()));
   }
 
   // 3. Go through each solver and figure out the number of particles on the new grids. Add
@@ -5149,7 +5149,7 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
 
     // These levels have changed.
     for (int lvl = std::max(1, a_lmin); lvl <= a_finestLevel; lvl++) {
-      RefCountedPtr<EBFineInterp>& interpolator = interpOp[lvl];
+      RefCountedPtr<EBCoarseToFineInterp>& interpolator = interpOp[lvl];
 
       interpolator->regridConservativeNoSlopes(*speciesPPC[lvl], *speciesPPC[lvl - 1], Interval(0, 0));
 

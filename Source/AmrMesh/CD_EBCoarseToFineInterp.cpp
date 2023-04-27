@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   CD_EBFineInterp.cpp
-  @brief  Implementation of EBFineInterp.H
+  @file   CD_EBCoarseToFineInterp.cpp
+  @brief  Implementation of EBCoarseToFineInterp.H
   @author Robert Marskar
 */
 
@@ -15,40 +15,40 @@
 #include <BaseIVFactory.H>
 
 // Our includes
-#include <CD_EBFineInterp.H>
+#include <CD_EBCoarseToFineInterp.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBFineInterp::EBFineInterp() noexcept
+EBCoarseToFineInterp::EBCoarseToFineInterp() noexcept
 {
-  CH_TIME("EBFineInterp::EBFineInterp(weak)");
+  CH_TIME("EBCoarseToFineInterp::EBCoarseToFineInterp(weak)");
   
   m_isDefined = false;
 }
 
-EBFineInterp::EBFineInterp(const EBLevelGrid&        a_eblgFine,
+EBCoarseToFineInterp::EBCoarseToFineInterp(const EBLevelGrid&        a_eblgFine,
                            const EBLevelGrid&        a_eblgCoFi,
                            const EBLevelGrid&        a_eblgCoar,
                            const int&                a_refRat,
                            const int&                a_nComp,
                            const EBIndexSpace* const a_ebisPtr) noexcept
 {
-  CH_TIME("EBFineInterp::EBFineInterp(full)");
+  CH_TIME("EBCoarseToFineInterp::EBCoarseToFineInterp(full)");
 
   this->define(a_eblgFine, a_eblgCoFi, a_eblgCoar, a_refRat, a_nComp, a_ebisPtr);
 }
 
-EBFineInterp::~EBFineInterp() noexcept {}
+EBCoarseToFineInterp::~EBCoarseToFineInterp() noexcept {}
 
 void
-EBFineInterp::define(const EBLevelGrid&        a_eblgFine,
+EBCoarseToFineInterp::define(const EBLevelGrid&        a_eblgFine,
                      const EBLevelGrid&        a_eblgCoFi,		     
                      const EBLevelGrid&        a_eblgCoar,
                      const int&                a_refRat,
                      const int&                a_nComp,
                      const EBIndexSpace* const a_ebisPtr) noexcept
 {
-  CH_TIME("EBFineInterp::define");
+  CH_TIME("EBCoarseToFineInterp::define");
 
   CH_assert(a_refRat > 1);
   CH_assert(a_nComp > 0);
@@ -98,9 +98,9 @@ EBFineInterp::define(const EBLevelGrid&        a_eblgFine,
 }
 
 void
-EBFineInterp::defineWeights() noexcept
+EBCoarseToFineInterp::defineWeights() noexcept
 {
-  CH_TIME("EBFineInterp::defineWeights");
+  CH_TIME("EBCoarseToFineInterp::defineWeights");
 
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
   const EBISLayout& ebislCoar = m_coarsenedFineEBISL;
@@ -142,14 +142,14 @@ EBFineInterp::defineWeights() noexcept
 }
 
 void
-EBFineInterp::interpolate(LevelData<EBCellFAB>&       a_fineData,
+EBCoarseToFineInterp::interpolate(LevelData<EBCellFAB>&       a_fineData,
                           const LevelData<EBCellFAB>& a_coarData,
                           const Interval&             a_variables,
-                          const EBFineInterp::Type&   a_interpType) const noexcept
+                          const EBCoarseToFineInterp::Type&   a_interpType) const noexcept
 {
-  CH_TIMERS("EBFineInterp::interpolate(LD<EBCellFAB>)");
-  CH_TIMER("EBFineInterp::define_buffer", t1);
-  CH_TIMER("EBFineInterp::copyTo", t2);
+  CH_TIMERS("EBCoarseToFineInterp::interpolate(LD<EBCellFAB>)");
+  CH_TIMER("EBCoarseToFineInterp::define_buffer", t1);
+  CH_TIMER("EBCoarseToFineInterp::copyTo", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_fineData.nComp() > a_variables.end());
@@ -168,24 +168,24 @@ EBFineInterp::interpolate(LevelData<EBCellFAB>&       a_fineData,
 
     for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
       switch (a_interpType) {
-      case EBFineInterp::Type::Arithmetic: {
+      case EBCoarseToFineInterp::Type::Arithmetic: {
         this->regridArithmetic(a_fineData, a_coarData, a_variables);
 
         break;
       }
-      case EBFineInterp::Type::ConservativeNoSlopes: {
+      case EBCoarseToFineInterp::Type::ConservativeNoSlopes: {
         this->regridConservativeNoSlopes(a_fineData, a_coarData, a_variables);
 
         break;
       }
-      case EBFineInterp::Type::ConservativeMinMod: {
+      case EBCoarseToFineInterp::Type::ConservativeMinMod: {
         //        this->regridMinMod(a_fineData, a_coarData, a_variables);
-        MayDay::Error("EBFineInterp::interpolate - logic bust");
+        MayDay::Error("EBCoarseToFineInterp::interpolate - logic bust");
 
         break;
       }
       default: {
-        MayDay::Error("EBFineInterp::interpolate - logic bust. Interpolation type not supported");
+        MayDay::Error("EBCoarseToFineInterp::interpolate - logic bust. Interpolation type not supported");
 
         break;
       }
@@ -195,13 +195,13 @@ EBFineInterp::interpolate(LevelData<EBCellFAB>&       a_fineData,
 }
 
 void
-EBFineInterp::regridArithmetic(LevelData<EBCellFAB>&       a_fineData,
+EBCoarseToFineInterp::regridArithmetic(LevelData<EBCellFAB>&       a_fineData,
                                const LevelData<EBCellFAB>& a_coarData,
                                const Interval&             a_variables) const noexcept
 {
-  CH_TIMERS("EBFineInterp::regridArithmetic(LD<EBCellFAB>)");
-  CH_TIMER("EBFineInterp::define_buffer", t1);
-  CH_TIMER("EBFineInterp::copyTo", t2);
+  CH_TIMERS("EBCoarseToFineInterp::regridArithmetic(LD<EBCellFAB>)");
+  CH_TIMER("EBCoarseToFineInterp::define_buffer", t1);
+  CH_TIMER("EBCoarseToFineInterp::copyTo", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_fineData.nComp() > a_variables.end());
@@ -225,13 +225,13 @@ EBFineInterp::regridArithmetic(LevelData<EBCellFAB>&       a_fineData,
 }
 
 void
-EBFineInterp::regridConservativeNoSlopes(LevelData<EBCellFAB>&       a_fineData,
+EBCoarseToFineInterp::regridConservativeNoSlopes(LevelData<EBCellFAB>&       a_fineData,
                                          const LevelData<EBCellFAB>& a_coarData,
                                          const Interval&             a_variables) const noexcept
 {
-  CH_TIMERS("EBFineInterp::regridConservativeNoSlopes(LD<EBCellFAB>)");
-  CH_TIMER("EBFineInterp::define_buffer", t1);
-  CH_TIMER("EBFineInterp::copyTo", t2);
+  CH_TIMERS("EBCoarseToFineInterp::regridConservativeNoSlopes(LD<EBCellFAB>)");
+  CH_TIMER("EBCoarseToFineInterp::define_buffer", t1);
+  CH_TIMER("EBCoarseToFineInterp::copyTo", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_fineData.nComp() > a_variables.end());
@@ -255,25 +255,25 @@ EBFineInterp::regridConservativeNoSlopes(LevelData<EBCellFAB>&       a_fineData,
 }
 
 void
-EBFineInterp::regridMinMod(LevelData<EBCellFAB>&       a_fineData,
+EBCoarseToFineInterp::regridMinMod(LevelData<EBCellFAB>&       a_fineData,
                            const LevelData<EBCellFAB>& a_coarData,
                            const Interval&             a_variables)
 {
-  CH_TIME("EBFineInterp::regridMinMod");
+  CH_TIME("EBCoarseToFineInterp::regridMinMod");
 
   EBPWLFineInterp::interpolate(a_fineData, a_coarData, a_variables);
 }
 
 void
-EBFineInterp::regridArithmetic(EBCellFAB&       a_fineData,
+EBCoarseToFineInterp::regridArithmetic(EBCellFAB&       a_fineData,
                                const EBCellFAB& a_coarData,
                                const DataIndex& a_dit,
                                const int&       a_fineVar,
                                const int&       a_coarVar) const noexcept
 {
-  CH_TIMERS("EBFineInterp::regridArithmetic(EBCellFAB)");
-  CH_TIMER("EBFineInterp::regular_regrid", t1);
-  CH_TIMER("EBFineInterp::irregular_regrid", t2);
+  CH_TIMERS("EBCoarseToFineInterp::regridArithmetic(EBCellFAB)");
+  CH_TIMER("EBCoarseToFineInterp::regular_regrid", t1);
+  CH_TIMER("EBCoarseToFineInterp::irregular_regrid", t2);
 
   CH_assert(a_fineData.nComp() > a_fineVar);
   CH_assert(a_coarData.nComp() > a_coarVar);
@@ -326,15 +326,15 @@ EBFineInterp::regridArithmetic(EBCellFAB&       a_fineData,
 }
 
 void
-EBFineInterp::regridConservativeNoSlopes(EBCellFAB&       a_fineData,
+EBCoarseToFineInterp::regridConservativeNoSlopes(EBCellFAB&       a_fineData,
                                          const EBCellFAB& a_coarData,
                                          const DataIndex& a_dit,
                                          const int&       a_fineVar,
                                          const int&       a_coarVar) const noexcept
 {
-  CH_TIMERS("EBFineInterp::regridConservativeNoSlopes(EBCellFAB)");
-  CH_TIMER("EBFineInterp::regular_regrid", t1);
-  CH_TIMER("EBFineInterp::irregular_regrid", t2);
+  CH_TIMERS("EBCoarseToFineInterp::regridConservativeNoSlopes(EBCellFAB)");
+  CH_TIMER("EBCoarseToFineInterp::regular_regrid", t1);
+  CH_TIMER("EBCoarseToFineInterp::irregular_regrid", t2);
 
   CH_assert(a_fineData.nComp() > a_fineVar);
   CH_assert(a_coarData.nComp() > a_coarVar);
@@ -403,13 +403,13 @@ EBFineInterp::regridConservativeNoSlopes(EBCellFAB&       a_fineData,
 }
 
 void
-EBFineInterp::regridConservative(LevelData<BaseIVFAB<Real>>&       a_fineData,
+EBCoarseToFineInterp::regridConservative(LevelData<BaseIVFAB<Real>>&       a_fineData,
                                  const LevelData<BaseIVFAB<Real>>& a_coarData,
                                  const Interval&                   a_variables) const noexcept
 {
-  CH_TIMERS("EBFineInterp::regridArithmetic(BaseIVFAB<Real>)");
-  CH_TIMER("EBFineInterp::copyTo", t1);
-  CH_TIMER("EBFineInterp::regrid", t2);    
+  CH_TIMERS("EBCoarseToFineInterp::regridArithmetic(BaseIVFAB<Real>)");
+  CH_TIMER("EBCoarseToFineInterp::copyTo", t1);
+  CH_TIMER("EBCoarseToFineInterp::regrid", t2);    
 
   CH_assert(a_fineData.nComp() >= a_variables.size());
   CH_assert(a_coarData.nComp() >= a_variables.size());
@@ -455,13 +455,13 @@ EBFineInterp::regridConservative(LevelData<BaseIVFAB<Real>>&       a_fineData,
 }
 
 void
-EBFineInterp::regridArithmetic(LevelData<BaseIVFAB<Real>>&       a_fineData,
+EBCoarseToFineInterp::regridArithmetic(LevelData<BaseIVFAB<Real>>&       a_fineData,
                                const LevelData<BaseIVFAB<Real>>& a_coarData,
                                const Interval&                   a_variables) const noexcept
 {
-  CH_TIMERS("EBFineInterp::regridArithmetic(BaseIVFAB<Real>)");
-  CH_TIMER("EBFineInterp::copyTo", t1);
-  CH_TIMER("EBFineInterp::regrid", t2);  
+  CH_TIMERS("EBCoarseToFineInterp::regridArithmetic(BaseIVFAB<Real>)");
+  CH_TIMER("EBCoarseToFineInterp::copyTo", t1);
+  CH_TIMER("EBCoarseToFineInterp::regrid", t2);  
 
   CH_assert(a_fineData.nComp() >= a_variables.size());
   CH_assert(a_coarData.nComp() >= a_variables.size());

@@ -38,7 +38,7 @@
 #include <CD_EBGradient.H>
 #include <CD_EBAMRParticleMesh.H>
 #include <CD_EBAMRSurfaceDeposition.H>
-#include <CD_EBFineInterp.H>
+#include <CD_EBCoarseToFineInterp.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_EbCentroidInterpolationStencil.H>
 #include <CD_CentroidInterpolationStencil.H>
@@ -319,7 +319,7 @@ public:
   /*!
     @brief Get piecewise linear ghost cell interpolation utility
   */
-  Vector<RefCountedPtr<EBFineInterp>>&
+  Vector<RefCountedPtr<EBCoarseToFineInterp>>&
   getFineInterp() const;
 
   /*!
@@ -524,7 +524,7 @@ protected:
   /*!
     @brief Ghost cell interpolation utility
   */
-  mutable Vector<RefCountedPtr<EBFineInterp>> m_ebFineInterp;
+  mutable Vector<RefCountedPtr<EBCoarseToFineInterp>> m_ebFineInterp;
 
   /*!
     @brief Flux register utility
@@ -628,7 +628,7 @@ protected:
     @param[in] a_lmin Coarsest grid level that changes
   */
   void
-  defineEBFineInterp(const int a_lmin);
+  defineEBCoarseToFineInterp(const int a_lmin);
 
   /*!
     @brief Define multigrid injection utility

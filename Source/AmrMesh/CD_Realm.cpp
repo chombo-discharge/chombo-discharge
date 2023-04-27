@@ -598,7 +598,7 @@ Realm::getFillPatch(const phase::which_phase a_phase)
   return m_realms[a_phase]->getFillPatch();
 }
 
-Vector<RefCountedPtr<EBFineInterp>>&
+Vector<RefCountedPtr<EBCoarseToFineInterp>>&
 Realm::getFineInterp(const phase::which_phase a_phase)
 {
   return m_realms[a_phase]->getFineInterp();

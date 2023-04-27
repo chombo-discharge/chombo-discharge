@@ -327,7 +327,7 @@ public:
     @brief Get piecewise linear ghost cell interpolation utility
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<EBFineInterp>>&
+  Vector<RefCountedPtr<EBCoarseToFineInterp>>&
   getFineInterp(const phase::which_phase a_phase);
 
   /*!

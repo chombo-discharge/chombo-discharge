@@ -222,7 +222,7 @@ PhaseRealm::regridOperators(const int a_lmin)
       MemoryReport::getMaxMinMemoryUsage();
     }
     timer.startEvent("PWL interp");
-    this->defineEBFineInterp(a_lmin);
+    this->defineEBCoarseToFineInterp(a_lmin);
     timer.stopEvent("PWL interp");
     if (m_profile) {
       MemoryReport::getMaxMinMemoryUsage();
@@ -662,11 +662,11 @@ PhaseRealm::defineFillPatch(const int a_lmin)
 }
 
 void
-PhaseRealm::defineEBFineInterp(const int a_lmin)
+PhaseRealm::defineEBCoarseToFineInterp(const int a_lmin)
 {
-  CH_TIME("PhaseRealm::defineEBFineInterp");
+  CH_TIME("PhaseRealm::defineEBCoarseToFineInterp");
   if (m_verbose) {
-    pout() << "PhaseRealm::defineEBFineInterp" << endl;
+    pout() << "PhaseRealm::defineEBCoarseToFineInterp" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_eb_fine_interp);
@@ -683,7 +683,7 @@ PhaseRealm::defineEBFineInterp(const int a_lmin)
 
       // Interpolator for filling data on level l from level l-1 lives on level l
       if (hasCoar) {
-        m_ebFineInterp[lvl] = RefCountedPtr<EBFineInterp>(new EBFineInterp(*m_eblg[lvl],
+        m_ebFineInterp[lvl] = RefCountedPtr<EBCoarseToFineInterp>(new EBCoarseToFineInterp(*m_eblg[lvl],
                                                                            *m_eblgCoFi[lvl - 1],
                                                                            *m_eblg[lvl - 1],
                                                                            m_refinementRatios[lvl - 1],
@@ -1145,7 +1145,7 @@ PhaseRealm::getFillPatch() const
   return m_pwlFillPatch;
 }
 
-Vector<RefCountedPtr<EBFineInterp>>&
+Vector<RefCountedPtr<EBCoarseToFineInterp>>&
 PhaseRealm::getFineInterp() const
 {
   if (!this->queryOperator(s_eb_fine_interp)) {

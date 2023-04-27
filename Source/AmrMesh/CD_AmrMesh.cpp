@@ -1951,7 +1951,7 @@ AmrMesh::interpToNewGrids(EBAMRCellData&           a_newData,
 
   // These levels have changed.
   for (int lvl = std::max(1, a_lmin); lvl <= a_newFinestLevel; lvl++) {
-    RefCountedPtr<EBFineInterp>& interpolator = this->getFineInterp(a_newData.getRealm(), a_phase)[lvl];
+    RefCountedPtr<EBCoarseToFineInterp>& interpolator = this->getFineInterp(a_newData.getRealm(), a_phase)[lvl];
 
     // Interpolate the data.
     if (a_useSlopes) {
@@ -1992,7 +1992,7 @@ AmrMesh::interpToNewGrids(EBAMRIVData&             a_newData,
   }
 
   for (int lvl = std::max(1, a_lmin); lvl <= a_newFinestLevel; lvl++) {
-    RefCountedPtr<EBFineInterp>& interpolator = this->getFineInterp(a_newData.getRealm(), a_phase)[lvl];
+    RefCountedPtr<EBCoarseToFineInterp>& interpolator = this->getFineInterp(a_newData.getRealm(), a_phase)[lvl];
 
     const int nComp = a_newData[lvl]->nComp();
 
@@ -2957,7 +2957,7 @@ AmrMesh::getFillPatch(const std::string a_realm, const phase::which_phase a_phas
   return m_realms[a_realm]->getFillPatch(a_phase);
 }
 
-Vector<RefCountedPtr<EBFineInterp>>&
+Vector<RefCountedPtr<EBCoarseToFineInterp>>&
 AmrMesh::getFineInterp(const std::string a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getFineInterp(string, phase::which_phase)");

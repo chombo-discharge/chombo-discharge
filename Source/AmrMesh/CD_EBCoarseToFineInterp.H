@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_EBFineInterp.H
+  @file   CD_EBCoarseToFineInterp.H
   @brief  Declaration of an aggregated class for regrid operations.
   @author Robert Marskar
 */
 
-#ifndef CD_EBFineInterp_H
-#define CD_EBFineInterp_H
+#ifndef CD_EBCoarseToFineInterp_H
+#define CD_EBCoarseToFineInterp_H
 
 // Chombo includes
 #include <EBLevelGrid.H>
@@ -22,7 +22,7 @@
 /*!
   @brief Class for interpolating data to fine grids. Can use constant interpolation or include limiters.
 */
-class EBFineInterp : public EBPWLFineInterp
+class EBCoarseToFineInterp : public EBPWLFineInterp
 {
 public:
   /*!
@@ -38,7 +38,7 @@ public:
   /*!
     @brief Default constructor. Must subsequently call the define method. 
   */
-  EBFineInterp() noexcept;
+  EBCoarseToFineInterp() noexcept;
 
   /*!
     @brief Constructor. Constructs a valid object which can be used for regridding.
@@ -49,7 +49,7 @@ public:
     @param[in] a_nComp    Number of components. 
     @param[in] a_ebisPtr  EB index space. 
   */
-  EBFineInterp(const EBLevelGrid&        a_eblgFine,
+  EBCoarseToFineInterp(const EBLevelGrid&        a_eblgFine,
                const EBLevelGrid&        a_eblgCoFi,
                const EBLevelGrid&        a_eblgCoar,
                const int&                a_refRat,
@@ -59,29 +59,29 @@ public:
   /*!
     @brief Disallowed copy constructor
   */
-  EBFineInterp(const EBFineInterp&) = delete;
+  EBCoarseToFineInterp(const EBCoarseToFineInterp&) = delete;
 
   /*!
     @brief Disallowed move constructor
   */
-  EBFineInterp(const EBFineInterp&&) = delete;
+  EBCoarseToFineInterp(const EBCoarseToFineInterp&&) = delete;
 
   /*!
     @brief Destructor
   */
-  virtual ~EBFineInterp() noexcept;
+  virtual ~EBCoarseToFineInterp() noexcept;
 
   /*!
     @brief Disallowed copy operator
   */
-  EBFineInterp&
-  operator=(const EBFineInterp&) = delete;
+  EBCoarseToFineInterp&
+  operator=(const EBCoarseToFineInterp&) = delete;
 
   /*!
     @brief Disallowed move operator
   */
-  EBFineInterp&
-  operator=(const EBFineInterp&&) = delete;
+  EBCoarseToFineInterp&
+  operator=(const EBCoarseToFineInterp&&) = delete;
 
   /*!
     @brief Define operation. Puts object in usable state.
@@ -111,7 +111,7 @@ public:
   interpolate(LevelData<EBCellFAB>&       a_fineData,
               const LevelData<EBCellFAB>& a_coarData,
               const Interval&             a_variables,
-              const EBFineInterp::Type&   a_interpType) const noexcept;
+              const EBCoarseToFineInterp::Type&   a_interpType) const noexcept;
 
   /*!
     @brief Do a piecewise constant interpolation to the new grids. This ignores the volume fraction of cut cells. 
