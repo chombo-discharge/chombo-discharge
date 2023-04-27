@@ -17,7 +17,6 @@
 #include <EBPWLFineInterp.H>
 
 // Our includes
-#include <CD_Regrid.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -26,6 +25,16 @@
 class EBFineInterp : public EBPWLFineInterp
 {
 public:
+  /*!
+    @brief Type of interpolation methods supported.
+  */
+  enum Type
+  {
+    Arithmetic,
+    ConservativeNoSlopes,
+    ConservativeMinMod,
+  };
+
   /*!
     @brief Default constructor. Must subsequently call the define method. 
   */
@@ -92,10 +101,34 @@ public:
          const EBIndexSpace* const a_ebisPtr) noexcept;
 
   /*!
+    @brief Interpolate to the fine grid using the specified method. 
+    @param[out] a_fineData  Piecewise constant interpolation of the coarse data.
+    @param[in]  a_coarData  Coarse data
+    @param[in]  a_variables Variables to interpolate to the fine grid.
+    @note This simply calls the other methods. 
+  */
+  virtual void
+  interpolate(LevelData<EBCellFAB>&       a_fineData,
+              const LevelData<EBCellFAB>& a_coarData,
+              const Interval&             a_variables,
+              const EBFineInterp::Type&   a_interpType) const noexcept;
+
+  /*!
+    @brief Do a piecewise constant interpolation to the new grids. This ignores the volume fraction of cut cells. 
+    @param[out] a_fineData  Piecewise constant interpolation of the coarse data.
+    @param[in]  a_coarData  Coarse data
+    @param[in]  a_variables Variables to interpolate to the fine grid.
+  */
+  virtual void
+  regridArithmetic(LevelData<EBCellFAB>&       a_fineData,
+                   const LevelData<EBCellFAB>& a_coarData,
+                   const Interval&             a_variables) const noexcept;
+
+  /*!
     @brief Do a piecewise constant interpolation to the new grids.
     @param[out] a_fineData  Piecewise constant interpolation of the coarse data.
     @param[in]  a_coarData  Coarse data
-    @param[in]  a_variables Variables to interpolate. 
+    @param[in]  a_variables Variables to interpolate to the fine grid.
   */
   virtual void
   regridConservativeNoSlopes(LevelData<EBCellFAB>&       a_fineData,
@@ -120,7 +153,7 @@ public:
   virtual void
   regridConservative(LevelData<BaseIVFAB<Real>>&       a_fineData,
                      const LevelData<BaseIVFAB<Real>>& a_coarData,
-                     const Interval&                   a_variables);
+                     const Interval&                   a_variables) const noexcept;
 
   /*!
     @brief Regrid irregular data using arithmetic interpolation
@@ -131,7 +164,7 @@ public:
   virtual void
   regridArithmetic(LevelData<BaseIVFAB<Real>>&       a_fineData,
                    const LevelData<BaseIVFAB<Real>>& a_coarData,
-                   const Interval&                   a_variables);
+                   const Interval&                   a_variables) const noexcept;
 
 protected:
   /*!
@@ -151,14 +184,15 @@ protected:
 
   /*!
     @brief Data holder for holding data on the coarsened fine grids. 
+    @note I'm letting this live as a permanent buffer, simply because its memory footprint is so small. 
   */
-  LevelData<BaseIVFAB<Real>> m_irregCoFi;
+  mutable LevelData<BaseIVFAB<Real>> m_irregCoFi;
 
   /*!
     @brief Iterator for valid cut-cells. 
     @details This iterator runs over the valid fine cells.
   */
-  LayoutData<VoFIterator> m_fineVoFs;
+  mutable LayoutData<VoFIterator> m_fineVoFs;
 
   /*!
     @brief Weights in cut-cells when regridding conservatively
@@ -171,6 +205,21 @@ protected:
   */
   virtual void
   defineWeights() noexcept;
+
+  /*!
+    @brief Piecewise constant interpolation of an EBCellFAB. This ignores the volume fraction. 
+    @param[out] a_fineData Piecewise constant interpolation of the coarse data.
+    @param[in]  a_coarData Coarse data
+    @param[in]  a_dit Grid index. 
+    @param[in]  a_fineVar Fine-grid variable
+    @param[in]  a_coarVar Coarse-grid variable
+  */
+  virtual void
+  regridArithmetic(EBCellFAB&       a_fineData,
+                   const EBCellFAB& a_coarData,
+                   const DataIndex& a_dit,
+                   const int&       a_fineVar,
+                   const int&       a_coarVar) const noexcept;
 
   /*!
     @brief Piecewise constant interpolation of an EBCellFAB 

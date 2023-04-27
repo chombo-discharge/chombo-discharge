@@ -142,6 +142,89 @@ EBFineInterp::defineWeights() noexcept
 }
 
 void
+EBFineInterp::interpolate(LevelData<EBCellFAB>&       a_fineData,
+                          const LevelData<EBCellFAB>& a_coarData,
+                          const Interval&             a_variables,
+                          const EBFineInterp::Type&   a_interpType) const noexcept
+{
+  CH_TIMERS("EBFineInterp::interpolate(LD<EBCellFAB>)");
+  CH_TIMER("EBFineInterp::define_buffer", t1);
+  CH_TIMER("EBFineInterp::copyTo", t2);
+
+  CH_assert(m_isDefined);
+  CH_assert(a_fineData.nComp() > a_variables.end());
+  CH_assert(a_coarData.nComp() > a_variables.end());
+
+  CH_START(t1);
+  const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
+  const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
+  LevelData<EBCellFAB>     coarsenedFineData(dblCoFi, 1, IntVect::Zero, EBCellFactory(ebislCoFi));
+  CH_STOP(t1);
+
+  for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
+    CH_START(t2);
+    a_coarData.copyTo(Interval(ivar, ivar), coarsenedFineData, Interval(0, 0));
+    CH_STOP(t2);
+
+    for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
+      switch (a_interpType) {
+      case EBFineInterp::Type::Arithmetic: {
+        this->regridArithmetic(a_fineData, a_coarData, a_variables);
+
+        break;
+      }
+      case EBFineInterp::Type::ConservativeNoSlopes: {
+        this->regridConservativeNoSlopes(a_fineData, a_coarData, a_variables);
+
+        break;
+      }
+      case EBFineInterp::Type::ConservativeMinMod: {
+        //        this->regridMinMod(a_fineData, a_coarData, a_variables);
+        MayDay::Error("EBFineInterp::interpolate - logic bust");
+
+        break;
+      }
+      default: {
+        MayDay::Error("EBFineInterp::interpolate - logic bust. Interpolation type not supported");
+
+        break;
+      }
+      }
+    }
+  }
+}
+
+void
+EBFineInterp::regridArithmetic(LevelData<EBCellFAB>&       a_fineData,
+                               const LevelData<EBCellFAB>& a_coarData,
+                               const Interval&             a_variables) const noexcept
+{
+  CH_TIMERS("EBFineInterp::regridArithmetic(LD<EBCellFAB>)");
+  CH_TIMER("EBFineInterp::define_buffer", t1);
+  CH_TIMER("EBFineInterp::copyTo", t2);
+
+  CH_assert(m_isDefined);
+  CH_assert(a_fineData.nComp() > a_variables.end());
+  CH_assert(a_coarData.nComp() > a_variables.end());
+
+  CH_START(t1);
+  const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
+  const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
+  LevelData<EBCellFAB>     coarsenedFineData(dblCoFi, 1, IntVect::Zero, EBCellFactory(ebislCoFi));
+  CH_STOP(t1);
+
+  for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
+    CH_START(t2);
+    a_coarData.copyTo(Interval(ivar, ivar), coarsenedFineData, Interval(0, 0));
+    CH_STOP(t2);
+
+    for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
+      this->regridArithmetic(a_fineData[dit()], coarsenedFineData[dit()], dit(), ivar, 0);
+    }
+  }
+}
+
+void
 EBFineInterp::regridConservativeNoSlopes(LevelData<EBCellFAB>&       a_fineData,
                                          const LevelData<EBCellFAB>& a_coarData,
                                          const Interval&             a_variables) const noexcept
@@ -149,8 +232,6 @@ EBFineInterp::regridConservativeNoSlopes(LevelData<EBCellFAB>&       a_fineData,
   CH_TIMERS("EBFineInterp::regridConservativeNoSlopes(LD<EBCellFAB>)");
   CH_TIMER("EBFineInterp::define_buffer", t1);
   CH_TIMER("EBFineInterp::copyTo", t2);
-
-  pout() << "in here" << endl;
 
   CH_assert(m_isDefined);
   CH_assert(a_fineData.nComp() > a_variables.end());
@@ -171,6 +252,77 @@ EBFineInterp::regridConservativeNoSlopes(LevelData<EBCellFAB>&       a_fineData,
       this->regridConservativeNoSlopes(a_fineData[dit()], coarsenedFineData[dit()], dit(), ivar, 0);
     }
   }
+}
+
+void
+EBFineInterp::regridMinMod(LevelData<EBCellFAB>&       a_fineData,
+                           const LevelData<EBCellFAB>& a_coarData,
+                           const Interval&             a_variables)
+{
+  CH_TIME("EBFineInterp::regridMinMod");
+
+  EBPWLFineInterp::interpolate(a_fineData, a_coarData, a_variables);
+}
+
+void
+EBFineInterp::regridArithmetic(EBCellFAB&       a_fineData,
+                               const EBCellFAB& a_coarData,
+                               const DataIndex& a_dit,
+                               const int&       a_fineVar,
+                               const int&       a_coarVar) const noexcept
+{
+  CH_TIMERS("EBFineInterp::regridArithmetic(EBCellFAB)");
+  CH_TIMER("EBFineInterp::regular_regrid", t1);
+  CH_TIMER("EBFineInterp::irregular_regrid", t2);
+
+  CH_assert(a_fineData.nComp() > a_fineVar);
+  CH_assert(a_coarData.nComp() > a_coarVar);
+
+  const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
+  const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
+
+  const EBISLayout& ebislFine = m_eblgFine.getEBISL();
+  const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
+
+  const EBISBox& ebisBoxFine = ebislFine[a_dit];
+  const EBISBox& ebisBoxCoar = ebislCoar[a_dit];
+
+  const Box coarBox = dblCoar[a_dit];
+  const Box refiBox = Box(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
+
+  const Real volFactor = std::pow(m_refRat, SpaceDim);
+
+  FArrayBox&       fineDataReg = a_fineData.getFArrayBox();
+  const FArrayBox& coarDataReg = a_coarData.getFArrayBox();
+
+  // Regular kernel. Set the fine data equal to the coarse data.
+  auto regularKernel = [&](const IntVect& coarIV) -> void {
+    const Real& coarVal = coarDataReg(coarIV, a_coarVar);
+
+    for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
+      const IntVect& fineIV = m_refRat * coarIV + bit();
+
+      fineDataReg(fineIV, a_fineVar) = coarVal;
+    }
+  };
+
+  // Cut-cell kernel.
+  auto irregularKernel = [&](const VolIndex& coarVoF) -> void {
+    const Vector<VolIndex> fineVoFs = ebislCoar.refine(coarVoF, m_refRat, a_dit);
+
+    for (int i = 0; i < fineVoFs.size(); i++) {
+      a_fineData(fineVoFs[i], a_fineVar) = a_coarData(coarVoF, a_coarVar);
+    }
+  };
+
+  CH_START(t1);
+  BoxLoops::loop(coarBox, regularKernel);
+  CH_STOP(t1);
+
+  CH_START(t2);
+  VoFIterator vofit(m_irregRegions[a_dit], ebisBoxCoar.getEBGraph());
+  BoxLoops::loop(vofit, irregularKernel);
+  CH_STOP(t2);
 }
 
 void
@@ -251,21 +403,13 @@ EBFineInterp::regridConservativeNoSlopes(EBCellFAB&       a_fineData,
 }
 
 void
-EBFineInterp::regridMinMod(LevelData<EBCellFAB>&       a_fineData,
-                           const LevelData<EBCellFAB>& a_coarData,
-                           const Interval&             a_variables)
-{
-  CH_TIME("EBFineInterp::regridMinMod");
-
-  EBPWLFineInterp::interpolate(a_fineData, a_coarData, a_variables);
-}
-
-void
 EBFineInterp::regridConservative(LevelData<BaseIVFAB<Real>>&       a_fineData,
                                  const LevelData<BaseIVFAB<Real>>& a_coarData,
-                                 const Interval&                   a_variables)
+                                 const Interval&                   a_variables) const noexcept
 {
-  CH_TIME("EBFineInterp::regridConservative");
+  CH_TIMERS("EBFineInterp::regridArithmetic(BaseIVFAB<Real>)");
+  CH_TIMER("EBFineInterp::copyTo", t1);
+  CH_TIMER("EBFineInterp::regrid", t2);    
 
   CH_assert(a_fineData.nComp() >= a_variables.size());
   CH_assert(a_coarData.nComp() >= a_variables.size());
@@ -277,13 +421,16 @@ EBFineInterp::regridConservative(LevelData<BaseIVFAB<Real>>&       a_fineData,
   CH_assert(a_coarData.disjointBoxLayout() == m_eblgCoar.getDBL());
 
   for (int comp = a_variables.begin(); comp <= a_variables.end(); comp++) {
+    CH_START(t1);
     a_coarData.copyTo(Interval(comp, comp), m_irregCoFi, Interval(0, 0));
+    CH_STOP(t1);    
 
     const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
 
     const EBISLayout& ebislFine = m_eblgFine.getEBISL();
     const EBISLayout& ebislCoar = m_coarsenedFineEBISL;
 
+    CH_START(t2);
     for (DataIterator dit(dblFine); dit.ok(); ++dit) {
       const EBISBox& fineEBISBox = ebislFine[dit()];
       const EBISBox& coarEBISBox = ebislCoar[dit()];
@@ -303,15 +450,18 @@ EBFineInterp::regridConservative(LevelData<BaseIVFAB<Real>>&       a_fineData,
 
       BoxLoops::loop(m_fineVoFs[dit()], kernel);
     }
+    CH_STOP(t2);    
   }
 }
 
 void
 EBFineInterp::regridArithmetic(LevelData<BaseIVFAB<Real>>&       a_fineData,
                                const LevelData<BaseIVFAB<Real>>& a_coarData,
-                               const Interval&                   a_variables)
+                               const Interval&                   a_variables) const noexcept
 {
-  CH_TIME("EBFineInterp::regridArithmetic");
+  CH_TIMERS("EBFineInterp::regridArithmetic(BaseIVFAB<Real>)");
+  CH_TIMER("EBFineInterp::copyTo", t1);
+  CH_TIMER("EBFineInterp::regrid", t2);  
 
   CH_assert(a_fineData.nComp() >= a_variables.size());
   CH_assert(a_coarData.nComp() >= a_variables.size());
@@ -323,10 +473,13 @@ EBFineInterp::regridArithmetic(LevelData<BaseIVFAB<Real>>&       a_fineData,
   CH_assert(a_coarData.disjointBoxLayout() == m_eblgCoar.getDBL());
 
   for (int comp = a_variables.begin(); comp <= a_variables.end(); comp++) {
+    CH_START(t1);
     a_coarData.copyTo(Interval(comp, comp), m_irregCoFi, Interval(0, 0));
+    CH_STOP(t1);    
 
     const EBISLayout& ebislFine = m_eblgFine.getEBISL();
 
+    CH_START(t2);
     for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
       BaseIVFAB<Real>&       fineData = a_fineData[dit()];
       const BaseIVFAB<Real>& coarData = m_irregCoFi[dit()];
@@ -339,6 +492,7 @@ EBFineInterp::regridArithmetic(LevelData<BaseIVFAB<Real>>&       a_fineData,
 
       BoxLoops::loop(m_fineVoFs[dit()], kernel);
     }
+    CH_START(t2);    
   }
 }
 
