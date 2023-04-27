@@ -32,7 +32,6 @@ main(int argc, char* argv[])
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
   engine->setupAndRun(input_file);
 
-  ReportUnfreedMemory(pout());
 #ifdef CH_MPI
   CH_TIMER_REPORT();
   MPI_Finalize();

@@ -141,16 +141,16 @@ Realm::regridBase(const int a_lmin)
   MemoryReport::getMaxMinMemoryUsage();
   pout() << endl;
 
-  pout() << "before/after mflevelgrid" << endl;  
+  pout() << "before/after mflevelgrid" << endl;
   MemoryReport::getMaxMinMemoryUsage();
   this->defineMFLevelGrid(a_lmin);
   MemoryReport::getMaxMinMemoryUsage();
-  pout() << endl;  
+  pout() << endl;
 
-  pout() << "before/after validcells" << endl;    
-  MemoryReport::getMaxMinMemoryUsage();  
+  pout() << "before/after validcells" << endl;
+  MemoryReport::getMaxMinMemoryUsage();
   this->defineValidCells();
-  MemoryReport::getMaxMinMemoryUsage();    
+  MemoryReport::getMaxMinMemoryUsage();
   pout() << endl;
 }
 
