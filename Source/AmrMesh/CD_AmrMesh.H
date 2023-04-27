@@ -1288,15 +1288,15 @@ public:
     @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed). 
     @param[in]  a_oldFinestLevel Previous finest level.
     @param[in]  a_newFinestLevel New finest level. 
-    @param[in]  a_useSlopes      If true, use slopes when regridding the data. 
+    @param[in]  a_type Interpolation type
   */
   void
-  interpToNewGrids(MFAMRCellData&       a_newData,
-                   const MFAMRCellData& a_oldData,
-                   const int            a_lmin,
-                   const int            a_oldFinestLevel,
-                   const int            a_newFinestLevel,
-                   const bool           a_useSlopes);
+  interpToNewGrids(MFAMRCellData&                   a_newData,
+                   const MFAMRCellData&             a_oldData,
+                   const int                        a_lmin,
+                   const int                        a_oldFinestLevel,
+                   const int                        a_newFinestLevel,
+                   const EBCoarseToFineInterp::Type a_type);
 
   /*!
     @brief Interpolate data to new grids
@@ -1308,16 +1308,16 @@ public:
     @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed). 
     @param[in]  a_oldFinestLevel Previous finest level.
     @param[in]  a_newFinestLevel New finest level. 
-    @param[in]  a_useSlopes      If true, use slopes when regridding the data. 
+    @param[in]  a_type Interpolation type
   */
   void
-  interpToNewGrids(EBAMRCellData&           a_newData,
-                   const EBAMRCellData&     a_oldData,
-                   const phase::which_phase a_phase,
-                   const int                a_lmin,
-                   const int                a_oldFinestLevel,
-                   const int                a_newFinestLevel,
-                   const bool               a_useSlopes);
+  interpToNewGrids(EBAMRCellData&                   a_newData,
+                   const EBAMRCellData&             a_oldData,
+                   const phase::which_phase         a_phase,
+                   const int                        a_lmin,
+                   const int                        a_oldFinestLevel,
+                   const int                        a_newFinestLevel,
+                   const EBCoarseToFineInterp::Type a_type);
 
   /*!
     @brief Interpolate data to new grids
@@ -1329,16 +1329,16 @@ public:
     @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed). 
     @param[in]  a_oldFinestLevel Previous finest level.
     @param[in]  a_newFinestLevel New finest level. 
-    @param[in]  a_conservative   If true, do conservative regridding. 
+    @param[in]  a_type           Interpolation type
   */
   void
-  interpToNewGrids(EBAMRIVData&             a_newData,
-                   const EBAMRIVData&       a_oldData,
-                   const phase::which_phase a_phase,
-                   const int                a_lmin,
-                   const int                a_oldFinestLevel,
-                   const int                a_newFinestLevel,
-                   const bool               a_conservative);
+  interpToNewGrids(EBAMRIVData&                     a_newData,
+                   const EBAMRIVData&               a_oldData,
+                   const phase::which_phase         a_phase,
+                   const int                        a_lmin,
+                   const int                        a_oldFinestLevel,
+                   const int                        a_newFinestLevel,
+                   const EBCoarseToFineInterp::Type a_type);
 
   /*!
     @brief Regrid particle to new grids. 
@@ -1588,7 +1588,7 @@ public:
     @param[in] a_phase Phase (gas or solid)
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
-  getEBLevelGridCoFi(const std::string a_realm, const phase::which_phase a_phase) const;  
+  getEBLevelGridCoFi(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get EBISLayouts for a Realm and phase

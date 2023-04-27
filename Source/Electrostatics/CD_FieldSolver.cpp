@@ -396,8 +396,11 @@ FieldSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_ne
   // Reallocate internals
   this->allocate();
 
+  const EBCoarseToFineInterp::Type interpType = m_regridSlopes ? EBCoarseToFineInterp::Type::ConservativeMinMod
+                                                               : EBCoarseToFineInterp::Type::ConservativeNoSlopes;
+
   // Regrid potential data holder
-  m_amr->interpToNewGrids(m_potential, m_cache, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
+  m_amr->interpToNewGrids(m_potential, m_cache, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);
 
   // Synchronize over levels.
   m_amr->conservativeAverage(m_potential, m_realm);

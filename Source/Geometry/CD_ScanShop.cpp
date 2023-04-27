@@ -385,7 +385,7 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
 
   m_timer.startEvent("Set box types");
   for (DataIterator dit(m_grids[a_level]); dit.ok(); ++dit) {
-    const Box  box  = sortedBoxesAndTypes[dit().intCode()].first;
+    const Box box  = sortedBoxesAndTypes[dit().intCode()].first;
     const int type = sortedBoxesAndTypes[dit().intCode()].second;
 
     // This is an error.

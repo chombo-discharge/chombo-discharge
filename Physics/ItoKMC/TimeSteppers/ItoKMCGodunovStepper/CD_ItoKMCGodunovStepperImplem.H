@@ -520,7 +520,7 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
                                 a_lmin,
                                 a_oldFinestLevel,
                                 a_newFinestLevel,
-                                false);
+                                EBCoarseToFineInterp::Type::ConservativeNoSlopes);
 
   this->m_amr->interpToNewGrids(m_semiImplicitConductivityCDR,
                                 m_scratchSemiImplicitConductivityCDR,
@@ -528,7 +528,7 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
                                 a_lmin,
                                 a_oldFinestLevel,
                                 a_newFinestLevel,
-                                false);
+                                EBCoarseToFineInterp::Type::ConservativeNoSlopes);
 
   // Set up the field solver with standard coefficients or with
   // modified coefficients if we are reusing data from the last time step.

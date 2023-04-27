@@ -22,7 +22,7 @@
 EBCoarseToFineInterp::EBCoarseToFineInterp() noexcept
 {
   CH_TIME("EBCoarseToFineInterp::EBCoarseToFineInterp(weak)");
-  
+
   m_isDefined = false;
 }
 
@@ -48,51 +48,60 @@ EBCoarseToFineInterp::define(const EBLevelGrid&        a_eblgFine,
                              const int&                a_nComp,
                              const EBIndexSpace* const a_ebisPtr) noexcept
 {
-  CH_TIME("EBCoarseToFineInterp::define");
+  CH_TIMERS("EBCoarseToFineInterp::define");
+  CH_TIMER("EBCoarseToFineInterp::define_ebpwlfineinterp", t0);
+  CH_TIMER("EBCoarseToFineInterp::define_buffers", t1);
 
   CH_assert(a_refRat > 1);
   CH_assert(a_nComp > 0);
   CH_assert(a_ebisPtr != nullptr);
 
-  EBPWLFineInterp::define(a_eblgFine.getDBL(),
-                          a_eblgCoar.getDBL(),
-                          a_eblgFine.getEBISL(),
-                          a_eblgCoar.getEBISL(),
-                          a_eblgCoar.getDomain(),
-                          a_refRat,
-                          a_nComp,
-                          a_ebisPtr);
+  CH_START(t0);
+  m_fineInterp = RefCountedPtr<EBPWLFineInterp>(new EBPWLFineInterp(a_eblgFine.getDBL(),
+                                                                    a_eblgCoar.getDBL(),
+                                                                    a_eblgFine.getEBISL(),
+                                                                    a_eblgCoar.getEBISL(),
+                                                                    a_eblgCoar.getDomain(),
+                                                                    a_refRat,
+                                                                    a_nComp,
+                                                                    a_ebisPtr));
+  CH_START(t0);
 
+  m_refRat   = a_refRat;
   m_eblgFine = a_eblgFine;
   m_eblgCoar = a_eblgCoar;
   m_eblgCoFi = a_eblgCoFi;
 
+  CH_START(t1);
   // Define the irreg data holder.
   LayoutData<IntVectSet> irregFine(m_eblgFine.getDBL());
-  LayoutData<IntVectSet> irregCoar(m_coarsenedFineGrids);
+  LayoutData<IntVectSet> irregCoar(m_eblgCoFi.getDBL());
 
   m_fineVoFs.define(m_eblgFine.getDBL());
+  m_irregRegions.define(m_eblgCoFi.getDBL());
 
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
     const Box& fineBox = m_eblgFine.getDBL()[dit()];
-    const Box& coarBox = m_coarsenedFineGrids[dit()];
+    const Box& coarBox = m_eblgCoFi.getDBL()[dit()];
 
     const EBISBox& fineEBISBox = m_eblgFine.getEBISL()[dit()];
-    const EBISBox& coarEBISBox = m_coarsenedFineEBISL[dit()];
+    const EBISBox& coarEBISBox = m_eblgCoFi.getEBISL()[dit()];
 
     irregFine[dit()] = fineEBISBox.getIrregIVS(fineBox);
     irregCoar[dit()] = coarEBISBox.getIrregIVS(coarBox);
 
     m_fineVoFs[dit()].define(irregFine[dit()], fineEBISBox.getEBGraph());
+    m_irregRegions[dit()] = coarEBISBox.getIrregIVS(coarBox);
   }
 
   // Should not need ghost cells for this one (because the irreg regrids don't use slopes but keeps it local).
-  m_irregCoFi.define(m_coarsenedFineGrids, 1, IntVect::Zero, BaseIVFactory<Real>(m_coarsenedFineEBISL, irregCoar));
+  m_irregCoFi.define(m_eblgCoFi.getDBL(), 1, IntVect::Zero, BaseIVFactory<Real>(m_eblgCoFi.getEBISL(), irregCoar));
 
   m_conservativeWeights.define(m_eblgFine.getDBL(),
                                1,
                                IntVect::Zero,
                                BaseIVFactory<Real>(m_eblgFine.getEBISL(), irregFine));
+  CH_START(t1);
 
   this->defineWeights();
 }
@@ -103,7 +112,7 @@ EBCoarseToFineInterp::defineWeights() noexcept
   CH_TIME("EBCoarseToFineInterp::defineWeights");
 
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
-  const EBISLayout& ebislCoar = m_coarsenedFineEBISL;
+  const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
   const Real areaFactor = std::pow(m_refRat, SpaceDim - 1);
 
@@ -154,6 +163,14 @@ EBCoarseToFineInterp::interpolate(LevelData<EBCellFAB>&             a_fineData,
   CH_assert(m_isDefined);
   CH_assert(a_fineData.nComp() > a_variables.end());
   CH_assert(a_coarData.nComp() > a_variables.end());
+
+#if 1 // Temporary code hook.
+  if (a_interpType == EBCoarseToFineInterp::Type::ConservativeMinMod) {
+    m_fineInterp->interpolate(a_fineData, a_coarData, a_variables);
+
+    return;
+  }
+#endif
 
   CH_START(t1);
   const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
@@ -236,16 +253,6 @@ EBCoarseToFineInterp::interpolate(LevelData<BaseIVFAB<Real>>&       a_fineData,
       }
     }
   }
-}
-
-void
-EBCoarseToFineInterp::regridMinMod(LevelData<EBCellFAB>&       a_fineData,
-                                   const LevelData<EBCellFAB>& a_coarData,
-                                   const Interval&             a_variables)
-{
-  CH_TIME("EBCoarseToFineInterp::regridMinMod");
-
-  EBPWLFineInterp::interpolate(a_fineData, a_coarData, a_variables);
 }
 
 void
@@ -402,7 +409,7 @@ EBCoarseToFineInterp::interpolateArithmetic(BaseIVFAB<Real>&       a_fineData,
   CH_assert(a_coarData.nComp() > a_variables.end());
 
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
-  const EBISLayout& ebislCoar = m_coarsenedFineEBISL;
+  const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
   const EBISBox& fineEBISBox = ebislFine[a_dit];
   const EBISBox& coarEBISBox = ebislCoar[a_dit];
@@ -435,7 +442,7 @@ EBCoarseToFineInterp::interpolateConservativeNoSlopes(BaseIVFAB<Real>&       a_f
   CH_assert(a_coarData.nComp() > a_variables.end());
 
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
-  const EBISLayout& ebislCoar = m_coarsenedFineEBISL;
+  const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
   const EBISBox& fineEBISBox = ebislFine[a_dit];
   const EBISBox& coarEBISBox = ebislCoar[a_dit];

@@ -133,7 +133,7 @@ Realm::regridBase(const int a_lmin)
   if (m_verbosity > 5) {
     pout() << "Realm::regridBase" << endl;
   }
-  
+
   for (auto& r : m_realms) {
     r.second->regridBase(a_lmin);
   }

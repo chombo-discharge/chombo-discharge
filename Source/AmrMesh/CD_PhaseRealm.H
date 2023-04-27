@@ -240,7 +240,7 @@ public:
     @return Immutable m_eblg
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
-  getEBLevelGridCoFi() const;  
+  getEBLevelGridCoFi() const;
 
   /*!
     @brief Get neighbor boxes to grid boxes

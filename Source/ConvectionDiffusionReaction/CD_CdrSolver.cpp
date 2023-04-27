@@ -1676,9 +1676,12 @@ CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
   // prior to this routine so the old m_phi (before the regrid) is stored in m_cachedPhi.
   this->allocate();
 
+  const EBCoarseToFineInterp::Type interpType = m_regridSlopes ? EBCoarseToFineInterp::Type::ConservativeMinMod
+                                                               : EBCoarseToFineInterp::Type::ConservativeNoSlopes;
+
   // Interpolate to the new grids.
-  m_amr->interpToNewGrids(m_phi, m_cachePhi, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
-  m_amr->interpToNewGrids(m_source, m_cacheSource, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
+  m_amr->interpToNewGrids(m_phi, m_cachePhi, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);
+  m_amr->interpToNewGrids(m_source, m_cacheSource, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);
 
   // Coarsen data and update ghost cells.
   m_amr->conservativeAverage(m_phi, m_realm, m_phase);

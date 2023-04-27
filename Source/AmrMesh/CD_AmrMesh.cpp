@@ -1892,16 +1892,16 @@ AmrMesh::interpGhostMG(EBAMRCellData& a_data, const std::string a_realm, const p
 }
 
 void
-AmrMesh::interpToNewGrids(MFAMRCellData&       a_newData,
-                          const MFAMRCellData& a_oldData,
-                          const int            a_lmin,
-                          const int            a_oldFinestLevel,
-                          const int            a_newFinestLevel,
-                          const bool           a_useSlopes)
+AmrMesh::interpToNewGrids(MFAMRCellData&                   a_newData,
+                          const MFAMRCellData&             a_oldData,
+                          const int                        a_lmin,
+                          const int                        a_oldFinestLevel,
+                          const int                        a_newFinestLevel,
+                          const EBCoarseToFineInterp::Type a_type)
 {
-  CH_TIME("AmrMesh::interpToNewGrids(MFAMRCellData x2, int x3, bool)");
+  CH_TIME("AmrMesh::interpToNewGrids(MFAMRCellData x2, int x3, type)");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::interpToNewGrids(MFAMRCellData x2, int x3, bool)" << endl;
+    pout() << "AmrMesh::interpToNewGrids(MFAMRCellData x2, int x3, type)" << endl;
   }
 
   for (int i = 0; i < phase::numPhases; i++) {
@@ -1920,23 +1920,23 @@ AmrMesh::interpToNewGrids(MFAMRCellData&       a_newData,
       EBAMRCellData       newData = this->alias(curPhase, a_newData);
       const EBAMRCellData oldData = this->alias(curPhase, a_oldData);
 
-      this->interpToNewGrids(newData, oldData, curPhase, a_lmin, a_oldFinestLevel, a_newFinestLevel, a_useSlopes);
+      this->interpToNewGrids(newData, oldData, curPhase, a_lmin, a_oldFinestLevel, a_newFinestLevel, a_type);
     }
   }
 }
 
 void
-AmrMesh::interpToNewGrids(EBAMRCellData&           a_newData,
-                          const EBAMRCellData&     a_oldData,
-                          const phase::which_phase a_phase,
-                          const int                a_lmin,
-                          const int                a_oldFinestLevel,
-                          const int                a_newFinestLevel,
-                          const bool               a_useSlopes)
+AmrMesh::interpToNewGrids(EBAMRCellData&                   a_newData,
+                          const EBAMRCellData&             a_oldData,
+                          const phase::which_phase         a_phase,
+                          const int                        a_lmin,
+                          const int                        a_oldFinestLevel,
+                          const int                        a_newFinestLevel,
+                          const EBCoarseToFineInterp::Type a_type)
 {
-  CH_TIME("AmrMesh::interpToNewGrids(EBAMRCellData x2, phase, int x3, bool)");
+  CH_TIME("AmrMesh::interpToNewGrids(EBAMRCellData x2, phase, int x3, type)");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::interpToNewGrids(EBAMRCellData x2, phase, int x3, bool)" << endl;
+    pout() << "AmrMesh::interpToNewGrids(EBAMRCellData x2, phase, int x3, type)" << endl;
   }
 
   CH_assert(a_newData.getRealm() == a_oldData.getRealm());
@@ -1954,15 +1954,7 @@ AmrMesh::interpToNewGrids(EBAMRCellData&           a_newData,
     RefCountedPtr<EBCoarseToFineInterp>& interpolator = this->getFineInterp(a_newData.getRealm(), a_phase)[lvl];
 
     // Interpolate the data.
-    if (a_useSlopes) {
-      interpolator->regridMinMod(*a_newData[lvl], *a_newData[lvl - 1], Interval(0, nComp - 1));
-    }
-    else {
-      interpolator->interpolate(*a_newData[lvl],
-                                *a_newData[lvl - 1],
-                                Interval(0, nComp - 1),
-                                EBCoarseToFineInterp::Type::ConservativeNoSlopes);
-    }
+    interpolator->interpolate(*a_newData[lvl], *a_newData[lvl - 1], Interval(0, nComp - 1), a_type);
 
     // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
     // to pollute the solution with interpolation there since we already have valid data.
@@ -1973,17 +1965,17 @@ AmrMesh::interpToNewGrids(EBAMRCellData&           a_newData,
 }
 
 void
-AmrMesh::interpToNewGrids(EBAMRIVData&             a_newData,
-                          const EBAMRIVData&       a_oldData,
-                          const phase::which_phase a_phase,
-                          const int                a_lmin,
-                          const int                a_oldFinestLevel,
-                          const int                a_newFinestLevel,
-                          const bool               a_conservative)
+AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
+                          const EBAMRIVData&               a_oldData,
+                          const phase::which_phase         a_phase,
+                          const int                        a_lmin,
+                          const int                        a_oldFinestLevel,
+                          const int                        a_newFinestLevel,
+                          const EBCoarseToFineInterp::Type a_type)
 {
-  CH_TIME("AmrMesh::interpToNewGrids(EBAMRCellData x2, phase, int x3, bool)");
+  CH_TIME("AmrMesh::interpToNewGrids(EBAMRCellData x2, phase, int x3, type)");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::interpToNewGrids(EBAMRCellData x2, phase, int x3, bool)" << endl;
+    pout() << "AmrMesh::interpToNewGrids(EBAMRCellData x2, phase, int x3, type)" << endl;
   }
 
   CH_assert(a_newData.getRealm() == a_oldData.getRealm());
@@ -1999,13 +1991,7 @@ AmrMesh::interpToNewGrids(EBAMRIVData&             a_newData,
 
     const int nComp = a_newData[lvl]->nComp();
 
-    // Interpolate the data
-    if (a_conservative) {
-      interpolator->regridConservative(*a_newData[lvl], *a_newData[lvl - 1], Interval(0, nComp - 1));
-    }
-    else {
-      interpolator->regridArithmetic(*a_newData[lvl], *a_newData[lvl - 1], Interval(0, nComp - 1));
-    }
+    interpolator->interpolate(*a_newData[lvl], *a_newData[lvl - 1], Interval(0, nComp - 1), a_type);
 
     // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
     // to pollute the solution with interpolation errors there since we already have valid data.
@@ -2834,8 +2820,8 @@ AmrMesh::getEBLevelGridCoFi(const std::string a_realm, const phase::which_phase 
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getEBLevelGridCoFi(string, phase::which_phase) - could not find realm '" + a_realm +
-                            "'";
+    const std::string str = "AmrMesh::getEBLevelGridCoFi(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 

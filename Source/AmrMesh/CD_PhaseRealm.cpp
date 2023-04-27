@@ -684,11 +684,11 @@ PhaseRealm::defineEBCoarseToFineInterp(const int a_lmin)
       // Interpolator for filling data on level l from level l-1 lives on level l
       if (hasCoar) {
         m_ebFineInterp[lvl] = RefCountedPtr<EBCoarseToFineInterp>(new EBCoarseToFineInterp(*m_eblg[lvl],
-                                                                           *m_eblgCoFi[lvl - 1],
-                                                                           *m_eblg[lvl - 1],
-                                                                           m_refinementRatios[lvl - 1],
-                                                                           comps,
-                                                                           &(*m_ebis)));
+                                                                                           *m_eblgCoFi[lvl - 1],
+                                                                                           *m_eblg[lvl - 1],
+                                                                                           m_refinementRatios[lvl - 1],
+                                                                                           comps,
+                                                                                           &(*m_ebis)));
       }
     }
   }

@@ -244,7 +244,7 @@ public:
     @param[in] a_phase Phase
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
-  getEBLevelGridCoFi(const phase::which_phase a_phase) const;  
+  getEBLevelGridCoFi(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get neighbors for particular phase

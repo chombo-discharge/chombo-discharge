@@ -597,7 +597,10 @@ SurfaceODESolver<N>::regrid(const int a_lmin, const int a_oldFinestLevel, const 
 
   this->allocate();
 
-  m_amr->interpToNewGrids(m_phi, m_cache, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_conservativeRegrid);
+  const EBCoarseToFineInterp::Type interpType = m_conservativeRegrid ? EBCoarseToFineInterp::Type::ConservativeNoSlopes
+                                                                     : EBCoarseToFineInterp::Type::Arithmetic;
+
+  m_amr->interpToNewGrids(m_phi, m_cache, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);
 
   m_amr->deallocate(m_cache);
 }

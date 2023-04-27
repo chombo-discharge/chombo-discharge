@@ -5127,7 +5127,7 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
   Vector<RefCountedPtr<EBCoarseToFineInterp>> interpOp(1 + a_finestLevel);
   for (int lvl = 1; lvl <= a_finestLevel; lvl++) {
     const EBLevelGrid& eblgFine = *m_amr->getEBLevelGrid(m_particleRealm, m_plasmaPhase)[lvl];
-    const EBLevelGrid& eblgCoFi = *m_amr->getEBLevelGridCoFi(m_particleRealm, m_plasmaPhase)[lvl-1];
+    const EBLevelGrid& eblgCoFi = *m_amr->getEBLevelGridCoFi(m_particleRealm, m_plasmaPhase)[lvl - 1];
     const EBLevelGrid& eblgCoar = *m_amr->getEBLevelGrid(m_particleRealm, m_plasmaPhase)[lvl - 1];
     const int          refRat   = m_amr->getRefinementRatios()[lvl - 1];
     const int          nComp    = 1;
@@ -5151,7 +5151,10 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
     for (int lvl = std::max(1, a_lmin); lvl <= a_finestLevel; lvl++) {
       RefCountedPtr<EBCoarseToFineInterp>& interpolator = interpOp[lvl];
 
-      interpolator->regridConservativeNoSlopes(*speciesPPC[lvl], *speciesPPC[lvl - 1], Interval(0, 0));
+      interpolator->interpolate(*speciesPPC[lvl],
+                                *speciesPPC[lvl - 1],
+                                Interval(0, 0),
+                                EBCoarseToFineInterp::Type::ConservativeNoSlopes);
 
       // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
       // to pollute the solution with interpolation there since we already have valid data.

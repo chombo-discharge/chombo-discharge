@@ -406,13 +406,16 @@ CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
     this->regridSolvers(a_lmin, a_oldFinestLevel, a_newFinestLevel);
     this->regridInternals(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
+    const EBCoarseToFineInterp::Type interpType = m_regridSlopes ? EBCoarseToFineInterp::Type::ConservativeMinMod
+                                                                 : EBCoarseToFineInterp::Type::ConservativeNoSlopes;
+
     m_amr->interpToNewGrids(m_conductivityFactorCell,
                             m_scratchConductivity,
                             phase::gas,
                             a_lmin,
                             a_oldFinestLevel,
                             a_newFinestLevel,
-                            m_regridSlopes);
+                            interpType);
 
     m_amr->interpToNewGrids(m_semiImplicitRho,
                             m_scratchSemiImplicitRho,
@@ -420,7 +423,7 @@ CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
                             a_lmin,
                             a_oldFinestLevel,
                             a_newFinestLevel,
-                            m_regridSlopes);
+                            interpType);
 
     // Coarsen the conductivity and space charge from the last step and update ghost cells.
     m_amr->arithmeticAverage(m_conductivityFactorCell, m_realm, m_phase);

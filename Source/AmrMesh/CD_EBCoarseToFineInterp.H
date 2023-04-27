@@ -13,7 +13,9 @@
 #define CD_EBCoarseToFineInterp_H
 
 // Chombo includes
+#include <RefCountedPtr.H>
 #include <EBLevelGrid.H>
+
 #include <EBPWLFineInterp.H>
 
 // Our includes
@@ -22,7 +24,7 @@
 /*!
   @brief Class for interpolating data to fine grids. Can use constant interpolation or include limiters.
 */
-class EBCoarseToFineInterp : public EBPWLFineInterp
+class EBCoarseToFineInterp
 {
 public:
   /*!
@@ -126,16 +128,17 @@ public:
               const Interval&                   a_variables,
               const EBCoarseToFineInterp::Type& a_interpType) const noexcept;
 
-  /*!
-    @brief Use min-mod slopes when interpolating to the new grids. 
-    @param[out] a_fineData  Piecewise constant interpolation of the coarse data.
-    @param[in]  a_coarData  Coarse data
-    @param[in]  a_variables Variables to interpolate. 
-  */
-  virtual void
-  regridMinMod(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData, const Interval& a_variables);
-
 protected:
+  /*!
+    @brief Is defined or not
+  */
+  bool m_isDefined;
+
+  /*!
+    @brief Refinement factor
+  */
+  int m_refRat;
+
   /*!
     @brief Fine grid.
   */
@@ -152,6 +155,22 @@ protected:
   EBLevelGrid m_eblgCoFi;
 
   /*!
+    @brief Irregular grid region.
+  */
+  LayoutData<IntVectSet> m_irregRegions;
+
+  /*!
+    @brief Weights in cut-cells when regridding conservatively
+    @details Defined over the fine layout. 
+  */
+  LevelData<BaseIVFAB<Real>> m_conservativeWeights;
+
+  /*!
+    @brief Chombo object. Will be taken out of the design.
+  */
+  mutable RefCountedPtr<EBPWLFineInterp> m_fineInterp;
+
+  /*!
     @brief Data holder for holding data on the coarsened fine grids. 
     @note I'm letting this live as a permanent buffer, simply because its memory footprint is so small. 
   */
@@ -162,12 +181,6 @@ protected:
     @details This iterator runs over the valid fine cells.
   */
   mutable LayoutData<VoFIterator> m_fineVoFs;
-
-  /*!
-    @brief Weights in cut-cells when regridding conservatively
-    @details Defined over the fine layout. 
-  */
-  LevelData<BaseIVFAB<Real>> m_conservativeWeights;
 
   /*!
     @brief Define weights for cut-cell conservative regridding
