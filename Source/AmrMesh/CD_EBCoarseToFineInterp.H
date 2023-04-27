@@ -29,12 +29,17 @@ class EBCoarseToFineInterp
 public:
   /*!
     @brief Type of interpolation methods supported.
+    PWC = Piecewise constant, ignoring the embedded boundary. This is not conservative. 
+    ConservativePWC = Piecewise constant, including the EB volume/area fractions boundary. 
+    ConservativeMinMod = Min-mod slope for interpolation. 
+    ConservativeMonotonizedCentral = Monotonized central slope for interpolation. 
   */
   enum Type
   {
-    Arithmetic,
-    ConservativeNoSlopes,
+    PWC,
+    ConservativePWC,
     ConservativeMinMod,
+    ConservativeMonotizedCentral,
   };
 
   /*!
@@ -190,7 +195,7 @@ protected:
 
   /*!
     @brief Piecewise constant interpolation of an EBCellFAB. This ignores the volume fraction. This sets
-    the fine-grid data to the coarse-grid data. 
+    the fine-grid data to the coarse-grid data, so it is not conservative. 
     @param[out] a_fineData Fine-grid data. 
     @param[in]  a_coarData Coarse data
     @param[in]  a_dit Grid index. 
@@ -198,11 +203,11 @@ protected:
     @param[in]  a_coarVar Coarse-grid variable
   */
   virtual void
-  interpolateArithmetic(EBCellFAB&       a_fineData,
-                        const EBCellFAB& a_coarData,
-                        const DataIndex& a_dit,
-                        const int&       a_fineVar,
-                        const int&       a_coarVar) const noexcept;
+  interpolatePWC(EBCellFAB&       a_fineData,
+                 const EBCellFAB& a_coarData,
+                 const DataIndex& a_dit,
+                 const int&       a_fineVar,
+                 const int&       a_coarVar) const noexcept;
 
   /*!
     @brief Piecewise constant interpolation of an EBCellFAB. Does not use slopes
@@ -213,11 +218,11 @@ protected:
     @param[in]  a_coarVar Coarse-grid variable
   */
   virtual void
-  interpolateConservativeNoSlopes(EBCellFAB&       a_fineData,
-                                  const EBCellFAB& a_coarData,
-                                  const DataIndex& a_dit,
-                                  const int&       a_fineVar,
-                                  const int&       a_coarVar) const noexcept;
+  interpolateConservativePWC(EBCellFAB&       a_fineData,
+                             const EBCellFAB& a_coarData,
+                             const DataIndex& a_dit,
+                             const int&       a_fineVar,
+                             const int&       a_coarVar) const noexcept;
 
   /*!
     @brief Piecewise constant interpolation of an EB-data. This ignores the area fraction. This sets
@@ -229,11 +234,11 @@ protected:
     @param[in]  a_coarVar Coarse-grid variable
   */
   virtual void
-  interpolateArithmetic(BaseIVFAB<Real>&       a_fineData,
-                        const BaseIVFAB<Real>& a_coarData,
-                        const DataIndex&       a_dit,
-                        const int&             a_fineVar,
-                        const int&             a_coarVar) const noexcept;
+  interpolatePWC(BaseIVFAB<Real>&       a_fineData,
+                 const BaseIVFAB<Real>& a_coarData,
+                 const DataIndex&       a_dit,
+                 const int&             a_fineVar,
+                 const int&             a_coarVar) const noexcept;
 
   /*!
     @brief Piecewise constant interpolation of an EB-data. This includes the area fraction and is therefore
@@ -245,11 +250,11 @@ protected:
     @param[in]  a_coarVar Coarse-grid variable
   */
   virtual void
-  interpolateConservativeNoSlopes(BaseIVFAB<Real>&       a_fineData,
-                                  const BaseIVFAB<Real>& a_coarData,
-                                  const DataIndex&       a_dit,
-                                  const int&             a_fineVar,
-                                  const int&             a_coarVar) const noexcept;
+  interpolateConservativePWC(BaseIVFAB<Real>&       a_fineData,
+                             const BaseIVFAB<Real>& a_coarData,
+                             const DataIndex&       a_dit,
+                             const int&             a_fineVar,
+                             const int&             a_coarVar) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

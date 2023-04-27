@@ -397,7 +397,7 @@ FieldSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_ne
   this->allocate();
 
   const EBCoarseToFineInterp::Type interpType = m_regridSlopes ? EBCoarseToFineInterp::Type::ConservativeMinMod
-                                                               : EBCoarseToFineInterp::Type::ConservativeNoSlopes;
+                                                               : EBCoarseToFineInterp::Type::ConservativePWC;
 
   // Regrid potential data holder
   m_amr->interpToNewGrids(m_potential, m_cache, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);

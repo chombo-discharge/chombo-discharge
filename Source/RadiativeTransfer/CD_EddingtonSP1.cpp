@@ -538,7 +538,7 @@ EddingtonSP1::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_n
   this->allocate();
 
   const EBCoarseToFineInterp::Type interpType = m_regridSlopes ? EBCoarseToFineInterp::Type::ConservativeMinMod
-                                                               : EBCoarseToFineInterp::Type::ConservativeNoSlopes;
+                                                               : EBCoarseToFineInterp::Type::ConservativePWC;
 
   // Regrid phi and source
   m_amr->interpToNewGrids(m_phi, m_cachePhi, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);

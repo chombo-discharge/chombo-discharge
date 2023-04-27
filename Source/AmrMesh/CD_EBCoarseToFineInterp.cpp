@@ -172,10 +172,11 @@ EBCoarseToFineInterp::interpolate(LevelData<EBCellFAB>&             a_fineData,
   }
 #endif
 
+  // Might need one ghost cell for regrid slopes.
   CH_START(t1);
   const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
   const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
-  LevelData<EBCellFAB>     coarsenedFineData(dblCoFi, 1, IntVect::Zero, EBCellFactory(ebislCoFi));
+  LevelData<EBCellFAB>     coarsenedFineData(dblCoFi, 1, IntVect::Unit, EBCellFactory(ebislCoFi));
   CH_STOP(t1);
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
@@ -185,13 +186,13 @@ EBCoarseToFineInterp::interpolate(LevelData<EBCellFAB>&             a_fineData,
 
     for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
       switch (a_interpType) {
-      case EBCoarseToFineInterp::Type::Arithmetic: {
-        this->interpolateArithmetic(a_fineData[dit()], coarsenedFineData[dit()], dit(), ivar, 0);
+      case EBCoarseToFineInterp::Type::PWC: {
+        this->interpolatePWC(a_fineData[dit()], coarsenedFineData[dit()], dit(), ivar, 0);
 
         break;
       }
-      case EBCoarseToFineInterp::Type::ConservativeNoSlopes: {
-        this->interpolateConservativeNoSlopes(a_fineData[dit()], coarsenedFineData[dit()], dit(), ivar, 0);
+      case EBCoarseToFineInterp::Type::ConservativePWC: {
+        this->interpolateConservativePWC(a_fineData[dit()], coarsenedFineData[dit()], dit(), ivar, 0);
 
         break;
       }
@@ -234,13 +235,13 @@ EBCoarseToFineInterp::interpolate(LevelData<BaseIVFAB<Real>>&       a_fineData,
 
     for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
       switch (a_interpType) {
-      case EBCoarseToFineInterp::Type::Arithmetic: {
-        this->interpolateArithmetic(a_fineData[dit()], m_irregCoFi[dit()], dit(), ivar, 0);
+      case EBCoarseToFineInterp::Type::PWC: {
+        this->interpolatePWC(a_fineData[dit()], m_irregCoFi[dit()], dit(), ivar, 0);
 
         break;
       }
-      case EBCoarseToFineInterp::Type::ConservativeNoSlopes: {
-        this->interpolateConservativeNoSlopes(a_fineData[dit()], m_irregCoFi[dit()], dit(), ivar, 0);
+      case EBCoarseToFineInterp::Type::ConservativePWC: {
+        this->interpolateConservativePWC(a_fineData[dit()], m_irregCoFi[dit()], dit(), ivar, 0);
 
         break;
       }
@@ -256,13 +257,13 @@ EBCoarseToFineInterp::interpolate(LevelData<BaseIVFAB<Real>>&       a_fineData,
 }
 
 void
-EBCoarseToFineInterp::interpolateArithmetic(EBCellFAB&       a_fineData,
-                                            const EBCellFAB& a_coarData,
-                                            const DataIndex& a_dit,
-                                            const int&       a_fineVar,
-                                            const int&       a_coarVar) const noexcept
+EBCoarseToFineInterp::interpolatePWC(EBCellFAB&       a_fineData,
+                                     const EBCellFAB& a_coarData,
+                                     const DataIndex& a_dit,
+                                     const int&       a_fineVar,
+                                     const int&       a_coarVar) const noexcept
 {
-  CH_TIMERS("EBCoarseToFineInterp::interpolateArithmetic(EBCellFAB)");
+  CH_TIMERS("EBCoarseToFineInterp::interpolatePWC(EBCellFAB)");
   CH_TIMER("EBCoarseToFineInterp::regular_regrid", t1);
   CH_TIMER("EBCoarseToFineInterp::irregular_regrid", t2);
 
@@ -317,13 +318,13 @@ EBCoarseToFineInterp::interpolateArithmetic(EBCellFAB&       a_fineData,
 }
 
 void
-EBCoarseToFineInterp::interpolateConservativeNoSlopes(EBCellFAB&       a_fineData,
-                                                      const EBCellFAB& a_coarData,
-                                                      const DataIndex& a_dit,
-                                                      const int&       a_fineVar,
-                                                      const int&       a_coarVar) const noexcept
+EBCoarseToFineInterp::interpolateConservativePWC(EBCellFAB&       a_fineData,
+                                                 const EBCellFAB& a_coarData,
+                                                 const DataIndex& a_dit,
+                                                 const int&       a_fineVar,
+                                                 const int&       a_coarVar) const noexcept
 {
-  CH_TIMERS("EBCoarseToFineInterp::interpolateConservativeNoSlopes(EBCellFAB)");
+  CH_TIMERS("EBCoarseToFineInterp::interpolateConservativePWC(EBCellFAB)");
   CH_TIMER("EBCoarseToFineInterp::regular_regrid", t1);
   CH_TIMER("EBCoarseToFineInterp::irregular_regrid", t2);
 
@@ -394,13 +395,13 @@ EBCoarseToFineInterp::interpolateConservativeNoSlopes(EBCellFAB&       a_fineDat
 }
 
 void
-EBCoarseToFineInterp::interpolateArithmetic(BaseIVFAB<Real>&       a_fineData,
-                                            const BaseIVFAB<Real>& a_coarData,
-                                            const DataIndex&       a_dit,
-                                            const int&             a_fineVar,
-                                            const int&             a_coarVar) const noexcept
+EBCoarseToFineInterp::interpolatePWC(BaseIVFAB<Real>&       a_fineData,
+                                     const BaseIVFAB<Real>& a_coarData,
+                                     const DataIndex&       a_dit,
+                                     const int&             a_fineVar,
+                                     const int&             a_coarVar) const noexcept
 {
-  CH_TIMERS("EBCoarseToFineInterp::interpolateArithmetic(BaseIVFAB<Real>)");
+  CH_TIMERS("EBCoarseToFineInterp::interpolatePWC(BaseIVFAB<Real>)");
 
   CH_assert(a_fineData.nComp() >= a_variables.size());
   CH_assert(a_coarData.nComp() >= a_variables.size());
@@ -427,13 +428,13 @@ EBCoarseToFineInterp::interpolateArithmetic(BaseIVFAB<Real>&       a_fineData,
 }
 
 void
-EBCoarseToFineInterp::interpolateConservativeNoSlopes(BaseIVFAB<Real>&       a_fineData,
-                                                      const BaseIVFAB<Real>& a_coarData,
-                                                      const DataIndex&       a_dit,
-                                                      const int&             a_fineVar,
-                                                      const int&             a_coarVar) const noexcept
+EBCoarseToFineInterp::interpolateConservativePWC(BaseIVFAB<Real>&       a_fineData,
+                                                 const BaseIVFAB<Real>& a_coarData,
+                                                 const DataIndex&       a_dit,
+                                                 const int&             a_fineVar,
+                                                 const int&             a_coarVar) const noexcept
 {
-  CH_TIMERS("EBCoarseToFineInterp::interpolateConservativeNoSlopes(BaseIVFAB<Real>)");
+  CH_TIMERS("EBCoarseToFineInterp::interpolateConservativePWC(BaseIVFAB<Real>)");
 
   CH_assert(a_fineData.nComp() >= a_variables.size());
   CH_assert(a_coarData.nComp() >= a_variables.size());

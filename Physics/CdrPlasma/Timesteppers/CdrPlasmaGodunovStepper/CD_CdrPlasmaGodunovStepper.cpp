@@ -407,7 +407,7 @@ CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
     this->regridInternals(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
     const EBCoarseToFineInterp::Type interpType = m_regridSlopes ? EBCoarseToFineInterp::Type::ConservativeMinMod
-                                                                 : EBCoarseToFineInterp::Type::ConservativeNoSlopes;
+                                                                 : EBCoarseToFineInterp::Type::ConservativePWC;
 
     m_amr->interpToNewGrids(m_conductivityFactorCell,
                             m_scratchConductivity,
