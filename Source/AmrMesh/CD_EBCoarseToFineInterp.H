@@ -50,11 +50,11 @@ public:
     @param[in] a_ebisPtr  EB index space. 
   */
   EBCoarseToFineInterp(const EBLevelGrid&        a_eblgFine,
-               const EBLevelGrid&        a_eblgCoFi,
-               const EBLevelGrid&        a_eblgCoar,
-               const int&                a_refRat,
-               const int&                a_nComp,
-               const EBIndexSpace* const a_ebisPtr) noexcept;
+                       const EBLevelGrid&        a_eblgCoFi,
+                       const EBLevelGrid&        a_eblgCoar,
+                       const int&                a_refRat,
+                       const int&                a_nComp,
+                       const EBIndexSpace* const a_ebisPtr) noexcept;
 
   /*!
     @brief Disallowed copy constructor
@@ -102,38 +102,29 @@ public:
 
   /*!
     @brief Interpolate to the fine grid using the specified method. 
-    @param[out] a_fineData  Piecewise constant interpolation of the coarse data.
+    @param[out] a_fineData  Fine-grid data.
     @param[in]  a_coarData  Coarse data
     @param[in]  a_variables Variables to interpolate to the fine grid.
-    @note This simply calls the other methods. 
+    @param[in]  a_interpType Interpolation type
   */
   virtual void
-  interpolate(LevelData<EBCellFAB>&       a_fineData,
-              const LevelData<EBCellFAB>& a_coarData,
-              const Interval&             a_variables,
-              const EBCoarseToFineInterp::Type&   a_interpType) const noexcept;
+  interpolate(LevelData<EBCellFAB>&             a_fineData,
+              const LevelData<EBCellFAB>&       a_coarData,
+              const Interval&                   a_variables,
+              const EBCoarseToFineInterp::Type& a_interpType) const noexcept;
 
   /*!
-    @brief Do a piecewise constant interpolation to the new grids. This ignores the volume fraction of cut cells. 
-    @param[out] a_fineData  Piecewise constant interpolation of the coarse data.
+    @brief Interpolate to the fine grid using the specified method. 
+    @param[out] a_fineData  Fine-grid data
     @param[in]  a_coarData  Coarse data
     @param[in]  a_variables Variables to interpolate to the fine grid.
+    @param[in]  a_interpType Interpolation type
   */
   virtual void
-  regridArithmetic(LevelData<EBCellFAB>&       a_fineData,
-                   const LevelData<EBCellFAB>& a_coarData,
-                   const Interval&             a_variables) const noexcept;
-
-  /*!
-    @brief Do a piecewise constant interpolation to the new grids.
-    @param[out] a_fineData  Piecewise constant interpolation of the coarse data.
-    @param[in]  a_coarData  Coarse data
-    @param[in]  a_variables Variables to interpolate to the fine grid.
-  */
-  virtual void
-  regridConservativeNoSlopes(LevelData<EBCellFAB>&       a_fineData,
-                             const LevelData<EBCellFAB>& a_coarData,
-                             const Interval&             a_variables) const noexcept;
+  interpolate(LevelData<BaseIVFAB<Real>>&       a_fineData,
+              const LevelData<BaseIVFAB<Real>>& a_coarData,
+              const Interval&                   a_variables,
+              const EBCoarseToFineInterp::Type& a_interpType) const noexcept;
 
   /*!
     @brief Use min-mod slopes when interpolating to the new grids. 
@@ -143,28 +134,6 @@ public:
   */
   virtual void
   regridMinMod(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData, const Interval& a_variables);
-
-  /*!
-    @brief Regrid irregular data using conservative interpolation
-    @param[out] a_fineData  Piecewise interpolation of coarse data.
-    @param[in]  a_coarData  Coarse data
-    @param[in]  a_variables Variables to interpolate. 
-  */
-  virtual void
-  regridConservative(LevelData<BaseIVFAB<Real>>&       a_fineData,
-                     const LevelData<BaseIVFAB<Real>>& a_coarData,
-                     const Interval&                   a_variables) const noexcept;
-
-  /*!
-    @brief Regrid irregular data using arithmetic interpolation
-    @param[out] a_fineData  Piecewise interpolation of coarse data.
-    @param[in]  a_coarData  Coarse data
-    @param[in]  a_variables Variables to interpolate. 
-  */
-  virtual void
-  regridArithmetic(LevelData<BaseIVFAB<Real>>&       a_fineData,
-                   const LevelData<BaseIVFAB<Real>>& a_coarData,
-                   const Interval&                   a_variables) const noexcept;
 
 protected:
   /*!
@@ -207,22 +176,23 @@ protected:
   defineWeights() noexcept;
 
   /*!
-    @brief Piecewise constant interpolation of an EBCellFAB. This ignores the volume fraction. 
-    @param[out] a_fineData Piecewise constant interpolation of the coarse data.
+    @brief Piecewise constant interpolation of an EBCellFAB. This ignores the volume fraction. This sets
+    the fine-grid data to the coarse-grid data. 
+    @param[out] a_fineData Fine-grid data. 
     @param[in]  a_coarData Coarse data
     @param[in]  a_dit Grid index. 
     @param[in]  a_fineVar Fine-grid variable
     @param[in]  a_coarVar Coarse-grid variable
   */
   virtual void
-  regridArithmetic(EBCellFAB&       a_fineData,
-                   const EBCellFAB& a_coarData,
-                   const DataIndex& a_dit,
-                   const int&       a_fineVar,
-                   const int&       a_coarVar) const noexcept;
+  interpolateArithmetic(EBCellFAB&       a_fineData,
+                        const EBCellFAB& a_coarData,
+                        const DataIndex& a_dit,
+                        const int&       a_fineVar,
+                        const int&       a_coarVar) const noexcept;
 
   /*!
-    @brief Piecewise constant interpolation of an EBCellFAB 
+    @brief Piecewise constant interpolation of an EBCellFAB. Does not use slopes
     @param[out] a_fineData Piecewise constant interpolation of the coarse data.
     @param[in]  a_coarData Coarse data
     @param[in]  a_dit Grid index. 
@@ -230,11 +200,43 @@ protected:
     @param[in]  a_coarVar Coarse-grid variable
   */
   virtual void
-  regridConservativeNoSlopes(EBCellFAB&       a_fineData,
-                             const EBCellFAB& a_coarData,
-                             const DataIndex& a_dit,
-                             const int&       a_fineVar,
-                             const int&       a_coarVar) const noexcept;
+  interpolateConservativeNoSlopes(EBCellFAB&       a_fineData,
+                                  const EBCellFAB& a_coarData,
+                                  const DataIndex& a_dit,
+                                  const int&       a_fineVar,
+                                  const int&       a_coarVar) const noexcept;
+
+  /*!
+    @brief Piecewise constant interpolation of an EB-data. This ignores the area fraction. This sets
+    the fine-grid data to the coarse-grid data. 
+    @param[out] a_fineData Fine-grid data. 
+    @param[in]  a_coarData Coarse data
+    @param[in]  a_dit Grid index. 
+    @param[in]  a_fineVar Fine-grid variable
+    @param[in]  a_coarVar Coarse-grid variable
+  */
+  virtual void
+  interpolateArithmetic(BaseIVFAB<Real>&       a_fineData,
+                        const BaseIVFAB<Real>& a_coarData,
+                        const DataIndex&       a_dit,
+                        const int&             a_fineVar,
+                        const int&             a_coarVar) const noexcept;
+
+  /*!
+    @brief Piecewise constant interpolation of an EB-data. This includes the area fraction and is therefore
+    conservative. 
+    @param[out] a_fineData Fine-grid data. 
+    @param[in]  a_coarData Coarse data
+    @param[in]  a_dit Grid index. 
+    @param[in]  a_fineVar Fine-grid variable
+    @param[in]  a_coarVar Coarse-grid variable
+  */
+  virtual void
+  interpolateConservativeNoSlopes(BaseIVFAB<Real>&       a_fineData,
+                                  const BaseIVFAB<Real>& a_coarData,
+                                  const DataIndex&       a_dit,
+                                  const int&             a_fineVar,
+                                  const int&             a_coarVar) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

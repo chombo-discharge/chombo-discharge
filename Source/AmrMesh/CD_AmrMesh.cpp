@@ -1958,7 +1958,10 @@ AmrMesh::interpToNewGrids(EBAMRCellData&           a_newData,
       interpolator->regridMinMod(*a_newData[lvl], *a_newData[lvl - 1], Interval(0, nComp - 1));
     }
     else {
-      interpolator->regridConservativeNoSlopes(*a_newData[lvl], *a_newData[lvl - 1], Interval(0, nComp - 1));
+      interpolator->interpolate(*a_newData[lvl],
+                                *a_newData[lvl - 1],
+                                Interval(0, nComp - 1),
+                                EBCoarseToFineInterp::Type::ConservativeNoSlopes);
     }
 
     // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
