@@ -17,6 +17,7 @@
 #include <EBPWLFineInterp.H>
 
 // Our includes
+#include <CD_Regrid.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -28,21 +29,23 @@ public:
   /*!
     @brief Default constructor. Must subsequently call the define method. 
   */
-  EBFineInterp();
+  EBFineInterp() noexcept;
 
   /*!
     @brief Constructor. Constructs a valid object which can be used for regridding.
     @param[in] a_eblgFine The fine grid. 
+    @param[in] a_eblgCoFi Coarsened fine grid. 
     @param[in] a_eblgCoar The coarse grid. 
     @param[in] a_refRat   Refinement ratio between fine and coarse. 
     @param[in] a_nComp    Number of components. 
     @param[in] a_ebisPtr  EB index space. 
   */
   EBFineInterp(const EBLevelGrid&        a_eblgFine,
+               const EBLevelGrid&        a_eblgCoFi,
                const EBLevelGrid&        a_eblgCoar,
                const int&                a_refRat,
                const int&                a_nComp,
-               const EBIndexSpace* const a_ebisPtr);
+               const EBIndexSpace* const a_ebisPtr) noexcept;
 
   /*!
     @brief Disallowed copy constructor
@@ -57,7 +60,7 @@ public:
   /*!
     @brief Destructor
   */
-  virtual ~EBFineInterp();
+  virtual ~EBFineInterp() noexcept;
 
   /*!
     @brief Disallowed copy operator
@@ -74,17 +77,19 @@ public:
   /*!
     @brief Define operation. Puts object in usable state.
     @param[in] a_eblgFine The fine grid. 
+    @param[in] a_eblgCoFi Coarsened fine grid. 
     @param[in] a_eblgCoar The coarse grid. 
     @param[in] a_refRat   Refinement ratio between fine and coarse. 
     @param[in] a_nComp    Number of components. 
     @param[in] a_ebisPtr  EB index space. 
   */
-  void
+  virtual void
   define(const EBLevelGrid&        a_eblgFine,
+         const EBLevelGrid&        a_eblgCoFi,
          const EBLevelGrid&        a_eblgCoar,
          const int&                a_refRat,
          const int&                a_nComp,
-         const EBIndexSpace* const a_ebisPtr);
+         const EBIndexSpace* const a_ebisPtr) noexcept;
 
   /*!
     @brief Do a piecewise constant interpolation to the new grids.
@@ -92,8 +97,10 @@ public:
     @param[in]  a_coarData  Coarse data
     @param[in]  a_variables Variables to interpolate. 
   */
-  void
-  regridNoSlopes(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData, const Interval& a_variables);
+  virtual void
+  regridConservativeNoSlopes(LevelData<EBCellFAB>&       a_fineData,
+                             const LevelData<EBCellFAB>& a_coarData,
+                             const Interval&             a_variables) const noexcept;
 
   /*!
     @brief Use min-mod slopes when interpolating to the new grids. 
@@ -101,7 +108,7 @@ public:
     @param[in]  a_coarData  Coarse data
     @param[in]  a_variables Variables to interpolate. 
   */
-  void
+  virtual void
   regridMinMod(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData, const Interval& a_variables);
 
   /*!
@@ -110,7 +117,7 @@ public:
     @param[in]  a_coarData  Coarse data
     @param[in]  a_variables Variables to interpolate. 
   */
-  void
+  virtual void
   regridConservative(LevelData<BaseIVFAB<Real>>&       a_fineData,
                      const LevelData<BaseIVFAB<Real>>& a_coarData,
                      const Interval&                   a_variables);
@@ -121,7 +128,7 @@ public:
     @param[in]  a_coarData  Coarse data
     @param[in]  a_variables Variables to interpolate. 
   */
-  void
+  virtual void
   regridArithmetic(LevelData<BaseIVFAB<Real>>&       a_fineData,
                    const LevelData<BaseIVFAB<Real>>& a_coarData,
                    const Interval&                   a_variables);
@@ -136,6 +143,11 @@ protected:
     @brief Coarse grid
   */
   EBLevelGrid m_eblgCoar;
+
+  /*!
+    @brief Coarsened fine grid (i.e., has same ProblemDomain as m_eblgCoar);
+  */
+  EBLevelGrid m_eblgCoFi;
 
   /*!
     @brief Data holder for holding data on the coarsened fine grids. 
@@ -157,21 +169,23 @@ protected:
   /*!
     @brief Define weights for cut-cell conservative regridding
   */
-  void
+  virtual void
   defineWeights() noexcept;
 
   /*!
     @brief Piecewise constant interpolation of an EBCellFAB 
-    @param[out] a_fineData  Piecewise constant interpolation of the coarse data.
-    @param[in]  a_coarData  Coarse data
-    @param[in]  a_dit       Grid index. 
-    @param[in]  a_variables Variables to interpolate. 
+    @param[out] a_fineData Piecewise constant interpolation of the coarse data.
+    @param[in]  a_coarData Coarse data
+    @param[in]  a_dit Grid index. 
+    @param[in]  a_fineVar Fine-grid variable
+    @param[in]  a_coarVar Coarse-grid variable
   */
-  void
-  regridNoSlopes(EBCellFAB&       a_fineData,
-                 const EBCellFAB& a_coarData,
-                 const DataIndex& a_dit,
-                 const Interval&  a_variables);
+  virtual void
+  regridConservativeNoSlopes(EBCellFAB&       a_fineData,
+                             const EBCellFAB& a_coarData,
+                             const DataIndex& a_dit,
+                             const int&       a_fineVar,
+                             const int&       a_coarVar) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

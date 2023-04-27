@@ -236,6 +236,13 @@ public:
   getEBLevelGrid() const;
 
   /*!
+    @brief Get coarsened fine grids
+    @return Immutable m_eblg
+  */
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGridCoFi() const;  
+
+  /*!
     @brief Get neighbor boxes to grid boxes
     @return Immutable m_neighbors
   */
@@ -493,21 +500,6 @@ protected:
     @brief Level-set function
   */
   EBAMRFAB m_levelset;
-
-  /*!
-    @brief Buffer data which is a coarsening of the fine grid data.
-  */
-  mutable EBAMRCellData m_coFiBufferCell;
-
-  /*!
-    @brief Buffer data which is a coarsening of the fine grid data.
-  */
-  mutable EBAMRFluxData m_coFiBufferFlux;
-
-  /*!
-    @brief Buffer data which is a coarsening of the fine grid data.
-  */
-  mutable EBAMRIVData m_coFiBufferEB;
 
   /*! 
     @brief Cut-cell iterator

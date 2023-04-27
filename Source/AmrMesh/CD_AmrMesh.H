@@ -1583,6 +1583,14 @@ public:
   getEBLevelGrid(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
+    @brief Get the coarsened fine EBLevelGrid for a Realm and phase
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+  */
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGridCoFi(const std::string a_realm, const phase::which_phase a_phase) const;  
+
+  /*!
     @brief Get EBISLayouts for a Realm and phase
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)

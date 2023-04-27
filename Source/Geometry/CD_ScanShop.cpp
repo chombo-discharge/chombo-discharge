@@ -386,7 +386,7 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   m_timer.startEvent("Set box types");
   for (DataIterator dit(m_grids[a_level]); dit.ok(); ++dit) {
     const Box  box  = sortedBoxesAndTypes[dit().intCode()].first;
-    const long type = sortedBoxesAndTypes[dit().intCode()].second;
+    const int type = sortedBoxesAndTypes[dit().intCode()].second;
 
     // This is an error.
     if (box != m_grids[a_level][dit()]) {
@@ -394,14 +394,17 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
     }
 
     // Otherwise we are fine, set the map to what it should be.
-    if (type == 0L) {
+    if (type == 0) {
       (*m_boxMap[a_level])[dit()] = GeometryService::Covered;
     }
-    else if (type == 1L) {
+    else if (type == 1) {
       (*m_boxMap[a_level])[dit()] = GeometryService::Regular;
     }
-    else if (type == 2L) {
+    else if (type == 2) {
       (*m_boxMap[a_level])[dit()] = GeometryService::Irregular;
+    }
+    else {
+      MayDay::Error("ScanShop::defineLevel - logic bust, did not find type!");
     }
   }
 

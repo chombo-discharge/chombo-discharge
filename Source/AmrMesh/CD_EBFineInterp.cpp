@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <CH_Timer.H>
+#include <EBCellFactory.H>
 #include <BaseIVFactory.H>
 
 // Our includes
@@ -18,31 +19,34 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBFineInterp::EBFineInterp()
+EBFineInterp::EBFineInterp() noexcept
 {
   CH_TIME("EBFineInterp::EBFineInterp(weak)");
+  
   m_isDefined = false;
 }
 
 EBFineInterp::EBFineInterp(const EBLevelGrid&        a_eblgFine,
+                           const EBLevelGrid&        a_eblgCoFi,
                            const EBLevelGrid&        a_eblgCoar,
                            const int&                a_refRat,
                            const int&                a_nComp,
-                           const EBIndexSpace* const a_ebisPtr)
+                           const EBIndexSpace* const a_ebisPtr) noexcept
 {
   CH_TIME("EBFineInterp::EBFineInterp(full)");
 
-  this->define(a_eblgFine, a_eblgCoar, a_refRat, a_nComp, a_ebisPtr);
+  this->define(a_eblgFine, a_eblgCoFi, a_eblgCoar, a_refRat, a_nComp, a_ebisPtr);
 }
 
-EBFineInterp::~EBFineInterp() {}
+EBFineInterp::~EBFineInterp() noexcept {}
 
 void
 EBFineInterp::define(const EBLevelGrid&        a_eblgFine,
+                     const EBLevelGrid&        a_eblgCoFi,		     
                      const EBLevelGrid&        a_eblgCoar,
                      const int&                a_refRat,
                      const int&                a_nComp,
-                     const EBIndexSpace* const a_ebisPtr)
+                     const EBIndexSpace* const a_ebisPtr) noexcept
 {
   CH_TIME("EBFineInterp::define");
 
@@ -61,6 +65,7 @@ EBFineInterp::define(const EBLevelGrid&        a_eblgFine,
 
   m_eblgFine = a_eblgFine;
   m_eblgCoar = a_eblgCoar;
+  m_eblgCoFi = a_eblgCoFi;
 
   // Define the irreg data holder.
   LayoutData<IntVectSet> irregFine(m_eblgFine.getDBL());
@@ -137,30 +142,61 @@ EBFineInterp::defineWeights() noexcept
 }
 
 void
-EBFineInterp::regridNoSlopes(LevelData<EBCellFAB>&       a_fineData,
-                             const LevelData<EBCellFAB>& a_coarData,
-                             const Interval&             a_variables)
+EBFineInterp::regridConservativeNoSlopes(LevelData<EBCellFAB>&       a_fineData,
+                                         const LevelData<EBCellFAB>& a_coarData,
+                                         const Interval&             a_variables) const noexcept
 {
-  CH_TIME("EBFineInterp::regridNoSlopes");
+  CH_TIMERS("EBFineInterp::regridConservativeNoSlopes(LD<EBCellFAB>)");
+  CH_TIMER("EBFineInterp::define_buffer", t1);
+  CH_TIMER("EBFineInterp::copyTo", t2);
+
+  pout() << "in here" << endl;
 
   CH_assert(m_isDefined);
+  CH_assert(a_fineData.nComp() > a_variables.end());
+  CH_assert(a_coarData.nComp() > a_variables.end());
 
-  a_coarData.copyTo(a_variables, m_coarsenedFineData, a_variables);
+  CH_START(t1);
+  const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
+  const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
+  LevelData<EBCellFAB>     coarsenedFineData(dblCoFi, 1, IntVect::Zero, EBCellFactory(ebislCoFi));
+  CH_STOP(t1);
 
-  for (DataIterator dit(m_coarsenedFineGrids); dit.ok(); ++dit) {
-    this->regridNoSlopes(a_fineData[dit()], m_coarsenedFineData[dit()], dit(), a_variables);
+  for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
+    CH_START(t2);
+    a_coarData.copyTo(Interval(ivar, ivar), coarsenedFineData, Interval(0, 0));
+    CH_STOP(t2);
+
+    for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
+      this->regridConservativeNoSlopes(a_fineData[dit()], coarsenedFineData[dit()], dit(), ivar, 0);
+    }
   }
 }
 
 void
-EBFineInterp::regridNoSlopes(EBCellFAB&       a_fineData,
-                             const EBCellFAB& a_coarData,
-                             const DataIndex& a_dit,
-                             const Interval&  a_variables)
+EBFineInterp::regridConservativeNoSlopes(EBCellFAB&       a_fineData,
+                                         const EBCellFAB& a_coarData,
+                                         const DataIndex& a_dit,
+                                         const int&       a_fineVar,
+                                         const int&       a_coarVar) const noexcept
 {
-  CH_TIME("EBFineInterp::regridNoSlopes");
+  CH_TIMERS("EBFineInterp::regridConservativeNoSlopes(EBCellFAB)");
+  CH_TIMER("EBFineInterp::regular_regrid", t1);
+  CH_TIMER("EBFineInterp::irregular_regrid", t2);
 
-  const Box coarBox = m_coarsenedFineGrids[a_dit];
+  CH_assert(a_fineData.nComp() > a_fineVar);
+  CH_assert(a_coarData.nComp() > a_coarVar);
+
+  const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
+  const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
+
+  const EBISLayout& ebislFine = m_eblgFine.getEBISL();
+  const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
+
+  const EBISBox& ebisBoxFine = ebislFine[a_dit];
+  const EBISBox& ebisBoxCoar = ebislCoar[a_dit];
+
+  const Box coarBox = dblCoar[a_dit];
   const Box refiBox = Box(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
 
   const Real volFactor = std::pow(m_refRat, SpaceDim);
@@ -168,52 +204,50 @@ EBFineInterp::regridNoSlopes(EBCellFAB&       a_fineData,
   FArrayBox&       fineDataReg = a_fineData.getFArrayBox();
   const FArrayBox& coarDataReg = a_coarData.getFArrayBox();
 
-  const EBISBox& ebisBoxCoar = m_coarsenedFineEBISL[a_dit];
-  const EBISBox& ebisBoxFine = m_eblgFine.getEBISL()[a_dit];
+  // Regular kernel. Set the fine data equal to the coarse data.
+  auto regularKernel = [&](const IntVect& coarIV) -> void {
+    const Real& coarVal = coarDataReg(coarIV, a_coarVar);
 
-  for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
+    for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
+      const IntVect& fineIV = m_refRat * coarIV + bit();
 
-    // Regular kernel. Set the fine data equal to the coarse data.
-    auto regularKernel = [&](const IntVect& coarIV) -> void {
-      const Real& coarVal = coarDataReg(coarIV, ivar);
+      fineDataReg(fineIV, a_fineVar) = coarVal;
+    }
+  };
 
-      for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
-        const IntVect& fineIV = m_refRat * coarIV + bit();
+  // Cut-cell kernel.
+  auto irregularKernel = [&](const VolIndex& coarVoF) -> void {
+    const Vector<VolIndex> fineVoFs = ebislCoar.refine(coarVoF, m_refRat, a_dit);
 
-        fineDataReg(fineIV, ivar) = coarVal;
-      }
-    };
+    // Compute kappaCoar/sum(kappaFine)
+    Real kappaFactor = 0.0;
+    for (int i = 0; i < fineVoFs.size(); i++) {
+      kappaFactor += ebisBoxFine.volFrac(fineVoFs[i]);
+    }
 
-    auto irregularKernel = [&](const VolIndex& coarVoF) -> void {
-      const Vector<VolIndex> fineVoFs = m_coarsenedFineEBISL.refine(coarVoF, m_refRat, a_dit);
+    if (kappaFactor > 1.E-9) {
+      kappaFactor = ebisBoxCoar.volFrac(coarVoF) / kappaFactor;
+    }
+    else {
+      kappaFactor = 1.0;
+    }
 
-      // Compute kappaCoar/sum(kappaFine)
-      Real kappaFactor = 0.0;
-      for (int i = 0; i < fineVoFs.size(); i++) {
-        kappaFactor += ebisBoxFine.volFrac(fineVoFs[i]);
-      }
+    kappaFactor *= volFactor;
 
-      if (kappaFactor > 1.E-9) {
-        kappaFactor = ebisBoxCoar.volFrac(coarVoF) / kappaFactor;
-      }
-      else {
-        kappaFactor = 1.0;
-      }
+    // Initialize irregular data.
+    for (int i = 0; i < fineVoFs.size(); i++) {
+      a_fineData(fineVoFs[i], a_fineVar) = kappaFactor * a_coarData(coarVoF, a_coarVar);
+    }
+  };
 
-      kappaFactor *= volFactor;
+  CH_START(t1);
+  BoxLoops::loop(coarBox, regularKernel);
+  CH_STOP(t1);
 
-      // Initialize irregular data.
-      for (int i = 0; i < fineVoFs.size(); i++) {
-        a_fineData(fineVoFs[i], ivar) = kappaFactor * a_coarData(coarVoF, ivar);
-      }
-    };
-
-    // Irregular kernel region.
-    VoFIterator vofit(m_irregRegions[a_dit], ebisBoxCoar.getEBGraph());
-
-    BoxLoops::loop(coarBox, regularKernel);
-    BoxLoops::loop(vofit, irregularKernel);
-  }
+  CH_START(t2);
+  VoFIterator vofit(m_irregRegions[a_dit], ebisBoxCoar.getEBGraph());
+  BoxLoops::loop(vofit, irregularKernel);
+  CH_STOP(t2);
 }
 
 void

@@ -133,25 +133,13 @@ Realm::regridBase(const int a_lmin)
   if (m_verbosity > 5) {
     pout() << "Realm::regridBase" << endl;
   }
-  pout() << "before/after base regrid" << endl;
-  MemoryReport::getMaxMinMemoryUsage();
+  
   for (auto& r : m_realms) {
     r.second->regridBase(a_lmin);
   }
-  MemoryReport::getMaxMinMemoryUsage();
-  pout() << endl;
 
-  pout() << "before/after mflevelgrid" << endl;
-  MemoryReport::getMaxMinMemoryUsage();
   this->defineMFLevelGrid(a_lmin);
-  MemoryReport::getMaxMinMemoryUsage();
-  pout() << endl;
-
-  pout() << "before/after validcells" << endl;
-  MemoryReport::getMaxMinMemoryUsage();
   this->defineValidCells();
-  MemoryReport::getMaxMinMemoryUsage();
-  pout() << endl;
 }
 
 void
@@ -536,6 +524,12 @@ const Vector<RefCountedPtr<EBLevelGrid>>&
 Realm::getEBLevelGrid(const phase::which_phase a_phase) const
 {
   return m_realms[a_phase]->getEBLevelGrid();
+}
+
+const Vector<RefCountedPtr<EBLevelGrid>>&
+Realm::getEBLevelGridCoFi(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getEBLevelGridCoFi();
 }
 
 const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>>&

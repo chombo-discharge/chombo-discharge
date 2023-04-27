@@ -1958,7 +1958,7 @@ AmrMesh::interpToNewGrids(EBAMRCellData&           a_newData,
       interpolator->regridMinMod(*a_newData[lvl], *a_newData[lvl - 1], Interval(0, nComp - 1));
     }
     else {
-      interpolator->regridNoSlopes(*a_newData[lvl], *a_newData[lvl - 1], Interval(0, nComp - 1));
+      interpolator->regridConservativeNoSlopes(*a_newData[lvl], *a_newData[lvl - 1], Interval(0, nComp - 1));
     }
 
     // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
@@ -2820,6 +2820,23 @@ AmrMesh::getEBLevelGrid(const std::string a_realm, const phase::which_phase a_ph
   }
 
   return m_realms[a_realm]->getEBLevelGrid(a_phase);
+}
+
+const Vector<RefCountedPtr<EBLevelGrid>>&
+AmrMesh::getEBLevelGridCoFi(const std::string a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getEBLevelGridCoFi(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getEBLevelGridCoFi(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getEBLevelGridCoFi(string, phase::which_phase) - could not find realm '" + a_realm +
+                            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getEBLevelGridCoFi(a_phase);
 }
 
 const Vector<RefCountedPtr<MFLevelGrid>>&

@@ -240,6 +240,13 @@ public:
   getEBLevelGrid(const phase::which_phase a_phase) const;
 
   /*!
+    @brief Get coarsened fine EBLevelGrid for particular phase
+    @param[in] a_phase Phase
+  */
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGridCoFi(const phase::which_phase a_phase) const;  
+
+  /*!
     @brief Get neighbors for particular phase
     @param[in] a_phase Phase
   */
