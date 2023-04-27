@@ -378,27 +378,6 @@ public:
   const AMRMask&
   getValidCells() const;
 
-  /*!
-    @brief Get coarsened fine data on specific realm
-    @param[in] a_phase Which phase
-  */
-  EBAMRCellData&
-  getCoFiBufferCell(const phase::which_phase a_phase) noexcept;
-
-  /*!
-    @brief Get coarsened fine data on specific realm
-    @param[in] a_phase Which phase
-  */
-  EBAMRFluxData&
-  getCoFiBufferFlux(const phase::which_phase a_phase) noexcept;
-
-  /*!
-    @brief Get coarsened fine data on specific realm
-    @param[in] a_phase Which phase
-  */
-  EBAMRIVData&
-  getCoFiBufferEB(const phase::which_phase a_phase) noexcept;
-
 protected:
   /*!
     @brief Realm defined or not

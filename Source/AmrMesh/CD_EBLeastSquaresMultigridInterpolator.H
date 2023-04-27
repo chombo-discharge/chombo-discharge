@@ -281,7 +281,7 @@ protected:
     @brief Define buffer data holder. 
   */
   virtual void
-  undefineBuffers() const noexcept;  
+  undefineBuffers() const noexcept;
 
   /*!
     @brief Define the coarse-sided interpolation stencils for doing the orthogonal derivatives. 

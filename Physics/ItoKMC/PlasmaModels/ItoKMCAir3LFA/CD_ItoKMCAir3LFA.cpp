@@ -102,7 +102,7 @@ ItoKMCAir3LFA::ItoKMCAir3LFA()
   m_photoReactions.emplace_back(y1);
 
   // Read input data
-  this->readTables();  
+  this->readTables();
 
   // Run the rest of the define method.
   this->define();

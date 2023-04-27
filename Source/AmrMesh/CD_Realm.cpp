@@ -663,22 +663,4 @@ Realm::getValidCells() const
   return m_validCells;
 }
 
-EBAMRCellData&
-Realm::getCoFiBufferCell(const phase::which_phase a_phase) noexcept
-{
-  return m_realms[a_phase]->getCoFiBufferCell();
-}
-
-EBAMRFluxData&
-Realm::getCoFiBufferFlux(const phase::which_phase a_phase) noexcept
-{
-  return m_realms[a_phase]->getCoFiBufferFlux();
-}
-
-EBAMRIVData&
-Realm::getCoFiBufferEB(const phase::which_phase a_phase) noexcept
-{
-  return m_realms[a_phase]->getCoFiBufferEB();
-}
-
 #include <CD_NamespaceFooter.H>

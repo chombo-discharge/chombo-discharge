@@ -1446,15 +1446,13 @@ AmrMesh::average(EBAMRCellData&           a_data,
     MayDay::Abort(str.c_str());
   }
 
-  EBAMRCellData& coFiBufferCell = m_realms[a_realm]->getCoFiBufferCell(a_phase);
-
   for (int lvl = m_finestLevel; lvl > 0; lvl--) {
     const int      nComps = a_data[lvl]->nComp();
     const Interval interv(0, nComps - 1);
 
     EBCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
 
-    aveOp.averageData(*a_data[lvl - 1], *coFiBufferCell[lvl - 1], *a_data[lvl], interv, a_average);
+    aveOp.averageData(*a_data[lvl - 1], *a_data[lvl], interv, a_average);
   }
 }
 
@@ -1475,14 +1473,12 @@ AmrMesh::average(EBAMRCellData&           a_data,
     MayDay::Abort(str.c_str());
   }
 
-  EBAMRCellData& coFiBufferCell = m_realms[a_realm]->getCoFiBufferCell(a_phase);
-
   for (int lvl = m_finestLevel; lvl > 0; lvl--) {
     CH_assert(a_variables.end() < a_data[lvl]->nComp());
 
     EBCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
 
-    aveOp.averageData(*a_data[lvl - 1], *coFiBufferCell[lvl - 1], *a_data[lvl], a_variables, a_average);
+    aveOp.averageData(*a_data[lvl - 1], *a_data[lvl], a_variables, a_average);
   }
 }
 
@@ -1572,8 +1568,6 @@ AmrMesh::average(EBAMRFluxData&           a_data,
     pout() << "AmrMesh::arithmeticAverage(EBAMRFluxData, string, phase::which_phase)" << endl;
   }
 
-  EBAMRFluxData& coFiBufferFlux = m_realms[a_realm]->getCoFiBufferFlux(a_phase);
-
   if (!this->queryRealm(a_realm)) {
     std::string str = "AmrMesh::average(EBAMRFluxData) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
@@ -1585,7 +1579,7 @@ AmrMesh::average(EBAMRFluxData&           a_data,
 
     EBCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
 
-    aveOp.averageData(*a_data[lvl - 1], *coFiBufferFlux[lvl - 1], *a_data[lvl], interv, a_average);
+    aveOp.averageData(*a_data[lvl - 1], *a_data[lvl], interv, a_average);
   }
 }
 
@@ -1638,15 +1632,13 @@ AmrMesh::average(EBAMRIVData&             a_data,
     MayDay::Abort(str.c_str());
   }
 
-  EBAMRIVData& coFiBufferEB = m_realms[a_realm]->getCoFiBufferEB(a_phase);
-
   for (int lvl = m_finestLevel; lvl > 0; lvl--) {
     const int      nComps = a_data[lvl]->nComp();
     const Interval interv(0, nComps - 1);
 
     EBCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
 
-    aveOp.averageData(*a_data[lvl - 1], *coFiBufferEB[lvl - 1], *a_data[lvl], interv, a_average);
+    aveOp.averageData(*a_data[lvl - 1], *a_data[lvl], interv, a_average);
   }
 }
 
