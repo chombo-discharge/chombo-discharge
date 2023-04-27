@@ -4,8 +4,8 @@
 AmrMesh.lo_corner       = -0.04  0.00 -0.16
 AmrMesh.hi_corner       =  0.04  0.08 0.16
 AmrMesh.verbosity       = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain = 32 32 128      # Number of cells on coarsest domain
-AmrMesh.max_amr_depth   = 3           # Maximum amr depth
+AmrMesh.coarsest_domain = 64 64 256      # Number of cells on coarsest domain
+AmrMesh.max_amr_depth   = 1           # Maximum amr depth
 AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
 AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size     = 4           # Number of cells between grid levels
