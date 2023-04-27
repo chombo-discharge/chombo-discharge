@@ -661,6 +661,11 @@ namespace Physics {
       std::string m_realm;
 
       /*!
+	@brief output data file
+      */
+      std::string m_dataOutputFile;
+      
+      /*!
 	@brief Output file
       */
       std::string m_outputFile;
@@ -893,6 +898,13 @@ namespace Physics {
       virtual void
       computeRdotStationary() noexcept;
 
+      /*!
+	@brief Print data report
+	@note For transient runs
+      */
+      void
+      writeDataReportTransient(const Real& a_voltage) const noexcept;
+      
       /*!
 	@brief Print report to the terminal. 
 	@note For stationary runs
