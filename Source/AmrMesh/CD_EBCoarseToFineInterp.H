@@ -13,16 +13,20 @@
 #define CD_EBCoarseToFineInterp_H
 
 // Chombo includes
-#include <RefCountedPtr.H>
 #include <EBLevelGrid.H>
-
-#include <EBPWLFineInterp.H>
+#include <LevelData.H>
+#include <EBCellFAB.H>
+#include <BaseIVFAB.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class for interpolating data to fine grids. Can use constant interpolation or include limiters.
+  @details This class should be used through the interpolate methods. The methods will switch between various supported
+  interpolation methods for the data types.
+  For EBCellFAB-type data we support PWC, ConservativePWC, ConservativeMinMod, ConservativeMonotonizedCentral, ConservativeSuperbee
+  For BASEIVFAB-type data we support PWC and ConservativePWC
 */
 class EBCoarseToFineInterp
 {
@@ -39,7 +43,8 @@ public:
     PWC,
     ConservativePWC,
     ConservativeMinMod,
-    ConservativeMonotizedCentral,
+    ConservativeMonotonizedCentral,
+    ConservativeSuperbee,
   };
 
   /*!
@@ -56,12 +61,10 @@ public:
     @param[in] a_nComp    Number of components. 
     @param[in] a_ebisPtr  EB index space. 
   */
-  EBCoarseToFineInterp(const EBLevelGrid&        a_eblgFine,
-                       const EBLevelGrid&        a_eblgCoFi,
-                       const EBLevelGrid&        a_eblgCoar,
-                       const int&                a_refRat,
-                       const int&                a_nComp,
-                       const EBIndexSpace* const a_ebisPtr) noexcept;
+  EBCoarseToFineInterp(const EBLevelGrid& a_eblgFine,
+                       const EBLevelGrid& a_eblgCoFi,
+                       const EBLevelGrid& a_eblgCoar,
+                       const int&         a_refRat) noexcept;
 
   /*!
     @brief Disallowed copy constructor
@@ -100,12 +103,10 @@ public:
     @param[in] a_ebisPtr  EB index space. 
   */
   virtual void
-  define(const EBLevelGrid&        a_eblgFine,
-         const EBLevelGrid&        a_eblgCoFi,
-         const EBLevelGrid&        a_eblgCoar,
-         const int&                a_refRat,
-         const int&                a_nComp,
-         const EBIndexSpace* const a_ebisPtr) noexcept;
+  define(const EBLevelGrid& a_eblgFine,
+         const EBLevelGrid& a_eblgCoFi,
+         const EBLevelGrid& a_eblgCoar,
+         const int&         a_refRat) noexcept;
 
   /*!
     @brief Interpolate to the fine grid using the specified method. 
@@ -135,6 +136,16 @@ public:
 
 protected:
   /*!
+    @brief Supported slope limiters for conservative interpolation with slopes.
+  */
+  enum class SlopeLimiter
+  {
+    MinMod,
+    MonotonizedCentral,
+    Superbee
+  };
+
+  /*!
     @brief Is defined or not
   */
   bool m_isDefined;
@@ -160,20 +171,16 @@ protected:
   EBLevelGrid m_eblgCoFi;
 
   /*!
-    @brief Irregular grid region.
+    @brief Weights in cut-cells when regridding conservatively
+    @details Defined over the fine layout.
   */
-  LayoutData<IntVectSet> m_irregRegions;
+  LevelData<BaseIVFAB<Real>> m_volumeWeights;
 
   /*!
     @brief Weights in cut-cells when regridding conservatively
     @details Defined over the fine layout. 
   */
-  LevelData<BaseIVFAB<Real>> m_conservativeWeights;
-
-  /*!
-    @brief Chombo object. Will be taken out of the design.
-  */
-  mutable RefCountedPtr<EBPWLFineInterp> m_fineInterp;
+  LevelData<BaseIVFAB<Real>> m_areaWeights;
 
   /*!
     @brief Data holder for holding data on the coarsened fine grids. 
@@ -186,6 +193,11 @@ protected:
     @details This iterator runs over the valid fine cells.
   */
   mutable LayoutData<VoFIterator> m_fineVoFs;
+
+  /*!
+    @brief Iterator for coarse grid cells.
+  */
+  mutable LayoutData<VoFIterator> m_coarVoFs;
 
   /*!
     @brief Define weights for cut-cell conservative regridding
@@ -225,6 +237,23 @@ protected:
                              const int&       a_coarVar) const noexcept;
 
   /*!
+    @brief Sloped interpolation of an EBCellFAB. Uses specified input slope.
+    @param[out] a_fineData Piecewise constant interpolation of the coarse data.
+    @param[in]  a_coarData Coarse data
+    @param[in]  a_dit Grid index. 
+    @param[in]  a_fineVar Fine-grid variable
+    @param[in]  a_coarVar Coarse-grid variable
+    @param[in]  a_limiter Which slope limiter to use. 
+  */
+  virtual void
+  interpolateConservativeSlope(EBCellFAB&          a_fineData,
+                               const EBCellFAB&    a_coarData,
+                               const DataIndex&    a_dit,
+                               const int&          a_fineVar,
+                               const int&          a_coarVar,
+                               const SlopeLimiter& a_limiter) const noexcept;
+
+  /*!
     @brief Piecewise constant interpolation of an EB-data. This ignores the area fraction. This sets
     the fine-grid data to the coarse-grid data. 
     @param[out] a_fineData Fine-grid data. 
@@ -255,6 +284,36 @@ protected:
                              const DataIndex&       a_dit,
                              const int&             a_fineVar,
                              const int&             a_coarVar) const noexcept;
+
+  /*!
+    @brief Check if the interpolation conserved. This will print an error message if it didn't. 
+    @param[out] a_fineData Fine-grid data. 
+    @param[in]  a_coarData Coarse data
+    @param[in]  a_dit Grid index. 
+    @param[in]  a_fineVar Fine-grid variable
+    @param[in]  a_coarVar Coarse-grid variable
+  */
+  virtual void
+  checkConservation(const EBCellFAB& a_fineData,
+                    const EBCellFAB& a_coarData,
+                    const DataIndex& a_dit,
+                    const int        a_fineVar,
+                    const int        a_coarVar) const noexcept;
+
+  /*!
+    @brief Check if the interpolation conserved. This will print an error message if it didn't. 
+    @param[out] a_fineData Fine-grid data. 
+    @param[in]  a_coarData Coarse data
+    @param[in]  a_dit Grid index. 
+    @param[in]  a_fineVar Fine-grid variable
+    @param[in]  a_coarVar Coarse-grid variable
+  */
+  virtual void
+  checkConservation(const BaseIVFAB<Real>& a_fineData,
+                    const BaseIVFAB<Real>& a_coarData,
+                    const DataIndex&       a_dit,
+                    const int              a_fineVar,
+                    const int              a_coarVar) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

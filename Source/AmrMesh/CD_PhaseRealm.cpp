@@ -674,21 +674,14 @@ PhaseRealm::defineEBCoarseToFineInterp(const int a_lmin)
   m_ebFineInterp.resize(1 + m_finestLevel);
 
   if (doThisOperator) {
-
-    const int comps = SpaceDim;
-
     for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
 
       const bool hasCoar = lvl > 0;
 
       // Interpolator for filling data on level l from level l-1 lives on level l
       if (hasCoar) {
-        m_ebFineInterp[lvl] = RefCountedPtr<EBCoarseToFineInterp>(new EBCoarseToFineInterp(*m_eblg[lvl],
-                                                                                           *m_eblgCoFi[lvl - 1],
-                                                                                           *m_eblg[lvl - 1],
-                                                                                           m_refinementRatios[lvl - 1],
-                                                                                           comps,
-                                                                                           &(*m_ebis)));
+        m_ebFineInterp[lvl] = RefCountedPtr<EBCoarseToFineInterp>(
+          new EBCoarseToFineInterp(*m_eblg[lvl], *m_eblgCoFi[lvl - 1], *m_eblg[lvl - 1], m_refinementRatios[lvl - 1]));
       }
     }
   }

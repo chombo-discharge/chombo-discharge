@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Std includes
+#include <limits>
+
 // Chombo includes
 #include <CH_Timer.H>
 #include <EBCellFactory.H>
@@ -26,27 +29,23 @@ EBCoarseToFineInterp::EBCoarseToFineInterp() noexcept
   m_isDefined = false;
 }
 
-EBCoarseToFineInterp::EBCoarseToFineInterp(const EBLevelGrid&        a_eblgFine,
-                                           const EBLevelGrid&        a_eblgCoFi,
-                                           const EBLevelGrid&        a_eblgCoar,
-                                           const int&                a_refRat,
-                                           const int&                a_nComp,
-                                           const EBIndexSpace* const a_ebisPtr) noexcept
+EBCoarseToFineInterp::EBCoarseToFineInterp(const EBLevelGrid& a_eblgFine,
+                                           const EBLevelGrid& a_eblgCoFi,
+                                           const EBLevelGrid& a_eblgCoar,
+                                           const int&         a_refRat) noexcept
 {
   CH_TIME("EBCoarseToFineInterp::EBCoarseToFineInterp(full)");
 
-  this->define(a_eblgFine, a_eblgCoFi, a_eblgCoar, a_refRat, a_nComp, a_ebisPtr);
+  this->define(a_eblgFine, a_eblgCoFi, a_eblgCoar, a_refRat);
 }
 
 EBCoarseToFineInterp::~EBCoarseToFineInterp() noexcept {}
 
 void
-EBCoarseToFineInterp::define(const EBLevelGrid&        a_eblgFine,
-                             const EBLevelGrid&        a_eblgCoFi,
-                             const EBLevelGrid&        a_eblgCoar,
-                             const int&                a_refRat,
-                             const int&                a_nComp,
-                             const EBIndexSpace* const a_ebisPtr) noexcept
+EBCoarseToFineInterp::define(const EBLevelGrid& a_eblgFine,
+                             const EBLevelGrid& a_eblgCoFi,
+                             const EBLevelGrid& a_eblgCoar,
+                             const int&         a_refRat) noexcept
 {
   CH_TIMERS("EBCoarseToFineInterp::define");
   CH_TIMER("EBCoarseToFineInterp::define_ebpwlfineinterp", t0);
@@ -55,17 +54,6 @@ EBCoarseToFineInterp::define(const EBLevelGrid&        a_eblgFine,
   CH_assert(a_refRat > 1);
   CH_assert(a_nComp > 0);
   CH_assert(a_ebisPtr != nullptr);
-
-  CH_START(t0);
-  m_fineInterp = RefCountedPtr<EBPWLFineInterp>(new EBPWLFineInterp(a_eblgFine.getDBL(),
-                                                                    a_eblgCoar.getDBL(),
-                                                                    a_eblgFine.getEBISL(),
-                                                                    a_eblgCoar.getEBISL(),
-                                                                    a_eblgCoar.getDomain(),
-                                                                    a_refRat,
-                                                                    a_nComp,
-                                                                    a_ebisPtr));
-  CH_START(t0);
 
   m_refRat   = a_refRat;
   m_eblgFine = a_eblgFine;
@@ -78,7 +66,7 @@ EBCoarseToFineInterp::define(const EBLevelGrid&        a_eblgFine,
   LayoutData<IntVectSet> irregCoar(m_eblgCoFi.getDBL());
 
   m_fineVoFs.define(m_eblgFine.getDBL());
-  m_irregRegions.define(m_eblgCoFi.getDBL());
+  m_coarVoFs.define(m_eblgFine.getDBL());
 
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
     const Box& fineBox = m_eblgFine.getDBL()[dit()];
@@ -91,17 +79,13 @@ EBCoarseToFineInterp::define(const EBLevelGrid&        a_eblgFine,
     irregCoar[dit()] = coarEBISBox.getIrregIVS(coarBox);
 
     m_fineVoFs[dit()].define(irregFine[dit()], fineEBISBox.getEBGraph());
-    m_irregRegions[dit()] = coarEBISBox.getIrregIVS(coarBox);
+    m_coarVoFs[dit()].define(coarEBISBox.getIrregIVS(coarBox), coarEBISBox.getEBGraph());
   }
 
-  // Should not need ghost cells for this one (because the irreg regrids don't use slopes but keeps it local).
   m_irregCoFi.define(m_eblgCoFi.getDBL(), 1, IntVect::Zero, BaseIVFactory<Real>(m_eblgCoFi.getEBISL(), irregCoar));
-
-  m_conservativeWeights.define(m_eblgFine.getDBL(),
-                               1,
-                               IntVect::Zero,
-                               BaseIVFactory<Real>(m_eblgFine.getEBISL(), irregFine));
-  CH_START(t1);
+  m_areaWeights.define(m_eblgFine.getDBL(), 1, IntVect::Zero, BaseIVFactory<Real>(m_eblgFine.getEBISL(), irregFine));
+  m_volumeWeights.define(m_eblgFine.getDBL(), 1, IntVect::Zero, BaseIVFactory<Real>(m_eblgFine.getEBISL(), irregFine));
+  CH_STOP(t1);
 
   this->defineWeights();
 }
@@ -114,35 +98,43 @@ EBCoarseToFineInterp::defineWeights() noexcept
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
-  const Real areaFactor = std::pow(m_refRat, SpaceDim - 1);
+  const Real areaFactor   = std::pow(m_refRat, SpaceDim - 1);
+  const Real volumeFactor = std::pow(m_refRat, SpaceDim);
 
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
     const EBISBox& ebisBoxFine = ebislFine[dit()];
     const EBISBox& ebisBoxCoar = ebislCoar[dit()];
 
-    BaseIVFAB<Real>& weights = m_conservativeWeights[dit()];
+    BaseIVFAB<Real>& volumeWeights = m_volumeWeights[dit()];
+    BaseIVFAB<Real>& areaWeights   = m_areaWeights[dit()];
+
+    volumeWeights.setVal(0.0);
+    areaWeights.setVal(0.0);
 
     auto kernel = [&](const VolIndex& fineVoF) -> void {
       // TLDR: We want refRat^(D-1) * coarArea/fineArea. We refine the coarse vof (which also gives regular cells)
-      // but that won't matter because they don't have a boundary area.
+      // but that won't matter because they don't have a boundary area. We do it similarly for the volume fractions.
 
-      const VolIndex         coarVoF     = ebislFine.coarsen(fineVoF, m_refRat, dit());
-      const Vector<VolIndex> refCoarVoFs = ebislCoar.refine(coarVoF, m_refRat, dit());
+      const VolIndex         coarVoF  = ebislFine.coarsen(fineVoF, m_refRat, dit());
+      const Vector<VolIndex> fineVoFs = ebislCoar.refine(coarVoF, m_refRat, dit());
 
-      Real fineArea = 0.0;
-      Real coarArea = ebisBoxCoar.bndryArea(coarVoF);
+      Real fineVolume = 0.0;
+      Real fineArea   = 0.0;
 
-      for (int i = 0; i < refCoarVoFs.size(); i++) {
-        if (ebisBoxFine.isIrregular(refCoarVoFs[i].gridIndex())) {
-          fineArea += ebisBoxFine.bndryArea(refCoarVoFs[i]);
-        }
+      const Real coarVolume = ebisBoxCoar.volFrac(coarVoF);
+      const Real coarArea   = ebisBoxCoar.bndryArea(coarVoF);
+
+      for (int i = 0; i < fineVoFs.size(); i++) {
+        fineArea += ebisBoxFine.bndryArea(fineVoFs[i]);
+        fineVolume += ebisBoxFine.volFrac(fineVoFs[i]);
       }
 
       if (fineArea > 0.0) {
-        weights(fineVoF, 0) = areaFactor * coarArea / fineArea;
+        areaWeights(fineVoF, 0) = areaFactor * coarArea / fineArea;
       }
-      else {
-        weights(fineVoF, 0) = 0.0;
+
+      if (fineVolume > 0.0) {
+        volumeWeights(fineVoF, 0) = volumeFactor * coarVolume / fineVolume;
       }
     };
 
@@ -164,15 +156,6 @@ EBCoarseToFineInterp::interpolate(LevelData<EBCellFAB>&             a_fineData,
   CH_assert(a_fineData.nComp() > a_variables.end());
   CH_assert(a_coarData.nComp() > a_variables.end());
 
-#if 1 // Temporary code hook.
-  if (a_interpType == EBCoarseToFineInterp::Type::ConservativeMinMod) {
-    m_fineInterp->interpolate(a_fineData, a_coarData, a_variables);
-
-    return;
-  }
-#endif
-
-  // Might need one ghost cell for regrid slopes.
   CH_START(t1);
   const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
   const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
@@ -197,8 +180,22 @@ EBCoarseToFineInterp::interpolate(LevelData<EBCellFAB>&             a_fineData,
         break;
       }
       case EBCoarseToFineInterp::Type::ConservativeMinMod: {
+        this->interpolateConservativeSlope(a_fineData[dit()],
+                                           coarsenedFineData[dit()],
+                                           dit(),
+                                           ivar,
+                                           0,
+                                           SlopeLimiter::MinMod);
 
-        MayDay::Error("EBCoarseToFineInterp::interpolate - logic bust");
+        break;
+      }
+      case EBCoarseToFineInterp::Type::ConservativeMonotonizedCentral: {
+        this->interpolateConservativeSlope(a_fineData[dit()],
+                                           coarsenedFineData[dit()],
+                                           dit(),
+                                           ivar,
+                                           0,
+                                           SlopeLimiter::MonotonizedCentral);
 
         break;
       }
@@ -312,8 +309,7 @@ EBCoarseToFineInterp::interpolatePWC(EBCellFAB&       a_fineData,
   CH_STOP(t1);
 
   CH_START(t2);
-  VoFIterator vofit(m_irregRegions[a_dit], ebisBoxCoar.getEBGraph());
-  BoxLoops::loop(vofit, irregularKernel);
+  BoxLoops::loop(m_coarVoFs[a_dit], irregularKernel);
   CH_STOP(t2);
 }
 
@@ -340,58 +336,221 @@ EBCoarseToFineInterp::interpolateConservativePWC(EBCellFAB&       a_fineData,
   const EBISBox& ebisBoxFine = ebislFine[a_dit];
   const EBISBox& ebisBoxCoar = ebislCoar[a_dit];
 
+  const Box fineBox = dblFine[a_dit];
   const Box coarBox = dblCoar[a_dit];
-  const Box refiBox = Box(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
 
-  const Real volFactor = std::pow(m_refRat, SpaceDim);
+  const BaseIVFAB<Real>& volumeFactor = m_volumeWeights[a_dit];
 
   FArrayBox&       fineDataReg = a_fineData.getFArrayBox();
   const FArrayBox& coarDataReg = a_coarData.getFArrayBox();
 
   // Regular kernel. Set the fine data equal to the coarse data.
-  auto regularKernel = [&](const IntVect& coarIV) -> void {
-    const Real& coarVal = coarDataReg(coarIV, a_coarVar);
+  auto regularKernel = [&](const IntVect& fineIV) -> void {
+    const IntVect coarIV = coarsen(fineIV, m_refRat);
 
-    for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
-      const IntVect& fineIV = m_refRat * coarIV + bit();
-
-      fineDataReg(fineIV, a_fineVar) = coarVal;
-    }
+    fineDataReg(fineIV, a_fineVar) = coarDataReg(coarIV, a_coarVar);
   };
 
   // Cut-cell kernel.
-  auto irregularKernel = [&](const VolIndex& coarVoF) -> void {
-    const Vector<VolIndex> fineVoFs = ebislCoar.refine(coarVoF, m_refRat, a_dit);
+  auto irregularKernel = [&](const VolIndex& fineVoF) -> void {
+    const VolIndex& coarVoF = ebislFine.coarsen(fineVoF, m_refRat, a_dit);
 
-    // Compute kappaCoar/sum(kappaFine)
-    Real kappaFactor = 0.0;
-    for (int i = 0; i < fineVoFs.size(); i++) {
-      kappaFactor += ebisBoxFine.volFrac(fineVoFs[i]);
-    }
-
-    if (kappaFactor > 1.E-9) {
-      kappaFactor = ebisBoxCoar.volFrac(coarVoF) / kappaFactor;
-    }
-    else {
-      kappaFactor = 1.0;
-    }
-
-    kappaFactor *= volFactor;
-
-    // Initialize irregular data.
-    for (int i = 0; i < fineVoFs.size(); i++) {
-      a_fineData(fineVoFs[i], a_fineVar) = kappaFactor * a_coarData(coarVoF, a_coarVar);
-    }
+    a_fineData(fineVoF, a_fineVar) = volumeFactor(fineVoF, 0) * a_coarData(coarVoF, a_coarVar);
   };
 
   CH_START(t1);
-  BoxLoops::loop(coarBox, regularKernel);
+  BoxLoops::loop(fineBox, regularKernel);
   CH_STOP(t1);
 
   CH_START(t2);
-  VoFIterator vofit(m_irregRegions[a_dit], ebisBoxCoar.getEBGraph());
-  BoxLoops::loop(vofit, irregularKernel);
+  BoxLoops::loop(m_fineVoFs[a_dit], irregularKernel);
   CH_STOP(t2);
+
+#ifndef NDEBUG
+  this->checkConservation(a_fineData, a_coarData, a_dit, a_fineVar, a_coarVar);
+#endif
+}
+
+void
+EBCoarseToFineInterp::interpolateConservativeSlope(EBCellFAB&          a_fineData,
+                                                   const EBCellFAB&    a_coarData,
+                                                   const DataIndex&    a_dit,
+                                                   const int&          a_fineVar,
+                                                   const int&          a_coarVar,
+                                                   const SlopeLimiter& a_limiter) const noexcept
+{
+  CH_TIMERS("EBCoarseToFineInterp::interpolateConservativeSlope(EBCellFAB)");
+  CH_TIMER("EBCoarseToFineInterp::slopes_interior", t1);
+  CH_TIMER("EBCoarseToFineInterp::extrap_regular", t2);
+  CH_TIMER("EBCoarseToFineInterp::constant_term_reg", t3);
+  CH_TIMER("EBCoarseToFineInterp::irreg_interp", t4);
+
+  CH_assert(a_fineData.nComp() > a_fineVar);
+  CH_assert(a_coarData.nComp() > a_coarVar);
+
+  const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
+  const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
+
+  const EBISLayout& ebislFine = m_eblgFine.getEBISL();
+  const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
+
+  const ProblemDomain& domainFine = m_eblgFine.getDomain();
+  const ProblemDomain& domainCoar = m_eblgCoar.getDomain();
+
+  const EBISBox& ebisBoxFine = ebislFine[a_dit];
+  const EBISBox& ebisBoxCoar = ebislCoar[a_dit];
+
+  const Box coarBox = dblCoar[a_dit];
+  const Box fineBox = dblFine[a_dit];
+
+  const BaseIVFAB<Real>& volumeFactor = m_volumeWeights[a_dit];
+
+  FArrayBox&       fineDataReg = a_fineData.getFArrayBox();
+  const FArrayBox& coarDataReg = a_coarData.getFArrayBox();
+
+  // Set to zero because we increment below.
+  a_fineData.setVal(0.0);
+
+  // Compute the slopes.
+  EBCellFAB  slopes(ebisBoxCoar, coarBox, 1);
+  FArrayBox& slopesReg = slopes.getFArrayBox();
+  slopes.setVal(0.0);
+
+  // Various slope definitions.
+  auto minmod = [](const Real& dwl, const Real& dwr) -> Real {
+    Real slope = 0.0;
+
+    if (dwl * dwr > 0.0) {
+      slope = std::abs(dwl) < std::abs(dwr) ? dwl : dwr;
+    }
+    return slope;
+  };
+
+  auto mc = [](const Real& dwl, const Real& dwr) -> Real {
+    Real slope = 0.0;
+
+    if (dwl * dwr > 0.0) {
+      const Real dwc = dwl + dwr;
+      const Real sgn = Real((dwc > 0.0) - (dwc < 0.0));
+
+      slope = sgn * std::min(0.5 * std::abs(dwc), 2.0 * std::min(std::abs(dwl), std::abs(dwr)));
+    }
+
+    return slope;
+  };
+
+  auto superbee = [=](const Real& dwl, const Real& dwr) -> Real {
+    Real slope = 0.0;
+
+    if (dwl * dwr > 0.0) {
+      const Real s1 = minmod(dwl, 2 * dwr);
+      const Real s2 = minmod(dwr, 2 * dwl);
+
+      if (s1 * s2 > 0.0) {
+        slope = std::abs(s1) > std::abs(s2) ? s1 : s2;
+      }
+    }
+
+    return slope;
+  };
+
+  // Compute slopes in every direction. Slopes in boundary cells are zero (because what would they be?). And in
+  // cut-cells we set slopes to zero (because I don't know how to combine hard conservation with slope extrapolation!).
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    const IntVect shift = BASISV(dir);
+
+    const Box interiorCells = grow(grow(coarBox, 1) & domainCoar, -1);
+
+    // Define the regular grid kernel.
+    std::function<void(const IntVect& iv)> interiorKernel;
+    switch (a_limiter) {
+    case SlopeLimiter::MinMod: {
+      interiorKernel = [&](const IntVect& iv) -> void {
+        const Real dwl = coarDataReg(iv, a_coarVar) - coarDataReg(iv - shift, a_coarVar);
+        const Real dwr = coarDataReg(iv + shift, a_coarVar) - coarDataReg(iv, a_coarVar);
+
+        slopesReg(iv, 0) = minmod(dwl, dwr);
+      };
+
+      break;
+    }
+    case SlopeLimiter::MonotonizedCentral: {
+      interiorKernel = [&](const IntVect& iv) -> void {
+        const Real dwl = coarDataReg(iv, a_coarVar) - coarDataReg(iv - shift, a_coarVar);
+        const Real dwr = coarDataReg(iv + shift, a_coarVar) - coarDataReg(iv, a_coarVar);
+
+        slopesReg(iv, 0) = mc(dwl, dwr);
+      };
+
+      break;
+    }
+    case SlopeLimiter::Superbee: {
+      interiorKernel = [&](const IntVect& iv) -> void {
+        const Real dwl = coarDataReg(iv, a_coarVar) - coarDataReg(iv - shift, a_coarVar);
+        const Real dwr = coarDataReg(iv + shift, a_coarVar) - coarDataReg(iv, a_coarVar);
+
+        slopesReg(iv, 0) = superbee(dwl, dwr);
+      };
+
+      break;
+    }
+    default: {
+      MayDay::Error("EBCoarseToFineInterp::interpolateConservativeSlope - logic bust 1");
+
+      break;
+    }
+    }
+
+    // Reset slopes in cut-cells because we can't extrapolate inside of them.
+    auto resetSlopeIrreg = [&](const VolIndex& coarVoF) -> void {
+      slopes(coarVoF, 0) = 0.0;
+    };
+
+    // Apply slopes in the fine-grid interior cells.
+    auto slopeExtrapRegular = [&](const IntVect& fineIV) -> void {
+      const IntVect  coarIV = coarsen(fineIV, m_refRat);
+      const Real&    slope  = slopesReg(coarIV, 0);
+      const RealVect delta  = (RealVect(fineIV) - m_refRat * RealVect(coarIV) + 0.5 * (1.0 - m_refRat)) / m_refRat;
+
+      fineDataReg(fineIV, a_fineVar) += slope * delta[dir];
+    };
+
+    // Compute slopes in interior cells. Crap on boundary and cut-cells.
+    CH_START(t1);
+    BoxLoops::loop(interiorCells, interiorKernel);
+    BoxLoops::loop(m_coarVoFs[a_dit], resetSlopeIrreg);
+    CH_STOP(t1);
+
+    CH_START(t2);
+    BoxLoops::loop(fineBox, slopeExtrapRegular);
+    CH_STOP(t2);
+  }
+
+  // Add in the constant term.
+  auto regularConstantTerm = [&](const IntVect& fineIV) {
+    const IntVect coarIV = coarsen(fineIV, m_refRat);
+
+    fineDataReg(fineIV, a_fineVar) += coarDataReg(coarIV, a_coarVar);
+  };
+
+  // Reset irregular cells, using hard conservation.
+  auto irregularInterp = [&](const VolIndex& fineVoF) {
+    const VolIndex coarVoF = ebislFine.coarsen(fineVoF, m_refRat, a_dit);
+
+    a_fineData(fineVoF, a_fineVar) = volumeFactor(fineVoF, 0) * a_coarData(coarVoF, a_coarVar);
+  };
+
+  CH_START(t3);
+  BoxLoops::loop(fineBox, regularConstantTerm);
+  CH_STOP(t3);
+
+  CH_START(t4);
+  BoxLoops::loop(m_fineVoFs[a_dit], irregularInterp);
+  CH_STOP(t4);
+
+#ifndef NDEBUG
+  this->checkConservation(a_fineData, a_coarData, a_dit, a_fineVar, a_coarVar);
+#endif
 }
 
 void
@@ -401,13 +560,10 @@ EBCoarseToFineInterp::interpolatePWC(BaseIVFAB<Real>&       a_fineData,
                                      const int&             a_fineVar,
                                      const int&             a_coarVar) const noexcept
 {
-  CH_TIMERS("EBCoarseToFineInterp::interpolatePWC(BaseIVFAB<Real>)");
+  CH_TIME("EBCoarseToFineInterp::interpolatePWC(BaseIVFAB<Real>)");
 
-  CH_assert(a_fineData.nComp() >= a_variables.size());
-  CH_assert(a_coarData.nComp() >= a_variables.size());
-
-  CH_assert(a_fineData.nComp() > a_variables.end());
-  CH_assert(a_coarData.nComp() > a_variables.end());
+  CH_assert(a_fineData.nComp() > a_fineVar);
+  CH_assert(a_coarData.nComp() > a_coarVar);
 
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
@@ -434,13 +590,10 @@ EBCoarseToFineInterp::interpolateConservativePWC(BaseIVFAB<Real>&       a_fineDa
                                                  const int&             a_fineVar,
                                                  const int&             a_coarVar) const noexcept
 {
-  CH_TIMERS("EBCoarseToFineInterp::interpolateConservativePWC(BaseIVFAB<Real>)");
+  CH_TIME("EBCoarseToFineInterp::interpolateConservativePWC(BaseIVFAB<Real>)");
 
-  CH_assert(a_fineData.nComp() >= a_variables.size());
-  CH_assert(a_coarData.nComp() >= a_variables.size());
-
-  CH_assert(a_fineData.nComp() > a_variables.end());
-  CH_assert(a_coarData.nComp() > a_variables.end());
+  CH_assert(a_fineData.nComp() > a_fineVar);
+  CH_assert(a_coarData.nComp() > a_coarVar);
 
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
@@ -448,7 +601,7 @@ EBCoarseToFineInterp::interpolateConservativePWC(BaseIVFAB<Real>&       a_fineDa
   const EBISBox& fineEBISBox = ebislFine[a_dit];
   const EBISBox& coarEBISBox = ebislCoar[a_dit];
 
-  const BaseIVFAB<Real>& weights = m_conservativeWeights[a_dit];
+  const BaseIVFAB<Real>& weights = m_areaWeights[a_dit];
 
   auto kernel = [&](const VolIndex& fineVoF) -> void {
     const VolIndex coarVoF = ebislFine.coarsen(fineVoF, m_refRat, a_dit);
@@ -460,6 +613,114 @@ EBCoarseToFineInterp::interpolateConservativePWC(BaseIVFAB<Real>&       a_fineDa
   };
 
   BoxLoops::loop(m_fineVoFs[a_dit], kernel);
+
+#ifndef NDEBUG
+  this->checkConservation(a_fineData, a_coarData, a_dit, a_fineVar, a_coarVar);
+#endif
+}
+
+void
+EBCoarseToFineInterp::checkConservation(const EBCellFAB& a_fineData,
+                                        const EBCellFAB& a_coarData,
+                                        const DataIndex& a_dit,
+                                        const int        a_fineVar,
+                                        const int        a_coarVar) const noexcept
+{
+  CH_TIME("EBCoarseToFineInterp::checkConservation(EBCellFAB)");
+
+  CH_assert(a_fineData.nComp() > a_fineVar);
+  CH_assert(a_coarData.nComp() > a_coarVar);
+
+  const Box fineBox = m_eblgFine.getDBL()[a_dit];
+  const Box coarBox = m_eblgCoFi.getDBL()[a_dit];
+
+  const EBISBox& ebisBoxFine = m_eblgFine.getEBISL()[a_dit];
+  const EBISBox& ebisBoxCoar = m_eblgCoFi.getEBISL()[a_dit];
+
+  const FArrayBox& fineDataReg = a_fineData.getFArrayBox();
+  const FArrayBox& coarDataReg = a_coarData.getFArrayBox();
+
+  Real sumCoar = 0.0;
+  Real sumFine = 0.0;
+
+  auto regCoar = [&](const IntVect& iv) -> void {
+    if (ebisBoxCoar.isRegular(iv)) {
+      sumCoar += coarDataReg(iv, a_coarVar);
+    }
+  };
+  auto regFine = [&](const IntVect& iv) -> void {
+    if (ebisBoxFine.isRegular(iv)) {
+      sumFine += fineDataReg(iv, a_fineVar);
+    }
+  };
+  auto irregCoar = [&](const VolIndex& coarVoF) -> void {
+    sumCoar += ebisBoxCoar.volFrac(coarVoF) * a_coarData(coarVoF, a_coarVar);
+  };
+  auto irregFine = [&](const VolIndex& fineVoF) -> void {
+    sumFine += ebisBoxFine.volFrac(fineVoF) * a_fineData(fineVoF, a_fineVar);
+  };
+
+  BoxLoops::loop(coarBox, regCoar);
+  BoxLoops::loop(fineBox, regFine);
+  BoxLoops::loop(m_coarVoFs[a_dit], irregCoar);
+  BoxLoops::loop(m_fineVoFs[a_dit], irregFine);
+
+  sumCoar *= std::pow(m_refRat, SpaceDim);
+
+  const Real delta = std::abs(sumCoar - sumFine);
+  const Real eps   = std::numeric_limits<Real>::epsilon();
+
+  // Issue an error message if we did not conserve. Try to guard against false negatives by some more
+  // thorough evaluations of round-off errors.
+  if (delta > eps && std::max(std::abs(sumCoar), std::abs(sumFine)) > eps &&
+      delta / std::abs(std::max(sumCoar, sumFine)) > 1.E-10) {
+
+    const std::string baseErr = "EBCoarseToFineInterp::checkConservation(EBCellFAB) - did not conserve = ";
+    std::cout << baseErr << sumFine << "\t" << sumCoar << std::endl;
+  }
+}
+
+void
+EBCoarseToFineInterp::checkConservation(const BaseIVFAB<Real>& a_fineData,
+                                        const BaseIVFAB<Real>& a_coarData,
+                                        const DataIndex&       a_dit,
+                                        const int              a_fineVar,
+                                        const int              a_coarVar) const noexcept
+{
+  CH_TIME("EBCoarseToFineInterp::checkConservation(EBCellFAB)");
+
+  CH_assert(a_fineData.nComp() > a_fineVar);
+  CH_assert(a_coarData.nComp() > a_coarVar);
+
+  const EBISBox& ebisBoxFine = m_eblgFine.getEBISL()[a_dit];
+  const EBISBox& ebisBoxCoar = m_eblgCoFi.getEBISL()[a_dit];
+
+  Real sumCoar = 0.0;
+  Real sumFine = 0.0;
+
+  auto irregCoar = [&](const VolIndex& coarVoF) -> void {
+    sumCoar += ebisBoxCoar.bndryArea(coarVoF) * a_coarData(coarVoF, a_coarVar);
+  };
+  auto irregFine = [&](const VolIndex& fineVoF) -> void {
+    sumFine += ebisBoxFine.bndryArea(fineVoF) * a_fineData(fineVoF, a_fineVar);
+  };
+
+  BoxLoops::loop(m_coarVoFs[a_dit], irregCoar);
+  BoxLoops::loop(m_fineVoFs[a_dit], irregFine);
+
+  sumCoar *= std::pow(m_refRat, SpaceDim - 1);
+
+  const Real delta = std::abs(sumCoar - sumFine);
+  const Real eps   = std::numeric_limits<Real>::epsilon();
+
+  // Issue an error message if we did not conserve. Try to guard against false negatives by some more
+  // thorough evaluations of round-off errors.
+  if (delta > eps && std::max(std::abs(sumCoar), std::abs(sumFine)) > eps &&
+      delta / std::abs(std::max(sumCoar, sumFine)) > 1.E-10) {
+
+    const std::string baseErr = "EBCoarseToFineInterp::checkConservation(BaseIVFAB) - did not conserve = ";
+    std::cout << baseErr << sumFine << "\t" << sumCoar << std::endl;
+  }
 }
 
 #include <CD_NamespaceFooter.H>

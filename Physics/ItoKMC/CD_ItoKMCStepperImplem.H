@@ -5130,10 +5130,8 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
     const EBLevelGrid& eblgCoFi = *m_amr->getEBLevelGridCoFi(m_particleRealm, m_plasmaPhase)[lvl - 1];
     const EBLevelGrid& eblgCoar = *m_amr->getEBLevelGrid(m_particleRealm, m_plasmaPhase)[lvl - 1];
     const int          refRat   = m_amr->getRefinementRatios()[lvl - 1];
-    const int          nComp    = 1;
 
-    interpOp[lvl] = RefCountedPtr<EBCoarseToFineInterp>(
-      new EBCoarseToFineInterp(eblgFine, eblgCoFi, eblgCoar, refRat, nComp, eblgFine.getEBIS()));
+    interpOp[lvl] = RefCountedPtr<EBCoarseToFineInterp>(new EBCoarseToFineInterp(eblgFine, eblgCoFi, eblgCoar, refRat));
   }
 
   // 3. Go through each solver and figure out the number of particles on the new grids. Add
