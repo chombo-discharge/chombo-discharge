@@ -245,7 +245,6 @@ EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
   // TLDR: This routine computes the two-level gradient. It first computes the level gradient and then iterates through
   //       all cells that require a "two-level" view of the gradient. The two-level stencils are applied to buffer data
   //       holders. Once the gradient has been computed (in the buffer data holder), it is copied into a_gradient.
-
   this->computeLevelGradient(a_gradient, a_phi);
 
   // Do corrections near the EBCF.
