@@ -930,6 +930,7 @@ PhaseRealm::defineGradSten(const int a_lmin)
 
       EBLevelGrid eblg;
       EBLevelGrid eblgFine;
+      EBLevelGrid eblgFiCo;      
 
       int refRat;
 
@@ -937,16 +938,18 @@ PhaseRealm::defineGradSten(const int a_lmin)
       if (hasFine) {
         refRat   = m_refinementRatios[lvl];
         eblgFine = *m_eblg[lvl + 1];
+	eblgFiCo = *m_eblgFiCo[lvl+1];
       }
       else {
         refRat   = 1;
         eblgFine = EBLevelGrid();
+	eblgFiCo = EBLevelGrid();
       }
 
       const int order  = 2;
-      const int weight = 2;
+      const int weight = 1;
 
-      m_gradientOp[lvl] = RefCountedPtr<EBGradient>(new EBGradient(eblg, eblgFine, m_dx[lvl], refRat, order, weight));
+      m_gradientOp[lvl] = RefCountedPtr<EBGradient>(new EBGradient(eblg, eblgFine, eblgFiCo, m_dx[lvl], refRat, order, weight, m_numGhostCells*IntVect::Unit));
     }
   }
 }

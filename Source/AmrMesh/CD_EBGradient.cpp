@@ -31,10 +31,12 @@ constexpr int EBGradient::m_nComp;
 
 EBGradient::EBGradient(const EBLevelGrid& a_eblg,
                        const EBLevelGrid& a_eblgFine,
+                       const EBLevelGrid& a_eblgFiCo,
                        const Real         a_dx,
                        const int          a_refRat,
                        const int          a_order,
-                       const int          a_weighting) noexcept
+                       const int          a_weighting,
+                       const IntVect      a_ghostVector) noexcept
 {
   CH_TIME("EBGradient::EBGradient");
 
@@ -43,6 +45,7 @@ EBGradient::EBGradient(const EBLevelGrid& a_eblg,
 
   m_eblg         = a_eblg;
   m_eblgFine     = a_eblgFine;
+  m_eblgFiCo     = a_eblgFiCo;
   m_dataLocation = Location::Cell::Center;
   m_dx           = a_dx;
   m_refRat       = a_refRat;
@@ -58,7 +61,6 @@ EBGradient::EBGradient(const EBLevelGrid& a_eblg,
     m_hasFine = false;
     m_dxFine  = 1;
   }
-
 
   // Define the level stencils. These are regular finite-difference stencils.
   this->defineLevelStencils();
