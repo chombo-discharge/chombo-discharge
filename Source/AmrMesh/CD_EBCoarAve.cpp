@@ -531,7 +531,7 @@ EBCoarAve::arithmeticAverage(EBFaceFAB&       a_coarData,
       a_coarData(coarFace, a_coarVar) *= 1.0 / numFineFaces;
     }
   }
-  CH_START(t2);
+  CH_STOP(t2);
 }
 
 void
@@ -611,7 +611,7 @@ EBCoarAve::harmonicAverage(EBFaceFAB&       a_coarData,
       a_coarData(coarFace, a_coarVar) = numFineFaces / a_coarData(coarFace, a_coarVar);
     }
   }
-  CH_START(t2);
+  CH_STOP(t2);
 }
 
 void

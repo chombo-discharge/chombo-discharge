@@ -52,8 +52,6 @@ EBCoarseToFineInterp::define(const EBLevelGrid& a_eblgFine,
   CH_TIMER("EBCoarseToFineInterp::define_buffers", t1);
 
   CH_assert(a_refRat > 1);
-  CH_assert(a_nComp > 0);
-  CH_assert(a_ebisPtr != nullptr);
 
   m_refRat   = a_refRat;
   m_eblgFine = a_eblgFine;

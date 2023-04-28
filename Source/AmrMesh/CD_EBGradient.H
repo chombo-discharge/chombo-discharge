@@ -12,11 +12,9 @@
 #ifndef CD_EBGradient_H
 #define CD_EBGradient_H
 
-// Std includes
-#include <map>
-
 // Chombo includes
 #include <EBLevelGrid.H>
+#include <AggStencil.H>
 
 // Our includes
 #include <CD_Location.H>
@@ -64,6 +62,7 @@ public:
     @param[in] a_eblg         Grids
     @param[in] a_eblgFine     Fine grids
     @param[in] a_eblgFiCo     Refinement of coarse grids
+    @param[in] a_hasFine      Has fine level or not
     @param[in] a_dx           Resolution
     @param[in] a_refRat       Refinement ratio
     @param[in] a_order        Interpolation order for modified gradients. 
@@ -73,6 +72,7 @@ public:
   EBGradient(const EBLevelGrid& a_eblg,
              const EBLevelGrid& a_eblgFine,
              const EBLevelGrid& a_eblgFiCo,
+             const bool         a_hasFine,
              const Real         a_dx,
              const int          a_refRat,
              const int          a_order,
@@ -89,6 +89,7 @@ public:
     @param[in] a_eblg         Grids
     @param[in] a_eblgFine     Fine grids
     @param[in] a_eblgFiCo     Refinement of coarse grids
+    @param[in] a_hasFine      Has fine level or not
     @param[in] a_dx           Resolution
     @param[in] a_refRat       Refinement ratio
     @param[in] a_order        Interpolation order for modified gradients. 
@@ -99,6 +100,7 @@ public:
   define(const EBLevelGrid& a_eblg,
          const EBLevelGrid& a_eblgFine,
          const EBLevelGrid& a_eblgFiCo,
+         const bool         a_hasFine,
          const Real         a_dx,
          const int          a_refRat,
          const int          a_order,
@@ -207,24 +209,9 @@ protected:
   int m_refRat;
 
   /*!
-    @brief Coarse-grid buffers
+    @brief Number of ghost cells in incoming data holders
   */
-  DisjointBoxLayout m_bufferDblCoar;
-
-  /*!
-    @brief Fine-grid buffers
-  */
-  DisjointBoxLayout m_bufferDblFine;
-
-  /*!
-    @brief Coarse EBISLayout buffer
-  */
-  EBISLayout m_bufferEBISLCoar;
-
-  /*!
-    @brief Fine EBISLayout buffer
-  */
-  EBISLayout m_bufferEBISLFine;
+  IntVect m_ghostVector;
 
   /*!
     @brief Stencils for boundaries and cut-cells
@@ -234,15 +221,19 @@ protected:
 
   /*!
     @brief Part of EBCF gradient stencil which reaches into the coarse level. 
-    @note Lives on the buffer layout. 
   */
-  LayoutData<BaseIVFAB<VoFStencil>> m_bufferStencilsCoar;
+  LayoutData<BaseIVFAB<VoFStencil>> m_ebcfStencilsCoar;
 
   /*!
-    @brief Part of EBCF gradient stencil which reaches into the fine level. 
-    @note Lives on the buffer layout. 
+    @brief Part of EBCF gradient stencil which reaches into the coarse level. 
   */
-  LayoutData<BaseIVFAB<VoFStencil>> m_bufferStencilsFine;
+  LayoutData<BaseIVFAB<VoFStencil>> m_ebcfStencilsFine;
+
+  /*!
+    @brief AggStencils for boundaries and cut-cells. Provides faster application of m_levelStencils.
+    @note Lives on the coarse layout and only has one component. 
+  */
+  LayoutData<RefCountedPtr<AggStencil<EBCellFAB, EBCellFAB>>> m_aggLevelStencils[SpaceDim];
 
   /*!
     @brief Iterator for boundary cells (either domain or EB)
@@ -255,35 +246,6 @@ protected:
     @note Lives on the coarse layout. 
   */
   mutable LayoutData<VoFIterator> m_ebcfIterator;
-
-  /*!
-    @brief Iterator for EBCF cells. Lives on the buffer layout. 
-  */
-  mutable LayoutData<VoFIterator> m_bufferIterator;
-
-  /*!
-    @brief Buffer for putting coarse-grid data on the buffer layout. 
-    @note Lives on the buffer layout. 
-  */
-  mutable LevelData<EBCellFAB> m_bufferCoar;
-
-  /*!
-    @brief Buffer for putting fine-grid data on the buffer layout.
-    @note Lives on the buffer layout. 
-  */
-  mutable LevelData<EBCellFAB> m_bufferFine;
-
-  /*!
-    @brief Storage for corrected gradient. 
-    @note Lives on the coarse layout. 
-  */
-  mutable LevelData<BaseIVFAB<Real>> m_ebcfGradient;
-
-  /*!
-    @brief Storage for corrected gradient. 
-    @note Lives on the buffer layout. 
-  */
-  mutable LevelData<BaseIVFAB<Real>> m_bufferGradient;
 
   /*!
     @brief Define level stencils. 
@@ -300,21 +262,6 @@ protected:
   defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>& a_coarMaskInvalid) noexcept;
 
   /*!
-    @brief Define buffers. 
-    @details Defines masks and buffers on the buffer grids. This will e.g. copy the masks from the coarse grids to the buffer grids,
-    and also define relevant iterators and storage on the buffer grids. 
-    @param[out] a_bufferCoarMaskCF      A copy of a_coarMaskCF to the buffer grids. 
-    @param[out] a_bufferCoarMaskInvalid A copy of a_coarMaskInvalid to the buffer grids. 
-    @param[in]  a_coarMaskCF            Mask for CF region on the coarse layout. 
-    @param[in]  a_coarMaskInvalid       Mask for invalid regions on the coarse layout. 
-  */
-  virtual void
-  defineBuffers(LevelData<FArrayBox>&       a_bufferCoarMaskCF,
-                LevelData<FArrayBox>&       a_bufferCoarMaskInvalid,
-                const LevelData<FArrayBox>& a_coarMaskCF,
-                const LevelData<FArrayBox>& a_coarMaskInvalid) noexcept;
-
-  /*!
     @brief Define iterators and cells that need modified stencils
     @param[in]  a_coarMaskCF            Mask for CF region on the coarse layout. 
     @param[in]  a_coarMaskInvalid       Mask for invalid regions on the coarse layout. 
@@ -327,7 +274,7 @@ protected:
     @param[in] a_bufferCoarMaskInvalid Map of coarse cells that are covered by finer cells. 
   */
   virtual void
-  defineStencilsEBCF(const LevelData<FArrayBox>& a_bufferCoarMaskInvalid) noexcept;
+  defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) noexcept;
 
   /*!
     @brief Get a finite difference stencil, assuming that the data is cell-centered
@@ -386,6 +333,12 @@ protected:
   isFiniteDifferenceStencilValid(const IntVect&   a_ivCoar,
                                  const EBISBox&   a_ebisBox,
                                  const FArrayBox& a_invalidRegion) const noexcept;
+
+  /*!
+    @brief Turn raw stencils into optimized AggStencils
+  */
+  virtual void
+  makeAggStencils() noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
