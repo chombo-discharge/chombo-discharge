@@ -73,15 +73,20 @@ public:
              const Real         a_dx,
              const int          a_refRat,
              const int          a_order,
-             const int          a_weighting = 0);
+             const int          a_weighting = 0) noexcept;
+
+  /*!
+    @brief Destructor (does nothing)
+  */
+  virtual ~EBGradient() noexcept;
 
   /*!
     @brief Compute gradient using data on the input level only. 
     @param[out] a_gradient Gradient of input scalar
     @param[in]  a_phi      Input scalar
   */
-  void
-  computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelData<EBCellFAB>& a_phi) const;
+  virtual void
+  computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelData<EBCellFAB>& a_phi) const noexcept;
 
   /*!
     @brief Compute the gradient component which is normal to the face, using centered differencing. 
@@ -91,8 +96,8 @@ public:
     @param[inout] a_gradient Gradient of input scalar
     @param[in]    a_phi      Input scalar
   */
-  void
-  computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient, const LevelData<EBCellFAB>& a_phi) const;
+  virtual void
+  computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient, const LevelData<EBCellFAB>& a_phi) const noexcept;
 
   /*!
     @brief Compute gradient using two-level stencils (matching at EBCF). 
@@ -100,15 +105,10 @@ public:
     @param[in]  a_phi      Input scalar
     @param[in]  a_phiFine  Input scalar on finer level. 
   */
-  void
+  virtual void
   computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
                      const LevelData<EBCellFAB>& a_phi,
-                     const LevelData<EBCellFAB>& a_phiFine) const;
-
-  /*!
-    @brief Destructor (does nothing)
-  */
-  virtual ~EBGradient();
+                     const LevelData<EBCellFAB>& a_phiFine) const noexcept;
 
 protected:
   /*!
@@ -253,16 +253,16 @@ protected:
   /*!
     @brief Define level stencils. 
   */
-  void
-  defineLevelStencils();
+  virtual void
+  defineLevelStencils() noexcept;
 
   /*!
     @brief Make masks
     @param[out] a_coarMaskCF      Mask holding a value of 1 in coarse cells that live on the refinement boundary. 
     @param[out] a_coarMaskInvalid Mask holding a value of 1 in coarse cells that are covered by a finer grid level. 
   */
-  void
-  defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>& a_coarMaskInvalid);
+  virtual void
+  defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>& a_coarMaskInvalid) noexcept;
 
   /*!
     @brief Define buffers. 
@@ -273,26 +273,26 @@ protected:
     @param[in]  a_coarMaskCF            Mask for CF region on the coarse layout. 
     @param[in]  a_coarMaskInvalid       Mask for invalid regions on the coarse layout. 
   */
-  void
+  virtual void
   defineBuffers(LevelData<FArrayBox>&       a_bufferCoarMaskCF,
                 LevelData<FArrayBox>&       a_bufferCoarMaskInvalid,
                 const LevelData<FArrayBox>& a_coarMaskCF,
-                const LevelData<FArrayBox>& a_coarMaskInvalid);
+                const LevelData<FArrayBox>& a_coarMaskInvalid) noexcept;
 
   /*!
     @brief Define iterators and cells that need modified stencils
     @param[in]  a_coarMaskCF            Mask for CF region on the coarse layout. 
     @param[in]  a_coarMaskInvalid       Mask for invalid regions on the coarse layout. 
   */
-  void
-  defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF, const LevelData<FArrayBox>& a_coarMaskInvalid);
+  virtual void
+  defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF, const LevelData<FArrayBox>& a_coarMaskInvalid) noexcept;
 
   /*!
     @brief Define stencils for interpolation across the EBCF refinement boundary. 
     @param[in] a_bufferCoarMaskInvalid Map of coarse cells that are covered by finer cells. 
   */
-  void
-  defineStencilsEBCF(const LevelData<FArrayBox>& a_bufferCoarMaskInvalid);
+  virtual void
+  defineStencilsEBCF(const LevelData<FArrayBox>& a_bufferCoarMaskInvalid) noexcept;
 
   /*!
     @brief Get a finite difference stencil, assuming that the data is cell-centered
@@ -302,12 +302,12 @@ protected:
     @param[in]  a_invalidRegion Map of cells that can/can't be used. 
     @param[in]  a_dx            Grid resolution
   */
-  bool
+  virtual bool
   getFiniteDifferenceStencil(VoFStencil&            a_stencil,
                              const VolIndex&        a_vof,
                              const EBISBox&         a_ebisBox,
                              const DenseIntVectSet& a_invalidRegion,
-                             const Real             a_dx);
+                             const Real             a_dx) const noexcept;
 
   /*!
     @brief Build a gradient stencil using least squares. 
@@ -325,7 +325,7 @@ protected:
     @param[in]  a_weight            Equation weighting for least squares reconstruction. 
     @return Returns true if a stencil was found, in which case it is defined in a_stencilFine and a_stencilCoar. 
   */
-  bool
+  virtual bool
   getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
                          VoFStencil&            a_stencilFine,
                          const VolIndex&        a_vofCoar,
@@ -338,7 +338,7 @@ protected:
                          const Real&            a_dxCoar,
                          const Real&            a_dxFine,
                          const int&             a_order,
-                         const int&             a_weight);
+                         const int&             a_weight) const noexcept;
 
   /*!
     @brief Check if a cell can produce valid finite difference stencils
@@ -347,8 +347,10 @@ protected:
     @param[in] a_ebisBox       EBISBox
     @param[in] a_invalidRegion Map of cells that are covered by a finer cell. 
   */
-  bool
-  isFiniteDifferenceStencilValid(const IntVect& a_ivCoar, const EBISBox& a_ebisBox, const FArrayBox& a_invalidRegion);
+  virtual bool
+  isFiniteDifferenceStencilValid(const IntVect&   a_ivCoar,
+                                 const EBISBox&   a_ebisBox,
+                                 const FArrayBox& a_invalidRegion) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
