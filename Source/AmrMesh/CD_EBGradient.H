@@ -60,7 +60,7 @@ public:
   EBGradient(const EBGradient& a_other) = delete;
 
   /*!
-    @brief Full constructor, assumes that there is a finer level. 
+    @brief Full constructor. Calsl the define function.
     @param[in] a_eblg         Grids
     @param[in] a_eblgFine     Fine grids
     @param[in] a_eblgFiCo     Refinement of coarse grids
@@ -83,6 +83,27 @@ public:
     @brief Destructor (does nothing)
   */
   virtual ~EBGradient() noexcept;
+
+  /*!
+    @brief Define function.
+    @param[in] a_eblg         Grids
+    @param[in] a_eblgFine     Fine grids
+    @param[in] a_eblgFiCo     Refinement of coarse grids
+    @param[in] a_dx           Resolution
+    @param[in] a_refRat       Refinement ratio
+    @param[in] a_order        Interpolation order for modified gradients. 
+    @param[in] a_weighting    Weighting factor least squares. 
+    @param[in] a_ghostVect    Number of ghost cells in the input data
+  */
+  virtual void
+  define(const EBLevelGrid& a_eblg,
+         const EBLevelGrid& a_eblgFine,
+         const EBLevelGrid& a_eblgFiCo,
+         const Real         a_dx,
+         const int          a_refRat,
+         const int          a_order,
+         const int          a_weighting,
+         const IntVect      a_ghostVector) noexcept;
 
   /*!
     @brief Compute gradient using data on the input level only. 
@@ -144,6 +165,11 @@ protected:
     @brief Refined coarse grids
   */
   EBLevelGrid m_eblgFiCo;
+
+  /*!
+    @brief Is defined or not
+  */
+  bool m_isDefined;
 
   /*!
     @brief True if we have a finer level (m_eblgFine is defined)

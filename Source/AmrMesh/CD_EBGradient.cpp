@@ -40,6 +40,21 @@ EBGradient::EBGradient(const EBLevelGrid& a_eblg,
 {
   CH_TIME("EBGradient::EBGradient");
 
+  this->define(a_eblg, a_eblgFine, a_eblgFiCo, a_dx, a_refRat, a_order, a_weighting, a_ghostVector);
+}
+
+void
+EBGradient::define(const EBLevelGrid& a_eblg,
+                   const EBLevelGrid& a_eblgFine,
+                   const EBLevelGrid& a_eblgFiCo,
+                   const Real         a_dx,
+                   const int          a_refRat,
+                   const int          a_order,
+                   const int          a_weighting,
+                   const IntVect      a_ghostVector) noexcept
+{
+  CH_TIME("EBGradient::define");
+
   CH_assert(a_order > 0);
   CH_assert(a_weighting >= 0);
 
@@ -92,6 +107,8 @@ EBGradient::EBGradient(const EBLevelGrid& a_eblg,
       this->defineStencilsEBCF(bufferCoarMaskInvalid);
     }
   }
+
+  m_isDefined = true;
 }
 
 EBGradient::~EBGradient() noexcept { CH_TIME("EBGradient::~EBGradient"); }
@@ -104,6 +121,7 @@ EBGradient::computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelDa
   CH_TIMER("EBGradient::irregular_cells", t2);
   CH_TIMER("EBGradient::set_covered_cells", t3);
 
+  CH_assert(m_isDefined);
   CH_assert(a_gradient.nComp() == SpaceDim);
   CH_assert(a_phi.nComp() == 1);
 
@@ -243,6 +261,11 @@ EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
   CH_TIMER("EBGradient::copy_to", t1);
   CH_TIMER("EBGradient::ebcf_calculation", t2);
   CH_TIMER("EBGradient::copy_from_buffer", t3);
+
+  CH_assert(m_isDefined);
+  CH_assert(a_gradient.nComp() == SpaceDim);
+  CH_assert(a_phi.nComp() == 1);
+  CH_assert(a_phiFine.nComp() == 1);
 
   // TLDR: This routine computes the two-level gradient. It first computes the level gradient and then iterates through
   //       all cells that require a "two-level" view of the gradient. The two-level stencils are applied to buffer data
