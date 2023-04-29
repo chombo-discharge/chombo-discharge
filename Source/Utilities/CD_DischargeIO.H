@@ -100,12 +100,12 @@ namespace DischargeIO {
   */
   void
   writeEBHDF5Level(HDF5Handle&                 a_handleH5,
-                   const int                   a_level,
                    const LevelData<EBCellFAB>& a_outputData,
                    const ProblemDomain         a_domain,
                    const Real                  a_dx,
                    const Real                  a_dt,
                    const Real                  a_time,
+                   const int                   a_level,
                    const int                   a_refRatio,
                    const int                   a_numGhost) noexcept;
 #endif

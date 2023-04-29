@@ -136,19 +136,191 @@ DischargeIO::writeEBHDF5Header(HDF5Handle&                a_handleH5,
 #ifdef CH_USE_HDF5
 void
 DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
-                              const int                   a_level,
                               const LevelData<EBCellFAB>& a_outputData,
                               const ProblemDomain         a_domain,
                               const Real                  a_dx,
                               const Real                  a_dt,
                               const Real                  a_time,
+                              const int                   a_level,
                               const int                   a_refRatio,
                               const int                   a_numGhost) noexcept
 {
-  CH_TIME("DischargeIO::writeEBHDF5Level");
+  CH_TIMERS("DischargeIO::writeEBHDF5Level");
+  CH_TIMER("DischargeIO::writeEBHDF5Level::alloc", t1);
+  CH_TIMER("DischargeIO::writeEBHDF5Level::copy_vars", t2);
+  CH_TIMER("DischargeIO::writeEBHDF5Level::average_multicells", t3);
+  CH_TIMER("DischargeIO::writeEBHDF5Level::set_eb_regular", t4);
+  CH_TIMER("DischargeIO::writeEBHDF5Level::set_eb_covered", t5);
+  CH_TIMER("DischargeIO::writeEBHDF5Level::set_eb_iregular", t6);
 
   CH_assert(a_refRatio > 0);
   CH_assert(a_numGhost >= 0);
+
+  const int numInputVars      = a_outputData.nComp();
+  const int indexVolFrac      = numInputVars;
+  const int indexBoundaryArea = indexVolFrac + 1;
+  const int indexAreaFrac     = indexBoundaryArea + 1;
+  const int indexNormal       = indexAreaFrac + 2 * SpaceDim;
+  const int indexDist         = indexNormal + SpaceDim;
+  const int numCompTotal      = indexDist + 1;
+
+  const DisjointBoxLayout& dbl = a_outputData.disjointBoxLayout();
+
+  CH_START(t1);
+  LevelData<FArrayBox> levelData(dbl, numCompTotal, a_numGhost * IntVect::Unit);
+  CH_STOP(t1);
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    FArrayBox&       levelFAB      = levelData[dit()];
+    const EBCellFAB& outputData    = a_outputData[dit()];
+    const FArrayBox& outputDataReg = outputData.getFArrayBox();
+    const EBISBox&   ebisbox       = outputData.getEBISBox();
+    const Box        outputBox     = levelFAB.box() & a_domain;
+
+    // Copy the regular data. This will also do single-valued cut-cells. Later, we average the
+    // contents in multi-valued cells.
+    CH_START(t2);
+    levelFAB.setVal(0.);
+    levelFAB.copy(outputDataReg, 0, 0, numInputVars);
+    CH_STOP(t2);
+
+    // Run through the multi-valued cells and set the single-valued output-data to be the sum of the multi-valued data. I just
+    // don't know of a different way of doing this that would also play well with HDF5..
+    CH_START(t3);
+    const IntVectSet multiCells = ebisbox.getMultiCells(outputBox);
+    for (IVSIterator ivsIt(multiCells); ivsIt.ok(); ++ivsIt) {
+      const IntVect iv = ivsIt();
+
+      const Vector<VolIndex>& multiVofs = ebisbox.getVoFs(iv);
+      const int               numVoFs   = ebisbox.numVoFs(iv);
+
+      CH_assert(numVoFs > 0);
+
+      const Real invNumVoFs = 1. / (Real(numVoFs));
+
+      for (int comp = 0; comp < numInputVars; ++comp) {
+        levelFAB(iv, comp) = 0.0;
+
+        for (int ivof = 0; ivof < numVoFs; ivof++) {
+          levelFAB(iv, comp) += outputData(multiVofs[ivof], comp);
+        }
+
+        levelFAB(iv, comp) *= invNumVoFs;
+      }
+    }
+    CH_STOP(t3);
+
+    // Set default volume fraction, area fraction, normal, and distance of EB from corner.
+    const bool isAllCovered = ebisbox.isAllCovered();
+    const bool isAllRegular = ebisbox.isAllRegular();
+
+    if (isAllRegular) {
+      CH_START(t4);
+      levelFAB.setVal(1.0, indexVolFrac);
+      levelFAB.setVal(0.0, indexBoundaryArea);
+      levelFAB.setVal(0.0, indexDist);
+
+      for (int i = 0; i < 2 * SpaceDim; i++) {
+        levelFAB.setVal(1.0, indexAreaFrac + i);
+      }
+
+      for (int i = 0; i < SpaceDim; i++) {
+        levelFAB.setVal(0.0, indexNormal + i);
+      }
+      CH_STOP(t4);
+    }
+    else if (isAllCovered) {
+      CH_START(t5);
+      levelFAB.setVal(0.0, indexVolFrac);
+      levelFAB.setVal(0.0, indexBoundaryArea);
+      levelFAB.setVal(0.0, indexDist);
+
+      for (int i = 0; i < 2 * SpaceDim; i++) {
+        levelFAB.setVal(0.0, indexAreaFrac + i);
+      }
+
+      for (int i = 0; i < SpaceDim; i++) {
+        levelFAB.setVal(0.0, indexNormal + i);
+      }
+      CH_STOP(t5);
+    }
+    else {
+      CH_START(t6);
+      const IntVectSet irregIVS = ebisbox.getIrregIVS(outputBox);
+
+      for (IVSIterator ivsIt(irregIVS); ivsIt.ok(); ++ivsIt) {
+        const IntVect iv = ivsIt();
+
+        // Take the last vof and put it in the data. For multi-cells this doesn't really make a whole lot of sense...
+        const Vector<VolIndex> vofs = ebisbox.getVoFs(iv);
+        const VolIndex&        vof0 = vofs[vofs.size() - 1];
+
+        Real     volFrac   = ebisbox.volFrac(vof0);
+        Real     bndryArea = ebisbox.bndryArea(vof0);
+        RealVect normal    = ebisbox.normal(vof0);
+
+        if (bndryArea == 0.0) {
+          if (volFrac > 0.5) {
+            volFrac = 1.0;
+          }
+          else {
+            volFrac = 0.0;
+          }
+
+          normal = RealVect::Zero;
+        }
+
+        // set volume fraction, EB boundary area, and face area fractions.
+        levelFAB(iv, indexVolFrac)      = volFrac;
+        levelFAB(iv, indexBoundaryArea) = bndryArea;
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          const Vector<FaceIndex> facesLo = ebisbox.getFaces(vof0, dir, Side::Lo);
+          const Vector<FaceIndex> facesHi = ebisbox.getFaces(vof0, dir, Side::Hi);
+
+          if (facesLo.size() == 0) {
+            levelFAB(iv, indexAreaFrac + 2 * dir) = 0.0;
+          }
+          else {
+            levelFAB(iv, indexAreaFrac + 2 * dir) = ebisbox.areaFrac(facesLo[0]);
+          }
+
+          if (facesHi.size() == 0) {
+            levelFAB(iv, indexAreaFrac + 2 * dir + 1) = 0.0;
+          }
+          else {
+            levelFAB(iv, indexAreaFrac + 2 * dir + 1) = ebisbox.areaFrac(facesHi[0]);
+          }
+        }
+
+        // Set the EB normal vector.
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          levelFAB(iv, indexNormal + dir) = normal[dir];
+        }
+
+        // Set distance unless the length of the normal is zero.
+        if (normal.vectorLength() > 0.0) {
+          levelFAB(iv, indexDist) = -PolyGeom::computeAlpha(volFrac, normal) * a_dx;
+        }
+      }
+      CH_STOP(t6);
+    }
+  }
+
+  const int success = writeLevel(a_handleH5,
+                                 a_level,
+                                 levelData,
+                                 a_dx,
+                                 a_dt,
+                                 a_time,
+                                 a_domain.domainBox(),
+                                 a_refRatio,
+                                 a_numGhost * IntVect::Unit,
+                                 Interval(0, numCompTotal - 1));
+
+  if (success != 0) {
+    MayDay::Error("DischargeIO::writeEBHDF5 -- error in writeLevel");
+  }
 }
 #endif
 
@@ -169,8 +341,6 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
 {
   CH_TIME("DischargeIO::writeEBHDF5");
 
-  const int numInputVars = a_data[0]->nComp();
-
   // Basic assertions to make sure the input makes sense.
   CH_assert(a_numLevels > 0);
   CH_assert(a_numGhost >= 0);
@@ -181,54 +351,13 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
 
   // Indices for where we store the Chombo stuff. This is for storing the volume fraction, EB boundary area,
   // face area fractions etc. These things are written AFTER the user input variables.
+  const int numInputVars      = a_data[0]->nComp();
   const int indexVolFrac      = numInputVars;
   const int indexBoundaryArea = indexVolFrac + 1;
   const int indexAreaFrac     = indexBoundaryArea + 1;
   const int indexNormal       = indexAreaFrac + 2 * SpaceDim;
   const int indexDist         = indexNormal + SpaceDim;
-
-  // Total number of variables -- the sum of the user input variables and the EB variables.
-  const int numCompTotal = indexDist + 1;
-
-  // Now create a vector of all the variable names. This is the user input variables plus the EB-related variables
-  // for doing the EB reconstruction.
-  Vector<std::string> variableNamesHDF5(numCompTotal);
-
-  const std::string volFracName("fraction-0");
-  const std::string boundaryAreaName("boundaryArea-0");
-
-  Vector<std::string> areaName(6);
-  areaName[0] = "xAreafractionLo-0";
-  areaName[1] = "xAreafractionHi-0";
-  areaName[2] = "yAreafractionLo-0";
-  areaName[3] = "yAreafractionHi-0";
-  areaName[4] = "zAreafractionLo-0";
-  areaName[5] = "zAreafractionHi-0";
-
-  Vector<std::string> normName(3);
-  normName[0] = "xnormal-0";
-  normName[1] = "ynormal-0";
-  normName[2] = "znormal-0";
-
-  const std::string distName("distance-0");
-
-  // Start appending names.
-  for (int i = 0; i < a_variableNames.size(); i++) {
-    variableNamesHDF5[i] = a_variableNames[i];
-  }
-
-  variableNamesHDF5[indexVolFrac]      = volFracName;
-  variableNamesHDF5[indexBoundaryArea] = boundaryAreaName;
-
-  for (int i = 0; i < 2 * SpaceDim; i++) {
-    variableNamesHDF5[indexAreaFrac + i] = areaName[i];
-  }
-
-  for (int i = 0; i < SpaceDim; i++) {
-    variableNamesHDF5[indexNormal + i] = normName[i];
-  }
-
-  variableNamesHDF5[indexDist] = distName;
+  const int numCompTotal      = indexDist + 1;
 
   // Write header.
 #ifdef CH_MPI
@@ -236,26 +365,8 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
 #endif
   HDF5Handle handle(a_filename.c_str(), HDF5Handle::CREATE);
 
-  // Write the header to file.
-  HDF5HeaderData header;
-
-  header.m_string["filetype"]    = "VanillaAMRFileType";
-  header.m_int["num_levels"]     = a_numLevels;
-  header.m_int["num_components"] = numCompTotal;
-#if 0 // Uncommenting this because although VisIt uses the attribute, slice operators tend to break. 
-  header.m_realvect["prob_lo"]        = a_probLo;
-#endif
-
-  for (int comp = 0; comp < numCompTotal; comp++) {
-    char labelString[100];
-    sprintf(labelString, "component_%d", comp);
-
-    std::string label(labelString);
-
-    header.m_string[label] = variableNamesHDF5[comp];
-  }
-
-  header.writeToFile(handle);
+  // write header data
+  DischargeIO::writeEBHDF5Header(handle, a_numLevels, a_probLo, a_variableNames);
 
   // Set things up for each level
   for (int lvl = 0; lvl < a_numLevels; lvl++) {
