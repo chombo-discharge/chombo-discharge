@@ -84,6 +84,34 @@ namespace DischargeIO {
 
 #ifdef CH_USE_HDF5
   /*!
+    @brief Write HDF5 header to the input handle
+  */
+  void
+  writeEBHDF5Header(HDF5Handle&                a_handleH5,
+                    const int                  a_numLevels,
+                    const RealVect&            a_probLo,
+                    const Vector<std::string>& a_variableNames) noexcept;
+
+#endif
+
+#ifdef CH_USE_HDF5
+  /*!
+    @brief Write data to output handle. 
+  */
+  void
+  writeEBHDF5Level(HDF5Handle&                 a_handleH5,
+                   const int                   a_level,
+                   const LevelData<EBCellFAB>& a_outputData,
+                   const ProblemDomain         a_domain,
+                   const Real                  a_dx,
+                   const Real                  a_dt,
+                   const Real                  a_time,
+                   const int                   a_refRatio,
+                   const int                   a_numGhost) noexcept;
+#endif
+
+#ifdef CH_USE_HDF5
+  /*!
     @brief Debugging function for quickly writing EBAMRCellData to HDF5
     @param[in] a_data Cell-centered EB+AMR data
     @param[in] a_file File name

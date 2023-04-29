@@ -54,6 +54,106 @@ DischargeIO::numberFmt(const Vector<long long> a_numbers, char a_sep) noexcept
 
 #ifdef CH_USE_HDF5
 void
+DischargeIO::writeEBHDF5Header(HDF5Handle&                a_handleH5,
+                               const int                  a_numLevels,
+                               const RealVect&            a_probLo,
+                               const Vector<std::string>& a_variableNames) noexcept
+{
+  CH_TIME("DischargeIO::writeEBHDF5Header");
+
+  CH_assert(a_handleH5.isOpen());
+  CH_assert(a_numLevels >= 0);
+
+  const int numInputVars      = a_variableNames.size();
+  const int indexVolFrac      = numInputVars;
+  const int indexBoundaryArea = indexVolFrac + 1;
+  const int indexAreaFrac     = indexBoundaryArea + 1;
+  const int indexNormal       = indexAreaFrac + 2 * SpaceDim;
+  const int indexDist         = indexNormal + SpaceDim;
+  const int numCompTotal      = indexDist + 1;
+
+  // Now create a vector of all the variable names. This is the user input variables plus the EB-related variables
+  // for doing the EB reconstruction.
+  Vector<std::string> variableNamesHDF5(numCompTotal);
+
+  const std::string volFracName("fraction-0");
+  const std::string boundaryAreaName("boundaryArea-0");
+
+  Vector<std::string> areaName(6);
+  areaName[0] = "xAreafractionLo-0";
+  areaName[1] = "xAreafractionHi-0";
+  areaName[2] = "yAreafractionLo-0";
+  areaName[3] = "yAreafractionHi-0";
+  areaName[4] = "zAreafractionLo-0";
+  areaName[5] = "zAreafractionHi-0";
+
+  Vector<std::string> normName(3);
+  normName[0] = "xnormal-0";
+  normName[1] = "ynormal-0";
+  normName[2] = "znormal-0";
+
+  const std::string distName("distance-0");
+
+  // Start appending names.
+  for (int i = 0; i < a_variableNames.size(); i++) {
+    variableNamesHDF5[i] = a_variableNames[i];
+  }
+
+  variableNamesHDF5[indexVolFrac]      = volFracName;
+  variableNamesHDF5[indexBoundaryArea] = boundaryAreaName;
+
+  for (int i = 0; i < 2 * SpaceDim; i++) {
+    variableNamesHDF5[indexAreaFrac + i] = areaName[i];
+  }
+
+  for (int i = 0; i < SpaceDim; i++) {
+    variableNamesHDF5[indexNormal + i] = normName[i];
+  }
+
+  variableNamesHDF5[indexDist] = distName;
+
+  // Write the header to file.
+  HDF5HeaderData header;
+
+  header.m_string["filetype"]    = "VanillaAMRFileType";
+  header.m_int["num_levels"]     = a_numLevels;
+  header.m_int["num_components"] = numCompTotal;
+  header.m_realvect["prob_lo"]   = a_probLo;
+
+  for (int comp = 0; comp < numCompTotal; comp++) {
+    char labelString[100];
+    sprintf(labelString, "component_%d", comp);
+
+    std::string label(labelString);
+
+    header.m_string[label] = variableNamesHDF5[comp];
+  }
+
+  header.writeToFile(a_handleH5);
+}
+#endif
+
+#ifdef CH_USE_HDF5
+void
+DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
+                              const int                   a_level,
+                              const LevelData<EBCellFAB>& a_outputData,
+                              const ProblemDomain         a_domain,
+                              const Real                  a_dx,
+                              const Real                  a_dt,
+                              const Real                  a_time,
+                              const int                   a_refRatio,
+                              const int                   a_numGhost) noexcept
+{
+  CH_TIME("DischargeIO::writeEBHDF5Level");
+
+  CH_assert(a_refRatio > 0);
+  CH_assert(a_numGhost >= 0);
+}
+#endif
+
+#ifdef CH_USE_HDF5
+void
 DischargeIO::writeEBHDF5(const std::string&                   a_filename,
                          const Vector<std::string>&           a_variableNames,
                          const Vector<DisjointBoxLayout>&     a_grids,
