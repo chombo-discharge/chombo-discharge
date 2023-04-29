@@ -355,7 +355,7 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
                          const Real                           a_time,
                          const RealVect                       a_probLo,
                          const int                            a_numLevels,
-                         const int                            a_numGhost)
+                         const int                            a_numGhost) noexcept
 {
   CH_TIME("DischargeIO::writeEBHDF5");
 
