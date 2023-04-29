@@ -149,9 +149,9 @@ DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
   CH_TIMER("DischargeIO::writeEBHDF5Level::alloc", t1);
   CH_TIMER("DischargeIO::writeEBHDF5Level::copy_vars", t2);
   CH_TIMER("DischargeIO::writeEBHDF5Level::average_multicells", t3);
-  CH_TIMER("DischargeIO::writeEBHDF5Level::set_eb_regular", t4);
-  CH_TIMER("DischargeIO::writeEBHDF5Level::set_eb_covered", t5);
-  CH_TIMER("DischargeIO::writeEBHDF5Level::set_eb_iregular", t6);
+  CH_TIMER("DischargeIO::writeEBHDF5Level::set_default_data", t4);
+  CH_TIMER("DischargeIO::writeEBHDF5Level::set_eb_moments", t5);
+  CH_TIMER("DischargeIO::writeEBHDF5Level::set_ghosts", t6);
 
   CH_assert(a_refRatio > 0);
   CH_assert(a_numGhost >= 0);
@@ -210,50 +210,42 @@ DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
     }
     CH_STOP(t3);
 
+    CH_START(t4);
     // Set default volume fraction, area fraction, normal, and distance of EB from corner.
-    const bool isAllCovered = ebisbox.isAllCovered();
-    const bool isAllRegular = ebisbox.isAllRegular();
-
-    if (isAllRegular) {
-      CH_START(t4);
-      levelFAB.setVal(1.0, indexVolFrac);
-      levelFAB.setVal(0.0, indexBoundaryArea);
-      levelFAB.setVal(0.0, indexDist);
-
-      for (int i = 0; i < 2 * SpaceDim; i++) {
-        levelFAB.setVal(1.0, indexAreaFrac + i);
-      }
-
-      for (int i = 0; i < SpaceDim; i++) {
-        levelFAB.setVal(0.0, indexNormal + i);
-      }
-      CH_STOP(t4);
+    levelFAB.setVal(1.0, indexVolFrac);
+    levelFAB.setVal(0.0, indexBoundaryArea);
+    levelFAB.setVal(0.0, indexDist);
+    for (int i = 0; i < 2 * SpaceDim; i++) {
+      levelFAB.setVal(1.0, indexAreaFrac + i);
     }
-    else if (isAllCovered) {
-      CH_START(t5);
-      levelFAB.setVal(0.0, indexVolFrac);
-      levelFAB.setVal(0.0, indexBoundaryArea);
-      levelFAB.setVal(0.0, indexDist);
 
-      for (int i = 0; i < 2 * SpaceDim; i++) {
-        levelFAB.setVal(0.0, indexAreaFrac + i);
-      }
-
-      for (int i = 0; i < SpaceDim; i++) {
-        levelFAB.setVal(0.0, indexNormal + i);
-      }
-      CH_STOP(t5);
+    for (int i = 0; i < SpaceDim; i++) {
+      levelFAB.setVal(0.0, indexNormal + i);
     }
-    else {
-      CH_START(t6);
-      const IntVectSet irregIVS = ebisbox.getIrregIVS(outputBox);
+    CH_STOP(t4);
 
-      for (IVSIterator ivsIt(irregIVS); ivsIt.ok(); ++ivsIt) {
-        const IntVect iv = ivsIt();
+    // Set EB moment data for each cell.
+    CH_START(t5);
+    for (BoxIterator bit(outputBox); bit.ok(); ++bit) {
+      const IntVect& iv = bit();
+
+      const bool isCovered   = ebisbox.isCovered(iv);
+      const bool isRegular   = ebisbox.isRegular(iv);
+      const bool isIrregular = !isCovered && !isRegular;
+
+      // In covered cells the volume and area fractions must be zero.
+      if (isCovered) {
+        levelFAB(iv, indexVolFrac) = 0.0;
+
+        for (int i = 0; i < 2 * SpaceDim; i++) {
+          levelFAB(iv, indexAreaFrac + i) = 0.0;
+        }
+      }
+      else if (isIrregular) {
+        const Vector<VolIndex> vofs = ebisbox.getVoFs(iv);
 
         // Take the last vof and put it in the data. For multi-cells this doesn't really make a whole lot of sense...
-        const Vector<VolIndex> vofs = ebisbox.getVoFs(iv);
-        const VolIndex&        vof0 = vofs[vofs.size() - 1];
+        const VolIndex& vof0 = vofs[vofs.size() - 1];
 
         Real     volFrac   = ebisbox.volFrac(vof0);
         Real     bndryArea = ebisbox.bndryArea(vof0);
@@ -303,8 +295,34 @@ DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
           levelFAB(iv, indexDist) = -PolyGeom::computeAlpha(volFrac, normal) * a_dx;
         }
       }
-      CH_STOP(t6);
     }
+    CH_STOP(t5);
+
+    // At this point we want to fill one layer of ghost cells OUTSIDE the domain.
+    CH_START(t6);
+    if (a_numGhost > 0) {
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        for (SideIterator sit; sit.ok(); ++sit) {
+          const IntVect shift = sign(flip(sit())) * BASISV(dir); // => +1 for Lo side and -1 for high side.
+
+          // Get the layer of cells immediately outside this box.
+          const Box domainBox   = a_domain.domainBox();
+          const Box validBox    = outputBox & domainBox;
+          const Box boundaryBox = adjCellBox(validBox, dir, sit(), 1);
+
+          if (!(domainBox.contains(boundaryBox))) {
+            for (BoxIterator bit(boundaryBox); bit.ok(); ++bit) {
+              const IntVect iv = bit();
+
+              for (int comp = 0; comp < numCompTotal; comp++) {
+                levelFAB(iv, comp) = levelFAB(iv + shift, comp);
+              }
+            }
+          }
+        }
+      }
+    }
+    CH_STOP(t6);
   }
 
   const int success = writeLevel(a_handleH5,
@@ -370,6 +388,19 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
 
   // Set things up for each level
   for (int lvl = 0; lvl < a_numLevels; lvl++) {
+#if 1
+    // Write this level.
+    const int refRat = (lvl < a_numLevels) ? a_refinementRatios[lvl] : 1;
+    DischargeIO::writeEBHDF5Level(handle,
+                                  *a_data[lvl],
+                                  a_domains[lvl],
+                                  a_dx[lvl],
+                                  a_dt,
+                                  a_time,
+                                  lvl,
+                                  refRat,
+                                  a_numGhost);
+#else
     const DisjointBoxLayout& dbl = a_grids[lvl];
 
     // This is the domain and grid resolution on this level.
@@ -544,6 +575,7 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
     if (success != 0) {
       MayDay::Error("DischargeIO::writeEBHDF5 -- error in writeLevel");
     }
+#endif
   }
 
 #ifdef CH_MPI
