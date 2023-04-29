@@ -199,7 +199,7 @@ protected:
   /*!
     @brief Maximum plot depth
   */
-  int m_maxPlotDepth;
+  int m_maxPlotLevel;
 
   /*!
     @brief Maximum plot depth

@@ -1026,7 +1026,7 @@ Driver::parseOptions()
   pp.get("max_steps", m_maxSteps);
   pp.get("start_time", m_startTime);
   pp.get("stop_time", m_stopTime);
-  pp.get("max_plot_depth", m_maxPlotDepth);
+  pp.get("max_plot_depth", m_maxPlotLevel);
   pp.get("max_chk_depth", m_maxCheckpointDepth);
   pp.get("do_init_load_balance", m_doInitLoadBalancing);
 
@@ -2130,125 +2130,107 @@ Driver::writeCrashFile()
 void
 Driver::writePlotFile(const std::string a_filename)
 {
-  CH_TIME("Driver::writePlotFile(string)");
+  CH_TIMERS("Driver::writePlotFile(string)");
+  CH_TIMER("Driver::writePlotFile::allocate", t1);
+  CH_TIMER("Driver::writePlotFile::assemble", t2);
+  CH_TIMER("Driver::writePlotFile::interp_exchange", t3);
+  CH_TIMER("Driver::writePlotFile::copy_internal", t4);
+  CH_TIMER("Driver::writePlotFile::h5_write", t5);
+
   if (m_verbosity > 3) {
     pout() << "Driver::writePlotFile(string)" << endl;
   }
 
-  // TLDR: This is the main routine for writing plot files. It consists of a bit of code with two essential components:
-  //
-  //       1. Copy data over from various solvers/celltaggers etc. and put them in a single EBAMRCellData with the
-  //          necessary amount of variables.
-  //
-  //       2. Write the big EBAMRCellData to file.
-  //
-  // For performance tracking, this routine can be timed.
-
-  Timer timer("Driver::writePlotFile(string)");
-
-  // Output file
-  EBAMRCellData output;
-  EBAMRCellData scratch;
-
-  // Names for output variables
-  Vector<std::string> plotVariableNames(0);
-
   // Get total number of components for output
-  int ncomp = m_timeStepper->getNumberOfPlotVariables();
+  int numOutputComp = m_timeStepper->getNumberOfPlotVariables();
   if (!m_cellTagger.isNull()) {
-    ncomp += m_cellTagger->getNumberOfPlotVariables();
+    numOutputComp += m_cellTagger->getNumberOfPlotVariables();
   }
-  ncomp += this->getNumberOfPlotVariables();
+  numOutputComp += this->getNumberOfPlotVariables();
 
   // If there's nothing to write, return.
-  if (ncomp > 0) {
+  if (numOutputComp > 0) {
+    Timer timer("Driver::writePlotFile(string)");
+
+    Vector<std::string> plotVariableNames(0);
 
     // Allocate storage
-    m_amr->allocate(output, m_realm, phase::gas, ncomp);
-    m_amr->allocate(scratch, m_realm, phase::gas, 1);
+    CH_START(t1);
+    EBAMRCellData output;
+    m_amr->allocate(output, m_realm, phase::gas, numOutputComp);
     DataOps::setValue(output, 0.0);
-    DataOps::setValue(scratch, 0.0);
-
-    // Assemble data
-    int icomp = 0; // Used as reference for output components
+    CH_STOP(t1);
 
     timer.startEvent("Assemble data");
     if (m_verbosity >= 3) {
       pout() << "Driver::writePlotFile - assembling data..." << endl;
     }
 
-    // Time stepper writes its data
-    m_timeStepper->writePlotData(output, plotVariableNames, icomp);
+    CH_START(t2);
 
-    // Cell tagger writes data
+    int icomp = 0;
+    m_timeStepper->writePlotData(output, plotVariableNames, icomp);
     if (!m_cellTagger.isNull()) {
       m_cellTagger->writePlotData(output, plotVariableNames, icomp);
     }
-
-    // Data file aliasing, because Chombo IO wants dumb pointers.
-    Vector<LevelData<EBCellFAB>*> output_ptr(1 + m_amr->getFinestLevel());
-    m_amr->alias(output_ptr, output);
-
-    // Restrict plot depth if need be
-    int plot_depth;
-    if (m_maxPlotDepth < 0) {
-      plot_depth = m_amr->getFinestLevel();
-    }
-    else {
-      plot_depth = Min(m_maxPlotDepth, m_amr->getFinestLevel());
-    }
+    CH_STOP(t2);
 
     // Interpolate ghost cells. This might be important if we use multiple Realms.
-    for (int icomp = 0; icomp < ncomp; icomp++) {
-      const Interval interv(icomp, icomp);
+    CH_START(t3);
+    for (int icomp = 0; icomp < numOutputComp; icomp++) {
+      EBAMRCellData singleComponentData = m_amr->slice(output, Interval(icomp, icomp));
 
-      for (int lvl = 1; lvl <= m_amr->getFinestLevel(); lvl++) {
-
-        LevelData<EBCellFAB> fineAlias;
-        LevelData<EBCellFAB> coarAlias;
-
-        aliasLevelData(fineAlias, output_ptr[lvl], interv);
-        aliasLevelData(coarAlias, output_ptr[lvl - 1], interv);
-
-        m_amr->interpGhost(fineAlias, coarAlias, lvl, m_realm, phase::gas);
-      }
+      m_amr->interpGhost(singleComponentData, m_realm, phase::gas);
     }
-
-    // Update ghost cells
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      output_ptr[lvl]->exchange();
-    }
+    output.exchange();
+    CH_STOP(t3);
 
     // Write internal data
+    CH_START(t4);
     plotVariableNames.append(this->getPlotVariableNames());
     this->writePlotData(output, icomp);
+    CH_STOP(t4);
     timer.stopEvent("Assemble data");
 
-    // Write.
+    // Write the fucking thing already.
 #ifdef CH_USE_HDF5
     if (m_verbosity >= 3) {
       pout() << "Driver::writePlotFile - writing plot file..." << endl;
     }
-
+    pout() << "h5 write" << endl;
+    CH_START(t5);
     timer.startEvent("Write data");
-    DischargeIO::writeEBHDF5(a_filename,
-                             plotVariableNames,
-                             m_amr->getGrids(m_realm),
-                             output_ptr,
-                             m_amr->getDomains(),
-                             m_amr->getDx(),
-                             m_amr->getRefinementRatios(),
-                             m_dt,
-                             m_time,
-                             m_amr->getProbLo(),
-                             plot_depth + 1,
-                             m_numPlotGhost);
+    HDF5Handle handle(a_filename.c_str(), HDF5Handle::CREATE);
+
+    const int finestLevel   = m_amr->getFinestLevel();
+    const int maxPlotLevel  = (m_maxPlotLevel < 0) ? finestLevel : std::min(m_maxPlotLevel, finestLevel);
+    const int numPlotLevels = maxPlotLevel + 1;
+
+    DischargeIO::writeEBHDF5Header(handle, numPlotLevels, m_amr->getProbLo(), plotVariableNames);
+
+    for (int lvl = 0; lvl < maxPlotLevel; lvl++) {
+      const int refRat = (lvl < m_amr->getFinestLevel()) ? m_amr->getRefinementRatios()[lvl] : 1;
+      DischargeIO::writeEBHDF5Level(handle,
+                                    *output[lvl],
+                                    m_amr->getDomains()[lvl],
+                                    m_amr->getDx()[lvl],
+                                    m_dt,
+                                    m_time,
+                                    lvl,
+                                    refRat,
+                                    m_numPlotGhost);
+    }
     timer.stopEvent("Write data");
+    CH_STOP(t5);
 #endif
 
     if (m_verbosity >= 3) {
       timer.eventReport(pout());
     }
+  }
+  else {
+    pout() << "Driver::writePlotFile - skipping file '" << a_filename.c_str() << "' since there is nothing to write"
+           << endl;
   }
 }
 
