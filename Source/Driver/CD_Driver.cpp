@@ -1615,9 +1615,18 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string a_restartF
       pout() << "Driver -- initial regrid # " << i + 1 << endl;
     }
 
+    if (m_writeRegridFiles) {
+      this->writePreRegridFile();
+    }
+
     const int lmin = 0;
     const int lmax = m_amr->getFinestLevel() + 1;
+
     this->regrid(lmin, lmax, false);
+
+    if (m_writeRegridFiles) {
+      this->writePostRegridFile();
+    }
 
     if (m_verbosity > 0) {
       this->gridReport();
@@ -2166,6 +2175,7 @@ Driver::writePlotFile(const std::string a_filename)
 #ifdef CH_USE_HDF5
     HDF5Handle handle(a_filename.c_str(), HDF5Handle::CREATE);
     DischargeIO::writeEBHDF5Header(handle, numPlotLevels, m_amr->getProbLo(), plotVariableNames);
+    handle.close();
 #endif
 
     for (int lvl = 0; lvl <= maxPlotLevel; lvl++) {
@@ -2183,7 +2193,11 @@ Driver::writePlotFile(const std::string a_filename)
 
       // Do the HDF5 write.
 #ifdef CH_USE_HDF5
-      pout()<< "memory before/after write level = " << lvl << endl;
+      HDF5Handle handle(a_filename.c_str(), HDF5Handle::OPEN_RDWR);
+      if (m_verbosity >= 3) {
+        pout() << "Driver::writePlotFile -- writing level = " << lvl << endl;
+      }
+
       MemoryReport::getMaxMinMemoryUsage();
       const int refRat = (lvl < m_amr->getFinestLevel()) ? m_amr->getRefinementRatios()[lvl] : 1;
       DischargeIO::writeEBHDF5Level(handle,
@@ -2196,11 +2210,9 @@ Driver::writePlotFile(const std::string a_filename)
                                     refRat,
                                     m_numPlotGhost);
       MemoryReport::getMaxMinMemoryUsage();
-      pout() << endl;
+      handle.close();
 #endif
     }
-
-    handle.close();
   }
   else {
     const std::string msg1 = "Driver::writePlotFile - skipping file '";

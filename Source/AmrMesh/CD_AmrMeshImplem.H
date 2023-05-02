@@ -851,10 +851,11 @@ AmrMesh::transferIrregularParticles(ParticleContainer<P>&         a_dstParticles
         const IntVect iv = ParticleOps::getParticleCellIndex(p.position(), probLo, dx);
 
         if (!(cellBox.contains(iv))) {
-          MayDay::Error("CD_AmrMeshImplem.H in routine 'transferIrregularParticles' - particle not in box!");
+          MayDay::Warning("CD_AmrMeshImplem.H in routine 'transferIrregularParticles' - particle not in box!");
+
+          ++lit;
         }
 
-        // If the particle is inside any vof, we keep it.
         if (ebisbox.isIrregular(iv)) {
           bool insideAnyVoF = false;
 

@@ -716,9 +716,6 @@ ItoKMCStepper<I, C, R, F>::postCheckpointSetup() noexcept
     pout() << m_name + "::postCheckpointSetup" << endl;
   }
 
-  // Allocate internal storage.
-  this->allocateInternals();
-
   m_ito->remap();
 
   // Recompute the electric field.
@@ -960,7 +957,6 @@ ItoKMCStepper<I, C, R, F>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_
   m_sigmaSolver->writePlotData(a_output, a_icomp, a_level);
 
   // Ito solvers copy their output data
-  m_ito->depositParticles();
   for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     solverIt()->writePlotData(a_output, a_icomp, a_level);
   }

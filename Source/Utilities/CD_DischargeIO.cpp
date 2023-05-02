@@ -118,7 +118,9 @@ DischargeIO::writeEBHDF5Header(HDF5Handle&                a_handleH5,
   header.m_string["filetype"]    = "VanillaAMRFileType";
   header.m_int["num_levels"]     = a_numLevels;
   header.m_int["num_components"] = numCompTotal;
+#if 0 // Uncommenting this because VisIt doesn't know what to do with it.
   header.m_realvect["prob_lo"]   = a_probLo;
+#endif
 
   for (int comp = 0; comp < numCompTotal; comp++) {
     char labelString[100];
