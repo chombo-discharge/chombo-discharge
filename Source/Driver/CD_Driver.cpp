@@ -2183,6 +2183,8 @@ Driver::writePlotFile(const std::string a_filename)
 
       // Do the HDF5 write.
 #ifdef CH_USE_HDF5
+      pout()<< "memory before/after write level = " << lvl << endl;
+      MemoryReport::getMaxMinMemoryUsage();
       const int refRat = (lvl < m_amr->getFinestLevel()) ? m_amr->getRefinementRatios()[lvl] : 1;
       DischargeIO::writeEBHDF5Level(handle,
                                     outputData,
@@ -2193,6 +2195,8 @@ Driver::writePlotFile(const std::string a_filename)
                                     lvl,
                                     refRat,
                                     m_numPlotGhost);
+      MemoryReport::getMaxMinMemoryUsage();
+      pout() << endl;
 #endif
     }
 
