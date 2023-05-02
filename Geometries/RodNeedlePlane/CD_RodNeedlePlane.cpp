@@ -55,8 +55,8 @@ void
 RodNeedlePlane::defineRodWNeedle()
 {
   Vector<Real> v(SpaceDim);
-  Real         rodRadius;
-  RealVect     rodE1, rodE2;
+  Real         rodSmallRadius, rodBigRadius, rodBendRadius;
+  RealVect     rodE1, rodMp, rodE2;
   bool         rodLive;
 
   Real length;
@@ -71,7 +71,9 @@ RodNeedlePlane::defineRodWNeedle()
   ParmParse ppRod("RodNeedlePlane.rod");
   ParmParse ppNeedle("RodNeedlePlane.needle");
 
-  ppRod.get("radius", rodRadius);
+  ppRod.get("smallRadius", rodSmallRadius);
+  ppRod.get("bigRadius", rodBigRadius);
+  ppRod.get("rodBendRadius", rodBendRadius);
   ppRod.get("live", rodLive);
 
   ppNeedle.get("length", length);
@@ -84,11 +86,18 @@ RodNeedlePlane::defineRodWNeedle()
 
   ppRod.getarr("endpoint1", v, 0, SpaceDim);
   rodE1 = RealVect(D_DECL(v[0], v[1], v[2]));
+  ppRod.getarr("midpoint", v, 0, SpaceDim);
+  rodMp = RealVect(D_DECL(v[0], v[1], v[2]));
   ppRod.getarr("endpoint2", v, 0, SpaceDim);
   rodE2 = RealVect(D_DECL(v[0], v[1], v[2]));
 
+  Vector<BaseIF*> rodParts;
+  rodParts.push_back((BaseIF*)new RodIF(rodE1, rodMp, rodSmallRadius, false));
+  rodParts.push_back((BaseIF*)new RodIF(rodMp, rodE2, rodBigRadius, false));
+
+
   Vector<BaseIF*> electrodeParts;
-  electrodeParts.push_back((BaseIF*)new RodIF(rodE1, rodE2, rodRadius, false));
+  electrodeParts.push_back((BaseIF*)new SmoothIntersection(rodParts, rodBendRadius));
   electrodeParts.push_back((BaseIF*)new NeedleIF(length, needleRadius, false, tipRadius, angle, cornerCurve));
 
   RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF>(new SmoothIntersection(electrodeParts, cornerCurve));
@@ -98,29 +107,45 @@ RodNeedlePlane::defineRodWNeedle()
   for (int i = 0; i < electrodeParts.size(); ++i) {
     delete electrodeParts[i];
   }
+
+  for (int i = 0; i < rodParts.size(); ++i) {
+    delete rodParts[i];
+  }
 }
 
 void
 RodNeedlePlane::defineRod()
 {
   Vector<Real> v(SpaceDim);
-  Real         radius;
-  RealVect     e1, e2;
+  Real         smallRadius, bigRadius, rodBendRadius;
+  RealVect     e1, mp, e2;
   bool         live;
 
   ParmParse pp("RodNeedlePlane.rod");
 
-  pp.get("radius", radius);
+  pp.get("smallRadius", smallRadius);
+  pp.get("bigRadius", bigRadius);
+  pp.get("rodBendRadius", rodBendRadius);
   pp.get("live", live);
 
   pp.getarr("endpoint1", v, 0, SpaceDim);
   e1 = RealVect(D_DECL(v[0], v[1], v[2]));
+  pp.getarr("midpoint", v, 0, SpaceDim);
+  mp = RealVect(D_DECL(v[0], v[1], v[2]));
   pp.getarr("endpoint2", v, 0, SpaceDim);
   e2 = RealVect(D_DECL(v[0], v[1], v[2]));
 
-  RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF>(new RodIF(e1, e2, radius, false));
+  Vector<BaseIF*> electrodeParts;
+  electrodeParts.push_back((BaseIF*)new RodIF(e1, mp, smallRadius, false));
+  electrodeParts.push_back((BaseIF*)new RodIF(mp, e2, bigRadius, false));
+
+  RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF>(new SmoothIntersection(electrodeParts, rodBendRadius));
 
   m_electrodes.push_back(Electrode(bif, live));
+
+  for (int i = 0; i < electrodeParts.size(); ++i) {
+    delete electrodeParts[i];
+  }
 }
 
 void
