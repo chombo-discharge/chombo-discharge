@@ -757,8 +757,10 @@ SurfaceODESolver<N>::writePlotFile() const noexcept
     EBAMRCellData output;
     m_amr->allocate(output, m_realm, m_phase, numPlotVars);
 
-    int icomp = 0;
-    this->writePlotData(output, icomp);
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      int icomp = 0;
+      this->writePlotData(*output[lvl], icomp, lvl);
+    }
 
     // Filename
     char filename[100];
@@ -790,28 +792,32 @@ SurfaceODESolver<N>::writePlotFile() const noexcept
 
 template <int N>
 void
-SurfaceODESolver<N>::writePlotData(EBAMRCellData& a_output, int& a_comp) const noexcept
+SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
 {
   CH_TIME("SurfaceODESolver::writePlotData");
   if (m_verbosity > 5) {
     pout() << m_name + "::writePlotData" << endl;
   }
 
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
   // HDF5 doesn't do irregular data the way we want so we copy into EBCellFABs and
   // use that as output.
-  EBAMRCellData scratch;
-
-  m_amr->allocate(scratch, m_realm, m_phase, N);
+  LevelData<EBCellFAB> scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, a_level, N);
 
   // Copy m_phi to a_output
   if (m_plotPhi) {
     DataOps::setValue(scratch, 0.0);
-    DataOps::incr(scratch, m_phi, 1.0);
+    DataOps::incr(scratch, *m_phi[a_level], 1.0);
 
     const Interval srcInterv(0, N - 1);
     const Interval dstInterv(a_comp, a_comp + N - 1);
 
-    a_output.copy(srcInterv, scratch, dstInterv);
+    scratch.copyTo(srcInterv, a_output, dstInterv);
+
+    a_output.exchange(dstInterv);
 
     a_comp += N;
   }
@@ -819,12 +825,14 @@ SurfaceODESolver<N>::writePlotData(EBAMRCellData& a_output, int& a_comp) const n
   // Copy m_rhs to a_output
   if (m_plotRHS) {
     DataOps::setValue(scratch, 0.0);
-    DataOps::incr(scratch, m_rhs, 1.0);
+    DataOps::incr(scratch, *m_rhs[a_level], 1.0);
 
     const Interval srcInterv(0, N - 1);
     const Interval dstInterv(a_comp, a_comp + N - 1);
 
-    a_output.copy(srcInterv, scratch, dstInterv);
+    scratch.copyTo(srcInterv, a_output, dstInterv);
+
+    a_output.exchange(dstInterv);
 
     a_comp += N;
   }

@@ -430,6 +430,24 @@ public:
            const int                a_nGhost = -1) const;
 
   /*!
+    @brief Allocate data on specific level
+    @param[out] a_data   Data holder to be allocated
+    @param[in]  a_realm  Realm of the name where the data will be allocated. 
+    @param[in]  a_phase  Phase (gas or solid)
+    @param[in]  a_level  AMR level
+    @param[in]  a_nComp  Number of components in a_data
+    @param[in]  a_nGhost Number of ghost cells for a_data
+    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
+  */
+  void
+  allocate(LevelData<EBCellFAB>&    a_data,
+           const std::string        a_realm,
+           const phase::which_phase a_phase,
+           const int                a_level,
+           const int                a_nComp,
+           const int                a_nGhost = -1) const;
+
+  /*!
     @brief Allocate a data holder over a specific realm
     @param[out] a_data   Data holder to be allocated
     @param[in]  a_realm  Realm of the name where the data will be allocated. 
@@ -1359,6 +1377,19 @@ public:
   */
   void
   interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Interpolate data to centroids
+    @param[inout] a_data  Data to be interpolated
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+    @param[in]    a_level Grid level
+  */
+  void
+  interpToCentroids(LevelData<EBCellFAB>&    a_data,
+                    const std::string        a_realm,
+                    const phase::which_phase a_phase,
+                    const int                a_level) const;
 
   /*!
     @brief Sets multifluid index space. 

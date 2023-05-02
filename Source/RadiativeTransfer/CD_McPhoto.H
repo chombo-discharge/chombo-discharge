@@ -313,9 +313,10 @@ public:
     @brief Write plot data
     @param[inout] a_ouput Output data holder
     @param[inout] a_icomp Starting component where we begin to write data to a_output
+    @param[in]    a_level Grid level
   */
   virtual void
-  writePlotData(EBAMRCellData& a_output, int& a_icomp) override;
+  writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const noexcept override;
 
   /*!
     @brief Write checkpoint data into handle
@@ -528,14 +529,9 @@ protected:
   CoarseFineDeposition m_coarseFineDeposition;
 
   /*!
-    @brief Plot deposition type
-  */
-  DepositionType m_plotDeposition;
-
-  /*!
     @brief Coarse data for interpolation of deposition clouds
   */
-  EBAMRCellData m_scratch;
+  mutable EBAMRCellData m_scratch;
 
   /*!
     @brief Scratch storage for holding the non-conservative deposition
@@ -708,6 +704,17 @@ protected:
   */
   void
   parsePlotVariables();
+
+  /*!
+    @brief Do an NGP deposit on a specific grid level. Used for IO.
+    @param[out] a_output Contains NGP deposition of photons. Ignores cut-cells.
+    @param[in] a_photons photons
+    @param[in] a_level Grid level
+  */
+  virtual void
+  depositPhotonsNGP(LevelData<EBCellFAB>&            a_output,
+                    const ParticleContainer<Photon>& a_particles,
+                    const int                        a_level) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -172,7 +172,7 @@ BrownianWalkerStepper::setVelocity()
 
   // Coarsen and update ghost cells.
   m_amr->conservativeAverage(vel, m_realm, m_phase);
-  m_amr->interpGhostMG(vel, m_realm, m_phase);
+  m_amr->interpGhost(vel, m_realm, m_phase);
 
   DataOps::setCoveredValue(vel, 0, 0.0);
 }
@@ -284,19 +284,29 @@ BrownianWalkerStepper::getNumberOfPlotVariables() const
   return numPlotVars;
 }
 
+Vector<std::string>
+BrownianWalkerStepper::getPlotVariableNames() const
+{
+  CH_TIME("BrownianWalkerStepper::getPlotVariableNames");
+  if (m_verbosity > 5) {
+    pout() << "BrownianWalkerStepper::getPlotVariableNames" << endl;
+  }
+
+  return m_solver->getPlotVariableNames();
+}
+
 void
-BrownianWalkerStepper::writePlotData(EBAMRCellData&       a_output,
-                                     Vector<std::string>& a_plotVariableNames,
-                                     int&                 a_icomp) const
+BrownianWalkerStepper::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const
 {
   CH_TIME("BrownianWalkerStepper::writePlotData");
   if (m_verbosity > 5) {
     pout() << "BrownianWalkerStepper::writePlotData" << endl;
   }
 
-  // We only write solver data -- it knows what to do.
-  a_plotVariableNames.append(m_solver->getPlotVariableNames());
-  m_solver->writePlotData(a_output, a_icomp);
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
+  m_solver->writePlotData(a_output, a_icomp, a_level);
 }
 
 Real

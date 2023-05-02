@@ -2022,8 +2022,10 @@ CdrSolver::writePlotFile()
   DataOps::setValue(output, 0.0);
 
   // Copy internal data to be plotted over to 'output'
-  int icomp = 0;
-  this->writePlotData(output, icomp);
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    int icomp = 0;
+    this->writePlotData(*output[lvl], icomp, lvl);
+  }
 
   // Filename
   char filename[100];
@@ -2053,11 +2055,11 @@ CdrSolver::writePlotFile()
 }
 
 void
-CdrSolver::writePlotData(EBAMRCellData& a_output, int& a_icomp)
+CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const noexcept
 {
-  CH_TIME("CdrSolver::writePlotData(EBAMRCellData, int)");
+  CH_TIME("CdrSolver::writePlotData");
   if (m_verbosity > 5) {
-    pout() << m_name + "::writePlotData(EBAMRCellData, int)" << endl;
+    pout() << m_name + "::writePlotData" << endl;
   }
 
   // TLDR: This routine writes plot data to an "external" data holder a_output, starting on a_icomp. The intention
@@ -2066,78 +2068,133 @@ CdrSolver::writePlotData(EBAMRCellData& a_output, int& a_icomp)
 
   // Plot state
   if (m_plotPhi) {
-    this->writeData(a_output, a_icomp, m_phi, true);
+    this->writeData(a_output, a_icomp, m_phi, a_level, true, true);
+    if (m_plotNumbers) {
+      LevelData<EBCellFAB> alias;
+
+      aliasLevelData<EBCellFAB>(alias, &a_output, Interval(a_icomp - 1, a_icomp - 1));
+
+      DataOps::scale(alias, std::pow(m_amr->getDx()[a_level], SpaceDim));
+    }
   }
 
   // Plot diffusion coefficients. These are stored on face centers but we need cell-centered data for output.
   if (m_plotDiffusionCoefficient && m_isDiffusive) {
-    DataOps::setValue(m_scratch, 0.0);
-    DataOps::averageFaceToCell(m_scratch, m_faceCenteredDiffusionCoefficient, m_amr->getDomains());
-    this->writeData(a_output, a_icomp, m_scratch, false);
+    DataOps::averageFaceToCell(*m_scratch[a_level],
+                               *m_faceCenteredDiffusionCoefficient[a_level],
+                               m_amr->getDomains()[a_level]);
+
+    // Do the previous because we need the ghost cells too.
+    if (a_level > 0) {
+      DataOps::averageFaceToCell(*m_scratch[a_level - 1],
+                                 *m_faceCenteredDiffusionCoefficient[a_level - 1],
+                                 m_amr->getDomains()[a_level - 1]);
+    }
+
+    this->writeData(a_output, a_icomp, m_scratch, a_level, false, true);
   }
 
   // Plot source terms
   if (m_plotSource) {
-    this->writeData(a_output, a_icomp, m_source, false);
+    this->writeData(a_output, a_icomp, m_source, a_level, false, true);
+
+    if (m_plotNumbers) {
+      LevelData<EBCellFAB> alias;
+
+      aliasLevelData<EBCellFAB>(alias, &a_output, Interval(a_icomp - 1, a_icomp - 1));
+
+      DataOps::scale(alias, std::pow(m_amr->getDx()[a_level], SpaceDim));
+    }
   }
 
   // Plot velocities
   if (m_plotVelocity && m_isMobile) {
-    this->writeData(a_output, a_icomp, m_cellVelocity, false);
+    this->writeData(a_output, a_icomp, m_cellVelocity, a_level, false, true);
   }
 
   // Plot EB fluxes. These are stored on sparse data structures but we need them on cell centers. So copy them to scratch and write data.
   if (m_plotEbFlux && m_isMobile) {
-    DataOps::setValue(m_scratch, 0.0);
-    DataOps::incr(m_scratch, m_ebFlux, 1.0);
-    this->writeData(a_output, a_icomp, m_scratch, false);
+    DataOps::setValue(*m_scratch[a_level], 0.0);
+    DataOps::incr(*m_scratch[a_level], *m_ebFlux[a_level], 1.0);
+    this->writeData(a_output, a_icomp, m_scratch, a_level, false, false);
   }
 }
 
 void
-CdrSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp)
-{
-  CH_TIME("CdrSolver::writeData(EBAMRCellData, int, EBAMRCellData, bool)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::writeData(EBAMRCellData, int, EBAMRCellData, bool)" << endl;
-  }
+CdrSolver::writeData(LevelData<EBCellFAB>& a_output,
+                     int&                  a_comp,
+                     const EBAMRCellData&  a_data,
+                     const int             a_level,
+                     const bool            a_interpToCentroids,
+                     const bool            a_interpGhost) const noexcept
 
-  // TLDR: This routine copies from a data holder to another data, but in a general way where components don't align (which prevents
-  //       us from using one-line methods). A special flag (a_interp) tells us to interpolate to cell centroids or not.
+{
+  CH_TIMERS("CdrSolver::writeData");
+  CH_TIMER("CdrSolver::writeData::allocate", t1);
+  CH_TIMER("CdrSolver::writeData::local_copy", t2);
+  CH_TIMER("CdrSolver::writeData::interp_ghost", t3);
+  CH_TIMER("CdrSolver::writeData::interp_centroid", t4);
+  CH_TIMER("CdrSolver::writeData::define_copier", t5);
+  CH_TIMER("CdrSolver::writeData::final_copy", t6);
+  if (m_verbosity > 5) {
+    pout() << m_name + "::writeData" << endl;
+  }
 
   // Number of components we are working with.
-  const int ncomp = a_data[0]->nComp();
+  const int numComp = a_data[a_level]->nComp();
 
   // Component ranges that we copy to/from.
-  const Interval srcInterv(0, ncomp - 1);
-  const Interval dstInterv(a_comp, a_comp + ncomp - 1);
+  const Interval srcInterv(0, numComp - 1);
+  const Interval dstInterv(a_comp, a_comp + numComp - 1);
 
-  // Copy data to scratch and interpolate scratch to cell centroids if we are asked to.
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, ncomp);
-  DataOps::copy(scratch, a_data);
+  CH_START(t1);
+  LevelData<EBCellFAB> scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, a_level, numComp);
+  CH_STOP(t1);
 
-  if (a_interp) {
-    m_amr->interpToCentroids(scratch, m_realm, phase::gas);
+  CH_START(t2);
+  a_data[a_level]->localCopyTo(scratch);
+  scratch.exchange();
+  CH_START(t2);
+
+  // Interpolate ghost cells
+  CH_START(t3);
+  if (a_level > 0 && a_interpGhost) {
+
+    for (int icomp = 0; icomp < numComp; icomp++) {
+      LevelData<EBCellFAB> coarData;
+
+      aliasLevelData<EBCellFAB>(coarData, &(*a_data[a_level - 1]), Interval(icomp, icomp));
+
+      m_amr->interpGhost(scratch, coarData, a_level, m_realm, m_phase);
+    }
   }
+  CH_STOP(t3);
 
-  m_amr->conservativeAverage(scratch, m_realm, m_phase);
-  m_amr->interpGhost(scratch, m_realm, m_phase);
+  CH_START(t4);
+  if (a_interpToCentroids) {
+    m_amr->interpToCentroids(scratch, m_realm, m_phase, a_level);
+  }
+  CH_STOP(t4);
 
   // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
   // we can't call EBAMRData<T>::copy either (because components don't align). So -- general type of copy here.
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    if (m_realm == a_output.getRealm()) {
-      scratch[lvl]->localCopyTo(srcInterv, *a_output[lvl], dstInterv);
-    }
-    else {
-      scratch[lvl]->copyTo(srcInterv, *a_output[lvl], dstInterv);
-    }
-  }
+  CH_START(t5);
+  Copier copier;
+  copier.ghostDefine(scratch.disjointBoxLayout(),
+                     a_output.disjointBoxLayout(),
+                     m_amr->getDomains()[a_level],
+                     scratch.ghostVect(),
+                     a_output.ghostVect());
+  CH_STOP(t5);
 
-  DataOps::setCoveredValue(a_output, a_comp, 0.0);
+  DataOps::setCoveredValue(scratch, 0.0);
 
-  a_comp += ncomp;
+  CH_START(t6);
+  scratch.copyTo(srcInterv, a_output, dstInterv, copier);
+  CH_STOP(t6);
+
+  a_comp += numComp;
 }
 
 #ifdef CH_USE_HDF5

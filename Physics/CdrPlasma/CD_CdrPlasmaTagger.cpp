@@ -109,35 +109,47 @@ CdrPlasmaTagger::getNumberOfPlotVariables() const
   return m_numTracers;
 }
 
-void
-CdrPlasmaTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const
+Vector<std::string>
+CdrPlasmaTagger::getPlotVariableNames() const
 {
-  CH_TIME("CdrPlasmaTagger::writePlotData(EBAMRCellData, Vector<std::string>, int)");
+  CH_TIME("CdrPlasmaTagger::getPlotVariableNames");
   if (m_verbosity > 5) {
-    pout() << m_name + "::writePlotData(EBAMRCellData, Vector<std::string>, int)" << endl;
+    pout() << m_name + "::getPlotVariableNames" << endl;
   }
 
-  // Update the tracer fields.
+  Vector<std::string> plotVars;
+
+  for (int i = 0; i < m_numTracers; i++) {
+    plotVars.push_back("Tracer field-" + std::to_string(i));
+  }
+
+  return plotVars;
+}
+
+void
+CdrPlasmaTagger::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const
+{
+  CH_TIME("CdrPlasmaTagger::writePlotData");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::writePlotData" << endl;
+  }
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
+  // Inefficient since we could do it only on level l. But screw it, I don't think it'll be a performance
+  // bottleneck anyways.
   this->computeTracers();
 
   // Go through the fields and add them to file.
   for (int i = 0; i < m_numTracers; i++) {
-
-    // Handle to tracer filed.
-    const EBAMRCellData& tracer = m_tracers[i];
-
     const Interval srcInterv(0, 0);
     const Interval dstInterv(a_icomp, a_icomp);
 
     // Copy data to the ouput data holder. Covered data is bogus.
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      tracer[lvl]->localCopyTo(srcInterv, *a_output[lvl], dstInterv);
+    (m_tracers[i])[a_level]->localCopyTo(srcInterv, a_output, dstInterv);
 
-      DataOps::setCoveredValue(*a_output[lvl], a_icomp, 0.0);
-    }
-
-    // Add variable name and update the starting component.
-    a_plotVariableNames.push_back("Tracer field-" + std::to_string(i));
+    DataOps::setCoveredValue(a_output, a_icomp, 0.0);
 
     a_icomp++;
   }

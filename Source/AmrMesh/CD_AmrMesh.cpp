@@ -256,6 +256,36 @@ AmrMesh::allocate(EBAMRCellData&           a_data,
 }
 
 void
+AmrMesh::allocate(LevelData<EBCellFAB>&    a_data,
+                  const std::string        a_realm,
+                  const phase::which_phase a_phase,
+                  const int                a_level,
+                  const int                a_nComp,
+                  const int                a_ghost) const
+{
+  CH_TIME("AmrMesh::allocate(LD<EBCellFAB>");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::allocate(LD<EBCellFAB>)" << endl;
+  }
+
+  CH_assert(a_nComp > 0);
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_finestLevel);
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::allocate(LD<EBCellFB>) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  const int ghost = (a_ghost < 0) ? m_numGhostCells : a_ghost;
+
+  const DisjointBoxLayout& dbl   = m_realms[a_realm]->getGrids()[a_level];
+  const EBISLayout&        ebisl = m_realms[a_realm]->getEBISLayout(a_phase)[a_level];
+
+  a_data.define(dbl, a_nComp, ghost * IntVect::Unit, EBCellFactory(ebisl));
+}
+
+void
 AmrMesh::allocate(EBAMRFluxData&           a_data,
                   const std::string        a_realm,
                   const phase::which_phase a_phase,
@@ -2004,20 +2034,40 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
 void
 AmrMesh::interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
 {
-  CH_TIME("AmrMesh::interpToCentroids(EBAMRCellData, string, phase::which_phase)");
+  CH_TIME("AmrMesh::interpToCentroids(AMR)");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::interpToCentroids(EBAMRCellData, string, phase::which_phase)" << endl;
+    pout() << "AmrMesh::interpToCentroids(AMR)" << endl;
   }
 
   if (!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::interpToCentroids(EBAMRCellData, string, phase::which_phase) - could not find realm '" +
-                      a_realm + "'";
+    std::string str = "AmrMesh::interpToCentroids(AMR) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
   const IrregAmrStencil<CentroidInterpolationStencil>& stencil = m_realms[a_realm]->getCentroidInterpolationStencils(
     a_phase);
   stencil.apply(a_data);
+}
+
+void
+AmrMesh::interpToCentroids(LevelData<EBCellFAB>&    a_data,
+                           const std::string        a_realm,
+                           const phase::which_phase a_phase,
+                           const int                a_level) const
+{
+  CH_TIME("AmrMesh::interpToCentroids(level)");
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_finestLevel);
+
+  if (!this->queryRealm(a_realm)) {
+    std::string str = "AmrMesh::interpToCentroids(level) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  const auto& stencil = m_realms[a_realm]->getCentroidInterpolationStencils(a_phase);
+
+  stencil.apply(a_data, a_level);
 }
 
 void

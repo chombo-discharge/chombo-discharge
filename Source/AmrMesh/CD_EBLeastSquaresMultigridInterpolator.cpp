@@ -70,8 +70,6 @@ EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const E
   m_eblgCoar     = a_eblgCoar;
   m_useQuadCFI   = false;
 
-  // Build the regular stencil objects for regular-grid interpolation. Use QuadCFInterp for this (might change this later)
-
   const DisjointBoxLayout& gridsFine = a_eblgFine.getDBL();
   const DisjointBoxLayout& gridsCoar = a_eblgCoar.getDBL();
 
@@ -152,7 +150,7 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
     aliasEB(coarAlias, (LevelData<EBCellFAB>&)*m_grownCoarData);
 
     aliasLevelData(fineAliasOneComp, &fineAlias, Interval(icomp, icomp));
-    aliasLevelData(coarAliasOneComp, &coarAlias, Interval(0, 0));
+    aliasLevelData(coarAliasOneComp, &coarAlias, Interval(m_comp, m_comp));
 
     if (m_useQuadCFI) {
       aliasEB(coarAlias, (LevelData<EBCellFAB>&)a_phiCoar);
@@ -160,7 +158,7 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
       m_quadCFInterp->coarseFineInterp(fineAliasOneComp, coarAliasOneComp);
     }
     else {
-      this->regularCoarseFineInterp(fineAliasOneComp, coarAliasOneComp, icomp, 0);
+      this->regularCoarseFineInterp(fineAliasOneComp, coarAliasOneComp, m_comp, m_comp);
     }
     CH_STOP(t2);
 
@@ -763,7 +761,7 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<FArrayBox
         const int iHiLo     = sign(sit());
         const Box interpBox = m_cfivs[dit()].at(std::make_pair(dir, sit()));
 
-        // Coarse-side interpolation stencil. This does interpolation orthogonal to direction 'dir'
+        //         // Coarse-side interpolation stencil. This does interpolation orthogonal to direction 'dir'
         const CoarseInterpQuadCF& coarseStencils = (sit() == Side::Lo) ? m_loCoarseInterpCF[dir][dit()]
                                                                        : m_hiCoarseInterpCF[dir][dit()];
 
@@ -800,7 +798,7 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<FArrayBox
         };
 
         // We've put the coarse-grid interpolation into finePhi(fineIV, a_fineVar). Now use that value
-        // when doing cubic interpolation with the additional fine-grid data.
+        // when doing quadratic interpolation with the additional fine-grid data.
         auto interpOnFine = [&](const IntVect& fineIV) -> void {
           const Real phi0 = finePhi(fineIV, a_fineVar);
           const Real phi1 = finePhi(fineIV - iHiLo * BASISV(dir), a_fineVar);

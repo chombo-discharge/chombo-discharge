@@ -139,6 +139,8 @@ DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&       a_faceDat
       }
     }
   }
+
+  a_faceData.exchange();
 }
 
 void
@@ -347,6 +349,8 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
       }
     }
   }
+
+  a_faceData.exchange();
 }
 
 void
@@ -427,6 +431,8 @@ DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
+
+  a_cellData.exchange();
 }
 
 void

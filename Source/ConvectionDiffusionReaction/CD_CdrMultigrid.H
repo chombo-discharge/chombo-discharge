@@ -321,14 +321,6 @@ protected:
   */
   virtual void
   parseMultigridSettings();
-
-  /*!
-    @brief Write output data to a_output
-    @param[inout] a_output Output data holder.
-    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
-  */
-  virtual void
-  writePlotData(EBAMRCellData& a_output, int& a_comp) override final;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -383,98 +383,6 @@ ItoSolver::getIntersectionAlgorithm() const noexcept
   return m_intersectionAlg;
 }
 
-Vector<std::string>
-ItoSolver::getPlotVariableNames() const
-{
-  CH_TIME("ItoSolver::getPlotVariableNames");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getPlotVariableNames" << endl;
-  }
-
-  Vector<std::string> names(0);
-
-  if (m_plotPhi) {
-    names.push_back(m_name + " phi");
-  }
-  if (m_plotDiffCo && m_isDiffusive) {
-    names.push_back(m_name + " diffusion_coefficient");
-  }
-  if (m_plotVelocity && m_isMobile) {
-    names.push_back("x-Velocity " + m_name);
-    names.push_back("y-Velocity " + m_name);
-    if (SpaceDim == 3) {
-      names.push_back("z-Velocity " + m_name);
-    }
-  }
-  if (m_plotParticles) {
-    names.push_back(m_name + " particles");
-  }
-  if (m_plotParticlesEB) {
-    names.push_back(m_name + " eb_particles");
-  }
-  if (m_plotParticlesDomain) {
-    names.push_back(m_name + " domain_particles");
-  }
-  if (m_plotParticlesSource) {
-    names.push_back(m_name + " source_particles");
-  }
-  if (m_plotParticlesCovered) {
-    names.push_back(m_name + " covered_particles");
-  }
-  if (m_plotEnergyDensity) {
-    names.push_back(m_name + " energy * phi");
-  }
-  if (m_plotAverageEnergy) {
-    names.push_back(m_name + " average_energy");
-  }
-
-  return names;
-}
-
-int
-ItoSolver::getNumberOfPlotVariables() const
-{
-  CH_TIME("ItoSolver::getNumberOfPlotVariables");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getNumberOfPlotVariables" << endl;
-  }
-
-  int numPlotVars = 0;
-
-  if (m_plotPhi) {
-    numPlotVars += 1;
-  }
-  if (m_plotDiffCo && m_isDiffusive) {
-    numPlotVars += 1;
-  }
-  if (m_plotVelocity && m_isMobile) {
-    numPlotVars += SpaceDim;
-  }
-  if (m_plotParticles) {
-    numPlotVars += 1;
-  }
-  if (m_plotParticlesEB) {
-    numPlotVars += 1;
-  }
-  if (m_plotParticlesDomain) {
-    numPlotVars += 1;
-  }
-  if (m_plotParticlesSource) {
-    numPlotVars += 1;
-  }
-  if (m_plotParticlesCovered) {
-    numPlotVars += 1;
-  }
-  if (m_plotEnergyDensity) {
-    numPlotVars += 1;
-  }
-  if (m_plotAverageEnergy) {
-    numPlotVars += 1;
-  }
-
-  return numPlotVars;
-}
-
 unsigned long long
 ItoSolver::getNumParticles(const WhichContainer a_whichContainer, const bool a_localOnly) const
 {
@@ -936,7 +844,7 @@ ItoSolver::allocate()
 
   // Only allocate memory if we actually have a diffusion solver
   if (m_isDiffusive) {
-    m_amr->allocate(m_diffusionFunction, m_realm, m_phase, 1);
+    m_amr->allocate(m_diffusionFunction, m_realm, m_phase, ncomp);
   }
   else {
     m_amr->allocatePointer(m_diffusionFunction, m_realm);
@@ -1299,31 +1207,119 @@ ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, cons
   }
 }
 
-void
-ItoSolver::writePlotData(EBAMRCellData& a_output, int& a_comp)
+int
+ItoSolver::getNumberOfPlotVariables() const
 {
-  CH_TIME("ItoSolver::writePlotData");
+  CH_TIME("ItoSolver::getNumberOfPlotVariables");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getNumberOfPlotVariables" << endl;
+  }
+
+  int numPlotVars = 0;
+
+  if (m_plotPhi) {
+    numPlotVars += 1;
+  }
+  if (m_plotDiffCo && m_isDiffusive) {
+    numPlotVars += 1;
+  }
+  if (m_plotVelocity && m_isMobile) {
+    numPlotVars += SpaceDim;
+  }
+  if (m_plotParticles) {
+    numPlotVars += 1;
+  }
+  if (m_plotParticlesEB) {
+    numPlotVars += 1;
+  }
+  if (m_plotParticlesDomain) {
+    numPlotVars += 1;
+  }
+  if (m_plotParticlesSource) {
+    numPlotVars += 1;
+  }
+  if (m_plotParticlesCovered) {
+    numPlotVars += 1;
+  }
+  if (m_plotEnergyDensity) {
+    numPlotVars += 1;
+  }
+  if (m_plotAverageEnergy) {
+    numPlotVars += 1;
+  }
+
+  return numPlotVars;
+}
+
+Vector<std::string>
+ItoSolver::getPlotVariableNames() const
+{
+  CH_TIME("ItoSolver::getPlotVariableNames");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getPlotVariableNames" << endl;
+  }
+
+  Vector<std::string> names(0);
+
+  if (m_plotPhi) {
+    names.push_back(m_name + " phi");
+  }
+  if (m_plotDiffCo && m_isDiffusive) {
+    names.push_back(m_name + " diffusion_coefficient");
+  }
+  if (m_plotVelocity && m_isMobile) {
+    names.push_back("x-Velocity " + m_name);
+    names.push_back("y-Velocity " + m_name);
+    if (SpaceDim == 3) {
+      names.push_back("z-Velocity " + m_name);
+    }
+  }
+  if (m_plotParticles) {
+    names.push_back(m_name + " particles");
+  }
+  if (m_plotParticlesEB) {
+    names.push_back(m_name + " eb_particles");
+  }
+  if (m_plotParticlesDomain) {
+    names.push_back(m_name + " domain_particles");
+  }
+  if (m_plotParticlesSource) {
+    names.push_back(m_name + " source_particles");
+  }
+  if (m_plotParticlesCovered) {
+    names.push_back(m_name + " covered_particles");
+  }
+  if (m_plotEnergyDensity) {
+    names.push_back(m_name + " energy * phi");
+  }
+  if (m_plotAverageEnergy) {
+    names.push_back(m_name + " average_energy");
+  }
+
+  return names;
+}
+
+void
+ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
+{
+  CH_TIMERS("ItoSolver::writePlotData");
+  CH_TIMER("ItoSolver::writePlotData::mesh_data", t1);
+  CH_TIMER("ItoSolver::writePlotData::particle_data", t2);
   if (m_verbosity > 5) {
     pout() << m_name + "::writePlotData" << endl;
   }
 
   CH_assert(a_comp >= 0);
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
 
   // Write phi
+  CH_START(t1);
   if (m_plotPhi) {
     const Interval srcInterval(m_comp, m_comp);
     const Interval dstInterval(a_comp, a_comp);
 
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      if (m_realm == a_output.getRealm()) {
-        m_phi[lvl]->localCopyTo(srcInterval, *a_output[lvl], dstInterval);
-      }
-      else {
-        m_phi[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
-      }
-    }
-    //DataOps::setCoveredValue(a_output, a_comp, 0.0);
-    a_comp++;
+    this->writeData(a_output, a_comp, m_phi, a_level, false, true);
   }
 
   // Plot diffusion coefficient
@@ -1331,19 +1327,7 @@ ItoSolver::writePlotData(EBAMRCellData& a_output, int& a_comp)
     const Interval srcInterval(m_comp, m_comp);
     const Interval dstInterval(a_comp, a_comp);
 
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      if (m_realm == a_output.getRealm()) {
-        m_diffusionFunction[lvl]->localCopyTo(srcInterval, *a_output[lvl], dstInterval);
-      }
-      else {
-        m_diffusionFunction[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
-      }
-    }
-
-    // Set covered diffusion coefficient to zero.
-    DataOps::setCoveredValue(a_output, a_comp, 0.0);
-
-    a_comp++;
+    this->writeData(a_output, a_comp, m_diffusionFunction, a_level, false, true);
   }
 
   // Write velocities
@@ -1351,115 +1335,146 @@ ItoSolver::writePlotData(EBAMRCellData& a_output, int& a_comp)
     const Interval srcInterval(m_comp, SpaceDim - 1);
     const Interval dstInterval(a_comp, a_comp + SpaceDim - 1);
 
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      if (m_realm == a_output.getRealm()) {
-        m_velocityFunction[lvl]->localCopyTo(srcInterval, *a_output[lvl], dstInterval);
-      }
-      else {
-        m_velocityFunction[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
-      }
-    }
-
-    // Set covered velocities to zero.
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      DataOps::setCoveredValue(a_output, a_comp + dir, 0.0);
-    }
-
-    a_comp += SpaceDim;
+    this->writeData(a_output, a_comp, m_velocityFunction, a_level, false, true);
   }
+  CH_STOP(t1);
 
-  // Plot various particle data holders.
-  constexpr bool interpolateToCentroids = false;
-
+  CH_START(t2);
   if (m_plotParticles) {
-    this->depositParticles<ItoParticle, &ItoParticle::weight>(m_scratch,
-                                                              m_particleContainers.at(WhichContainer::Bulk),
-                                                              m_plotDeposition,
-                                                              m_coarseFineDeposition);
+    this->depositParticlesNGP<ItoParticle, &ItoParticle::weight>(*m_scratch[a_level],
+                                                                 m_particleContainers.at(WhichContainer::Bulk),
+                                                                 a_level);
 
-    this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
   if (m_plotParticlesEB) {
-    this->depositParticles<ItoParticle, &ItoParticle::weight>(m_scratch,
-                                                              m_particleContainers.at(WhichContainer::EB),
-                                                              m_plotDeposition,
-                                                              m_coarseFineDeposition);
+    this->depositParticlesNGP<ItoParticle, &ItoParticle::weight>(*m_scratch[a_level],
+                                                                 m_particleContainers.at(WhichContainer::EB),
+                                                                 a_level);
 
-    this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
   if (m_plotParticlesDomain) {
-    this->depositParticles<ItoParticle, &ItoParticle::weight>(m_scratch,
-                                                              m_particleContainers.at(WhichContainer::Domain),
-                                                              m_plotDeposition,
-                                                              m_coarseFineDeposition);
+    this->depositParticlesNGP<ItoParticle, &ItoParticle::weight>(*m_scratch[a_level],
+                                                                 m_particleContainers.at(WhichContainer::Domain),
+                                                                 a_level);
 
-    this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
   if (m_plotParticlesSource) {
-    this->depositParticles<ItoParticle, &ItoParticle::weight>(m_scratch,
-                                                              m_particleContainers.at(WhichContainer::Source),
-                                                              m_plotDeposition,
-                                                              m_coarseFineDeposition);
+    this->depositParticlesNGP<ItoParticle, &ItoParticle::weight>(*m_scratch[a_level],
+                                                                 m_particleContainers.at(WhichContainer::Source),
+                                                                 a_level);
 
-    this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
   if (m_plotEnergyDensity) {
-    this->depositEnergyDensity(m_scratch,
-                               m_particleContainers.at(WhichContainer::Bulk),
-                               m_plotDeposition,
-                               m_coarseFineDeposition);
+    this->depositParticlesNGP<ItoParticle, &ItoParticle::totalEnergy>(*m_scratch[a_level],
+                                                                      m_particleContainers.at(WhichContainer::Bulk),
+                                                                      a_level);
 
-    this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
   if (m_plotAverageEnergy) {
-    this->computeAverageEnergy(m_scratch, m_particleContainers.at(WhichContainer::Bulk));
+    LevelData<EBCellFAB> mass;
+    m_amr->allocate(mass, m_realm, m_phase, a_level, 1);
+    this->depositParticlesNGP<ItoParticle, &ItoParticle::weight>(mass,
+                                                                 m_particleContainers.at(WhichContainer::Bulk),
+                                                                 a_level);
 
-    this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
+    this->depositParticlesNGP<ItoParticle, &ItoParticle::totalEnergy>(*m_scratch[a_level],
+                                                                      m_particleContainers.at(WhichContainer::Bulk),
+                                                                      a_level);
+
+    // Set scratch = totalEnergy/totalWeight
+    DataOps::divideFallback(*m_scratch[a_level], mass, 0.0);
+
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
+  CH_STOP(t2);
 }
 
 void
-ItoSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp) const
+ItoSolver::writeData(LevelData<EBCellFAB>& a_output,
+                     int&                  a_comp,
+                     const EBAMRCellData&  a_data,
+                     const int             a_level,
+                     const bool            a_interpToCentroids,
+                     const bool            a_interpGhost) const noexcept
 {
-  CH_TIME("ItoSolver::writeData");
+  CH_TIMERS("ItoSolver::writeData");
+  CH_TIMER("ItoSolver::writeData::allocate", t1);
+  CH_TIMER("ItoSolver::writeData::local_copy", t2);
+  CH_TIMER("ItoSolver::writeData::interp_ghost", t3);
+  CH_TIMER("ItoSolver::writeData::interp_centroid", t4);
+  CH_TIMER("ItoSolver::writeData::define_copier", t5);
+  CH_TIMER("ItoSolver::writeData::final_copy", t6);
   if (m_verbosity > 5) {
     pout() << m_name + "::writeData" << endl;
   }
 
-  CH_assert(a_output.getRealm() == m_realm);
+  // Number of components we are working with.
+  const int numComp = a_data[a_level]->nComp();
 
-  const int numComp = a_data[0]->nComp();
+  CH_START(t1);
+  LevelData<EBCellFAB> scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, a_level, numComp);
+  CH_STOP(t1);
 
-  const Interval srcInterval(0, numComp - 1);
-  const Interval dstInterval(a_comp, a_comp + numComp - 1);
+  CH_START(t2);
+  a_data[a_level]->localCopyTo(scratch);
+  CH_START(t2);
 
-  // Copy data onto scratch
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, numComp);
-  DataOps::copy(scratch, a_data);
+  // Interpolate ghost cells
+  CH_START(t3);
+  if (a_level > 0 && a_interpGhost) {
+    for (int icomp = 0; icomp < numComp; icomp++) {
+      LevelData<EBCellFAB> coarData;
 
-  // Interp if we should
-  if (a_interp) {
-    m_amr->interpToCentroids(scratch, m_realm, phase::gas);
-  }
+      aliasLevelData<EBCellFAB>(coarData, &(*a_data[a_level - 1]), Interval(icomp, icomp));
 
-  m_amr->conservativeAverage(scratch, m_realm, m_phase);
-  m_amr->interpGhost(scratch, m_realm, m_phase);
-
-  // Copy into source data holder.
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    if (m_realm == a_output.getRealm()) {
-      scratch[lvl]->localCopyTo(srcInterval, *a_output[lvl], dstInterval);
-    }
-    else {
-      scratch[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+      m_amr->interpGhost(scratch, coarData, a_level, m_realm, m_phase);
     }
   }
+  CH_STOP(t3);
 
-  // Set covered value to zero.
-  for (int comp = 0; comp < numComp; comp++) {
-    DataOps::setCoveredValue(a_output, a_comp + comp, 0.0);
+  CH_START(t4);
+  if (a_interpToCentroids) {
+    m_amr->interpToCentroids(scratch, m_realm, m_phase, a_level);
   }
+  CH_STOP(t4);
+
+  // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
+  // we can't call EBAMRData<T>::copy either (because components don't align). So -- general type of copy here.
+  CH_START(t5);
+  Copier copier;
+  copier.ghostDefine(scratch.disjointBoxLayout(),
+                     a_output.disjointBoxLayout(),
+                     m_amr->getDomains()[a_level],
+                     scratch.ghostVect(),
+                     a_output.ghostVect());
+  CH_STOP(t5);
+
+  DataOps::setCoveredValue(scratch, 0.0);
+
+  CH_START(t6);
+  const Interval srcInterv(0, numComp - 1);
+  const Interval dstInterv(a_comp, a_comp + numComp - 1);
+
+  scratch.copyTo(srcInterv, a_output, dstInterv, copier);
+  CH_STOP(t6);
 
   a_comp += numComp;
 }
@@ -3049,16 +3064,17 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
 void
 ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
 {
-  CH_TIME("ItoSolver::makeSuperparticles");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::makeSuperparticles" << endl;
-  }
+  CH_TIMERS("ItoSolver::makeSuperparticles");
+  CH_TIMER("ItoSolver::makeSuperParticles::populate_list", t1);
+  CH_TIMER("ItoSolver::makeSuperParticles::build_kd", t2);
+  CH_TIMER("ItoSolver::makeSuperParticles::merge_particles", t3);
 
   using PType        = NonCommParticle<2, 1>;
   using Node         = ParticleManagement::KDNode<PType>;
   using ParticleList = ParticleManagement::KDNode<PType>::ParticleList;
 
   // 1. Make the input list into a vector of particles with a smaller memory footprint.
+  CH_START(t1);
   Real         W = 0.0;
   ParticleList particles;
   for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
@@ -3072,6 +3088,7 @@ ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
 
     particles.emplace_back(p);
   }
+  CH_STOP(t1);
 
   // 2. Init the KD tree -- adding necessary capacity to avoid
   //    potential reallocations throughout.
@@ -3083,6 +3100,7 @@ ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
 
   // 3. Build the KD-tree; this uses a "width-first" construction which places most leaves
   //    on the same level (differing by at most one).
+  CH_START(t2);
   bool keepGoing = true;
 
   while (keepGoing && leaves1.size() < a_ppc) {
@@ -3110,8 +3128,10 @@ ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
     leaves1 = leaves2;
     leaves2.resize(0);
   }
+  CH_STOP(t2);
 
   // Merge leaves into new particles.
+  CH_START(t3);
   a_particles.clear();
 
   for (const auto& l : leaves1) {
@@ -3130,6 +3150,7 @@ ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
 
     a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, e));
   }
+  CH_STOP(t3);
 }
 
 void

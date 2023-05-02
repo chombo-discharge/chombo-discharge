@@ -123,21 +123,27 @@ namespace Physics {
 #endif
 
       /*!
-	@brief Write plot data to output holder. 
-	@param[inout] a_output            Output data holder.
-	@param[in]    a_plotVariableNames Plot variable names.
-	@param[inout] a_icomp             Starting component in a_output to begin at. 
-      */
-      virtual void
-      writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
-
-      /*!
 	@brief Get the number of plot variables for this time stepper. 
 	@details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. 
 	@return Returns number of plot variables that will be written during writePlotData
       */
       virtual int
       getNumberOfPlotVariables() const override;
+
+      /*!
+	@brief Get plot variable names
+      */
+      virtual Vector<std::string>
+      getPlotVariableNames() const override;
+
+      /*!
+	@brief Write plot data to output holder. 
+	@param[inout] a_output            Output data holder.
+	@param[inout] a_icomp             Starting component in a_output to begin at. 
+	@param[in]    a_level             Grid level
+      */
+      virtual void
+      writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const override;
 
       /*!
 	@brief Compute the time step.
@@ -1310,6 +1316,16 @@ namespace Physics {
       RefCountedPtr<SurfaceODESolver<1>> m_sigma;
 
       /*!
+	@brief Storage for the current
+      */
+      EBAMRCellData m_currentDensity;
+
+      /*!
+	@brief Storage for physics-observables
+      */
+      EBAMRCellData m_physicsPlotVars;
+
+      /*!
 	@brief Set the potential
       */
       std::function<Real(const Real a_time)> m_voltage;
@@ -1433,18 +1449,33 @@ namespace Physics {
 	@brief Compute and put the current density in output data holder
 	@param[inout] a_output Output data holder.
 	@param[inout] a_icomp  Starting component in a_output to begin at. On output this is incremented by SpaceDim.
+	@param[in]    a_level  Grid level
       */
       virtual void
-      writeJ(EBAMRCellData& a_output, int& a_comp) const;
+      writeJ(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const;
 
       /*!
-	@brief Write physics data to output data holder. 
-	@details This will fetch plot variables from m_physics and put them in the data holder. 
-	@param[inout] a_output Output data holder.
-	@param[inout] a_icomp  Starting component in a_output to begin at. On output this is incremented by the number of plot variables from m_physics. 
+	@brief Calculate the user-supplied plot variables
       */
       virtual void
-      writePhysics(EBAMRCellData& a_output, int& a_comp) const;
+      computePhysicsPlotVars(EBAMRCellData& a_physicsPlotVars) const noexcept;
+
+      /*!
+	@brief Write data to output. Convenience function. 
+	@param[inout] a_output Output data holder.
+	@param[inout] a_icomp  Starting component where this solver begins writing the output. 
+	@param[in]    a_data   Data to write. 
+	@param[in]    a_level  Grid level
+	@param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
+	@param[in]    a_interpGhost If true, interpolate ghost cells
+      */
+      virtual void
+      writeData(LevelData<EBCellFAB>& a_output,
+                int&                  a_comp,
+                const EBAMRCellData&  a_data,
+                const int             a_level,
+                const bool            a_interpToCentroids,
+                const bool            a_interpGhost) const noexcept;
     };
   } // namespace CdrPlasma
 } // namespace Physics

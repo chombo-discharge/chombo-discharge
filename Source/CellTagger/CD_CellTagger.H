@@ -80,13 +80,19 @@ public:
   getNumberOfPlotVariables() const;
 
   /*!
+    @brief Get plot variable names. 
+  */
+  virtual Vector<std::string>
+  getPlotVariableNames() const;
+
+  /*!
     @brief Write plot data.
-    @param[inout] a_output            Output data holder
-    @param[inout] a_plotVariableNames Plot variable names
-    @param[inout] a_icomp             Starting variable in a_output where we begin appending data.
+    @param[inout] a_output Output data holder
+    @param[inout] a_icomp Starting variable in a_output where we begin appending data.
+    @param[in] a_level Grid level
   */
   virtual void
-  writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const;
+  writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const;
 
   /*!
     @brief Get tag buffer. 

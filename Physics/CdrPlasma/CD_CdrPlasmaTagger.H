@@ -83,12 +83,6 @@ namespace Physics {
       parseOptions() = 0;
 
       /*!
-	@brief Get number of plot variables. This is fetched by Driver and can be used. 
-      */
-      virtual int
-      getNumberOfPlotVariables() const override final;
-
-      /*!
 	@brief Regrid method -- used for reallocating storage for the tracer fields. 
       */
       virtual void
@@ -105,15 +99,25 @@ namespace Physics {
       tagCells(EBAMRTags& a_tags) override final;
 
       /*!
-	@brief Write plot data
-	@param[inout] a_output            Output data holder
-	@param[inout] a_plotVariableNames Plot variable names
-	@param[inout] a_icomp             Starting variable in a_output where we begin appending data.
+	@brief Get number of plot variables. This is fetched by Driver and can be used. 
+      */
+      virtual int
+      getNumberOfPlotVariables() const override final;
+
+      /*!
+	@brief Get plot variable names. 
+      */
+      virtual Vector<std::string>
+      getPlotVariableNames() const override final;
+
+      /*!
+	@brief Write plot data.
+	@param[inout] a_output Output data holder
+	@param[inout] a_icomp Starting variable in a_output where we begin appending data.
+	@param[in] a_level Grid level
       */
       virtual void
-      writePlotData(EBAMRCellData&       a_output,
-                    Vector<std::string>& a_plotVariableNames,
-                    int&                 a_icomp) const override final;
+      writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const override final;
 
     protected:
       /*!

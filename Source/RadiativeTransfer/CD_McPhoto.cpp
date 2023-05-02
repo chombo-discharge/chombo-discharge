@@ -299,22 +299,6 @@ McPhoto::parseDeposition()
     MayDay::Error("McPhoto::parseDeposition - unsupported deposition method requested");
   }
 
-  pp.get("plot_deposition", str);
-  m_plotNumbers = false;
-  if (str == "num") {
-    m_plotDeposition = DepositionType::NGP;
-    m_plotNumbers    = true;
-  }
-  else if (str == "ngp") {
-    m_plotDeposition = DepositionType::NGP;
-  }
-  else if (str == "cic") {
-    m_plotDeposition = DepositionType::CIC;
-  }
-  else {
-    MayDay::Error("McPhoto::parseDeposition - unsupported interpolant requested");
-  }
-
   pp.get("deposition_cf", str);
   if (str == "interp") {
     m_coarseFineDeposition = CoarseFineDeposition::Interp;
@@ -1131,6 +1115,39 @@ McPhoto::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifferen
 }
 
 void
+McPhoto::depositPhotonsNGP(LevelData<EBCellFAB>&            a_output,
+                           const ParticleContainer<Photon>& a_photons,
+                           const int                        a_level) const noexcept
+{
+  CH_TIME("McPhoto::depositPhotonsNGP");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::depositPhotonsNGP" << endl;
+  }
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
+  const DisjointBoxLayout& dbl    = m_amr->getGrids(a_photons.getRealm())[a_level];
+  const EBISLayout&        ebisl  = m_amr->getEBISLayout(a_photons.getRealm(), m_phase)[a_level];
+  const Real               dx     = m_amr->getDx()[a_level];
+  const RealVect           probLo = m_amr->getProbLo();
+
+  CH_assert(a_output.disjointBoxLayout() == dbl);
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const Box      cellBox = dbl[dit()];
+    const EBISBox& ebisbox = ebisl[dit()];
+
+    EBParticleMesh particleMesh(cellBox, ebisbox, dx * RealVect::Unit, probLo);
+
+    EBCellFAB&          output  = a_output[dit()];
+    const List<Photon>& photons = a_photons[a_level][dit()].listItems();
+
+    particleMesh.deposit<Photon, &Photon::weight>(photons, output, DepositionType::NGP, true);
+  }
+}
+
+void
 McPhoto::incrementRedist(const EBAMRIVData& a_massDifference)
 {
   CH_TIME("McPhoto::incrementRedist");
@@ -1657,39 +1674,64 @@ McPhoto::countOutcast(const AMRParticles<Photon>& a_photons) const
 }
 
 void
-McPhoto::writePlotData(EBAMRCellData& a_output, int& a_comp)
+McPhoto::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
 {
-  CH_TIME("McPhoto::writePlotData");
+  CH_TIMERS("McPhoto::writePlotData");
+  CH_TIMER("McPhoto::writePlotData::mesh_data", t1);
+  CH_TIMER("McPhoto::writePlotData::particle_data", t2);
   if (m_verbosity > 5) {
     pout() << m_name + "::writePlotData" << endl;
   }
 
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
+  CH_START(t1);
   if (m_plotPhi) {
-    this->writeData(a_output, a_comp, m_phi, false);
+    this->writeData(a_output, a_comp, m_phi, a_level, false, true);
   }
   if (m_plotSource) {
-    this->writeData(a_output, a_comp, m_source, false);
+    this->writeData(a_output, a_comp, m_source, a_level, false, true);
   }
+  CH_STOP(t1);
+
+  CH_START(t2);
   if (m_plotPhotons) {
-    this->depositPhotons(m_scratch, m_photons, m_plotDeposition);
-    this->writeData(a_output, a_comp, m_scratch, false);
+    this->depositPhotonsNGP(*m_scratch[a_level], m_photons, a_level);
+
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
   if (m_plotBulkPhotons) {
-    this->depositPhotons(m_scratch, m_bulkPhotons, m_plotDeposition);
-    this->writeData(a_output, a_comp, m_scratch, false);
+    this->depositPhotonsNGP(*m_scratch[a_level], m_bulkPhotons, a_level);
+
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
   if (m_plotEBPhotons) {
-    this->depositPhotons(m_scratch, m_ebPhotons, m_plotDeposition);
-    this->writeData(a_output, a_comp, m_scratch, false);
+    this->depositPhotonsNGP(*m_scratch[a_level], m_ebPhotons, a_level);
+
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
   if (m_plotDomainPhotons) {
-    this->depositPhotons(m_scratch, m_domainPhotons, m_plotDeposition);
-    this->writeData(a_output, a_comp, m_scratch, false);
+    this->depositPhotonsNGP(*m_scratch[a_level], m_domainPhotons, a_level);
+
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
   if (m_plotSourcePhotons) {
-    this->depositPhotons(m_scratch, m_sourcePhotons, m_plotDeposition);
-    this->writeData(a_output, a_comp, m_scratch, false);
+    this->depositPhotonsNGP(*m_scratch[a_level], m_sourcePhotons, a_level);
+
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
+  CH_STOP(t2);
 }
 
 ParticleContainer<Photon>&

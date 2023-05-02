@@ -256,12 +256,10 @@ Driver::getGeometryTags()
     m_geomTags[lvl] |= condTags;
 
     // Evaluate angles between cut-cells and refine based on that.
+    // Need one ghost cell because we fetch normal vectors from neighboring cut-cells.
     DisjointBoxLayout irregGrids = ebisGas->getIrregGrids(curDomain);
     EBISLayout        ebisl;
-    ebisGas->fillEBISLayout(ebisl,
-                            irregGrids,
-                            curDomain,
-                            1); // Need one ghost cell because we fetch normal vectors from neighboring cut-cells.
+    ebisGas->fillEBISLayout(ebisl, irregGrids, curDomain, 1);
 
     const RealVect probLo = m_amr->getProbLo();
 
@@ -2011,7 +2009,9 @@ Driver::writeGeometry()
 
   // Write levelsets
   int icomp = 0;
-  this->writeLevelset(output, icomp);
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    this->writeLevelset(*output[lvl], icomp, lvl);
+  }
 
   // Use raw pointers because Chombo IO is not too smart.
   Vector<LevelData<EBCellFAB>*> outputPtr(1 + m_amr->getFinestLevel());
@@ -2135,7 +2135,7 @@ Driver::writePlotFile(const std::string a_filename)
   CH_TIMER("Driver::writePlotFile::assemble", t2);
   CH_TIMER("Driver::writePlotFile::interp_exchange", t3);
   CH_TIMER("Driver::writePlotFile::copy_internal", t4);
-  CH_TIMER("Driver::writePlotFile::h5_write", t5);
+  CH_TIMER("Driver::writePlotFile::hdf5_write", t5);
 
   if (m_verbosity > 3) {
     pout() << "Driver::writePlotFile(string)" << endl;
@@ -2148,70 +2148,44 @@ Driver::writePlotFile(const std::string a_filename)
   }
   numOutputComp += this->getNumberOfPlotVariables();
 
-  // If there's nothing to write, return.
   if (numOutputComp > 0) {
-    Timer timer("Driver::writePlotFile(string)");
-
-    Vector<std::string> plotVariableNames(0);
-
-    // Allocate storage
-    CH_START(t1);
-    EBAMRCellData output;
-    m_amr->allocate(output, m_realm, phase::gas, numOutputComp);
-    DataOps::setValue(output, 0.0);
-    CH_STOP(t1);
-
-    timer.startEvent("Assemble data");
-    if (m_verbosity >= 3) {
-      pout() << "Driver::writePlotFile - assembling data..." << endl;
-    }
-
-    CH_START(t2);
-
-    int icomp = 0;
-    m_timeStepper->writePlotData(output, plotVariableNames, icomp);
-    if (!m_cellTagger.isNull()) {
-      m_cellTagger->writePlotData(output, plotVariableNames, icomp);
-    }
-    CH_STOP(t2);
-
-    // Interpolate ghost cells. This might be important if we use multiple Realms.
-    CH_START(t3);
-    for (int icomp = 0; icomp < numOutputComp; icomp++) {
-      EBAMRCellData singleComponentData = m_amr->slice(output, Interval(icomp, icomp));
-
-      m_amr->interpGhost(singleComponentData, m_realm, phase::gas);
-    }
-    output.exchange();
-    CH_STOP(t3);
-
-    // Write internal data
-    CH_START(t4);
-    plotVariableNames.append(this->getPlotVariableNames());
-    this->writePlotData(output, icomp);
-    CH_STOP(t4);
-    timer.stopEvent("Assemble data");
-
-    // Write the fucking thing already.
-#ifdef CH_USE_HDF5
-    if (m_verbosity >= 3) {
-      pout() << "Driver::writePlotFile - writing plot file..." << endl;
-    }
-    pout() << "h5 write" << endl;
-    CH_START(t5);
-    timer.startEvent("Write data");
-    HDF5Handle handle(a_filename.c_str(), HDF5Handle::CREATE);
-
+    // Users get to restrict the maximum plot depth.
     const int finestLevel   = m_amr->getFinestLevel();
     const int maxPlotLevel  = (m_maxPlotLevel < 0) ? finestLevel : std::min(m_maxPlotLevel, finestLevel);
     const int numPlotLevels = maxPlotLevel + 1;
 
-    DischargeIO::writeEBHDF5Header(handle, numPlotLevels, m_amr->getProbLo(), plotVariableNames);
+    // Get plot variable names.
+    Vector<std::string> plotVariableNames;
+    plotVariableNames.append(m_timeStepper->getPlotVariableNames());
+    if (!(m_cellTagger.isNull())) {
+      plotVariableNames.append(m_cellTagger->getPlotVariableNames());
+    }
+    plotVariableNames.append(this->getPlotVariableNames());
 
-    for (int lvl = 0; lvl < maxPlotLevel; lvl++) {
+    // Write HDF5 header.
+#ifdef CH_USE_HDF5
+    HDF5Handle handle(a_filename.c_str(), HDF5Handle::CREATE);
+    DischargeIO::writeEBHDF5Header(handle, numPlotLevels, m_amr->getProbLo(), plotVariableNames);
+#endif
+
+    for (int lvl = 0; lvl <= maxPlotLevel; lvl++) {
+      LevelData<EBCellFAB> outputData;
+      m_amr->allocate(outputData, m_realm, phase::gas, lvl, numOutputComp);
+      DataOps::setValue(outputData, 0.0);
+
+      // Relevant components collect data for IO.
+      int comp = 0;
+      m_timeStepper->writePlotData(outputData, comp, lvl);
+      if (!(m_cellTagger.isNull())) {
+        m_cellTagger->writePlotData(outputData, comp, lvl);
+      }
+      this->writePlotData(outputData, comp, lvl);
+
+      // Do the HDF5 write.
+#ifdef CH_USE_HDF5
       const int refRat = (lvl < m_amr->getFinestLevel()) ? m_amr->getRefinementRatios()[lvl] : 1;
       DischargeIO::writeEBHDF5Level(handle,
-                                    *output[lvl],
+                                    outputData,
                                     m_amr->getDomains()[lvl],
                                     m_amr->getDx()[lvl],
                                     m_dt,
@@ -2219,143 +2193,151 @@ Driver::writePlotFile(const std::string a_filename)
                                     lvl,
                                     refRat,
                                     m_numPlotGhost);
-    }
-    timer.stopEvent("Write data");
-    CH_STOP(t5);
 #endif
-
-    if (m_verbosity >= 3) {
-      timer.eventReport(pout());
     }
+
+    handle.close();
   }
   else {
-    pout() << "Driver::writePlotFile - skipping file '" << a_filename.c_str() << "' since there is nothing to write"
-           << endl;
+    const std::string msg1 = "Driver::writePlotFile - skipping file '";
+    const std::string msg2 = "' since there is nothing to write";
+
+    pout() << msg1 << a_filename.c_str() << msg2 << endl;
   }
 }
 
 void
-Driver::writePlotData(EBAMRCellData& a_output, int& a_comp)
+Driver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
 {
-  CH_TIME("Driver::writePlotData(EBAMRCellData, int)");
+  CH_TIME("Driver::writePlotData(LevelData<EBCellFAB>, int, int)");
   if (m_verbosity > 3) {
-    pout() << "Driver::writePlotData(EBAMRCellData, int)" << endl;
+    pout() << "Driver::writePlotData(LevelData<EBCellFAB>, int, int)" << endl;
   }
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
 
   if (m_plotTags) {
-    this->writeTags(a_output, a_comp);
+    this->writeTags(a_output, a_comp, a_level);
   }
   if (m_plotRanks) {
-    this->writeRanks(a_output, a_comp);
+    this->writeRanks(a_output, a_comp, a_level);
   }
   if (m_plotLevelset) {
-    this->writeLevelset(a_output, a_comp);
+    this->writeLevelset(a_output, a_comp, a_level);
   }
 }
 
 void
-Driver::writeTags(EBAMRCellData& a_output, int& a_comp)
+Driver::writeTags(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
 {
-  CH_TIME("Driver::writeTags(EBAMRCellData, int)");
+  CH_TIME("Driver::writeTags");
   if (m_verbosity > 3) {
-    pout() << "Driver::writeTags(EBAMRCellData, int)" << endl;
+    pout() << "Driver::writeTags" << endl;
   }
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+  CH_assert(a_output.nComp() > a_comp);
 
   // Need some scratch storage for the tags because DenseIntVectSet can't be written to file. We just run through
   // the cells and set data == 1 if a cell had been flagged for refinement.
-  EBAMRCellData tags;
-  m_amr->allocate(tags, m_realm, phase::gas, 1);
-  DataOps::setValue(tags, 0.0);
+  LevelData<EBCellFAB> scratch;
+  m_amr->allocate(scratch, m_realm, phase::gas, a_level, 1);
+  DataOps::setValue(scratch, 0.0);
 
   // Set tagged cells = 1
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const DenseIntVectSet& ivs     = (*m_tags[a_level])[dit()];
+    const Box              cellBox = dbl[dit()];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const DenseIntVectSet& ivs     = (*m_tags[lvl])[dit()];
-      const Box              cellBox = dbl[dit()];
+    // Do regular cells only.
+    FArrayBox& regTags = scratch[dit()].getFArrayBox();
 
-      // Do regular cells only.
-      BaseFab<Real>& regTags = (*tags[lvl])[dit()].getSingleValuedFAB();
+    auto kernel = [&](const IntVect& iv) -> void {
+      if (ivs[iv]) {
+        regTags(iv, 0) = 1.0;
+      }
+    };
 
-      auto kernel = [&](const IntVect& iv) -> void {
-        if (ivs[iv]) {
-          regTags(iv, 0) = 1.0;
-        }
-      };
-
-      BoxLoops::loop(cellBox, kernel);
-    }
+    BoxLoops::loop(dbl[dit()], kernel);
   }
 
   // Copy 'tags' over to 'a_output', starting on component a_comp.
   const Interval srcInterv(0, 0);
   const Interval dstInterv(a_comp, a_comp);
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    tags[lvl]->localCopyTo(srcInterv, *a_output[lvl], dstInterv);
-  }
+  scratch.localCopyTo(srcInterv, a_output, dstInterv);
 
   a_comp++;
 }
 
 void
-Driver::writeRanks(EBAMRCellData& a_output, int& a_comp)
+Driver::writeRanks(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
 {
-  CH_TIME("Driver::writeRanks(EBAMRCellData, int)");
+  CH_TIME("Driver::writeRanks");
   if (m_verbosity > 3) {
-    pout() << "Driver::writeRanks(EBAMRCellData, int)" << endl;
+    pout() << "Driver::writeRanks" << endl;
   }
 
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
   for (const auto& r : m_amr->getRealms()) {
-    EBAMRCellData scratch;
-    m_amr->allocate(scratch, r, phase::gas, 1);
+    CH_assert(a_output.nComp() > a_comp);
+
+    LevelData<EBCellFAB> scratch;
+    m_amr->allocate(scratch, r, phase::gas, a_level, 1);
 
     DataOps::setValue(scratch, 1.0 * procID());
 
     const Interval scrInterv(0, 0);
     const Interval dstInterv(a_comp, a_comp);
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      scratch[lvl]->copyTo(scrInterv, *a_output[lvl], dstInterv);
-    }
+
+    scratch.copyTo(scrInterv, a_output, dstInterv);
 
     a_comp++;
   }
 }
 
 void
-Driver::writeLevelset(EBAMRCellData& a_output, int& a_comp)
+Driver::writeLevelset(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
 {
-  CH_TIME("Driver::writeLevelset(EBAMRCellData, int)");
+  CH_TIME("Driver::writeLevelset");
   if (m_verbosity > 3) {
-    pout() << "Driver::writeLevelset(EBAMRCellData, int)" << endl;
+    pout() << "Driver::writeLevelset" << endl;
   }
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+  CH_assert(a_output.nComp() > a_comp + 1);
 
   const RefCountedPtr<BaseIF>& lsf1 = m_computationalGeometry->getGasImplicitFunction();
   const RefCountedPtr<BaseIF>& lsf2 = m_computationalGeometry->getSolidImplicitFunction();
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl    = m_amr->getGrids(a_output.getRealm())[lvl];
-    const Real               dx     = m_amr->getDx()[lvl];
-    const RealVect           probLo = m_amr->getProbLo();
+  const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_level];
+  const Real               dx     = m_amr->getDx()[a_level];
+  const RealVect           probLo = m_amr->getProbLo();
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      FArrayBox& fab = (*a_output[lvl])[dit()].getFArrayBox();
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+    FArrayBox& fab = a_output[dit()].getFArrayBox();
 
-      fab.setVal(0.0, a_comp);
-      fab.setVal(0.0, a_comp + 1);
+    fab.setVal(std::numeric_limits<Real>::max(), a_comp);
+    fab.setVal(std::numeric_limits<Real>::max(), a_comp + 1);
 
-      auto kernel = [&](const IntVect& iv) -> void {
-        const RealVect pos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
+    auto kernel = [&](const IntVect& iv) -> void {
+      const RealVect pos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
 
-        if (!lsf1.isNull())
-          fab(iv, a_comp) = lsf1->value(pos);
-        if (!lsf2.isNull())
-          fab(iv, a_comp + 1) = lsf2->value(pos);
-      };
+      if (!lsf1.isNull()) {
+        fab(iv, a_comp) = lsf1->value(pos);
+      }
+      if (!lsf2.isNull()) {
+        fab(iv, a_comp + 1) = lsf2->value(pos);
+      }
+    };
 
-      BoxLoops::loop(fab.box(), kernel);
-    }
+    BoxLoops::loop(fab.box(), kernel);
   }
 
   a_comp = a_comp + 2;

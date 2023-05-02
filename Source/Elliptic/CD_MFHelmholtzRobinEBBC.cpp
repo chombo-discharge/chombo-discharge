@@ -196,11 +196,11 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
       }
       else {
         // Dead cell. No flux.
-        const std::string baseErr = "MFHelmholtzRobinEBBC::defineSinglePhase - dead cell on domain = ";
-        const std::string vofErr  = " on vof = ";
-        const std::string impErr  = " (this may cause multigrid divergence)";
+        // const std::string baseErr = "MFHelmholtzRobinEBBC::defineSinglePhase - dead cell on domain = ";
+        // const std::string vofErr  = " on vof = ";
+        // const std::string impErr  = " (this may cause multigrid divergence)";
 
-        std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << std::endl;
+        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << std::endl;
 
         fluxStencil.clear();
       }

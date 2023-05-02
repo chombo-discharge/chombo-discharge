@@ -299,11 +299,33 @@ public:
     @brief Write output data to a_output
     @param[inout] a_output Output data holder
     @param[inout] a_comp   Current component in a_output. 
+    @param[in]    a_level Grid level
     @param[in]    a_forceNoInterp Forces data to be written using native centering
     @return On output, the solver will have written its plot variables to a_output and increment a_comp by the number of plotted variables. 
   */
   virtual void
-  writePlotData(EBAMRCellData& a_output, int& a_comp, const bool a_forceNoInterp = false);
+  writePlotData(LevelData<EBCellFAB>& a_output,
+                int&                  a_comp,
+                const int             a_level,
+                const bool            a_forceNoInterp = false) const noexcept;
+
+  /*!
+    @brief Write multifluid data to single-fluid data holders. 
+    @details This takes the valid data from each phase and writes it to a_output. On cut-cells, the a_phase flag determines which phase will be plotted.
+    @param[inout] a_output Output data holder
+    @param[inout] a_comp   Current component in a_output. 
+    @param[in]    a_data   Multifluid data holder
+    @param[in]    a_phase  Main phase in cut-cells. 
+    @param[in]    a_level  Grid level
+    @param[in]    a_interp Special flag which, if true, tells AmrMesh to interpolate the data to centroids (in irregular cells). 
+  */
+  virtual void
+  writeMultifluidData(LevelData<EBCellFAB>&    a_output,
+                      int&                     a_comp,
+                      const MFAMRCellData&     a_data,
+                      const phase::which_phase a_phase,
+                      const int                a_level,
+                      const bool               a_interp) const noexcept;
 
   /*!
     @brief Set Realm
@@ -486,22 +508,6 @@ public:
   */
   Location::Cell
   getDataLocation() const;
-
-  /*!
-    @brief Write multifluid data to single-fluid data holders. 
-    @details This takes the valid data from each phase and writes it to a_output. On cut-cells, the a_phase flag determines which phase will be plotted.
-    @param[inout] a_output Output data holder
-    @param[inout] a_comp   Current component in a_output. 
-    @param[in]    a_data   Multifluid data holder
-    @param[in]    a_phase  Main phase in cut-cells. 
-    @param[in]    a_interp Special flag which, if true, tells AmrMesh to interpolate the data to centroids (in irregular cells). 
-  */
-  virtual void
-  writeMultifluidData(EBAMRCellData&           a_output,
-                      int&                     a_comp,
-                      const MFAMRCellData&     a_data,
-                      const phase::which_phase a_phase,
-                      const bool               a_interp) const;
 
 protected:
   /*!
@@ -783,7 +789,10 @@ protected:
     @param[in]    a_interp Special flag which, if true, tells AmrMesh to interpolate the data to centroids (in irregular cells). 
   */
   virtual void
-  writeSurfaceData(EBAMRCellData& a_output, int& a_comp, const EBAMRIVData& a_data);
+  writeSurfaceData(LevelData<EBCellFAB>&             a_output,
+                   int&                              a_comp,
+                   const LevelData<BaseIVFAB<Real>>& a_data,
+                   const int                         a_level) const noexcept;
 
   /*!
     @brief Returns BC type based on string.

@@ -61,6 +61,28 @@ namespace Physics {
              const RefCountedPtr<AmrMesh>&       a_amr) noexcept;
 
       /*!
+	@brief Get number of plot variables that will be written to file (by Driver).
+	@return Returns number of plot variables that Driver will write to plot files. 
+      */
+      virtual int
+      getNumberOfPlotVariables() const noexcept;
+
+      /*!
+	@brief Get plot variable names. 
+      */
+      virtual Vector<std::string>
+      getPlotVariableNames() const noexcept;
+
+      /*!
+	@brief Write plot data.
+	@param[inout] a_output Output data holder
+	@param[inout] a_icomp Starting variable in a_output where we begin appending data.
+	@param[in] a_level Grid level
+      */
+      virtual void
+      writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const noexcept;
+
+      /*!
 	@brief Compute tagging fields.
       */
       virtual void
@@ -77,12 +99,6 @@ namespace Physics {
       */
       virtual void
       parseRuntimeOptions() = 0;
-
-      /*!
-	@brief Get number of plot variables for plot files.
-      */
-      virtual int
-      getNumberOfPlotVariables() const noexcept override;
 
       /*!
 	@brief Regrid this class. Note that there is no preRegrid method.
@@ -109,17 +125,6 @@ namespace Physics {
       */
       virtual Vector<EBAMRCellData>&
       getTagFields() noexcept;
-
-      /*!
-	@brief Write plot data
-	@param[inout] a_output            Output data holder
-	@param[inout] a_plotVariableNames Plot variable names
-	@param[inout] a_icomp             Starting variable in a_output where we begin appending data.
-      */
-      virtual void
-      writePlotData(EBAMRCellData&       a_output,
-                    Vector<std::string>& a_plotVariableNames,
-                    int&                 a_icomp) const noexcept override;
 
     protected:
       /*!

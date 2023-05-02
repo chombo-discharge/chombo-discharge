@@ -6,8 +6,8 @@
 /*!
   @file   CD_StreamerInceptionStepper.H
   @brief  TimeStepper class for evaluating the streamer inception criterion.
-  @author Robert Marskar
-  @author Rasmus Hoholm
+  @author Robert Marskar (SINTEF)
+  @author Rasmus Hoholm (SINTEF)
 */
 
 #ifndef CD_StreamerInceptionStepper_H
@@ -176,13 +176,39 @@ namespace Physics {
 #endif
 
       /*!
+	@brief Get the number of plot variables for this time stepper. 
+	@details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. 
+	@return Returns number of plot variables that will be written during writePlotData
+      */
+      virtual int
+      getNumberOfPlotVariables() const override;
+
+      /*!
+	@brief Get plot variable names
+      */
+      virtual Vector<std::string>
+      getPlotVariableNames() const override;
+
+      /*!
 	@brief Write plot data to output holder. 
-	@param[inout] a_output            Output data holder.
-	@param[in]    a_plotVariableNames Plot variable names.
-	@param[inout] a_icomp             Starting component in a_output to begin at. 
+	@param[inout] a_output Output data holder.
+	@param[inout] a_icomp  Starting component in a_output to begin at. 
+	@param[in]    a_level  Grid level
       */
       virtual void
-      writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
+      writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const override;
+
+      /*!
+	@brief Get plot variable names for stationary mode
+      */
+      virtual Vector<std::string>
+      getStationaryPlotVariableNames() const noexcept;
+
+      /*!
+	@brief Get plot variable names for transient mode
+      */
+      virtual Vector<std::string>
+      getTransientPlotVariableNames() const noexcept;
 
       /*!
 	@brief Get the electric field
@@ -190,14 +216,6 @@ namespace Physics {
       */
       virtual const EBAMRCellData* const
       getElectricField() const noexcept;
-
-      /*!
-	@brief Get the number of plot variables for this time stepper. 
-	@details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. 
-	@return Returns number of plot variables that will be written during writePlotData
-      */
-      virtual int
-      getNumberOfPlotVariables() const override;
 
       /*!
 	@brief Compute a time step to be used by Driver. 
@@ -545,6 +563,11 @@ namespace Physics {
       Real m_inceptionK;
 
       /*!
+	@brief Profile calculation or not
+      */
+      bool m_profile;
+
+      /*!
 	@brief If true, used fixed integration step for inception integration
       */
       bool m_useFixedInceptionStep;
@@ -764,26 +787,53 @@ namespace Physics {
 	@brief Evaluate a function f = f(E) in a volume. 
 	@param[out] a_data    Mesh data
 	@param[in]  a_voltage Voltage multiplier
-	@param[im]  a_func    Function to evaluate
+	@param[in]  a_func    Function to evaluate
 	@note For plotting the emission rate in transient simulations. 
       */
       virtual void
-      evaluateFunction(EBAMRCellData&                           a_emissionRate,
+      evaluateFunction(EBAMRCellData&                           a_data,
                        const Real&                              a_voltage,
                        const std::function<Real(const Real E)>& a_func) const noexcept;
+
+      /*!
+	@brief Evaluate a function f = f(E) in a volume. 
+	@param[out] a_data    Mesh data
+	@param[in]  a_voltage Voltage multiplier
+	@param[in]  a_func    Function to evaluate
+	@param[in]  a_level   Grid level
+	@note For plotting the emission rate in transient simulations. 
+      */
+      virtual void
+      evaluateFunction(LevelData<EBCellFAB>&                    a_data,
+                       const Real&                              a_voltage,
+                       const std::function<Real(const Real E)>& a_func,
+                       const int                                a_level) const noexcept;
 
       /*!
 	@brief Evaluate a function f = f(E, x) in a volume. 
 	@param[out] a_data    Mesh data
 	@param[in]  a_voltage Voltage multiplier
-
-	@param[im]  a_func    Function to evaluate
+	@param[in]  a_func    Function to evaluate
 	@note For plotting the emission rate in transient simulations. 
       */
       virtual void
-      evaluateFunction(EBAMRCellData&                                             a_emissionRate,
+      evaluateFunction(EBAMRCellData&                                             a_data,
                        const Real&                                                a_voltage,
                        const std::function<Real(const Real E, const RealVect x)>& a_func) const noexcept;
+
+      /*!
+	@brief Evaluate a function f = f(E,x) in a volume. 
+	@param[out] a_data    Mesh data
+	@param[in]  a_voltage Voltage multiplier
+	@param[in]  a_func    Function to evaluate
+	@param[in]  a_level   Grid level
+	@note For plotting the emission rate in transient simulations. 
+      */
+      virtual void
+      evaluateFunction(LevelData<EBCellFAB>&                                      a_data,
+                       const Real&                                                a_voltage,
+                       const std::function<Real(const Real E, const RealVect x)>& a_func,
+                       const int                                                  a_level) const noexcept;
 
       /*!
 	@brief Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage. 
@@ -835,25 +885,21 @@ namespace Physics {
 
       /*!
 	@brief Write plot data for the 'stationary' mode
-	@param[inout] a_output            Output data holder.
-	@param[in]    a_plotVariableNames Plot variable names.
-	@param[inout] a_icomp             Starting component in a_output to begin at. 
+	@param[inout] a_output Output data holder.
+	@param[inout] a_icomp  Starting component in a_output to begin at. 
+	@param[in]    a_level  Grid level
       */
       virtual void
-      writePlotDataStationary(EBAMRCellData&       a_output,
-                              Vector<std::string>& a_plotVariableNames,
-                              int&                 a_icomp) const noexcept;
+      writePlotDataStationary(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const noexcept;
 
       /*!
-	@brief Write plot data for the 'stationary' mode
+	@brief Write plot data for the 'transient' mode
 	@param[inout] a_output            Output data holder.
 	@param[in]    a_plotVariableNames Plot variable names.
 	@param[inout] a_icomp             Starting component in a_output to begin at. 
       */
       virtual void
-      writePlotDataTransient(EBAMRCellData&       a_output,
-                             Vector<std::string>& a_plotVariableNames,
-                             int&                 a_icomp) const noexcept;
+      writePlotDataTransient(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const noexcept;
 
       /*!
 	@brief Check if particle is outside grid boundaries
@@ -928,6 +974,23 @@ namespace Physics {
       */
       inline void
       parsePlotVariables() noexcept;
+
+      /*!
+	@brief Write data to output. Convenience function used for IO.
+	@param[inout] a_output Output data holder.
+	@param[inout] a_icomp  Starting component where this solver begins writing the output. 
+	@param[in]    a_data   Data to write. 
+	@param[in]    a_level  Grid level
+	@param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
+	@param[in]    a_interpGhost If true, interpolate ghost cells
+      */
+      virtual void
+      writeData(LevelData<EBCellFAB>& a_output,
+                int&                  a_comp,
+                const EBAMRCellData&  a_data,
+                const int             a_level,
+                const bool            a_interpToCentroids,
+                const bool            a_interpGhost) const noexcept;
     };
   } // namespace StreamerInception
 } // namespace Physics
