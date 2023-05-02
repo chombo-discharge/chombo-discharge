@@ -573,7 +573,7 @@ namespace Physics {
       /*!
 	@brief previous time step
       */
-      Real m_prevDt{0};
+      Real m_prevDt{0.0};
 
       /*!
 	@brief Variable step size for K-integration algorithm (factor of dx)

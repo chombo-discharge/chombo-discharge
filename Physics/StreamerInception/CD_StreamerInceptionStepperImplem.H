@@ -1077,7 +1077,6 @@ StreamerInceptionStepper<P, F, C>::computeDt()
     dt = std::min(dt, m_maxDt);
     dt = std::max(dt, m_minDt);
   }
-  m_prevDt = dt;
   return dt;
 }
 
@@ -1091,7 +1090,8 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
   }
 
   if (m_mode == Mode::Transient) {
-
+    m_prevDt = a_dt;
+    
     const Real curTime    = m_time + a_dt;
     const Real curVoltage = m_voltageCurve(curTime);
 
