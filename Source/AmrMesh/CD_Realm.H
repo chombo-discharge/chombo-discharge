@@ -317,11 +317,11 @@ public:
   getGradientOp(const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get piecewise linear regrid utility
+    @brief Get ghost cell interpolator
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<AggEBPWLFillPatch>>&
-  getFillPatch(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBGhostCellInterpolator>>&
+  getGhostCellInterpolator(const phase::which_phase a_phase);
 
   /*!
     @brief Get piecewise linear ghost cell interpolation utility

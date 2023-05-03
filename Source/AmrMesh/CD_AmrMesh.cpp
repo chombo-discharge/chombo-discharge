@@ -1746,12 +1746,13 @@ AmrMesh::interpGhost(LevelData<EBCellFAB>&       a_fineData,
     const int      nComps = a_fineData.nComp();
     const Interval interv = Interval(0, nComps - 1);
 
-    AggEBPWLFillPatch& fillpatch = *m_realms[a_realm]->getFillPatch(a_phase)[a_fineLevel];
+    EBGhostCellInterpolator& interpolator = *m_realms[a_realm]->getGhostCellInterpolator(a_phase)[a_fineLevel];
 
-    fillpatch.interpolate(a_fineData, a_coarData, a_coarData, 0.0, 0.0, 0.0, interv);
+    interpolator.interpolate(a_fineData, a_coarData, interv, EBGhostCellInterpolator::Type::MinMod);
   }
-
-  a_fineData.exchange();
+  else {
+    a_fineData.exchange();
+  }
 }
 
 void
@@ -1849,9 +1850,9 @@ AmrMesh::interpGhostPwl(EBAMRCellData& a_data, const std::string a_realm, const 
     const int      nComps = a_data[lvl]->nComp();
     const Interval interv(0, nComps - 1);
 
-    AggEBPWLFillPatch& fillpatch = *m_realms[a_realm]->getFillPatch(a_phase)[lvl];
+    EBGhostCellInterpolator& interpolator = *m_realms[a_realm]->getGhostCellInterpolator(a_phase)[lvl];
 
-    fillpatch.interpolate(*a_data[lvl], *a_data[lvl - 1], *a_data[lvl - 1], 0.0, 0.0, 0.0, interv);
+    interpolator.interpolate(*a_data[lvl], *a_data[lvl - 1], interv, EBGhostCellInterpolator::Type::MinMod);
   }
 
   a_data.exchange();
@@ -2977,23 +2978,6 @@ AmrMesh::getMultigridInterpolator(const std::string a_realm, const phase::which_
   }
 
   return m_realms[a_realm]->getMultigridInterpolator(a_phase);
-}
-
-Vector<RefCountedPtr<AggEBPWLFillPatch>>&
-AmrMesh::getFillPatch(const std::string a_realm, const phase::which_phase a_phase) const
-{
-  CH_TIME("AmrMesh::getFillPatch(string, phase::which_phase)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getFillPatch(string, phase::which_phase)" << endl;
-  }
-
-  if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getFillPatch(string, phase::which_phase) - could not find realm '" + a_realm +
-                            "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  return m_realms[a_realm]->getFillPatch(a_phase);
 }
 
 Vector<RefCountedPtr<EBCoarseToFineInterp>>&

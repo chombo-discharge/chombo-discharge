@@ -11,13 +11,13 @@ AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm   = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting      = morton      # 'none', 'shuffle', 'morton'
-AmrMesh.blocking_factor  = 16          # Blocking factor. 
+AmrMesh.blocking_factor  = 4          # Blocking factor. 
 AmrMesh.max_box_size     = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box     = 16          # Maximum allowed box size for EBIS generation. 
 AmrMesh.ref_rat          = 2 2 2 2 2 2 # Refinement ratios (mixed ratios are allowed). 
 AmrMesh.num_ghost        = 2           # Number of ghost cells. 
 AmrMesh.lsf_ghost        = 2           # Number of ghost cells when writing level-set to grid
-AmrMesh.eb_ghost         = 4           # Set number of of ghost cells for EB stuff
+AmrMesh.eb_ghost         = 2           # Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
 AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
@@ -35,7 +35,7 @@ Driver.geometry_scan_level             = 0                # Geometry scan level 
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
 Driver.plot_interval                   = 10               # Plot interval
 Driver.checkpoint_interval             = 100              # Checkpoint interval
-Driver.regrid_interval                 = 10               # Regrid interval
+Driver.regrid_interval                 = 2                # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
 Driver.initial_regrids                 = 4                # Number of initial regrids
@@ -160,7 +160,7 @@ AdvectionDiffusion.max_dt         = 1.E99   # Largest acceptable time step
 # Cell tagging controls
 # ---------------------
 AdvectionDiffusion.refine_curv = 0.1        # Refine if curvature exceeds this
-AdvectionDiffusion.refine_magn = 1E-2       # Only tag if magnitude eceeds this
+AdvectionDiffusion.refine_magn = 0.05       # Only tag if magnitude eceeds this
 AdvectionDiffusion.buffer      = 0          # Grow tagged cells     
 
 

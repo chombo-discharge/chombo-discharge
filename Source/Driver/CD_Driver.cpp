@@ -2198,7 +2198,6 @@ Driver::writePlotFile(const std::string a_filename)
         pout() << "Driver::writePlotFile -- writing level = " << lvl << endl;
       }
 
-      MemoryReport::getMaxMinMemoryUsage();
       const int refRat = (lvl < m_amr->getFinestLevel()) ? m_amr->getRefinementRatios()[lvl] : 1;
       DischargeIO::writeEBHDF5Level(handle,
                                     outputData,
@@ -2209,7 +2208,6 @@ Driver::writePlotFile(const std::string a_filename)
                                     lvl,
                                     refRat,
                                     m_numPlotGhost);
-      MemoryReport::getMaxMinMemoryUsage();
       handle.close();
 #endif
     }

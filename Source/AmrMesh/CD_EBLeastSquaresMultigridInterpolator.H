@@ -7,7 +7,6 @@
   @file   CD_EBLeastSquaresMultigridInterpolator.H
   @brief  Declaration of a class that can interpolate more ghost cells near the coarse-fine boundary near the EB. 
   @author Robert Marskar
-  @todo   Should purge QuadCFInterp from this class and run our own version (without replicated meta-data).
 */
 
 #ifndef CD_EBLeastSquaresMultigridInterpolator_H
@@ -167,7 +166,7 @@ protected:
   EBLevelGrid m_eblgCoar;
 
   /*!
-    @brief Refined coarse grids
+    @brief Coarsened fine grids.
   */
   EBLevelGrid m_eblgCoFi;
 

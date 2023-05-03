@@ -592,10 +592,10 @@ Realm::getGradientOp(const phase::which_phase a_phase) const
   return m_realms[a_phase]->getGradientOp();
 }
 
-Vector<RefCountedPtr<AggEBPWLFillPatch>>&
-Realm::getFillPatch(const phase::which_phase a_phase)
+Vector<RefCountedPtr<EBGhostCellInterpolator>>&
+Realm::getGhostCellInterpolator(const phase::which_phase a_phase)
 {
-  return m_realms[a_phase]->getFillPatch();
+  return m_realms[a_phase]->getGhostCellInterpolator();
 }
 
 Vector<RefCountedPtr<EBCoarseToFineInterp>>&

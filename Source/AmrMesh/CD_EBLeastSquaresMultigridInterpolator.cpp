@@ -348,10 +348,6 @@ EBLeastSquaresMultigridInterpolator::undefineBuffers() const noexcept
 {
   CH_TIME("EBLeastSquaresMultigridInterpolator::undefineBuffers()");
 
-  // TLDR: On both the fine and the coarse level we want to have a BoxLayout which is just like the DisjointBoxLayout except that
-  //       the boxes should be grown on each level.
-
-  // This is the number of ghost cells that we will place on the coarse grid. We use it to ensure that we have enough equations.
   delete m_grownCoarData;
 }
 
@@ -761,7 +757,7 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<FArrayBox
         const int iHiLo     = sign(sit());
         const Box interpBox = m_cfivs[dit()].at(std::make_pair(dir, sit()));
 
-        //         // Coarse-side interpolation stencil. This does interpolation orthogonal to direction 'dir'
+        // Coarse-side interpolation stencil. This does interpolation orthogonal to direction 'dir'
         const CoarseInterpQuadCF& coarseStencils = (sit() == Side::Lo) ? m_loCoarseInterpCF[dir][dit()]
                                                                        : m_hiCoarseInterpCF[dir][dit()];
 

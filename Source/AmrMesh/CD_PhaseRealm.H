@@ -14,7 +14,6 @@
 
 // Chombo includes
 #include <DisjointBoxLayout.H>
-#include <AggEBPWLFillPatch.H>
 #include <EBFluxRegister.H>
 #include <EBLevelRedist.H>
 #include <EBCoarToFineRedist.H>
@@ -39,6 +38,7 @@
 #include <CD_EBAMRParticleMesh.H>
 #include <CD_EBAMRSurfaceDeposition.H>
 #include <CD_EBCoarseToFineInterp.H>
+#include <CD_EBGhostCellInterpolator.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_EbCentroidInterpolationStencil.H>
 #include <CD_CentroidInterpolationStencil.H>
@@ -311,10 +311,10 @@ public:
   getMultigridInterpolator() const;
 
   /*!
-    @brief Get patch regridding utility
+    @brief Get ghost cell interpolation utility
   */
-  Vector<RefCountedPtr<AggEBPWLFillPatch>>&
-  getFillPatch() const;
+  Vector<RefCountedPtr<EBGhostCellInterpolator>>&
+  getGhostCellInterpolator() const;
 
   /*!
     @brief Get piecewise linear ghost cell interpolation utility
@@ -517,12 +517,12 @@ protected:
   mutable Vector<RefCountedPtr<EBMultigridInterpolator>> m_multigridInterpolator;
 
   /*!
-    @brief Regridding utility (for filling new grid patches)
+    @brief Ghost cell interpolation utility
   */
-  mutable Vector<RefCountedPtr<AggEBPWLFillPatch>> m_pwlFillPatch;
+  mutable Vector<RefCountedPtr<EBGhostCellInterpolator>> m_ghostCellInterpolator;
 
   /*!
-    @brief Ghost cell interpolation utility
+    @brief Regridding utility (for filling new grid patches)
   */
   mutable Vector<RefCountedPtr<EBCoarseToFineInterp>> m_ebFineInterp;
 
