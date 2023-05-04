@@ -317,6 +317,11 @@ For GNU installations, one will usually have <code class="docutils literal notra
 <li><p><code class="docutils literal notranslate"><span class="pre">HDFMPIINCFLAGS</span>&#160;&#160; <span class="pre">=</span> <span class="pre">-I&lt;path</span> <span class="pre">to</span> <span class="pre">hdf5-parallel&gt;/include</span></code> (for parallel HDF5)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">HDFMPILIBFLAGS</span>&#160;&#160; <span class="pre">=</span> <span class="pre">-L&lt;path</span> <span class="pre">to</span> <span class="pre">hdf5-parallel&gt;/lib</span> <span class="pre">-lhdf5</span> <span class="pre">-lz</span></code> (for parallel HDF5).</p></li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">Chombo</span></code> only supports HDF5 APIs at version 1.10 and below.
+To use a newer version of HDF5 together with the 1.10 API, add <code class="docutils literal notranslate"><span class="pre">-DH5_USE_110_API</span></code> to the HDFINC flags.</p>
+</div>
 </section>
 <section id="compiler-flags">
 <h3>Compiler flags<a class="headerlink" href="#compiler-flags" title="Permalink to this heading"></a></h3>
