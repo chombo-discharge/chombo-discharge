@@ -12,6 +12,7 @@
 // Chombo includes
 #include <ParmParse.H>
 #include <CH_Timer.H>
+#include <EBLevelDataOps.H>
 
 // Our includes
 #include <CD_Timer.H>
@@ -29,7 +30,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                              const MFLevelGrid&                               a_mflgCoar,
                              const MFLevelGrid&                               a_mflgCoarMG,
                              const MFMultigridInterpolator&                   a_interpolator,
-                             const MFFluxReg&                                 a_fluxReg,
+                             const MFReflux&                                  a_fluxReg,
                              const MFCoarAve&                                 a_coarAve,
                              const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBcFactory,
                              const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBcFactory,
@@ -105,7 +106,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
     EBLevelGrid eblgCoarMG = a_hasMGObjects ? a_mflgCoarMG.getEBLevelGrid(iphase) : dummy;
 
     RefCountedPtr<EBMultigridInterpolator> interpolator = RefCountedPtr<EBMultigridInterpolator>(nullptr);
-    RefCountedPtr<EBFluxRegister>          fluxRegister = RefCountedPtr<EBFluxRegister>(nullptr);
+    RefCountedPtr<EBReflux>                fluxRegister = RefCountedPtr<EBReflux>(nullptr);
     RefCountedPtr<EBCoarAve>               coarsener    = RefCountedPtr<EBCoarAve>(nullptr);
 
     if (!a_isMGOperator) {
@@ -1103,7 +1104,7 @@ MFHelmholtzOp::AMROperatorNC(LevelData<MFCellFAB>&             a_Lphi,
       MultifluidAlias::aliasMF(phi, op.first, a_phi);
       MultifluidAlias::aliasMF(phiFine, op.first, a_phiFine);
 
-      op.second->coarsen(phi, phiFine);
+      op.second->coarsenCell(phi, phiFine);
     }
   }
 
@@ -1158,7 +1159,7 @@ MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&             a_Lphi,
       MultifluidAlias::aliasMF(phi, op.first, a_phi);
       MultifluidAlias::aliasMF(phiFine, op.first, a_phiFine);
 
-      op.second->coarsen(phi, phiFine);
+      op.second->coarsenCell(phi, phiFine);
     }
   }
 

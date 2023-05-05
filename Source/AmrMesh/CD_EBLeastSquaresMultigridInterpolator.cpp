@@ -136,7 +136,6 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
     const Interval srcInterv = Interval(icomp, icomp);
     const Interval dstInterv = Interval(m_comp, m_comp);
     a_phiCoar.copyTo(srcInterv, *m_grownCoarData, dstInterv);
-    m_grownCoarData->exchange();
     CH_STOP(t1);
 
     // Do the regular interpolation as if the EB is not there.

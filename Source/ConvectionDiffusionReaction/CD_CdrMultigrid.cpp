@@ -44,6 +44,7 @@ CdrMultigrid::registerOperators()
   CdrSolver::registerOperators();
 
   m_amr->registerOperator(s_eb_multigrid, m_realm, m_phase);
+  m_amr->registerOperator(s_eb_flux_reg, m_realm, m_phase);
 }
 
 void
@@ -287,7 +288,7 @@ CdrMultigrid::setupHelmholtzFactory()
 
   const Vector<RefCountedPtr<EBLevelGrid>>&             levelGrids   = m_amr->getEBLevelGrid(m_realm, m_phase);
   const Vector<RefCountedPtr<EBCoarAve>>&               coarAve      = m_amr->getCoarseAverage(m_realm, m_phase);
-  const Vector<RefCountedPtr<EBFluxRegister>>&          fluxReg      = m_amr->getFluxRegister(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBReflux>>&                fluxReg      = m_amr->getFluxRegister(m_realm, m_phase);
   const Vector<RefCountedPtr<EBMultigridInterpolator>>& interpolator = m_amr->getMultigridInterpolator(m_realm,
                                                                                                        m_phase);
 

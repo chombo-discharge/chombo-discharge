@@ -16,7 +16,6 @@
 
 // Chombo includes
 #include <DisjointBoxLayout.H>
-#include <EBFluxRegister.H>
 #include <EBLevelRedist.H>
 #include <EBCoarToFineRedist.H>
 #include <EBMGInterp.H>
@@ -33,6 +32,7 @@
 #include <CD_IrregAmrStencil.H>
 #include <CD_LoadBalancing.H>
 #include <CD_MFLevelGrid.H>
+#include <CD_EBReflux.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
@@ -1702,7 +1702,7 @@ public:
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBFluxRegister>>&
+  Vector<RefCountedPtr<EBReflux>>&
   getFluxRegister(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!

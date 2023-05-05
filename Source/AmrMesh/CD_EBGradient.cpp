@@ -83,7 +83,7 @@ EBGradient::define(const EBLevelGrid& a_eblg,
   // Define the level stencils. These are regular finite-difference stencils.
   this->defineLevelStencils();
 
-  bool      makeEBCF = false;
+  bool      makeEBCF = true;
   ParmParse pp("EBGradient");
   pp.query("ebcf", makeEBCF);
 

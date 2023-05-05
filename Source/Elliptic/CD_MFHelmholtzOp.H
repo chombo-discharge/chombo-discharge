@@ -23,7 +23,7 @@
 #include <CD_Location.H>
 #include <CD_MFMultigridInterpolator.H>
 #include <CD_MFCoarAve.H>
-#include <CD_MFFluxReg.H>
+#include <CD_MFReflux.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_MFBaseIVFAB.H>
 #include <CD_MFHelmholtzJumpBC.H>
@@ -106,7 +106,7 @@ public:
                 const MFLevelGrid&                               a_mflgCoar,
                 const MFLevelGrid&                               a_mflgCoarMG,
                 const MFMultigridInterpolator&                   a_interpolator,
-                const MFFluxReg&                                 a_fluxReg,
+                const MFReflux&                                  a_fluxReg,
                 const MFCoarAve&                                 a_coarAve,
                 const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBC,
                 const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBC,

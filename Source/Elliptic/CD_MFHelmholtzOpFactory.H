@@ -22,7 +22,7 @@
 #include <CD_EBAMRData.H>
 #include <CD_MFHelmholtzOp.H>
 #include <CD_MFCoarAve.H>
-#include <CD_MFFluxReg.H>
+#include <CD_MFReflux.H>
 #include <CD_MFMultigridInterpolator.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_MFBaseIVFAB.H>
@@ -43,7 +43,7 @@ public:
   using MFIS             = RefCountedPtr<MultiFluidIndexSpace>;
   using AmrLevelGrids    = Vector<MFLevelGrid>;
   using AmrInterpolators = Vector<MFMultigridInterpolator>;
-  using AmrFluxRegisters = Vector<MFFluxReg>;
+  using AmrFluxRegisters = Vector<MFReflux>;
   using AmrCoarseners    = Vector<MFCoarAve>;
   using AmrResolutions   = Vector<Real>;
   using AmrRefRatios     = Vector<int>;

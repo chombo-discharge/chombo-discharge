@@ -2997,7 +2997,7 @@ AmrMesh::getFineInterp(const std::string a_realm, const phase::which_phase a_pha
   return m_realms[a_realm]->getFineInterp(a_phase);
 }
 
-Vector<RefCountedPtr<EBFluxRegister>>&
+Vector<RefCountedPtr<EBReflux>>&
 AmrMesh::getFluxRegister(const std::string a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getFluxRegister(string, phase::which_phase)");

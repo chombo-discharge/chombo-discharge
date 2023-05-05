@@ -13,6 +13,7 @@
 #include <ParmParse.H>
 #include <EBAMRIO.H>
 #include <EBArith.H>
+#include <EBLevelDataOps.H>
 
 // Our includes
 #include <CD_CdrSolver.H>
@@ -1197,38 +1198,6 @@ CdrSolver::defineInterpolationStencils()
 }
 
 void
-CdrSolver::incrementRedistFlux()
-{
-  CH_TIME("CdrSolver::incrementRedistFlux()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::incrementRedistFlux()" << endl;
-  }
-
-  // This routine lets the flux register know what is going on with the cut-cell mass redistribution
-  // across the coarse-fine boundary.
-
-  const int finestLevel = m_amr->getFinestLevel();
-
-  const Interval interv(m_comp, m_comp);
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    const Real dx      = m_amr->getDx()[lvl];
-    const bool hasFine = lvl < finestLevel;
-
-    if (hasFine) {
-      RefCountedPtr<EBFluxRegister>&     fluxReg         = m_amr->getFluxRegister(m_realm, m_phase)[lvl];
-      RefCountedPtr<EBCoarToFineRedist>& coar2fineRedist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-      RefCountedPtr<EBCoarToCoarRedist>& coar2coarRedist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-
-      const Real scale = -dx;
-
-      fluxReg->incrementRedistRegister(*coar2fineRedist, interv, scale);
-      fluxReg->incrementRedistRegister(*coar2coarRedist, interv, scale);
-    }
-  }
-}
-
-void
 CdrSolver::initialData()
 {
   CH_TIME("CdrSolver::initialData()");
@@ -1535,83 +1504,6 @@ CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const in
 }
 
 void
-CdrSolver::resetFluxRegister()
-{
-  CH_TIME("CdrSolver::resetFluxRegister()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::resetFluxRegister()" << endl;
-  }
-
-  // Function just sets the flux register to zero (so we can increment it later).
-  const int finestLevel = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    if (lvl < finestLevel) { // Because flux registers between level l and level l+1 live on level l.
-      RefCountedPtr<EBFluxRegister>& fluxReg = m_amr->getFluxRegister(m_realm, m_phase)[lvl];
-
-      fluxReg->setToZero();
-    }
-  }
-}
-
-void
-CdrSolver::incrementFluxRegister(const EBAMRFluxData& a_flux)
-{
-  CH_TIME("CdrSolver::incrementFluxRegister(EBAMRFluxData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::incrementFluxRegister(EBAMRFluxData)" << endl;
-  }
-
-  CH_assert(a_flux[0]->nComp() == 1);
-
-  // TLDR: To enforce flux matching on refinement boundaries we must have coarse flux = sum(fine fluxes). Fortunately
-  //       Chombo has operators to handle that choreography, and this function provides the necessary fluxes to that operator.
-
-  const int finestLevel = m_amr->getFinestLevel();
-
-  const Interval interv(m_comp, m_comp);
-
-  Vector<RefCountedPtr<EBFluxRegister>>& fluxReg = m_amr->getFluxRegister(m_realm, m_phase);
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-    const bool hasCoar = lvl > 0;
-    const bool hasFine = lvl < finestLevel;
-
-    // Reset flux register first.
-    if (hasFine) {
-      fluxReg[lvl]->setToZero();
-    }
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        const Real       scale = 1.0;
-        const EBFaceFAB& flux  = (*a_flux[lvl])[dit()][dir];
-
-        // Increment flux register for irregular/regular. Add both from coarse to fine and from fine to coarse.
-        if (hasFine) {
-          for (SideIterator sit; sit.ok(); ++sit) {
-            fluxReg[lvl]->incrementCoarseBoth(flux, scale, dit(), interv, dir, sit()); // Register between lvl and lvl+1
-          }
-        }
-
-        if (hasCoar) {
-          for (SideIterator sit; sit.ok(); ++sit) {
-            fluxReg[lvl - 1]->incrementFineBoth(flux,
-                                                scale,
-                                                dit(),
-                                                interv,
-                                                dir,
-                                                sit()); // Register between lvl-1 and lvl.
-          }
-        }
-      }
-    }
-  }
-}
-
-void
 CdrSolver::incrementRedist(const EBAMRIVData& a_massDifference)
 {
   CH_TIME("CdrSolver::incrementRedist(EBAMRIVData)");
@@ -1696,35 +1588,6 @@ CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
 }
 
 void
-CdrSolver::reflux(EBAMRCellData& a_phi)
-{
-  CH_TIME("CdrSolver::reflux(EBAMRCellData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::reflux(EBAMRCellData)" << endl;
-  }
-
-  CH_assert(a_phi[0]->nComp() == 1);
-
-  const int finestLevel = m_amr->getFinestLevel();
-
-  const Interval interv(m_comp, m_comp);
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    if (lvl < finestLevel) {
-      RefCountedPtr<EBFluxRegister>& fluxReg =
-        m_amr->getFluxRegister(m_realm,
-                               m_phase)[lvl]; // Flux matching between lvl and lvl-1 lives on lvl-1
-
-      const Real dx    = m_amr->getDx()[lvl];
-      const Real scale = 1.0 / dx;
-
-      fluxReg->reflux(*a_phi[lvl], interv, scale);
-      fluxReg->setToZero();
-    }
-  }
-}
-
-void
 CdrSolver::setAmr(const RefCountedPtr<AmrMesh>& a_amr)
 {
   CH_TIME("CdrSolver::setAmr(AmrMesh)");
@@ -1750,7 +1613,6 @@ CdrSolver::registerOperators()
   m_amr->registerOperator(s_eb_coar_ave, m_realm, m_phase);
   m_amr->registerOperator(s_eb_fill_patch, m_realm, m_phase);
   m_amr->registerOperator(s_eb_fine_interp, m_realm, m_phase);
-  m_amr->registerOperator(s_eb_flux_reg, m_realm, m_phase);
   m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
   m_amr->registerOperator(s_eb_irreg_interp, m_realm, m_phase);
   m_amr->registerOperator(s_noncons_div, m_realm, m_phase);

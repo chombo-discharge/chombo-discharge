@@ -16,6 +16,7 @@
 #include <CH_Timer.H>
 #include <ParmParse.H>
 #include <ParticleIO.H>
+#include <EBLevelDataOps.H>
 
 // Our includes
 #include <CD_SimpleItoParticle.H>

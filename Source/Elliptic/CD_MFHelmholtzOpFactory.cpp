@@ -570,7 +570,7 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
   MFLevelGrid mflgMgCoar;
 
   MFMultigridInterpolator interpolator; // Only if defined on an AMR level
-  MFFluxReg               fluxReg;      // Only if defined on an AMR level
+  MFReflux                fluxReg;      // Only if defined on an AMR level
   MFCoarAve               coarsener;    // Only if defined on an AMR level
 
   bool hasMGObjects;

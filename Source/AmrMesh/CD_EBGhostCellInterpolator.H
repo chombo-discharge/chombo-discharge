@@ -17,8 +17,6 @@
 
 // Chombo includes
 #include <EBLevelGrid.H>
-#include <QuadCFInterp.H>
-#include <AggStencil.H>
 
 // Our includes
 #include <CD_Location.H>

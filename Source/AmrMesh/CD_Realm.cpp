@@ -604,7 +604,7 @@ Realm::getFineInterp(const phase::which_phase a_phase)
   return m_realms[a_phase]->getFineInterp();
 }
 
-Vector<RefCountedPtr<EBFluxRegister>>&
+Vector<RefCountedPtr<EBReflux>>&
 Realm::getFluxRegister(const phase::which_phase a_phase)
 {
   return m_realms[a_phase]->getFluxRegister();

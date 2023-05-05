@@ -1135,19 +1135,6 @@ protected:
                              const int                         a_lvl);
 
   /*!
-    @brief Increment flux registers
-    @param[in] a_flux Face centered fluxes
-  */
-  virtual void
-  incrementFluxRegister(const EBAMRFluxData& a_flux);
-
-  /*!
-    @brief Set flux registers to zero (so they can be increment later). 
-  */
-  virtual void
-  resetFluxRegister();
-
-  /*!
     @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
     @param[in] a_massDifference Mass difference
     @note This increments the so-called redistribution registers for ensuring that redistributed mass around the cut cells ends up in the right place. 
@@ -1164,13 +1151,6 @@ protected:
   hyperbolicRedistribution(EBAMRCellData& a_stableDivergence);
 
   /*!
-    @brief Increment redistribution flux registers. 
-    @note This just tells the flux registers about whats going on near EB refinement boundaries. 
-  */
-  virtual void
-  incrementRedistFlux();
-
-  /*!
     @brief Increment redistribution objects with mass to be redistributed.
     @param[in] a_massDifference Mass to be redistributed. 
     @note This only increments the level-register -- must call coarseFineIncrement to do the other registers. 
@@ -1185,13 +1165,6 @@ protected:
   */
   virtual void
   coarseFineRedistribution(EBAMRCellData& a_phi);
-
-  /*!
-    @brief Reflux across refinement boundaries, using whatever is inside the flux registers. 
-    @param[inout] a_phi Cell-centered state
-  */
-  virtual void
-  reflux(EBAMRCellData& a_phi);
 
   /*!
     @brief Set ebis

@@ -15,6 +15,8 @@
 #include <LoadBalance.H>
 #include <BaseIVFactory.H>
 #include <CH_Timer.H>
+#include <EBCellFactory.H>
+#include <EBFluxFactory.H>
 
 // Our includes
 #include <CD_EBHelmholtzOpFactory.H>
@@ -436,7 +438,7 @@ EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
   bool hasMGObjects;
 
   RefCountedPtr<EBMultigridInterpolator> interpolator; // Only if defined on an AMR level
-  RefCountedPtr<EBFluxRegister>          fluxReg;      // Only if defined on an AMR level
+  RefCountedPtr<EBReflux>                fluxReg;      // Only if defined on an AMR level
   RefCountedPtr<EBCoarAve>               coarsener;    // Only if defined on an AMR level
 
   RefCountedPtr<LevelData<EBCellFAB>>       Acoef;      // Always defined.

@@ -181,19 +181,6 @@ namespace Physics {
       if (m_verbosity > 5) {
         pout() << "FieldStepper<T>::initialData" << endl;
       }
-
-      // Fetch the potential and surface/space charges and initialize them. The potential is set to zero
-      // and the space/surface charge set from m_rhoGas, m_rhoDielectric, and m_surfaceChargeDensity
-      MFAMRCellData& state = m_fieldSolver->getPotential();
-      EBAMRIVData&   sigma = m_sigma->getPhi();
-
-      DataOps::setValue(state, 0.0);
-      DataOps::setValue(sigma, m_surfaceChargeDensity, m_amr->getProbLo(), m_amr->getDx(), 0);
-      m_sigma->resetElectrodes(sigma, 0.0);
-      m_fieldSolver->setRho(m_rhoGas);
-
-      // Solve Poisson equation.
-      this->solvePoisson();
     }
 
     template <class T>
@@ -229,6 +216,19 @@ namespace Physics {
       if (m_verbosity > 5) {
         pout() << "FieldStepper<T>::postInitialize" << endl;
       }
+
+      // Fetch the potential and surface/space charges and initialize them. The potential is set to zero
+      // and the space/surface charge set from m_rhoGas, m_rhoDielectric, and m_surfaceChargeDensity
+      MFAMRCellData& state = m_fieldSolver->getPotential();
+      EBAMRIVData&   sigma = m_sigma->getPhi();
+
+      DataOps::setValue(state, 0.0);
+      DataOps::setValue(sigma, m_surfaceChargeDensity, m_amr->getProbLo(), m_amr->getDx(), 0);
+      m_sigma->resetElectrodes(sigma, 0.0);
+      m_fieldSolver->setRho(m_rhoGas);
+
+      // Solve Poisson equation.
+      this->solvePoisson();
     }
 
     template <class T>

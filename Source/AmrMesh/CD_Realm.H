@@ -334,7 +334,7 @@ public:
     @brief Get flux register utility
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<EBFluxRegister>>&
+  Vector<RefCountedPtr<EBReflux>>&
   getFluxRegister(const phase::which_phase a_phase);
 
   /*!

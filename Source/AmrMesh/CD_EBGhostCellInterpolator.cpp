@@ -114,6 +114,11 @@ EBGhostCellInterpolator::defineGhostRegions() noexcept
           }
         }
         cfivs &= domainFine;
+
+        NeighborIterator nit(dblFine);
+        for (nit.begin(dit()); nit.ok(); ++nit) {
+          cfivs -= dblFine[nit()];
+        }
         cfivs.recalcMinBox();
 
         const Box fineGhostBox = cfivs.minBox();
@@ -141,7 +146,11 @@ EBGhostCellInterpolator::interpolate(LevelData<EBCellFAB>&       a_phiFine,
                                      const Interval              a_variables,
                                      const Type                  a_interpType) const noexcept
 {
-  CH_TIME("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>");
+  CH_TIMERS("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>");
+  CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::buffer_define", t1);
+  CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::copy_exchange", t2);
+  CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::regular_cells", t3);
+  CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::irregular_cells", t4);
 
   CH_assert(a_phiFine.nComp() > a_variables.end());
   CH_assert(a_phiCoar.nComp() > a_variables.end());
@@ -150,21 +159,30 @@ EBGhostCellInterpolator::interpolate(LevelData<EBCellFAB>&       a_phiFine,
   const DisjointBoxLayout& coFiGrids = m_eblgCoFi.getDBL();
   const EBISLayout&        coFiEBISL = m_eblgCoFi.getEBISL();
 
+  CH_START(t1);
   LevelData<EBCellFAB> grownCoarData(coFiGrids, 1, m_ghostCF * IntVect::Unit, EBCellFactory(coFiEBISL));
+  CH_STOP(t1);
 
   for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++) {
     const Interval srcInterv = Interval(icomp, icomp);
     const Interval dstInterv = Interval(0, 0);
+
+    CH_START(t2);
     a_phiCoar.copyTo(srcInterv, grownCoarData, dstInterv);
-    grownCoarData.exchange();
+    CH_STOP(t2);
 
     // Fill invalid regions.
     for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
       EBCellFAB&       phiFine = a_phiFine[dit()];
       const EBCellFAB& phiCoar = grownCoarData[dit()];
 
+      CH_START(t3);
       this->interpolateRegular(phiFine.getFArrayBox(), phiCoar.getFArrayBox(), dit(), icomp, 0, a_interpType);
+      CH_STOP(t3);
+
+      CH_START(t4);
       this->interpolateIrregular(phiFine, phiCoar, dit(), icomp, 0, a_interpType);
+      CH_STOP(t4);
     }
   }
 

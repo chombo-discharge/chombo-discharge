@@ -14,7 +14,6 @@
 
 // Chombo includes
 #include <DisjointBoxLayout.H>
-#include <EBFluxRegister.H>
 #include <EBLevelRedist.H>
 #include <EBCoarToFineRedist.H>
 #include <EBMGInterp.H>
@@ -30,6 +29,7 @@
 #include <CD_LoadBalancing.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_EBCoarAve.H>
+#include <CD_EBReflux.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
@@ -42,7 +42,6 @@
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_EbCentroidInterpolationStencil.H>
 #include <CD_CentroidInterpolationStencil.H>
-#include <CD_EbFastFluxRegister.H>
 #include <CD_NamespaceHeader.H>
 
 // These are operator that can be defined.
@@ -325,7 +324,7 @@ public:
   /*!
     @brief Get flux register utility
   */
-  Vector<RefCountedPtr<EBFluxRegister>>&
+  Vector<RefCountedPtr<EBReflux>>&
   getFluxRegister() const;
 
   /*!
@@ -529,7 +528,7 @@ protected:
   /*!
     @brief Flux register utility
   */
-  mutable Vector<RefCountedPtr<EBFluxRegister>> m_fluxReg;
+  mutable Vector<RefCountedPtr<EBReflux>> m_ebReflux;
 
   /*!
     @brief Level redistribution utility

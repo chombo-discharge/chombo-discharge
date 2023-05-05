@@ -20,13 +20,13 @@
 #include <LevelTGA.H>
 #include <BaseIVFAB.H>
 #include <VCAggStencil.H>
-#include <EBFluxRegister.H>
 
 // Our includes
 #include <CD_Timer.H>
 #include <CD_Location.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBCoarAve.H>
+#include <CD_EBReflux.H>
 #include <CD_EBMGRestrict.H>
 #include <CD_EBMGProlong.H>
 #include <CD_EBHelmholtzEBBC.H>
@@ -104,7 +104,7 @@ public:
                 const EBLevelGrid&                               a_eblgCoar,
                 const EBLevelGrid&                               a_eblgCoarMG,
                 const RefCountedPtr<EBMultigridInterpolator>&    a_interpolator,
-                const RefCountedPtr<EBFluxRegister>&             a_fluxReg,
+                const RefCountedPtr<EBReflux>&                   a_fluxReg,
                 const RefCountedPtr<EBCoarAve>&                  a_coarAve,
                 const RefCountedPtr<EBHelmholtzDomainBC>&        a_domainBC,
                 const RefCountedPtr<EBHelmholtzEBBC>&            a_ebBC,
@@ -223,7 +223,7 @@ public:
     @note This routine is used in AMROperator to ensure that EB fluxes which are described by stencils get consistent data under the fine level. 
   */
   void
-  coarsen(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiFine);
+  coarsenCell(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiFine);
 
   /*!
     @brief Coarsen fluxes on the fine level onto this level. 
@@ -233,7 +233,7 @@ public:
     @note This routine is used in the reflux-free AMROperator
   */
   void
-  coarsen(LevelData<EBFluxFAB>& a_flux, const LevelData<EBFluxFAB>& a_fineFlux);
+  coarsenFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBFluxFAB>& a_fineFlux);
 
   /*!
     @brief Point Jacobi kernel. 
@@ -945,7 +945,7 @@ protected:
   /*!
     @brief Flux register
   */
-  RefCountedPtr<EBFluxRegister> m_fluxReg;
+  RefCountedPtr<EBReflux> m_fluxReg;
 
   /*!
     @brief Conservative coarsener

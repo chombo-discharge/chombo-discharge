@@ -24,7 +24,6 @@
 #include <CD_EbFastFineToCoarRedist.H>
 #include <CD_EbFastCoarToFineRedist.H>
 #include <CD_EbFastCoarToCoarRedist.H>
-#include <CD_EbFastFluxRegister.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_BoxLoops.H>
 #include <CD_EBLeastSquaresMultigridInterpolator.H>
@@ -697,7 +696,7 @@ PhaseRealm::defineFluxReg(const int a_lmin, const int a_regsize)
 
   const bool doThisOperator = this->queryOperator(s_eb_flux_reg);
 
-  m_fluxReg.resize(1 + m_finestLevel);
+  m_ebReflux.resize(1 + m_finestLevel);
 
   if (doThisOperator) {
 
@@ -709,26 +708,8 @@ PhaseRealm::defineFluxReg(const int a_lmin, const int a_regsize)
 
       // Flux register for matching fluxes between level l and level l+1 (the fine level) lives on level l
       if (hasFine) {
-        if (useChomboFluxRegister) {
-          m_fluxReg[lvl] = RefCountedPtr<EBFluxRegister>(new EBFluxRegister(m_grids[lvl + 1],
-                                                                            m_grids[lvl],
-                                                                            m_ebisl[lvl + 1],
-                                                                            m_ebisl[lvl],
-                                                                            m_domains[lvl].domainBox(),
-                                                                            m_refinementRatios[lvl],
-                                                                            comps,
-                                                                            &(*m_ebis)));
-        }
-        else { // This is the default behavior
-          m_fluxReg[lvl] = RefCountedPtr<EBFluxRegister>(new EbFastFluxRegister(m_grids[lvl + 1],
-                                                                                m_grids[lvl],
-                                                                                m_ebisl[lvl + 1],
-                                                                                m_ebisl[lvl],
-                                                                                m_domains[lvl].domainBox(),
-                                                                                m_refinementRatios[lvl],
-                                                                                comps,
-                                                                                &(*m_ebis)));
-        }
+        m_ebReflux[lvl] = RefCountedPtr<EBReflux>(
+          new EBReflux(*m_eblg[lvl], *m_eblg[lvl + 1], *m_eblgCoFi[lvl], m_refinementRatios[lvl]));
       }
     }
   }
@@ -1155,14 +1136,14 @@ PhaseRealm::getFineInterp() const
   return m_ebFineInterp;
 }
 
-Vector<RefCountedPtr<EBFluxRegister>>&
+Vector<RefCountedPtr<EBReflux>>&
 PhaseRealm::getFluxRegister() const
 {
   if (!this->queryOperator(s_eb_flux_reg)) {
     MayDay::Error("PhaseRealm::getFluxRegister - operator not registered!");
   }
 
-  return m_fluxReg;
+  return m_ebReflux;
 }
 
 Vector<RefCountedPtr<EBLevelRedist>>&
