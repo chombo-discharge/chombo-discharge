@@ -226,32 +226,16 @@ FieldSolverMultigrid::parseJumpBC()
   }
 }
 
-void
-FieldSolverMultigrid::allocate()
-{
-  CH_TIME("FieldSolverMultigrid::allocate()");
-  if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::allocate()" << endl;
-  }
-
-  FieldSolver::allocate();
-
-  m_amr->allocate(m_zero, m_realm, m_nComp);
-  m_amr->allocate(m_kappaRhoByEps0, m_realm, m_nComp);
-  m_amr->allocate(m_sigmaByEps0, m_realm, phase::gas, m_nComp);
-
-  DataOps::setValue(m_zero, 0.0);
-  DataOps::setValue(m_kappaRhoByEps0, 0.0);
-  DataOps::setValue(m_sigmaByEps0, 0.0);
-}
-
 bool
 FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
                             const MFAMRCellData& a_rho,
                             const EBAMRIVData&   a_sigma,
                             const bool           a_zeroPhi)
 {
-  CH_TIME("FieldSolverMultigrid::solve(MFAMRCellData, MFAMRCellData, EBAMRIVData, bool)");
+  CH_TIMERS("FieldSolverMultigrid::solve");
+  CH_TIMER("FieldSolverMultigrid::solve::alloc_temps", t1);
+  CH_TIMER("FieldSolverMultigrid::solve::set_temps", t2);
+  CH_TIMER("FieldSolverMultigrid::solve::smooth_phi", t3);
   if (m_verbosity > 5) {
     pout() << "FieldSolverMultigrid::solve(MFAMRCellData, MFAMRCellData, EBAMRIVData, bool)" << endl;
   }
@@ -269,42 +253,60 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 
   bool converged = false;
 
+  // Set up multigrid solver if it is not already done.
   if (!m_isSolverSetup) {
-    this->setupSolver(); // This does everything, allocates coefficients, gets bc stuff and so on
+    this->setupSolver();
   }
 
+  // Define temporaries; the incoming data might need to be scaled but we don't want to
+  // alter it directly.
+  CH_START(t1);
+  MFAMRCellData zero;
+  MFAMRCellData kappaRhoByEps0;
+  EBAMRIVData   sigmaByEps0;
+
+  m_amr->allocate(zero, m_realm, m_nComp);
+  m_amr->allocate(kappaRhoByEps0, m_realm, m_nComp);
+  m_amr->allocate(sigmaByEps0, m_realm, phase::gas, m_nComp);
+  CH_STOP(t1);
+
+  // Scale data as appropriate.
+  CH_START(t2);
+  DataOps::setValue(zero, 0.0);
+
   // Do the scaled space charge density.
-  DataOps::copy(m_kappaRhoByEps0, a_rho);
-  DataOps::scale(m_kappaRhoByEps0, 1. / (Units::eps0));
+  DataOps::copy(kappaRhoByEps0, a_rho);
+  DataOps::scale(kappaRhoByEps0, 1. / (Units::eps0));
 
   // Special flag for when a_rho is on the centroid but was not scaled by kappa on input. The multigrid operator solves
   // kappa*L(phi) = kappa*rho so the right-hand side must be kappa-weighted.
   if (m_kappaSource) {
-    DataOps::kappaScale(m_kappaRhoByEps0);
+    DataOps::kappaScale(kappaRhoByEps0);
   }
 
   m_amr->conservativeAverage(a_phi, m_realm);
   m_amr->interpGhost(a_phi, m_realm);
-  m_amr->conservativeAverage(m_kappaRhoByEps0, m_realm);
-  m_amr->interpGhost(m_kappaRhoByEps0, m_realm);
+  m_amr->arithmeticAverage(kappaRhoByEps0, m_realm);
+  m_amr->interpGhost(kappaRhoByEps0, m_realm);
 
   // Do the scaled surface charge
-  DataOps::copy(m_sigmaByEps0, a_sigma);
-  DataOps::scale(m_sigmaByEps0, 1. / (Units::eps0));
+  DataOps::copy(sigmaByEps0, a_sigma);
+  DataOps::scale(sigmaByEps0, 1. / (Units::eps0));
+  CH_STOP(t2);
 
   // Factory needs knowledge of the new surface charge -- it passes this data by reference to the multigrid operators (MFHelmholtzOps).
-  m_helmholtzOpFactory->setJump(m_sigmaByEps0, 1.0);
+  m_helmholtzOpFactory->setJump(sigmaByEps0, 1.0);
 
   // Aliasing, because Chombo is not too smart about smart pointers.
-  Vector<LevelData<MFCellFAB>*> phi;  // Raw pointers of a_phi
-  Vector<LevelData<MFCellFAB>*> rhs;  // Raw pointers of m_kappaRhoByEps0
-  Vector<LevelData<MFCellFAB>*> res;  // Raw pointers of m_residue
-  Vector<LevelData<MFCellFAB>*> zero; // Raw pointers of m_zero
+  Vector<LevelData<MFCellFAB>*> phi; // Raw pointers of a_phi
+  Vector<LevelData<MFCellFAB>*> rhs; // Raw pointers of m_kappaRhoByEps0
+  Vector<LevelData<MFCellFAB>*> res; // Raw pointers of m_residue
+  Vector<LevelData<MFCellFAB>*> zer; // Raw pointers of m_zero
 
   m_amr->alias(phi, a_phi);
-  m_amr->alias(rhs, m_kappaRhoByEps0);
+  m_amr->alias(rhs, kappaRhoByEps0);
   m_amr->alias(res, m_residue);
-  m_amr->alias(zero, m_zero);
+  m_amr->alias(zer, zero);
 
   // GMG solve. Use phi = zero as initial metric. We want to reduce this by m_multigridExitTolerance, in which case
   // multigrid has "converged".
@@ -315,7 +317,7 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   const Real phiResid = m_multigridSolver.computeAMRResidual(phi, rhs, finestLevel, 0);
 
   // This is the residue rho - L(phi=0)
-  const Real zeroResid = m_multigridSolver.computeAMRResidual(zero, rhs, finestLevel, 0);
+  const Real zeroResid = m_multigridSolver.computeAMRResidual(zer, rhs, finestLevel, 0);
 
   // Convergence criterion.
   const Real convergedResid = zeroResid * m_multigridExitTolerance;
@@ -337,6 +339,7 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   m_multigridSolver.revert(phi, rhs, finestLevel, 0);
 
   if (m_numFilterSmooth > 0) {
+    CH_START(t3);
     for (int i = 0; i < m_numFilterSmooth; i++) {
 
       // Must do the piecewise linear interpolator rather than the MG interpolator (which only does one layer across the CF, except near the EB)
@@ -361,6 +364,7 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
         DataOps::filterSmooth(phi, alpha, stride);
       }
     }
+    CH_STOP(t3);
   }
 
   // Coarsen/update ghosts before computing the field.

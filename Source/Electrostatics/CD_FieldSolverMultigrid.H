@@ -152,12 +152,6 @@ public:
   registerOperators() override;
 
   /*!
-    @brief Allocates internal storage. 
-  */
-  virtual void
-  allocate() override;
-
-  /*!
     @brief Set up multigrid solver
   */
   virtual void
@@ -343,21 +337,6 @@ protected:
     @brief Multigrid operator factory. 
   */
   RefCountedPtr<MFHelmholtzOpFactory> m_helmholtzOpFactory;
-
-  /*!
-    @brief Zero
-  */
-  MFAMRCellData m_zero;
-
-  /*!
-    @brief Scaled soruce
-  */
-  MFAMRCellData m_kappaRhoByEps0;
-
-  /*!
-    @brief Sigma
-  */
-  EBAMRIVData m_sigmaByEps0;
 
   /*!
     @brief Geometric multigrid solver

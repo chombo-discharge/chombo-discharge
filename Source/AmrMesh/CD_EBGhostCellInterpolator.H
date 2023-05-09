@@ -27,6 +27,9 @@
 
   @details This class works by computing slopes on the coarse grid. We then interpolate within the coarse-grid cell to the fine-grid ghost cell, using
   the computed slopes. Note that all fine-grid ghost cells are interpolated from the coarse grid. Thus, this interpolator is useless for multigrid. 
+
+  @todo The cut-cell slope calculation and interpolation uses on-the-fly coarsening of the ghost cell. This could be made more efficient but since there
+  are few of these cells I don't think it is necessary (but only benchmark timings will answer this quantitatively).
 */
 class EBGhostCellInterpolator
 {

@@ -1,5 +1,5 @@
 /* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
+ * Copyright © 2023 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
@@ -13,7 +13,10 @@
 #define CD_EBCoarAve_H
 
 // Chombo includes
+#include <AggStencil.H>
 #include <EBLevelGrid.H>
+#include <VoFIterator.H>
+#include <FaceIterator.H>
 
 // Our includes
 #include <CD_Average.H>
@@ -28,6 +31,16 @@
 class EBCoarAve
 {
 public:
+  /*!
+    @brief Type of coarsening supported
+  */
+  enum class Type
+  {
+    Arithmetic,
+    Conservative,
+    Harmonic
+  };
+
   /*!
     @brief Default constructor. Must call define afterwards. 
   */
@@ -213,6 +226,81 @@ protected:
     @brief Irregular cells on the coarsened fine layout
   */
   LayoutData<IntVectSet> m_irregSetsCoFi;
+
+  /*!
+    @brief Irregular cells on the coarsened fine layout
+  */
+  mutable LayoutData<VoFIterator> m_irregCellsCoFi;
+
+  /*!
+    @brief Irregular faces on the coarsened fine layout
+  */
+  mutable LayoutData<std::map<int, FaceIterator>> m_irregFacesCoFi;
+
+  /*!
+    @brief Stencils for arithmetic coarsening of volume data
+  */
+  LayoutData<BaseIVFAB<VoFStencil>> m_cellArithmeticStencils;
+
+  /*!
+    @brief Stencils for harmonic coarsening of volume data
+    @note This is different than the cellConservative and cellArithmetic stencils because its weights are all one and
+    the harmonic average is applied differently. 
+  */
+  LayoutData<BaseIVFAB<VoFStencil>> m_cellHarmonicStencils;  
+
+  /*!
+    @brief Stencils for conservative coarsening of volume data
+  */
+  LayoutData<BaseIVFAB<VoFStencil>> m_cellConservativeStencils;
+
+  /*!
+    @brief Stencils for arithmetic coarsening of face data
+  */
+  LayoutData<std::map<int, BaseIFFAB<FaceStencil>>> m_faceArithmeticStencils;
+
+  /*!
+    @brief Stencils for harmonic coarsening of face data
+  */
+  LayoutData<std::map<int, BaseIFFAB<FaceStencil>>> m_faceHarmonicStencils;
+
+  /*!
+    @brief Stencils for conservative coarsening of face data
+  */
+  LayoutData<std::map<int, BaseIFFAB<FaceStencil>>> m_faceConservativeStencils;
+
+  /*!
+    @brief Stencils for arithmetic coarsening of EB data
+  */
+  LayoutData<BaseIVFAB<VoFStencil>> m_ebArithmeticStencils;
+
+  /*!
+    @brief Stencils for harmonic coarsening of EB data
+  */
+  LayoutData<BaseIVFAB<VoFStencil>> m_ebHarmonicStencils;
+
+  /*!
+    @brief Stencils for conservative coarsening of EB data
+  */
+  LayoutData<BaseIVFAB<VoFStencil>> m_ebConservativeStencils;
+
+  /*!
+    @brief Define stencils for the various coarsening functions of cell data
+  */
+  virtual void
+  defineCellStencils() noexcept;
+
+  /*!
+    @brief Define stencils for the various coarsening functions of face data
+  */
+  virtual void
+  defineFaceStencils() noexcept;
+
+  /*!
+    @brief Define stencils for the various coarsening functions of EB data
+  */
+  virtual void
+  defineEBStencils() noexcept;    
 
   /*!
     @brief Do an arithmetic average of cell-centered data when coarsening. 
