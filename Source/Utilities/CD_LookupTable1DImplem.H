@@ -552,17 +552,45 @@ LookupTable1D<N>::makeUniform(const int a_numRows)
       }
       }
 
-      // Now linearly interpolate the data.
-      std::vector<std::array<Real, N>> newData;
+      // Linearly interpolate the data.
+      std::array<Real, N>              interpRow;
+      std::vector<std::array<Real, N>> interpData;
+
+      int irow = 0;
+
+      const int column = std::get<Column>(m_state);
 
       for (const auto& x : xValues) {
-        newData.emplace_back(this->directLookup(x));
+        while (true) {
+          const std::array<Real, N>& row1 = m_data[irow];
+          const std::array<Real, N>& row2 = m_data[irow + 1];
+
+          const Real x1 = row1[column];
+          const Real x2 = row2[column];
+
+          if (x >= x1 && x <= x2) {
+            const Real t = (x - x1) / (x2 - x1);
+
+            for (int j = 0; j < N; j++) {
+              interpRow[j] = row1[j] + t * (row2[j] - row1[j]);
+            }
+
+            interpData.emplace_back(interpRow);
+
+            break;
+          }
+          else {
+            if (irow >= m_data.size() - 1) {
+              MayDay::Abort("LookupTable1D<N>::makeUniform - logic bust. Interpolated row is out-of-range");
+            }
+
+            irow++;
+          }
+        }
       }
 
-      // Now replace the data with the freshly interpolated data.
-      m_data = newData;
+      m_data = interpData;
 
-      // Set the state flag for uniform spacing to true.
       std::get<Uniform>(m_state) = true;
     }
     else {
