@@ -505,28 +505,29 @@ MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid&       a_coarMflg,
 
   // Check if we can get a coarsenable domain. Don't want to coarsen to 1x1 so hence the factor of 2 in the test here.
   ProblemDomain test = fineDomain;
-  if (refine(coarsen(test, 2 * a_refRat), 2 * a_refRat) == fineDomain) {
+  if (refine(coarsen(test, a_refRat), a_refRat) == fineDomain) {
 
     // Use coarsening if we can
-    if (fineDbl.coarsenable(2 * a_refRat)) {
+    if (isFullyCovered(a_fineMflg) && fineDomain.domainBox().coarsenable(a_blockingFactor)) {
+      Vector<Box> boxes;
+      Vector<int> procs;
+
+      // We could have use our load balancing here, but I don't see why.
+      domainSplit(coarDomain, boxes, a_blockingFactor);
+      mortonOrdering(boxes);
+      LoadBalance(procs, boxes);
+
+      coarDbl.define(boxes, procs, coarDomain);
+
+      hasCoarser = true;
+    }
+    else if (fineDbl.coarsenable(a_refRat)) {
       coarsen(coarDbl, fineDbl, a_refRat);
 
       hasCoarser = true;
     }
-    else { // if(false){// { // Check if we can use box aggregation
-      if (isFullyCovered(a_fineMflg)) {
-        Vector<Box> boxes;
-        Vector<int> procs;
-
-        // We could have use our load balancing here, but I don't see why.
-        domainSplit(coarDomain, boxes, a_blockingFactor);
-        mortonOrdering(boxes);
-        LoadBalance(procs, boxes);
-
-        coarDbl.define(boxes, procs, coarDomain);
-
-        hasCoarser = true;
-      }
+    else {
+      hasCoarser = false;
     }
 
     // Ok, found a coarsened layout.

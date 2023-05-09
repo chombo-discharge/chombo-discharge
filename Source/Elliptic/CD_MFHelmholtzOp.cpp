@@ -489,7 +489,6 @@ void
 MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>& a_residual)
 {
   CH_TIME("MFHelmholtzOp::preCond(LD<MFCellFAB>, LD<MFCellFAB>)");
-
 #if 1
   this->relax(a_corr, a_residual, 40);
 #else
@@ -1005,7 +1004,7 @@ MFHelmholtzOp::AMRResidual(LevelData<MFCellFAB>&             a_residual,
                            bool                              a_homogeneousPhysBC,
                            AMRLevelOp<LevelData<MFCellFAB>>* a_finerOp)
 {
-  CH_TIME("MFHelmholtzOp::AMRResidual(5x LD<MFCellFAB>, bool, AMRLevelOp<LevelData<MFCellFAB> >)");
+  CH_TIME("MFHelmholtzOp::AMRResidual");
 
   // Make residual = a_rhs - L(phi)
   this->AMROperator(a_residual, a_phiFine, a_phi, a_phiCoar, a_homogeneousPhysBC, a_finerOp);
@@ -1021,7 +1020,7 @@ MFHelmholtzOp::AMRResidualNF(LevelData<MFCellFAB>&       a_residual,
                              const LevelData<MFCellFAB>& a_rhs,
                              bool                        a_homogeneousPhysBC)
 {
-  CH_TIME("MFHelmholtzOp::AMRResidualNF(LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>, bool)");
+  CH_TIME("MFHelmholtzOp::AMRResidualNF");
 
   // Make residual = a_rhs - L(phi)
   this->AMROperatorNF(a_residual, a_phi, a_phiCoar, a_homogeneousPhysBC);
@@ -1038,8 +1037,7 @@ MFHelmholtzOp::AMRResidualNC(LevelData<MFCellFAB>&             a_residual,
                              bool                              a_homogeneousPhysBC,
                              AMRLevelOp<LevelData<MFCellFAB>>* a_finerOp)
 {
-  CH_TIME(
-    "MFHelmholtzOp::AMRResidualNC(LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>, bool, AMRLevelOp<LevelData<MFCellFAB>)");
+  CH_TIME("MFHelmholtzOp::AMRResidualNC");
 
   this->AMROperatorNC(a_residual, a_phiFine, a_phi, a_homogeneousPhysBC, a_finerOp);
 
@@ -1053,14 +1051,11 @@ MFHelmholtzOp::AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
                              const LevelData<MFCellFAB>& a_phiCoar,
                              bool                        a_homogeneousPhysBC)
 {
-  CH_TIME("MFHelmholtzOp::AMROperatorNF(LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>, bool)");
+  CH_TIME("MFHelmholtzOp::AMROperatorNF");
 
   constexpr bool homogeneousCFBC = false;
 
-  // Update ghost cells and jump conditions first. Doing an exchange is not sufficient here because
-  // the jump stencils might reach over CFs.
   this->exchangeGhost(a_phi);
-  this->interpolateCF(a_phi, &a_phiCoar, homogeneousCFBC);
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
   for (auto& op : m_helmOps) {
@@ -1091,8 +1086,7 @@ MFHelmholtzOp::AMROperatorNC(LevelData<MFCellFAB>&             a_Lphi,
                              bool                              a_homogeneousPhysBC,
                              AMRLevelOp<LevelData<MFCellFAB>>* a_finerOp)
 {
-  CH_TIME(
-    "MFHelmholtzOp::AMROperatorNC(LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>, bool, AMRLevelOp<LevelData<MFCellFAB> >");
+  CH_TIME("MFHelmholtzOp::AMROperatorNC");
 
   if (m_hasFine) {
     MFHelmholtzOp* finerOp = (MFHelmholtzOp*)a_finerOp;
@@ -1108,7 +1102,6 @@ MFHelmholtzOp::AMROperatorNC(LevelData<MFCellFAB>&             a_Lphi,
     }
   }
 
-  // Must update the jump BC first. Don't have coarser here so no need for CF interpolation.
   this->exchangeGhost(a_phi);
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
@@ -1144,8 +1137,7 @@ MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&             a_Lphi,
                            const bool                        a_homogeneousPhysBC,
                            AMRLevelOp<LevelData<MFCellFAB>>* a_finerOp)
 {
-  CH_TIME(
-    "MFHelmholtzOp::AMROperator(LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>, bool, AMRLevelOp<LevelData<MFCellFAB> >");
+  CH_TIME("MFHelmholtzOp::AMROperator");
 
   constexpr bool homogeneousCFBC = false;
 
@@ -1163,14 +1155,9 @@ MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&             a_Lphi,
     }
   }
 
-  // Update ghost cells and jump conditions first. Doing an exchange is not sufficient here because
-  // the jump stencils might reach over CFs.
   this->exchangeGhost(a_phi);
-  this->interpolateCF(a_phi, &a_phiCoar, homogeneousCFBC);
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
-  // Note: This could by optimized by calling the kernel functions directly on each patch, but I don't think
-  //       we would get noticably more performance out of it.
   for (auto& op : m_helmOps) {
     LevelData<EBCellFAB> Lphi;
     LevelData<EBCellFAB> phiFine;
@@ -1184,7 +1171,9 @@ MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&             a_Lphi,
 
     MFHelmholtzOp* finerOp = (MFHelmholtzOp*)(a_finerOp);
 
-    // Don't need to update ghost cells again, coarsen, or exchange data.
+    // Don't need to update ghost cells again, coarsen, or exchange data. Our ability to turn off coarse-fine interpolation comes from
+    // the fact that EBHelmholtzOp will interpolate the ghost cells on the finer level during the reflux stage. When we enter this routine
+    // we already have updated our ghost cells!
     op.second->turnOffCFInterp();
     op.second->turnOffCoarsening();
     op.second->turnOffExchange();
