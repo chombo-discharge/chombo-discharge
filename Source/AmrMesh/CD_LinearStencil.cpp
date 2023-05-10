@@ -413,8 +413,9 @@ LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
       MayDay::Warning("LinearStencil::computeInterpStencil2D - bilinear negative weight");
     sumweights += w;
   }
-  if (Abs((sumweights - 1.0)) > 1.E-5)
-    MayDay::Warning("LinearStencil::computeInterpStencil2D - weights do not sum to 1");
+  if (std::abs((sumweights - 1.0)) > 1.E-5) {
+    pout() << "LinearStencil::computeInterpStencil2D - weights do not sum to 1" << endl;
+  }
 #endif
 
   return foundStencil;

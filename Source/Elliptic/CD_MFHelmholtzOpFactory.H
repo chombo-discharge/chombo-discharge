@@ -32,9 +32,9 @@
 
 /*!
   @brief Factory class for making MFHelmholtzOp. 
-  @note  This factory is designed for coupling EBHelmholtzOps across EBIS levels
-  @note  This factory is designed without time-dependence in BCs. Time-dependent BCs are still doable by letting the boundary condition classes carry a reference to 
-         an externally updated time. If you need new coefficients you will have to set up multigrid again. 
+  @note This factory is designed for coupling EBHelmholtzOps across EBIS levels
+  @note This factory is designed without time-dependence in BCs. Time-dependent BCs are still doable by letting the boundary condition classes carry a reference to 
+  an externally updated time. If you need new coefficients you will have to set up multigrid again. 
 */
 class MFHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<MFCellFAB>>
 {
