@@ -263,8 +263,9 @@ MFHelmholtzOpFactory::defineMultigridLevels()
       bool hasCoarser = true;
 
       while (hasCoarser) {
-        const int          curMgLevels = m_mgLevelGrids[amrLevel].size();
-        const MFLevelGrid& mgMflgFine  = m_mgLevelGrids[amrLevel].back();
+        const int            curMgLevels = m_mgLevelGrids[amrLevel].size();
+        const MFLevelGrid&   mgMflgFine  = m_mgLevelGrids[amrLevel].back();
+        const ProblemDomain& domainFine  = mgMflgFine.getDomain();
 
         // This is the one we will define
         MFLevelGrid mgMflgCoar;
@@ -519,6 +520,10 @@ MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid&       a_coarMflg,
           coarDbl.define(boxes, procs, coarDomain);
 
           hasCoarser = true;
+
+          if (procID() == 0) {
+            std::cout << coarDomain << "\t" << block << std::endl;
+          }
 
           break;
         }

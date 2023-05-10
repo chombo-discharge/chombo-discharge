@@ -343,18 +343,12 @@ EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid&       a_coarEblg,
 {
   CH_TIME("EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid, EBLevelGrid, int, int)");
 
-  // TLDR: This creates a coarsening of a_fineGrid with refinement factor 2. The strategy is to first coarsen directly, leaving the box-to-rank array intact
-  //       but where the boxes are coarsened by a factor of two. If that does not work we will try domain decomposition with the blocking factor.
-  //
-  //       This returns true if the fine grid fully covers the domain. The nature of this makes it
-  //       always true for the "deeper" multigridlevels,  but not so for the intermediate levels.
-
   bool hasCoarser = false;
 
-  // Lambda for checking if a grid is fully covered.
+  // Returns true if the grid fully covers the domain. In that case we can re-partition the domain
   auto isFullyCovered = [&](const EBLevelGrid& a_eblg) -> bool {
-    unsigned long long numPtsLeft = a_eblg.getDomain().domainBox().numPts(); // Number of grid points in the domain.
-    const DisjointBoxLayout& dbl  = a_eblg.getDBL();                         // DisjointBoxLayout.
+    unsigned long long       numPtsLeft = a_eblg.getDomain().domainBox().numPts();
+    const DisjointBoxLayout& dbl        = a_eblg.getDBL();
 
     for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
       numPtsLeft -= dbl[lit()].numPts();
@@ -370,37 +364,41 @@ EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid&       a_coarEblg,
 
   // Check if we can get a coarsenable domain. Don't want to coarsen to 1x1 so hence the factor of 2 in the test here.
   ProblemDomain test = fineDomain;
-  if (refine(coarsen(test, 2 * a_refRat), 2 * a_refRat) == fineDomain) {
+  if (refine(coarsen(test, a_refRat), a_refRat) == fineDomain) {
+    const Box domainBox = fineDomain.domainBox();
 
-    // Use coarsening if we can.
-    if (a_fineEblg.getDBL().coarsenable(2 * a_refRat)) {
+    if (isFullyCovered(a_fineEblg)) {
+      int block = a_blockingFactor;
+
+      while (block > 1) {
+        if (domainBox.coarsenable(block)) {
+          Vector<Box> boxes;
+          Vector<int> procs;
+
+          domainSplit(coarDomain, boxes, a_blockingFactor);
+          mortonOrdering(boxes);
+          LoadBalance(procs, boxes);
+
+          coarDbl.define(boxes, procs, coarDomain);
+
+          hasCoarser = true;
+
+          break;
+        }
+        else {
+          block = block / 2;
+        }
+      }
+    }
+    else if (a_fineEblg.getDBL().coarsenable(a_refRat)) {
       coarsen(coarDbl, a_fineEblg.getDBL(), a_refRat);
-      a_coarEblg.define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
 
       hasCoarser = true;
     }
-    else { // Check if we can use box aggregation
-      if (isFullyCovered(a_fineEblg)) {
-        Vector<Box> boxes;
-        Vector<int> procs;
-
-        // We could have use our load balancing here, but I don't see why.
-        domainSplit(coarDomain, boxes, a_blockingFactor);
-        mortonOrdering(boxes);
-        LoadBalance(procs, boxes);
-
-        coarDbl.define(boxes, procs, coarDomain);
-        a_coarEblg.define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
-
-        hasCoarser = true;
-      }
-      else { // out of ideas
-        hasCoarser = false;
-      }
-    }
   }
-  else { // Nothing we can do.
-    hasCoarser = false;
+
+  if (hasCoarser) {
+    a_coarEblg.define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
   }
 
   return hasCoarser;
