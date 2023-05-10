@@ -247,7 +247,7 @@ protected:
     @note This is different than the cellConservative and cellArithmetic stencils because its weights are all one and
     the harmonic average is applied differently. 
   */
-  LayoutData<BaseIVFAB<VoFStencil>> m_cellHarmonicStencils;  
+  LayoutData<BaseIVFAB<VoFStencil>> m_cellHarmonicStencils;
 
   /*!
     @brief Stencils for conservative coarsening of volume data
@@ -300,7 +300,7 @@ protected:
     @brief Define stencils for the various coarsening functions of EB data
   */
   virtual void
-  defineEBStencils() noexcept;    
+  defineEBStencils() noexcept;
 
   /*!
     @brief Do an arithmetic average of cell-centered data when coarsening. 

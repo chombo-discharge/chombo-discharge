@@ -263,8 +263,9 @@ MFHelmholtzOpFactory::defineMultigridLevels()
       bool hasCoarser = true;
 
       while (hasCoarser) {
-        const int          curMgLevels = m_mgLevelGrids[amrLevel].size();
-        const MFLevelGrid& mgMflgFine  = m_mgLevelGrids[amrLevel].back();
+        const int            curMgLevels = m_mgLevelGrids[amrLevel].size();
+        const MFLevelGrid&   mgMflgFine  = m_mgLevelGrids[amrLevel].back();
+        const ProblemDomain& domainFine  = mgMflgFine.getDomain();
 
         // This is the one we will define
         MFLevelGrid mgMflgCoar;
@@ -477,18 +478,15 @@ MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid&       a_coarMflg,
 {
   CH_TIME("MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid, MFLevelGrid, int, int)");
 
-  // TLDR: This creates a coarsening of a_fineGrid with refinement factor 2. The strategy is to first coarsen directly, leaving the box-to-rank array intact
-  //       but where the boxes are coarsened by a factor of two. If that does not work we will try domain decomposition with the blocking factor.
-  //
-  //       This returns true if the fine grid fully covers the domain. The nature of this makes it
-  //       always true for the "deeper" multigridlevels,  but not so for the intermediate levels.
+  CH_assert(a_blockingFactor % 2 == 0);
+  CH_assert(a_blockingFactor >= 2);
 
   bool hasCoarser = false;
 
   // This returns true if the fine grid fully covers the domain. The nature of this makes it
-  // always true for the "deeper" multigridlevels,  but not so for the intermediate levels.
-  auto isFullyCovered = [&](const MFLevelGrid& a_mflg) -> bool {
-    unsigned long long       numPtsLeft = a_mflg.getDomain().domainBox().numPts(); // Number of grid points in
+  // always true for the "deeper" multigridlevels,  but not so for the intermediate levels between AMR levels.
+  auto gridsCoverDomain = [&](const MFLevelGrid& a_mflg) -> bool {
+    unsigned long long       numPtsLeft = a_mflg.getDomain().domainBox().numPts();
     const DisjointBoxLayout& dbl        = a_mflg.getGrids();
 
     for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
@@ -503,39 +501,43 @@ MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid&       a_coarMflg,
   const DisjointBoxLayout& fineDbl    = a_fineMflg.getGrids();
   DisjointBoxLayout        coarDbl;
 
-  // Check if we can get a coarsenable domain. Don't want to coarsen to 1x1 so hence the factor of 2 in the test here.
   ProblemDomain test = fineDomain;
-  if (refine(coarsen(test, 2 * a_refRat), 2 * a_refRat) == fineDomain) {
+  if (refine(coarsen(test, a_refRat), a_refRat) == fineDomain) {
+    const Box domainBox = fineDomain.domainBox();
 
-    // Use coarsening if we can
-    if (fineDbl.coarsenable(2 * a_refRat)) {
+    if (gridsCoverDomain(a_fineMflg)) {
+      int block = a_blockingFactor;
+
+      while (block > 1) {
+        if (domainBox.coarsenable(block)) {
+          Vector<Box> boxes;
+          Vector<int> procs;
+
+          domainSplit(coarDomain, boxes, block);
+          mortonOrdering(boxes);
+          LoadBalance(procs, boxes);
+
+          coarDbl.define(boxes, procs, coarDomain);
+
+          hasCoarser = true;
+
+          break;
+        }
+        else {
+          block = block / 2;
+        }
+      }
+    }
+    else if (fineDbl.coarsenable(a_refRat)) {
       coarsen(coarDbl, fineDbl, a_refRat);
 
       hasCoarser = true;
     }
-    else { // if(false){// { // Check if we can use box aggregation
-      if (isFullyCovered(a_fineMflg)) {
-        Vector<Box> boxes;
-        Vector<int> procs;
-
-        // We could have use our load balancing here, but I don't see why.
-        domainSplit(coarDomain, boxes, a_blockingFactor);
-        mortonOrdering(boxes);
-        LoadBalance(procs, boxes);
-
-        coarDbl.define(boxes, procs, coarDomain);
-
-        hasCoarser = true;
-      }
-    }
-
-    // Ok, found a coarsened layout.
-    if (hasCoarser) {
-      a_coarMflg = MFLevelGrid(coarDbl, coarDomain, m_ghostPhi.max(), m_mfis);
-    }
   }
-  else {
-    hasCoarser = false;
+
+  // Define the coarse grid layout.
+  if (hasCoarser) {
+    a_coarMflg = MFLevelGrid(coarDbl, coarDomain, m_ghostPhi.max(), m_mfis);
   }
 
   return hasCoarser;

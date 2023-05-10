@@ -758,6 +758,18 @@ public:
           Real                        a_scale) override final;
 
   /*!
+    @brief Allocate m_flux
+  */
+  void
+  allocateFlux() const noexcept;
+
+  /*!
+    @brief Deallocate m_flux
+  */
+  void
+  deallocateFlux() const noexcept;
+
+  /*!
     @brief Returns m_flux. This is used in refluxing routines. 
   */
   LevelData<EBFluxFAB>&
@@ -975,7 +987,7 @@ protected:
   /*!
     @brief For holding fluxes
   */
-  mutable LevelData<EBFluxFAB> m_flux;
+  mutable LevelData<EBFluxFAB>* m_flux;
 
   /*!
     @brief Interpolant for when we want centroid fluxes
@@ -1130,11 +1142,11 @@ protected:
     @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. 
   */
   void
-  getFaceCentroidFlux(EBFaceFAB&       a_fluxCentroid,
-                      const EBCellFAB& a_phi,
-                      const Box&       a_cellBox,
-                      const DataIndex& a_dit,
-                      const int        a_dir);
+  computeFlux(EBFaceFAB&       a_fluxCentroid,
+              const EBCellFAB& a_phi,
+              const Box&       a_cellBox,
+              const DataIndex& a_dit,
+              const int        a_dir);
 
   /*!
     @brief Compute face-centered fluxes
@@ -1173,24 +1185,6 @@ protected:
   */
   void
   computeFlux(const LevelData<EBCellFAB>& a_phi);
-
-  /*!
-    @brief Increment coarse flux register
-    @param[in] a_phi Cell-centered data on the coarse level. 
-  */
-  void
-  incrementFRCoar(const LevelData<EBCellFAB>& a_phi);
-
-  /*!
-    @brief Increment coarse flux register
-    @param[in] a_phiFine Cell-centered data on the fine level
-    @param[in] a_phi     Cell-centered data on the coarse level
-    @param[in] a_finerOp Finer operator
-  */
-  void
-  incrementFRFine(const LevelData<EBCellFAB>&       a_phiFine,
-                  const LevelData<EBCellFAB>&       a_phi,
-                  AMRLevelOp<LevelData<EBCellFAB>>& a_finerOp);
 
   /*!
     @brief Reflux algorithm.
