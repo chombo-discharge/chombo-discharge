@@ -1725,6 +1725,11 @@ EBHelmholtzOp::computeRelaxationCoefficient()
   // TLDR: Compute the relaxation coefficient in the operator. This is just the inverted diagonal of kappa*L(phi). It is inverted
   //       for performance reasons (because we divide by the diagonal in the relaxation steps).
 
+  Real sor_factor = 1.0;
+
+  ParmParse pp("EBHelmholtzOp");
+  pp.query("sor_factor", sor_factor);
+
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit) {
     const Box cellBox = m_eblg.getDBL()[dit()];
 
@@ -1750,7 +1755,7 @@ EBHelmholtzOp::computeRelaxationCoefficient()
 
     // At this point we have computed kappa*diag(L), but we need to invert it.
     auto inversionKernel = [&](const IntVect& iv) -> void {
-      regRel(iv, m_comp) = 1. / regRel(iv, m_comp);
+      regRel(iv, m_comp) = sor_factor / regRel(iv, m_comp);
     };
     BoxLoops::loop(cellBox, inversionKernel);
 
@@ -1762,7 +1767,7 @@ EBHelmholtzOp::computeRelaxationCoefficient()
       // m_betaWeight holds the diagonal part of kappa*div(b*grad(phi)) in the cut-cells.
       const Real betaWeight = m_beta * m_betaDiagWeight[dit()](vof, m_comp);
 
-      m_relCoef[dit()](vof, m_comp) = 1. / (alphaWeight + betaWeight);
+      m_relCoef[dit()](vof, m_comp) = sor_factor / (alphaWeight + betaWeight);
     };
 
     BoxLoops::loop(m_vofIterStenc[dit()], irregularKernel);
