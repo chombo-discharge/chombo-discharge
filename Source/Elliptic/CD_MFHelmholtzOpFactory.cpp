@@ -521,10 +521,6 @@ MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid&       a_coarMflg,
 
           hasCoarser = true;
 
-          if (procID() == 0) {
-            std::cout << coarDomain << "\t" << block << std::endl;
-          }
-
           break;
         }
         else {
