@@ -903,6 +903,8 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
     pout() << "==================================" << endl;
     pout() << "Driver::run -- ending run  " << endl;
     pout() << "==================================" << endl;
+
+    MemoryReport::getMaxMinMemoryUsage();
   }
 }
 

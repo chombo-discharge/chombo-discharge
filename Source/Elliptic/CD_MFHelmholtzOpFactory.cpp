@@ -507,7 +507,7 @@ MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid&       a_coarMflg,
     if (gridsCoverDomain(a_fineMflg)) {
       int block = a_blockingFactor;
 
-      while (block >= 2) {
+      while (block > 1) {
         if (domainBox.coarsenable(block)) {
           Vector<Box> boxes;
           Vector<int> procs;
