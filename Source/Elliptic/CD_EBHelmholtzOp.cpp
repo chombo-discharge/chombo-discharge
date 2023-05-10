@@ -2019,8 +2019,8 @@ EBHelmholtzOp::reflux(LevelData<EBCellFAB>&             a_Lphi,
                       AMRLevelOp<LevelData<EBCellFAB>>& a_finerOp)
 {
   CH_TIMERS("EBHelmholtzOp::reflux");
-  CH_TIMER("EBHelmholtzOp::reflux::flux_this_level",t1);
-  CH_TIMER("EBHelmholtzOp::reflux::flux_finer_level",t2);  
+  CH_TIMER("EBHelmholtzOp::reflux::flux_this_level", t1);
+  CH_TIMER("EBHelmholtzOp::reflux::flux_finer_level", t2);
   // This routine computes the fluxes on the coarse and fine-side of the boundary and does a refluxing operation where
   // we subtract the contribution from the coarse grid fluxes in a_Lphi and add in the contribution from the fine grid fluxes.
   //
@@ -2039,7 +2039,7 @@ EBHelmholtzOp::reflux(LevelData<EBCellFAB>&             a_Lphi,
 
   CH_START(t2);
   finerOp.computeFlux(a_phiFine);
-  CH_STOP(t2);  
+  CH_STOP(t2);
 
   const Real scale = 1.0 / m_dx;
 
