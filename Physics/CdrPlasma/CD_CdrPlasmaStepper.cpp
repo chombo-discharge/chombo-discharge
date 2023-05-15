@@ -4867,6 +4867,7 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
     // I want to coarsen and interpolate this data because it might otherwise contain bogus values.
     const Interval interv(0, numVars - 1);
     m_amr->arithmeticAverage(a_plotVars, m_realm, phase::gas, interv);
+    m_amr->interpGhostPwl(a_plotVars, m_realm, phase::gas);
   }
 }
 
