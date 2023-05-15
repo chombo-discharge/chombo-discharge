@@ -565,15 +565,21 @@ namespace Physics {
 	@brief Value between 0 and 1. The maximum deviation from V(t) in percent, i.e. deltaVPercent=deltaV/V
       */
       Real m_deltaVPercent;
+
       /*!
 	@brief Time at the end of the input voltage curve
       */
       Real m_endTime;
 
       /*!
+	@brief Time at the peak of the input voltage curve
+      */
+      Real m_peakTime;
+
+      /*!
 	@brief previous time step
       */
-      Real m_prevDt{0.0};
+      Real m_prevDt;
 
       /*!
 	@brief Variable step size for K-integration algorithm (factor of dx)

@@ -21,3 +21,4 @@ StreamerInceptionStepper.min_dt        = 0.0001E-06                           # 
 StreamerInceptionStepper.max_dt        = 0.0001                          # Maximum permitted time step
 StreamerInceptionStepper.delta_v_percent = 0.1                        # Value between 0 and 1. The maximum deviation from V(t) in percent, i.e. deltaVPercent=deltaV/V
 StreamerInceptionStepper.end_time        = 0.000169                    # Time at the end of the input voltage curve
+StreamerInceptionStepper.peak_time       = 3.272E-07                    # Time at the peak of the input voltage curve

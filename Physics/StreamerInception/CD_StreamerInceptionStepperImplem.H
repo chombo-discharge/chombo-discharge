@@ -48,6 +48,8 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
 
   this->parseOptions();
 
+  m_prevDt = 0.0;
+
   m_rho = [](const RealVect x) -> Real {
     return 0.0;
   };
@@ -454,6 +456,7 @@ StreamerInceptionStepper<P, F, C>::parseTransportAlgorithm() noexcept
   pp.get("min_dt", m_minDt);
   pp.get("delta_v_percent", m_deltaVPercent);
   pp.get("end_time", m_endTime);
+  pp.get("peak_time", m_peakTime);
 
   m_minDt = std::max(m_minDt, 0.0);
 
@@ -1060,20 +1063,35 @@ StreamerInceptionStepper<P, F, C>::computeDt()
     auto computeGradient = [this](const Real& a_timeStep) {
       return (m_voltageCurve(m_time + a_timeStep) - m_voltageCurve(m_time)) / a_timeStep;
     };
-    if(m_prevDt == 0){
-      m_prevDt = m_minDt;
+    if(m_time <= m_peakTime){
+      Real currDt = 2*m_minDt;
+      Real currGradient = computeGradient(currDt);
+      const Real currVoltage = m_voltageCurve(m_time);
+      Real deltaV = currGradient*currDt;
+
+      while(std::abs(deltaV) <= std::abs(m_deltaVPercent*currVoltage) && (m_time + currDt) < m_endTime){
+	currDt += m_minDt;
+	currGradient = computeGradient(currDt);
+	deltaV = currGradient*currDt;
+      }
+      
+      dt = currDt-m_minDt;
     }
-    Real       currGradient = computeGradient(m_prevDt);
-    while(currGradient == 0){
-      m_prevDt += m_minDt;
-      currGradient = computeGradient(m_prevDt);
+    else{
+      if(m_prevDt == 0){
+	m_prevDt = m_minDt;
+      }
+      Real       currGradient = computeGradient(m_prevDt);
+      while(currGradient == 0){
+	m_prevDt += m_minDt;
+	currGradient = computeGradient(m_prevDt);
+      }
+      Real currVoltage  = m_voltageCurve(m_time);
+      if(currVoltage == 0){
+	currVoltage = m_voltageCurve(m_time+m_prevDt);
+      }
+      dt = std::abs(m_deltaVPercent*currVoltage/currGradient);
     }
-    Real currVoltage  = m_voltageCurve(m_time);
-    if(currVoltage == 0){
-      currVoltage = m_voltageCurve(m_time+m_prevDt);
-    }
-    dt = std::abs(m_deltaVPercent*currVoltage/currGradient);
-    
     dt = std::min(dt, m_maxDt);
     dt = std::max(dt, m_minDt);
   }
