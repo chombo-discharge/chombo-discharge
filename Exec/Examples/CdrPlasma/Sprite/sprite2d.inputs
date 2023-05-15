@@ -108,7 +108,7 @@ CdrCTU.bc.y.lo              = data                    # 'data', 'function', 'wal
 CdrCTU.bc.y.hi              = data                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.bc.z.lo              = data                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.bc.z.hi              = data                    # 'data', 'function', 'wall', 'outflow', or 'solver'
-CdrCTU.slope_limiter        = none                    # Slope limiter. 'none', 'minmod', 'mc', or 'superbee'
+CdrCTU.slope_limiter        = minmod                  # Slope limiter. 'none', 'minmod', 'mc', or 'superbee'
 CdrCTU.use_ctu              = true                    # If true, use CTU. Otherwise it's DTU.
 CdrCTU.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 CdrCTU.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
@@ -134,7 +134,7 @@ CdrCTU.gmg_smoother         = red_black               # Relaxation type. 'jacobi
 # ====================================================================================================
 McPhoto.verbosity          = -1            # Solver verbosity.
 McPhoto.instantaneous      = true          # Instantaneous transport or not
-McPhoto.max_photons        = 128           # Maximum no. generated in a cell (< = 0 yields physical photons)
+McPhoto.max_photons        = 16           # Maximum no. generated in a cell (< = 0 yields physical photons)
 McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
 McPhoto.transparent_eb     = false         # Turn on/off transparent boundaries. Only for instantaneous=true
 McPhoto.pvr_buffer         = 0             # Buffer for PVR. 
@@ -189,7 +189,7 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 CdrPlasmaGodunovStepper.verbosity         = -1            # Class verbosity
 CdrPlasmaGodunovStepper.solver_verbosity  = -1            # Individual solver verbosities
 CdrPlasmaGodunovStepper.min_dt            = 0.            # Minimum permitted time step
-CdrPlasmaGodunovStepper.max_dt            = 25E-6         # Maximum permitted time step
+CdrPlasmaGodunovStepper.max_dt            = 100E-6        # Maximum permitted time step
 CdrPlasmaGodunovStepper.cfl               = 0.8	          # CFL number
 CdrPlasmaGodunovStepper.use_regrid_slopes = true          # Use slopes when regridding (or not)
 CdrPlasmaGodunovStepper.field_coupling    = semi_implicit # Field coupling. 'explicit' or 'semi_implicit'
@@ -212,14 +212,14 @@ CdrPlasmaGodunovStepper.profile           = true          # Turn on/off performa
 CdrPlasmaStreamerTagger.buffer            = 8		 # Refinement buffer
 CdrPlasmaStreamerTagger.verbosity         = -1           # Verbosity
 CdrPlasmaStreamerTagger.num_ref_boxes     = 1            # Manual refinement            
-CdrPlasmaStreamerTagger.ref_box1_lo       = -50E3 70E3   # Between this corner
-CdrPlasmaStreamerTagger.ref_box1_hi       = 50E3  85E3   # and this corner
-CdrPlasmaStreamerTagger.ref_box1_lvl      = 3            # Refine to this level
+CdrPlasmaStreamerTagger.ref_box1_lo       = -100E3 70E3   # Between this corner
+CdrPlasmaStreamerTagger.ref_box1_hi       = 100E3  85E3   # and this corner
+CdrPlasmaStreamerTagger.ref_box1_lvl      = 4            # Refine to this level
 
 CdrPlasmaStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
 CdrPlasmaStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
 CdrPlasmaStreamerTagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
-CdrPlasmaStreamerTagger.coarsen_alpha     = 0.25         # Set alpha coarsening. Higher => Less mesh
+CdrPlasmaStreamerTagger.coarsen_alpha     = 0.5          # Set alpha coarsening. Higher => Less mesh
 CdrPlasmaStreamerTagger.max_coarsen_lvl   = 4            # Set max coarsening depth
 
 # ====================================================================================================
