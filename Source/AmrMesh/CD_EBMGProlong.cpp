@@ -64,8 +64,6 @@ EBMGProlong::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar
   const EBISLayout& ebislCoFi = m_eblgCoFi.getEBISL();
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
 
-  m_dataCoFi.define(dblCoFi, 1, IntVect::Zero, EBCellFactory(ebislCoFi));
-
   // Figure out the EB restriction stencils.
   m_vofitFine.define(dblCoFi);
   m_prolongStencils.define(dblCoFi);
@@ -101,7 +99,10 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
                              const LevelData<EBCellFAB>& a_coarData,
                              const Interval              a_variables) const noexcept
 {
-  CH_TIME("EBMGProlong::prolongResidual");
+  CH_TIMERS("EBMGProlong::prolongResidual");
+  CH_TIMER("EBMGProlong::prolongResidual::define_buffer", t1);
+  CH_TIMER("EBMGProlong::prolongResidual::regular_cells", t2);
+  CH_TIMER("EBMGProlong::prolongResidual::irregular_cells", t3);
 
   CH_assert(m_isDefined);
   CH_assert(a_fineData.nComp() > a_variables.end());
@@ -109,13 +110,20 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
 
   const Box refineBox(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
 
+  const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
+  const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
+
+  CH_START(t1);
+  LevelData<EBCellFAB> dataCoFi(dblCoFi, 1, IntVect::Zero, EBCellFactory(ebislCoFi));
+  CH_STOP(t1);
+
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
 
     // Copy coarse data to buffer.
     const Interval srcComps = Interval(ivar, ivar);
     const Interval dstComps = Interval(0, 0);
 
-    a_coarData.copyTo(srcComps, m_dataCoFi, dstComps);
+    a_coarData.copyTo(srcComps, dataCoFi, dstComps);
 
     // Add coarse-grid residual to the fine grid. Recall that m_eblgCoFi is a coarsening of the fine grid
     // so this runs over the part of the coarse level that is covered by the finer level.
@@ -124,7 +132,7 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
 
     for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
       EBCellFAB&       fineData = a_fineData[dit()];
-      const EBCellFAB& coarData = m_dataCoFi[dit()];
+      const EBCellFAB& coarData = dataCoFi[dit()];
 
       FArrayBox&       fineDataReg = fineData.getFArrayBox();
       const FArrayBox& coarDataReg = coarData.getFArrayBox();
@@ -161,8 +169,13 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
       const Box    coarBox  = dblCoFi[dit()];
       VoFIterator& fineVoFs = m_vofitFine[dit()];
 
+      CH_START(t2);
       BoxLoops::loop(coarBox, regularKernel);
+      CH_STOP(t2);
+
+      CH_START(t3);
       BoxLoops::loop(fineVoFs, irregularKernel);
+      CH_STOP(t3);
     }
   }
 }

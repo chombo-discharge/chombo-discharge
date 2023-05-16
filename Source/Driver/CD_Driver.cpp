@@ -2148,7 +2148,7 @@ Driver::writePlotFile(const std::string a_filename)
   CH_TIMER("Driver::writePlotFile::copy_internal", t4);
   CH_TIMER("Driver::writePlotFile::hdf5_write", t5);
 
-  if (m_verbosity > 3) {
+  if (m_verbosity > 2) {
     pout() << "Driver::writePlotFile(string)" << endl;
   }
 
@@ -2180,27 +2180,37 @@ Driver::writePlotFile(const std::string a_filename)
     handle.close();
 #endif
 
+    Timer timer("Driver::writePlotFile");
     for (int lvl = 0; lvl <= maxPlotLevel; lvl++) {
+      timer.startEvent("Allocate");
       LevelData<EBCellFAB> outputData;
       m_amr->allocate(outputData, m_realm, phase::gas, lvl, numOutputComp);
       DataOps::setValue(outputData, 0.0);
+      timer.stopEvent("Allocate");
 
       // Relevant components collect data for IO.
       int comp = 0;
+      timer.startEvent("Assemble data");
+      if (m_verbosity > 2) {
+        pout() << "Driver::writePlotFile -- assembling data on level = " << lvl << endl;
+      }
       m_timeStepper->writePlotData(outputData, comp, lvl);
       if (!(m_cellTagger.isNull())) {
         m_cellTagger->writePlotData(outputData, comp, lvl);
       }
       this->writePlotData(outputData, comp, lvl);
+      timer.stopEvent("Assemble data");
 
       // Do the HDF5 write.
 #ifdef CH_USE_HDF5
-      HDF5Handle handle(a_filename.c_str(), HDF5Handle::OPEN_RDWR);
-      if (m_verbosity >= 3) {
-        pout() << "Driver::writePlotFile -- writing level = " << lvl << endl;
+      if (m_verbosity > 2) {
+        pout() << "Driver::writePlotFile -- HDF5 write on level = " << lvl << endl;
+        MemoryReport::getMaxMinMemoryUsage();
       }
 
-      const int refRat = (lvl < m_amr->getFinestLevel()) ? m_amr->getRefinementRatios()[lvl] : 1;
+      timer.startEvent("HDF5 write");
+      HDF5Handle handle(a_filename.c_str(), HDF5Handle::OPEN_RDWR);
+      const int  refRat = (lvl < m_amr->getFinestLevel()) ? m_amr->getRefinementRatios()[lvl] : 1;
       DischargeIO::writeEBHDF5Level(handle,
                                     outputData,
                                     m_amr->getDomains()[lvl],
@@ -2211,7 +2221,16 @@ Driver::writePlotFile(const std::string a_filename)
                                     refRat,
                                     m_numPlotGhost);
       handle.close();
+      timer.stopEvent("HDF5 write");
+
+      if (m_verbosity > 2) {
+        MemoryReport::getMaxMinMemoryUsage();
+      }
 #endif
+    }
+
+    if (m_verbosity >= 2) {
+      timer.eventReport(pout(), false);
     }
   }
   else {

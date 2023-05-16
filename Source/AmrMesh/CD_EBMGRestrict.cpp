@@ -61,8 +61,6 @@ EBMGRestrict::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoa
   const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
   const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
 
-  m_dataCoFi.define(dblCoFi, 1, IntVect::Zero, EBCellFactory(ebislCoFi));
-
   // Weighting factor for stencils.
   const Real fineWeight = 1. / std::pow(m_refRat, SpaceDim);
 
@@ -104,7 +102,10 @@ EBMGRestrict::restrictResidual(LevelData<EBCellFAB>&       a_coarData,
                                const LevelData<EBCellFAB>& a_fineData,
                                const Interval              a_variables) const noexcept
 {
-  CH_TIME("EBMGRestrict::restrictResidual");
+  CH_TIMERS("EBMGRestrict::restrictResidual");
+  CH_TIMER("EBMGRestrict::restrictResidual::define_buffer", t1);
+  CH_TIMER("EBMGRestrict::restrictResidual::regular_cells", t2);
+  CH_TIMER("EBMGRestrict::restrictResidual::irregular_cells", t3);
 
   CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() > a_variables.end());
@@ -114,11 +115,16 @@ EBMGRestrict::restrictResidual(LevelData<EBCellFAB>&       a_coarData,
   const Box  refineBox     = Box(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
   const Real regFineWeight = 1.0 / std::pow(m_refRat, SpaceDim);
 
-  const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
+  const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
+  const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
+
+  CH_START(t1);
+  LevelData<EBCellFAB> dataCoFi(dblCoFi, 1, IntVect::Zero, EBCellFactory(ebislCoFi));
+  CH_STOP(t1);
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
-    for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
-      EBCellFAB&       coarData = m_dataCoFi[dit()];
+    for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
+      EBCellFAB&       coarData = dataCoFi[dit()];
       const EBCellFAB& fineData = a_fineData[dit()];
 
       FArrayBox&       coarDataReg = coarData.getFArrayBox();
@@ -151,17 +157,22 @@ EBMGRestrict::restrictResidual(LevelData<EBCellFAB>&       a_coarData,
       // Run kernels
       coarData.setVal(0.0);
 
-      const Box    coarBox  = dblCoar[dit()];
+      const Box    coarBox  = dblCoFi[dit()];
       VoFIterator& coarVoFs = m_vofitCoar[dit()];
 
+      CH_START(t2);
       BoxLoops::loop(coarBox, regularKernel);
+      CH_STOP(t2);
+
+      CH_START(t3);
       BoxLoops::loop(coarVoFs, irregularKernel);
+      CH_STOP(t3);
     }
 
     const Interval srcComps = Interval(0, 0);
     const Interval dstComps = Interval(ivar, ivar);
 
-    m_dataCoFi.copyTo(srcComps, a_coarData, dstComps);
+    dataCoFi.copyTo(srcComps, a_coarData, dstComps);
   }
 }
 

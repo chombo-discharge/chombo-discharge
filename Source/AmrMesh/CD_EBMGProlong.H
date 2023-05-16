@@ -94,11 +94,6 @@ protected:
   EBLevelGrid m_eblgCoFi;
 
   /*!
-    @brief Buffer data on the coarsened fine grids
-  */
-  mutable LevelData<EBCellFAB> m_dataCoFi;
-
-  /*!
     @brief Iterator for iterating over cut-cells on the fine level
   */
   mutable LayoutData<VoFIterator> m_vofitFine;
