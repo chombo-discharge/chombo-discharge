@@ -413,9 +413,11 @@ DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
         int numFaces = 0;
         for (int dir = 0; dir < SpaceDim; dir++) {
           for (SideIterator sit; sit.ok(); ++sit) {
-            const std::vector<FaceIndex>& faces = ebisbox.getFaces(vof, dir, sit()).stdVector();
+            const Vector<FaceIndex>& faces = ebisbox.getFaces(vof, dir, sit());
 
-            for (const auto& face : faces) {
+            for (int i = 0; i < faces.size(); i++) {
+              const FaceIndex& face = faces[i];
+
               cellData(vof, comp) += fluxData[dir](face, comp);
             }
 

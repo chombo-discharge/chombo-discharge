@@ -154,6 +154,7 @@ EBGhostCellInterpolator::interpolate(LevelData<EBCellFAB>&       a_phiFine,
 
   CH_assert(a_phiFine.nComp() > a_variables.end());
   CH_assert(a_phiCoar.nComp() > a_variables.end());
+  CH_assert(a_phiFine.nComp() == a_phiCoar.nComp());
 
   // Define buffer that we need. Need two ghost cells for doing the coarse-side slopes.
   const DisjointBoxLayout& coFiGrids = m_eblgCoFi.getDBL();
@@ -176,8 +177,11 @@ EBGhostCellInterpolator::interpolate(LevelData<EBCellFAB>&       a_phiFine,
       EBCellFAB&       phiFine = a_phiFine[dit()];
       const EBCellFAB& phiCoar = grownCoarData[dit()];
 
+      FArrayBox&       phiFineReg = phiFine.getFArrayBox();
+      const FArrayBox& phiCoarReg = phiCoar.getFArrayBox();
+
       CH_START(t3);
-      this->interpolateRegular(phiFine.getFArrayBox(), phiCoar.getFArrayBox(), dit(), icomp, 0, a_interpType);
+      this->interpolateRegular(phiFineReg, phiCoarReg, dit(), icomp, 0, a_interpType);
       CH_STOP(t3);
 
       CH_START(t4);
