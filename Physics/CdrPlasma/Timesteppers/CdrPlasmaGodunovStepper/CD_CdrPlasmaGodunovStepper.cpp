@@ -360,7 +360,7 @@ CdrPlasmaGodunovStepper::advance(const Real a_dt)
 
   m_timer->startEvent("Calc physics plot");
   this->computePhysicsPlotVars(m_physicsPlotVars);
-  m_timer->startEvent("Calc physics plot");
+  m_timer->stopEvent("Calc physics plot");
 
   if (m_profile) {
     m_timer->eventReport(pout(), false);
