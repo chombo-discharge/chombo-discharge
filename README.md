@@ -1,10 +1,13 @@
 chombo-discharge
 ----------------
 
+[![DOI](https://zenodo.org/badge/355565674.svg)](https://zenodo.org/badge/latestdoi/355565674)
+[![DOI](https://zenodo.org/badge/355565674.svg)](https://zenodo.org/badge/latestdoi/355565674)
+
 This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for discharge simulations with adaptive mesh refinement (AMR) on embedded boundary grids.
 A modified version of ``Chombo`` is distributed together with this code.
 
-[![DOI](https://zenodo.org/badge/355565674.svg)](https://zenodo.org/badge/latestdoi/355565674)
+
 
 <p align="center">
    <img src="./Docs/Sphinx/source/_static/figures/BranchingAir.gif" width="50%">
