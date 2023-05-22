@@ -11,8 +11,8 @@ AmrMesh.lo_corner        = -200E3 0E3   # Low corner of problem domain
 AmrMesh.hi_corner        =  200E3 200E3 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 64      # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 10           # Maximum amr depth
-AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
+AmrMesh.max_amr_depth    = 8           # Maximum amr depth
+AmrMesh.max_sim_depth    = 8          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm   = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
@@ -209,7 +209,7 @@ CdrPlasmaGodunovStepper.profile           = true          # Turn on/off performa
 # ====================================================================================================
 # CdrPlasmaStreamerTagger class options
 # ====================================================================================================
-CdrPlasmaStreamerTagger.buffer            = 8		 # Refinement buffer
+CdrPlasmaStreamerTagger.buffer            = 0		 # Refinement buffer
 CdrPlasmaStreamerTagger.verbosity         = -1           # Verbosity
 CdrPlasmaStreamerTagger.num_ref_boxes     = 1            # Manual refinement            
 CdrPlasmaStreamerTagger.ref_box1_lo       = -100E3 70E3   # Between this corner

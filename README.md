@@ -1,4 +1,4 @@
-
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.05335/status.svg)](https://doi.org/10.21105/joss.05335)
 [![DOI](https://zenodo.org/badge/355565674.svg)](https://zenodo.org/badge/latestdoi/355565674)
 
 chombo-discharge
