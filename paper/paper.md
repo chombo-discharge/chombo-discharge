@@ -45,18 +45,18 @@ Many solvers already exist in chombo-discharge, all of which are parallelized an
 * An electrostatic solver (with support for discontinuous coefficients).
 * Kinetic Monte Carlo chemistry solvers. 
 * Radiative transfer solvers (continuum and Monte Carlo).
-* Various particle solvers, e.g. for Monte Carlo radiative transfer, tracer particles, and microscopic drift-diffusion.
+* Various particle solvers, e.g., for Monte Carlo radiative transfer, tracer particles, and microscopic drift-diffusion.
 * ODE solvers defined over volume or surface meshes.
 
-All solvers exist as stand-alone applications, and many of them are also coupled through more complex physics applications that aim at resolving different types of discharge phenomena (e.g. statistical inception models, or particle and fluid models of streamer discharges).
+All solvers exist as stand-alone applications, and many of them are also coupled through more complex physics applications that aim at resolving different types of discharge phenomena (e.g., statistical inception models, or particle and fluid models of streamer discharges).
 The interaction of these solvers occurs through a common AMR "core", which can also use dual grids where e.g. fluid and particle kernels are load-balanced separately.
 Depending on their needs, users can therefore enter the framework at several levels. 
-E.g. they need to learn interfaces when using existing applications (e.g., streamer models); use C++ APIs if developing new physics applications, or use the EB-AMR infrastructure if contributing with new solvers.
+For example, they need to learn interfaces when using existing applications (e.g., streamer models); use C++ APIs if developing new physics applications, or use the EB-AMR infrastructure if contributing with new solvers.
 
 # Statement of need
 
 There is already a number of discharge simulation codes currently available.
-Commercial codes used for simulating discharges include COMSOL (see e.g. @mcplas), ANSYS Fluent (see e.g. @Niknezhad_2021), and PLASIMO [@plasimo].
+Commercial codes used for simulating discharges include COMSOL [@mcplas], ANSYS Fluent [@Niknezhad_2021], and PLASIMO [@plasimo].
 Another example is Afivo-streamer [@Teunissen:2017], which is also open source and uses Cartesian AMR.
 
 While chombo-discharge is not the only open-source discharge simulation code, it has a number of unique features.
