@@ -102,6 +102,12 @@ namespace Physics {
       virtual void
       parseRuntimeOptions() = 0;
 
+      /*!
+	@brief Compute some thing that go into plot files
+      */
+      virtual void
+      prePlot() override;
+
 #ifdef CH_USE_HDF5
       /*!  
 	@brief Write checkpoint data to file.

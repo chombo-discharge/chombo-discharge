@@ -68,6 +68,9 @@ EBMGRestrict::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoa
   m_vofitCoar.define(dblCoFi);
   m_restrictStencils.define(dblCoFi);
 
+  // Note: MUST have the same number of ghost cells as the buffer being defined in the restriction function.
+  m_copier.ghostDefine(dblCoFi, m_eblgCoar.getDBL(), m_eblgCoar.getDomain(), IntVect::Zero);
+
   for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
     const Box&       cellBox = dblCoFi[dit()];
     const EBISBox&   ebisBox = ebislCoFi[dit()];
@@ -103,7 +106,6 @@ EBMGRestrict::restrictResidual(LevelData<EBCellFAB>&       a_coarData,
                                const Interval              a_variables) const noexcept
 {
   CH_TIMERS("EBMGRestrict::restrictResidual");
-  CH_TIMER("EBMGRestrict::restrictResidual::define_buffer", t1);
   CH_TIMER("EBMGRestrict::restrictResidual::regular_cells", t2);
   CH_TIMER("EBMGRestrict::restrictResidual::irregular_cells", t3);
 
@@ -118,13 +120,11 @@ EBMGRestrict::restrictResidual(LevelData<EBCellFAB>&       a_coarData,
   const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
   const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
 
-  CH_START(t1);
-  LevelData<EBCellFAB> dataCoFi(dblCoFi, 1, IntVect::Zero, EBCellFactory(ebislCoFi));
-  CH_STOP(t1);
+  LevelData<EBCellFAB> coFiData(dblCoFi, 1, IntVect::Zero, EBCellFactory(ebislCoFi));
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
     for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
-      EBCellFAB&       coarData = dataCoFi[dit()];
+      EBCellFAB&       coarData = coFiData[dit()];
       const EBCellFAB& fineData = a_fineData[dit()];
 
       FArrayBox&       coarDataReg = coarData.getFArrayBox();
@@ -172,7 +172,7 @@ EBMGRestrict::restrictResidual(LevelData<EBCellFAB>&       a_coarData,
     const Interval srcComps = Interval(0, 0);
     const Interval dstComps = Interval(ivar, ivar);
 
-    dataCoFi.copyTo(srcComps, a_coarData, dstComps);
+    coFiData.copyTo(srcComps, a_coarData, dstComps, m_copier);
   }
 }
 

@@ -451,6 +451,14 @@ public:
   assign(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
 
   /*!
+    @brief Local assignment function
+    @param[out] a_lhs. Equal to a_rhs on output
+    @param[in]  a_rhs. Data
+  */
+  void
+  assignLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
+
+  /*!
     @brief Compute the dot product??
   */
   Real
@@ -893,6 +901,11 @@ protected:
     @brief Lower-left corner of domain
   */
   RealVect m_probLo;
+
+  /*!
+    @brief Copier for making assign function go faster
+  */
+  Copier m_copier;
 
   /*!
     @brief Fine level grid (if the operator has a fine level)

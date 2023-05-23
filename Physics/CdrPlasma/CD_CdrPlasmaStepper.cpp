@@ -4703,6 +4703,16 @@ CdrPlasmaStepper::writeJ(LevelData<EBCellFAB>& a_output, int& a_icomp, const int
 }
 
 void
+CdrPlasmaStepper::prePlot()
+{
+  CH_TIME("CdrPlasmaStepper::prePlot");
+  if (m_verbosity > 3) {
+    pout() << "CdrPlasmaStepper::prePlot" << endl;
+  }
+  this->computePhysicsPlotVars(m_physicsPlotVars);
+}
+
+void
 CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexcept
 {
   CH_TIME("CdrPlasmaStepper::computePhysicsPlotVars");

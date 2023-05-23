@@ -322,11 +322,11 @@ MFHelmholtzOpFactory::defineMultigridLevels()
           const int dummy = 1;
 
           auto coarAcoef = RefCountedPtr<LevelData<MFCellFAB>>(
-            new LevelData<MFCellFAB>(dblCoar, dummy, nghost * IntVect::Unit, cellFact));
+            new LevelData<MFCellFAB>(dblCoar, dummy, m_ghostPhi, cellFact));
           auto coarBcoef = RefCountedPtr<LevelData<MFFluxFAB>>(
-            new LevelData<MFFluxFAB>(dblCoar, dummy, nghost * IntVect::Unit, fluxFact));
+            new LevelData<MFFluxFAB>(dblCoar, dummy, m_ghostPhi, fluxFact));
           auto coarBcoefIrreg = RefCountedPtr<LevelData<MFBaseIVFAB>>(
-            new LevelData<MFBaseIVFAB>(dblCoar, dummy, nghost * IntVect::Unit, ivFact));
+            new LevelData<MFBaseIVFAB>(dblCoar, dummy, m_ghostPhi, ivFact));
           auto coarJump = RefCountedPtr<LevelData<BaseIVFAB<Real>>>(
             new LevelData<BaseIVFAB<Real>>(dblCoar, m_nComp, nghost * IntVect::Zero, irregFact));
 

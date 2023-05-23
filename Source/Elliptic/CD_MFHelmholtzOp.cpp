@@ -72,6 +72,8 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
   m_Acoef        = a_Acoef;
   m_Bcoef        = a_Bcoef;
   m_BcoefIrreg   = a_BcoefIrreg;
+  m_ghostPhi     = a_ghostPhi;
+  m_ghostRhs     = a_ghostRhs;
 
   if (a_hasCoar) {
     m_mflgCoFi = a_mflgCoFi;
@@ -245,7 +247,7 @@ MFHelmholtzOp::getBcoefIrreg()
 void
 MFHelmholtzOp::setJump(RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_jump)
 {
-  CH_TIME("MFHelmholtzOp::setJump(RefCountedPtr<BaseIVFAB<Real> >)");
+  CH_TIME("MFHelmholtzOp::setJump");
 
   m_jump = a_jump;
 }
@@ -253,7 +255,7 @@ MFHelmholtzOp::setJump(RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_jump)
 int
 MFHelmholtzOp::refToCoarser()
 {
-  CH_TIME("MFHelmholtzOp::refToCoarser()");
+  CH_TIME("MFHelmholtzOp::refToCoarser");
 
   return m_refToCoar;
 }
@@ -261,7 +263,7 @@ MFHelmholtzOp::refToCoarser()
 void
 MFHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta)
 {
-  CH_TIME("MFHelmholtzOp::setAlphaAndBeta(Real, Real)");
+  CH_TIME("MFHelmholtzOp::setAlphaAndBeta");
 
   for (auto& op : m_helmOps) {
     op.second->setAlphaAndBeta(a_alpha, a_beta);
@@ -271,7 +273,7 @@ MFHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta)
 void
 MFHelmholtzOp::divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs)
 {
-  CH_TIME("MFHelmholtzOp::setAlphaAndBeta(Real, Real)");
+  CH_TIME("MFHelmholtzOp::divideByIdentityCoef");
 
   LevelData<EBCellFAB> rhs;
 
@@ -285,7 +287,7 @@ MFHelmholtzOp::divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs)
 void
 MFHelmholtzOp::applyOpNoBoundary(LevelData<MFCellFAB>& a_ans, const LevelData<MFCellFAB>& a_phi)
 {
-  CH_TIME("MFHelmholtzOp::applyOpNoBoundary(LD<MFCellFAB>, LD<MFCellFAB>)");
+  CH_TIME("MFHelmholtzOp::applyOpNoBoundary");
 
   LevelData<EBCellFAB> ans;
   LevelData<EBCellFAB> phi;
@@ -325,7 +327,7 @@ MFHelmholtzOp::getFlux(MFFluxFAB&                  a_flux,
 void
 MFHelmholtzOp::incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, Real a_scale)
 {
-  CH_TIME("MFHelmholtzOp::incr(LD<MFCellFAB>, LD<MFCellFAB>, Real)");
+  CH_TIME("MFHelmholtzOp::incr");
 
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit) {
     a_lhs[dit()].plus(a_rhs[dit()], a_scale);
@@ -335,7 +337,7 @@ MFHelmholtzOp::incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_r
 void
 MFHelmholtzOp::scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale)
 {
-  CH_TIME("MFHelmholtzOp::scale(LD<MFCellFAB>, Real)");
+  CH_TIME("MFHelmholtzOp::scale");
 
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit) {
     a_lhs[dit()] *= a_scale;
@@ -345,7 +347,7 @@ MFHelmholtzOp::scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale)
 void
 MFHelmholtzOp::setToZero(LevelData<MFCellFAB>& a_lhs)
 {
-  CH_TIME("MFHelmholtzOp::setToZero(LD<MFCellFAB>)");
+  CH_TIME("MFHelmholtzOp::setToZero)");
 
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit) {
     a_lhs[dit()].setVal(0.0);
@@ -355,27 +357,26 @@ MFHelmholtzOp::setToZero(LevelData<MFCellFAB>& a_lhs)
 void
 MFHelmholtzOp::assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs)
 {
-  CH_TIME("MFHelmholtzOp::assign(LD<MFCellFAB>, LD<MFCellFAB>)");
+  CH_TIME("MFHelmholtzOp::assign");
 
-#if 1
-  a_rhs.copyTo(a_lhs);
-#else
-  for (auto& op : m_helmOps) {
-    LevelData<EBCellFAB> lhs;
-    LevelData<EBCellFAB> rhs;
-
-    MultifluidAlias::aliasMF(lhs, op.first, a_lhs);
-    MultifluidAlias::aliasMF(rhs, op.first, a_rhs);
-
-    op.second->assign(lhs, rhs);
+  if (!(m_copier.isDefined())) {
+    m_copier.define(a_rhs.disjointBoxLayout(), a_lhs.disjointBoxLayout(), m_ghostPhi);
   }
-#endif
+  a_rhs.copyTo(a_lhs, m_copier);
+}
+
+void
+MFHelmholtzOp::assignLocal(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs)
+{
+  CH_TIME("MFHelmholtzOp::assignLocal");
+
+  a_rhs.localCopyTo(a_lhs);
 }
 
 Real
 MFHelmholtzOp::norm(const LevelData<MFCellFAB>& a_lhs, int a_order)
 {
-  CH_TIME("MFHelmholtzOp::norm(LD<MFCellFAB>)");
+  CH_TIME("MFHelmholtzOp::norm");
 
   Real norm = 0.0;
   for (auto& op : m_helmOps) {
@@ -384,7 +385,8 @@ MFHelmholtzOp::norm(const LevelData<MFCellFAB>& a_lhs, int a_order)
     MultifluidAlias::aliasMF(lhs, op.first, a_lhs);
 
     const Real curNorm = op.second->norm(lhs, a_order);
-    norm               = std::max(norm, curNorm);
+
+    norm = std::max(norm, curNorm);
   }
 
   return norm;
@@ -393,7 +395,7 @@ MFHelmholtzOp::norm(const LevelData<MFCellFAB>& a_lhs, int a_order)
 Real
 MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs)
 {
-  CH_TIME("MFHelmholtzOp::dotProduct(LD<MFCellFAB>, LD<MFCellFAB>)");
+  CH_TIME("MFHelmholtzOp::dotProduct)");
 
   Real ret = 0.0;
 
@@ -440,7 +442,7 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
 void
 MFHelmholtzOp::create(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs)
 {
-  CH_TIME("MFHelmholtzOp::create(LD<MFCellFAB>, LD<MFCellFAB>)");
+  CH_TIME("MFHelmholtzOp::create");
 
   Vector<EBISLayout> layouts;
   Vector<int>        comps;
@@ -472,7 +474,7 @@ MFHelmholtzOp::createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFC
 void
 MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const int& a_refRat)
 {
-  CH_TIME("MFHelmholtzOp::createCoarsened(LD<MFCellFAB>, LD<MFCellFAB>, int)");
+  CH_TIME("MFHelmholtzOp::createCoarsened");
 
   Vector<EBISLayout> layouts;
   Vector<int>        comps;
@@ -488,7 +490,7 @@ MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCe
 void
 MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>& a_residual)
 {
-  CH_TIME("MFHelmholtzOp::preCond(LD<MFCellFAB>, LD<MFCellFAB>)");
+  CH_TIME("MFHelmholtzOp::preCond");
 #if 1
   this->relax(a_corr, a_residual, 40);
 #else
@@ -509,7 +511,7 @@ MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>&
 void
 MFHelmholtzOp::applyOp(LevelData<MFCellFAB>& a_Lphi, const LevelData<MFCellFAB>& a_phi, bool a_homogeneousPhysBC)
 {
-  CH_TIME("MFHelmholtzOp::applyOp(LD<MFCellFAB>, LD<MFCellFAB>, bool)");
+  CH_TIME("MFHelmholtzOp::applyOp");
 
   constexpr bool homogeneousCFBC = true;
 
@@ -519,7 +521,7 @@ MFHelmholtzOp::applyOp(LevelData<MFCellFAB>& a_Lphi, const LevelData<MFCellFAB>&
 void
 MFHelmholtzOp::computeOperatorLoads(LevelData<MFCellFAB>& a_phi, TimedDataIterator& a_timeDit)
 {
-  CH_TIME("MFHelmholtzOp::computeOperatorLoads(LD<MFCellFAB>, TimedDataIterator)");
+  CH_TIME("MFHelmholtzOp::computeOperatorLoads");
 
   // TLDR: This routine estimates the time spent in each grid patch for a typical relaxation step. This includes
   //       coarse-fine interpolation, BC matching, and applying the operator.
@@ -568,7 +570,7 @@ MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
                        const bool                        a_homogeneousPhysBC,
                        const bool                        a_homogeneousCFBC)
 {
-  CH_TIME("MFHelmholtzOp::applyOp(LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>, bool, bool)");
+  CH_TIME("MFHelmholtzOp::applyOp");
 
   // We need updated ghost cells since both the operator stencil and the "jump" stencil
   // reach into ghost regions.
@@ -598,7 +600,7 @@ MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi,
                              const LevelData<MFCellFAB>* a_phiCoar,
                              const bool                  a_homogeneousCF)
 {
-  CH_TIME("MFHelmholtzOp::interpolateCF(LD<MFCellFAB>, LD<MFCellFAB>, bool");
+  CH_TIME("MFHelmholtzOp::interpolateCF");
 
   // TLDR: This is a wrapper for interpolating ghost cells on each phase. The user can put a_homogeneousCF = false if he wants inhomogeneous interpolation. This routine
   //       was written so that we avoid calling Multifluid::aliasMF, since that tends to be expensive to call during every smoothing step.
@@ -659,7 +661,7 @@ MFHelmholtzOp::axby(LevelData<MFCellFAB>&       a_lhs,
                     const Real                  a,
                     const Real                  b)
 {
-  CH_TIME("MFHelmholtzOp::axby(LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>, Real, Real");
+  CH_TIME("MFHelmholtzOp::axby");
 
   for (auto& op : m_helmOps) {
     LevelData<EBCellFAB> lhs;
@@ -677,7 +679,7 @@ MFHelmholtzOp::axby(LevelData<MFCellFAB>&       a_lhs,
 void
 MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC)
 {
-  CH_TIME("MFHelmholtzOp::updateJumpBC(LD<MFCellFAB>, bool)");
+  CH_TIME("MFHelmholtzOp::updateJumpBC");
 
   m_jumpBC->matchBC(*m_jump, a_phi, a_homogeneousPhysBC);
 }
@@ -685,7 +687,7 @@ MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homo
 void
 MFHelmholtzOp::exchangeGhost(const LevelData<MFCellFAB>& a_phi) const
 {
-  CH_TIME("MFHelmholtzOp::exchangeGhost(LD<MFCellFAB>)");
+  CH_TIME("MFHelmholtzOp::exchangeGhost");
 
   LevelData<MFCellFAB>& phi = (LevelData<MFCellFAB>&)a_phi;
 
@@ -695,7 +697,7 @@ MFHelmholtzOp::exchangeGhost(const LevelData<MFCellFAB>& a_phi) const
 void
 MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations)
 {
-  CH_TIME("MFHelmholtzOp::relax(LD<MFCellFAB>, LD<MFCellFAB>, int");
+  CH_TIME("MFHelmholtzOp::relax");
 
   // This function performs relaxation. The user can switch between various kernels.
 
@@ -728,7 +730,7 @@ MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>&       a_correction,
                                 const LevelData<MFCellFAB>& a_residual,
                                 const int                   a_iterations)
 {
-  CH_TIME("MFHelmholtzOp::relaxPointJacobi(LD<MFCellFAB>, LD<MFCellFAB>, int)");
+  CH_TIME("MFHelmholtzOp::relaxPointJacobi");
 
   // TLDR: This function performs point Jacobi relaxation in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)|. Here, diag(L) is captured
   //       in m_relCoef. For performance integration, EBHelmholtzOp has a public function for the kernel.
@@ -770,7 +772,7 @@ MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>&       a_correction,
                                const LevelData<MFCellFAB>& a_residual,
                                const int                   a_iterations)
 {
-  CH_TIME("MFHelmholtzOp::relaxGSRedBlack(LD<MFCellFAB>, LD<MFCellFAB>, int)");
+  CH_TIME("MFHelmholtzOp::relaxGSRedBlack");
 
   // TLDR: This function performs red-black Gauss-Seidel relaxation. As always, this occurs in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| but
   //       for a red-black update pattern:
@@ -816,7 +818,7 @@ MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>&       a_correction,
                                  const LevelData<MFCellFAB>& a_residual,
                                  const int                   a_iterations)
 {
-  CH_TIME("MFHelmholtzOp::relaxGSMultiColor(LD<MFCellFAB>, LD<MFCellFAB>, int)");
+  CH_TIME("MFHelmholtzOp::relaxGSMultiColor");
 
   // TLDR: This function performs multi-colored Gauss-Seidel relaxation. As always, this occurs in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| but
   //       using more colors than just red-black. The update pattern here cycles through quadrants/octants in 2D/3D. This is just like red-black except that
@@ -864,7 +866,7 @@ MFHelmholtzOp::restrictResidual(LevelData<MFCellFAB>&       a_resCoar,
                                 LevelData<MFCellFAB>&       a_phi,
                                 const LevelData<MFCellFAB>& a_rhs)
 {
-  CH_TIME("MFHelmholtzOp::restrictResidual(LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>");
+  CH_TIME("MFHelmholtzOp::restrictResidual");
 
   constexpr bool homogeneousPhysBC = true;
 
@@ -889,7 +891,7 @@ MFHelmholtzOp::restrictResidual(LevelData<MFCellFAB>&       a_resCoar,
 void
 MFHelmholtzOp::prolongIncrement(LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>& a_correctCoarse)
 {
-  CH_TIME("MFHelmholtzOp::prolongIncrement(LD<MFCellFAB>, LD<MFCellFAB>)");
+  CH_TIME("MFHelmholtzOp::prolongIncrement");
 
   for (auto& op : m_helmOps) {
     LevelData<EBCellFAB> phi;
@@ -907,7 +909,7 @@ MFHelmholtzOp::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
                                  const LevelData<MFCellFAB>& a_correction,
                                  const LevelData<MFCellFAB>& a_coarseCorrection)
 {
-  CH_TIME("MFHelmholtzOp::AMRUpdateResidual(LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>)");
+  CH_TIME("MFHelmholtzOp::AMRUpdateResidual");
 
   constexpr bool homogeneousCFBC   = false;
   constexpr bool homogeneousPhysBC = true;
@@ -946,7 +948,7 @@ MFHelmholtzOp::AMRRestrict(LevelData<MFCellFAB>&       a_residualCoarse,
                            const LevelData<MFCellFAB>& a_coarseCorrection,
                            bool                        a_skip_res)
 {
-  CH_TIME("MFHelmholtzOp::AMRRestrict(LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>, bool)");
+  CH_TIME("MFHelmholtzOp::AMRRestrict");
 
   constexpr bool homogeneousCFBC   = false;
   constexpr bool homogeneousPhysBC = true;
@@ -982,7 +984,7 @@ MFHelmholtzOp::AMRRestrict(LevelData<MFCellFAB>&       a_residualCoarse,
 void
 MFHelmholtzOp::AMRProlong(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_coarseCorrection)
 {
-  CH_TIME("MFHelmholtzOp::AMRProlong(LD<MFCellFAB>, LD<MFCellFAB>)");
+  CH_TIME("MFHelmholtzOp::AMRProlong");
 
   for (auto& op : m_helmOps) {
     LevelData<EBCellFAB> correction;
@@ -1055,6 +1057,8 @@ MFHelmholtzOp::AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
 
   constexpr bool homogeneousCFBC = false;
 
+  // Note; There is no coarse-fine interpolation here because that will have been
+  // done by AMROperator (which is called before this routine).
   this->exchangeGhost(a_phi);
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 

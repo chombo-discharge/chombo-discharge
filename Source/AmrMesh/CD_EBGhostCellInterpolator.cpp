@@ -66,6 +66,7 @@ EBGhostCellInterpolator::define(const EBLevelGrid& a_eblgFine,
   m_ghostCF     = a_ghostCF;
 
   this->defineGhostRegions();
+  this->defineBuffers();
 
   m_isDefined = true;
 }
@@ -88,6 +89,7 @@ EBGhostCellInterpolator::defineGhostRegions() noexcept
   m_fineIrregCells.define(dblFine);
   m_coarIrregCells.define(dblCoar);
   m_coarIrregSlopes.define(dblCoar);
+  m_coarsenedFineGhosts.define(dblCoar);
 
   for (DataIterator dit(dblFine); dit.ok(); ++dit) {
     const Box fineCellBox = dblFine[dit()];
@@ -137,7 +139,24 @@ EBGhostCellInterpolator::defineGhostRegions() noexcept
     m_fineIrregCells[dit()].define(fineIrregIVS, fineGraph);
     m_coarIrregCells[dit()].define(coarIrregIVS, coarGraph);
     m_coarIrregSlopes[dit()].define(coarIrregIVS, coarGraph, SpaceDim);
+    m_coarsenedFineGhosts[dit()].define(fineIrregIVS, fineGraph, 1);
+
+    // Go through the cut-cell ghost cells and coarsen them.
+    for (VoFIterator vofit(m_fineIrregCells[dit()]); vofit.ok(); ++vofit) {
+      const VolIndex& fineVoF = vofit();
+      const VolIndex& coarVoF = ebislFine.coarsen(fineVoF, m_refRat, dit());
+
+      m_coarsenedFineGhosts[dit()](fineVoF, 0) = coarVoF;
+    }
   }
+}
+
+void
+EBGhostCellInterpolator::defineBuffers() noexcept
+{
+  CH_TIME("EBGhostCellInterpolator::defineBuffers");
+
+  m_copier.define(m_eblgCoar.getDBL(), m_eblgCoFi.getDBL(), m_ghostCF * IntVect::Unit);
 }
 
 void
@@ -156,37 +175,24 @@ EBGhostCellInterpolator::interpolate(LevelData<EBCellFAB>&       a_phiFine,
   CH_assert(a_phiCoar.nComp() > a_variables.end());
   CH_assert(a_phiFine.nComp() == a_phiCoar.nComp());
 
-  // Define buffer that we need. Need two ghost cells for doing the coarse-side slopes.
-  const DisjointBoxLayout& coFiGrids = m_eblgCoFi.getDBL();
-  const EBISLayout&        coFiEBISL = m_eblgCoFi.getEBISL();
-
-  CH_START(t1);
-  LevelData<EBCellFAB> grownCoarData(coFiGrids, 1, m_ghostCF * IntVect::Unit, EBCellFactory(coFiEBISL));
-  CH_STOP(t1);
+  LevelData<EBCellFAB> phiCoFi(m_eblgCoFi.getDBL(), 1, m_ghostCF * IntVect::Unit, EBCellFactory(m_eblgCoFi.getEBISL()));
 
   for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++) {
     const Interval srcInterv = Interval(icomp, icomp);
     const Interval dstInterv = Interval(0, 0);
 
-    CH_START(t2);
-    a_phiCoar.copyTo(srcInterv, grownCoarData, dstInterv);
-    CH_STOP(t2);
+    a_phiCoar.copyTo(srcInterv, phiCoFi, dstInterv, m_copier);
 
     // Fill invalid regions.
     for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
       EBCellFAB&       phiFine = a_phiFine[dit()];
-      const EBCellFAB& phiCoar = grownCoarData[dit()];
+      const EBCellFAB& phiCoar = phiCoFi[dit()];
 
       FArrayBox&       phiFineReg = phiFine.getFArrayBox();
       const FArrayBox& phiCoarReg = phiCoar.getFArrayBox();
 
-      CH_START(t3);
       this->interpolateRegular(phiFineReg, phiCoarReg, dit(), icomp, 0, a_interpType);
-      CH_STOP(t3);
-
-      CH_START(t4);
       this->interpolateIrregular(phiFine, phiCoar, dit(), icomp, 0, a_interpType);
-      CH_STOP(t4);
     }
   }
 
@@ -343,7 +349,7 @@ EBGhostCellInterpolator::interpolateIrregular(EBCellFAB&       a_phiFine,
   const EBISLayout& fineEBISL = m_eblgFine.getEBISL();
   const EBISLayout& coarEBISL = m_eblgCoFi.getEBISL();
 
-  const Box fineDomainBxo = fineDomain.domainBox();
+  const Box fineDomainBox = fineDomain.domainBox();
   const Box coarDomainBox = coarDomain.domainBox();
 
   const EBISBox& fineEBISBox = a_phiFine.getEBISBox();
@@ -352,6 +358,8 @@ EBGhostCellInterpolator::interpolateIrregular(EBCellFAB&       a_phiFine,
   VoFIterator&     vofitCoar = m_coarIrregCells[a_dit];
   VoFIterator&     vofitFine = m_fineIrregCells[a_dit];
   BaseIVFAB<Real>& slopes    = m_coarIrregSlopes[a_dit];
+
+  const BaseIVFAB<VolIndex>& coarsenedFineVoFs = m_coarsenedFineGhosts[a_dit];
 
   // Compute slopes in each direction.
   for (int dir = 0; dir < SpaceDim; dir++) {
@@ -420,13 +428,13 @@ EBGhostCellInterpolator::interpolateIrregular(EBCellFAB&       a_phiFine,
     };
 
     CH_START(t1);
-    //    BoxLoops::loop(vofitCoar, computeIrregSlopes);
+    BoxLoops::loop(vofitCoar, computeIrregSlopes);
     CH_STOP(t1);
   }
 
   // Apply interpolation.
   auto applySlopes = [&](const VolIndex& fineVoF) -> void {
-    const VolIndex& coarVoF = fineEBISL.coarsen(fineVoF, m_refRat, a_dit);
+    const VolIndex& coarVoF = coarsenedFineVoFs(fineVoF, 0);
 
     const IntVect fineIV = fineVoF.gridIndex();
     const IntVect coarIV = coarVoF.gridIndex();

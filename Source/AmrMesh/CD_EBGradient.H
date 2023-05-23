@@ -214,6 +214,11 @@ protected:
   IntVect m_ghostVector;
 
   /*!
+    @brief Pre-built copier for making copying from m_eblg to m_eblgFiCo go faster
+  */
+  Copier m_copier;
+
+  /*!
     @brief Stencils for boundaries and cut-cells
     @note Lives on the coarse layout. 
   */
@@ -275,6 +280,12 @@ protected:
   */
   virtual void
   defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) noexcept;
+
+  /*!
+    @brief Define buffer data
+  */
+  virtual void
+  defineBuffers() noexcept;
 
   /*!
     @brief Get a finite difference stencil, assuming that the data is cell-centered

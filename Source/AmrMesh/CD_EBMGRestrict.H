@@ -81,6 +81,11 @@ protected:
   int m_refRat;
 
   /*!
+    @brief Number of ghost cells in data holders
+  */
+  IntVect m_ghostPhi;
+
+  /*!
     @brief Fine grid
   */
   EBLevelGrid m_eblgFine;
@@ -94,6 +99,11 @@ protected:
     @brief Coarsened fine grids
   */
   EBLevelGrid m_eblgCoFi;
+
+  /*!
+    @brief Copier for making copying from the coarsened fine grids to the coarse grid go faster.
+  */
+  Copier m_copier;
 
   /*!
     @brief Iterator for iterating over cut-cells on the coarse level

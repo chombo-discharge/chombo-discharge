@@ -54,6 +54,7 @@ EBReflux::define(const EBLevelGrid& a_eblg,
 
   this->defineRegionsCF();
   this->defineStencils();
+  this->defineBuffers();
 
   m_isDefined = true;
 }
@@ -165,7 +166,7 @@ EBReflux::defineRegionsCF() noexcept
 void
 EBReflux::defineStencils() noexcept
 {
-  CH_TIMERS("EBReflux::defineStencils");
+  CH_TIME("EBReflux::defineStencils");
 
   const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
   const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
@@ -226,6 +227,15 @@ EBReflux::defineStencils() noexcept
 }
 
 void
+EBReflux::defineBuffers() noexcept
+{
+  CH_TIME("EBReflux::defineBuffers");
+
+  // Note: MUST have the same number of ghost cells as the buffers being defined.
+  m_copier.define(m_eblgCoFi.getDBL(), m_eblg.getDBL(), IntVect::Unit);
+}
+
+void
 EBReflux::reflux(LevelData<EBCellFAB>&       a_Lphi,
                  const LevelData<EBFluxFAB>& a_flux,
                  const LevelData<EBFluxFAB>& a_fineFlux,
@@ -247,16 +257,19 @@ EBReflux::reflux(LevelData<EBCellFAB>&       a_Lphi,
   const EBISLayout& ebisl     = m_eblg.getEBISL();
   const EBISLayout& ebislCoFi = m_eblgCoFi.getEBISL();
 
-  CH_START(t1);
   LevelData<EBFluxFAB> fluxCoFi(dblCoFi, 1, IntVect::Zero, EBFluxFactory(ebislCoFi));
   LevelData<EBFluxFAB> fluxCoar(dbl, 1, IntVect::Unit, EBFluxFactory(ebisl));
-  CH_STOP(t1);
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
 
-    // Coarsen fluxes and copy to something viewable by dbl
+    // Coarsen fluxes
     this->coarsenFluxesCF(fluxCoFi, a_fineFlux, 0, ivar);
-    fluxCoFi.copyTo(fluxCoar);
+
+    // Copy fluxes to coarse grids
+    const Interval srcInterv = Interval(0, 0);
+    const Interval dstInterv = Interval(0, 0);
+
+    fluxCoFi.copyTo(srcInterv, fluxCoar, dstInterv, m_copier);
 
     // Reflux the coarse level.
     this->refluxIntoCoarse(a_Lphi, a_flux, fluxCoar, ivar, 0, ivar, a_scaleCoarFlux, a_scaleFineFlux);
@@ -388,7 +401,7 @@ EBReflux::refluxIntoCoarse(LevelData<EBCellFAB>&       a_Lphi,
   CH_TIMER("EBReflux::refluxIntoCoarse::irregular_cells", t2);
 
   CH_assert(m_isDefined);
-  CH_assert(a_Lphi.nComp() > a_phivar);
+  CH_assert(a_Lphi.nComp() > a_phiVar);
   CH_assert(a_oldFluxes.nComp() > a_oldFluxVar);
   CH_assert(a_newFluxes.nComp() > a_newFluxVar);
 

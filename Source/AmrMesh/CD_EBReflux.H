@@ -122,6 +122,11 @@ protected:
   EBLevelGrid m_eblgCoFi;
 
   /*!
+    @brief Copier for copying from the coarsened fine grids to the coarse grids
+  */
+  Copier m_copier;
+
+  /*!
     @brief Stencils for conservatively coarsening fine-grid fluxes onto the coarse grid
   */
   LayoutData<std::map<std::pair<int, Side::LoHiSide>, BaseIFFAB<FaceStencil>>> m_fluxCoarseningStencils;
@@ -153,6 +158,12 @@ protected:
   */
   virtual void
   defineStencils() noexcept;
+
+  /*!
+    @brief Define buffers
+  */
+  virtual void
+  defineBuffers() noexcept;
 
   /*!
     @brief Coarsen the input fine fluxes onto the coarse fluxes. 

@@ -367,7 +367,6 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
   CH_assert(a_grids.size() >= a_numLevels);
   CH_assert(a_data.size() >= a_numLevels);
   CH_assert(a_refinementRatios.size() >= a_numLevels - 1);
-  CH_assert(a_variableNames.size() >= numInputVars);
 
   // Indices for where we store the Chombo stuff. This is for storing the volume fraction, EB boundary area,
   // face area fractions etc. These things are written AFTER the user input variables.

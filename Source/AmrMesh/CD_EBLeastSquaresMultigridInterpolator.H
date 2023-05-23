@@ -43,7 +43,6 @@
   
   will have a coarse and and a fine grid stencil, but the fine stencil does not reach out of the ghosted fine-grid patch. The fine-grid part of the stencil is thus
   allowed to use the ghost cells in the patch that are filled from neighboring patches. 
-  @note This class includes, as an option, usage of Chombos QuadCFInterp for doing the regular interpolation. To enable that, pass EBLeastSquaresMultigridInterpolator.use_quad_cfi = true in your input script. 
 */
 class EBLeastSquaresMultigridInterpolator : public EBMultigridInterpolator
 {
@@ -144,13 +143,6 @@ protected:
   static constexpr int m_comp = 0;
 
   /*!
-    @brief For regular interpolation of scalar quantities
-    @note By default this is discontinued, but supported by adding EBLeastSquaresMultigridInterpolator.use_quad_cfi = true to
-    your input script. 
-  */
-  RefCountedPtr<QuadCFInterp> m_quadCFInterp;
-
-  /*!
     @brief How to interpret data locations. 
   */
   CellLocation m_dataLocation;
@@ -171,9 +163,9 @@ protected:
   EBLevelGrid m_eblgCoFi;
 
   /*!
-    @brief Coarsened data
+    @brief Copier for making copying into m_grownCoarData go faster
   */
-  mutable LevelData<EBCellFAB>* m_grownCoarData;
+  Copier m_copier;
 
   /*!
     @brief Iterator over ghost cells
@@ -186,14 +178,15 @@ protected:
   bool m_isDefined;
 
   /*!
-    @brief If true, will use QuadCFInterp for interpolating ghost cells. Default is false
-  */
-  bool m_useQuadCFI;
-
-  /*!
     @brief Minimum number of ghost cells in input data. 
   */
-  IntVect m_ghostVector;
+  IntVect m_ghostVectorFine;
+
+  /*!
+    @brief Number of ghost cells on the coarsened-fine grids. Needed because the fine grids need some of
+    the coarse grid cells.
+  */
+  IntVect m_ghostVectorCoFi;
 
   /*!
     @brief Refinement factor between fine and coarse level. 
@@ -274,13 +267,7 @@ protected:
     @brief Define buffer data holder. 
   */
   virtual void
-  defineBuffers() const noexcept;
-
-  /*!
-    @brief Define buffer data holder. 
-  */
-  virtual void
-  undefineBuffers() const noexcept;
+  defineBuffers() noexcept;
 
   /*!
     @brief Define the coarse-sided interpolation stencils for doing the orthogonal derivatives. 
@@ -337,11 +324,11 @@ protected:
     @param[inout] a_finePhi Fine-level data.
     @param[in] a_coarPhi Coarse-grid data.
     @param[in] a_fineVar Fine variable
-    @param[in] a_coarVar Coarse variables
+    @param[in] a_coarVar Coarse variable
   */
   virtual void
-  regularCoarseFineInterp(LevelData<FArrayBox>&       a_finePhi,
-                          const LevelData<FArrayBox>& a_coarPhi,
+  regularCoarseFineInterp(LevelData<EBCellFAB>&       a_finePhi,
+                          const LevelData<EBCellFAB>& a_coarPhi,
                           const int                   a_fineVar,
                           const int                   a_coarVar) const noexcept;
 };

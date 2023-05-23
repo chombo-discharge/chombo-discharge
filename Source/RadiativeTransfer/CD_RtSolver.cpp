@@ -302,7 +302,7 @@ RtSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a
   }
 
   CH_assert(a_level >= 0);
-  CH_assert(a_level <= m_amr->getFinestLevel(););
+  CH_assert(a_level <= m_amr->getFinestLevel());
 
   if (m_plotPhi) {
     this->writeData(a_output, a_comp, m_phi, a_level, true, true);

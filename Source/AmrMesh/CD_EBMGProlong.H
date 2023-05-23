@@ -94,15 +94,20 @@ protected:
   EBLevelGrid m_eblgCoFi;
 
   /*!
-    @brief Iterator for iterating over cut-cells on the fine level
+    @brief Copier for making copying from eblgCoar to eblgCoFi go faster
   */
-  mutable LayoutData<VoFIterator> m_vofitFine;
+  Copier m_copier;
 
   /*!
     @brief Prolongion stencils near the EB.
     @details The stencils are defined on the fine grid but their vofs reach into the coarse grid. 
   */
   LayoutData<BaseIVFAB<VoFStencil>> m_prolongStencils;
+
+  /*!
+    @brief Iterator for iterating over cut-cells on the fine level
+  */
+  mutable LayoutData<VoFIterator> m_vofitFine;
 };
 
 #include <CD_NamespaceFooter.H>

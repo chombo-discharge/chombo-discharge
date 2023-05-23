@@ -39,6 +39,8 @@ EBCoarAve::EBCoarAve(const DisjointBoxLayout& a_dblFine,
   CH_TIME("EBCoarAve::EBCoarAve(DBL version)");
 
   CH_assert(a_ebisPtr->isDefined());
+  CH_assert(a_refRat >= 2);
+  CH_assert(a_refRat % 2 == 0);
 
   ProblemDomain domainFine = a_domainCoar;
   domainFine.refine(a_refRat);
@@ -73,11 +75,13 @@ EBCoarAve::define(const EBLevelGrid& a_eblgFine,
 {
   CH_TIME("EBCoarAve::define");
 
+  CH_assert(a_refRat >= 2);
+  CH_assert(a_refRat % 2 == 0);
+
   m_eblgFine = a_eblgFine;
   m_eblgCoar = a_eblgCoar;
   m_eblgCoFi = a_eblgCoFi;
-
-  m_refRat = a_refRat;
+  m_refRat   = a_refRat;
 
   m_irregSetsCoFi.define(m_eblgCoFi.getDBL());
   for (DataIterator dit = m_eblgCoFi.getDBL().dataIterator(); dit.ok(); ++dit) {
@@ -87,6 +91,7 @@ EBCoarAve::define(const EBLevelGrid& a_eblgFine,
   this->defineCellStencils();
   this->defineFaceStencils();
   this->defineEBStencils();
+  this->defineBuffers();
 
   m_isDefined = true;
 }
@@ -316,27 +321,15 @@ EBCoarAve::defineEBStencils() noexcept
 }
 
 void
-EBCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
-                       const LevelData<EBCellFAB>& a_fineData,
-                       const Interval&             a_variables,
-                       const Average&              a_average) const noexcept
+EBCoarAve::defineBuffers() noexcept
 {
-  CH_TIME("EBCoarAve::averageData(ebcellfab_no_buffer)");
+  CH_TIME("EBCoarAve::defineBuffers");
 
-  CH_assert(m_isDefined);
-  CH_assert(a_fineData.nComp() > a_variables.end());
-  CH_assert(a_coarData.nComp() > a_variables.end());
-
-  LevelData<EBCellFAB> coarFiData;
-  EBCellFactory        factCoFi(m_eblgCoFi.getEBISL());
-  coarFiData.define(m_eblgCoFi.getDBL(), 1, IntVect::Zero, factCoFi);
-
-  this->averageData(a_coarData, coarFiData, a_fineData, a_variables, a_average);
+  m_copier.ghostDefine(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(), m_eblgCoar.getDomain(), IntVect::Zero);
 }
 
 void
 EBCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
-                       LevelData<EBCellFAB>&       a_coFiData,
                        const LevelData<EBCellFAB>& a_fineData,
                        const Interval&             a_variables,
                        const Average&              a_average) const noexcept
@@ -349,18 +342,13 @@ EBCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
   CH_assert(a_fineData.nComp() > a_variables.end());
   CH_assert(a_coarData.nComp() > a_variables.end());
 
-  const Interval buffInterv = Interval(0, a_variables.size() - 1);
-  const Interval fineInterv = a_variables;
-
-  const DisjointBoxLayout& dbl = m_eblgFine.getDBL();
-
-  Copier copier;
-  copier.define(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL());
+  LevelData<EBCellFAB> coFiData(m_eblgCoFi.getDBL(), 1, IntVect::Zero, EBCellFactory(m_eblgCoFi.getEBISL()));
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
+
     CH_START(t1);
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&       coarData = a_coFiData[dit()];
+    for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
+      EBCellFAB&       coarData = coFiData[dit()];
       const EBCellFAB& fineData = a_fineData[dit()];
 
       // Switch between methods.
@@ -393,7 +381,7 @@ EBCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
     const Interval srcInterv = Interval(0, 0);
     const Interval dstInterv = Interval(ivar, ivar);
 
-    a_coFiData.copyTo(srcInterv, a_coarData, dstInterv, copier);
+    coFiData.copyTo(srcInterv, a_coarData, dstInterv, m_copier);
     CH_STOP(t2);
   }
 }
@@ -587,44 +575,19 @@ EBCoarAve::averageData(LevelData<EBFluxFAB>&       a_coarData,
                        const Interval&             a_variables,
                        const Average&              a_average) const noexcept
 {
-  CH_TIMERS("EBCoarAve::averageData(ebfluxfab_no_buffer)");
-  CH_TIMER("EBCoarAve::averageData(ebfluxfab_no_buffer)::define_buffer", t1);
-  CH_TIMER("EBCoarAve::averageData(ebfluxfab_no_buffer)::averageData", t2);
-
-  CH_assert(m_isDefined);
-  CH_assert(a_coarData.nComp() > a_variables.end());
-  CH_assert(a_fineData.nComp() > a_variables.end());
-
-  CH_START(t1);
-  LevelData<EBFluxFAB> coarFiData;
-  EBFluxFactory        factCoFi(m_eblgCoFi.getEBISL());
-  coarFiData.define(m_eblgCoFi.getDBL(), 1, IntVect::Zero, factCoFi);
-  CH_STOP(t1);
-
-  CH_START(t2);
-  this->averageData(a_coarData, coarFiData, a_fineData, a_variables, a_average);
-  CH_STOP(t2);
-}
-
-void
-EBCoarAve::averageData(LevelData<EBFluxFAB>&       a_coarData,
-                       LevelData<EBFluxFAB>&       a_coFiData,
-                       const LevelData<EBFluxFAB>& a_fineData,
-                       const Interval&             a_variables,
-                       const Average&              a_average) const noexcept
-{
   CH_TIMERS("EBCoarAve::averageData(LD<EBFluxFAB>)");
   CH_TIMER("EBCoarAve::averageData(LD<EBFluxFAB>)::average", t1);
-  CH_TIMER("EBCoarAve::averageData(LD<EBFluxFAB>)::copyTo", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() > a_variables.end());
   CH_assert(a_fineData.nComp() > a_variables.end());
+
+  LevelData<EBFluxFAB> coFiData(m_eblgCoFi.getDBL(), 1, IntVect::Zero, EBFluxFactory(m_eblgCoFi.getEBISL()));
 
   CH_START(t1);
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
-    for (DataIterator dit = m_eblgFine.getDBL().dataIterator(); dit.ok(); ++dit) {
-      EBFluxFAB&       coarData = a_coFiData[dit()];
+    for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
+      EBFluxFAB&       coarData = coFiData[dit()];
       const EBFluxFAB& fineData = a_fineData[dit()];
 
       switch (a_average) {
@@ -658,10 +621,14 @@ EBCoarAve::averageData(LevelData<EBFluxFAB>&       a_coarData,
     }
     CH_STOP(t1);
 
-    // Copy back to input data.
-    CH_START(t2);
-    a_coFiData.copyTo(Interval(0, 0), a_coarData, Interval(ivar, ivar));
-    CH_STOP(t2);
+    // Copy back to input data. If the input data had the specified number of ghost cells we can use a faster
+    // copying version which does not build the copier every time.
+    const Interval srcInterv = Interval(0, 0);
+    const Interval dstInterv = Interval(ivar, ivar);
+
+    // Doesn't work for some reason. Needs to be investigated.
+    //    coFiData.copyTo(srcInterv, a_coarData, dstInterv, m_copier);
+    coFiData.copyTo(srcInterv, a_coarData, dstInterv);
   }
 }
 
@@ -898,44 +865,21 @@ EBCoarAve::averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
                        const Interval&                   a_variables,
                        const Average&                    a_average) const noexcept
 {
-  CH_TIMERS("EBCoarAve::averageData(baseivfab_no_buffer)");
-  CH_TIMER("EBCoarAve::averageData(baseivfab_no_buffer)::define_buffer", t1);
-  CH_TIMER("EBCoarAve::averageData(baseivfab_no_buffer)::averageData", t2);
-
-  CH_assert(m_isDefined);
-  CH_assert(a_coarData.nComp() > a_variables.end());
-  CH_assert(a_fineData.nComp() > a_variables.end());
-
-  CH_START(t1);
-  LevelData<BaseIVFAB<Real>> coarFiData;
-  BaseIVFactory<Real>        factCoFi(m_eblgCoFi.getEBISL(), m_irregSetsCoFi);
-  coarFiData.define(m_eblgCoFi.getDBL(), a_variables.size(), IntVect::Zero, factCoFi);
-  CH_STOP(t1);
-
-  CH_START(t2);
-  this->averageData(a_coarData, coarFiData, a_fineData, a_variables, a_average);
-  CH_STOP(t2);
-}
-
-void
-EBCoarAve::averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
-                       LevelData<BaseIVFAB<Real>>&       a_coFiData,
-                       const LevelData<BaseIVFAB<Real>>& a_fineData,
-                       const Interval&                   a_variables,
-                       const Average&                    a_average) const noexcept
-{
   CH_TIMERS("EBCoarAve::averageData(LD<BaseIVFAB>)");
   CH_TIMER("EBCoarAve::averageData(LD<BaseIVFAB>)::average", t1);
-  CH_TIMER("EBCoarAve::averageData(LD<BaseIVFAB>)::copyTo", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() > a_variables.end());
   CH_assert(a_fineData.nComp() > a_variables.end());
+
+  LevelData<BaseIVFAB<Real>> coFiData;
+  BaseIVFactory<Real>        factCoFi(m_eblgCoFi.getEBISL(), m_irregSetsCoFi);
+  coFiData.define(m_eblgCoFi.getDBL(), a_variables.size(), IntVect::Zero, factCoFi);
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
     CH_START(t1);
     for (DataIterator dit = m_eblgFine.getDBL().dataIterator(); dit.ok(); ++dit) {
-      BaseIVFAB<Real>&       coarData = a_coFiData[dit()];
+      BaseIVFAB<Real>&       coarData = coFiData[dit()];
       const BaseIVFAB<Real>& fineData = a_fineData[dit()];
 
       // Switch between averaging methods.
@@ -964,9 +908,7 @@ EBCoarAve::averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
     }
     CH_STOP(t1);
 
-    CH_START(t2);
-    a_coFiData.copyTo(Interval(0, 0), a_coarData, Interval(ivar, ivar));
-    CH_STOP(t2);
+    coFiData.copyTo(Interval(0, 0), a_coarData, Interval(ivar, ivar));
   }
 }
 

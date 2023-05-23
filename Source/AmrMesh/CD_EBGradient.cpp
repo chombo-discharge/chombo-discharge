@@ -109,6 +109,8 @@ EBGradient::define(const EBLevelGrid& a_eblg,
     if (m_hasEBCF) {
       this->defineStencilsEBCF(coarMaskInvalid);
     }
+
+    this->defineBuffers();
   }
 
   // Define optimized stencils.
@@ -269,9 +271,7 @@ EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
                                const LevelData<EBCellFAB>& a_phiFine) const noexcept
 {
   CH_TIMERS("EBGradient::computeAMRGradient");
-  CH_TIMER("EBGradient::buffer_def", t1);
-  CH_TIMER("EBGradient::copy_and_exchange", t2);
-  CH_TIMER("EBGradient::ebcf_calculate", t3);
+  CH_TIMER("EBGradient::ebcf_calculate", t1);
 
   CH_assert(m_isDefined);
   CH_assert(a_gradient.nComp() == SpaceDim);
@@ -290,15 +290,10 @@ EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
     const EBISLayout& ebisl     = m_eblg.getEBISL();
     const EBISLayout& ebislFiCo = m_eblgFiCo.getEBISL();
 
-    CH_START(t1)
     LevelData<EBCellFAB> phiFiCo(dblFiCo, 1, m_ghostVector, EBCellFactory(ebislFiCo));
-    CH_STOP(t1);
 
-    CH_START(t2);
-    a_phiFine.copyTo(phiFiCo);
-    CH_STOP(t2);
+    a_phiFine.copyTo(phiFiCo, m_copier);
 
-    CH_START(t3);
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
       EBCellFAB&       gradient = a_gradient[dit()];
       const EBCellFAB& phi      = a_phi[dit()];
@@ -332,9 +327,10 @@ EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
         }
       };
 
+      CH_START(t1);
       BoxLoops::loop(m_ebcfIterator[dit()], kernel);
+      CH_STOP(t1);
     }
-    CH_STOP(t3);
   }
 }
 
@@ -714,6 +710,14 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
     BoxLoops::loop(ebcfIterator, irregularKernel);
     CH_STOP(t3);
   }
+}
+
+void
+EBGradient::defineBuffers() noexcept
+{
+  CH_TIME("EBGradient::defineBuffers");
+
+  m_copier.define(m_eblgFine.getDBL(), m_eblgFiCo.getDBL(), m_ghostVector);
 }
 
 bool

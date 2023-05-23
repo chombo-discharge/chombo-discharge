@@ -86,6 +86,7 @@ EBCoarseToFineInterp::define(const EBLevelGrid& a_eblgFine,
   CH_STOP(t1);
 
   this->defineWeights();
+  this->defineBuffers();
 }
 
 void
@@ -141,55 +142,56 @@ EBCoarseToFineInterp::defineWeights() noexcept
 }
 
 void
+EBCoarseToFineInterp::defineBuffers() noexcept
+{
+  CH_TIME("EBCoarseToFineInterp::defineBuffers");
+
+  // Note --same number of ghost cells as in EBCoarseToFineInterp. Must be one because of the slopes!
+  m_copier.define(m_eblgCoar.getDBL(), m_eblgCoFi.getDBL(), IntVect::Unit);
+}
+
+void
 EBCoarseToFineInterp::interpolate(LevelData<EBCellFAB>&             a_fineData,
                                   const LevelData<EBCellFAB>&       a_coarData,
                                   const Interval&                   a_variables,
                                   const EBCoarseToFineInterp::Type& a_interpType) const noexcept
 {
   CH_TIMERS("EBCoarseToFineInterp::interpolate(LD<EBCellFAB>)");
-  CH_TIMER("EBCoarseToFineInterp::define_buffer", t1);
-  CH_TIMER("EBCoarseToFineInterp::copyTo", t2);
+  CH_TIMER("EBCoarseToFineInterp::interpolate(LD<EBCellFAB>)::interpolate", t1);
 
   CH_assert(m_isDefined);
   CH_assert(a_fineData.nComp() > a_variables.end());
   CH_assert(a_coarData.nComp() > a_variables.end());
 
-  CH_START(t1);
-  const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
-  const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
-  LevelData<EBCellFAB>     coarsenedFineData(dblCoFi, 1, IntVect::Unit, EBCellFactory(ebislCoFi));
-  CH_STOP(t1);
+  LevelData<EBCellFAB> m_coFiData(m_eblgCoFi.getDBL(), 1, IntVect::Unit, EBCellFactory(m_eblgCoFi.getEBISL()));
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
-    CH_START(t2);
-    a_coarData.copyTo(Interval(ivar, ivar), coarsenedFineData, Interval(0, 0));
-    CH_STOP(t2);
+    const Interval srcInterv = Interval(ivar, ivar);
+    const Interval dstInterv = Interval(0, 0);
 
-    for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
+    a_coarData.copyTo(srcInterv, m_coFiData, dstInterv, m_copier);
+
+    CH_START(t1);
+    for (DataIterator dit(m_eblgCoFi.getDBL()); dit.ok(); ++dit) {
       switch (a_interpType) {
       case EBCoarseToFineInterp::Type::PWC: {
-        this->interpolatePWC(a_fineData[dit()], coarsenedFineData[dit()], dit(), ivar, 0);
+        this->interpolatePWC(a_fineData[dit()], m_coFiData[dit()], dit(), ivar, 0);
 
         break;
       }
       case EBCoarseToFineInterp::Type::ConservativePWC: {
-        this->interpolateConservativePWC(a_fineData[dit()], coarsenedFineData[dit()], dit(), ivar, 0);
+        this->interpolateConservativePWC(a_fineData[dit()], m_coFiData[dit()], dit(), ivar, 0);
 
         break;
       }
       case EBCoarseToFineInterp::Type::ConservativeMinMod: {
-        this->interpolateConservativeSlope(a_fineData[dit()],
-                                           coarsenedFineData[dit()],
-                                           dit(),
-                                           ivar,
-                                           0,
-                                           SlopeLimiter::MinMod);
+        this->interpolateConservativeSlope(a_fineData[dit()], m_coFiData[dit()], dit(), ivar, 0, SlopeLimiter::MinMod);
 
         break;
       }
       case EBCoarseToFineInterp::Type::ConservativeMonotonizedCentral: {
         this->interpolateConservativeSlope(a_fineData[dit()],
-                                           coarsenedFineData[dit()],
+                                           m_coFiData[dit()],
                                            dit(),
                                            ivar,
                                            0,
@@ -204,6 +206,7 @@ EBCoarseToFineInterp::interpolate(LevelData<EBCellFAB>&             a_fineData,
       }
       }
     }
+    CH_STOP(t1);
   }
 }
 

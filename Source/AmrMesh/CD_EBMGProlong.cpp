@@ -53,11 +53,10 @@ EBMGProlong::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar
     MayDay::Abort("EBMGProlong::define -- the input grid is not coarsenable. We need to adopt a new strategy!");
   }
 
-  // Create the coarsend layout
+  // Create the coarsened layout
   coarsen(m_eblgCoFi, m_eblgFine, m_refRat);
   m_eblgCoFi.setMaxRefinementRatio(m_refRat);
 
-  // Define buffer data.
   const DisjointBoxLayout& dblCoFi = m_eblgCoFi.getDBL();
   const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
 
@@ -91,6 +90,9 @@ EBMGProlong::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar
     }
   }
 
+  // Note: MUST have the same number of ghost cells as the buffer being defined in prolongResidual
+  m_copier.ghostDefine(m_eblgCoar.getDBL(), dblCoFi, m_eblgCoar.getDomain(), IntVect::Zero);
+
   m_isDefined = true;
 }
 
@@ -100,22 +102,16 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
                              const Interval              a_variables) const noexcept
 {
   CH_TIMERS("EBMGProlong::prolongResidual");
-  CH_TIMER("EBMGProlong::prolongResidual::define_buffer", t1);
-  CH_TIMER("EBMGProlong::prolongResidual::regular_cells", t2);
-  CH_TIMER("EBMGProlong::prolongResidual::irregular_cells", t3);
+  CH_TIMER("EBMGProlong::prolongResidual::regular_cells", t1);
+  CH_TIMER("EBMGProlong::prolongResidual::irregular_cells", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_fineData.nComp() > a_variables.end());
   CH_assert(a_coarData.nComp() > a_variables.end());
 
+  LevelData<EBCellFAB> coFiData(m_eblgCoFi.getDBL(), 1, IntVect::Zero, EBCellFactory(m_eblgCoFi.getEBISL()));
+
   const Box refineBox(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
-
-  const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
-  const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
-
-  CH_START(t1);
-  LevelData<EBCellFAB> dataCoFi(dblCoFi, 1, IntVect::Zero, EBCellFactory(ebislCoFi));
-  CH_STOP(t1);
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
 
@@ -123,7 +119,7 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
     const Interval srcComps = Interval(ivar, ivar);
     const Interval dstComps = Interval(0, 0);
 
-    a_coarData.copyTo(srcComps, dataCoFi, dstComps);
+    a_coarData.copyTo(srcComps, coFiData, dstComps, m_copier);
 
     // Add coarse-grid residual to the fine grid. Recall that m_eblgCoFi is a coarsening of the fine grid
     // so this runs over the part of the coarse level that is covered by the finer level.
@@ -132,7 +128,7 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
 
     for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
       EBCellFAB&       fineData = a_fineData[dit()];
-      const EBCellFAB& coarData = dataCoFi[dit()];
+      const EBCellFAB& coarData = coFiData[dit()];
 
       FArrayBox&       fineDataReg = fineData.getFArrayBox();
       const FArrayBox& coarDataReg = coarData.getFArrayBox();
@@ -169,13 +165,13 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
       const Box    coarBox  = dblCoFi[dit()];
       VoFIterator& fineVoFs = m_vofitFine[dit()];
 
-      CH_START(t2);
+      CH_START(t1);
       BoxLoops::loop(coarBox, regularKernel);
-      CH_STOP(t2);
+      CH_STOP(t1);
 
-      CH_START(t3);
+      CH_START(t2);
       BoxLoops::loop(fineVoFs, irregularKernel);
-      CH_STOP(t3);
+      CH_STOP(t2);
     }
   }
 }

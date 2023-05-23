@@ -380,6 +380,14 @@ public:
   assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
 
   /*!
+    @brief Local assignment function
+    @param[out] a_lhs. Equal to a_rhs on output
+    @param[in]  a_rhs. Data
+  */
+  void
+  assignLocal(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
+
+  /*!
     @brief Compute solution norm. 
     @param[in] a_lhs   Data
     @param[in] a_order Norm order. Not used. 
@@ -650,6 +658,21 @@ protected:
     @brief Refinement factor to coarser AMR level
   */
   int m_refToCoar;
+
+  /*!
+    @brief Number of ghost cells
+  */
+  IntVect m_ghostPhi;
+
+  /*!
+    @brief Number of ghost cells
+  */
+  IntVect m_ghostRhs;
+
+  /*!
+    @brief Copier for making assign function go faster
+  */
+  Copier m_copier;
 
   /*!
     @brief True if there is a coarser AMR level

@@ -156,6 +156,11 @@ protected:
   int m_refRat;
 
   /*!
+    @brief Copier for making copying from m_eblg to m_eblgCoFi go faster
+  */
+  Copier m_copier;
+
+  /*!
     @brief Fine grid.
   */
   EBLevelGrid m_eblgFine;
@@ -204,6 +209,12 @@ protected:
   */
   virtual void
   defineWeights() noexcept;
+
+  /*!
+    @brief Define buffer storage
+  */
+  virtual void
+  defineBuffers() noexcept;
 
   /*!
     @brief Piecewise constant interpolation of an EBCellFAB. This ignores the volume fraction. This sets

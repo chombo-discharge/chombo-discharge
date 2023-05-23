@@ -872,6 +872,10 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
             pout() << "Driver::run -- Writing plot file" << endl;
           }
 
+          // TimeStepper does pre-plot calculations.
+          m_timeStepper->prePlot();
+
+          // Write plot file.
           this->writePlotFile();
         }
       }
@@ -1299,6 +1303,9 @@ Driver::setup(const std::string a_inputFile,
         if (m_writeLoads) {
           this->writeComputationalLoads();
         }
+
+        m_timeStepper->prePlot();
+
         this->writePlotFile();
       }
 #endif
@@ -1731,12 +1738,21 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
   pout() << metrics << endl;
 
   // Hours, minutes, seconds and millisecond of the previous iteration
-  const Real wt_ns  = (m_wallClockTwo - m_wallClockOne) * 1.E-9 / m_dt;
-  const int  wt_Hrs = floor(wt_ns / 3600);
-  const int  wt_Min = floor((wt_ns - 3600 * wt_Hrs) / 60);
-  const int  wt_Sec = floor(wt_ns - 3600 * wt_Hrs - 60 * wt_Min);
-  const int  wt_Ms  = floor((wt_ns - 3600 * wt_Hrs - 60 * wt_Min - wt_Sec) * 1000);
+  const Real wt_factor = std::pow(10.0, 3.0 * (int(std::floor(log10(m_dt))) / 3));
+  const Real wt_ns     = (m_wallClockTwo - m_wallClockOne) * wt_factor / m_dt;
+  const int  wt_Hrs    = floor(wt_ns / 3600);
+  const int  wt_Min    = floor((wt_ns - 3600 * wt_Hrs) / 60);
+  const int  wt_Sec    = floor(wt_ns - 3600 * wt_Hrs - 60 * wt_Min);
+  const int  wt_Ms     = floor((wt_ns - 3600 * wt_Hrs - 60 * wt_Min - wt_Sec) * 1000);
   sprintf(metrics, "%31c -- Wall time per ns      : %3.3ih %2.2im %2.2is %3.3ims", ' ', wt_Hrs, wt_Min, wt_Sec, wt_Ms);
+  sprintf(metrics,
+          "%31c -- Wall time per/%1.0E   : %3.3ih %2.2im %2.2is %3.3ims",
+          ' ',
+          wt_factor,
+          wt_Hrs,
+          wt_Min,
+          wt_Sec,
+          wt_Ms);
   pout() << metrics << endl;
 
   // This is the time remaining
