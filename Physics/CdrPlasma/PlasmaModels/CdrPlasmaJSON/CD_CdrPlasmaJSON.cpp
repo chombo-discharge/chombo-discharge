@@ -4950,6 +4950,7 @@ CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_time,
                                          const RealVect     a_E,
                                          const Vector<Real> a_cdrDensities) const
 {
+  CH_TIME("CdrPlasmaJSON::computeCdrDriftVelocities");  
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::computeCdrDriftVelocities" << endl;
   }
@@ -4996,6 +4997,7 @@ CdrPlasmaJSON::computeCdrDiffusionCoefficients(const Real         a_time,
                                                const RealVect     a_E,
                                                const Vector<Real> a_cdrDensities) const
 {
+  CH_TIME("CdrPlasmaJSON::computeCdrDiffusionCoefficients");    
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::computeCdrDiffusionCoefficients" << endl;
   }
@@ -5019,6 +5021,7 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real         a_time,
                                          const Vector<Real> a_rteFluxes,
                                          const Vector<Real> a_extrapCdrFluxes) const
 {
+  CH_TIME("CdrPlasmaJSON::computeCdrElectrodeFluxes");      
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::computeCdrElectrodeFluxes" << endl;
   }
