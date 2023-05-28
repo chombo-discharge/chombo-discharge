@@ -135,6 +135,14 @@ public:
                        const MFAMRCellData&     a_potential) const override;
 
   /*!
+    @brief Cache state before regridding
+    @param[in] a_lbase          Coarsest level which changes during regrid. 
+    @param[in] a_oldFinestLevel Finest AMR level before regrid. 
+  */
+  virtual void
+  preRegrid(const int a_lbase, const int a_oldFinestLevel);
+
+  /*!
     @brief Regrid method. 
     @details This calls the parent regrid function first. We only need the overwrite because we have to signal that multigrid must be set up again. 
     @param[in] a_lmin           Coarsest level allowed to change. 
@@ -341,7 +349,7 @@ protected:
   /*!
     @brief Geometric multigrid solver
   */
-  AMRMultiGrid<LevelData<MFCellFAB>> m_multigridSolver;
+  RefCountedPtr<AMRMultiGrid<LevelData<MFCellFAB>>> m_multigridSolver;
 
   /*!
     @brief Conjugate gradient solver bottom MG level

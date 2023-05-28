@@ -473,6 +473,8 @@ McPhoto::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   m_ebPhotons.preRegrid(a_lmin);
   m_domainPhotons.preRegrid(a_lmin);
   m_sourcePhotons.preRegrid(a_lmin);
+
+  this->deallocate();
 }
 
 void
@@ -482,6 +484,12 @@ McPhoto::deallocate()
   if (m_verbosity > 5) {
     pout() << m_name + "::deallocate" << endl;
   }
+
+  m_phi.clear();
+  m_source.clear();
+  m_scratch.clear();
+  m_depositionNC.clear();
+  m_massDiff.clear();
 }
 
 void
@@ -493,11 +501,11 @@ McPhoto::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFin
   }
 
   // Mesh data regrids
-  m_amr->reallocate(m_phi, m_phase, a_lmin);
-  m_amr->reallocate(m_source, m_phase, a_lmin);
-  m_amr->reallocate(m_scratch, m_phase, a_lmin);
-  m_amr->reallocate(m_depositionNC, m_phase, a_lmin);
-  m_amr->reallocate(m_massDiff, m_phase, a_lmin);
+  m_amr->allocate(m_phi, m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_source, m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_scratch, m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_depositionNC, m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_massDiff, m_realm, m_phase, m_nComp);
 
   m_amr->remapToNewGrids(m_photons, a_lmin, a_newFinestLevel);
   m_amr->remapToNewGrids(m_bulkPhotons, a_lmin, a_newFinestLevel);

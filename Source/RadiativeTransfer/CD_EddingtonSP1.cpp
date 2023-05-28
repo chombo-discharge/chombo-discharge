@@ -516,12 +516,17 @@ EddingtonSP1::allocate()
 void
 EddingtonSP1::deallocate()
 {
-  m_amr->deallocate(m_helmAco);
-  m_amr->deallocate(m_helmBco);
-  m_amr->deallocate(m_helmBcoIrreg);
-  m_amr->deallocate(m_phi);
-  m_amr->deallocate(m_source);
-  m_amr->deallocate(m_resid);
+  CH_TIME("EddingtonSP1::deallocate");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::deallocate" << endl;
+  }
+
+  m_helmAco.clear();
+  m_helmBco.clear();
+  m_helmBcoIrreg.clear();
+  m_phi.clear();
+  m_source.clear();
+  m_resid.clear();
 }
 
 void
@@ -551,8 +556,8 @@ EddingtonSP1::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_n
   m_isSolverSetup = false;
 
   // Deallocate the scratch data.
-  m_amr->deallocate(m_cachePhi);
-  m_amr->deallocate(m_cacheSrc);
+  m_cachePhi.clear();
+  m_cacheSrc.clear();
 }
 
 void

@@ -52,9 +52,9 @@ CdrPlasmaFieldTagger::deallocateStorage() const
     pout() << m_name + "::deallocateStorage()" << endl;
   }
 
-  m_amr->deallocate(m_scratch);
-  m_amr->deallocate(m_electricField);
-  m_amr->deallocate(m_gradElectricField);
+  m_scratch.clear();
+  m_electricField.clear();
+  m_gradElectricField.clear();
 }
 
 void

@@ -387,6 +387,8 @@ MeshODESolver<N>::preRegrid(const int a_lbase, const int a_oldFinestLevel) noexc
   m_amr->allocate(m_cache, m_realm, m_phase, N);
 
   m_cache.copy(m_phi);
+
+  m_phi.clear();
 }
 
 template <size_t N>
@@ -408,7 +410,7 @@ MeshODESolver<N>::regrid(const int a_lmin, const int a_oldFinestLevel, const int
   m_amr->conservativeAverage(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
 
-  m_amr->deallocate(m_cache);
+  m_cache.clear();
 }
 
 template <size_t N>

@@ -618,6 +618,9 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
   timer.startEvent("Pre-regrid");
   this->cacheTags(m_tags); // Cache m_tags because after regrid, ownership will change
   m_timeStepper->preRegrid(a_lmin, m_amr->getFinestLevel());
+  if (!(m_cellTagger.isNull())) {
+    m_cellTagger->preRegrid();
+  }
   timer.stopEvent("Pre-regrid");
 
   // Regrid AMR. Only levels [lmin, lmax] are allowed to change.
@@ -874,6 +877,9 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
 
           // TimeStepper does pre-plot calculations.
           m_timeStepper->prePlot();
+          if (!(m_cellTagger.isNull())) {
+            m_cellTagger->prePlot();
+          }
 
           // Write plot file.
           this->writePlotFile();
@@ -1506,6 +1512,9 @@ Driver::setupFresh(const int a_initialRegrids)
   if (m_doInitLoadBalancing) {
     this->cacheTags(m_tags);
     m_timeStepper->preRegrid(lmin, lmax);
+    if (!(m_cellTagger.isNull())) {
+      m_cellTagger->preRegrid();
+    }
     for (const auto& str : m_amr->getRealms()) {
       if (m_timeStepper->loadBalanceThisRealm(str)) {
 

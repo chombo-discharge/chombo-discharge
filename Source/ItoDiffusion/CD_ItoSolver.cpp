@@ -765,25 +765,31 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
   CH_assert(a_oldFinestLevel >= 0);
   CH_assert(a_newFinestLevel >= 0);
 
-  // Reallocate mesh data.
-  m_amr->reallocate(m_phi, m_phase, a_lmin);
-  m_amr->reallocate(m_scratch, m_phase, a_lmin);
-  m_amr->reallocate(m_depositionNC, m_phase, a_lmin);
-  m_amr->reallocate(m_massDiff, m_phase, a_lmin);
+  const int ncomp = 1;
 
-  // Only allocate memory if we have advection.
+  // Mesh data -- always allocate it.
+  m_amr->allocate(m_phi, m_realm, m_phase, ncomp);
+
+  // Scratch data -- needed because of IO when we deposit particles (should always allocate it).
+  m_amr->allocate(m_scratch, m_realm, m_phase, ncomp);
+
+  // For "redistributed" particle deposition
+  m_amr->allocate(m_depositionNC, m_realm, m_phase, ncomp);
+  m_amr->allocate(m_massDiff, m_realm, m_phase, ncomp);
+
+  // Only allocate memory for velocity if we actually have a mobile solver
   if (m_isMobile) {
-    m_amr->reallocate(m_mobilityFunction, m_phase, a_lmin);
-    m_amr->reallocate(m_velocityFunction, m_phase, a_lmin);
+    m_amr->allocate(m_mobilityFunction, m_realm, m_phase, ncomp); //
+    m_amr->allocate(m_velocityFunction, m_realm, m_phase, SpaceDim);
   }
   else {
     m_amr->allocatePointer(m_mobilityFunction, m_realm);
     m_amr->allocatePointer(m_velocityFunction, m_realm);
   }
 
-  // Only allocate memory if we have diffusion.
+  // Only allocate memory if we actually have a diffusion solver
   if (m_isDiffusive) {
-    m_amr->reallocate(m_diffusionFunction, m_phase, a_lmin);
+    m_amr->allocate(m_diffusionFunction, m_realm, m_phase, ncomp);
   }
   else {
     m_amr->allocatePointer(m_diffusionFunction, m_realm);
@@ -1957,6 +1963,14 @@ ItoSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel)
 
     particles.preRegrid(a_lbase);
   }
+
+  m_phi.clear();
+  m_mobilityFunction.clear();
+  m_velocityFunction.clear();
+  m_diffusionFunction.clear();
+  m_scratch.clear();
+  m_depositionNC.clear();
+  m_massDiff.clear();
 }
 
 ParticleContainer<ItoParticle>&

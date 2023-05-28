@@ -77,6 +77,31 @@ CdrPlasmaTagger::define(const RefCountedPtr<CdrPlasmaPhysics>&      a_physics,
 }
 
 void
+CdrPlasmaTagger::prePlot() const noexcept
+{
+  CH_TIME("CdrPlasmaTagger::prePlot()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::prePlot()" << endl;
+  }
+
+  this->computeTracers();
+}
+
+void
+CdrPlasmaTagger::preRegrid() noexcept
+{
+  CH_TIME("CdrPlasmaTagger::preRegrid()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::preRegrid()" << endl;
+  }
+
+  for (int i = 0; i < m_numTracers; i++) {
+    m_tracers[i].clear();
+    m_gradTracers[i].clear();
+  }
+}
+
+void
 CdrPlasmaTagger::regrid()
 {
   CH_TIME("CdrPlasmaTagger::regrid()");
@@ -136,10 +161,6 @@ CdrPlasmaTagger::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, con
 
   CH_assert(a_level >= 0);
   CH_assert(a_level <= m_amr->getFinestLevel());
-
-  // Inefficient since we could do it only on level l. But screw it, I don't think it'll be a performance
-  // bottleneck anyways.
-  this->computeTracers();
 
   // Go through the fields and add them to file.
   for (int i = 0; i < m_numTracers; i++) {

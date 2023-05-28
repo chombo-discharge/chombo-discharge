@@ -70,6 +70,17 @@ EBAMRData<T>::size() const noexcept
 
 template <typename T>
 void
+EBAMRData<T>::clear() noexcept
+{
+  for (int lvl = 0; lvl < m_data.size(); lvl++) {
+    m_data[lvl] = RefCountedPtr<LevelData<T>>(0);
+  }
+
+  m_data.resize(0);
+}
+
+template <typename T>
+void
 EBAMRData<T>::reserve() noexcept
 {
   m_reserved = true;

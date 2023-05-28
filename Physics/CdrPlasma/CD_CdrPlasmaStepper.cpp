@@ -2965,6 +2965,9 @@ CdrPlasmaStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_rte->preRegrid(a_lmin, a_oldFinestLevel);
   m_sigma->preRegrid(a_lmin, a_oldFinestLevel);
+
+  m_currentDensity.clear();
+  m_physicsPlotVars.clear();
 }
 
 void

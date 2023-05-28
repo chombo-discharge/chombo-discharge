@@ -95,6 +95,12 @@ public:
   exchange() noexcept;
 
   /*!
+    @brief Delete all data
+  */
+  void
+  clear() noexcept;
+
+  /*!
     @brief Reserve data
   */
   void

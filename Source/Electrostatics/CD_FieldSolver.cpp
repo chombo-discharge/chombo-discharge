@@ -178,6 +178,8 @@ FieldSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel)
   for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++) {
     m_potential[lvl]->localCopyTo(*m_cache[lvl]);
   }
+
+  this->deallocate();
 }
 
 void
@@ -377,10 +379,14 @@ FieldSolver::deallocate()
     pout() << "FieldSolver::deallocate()" << endl;
   }
 
-  m_amr->deallocate(m_potential);
-  m_amr->deallocate(m_rho);
-  m_amr->deallocate(m_residue);
-  m_amr->deallocate(m_sigma);
+  m_potential.clear();
+  m_electricField.clear();
+  m_rho.clear();
+  m_sigma.clear();
+  m_residue.clear();
+  m_permittivityCell.clear();
+  m_permittivityFace.clear();
+  m_permittivityEB.clear();
 }
 
 void
@@ -413,7 +419,7 @@ FieldSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_ne
   this->setPermittivities();
 
   // Deallocate the scratch storage.
-  m_amr->deallocate(m_cache);
+  m_cache.clear();
 }
 
 void

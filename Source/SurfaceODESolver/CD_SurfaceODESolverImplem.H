@@ -507,10 +507,8 @@ SurfaceODESolver<N>::deallocate() noexcept
     pout() << m_name + "::deallocate" << endl;
   }
 
-  CH_assert(!(m_amr.isNull()));
-
-  m_amr->deallocate(m_phi);
-  m_amr->deallocate(m_rhs);
+  m_phi.clear();
+  m_rhs.clear();
 }
 
 template <int N>
@@ -602,7 +600,7 @@ SurfaceODESolver<N>::regrid(const int a_lmin, const int a_oldFinestLevel, const 
 
   m_amr->interpToNewGrids(m_phi, m_cache, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);
 
-  m_amr->deallocate(m_cache);
+  m_cache.clear();
 }
 
 template <int N>

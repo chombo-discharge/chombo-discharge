@@ -388,6 +388,11 @@ CdrPlasmaGodunovStepper::preRegrid(const int a_lbase, const int a_finestLevel)
     DataOps::copy(m_scratchConductivity, m_conductivityFactorCell);
     DataOps::copy(m_scratchSemiImplicitRho, m_semiImplicitRho);
   }
+
+  m_semiImplicitRho.clear();
+  m_conductivityFactorCell.clear();
+  m_conductivityFactorFace.clear();
+  m_conductivityFactorEB.clear();
 }
 
 void

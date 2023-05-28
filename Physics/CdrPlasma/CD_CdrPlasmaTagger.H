@@ -83,6 +83,18 @@ namespace Physics {
       parseOptions() = 0;
 
       /*!
+	@brief Pre-plot magic for Driver
+      */
+      virtual void
+      prePlot() const noexcept override;
+
+      /*!
+	@brief Perform pre-regrid operations
+      */
+      virtual void
+      preRegrid() noexcept override;
+
+      /*!
 	@brief Regrid method -- used for reallocating storage for the tracer fields. 
       */
       virtual void

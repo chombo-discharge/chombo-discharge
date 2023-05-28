@@ -31,6 +31,24 @@ CellTagger::CellTagger()
 
 CellTagger::~CellTagger() { CH_TIME("CellTagger::~CellTagger()"); }
 
+void
+CellTagger::preRegrid() noexcept
+{
+  CH_TIME("CellTagger::preRegrid()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::preRegrid()" << endl;
+  }
+}
+
+void
+CellTagger::prePlot() const noexcept
+{
+  CH_TIME("CellTagger::prePlot()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::prePlot()" << endl;
+  }
+}
+
 int
 CellTagger::getNumberOfPlotVariables() const
 {

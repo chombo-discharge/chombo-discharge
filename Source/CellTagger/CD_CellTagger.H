@@ -41,6 +41,12 @@ public:
   virtual ~CellTagger();
 
   /*!
+    @brief Pre-regrid function for cell-tagger
+  */
+  virtual void
+  preRegrid() noexcept;
+
+  /*!
     @brief Regrid function for cell tagger (in case it uses transient storage to do things)
     @details This function exists because implementations may require data to be allocated on a mesh. This function is
     called by Driver to make sure data is reallocated when it needs to. 
@@ -71,6 +77,12 @@ public:
   */
   virtual bool
   tagCells(EBAMRTags& a_tags) = 0;
+
+  /*!
+    @brief Perform pre-plotting operations (if necessary)
+  */
+  virtual void
+  prePlot() const noexcept;
 
   /*!
     @brief Get number of plot variables that will be written to file (by Driver).

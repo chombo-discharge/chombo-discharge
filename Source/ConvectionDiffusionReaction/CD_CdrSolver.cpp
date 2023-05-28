@@ -349,15 +349,15 @@ CdrSolver::deallocate()
   }
 
   // TLDR: This deallocates a bunch of storage. This can be used during regrids to trim memory (because the Berger-Rigoutsous algorithm eats memory).
-  m_amr->deallocate(m_phi);
-  m_amr->deallocate(m_source);
-  m_amr->deallocate(m_faceVelocity);
-  m_amr->deallocate(m_faceStates);
-  m_amr->deallocate(m_cellVelocity);
-  m_amr->deallocate(m_ebFlux);
-  m_amr->deallocate(m_cellCenteredDiffusionCoefficient);
-  m_amr->deallocate(m_faceCenteredDiffusionCoefficient);
-  m_amr->deallocate(m_ebCenteredDiffusionCoefficient);
+  m_phi.clear();
+  m_source.clear();
+  m_faceVelocity.clear();
+  m_faceStates.clear();
+  m_cellVelocity.clear();
+  m_ebFlux.clear();
+  m_cellCenteredDiffusionCoefficient.clear();
+  m_faceCenteredDiffusionCoefficient.clear();
+  m_ebCenteredDiffusionCoefficient.clear();
 }
 
 void
@@ -412,6 +412,8 @@ CdrSolver::preRegrid(const int a_lmin, const int a_oldFinestLevel)
     m_phi[lvl]->localCopyTo(*m_cachePhi[lvl]);
     m_source[lvl]->localCopyTo(*m_cacheSource[lvl]);
   }
+
+  this->deallocate();
 }
 
 void
@@ -1578,8 +1580,8 @@ CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
   m_amr->interpGhost(m_source, m_realm, m_phase);
 
   // Deallocate the scratch storage.
-  m_amr->deallocate(m_cachePhi);
-  m_amr->deallocate(m_cacheSource);
+  m_cachePhi.clear();
+  m_cacheSource.clear();
 }
 
 void
