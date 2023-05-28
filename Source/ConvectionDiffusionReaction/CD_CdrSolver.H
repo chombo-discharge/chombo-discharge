@@ -768,28 +768,21 @@ protected:
 
   /*!
     @brief Cell-centered velocities
+    @note Memory is only allocated if the solver is mobile. 
   */
   EBAMRCellData m_cellVelocity;
 
   /*!
     @brief Holder for face centered states
+    @note Memory is only allocated if the solver is mobile. 
   */
   EBAMRFluxData m_faceStates;
 
   /*!
-    @brief Scratch storage. 
+    @brief Face-centered velocities (only normal components)
+    @note Memory is only allocated if the solver is mobile. 
   */
-  mutable EBAMRCellData m_scratch;
-
-  /*!
-    @brief Scratch storage for flux
-  */
-  EBAMRFluxData m_scratchFluxOne;
-
-  /*!
-    @brief Scratch storage for flux
-  */
-  EBAMRFluxData m_scratchFluxTwo;
+  EBAMRFluxData m_faceVelocity;
 
   /*!
     @brief Scratch storage for the non-conservative divergence
@@ -817,11 +810,6 @@ protected:
   EBAMRCellData m_cacheSource;
 
   /*!
-    @brief Face-centered velocities (only normal components)
-  */
-  EBAMRFluxData m_faceVelocity;
-
-  /*!
     @brief EB-centered velocities
   */
   EBAMRIVData m_ebVelocity;
@@ -838,16 +826,19 @@ protected:
 
   /*!
     @brief Diffusion coefficients on cell centers
+    @note Memory is only allocated if the solver is diffusive
   */
   EBAMRCellData m_cellCenteredDiffusionCoefficient;
 
   /*!
     @brief Diffusion coefficients on face centers
+    @note Memory is only allocated if the solver is diffusive
   */
   EBAMRFluxData m_faceCenteredDiffusionCoefficient;
 
   /*!
     @brief Diffusion coefficients on EB faces
+    @note Memory is only allocated if the solver is diffusive
   */
   EBAMRIVData m_ebCenteredDiffusionCoefficient;
 

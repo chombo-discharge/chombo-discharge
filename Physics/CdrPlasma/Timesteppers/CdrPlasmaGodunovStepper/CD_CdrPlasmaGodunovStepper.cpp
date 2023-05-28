@@ -304,6 +304,8 @@ CdrPlasmaGodunovStepper::advance(const Real a_dt)
   //    4. Solve the radiative transfer problem
   //    5. Put data back into solvers to prepare for the next time step.
 
+  this->allocateScratch();
+
   m_timer = std::make_unique<Timer>("CdrPlasmaGodunovStepper::advance");
 
   Timer timer("CdrPlasmaGodunovStepper::advance");
@@ -360,6 +362,8 @@ CdrPlasmaGodunovStepper::advance(const Real a_dt)
   if (m_profile) {
     m_timer->eventReport(pout(), false);
   }
+
+  this->deallocateScratch();
 
   return a_dt;
 }
@@ -592,10 +596,28 @@ CdrPlasmaGodunovStepper::allocateInternals()
 
   constexpr int nComp = 1;
 
-  // TLDR: Since the advancement method requires some temporary variables (for holding various things at BCs, for example),
-  //       we have organized the transient memory into classes. Here, we allocate those classes.
-
   CdrPlasmaStepper::allocateInternals();
+
+  // Set up storage for semi-implicit field solves.
+  m_amr->allocate(m_semiImplicitRho, m_realm, m_phase, nComp);
+  m_amr->allocate(m_conductivityFactorCell, m_realm, m_phase, nComp);
+  m_amr->allocate(m_conductivityFactorFace, m_realm, m_phase, nComp);
+  m_amr->allocate(m_conductivityFactorEB, m_realm, m_phase, nComp);
+
+  // Initialize values.
+  DataOps::setValue(m_semiImplicitRho, 0.0);
+  DataOps::setValue(m_conductivityFactorCell, 0.0);
+  DataOps::setValue(m_conductivityFactorFace, 0.0);
+  DataOps::setValue(m_conductivityFactorEB, 0.0);
+}
+
+void
+CdrPlasmaGodunovStepper::allocateScratch()
+{
+  CH_TIME("CdrPlasmaGodunovStepper::allocateScratch()");
+  if (m_verbosity > 5) {
+    pout() << "CdrPlasmaGodunovStepper::allocateScratch()" << endl;
+  }
 
   // Number of CDR solvers and RTE solvers that we have.
   const int numCdrSpecies = m_physics->getNumCdrSpecies();
@@ -626,18 +648,6 @@ CdrPlasmaGodunovStepper::allocateInternals()
   // Allocate storage for surface charge solver.
   m_sigmaScratch = RefCountedPtr<SigmaStorage>(new SigmaStorage(m_amr, m_realm, m_cdr->getPhase()));
   m_sigmaScratch->allocateStorage();
-
-  // Set up storage for semi-implicit field solves.
-  m_amr->allocate(m_semiImplicitRho, m_realm, m_phase, nComp);
-  m_amr->allocate(m_conductivityFactorCell, m_realm, m_phase, nComp);
-  m_amr->allocate(m_conductivityFactorFace, m_realm, m_phase, nComp);
-  m_amr->allocate(m_conductivityFactorEB, m_realm, m_phase, nComp);
-
-  // Initialize values.
-  DataOps::setValue(m_semiImplicitRho, 0.0);
-  DataOps::setValue(m_conductivityFactorCell, 0.0);
-  DataOps::setValue(m_conductivityFactorFace, 0.0);
-  DataOps::setValue(m_conductivityFactorEB, 0.0);
 }
 
 void
@@ -680,6 +690,42 @@ CdrPlasmaGodunovStepper::deallocateInternals()
   m_amr->deallocate(m_conductivityFactorCell);
   m_amr->deallocate(m_conductivityFactorFace);
   m_amr->deallocate(m_conductivityFactorEB);
+}
+
+void
+CdrPlasmaGodunovStepper::deallocateScratch()
+{
+  CH_TIME("CdrPlasmaGodunovStepper::deallocateScratch()");
+  if (m_verbosity > 5) {
+    pout() << "CdrPlasmaGodunovStepper::deallocateScratch()" << endl;
+  }
+
+  // TLDR: This routine simply deallocates the transient memory used by CdrPlasmaGodunovStepper.
+
+  // Run through CDR solvers and deallocate the transient memory assocaited with them.
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    const int idx = solverIt.index();
+
+    m_cdrScratch[idx]->deallocateStorage();
+    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(0);
+  }
+
+  // Run through RTE solvers and deallocate the transient memory assocaited with them.
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+    const int idx = solverIt.index();
+
+    m_rteScratch[idx]->deallocateStorage();
+    m_rteScratch[idx] = RefCountedPtr<RtStorage>(0);
+  }
+
+  m_cdrScratch.resize(0);
+  m_rteScratch.resize(0);
+
+  m_fieldScratch->deallocateStorage();
+  m_fieldScratch = RefCountedPtr<FieldStorage>(0);
+
+  m_sigmaScratch->deallocateStorage();
+  m_sigmaScratch = RefCountedPtr<SigmaStorage>(0);
 }
 
 void

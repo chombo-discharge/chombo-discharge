@@ -112,6 +112,14 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
   }
 
   if (m_isDiffusive) {
+    // Allocate some data = 0 which we use for computing the residual.
+    EBAMRCellData zero;
+    EBAMRCellData scratch;
+
+    m_amr->allocate(zero, m_realm, m_phase, 1);
+    m_amr->allocate(scratch, m_realm, m_phase, 1);
+
+    DataOps::setValue(zero, 0.0);
 
     // TLDR: Recall that the elliptic operator solves
     //
@@ -127,10 +135,10 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     //
     //     kappa * phi^(k+1) - kappa*dt*L(phi^(k+1)) = kappa * phi^k + kappa*dt*S
     //
-    // we need to put the right-hand side somewhere. We use m_scratch for holding kappa*phi^k + kappa*dt*S. Note that we assume that S comes in weighted.
-    DataOps::copy(m_scratch, a_oldPhi);
-    DataOps::kappaScale(m_scratch);
-    DataOps::incr(m_scratch, a_source, a_dt);
+    // we need to put the right-hand side somewhere. We use scratch for holding kappa*phi^k + kappa*dt*S. Note that we assume that S comes in weighted.
+    DataOps::copy(scratch, a_oldPhi);
+    DataOps::kappaScale(scratch);
+    DataOps::incr(scratch, a_source, a_dt);
 
     // As above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -a_dt. The kappas on the left-hand side
     // in the above equation are absorbed into the Helmholtz operator so we don't need to worry about those.
@@ -140,18 +148,18 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     Vector<LevelData<EBCellFAB>*> newPhi;
     Vector<LevelData<EBCellFAB>*> eulerRHS;
     Vector<LevelData<EBCellFAB>*> resid;
-    Vector<LevelData<EBCellFAB>*> zero;
+    Vector<LevelData<EBCellFAB>*> zer;
 
     m_amr->alias(newPhi, a_newPhi);
-    m_amr->alias(eulerRHS, m_scratch);
+    m_amr->alias(eulerRHS, scratch);
     m_amr->alias(resid, m_residual);
-    m_amr->alias(zero, m_zero);
+    m_amr->alias(zer, zero);
 
     const int coarsestLevel = 0;
     const int finestLevel   = m_amr->getFinestLevel();
 
     // Figure out how far away we are form a "converged" solution.
-    const Real zeroResid = m_multigridSolver->computeAMRResidual(zero, eulerRHS, finestLevel, coarsestLevel);
+    const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, eulerRHS, finestLevel, coarsestLevel);
 
     // Set the convergence metric.
     m_multigridSolver->m_convergenceMetric = zeroResid;
@@ -179,6 +187,14 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
   }
 
   if (m_isDiffusive) {
+    // Allocate some data = 0 which we use for computing the residual.
+    EBAMRCellData zero;
+    EBAMRCellData scratch;
+
+    m_amr->allocate(zero, m_realm, m_phase, 1);
+    m_amr->allocate(scratch, m_realm, m_phase, 1);
+
+    DataOps::setValue(zero, 0.0);
 
     const int coarsestLevel = 0;
     const int finestLevel   = m_amr->getFinestLevel();
@@ -197,15 +213,15 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     //
     //     kappa * phi^(k+1) - 0.5 * kappa*dt*L(phi^(k+1)) = kappa * phi^k + 0.5 * kappa*dt*L(phi^k) + kappa*dt*S^(k+1/2)
     //
-    // we need to put the right-hand side somewhere. We use m_scratch for holding the right-hand side. Note that S^(k+1/2) should come in weighted and the old solution
+    // we need to put the right-hand side somewhere. We use scratch for holding the right-hand side. Note that S^(k+1/2) should come in weighted and the old solution
     // come in unweighted.
 
     // First, put kappa*phi^k in scratch.
-    DataOps::copy(m_scratch, a_oldPhi);
-    DataOps::kappaScale(m_scratch);
+    DataOps::copy(scratch, a_oldPhi);
+    DataOps::kappaScale(scratch);
 
     // Add the source term, which by assumption comes in weighted by the volume fraction.
-    DataOps::incr(m_scratch, a_source, a_dt);
+    DataOps::incr(scratch, a_source, a_dt);
 
     // Compute kappa*L(phi^k) and add it to the scratch data holder.
     EBAMRCellData kappaLphi;
@@ -218,8 +234,8 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
 
     this->computeKappaLphi(kappaLphi, phiScratch);
 
-    // After this we have m_scratch = kappa * phi^k + 0.5 * kappa*dt*L(phi^k) + kappa*dt*S^(k+1/2)
-    DataOps::incr(m_scratch, kappaLphi, 0.5 * a_dt);
+    // After this we have scratch = kappa * phi^k + 0.5 * kappa*dt*L(phi^k) + kappa*dt*S^(k+1/2)
+    DataOps::incr(scratch, kappaLphi, 0.5 * a_dt);
 
     // From the equation above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -0.5*a_dt. The kappas on the left-hand side
     // in the above equation are absorbed into the Helmholtz operator so we don't need to worry about those.
@@ -229,15 +245,15 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     Vector<LevelData<EBCellFAB>*> newPhi;
     Vector<LevelData<EBCellFAB>*> eulerRHS;
     Vector<LevelData<EBCellFAB>*> resid;
-    Vector<LevelData<EBCellFAB>*> zero;
+    Vector<LevelData<EBCellFAB>*> zer;
 
     m_amr->alias(newPhi, a_newPhi);
-    m_amr->alias(eulerRHS, m_scratch);
+    m_amr->alias(eulerRHS, scratch);
     m_amr->alias(resid, m_residual);
-    m_amr->alias(zero, m_zero);
+    m_amr->alias(zer, zero);
 
     // Figure out how far away we are form a "converged" solution.
-    const Real zeroResid = m_multigridSolver->computeAMRResidual(zero, eulerRHS, finestLevel, coarsestLevel);
+    const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, eulerRHS, finestLevel, coarsestLevel);
 
     // Set the convergence metric.
     m_multigridSolver->m_convergenceMetric = zeroResid;
@@ -264,11 +280,9 @@ CdrMultigrid::setupDiffusionSolver()
   // This is storage which is needed if we are doing an implicit diffusion solve. I know that not all
   // diffusion solves are implicit, but this is really the easiest way of
   if (m_isDiffusive) {
-    m_amr->allocate(m_zero, m_realm, m_phase, m_nComp);
     m_amr->allocate(m_helmAcoef, m_realm, m_phase, m_nComp);
     m_amr->allocate(m_residual, m_realm, m_phase, m_nComp);
 
-    DataOps::setValue(m_zero, 0.0);
     DataOps::setValue(m_helmAcoef, 1.0);
     DataOps::setValue(m_residual, 0.0);
 
@@ -449,6 +463,8 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
   }
 
   if (m_isMobile || m_isDiffusive) {
+    EBAMRFluxData scratchFlux;
+    m_amr->allocate(scratchFlux, m_realm, m_phase, m_nComp);
 
     // Fill ghost cells
     m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
@@ -457,8 +473,8 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
       this->setRedistWeights(a_phi);
     }
 
-    // We will let m_scratchFluxOne hold the total flux = advection + diffusion fluxes
-    DataOps::setValue(m_scratchFluxOne, 0.0);
+    // We will let scratchFlux hold the total flux = advection + diffusion fluxes
+    DataOps::setValue(scratchFlux, 0.0);
 
     if (m_isMobile && !m_isDiffusive) {
       m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
@@ -466,18 +482,18 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
       // Update face velocity and advect to faces.
       this->averageVelocityToFaces();
       this->advectToFaces(m_faceStates, a_phi, a_extrapDt);
-      this->computeAdvectionFlux(m_scratchFluxOne, m_faceVelocity, m_faceStates, a_domainFlux);
+      this->computeAdvectionFlux(scratchFlux, m_faceVelocity, m_faceStates, a_domainFlux);
     }
     else if (!m_isMobile && m_isDiffusive) {
-      this->computeDiffusionFlux(m_scratchFluxOne, a_phi, a_domainFlux); // Domain flux needs to come in through here.
-      DataOps::scale(m_scratchFluxOne, -1.0);
+      this->computeDiffusionFlux(scratchFlux, a_phi, a_domainFlux); // Domain flux needs to come in through here.
+      DataOps::scale(scratchFlux, -1.0);
     }
     else if (m_isMobile && m_isDiffusive) { //
       m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
       this->averageVelocityToFaces();
       this->advectToFaces(m_faceStates, a_phi, a_extrapDt);
 
-      this->computeAdvectionDiffusionFlux(m_scratchFluxOne,
+      this->computeAdvectionDiffusionFlux(scratchFlux,
                                           a_phi,
                                           m_faceStates,
                                           m_faceVelocity,
@@ -493,7 +509,7 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
     else {
       ebflux = &m_ebZero;
     }
-    this->computeDivG(a_divJ, m_scratchFluxOne, *ebflux, a_conservativeOnly);
+    this->computeDivG(a_divJ, scratchFlux, *ebflux, a_conservativeOnly);
   }
   else {
     DataOps::setValue(a_divJ, 0.0);
@@ -516,6 +532,8 @@ CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
   }
 
   if (m_isMobile) {
+    EBAMRFluxData scratchFlux;
+    m_amr->allocate(scratchFlux, m_realm, m_phase, m_nComp);
 
     // Fill ghost cells
     m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
@@ -532,7 +550,7 @@ CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
     this->advectToFaces(m_faceStates, a_phi, a_extrapDt);
 
     // Compute face-centered fluxes
-    this->computeAdvectionFlux(m_scratchFluxOne, m_faceVelocity, m_faceStates, a_domainFlux);
+    this->computeAdvectionFlux(scratchFlux, m_faceVelocity, m_faceStates, a_domainFlux);
 
     EBAMRIVData* ebflux;
     if (a_ebFlux) {
@@ -543,7 +561,7 @@ CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
     }
 
     // Compute div(F) -- this includes interpolation to centroids and redistribution.
-    this->computeDivG(a_divF, m_scratchFluxOne, *ebflux, a_conservativeOnly);
+    this->computeDivG(a_divF, scratchFlux, *ebflux, a_conservativeOnly);
   }
   else {
     DataOps::setValue(a_divF, 0.0);
@@ -563,6 +581,8 @@ CdrMultigrid::computeDivD(EBAMRCellData& a_divD,
   }
 
   if (m_isDiffusive) {
+    EBAMRFluxData scratchFlux;
+    m_amr->allocate(scratchFlux, m_realm, m_phase, m_nComp);
 
     // Fill ghost cells
     m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
@@ -571,7 +591,7 @@ CdrMultigrid::computeDivD(EBAMRCellData& a_divD,
       this->setRedistWeights(a_phi);
     }
 
-    this->computeDiffusionFlux(m_scratchFluxOne, a_phi, a_domainFlux); // Compute the face-centered diffusion flux
+    this->computeDiffusionFlux(scratchFlux, a_phi, a_domainFlux); // Compute the face-centered diffusion flux
 
     EBAMRIVData* ebflux;
     if (a_ebFlux) {
@@ -581,7 +601,7 @@ CdrMultigrid::computeDivD(EBAMRCellData& a_divD,
       ebflux = &m_ebZero;
     }
     this->computeDivG(a_divD,
-                      m_scratchFluxOne,
+                      scratchFlux,
                       *ebflux,
                       a_conservativeOnly); // General face-centered flux to divergence magic.
 

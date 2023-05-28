@@ -221,25 +221,28 @@ CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellP
   CH_assert(a_cellPhi[0]->nComp() == 1);
 
   // If we are extrapolating in time the source term will yield different states on the face centers. The source term is the source
-  // S^k + Div(D*Grad(Phi)), which we add to the solver below. It is stored on m_scratch (which won't be used elsewhere, I think).
-  DataOps::setValue(m_scratch, 0.0);
+  // S^k + Div(D*Grad(Phi)), which we add to the solver below.
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, 1);
+
+  DataOps::setValue(scratch, 0.0);
 
   // Compute viscous source term for the advection.
 #if 0
   if(m_isDiffusive && a_extrapDt > 0.0) {
     this->setupDiffusionSolver();
 
-    this->computeKappaLphi(m_scratch, a_cellPhi);
+    this->computeKappaLphi(scratch, a_cellPhi);
   }
 #endif
 
   // If user asks for it, add the source term to the extrapolation.
   if (m_extrapolateSourceTerm && a_extrapDt > 0.0) {
-    DataOps::incr(m_scratch, m_source, 1.0);
+    DataOps::incr(scratch, m_source, 1.0);
   }
 
-  m_amr->conservativeAverage(m_scratch, m_realm, m_phase);
-  m_amr->interpGhost(m_scratch, m_realm, m_phase);
+  m_amr->conservativeAverage(scratch, m_realm, m_phase);
+  m_amr->interpGhost(scratch, m_realm, m_phase);
 
   // This code extrapolates the cell-centered state to face centers on every grid level, in both space and time.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -250,7 +253,7 @@ CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellP
       const EBCellFAB& cellPhi = (*a_cellPhi[lvl])[dit()];
       const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[dit()];
       const EBFluxFAB& faceVel = (*m_faceVelocity[lvl])[dit()];
-      const EBCellFAB& source  = (*m_scratch[lvl])[dit()];
+      const EBCellFAB& source  = (*scratch[lvl])[dit()];
       const Real       time    = 0.0;
 
       EBAdvectPatchIntegrator& ebAdvectPatch = m_levelAdvect[lvl]->getPatchAdvect(dit());

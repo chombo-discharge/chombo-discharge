@@ -206,11 +206,6 @@ protected:
   GMRESSolver<LevelData<EBCellFAB>> m_gmres;
 
   /*!
-    @brief Data which is always zero. 
-  */
-  EBAMRCellData m_zero;
-
-  /*!
     @brief Storage for Helmholtz a-coefficient. Always 1. 
   */
   EBAMRCellData m_helmAcoef;
