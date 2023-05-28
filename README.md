@@ -8,8 +8,8 @@ This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for disc
 A modified version of ``Chombo`` is distributed together with this code.
 
 <p align="center">
-   <img src="./Docs/Sphinx/source/_static/figures/BranchingAir.gif" width="50%">
-   <img src="./Exec/Examples/CdrPlasma/Sprite/sprite3d.png" width="50%">
+   <img src="./Docs/Sphinx/source/_static/figures/BranchingAir.gif" width="45%">
+   <img src="./Exec/Examples/CdrPlasma/Sprite/sprite3d.png" width="45%">
 </p align="center">
 
 Installation
