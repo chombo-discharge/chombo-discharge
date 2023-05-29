@@ -564,23 +564,6 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
     pout() << "Driver::regrid(int, int, bool)" << endl;
   }
 
-  // We need to be careful with memory allocations here. Therefore we do:
-  // --------------------------------------------------------------------
-  // 1.  Tag cells, this calls CellTagger which allocates and deallocate its own storage so
-  //     there's a peak in memory consumption here. We have to eat this one because we
-  //     potentially need all the solver data for tagging, so that data can't be touched.
-  //     If we don't get new tags, we exit this routine already here.
-  // 2.  Deallocate internal storage for the TimeStepper - this frees up a bunch of memory that
-  //     we don't need since we won't advance until after regridding anyways.
-  // 3.  Cache tags, this doubles up on the memory for m_tags but that shouldn't matter.
-  // 4.  Free up m_tags for safety because it will be regridded anyways.
-  // 5.  Cache solver states
-  // 6.  Deallocate internal storage for solver. This should free up a bunch of memory.
-  // 7.  Regrid AmrMesh - this shouldn't cause any extra memory issues
-  // 8.  Regrid Driver - this
-  // 9.  Regrid the cell tagger. I'm not explicitly releasing storage from here since it's so small.
-  // 10. Solve elliptic equations and fill solvers
-
   // Use a timer here because I want to be able to put some diagnostics into this function.
   Timer timer("Driver::regrid(int, int, bool)");
 
@@ -618,6 +601,7 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
   timer.startEvent("Pre-regrid");
   this->cacheTags(m_tags); // Cache m_tags because after regrid, ownership will change
   m_timeStepper->preRegrid(a_lmin, m_amr->getFinestLevel());
+  m_amr->preRegrid();
   if (!(m_cellTagger.isNull())) {
     m_cellTagger->preRegrid();
   }

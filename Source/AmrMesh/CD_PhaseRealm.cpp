@@ -115,6 +115,38 @@ PhaseRealm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_fines
 }
 
 void
+PhaseRealm::preRegrid()
+{
+  CH_TIME("PhaseRealm::preRegrid");
+  if (m_verbose) {
+    pout() << "PhaseRealm::preRegrid" << endl;
+  }
+
+  MemoryReport::getMaxMinMemoryUsage();
+  m_grids.resize(0);
+  m_ebisl.resize(0);
+  m_eblg.resize(0);
+  m_eblgCoFi.resize(0);
+  m_eblgFiCo.resize(0);
+  m_vofIter.resize(0);
+  m_coarAve.resize(0);
+  m_multigridInterpolator.resize(0);
+  m_ebFineInterp.resize(0);
+  m_ebReflux.resize(0);
+  m_levelRedist.resize(0);
+  m_coarToFineRedist.resize(0);
+  m_coarToCoarRedist.resize(0);
+  m_fineToCoarRedist.resize(0);
+  m_gradientOp.resize(0);
+  m_levelset.resize(0);
+
+  m_centroidInterpolationStencil     = RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil>>(0);
+  m_ebCentroidInterpolationStencil   = RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil>>(0);
+  m_NonConservativeDivergenceStencil = RefCountedPtr<IrregAmrStencil<NonConservativeDivergenceStencil>>(0);
+  MemoryReport::getMaxMinMemoryUsage();
+}
+
+void
 PhaseRealm::regridBase(const int a_lmin)
 {
   CH_TIME("PhaseRealm::regridBase");
@@ -133,18 +165,6 @@ PhaseRealm::regridBase(const int a_lmin)
     timer.startEvent("Define EBLevelGrid");
     this->defineEBLevelGrid(a_lmin);
     timer.stopEvent("Define EBLevelGrid");
-    if (m_profile) {
-      MemoryReport::getMaxMinMemoryUsage();
-      pout() << endl;
-    }
-
-    if (m_profile) {
-      pout() << "before/after neighbor define" << endl;
-      MemoryReport::getMaxMinMemoryUsage();
-    }
-    timer.startEvent("Define neighbors");
-    this->defineNeighbors(a_lmin);
-    timer.stopEvent("Define neighbors");
     if (m_profile) {
       MemoryReport::getMaxMinMemoryUsage();
       pout() << endl;
@@ -471,42 +491,6 @@ PhaseRealm::defineVofIterator(const int a_lmin)
       const IntVectSet& irreg   = ebisbox.getIrregIVS(cellBox);
 
       vofit.define(irreg, ebgraph);
-    }
-  }
-}
-
-void
-PhaseRealm::defineNeighbors(const int a_lmin)
-{
-  CH_TIME("PhaseRealm::defineNeighbors");
-  if (m_verbose) {
-    pout() << "PhaseRealm::defineNeighbors" << endl;
-  }
-
-  m_neighbors.resize(1 + m_finestLevel);
-
-  for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
-    m_neighbors[lvl] = RefCountedPtr<LayoutData<Vector<LayoutIndex>>>(
-      new LayoutData<Vector<LayoutIndex>>(m_grids[lvl]));
-
-    const DisjointBoxLayout& dbl = m_grids[lvl];
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box& box = dbl.get(dit());
-
-      Vector<LayoutIndex>& curNeighbors = (*m_neighbors[lvl])[dit()];
-
-      for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
-        const Box& otherBox = dbl.get(lit());
-
-        if (otherBox != box) {
-          Box grownBox = otherBox;
-          grownBox.grow(1);
-
-          if (box.intersects(grownBox)) {
-            curNeighbors.push_back(lit());
-          }
-        }
-      }
     }
   }
 }
@@ -1053,11 +1037,6 @@ PhaseRealm::getEBLevelGridCoFi() const
   return m_eblgCoFi;
 }
 
-const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>>&
-PhaseRealm::getNeighbors() const
-{
-  return m_neighbors;
-}
 Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
 PhaseRealm::getVofIterator() const
 {

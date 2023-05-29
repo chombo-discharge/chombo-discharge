@@ -155,6 +155,12 @@ public:
   setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLevel);
 
   /*!
+    @brief Perform pre-regrid operations
+  */
+  void
+  preRegrid();
+
+  /*!
     @brief Regrid method for EBAMR base
     @param[in] a_lmin Coarsest grid level that changed. 
     @details This regrids EBLevelGrid and iterators
@@ -240,13 +246,6 @@ public:
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGridCoFi() const;
-
-  /*!
-    @brief Get neighbor boxes to grid boxes
-    @return Immutable m_neighbors
-  */
-  const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>>&
-  getNeighbors() const;
 
   /*!
     @brief Return vof iterator for iterating over irregular cells in each grid patch
@@ -491,11 +490,6 @@ protected:
   Vector<RefCountedPtr<EBLevelGrid>> m_eblgFiCo;
 
   /*!
-    @brief Weird but true thing that indexces neighboring boxes
-  */
-  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>> m_neighbors;
-
-  /*!
     @brief Level-set function
   */
   EBAMRFAB m_levelset;
@@ -593,13 +587,6 @@ protected:
   */
   void
   defineVofIterator(const int a_lmin);
-
-  /*!
-    @brief Define patch neighbors
-    @param[in] a_lmin Coarsest grid level that changes
-  */
-  void
-  defineNeighbors(const int a_lmin);
 
   /*!
     @brief Define coarsening utility

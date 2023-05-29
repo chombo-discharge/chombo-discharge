@@ -1407,6 +1407,12 @@ public:
   setBaseImplicitFunction(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseIF);
 
   /*!
+    @brief Run pre-regrid operations. 
+  */
+  void
+  preRegrid();
+
+  /*!
     @brief Regrid AMR. This versions generates the grids and Realms, but not the operator. 
     @param[in] a_tags    Cell tags which will generate the grid. 
     @param[in] a_lmin    Coarsest grid level allowed to change. 
@@ -1642,14 +1648,6 @@ public:
   */
   Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
   getVofIterator(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get neighboring boxes
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>>&
-  getNeighbors(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get levelset function, allocated over a grid for a Realm and phase
@@ -2004,7 +2002,7 @@ protected:
     @details This will call the specified grid generation method and fill m_grids with the new grids. 
   */
   void
-  buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
+  buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
 
   /*!
     @brief Parse the low/high corners of the computational domain. 

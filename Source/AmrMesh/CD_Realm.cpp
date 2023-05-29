@@ -127,6 +127,28 @@ Realm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLeve
 }
 
 void
+Realm::preRegrid()
+{
+  CH_TIME("Realm::preRegrid");
+  if (m_verbosity > 5) {
+    pout() << "Realm::preRegrid" << endl;
+  }
+
+  m_grids.resize(0);
+  m_mflg.resize(0);
+  m_validCells.resize(0);
+
+  for (auto& mask : m_masks) {
+    mask.second.resize(0);
+  }
+  //  m_masks.clear();
+
+  for (auto& r : m_realms) {
+    r.second->preRegrid();
+  }
+}
+
+void
 Realm::regridBase(const int a_lmin)
 {
   CH_TIME("Realm::regridBase");
@@ -530,12 +552,6 @@ const Vector<RefCountedPtr<EBLevelGrid>>&
 Realm::getEBLevelGridCoFi(const phase::which_phase a_phase) const
 {
   return m_realms[a_phase]->getEBLevelGridCoFi();
-}
-
-const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>>&
-Realm::getNeighbors(const phase::which_phase a_phase) const
-{
-  return m_realms[a_phase]->getNeighbors();
 }
 
 Vector<RefCountedPtr<LayoutData<VoFIterator>>>&

@@ -997,6 +997,21 @@ AmrMesh::buildDomains()
 }
 
 void
+AmrMesh::preRegrid()
+{
+  CH_TIME("AmrMesh::preRegrid");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::preRegrid" << endl;
+  }
+
+  m_grids.resize(0);
+
+  for (auto& r : m_realms) {
+    r.second->preRegrid();
+  }
+}
+
+void
 AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap)
 {
   CH_TIME("AmrMesh::regridAmr(Vector<IntVectSet>, int, int)");
@@ -1008,10 +1023,9 @@ AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags, const int a_lmin, const int
 
   // TLDR: This is the version that reads boxes. AmrMesh makes the grids from the tags and load balances them
   //       by using the patch volume. Those grids are then sent to the various Realms.
-  Vector<IntVectSet> tags = a_tags; // buildGrids destroys tags, so we actually have to copy them.
 
-  this->buildGrids(tags, a_lmin, a_hardcap); // Build AMR grids -- the realm grids are defined with these grids.
-  this->defineRealms();                      // Define Realms with the new grids and redo the Realm stuff
+  this->buildGrids(a_tags, a_lmin, a_hardcap); // Build AMR grids -- the realm grids are defined with these grids.
+  this->defineRealms();                        // Define Realms with the new grids and redo the Realm stuff
 
   for (auto& r : m_realms) {
     r.second->regridBase(a_lmin);
@@ -1048,11 +1062,11 @@ AmrMesh::regridOperators(const std::string a_realm, const int a_lmin)
 }
 
 void
-AmrMesh::buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap)
+AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap)
 {
-  CH_TIME("AmrMesh::buildGrids(Vector<IntVectSet>, int, int)");
+  CH_TIME("AmrMesh::buildGrids");
   if (m_verbosity > 2) {
-    pout() << "AmrMesh::buildGrids(Vector<IntVectSet>, int, int)" << endl;
+    pout() << "AmrMesh::buildGrids" << endl;
   }
 
   // TLDR: a_lmin is the coarsest level that changes and a_hardcap is a hardcap for the maximum grid level that can
@@ -1092,30 +1106,38 @@ AmrMesh::buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_ha
 
     switch (m_gridGenerationMethod) {
     case GridGenerationMethod::BergerRigoutsous: {
+      // BRMeshRefine destroys tags.
+      Vector<IntVectSet> tags = a_tags;
+
       BRMeshRefine meshRefine(m_domains[0],
                               m_refinementRatios,
                               m_fillRatioBR,
                               m_blockingFactor,
                               m_bufferSizeBR,
                               m_maxBoxSize);
-      newFinestLevel = meshRefine.regrid(newBoxes, a_tags, baseLevel, topLevel, oldBoxes);
+
+      newFinestLevel = meshRefine.regrid(newBoxes, tags, baseLevel, topLevel, oldBoxes);
+
       break;
     }
     case GridGenerationMethod::Tiled: {
       TiledMeshRefine meshRefine(m_domains[0], m_refinementRatios, m_blockingFactor * IntVect::Unit);
+
       newFinestLevel = meshRefine.regrid(newBoxes, a_tags, baseLevel, topLevel, oldBoxes);
+
       break;
     }
-    default:
-      MayDay::Error(
-        "AmrMesh::buildGrids(Vector<IntVectSet>, int, int) - logic bust, regridding with unknown regrid algorithm");
+    default: {
+      MayDay::Error("AmrMesh::buildGrids - logic bust, regridding with unknown regrid algorithm");
+
       break;
+    }
     }
 
     // Identify the new finest grid level.
-    m_finestLevel = Min(newFinestLevel, m_maxAmrDepth);       // Don't exceed m_maxAmrDepth
-    m_finestLevel = Min(m_finestLevel, m_maxSimulationDepth); // Don't exceed maximum simulation depth
-    m_finestLevel = Min(m_finestLevel, hardcap);              // Don't exceed hardcap
+    m_finestLevel = std::min(newFinestLevel, m_maxAmrDepth);       // Don't exceed m_maxAmrDepth
+    m_finestLevel = std::min(m_finestLevel, m_maxSimulationDepth); // Don't exceed maximum simulation depth
+    m_finestLevel = std::min(m_finestLevel, hardcap);              // Don't exceed hardcap
   }
   else { // Only end up here if we have a single grid level, i.e. just single-level grid decomposition.
     newBoxes.resize(1);
@@ -2794,23 +2816,6 @@ AmrMesh::getVofIterator(const std::string a_realm, const phase::which_phase a_ph
   }
 
   return m_realms[a_realm]->getVofIterator(a_phase);
-}
-
-const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>>&
-AmrMesh::getNeighbors(const std::string a_realm, const phase::which_phase a_phase) const
-{
-  CH_TIME("AmrMesh::getNeighbors(string, phase::which_phase)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getNeighbors(string, phase::which_phase)" << endl;
-  }
-
-  if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getNeighbors(string, phase::which_phase) - could not find realm '" + a_realm +
-                            "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  return m_realms[a_realm]->getNeighbors(a_phase);
 }
 
 const AMRMask&

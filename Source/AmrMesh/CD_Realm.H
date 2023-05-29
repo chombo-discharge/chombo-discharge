@@ -135,6 +135,12 @@ public:
   setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLevel);
 
   /*!
+    @brief Perform pre-regrid operations
+  */
+  void
+  preRegrid();
+
+  /*!
     @brief Regrid method for EBAMR base
     @param[in] a_lmin Coarsest grid level that changed. 
     @details This regrids EBLevelGrid and iterators
@@ -245,13 +251,6 @@ public:
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGridCoFi(const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get neighbors for particular phase
-    @param[in] a_phase Phase
-  */
-  const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>>&
-  getNeighbors(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get VoFIterators for particular phase
