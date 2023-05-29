@@ -122,7 +122,6 @@ PhaseRealm::preRegrid()
     pout() << "PhaseRealm::preRegrid" << endl;
   }
 
-  MemoryReport::getMaxMinMemoryUsage();
   m_grids.resize(0);
   m_ebisl.resize(0);
   m_eblg.resize(0);
@@ -143,7 +142,6 @@ PhaseRealm::preRegrid()
   m_centroidInterpolationStencil     = RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil>>(0);
   m_ebCentroidInterpolationStencil   = RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil>>(0);
   m_NonConservativeDivergenceStencil = RefCountedPtr<IrregAmrStencil<NonConservativeDivergenceStencil>>(0);
-  MemoryReport::getMaxMinMemoryUsage();
 }
 
 void

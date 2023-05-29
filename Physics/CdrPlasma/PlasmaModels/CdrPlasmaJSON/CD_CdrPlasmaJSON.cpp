@@ -143,8 +143,8 @@ CdrPlasmaJSON::parseJSON()
     this->throwParserError("CdrPlasmaJSON::parseJSON -- file '" + m_jsonFile + "' does not exist");
 
   // Parse the JSON file
-  std::ifstream istream(m_jsonFile);
-  istream >> m_json;
+  std::ifstream f(m_jsonFile);
+  m_json = json::parse(f, nullptr, true, true);
 }
 
 void
