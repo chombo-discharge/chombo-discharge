@@ -3673,26 +3673,30 @@ CdrPlasmaStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int
   this->regridSolvers(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   this->regridInternals(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
-  // Solvers have been regridded. Now resolve the Poisson equation with the new data
-  const bool converged = this->solvePoisson();
+  // Solvers have been regridded. Now resolve the Poisson equation with the new data. If this
+  // is the first time step, we can skip this call because it's done in the initialData routine.
+  if (m_timeStep > 0) {
+    const bool converged = this->solvePoisson();
 
-  // If we don't converge, try new Poisson solver settings
-  if (!converged) {
-    if (m_verbosity > 0) {
-      pout() << "CdrPlasmaStepper::regrid - Poisson solver failed to converge." << endl;
+    // If we don't converge, try new Poisson solver settings
+    if (!converged) {
+      if (m_verbosity > 0) {
+        pout() << "CdrPlasmaStepper::regrid - Poisson solver failed to converge." << endl;
+      }
     }
-  }
 
-  // Compute stuff that is important for the CDR solvers.
-  this->computeCdrDriftVelocities();
-  this->computeCdrDiffusion();
+    // Compute stuff that is important for the CDR solvers.
+    this->computeCdrDriftVelocities();
+    this->computeCdrDiffusion();
 
-  // If we're doing a stationary RTE, we should update the elliptic equations. The RTE solvers should
-  // have regridded the source term in that case.
-  if (this->stationaryRTE()) {
-    constexpr Real dummyDt = 0.0;
+    // If we're doing a stationary RTE, we should update the elliptic equations. The RTE solvers should
+    // have regridded the source term in that case.
+    if (this->stationaryRTE()) {
+      MayDay::Abort("crap");
+      constexpr Real dummyDt = 0.0;
 
-    this->solveRadiativeTransfer(dummyDt);
+      this->solveRadiativeTransfer(dummyDt);
+    }
   }
 }
 
