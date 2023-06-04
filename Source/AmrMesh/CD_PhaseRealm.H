@@ -14,12 +14,6 @@
 
 // Chombo includes
 #include <DisjointBoxLayout.H>
-#include <EBLevelRedist.H>
-#include <EBCoarToFineRedist.H>
-#include <EBMGInterp.H>
-#include <EBCoarToCoarRedist.H>
-#include <EBFineToCoarRedist.H>
-#include <EBPWLFineInterp.H>
 #include <ProblemDomain.H>
 
 // Our includes
@@ -35,6 +29,7 @@
 #include <CD_ParticleContainer.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBGradient.H>
+#include <CD_EBRedistribution.H>
 #include <CD_EBAMRParticleMesh.H>
 #include <CD_EBAMRSurfaceDeposition.H>
 #include <CD_EBCoarseToFineInterp.H>
@@ -327,28 +322,11 @@ public:
   getFluxRegister() const;
 
   /*!
-    @brief Get level redistribution utility
+    @brief Get the redistribution operators
+    @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBLevelRedist>>&
-  getLevelRedist() const;
-
-  /*!
-    @brief Get coarse-to-fine redistribution utility
-  */
-  Vector<RefCountedPtr<EBCoarToFineRedist>>&
-  getCoarToFineRedist() const;
-
-  /*!
-    @brief Get coarse-to-coarse redistribution utility
-  */
-  Vector<RefCountedPtr<EBCoarToCoarRedist>>&
-  getCoarToCoarRedist() const;
-
-  /*!
-    @brief Get fine-to-coarse redistribution utility
-  */
-  Vector<RefCountedPtr<EBFineToCoarRedist>>&
-  getFineToCoarRedist() const;
+  Vector<RefCountedPtr<EBRedistribution>>&
+  getRedistributionOp() const;
 
   /*!
     @brief Get level-set function
@@ -525,24 +503,9 @@ protected:
   mutable Vector<RefCountedPtr<EBReflux>> m_ebReflux;
 
   /*!
-    @brief Level redistribution utility
+    @brief Redistribution utilities
   */
-  mutable Vector<RefCountedPtr<EBLevelRedist>> m_levelRedist;
-
-  /*!
-    @brief Coarse-to-fine redistribution utility
-  */
-  mutable Vector<RefCountedPtr<EBCoarToFineRedist>> m_coarToFineRedist;
-
-  /*!
-    @brief Coarse-to-coarse redistribution utility
-  */
-  mutable Vector<RefCountedPtr<EBCoarToCoarRedist>> m_coarToCoarRedist;
-
-  /*!
-    @brief Fine-to-coarse redistribution utility
-  */
-  mutable Vector<RefCountedPtr<EBFineToCoarRedist>> m_fineToCoarRedist;
+  mutable Vector<RefCountedPtr<EBRedistribution>> m_redistributionOp;
 
   /*!
     @brief Gradient operator

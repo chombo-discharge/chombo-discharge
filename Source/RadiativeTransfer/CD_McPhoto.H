@@ -624,34 +624,6 @@ protected:
   depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC);
 
   /*!
-    @brief Increment redistribution objects with mass to be redistributed
-    @param[in] a_massDifference Mass difference
-  */
-  void
-  incrementRedist(const EBAMRIVData& a_massDifference);
-
-  /*!
-    @brief Do redistribution on all levels, no coarse-fine EB magic. 
-    @param[in] a_phi Data to be redistributed (with whatever has been put in the redistribution registers)
-  */
-  void
-  levelRedist(EBAMRCellData& a_phi);
-
-  /*!
-    @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
-    @param[in] m_massDifference Mass difference
-  */
-  void
-  coarseFineIncrement(const EBAMRIVData& m_massDifference);
-
-  /*!
-    @brief Do coarse-fine redistribution
-    @param[inout] Data to be redistributed (with whatever has been put in the redistribution registers)
-  */
-  void
-  coarseFineRedistribution(EBAMRCellData& a_phi);
-
-  /*!
     @brief Turn on/off transparent boundaries
   */
   void

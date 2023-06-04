@@ -337,32 +337,11 @@ public:
   getFluxRegister(const phase::which_phase a_phase);
 
   /*!
-    @brief Get level redistribution utility
-    @param[in] a_phase Phase
+    @brief Get the redistribution operators
+    @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBLevelRedist>>&
-  getLevelRedist(const phase::which_phase a_phase);
-
-  /*!
-    @brief Get coarse-to-fine redistribution utility
-    @param[in] a_phase Phase
-  */
-  Vector<RefCountedPtr<EBCoarToFineRedist>>&
-  getCoarToFineRedist(const phase::which_phase a_phase);
-
-  /*!
-    @brief Get coarse-to-coarse redistribution utility
-    @param[in] a_phase Phase
-  */
-  Vector<RefCountedPtr<EBCoarToCoarRedist>>&
-  getCoarToCoarRedist(const phase::which_phase a_phase);
-
-  /*!
-    @brief Get fine-to-coarse redistribution utility
-    @param[in] a_phase Phase
-  */
-  Vector<RefCountedPtr<EBFineToCoarRedist>>&
-  getFineToCoarRedist(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBRedistribution>>&
+  getRedistributionOp(const phase::which_phase a_phase);
 
   /*!
     @brief Get level-set function

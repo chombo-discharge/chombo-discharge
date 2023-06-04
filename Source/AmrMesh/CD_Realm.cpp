@@ -435,7 +435,7 @@ Realm::defineValidCells()
           }
         };
 
-        BoxLoops::loop(cellBox, kernel);
+        BoxLoops::loop(fabMask.box(), kernel);
       }
     }
   }
@@ -626,28 +626,10 @@ Realm::getFluxRegister(const phase::which_phase a_phase)
   return m_realms[a_phase]->getFluxRegister();
 }
 
-Vector<RefCountedPtr<EBLevelRedist>>&
-Realm::getLevelRedist(const phase::which_phase a_phase)
+Vector<RefCountedPtr<EBRedistribution>>&
+Realm::getRedistributionOp(const phase::which_phase a_phase)
 {
-  return m_realms[a_phase]->getLevelRedist();
-}
-
-Vector<RefCountedPtr<EBCoarToFineRedist>>&
-Realm::getCoarToFineRedist(const phase::which_phase a_phase)
-{
-  return m_realms[a_phase]->getCoarToFineRedist();
-}
-
-Vector<RefCountedPtr<EBCoarToCoarRedist>>&
-Realm::getCoarToCoarRedist(const phase::which_phase a_phase)
-{
-  return m_realms[a_phase]->getCoarToCoarRedist();
-}
-
-Vector<RefCountedPtr<EBFineToCoarRedist>>&
-Realm::getFineToCoarRedist(const phase::which_phase a_phase)
-{
-  return m_realms[a_phase]->getFineToCoarRedist();
+  return m_realms[a_phase]->getRedistributionOp();
 }
 
 const EBAMRFAB&

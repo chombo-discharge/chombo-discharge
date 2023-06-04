@@ -770,9 +770,6 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
   // Mesh data -- always allocate it.
   m_amr->allocate(m_phi, m_realm, m_phase, ncomp);
 
-  // Scratch data -- needed because of IO when we deposit particles (should always allocate it).
-  m_amr->allocate(m_scratch, m_realm, m_phase, ncomp);
-
   // For "redistributed" particle deposition
   m_amr->allocate(m_depositionNC, m_realm, m_phase, ncomp);
   m_amr->allocate(m_massDiff, m_realm, m_phase, ncomp);
@@ -831,9 +828,6 @@ ItoSolver::allocate()
 
   // Mesh data -- always allocate it.
   m_amr->allocate(m_phi, m_realm, m_phase, ncomp);
-
-  // Scratch data -- needed because of IO when we deposit particles (should always allocate it).
-  m_amr->allocate(m_scratch, m_realm, m_phase, ncomp);
 
   // For "redistributed" particle deposition
   m_amr->allocate(m_depositionNC, m_realm, m_phase, ncomp);
@@ -931,7 +925,7 @@ ItoSolver::writeCheckPointLevelParticles(HDF5Handle& a_handle, const int a_level
     // Handle to list of particles low-memory particles in the current grid patch.
     List<SimpleItoParticle>& simpleParticles = (lowMemoryParticles[a_level])[dit()].listItems();
 
-    // Make the ItoParticle into a SimpleItoParticle for checkpointing purposes -- we only need mass, position, and energy.
+    // Make the ItoParticle into a SimpleItoParticle for checkpointing purposes -- we only need weight, position, and energy.
     simpleParticles.clear();
     for (ListIterator<ItoParticle> lit(myParticles[a_level][dit()].listItems()); lit.ok(); ++lit) {
       const ItoParticle& p = lit();
@@ -1320,6 +1314,9 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int 
   CH_assert(a_level >= 0);
   CH_assert(a_level <= m_amr->getFinestLevel());
 
+  LevelData<EBCellFAB> scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, a_level, 1);
+
   // Write phi
   CH_START(t1);
   if (m_plotPhi) {
@@ -1348,65 +1345,65 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int 
 
   CH_START(t2);
   if (m_plotParticles) {
-    this->depositParticlesNGP<ItoParticle, &ItoParticle::weight>(*m_scratch[a_level],
+    this->depositParticlesNGP<ItoParticle, &ItoParticle::weight>(scratch,
                                                                  m_particleContainers.at(WhichContainer::Bulk),
                                                                  a_level);
 
-    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    scratch.copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
 
     a_comp++;
   }
   if (m_plotParticlesEB) {
-    this->depositParticlesNGP<ItoParticle, &ItoParticle::weight>(*m_scratch[a_level],
+    this->depositParticlesNGP<ItoParticle, &ItoParticle::weight>(scratch,
                                                                  m_particleContainers.at(WhichContainer::EB),
                                                                  a_level);
 
-    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    scratch.copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
 
     a_comp++;
   }
   if (m_plotParticlesDomain) {
-    this->depositParticlesNGP<ItoParticle, &ItoParticle::weight>(*m_scratch[a_level],
+    this->depositParticlesNGP<ItoParticle, &ItoParticle::weight>(scratch,
                                                                  m_particleContainers.at(WhichContainer::Domain),
                                                                  a_level);
 
-    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    scratch.copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
 
     a_comp++;
   }
   if (m_plotParticlesSource) {
-    this->depositParticlesNGP<ItoParticle, &ItoParticle::weight>(*m_scratch[a_level],
+    this->depositParticlesNGP<ItoParticle, &ItoParticle::weight>(scratch,
                                                                  m_particleContainers.at(WhichContainer::Source),
                                                                  a_level);
 
-    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    scratch.copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
 
     a_comp++;
   }
   if (m_plotEnergyDensity) {
-    this->depositParticlesNGP<ItoParticle, &ItoParticle::totalEnergy>(*m_scratch[a_level],
+    this->depositParticlesNGP<ItoParticle, &ItoParticle::totalEnergy>(scratch,
                                                                       m_particleContainers.at(WhichContainer::Bulk),
                                                                       a_level);
 
-    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    scratch.copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
 
     a_comp++;
   }
   if (m_plotAverageEnergy) {
-    LevelData<EBCellFAB> mass;
-    m_amr->allocate(mass, m_realm, m_phase, a_level, 1);
-    this->depositParticlesNGP<ItoParticle, &ItoParticle::weight>(mass,
+    LevelData<EBCellFAB> weight;
+    m_amr->allocate(weight, m_realm, m_phase, a_level, 1);
+    this->depositParticlesNGP<ItoParticle, &ItoParticle::weight>(weight,
                                                                  m_particleContainers.at(WhichContainer::Bulk),
                                                                  a_level);
 
-    this->depositParticlesNGP<ItoParticle, &ItoParticle::totalEnergy>(*m_scratch[a_level],
+    this->depositParticlesNGP<ItoParticle, &ItoParticle::totalEnergy>(scratch,
                                                                       m_particleContainers.at(WhichContainer::Bulk),
                                                                       a_level);
 
     // Set scratch = totalEnergy/totalWeight
-    DataOps::divideFallback(*m_scratch[a_level], mass, 0.0);
+    DataOps::divideFallback(scratch, weight, 0.0);
 
-    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    scratch.copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
 
     a_comp++;
   }
@@ -1595,24 +1592,20 @@ ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<ItoPar
   CH_assert(a_phi[0]->nComp() == 1);
   CH_assert(!a_particles.isOrganizedByCell());
 
-  DataOps::setValue(a_phi, 0.0);
-  DataOps::setValue(m_scratch, 0.0);
+  EBAMRCellData weight;
+  m_amr->allocate(weight, m_realm, m_phase, m_nComp);
 
-  // Need scratch storage to deposit into (can't use m_scratch)
-  EBAMRCellData mass;
-  m_amr->allocate(mass, m_realm, m_phase, m_nComp);
-
-  // Deposit mass*mu and mass
+  // Deposit weight*mu and weight
   this->depositParticles<ItoParticle, &ItoParticle::conductivity>(a_phi,
                                                                   a_particles,
                                                                   m_deposition,
                                                                   m_coarseFineDeposition);
-  this->depositParticles<ItoParticle, &ItoParticle::weight>(mass, a_particles, m_deposition, m_coarseFineDeposition);
+  this->depositParticles<ItoParticle, &ItoParticle::weight>(weight, a_particles, m_deposition, m_coarseFineDeposition);
 
-  // Make averageMobility = mass*mu/mass. If there is no mass then set the value to zero.
+  // Make averageMobility = weight*mu/weight. If there is no weight then set the value to zero.
   constexpr Real zero = 0.0;
 
-  DataOps::divideFallback(a_phi, mass, zero);
+  DataOps::divideFallback(a_phi, weight, zero);
 }
 
 void
@@ -1626,24 +1619,20 @@ ItoSolver::computeAverageDiffusion(EBAMRCellData& a_phi, ParticleContainer<ItoPa
   CH_assert(a_phi[0]->nComp() == 1);
   CH_assert(!a_particles.isOrganizedByCell());
 
-  DataOps::setValue(a_phi, 0.0);
-  DataOps::setValue(m_scratch, 0.0);
+  EBAMRCellData weight;
+  m_amr->allocate(weight, m_realm, m_phase, m_nComp);
 
-  // Need scratch storage to deposit into (can't use m_scratch)
-  EBAMRCellData mass;
-  m_amr->allocate(mass, m_realm, m_phase, m_nComp);
-
-  // Deposit mass*D and mass
+  // Deposit weight*D and weight
   this->depositParticles<ItoParticle, &ItoParticle::diffusivity>(a_phi,
                                                                  a_particles,
                                                                  m_deposition,
                                                                  m_coarseFineDeposition);
-  this->depositParticles<ItoParticle, &ItoParticle::weight>(mass, a_particles, m_deposition, m_coarseFineDeposition);
+  this->depositParticles<ItoParticle, &ItoParticle::weight>(weight, a_particles, m_deposition, m_coarseFineDeposition);
 
-  // Make averageMobility = mass*mu/mass. If there is no mass then set the value to zero.
+  // Make average diffusion coefficient = weight*D/weight. If there is no weight then set the value to zero.
   constexpr Real zero = 0.0;
 
-  DataOps::divideFallback(a_phi, mass, zero);
+  DataOps::divideFallback(a_phi, weight, zero);
 }
 
 void
@@ -1657,24 +1646,21 @@ ItoSolver::computeAverageEnergy(EBAMRCellData& a_phi, ParticleContainer<ItoParti
   CH_assert(a_phi[0]->nComp() == 1);
   CH_assert(!a_particles.isOrganizedByCell());
 
-  DataOps::setValue(a_phi, 0.0);
-  DataOps::setValue(m_scratch, 0.0);
+  // Need scratch storage to deposit into
+  EBAMRCellData weight;
+  m_amr->allocate(weight, m_realm, m_phase, m_nComp);
 
-  // Need scratch storage to deposit into (can't use m_scratch)
-  EBAMRCellData mass;
-  m_amr->allocate(mass, m_realm, m_phase, m_nComp);
-
-  // Deposit mass*energy and mass
+  // Deposit weight*energy and weight
   this->depositParticles<ItoParticle, &ItoParticle::totalEnergy>(a_phi,
                                                                  a_particles,
                                                                  m_deposition,
                                                                  m_coarseFineDeposition);
-  this->depositParticles<ItoParticle, &ItoParticle::weight>(mass, a_particles, m_deposition, m_coarseFineDeposition);
+  this->depositParticles<ItoParticle, &ItoParticle::weight>(weight, a_particles, m_deposition, m_coarseFineDeposition);
 
-  // Make averageMobility = mass*mu/mass. If there is no mass then set the value to zero.
+  // Make average energy = weight*energy/weight. If there is no weight then set the value to zero.
   constexpr Real zero = 0.0;
 
-  DataOps::divideFallback(a_phi, mass, zero);
+  DataOps::divideFallback(a_phi, weight, zero);
 }
 
 void
@@ -1723,17 +1709,23 @@ ItoSolver::redistributeAMR(EBAMRCellData& a_phi) const
   if (m_useRedistribution) {
     this->depositNonConservative(m_depositionNC, a_phi);    // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
     this->depositHybrid(a_phi, m_massDiff, m_depositionNC); // Compute hybrid deposition, including mass differnce
-    this->incrementRedist(m_massDiff);                      // Increment level redistribution register
 
-    // Do the redistribution magic
-    const bool ebcf = m_amr->getEbCf();
-    if (ebcf) {                              // Mucho stuff to do here...
-      this->coarseFineIncrement(m_massDiff); // Compute C2F, F2C, and C2C mass transfers.
-      this->levelRedist(a_phi);              // Level redistribution.
-      this->coarseFineRedistribution(a_phi); // Do the coarse-fine redistribution.
-    }
-    else { // Very simple, just redistribute this level.
-      this->levelRedist(a_phi);
+    Vector<RefCountedPtr<EBRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Real     scale     = 1.0;
+      const Interval variables = Interval(0, 0);
+      const bool     hasCoar   = lvl > 0;
+      const bool     hasFine   = lvl < m_amr->getFinestLevel();
+
+      if (hasCoar) {
+        redistOps[lvl]->redistributeCoar(*a_phi[lvl - 1], *m_massDiff[lvl], scale, variables);
+      }
+
+      redistOps[lvl]->redistributeLevel(*a_phi[lvl], *m_massDiff[lvl], scale, variables);
+
+      if (hasFine) {
+        redistOps[lvl]->redistributeFine(*a_phi[lvl + 1], *m_massDiff[lvl], scale, variables);
+      }
     }
   }
 }
@@ -1800,124 +1792,6 @@ ItoSolver::depositHybrid(EBAMRCellData&     a_depositionH,
   }
 }
 
-void
-ItoSolver::incrementRedist(const EBAMRIVData& a_massDifference) const
-{
-  CH_TIME("ItoSolver::incrementRedist");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::incrementRedist" << endl;
-  }
-
-  const Interval interv(m_comp, m_comp);
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-    EBLevelRedist& levelRedist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
-    levelRedist.setToZero();
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      levelRedist.increment((*a_massDifference[lvl])[dit()], dit(), interv);
-    }
-  }
-}
-
-void
-ItoSolver::levelRedist(EBAMRCellData& a_phi) const
-{
-  CH_TIME("ItoSolver::levelRedist");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::levelRedist" << endl;
-  }
-
-  const Interval interv(m_comp, m_comp);
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    EBLevelRedist& levelRedist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
-
-    levelRedist.redistribute(*a_phi[lvl], interv);
-    levelRedist.setToZero();
-  }
-}
-
-void
-ItoSolver::coarseFineIncrement(const EBAMRIVData& a_massDifference) const
-{
-  CH_TIME("ItoSolver::coarseFineIncrement");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::coarseFineIncrement" << endl;
-  }
-
-  const Interval interv(m_comp, m_comp);
-
-  const int finestLevel = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-    RefCountedPtr<EBFineToCoarRedist>& fine2coarRedist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToFineRedist>& coar2fineRedist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coarRedist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-
-    const bool hasCoar = lvl > 0;
-    const bool hasFine = lvl < finestLevel;
-
-    if (hasCoar) {
-      fine2coarRedist->setToZero();
-    }
-    if (hasFine) {
-      coar2fineRedist->setToZero();
-      coar2coarRedist->setToZero();
-    }
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      if (hasCoar) {
-        fine2coarRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
-      }
-      if (hasFine) {
-        coar2fineRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
-        coar2coarRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
-      }
-    }
-  }
-}
-
-void
-ItoSolver::coarseFineRedistribution(EBAMRCellData& a_phi) const
-{
-  CH_TIME("ItoSolver::coarseFineRedistribution");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::coarseFineRedistribution" << endl;
-  }
-
-  const Interval interv(m_comp, m_comp);
-
-  const int finestLevel = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-
-    const bool hasCoar = lvl > 0;
-    const bool hasFine = lvl < finestLevel;
-
-    RefCountedPtr<EBCoarToFineRedist>& coar2fineRedist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coarRedist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBFineToCoarRedist>& fine2coarRedist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
-
-    if (hasCoar) {
-      fine2coarRedist->redistribute(*a_phi[lvl - 1], interv);
-      fine2coarRedist->setToZero();
-    }
-
-    if (hasFine) {
-      coar2fineRedist->redistribute(*a_phi[lvl + 1], interv);
-      coar2coarRedist->redistribute(*a_phi[lvl], interv);
-
-      coar2fineRedist->setToZero();
-      coar2coarRedist->setToZero();
-    }
-  }
-}
-
 bool
 ItoSolver::isMobile() const
 {
@@ -1944,20 +1818,6 @@ ItoSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel)
 
   CH_assert(a_lbase >= 0);
 
-  // TLDR: This does two things. The first is to deposit the number of particles per cell (ish) to the mesh. This can be used to load balance the application
-  //       in the regrid step. The second this is that it puts all particle data holders in "regrid" mode.
-
-  // Deposit mass to scratch data holder. Then make sure the number of particles per cell
-  this->depositParticles<ItoParticle, &ItoParticle::weight>(m_scratch,
-                                                            this->getParticles(WhichContainer::Bulk),
-                                                            m_deposition,
-                                                            m_coarseFineDeposition);
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Real dx = m_amr->getDx()[lvl];
-    const Real dV = std::pow(dx, SpaceDim);
-    DataOps::scale(*m_scratch[lvl], dV);
-  }
-
   for (auto& container : m_particleContainers) {
     ParticleContainer<ItoParticle>& particles = container.second;
 
@@ -1968,7 +1828,6 @@ ItoSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel)
   m_mobilityFunction.clear();
   m_velocityFunction.clear();
   m_diffusionFunction.clear();
-  m_scratch.clear();
   m_depositionNC.clear();
   m_massDiff.clear();
 }
@@ -2048,28 +1907,6 @@ ItoSolver::getDiffusionFunction() const
   }
 
   return m_diffusionFunction;
-}
-
-EBAMRCellData&
-ItoSolver::getScratch()
-{
-  CH_TIME("ItoSolver::getScratch");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getScratch" << endl;
-  }
-
-  return m_scratch;
-}
-
-const EBAMRCellData&
-ItoSolver::getScratch() const
-{
-  CH_TIME("ItoSolver::getScratch");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getScratch" << endl;
-  }
-
-  return m_scratch;
 }
 
 EBAMRCellData&
@@ -2208,15 +2045,17 @@ ItoSolver::interpolateMobilities()
   }
 
   if (m_isMobile) {
+    EBAMRCellData velocityMagnitude;
+    m_amr->allocate(velocityMagnitude, m_realm, m_phase, 1);
 
     switch (m_mobilityInterp) {
     case WhichMobilityInterpolation::Velocity: {
 
       // Compute |v|
-      DataOps::vectorLength(m_scratch, m_velocityFunction);
+      DataOps::vectorLength(velocityMagnitude, m_velocityFunction);
 
-      m_amr->conservativeAverage(m_scratch, m_realm, m_phase);
-      m_amr->interpGhostPwl(m_scratch, m_realm, m_phase);
+      m_amr->conservativeAverage(velocityMagnitude, m_realm, m_phase);
+      m_amr->interpGhostPwl(velocityMagnitude, m_realm, m_phase);
 
       break;
     }
@@ -2229,18 +2068,18 @@ ItoSolver::interpolateMobilities()
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
       for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        this->interpolateMobilities(lvl, dit());
+        this->interpolateMobilities(lvl, dit(), (*velocityMagnitude[lvl])[dit()]);
       }
     }
   }
 }
 
 void
-ItoSolver::interpolateMobilities(const int a_lvl, const DataIndex& a_dit)
+ItoSolver::interpolateMobilities(const int a_lvl, const DataIndex& a_dit, const EBCellFAB& a_velocityMagnitude) noexcept
 {
-  CH_TIME("ItoSolver::interpolateMobilities(lvl, dit)");
+  CH_TIME("ItoSolver::interpolateMobilities(lvl, patch)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::interpolateMobilities(lvl, dit)" << endl;
+    pout() << m_name + "::interpolateMobilities(lvl, patch)" << endl;
   }
 
   CH_assert(m_isMobile);
@@ -2252,7 +2091,7 @@ ItoSolver::interpolateMobilities(const int a_lvl, const DataIndex& a_dit)
     break;
   }
   case WhichMobilityInterpolation::Velocity: {
-    this->interpolateMobilitiesVelocity(a_lvl, a_dit);
+    this->interpolateMobilitiesVelocity(a_lvl, a_dit, a_velocityMagnitude);
 
     break;
   }
@@ -2265,7 +2104,7 @@ ItoSolver::interpolateMobilities(const int a_lvl, const DataIndex& a_dit)
 }
 
 void
-ItoSolver::interpolateMobilitiesDirect(const int a_lvl, const DataIndex& a_dit)
+ItoSolver::interpolateMobilitiesDirect(const int a_lvl, const DataIndex& a_dit) noexcept
 {
   CH_TIME("ItoSolver::interpolateMobilitiesDirect");
   if (m_verbosity > 5) {
@@ -2298,7 +2137,9 @@ ItoSolver::interpolateMobilitiesDirect(const int a_lvl, const DataIndex& a_dit)
 }
 
 void
-ItoSolver::interpolateMobilitiesVelocity(const int a_lvl, const DataIndex& a_dit)
+ItoSolver::interpolateMobilitiesVelocity(const int        a_lvl,
+                                         const DataIndex& a_dit,
+                                         const EBCellFAB& a_velocityMagnitude) noexcept
 {
   CH_TIME("ItoSolver::interpolateMobilitiesVelocity");
   if (m_verbosity > 5) {
@@ -2306,36 +2147,35 @@ ItoSolver::interpolateMobilitiesVelocity(const int a_lvl, const DataIndex& a_dit
   }
 
   CH_assert(m_isMobile);
+  CH_assert(a_velocityMagnitude.nComp() == 1);
   CH_assert(m_mobilityInterp == WhichMobilityInterpolation::Velocity);
 
   // TLDR: This function computes the particle mobilities by interpolating mu*V to the particle position and then setting
-  //       the mobility as mu = [mu*V(Xp)]/V(Xp). We happen to know that |V| is already stored in m_scratch.
+  //       the mobility as mu = [mu*V(Xp)]/V(Xp).
 
-  ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
+  const EBAMRParticleMesh& particleMesh     = m_amr->getParticleMesh(m_realm, m_phase);
+  const EBCellFAB&         mobilityFunction = (*m_mobilityFunction[a_lvl])[a_dit];
+  const RealVect           dx               = m_amr->getDx()[a_lvl] * RealVect::Unit;
+  const RealVect           probLo           = m_amr->getProbLo();
+  const Box                box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
+  const EBParticleMesh&    meshInterp       = particleMesh.getEBParticleMesh(a_lvl, a_dit);
 
-  EBAMRParticleMesh& particleMesh = m_amr->getParticleMesh(m_realm, m_phase);
+  ParticleContainer<ItoParticle>& particles    = m_particleContainers.at(WhichContainer::Bulk);
+  List<ItoParticle>&              particleList = particles[a_lvl][a_dit].listItems();
 
-  const EBCellFAB& mobilityFunction = (*m_mobilityFunction[a_lvl])[a_dit];
-  const RealVect   dx               = m_amr->getDx()[a_lvl] * RealVect::Unit;
-  const RealVect   probLo           = m_amr->getProbLo();
-  const Box        box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
-
-  EBCellFAB& scratch = (*m_scratch[a_lvl])[a_dit];
-
-  List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
-
-  const EBParticleMesh& meshInterp = particleMesh.getEBParticleMesh(a_lvl, a_dit);
+  // Compute mu*|V| on the mesh
+  EBCellFAB muV;
+  muV.clone(a_velocityMagnitude);
+  muV *= mobilityFunction;
 
   // First, interpolate |V| to the particle position, it will be stored on m_tmp.
   meshInterp.interpolate<ItoParticle, &ItoParticle::tmpReal>(particleList,
-                                                             scratch,
+                                                             a_velocityMagnitude,
                                                              m_deposition,
                                                              m_forceIrregInterpolationNGP);
 
-  // Secondly, let m_scratch hold mu*|V| and interpolate that to the particle mobility field.
-  scratch *= mobilityFunction;
   meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList,
-                                                              scratch,
+                                                              muV,
                                                               m_deposition,
                                                               m_forceIrregInterpolationNGP);
 

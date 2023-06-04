@@ -20,13 +20,9 @@
 #include <CD_PhaseRealm.H>
 #include <CD_Timer.H>
 #include <CD_LoadBalancing.H>
-#include <CD_MemoryReport.H>
-#include <CD_EbFastFineToCoarRedist.H>
-#include <CD_EbFastCoarToFineRedist.H>
-#include <CD_EbFastCoarToCoarRedist.H>
-#include <CD_EBMultigridInterpolator.H>
-#include <CD_BoxLoops.H>
 #include <CD_EBLeastSquaresMultigridInterpolator.H>
+#include <CD_MemoryReport.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 PhaseRealm::PhaseRealm()
@@ -259,48 +255,12 @@ PhaseRealm::regridOperators(const int a_lmin)
     }
 
     if (m_profile) {
-      pout() << "before/after levelredist define" << endl;
+      pout() << "before/after redist define" << endl;
       MemoryReport::getMaxMinMemoryUsage();
     }
-    timer.startEvent("Level redist");
+    timer.startEvent("EB redist");
     this->defineRedistOper(a_lmin, 1);
-    timer.stopEvent("Level redist");
-    if (m_profile) {
-      MemoryReport::getMaxMinMemoryUsage();
-      pout() << endl;
-    }
-
-    if (m_profile) {
-      pout() << "before/after fine2coar levelredist define" << endl;
-      MemoryReport::getMaxMinMemoryUsage();
-    }
-    timer.startEvent("Fine-to-coar redist");
-    this->defineFineToCoarRedistOper(a_lmin, 1);
-    timer.stopEvent("Fine-to-coar redist");
-    if (m_profile) {
-      MemoryReport::getMaxMinMemoryUsage();
-      pout() << endl;
-    }
-
-    if (m_profile) {
-      pout() << "before/after coar2fine levelredist define" << endl;
-      MemoryReport::getMaxMinMemoryUsage();
-    }
-    timer.startEvent("Coar-to-fine redist");
-    this->defineCoarToFineRedistOper(a_lmin, 1);
-    timer.stopEvent("Coar-to-fine redist");
-    if (m_profile) {
-      MemoryReport::getMaxMinMemoryUsage();
-      pout() << endl;
-    }
-
-    if (m_profile) {
-      pout() << "before/after coar2coar levelredist define" << endl;
-      MemoryReport::getMaxMinMemoryUsage();
-    }
-    timer.startEvent("Coar-to-coar redist");
-    this->defineCoarToCoarRedistOper(a_lmin, 1);
-    timer.stopEvent("Coar-to-coar redist");
+    timer.stopEvent("EB redist");
     if (m_profile) {
       MemoryReport::getMaxMinMemoryUsage();
       pout() << endl;
@@ -709,149 +669,49 @@ PhaseRealm::defineRedistOper(const int a_lmin, const int a_regsize)
 
   const bool doThisOperator = this->queryOperator(s_eb_redist);
 
-  m_levelRedist.resize(1 + m_finestLevel);
+  m_redistributionOp.resize(1 + m_finestLevel);
 
   if (doThisOperator) {
 
-    for (int lvl = Max(0, a_lmin - 1); lvl <= m_finestLevel; lvl++) {
-
-      if (lvl >= a_lmin) {
-        m_levelRedist[lvl] = RefCountedPtr<EBLevelRedist>(
-          new EBLevelRedist(m_grids[lvl], m_ebisl[lvl], m_domains[lvl], a_regsize, m_redistributionRadius));
-      }
-    }
-  }
-}
-
-void
-PhaseRealm::defineFineToCoarRedistOper(const int a_lmin, const int a_regsize)
-{
-  CH_TIME("PhaseRealm::defineFineToCoarRedistOper");
-  if (m_verbose) {
-    pout() << "PhaseRealm::defineFineToCoarRedistOper" << endl;
-  }
-
-  // TLDR: The fine-to-coar redistribution operator transfers mass from the coarse level
-  //       to the fine level. It lives on the fine level.
-
-  const bool doThisOperator = this->queryOperator(s_eb_redist);
-
-  m_fineToCoarRedist.resize(1 + m_finestLevel);
-
-  if (doThisOperator) {
-
-    for (int lvl = Max(0, a_lmin - 1); lvl <= m_finestLevel; lvl++) {
-
+    for (int lvl = std::max(0, a_lmin - 2); lvl <= m_finestLevel; lvl++) {
       const bool hasCoar = lvl > 0;
-
-      if (m_hasEbCf) {
-        if (hasCoar) {
-
-          // TLDR: The fine-to-coar redistribution operator that transfers from the fine level to the coar level
-          //       obviously lives on the fine level. But since a_lmin is the coarsest level that changed, we only
-          //       need to update this if lvl >= a_lmin
-          if (lvl >= a_lmin) {
-
-            RefCountedPtr<EbFastFineToCoarRedist> redist = RefCountedPtr<EbFastFineToCoarRedist>(
-              new EbFastFineToCoarRedist());
-            redist->fastDefine(*m_eblg[lvl],
-                               *m_eblg[lvl - 1],
-                               m_refinementRatios[lvl - 1],
-                               a_regsize,
-                               m_redistributionRadius);
-
-            m_fineToCoarRedist[lvl] = RefCountedPtr<EBFineToCoarRedist>(redist);
-          }
-        }
-      }
-    }
-  }
-}
-
-void
-PhaseRealm::defineCoarToFineRedistOper(const int a_lmin, const int a_regsize)
-{
-  CH_TIME("PhaseRealm::defineCoarToFineRedistOper");
-  if (m_verbose) {
-    pout() << "PhaseRealm::defineCoarToFineRedistOper" << endl;
-  }
-
-  // TLDR: The coarse-to-fine redistriution operator transfers mass from the coarse level to the
-  //       fine level. It lives on the coarse level.
-
-  const bool doThisOperator = this->queryOperator(s_eb_redist);
-
-  m_coarToFineRedist.resize(1 + m_finestLevel);
-
-  if (doThisOperator) {
-
-    for (int lvl = std::max(0, a_lmin - 1); lvl <= m_finestLevel; lvl++) {
-
       const bool hasFine = lvl < m_finestLevel;
 
-      if (m_hasEbCf) {
+      int refToCoar = -1;
+      int refToFine = -1;
 
-        if (hasFine) {
-          // TLDR: The coar-to-fine redistribution operator transfers from the coarse level and to the fine level and
-          //       therefore lives on the coarse level. Since a_lmin is the coarsest level that changed, we need to update
-          //       if lvl >= a_lmin-1
-          if (lvl >= a_lmin - 1) {
+      EBLevelGrid eblgCoar;
+      EBLevelGrid eblgCoarsened;
+      EBLevelGrid eblg;
+      EBLevelGrid eblgRefined;
+      EBLevelGrid eblgFine;
 
-            RefCountedPtr<EbFastCoarToFineRedist> redist = RefCountedPtr<EbFastCoarToFineRedist>(
-              new EbFastCoarToFineRedist());
-            redist->fastDefine(*m_eblg[lvl + 1],
-                               *m_eblg[lvl],
-                               m_refinementRatios[lvl],
-                               a_regsize,
-                               m_redistributionRadius);
+      if (hasCoar) {
+        eblgCoar      = *m_eblg[lvl - 1];
+        eblgCoarsened = *m_eblgCoFi[lvl - 1];
 
-            m_coarToFineRedist[lvl] = RefCountedPtr<EBCoarToFineRedist>(redist);
-          }
-        }
+        refToCoar = m_refinementRatios[lvl - 1];
       }
-    }
-  }
-}
 
-void
-PhaseRealm::defineCoarToCoarRedistOper(const int a_lmin, const int a_regsize)
-{
-  CH_TIME("PhaseRealm::defineCoarToCoarRedistOper");
-  if (m_verbose) {
-    pout() << "PhaseRealm::defineCoarToCoarRedistOper" << endl;
-  }
+      eblg = *m_eblg[lvl];
 
-  // TLDR: The coarse-to-coarse redistribution operator corrects for mass that was distributed from invalid regions. It lives
-  //       on the coarse level.
+      if (hasFine) {
+        eblgRefined = *m_eblgFiCo[lvl + 1];
+        eblgFine    = *m_eblg[lvl + 1];
 
-  const bool doThisOperator = this->queryOperator(s_eb_redist);
-
-  m_coarToCoarRedist.resize(1 + m_finestLevel);
-
-  if (doThisOperator) {
-
-    for (int lvl = std::max(0, a_lmin - 1); lvl <= m_finestLevel; lvl++) {
-
-      const bool hasFine = lvl < m_finestLevel;
-
-      if (m_hasEbCf) {
-
-        if (hasFine) {
-          // TLDR: The coar-to-fine redistribution operator transfers from the coarse level and to the fine level and
-          //       therefore lives on the coarse level. Since a_lmin is the coarsest level that changed, we need to update
-          //       if lvl >= a_lmin-1
-          if (lvl >= a_lmin - 1) {
-            auto redist = RefCountedPtr<EbFastCoarToCoarRedist>(new EbFastCoarToCoarRedist());
-            redist->fastDefine(*m_eblg[lvl + 1],
-                               *m_eblg[lvl],
-                               m_refinementRatios[lvl],
-                               a_regsize,
-                               m_redistributionRadius);
-
-            m_coarToCoarRedist[lvl] = RefCountedPtr<EBCoarToCoarRedist>(redist);
-          }
-        }
+        refToFine = m_refinementRatios[lvl];
       }
+
+      const bool redistributeOutside = true;
+
+      m_redistributionOp[lvl] = RefCountedPtr<EBRedistribution>(new EBRedistribution(eblgCoar,
+                                                                                     eblgCoarsened,
+                                                                                     eblg,
+                                                                                     eblgRefined,
+                                                                                     eblgFine,
+                                                                                     refToCoar,
+                                                                                     refToFine,
+                                                                                     redistributeOutside));
     }
   }
 }
@@ -1123,44 +983,14 @@ PhaseRealm::getFluxRegister() const
   return m_ebReflux;
 }
 
-Vector<RefCountedPtr<EBLevelRedist>>&
-PhaseRealm::getLevelRedist() const
+Vector<RefCountedPtr<EBRedistribution>>&
+PhaseRealm::getRedistributionOp() const
 {
   if (!this->queryOperator(s_eb_redist)) {
-    MayDay::Error("PhaseRealm::getLevelRedist - operator not registered!");
+    MayDay::Error("PhaseRealm::getRedistributionOp - operator not registered!");
   }
 
-  return m_levelRedist;
-}
-
-Vector<RefCountedPtr<EBCoarToFineRedist>>&
-PhaseRealm::getCoarToFineRedist() const
-{
-  if (!this->queryOperator(s_eb_redist)) {
-    MayDay::Error("PhaseRealm::getCoarToFineRedist - operator not registered!");
-  }
-
-  return m_coarToFineRedist;
-}
-
-Vector<RefCountedPtr<EBCoarToCoarRedist>>&
-PhaseRealm::getCoarToCoarRedist() const
-{
-  if (!this->queryOperator(s_eb_redist)) {
-    MayDay::Error("PhaseRealm::get_coar_to_coar - operator not registered!");
-  }
-
-  return m_coarToCoarRedist;
-}
-
-Vector<RefCountedPtr<EBFineToCoarRedist>>&
-PhaseRealm::getFineToCoarRedist() const
-{
-  if (!this->queryOperator(s_eb_redist)) {
-    MayDay::Error("PhaseRealm::getFineToCoarRedist - operator not registered!");
-  }
-
-  return m_fineToCoarRedist;
+  return m_redistributionOp;
 }
 
 EBAMRParticleMesh&

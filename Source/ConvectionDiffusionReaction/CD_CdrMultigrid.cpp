@@ -26,8 +26,9 @@ CdrMultigrid::CdrMultigrid() : CdrSolver()
   CH_TIME("CdrMultigrid::CdrMultigrid()");
 
   // Default settings
-  m_name      = "CdrMultigrid";
-  m_className = "CdrMultigrid";
+  m_name               = "CdrMultigrid";
+  m_className          = "CdrMultigrid";
+  m_hasMultigridSolver = false;
 }
 
 CdrMultigrid::~CdrMultigrid() {}
@@ -59,6 +60,19 @@ CdrMultigrid::allocate()
 }
 
 void
+CdrMultigrid::preRegrid(const int a_lbase, const int a_oldFinestLevel)
+{
+  CH_TIME("CdrMultigrid::preRegrid");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::preRegrid" << endl;
+  }
+
+  CdrSolver::preRegrid(a_lbase, a_oldFinestLevel);
+
+  m_hasMultigridSolver = false;
+}
+
+void
 CdrMultigrid::resetAlphaAndBeta(const Real a_alpha, const Real a_beta)
 {
   CH_TIME("CdrMultigrid::resetAlphaAndBeta(Real, Real");
@@ -73,6 +87,51 @@ CdrMultigrid::resetAlphaAndBeta(const Real a_alpha, const Real a_beta)
       TGAHelmOp<LevelData<EBCellFAB>>* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)multigridOperators[i];
 
       helmholtzOperator->setAlphaAndBeta(a_alpha, a_beta);
+    }
+  }
+}
+
+void
+CdrMultigrid::setMultigridSolverCoefficients()
+{
+  CH_TIME("CdrMultigrid::setMultigridSolverCoefficients()");
+  if (m_verbosity > 5) {
+    pout() << "CdrMultigrid::setMultigridSolverCoefficients" << endl;
+  }
+
+  if (!m_hasMultigridSolver) {
+    MayDay::Error("CdrMultigrid::setMultigridSolverCoefficients -- must set up solver first!");
+  }
+
+  // Get the AMR operators and update the coefficients.
+  Vector<AMRLevelOp<LevelData<EBCellFAB>>*>& operatorsAMR = m_multigridSolver->getAMROperators();
+
+  CH_assert(operatorsAMR.size() == 1 + m_amr->getFinestLevel());
+
+  // Set coefficients for the AMR levels.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    CH_assert(!(operatorsAMR[lvl] == nullptr));
+
+    EBHelmholtzOp& op = static_cast<EBHelmholtzOp&>(*operatorsAMR[lvl]);
+
+    op.setAcoAndBco(m_helmAcoef[lvl], m_faceCenteredDiffusionCoefficient[lvl], m_ebCenteredDiffusionCoefficient[lvl]);
+  }
+
+  // Get the deeper multigrid levels and coarsen onto that data as well. Strictly speaking, we don't
+  // have to do this but it facilitates multigrid convergence and is therefore good practice. The operator
+  // factory has routines for the coefficients that belong to the multigrid levels. The factory does not
+  // have access to the operator, so we fetch those using AMRMultiGrid and call setAcoAndBco from there.
+  // access to the operator.
+  m_helmholtzOpFactory->coarsenCoefficientsMG();
+  Vector<Vector<MGLevelOp<LevelData<EBCellFAB>>*>> operatorsMG = m_multigridSolver->getOperatorsMG();
+
+  for (int amrLevel = 0; amrLevel < operatorsMG.size(); amrLevel++) {
+    for (int mgLevel = 0; mgLevel < operatorsMG[amrLevel].size(); mgLevel++) {
+      CH_assert(!(operatorsMG[amrLevel][mgLevel] == nullptr));
+
+      EBHelmholtzOp& op = static_cast<EBHelmholtzOp&>(*operatorsMG[amrLevel][mgLevel]);
+
+      op.setAcoAndBco(op.getAcoef(), op.getBcoef(), op.getBcoefIrreg());
     }
   }
 }
@@ -129,7 +188,12 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     //       has provided a source-term that comes in is already weighted, but that the old solution comes in unweighted.
 
     // Set up multigrid again because the diffusion coefficients might have changed underneath us.
-    this->setupDiffusionSolver();
+    if (!m_hasMultigridSolver) {
+      this->setupDiffusionSolver();
+    }
+    else {
+      this->setMultigridSolverCoefficients();
+    }
 
     // Make the right-hand side for the Euler equation. Since we are solving
     //
@@ -207,7 +271,12 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     //       has provided a source-term that comes in is already weighted, but that the old solution comes in unweighted.
 
     // Set up multigrid again because the diffusion coefficients might have changed underneath us.
-    this->setupDiffusionSolver();
+    if (!m_hasMultigridSolver) {
+      this->setupDiffusionSolver();
+    }
+    else {
+      this->setMultigridSolverCoefficients();
+    }
 
     // Make the right-hand side for the Euler equation. Since we are solving
     //
@@ -289,6 +358,8 @@ CdrMultigrid::setupDiffusionSolver()
     // This sets up the multigrid Helmholtz solver.
     this->setupHelmholtzFactory();
     this->setupMultigrid();
+
+    m_hasMultigridSolver = true;
   }
 }
 
@@ -469,10 +540,6 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
     // Fill ghost cells
     m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
 
-    if (m_whichRedistribution == Redistribution::MassWeighted) {
-      this->setRedistWeights(a_phi);
-    }
-
     // We will let scratchFlux hold the total flux = advection + diffusion fluxes
     DataOps::setValue(scratchFlux, 0.0);
 
@@ -539,10 +606,6 @@ CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
     m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
     m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
 
-    if (m_whichRedistribution == Redistribution::MassWeighted) {
-      this->setRedistWeights(a_phi);
-    }
-
     // Cell-centered velocities become face-centered velocities.
     this->averageVelocityToFaces();
 
@@ -586,10 +649,6 @@ CdrMultigrid::computeDivD(EBAMRCellData& a_divD,
 
     // Fill ghost cells
     m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
-
-    if (m_whichRedistribution == Redistribution::MassWeighted) {
-      this->setRedistWeights(a_phi);
-    }
 
     this->computeDiffusionFlux(scratchFlux, a_phi, a_domainFlux); // Compute the face-centered diffusion flux
 

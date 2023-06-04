@@ -3019,72 +3019,21 @@ AmrMesh::getFluxRegister(const std::string a_realm, const phase::which_phase a_p
   return m_realms[a_realm]->getFluxRegister(a_phase);
 }
 
-Vector<RefCountedPtr<EBLevelRedist>>&
-AmrMesh::getLevelRedist(const std::string a_realm, const phase::which_phase a_phase) const
+Vector<RefCountedPtr<EBRedistribution>>&
+AmrMesh::getRedistributionOp(const std::string a_realm, const phase::which_phase a_phase) const
 {
-  CH_TIME("AmrMesh::getLevelRedist(string, phase::which_phase)");
+  CH_TIME("AmrMesh::getRedistributionOp");
   if (m_verbosity > 1) {
-    pout() << "AmrMesh::getLevelRedist(string, phase::which_phase)" << endl;
+    pout() << "AmrMesh::getRedistributionOp" << endl;
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getLevelRedist(string, phase::which_phase) - could not find realm '" + a_realm +
-                            "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  return m_realms[a_realm]->getLevelRedist(a_phase);
-}
-
-Vector<RefCountedPtr<EBCoarToFineRedist>>&
-AmrMesh::getCoarToFineRedist(const std::string a_realm, const phase::which_phase a_phase) const
-{
-  CH_TIME("AmrMesh::getCoarToFineRedist(string, phase::which_phase)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getCoarToFineRedist(string, phase::which_phase)" << endl;
-  }
-
-  if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getCoarToFineRedist(string, phase::which_phase) - could not find realm '" +
+    const std::string str = "AmrMesh::getRedistributionOp(string, phase::which_phase) - could not find realm '" +
                             a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
-  return m_realms[a_realm]->getCoarToFineRedist(a_phase);
-}
-
-Vector<RefCountedPtr<EBCoarToCoarRedist>>&
-AmrMesh::getCoarToCoarRedist(const std::string a_realm, const phase::which_phase a_phase) const
-{
-  CH_TIME("AmrMesh::getCoarToCoarRedist(string, phase::which_phase)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getCoarToCoarRedist(string, phase::which_phase)" << endl;
-  }
-
-  if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getCoarToCoarRedist(string, phase::which_phase) - could not find realm '" +
-                            a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  return m_realms[a_realm]->getCoarToCoarRedist(a_phase);
-}
-
-Vector<RefCountedPtr<EBFineToCoarRedist>>&
-AmrMesh::getFineToCoarRedist(const std::string a_realm, const phase::which_phase a_phase) const
-{
-  CH_TIME("AmrMesh::getFineToCoarRedist(string, phase::which_phase)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getFineToCoarRedist(string, phase::which_phase)" << endl;
-  }
-
-  if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getFineToCoarRedist(string, phase::which_phase) - could not find realm '" +
-                            a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  return m_realms[a_realm]->getFineToCoarRedist(a_phase);
+  return m_realms[a_realm]->getRedistributionOp(a_phase);
 }
 
 const IrregAmrStencil<CentroidInterpolationStencil>&

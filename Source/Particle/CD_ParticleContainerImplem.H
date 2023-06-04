@@ -499,17 +499,18 @@ ParticleContainer<P>::addParticles(const List<P>& a_particles)
     MayDay::Error("ParticleContainer<P>::addParticles(List<P>) - particles are sorted by cell!");
   }
 
-  // Put the initial particles on the coarsest grid level
-  List<P>& outcastBase = m_particles[0]->outcast();
-  outcastBase.join(a_particles);
-  m_particles[0]->remapOutcast();
+  List<P>& outcastFinest = m_particles[m_finestLevel]->outcast();
+  outcastFinest.join(a_particles);
 
-  // Move particles to finer levels if they belong there. This piece of code moves particles from lvl-1
-  // and onto the outcast list on level lvl. Then, we remap the outcast list
-  for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
-    this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl - 1], lvl - 1);
-
+  for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
     m_particles[lvl]->remapOutcast();
+
+    if (lvl > 0) {
+      List<P>& outcast     = m_particles[lvl]->outcast();
+      List<P>& outcastCoar = m_particles[lvl - 1]->outcast();
+
+      outcastCoar.catenate(outcast);
+    }
   }
 }
 
@@ -525,18 +526,18 @@ ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles)
     MayDay::Error("ParticleContainer<P>::addParticlesDestructive(List<P>) - particles are sorted by cell!");
   }
 
-  // Put the initial particles on the coarsest grid level. When we use catenate then
-  // a_particles will be destroyed.
-  List<P>& outcastBase = m_particles[0]->outcast();
-  outcastBase.catenate(a_particles);
-  m_particles[0]->remapOutcast();
+  List<P>& outcastFinest = m_particles[m_finestLevel]->outcast();
+  outcastFinest.join(a_particles);
 
-  // Move particles to finer levels if they belong there. This piece of code moves particles from lvl-1
-  // and onto the outcast list on level lvl. Then, we remap the outcast list
-  for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
-    this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl - 1], lvl - 1);
-
+  for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
     m_particles[lvl]->remapOutcast();
+
+    if (lvl > 0) {
+      List<P>& outcast     = m_particles[lvl]->outcast();
+      List<P>& outcastCoar = m_particles[lvl - 1]->outcast();
+
+      outcastCoar.catenate(outcast);
+    }
   }
 }
 

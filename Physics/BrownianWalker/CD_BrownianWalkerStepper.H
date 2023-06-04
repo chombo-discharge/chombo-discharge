@@ -278,6 +278,11 @@ namespace Physics {
       RefCountedPtr<ItoSpecies> m_species;
 
       /*!
+	@brief Number of particles per cell. Used only during regrids
+      */
+      EBAMRCellData m_regridPPC;
+
+      /*!
 	@brief Fluid diffusion coefficient
       */
       Real m_diffCo;

@@ -16,12 +16,6 @@
 
 // Chombo includes
 #include <DisjointBoxLayout.H>
-#include <EBLevelRedist.H>
-#include <EBCoarToFineRedist.H>
-#include <EBMGInterp.H>
-#include <EBCoarToCoarRedist.H>
-#include <EBFineToCoarRedist.H>
-#include <EBPWLFineInterp.H>
 #include <ProblemDomain.H>
 
 // Our includes
@@ -1704,36 +1698,12 @@ public:
   getFluxRegister(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get redistribution
+    @brief Get the redistribution operators
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBLevelRedist>>&
-  getLevelRedist(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get coar-to-fine redistribution for a Realm and phase
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  Vector<RefCountedPtr<EBCoarToFineRedist>>&
-  getCoarToFineRedist(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get coar-to-coar redistribution objects
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  Vector<RefCountedPtr<EBCoarToCoarRedist>>&
-  getCoarToCoarRedist(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get coar-to-coar redistribution redistribution objects
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  Vector<RefCountedPtr<EBFineToCoarRedist>>&
-  getFineToCoarRedist(const std::string a_realm, const phase::which_phase a_phase) const;
+  Vector<RefCountedPtr<EBRedistribution>>&
+  getRedistributionOp(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get interpolation stencils for going from cell center to cell centroid

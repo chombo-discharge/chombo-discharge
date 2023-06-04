@@ -417,97 +417,6 @@ CdrSolver::preRegrid(const int a_lmin, const int a_oldFinestLevel)
 }
 
 void
-CdrSolver::coarseFineIncrement(const EBAMRIVData& a_massDifference)
-{
-  CH_TIME("CdrSolver::coarseFineIncrement(EBAMRIVData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::coarseFineIncrement(EBAMRIVData)" << endl;
-  }
-
-  CH_assert(a_massDifference[0]->nComp() == 1);
-
-  // TLDR: This routine increments masses for the coarse-fine redistribution. In the algorithm we can have an EBCF situation
-  //       where we 1) redistribute mass to ghost cells, 2) redistribute mass into the part under the fine grid. Fortunately,
-  //       there are registers in Chombo that let us do this kind of redistribution magic.
-
-  const Interval interv(m_comp, m_comp);
-
-  const int finestLevel = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-    RefCountedPtr<EBFineToCoarRedist>& fine2coarRedist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToFineRedist>& coar2fineRedist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coarRedist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-
-    const bool hasCoar = lvl > 0;
-    const bool hasFine = lvl < finestLevel;
-
-    if (hasCoar) {
-      fine2coarRedist->setToZero();
-    }
-    if (hasFine) {
-      coar2fineRedist->setToZero();
-      coar2coarRedist->setToZero();
-    }
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      if (hasCoar) {
-        fine2coarRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
-      }
-
-      if (hasFine) {
-        coar2fineRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
-        coar2coarRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
-      }
-    }
-  }
-}
-
-void
-CdrSolver::coarseFineRedistribution(EBAMRCellData& a_phi)
-{
-  CH_TIME("CdrSolver::coarseFineRedistribution(EBAMRCellData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::coarseFineRedistribution(EBAMRCellData)" << endl;
-  }
-
-  CH_assert(a_phi[0]->nComp() == 1);
-
-  // TLDR: This routine does the coarse-fine redistribution. In the algorithm we can have an EBCF situation
-  //       where we 1) redistribute mass to ghost cells, 2) redistribute mass into the part under the fine grid. Fortunately,
-  //       there are registers in Chombo that let us do precisely this kind of redistribution magic.
-
-  const Interval interv(m_comp, m_comp);
-
-  const int finestLevel = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-
-    const bool hasCoar = lvl > 0;
-    const bool hasFine = lvl < finestLevel;
-
-    RefCountedPtr<EBCoarToFineRedist>& coar2fineRedist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coarRedist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBFineToCoarRedist>& fine2coarRedist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
-
-    if (hasCoar) {
-      fine2coarRedist->redistribute(*a_phi[lvl - 1], interv);
-      fine2coarRedist->setToZero();
-    }
-
-    if (hasFine) {
-      coar2fineRedist->redistribute(*a_phi[lvl + 1], interv);
-      coar2coarRedist->redistribute(*a_phi[lvl], interv);
-
-      coar2fineRedist->setToZero();
-      coar2coarRedist->setToZero();
-    }
-  }
-}
-
-void
 CdrSolver::computeDivG(EBAMRCellData&     a_divG,
                        EBAMRFluxData&     a_G,
                        const EBAMRIVData& a_ebFlux,
@@ -524,7 +433,7 @@ CdrSolver::computeDivG(EBAMRCellData&     a_divG,
 
   // TLDR: This routine computes a finite volume approximation to Div(G) where G is a flux, stored on face centers and eb faces. The routine uses
   //       flux matching on refinement boundaries and the so-called hybrid divergence in the cut-cells. The mass which is missed by the hybrid
-  //       divergence is smooshed back in through Chombo's redistribution registers.
+  //       divergence is smooshed back in through through redistribution.
 
   DataOps::setValue(a_divG, 0.0);
 
@@ -544,13 +453,59 @@ CdrSolver::computeDivG(EBAMRCellData&     a_divG,
     this->hybridDivergence(a_divG, m_massDifference, m_nonConservativeDivG);
 
     if (m_whichRedistribution != Redistribution::None) {
-      // Increment redistribution registers with the mass difference.
-      this->incrementRedist(m_massDifference);
-      this->coarseFineIncrement(m_massDifference);
 
-      // Redistribute mass on the level and across the coarse-fine boundaries.
-      this->hyperbolicRedistribution(a_divG); // Level redistribution.
-      this->coarseFineRedistribution(a_divG); // Coarse-fine redistribution
+      Vector<RefCountedPtr<EBRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
+
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+        const Real     scale     = 1.0;
+        const Interval variables = Interval(0, 0);
+        const bool     hasCoar   = lvl > 0;
+        const bool     hasFine   = lvl < m_amr->getFinestLevel();
+
+        if (hasCoar) {
+          redistOps[lvl]->redistributeCoar(*a_divG[lvl - 1], *m_massDifference[lvl], scale, variables);
+        }
+
+        redistOps[lvl]->redistributeLevel(*a_divG[lvl], *m_massDifference[lvl], scale, variables);
+
+        if (hasFine) {
+          redistOps[lvl]->redistributeFine(*a_divG[lvl + 1], *m_massDifference[lvl], scale, variables);
+        }
+      }
+    }
+  }
+}
+
+void
+CdrSolver::redistribute(EBAMRCellData& a_phi, const EBAMRIVData& a_delta) const noexcept
+{
+  CH_TIME("CdrSolver::redistribute");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::redistribute" << endl;
+  }
+
+  CH_assert(a_phi.getRealm() == m_realm);
+  CH_assert(a_delta.getRealm() == m_realm);
+
+  Vector<RefCountedPtr<EBRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const Real     scale     = 1.0;
+    const Interval variables = Interval(0, 0);
+    const bool     hasCoar   = lvl > 0;
+    const bool     hasFine   = lvl < m_amr->getFinestLevel();
+
+    CH_assert(a_phi[lvl]->nComp() == 1);
+    CH_assert(a_delta[lvl]->nComp() == 1);
+
+    if (hasCoar) {
+      redistOps[lvl]->redistributeCoar(*a_phi[lvl - 1], *a_delta[lvl], scale, variables);
+    }
+
+    redistOps[lvl]->redistributeLevel(*a_phi[lvl], *a_delta[lvl], scale, variables);
+
+    if (hasFine) {
+      redistOps[lvl]->redistributeFine(*a_phi[lvl + 1], *a_delta[lvl], scale, variables);
     }
   }
 }
@@ -1364,68 +1319,6 @@ CdrSolver::hybridDivergence(LevelData<EBCellFAB>&             a_hybridDivergence
 }
 
 void
-CdrSolver::setRedistWeights(const EBAMRCellData& a_weights)
-{
-  CH_TIME("CdrSolver::setRedistWeights(EBAMRCellData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setRedistWeights(EBAMRCellData)" << endl;
-  }
-
-  CH_assert(a_weights[0]->nComp() == 1);
-
-  // This function sets the weights for redistribution (the default is to use volume-weighted). This applies
-  // to level-redistribution, fine-to-coar redistribution, coarse-to-fine redistribution, and the heinous
-  // re-redistribution.
-
-  const int finestLevel = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-
-    // Level redistribution
-    EBLevelRedist& redist = *m_amr->getLevelRedist(m_realm, m_phase)[lvl];
-    redist.resetWeights(*a_weights[lvl], m_comp);
-
-    const bool hasCoar = lvl > 0;
-    const bool hasFine = lvl < finestLevel;
-
-    if (hasCoar) {
-      EBFineToCoarRedist& fine2coarRedist = *m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
-      fine2coarRedist.resetWeights(*a_weights[lvl - 1], m_comp);
-    }
-    if (hasFine) {
-      EBCoarToCoarRedist& coar2coarRedist = *m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-      EBCoarToFineRedist& coar2fineRedist = *m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-
-      coar2coarRedist.resetWeights(*a_weights[lvl], m_comp);
-      coar2fineRedist.resetWeights(*a_weights[lvl], m_comp);
-    }
-  }
-}
-
-void
-CdrSolver::hyperbolicRedistribution(EBAMRCellData& a_divF)
-{
-  CH_TIME("CdrSolver::hyberbolicRedistribution(EBAMRCellData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::hyperbolicRedistribution(EBAMRCellData)" << endl;
-  }
-
-  CH_assert(a_divF[0]->nComp() == 1);
-
-  // This function ONLY redistributes on a grid level. If you don't have EBxCF crossings, thats the end of the story but in
-  // general we also need to account for mass that redistributes over refinement boundaries.
-
-  const Interval interv(m_comp, m_comp);
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    EBLevelRedist& levelRedist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
-
-    levelRedist.redistribute(*a_divF[lvl], interv);
-    levelRedist.setToZero();
-  }
-}
-
-void
 CdrSolver::interpolateFluxToFaceCentroids(EBAMRFluxData& a_flux)
 {
   CH_TIME("CdrSolver::interpolateFluxToFaceCentroids(EBAMRFluxData)");
@@ -1496,34 +1389,6 @@ CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const in
 
         BoxLoops::loop(faceit, kernel);
       }
-    }
-  }
-}
-
-void
-CdrSolver::incrementRedist(const EBAMRIVData& a_massDifference)
-{
-  CH_TIME("CdrSolver::incrementRedist(EBAMRIVData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::incrementRedist(EBAMRIVData)" << endl;
-  }
-
-  CH_assert(a_massDifference[0]->nComp() == 1);
-
-  // a_massDifference is the mass to be smooshed back onto the grid through redistribution. Here, we increment the level-only
-  // redistribution object with that mass.
-
-  const Interval interv(m_comp, m_comp);
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-    EBLevelRedist& levelRedist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
-
-    levelRedist.setToZero();
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      levelRedist.increment((*a_massDifference[lvl])[dit()], dit(), interv);
     }
   }
 }
@@ -1628,8 +1493,6 @@ CdrSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& 
   m_computationalGeometry = a_computationalGeometry;
 
   const RefCountedPtr<MultiFluidIndexSpace> MultiFluidIndexSpace = m_computationalGeometry->getMfIndexSpace();
-
-  this->setEbIndexSpace(MultiFluidIndexSpace->getEBIndexSpace(m_phase));
 }
 
 void
@@ -1704,19 +1567,6 @@ CdrSolver::setEbFlux(const Real a_ebFlux)
   }
 
   DataOps::setValue(m_ebFlux, a_ebFlux);
-}
-
-void
-CdrSolver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis)
-{
-  CH_TIME("CdrSolver::setEbIndexSpace(RefCountedPtr<EBIndexSpace>)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setEbIndexSpace(RefCountedPtr<EBIndexSpace>)" << endl;
-  }
-
-  CH_assert(!a_ebis.isNull());
-
-  m_ebis = a_ebis;
 }
 
 void
@@ -2847,20 +2697,6 @@ CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
   }
 }
 
-void
-CdrSolver::redistribute(EBAMRCellData& a_phi, const EBAMRIVData& a_delta) noexcept
-{
-  CH_TIME("CdrSolver::redistribute");
-  if (m_verbosity > 5) {
-    pout() << "CdrSolver::redistribute" << endl;
-  }
-
-  this->incrementRedist(a_delta);
-  this->coarseFineIncrement(a_delta);
-  this->hyperbolicRedistribution(a_phi);
-  this->coarseFineRedistribution(a_phi);
-}
-
 std::string
 CdrSolver::makeBcString(const int a_dir, const Side::LoHiSide a_side) const
 {
@@ -2955,14 +2791,11 @@ CdrSolver::parseDivergenceComputation()
   if (str == "volume") {
     m_whichRedistribution = Redistribution::VolumeWeighted;
   }
-  else if (str == "mass") {
-    m_whichRedistribution = Redistribution::MassWeighted;
-  }
   else if (str == "none") {
     m_whichRedistribution = Redistribution::None;
   }
   else {
-    MayDay::Error("CdrSolver::parseDivergenceComputation -- logic bust. Must specify 'volume', 'mass', or 'none'");
+    MayDay::Error("CdrSolver::parseDivergenceComputation -- logic bust. Must specify 'volume' or 'none'");
   }
 
   // Blend conservation or not.
