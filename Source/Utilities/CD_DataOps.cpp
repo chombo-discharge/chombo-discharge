@@ -571,7 +571,7 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
   CH_assert(a_alpha >= 0.0);
   CH_assert(a_alpha <= 0.0);
   CH_assert(a_stride > 0);
-  CH_assert(a_stride <= a_data.ghostVect[0]);
+  CH_assert(a_stride <= ghostVec[0]);
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (ghostVec[dir] < a_stride) {

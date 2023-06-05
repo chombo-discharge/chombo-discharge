@@ -4727,9 +4727,6 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
     pout() << "CdrPlasmaStepper::computePhysicsPlotVars" << endl;
   }
 
-  CH_assert(a_level >= 0);
-  CH_assert(a_level <= m_amr->getFinestLevel());
-
   // Number of output variables from CdrPlasmaPhysics
   const int numVars = m_physics->getNumberOfPlotVariables();
 
