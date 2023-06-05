@@ -128,10 +128,7 @@ PhaseRealm::preRegrid()
   m_multigridInterpolator.resize(0);
   m_ebFineInterp.resize(0);
   m_ebReflux.resize(0);
-  m_levelRedist.resize(0);
-  m_coarToFineRedist.resize(0);
-  m_coarToCoarRedist.resize(0);
-  m_fineToCoarRedist.resize(0);
+  m_redistributionOp.resize(0);
   m_gradientOp.resize(0);
   m_levelset.resize(0);
 
