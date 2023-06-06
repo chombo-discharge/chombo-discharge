@@ -677,7 +677,7 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
         }
       };
 
-      BoxLoops::loop(interiorBox, regularKernel);
+      BoxLoops::loop(cellBox, regularKernel);
     }
 #else
     MayDay::Error("DataOps::filterSmooth -- dimensionality logic bust");
