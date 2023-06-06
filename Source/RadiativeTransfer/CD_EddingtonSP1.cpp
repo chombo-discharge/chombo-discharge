@@ -663,6 +663,8 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     DataOps::copy(a_phi, m_resid);
   }
 
+  DataOps::setCoveredValue(a_phi, 0.0);
+
   m_amr->conservativeAverage(a_phi, m_realm, m_phase);
   m_amr->interpGhost(a_phi, m_realm, m_phase);
 

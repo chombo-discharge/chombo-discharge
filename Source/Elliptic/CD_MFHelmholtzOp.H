@@ -380,12 +380,32 @@ public:
   assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
 
   /*!
+    @brief Assign lhs
+    @details This is the version that is called by AMRMultiGrid::VCycle. Note that the other version
+    might be called by other operators (e.g., EBBackwardEuler)
+    @param[out] a_lhs    Outgoing data
+    @param[in]  a_rhs    Incoming data
+    @param[in]  a_copier Copier
+  */
+  void
+  assignCopier(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Copier& a_copier) override final;
+
+  /*!
     @brief Local assignment function
     @param[out] a_lhs. Equal to a_rhs on output
     @param[in]  a_rhs. Data
   */
   void
   assignLocal(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
+
+  /*!
+    @brief Build copier
+    @param[out] a_copier Copier for copying between a_lhs and a_rhs
+    @param[in]  a_lhs    Copying from
+    @param[in]  a_rhs    Copying to
+  */
+  void
+  buildCopier(Copier& a_copier, const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override;
 
   /*!
     @brief Compute solution norm. 
@@ -668,11 +688,6 @@ protected:
     @brief Number of ghost cells
   */
   IntVect m_ghostRhs;
-
-  /*!
-    @brief Copier for making assign function go faster
-  */
-  Copier m_copier;
 
   /*!
     @brief True if there is a coarser AMR level
