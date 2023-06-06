@@ -87,6 +87,8 @@ EBCoarseToFineInterp::define(const EBLevelGrid& a_eblgFine,
 
   this->defineWeights();
   this->defineBuffers();
+
+  m_isDefined = true;
 }
 
 void

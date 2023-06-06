@@ -273,8 +273,8 @@ TracerParticleStepper<P>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_i
     pout() << "TracerParticleStepper::writePlotData(EBAMRCellData, Vector<std::string>, int)" << endl;
   }
 
-  CH_assert(a_level <= 0);
-  CH_assert(a_level >= m_amr->getFinestLevel());
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
 
   m_solver->writePlotData(a_output, a_icomp, a_level);
 }
