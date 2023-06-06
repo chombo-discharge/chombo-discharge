@@ -160,6 +160,11 @@ If using HDF5, one must also set the following flags:
 * ``HDFMPIINCFLAGS   = -I<path to hdf5-parallel>/include`` (for parallel HDF5)
 * ``HDFMPILIBFLAGS   = -L<path to hdf5-parallel>/lib -lhdf5 -lz`` (for parallel HDF5).
 
+.. warning::
+
+   ``Chombo`` only supports HDF5 APIs at version 1.10 and below.
+   To use a newer version of HDF5 together with the 1.10 API, add ``-DH5_USE_110_API`` to the HDFINC flags.
+
 Compiler flags
 ______________
 
