@@ -359,10 +359,15 @@ MFHelmholtzOp::assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a
 {
   CH_TIME("MFHelmholtzOp::assign");
 
-  if (!(m_copier.isDefined())) {
-    m_copier.define(a_rhs.disjointBoxLayout(), a_lhs.disjointBoxLayout(), m_ghostPhi);
-  }
-  a_rhs.copyTo(a_lhs, m_copier);
+  a_rhs.copyTo(a_lhs);
+}
+
+void
+MFHelmholtzOp::assignCopier(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Copier& a_copier)
+{
+  CH_TIME("EBHelmholtzOp::assignCopier");
+
+  a_rhs.copyTo(a_lhs, a_copier);
 }
 
 void
@@ -371,6 +376,14 @@ MFHelmholtzOp::assignLocal(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFA
   CH_TIME("MFHelmholtzOp::assignLocal");
 
   a_rhs.localCopyTo(a_lhs);
+}
+
+void
+MFHelmholtzOp::buildCopier(Copier& a_copier, const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs)
+{
+  CH_TIME("MFHelmholtzOp::buildCopier");
+
+  a_copier.define(a_rhs.disjointBoxLayout(), a_lhs.disjointBoxLayout(), a_lhs.ghostVect());
 }
 
 Real

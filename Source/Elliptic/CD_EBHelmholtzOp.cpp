@@ -504,10 +504,15 @@ EBHelmholtzOp::assign(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a
 {
   CH_TIME("EBHelmholtzOp::assign");
 
-  if (!(m_copier.isDefined())) {
-    m_copier.define(a_rhs.disjointBoxLayout(), a_lhs.disjointBoxLayout(), a_lhs.ghostVect());
-  }
-  a_rhs.copyTo(a_lhs, m_copier);
+  a_rhs.copyTo(a_lhs);
+}
+
+void
+EBHelmholtzOp::assignCopier(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Copier& a_copier)
+{
+  CH_TIME("EBHelmholtzOp::assignCopier");
+
+  a_rhs.copyTo(a_lhs, a_copier);
 }
 
 void
@@ -2054,7 +2059,7 @@ EBHelmholtzOp::reflux(LevelData<EBCellFAB>&             a_Lphi,
 
   EBHelmholtzOp&        finerOp = (EBHelmholtzOp&)(a_finerOp);
   LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&)a_phiFine;
-  //  phiFine.exchange(); Apparently this one is unecessary.
+  phiFine.exchange();
   finerOp.inhomogeneousCFInterp(phiFine, a_phi);
 
   this->allocateFlux();
@@ -2080,7 +2085,7 @@ EBHelmholtzOp::reflux(LevelData<EBCellFAB>&             a_Lphi,
 void
 EBHelmholtzOp::coarsenCell(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiFine)
 {
-  CH_TIME("EBHelmholtzOp::coarsen(LD<EBCellFAB>, LD<EBCellFAB>)");
+  CH_TIME("EBHelmholtzOp::coarsenCell");
 
   m_coarAve->averageData(a_phi, a_phiFine, m_interval, Average::Conservative);
 }
@@ -2088,7 +2093,17 @@ EBHelmholtzOp::coarsenCell(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFA
 void
 EBHelmholtzOp::coarsenFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBFluxFAB>& a_fineFlux)
 {
+  CH_TIME("EBHelmholtzOp::coarsenFlux");
+
   m_coarAve->averageData(a_flux, a_fineFlux, m_interval, Average::Conservative);
+}
+
+void
+EBHelmholtzOp::buildCopier(Copier& a_copier, const LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs)
+{
+  CH_TIME("EBHelmholtzOp::buildCopier");
+
+  a_copier.define(a_rhs.disjointBoxLayout(), a_lhs.disjointBoxLayout(), a_lhs.ghostVect());
 }
 
 #include <CD_NamespaceFooter.H>

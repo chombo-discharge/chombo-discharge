@@ -1444,13 +1444,7 @@ ItoSolver::writeData(LevelData<EBCellFAB>& a_output,
   // Interpolate ghost cells
   CH_START(t3);
   if (a_level > 0 && a_interpGhost) {
-    for (int icomp = 0; icomp < numComp; icomp++) {
-      LevelData<EBCellFAB> coarData;
-
-      aliasLevelData<EBCellFAB>(coarData, &(*a_data[a_level - 1]), Interval(icomp, icomp));
-
-      m_amr->interpGhost(scratch, coarData, a_level, m_realm, m_phase);
-    }
+    m_amr->interpGhost(scratch, *a_data[a_level - 1], a_level, m_realm, m_phase);
   }
   CH_STOP(t3);
 

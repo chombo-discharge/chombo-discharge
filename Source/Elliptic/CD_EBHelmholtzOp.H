@@ -444,11 +444,22 @@ public:
   create(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
 
   /*!
-    @brief Assign data. 
-    @details This does a local copy from rhs to lhs
+    @brief Assign data.
+    @details This does a copy from rhs to lhs
   */
   void
   assign(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
+
+  /*!
+    @brief Assign lhs
+    @details This is the version that is called by AMRMultiGrid::VCycle. Note that the other version
+    might be called by other operators (e.g., EBBackwardEuler)
+    @param[out] a_lhs    Outgoing data
+    @param[in]  a_rhs    Incoming data
+    @param[in]  a_copier Copier
+  */
+  void
+  assignCopier(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Copier& a_copier) override final;
 
   /*!
     @brief Local assignment function
@@ -457,6 +468,15 @@ public:
   */
   void
   assignLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
+
+  /*!
+    @brief Build copier
+    @param[out] a_copier Copier for copying between a_lhs and a_rhs
+    @param[in]  a_lhs    Copying from
+    @param[in]  a_rhs    Copying to
+  */
+  void
+  buildCopier(Copier& a_copier, const LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override;
 
   /*!
     @brief Compute the dot product??
@@ -901,11 +921,6 @@ protected:
     @brief Lower-left corner of domain
   */
   RealVect m_probLo;
-
-  /*!
-    @brief Copier for making assign function go faster
-  */
-  Copier m_copier;
 
   /*!
     @brief Fine level grid (if the operator has a fine level)
