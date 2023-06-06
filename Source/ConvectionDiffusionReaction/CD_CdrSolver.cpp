@@ -348,7 +348,6 @@ CdrSolver::deallocate()
     pout() << m_name + "::deallocate()" << endl;
   }
 
-  // TLDR: This deallocates a bunch of storage. This can be used during regrids to trim memory (because the Berger-Rigoutsous algorithm eats memory).
   m_phi.clear();
   m_source.clear();
   m_faceVelocity.clear();

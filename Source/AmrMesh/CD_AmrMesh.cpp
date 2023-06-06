@@ -1004,8 +1004,6 @@ AmrMesh::preRegrid()
     pout() << "AmrMesh::preRegrid" << endl;
   }
 
-  m_grids.resize(0);
-
   for (auto& r : m_realms) {
     r.second->preRegrid();
   }
