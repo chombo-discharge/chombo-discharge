@@ -53,7 +53,7 @@ public:
   /*!
     @brief Destructor (does nothing)
   */
-  ~Driver();
+  virtual ~Driver();
 
   /*!
     @brief Setup and run simulations
