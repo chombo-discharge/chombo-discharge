@@ -1,0 +1,28 @@
+cff-version: "1.2.0"
+authors:
+- family-names: Marskar
+  given-names: Robert
+  orcid: "https://orcid.org/0000-0003-1706-9736"
+doi: 10.5281/zenodo.7950220
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Marskar
+    given-names: Robert
+    orcid: "https://orcid.org/0000-0003-1706-9736"
+  date-published: 2023-05-22
+  doi: 10.21105/joss.05335
+  issn: 2475-9066
+  issue: 85
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 5335
+  title: "chombo-discharge: An AMR code for gas discharge simulations in
+    complex geometries"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.05335"
+  volume: 8
+title: "chombo-discharge: An AMR code for gas discharge simulations in
+  complex geometries"

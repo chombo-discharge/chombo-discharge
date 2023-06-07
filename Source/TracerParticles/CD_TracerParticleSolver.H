@@ -180,7 +180,7 @@ public:
     @param[out] a_phi Deposited weight. 
   */
   virtual void
-  deposit(EBAMRCellData& a_phi);
+  deposit(EBAMRCellData& a_phi) const noexcept;
 
   /*!
     @brief Interpolate a scalar field onto the particle weight
@@ -207,6 +207,14 @@ public:
   parseRuntimeOptions();
 
   /*!
+    @brief Write plot file
+    @details The name of the plot file is m_name.stepXXXXX.DIM.hdf5
+    @note This calls writePlotData(...)
+  */
+  virtual void
+  writePlotFile();
+
+  /*!
     @brief Get the number of plot variables
     @return Returns number of plot variables. 
   */
@@ -221,22 +229,14 @@ public:
   getPlotVariableNames() const;
 
   /*!
-    @brief Write plot file
-    @details The name of the plot file is m_name.stepXXXXX.DIM.hdf5
-    @note This calls writePlotData(...)
-  */
-  virtual void
-  writePlotFile();
-
-  /*!
-    @brief Write output data to a_output
+    @brief Write plot data
     @param[inout] a_output Output data holder.
     @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in]    a_level  Grid level
     @note This will write the plot data in this solver to a_output, starting on a_comp
-    @note This routine writes m_phi on centroids (and not cell-centers). 
   */
   virtual void
-  writePlotData(EBAMRCellData& a_output, int& a_icomp);
+  writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept;
 
   /*!
     @brief Write checkpoint data into HDF5 file. 
@@ -409,10 +409,27 @@ protected:
   */
   template <typename T, const Real& (T::*particleScalarFunction)() const>
   void
-  depositParticles(EBAMRCellData&             a_phi,
-                   ParticleContainer<T>&      a_particles,
-                   const DepositionType       a_baseDeposition,
-                   const CoarseFineDeposition a_coarseFineDeposition);
+  depositParticles(EBAMRCellData&              a_phi,
+                   const ParticleContainer<T>& a_particles,
+                   const DepositionType        a_baseDeposition,
+                   const CoarseFineDeposition  a_coarseFineDeposition) const noexcept;
+
+  /*!
+    @brief Write data to output. Convenience function. 
+    @param[inout] a_output Output data holder.
+    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in]    a_data   Data to write. 
+    @param[in]    a_level  Grid level
+    @param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
+    @param[in]    a_interpGhost If true, interpolate ghost cells
+  */
+  virtual void
+  writeData(LevelData<EBCellFAB>& a_output,
+            int&                  a_comp,
+            const EBAMRCellData&  a_data,
+            const int             a_level,
+            const bool            a_interpToCentroids,
+            const bool            a_interpGhost) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

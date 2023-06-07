@@ -214,6 +214,12 @@ MFHelmholtzJumpBC::defineStencils()
             gradStencils(vof, m_comp) = pairSten.second;
           }
           else {
+            // const std::string baseErr = "MFHelmholtzJumpBC::defineStencils - dead cell on domain = ";
+            // const std::string vofErr  = " on vof = ";
+            // const std::string impErr  = " (this may cause multigrid divergence)";
+
+            // std::cout << baseErr << m_mflg.getDomain() << vofErr << vof << impErr << std::endl;
+
             bndryWeights(vof, m_comp) = 0.0;
             gradStencils(vof, m_comp).clear();
           }

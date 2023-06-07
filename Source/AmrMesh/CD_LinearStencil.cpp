@@ -118,12 +118,14 @@ LinearStencil::computeInterpStencil1D(VoFStencil&          a_stencil,
   Real sumweights = 0.0;
   for (int i = 0; i < a_stencil.size(); i++) {
     const Real w = a_stencil.weight(i);
-    if (w < 0.0)
-      MayDay::Warning("LinearStencil::computeInterpStencil1d - linear negative weight");
+    if (w < 0.0) {
+      pout() << "LinearStencil::computeInterpStencil1d - linear negative weight" << endl;
+    }
     sumweights += w;
   }
-  if (Abs((sumweights - 1.0)) > 1.E-5)
-    MayDay::Warning("LinearStencil::computeInterpStencil1d - sum of weights are not 1");
+  if (Abs((sumweights - 1.0)) > 1.E-5) {
+    pout() << "LinearStencil::computeInterpStencil1d - sum of weights are not 1" << endl;
+  }
 #endif
 
   return foundStencil;
@@ -348,8 +350,9 @@ LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
       }
       else if (foundFirstStencil0 && foundFirstStencil1 && !(foundSecondStencil0 || foundSecondStencil1)) {
 #if DEBUG_LINEARSTENCIL
-        MayDay::Warning(
-          "LinearStencil::computeInterpStencil2D - could not find stencil BC or CD. Defaulting to linear stencil");
+        pout()
+          << "LinearStencil::computeInterpStencil2D - could not find stencil BC or CD. Defaulting to linear stencil"
+          << endl;
 #endif
         // Here, we could find stencil AB and AD but not BC or CD. This shouldn't happen but if it does, we default to 1D
         // interpolation along the axis with the largest displacement.
@@ -410,8 +413,9 @@ LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
       MayDay::Warning("LinearStencil::computeInterpStencil2D - bilinear negative weight");
     sumweights += w;
   }
-  if (Abs((sumweights - 1.0)) > 1.E-5)
-    MayDay::Warning("LinearStencil::computeInterpStencil2D - weights do not sum to 1");
+  if (std::abs((sumweights - 1.0)) > 1.E-5) {
+    pout() << "LinearStencil::computeInterpStencil2D - weights do not sum to 1" << endl;
+  }
 #endif
 
   return foundStencil;
@@ -557,12 +561,14 @@ LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
   Real sumweights = 0.0;
   for (int i = 0; i < a_stencil.size(); i++) {
     const Real w = a_stencil.weight(i);
-    if (w < 0.0)
-      MayDay::Warning("LinearStencil::computeInterpStencil3d - trilinear stencil weight < 0.0");
+    if (w < 0.0) {
+      pout() << "LinearStencil::computeInterpStencil3d - trilinear stencil weight < 0.0" << endl;
+    }
     sumweights += w;
   }
-  if (Abs((sumweights - 1.0)) > 1.E-5)
-    MayDay::Warning("LinearStencil::computeInterpStencil3d - sum of weights not equal to one");
+  if (Abs((sumweights - 1.0)) > 1.E-5) {
+    pout() << "LinearStencil::computeInterpStencil3d - sum of weights not equal to one" << endl;
+  }
 #endif
 
   return foundStencil;

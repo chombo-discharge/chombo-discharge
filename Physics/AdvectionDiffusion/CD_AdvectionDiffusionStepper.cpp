@@ -289,21 +289,29 @@ AdvectionDiffusionStepper::getNumberOfPlotVariables() const
   return m_solver->getNumberOfPlotVariables();
 }
 
+Vector<std::string>
+AdvectionDiffusionStepper::getPlotVariableNames() const
+{
+  CH_TIME("AdvectionDiffusionStepper::getPlotVariableNames");
+  if (m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::getPlotVariableNames" << endl;
+  }
+
+  return m_solver->getPlotVariableNames();
+}
+
 void
-AdvectionDiffusionStepper::writePlotData(EBAMRCellData&       a_output,
-                                         Vector<std::string>& a_plotVariableNames,
-                                         int&                 a_icomp) const
+AdvectionDiffusionStepper::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const
 {
   CH_TIME("AdvectionDiffusionStepper::writePlotData");
   if (m_verbosity > 5) {
     pout() << "AdvectionDiffusionStepper::writePlotData" << endl;
   }
 
-  // Append plot variable names
-  a_plotVariableNames.append(m_solver->getPlotVariableNames());
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
 
-  // Solver writes data to be plotted.
-  m_solver->writePlotData(a_output, a_icomp);
+  m_solver->writePlotData(a_output, a_icomp, a_level);
 }
 
 Real

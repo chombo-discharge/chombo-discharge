@@ -11,16 +11,14 @@
 
 // Chombo includes
 #include <ParmParse.H>
-#include <PolyGeom.H>
 #include <CH_Timer.H>
-#include <BinFab.H>
 
 // Our includes
 #include <CD_BrownianWalkerStepper.H>
 #include <CD_BrownianWalkerSpecies.H>
-#include <CD_PolyUtils.H>
 #include <CD_Random.H>
 #include <CD_ParallelOps.H>
+#include <CD_EBCoarseToFineInterp.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::BrownianWalker;
@@ -172,7 +170,7 @@ BrownianWalkerStepper::setVelocity()
 
   // Coarsen and update ghost cells.
   m_amr->conservativeAverage(vel, m_realm, m_phase);
-  m_amr->interpGhostMG(vel, m_realm, m_phase);
+  m_amr->interpGhost(vel, m_realm, m_phase);
 
   DataOps::setCoveredValue(vel, 0, 0.0);
 }
@@ -284,19 +282,29 @@ BrownianWalkerStepper::getNumberOfPlotVariables() const
   return numPlotVars;
 }
 
+Vector<std::string>
+BrownianWalkerStepper::getPlotVariableNames() const
+{
+  CH_TIME("BrownianWalkerStepper::getPlotVariableNames");
+  if (m_verbosity > 5) {
+    pout() << "BrownianWalkerStepper::getPlotVariableNames" << endl;
+  }
+
+  return m_solver->getPlotVariableNames();
+}
+
 void
-BrownianWalkerStepper::writePlotData(EBAMRCellData&       a_output,
-                                     Vector<std::string>& a_plotVariableNames,
-                                     int&                 a_icomp) const
+BrownianWalkerStepper::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const
 {
   CH_TIME("BrownianWalkerStepper::writePlotData");
   if (m_verbosity > 5) {
     pout() << "BrownianWalkerStepper::writePlotData" << endl;
   }
 
-  // We only write solver data -- it knows what to do.
-  a_plotVariableNames.append(m_solver->getPlotVariableNames());
-  m_solver->writePlotData(a_output, a_icomp);
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
+  m_solver->writePlotData(a_output, a_icomp, a_level);
 }
 
 Real
@@ -359,6 +367,22 @@ BrownianWalkerStepper::preRegrid(const int a_lbase, const int a_oldFinestLevel)
   CH_TIME("BrownianWalkerStepper::preRegrid");
   if (m_verbosity > 5) {
     pout() << "BrownianWalkerStepper::preRegrid" << endl;
+  }
+
+  // TLDR: This does two things. The first is to deposit the number of particles per cell (ish) to the mesh. This can be used to load balance the application
+  //       in the regrid step. The second this is that it puts all particle data holders in "regrid" mode.
+  m_amr->allocate(m_regridPPC, m_realm, m_phase, 1);
+
+  // Deposit mass to scratch data holder. Then make sure the number of particles per cell
+  m_solver->depositParticles<ItoParticle, &ItoParticle::weight>(m_regridPPC,
+                                                                m_solver->getParticles(ItoSolver::WhichContainer::Bulk),
+                                                                DepositionType::NGP,
+                                                                CoarseFineDeposition::Interp);
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const Real dx = m_amr->getDx()[lvl];
+    const Real dV = std::pow(dx, SpaceDim);
+
+    DataOps::scale(*m_regridPPC[lvl], dV);
   }
 
   // Solver knows what to do.
@@ -509,6 +533,8 @@ BrownianWalkerStepper::postRegrid()
     pout() << "BrownianWalkerStepper::postRegrid" << endl;
   }
 
+  m_regridPPC.clear();
+
   // Update advection-diffusion fields
   this->setAdvectionDiffusion();
 
@@ -555,8 +581,8 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
 
   // TLDR: This routine is called AFTER AmrMesh::regridAMR which means that we have all EB-related information we need for building operators. We happen to
   //       know that ItoSolver computed the number of particles per cell in the preRegrid method and that these values are returned by a call to
-  //       EBAMRCellData& ItoSolver::getScratch(). We take that data and regrid it onto the new grids. This requires us to manually build an operator (EBPWLFineInterp) which
-  //       can regrid that data.
+  //       EBAMRCellData& ItoSolver::getScratch(). We take that data and regrid it onto the new grids. This requires us to manually build an operator which
+  //       can do that interpolation.
   //
   //       Once we've put that data on the new mesh, we can simply compute the sum of all mesh data in each grid patch. That sum is equal to the number of particles
   //       in the patch, which we can use for load balancing.
@@ -564,43 +590,33 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
   constexpr int comp  = 0;
   constexpr int nComp = 1;
 
-  // This is the number of particles per cell, but it is stored on the old grids.
-  const EBAMRCellData& oldParticlesPerCell = m_solver->getScratch();
-
   // Make some storage for the number of particles per cell on the new grids.
   EBAMRCellData newParticlesPerCell;
   m_amr->allocate(newParticlesPerCell, a_realm, m_phase, 1);
 
   // Grid information.
-  const Vector<ProblemDomain>& domains = m_amr->getDomains();
-  const Vector<EBISLayout>&    ebisl   = m_amr->getEBISLayout(a_realm, m_phase);
-  const Vector<int>&           refRat  = m_amr->getRefinementRatios();
+  const Vector<RefCountedPtr<EBLevelGrid>>& eblg     = m_amr->getEBLevelGrid(a_realm, m_phase);
+  const Vector<RefCountedPtr<EBLevelGrid>>& eblgCoFi = m_amr->getEBLevelGridCoFi(a_realm, m_phase);
+  const Vector<int>&                        refRat   = m_amr->getRefinementRatios();
 
   // Copy old mesh data to new mesh data.
   for (int lvl = 0; lvl <= std::max(0, a_lmin - 1); lvl++) {
-    oldParticlesPerCell[lvl]->copyTo(*newParticlesPerCell[lvl]);
+    m_regridPPC[lvl]->copyTo(*newParticlesPerCell[lvl]);
   }
 
   // Now regrid where we got new grids.
   for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++) {
+    if (lvl > 0) {
+      EBCoarseToFineInterp fineInterp(*eblg[lvl], *eblgCoFi[lvl - 1], *eblg[lvl - 1], refRat[lvl - 1]);
 
-    const bool hasCoar = lvl > 0;
-
-    if (hasCoar) {
-      EBPWLFineInterp fineInterp(a_grids[lvl],
-                                 a_grids[lvl - 1],
-                                 ebisl[lvl],
-                                 ebisl[lvl - 1],
-                                 domains[lvl - 1],
-                                 refRat[lvl - 1],
-                                 nComp,
-                                 ebisl[lvl].getEBIS());
-
-      fineInterp.interpolate(*newParticlesPerCell[lvl], *newParticlesPerCell[lvl - 1], Interval(0, 0));
+      fineInterp.interpolate(*newParticlesPerCell[lvl],
+                             *newParticlesPerCell[lvl - 1],
+                             Interval(0, 0),
+                             EBCoarseToFineInterp::Type::PWC);
 
       // Replace data where old region overlapped new region.
-      if (lvl < std::min(newParticlesPerCell.size(), oldParticlesPerCell.size())) {
-        oldParticlesPerCell[lvl]->copyTo(*newParticlesPerCell[lvl]);
+      if (lvl < std::min(newParticlesPerCell.size(), m_regridPPC.size())) {
+        m_regridPPC[lvl]->copyTo(*newParticlesPerCell[lvl]);
       }
     }
   }

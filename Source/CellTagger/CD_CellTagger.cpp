@@ -31,6 +31,24 @@ CellTagger::CellTagger()
 
 CellTagger::~CellTagger() { CH_TIME("CellTagger::~CellTagger()"); }
 
+void
+CellTagger::preRegrid() noexcept
+{
+  CH_TIME("CellTagger::preRegrid()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::preRegrid()" << endl;
+  }
+}
+
+void
+CellTagger::prePlot() const noexcept
+{
+  CH_TIME("CellTagger::prePlot()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::prePlot()" << endl;
+  }
+}
+
 int
 CellTagger::getNumberOfPlotVariables() const
 {
@@ -40,6 +58,26 @@ CellTagger::getNumberOfPlotVariables() const
   }
 
   return 0;
+}
+
+Vector<std::string>
+CellTagger::getPlotVariableNames() const
+{
+  CH_TIME("CellTagger::getPlotVariableNames)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getPlotVariableNames" << endl;
+  }
+
+  return Vector<std::string>();
+}
+
+void
+CellTagger::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const
+{
+  CH_TIME("CellTagger::writePlotData)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::writePlotData" << endl;
+  }
 }
 
 int
@@ -201,15 +239,6 @@ CellTagger::parseVerbosity()
 
   if (m_verbosity > 5) {
     pout() << m_name + "::parseVerbosity()" << endl;
-  }
-}
-
-void
-CellTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const
-{
-  CH_TIME("CellTagger::writePlotData(EBAMRCellData, Vector<std::string>, int)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::writePlotData(EBAMRCellData, Vector<std::string>, int)" << endl;
   }
 }
 

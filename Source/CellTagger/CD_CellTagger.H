@@ -41,6 +41,12 @@ public:
   virtual ~CellTagger();
 
   /*!
+    @brief Pre-regrid function for cell-tagger
+  */
+  virtual void
+  preRegrid() noexcept;
+
+  /*!
     @brief Regrid function for cell tagger (in case it uses transient storage to do things)
     @details This function exists because implementations may require data to be allocated on a mesh. This function is
     called by Driver to make sure data is reallocated when it needs to. 
@@ -73,6 +79,12 @@ public:
   tagCells(EBAMRTags& a_tags) = 0;
 
   /*!
+    @brief Perform pre-plotting operations (if necessary)
+  */
+  virtual void
+  prePlot() const noexcept;
+
+  /*!
     @brief Get number of plot variables that will be written to file (by Driver).
     @return Returns number of plot variables that Driver will write to plot files. 
   */
@@ -80,13 +92,19 @@ public:
   getNumberOfPlotVariables() const;
 
   /*!
+    @brief Get plot variable names. 
+  */
+  virtual Vector<std::string>
+  getPlotVariableNames() const;
+
+  /*!
     @brief Write plot data.
-    @param[inout] a_output            Output data holder
-    @param[inout] a_plotVariableNames Plot variable names
-    @param[inout] a_icomp             Starting variable in a_output where we begin appending data.
+    @param[inout] a_output Output data holder
+    @param[inout] a_icomp Starting variable in a_output where we begin appending data.
+    @param[in] a_level Grid level
   */
   virtual void
-  writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const;
+  writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const;
 
   /*!
     @brief Get tag buffer. 

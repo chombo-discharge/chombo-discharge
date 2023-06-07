@@ -11,7 +11,7 @@ AmrMesh.lo_corner        = -200E3 0E3   # Low corner of problem domain
 AmrMesh.hi_corner        =  200E3 200E3 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 64      # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 10           # Maximum amr depth
+AmrMesh.max_amr_depth    = 10          # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -108,7 +108,7 @@ CdrCTU.bc.y.lo              = data                    # 'data', 'function', 'wal
 CdrCTU.bc.y.hi              = data                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.bc.z.lo              = data                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.bc.z.hi              = data                    # 'data', 'function', 'wall', 'outflow', or 'solver'
-CdrCTU.slope_limiter        = none                    # Slope limiter. 'none', 'minmod', 'mc', or 'superbee'
+CdrCTU.slope_limiter        = minmod                  # Slope limiter. 'none', 'minmod', 'mc', or 'superbee'
 CdrCTU.use_ctu              = true                    # If true, use CTU. Otherwise it's DTU.
 CdrCTU.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 CdrCTU.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
@@ -134,7 +134,7 @@ CdrCTU.gmg_smoother         = red_black               # Relaxation type. 'jacobi
 # ====================================================================================================
 McPhoto.verbosity          = -1            # Solver verbosity.
 McPhoto.instantaneous      = true          # Instantaneous transport or not
-McPhoto.max_photons        = 128           # Maximum no. generated in a cell (< = 0 yields physical photons)
+McPhoto.max_photons        = 16           # Maximum no. generated in a cell (< = 0 yields physical photons)
 McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
 McPhoto.transparent_eb     = false         # Turn on/off transparent boundaries. Only for instantaneous=true
 McPhoto.pvr_buffer         = 0             # Buffer for PVR. 
@@ -209,17 +209,17 @@ CdrPlasmaGodunovStepper.profile           = true          # Turn on/off performa
 # ====================================================================================================
 # CdrPlasmaStreamerTagger class options
 # ====================================================================================================
-CdrPlasmaStreamerTagger.buffer            = 8		 # Refinement buffer
+CdrPlasmaStreamerTagger.buffer            = 0		 # Refinement buffer
 CdrPlasmaStreamerTagger.verbosity         = -1           # Verbosity
 CdrPlasmaStreamerTagger.num_ref_boxes     = 1            # Manual refinement            
-CdrPlasmaStreamerTagger.ref_box1_lo       = -50E3 70E3   # Between this corner
-CdrPlasmaStreamerTagger.ref_box1_hi       = 50E3  85E3   # and this corner
-CdrPlasmaStreamerTagger.ref_box1_lvl      = 3            # Refine to this level
+CdrPlasmaStreamerTagger.ref_box1_lo       = -100E3 70E3   # Between this corner
+CdrPlasmaStreamerTagger.ref_box1_hi       = 100E3  85E3   # and this corner
+CdrPlasmaStreamerTagger.ref_box1_lvl      = 4            # Refine to this level
 
 CdrPlasmaStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
 CdrPlasmaStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
 CdrPlasmaStreamerTagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
-CdrPlasmaStreamerTagger.coarsen_alpha     = 0.25         # Set alpha coarsening. Higher => Less mesh
+CdrPlasmaStreamerTagger.coarsen_alpha     = 0.5          # Set alpha coarsening. Higher => Less mesh
 CdrPlasmaStreamerTagger.max_coarsen_lvl   = 4            # Set max coarsening depth
 
 # ====================================================================================================

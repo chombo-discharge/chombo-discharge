@@ -198,20 +198,6 @@ public:
   setName(const std::string& a_name) noexcept;
 
   /*!
-    @brief Get output plot names
-    @return Return a list of plot variable names. 
-  */
-  virtual Vector<std::string>
-  getPlotVariableNames() const noexcept;
-
-  /*!
-    @brief Get number of output fields
-    @return Returns number of plot variables include in writePlotFile() and writePlotData()
-  */
-  virtual int
-  getNumberOfPlotVariables() const noexcept;
-
-  /*!
     @brief Register operators for AMR operations
     @note This includes operators for redistribution, flux registers, regridding, ghost cell interpolation, and conservative coarsening. 
   */
@@ -258,14 +244,27 @@ public:
   writePlotFile() const noexcept;
 
   /*!
-    @brief Write output data to a_output
-    @param[inout] a_output Output data holder.
-    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
-    @note This will write the plot data in this solver to a_output, starting on a_comp
-    @note This routine writes m_phi on centroids (and not cell-centers). 
+    @brief Get number of output fields
+    @return Returns number of plot variables include in writePlotFile() and writePlotData()
+  */
+  virtual int
+  getNumberOfPlotVariables() const noexcept;
+
+  /*!
+    @brief Get output plot names
+    @return Return a list of plot variable names. 
+  */
+  virtual Vector<std::string>
+  getPlotVariableNames() const noexcept;
+
+  /*!
+    @brief Write plot data to output holder. 
+    @param[inout] a_output            Output data holder.
+    @param[inout] a_icomp             Starting component in a_output to begin at. 
+    @param[in]    a_level             Grid level
   */
   virtual void
-  writePlotData(EBAMRCellData& a_output, int& a_icomp) const noexcept;
+  writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const noexcept;
 
   /*!
     @brief Write checkpoint data into HDF5 file. 
@@ -369,10 +368,17 @@ protected:
     @param[inout] a_output Output data holder.
     @param[inout] a_icomp  Starting component where this solver begins writing the output. 
     @param[in]    a_data   Data to write. 
-    @param[in]    a_interp If true, a_data will be interpolated to cell centroids before writing to a_output. 
+    @param[in]    a_level  Grid level
+    @param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
+    @param[in]    a_interpGhost If true, interpolate ghost cells
   */
   virtual void
-  writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp) const noexcept;
+  writeData(LevelData<EBCellFAB>& a_output,
+            int&                  a_comp,
+            const EBAMRCellData&  a_data,
+            const int             a_level,
+            const bool            a_interpToCentroids,
+            const bool            a_interpGhost) const noexcept;
 
   /*!
     @brief Parse plot variables

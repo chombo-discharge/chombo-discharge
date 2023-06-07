@@ -42,51 +42,51 @@ public:
   /*!
     @brief Default constructor. Does nothing.
   */
-  EBAMRData();
+  EBAMRData() noexcept;
 
   /*!
     @brief Destructor. Sets m_data to size a_size but does not allocate anything. 
   */
-  EBAMRData(const int a_size);
+  EBAMRData(const int a_size) noexcept;
 
   /*!
     @brief Destructor. Does nothing.
   */
-  ~EBAMRData();
+  virtual ~EBAMRData() noexcept;
 
   /*!
     @brief Indexing operators. Returns m_data[a_level]
     @param[in] a_level Grid level
   */
   RefCountedPtr<LevelData<T>>&
-  operator[](int a_level);
+  operator[](int a_level) noexcept;
 
   /*!
     @brief Indexing operators. Returns const m_data[a_level]
     @param[in] a_level Grid level
   */
   const RefCountedPtr<LevelData<T>>&
-  operator[](int a_level) const;
+  operator[](int a_level) const noexcept;
 
   /*!
     @brief Resize m_data to having size a_size
     @param[in] a_size Data size
   */
   void
-  resize(const int a_size);
+  resize(const int a_size) noexcept;
 
   /*!
     @brief Sets the realm for this object
     @param[in] a_realm Realm name
   */
   void
-  setRealm(const std::string a_realm);
+  setRealm(const std::string a_realm) noexcept;
 
   /*!
     @brief Get size of m_data
   */
   int
-  size() const;
+  size() const noexcept;
 
   /*!
     @brief Exchange on all AMR levels
@@ -95,16 +95,40 @@ public:
   exchange() noexcept;
 
   /*!
+    @brief Delete all data
+  */
+  void
+  clear() noexcept;
+
+  /*!
+    @brief Reserve data
+  */
+  void
+  reserve() noexcept;
+
+  /*!
+    @brief Release data
+  */
+  void
+  release() noexcept;
+
+  /*!
+    @brief Check if data is reserved
+  */
+  bool
+  isReserved() const noexcept;
+
+  /*!
     @brief Get underlying data. Returns m_data. 
   */
   Vector<RefCountedPtr<LevelData<T>>>&
-  getData();
+  getData() noexcept;
 
   /*!
     @brief Get underlying data. Returns const m_data.
   */
   const Vector<RefCountedPtr<LevelData<T>>>&
-  getData() const;
+  getData() const noexcept;
 
   /*!
     @brief General copying of another object. This does a local copy if the two realms are the same. Otherwise it does
@@ -112,7 +136,7 @@ public:
     @param[in] a_other Other EBAMRData object
   */
   void
-  copy(const EBAMRData<T>& a_other);
+  copy(const EBAMRData<T>& a_other) noexcept;
 
   /*!
     @brief General copying of another object. This does a local copy if the two realms are the same. Otherwise it does
@@ -122,26 +146,31 @@ public:
     @param[in] a_stInterval  Destination interval in *this
   */
   void
-  copy(const Interval a_srcInterval, const EBAMRData<T>& a_other, const Interval a_dstInterval);
+  copy(const Interval a_srcInterval, const EBAMRData<T>& a_other, const Interval a_dstInterval) noexcept;
 
   /*!
     @brief Push a LevelData<T> object to the back of the data vector
     @param[in] a_levelData Data to append to vector
   */
   void
-  push_back(RefCountedPtr<LevelData<T>>& a_levelData);
+  push_back(RefCountedPtr<LevelData<T>>& a_levelData) noexcept;
 
   /*!
     @brief Returns the string identifier for whatever realm this data is supposed to be allocated over. 
   */
   const std::string
-  getRealm() const;
+  getRealm() const noexcept;
 
 protected:
   /*!
     @brief Identifier for realm
   */
   std::string m_realm;
+
+  /*!
+    @brief Reserved or not
+  */
+  bool m_reserved;
 
   /*!
     @brief Underlying data

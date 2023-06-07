@@ -83,9 +83,22 @@ public:
     @param[inout] a_phi     RTE solution
     @param[in]    a_source  Source term
     @param[in]    a_zeroPhi Set phi to zero in initial guess for multigrid solve
+    @note If you're not doing a stationary solve, this does a backward Euler solve. 
   */
   virtual bool
   advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zeroPhi = false) override;
+
+  /*!
+    @brief Advance using the Euler rule
+    @details This implementation assumes that the incoming previous solution has not been weighted by the volume fraction, and
+    that the incoming source term a_source HAS been weighted by the volume fraction. 
+    @param[inout] a_newPhi  On exit, contains solution at time t + dt. On entry, containes solution at tim et
+    @param[in]    a_source  Source term. Should be weighted by the volume fraction. 
+    @param[in]    a_dt      Time step.
+    @param[in]    a_zeroPhi Set phi to zero before multigrid solving
+  */
+  virtual void
+  advanceEuler(EBAMRCellData& a_phi, const EBAMRCellData& a_source, const Real a_dt, const bool a_zeroPhi) noexcept;
 
   /*!
     @brief Parse class options
@@ -261,11 +274,6 @@ protected:
   bool m_isSolverSetup;
 
   /*!
-    @brief Use tga for transient solevs
-  */
-  bool m_useTGA;
-
-  /*!
     @brief Use kappa scaling for source or not
   */
   bool m_kappaScale;
@@ -366,16 +374,6 @@ protected:
   GMRESSolver<LevelData<EBCellFAB>> m_gmres;
 
   /*!
-    @brief TGA solver
-  */
-  RefCountedPtr<AMRTGA<LevelData<EBCellFAB>>> m_tgaSolver;
-
-  /*!
-    @brief Euler solver
-  */
-  RefCountedPtr<EBBackwardEuler> m_eulerSolver;
-
-  /*!
     @brief Operator factory
   */
   RefCountedPtr<EBHelmholtzOpFactory> m_helmholtzOpFactory;
@@ -394,16 +392,6 @@ protected:
     @brief Multigrid residue
   */
   EBAMRCellData m_resid;
-
-  /*!
-    @brief Always zero
-  */
-  EBAMRCellData m_zero;
-
-  /*!
-    @brief Scaled source term
-  */
-  EBAMRCellData m_scaledSource;
 
   /*!
     @brief a-coefficient
@@ -491,18 +479,6 @@ protected:
   */
   virtual EddingtonSP1DomainBc::BcType
   parseBcString(const std::string a_str) const;
-
-  /*!
-    @brief Set up the TGA solver
-  */
-  virtual void
-  setupTGA();
-
-  /*!
-    @brief Set up the Euler solver
-  */
-  virtual void
-  setupEuler();
 
   /*!
     @brief Parse domain BC settings

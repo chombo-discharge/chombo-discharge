@@ -499,17 +499,18 @@ ParticleContainer<P>::addParticles(const List<P>& a_particles)
     MayDay::Error("ParticleContainer<P>::addParticles(List<P>) - particles are sorted by cell!");
   }
 
-  // Put the initial particles on the coarsest grid level
-  List<P>& outcastBase = m_particles[0]->outcast();
-  outcastBase.join(a_particles);
-  m_particles[0]->remapOutcast();
+  List<P>& outcastFinest = m_particles[m_finestLevel]->outcast();
+  outcastFinest.join(a_particles);
 
-  // Move particles to finer levels if they belong there. This piece of code moves particles from lvl-1
-  // and onto the outcast list on level lvl. Then, we remap the outcast list
-  for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
-    this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl - 1], lvl - 1);
-
+  for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
     m_particles[lvl]->remapOutcast();
+
+    if (lvl > 0) {
+      List<P>& outcast     = m_particles[lvl]->outcast();
+      List<P>& outcastCoar = m_particles[lvl - 1]->outcast();
+
+      outcastCoar.catenate(outcast);
+    }
   }
 }
 
@@ -525,18 +526,18 @@ ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles)
     MayDay::Error("ParticleContainer<P>::addParticlesDestructive(List<P>) - particles are sorted by cell!");
   }
 
-  // Put the initial particles on the coarsest grid level. When we use catenate then
-  // a_particles will be destroyed.
-  List<P>& outcastBase = m_particles[0]->outcast();
-  outcastBase.catenate(a_particles);
-  m_particles[0]->remapOutcast();
+  List<P>& outcastFinest = m_particles[m_finestLevel]->outcast();
+  outcastFinest.join(a_particles);
 
-  // Move particles to finer levels if they belong there. This piece of code moves particles from lvl-1
-  // and onto the outcast list on level lvl. Then, we remap the outcast list
-  for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
-    this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl - 1], lvl - 1);
-
+  for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
     m_particles[lvl]->remapOutcast();
+
+    if (lvl > 0) {
+      List<P>& outcast     = m_particles[lvl]->outcast();
+      List<P>& outcastCoar = m_particles[lvl - 1]->outcast();
+
+      outcastCoar.catenate(outcast);
+    }
   }
 }
 
@@ -775,50 +776,32 @@ template <class P>
 void
 ParticleContainer<P>::remap()
 {
-  CH_TIME("ParticleContainer<P>::remap");
+  CH_TIMERS("ParticleContainer<P>::remap");
+  CH_TIMER("ParticleContainer<P>::remap::catenate_to_finest", t1);
+  CH_TIMER("ParticleContainer<P>::remap::catenate_to_coarser", t2);
 
-  CH_assert(m_isDefined);
-
-  if (m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::remap() - particles are sorted by cell!");
-  }
-
+  CH_START(t1);
+  List<P>& outcastFinest = m_particles[m_finestLevel]->outcast();
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const bool hasCoar = (lvl > 0);
-
-    // Gather coarse-level particles onto this level if they lie on this level.
-    if (hasCoar) {
-      this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl - 1], lvl - 1);
+    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
+      outcastFinest.catenate((*m_particles[lvl])[dit()].listItems());
     }
+  }
+  CH_STOP(t1);
 
-    // Rebin this level.
-    m_particles[lvl]->gatherOutcast();
+  for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
     m_particles[lvl]->remapOutcast();
 
-    // Some particles might have moved over the refinement boundary to the coarse level. Try to remap
-    // them on the coarse level; note that they may also have moved across that level too, in which case
-    // they just lie dormant on the coarse-grid outcast list.
-    // and remap again.
-    if (hasCoar) {
+    CH_START(t2);
+    if (lvl > 0) {
+
+      List<P>& outcast     = m_particles[lvl]->outcast();
       List<P>& outcastCoar = m_particles[lvl - 1]->outcast();
-      List<P>& outcastFine = m_particles[lvl]->outcast();
 
-      outcastCoar.catenate(outcastFine);
-
-      m_particles[lvl - 1]->remapOutcast();
+      outcastCoar.catenate(outcast);
     }
+    CH_STOP(t2);
   }
-
-  // If there are still outcast particles, which happens if particles moved across more than one
-  // refinement boundary, we can no longer move them between neighboring levels. Instead, gather
-  // all the remaining outcasts and call addParticlesDestructive. This puts all the remaining outcasts
-  // on the coarse level first, following by eviction-remapping towards the finest grid level.
-  List<P> particles;
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    particles.catenate(m_particles[lvl]->outcast());
-  }
-
-  this->addParticlesDestructive(particles);
 }
 
 template <class P>

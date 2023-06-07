@@ -144,21 +144,34 @@ public:
 #endif
 
   /*!
-    @brief Write plot data to output holder. 
-    @param[inout] a_output            Output data holder.
-    @param[in]    a_plotVariableNames Plot variable names.
-    @param[inout] a_icomp             Starting component in a_output to begin at. 
-  */
-  virtual void
-  writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const = 0;
-
-  /*!
     @brief Get the number of plot variables for this time stepper. 
     @details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. 
     @return Returns number of plot variables that will be written during writePlotData
   */
   virtual int
   getNumberOfPlotVariables() const = 0;
+
+  /*!
+    @brief Get plot variable names
+  */
+  virtual Vector<std::string>
+  getPlotVariableNames() const = 0;
+
+  /*!
+    @brief Write plot data to output holder. 
+    @param[inout] a_output Output data holder.
+    @param[inout] a_icomp  Starting component in a_output to begin at. 
+    @param[in]    a_level  Grid level
+  */
+  virtual void
+  writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const = 0;
+
+  /*!
+    @brief An option for calling special functions prior to plotting data. 
+    Called by Driver in the IMMEDIATELY before writing the plot file. 
+  */
+  virtual void
+  prePlot();
 
   /*!
     @brief Get computational loads to be checkpointed. 

@@ -4,7 +4,6 @@
 EddingtonSP1.verbosity           = -1           # Solver verbosity
 EddingtonSP1.stationary          = true         # Stationary solver
 EddingtonSP1.reflectivity        = 0.           # Reflectivity
-EddingtonSP1.use_tga             = false        # Use TGA for integration
 EddingtonSP1.kappa_scale         = true         # Kappa scale source or not (depends on algorithm)
 EddingtonSP1.plt_vars            = phi src      # Plot variables. Available are 'phi' and 'src'
 EddingtonSP1.use_regrid_slopes   = true         # Slopes on/off when regridding

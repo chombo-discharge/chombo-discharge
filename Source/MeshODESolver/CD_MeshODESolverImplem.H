@@ -387,6 +387,8 @@ MeshODESolver<N>::preRegrid(const int a_lbase, const int a_oldFinestLevel) noexc
   m_amr->allocate(m_cache, m_realm, m_phase, N);
 
   m_cache.copy(m_phi);
+
+  m_phi.clear();
 }
 
 template <size_t N>
@@ -400,12 +402,15 @@ MeshODESolver<N>::regrid(const int a_lmin, const int a_oldFinestLevel, const int
 
   this->allocate();
 
-  m_amr->interpToNewGrids(m_phi, m_cache, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
+  const EBCoarseToFineInterp::Type interpType = m_regridSlopes ? EBCoarseToFineInterp::Type::ConservativeMinMod
+                                                               : EBCoarseToFineInterp::Type::ConservativePWC;
+
+  m_amr->interpToNewGrids(m_phi, m_cache, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);
 
   m_amr->conservativeAverage(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
 
-  m_amr->deallocate(m_cache);
+  m_cache.clear();
 }
 
 template <size_t N>
@@ -442,54 +447,6 @@ MeshODESolver<N>::setName(const std::string& a_name) noexcept
   }
 
   m_name = a_name;
-}
-
-template <size_t N>
-Vector<std::string>
-MeshODESolver<N>::getPlotVariableNames() const noexcept
-{
-  CH_TIME("MeshODESolver::getPlotVariableNames()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getPlotVariableNames()" << endl;
-  }
-
-  Vector<std::string> plotVarNames(0);
-
-  if (m_plotPhi) {
-    for (size_t i = 0; i < N; i++) {
-      plotVarNames.push_back(m_name + " phi-" + std::to_string(i));
-    }
-  }
-
-  if (m_plotRHS) {
-    for (size_t i = 0; i < N; i++) {
-      plotVarNames.push_back(m_name + " source-" + std::to_string(i));
-    }
-  }
-
-  return plotVarNames;
-}
-
-template <size_t N>
-int
-MeshODESolver<N>::getNumberOfPlotVariables() const noexcept
-{
-  CH_TIME("MeshODESolver::getNumberOfPlotVariables()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getNumberOfPlotVariables()" << endl;
-  }
-
-  int numPlotVars = 0;
-
-  if (m_plotPhi) {
-    numPlotVars += int(N);
-  }
-
-  if (m_plotRHS) {
-    numPlotVars += int(N);
-  }
-
-  return numPlotVars;
 }
 
 template <size_t N>
@@ -577,7 +534,9 @@ MeshODESolver<N>::writePlotFile() const noexcept
   DataOps::setValue(output, 0.0);
 
   int icomp = 0;
-  this->writePlotData(output, icomp);
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    this->writePlotData(*output[lvl], icomp, lvl);
+  }
 
   char filename[100];
   sprintf(filename, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_timeStep, SpaceDim);
@@ -606,21 +565,147 @@ MeshODESolver<N>::writePlotFile() const noexcept
 }
 
 template <size_t N>
-void
-MeshODESolver<N>::writePlotData(EBAMRCellData& a_output, int& a_icomp) const noexcept
+int
+MeshODESolver<N>::getNumberOfPlotVariables() const noexcept
 {
-  CH_TIME("MeshODESolver::writePlotData(EBAMRCellData, int)");
+  CH_TIME("MeshODESolver::getNumberOfPlotVariables()");
   if (m_verbosity > 5) {
-    pout() << m_name + "::writePlotData(EBAMRCellData, int)" << endl;
+    pout() << m_name + "::getNumberOfPlotVariables()" << endl;
   }
 
+  int numPlotVars = 0;
+
   if (m_plotPhi) {
-    this->writeData(a_output, a_icomp, m_phi, false);
+    numPlotVars += int(N);
   }
 
   if (m_plotRHS) {
-    this->writeData(a_output, a_icomp, m_rhs, false);
+    numPlotVars += int(N);
   }
+
+  return numPlotVars;
+}
+
+template <size_t N>
+Vector<std::string>
+MeshODESolver<N>::getPlotVariableNames() const noexcept
+{
+  CH_TIME("MeshODESolver::getPlotVariableNames()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getPlotVariableNames()" << endl;
+  }
+
+  Vector<std::string> plotVarNames(0);
+
+  if (m_plotPhi) {
+    for (size_t i = 0; i < N; i++) {
+      plotVarNames.push_back(m_name + " phi-" + std::to_string(i));
+    }
+  }
+
+  if (m_plotRHS) {
+    for (size_t i = 0; i < N; i++) {
+      plotVarNames.push_back(m_name + " source-" + std::to_string(i));
+    }
+  }
+
+  return plotVarNames;
+}
+
+template <size_t N>
+void
+MeshODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const noexcept
+{
+  CH_TIME("MeshODESolver::writePlotData");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::writePlotData" << endl;
+  }
+
+  if (m_plotPhi) {
+    this->writeData(a_output, a_icomp, m_phi, a_level, false, true);
+  }
+
+  if (m_plotRHS) {
+    this->writeData(a_output, a_icomp, m_rhs, a_level, false, true);
+  }
+}
+
+template <size_t N>
+void
+MeshODESolver<N>::writeData(LevelData<EBCellFAB>& a_output,
+                            int&                  a_comp,
+                            const EBAMRCellData&  a_data,
+                            const int             a_level,
+                            const bool            a_interpToCentroids,
+                            const bool            a_interpGhost) const noexcept
+
+{
+  CH_TIMERS("MeshODESolver::writeData");
+  CH_TIMER("MeshODESolver::writeData::allocate", t1);
+  CH_TIMER("MeshODESolver::writeData::local_copy", t2);
+  CH_TIMER("MeshODESolver::writeData::interp_ghost", t3);
+  CH_TIMER("MeshODESolver::writeData::interp_centroid", t4);
+  CH_TIMER("MeshODESolver::writeData::define_copier", t5);
+  CH_TIMER("MeshODESolver::writeData::final_copy", t6);
+  if (m_verbosity > 5) {
+    pout() << m_name + "::writeData" << endl;
+  }
+
+  // Number of components we are working with.
+  const int numComp = a_data[a_level]->nComp();
+
+  // Component ranges that we copy to/from.
+  const Interval srcInterv(0, numComp - 1);
+  const Interval dstInterv(a_comp, a_comp + numComp - 1);
+
+  CH_START(t1);
+  LevelData<EBCellFAB> scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, a_level, numComp);
+  CH_STOP(t1);
+
+  CH_START(t2);
+  a_data[a_level]->localCopyTo(scratch);
+  scratch.exchange();
+  CH_START(t2);
+
+  // Interpolate ghost cells
+  CH_START(t3);
+  if (a_level > 0 && a_interpGhost) {
+    for (int icomp = 0; icomp < numComp; icomp++) {
+      LevelData<EBCellFAB> coarData;
+
+      aliasLevelData<EBCellFAB>(coarData, &(*a_data[a_level - 1]), Interval(icomp, icomp));
+
+      m_amr->interpGhost(scratch, coarData, a_level, m_realm, m_phase);
+    }
+  }
+  CH_STOP(t3);
+
+  CH_START(t4);
+  if (a_interpToCentroids) {
+    m_amr->interpToCentroids(scratch, m_realm, m_phase, a_level);
+  }
+  CH_STOP(t4);
+
+  // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
+  // we can't call EBAMRData<T>::copy either (because components don't align). So -- general type of copy here.
+  CH_START(t5);
+  Copier copier;
+  copier.ghostDefine(scratch.disjointBoxLayout(),
+                     a_output.disjointBoxLayout(),
+                     m_amr->getDomains()[a_level],
+                     scratch.ghostVect(),
+                     a_output.ghostVect());
+  CH_STOP(t5);
+
+  DataOps::setCoveredValue(scratch, 0.0);
+
+  CH_START(t6);
+  scratch.copyTo(srcInterv, a_output, dstInterv, copier);
+  a_output.exchange();
+  CH_STOP(t6);
+
+  a_comp += numComp;
 }
 
 #ifdef CH_USE_HDF5
@@ -657,53 +742,6 @@ MeshODESolver<N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level) n
                   false);
 }
 #endif
-
-template <size_t N>
-void
-MeshODESolver<N>::writeData(EBAMRCellData&       a_output,
-                            int&                 a_comp,
-                            const EBAMRCellData& a_data,
-                            const bool           a_interp) const noexcept
-{
-  CH_TIME("MeshODESolver::writeData(EBAMRCellData, int, EBAMRCellData, bool)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::writeData(EBAMRCellData, int, EBAMRCellData, bool)" << endl;
-  }
-
-  // Number of components we are working with.
-  const int ncomp = a_data[0]->nComp();
-
-  // Component ranges.
-  const Interval srcInterv(0, ncomp - 1);
-  const Interval dstInterv(a_comp, a_comp + ncomp - 1);
-
-  // Copy data to scratch and interpolate scratch to cell centroids if we are asked to.
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, ncomp);
-  DataOps::copy(scratch, a_data);
-
-  if (a_interp) {
-    m_amr->interpToCentroids(scratch, m_realm, phase::gas);
-  }
-
-  m_amr->conservativeAverage(scratch, m_realm, m_phase);
-  m_amr->interpGhost(scratch, m_realm, m_phase);
-
-  // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
-  // we can't call EBAMRData<T>::copy either (because components don't align). So -- general type of copy here.
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    if (m_realm == a_output.getRealm()) {
-      scratch[lvl]->localCopyTo(srcInterv, *a_output[lvl], dstInterv);
-    }
-    else {
-      scratch[lvl]->copyTo(srcInterv, *a_output[lvl], dstInterv);
-    }
-  }
-
-  DataOps::setCoveredValue(a_output, a_comp, 0.0);
-
-  a_comp += ncomp;
-}
 
 #include <CD_NamespaceFooter.H>
 

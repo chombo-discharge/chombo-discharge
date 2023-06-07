@@ -24,6 +24,8 @@
 inline void
 ParallelOps::barrier() noexcept
 {
+  CH_TIME("ParallelOps::barrier");
+
 #ifdef CH_MPI
   MPI_Barrier(Chombo_MPI::comm);
 #endif
@@ -32,6 +34,8 @@ ParallelOps::barrier() noexcept
 inline std::pair<int, int>
 ParallelOps::partition(const int a_N) noexcept
 {
+  CH_TIME("ParallelOps::partition");
+
 #ifdef CH_MPI
   const int equalChunk = a_N / numProc();
   const int remainder  = a_N % numProc();
@@ -53,12 +57,17 @@ ParallelOps::partition(const int a_N) noexcept
 inline Real
 ParallelOps::min(const Real& a_input) noexcept
 {
+  CH_TIME("ParallelOps::min(Real)");
+
 #ifdef CH_MPI
-  Real      ret    = 1.0;
-  const int result = MPI_Allreduce(&a_input, &ret, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+  Real ret = a_input;
+
+  const int result = MPI_Allreduce(MPI_IN_PLACE, &ret, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+
   if (result != MPI_SUCCESS) {
     MayDay::Error("In file ParallelOps::min -- MPI communication error");
   }
+
   return ret;
 #else
   return a_input;
@@ -68,9 +77,13 @@ ParallelOps::min(const Real& a_input) noexcept
 inline int
 ParallelOps::min(const int& a_input) noexcept
 {
+  CH_TIME("ParallelOps::min(int)");
+
 #ifdef CH_MPI
-  int       ret    = 1;
-  const int result = MPI_Allreduce(&a_input, &ret, 1, MPI_INT, MPI_MIN, Chombo_MPI::comm);
+  int ret = a_input;
+
+  const int result = MPI_Allreduce(MPI_IN_PLACE, &ret, 1, MPI_INT, MPI_MIN, Chombo_MPI::comm);
+
   if (result != MPI_SUCCESS) {
     MayDay::Error("In file ParallelOps::min -- MPI communication error");
   }
@@ -83,6 +96,8 @@ ParallelOps::min(const int& a_input) noexcept
 inline std::pair<Real, RealVect>
 ParallelOps::min(const Real& a_val, const RealVect& a_pos) noexcept
 {
+  CH_TIME("ParallelOps::min(Real, RealVect)");
+
 #ifdef CH_MPI
   const int nProc = numProc();
 
@@ -141,12 +156,16 @@ ParallelOps::min(const Real& a_val, const RealVect& a_pos) noexcept
 inline Real
 ParallelOps::max(const Real& a_input) noexcept
 {
+  CH_TIME("ParallelOps::max(Real)");
+
 #ifdef CH_MPI
-  Real      ret    = 1.0;
-  const int result = MPI_Allreduce(&a_input, &ret, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+  Real ret = a_input;
+
+  const int result = MPI_Allreduce(MPI_IN_PLACE, &ret, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
   if (result != MPI_SUCCESS) {
     MayDay::Error("In file ParallelOps::max -- MPI communication error");
   }
+
   return ret;
 #else
   return a_input;
@@ -156,10 +175,13 @@ ParallelOps::max(const Real& a_input) noexcept
 inline int
 ParallelOps::max(const int& a_input) noexcept
 {
+  CH_TIME("ParallelOps::max(int)");
 
 #ifdef CH_MPI
-  int       ret    = 1;
-  const int result = MPI_Allreduce(&a_input, &ret, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+  int ret = a_input;
+
+  const int result = MPI_Allreduce(MPI_IN_PLACE, &ret, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+
   if (result != MPI_SUCCESS) {
     MayDay::Error("In file ParallelOps::max -- MPI communication error");
   }
@@ -172,6 +194,8 @@ ParallelOps::max(const int& a_input) noexcept
 inline std::pair<Real, RealVect>
 ParallelOps::max(const Real& a_val, const RealVect& a_pos) noexcept
 {
+  CH_TIME("ParallelOps::max(Real, RealVect)");
+
 #ifdef CH_MPI
   const int nProc = numProc();
 
@@ -230,6 +254,8 @@ ParallelOps::max(const Real& a_val, const RealVect& a_pos) noexcept
 inline std::pair<Real, int>
 ParallelOps::maxRank(const Real& a_val) noexcept
 {
+  CH_TIME("ParallelOps::maxRank(Real)");
+
 #ifdef CH_MPI
   const int nProc = numProc();
 
@@ -258,6 +284,8 @@ ParallelOps::maxRank(const Real& a_val) noexcept
 inline std::pair<Real, int>
 ParallelOps::minRank(const Real& a_val) noexcept
 {
+  CH_TIME("ParallelOps::minRank(Real)");
+
 #ifdef CH_MPI
   const int nProc = numProc();
 
@@ -286,6 +314,8 @@ ParallelOps::minRank(const Real& a_val) noexcept
 inline Real
 ParallelOps::sum(const Real& a_value) noexcept
 {
+  CH_TIME("ParallelOps::sum(Real)");
+
 #ifdef CH_MPI
   Real ret = 0.0;
 
@@ -303,6 +333,8 @@ ParallelOps::sum(const Real& a_value) noexcept
 inline int
 ParallelOps::sum(const int& a_value) noexcept
 {
+  CH_TIME("ParallelOps::sum(Real)");
+
 #ifdef CH_MPI
   int ret = 0;
 
@@ -320,6 +352,8 @@ ParallelOps::sum(const int& a_value) noexcept
 inline long
 ParallelOps::sum(const long& a_value) noexcept
 {
+  CH_TIME("ParallelOps::sum(long)");
+
 #ifdef CH_MPI
   long ret = 0;
 
@@ -337,6 +371,8 @@ ParallelOps::sum(const long& a_value) noexcept
 inline long long
 ParallelOps::sum(const long long& a_value) noexcept
 {
+  CH_TIME("ParallelOps::sum(long long)");
+
 #ifdef CH_MPI
   long long ret = 0;
 
@@ -354,6 +390,8 @@ ParallelOps::sum(const long long& a_value) noexcept
 inline unsigned long long
 ParallelOps::sum(const unsigned long long& a_value) noexcept
 {
+  CH_TIME("ParallelOps::sum(unsigned long long)");
+
 #ifdef CH_MPI
   unsigned long long ret = 0;
 
@@ -371,6 +409,8 @@ ParallelOps::sum(const unsigned long long& a_value) noexcept
 inline void
 ParallelOps::vectorSum(Vector<Real>& a_data) noexcept
 {
+  CH_TIME("ParallelOps::vectorSum(Real)");
+
 #ifdef CH_MPI
   const Vector<Real> tmp = a_data;
   const int result = MPI_Allreduce(&(tmp[0]), &(a_data[0]), a_data.size(), MPI_CH_REAL, MPI_SUM, Chombo_MPI::comm);
@@ -383,6 +423,8 @@ ParallelOps::vectorSum(Vector<Real>& a_data) noexcept
 inline void
 ParallelOps::vectorSum(Vector<long int>& a_data) noexcept
 {
+  CH_TIME("ParallelOps::vectorSum(long int)");
+
 #ifdef CH_MPI
   const Vector<long int> tmp = a_data;
   const int result = MPI_Allreduce(&(tmp[0]), &(a_data[0]), a_data.size(), MPI_LONG, MPI_SUM, Chombo_MPI::comm);
@@ -395,6 +437,8 @@ ParallelOps::vectorSum(Vector<long int>& a_data) noexcept
 inline Real
 ParallelOps::average(const Real& a_val) noexcept
 {
+  CH_TIME("ParallelOps::average(Real)");
+
 #ifdef CH_MPI
   return ParallelOps::sum(a_val) / numProc();
 #else
@@ -405,6 +449,8 @@ ParallelOps::average(const Real& a_val) noexcept
 inline Real
 ParallelOps::standardDeviation(const Real& a_value) noexcept
 {
+  CH_TIME("ParallelOps::standardDeviation(Real)");
+
 #ifdef CH_MPI
   const int nProc = numProc();
 

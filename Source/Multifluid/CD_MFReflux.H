@@ -4,76 +4,76 @@
  */
 
 /*!
-  @file   CD_MFFluxReg.H
+  @file   CD_MFReflux.H
   @brief  Declaration of a class for refluxing in a multiphase context. 
   @author Robert Marskar
 */
 
-#ifndef CD_MFFluxReg_H
-#define CD_MFFluxReg_H
+#ifndef CD_MFReflux_H
+#define CD_MFReflux_H
 
 // Chombo includes
 #include <RefCountedPtr.H>
-#include <EBFluxRegister.H>
 
 // Our includes
+#include <CD_EBReflux.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Class which wraps EBFluxRegisters in multiphase. 
+  @brief Class which wraps EBRefluxs in multiphase. 
 */
-class MFFluxReg
+class MFReflux
 {
 public:
   /*!
     @brief Weak constructor. Must subsequently call define. 
   */
-  MFFluxReg();
+  MFReflux();
 
   /*!
     @brief Full constructor. Calls define
     @param[in] a_fluxRegs Flux registers on each phase
   */
-  MFFluxReg(const Vector<RefCountedPtr<EBFluxRegister>>& a_fluxRegs);
+  MFReflux(const Vector<RefCountedPtr<EBReflux>>& a_fluxRegs);
 
   /*!
     @brief Destructor (does nothing)
   */
-  ~MFFluxReg();
+  ~MFReflux();
 
   /*!
     @brief Define function
     @param[in] a_fluxRegs Flux registers on each phase
   */
   void
-  define(const Vector<RefCountedPtr<EBFluxRegister>>& a_fluxRegs);
+  define(const Vector<RefCountedPtr<EBReflux>>& a_fluxRegs);
 
   /*!
     @brief Get flux register for specified phase
     @param[in] a_phase Phase
   */
-  const RefCountedPtr<EBFluxRegister>&
+  const RefCountedPtr<EBReflux>&
   getFluxRegPointer(const int a_phase) const;
 
   /*!
     @brief Get flux register for specified phase
     @param[in] a_phase Phase
   */
-  EBFluxRegister&
+  EBReflux&
   getFluxReg(const int a_phase);
 
   /*!
     @brief Get flux register for specified phase
     @param[in] a_phase Phase
   */
-  const EBFluxRegister&
+  const EBReflux&
   getFluxReg(const int a_phase) const;
 
 protected:
   /*!
     @brief Flux register for each phase. 
   */
-  Vector<RefCountedPtr<EBFluxRegister>> m_fluxRegs;
+  Vector<RefCountedPtr<EBReflux>> m_fluxRegs;
 };
 
 #include <CD_NamespaceFooter.H>

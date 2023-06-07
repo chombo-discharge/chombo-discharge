@@ -162,21 +162,25 @@ namespace Physics {
 #endif
 
       /*!
-	@brief Write plot data to output holder. 
-	@param[inout] a_output            Output data holder.
-	@param[in]    a_plotVariableNames Plot variable names.
-	@param[inout] a_icomp             Starting component in a_output to begin at. 
-      */
-      virtual void
-      writePlotData(EBAMRCellData&       a_output,
-                    Vector<std::string>& a_plotVariableNames,
-                    int&                 a_icomp) const noexcept override;
-
-      /*!
 	@brief Get number of plot variables for the output file
       */
       virtual int
       getNumberOfPlotVariables() const noexcept override;
+
+      /*!
+	@brief Get plot variable names
+      */
+      virtual Vector<std::string>
+      getPlotVariableNames() const noexcept override;
+
+      /*!
+	@brief Write plot data to output holder. 
+	@param[inout] a_output Output data holder.
+	@param[inout] a_icomp  Starting component in a_output to begin at. 
+	@param[in]    a_level  Grid level
+      */
+      virtual void
+      writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const noexcept override;
 
       /*!
 	@brief Get computational loads to be checkpointed. 
@@ -871,12 +875,30 @@ namespace Physics {
                                const Real                      a_tolerance) noexcept;
 
       /*!
+	@brief Write data to output. Convenience function. 
+	@param[inout] a_output Output data holder.
+	@param[inout] a_icomp  Starting component where this solver begins writing the output. 
+	@param[in]    a_data   Data to write. 
+	@param[in]    a_level  Grid level
+	@param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
+	@param[in]    a_interpGhost If true, interpolate ghost cells
+      */
+      virtual void
+      writeData(LevelData<EBCellFAB>& a_output,
+                int&                  a_comp,
+                const EBAMRCellData&  a_data,
+                const int             a_level,
+                const bool            a_interpToCentroids,
+                const bool            a_interpGhost) const noexcept;
+
+      /*!
 	@brief Write number of particles per patch to output holder. 
 	@param[inout] a_output Output data holder.
 	@param[inout] a_icomp  Starting component in a_output to begin at. 
+	@param[in]    a_level  Grid level
       */
       virtual void
-      writeNumberOfParticlesPerPatch(EBAMRCellData& a_output, int& a_icomp) const noexcept;
+      writeNumberOfParticlesPerPatch(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const noexcept;
 
       /*!
 	@brief Get maximum density of the Ito species

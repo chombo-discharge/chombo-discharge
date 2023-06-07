@@ -6,8 +6,8 @@
 /*!
   @file   CD_StreamerInceptionStepperImplem.H
   @brief  Implementation of CD_StreamerInceptionStepper.H
-  @author Robert Marskar
-  @author Rasmus Hoholm
+  @author Robert Marskar (SINTEF)
+  @author Rasmus Hoholm (SINTEF)
 */
 
 #ifndef CD_StreamerInceptionStepperImplem_H
@@ -42,6 +42,7 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   m_phase              = phase::gas;
   m_mode               = Mode::Stationary;
   m_transportAlgorithm = TransportAlgorithm::ImExCTU;
+  m_profile            = false;
 
   this->parseOptions();
 
@@ -313,6 +314,7 @@ StreamerInceptionStepper<P, F, C>::parseVerbosity() noexcept
 
   ParmParse pp("StreamerInceptionStepper");
   pp.get("verbosity", m_verbosity);
+  pp.get("profile", m_profile);
 }
 
 template <typename P, typename F, typename C>
@@ -556,362 +558,6 @@ StreamerInceptionStepper<P, F, C>::readCheckpointData(HDF5Handle& a_handle, cons
 #endif
 
 template <typename P, typename F, typename C>
-void
-StreamerInceptionStepper<P, F, C>::writePlotData(EBAMRCellData&       a_output,
-                                                 Vector<std::string>& a_plotVariableNames,
-                                                 int&                 a_icomp) const
-{
-  CH_TIME("StreamerInceptionStepper::writePlotData");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::writePlotData" << endl;
-  }
-
-  if (m_plotPoisson) {
-    m_fieldSolver->writePlotData(a_output, a_icomp);
-    a_plotVariableNames.append(m_fieldSolver->getPlotVariableNames());
-  }
-
-  if (m_plotTracer) {
-    m_tracerParticleSolver->writePlotData(a_output, a_icomp);
-    a_plotVariableNames.append(m_tracerParticleSolver->getPlotVariableNames());
-  }
-
-  if (m_plotNegativeIons) {
-    m_ionSolver->writePlotData(a_output, a_icomp);
-    a_plotVariableNames.append(m_ionSolver->getPlotVariableNames());
-  }
-
-  // Write data -- this differs between the 'stationary' and 'transient' modes
-  switch (m_mode) {
-  case Mode::Stationary: {
-    this->writePlotDataStationary(a_output, a_plotVariableNames, a_icomp);
-
-    break;
-  }
-  case Mode::Transient:
-    this->writePlotDataTransient(a_output, a_plotVariableNames, a_icomp);
-
-    break;
-  default: {
-    break;
-  }
-  }
-}
-
-template <typename P, typename F, typename C>
-void
-StreamerInceptionStepper<P, F, C>::writePlotDataStationary(EBAMRCellData&       a_output,
-                                                           Vector<std::string>& a_plotVariableNames,
-                                                           int&                 a_icomp) const noexcept
-{
-  CH_TIME("StreamerInceptionStepper::writePlotDataStationary");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::writePlotDataStationary" << endl;
-  }
-
-  const std::string prefix = "StreamerInceptionStepper/";
-
-  // Write the inception voltage.
-  if (m_plotInceptionVoltage) {
-
-    // Positive polarity
-    DataOps::copy(a_output, m_inceptionVoltagePlus, Interval(a_icomp, a_icomp), Interval(0, 0));
-    a_icomp += 1;
-    a_plotVariableNames.push_back(prefix + "Inception voltage +");
-
-    // Negative polarity
-    DataOps::copy(a_output, m_inceptionVoltageMinu, Interval(a_icomp, a_icomp), Interval(0, 0));
-    a_icomp += 1;
-    a_plotVariableNames.push_back(prefix + "Inception voltage -");
-  }
-
-  // Write our K values.
-  if (m_plotInceptionIntegral) {
-
-    // Positive polarity
-    {
-      const Interval srcInterval(0, m_voltageSweeps.size() - 1);
-      const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
-      DataOps::copy(a_output, m_inceptionIntegralPlus, dstInterval, srcInterval);
-
-      a_icomp += m_voltageSweeps.size();
-
-      std::string varName;
-      for (const Real& V : m_voltageSweeps) {
-        varName = prefix + "K-value/ V = +";
-        varName += std::to_string(V);
-        a_plotVariableNames.push_back(varName);
-      }
-    }
-
-    // Negative polarity
-    {
-      const Interval srcInterval(0, m_voltageSweeps.size() - 1);
-      const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
-      DataOps::copy(a_output, m_inceptionIntegralMinu, dstInterval, srcInterval);
-
-      a_icomp += m_voltageSweeps.size();
-
-      std::string varName;
-      for (const Real& V : m_voltageSweeps) {
-        varName = prefix + "K-value/ V = -";
-        varName += std::to_string(V);
-        a_plotVariableNames.push_back(varName);
-      }
-    }
-  }
-
-  // Write the background ionization rates
-  if (m_plotBackgroundIonization) {
-    const Interval srcInterval(0, m_voltageSweeps.size() - 1);
-    const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
-    DataOps::copy(a_output, m_backgroundIonization, dstInterval, srcInterval);
-
-    a_icomp += m_voltageSweeps.size();
-
-    std::string varName;
-    for (const Real& V : m_voltageSweeps) {
-      varName = prefix + "Background ionization rate/ V =  ";
-      varName += std::to_string(V);
-      a_plotVariableNames.push_back(varName);
-    }
-  }
-
-  // Write detachment rates
-  if (m_plotDetachment) {
-    const Interval srcInterval(0, m_voltageSweeps.size() - 1);
-    const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
-    DataOps::copy(a_output, m_detachment, dstInterval, srcInterval);
-
-    a_icomp += m_voltageSweeps.size();
-
-    std::string varName;
-    for (const Real& V : m_voltageSweeps) {
-      varName = prefix + "Detachment rate/ V =  ";
-      varName += std::to_string(V);
-      a_plotVariableNames.push_back(varName);
-    }
-  }
-
-  // Write field emission rates
-  if (m_plotFieldEmission) {
-    // Positive polarity
-    {
-      const Interval srcInterval(0, m_voltageSweeps.size() - 1);
-      const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
-      DataOps::copy(a_output, m_emissionRatesPlus, dstInterval, srcInterval);
-
-      a_icomp += m_voltageSweeps.size();
-
-      std::string varName;
-      for (const Real& V : m_voltageSweeps) {
-        varName = prefix + "Field emission rate/ V = +";
-        varName += std::to_string(V);
-        a_plotVariableNames.push_back(varName);
-      }
-    }
-
-    // Negative polarity
-    {
-
-      const Interval srcInterval(0, m_voltageSweeps.size() - 1);
-      const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
-      DataOps::copy(a_output, m_emissionRatesMinu, dstInterval, srcInterval);
-
-      a_icomp += m_voltageSweeps.size();
-
-      std::string varName;
-      for (const Real& V : m_voltageSweeps) {
-        varName = prefix + "Field emission rate/ V = -";
-        varName += std::to_string(V);
-        a_plotVariableNames.push_back(varName);
-      }
-    }
-  }
-
-  // Alpha value
-  if (m_plotAlpha) {
-    EBAMRCellData alpha;
-    m_amr->allocate(alpha, m_realm, m_phase, 1);
-
-    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      this->evaluateFunction(alpha, m_voltageSweeps[i], m_alpha);
-
-      m_amr->conservativeAverage(alpha, m_realm, m_phase);
-      m_amr->interpGhost(alpha, m_realm, m_phase);
-
-      DataOps::copy(a_output, alpha, Interval(a_icomp, a_icomp), Interval(0, 0));
-
-      a_icomp++;
-
-      const std::string varName = prefix + "Alpha coefficient/ V = " + std::to_string(m_voltageSweeps[i]);
-
-      a_plotVariableNames.push_back(varName);
-    }
-  }
-
-  // Eta
-  if (m_plotEta) {
-    EBAMRCellData eta;
-    m_amr->allocate(eta, m_realm, m_phase, 1);
-
-    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      this->evaluateFunction(eta, m_voltageSweeps[i], m_eta);
-
-      m_amr->conservativeAverage(eta, m_realm, m_phase);
-      m_amr->interpGhost(eta, m_realm, m_phase);
-
-      DataOps::copy(a_output, eta, Interval(a_icomp, a_icomp), Interval(0, 0));
-
-      a_icomp++;
-
-      const std::string varName = prefix + "Eta coefficient/ V = " + std::to_string(m_voltageSweeps[i]);
-
-      a_plotVariableNames.push_back(varName);
-    }
-  }
-}
-
-template <typename P, typename F, typename C>
-void
-StreamerInceptionStepper<P, F, C>::writePlotDataTransient(EBAMRCellData&       a_output,
-                                                          Vector<std::string>& a_plotVariableNames,
-                                                          int&                 a_icomp) const noexcept
-{
-  CH_TIME("StreamerInceptionStepper::writePlotDataTransient");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::writePlotDataTransient" << endl;
-  }
-
-  // Add potential and electric field to output
-  {
-    EBAMRCellData potential;
-    EBAMRCellData E;
-
-    m_amr->allocate(potential, m_realm, m_phase, 1);
-    m_amr->allocate(E, m_realm, m_phase, SpaceDim);
-
-    int comp1 = 0;
-    int comp2 = 0;
-    m_fieldSolver->writeMultifluidData(potential, comp1, m_fieldSolver->getPotential(), phase::gas, true);
-    m_fieldSolver->writeMultifluidData(E, comp2, m_fieldSolver->getElectricField(), phase::gas, true);
-
-    DataOps::scale(potential, m_voltageCurve(m_time));
-    DataOps::scale(E, m_voltageCurve(m_time));
-
-    // Copy potential to output data.
-    DataOps::copy(a_output, potential, Interval(a_icomp, a_icomp), Interval(0, 0));
-
-    a_plotVariableNames.push_back("Electric potential");
-    a_icomp += 1;
-
-    // Copy electric field to output data
-    const Interval srcInterv(0, SpaceDim - 1);
-    const Interval dstInterv(a_icomp, a_icomp + SpaceDim - 1);
-    DataOps::copy(a_output, E, dstInterv, srcInterv);
-
-    a_plotVariableNames.push_back("x-E");
-    a_plotVariableNames.push_back("y-E");
-    if (SpaceDim == 3) {
-      a_plotVariableNames.push_back("z-E");
-    }
-
-    a_icomp += SpaceDim;
-  }
-
-  // Plot inception integral
-  if (m_plotInceptionIntegral) {
-    DataOps::copy(a_output, m_inceptionIntegral, Interval(a_icomp, a_icomp), Interval(0, 0));
-
-    a_icomp++;
-
-    a_plotVariableNames.push_back("Inception integral");
-  }
-
-  // Plot background ionization rate
-  if (m_plotBackgroundIonization) {
-    EBAMRCellData bgIonization;
-
-    m_amr->allocate(bgIonization, m_realm, m_phase, 1);
-
-    this->evaluateFunction(bgIonization, m_voltageCurve(m_time), m_backgroundRate);
-
-    m_amr->conservativeAverage(bgIonization, m_realm, m_phase);
-    m_amr->interpGhost(bgIonization, m_realm, m_phase);
-
-    DataOps::copy(a_output, bgIonization, Interval(a_icomp, a_icomp), Interval(0, 0));
-
-    a_icomp++;
-
-    a_plotVariableNames.push_back("Background rate");
-  }
-
-  // Plot electron detachment rate
-  if (m_plotDetachment) {
-    EBAMRCellData detachment;
-
-    m_amr->allocate(detachment, m_realm, m_phase, 1);
-
-    this->evaluateFunction(detachment, m_voltageCurve(m_time), m_detachmentRate);
-
-    const EBAMRCellData& phi = m_ionSolver->getPhi();
-
-    DataOps::multiply(detachment, phi);
-
-    m_amr->conservativeAverage(detachment, m_realm, m_phase);
-    m_amr->interpGhost(detachment, m_realm, m_phase);
-
-    DataOps::copy(a_output, detachment, Interval(a_icomp, a_icomp), Interval(0, 0));
-
-    a_icomp++;
-
-    a_plotVariableNames.push_back("Detachment rate");
-  }
-
-  if (m_plotFieldEmission) {
-    DataOps::copy(a_output, m_emissionRate, Interval(a_icomp, a_icomp), Interval(0, 0));
-
-    a_icomp++;
-
-    a_plotVariableNames.push_back("Field emission");
-  }
-
-  // Alpha value
-  if (m_plotAlpha) {
-    EBAMRCellData alpha;
-    m_amr->allocate(alpha, m_realm, m_phase, 1);
-
-    this->evaluateFunction(alpha, m_voltageCurve(m_time), m_alpha);
-
-    m_amr->conservativeAverage(alpha, m_realm, m_phase);
-    m_amr->interpGhost(alpha, m_realm, m_phase);
-
-    DataOps::copy(a_output, alpha, Interval(a_icomp, a_icomp), Interval(0, 0));
-
-    a_icomp++;
-
-    a_plotVariableNames.push_back("Townsend alpha coefficient");
-  }
-
-  // Eta
-  if (m_plotEta) {
-    EBAMRCellData eta;
-    m_amr->allocate(eta, m_realm, m_phase, 1);
-
-    this->evaluateFunction(eta, m_voltageCurve(m_time), m_eta);
-
-    m_amr->conservativeAverage(eta, m_realm, m_phase);
-    m_amr->interpGhost(eta, m_realm, m_phase);
-
-    DataOps::copy(a_output, eta, Interval(a_icomp, a_icomp), Interval(0, 0));
-
-    a_icomp++;
-
-    a_plotVariableNames.push_back("Townsend eta coefficient");
-  }
-}
-
-template <typename P, typename F, typename C>
 int
 StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
 {
@@ -1006,6 +652,376 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
 }
 
 template <typename P, typename F, typename C>
+Vector<std::string>
+StreamerInceptionStepper<P, F, C>::getPlotVariableNames() const
+{
+  CH_TIME("StreamerInceptionStepper::getPlotVariableNames");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::getPlotVariableNames" << endl;
+  }
+
+  Vector<std::string> plotVars;
+
+  if (m_plotPoisson) {
+    plotVars.append(m_fieldSolver->getPlotVariableNames());
+  }
+
+  if (m_plotTracer) {
+    plotVars.append(m_tracerParticleSolver->getPlotVariableNames());
+  }
+
+  if (m_plotNegativeIons) {
+    plotVars.append(m_ionSolver->getPlotVariableNames());
+  }
+
+  switch (m_mode) {
+  case Mode::Stationary: {
+    plotVars.append(this->getStationaryPlotVariableNames());
+
+    break;
+  }
+  case Mode::Transient: {
+    plotVars.append(this->getTransientPlotVariableNames());
+
+    break;
+  }
+  default: {
+    MayDay::Error("StreamerInceptionStepper::getPlotVariableNames - logic bust");
+
+    break;
+  }
+  }
+
+  return plotVars;
+}
+
+template <typename P, typename F, typename C>
+Vector<std::string>
+StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::getStationaryPlotVariableNames");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::getStationaryPlotVariableNames" << endl;
+  }
+
+  Vector<std::string> plotVars;
+
+  const std::string prefix = "StreamerInceptionStepper/";
+
+  if (m_plotInceptionVoltage) {
+    plotVars.push_back(prefix + "Inception voltage +");
+    plotVars.push_back(prefix + "Inception voltage -");
+  }
+
+  if (m_plotInceptionIntegral) {
+    std::string varName;
+
+    for (const Real& V : m_voltageSweeps) {
+      varName = prefix + "K-value/ V = +" + std::to_string(V);
+      plotVars.push_back(varName);
+    }
+
+    for (const Real& V : m_voltageSweeps) {
+      varName = prefix + "K-value/ V = -" + std::to_string(V);
+      plotVars.push_back(varName);
+    }
+  }
+
+  // Write the background ionization rates
+  if (m_plotBackgroundIonization) {
+    std::string varName;
+
+    for (const Real& V : m_voltageSweeps) {
+      varName = prefix + "Background ionization rate/ V =  " + std::to_string(V);
+      plotVars.push_back(varName);
+    }
+  }
+
+  // Write detachment rates
+  if (m_plotDetachment) {
+    std::string varName;
+
+    for (const Real& V : m_voltageSweeps) {
+      varName = prefix + "Detachment rate/ V =  " + std::to_string(V);
+      plotVars.push_back(varName);
+    }
+  }
+
+  // Write field emission rates
+  if (m_plotFieldEmission) {
+    std::string varName;
+
+    for (const Real& V : m_voltageSweeps) {
+      varName = prefix + "Field emission rate/ V = +" + std::to_string(V);
+      plotVars.push_back(varName);
+    }
+
+    for (const Real& V : m_voltageSweeps) {
+      varName = prefix + "Field emission rate/ V = -" + std::to_string(V);
+      plotVars.push_back(varName);
+    }
+  }
+
+  // Alpha value
+  if (m_plotAlpha) {
+    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+
+      const std::string varName = prefix + "Alpha coefficient/ V = " + std::to_string(m_voltageSweeps[i]);
+
+      plotVars.push_back(varName);
+    }
+  }
+
+  // Eta
+  if (m_plotEta) {
+    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+      const std::string varName = prefix + "Eta coefficient/ V = " + std::to_string(m_voltageSweeps[i]);
+
+      plotVars.push_back(varName);
+    }
+  }
+
+  return plotVars;
+}
+
+template <typename P, typename F, typename C>
+Vector<std::string>
+StreamerInceptionStepper<P, F, C>::getTransientPlotVariableNames() const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::getTransientPlotVariableNames");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::getTransientPlotVariableNames" << endl;
+  }
+
+  Vector<std::string> plotVars;
+
+  // Add potential and electric field to output
+  plotVars.push_back("Electric potential");
+  plotVars.push_back("x-E");
+  plotVars.push_back("y-E");
+  if (SpaceDim == 3) {
+    plotVars.push_back("z-E");
+  }
+
+  if (m_plotInceptionIntegral) {
+    plotVars.push_back("Inception integral");
+  }
+
+  if (m_plotBackgroundIonization) {
+    plotVars.push_back("Background rate");
+  }
+
+  if (m_plotDetachment) {
+    plotVars.push_back("Detachment rate");
+  }
+
+  if (m_plotFieldEmission) {
+    plotVars.push_back("Field emission");
+  }
+
+  if (m_plotAlpha) {
+    plotVars.push_back("Townsend alpha coefficient");
+  }
+
+  if (m_plotEta) {
+    plotVars.push_back("Townsend eta coefficient");
+  }
+
+  return plotVars;
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const
+{
+  CH_TIME("StreamerInceptionStepper::writePlotData");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::writePlotData" << endl;
+  }
+
+  if (m_plotPoisson) {
+    m_fieldSolver->writePlotData(a_output, a_icomp, a_level);
+  }
+
+  if (m_plotTracer) {
+    m_tracerParticleSolver->writePlotData(a_output, a_icomp, a_level);
+  }
+
+  if (m_plotNegativeIons) {
+    m_ionSolver->writePlotData(a_output, a_icomp, a_level);
+  }
+
+  // Write internal data -- this differs between the 'stationary' and 'transient' modes
+  switch (m_mode) {
+  case Mode::Stationary: {
+    this->writePlotDataStationary(a_output, a_icomp, a_level);
+
+    break;
+  }
+  case Mode::Transient:
+    this->writePlotDataTransient(a_output, a_icomp, a_level);
+
+    break;
+  default: {
+    MayDay::Error("StreamerInceptionStepper::writePlotData - logic bust");
+
+    break;
+  }
+  }
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>& a_output,
+                                                           int&                  a_icomp,
+                                                           const int             a_level) const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::writePlotDataStationary");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::writePlotDataStationary" << endl;
+  }
+
+  const std::string prefix = "StreamerInceptionStepper/";
+
+  if (m_plotInceptionVoltage) {
+    this->writeData(a_output, a_icomp, m_inceptionVoltagePlus, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_inceptionVoltageMinu, a_level, false, true);
+  }
+
+  if (m_plotInceptionIntegral) {
+    this->writeData(a_output, a_icomp, m_inceptionIntegralPlus, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_inceptionIntegralMinu, a_level, false, true);
+  }
+
+  if (m_plotBackgroundIonization) {
+    this->writeData(a_output, a_icomp, m_backgroundIonization, a_level, false, true);
+  }
+
+  if (m_plotDetachment) {
+    this->writeData(a_output, a_icomp, m_detachment, a_level, false, true);
+  }
+
+  if (m_plotFieldEmission) {
+    this->writeData(a_output, a_icomp, m_emissionRatesPlus, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_emissionRatesMinu, a_level, false, true);
+  }
+
+  if (m_plotAlpha) {
+    LevelData<EBCellFAB> alpha;
+    m_amr->allocate(alpha, m_realm, m_phase, a_level, 1);
+
+    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+      this->evaluateFunction(alpha, m_voltageSweeps[i], m_alpha, a_level);
+
+      // Do a copy, but note that this does not include ghost cells across the CF interface since
+      // we are only computing for a single grid level.
+      alpha.copyTo(Interval(0, 0), a_output, Interval(a_icomp, a_icomp));
+
+      a_icomp++;
+    }
+  }
+
+  if (m_plotEta) {
+    LevelData<EBCellFAB> eta;
+    m_amr->allocate(eta, m_realm, m_phase, a_level, 1);
+
+    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+      this->evaluateFunction(eta, m_voltageSweeps[i], m_eta, a_level);
+
+      // Do a copy, but note that this does not include ghost cells across the CF interface since
+      // we are only computing for a single grid level.
+      eta.copyTo(Interval(0, 0), a_output, Interval(a_icomp, a_icomp));
+
+      a_icomp++;
+    }
+  }
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& a_output,
+                                                          int&                  a_icomp,
+                                                          const int             a_level) const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::writePlotDataTransient");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::writePlotDataTransient" << endl;
+  }
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
+  // Add potential and electric field to output. Note that we need to scale appropriately.
+  LevelData<EBCellFAB> aliasData;
+  aliasLevelData<EBCellFAB>(aliasData, &a_output, Interval(a_icomp, a_icomp + SpaceDim));
+
+  m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_fieldSolver->getPotential(), phase::gas, a_level, true);
+  m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_fieldSolver->getElectricField(), phase::gas, a_level, true);
+
+  DataOps::scale(aliasData, m_voltageCurve(m_time));
+
+  if (m_plotInceptionIntegral) {
+    this->writeData(a_output, a_icomp, m_inceptionIntegral, a_level, false, true);
+  }
+
+  if (m_plotBackgroundIonization) {
+    LevelData<EBCellFAB> bgIonization;
+    m_amr->allocate(bgIonization, m_realm, m_phase, a_level, 1);
+
+    this->evaluateFunction(bgIonization, m_voltageCurve(m_time), m_backgroundRate, a_level);
+
+    // Do a copy, but note that this does not include ghost cells across the CF interface since
+    // we are only computing for a single grid level.
+    bgIonization.copyTo(Interval(0, 0), a_output, Interval(a_icomp, a_icomp));
+
+    a_icomp++;
+  }
+
+  if (m_plotDetachment) {
+    LevelData<EBCellFAB> detachRate;
+    m_amr->allocate(detachRate, m_realm, m_phase, a_level, 1);
+
+    this->evaluateFunction(detachRate, m_voltageCurve(m_time), m_detachmentRate, a_level);
+
+    // Do a copy, but note that this does not include ghost cells across the CF interface since
+    // we are only computing for a single grid level.
+    detachRate.copyTo(Interval(0, 0), a_output, Interval(a_icomp, a_icomp));
+
+    a_icomp++;
+  }
+
+  if (m_plotFieldEmission) {
+    this->writeData(a_output, a_icomp, m_emissionRate, a_level, false, false);
+  }
+
+  if (m_plotAlpha) {
+    LevelData<EBCellFAB> alpha;
+    m_amr->allocate(alpha, m_realm, m_phase, a_level, 1);
+
+    this->evaluateFunction(alpha, m_voltageCurve(m_time), m_alpha, a_level);
+
+    // Do a copy, but note that this does not include ghost cells across the CF interface since
+    // we are only computing for a single grid level.
+    alpha.copyTo(Interval(0, 0), a_output, Interval(a_icomp, a_icomp));
+
+    a_icomp++;
+  }
+
+  if (m_plotEta) {
+    LevelData<EBCellFAB> eta;
+    m_amr->allocate(eta, m_realm, m_phase, a_level, 1);
+
+    this->evaluateFunction(eta, m_voltageCurve(m_time), m_eta, a_level);
+
+    // Do a copy, but note that this does not include ghost cells across the CF interface since
+    // we are only computing for a single grid level.
+    eta.copyTo(Interval(0, 0), a_output, Interval(a_icomp, a_icomp));
+
+    a_icomp++;
+  }
+}
+
+template <typename P, typename F, typename C>
 const EBAMRCellData* const
 StreamerInceptionStepper<P, F, C>::getElectricField() const noexcept
 {
@@ -1071,25 +1087,38 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
 
   if (m_mode == Mode::Transient) {
 
+    Timer timer("StreamerInceptionStepper::advance");
+
     const Real curTime    = m_time + a_dt;
     const Real curVoltage = m_voltageCurve(curTime);
 
     // Move the negative ions -- still want this for the time step.
+    timer.startEvent("Ion advance");
     this->computeIonVelocity(curVoltage);
     if (m_ionTransport) {
       this->computeIonDiffusion(curVoltage);
       this->advanceIons(a_dt);
     }
+    timer.stopEvent("Ion advance");
 
     // Seed new particles and compute the inception integral.
+    timer.startEvent("Set velocity");
     m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
+    timer.stopEvent("Set velocity");
 
+    timer.startEvent("Seed particles");
     this->seedIonizationParticles(curVoltage);
+    timer.stopEvent("Seed particles");
+
+    timer.startEvent("Compute integral");
     this->computeInceptionIntegralTransient(curVoltage);
+    timer.stopEvent("Compute integral");
 
     // Compute the critical volume and the electron appearance rate.
+    timer.startEvent("Compute Vcr");
     const Real Vcr  = this->computeCriticalVolumeTransient();
     const Real Rdot = this->computeRdot(curVoltage);
+    timer.stopEvent("Compute Vcr");
 
     m_criticalVolume.emplace_back(curTime, Vcr);
     m_Rdot.emplace_back(curTime, Rdot);
@@ -1108,14 +1137,20 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
     }
 
     // Get the maximum K-value
+    timer.startEvent("Get max/min K");
     Real maxK = -std::numeric_limits<Real>::max();
     Real minK = +std::numeric_limits<Real>::max();
 
     DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0);
 
     m_maxK.emplace_back(m_time + a_dt, maxK);
+    timer.stopEvent("Get max/min K");
 
+    timer.startEvent("Write report");
     this->writeReportTransient();
+    timer.stopEvent("Write report");
+
+    timer.eventReport(pout(), false);
   }
   else {
     MayDay::Error("StreamerInceptionStepper::advance -- must have 'StreamerInceptionStepper.mode = transient'");
@@ -2488,41 +2523,57 @@ StreamerInceptionStepper<P, F, C>::evaluateFunction(EBAMRCellData&              
   CH_assert(a_data[0]->nComp() == 1);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    this->evaluateFunction(*a_data[lvl], a_voltage, a_func, lvl);
+  }
+}
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox& ebisbox = ebisl[dit()];
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::evaluateFunction(LevelData<EBCellFAB>&                    a_data,
+                                                    const Real&                              a_voltage,
+                                                    const std::function<Real(const Real E)>& a_func,
+                                                    const int                                a_level) const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::evaluateFunction(level_version)");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::evaluateFunction(level_version)" << endl;
+  }
 
-      // Here, emissionPlus is when we have the standard voltage (V = 1) and
-      // emissionMinu is when the voltage is reverted.
-      EBCellFAB& data    = (*a_data[lvl])[dit()];
-      FArrayBox& dataReg = data.getFArrayBox();
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
 
-      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
-      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+  const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_level];
+  const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[a_level];
 
-      auto regularKernel = [&](const IntVect& iv) -> void {
-        const RealVect EE = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-        const Real     E  = std::abs(a_voltage * EE.vectorLength());
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const EBISBox& ebisbox = ebisl[dit()];
 
-        dataReg(iv, 0) = a_func(E);
-      };
+    EBCellFAB& data    = a_data[dit()];
+    FArrayBox& dataReg = data.getFArrayBox();
 
-      auto irregularKernel = [&](const VolIndex& vof) -> void {
-        const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-        const Real     E  = std::abs(a_voltage * EE.vectorLength());
+    const EBCellFAB& electricField    = (*m_electricFieldPlus[a_level])[dit()];
+    const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
-        data(vof, 0) = a_func(E);
-      };
+    auto regularKernel = [&](const IntVect& iv) -> void {
+      const RealVect EE = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+      const Real     E  = std::abs(a_voltage * EE.vectorLength());
 
-      // Execute kernels
-      Box          cellBox = dbl[dit()];
-      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      dataReg(iv, 0) = a_func(E);
+    };
 
-      BoxLoops::loop(cellBox, regularKernel);
-      BoxLoops::loop(vofit, irregularKernel);
-    }
+    auto irregularKernel = [&](const VolIndex& vof) -> void {
+      const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+      const Real     E  = std::abs(a_voltage * EE.vectorLength());
+
+      data(vof, 0) = a_func(E);
+    };
+
+    // Execute kernels
+    Box          cellBox = dbl[dit()];
+    VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[dit()];
+
+    BoxLoops::loop(cellBox, regularKernel);
+    BoxLoops::loop(vofit, irregularKernel);
   }
 }
 
@@ -2538,51 +2589,67 @@ StreamerInceptionStepper<P, F, C>::evaluateFunction(
     pout() << "StreamerInceptionStepper::evaluateFunction" << endl;
   }
 
-  CH_assert(a_data[0]->nComp() == 1);
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    this->evaluateFunction(*a_data[lvl], a_voltage, a_func, lvl);
+  }
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::evaluateFunction(LevelData<EBCellFAB>& a_data,
+                                                    const Real&           a_voltage,
+                                                    const std::function<Real(const Real E, const RealVect x)>& a_func,
+                                                    const int a_level) const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::evaluateFunction(level)");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::evaluateFunction(level)" << endl;
+  }
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
 
   const RealVect probLo = m_amr->getProbLo();
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const Real               dx    = m_amr->getDx()[lvl];
+  const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_level];
+  const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[a_level];
+  const Real               dx    = m_amr->getDx()[a_level];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox& ebisbox = ebisl[dit()];
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const EBISBox& ebisbox = ebisl[dit()];
 
-      // Here, emissionPlus is when we have the standard voltage (V = 1) and
-      // emissionMinu is when the voltage is reverted.
-      EBCellFAB& data    = (*a_data[lvl])[dit()];
-      FArrayBox& dataReg = data.getFArrayBox();
+    // Here, emissionPlus is when we have the standard voltage (V = 1) and
+    // emissionMinu is when the voltage is reverted.
+    EBCellFAB& data    = a_data[dit()];
+    FArrayBox& dataReg = data.getFArrayBox();
 
-      data.setVal(0.0);
+    data.setVal(0.0);
 
-      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
-      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+    const EBCellFAB& electricField    = (*m_electricFieldPlus[a_level])[dit()];
+    const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
-      auto regularKernel = [&](const IntVect& iv) -> void {
-        const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-        const RealVect EE = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-        const Real     E  = std::abs(a_voltage * EE.vectorLength());
+    auto regularKernel = [&](const IntVect& iv) -> void {
+      const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
+      const RealVect EE  = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+      const Real     E   = std::abs(a_voltage * EE.vectorLength());
 
-        dataReg(iv, 0) = a_func(E, pos);
-      };
+      dataReg(iv, 0) = a_func(E, pos);
+    };
 
-      auto irregularKernel = [&](const VolIndex& vof) -> void {
-        const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-        const RealVect EE  = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-        const Real     E   = std::abs(a_voltage * EE.vectorLength());
+    auto irregularKernel = [&](const VolIndex& vof) -> void {
+      const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+      const RealVect EE  = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+      const Real     E   = std::abs(a_voltage * EE.vectorLength());
 
-        data(vof, 0) = a_func(E, pos);
-      };
+      data(vof, 0) = a_func(E, pos);
+    };
 
-      // Execute kernels
-      Box          cellBox = dbl[dit()];
-      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+    // Execute kernels
+    Box          cellBox = dbl[dit()];
+    VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[dit()];
 
-      BoxLoops::loop(cellBox, regularKernel);
-      BoxLoops::loop(vofit, irregularKernel);
-    }
+    BoxLoops::loop(cellBox, regularKernel);
+    BoxLoops::loop(vofit, irregularKernel);
   }
 }
 
@@ -3288,6 +3355,86 @@ StreamerInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) no
                              Interval(0, 0),
                              Interval(0, 0),
                              Average::Arithmetic);
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
+                                             int&                  a_comp,
+                                             const EBAMRCellData&  a_data,
+                                             const int             a_level,
+                                             const bool            a_interpToCentroids,
+                                             const bool            a_interpGhost) const noexcept
+{
+
+  CH_TIMERS("StreamerInceptionStepper::writeData");
+  CH_TIMER("StreamerInceptionStepper::writeData::allocate", t1);
+  CH_TIMER("StreamerInceptionStepper::writeData::local_copy", t2);
+  CH_TIMER("StreamerInceptionStepper::writeData::interp_ghost", t3);
+  CH_TIMER("StreamerInceptionStepper::writeData::interp_centroid", t4);
+  CH_TIMER("StreamerInceptionStepper::writeData::define_copier", t5);
+  CH_TIMER("StreamerInceptionStepper::writeData::final_copy", t6);
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::writeData" << endl;
+  }
+
+  // Number of components we are working with.
+  const int numComp = a_data[a_level]->nComp();
+
+  // Component ranges that we copy to/from.
+  const Interval srcInterv(0, numComp - 1);
+  const Interval dstInterv(a_comp, a_comp + numComp - 1);
+
+  CH_START(t1);
+  LevelData<EBCellFAB> scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, a_level, numComp);
+  CH_STOP(t1);
+
+  CH_START(t2);
+  a_data[a_level]->localCopyTo(scratch);
+  scratch.exchange();
+  CH_START(t2);
+
+  // Interpolate ghost cells
+  CH_START(t3);
+  if (a_level > 0 && a_interpGhost) {
+
+    for (int icomp = 0; icomp < numComp; icomp++) {
+      LevelData<EBCellFAB> fineData;
+      LevelData<EBCellFAB> coarData;
+
+      aliasLevelData<EBCellFAB>(fineData, &scratch, Interval(icomp, icomp));
+      aliasLevelData<EBCellFAB>(coarData, &(*a_data[a_level - 1]), Interval(icomp, icomp));
+
+      m_amr->interpGhost(fineData, coarData, a_level, m_realm, m_phase);
+    }
+  }
+  CH_STOP(t3);
+
+  CH_START(t4);
+  if (a_interpToCentroids) {
+    m_amr->interpToCentroids(scratch, m_realm, m_phase, a_level);
+  }
+  CH_STOP(t4);
+
+  // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
+  // we can't call EBAMRData<T>::copy either (because components don't align). So -- general type of copy here.
+  CH_START(t5);
+  Copier copier;
+  copier.ghostDefine(scratch.disjointBoxLayout(),
+                     a_output.disjointBoxLayout(),
+                     m_amr->getDomains()[a_level],
+                     scratch.ghostVect(),
+                     a_output.ghostVect());
+  CH_STOP(t5);
+
+  DataOps::setCoveredValue(scratch, 0.0);
+
+  CH_START(t6);
+  scratch.copyTo(srcInterv, a_output, dstInterv, copier);
+  CH_STOP(t6);
+
+  a_comp += numComp;
 }
 
 #include <CD_NamespaceFooter.H>

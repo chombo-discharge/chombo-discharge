@@ -299,22 +299,6 @@ McPhoto::parseDeposition()
     MayDay::Error("McPhoto::parseDeposition - unsupported deposition method requested");
   }
 
-  pp.get("plot_deposition", str);
-  m_plotNumbers = false;
-  if (str == "num") {
-    m_plotDeposition = DepositionType::NGP;
-    m_plotNumbers    = true;
-  }
-  else if (str == "ngp") {
-    m_plotDeposition = DepositionType::NGP;
-  }
-  else if (str == "cic") {
-    m_plotDeposition = DepositionType::CIC;
-  }
-  else {
-    MayDay::Error("McPhoto::parseDeposition - unsupported interpolant requested");
-  }
-
   pp.get("deposition_cf", str);
   if (str == "interp") {
     m_coarseFineDeposition = CoarseFineDeposition::Interp;
@@ -489,6 +473,8 @@ McPhoto::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   m_ebPhotons.preRegrid(a_lmin);
   m_domainPhotons.preRegrid(a_lmin);
   m_sourcePhotons.preRegrid(a_lmin);
+
+  this->deallocate();
 }
 
 void
@@ -498,6 +484,12 @@ McPhoto::deallocate()
   if (m_verbosity > 5) {
     pout() << m_name + "::deallocate" << endl;
   }
+
+  m_phi.clear();
+  m_source.clear();
+  m_scratch.clear();
+  m_depositionNC.clear();
+  m_massDiff.clear();
 }
 
 void
@@ -509,11 +501,11 @@ McPhoto::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFin
   }
 
   // Mesh data regrids
-  m_amr->reallocate(m_phi, m_phase, a_lmin);
-  m_amr->reallocate(m_source, m_phase, a_lmin);
-  m_amr->reallocate(m_scratch, m_phase, a_lmin);
-  m_amr->reallocate(m_depositionNC, m_phase, a_lmin);
-  m_amr->reallocate(m_massDiff, m_phase, a_lmin);
+  m_amr->allocate(m_phi, m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_source, m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_scratch, m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_depositionNC, m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_massDiff, m_realm, m_phase, m_nComp);
 
   m_amr->remapToNewGrids(m_photons, a_lmin, a_newFinestLevel);
   m_amr->remapToNewGrids(m_bulkPhotons, a_lmin, a_newFinestLevel);
@@ -625,6 +617,7 @@ McPhoto::registerOperators()
     m_amr->registerOperator(s_eb_fill_patch, m_realm, m_phase);
     m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
     m_amr->registerOperator(s_particle_mesh, m_realm, m_phase);
+    m_amr->registerOperator(s_noncons_div, m_realm, m_phase);
 
     // For CIC deposition
     m_amr->registerMask(s_particle_halo, m_haloBuffer, m_realm);
@@ -989,13 +982,26 @@ McPhoto::depositPhotons(EBAMRCellData& a_phi, ParticleContainer<Photon>& a_photo
   // Compute hybrid deposition, including mass differnce
   this->depositHybrid(a_phi, m_massDiff, m_depositionNC);
 
-  // Increment level redistribution register
-  this->incrementRedist(m_massDiff);
+  // Redistribute
+  if (m_blendConservation) {
+    Vector<RefCountedPtr<EBRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Real     scale     = 1.0;
+      const Interval variables = Interval(0, 0);
+      const bool     hasCoar   = lvl > 0;
+      const bool     hasFine   = lvl < m_amr->getFinestLevel();
 
-  // Do the redistribution magic
-  this->coarseFineIncrement(m_massDiff); // Compute C2F, F2C, and C2C mass transfers
-  this->levelRedist(a_phi);              // Level redistribution. Weights is a dummy parameter
-  this->coarseFineRedistribution(a_phi); // Do the coarse-fine redistribution
+      if (hasCoar) {
+        redistOps[lvl]->redistributeCoar(*a_phi[lvl - 1], *m_massDiff[lvl], scale, variables);
+      }
+
+      redistOps[lvl]->redistributeLevel(*a_phi[lvl], *m_massDiff[lvl], scale, variables);
+
+      if (hasFine) {
+        redistOps[lvl]->redistributeFine(*a_phi[lvl + 1], *m_massDiff[lvl], scale, variables);
+      }
+    }
+  }
 
   // Average down and interpolate
   m_amr->conservativeAverage(a_phi, m_realm, m_phase);
@@ -1131,116 +1137,35 @@ McPhoto::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifferen
 }
 
 void
-McPhoto::incrementRedist(const EBAMRIVData& a_massDifference)
+McPhoto::depositPhotonsNGP(LevelData<EBCellFAB>&            a_output,
+                           const ParticleContainer<Photon>& a_photons,
+                           const int                        a_level) const noexcept
 {
-  CH_TIME("McPhoto::incrementRedist");
+  CH_TIME("McPhoto::depositPhotonsNGP");
   if (m_verbosity > 5) {
-    pout() << m_name + "::incrementRedist" << endl;
+    pout() << m_name + "::depositPhotonsNGP" << endl;
   }
 
-  const Interval interv(m_comp, m_comp);
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+  const DisjointBoxLayout& dbl    = m_amr->getGrids(a_photons.getRealm())[a_level];
+  const EBISLayout&        ebisl  = m_amr->getEBISLayout(a_photons.getRealm(), m_phase)[a_level];
+  const Real               dx     = m_amr->getDx()[a_level];
+  const RealVect           probLo = m_amr->getProbLo();
 
-    EBLevelRedist& levelRedist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
-    levelRedist.setToZero();
+  CH_assert(a_output.disjointBoxLayout() == dbl);
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      levelRedist.increment((*a_massDifference[lvl])[dit()], dit(), interv);
-    }
-  }
-}
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const Box      cellBox = dbl[dit()];
+    const EBISBox& ebisbox = ebisl[dit()];
 
-void
-McPhoto::levelRedist(EBAMRCellData& a_phi)
-{
-  CH_TIME("McPhoto::levelRedist");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::levelRedist" << endl;
-  }
+    EBParticleMesh particleMesh(cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
-  const Interval interv(m_comp, m_comp);
+    EBCellFAB&          output  = a_output[dit()];
+    const List<Photon>& photons = a_photons[a_level][dit()].listItems();
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    EBLevelRedist& levelRedist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
-    levelRedist.redistribute(*a_phi[lvl], interv);
-    levelRedist.setToZero();
-  }
-}
-
-void
-McPhoto::coarseFineIncrement(const EBAMRIVData& a_massDifference)
-{
-  CH_TIME("McPhoto::coarseFineIncrement");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::coarseFineIncrement" << endl;
-  }
-
-  const Interval interv(m_comp, m_comp);
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-    RefCountedPtr<EBFineToCoarRedist>& fine2coarRedist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToFineRedist>& coar2fineRedist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coarRedist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-
-    const bool hasCoar = lvl > 0;
-    const bool hasFine = lvl < 0;
-
-    if (hasCoar) {
-      fine2coarRedist->setToZero();
-    }
-    if (hasFine) {
-      coar2fineRedist->setToZero();
-      coar2coarRedist->setToZero();
-    }
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      if (hasCoar) {
-        fine2coarRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
-      }
-
-      if (hasFine) {
-        coar2fineRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
-        coar2coarRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
-      }
-    }
-  }
-}
-
-void
-McPhoto::coarseFineRedistribution(EBAMRCellData& a_phi)
-{
-  CH_TIME("McPhoto::coarseFineRedistribution");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::coarseFineRedistribution" << endl;
-  }
-
-  const Interval interv(m_comp, m_comp);
-  const int      finestLevel = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const bool hasCoar = lvl > 0;
-    const bool hasFine = lvl < finestLevel;
-
-    RefCountedPtr<EBCoarToFineRedist>& coar2fineRedist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coarRedist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBFineToCoarRedist>& fine2coarRedist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
-
-    if (hasCoar) {
-      fine2coarRedist->redistribute(*a_phi[lvl - 1], interv);
-      fine2coarRedist->setToZero();
-    }
-
-    if (hasFine) {
-      coar2fineRedist->redistribute(*a_phi[lvl + 1], interv);
-      coar2coarRedist->redistribute(*a_phi[lvl], interv);
-
-      coar2fineRedist->setToZero();
-      coar2coarRedist->setToZero();
-    }
+    particleMesh.deposit<Photon, &Photon::weight>(photons, output, DepositionType::NGP, true);
   }
 }
 
@@ -1657,39 +1582,64 @@ McPhoto::countOutcast(const AMRParticles<Photon>& a_photons) const
 }
 
 void
-McPhoto::writePlotData(EBAMRCellData& a_output, int& a_comp)
+McPhoto::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
 {
-  CH_TIME("McPhoto::writePlotData");
+  CH_TIMERS("McPhoto::writePlotData");
+  CH_TIMER("McPhoto::writePlotData::mesh_data", t1);
+  CH_TIMER("McPhoto::writePlotData::particle_data", t2);
   if (m_verbosity > 5) {
     pout() << m_name + "::writePlotData" << endl;
   }
 
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
+  CH_START(t1);
   if (m_plotPhi) {
-    this->writeData(a_output, a_comp, m_phi, false);
+    this->writeData(a_output, a_comp, m_phi, a_level, false, true);
   }
   if (m_plotSource) {
-    this->writeData(a_output, a_comp, m_source, false);
+    this->writeData(a_output, a_comp, m_source, a_level, false, true);
   }
+  CH_STOP(t1);
+
+  CH_START(t2);
   if (m_plotPhotons) {
-    this->depositPhotons(m_scratch, m_photons, m_plotDeposition);
-    this->writeData(a_output, a_comp, m_scratch, false);
+    this->depositPhotonsNGP(*m_scratch[a_level], m_photons, a_level);
+
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
   if (m_plotBulkPhotons) {
-    this->depositPhotons(m_scratch, m_bulkPhotons, m_plotDeposition);
-    this->writeData(a_output, a_comp, m_scratch, false);
+    this->depositPhotonsNGP(*m_scratch[a_level], m_bulkPhotons, a_level);
+
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
   if (m_plotEBPhotons) {
-    this->depositPhotons(m_scratch, m_ebPhotons, m_plotDeposition);
-    this->writeData(a_output, a_comp, m_scratch, false);
+    this->depositPhotonsNGP(*m_scratch[a_level], m_ebPhotons, a_level);
+
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
   if (m_plotDomainPhotons) {
-    this->depositPhotons(m_scratch, m_domainPhotons, m_plotDeposition);
-    this->writeData(a_output, a_comp, m_scratch, false);
+    this->depositPhotonsNGP(*m_scratch[a_level], m_domainPhotons, a_level);
+
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
   if (m_plotSourcePhotons) {
-    this->depositPhotons(m_scratch, m_sourcePhotons, m_plotDeposition);
-    this->writeData(a_output, a_comp, m_scratch, false);
+    this->depositPhotonsNGP(*m_scratch[a_level], m_sourcePhotons, a_level);
+
+    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+
+    a_comp++;
   }
+  CH_STOP(t2);
 }
 
 ParticleContainer<Photon>&

@@ -103,28 +103,6 @@ namespace Physics {
       postRegrid() override;
 
       /*!
-	@brief For regridding internal storage. Does nothing. 
-	@param[in] a_lmin           The coarsest level that changed. 
-	@param[in] a_oldFinestLevel The finest level before the regrid. 
-	@param[in] a_newFinestLevel The finest level after the regrid. 
-      */
-      void
-      regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
-
-      /*!
-	@brief Allocate internal storage.
-	@details This will set up the memory for handling all the various advances. 
-      */
-      void
-      allocateInternals() override;
-
-      /*!
-	@brief Deallocate transient memory
-      */
-      void
-      deallocateInternals() override;
-
-      /*!
 	@brief Compute the time step -- this will be different for the different supported algorithms. 
       */
       Real
@@ -299,6 +277,42 @@ namespace Physics {
       */
       RefCountedPtr<RtStorage>&
       getRtStorage(const RtIterator<RtSolver>& a_solverIt);
+
+      /*!
+	@brief For regridding internal storage. Does nothing. 
+	@param[in] a_lmin           The coarsest level that changed. 
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_newFinestLevel The finest level after the regrid. 
+      */
+      void
+      regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+
+      /*!
+	@brief Allocate internal storage.
+	@details This will set up extra memory needed in the semi-implicit coupling. 
+      */
+      void
+      allocateInternals() override;
+
+      /*!
+	@brief Allocate internal storage.
+	@details Set up some scratch storage needed in the time advancement algorithms.
+      */
+      void
+      allocateScratch();
+
+      /*!
+	@brief Deallocate transient memory
+      */
+      void
+      deallocateInternals() override;
+
+      /*!
+	@brief Allocate internal storage.
+	@details Set up some scratch storage needed in the algorithms
+      */
+      void
+      deallocateScratch();
 
       /*!
 	@brief Compute electric field into scratch storage.
