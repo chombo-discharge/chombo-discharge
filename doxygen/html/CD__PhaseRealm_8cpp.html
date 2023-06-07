@@ -81,16 +81,15 @@ $(function() {
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;EBArith.H&gt;</code><br />
 <code>#include &lt;ParmParse.H&gt;</code><br />
+<code>#include &lt;BaseIVFactory.H&gt;</code><br />
+<code>#include &lt;EBCellFactory.H&gt;</code><br />
+<code>#include &lt;EBFluxFactory.H&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__PhaseRealm_8H_source.html">CD_PhaseRealm.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__Timer_8H_source.html">CD_Timer.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__LoadBalancing_8H_source.html">CD_LoadBalancing.H</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="CD__EbFastFineToCoarRedist_8H_source.html">CD_EbFastFineToCoarRedist.H</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="CD__EbFastCoarToFineRedist_8H_source.html">CD_EbFastCoarToFineRedist.H</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="CD__EbFastCoarToCoarRedist_8H_source.html">CD_EbFastCoarToCoarRedist.H</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="CD__EbFastFluxRegister_8H_source.html">CD_EbFastFluxRegister.H</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="CD__EBMultigridInterpolator_8H_source.html">CD_EBMultigridInterpolator.H</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="CD__BoxLoops_8H_source.html">CD_BoxLoops.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__EBLeastSquaresMultigridInterpolator_8H_source.html">CD_EBLeastSquaresMultigridInterpolator.H</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__MemoryReport_8H_source.html">CD_MemoryReport.H</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__BoxLoops_8H_source.html">CD_BoxLoops.H</a>&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
@@ -98,56 +97,56 @@ Include dependency graph for CD_PhaseRealm.cpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__PhaseRealm_8cpp__incl.png" border="0" usemap="#aSource_2AmrMesh_2CD__PhaseRealm_8cpp" alt=""/></div>
 <map name="aSource_2AmrMesh_2CD__PhaseRealm_8cpp" id="aSource_2AmrMesh_2CD__PhaseRealm_8cpp">
-<area shape="rect" title="Implementation of CD_PhaseRealm.H." alt="" coords="3524,5,3795,32"/>
-<area shape="rect" title=" " alt="" coords="5,87,89,114"/>
-<area shape="rect" title=" " alt="" coords="114,87,218,114"/>
-<area shape="rect" href="CD__PhaseRealm_8H.html" title="Declaration of the PhaseRealm class." alt="" coords="2396,87,2539,114"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2589,333,2775,360"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="3058,333,3237,360"/>
-<area shape="rect" href="CD__LoadBalancing_8H.html" title="Declaration of a static class for various load balancing operations." alt="" coords="3839,169,3997,196"/>
-<area shape="rect" href="CD__EBMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="444,169,656,196"/>
-<area shape="rect" href="CD__EbFastFluxRegister_8H.html" title="Declaration of a new EBFluxRegister that uses some optimization." alt="" coords="3480,169,3665,196"/>
-<area shape="rect" href="CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="4973,169,5071,196"/>
-<area shape="rect" href="CD__EbFastFineToCoarRedist_8H.html" title="New EBFineToCoarRedist class with faster define function." alt="" coords="4023,87,4239,114"/>
-<area shape="rect" href="CD__EbFastCoarToFineRedist_8H.html" title="New EBCoarToFineRedist with much faster define functions." alt="" coords="4291,87,4507,114"/>
-<area shape="rect" href="CD__EbFastCoarToCoarRedist_8H.html" title="New EBFineToCoarRedist class with faster define function." alt="" coords="4587,87,4806,114"/>
-<area shape="rect" href="CD__BoxLoops_8H.html" title="Declaration of a namespace for proto&#45;typing grid and EB loops." alt="" coords="3690,169,3815,196"/>
-<area shape="rect" href="CD__EBLeastSquaresMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="1277,80,1487,121"/>
-<area shape="rect" title=" " alt="" coords="447,333,602,360"/>
-<area shape="rect" title=" " alt="" coords="2555,169,2715,196"/>
-<area shape="rect" href="CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="1649,169,1782,196"/>
-<area shape="rect" title=" " alt="" coords="3632,251,3767,278"/>
-<area shape="rect" title=" " alt="" coords="2740,169,2869,196"/>
-<area shape="rect" title=" " alt="" coords="4210,169,4375,196"/>
-<area shape="rect" title=" " alt="" coords="2893,169,3007,196"/>
-<area shape="rect" title=" " alt="" coords="4450,169,4618,196"/>
-<area shape="rect" title=" " alt="" coords="4021,169,4186,196"/>
-<area shape="rect" title=" " alt="" coords="1871,251,2018,278"/>
-<area shape="rect" title=" " alt="" coords="794,333,935,360"/>
-<area shape="rect" href="CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="3082,169,3303,196"/>
-<area shape="rect" href="CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="3354,251,3557,278"/>
-<area shape="rect" href="CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="3066,251,3229,278"/>
-<area shape="rect" href="CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="2235,169,2379,196"/>
-<area shape="rect" href="CD__DomainFluxIFFAB_8H.html" title="Declaration of a BaseIFFAB wrapper that holds domain fluxes." alt="" coords="776,251,953,278"/>
-<area shape="rect" href="CD__DomainFluxIFFABFactory_8H.html" title="Declaration of factory class for DomainFluxIFFAB." alt="" coords="680,169,903,196"/>
-<area shape="rect" href="CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="1080,251,1252,278"/>
-<area shape="rect" href="CD__EBGradient_8H.html" title="Declaration of a class which computes gradients in an EBAMR context." alt="" coords="2025,169,2160,196"/>
-<area shape="rect" href="CD__EBAMRParticleMesh_8H.html" title="Declaration of a class for handling particle&#45;mesh operations with AMR." alt="" coords="1129,169,1321,196"/>
-<area shape="rect" href="CD__EBAMRSurfaceDeposition_8H.html" title="Declaration of a class for handling surface deposition of particles with EB and AMR." alt="" coords="1345,169,1573,196"/>
-<area shape="rect" href="CD__EBFineInterp_8H.html" title="Declaration of an aggregated class for regrid operations." alt="" coords="1806,169,1950,196"/>
-<area shape="rect" href="CD__NonConservativeDivergenceStencil_8H.html" title="Implementation of IrregStencil that can perform the nonconservative divergence averaging." alt="" coords="2807,244,3042,285"/>
-<area shape="rect" href="CD__EbCentroidInterpolationStencil_8H.html" title="Declaration of IrregStencil&#45;derived class that can from cell centers to embedded boundary centroids." alt="" coords="2581,244,2783,285"/>
-<area shape="rect" href="CD__CentroidInterpolationStencil_8H.html" title="Implementation of IrregStencil that interpolates from cell centers to cell centroids." alt="" coords="2370,244,2557,285"/>
-<area shape="rect" title=" " alt="" coords="1530,251,1645,278"/>
-<area shape="rect" title=" " alt="" coords="3791,251,3853,278"/>
-<area shape="rect" href="CD__BoxSorting_8H.html" title="Declaration of an enum for identifying various ways of sorting grid patches." alt="" coords="4181,251,4314,278"/>
-<area shape="rect" href="CD__LoadBalancingImplem_8H.html" title=" " alt="" coords="4389,251,4596,278"/>
-<area shape="rect" title=" " alt="" coords="4918,333,4985,360"/>
-<area shape="rect" title=" " alt="" coords="2143,251,2194,278"/>
-<area shape="rect" title=" " alt="" coords="445,251,548,278"/>
-<area shape="rect" title=" " alt="" coords="5173,251,5228,278"/>
-<area shape="rect" title=" " alt="" coords="5253,251,5322,278"/>
-<area shape="rect" href="CD__TimerImplem_8H.html" title="Implementation of CD_Timer.H." alt="" coords="4947,251,5097,278"/>
+<area shape="rect" title="Implementation of CD_PhaseRealm.H." alt="" coords="2498,5,2769,32"/>
+<area shape="rect" title=" " alt="" coords="1882,80,1966,107"/>
+<area shape="rect" title=" " alt="" coords="1991,80,2095,107"/>
+<area shape="rect" title=" " alt="" coords="2119,80,2246,107"/>
+<area shape="rect" title=" " alt="" coords="2271,80,2393,107"/>
+<area shape="rect" title=" " alt="" coords="2418,80,2545,107"/>
+<area shape="rect" href="CD__PhaseRealm_8H.html" title="Declaration of the PhaseRealm class." alt="" coords="2671,80,2814,107"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="3238,333,3423,360"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="2587,333,2765,360"/>
+<area shape="rect" href="CD__LoadBalancing_8H.html" title="Declaration of a static class for various load balancing operations." alt="" coords="3927,162,4084,189"/>
+<area shape="rect" href="CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="4660,162,4759,189"/>
+<area shape="rect" href="CD__EBLeastSquaresMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="620,155,831,196"/>
+<area shape="rect" href="CD__MemoryReport_8H.html" title="Headers for utility functions that report memory usage." alt="" coords="5686,162,5845,189"/>
+<area shape="rect" href="CD__BoxLoops_8H.html" title="Declaration of a namespace for proto&#45;typing grid and EB loops." alt="" coords="5535,162,5660,189"/>
+<area shape="rect" title=" " alt="" coords="987,333,1141,360"/>
+<area shape="rect" title=" " alt="" coords="5247,333,5388,360"/>
+<area shape="rect" href="CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="4287,162,4508,189"/>
+<area shape="rect" href="CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="3713,251,3916,278"/>
+<area shape="rect" href="CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="3249,251,3412,278"/>
+<area shape="rect" href="CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="2241,162,2385,189"/>
+<area shape="rect" href="CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="996,162,1129,189"/>
+<area shape="rect" href="CD__EBReflux_8H.html" title="Declaration of a class which can reflux over the coarse&#45;fine interface." alt="" coords="1855,162,1975,189"/>
+<area shape="rect" href="CD__DomainFluxIFFAB_8H.html" title="Declaration of a BaseIFFAB wrapper that holds domain fluxes." alt="" coords="5229,251,5406,278"/>
+<area shape="rect" href="CD__DomainFluxIFFABFactory_8H.html" title="Declaration of factory class for DomainFluxIFFAB." alt="" coords="5221,162,5443,189"/>
+<area shape="rect" href="CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="2794,251,2966,278"/>
+<area shape="rect" href="CD__EBMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="45,251,257,278"/>
+<area shape="rect" href="CD__EBGradient_8H.html" title="Declaration of a class which computes gradients in an EBAMR context." alt="" coords="1154,162,1289,189"/>
+<area shape="rect" href="CD__EBRedistribution_8H.html" title="Declaration of a class which can perform redistribution in an EB&#45;AMR context." alt="" coords="1564,251,1735,278"/>
+<area shape="rect" href="CD__EBAMRParticleMesh_8H.html" title="Declaration of a class for handling particle&#45;mesh operations with AMR." alt="" coords="2713,162,2905,189"/>
+<area shape="rect" href="CD__EBAMRSurfaceDeposition_8H.html" title="Declaration of a class for handling surface deposition of particles with EB and AMR." alt="" coords="2410,162,2638,189"/>
+<area shape="rect" href="CD__EBCoarseToFineInterp_8H.html" title="Declaration of an aggregated class for regrid operations." alt="" coords="1337,251,1540,278"/>
+<area shape="rect" href="CD__EBGhostCellInterpolator_8H.html" title="Declaration of a class which interpolates ghost cells across the coarse&#45;fine interface." alt="" coords="1999,162,2217,189"/>
+<area shape="rect" href="CD__NonConservativeDivergenceStencil_8H.html" title="Implementation of IrregStencil that can perform the nonconservative divergence averaging." alt="" coords="2991,244,3225,285"/>
+<area shape="rect" href="CD__EbCentroidInterpolationStencil_8H.html" title="Declaration of IrregStencil&#45;derived class that can from cell centers to embedded boundary centroids." alt="" coords="3436,244,3639,285"/>
+<area shape="rect" href="CD__CentroidInterpolationStencil_8H.html" title="Implementation of IrregStencil that interpolates from cell centers to cell centroids." alt="" coords="2583,244,2769,285"/>
+<area shape="rect" title=" " alt="" coords="5041,251,5103,278"/>
+<area shape="rect" href="CD__BoxSorting_8H.html" title="Declaration of an enum for identifying various ways of sorting grid patches." alt="" coords="3991,251,4124,278"/>
+<area shape="rect" href="CD__LoadBalancingImplem_8H.html" title=" " alt="" coords="4199,251,4406,278"/>
+<area shape="rect" title=" " alt="" coords="4688,333,4755,360"/>
+<area shape="rect" title=" " alt="" coords="2153,251,2204,278"/>
+<area shape="rect" title=" " alt="" coords="720,333,835,360"/>
+<area shape="rect" title=" " alt="" coords="533,251,638,278"/>
+<area shape="rect" title=" " alt="" coords="5727,251,5803,278"/>
+<area shape="rect" href="CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="1759,251,1876,278"/>
+<area shape="rect" title=" " alt="" coords="4911,251,4966,278"/>
+<area shape="rect" title=" " alt="" coords="5532,251,5601,278"/>
+<area shape="rect" href="CD__TimerImplem_8H.html" title="Implementation of CD_Timer.H." alt="" coords="4634,251,4785,278"/>
+<area shape="rect" title=" " alt="" coords="281,251,407,278"/>
+<area shape="rect" href="CD__CoarseInterpQuadCF_8H.html" title="Supporting class for doing the coarse&#45;side interpolation for multigrid." alt="" coords="967,251,1161,278"/>
+<area shape="rect" title=" " alt="" coords="5827,251,5930,278"/>
 </map>
 </div>
 </div><a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>

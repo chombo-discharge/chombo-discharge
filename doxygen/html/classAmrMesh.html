@@ -228,6 +228,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a97a408d2381f605f562b01a7de04ef2c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a97a408d2381f605f562b01a7de04ef2c">allocate</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_nComp, const int a_nGhost=-1) const</td></tr>
 <tr class="memdesc:a97a408d2381f605f562b01a7de04ef2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate a data holder over a specific realm.  <a href="classAmrMesh.html#a97a408d2381f605f562b01a7de04ef2c">More...</a><br /></td></tr>
 <tr class="separator:a97a408d2381f605f562b01a7de04ef2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6eda2721c69cdd09b48dd604ede5a769"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a6eda2721c69cdd09b48dd604ede5a769">allocate</a> (LevelData&lt; EBCellFAB &gt; &amp;a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_level, const int a_nComp, const int a_nGhost=-1) const</td></tr>
+<tr class="memdesc:a6eda2721c69cdd09b48dd604ede5a769"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate data on specific level.  <a href="classAmrMesh.html#a6eda2721c69cdd09b48dd604ede5a769">More...</a><br /></td></tr>
+<tr class="separator:a6eda2721c69cdd09b48dd604ede5a769"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8000cf94e2d87a651cf49c7e853ce6f4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a8000cf94e2d87a651cf49c7e853ce6f4">allocate</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_nComp, const int a_nGhost=-1) const</td></tr>
 <tr class="memdesc:a8000cf94e2d87a651cf49c7e853ce6f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate a data holder over a specific realm.  <a href="classAmrMesh.html#a8000cf94e2d87a651cf49c7e853ce6f4">More...</a><br /></td></tr>
 <tr class="separator:a8000cf94e2d87a651cf49c7e853ce6f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -434,15 +437,15 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a187f9807eae7f2c90a6b0ac1c32f8cb1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a187f9807eae7f2c90a6b0ac1c32f8cb1">interpGhostMG</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a187f9807eae7f2c90a6b0ac1c32f8cb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate ghost cells over a realm and phase.  <a href="classAmrMesh.html#a187f9807eae7f2c90a6b0ac1c32f8cb1">More...</a><br /></td></tr>
 <tr class="separator:a187f9807eae7f2c90a6b0ac1c32f8cb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a27ced532eeaca03e97e064b0a6cf3bc1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a27ced532eeaca03e97e064b0a6cf3bc1">interpToNewGrids</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_newData, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_oldData, const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel, const bool a_useSlopes)</td></tr>
-<tr class="memdesc:a27ced532eeaca03e97e064b0a6cf3bc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate data to new grids.  <a href="classAmrMesh.html#a27ced532eeaca03e97e064b0a6cf3bc1">More...</a><br /></td></tr>
-<tr class="separator:a27ced532eeaca03e97e064b0a6cf3bc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d58d2eac35c0c39372e209dd8a1951c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a8d58d2eac35c0c39372e209dd8a1951c">interpToNewGrids</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_newData, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_oldData, const phase::which_phase a_phase, const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel, const bool a_useSlopes)</td></tr>
-<tr class="memdesc:a8d58d2eac35c0c39372e209dd8a1951c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate data to new grids.  <a href="classAmrMesh.html#a8d58d2eac35c0c39372e209dd8a1951c">More...</a><br /></td></tr>
-<tr class="separator:a8d58d2eac35c0c39372e209dd8a1951c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeab6792375474b61a99bd36203fd3de3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aeab6792375474b61a99bd36203fd3de3">interpToNewGrids</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_newData, const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_oldData, const phase::which_phase a_phase, const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel, const bool a_conservative)</td></tr>
-<tr class="memdesc:aeab6792375474b61a99bd36203fd3de3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate data to new grids.  <a href="classAmrMesh.html#aeab6792375474b61a99bd36203fd3de3">More...</a><br /></td></tr>
-<tr class="separator:aeab6792375474b61a99bd36203fd3de3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb8c62ee3fbc0bac33784f1abf312816"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#adb8c62ee3fbc0bac33784f1abf312816">interpToNewGrids</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_newData, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_oldData, const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel, const <a class="el" href="classEBCoarseToFineInterp.html#a7da81d645a467200cc6ad9b2667c1c08">EBCoarseToFineInterp::Type</a> a_type)</td></tr>
+<tr class="memdesc:adb8c62ee3fbc0bac33784f1abf312816"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate data to new grids.  <a href="classAmrMesh.html#adb8c62ee3fbc0bac33784f1abf312816">More...</a><br /></td></tr>
+<tr class="separator:adb8c62ee3fbc0bac33784f1abf312816"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a195914bb2a8bace5985d1960d6074100"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a195914bb2a8bace5985d1960d6074100">interpToNewGrids</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_newData, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_oldData, const phase::which_phase a_phase, const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel, const <a class="el" href="classEBCoarseToFineInterp.html#a7da81d645a467200cc6ad9b2667c1c08">EBCoarseToFineInterp::Type</a> a_type)</td></tr>
+<tr class="memdesc:a195914bb2a8bace5985d1960d6074100"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate data to new grids.  <a href="classAmrMesh.html#a195914bb2a8bace5985d1960d6074100">More...</a><br /></td></tr>
+<tr class="separator:a195914bb2a8bace5985d1960d6074100"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6fb81553cf7712d97c54615f69634f03"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a6fb81553cf7712d97c54615f69634f03">interpToNewGrids</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_newData, const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_oldData, const phase::which_phase a_phase, const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel, const <a class="el" href="classEBCoarseToFineInterp.html#a7da81d645a467200cc6ad9b2667c1c08">EBCoarseToFineInterp::Type</a> a_type)</td></tr>
+<tr class="memdesc:a6fb81553cf7712d97c54615f69634f03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate data to new grids.  <a href="classAmrMesh.html#a6fb81553cf7712d97c54615f69634f03">More...</a><br /></td></tr>
+<tr class="separator:a6fb81553cf7712d97c54615f69634f03"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a33518b8e6bc4daf6ce94d33d5905c357"><td class="memTemplParams" colspan="2">template&lt;class P &gt; </td></tr>
 <tr class="memitem:a33518b8e6bc4daf6ce94d33d5905c357"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a33518b8e6bc4daf6ce94d33d5905c357">remapToNewGrids</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const int a_lmin, const int a_newFinestLevel) const noexcept</td></tr>
 <tr class="memdesc:a33518b8e6bc4daf6ce94d33d5905c357"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid particle to new grids.  <a href="classAmrMesh.html#a33518b8e6bc4daf6ce94d33d5905c357">More...</a><br /></td></tr>
@@ -450,12 +453,19 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a58008f166bc2d7de06c4c24d879513fe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a58008f166bc2d7de06c4c24d879513fe">interpToCentroids</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a58008f166bc2d7de06c4c24d879513fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate data to centroids on realm and phase.  <a href="classAmrMesh.html#a58008f166bc2d7de06c4c24d879513fe">More...</a><br /></td></tr>
 <tr class="separator:a58008f166bc2d7de06c4c24d879513fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69e42a6fb2e20aae67933c15a2b5e604"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a69e42a6fb2e20aae67933c15a2b5e604">interpToCentroids</a> (LevelData&lt; EBCellFAB &gt; &amp;a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_level) const</td></tr>
+<tr class="memdesc:a69e42a6fb2e20aae67933c15a2b5e604"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate data to centroids.  <a href="classAmrMesh.html#a69e42a6fb2e20aae67933c15a2b5e604">More...</a><br /></td></tr>
+<tr class="separator:a69e42a6fb2e20aae67933c15a2b5e604"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a80a0ed99e2d6e6edf3fb65ad4b79d9a0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a80a0ed99e2d6e6edf3fb65ad4b79d9a0">setMultifluidIndexSpace</a> (const RefCountedPtr&lt; <a class="el" href="classMultiFluidIndexSpace.html">MultiFluidIndexSpace</a> &gt; &amp;a_multiFluidIndexSpace)</td></tr>
 <tr class="memdesc:a80a0ed99e2d6e6edf3fb65ad4b79d9a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets multifluid index space.  <a href="classAmrMesh.html#a80a0ed99e2d6e6edf3fb65ad4b79d9a0">More...</a><br /></td></tr>
 <tr class="separator:a80a0ed99e2d6e6edf3fb65ad4b79d9a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc74d0037dc972aea59860feeb54a6e3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#afc74d0037dc972aea59860feeb54a6e3">setBaseImplicitFunction</a> (const phase::which_phase a_phase, const RefCountedPtr&lt; BaseIF &gt; &amp;a_baseIF)</td></tr>
 <tr class="memdesc:afc74d0037dc972aea59860feeb54a6e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set implicit function for a specific phase. Need e.g. for level-sets.  <a href="classAmrMesh.html#afc74d0037dc972aea59860feeb54a6e3">More...</a><br /></td></tr>
 <tr class="separator:afc74d0037dc972aea59860feeb54a6e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace51b171107edeb5a8d901f8869a16ee"><td class="memItemLeft" align="right" valign="top"><a id="ace51b171107edeb5a8d901f8869a16ee"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ace51b171107edeb5a8d901f8869a16ee">preRegrid</a> ()</td></tr>
+<tr class="memdesc:ace51b171107edeb5a8d901f8869a16ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run pre-regrid operations. <br /></td></tr>
+<tr class="separator:ace51b171107edeb5a8d901f8869a16ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9a8897dc00f6ac738080aba2ec29ad7a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a9a8897dc00f6ac738080aba2ec29ad7a">regridAmr</a> (const Vector&lt; IntVectSet &gt; &amp;a_tags, const int a_lmin, const int a_hardcap=-1)</td></tr>
 <tr class="memdesc:a9a8897dc00f6ac738080aba2ec29ad7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid AMR. This versions generates the grids and Realms, but not the operator.  <a href="classAmrMesh.html#a9a8897dc00f6ac738080aba2ec29ad7a">More...</a><br /></td></tr>
 <tr class="separator:a9a8897dc00f6ac738080aba2ec29ad7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -565,6 +575,9 @@ const Vector&lt; ProblemDomain &gt; &amp;&#160;</td><td class="memItemRight" val
 <tr class="memitem:a6b1071a09cfc3ff93bd467ae8c63da08"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a6b1071a09cfc3ff93bd467ae8c63da08">getEBLevelGrid</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a6b1071a09cfc3ff93bd467ae8c63da08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the EBLevelGrid for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <a href="classAmrMesh.html#a6b1071a09cfc3ff93bd467ae8c63da08">More...</a><br /></td></tr>
 <tr class="separator:a6b1071a09cfc3ff93bd467ae8c63da08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff109a783f6987d82f9ca37349605fc7"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aff109a783f6987d82f9ca37349605fc7">getEBLevelGridCoFi</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:aff109a783f6987d82f9ca37349605fc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the coarsened fine EBLevelGrid for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <a href="classAmrMesh.html#aff109a783f6987d82f9ca37349605fc7">More...</a><br /></td></tr>
+<tr class="separator:aff109a783f6987d82f9ca37349605fc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8db2254121059379e82f6569b2c6641a"><td class="memItemLeft" align="right" valign="top">const Vector&lt; EBISLayout &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a8db2254121059379e82f6569b2c6641a">getEBISLayout</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a8db2254121059379e82f6569b2c6641a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get EBISLayouts for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <a href="classAmrMesh.html#a8db2254121059379e82f6569b2c6641a">More...</a><br /></td></tr>
 <tr class="separator:a8db2254121059379e82f6569b2c6641a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -574,9 +587,6 @@ const Vector&lt; ProblemDomain &gt; &amp;&#160;</td><td class="memItemRight" val
 <tr class="memitem:ae3a0d0f998de1a920a638a7b23c8056a"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; LayoutData&lt; VoFIterator &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ae3a0d0f998de1a920a638a7b23c8056a">getVofIterator</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:ae3a0d0f998de1a920a638a7b23c8056a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get vof iterators for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase. This has the capability of iterating through cut-cells.  <a href="classAmrMesh.html#ae3a0d0f998de1a920a638a7b23c8056a">More...</a><br /></td></tr>
 <tr class="separator:ae3a0d0f998de1a920a638a7b23c8056a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4abbe61fb38994322f510515d9ea3849"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; LayoutData&lt; Vector&lt; LayoutIndex &gt; &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a4abbe61fb38994322f510515d9ea3849">getNeighbors</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:a4abbe61fb38994322f510515d9ea3849"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get neighboring boxes.  <a href="classAmrMesh.html#a4abbe61fb38994322f510515d9ea3849">More...</a><br /></td></tr>
-<tr class="separator:a4abbe61fb38994322f510515d9ea3849"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6ae0a0c9ceba11621bc8f1ba1682824"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classEBAMRData.html">EBAMRFAB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#af6ae0a0c9ceba11621bc8f1ba1682824">getLevelset</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:af6ae0a0c9ceba11621bc8f1ba1682824"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get levelset function, allocated over a grid for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <a href="classAmrMesh.html#af6ae0a0c9ceba11621bc8f1ba1682824">More...</a><br /></td></tr>
 <tr class="separator:af6ae0a0c9ceba11621bc8f1ba1682824"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -593,27 +603,15 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve<
 <tr class="memitem:a28d1aa576ea1b98c23378f127212844e"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a28d1aa576ea1b98c23378f127212844e">getMultigridInterpolator</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a28d1aa576ea1b98c23378f127212844e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get multigrid interpolation utility.  <a href="classAmrMesh.html#a28d1aa576ea1b98c23378f127212844e">More...</a><br /></td></tr>
 <tr class="separator:a28d1aa576ea1b98c23378f127212844e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2947e26ae104dd0bf1476ac94638100a"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; AggEBPWLFillPatch &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a2947e26ae104dd0bf1476ac94638100a">getFillPatch</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:a2947e26ae104dd0bf1476ac94638100a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get piecewise linear ghost cell interpolator.  <a href="classAmrMesh.html#a2947e26ae104dd0bf1476ac94638100a">More...</a><br /></td></tr>
-<tr class="separator:a2947e26ae104dd0bf1476ac94638100a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4cbe95dc353cef3fe72aea2f83927e98"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFineInterp.html">EBFineInterp</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a4cbe95dc353cef3fe72aea2f83927e98">getFineInterp</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:a4cbe95dc353cef3fe72aea2f83927e98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get interpolator.  <a href="classAmrMesh.html#a4cbe95dc353cef3fe72aea2f83927e98">More...</a><br /></td></tr>
-<tr class="separator:a4cbe95dc353cef3fe72aea2f83927e98"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a04896ca8511ca4f17a1558d89683085d"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBFluxRegister &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a04896ca8511ca4f17a1558d89683085d">getFluxRegister</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:a04896ca8511ca4f17a1558d89683085d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flux register.  <a href="classAmrMesh.html#a04896ca8511ca4f17a1558d89683085d">More...</a><br /></td></tr>
-<tr class="separator:a04896ca8511ca4f17a1558d89683085d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0a15d1ab20a04a86618e7c45d001c6c5"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBLevelRedist &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a0a15d1ab20a04a86618e7c45d001c6c5">getLevelRedist</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:a0a15d1ab20a04a86618e7c45d001c6c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get redistribution.  <a href="classAmrMesh.html#a0a15d1ab20a04a86618e7c45d001c6c5">More...</a><br /></td></tr>
-<tr class="separator:a0a15d1ab20a04a86618e7c45d001c6c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7fe8f027bf253db4627512e378ef0a95"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBCoarToFineRedist &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a7fe8f027bf253db4627512e378ef0a95">getCoarToFineRedist</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:a7fe8f027bf253db4627512e378ef0a95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get coar-to-fine redistribution for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <a href="classAmrMesh.html#a7fe8f027bf253db4627512e378ef0a95">More...</a><br /></td></tr>
-<tr class="separator:a7fe8f027bf253db4627512e378ef0a95"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab2f69225d0b1c2b84e8f69bd0dd5c4d5"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBCoarToCoarRedist &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ab2f69225d0b1c2b84e8f69bd0dd5c4d5">getCoarToCoarRedist</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:ab2f69225d0b1c2b84e8f69bd0dd5c4d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get coar-to-coar redistribution objects.  <a href="classAmrMesh.html#ab2f69225d0b1c2b84e8f69bd0dd5c4d5">More...</a><br /></td></tr>
-<tr class="separator:ab2f69225d0b1c2b84e8f69bd0dd5c4d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4352f3a572ffe95357934042c5409ec5"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBFineToCoarRedist &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a4352f3a572ffe95357934042c5409ec5">getFineToCoarRedist</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:a4352f3a572ffe95357934042c5409ec5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get coar-to-coar redistribution redistribution objects.  <a href="classAmrMesh.html#a4352f3a572ffe95357934042c5409ec5">More...</a><br /></td></tr>
-<tr class="separator:a4352f3a572ffe95357934042c5409ec5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a568f8a5e5bd4d2778cf051ff28da380c"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarseToFineInterp.html">EBCoarseToFineInterp</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a568f8a5e5bd4d2778cf051ff28da380c">getFineInterp</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:a568f8a5e5bd4d2778cf051ff28da380c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get interpolator.  <a href="classAmrMesh.html#a568f8a5e5bd4d2778cf051ff28da380c">More...</a><br /></td></tr>
+<tr class="separator:a568f8a5e5bd4d2778cf051ff28da380c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dd953629079c965c72a6a6b742f507a"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBReflux.html">EBReflux</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a8dd953629079c965c72a6a6b742f507a">getFluxRegister</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:a8dd953629079c965c72a6a6b742f507a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flux register.  <a href="classAmrMesh.html#a8dd953629079c965c72a6a6b742f507a">More...</a><br /></td></tr>
+<tr class="separator:a8dd953629079c965c72a6a6b742f507a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35c78b954fe36e01edfa0d0260ba0b63"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBRedistribution.html">EBRedistribution</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a35c78b954fe36e01edfa0d0260ba0b63">getRedistributionOp</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:a35c78b954fe36e01edfa0d0260ba0b63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the redistribution operators.  <a href="classAmrMesh.html#a35c78b954fe36e01edfa0d0260ba0b63">More...</a><br /></td></tr>
+<tr class="separator:a35c78b954fe36e01edfa0d0260ba0b63"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8a85437e92d6b8493258d04c05d30db"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classIrregAmrStencil.html">IrregAmrStencil</a>&lt; <a class="el" href="classCentroidInterpolationStencil.html">CentroidInterpolationStencil</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ab8a85437e92d6b8493258d04c05d30db">getCentroidInterpolationStencils</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:ab8a85437e92d6b8493258d04c05d30db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get interpolation stencils for going from cell center to cell centroid.  <a href="classAmrMesh.html#ab8a85437e92d6b8493258d04c05d30db">More...</a><br /></td></tr>
 <tr class="separator:ab8a85437e92d6b8493258d04c05d30db"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -647,9 +645,9 @@ Protected Member Functions</h2></td></tr>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a82b28bf393e8ff6ed5cc544a48ea75ea">defineRealms</a> ()</td></tr>
 <tr class="memdesc:a82b28bf393e8ff6ed5cc544a48ea75ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define Realms. <br /></td></tr>
 <tr class="separator:a82b28bf393e8ff6ed5cc544a48ea75ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a338e3c1c4ba567f145e898a6c66a0ede"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a338e3c1c4ba567f145e898a6c66a0ede">buildGrids</a> (Vector&lt; IntVectSet &gt; &amp;a_tags, const int a_lmin, const int a_hardcap=-1)</td></tr>
-<tr class="memdesc:a338e3c1c4ba567f145e898a6c66a0ede"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build new internal AMR grids.  <a href="classAmrMesh.html#a338e3c1c4ba567f145e898a6c66a0ede">More...</a><br /></td></tr>
-<tr class="separator:a338e3c1c4ba567f145e898a6c66a0ede"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69e4f0db7383a8a926a9bcb59defb67e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a69e4f0db7383a8a926a9bcb59defb67e">buildGrids</a> (const Vector&lt; IntVectSet &gt; &amp;a_tags, const int a_lmin, const int a_hardcap=-1)</td></tr>
+<tr class="memdesc:a69e4f0db7383a8a926a9bcb59defb67e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build new internal AMR grids.  <a href="classAmrMesh.html#a69e4f0db7383a8a926a9bcb59defb67e">More...</a><br /></td></tr>
+<tr class="separator:a69e4f0db7383a8a926a9bcb59defb67e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad64b6dda8135d3f53ec299c945ad5b4b"><td class="memItemLeft" align="right" valign="top"><a id="ad64b6dda8135d3f53ec299c945ad5b4b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ad64b6dda8135d3f53ec299c945ad5b4b">parseProbLoHiCorners</a> ()</td></tr>
 <tr class="memdesc:ad64b6dda8135d3f53ec299c945ad5b4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the low/high corners of the computational domain. <br /></td></tr>
@@ -1385,7 +1383,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="af5c89795f369b846f251f1fec56c48a5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af5c89795f369b846f251f1fec56c48a5">&#9670;&nbsp;</a></span>allocate() <span class="overload">[1/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#af5c89795f369b846f251f1fec56c48a5">&#9670;&nbsp;</a></span>allocate() <span class="overload">[1/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1437,7 +1435,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a97a408d2381f605f562b01a7de04ef2c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a97a408d2381f605f562b01a7de04ef2c">&#9670;&nbsp;</a></span>allocate() <span class="overload">[2/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a97a408d2381f605f562b01a7de04ef2c">&#9670;&nbsp;</a></span>allocate() <span class="overload">[2/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1496,7 +1494,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a8000cf94e2d87a651cf49c7e853ce6f4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8000cf94e2d87a651cf49c7e853ce6f4">&#9670;&nbsp;</a></span>allocate() <span class="overload">[3/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a8000cf94e2d87a651cf49c7e853ce6f4">&#9670;&nbsp;</a></span>allocate() <span class="overload">[3/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1555,7 +1553,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a74ebef713ce593b19fe2ffbbba9ce2ea"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a74ebef713ce593b19fe2ffbbba9ce2ea">&#9670;&nbsp;</a></span>allocate() <span class="overload">[4/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a74ebef713ce593b19fe2ffbbba9ce2ea">&#9670;&nbsp;</a></span>allocate() <span class="overload">[4/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1613,7 +1611,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a4e05b28f775f47845a231661f708c963"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4e05b28f775f47845a231661f708c963">&#9670;&nbsp;</a></span>allocate() <span class="overload">[5/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e05b28f775f47845a231661f708c963">&#9670;&nbsp;</a></span>allocate() <span class="overload">[5/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1671,8 +1669,74 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
+<a id="a6eda2721c69cdd09b48dd604ede5a769"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6eda2721c69cdd09b48dd604ede5a769">&#9670;&nbsp;</a></span>allocate() <span class="overload">[6/11]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::allocate </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_nComp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_nGhost</em> = <code>-1</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Allocate data on specific level. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_data</td><td>Data holder to be allocated </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> of the name where the data will be allocated. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>AMR level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_nComp</td><td>Number of components in a_data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_nGhost</td><td>Number of ghost cells for a_data </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>If a_nGhost &lt; 0, this routine will use the default number of ghost cells. </dd></dl>
+
+</div>
+</div>
 <a id="a02342a1d423fc64ed7bd1d3f08fafae6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a02342a1d423fc64ed7bd1d3f08fafae6">&#9670;&nbsp;</a></span>allocate() <span class="overload">[6/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a02342a1d423fc64ed7bd1d3f08fafae6">&#9670;&nbsp;</a></span>allocate() <span class="overload">[7/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1724,7 +1788,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a6a666605ffc876316d34fe42318a13bb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6a666605ffc876316d34fe42318a13bb">&#9670;&nbsp;</a></span>allocate() <span class="overload">[7/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a666605ffc876316d34fe42318a13bb">&#9670;&nbsp;</a></span>allocate() <span class="overload">[8/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1776,7 +1840,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a5010f466f55bebc90afc212bd78e494c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5010f466f55bebc90afc212bd78e494c">&#9670;&nbsp;</a></span>allocate() <span class="overload">[8/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5010f466f55bebc90afc212bd78e494c">&#9670;&nbsp;</a></span>allocate() <span class="overload">[9/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1828,7 +1892,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a14f77ca80a54f034ec88ad6451677757"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a14f77ca80a54f034ec88ad6451677757">&#9670;&nbsp;</a></span>allocate() <span class="overload">[9/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a14f77ca80a54f034ec88ad6451677757">&#9670;&nbsp;</a></span>allocate() <span class="overload">[10/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1867,7 +1931,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="ad7fffb758e5b66b09bed3d194d99d94c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad7fffb758e5b66b09bed3d194d99d94c">&#9670;&nbsp;</a></span>allocate() <span class="overload">[10/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7fffb758e5b66b09bed3d194d99d94c">&#9670;&nbsp;</a></span>allocate() <span class="overload">[11/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2617,8 +2681,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a338e3c1c4ba567f145e898a6c66a0ede"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a338e3c1c4ba567f145e898a6c66a0ede">&#9670;&nbsp;</a></span>buildGrids()</h2>
+<a id="a69e4f0db7383a8a926a9bcb59defb67e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69e4f0db7383a8a926a9bcb59defb67e">&#9670;&nbsp;</a></span>buildGrids()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2629,7 +2693,7 @@ template&lt;typename T &gt; </div>
         <tr>
           <td class="memname">void AmrMesh::buildGrids </td>
           <td>(</td>
-          <td class="paramtype">Vector&lt; IntVectSet &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; IntVectSet &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_tags</em>, </td>
         </tr>
         <tr>
@@ -3783,80 +3847,6 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="ab2f69225d0b1c2b84e8f69bd0dd5c4d5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab2f69225d0b1c2b84e8f69bd0dd5c4d5">&#9670;&nbsp;</a></span>getCoarToCoarRedist()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; EBCoarToCoarRedist &gt; &gt; &amp; AmrMesh::getCoarToCoarRedist </td>
-          <td>(</td>
-          <td class="paramtype">const std::string&#160;</td>
-          <td class="paramname"><em>a_realm</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const phase::which_phase&#160;</td>
-          <td class="paramname"><em>a_phase</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get coar-to-coar redistribution objects. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a7fe8f027bf253db4627512e378ef0a95"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7fe8f027bf253db4627512e378ef0a95">&#9670;&nbsp;</a></span>getCoarToFineRedist()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; EBCoarToFineRedist &gt; &gt; &amp; AmrMesh::getCoarToFineRedist </td>
-          <td>(</td>
-          <td class="paramtype">const std::string&#160;</td>
-          <td class="paramname"><em>a_realm</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const phase::which_phase&#160;</td>
-          <td class="paramname"><em>a_phase</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get coar-to-fine redistribution for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a9e8721574be5dce546f43bc88f9ca9cd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9e8721574be5dce546f43bc88f9ca9cd">&#9670;&nbsp;</a></span>getEbCentroidInterpolationStencils()</h2>
 
@@ -4022,14 +4012,14 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="a2947e26ae104dd0bf1476ac94638100a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2947e26ae104dd0bf1476ac94638100a">&#9670;&nbsp;</a></span>getFillPatch()</h2>
+<a id="aff109a783f6987d82f9ca37349605fc7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff109a783f6987d82f9ca37349605fc7">&#9670;&nbsp;</a></span>getEBLevelGridCoFi()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; AggEBPWLFillPatch &gt; &gt; &amp; AmrMesh::getFillPatch </td>
+          <td class="memname">const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp; AmrMesh::getEBLevelGridCoFi </td>
           <td>(</td>
           <td class="paramtype">const std::string&#160;</td>
           <td class="paramname"><em>a_realm</em>, </td>
@@ -4048,7 +4038,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Get piecewise linear ghost cell interpolator. </p>
+<p>Get the coarsened fine EBLevelGrid for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
@@ -4059,14 +4049,14 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="a4cbe95dc353cef3fe72aea2f83927e98"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4cbe95dc353cef3fe72aea2f83927e98">&#9670;&nbsp;</a></span>getFineInterp()</h2>
+<a id="a568f8a5e5bd4d2778cf051ff28da380c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a568f8a5e5bd4d2778cf051ff28da380c">&#9670;&nbsp;</a></span>getFineInterp()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFineInterp.html">EBFineInterp</a> &gt; &gt; &amp; AmrMesh::getFineInterp </td>
+          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarseToFineInterp.html">EBCoarseToFineInterp</a> &gt; &gt; &amp; AmrMesh::getFineInterp </td>
           <td>(</td>
           <td class="paramtype">const std::string&#160;</td>
           <td class="paramname"><em>a_realm</em>, </td>
@@ -4096,51 +4086,14 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="a4352f3a572ffe95357934042c5409ec5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4352f3a572ffe95357934042c5409ec5">&#9670;&nbsp;</a></span>getFineToCoarRedist()</h2>
+<a id="a8dd953629079c965c72a6a6b742f507a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8dd953629079c965c72a6a6b742f507a">&#9670;&nbsp;</a></span>getFluxRegister()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; EBFineToCoarRedist &gt; &gt; &amp; AmrMesh::getFineToCoarRedist </td>
-          <td>(</td>
-          <td class="paramtype">const std::string&#160;</td>
-          <td class="paramname"><em>a_realm</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const phase::which_phase&#160;</td>
-          <td class="paramname"><em>a_phase</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get coar-to-coar redistribution redistribution objects. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a04896ca8511ca4f17a1558d89683085d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a04896ca8511ca4f17a1558d89683085d">&#9670;&nbsp;</a></span>getFluxRegister()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; EBFluxRegister &gt; &gt; &amp; AmrMesh::getFluxRegister </td>
+          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBReflux.html">EBReflux</a> &gt; &gt; &amp; AmrMesh::getFluxRegister </td>
           <td>(</td>
           <td class="paramtype">const std::string&#160;</td>
           <td class="paramname"><em>a_realm</em>, </td>
@@ -4160,43 +4113,6 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 </div><div class="memdoc">
 
 <p>Get flux register. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a0a15d1ab20a04a86618e7c45d001c6c5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0a15d1ab20a04a86618e7c45d001c6c5">&#9670;&nbsp;</a></span>getLevelRedist()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; EBLevelRedist &gt; &gt; &amp; AmrMesh::getLevelRedist </td>
-          <td>(</td>
-          <td class="paramtype">const std::string&#160;</td>
-          <td class="paramname"><em>a_realm</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const phase::which_phase&#160;</td>
-          <td class="paramname"><em>a_phase</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get redistribution. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
@@ -4351,43 +4267,6 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="a4abbe61fb38994322f510515d9ea3849"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4abbe61fb38994322f510515d9ea3849">&#9670;&nbsp;</a></span>getNeighbors()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const Vector&lt; RefCountedPtr&lt; LayoutData&lt; Vector&lt; LayoutIndex &gt; &gt; &gt; &gt; &amp; AmrMesh::getNeighbors </td>
-          <td>(</td>
-          <td class="paramtype">const std::string&#160;</td>
-          <td class="paramname"><em>a_realm</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const phase::which_phase&#160;</td>
-          <td class="paramname"><em>a_phase</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get neighboring boxes. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="aa71d4093fe3c996f104348eec16cf0bd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa71d4093fe3c996f104348eec16cf0bd">&#9670;&nbsp;</a></span>getNonConservativeDivergenceStencils()</h2>
 
@@ -4500,6 +4379,43 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 <p>Get the name of all Realms. </p>
 <dl class="section return"><dt>Returns</dt><dd>Names of all Realms </dd></dl>
+
+</div>
+</div>
+<a id="a35c78b954fe36e01edfa0d0260ba0b63"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35c78b954fe36e01edfa0d0260ba0b63">&#9670;&nbsp;</a></span>getRedistributionOp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBRedistribution.html">EBRedistribution</a> &gt; &gt; &amp; AmrMesh::getRedistributionOp </td>
+          <td>(</td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the redistribution operators. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -5335,7 +5251,7 @@ template&lt;class P , RealVect &amp;(P::*)() particleVectorField&gt; </div>
 </div>
 </div>
 <a id="a58008f166bc2d7de06c4c24d879513fe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a58008f166bc2d7de06c4c24d879513fe">&#9670;&nbsp;</a></span>interpToCentroids()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a58008f166bc2d7de06c4c24d879513fe">&#9670;&nbsp;</a></span>interpToCentroids() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5379,8 +5295,59 @@ template&lt;class P , RealVect &amp;(P::*)() particleVectorField&gt; </div>
 
 </div>
 </div>
-<a id="a8d58d2eac35c0c39372e209dd8a1951c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8d58d2eac35c0c39372e209dd8a1951c">&#9670;&nbsp;</a></span>interpToNewGrids() <span class="overload">[1/3]</span></h2>
+<a id="a69e42a6fb2e20aae67933c15a2b5e604"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69e42a6fb2e20aae67933c15a2b5e604">&#9670;&nbsp;</a></span>interpToCentroids() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::interpToCentroids </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Interpolate data to centroids. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be interpolated </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a195914bb2a8bace5985d1960d6074100"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a195914bb2a8bace5985d1960d6074100">&#9670;&nbsp;</a></span>interpToNewGrids() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5424,8 +5391,8 @@ template&lt;class P , RealVect &amp;(P::*)() particleVectorField&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const bool&#160;</td>
-          <td class="paramname"><em>a_useSlopes</em>&#160;</td>
+          <td class="paramtype">const <a class="el" href="classEBCoarseToFineInterp.html#a7da81d645a467200cc6ad9b2667c1c08">EBCoarseToFineInterp::Type</a>&#160;</td>
+          <td class="paramname"><em>a_type</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -5444,15 +5411,15 @@ template&lt;class P , RealVect &amp;(P::*)() particleVectorField&gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level that did not change (but distribution may have changed). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_oldFinestLevel</td><td>Previous finest level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_newFinestLevel</td><td>New finest level. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_useSlopes</td><td>If true, use slopes when regridding the data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_type</td><td>Interpolation type </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="aeab6792375474b61a99bd36203fd3de3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeab6792375474b61a99bd36203fd3de3">&#9670;&nbsp;</a></span>interpToNewGrids() <span class="overload">[2/3]</span></h2>
+<a id="a6fb81553cf7712d97c54615f69634f03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6fb81553cf7712d97c54615f69634f03">&#9670;&nbsp;</a></span>interpToNewGrids() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5496,8 +5463,8 @@ template&lt;class P , RealVect &amp;(P::*)() particleVectorField&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const bool&#160;</td>
-          <td class="paramname"><em>a_conservative</em>&#160;</td>
+          <td class="paramtype">const <a class="el" href="classEBCoarseToFineInterp.html#a7da81d645a467200cc6ad9b2667c1c08">EBCoarseToFineInterp::Type</a>&#160;</td>
+          <td class="paramname"><em>a_type</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -5516,15 +5483,15 @@ template&lt;class P , RealVect &amp;(P::*)() particleVectorField&gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level that did not change (but distribution may have changed). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_oldFinestLevel</td><td>Previous finest level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_newFinestLevel</td><td>New finest level. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_conservative</td><td>If true, do conservative regridding. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_type</td><td>Interpolation type </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a27ced532eeaca03e97e064b0a6cf3bc1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a27ced532eeaca03e97e064b0a6cf3bc1">&#9670;&nbsp;</a></span>interpToNewGrids() <span class="overload">[3/3]</span></h2>
+<a id="adb8c62ee3fbc0bac33784f1abf312816"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb8c62ee3fbc0bac33784f1abf312816">&#9670;&nbsp;</a></span>interpToNewGrids() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5562,8 +5529,8 @@ template&lt;class P , RealVect &amp;(P::*)() particleVectorField&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const bool&#160;</td>
-          <td class="paramname"><em>a_useSlopes</em>&#160;</td>
+          <td class="paramtype">const <a class="el" href="classEBCoarseToFineInterp.html#a7da81d645a467200cc6ad9b2667c1c08">EBCoarseToFineInterp::Type</a>&#160;</td>
+          <td class="paramname"><em>a_type</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -5581,7 +5548,7 @@ template&lt;class P , RealVect &amp;(P::*)() particleVectorField&gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level that did not change (but distribution may have changed). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_oldFinestLevel</td><td>Previous finest level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_newFinestLevel</td><td>New finest level. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_useSlopes</td><td>If true, use slopes when regridding the data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_type</td><td>Interpolation type </td></tr>
   </table>
   </dd>
 </dl>

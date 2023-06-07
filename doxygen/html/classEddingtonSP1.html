@@ -99,13 +99,13 @@ Collaboration diagram for EddingtonSP1:</div>
 <div class="dyncontent">
 <div class="center"><img src="classEddingtonSP1__coll__graph.png" border="0" usemap="#aEddingtonSP1_coll__map" alt="Collaboration graph"/></div>
 <map name="aEddingtonSP1_coll__map" id="aEddingtonSP1_coll__map">
-<area shape="rect" title="Radiative tranfer equation solver in the SP1 (diffusion) approximation." alt="" coords="1000,185,1111,212"/>
-<area shape="rect" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="735,185,812,212"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="362,134,546,175"/>
-<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,141,144,168"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="356,80,552,107"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="355,204,553,231"/>
-<area shape="rect" href="classEddingtonSP1DomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="684,309,863,336"/>
+<area shape="rect" title="Radiative tranfer equation solver in the SP1 (diffusion) approximation." alt="" coords="1000,156,1111,183"/>
+<area shape="rect" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="735,156,812,183"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="362,105,546,146"/>
+<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,112,144,139"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="356,51,552,77"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="355,175,553,201"/>
+<area shape="rect" href="classEddingtonSP1DomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="684,280,863,307"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -138,6 +138,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a5537f12b6f3c8990b4835edd4da1f470"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#a5537f12b6f3c8990b4835edd4da1f470">advance</a> (const Real a_dt, <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_source, const bool a_zeroPhi=false) override</td></tr>
 <tr class="memdesc:a5537f12b6f3c8990b4835edd4da1f470"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance RTE onto state a_phi.  <a href="classEddingtonSP1.html#a5537f12b6f3c8990b4835edd4da1f470">More...</a><br /></td></tr>
 <tr class="separator:a5537f12b6f3c8990b4835edd4da1f470"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2416891ee28eaaeae984d453c017d3e2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#a2416891ee28eaaeae984d453c017d3e2">advanceEuler</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_source, const Real a_dt, const bool a_zeroPhi) noexcept</td></tr>
+<tr class="memdesc:a2416891ee28eaaeae984d453c017d3e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance using the Euler rule.  <a href="classEddingtonSP1.html#a2416891ee28eaaeae984d453c017d3e2">More...</a><br /></td></tr>
+<tr class="separator:a2416891ee28eaaeae984d453c017d3e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:addae4ed3cdbec16a39677c8981dc315e"><td class="memItemLeft" align="right" valign="top"><a id="addae4ed3cdbec16a39677c8981dc315e"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#addae4ed3cdbec16a39677c8981dc315e">parseOptions</a> () override</td></tr>
 <tr class="memdesc:addae4ed3cdbec16a39677c8981dc315e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse class options. <br /></td></tr>
@@ -200,10 +203,6 @@ virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class=
 virtual const std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#accc0f190f552e16dbc89b408fde1d0f5">getRealm</a> () const</td></tr>
 <tr class="memdesc:accc0f190f552e16dbc89b408fde1d0f5 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the realm where the solver lives. <br /></td></tr>
 <tr class="separator:accc0f190f552e16dbc89b408fde1d0f5 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a804f78527ec2e9d5a1079e5d84b7a19b inherit pub_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top"><a id="a804f78527ec2e9d5a1079e5d84b7a19b"></a>
-virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a804f78527ec2e9d5a1079e5d84b7a19b">getPlotVariableNames</a> () const</td></tr>
-<tr class="memdesc:a804f78527ec2e9d5a1079e5d84b7a19b inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get output plot names. <br /></td></tr>
-<tr class="separator:a804f78527ec2e9d5a1079e5d84b7a19b inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afab22f65be49033a88f611ed0d98c8e3 inherit pub_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#afab22f65be49033a88f611ed0d98c8e3">advance</a> (const Real a_dt, const bool a_zeroPhi=false)</td></tr>
 <tr class="memdesc:afab22f65be49033a88f611ed0d98c8e3 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance equation one time step.  <a href="classRtSolver.html#afab22f65be49033a88f611ed0d98c8e3">More...</a><br /></td></tr>
 <tr class="separator:afab22f65be49033a88f611ed0d98c8e3 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -254,15 +253,16 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:ac4737b50759400092d1fb2e78c2f0451 inherit pub_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#ac4737b50759400092d1fb2e78c2f0451">setSource</a> (const std::function&lt; Real(const RealVect a_pos)&gt; a_source)</td></tr>
 <tr class="memdesc:ac4737b50759400092d1fb2e78c2f0451 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set source.  <a href="classRtSolver.html#ac4737b50759400092d1fb2e78c2f0451">More...</a><br /></td></tr>
 <tr class="separator:ac4737b50759400092d1fb2e78c2f0451 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a45f2b6248bc27e777d657e02aab12167 inherit pub_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a45f2b6248bc27e777d657e02aab12167">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp)</td></tr>
-<tr class="memdesc:a45f2b6248bc27e777d657e02aab12167 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write output data to a_output.  <a href="classRtSolver.html#a45f2b6248bc27e777d657e02aab12167">More...</a><br /></td></tr>
-<tr class="separator:a45f2b6248bc27e777d657e02aab12167 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8637ffaa5e61e4768ba6ea39358a1fed inherit pub_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a8637ffaa5e61e4768ba6ea39358a1fed">writeData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const bool a_interp)</td></tr>
-<tr class="memdesc:a8637ffaa5e61e4768ba6ea39358a1fed inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classRtSolver.html#a8637ffaa5e61e4768ba6ea39358a1fed">More...</a><br /></td></tr>
-<tr class="separator:a8637ffaa5e61e4768ba6ea39358a1fed inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a61ef9ae5ac5333f9c562d4496346c480 inherit pub_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a61ef9ae5ac5333f9c562d4496346c480">getNumberOfPlotVariables</a> () const</td></tr>
 <tr class="memdesc:a61ef9ae5ac5333f9c562d4496346c480 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of output fields.  <a href="classRtSolver.html#a61ef9ae5ac5333f9c562d4496346c480">More...</a><br /></td></tr>
 <tr class="separator:a61ef9ae5ac5333f9c562d4496346c480 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a804f78527ec2e9d5a1079e5d84b7a19b inherit pub_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top"><a id="a804f78527ec2e9d5a1079e5d84b7a19b"></a>
+virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a804f78527ec2e9d5a1079e5d84b7a19b">getPlotVariableNames</a> () const</td></tr>
+<tr class="memdesc:a804f78527ec2e9d5a1079e5d84b7a19b inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get output plot names. <br /></td></tr>
+<tr class="separator:a804f78527ec2e9d5a1079e5d84b7a19b inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5aacc3d3f53c04da92779869a873932 inherit pub_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#ad5aacc3d3f53c04da92779869a873932">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:ad5aacc3d3f53c04da92779869a873932 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write output data to a_output.  <a href="classRtSolver.html#ad5aacc3d3f53c04da92779869a873932">More...</a><br /></td></tr>
+<tr class="separator:ad5aacc3d3f53c04da92779869a873932 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ff3b079fde1768aa6f7b951020c0a63 inherit pub_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a0ff3b079fde1768aa6f7b951020c0a63">getTime</a> () const</td></tr>
 <tr class="memdesc:a0ff3b079fde1768aa6f7b951020c0a63 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current time.  <a href="classRtSolver.html#a0ff3b079fde1768aa6f7b951020c0a63">More...</a><br /></td></tr>
 <tr class="separator:a0ff3b079fde1768aa6f7b951020c0a63 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -339,14 +339,6 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:ad887836fde8b1fea9096215bf173166d"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classEddingtonSP1DomainBc.html#a8c622184b199c73eb53f0ca7efb27d88">EddingtonSP1DomainBc::BcType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#ad887836fde8b1fea9096215bf173166d">parseBcString</a> (const std::string a_str) const</td></tr>
 <tr class="memdesc:ad887836fde8b1fea9096215bf173166d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns BC type based on string.  <a href="classEddingtonSP1.html#ad887836fde8b1fea9096215bf173166d">More...</a><br /></td></tr>
 <tr class="separator:ad887836fde8b1fea9096215bf173166d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a13fb3eb0d02484a00a6d07e1f39814f9"><td class="memItemLeft" align="right" valign="top"><a id="a13fb3eb0d02484a00a6d07e1f39814f9"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#a13fb3eb0d02484a00a6d07e1f39814f9">setupTGA</a> ()</td></tr>
-<tr class="memdesc:a13fb3eb0d02484a00a6d07e1f39814f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up the TGA solver. <br /></td></tr>
-<tr class="separator:a13fb3eb0d02484a00a6d07e1f39814f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac0a92fb820f5054ea7605658a5aa00dc"><td class="memItemLeft" align="right" valign="top"><a id="ac0a92fb820f5054ea7605658a5aa00dc"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#ac0a92fb820f5054ea7605658a5aa00dc">setupEuler</a> ()</td></tr>
-<tr class="memdesc:ac0a92fb820f5054ea7605658a5aa00dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up the Euler solver. <br /></td></tr>
-<tr class="separator:ac0a92fb820f5054ea7605658a5aa00dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b06219fa086d2e713820d861ba03445"><td class="memItemLeft" align="right" valign="top"><a id="a8b06219fa086d2e713820d861ba03445"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#a8b06219fa086d2e713820d861ba03445">parseDomainBC</a> ()</td></tr>
 <tr class="memdesc:a8b06219fa086d2e713820d861ba03445"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse domain BC settings. <br /></td></tr>
@@ -392,6 +384,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a431f024c83df8b2b33c11e6a675a37e3">parseVerbosity</a> () noexcept</td></tr>
 <tr class="memdesc:a431f024c83df8b2b33c11e6a675a37e3 inherit pro_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse verbosity. <br /></td></tr>
 <tr class="separator:a431f024c83df8b2b33c11e6a675a37e3 inherit pro_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af08ea755a7bf62b54a17d00d29807356 inherit pro_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#af08ea755a7bf62b54a17d00d29807356">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
+<tr class="memdesc:af08ea755a7bf62b54a17d00d29807356 inherit pro_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classRtSolver.html#af08ea755a7bf62b54a17d00d29807356">More...</a><br /></td></tr>
+<tr class="separator:af08ea755a7bf62b54a17d00d29807356 inherit pro_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -407,10 +402,6 @@ Protected Attributes</h2></td></tr>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#a988d5c069af7acc6f001fb27e85d3d2e">m_isSolverSetup</a></td></tr>
 <tr class="memdesc:a988d5c069af7acc6f001fb27e85d3d2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Needs setup. <br /></td></tr>
 <tr class="separator:a988d5c069af7acc6f001fb27e85d3d2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae65c85d52cb2f063f4c80ad4800d70e6"><td class="memItemLeft" align="right" valign="top"><a id="ae65c85d52cb2f063f4c80ad4800d70e6"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#ae65c85d52cb2f063f4c80ad4800d70e6">m_useTGA</a></td></tr>
-<tr class="memdesc:ae65c85d52cb2f063f4c80ad4800d70e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use tga for transient solevs. <br /></td></tr>
-<tr class="separator:ae65c85d52cb2f063f4c80ad4800d70e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8c7064d6089e364345d1e55289da0654"><td class="memItemLeft" align="right" valign="top"><a id="a8c7064d6089e364345d1e55289da0654"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#a8c7064d6089e364345d1e55289da0654">m_kappaScale</a></td></tr>
 <tr class="memdesc:a8c7064d6089e364345d1e55289da0654"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use kappa scaling for source or not. <br /></td></tr>
@@ -489,14 +480,6 @@ BiCGStabSolver&lt; LevelData&lt; EBCellFAB &gt; &gt;&#160;</td><td class="memIte
 GMRESSolver&lt; LevelData&lt; EBCellFAB &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#a1c582880fc5cf89a251cb7b3fc28eb52">m_gmres</a></td></tr>
 <tr class="memdesc:a1c582880fc5cf89a251cb7b3fc28eb52"><td class="mdescLeft">&#160;</td><td class="mdescRight">GMRES solver. <br /></td></tr>
 <tr class="separator:a1c582880fc5cf89a251cb7b3fc28eb52"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a283a2f6b9039803e8dca80a7f4d66b0d"><td class="memItemLeft" align="right" valign="top"><a id="a283a2f6b9039803e8dca80a7f4d66b0d"></a>
-RefCountedPtr&lt; AMRTGA&lt; LevelData&lt; EBCellFAB &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#a283a2f6b9039803e8dca80a7f4d66b0d">m_tgaSolver</a></td></tr>
-<tr class="memdesc:a283a2f6b9039803e8dca80a7f4d66b0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">TGA solver. <br /></td></tr>
-<tr class="separator:a283a2f6b9039803e8dca80a7f4d66b0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aab6f3efdc84b19a176d6c753dbc2fb61"><td class="memItemLeft" align="right" valign="top"><a id="aab6f3efdc84b19a176d6c753dbc2fb61"></a>
-RefCountedPtr&lt; EBBackwardEuler &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#aab6f3efdc84b19a176d6c753dbc2fb61">m_eulerSolver</a></td></tr>
-<tr class="memdesc:aab6f3efdc84b19a176d6c753dbc2fb61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Euler solver. <br /></td></tr>
-<tr class="separator:aab6f3efdc84b19a176d6c753dbc2fb61"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1b1ed0fdf0f344ec5ab4bdbab3e0b155"><td class="memItemLeft" align="right" valign="top"><a id="a1b1ed0fdf0f344ec5ab4bdbab3e0b155"></a>
 RefCountedPtr&lt; <a class="el" href="classEBHelmholtzOpFactory.html">EBHelmholtzOpFactory</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#a1b1ed0fdf0f344ec5ab4bdbab3e0b155">m_helmholtzOpFactory</a></td></tr>
 <tr class="memdesc:a1b1ed0fdf0f344ec5ab4bdbab3e0b155"><td class="mdescLeft">&#160;</td><td class="mdescRight">Operator factory. <br /></td></tr>
@@ -513,14 +496,6 @@ EBSimpleSolver&#160;</td><td class="memItemRight" valign="bottom"><a class="el" 
 <a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#a13eb3cb444d123dff00e6b1c36d2d6d2">m_resid</a></td></tr>
 <tr class="memdesc:a13eb3cb444d123dff00e6b1c36d2d6d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multigrid residue. <br /></td></tr>
 <tr class="separator:a13eb3cb444d123dff00e6b1c36d2d6d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a604493c979747001cd38bc63bbeca5df"><td class="memItemLeft" align="right" valign="top"><a id="a604493c979747001cd38bc63bbeca5df"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#a604493c979747001cd38bc63bbeca5df">m_zero</a></td></tr>
-<tr class="memdesc:a604493c979747001cd38bc63bbeca5df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Always zero. <br /></td></tr>
-<tr class="separator:a604493c979747001cd38bc63bbeca5df"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4693d98d968c2eed3aef3a5eaa9a61e0"><td class="memItemLeft" align="right" valign="top"><a id="a4693d98d968c2eed3aef3a5eaa9a61e0"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#a4693d98d968c2eed3aef3a5eaa9a61e0">m_scaledSource</a></td></tr>
-<tr class="memdesc:a4693d98d968c2eed3aef3a5eaa9a61e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scaled source term. <br /></td></tr>
-<tr class="separator:a4693d98d968c2eed3aef3a5eaa9a61e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abea30f4e95d09fd5bf7b55c7dd67a5cb"><td class="memItemLeft" align="right" valign="top"><a id="abea30f4e95d09fd5bf7b55c7dd67a5cb"></a>
 <a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1.html#abea30f4e95d09fd5bf7b55c7dd67a5cb">m_helmAco</a></td></tr>
 <tr class="memdesc:abea30f4e95d09fd5bf7b55c7dd67a5cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">a-coefficient <br /></td></tr>
@@ -706,8 +681,68 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
   </table>
   </dd>
 </dl>
+<dl class="section note"><dt>Note</dt><dd>If you're not doing a stationary solve, this does a backward Euler solve. </dd></dl>
 
 <p>Implements <a class="el" href="classRtSolver.html#a55c549d050929d2a183add227e2811fe">RtSolver</a>.</p>
+
+</div>
+</div>
+<a id="a2416891ee28eaaeae984d453c017d3e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2416891ee28eaaeae984d453c017d3e2">&#9670;&nbsp;</a></span>advanceEuler()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EddingtonSP1::advanceEuler </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_phi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_dt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_zeroPhi</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Advance using the Euler rule. </p>
+<p>This implementation assumes that the incoming previous solution has not been weighted by the volume fraction, and that the incoming source term a_source HAS been weighted by the volume fraction. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_newPhi</td><td>On exit, contains solution at time t + dt. On entry, containes solution at tim et </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_source</td><td>Source term. Should be weighted by the volume fraction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_zeroPhi</td><td>Set phi to zero before multigrid solving </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

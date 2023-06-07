@@ -98,15 +98,15 @@ Collaboration diagram for FieldSolverMultigrid:</div>
 <div class="dyncontent">
 <div class="center"><img src="classFieldSolverMultigrid__coll__graph.png" border="0" usemap="#aFieldSolverMultigrid_coll__map" alt="Collaboration graph"/></div>
 <map name="aFieldSolverMultigrid_coll__map" id="aFieldSolverMultigrid_coll__map">
-<area shape="rect" title="Implementation of FieldSolver which uses multigrid." alt="" coords="939,52,1091,79"/>
-<area shape="rect" href="classFieldSolver.html" title="Base class for electrostatic solvers." alt="" coords="773,251,868,277"/>
-<area shape="rect" href="classElectrostaticDomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="379,396,549,423"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="372,79,556,121"/>
-<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,220,144,247"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="355,345,573,372"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="365,193,563,220"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="363,244,565,271"/>
-<area shape="rect" href="classElectrostaticEbBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="397,295,531,321"/>
+<area shape="rect" title="Implementation of FieldSolver which uses multigrid." alt="" coords="896,157,1048,184"/>
+<area shape="rect" href="classFieldSolver.html" title="Base class for electrostatic solvers." alt="" coords="752,157,847,184"/>
+<area shape="rect" href="classElectrostaticDomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="379,7,549,33"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="372,59,556,101"/>
+<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,163,144,189"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="355,129,573,156"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="365,188,563,215"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="363,253,565,280"/>
+<area shape="rect" href="classElectrostaticEbBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="397,307,531,333"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -154,6 +154,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a6d1b52f36ccb73d28d18756f12085716"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a6d1b52f36ccb73d28d18756f12085716">computeElectricField</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_E, const phase::which_phase a_phase, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_potential) const override</td></tr>
 <tr class="memdesc:a6d1b52f36ccb73d28d18756f12085716"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the face-centered electric field on a specific phase.  <a href="classFieldSolverMultigrid.html#a6d1b52f36ccb73d28d18756f12085716">More...</a><br /></td></tr>
 <tr class="separator:a6d1b52f36ccb73d28d18756f12085716"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5527b37ad1f660d7e22c42f543377ac9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a5527b37ad1f660d7e22c42f543377ac9">preRegrid</a> (const int a_lbase, const int a_oldFinestLevel)</td></tr>
+<tr class="memdesc:a5527b37ad1f660d7e22c42f543377ac9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache state before regridding.  <a href="classFieldSolverMultigrid.html#a5527b37ad1f660d7e22c42f543377ac9">More...</a><br /></td></tr>
+<tr class="separator:a5527b37ad1f660d7e22c42f543377ac9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad2ff25c7cdf35abd6d7c210d3e98fa05"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#ad2ff25c7cdf35abd6d7c210d3e98fa05">regrid</a> (const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override</td></tr>
 <tr class="memdesc:ad2ff25c7cdf35abd6d7c210d3e98fa05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid method.  <a href="classFieldSolverMultigrid.html#ad2ff25c7cdf35abd6d7c210d3e98fa05">More...</a><br /></td></tr>
 <tr class="separator:ad2ff25c7cdf35abd6d7c210d3e98fa05"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -161,10 +164,6 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a7e63d9f9dddb049fd27355f4133d9d48">registerOperators</a> () override</td></tr>
 <tr class="memdesc:a7e63d9f9dddb049fd27355f4133d9d48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers required operators for AMR for this class. <br /></td></tr>
 <tr class="separator:a7e63d9f9dddb049fd27355f4133d9d48"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ace0d457cee4716aa77ed4770b3901071"><td class="memItemLeft" align="right" valign="top"><a id="ace0d457cee4716aa77ed4770b3901071"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#ace0d457cee4716aa77ed4770b3901071">allocate</a> () override</td></tr>
-<tr class="memdesc:ace0d457cee4716aa77ed4770b3901071"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates internal storage. <br /></td></tr>
-<tr class="separator:ace0d457cee4716aa77ed4770b3901071"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2e28a48d4ce140b46dc2ebec38da88af"><td class="memItemLeft" align="right" valign="top"><a id="a2e28a48d4ce140b46dc2ebec38da88af"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a2e28a48d4ce140b46dc2ebec38da88af">setupSolver</a> () override</td></tr>
 <tr class="memdesc:a2e28a48d4ce140b46dc2ebec38da88af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up multigrid solver. <br /></td></tr>
@@ -205,9 +204,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:ab7dc8ec1c7cb543b5c8b465e8a1c7200 inherit pub_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ab7dc8ec1c7cb543b5c8b465e8a1c7200">computeElectricField</a> ()</td></tr>
 <tr class="memdesc:ab7dc8ec1c7cb543b5c8b465e8a1c7200 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the cell-centered electric field.  <a href="classFieldSolver.html#ab7dc8ec1c7cb543b5c8b465e8a1c7200">More...</a><br /></td></tr>
 <tr class="separator:ab7dc8ec1c7cb543b5c8b465e8a1c7200 inherit pub_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae194783b6c35a2f5c647bf9af6e7fefc inherit pub_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ae194783b6c35a2f5c647bf9af6e7fefc">preRegrid</a> (const int a_lbase, const int a_oldFinestLevel)</td></tr>
-<tr class="memdesc:ae194783b6c35a2f5c647bf9af6e7fefc inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache state before regridding.  <a href="classFieldSolver.html#ae194783b6c35a2f5c647bf9af6e7fefc">More...</a><br /></td></tr>
-<tr class="separator:ae194783b6c35a2f5c647bf9af6e7fefc inherit pub_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88261a81363faa8bc73a3579cf186f13 inherit pub_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top"><a id="a88261a81363faa8bc73a3579cf186f13"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a88261a81363faa8bc73a3579cf186f13">allocate</a> ()</td></tr>
+<tr class="memdesc:a88261a81363faa8bc73a3579cf186f13 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates internal storage for <a class="el" href="classFieldSolver.html" title="Base class for electrostatic solvers.">FieldSolver</a>. Derived classes may want to overwrite. <br /></td></tr>
+<tr class="separator:a88261a81363faa8bc73a3579cf186f13 inherit pub_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8791d9db454d7c84ecf65d44db8bcfe3 inherit pub_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a8791d9db454d7c84ecf65d44db8bcfe3">computeDisplacementField</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_displacementField, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_electricField)</td></tr>
 <tr class="memdesc:a8791d9db454d7c84ecf65d44db8bcfe3 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute displacement field from the electric field.  <a href="classFieldSolver.html#a8791d9db454d7c84ecf65d44db8bcfe3">More...</a><br /></td></tr>
 <tr class="separator:a8791d9db454d7c84ecf65d44db8bcfe3 inherit pub_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -237,9 +237,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a83d7523f112723ad7b036527589375b3 inherit pub_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a83d7523f112723ad7b036527589375b3">postCheckpoint</a> ()</td></tr>
 <tr class="memdesc:a83d7523f112723ad7b036527589375b3 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write checkpoint data for a level @paramo[out] a_handle HDF5 handle.  <a href="classFieldSolver.html#a83d7523f112723ad7b036527589375b3">More...</a><br /></td></tr>
 <tr class="separator:a83d7523f112723ad7b036527589375b3 inherit pub_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a52c0ac9548d87ba8684fe01f9e27c071 inherit pub_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a52c0ac9548d87ba8684fe01f9e27c071">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp, const bool a_forceNoInterp=false)</td></tr>
-<tr class="memdesc:a52c0ac9548d87ba8684fe01f9e27c071 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write output data to a_output.  <a href="classFieldSolver.html#a52c0ac9548d87ba8684fe01f9e27c071">More...</a><br /></td></tr>
-<tr class="separator:a52c0ac9548d87ba8684fe01f9e27c071 inherit pub_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5827e0db4fc45a44401041f6c84010b0 inherit pub_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a5827e0db4fc45a44401041f6c84010b0">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const int a_level, const bool a_forceNoInterp=false) const noexcept</td></tr>
+<tr class="memdesc:a5827e0db4fc45a44401041f6c84010b0 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write output data to a_output.  <a href="classFieldSolver.html#a5827e0db4fc45a44401041f6c84010b0">More...</a><br /></td></tr>
+<tr class="separator:a5827e0db4fc45a44401041f6c84010b0 inherit pub_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a68c536ce91b20aadb60afd29518e4109 inherit pub_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a68c536ce91b20aadb60afd29518e4109">writeMultifluidData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_data, const phase::which_phase a_phase, const int a_level, const bool a_interp) const noexcept</td></tr>
+<tr class="memdesc:a68c536ce91b20aadb60afd29518e4109 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write multifluid data to single-fluid data holders.  <a href="classFieldSolver.html#a68c536ce91b20aadb60afd29518e4109">More...</a><br /></td></tr>
+<tr class="separator:a68c536ce91b20aadb60afd29518e4109 inherit pub_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23561315186bb33eb58899a4fe545f90 inherit pub_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a23561315186bb33eb58899a4fe545f90">setRealm</a> (const std::string a_realm)</td></tr>
 <tr class="memdesc:a23561315186bb33eb58899a4fe545f90 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a>.  <a href="classFieldSolver.html#a23561315186bb33eb58899a4fe545f90">More...</a><br /></td></tr>
 <tr class="separator:a23561315186bb33eb58899a4fe545f90 inherit pub_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -320,9 +323,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a37f560df4bb28e832891a74893bd115c">getDataLocation</a> () const</td></tr>
 <tr class="memdesc:a37f560df4bb28e832891a74893bd115c inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get data location. <br /></td></tr>
 <tr class="separator:a37f560df4bb28e832891a74893bd115c inherit pub_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4a41799caf6e7027ba765b2a30839b59 inherit pub_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a4a41799caf6e7027ba765b2a30839b59">writeMultifluidData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_data, const phase::which_phase a_phase, const bool a_interp) const</td></tr>
-<tr class="memdesc:a4a41799caf6e7027ba765b2a30839b59 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write multifluid data to single-fluid data holders.  <a href="classFieldSolver.html#a4a41799caf6e7027ba765b2a30839b59">More...</a><br /></td></tr>
-<tr class="separator:a4a41799caf6e7027ba765b2a30839b59 inherit pub_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-types"></a>
 Protected Types</h2></td></tr>
@@ -408,9 +408,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a0f209367f32a6c4a8afa2b26b7cf681d inherit pro_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a0f209367f32a6c4a8afa2b26b7cf681d">setEbPermittivities</a> (BaseIVFAB&lt; Real &gt; &amp;a_perm, const Box &amp;a_cellBox, const EBISBox &amp;a_ebisbox, const RealVect &amp;a_origin, const Real &amp;a_dx)</td></tr>
 <tr class="memdesc:a0f209367f32a6c4a8afa2b26b7cf681d inherit pro_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set EB-centered permittivities.  <a href="classFieldSolver.html#a0f209367f32a6c4a8afa2b26b7cf681d">More...</a><br /></td></tr>
 <tr class="separator:a0f209367f32a6c4a8afa2b26b7cf681d inherit pro_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa78e7e79984fd55bf24d39b4773d989a inherit pro_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#aa78e7e79984fd55bf24d39b4773d989a">writeSurfaceData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_data)</td></tr>
-<tr class="memdesc:aa78e7e79984fd55bf24d39b4773d989a inherit pro_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write surface data to volume data holder.  <a href="classFieldSolver.html#aa78e7e79984fd55bf24d39b4773d989a">More...</a><br /></td></tr>
-<tr class="separator:aa78e7e79984fd55bf24d39b4773d989a inherit pro_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e719b8fd943ce745c34ee14b4d1b2e3 inherit pro_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a2e719b8fd943ce745c34ee14b4d1b2e3">writeSurfaceData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_data, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a2e719b8fd943ce745c34ee14b4d1b2e3 inherit pro_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write surface data to volume data holder.  <a href="classFieldSolver.html#a2e719b8fd943ce745c34ee14b4d1b2e3">More...</a><br /></td></tr>
+<tr class="separator:a2e719b8fd943ce745c34ee14b4d1b2e3 inherit pro_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a07d5385f7fc47518c1a89f42124e2385 inherit pro_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classElectrostaticDomainBc.html#a313bf6a5f5d16731a6b0349835ebb934">ElectrostaticDomainBc::BcType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a07d5385f7fc47518c1a89f42124e2385">parseBcString</a> (const std::string a_str) const</td></tr>
 <tr class="memdesc:a07d5385f7fc47518c1a89f42124e2385 inherit pro_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns BC type based on string.  <a href="classFieldSolver.html#a07d5385f7fc47518c1a89f42124e2385">More...</a><br /></td></tr>
 <tr class="separator:a07d5385f7fc47518c1a89f42124e2385 inherit pro_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -514,22 +514,10 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 RefCountedPtr&lt; <a class="el" href="classMFHelmholtzOpFactory.html">MFHelmholtzOpFactory</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a2ce15afa3bc59ba89341496c7dcf2c98">m_helmholtzOpFactory</a></td></tr>
 <tr class="memdesc:a2ce15afa3bc59ba89341496c7dcf2c98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multigrid operator factory. <br /></td></tr>
 <tr class="separator:a2ce15afa3bc59ba89341496c7dcf2c98"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af85b28138b431b717652a6b21c8bf687"><td class="memItemLeft" align="right" valign="top"><a id="af85b28138b431b717652a6b21c8bf687"></a>
-<a class="el" href="classEBAMRData.html">MFAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#af85b28138b431b717652a6b21c8bf687">m_zero</a></td></tr>
-<tr class="memdesc:af85b28138b431b717652a6b21c8bf687"><td class="mdescLeft">&#160;</td><td class="mdescRight">Zero. <br /></td></tr>
-<tr class="separator:af85b28138b431b717652a6b21c8bf687"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5d51837960b7904ec68f42235356ff01"><td class="memItemLeft" align="right" valign="top"><a id="a5d51837960b7904ec68f42235356ff01"></a>
-<a class="el" href="classEBAMRData.html">MFAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a5d51837960b7904ec68f42235356ff01">m_kappaRhoByEps0</a></td></tr>
-<tr class="memdesc:a5d51837960b7904ec68f42235356ff01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scaled soruce. <br /></td></tr>
-<tr class="separator:a5d51837960b7904ec68f42235356ff01"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5ac80f586f09b5cdd1f304360b173c33"><td class="memItemLeft" align="right" valign="top"><a id="a5ac80f586f09b5cdd1f304360b173c33"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a5ac80f586f09b5cdd1f304360b173c33">m_sigmaByEps0</a></td></tr>
-<tr class="memdesc:a5ac80f586f09b5cdd1f304360b173c33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sigma. <br /></td></tr>
-<tr class="separator:a5ac80f586f09b5cdd1f304360b173c33"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8a284b61df05da29ecb29b098fca9be1"><td class="memItemLeft" align="right" valign="top"><a id="a8a284b61df05da29ecb29b098fca9be1"></a>
-AMRMultiGrid&lt; LevelData&lt; MFCellFAB &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a8a284b61df05da29ecb29b098fca9be1">m_multigridSolver</a></td></tr>
-<tr class="memdesc:a8a284b61df05da29ecb29b098fca9be1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Geometric multigrid solver. <br /></td></tr>
-<tr class="separator:a8a284b61df05da29ecb29b098fca9be1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bc3c918d61aad66af9fd230fdf6212f"><td class="memItemLeft" align="right" valign="top"><a id="a1bc3c918d61aad66af9fd230fdf6212f"></a>
+RefCountedPtr&lt; AMRMultiGrid&lt; LevelData&lt; MFCellFAB &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a1bc3c918d61aad66af9fd230fdf6212f">m_multigridSolver</a></td></tr>
+<tr class="memdesc:a1bc3c918d61aad66af9fd230fdf6212f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Geometric multigrid solver. <br /></td></tr>
+<tr class="separator:a1bc3c918d61aad66af9fd230fdf6212f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4ac2e6d0c676e10fb543e74f2d074f4"><td class="memItemLeft" align="right" valign="top"><a id="ab4ac2e6d0c676e10fb543e74f2d074f4"></a>
 BiCGStabSolver&lt; LevelData&lt; MFCellFAB &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#ab4ac2e6d0c676e10fb543e74f2d074f4">m_bicgstab</a></td></tr>
 <tr class="memdesc:ab4ac2e6d0c676e10fb543e74f2d074f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conjugate gradient solver bottom MG level. <br /></td></tr>
@@ -1108,6 +1096,53 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a5527b37ad1f660d7e22c42f543377ac9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5527b37ad1f660d7e22c42f543377ac9">&#9670;&nbsp;</a></span>preRegrid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FieldSolverMultigrid::preRegrid </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_lbase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_oldFinestLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache state before regridding. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lbase</td><td>Coarsest level which changes during regrid. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_oldFinestLevel</td><td>Finest AMR level before regrid. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classFieldSolver.html#ae194783b6c35a2f5c647bf9af6e7fefc">FieldSolver</a>.</p>
 
 </div>
 </div>

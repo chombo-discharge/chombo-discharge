@@ -102,50 +102,58 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a12350349cfc0fcbe47f1e8bba6968ac1">EBGradient</a> (const <a class="el" href="classEBGradient.html">EBGradient</a> &amp;a_other)=delete</td></tr>
 <tr class="memdesc:a12350349cfc0fcbe47f1e8bba6968ac1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed copy constructor. <br /></td></tr>
 <tr class="separator:a12350349cfc0fcbe47f1e8bba6968ac1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a235935e41b02b4d957c3a97f304c139c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a235935e41b02b4d957c3a97f304c139c">EBGradient</a> (const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgFine, const Real a_dx, const int a_refRat, const int a_order, const int a_weighting=0)</td></tr>
-<tr class="memdesc:a235935e41b02b4d957c3a97f304c139c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor, assumes that there is a finer level.  <a href="classEBGradient.html#a235935e41b02b4d957c3a97f304c139c">More...</a><br /></td></tr>
-<tr class="separator:a235935e41b02b4d957c3a97f304c139c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a51a4d9ae8c795d87778e9c12294e008b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a51a4d9ae8c795d87778e9c12294e008b">computeLevelGradient</a> (LevelData&lt; EBCellFAB &gt; &amp;a_gradient, const LevelData&lt; EBCellFAB &gt; &amp;a_phi) const</td></tr>
-<tr class="memdesc:a51a4d9ae8c795d87778e9c12294e008b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute gradient using data on the input level only.  <a href="classEBGradient.html#a51a4d9ae8c795d87778e9c12294e008b">More...</a><br /></td></tr>
-<tr class="separator:a51a4d9ae8c795d87778e9c12294e008b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa60f5bf72719468ae31d99e3601f9395"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#aa60f5bf72719468ae31d99e3601f9395">computeNormalDerivative</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_gradient, const LevelData&lt; EBCellFAB &gt; &amp;a_phi) const</td></tr>
-<tr class="memdesc:aa60f5bf72719468ae31d99e3601f9395"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the gradient component which is normal to the face, using centered differencing.  <a href="classEBGradient.html#aa60f5bf72719468ae31d99e3601f9395">More...</a><br /></td></tr>
-<tr class="separator:aa60f5bf72719468ae31d99e3601f9395"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad45a607bf4b5d675b544ce443a8fbcb1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#ad45a607bf4b5d675b544ce443a8fbcb1">computeAMRGradient</a> (LevelData&lt; EBCellFAB &gt; &amp;a_gradient, const LevelData&lt; EBCellFAB &gt; &amp;a_phi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiFine) const</td></tr>
-<tr class="memdesc:ad45a607bf4b5d675b544ce443a8fbcb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute gradient using two-level stencils (matching at EBCF).  <a href="classEBGradient.html#ad45a607bf4b5d675b544ce443a8fbcb1">More...</a><br /></td></tr>
-<tr class="separator:ad45a607bf4b5d675b544ce443a8fbcb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0ba6506d3c09f2b5228e3761ac2e81b6"><td class="memItemLeft" align="right" valign="top"><a id="a0ba6506d3c09f2b5228e3761ac2e81b6"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a0ba6506d3c09f2b5228e3761ac2e81b6">~EBGradient</a> ()</td></tr>
-<tr class="memdesc:a0ba6506d3c09f2b5228e3761ac2e81b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing) <br /></td></tr>
-<tr class="separator:a0ba6506d3c09f2b5228e3761ac2e81b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3713430dc2df53b36ba45c8bc64e67ef"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a3713430dc2df53b36ba45c8bc64e67ef">EBGradient</a> (const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgFiCo, const bool a_hasFine, const Real a_dx, const int a_refRat, const int a_order, const int a_weighting, const IntVect a_ghostVector) noexcept</td></tr>
+<tr class="memdesc:a3713430dc2df53b36ba45c8bc64e67ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calsl the define function.  <a href="classEBGradient.html#a3713430dc2df53b36ba45c8bc64e67ef">More...</a><br /></td></tr>
+<tr class="separator:a3713430dc2df53b36ba45c8bc64e67ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0399a518e78fe4c6a7e5ada3614e855f"><td class="memItemLeft" align="right" valign="top"><a id="a0399a518e78fe4c6a7e5ada3614e855f"></a>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a0399a518e78fe4c6a7e5ada3614e855f">~EBGradient</a> () noexcept</td></tr>
+<tr class="memdesc:a0399a518e78fe4c6a7e5ada3614e855f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing) <br /></td></tr>
+<tr class="separator:a0399a518e78fe4c6a7e5ada3614e855f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a305b9c6e9ec0256f28dd17ec6f159822"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a305b9c6e9ec0256f28dd17ec6f159822">define</a> (const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgFiCo, const bool a_hasFine, const Real a_dx, const int a_refRat, const int a_order, const int a_weighting, const IntVect a_ghostVector) noexcept</td></tr>
+<tr class="memdesc:a305b9c6e9ec0256f28dd17ec6f159822"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <a href="classEBGradient.html#a305b9c6e9ec0256f28dd17ec6f159822">More...</a><br /></td></tr>
+<tr class="separator:a305b9c6e9ec0256f28dd17ec6f159822"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2eb1e4369073b7b115033a806c03c0c5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a2eb1e4369073b7b115033a806c03c0c5">computeLevelGradient</a> (LevelData&lt; EBCellFAB &gt; &amp;a_gradient, const LevelData&lt; EBCellFAB &gt; &amp;a_phi) const noexcept</td></tr>
+<tr class="memdesc:a2eb1e4369073b7b115033a806c03c0c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute gradient using data on the input level only.  <a href="classEBGradient.html#a2eb1e4369073b7b115033a806c03c0c5">More...</a><br /></td></tr>
+<tr class="separator:a2eb1e4369073b7b115033a806c03c0c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca26e228269ae4f3b8659977c905be64"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#aca26e228269ae4f3b8659977c905be64">computeNormalDerivative</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_gradient, const LevelData&lt; EBCellFAB &gt; &amp;a_phi) const noexcept</td></tr>
+<tr class="memdesc:aca26e228269ae4f3b8659977c905be64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the gradient component which is normal to the face, using centered differencing.  <a href="classEBGradient.html#aca26e228269ae4f3b8659977c905be64">More...</a><br /></td></tr>
+<tr class="separator:aca26e228269ae4f3b8659977c905be64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b517cf638ea97735590cc6f5e26362e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a3b517cf638ea97735590cc6f5e26362e">computeAMRGradient</a> (LevelData&lt; EBCellFAB &gt; &amp;a_gradient, const LevelData&lt; EBCellFAB &gt; &amp;a_phi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiFine) const noexcept</td></tr>
+<tr class="memdesc:a3b517cf638ea97735590cc6f5e26362e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute gradient using two-level stencils (matching at EBCF).  <a href="classEBGradient.html#a3b517cf638ea97735590cc6f5e26362e">More...</a><br /></td></tr>
+<tr class="separator:a3b517cf638ea97735590cc6f5e26362e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a6665be159ed68d86cb68d16fda20db20"><td class="memItemLeft" align="right" valign="top"><a id="a6665be159ed68d86cb68d16fda20db20"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a6665be159ed68d86cb68d16fda20db20">defineLevelStencils</a> ()</td></tr>
-<tr class="memdesc:a6665be159ed68d86cb68d16fda20db20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define level stencils. <br /></td></tr>
-<tr class="separator:a6665be159ed68d86cb68d16fda20db20"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0a1372add0de5bcd75c3db377e1750b0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a0a1372add0de5bcd75c3db377e1750b0">defineMasks</a> (LevelData&lt; FArrayBox &gt; &amp;a_coarMaskCF, LevelData&lt; FArrayBox &gt; &amp;a_coarMaskInvalid)</td></tr>
-<tr class="memdesc:a0a1372add0de5bcd75c3db377e1750b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make masks.  <a href="classEBGradient.html#a0a1372add0de5bcd75c3db377e1750b0">More...</a><br /></td></tr>
-<tr class="separator:a0a1372add0de5bcd75c3db377e1750b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a43493855791aa92d6212319210aaf885"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a43493855791aa92d6212319210aaf885">defineBuffers</a> (LevelData&lt; FArrayBox &gt; &amp;a_bufferCoarMaskCF, LevelData&lt; FArrayBox &gt; &amp;a_bufferCoarMaskInvalid, const LevelData&lt; FArrayBox &gt; &amp;a_coarMaskCF, const LevelData&lt; FArrayBox &gt; &amp;a_coarMaskInvalid)</td></tr>
-<tr class="memdesc:a43493855791aa92d6212319210aaf885"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define buffers.  <a href="classEBGradient.html#a43493855791aa92d6212319210aaf885">More...</a><br /></td></tr>
-<tr class="separator:a43493855791aa92d6212319210aaf885"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af649484360e9d98cfce28ae623ba73a9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#af649484360e9d98cfce28ae623ba73a9">defineIteratorsEBCF</a> (const LevelData&lt; FArrayBox &gt; &amp;a_coarMaskCF, const LevelData&lt; FArrayBox &gt; &amp;a_coarMaskInvalid)</td></tr>
-<tr class="memdesc:af649484360e9d98cfce28ae623ba73a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define iterators and cells that need modified stencils.  <a href="classEBGradient.html#af649484360e9d98cfce28ae623ba73a9">More...</a><br /></td></tr>
-<tr class="separator:af649484360e9d98cfce28ae623ba73a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a954001537d5ab2048c38e9cfff4bb79d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a954001537d5ab2048c38e9cfff4bb79d">defineStencilsEBCF</a> (const LevelData&lt; FArrayBox &gt; &amp;a_bufferCoarMaskInvalid)</td></tr>
-<tr class="memdesc:a954001537d5ab2048c38e9cfff4bb79d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define stencils for interpolation across the EBCF refinement boundary.  <a href="classEBGradient.html#a954001537d5ab2048c38e9cfff4bb79d">More...</a><br /></td></tr>
-<tr class="separator:a954001537d5ab2048c38e9cfff4bb79d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a786082a66231ac3b2f53f867756fbab1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a786082a66231ac3b2f53f867756fbab1">getFiniteDifferenceStencil</a> (VoFStencil &amp;a_stencil, const VolIndex &amp;a_vof, const EBISBox &amp;a_ebisBox, const DenseIntVectSet &amp;a_invalidRegion, const Real a_dx)</td></tr>
-<tr class="memdesc:a786082a66231ac3b2f53f867756fbab1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a finite difference stencil, assuming that the data is cell-centered.  <a href="classEBGradient.html#a786082a66231ac3b2f53f867756fbab1">More...</a><br /></td></tr>
-<tr class="separator:a786082a66231ac3b2f53f867756fbab1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afa2bb2986efa540801716858771221a4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#afa2bb2986efa540801716858771221a4">getLeastSquaresStencil</a> (VoFStencil &amp;a_stencilCoar, VoFStencil &amp;a_stencilFine, const VolIndex &amp;a_vofCoar, const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">CellLocation</a> &amp;a_dataLocation, const EBISLayout &amp;a_ebislCoar, const EBISLayout &amp;a_ebislFine, const DataIndex &amp;a_dit, const DenseIntVectSet &amp;a_validCellsCoar, const DenseIntVectSet &amp;a_validCellsFine, const Real &amp;a_dxCoar, const Real &amp;a_dxFine, const int &amp;a_order, const int &amp;a_weight)</td></tr>
-<tr class="memdesc:afa2bb2986efa540801716858771221a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a gradient stencil using least squares.  <a href="classEBGradient.html#afa2bb2986efa540801716858771221a4">More...</a><br /></td></tr>
-<tr class="separator:afa2bb2986efa540801716858771221a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a79126929be7ad2252fa9106cc75edb74"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a79126929be7ad2252fa9106cc75edb74">isFiniteDifferenceStencilValid</a> (const IntVect &amp;a_ivCoar, const EBISBox &amp;a_ebisBox, const FArrayBox &amp;a_invalidRegion)</td></tr>
-<tr class="memdesc:a79126929be7ad2252fa9106cc75edb74"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a cell can produce valid finite difference stencils.  <a href="classEBGradient.html#a79126929be7ad2252fa9106cc75edb74">More...</a><br /></td></tr>
-<tr class="separator:a79126929be7ad2252fa9106cc75edb74"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5d682a65aabd72ca6c03f00383471dc"><td class="memItemLeft" align="right" valign="top"><a id="af5d682a65aabd72ca6c03f00383471dc"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#af5d682a65aabd72ca6c03f00383471dc">defineLevelStencils</a> () noexcept</td></tr>
+<tr class="memdesc:af5d682a65aabd72ca6c03f00383471dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define level stencils. <br /></td></tr>
+<tr class="separator:af5d682a65aabd72ca6c03f00383471dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad73f867c27cdb3947688a0da3b39409e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#ad73f867c27cdb3947688a0da3b39409e">defineMasks</a> (LevelData&lt; FArrayBox &gt; &amp;a_coarMaskCF, LevelData&lt; FArrayBox &gt; &amp;a_coarMaskInvalid) noexcept</td></tr>
+<tr class="memdesc:ad73f867c27cdb3947688a0da3b39409e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make masks.  <a href="classEBGradient.html#ad73f867c27cdb3947688a0da3b39409e">More...</a><br /></td></tr>
+<tr class="separator:ad73f867c27cdb3947688a0da3b39409e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a54de3bfff43ae4528cb4affecce5e7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a9a54de3bfff43ae4528cb4affecce5e7">defineIteratorsEBCF</a> (const LevelData&lt; FArrayBox &gt; &amp;a_coarMaskCF, const LevelData&lt; FArrayBox &gt; &amp;a_coarMaskInvalid) noexcept</td></tr>
+<tr class="memdesc:a9a54de3bfff43ae4528cb4affecce5e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define iterators and cells that need modified stencils.  <a href="classEBGradient.html#a9a54de3bfff43ae4528cb4affecce5e7">More...</a><br /></td></tr>
+<tr class="separator:a9a54de3bfff43ae4528cb4affecce5e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a46d9f842d77033a59b1fc3156946bac6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a46d9f842d77033a59b1fc3156946bac6">defineStencilsEBCF</a> (const LevelData&lt; FArrayBox &gt; &amp;a_coarMaskInvalid) noexcept</td></tr>
+<tr class="memdesc:a46d9f842d77033a59b1fc3156946bac6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define stencils for interpolation across the EBCF refinement boundary.  <a href="classEBGradient.html#a46d9f842d77033a59b1fc3156946bac6">More...</a><br /></td></tr>
+<tr class="separator:a46d9f842d77033a59b1fc3156946bac6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3062394417d58d028ebe55931735436"><td class="memItemLeft" align="right" valign="top"><a id="ab3062394417d58d028ebe55931735436"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#ab3062394417d58d028ebe55931735436">defineBuffers</a> () noexcept</td></tr>
+<tr class="memdesc:ab3062394417d58d028ebe55931735436"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define buffer data. <br /></td></tr>
+<tr class="separator:ab3062394417d58d028ebe55931735436"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2fcd316661bb52b71c69d2c4317d40c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#af2fcd316661bb52b71c69d2c4317d40c">getFiniteDifferenceStencil</a> (VoFStencil &amp;a_stencil, const VolIndex &amp;a_vof, const EBISBox &amp;a_ebisBox, const DenseIntVectSet &amp;a_invalidRegion, const Real a_dx) const noexcept</td></tr>
+<tr class="memdesc:af2fcd316661bb52b71c69d2c4317d40c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a finite difference stencil, assuming that the data is cell-centered.  <a href="classEBGradient.html#af2fcd316661bb52b71c69d2c4317d40c">More...</a><br /></td></tr>
+<tr class="separator:af2fcd316661bb52b71c69d2c4317d40c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a496636504abed6115ff9a3f8cb3ec555"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a496636504abed6115ff9a3f8cb3ec555">getLeastSquaresStencil</a> (VoFStencil &amp;a_stencilCoar, VoFStencil &amp;a_stencilFine, const VolIndex &amp;a_vofCoar, const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">CellLocation</a> &amp;a_dataLocation, const EBISLayout &amp;a_ebislCoar, const EBISLayout &amp;a_ebislFine, const DataIndex &amp;a_dit, const DenseIntVectSet &amp;a_validCellsCoar, const DenseIntVectSet &amp;a_validCellsFine, const Real &amp;a_dxCoar, const Real &amp;a_dxFine, const int &amp;a_order, const int &amp;a_weight) const noexcept</td></tr>
+<tr class="memdesc:a496636504abed6115ff9a3f8cb3ec555"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a gradient stencil using least squares.  <a href="classEBGradient.html#a496636504abed6115ff9a3f8cb3ec555">More...</a><br /></td></tr>
+<tr class="separator:a496636504abed6115ff9a3f8cb3ec555"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27817d8ff9b015e221359d4a18e64c91"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a27817d8ff9b015e221359d4a18e64c91">isFiniteDifferenceStencilValid</a> (const IntVect &amp;a_ivCoar, const EBISBox &amp;a_ebisBox, const FArrayBox &amp;a_invalidRegion) const noexcept</td></tr>
+<tr class="memdesc:a27817d8ff9b015e221359d4a18e64c91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a cell can produce valid finite difference stencils.  <a href="classEBGradient.html#a27817d8ff9b015e221359d4a18e64c91">More...</a><br /></td></tr>
+<tr class="separator:a27817d8ff9b015e221359d4a18e64c91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20a6af62ee930a01d7a065c1f5829b7c"><td class="memItemLeft" align="right" valign="top"><a id="a20a6af62ee930a01d7a065c1f5829b7c"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a20a6af62ee930a01d7a065c1f5829b7c">makeAggStencils</a> () noexcept</td></tr>
+<tr class="memdesc:a20a6af62ee930a01d7a065c1f5829b7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn raw stencils into optimized AggStencils. <br /></td></tr>
+<tr class="separator:a20a6af62ee930a01d7a065c1f5829b7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -161,6 +169,14 @@ EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a2ecca09e77feb6f4a61f831fc48c4477">m_eblgFine</a></td></tr>
 <tr class="memdesc:a2ecca09e77feb6f4a61f831fc48c4477"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fine grids. <br /></td></tr>
 <tr class="separator:a2ecca09e77feb6f4a61f831fc48c4477"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31e74b2dba5598fce244a622ad5f93ba"><td class="memItemLeft" align="right" valign="top"><a id="a31e74b2dba5598fce244a622ad5f93ba"></a>
+EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a31e74b2dba5598fce244a622ad5f93ba">m_eblgFiCo</a></td></tr>
+<tr class="memdesc:a31e74b2dba5598fce244a622ad5f93ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refined coarse grids. <br /></td></tr>
+<tr class="separator:a31e74b2dba5598fce244a622ad5f93ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bb6e9028b04754dba16f94a28f68d19"><td class="memItemLeft" align="right" valign="top"><a id="a3bb6e9028b04754dba16f94a28f68d19"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a3bb6e9028b04754dba16f94a28f68d19">m_isDefined</a></td></tr>
+<tr class="memdesc:a3bb6e9028b04754dba16f94a28f68d19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is defined or not. <br /></td></tr>
+<tr class="separator:a3bb6e9028b04754dba16f94a28f68d19"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7cf19ede81ed01c22602316ec912b8e9"><td class="memItemLeft" align="right" valign="top"><a id="a7cf19ede81ed01c22602316ec912b8e9"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a7cf19ede81ed01c22602316ec912b8e9">m_hasFine</a></td></tr>
 <tr class="memdesc:a7cf19ede81ed01c22602316ec912b8e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if we have a finer level (m_eblgFine is defined) <br /></td></tr>
@@ -189,53 +205,34 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a9eaa2ed12d6ec83620a6e6ff19164993">m_refRat</a></td></tr>
 <tr class="memdesc:a9eaa2ed12d6ec83620a6e6ff19164993"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refinement factor between fine and coarse level. <br /></td></tr>
 <tr class="separator:a9eaa2ed12d6ec83620a6e6ff19164993"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a661bafc7dc979595945bc620082b7d75"><td class="memItemLeft" align="right" valign="top"><a id="a661bafc7dc979595945bc620082b7d75"></a>
-DisjointBoxLayout&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a661bafc7dc979595945bc620082b7d75">m_bufferDblCoar</a></td></tr>
-<tr class="memdesc:a661bafc7dc979595945bc620082b7d75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarse-grid buffers. <br /></td></tr>
-<tr class="separator:a661bafc7dc979595945bc620082b7d75"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a279284bf2d4edb7a520e7f0cad7bc6b7"><td class="memItemLeft" align="right" valign="top"><a id="a279284bf2d4edb7a520e7f0cad7bc6b7"></a>
-DisjointBoxLayout&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a279284bf2d4edb7a520e7f0cad7bc6b7">m_bufferDblFine</a></td></tr>
-<tr class="memdesc:a279284bf2d4edb7a520e7f0cad7bc6b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fine-grid buffers. <br /></td></tr>
-<tr class="separator:a279284bf2d4edb7a520e7f0cad7bc6b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d21112d4278122af342a6f09920f056"><td class="memItemLeft" align="right" valign="top"><a id="a6d21112d4278122af342a6f09920f056"></a>
-EBISLayout&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a6d21112d4278122af342a6f09920f056">m_bufferEBISLCoar</a></td></tr>
-<tr class="memdesc:a6d21112d4278122af342a6f09920f056"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarse EBISLayout buffer. <br /></td></tr>
-<tr class="separator:a6d21112d4278122af342a6f09920f056"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a51680e44b1b71bc5c30e6abef6cfda4c"><td class="memItemLeft" align="right" valign="top"><a id="a51680e44b1b71bc5c30e6abef6cfda4c"></a>
-EBISLayout&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a51680e44b1b71bc5c30e6abef6cfda4c">m_bufferEBISLFine</a></td></tr>
-<tr class="memdesc:a51680e44b1b71bc5c30e6abef6cfda4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fine EBISLayout buffer. <br /></td></tr>
-<tr class="separator:a51680e44b1b71bc5c30e6abef6cfda4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aafd128e30ad8bdc13f912cc45976a7db"><td class="memItemLeft" align="right" valign="top"><a id="aafd128e30ad8bdc13f912cc45976a7db"></a>
+IntVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#aafd128e30ad8bdc13f912cc45976a7db">m_ghostVector</a></td></tr>
+<tr class="memdesc:aafd128e30ad8bdc13f912cc45976a7db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of ghost cells in incoming data holders. <br /></td></tr>
+<tr class="separator:aafd128e30ad8bdc13f912cc45976a7db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a973fe445e8ca135397ae1c43429f142e"><td class="memItemLeft" align="right" valign="top"><a id="a973fe445e8ca135397ae1c43429f142e"></a>
+Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a973fe445e8ca135397ae1c43429f142e">m_copier</a></td></tr>
+<tr class="memdesc:a973fe445e8ca135397ae1c43429f142e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pre-built copier for making copying from m_eblg to m_eblgFiCo go faster. <br /></td></tr>
+<tr class="separator:a973fe445e8ca135397ae1c43429f142e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ee391826c615f7efa2e7d5d8d4686d6"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a7ee391826c615f7efa2e7d5d8d4686d6">m_levelStencils</a></td></tr>
 <tr class="memdesc:a7ee391826c615f7efa2e7d5d8d4686d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for boundaries and cut-cells.  <a href="classEBGradient.html#a7ee391826c615f7efa2e7d5d8d4686d6">More...</a><br /></td></tr>
 <tr class="separator:a7ee391826c615f7efa2e7d5d8d4686d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a80ca2d2ec38f8ff2c7f90a60fd767afe"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a80ca2d2ec38f8ff2c7f90a60fd767afe">m_bufferStencilsCoar</a></td></tr>
-<tr class="memdesc:a80ca2d2ec38f8ff2c7f90a60fd767afe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Part of EBCF gradient stencil which reaches into the coarse level.  <a href="classEBGradient.html#a80ca2d2ec38f8ff2c7f90a60fd767afe">More...</a><br /></td></tr>
-<tr class="separator:a80ca2d2ec38f8ff2c7f90a60fd767afe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a93095bcea9ce535a05c51e65546dd75e"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a93095bcea9ce535a05c51e65546dd75e">m_bufferStencilsFine</a></td></tr>
-<tr class="memdesc:a93095bcea9ce535a05c51e65546dd75e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Part of EBCF gradient stencil which reaches into the fine level.  <a href="classEBGradient.html#a93095bcea9ce535a05c51e65546dd75e">More...</a><br /></td></tr>
-<tr class="separator:a93095bcea9ce535a05c51e65546dd75e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee58edd9be9e542536bb1ef8c9122f6c"><td class="memItemLeft" align="right" valign="top"><a id="aee58edd9be9e542536bb1ef8c9122f6c"></a>
+LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#aee58edd9be9e542536bb1ef8c9122f6c">m_ebcfStencilsCoar</a></td></tr>
+<tr class="memdesc:aee58edd9be9e542536bb1ef8c9122f6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Part of EBCF gradient stencil which reaches into the coarse level. <br /></td></tr>
+<tr class="separator:aee58edd9be9e542536bb1ef8c9122f6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7985db24bc73af03992c97c033058e7f"><td class="memItemLeft" align="right" valign="top"><a id="a7985db24bc73af03992c97c033058e7f"></a>
+LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a7985db24bc73af03992c97c033058e7f">m_ebcfStencilsFine</a></td></tr>
+<tr class="memdesc:a7985db24bc73af03992c97c033058e7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Part of EBCF gradient stencil which reaches into the coarse level. <br /></td></tr>
+<tr class="separator:a7985db24bc73af03992c97c033058e7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f4bc48da84c63cc8054a2d30c9e7499"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; RefCountedPtr&lt; AggStencil&lt; EBCellFAB, EBCellFAB &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a8f4bc48da84c63cc8054a2d30c9e7499">m_aggLevelStencils</a> [SpaceDim]</td></tr>
+<tr class="memdesc:a8f4bc48da84c63cc8054a2d30c9e7499"><td class="mdescLeft">&#160;</td><td class="mdescRight">AggStencils for boundaries and cut-cells. Provides faster application of m_levelStencils.  <a href="classEBGradient.html#a8f4bc48da84c63cc8054a2d30c9e7499">More...</a><br /></td></tr>
+<tr class="separator:a8f4bc48da84c63cc8054a2d30c9e7499"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2205ec9296f6d06cb3c5ac73a191d9f"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#af2205ec9296f6d06cb3c5ac73a191d9f">m_levelIterator</a></td></tr>
 <tr class="memdesc:af2205ec9296f6d06cb3c5ac73a191d9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterator for boundary cells (either domain or EB)  <a href="classEBGradient.html#af2205ec9296f6d06cb3c5ac73a191d9f">More...</a><br /></td></tr>
 <tr class="separator:af2205ec9296f6d06cb3c5ac73a191d9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adb693feaf78150f97da56c75ddc17f40"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#adb693feaf78150f97da56c75ddc17f40">m_ebcfIterator</a></td></tr>
 <tr class="memdesc:adb693feaf78150f97da56c75ddc17f40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterator for EBCF cells.  <a href="classEBGradient.html#adb693feaf78150f97da56c75ddc17f40">More...</a><br /></td></tr>
 <tr class="separator:adb693feaf78150f97da56c75ddc17f40"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad4e695cd5ce081bf804c9af9ff3e17e4"><td class="memItemLeft" align="right" valign="top"><a id="ad4e695cd5ce081bf804c9af9ff3e17e4"></a>
-LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#ad4e695cd5ce081bf804c9af9ff3e17e4">m_bufferIterator</a></td></tr>
-<tr class="memdesc:ad4e695cd5ce081bf804c9af9ff3e17e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterator for EBCF cells. Lives on the buffer layout. <br /></td></tr>
-<tr class="separator:ad4e695cd5ce081bf804c9af9ff3e17e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6c6a8f4798ed68652a3aba20cdc81b4b"><td class="memItemLeft" align="right" valign="top">LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a6c6a8f4798ed68652a3aba20cdc81b4b">m_bufferCoar</a></td></tr>
-<tr class="memdesc:a6c6a8f4798ed68652a3aba20cdc81b4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer for putting coarse-grid data on the buffer layout.  <a href="classEBGradient.html#a6c6a8f4798ed68652a3aba20cdc81b4b">More...</a><br /></td></tr>
-<tr class="separator:a6c6a8f4798ed68652a3aba20cdc81b4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7236c39883d5140182eca9ea35e81392"><td class="memItemLeft" align="right" valign="top">LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a7236c39883d5140182eca9ea35e81392">m_bufferFine</a></td></tr>
-<tr class="memdesc:a7236c39883d5140182eca9ea35e81392"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer for putting fine-grid data on the buffer layout.  <a href="classEBGradient.html#a7236c39883d5140182eca9ea35e81392">More...</a><br /></td></tr>
-<tr class="separator:a7236c39883d5140182eca9ea35e81392"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a05a32b060af69fd02dc966cce06c60c6"><td class="memItemLeft" align="right" valign="top">LevelData&lt; BaseIVFAB&lt; Real &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#a05a32b060af69fd02dc966cce06c60c6">m_ebcfGradient</a></td></tr>
-<tr class="memdesc:a05a32b060af69fd02dc966cce06c60c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for corrected gradient.  <a href="classEBGradient.html#a05a32b060af69fd02dc966cce06c60c6">More...</a><br /></td></tr>
-<tr class="separator:a05a32b060af69fd02dc966cce06c60c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac96e78a72fa9670928cb18245093c52c"><td class="memItemLeft" align="right" valign="top">LevelData&lt; BaseIVFAB&lt; Real &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#ac96e78a72fa9670928cb18245093c52c">m_bufferGradient</a></td></tr>
-<tr class="memdesc:ac96e78a72fa9670928cb18245093c52c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for corrected gradient.  <a href="classEBGradient.html#ac96e78a72fa9670928cb18245093c52c">More...</a><br /></td></tr>
-<tr class="separator:ac96e78a72fa9670928cb18245093c52c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
@@ -256,11 +253,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <dd>
 This class requires at least one ghost cell. </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a235935e41b02b4d957c3a97f304c139c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a235935e41b02b4d957c3a97f304c139c">&#9670;&nbsp;</a></span>EBGradient()</h2>
+<a id="a3713430dc2df53b36ba45c8bc64e67ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3713430dc2df53b36ba45c8bc64e67ef">&#9670;&nbsp;</a></span>EBGradient()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">EBGradient::EBGradient </td>
@@ -273,6 +273,18 @@ This class requires at least one ghost cell. </dd></dl>
           <td></td>
           <td class="paramtype">const EBLevelGrid &amp;&#160;</td>
           <td class="paramname"><em>a_eblgFine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBLevelGrid &amp;&#160;</td>
+          <td class="paramname"><em>a_eblgFiCo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_hasFine</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -296,7 +308,13 @@ This class requires at least one ghost cell. </dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_weighting</em> = <code>0</code>&#160;</td>
+          <td class="paramname"><em>a_weighting</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect&#160;</td>
+          <td class="paramname"><em>a_ghostVector</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -304,17 +322,25 @@ This class requires at least one ghost cell. </dd></dl>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p>Full constructor, assumes that there is a finer level. </p>
+<p>Full constructor. Calsl the define function. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblg</td><td>Grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFiCo</td><td>Refinement of coarse grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_hasFine</td><td>Has fine level or not </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Resolution </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_order</td><td>Interpolation order for modified gradients. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_weighting</td><td>Weighting factor least squares. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostVect</td><td>Number of ghost cells in the input data </td></tr>
   </table>
   </dd>
 </dl>
@@ -322,11 +348,14 @@ This class requires at least one ghost cell. </dd></dl>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="ad45a607bf4b5d675b544ce443a8fbcb1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad45a607bf4b5d675b544ce443a8fbcb1">&#9670;&nbsp;</a></span>computeAMRGradient()</h2>
+<a id="a3b517cf638ea97735590cc6f5e26362e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b517cf638ea97735590cc6f5e26362e">&#9670;&nbsp;</a></span>computeAMRGradient()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBGradient::computeAMRGradient </td>
@@ -352,6 +381,11 @@ This class requires at least one ghost cell. </dd></dl>
           <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Compute gradient using two-level stencils (matching at EBCF). </p>
@@ -366,11 +400,14 @@ This class requires at least one ghost cell. </dd></dl>
 
 </div>
 </div>
-<a id="a51a4d9ae8c795d87778e9c12294e008b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a51a4d9ae8c795d87778e9c12294e008b">&#9670;&nbsp;</a></span>computeLevelGradient()</h2>
+<a id="a2eb1e4369073b7b115033a806c03c0c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2eb1e4369073b7b115033a806c03c0c5">&#9670;&nbsp;</a></span>computeLevelGradient()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBGradient::computeLevelGradient </td>
@@ -390,6 +427,11 @@ This class requires at least one ghost cell. </dd></dl>
           <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Compute gradient using data on the input level only. </p>
@@ -403,11 +445,14 @@ This class requires at least one ghost cell. </dd></dl>
 
 </div>
 </div>
-<a id="aa60f5bf72719468ae31d99e3601f9395"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa60f5bf72719468ae31d99e3601f9395">&#9670;&nbsp;</a></span>computeNormalDerivative()</h2>
+<a id="aca26e228269ae4f3b8659977c905be64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca26e228269ae4f3b8659977c905be64">&#9670;&nbsp;</a></span>computeNormalDerivative()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBGradient::computeNormalDerivative </td>
@@ -427,6 +472,11 @@ This class requires at least one ghost cell. </dd></dl>
           <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Compute the gradient component which is normal to the face, using centered differencing. </p>
@@ -440,8 +490,8 @@ This class requires at least one ghost cell. </dd></dl>
 
 </div>
 </div>
-<a id="a43493855791aa92d6212319210aaf885"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a43493855791aa92d6212319210aaf885">&#9670;&nbsp;</a></span>defineBuffers()</h2>
+<a id="a305b9c6e9ec0256f28dd17ec6f159822"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a305b9c6e9ec0256f28dd17ec6f159822">&#9670;&nbsp;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -450,28 +500,58 @@ This class requires at least one ghost cell. </dd></dl>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void EBGradient::defineBuffers </td>
+          <td class="memname">void EBGradient::define </td>
           <td>(</td>
-          <td class="paramtype">LevelData&lt; FArrayBox &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_bufferCoarMaskCF</em>, </td>
+          <td class="paramtype">const EBLevelGrid &amp;&#160;</td>
+          <td class="paramname"><em>a_eblg</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">LevelData&lt; FArrayBox &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_bufferCoarMaskInvalid</em>, </td>
+          <td class="paramtype">const EBLevelGrid &amp;&#160;</td>
+          <td class="paramname"><em>a_eblgFine</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const LevelData&lt; FArrayBox &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_coarMaskCF</em>, </td>
+          <td class="paramtype">const EBLevelGrid &amp;&#160;</td>
+          <td class="paramname"><em>a_eblgFiCo</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const LevelData&lt; FArrayBox &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_coarMaskInvalid</em>&#160;</td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_hasFine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_dx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_refRat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_order</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_weighting</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect&#160;</td>
+          <td class="paramname"><em>a_ghostVector</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -481,26 +561,31 @@ This class requires at least one ghost cell. </dd></dl>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Define buffers. </p>
-<p>Defines masks and buffers on the buffer grids. This will e.g. copy the masks from the coarse grids to the buffer grids, and also define relevant iterators and storage on the buffer grids. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Define function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_bufferCoarMaskCF</td><td>A copy of a_coarMaskCF to the buffer grids. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_bufferCoarMaskInvalid</td><td>A copy of a_coarMaskInvalid to the buffer grids. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarMaskCF</td><td>Mask for CF region on the coarse layout. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarMaskInvalid</td><td>Mask for invalid regions on the coarse layout. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblg</td><td>Grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFiCo</td><td>Refinement of coarse grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_hasFine</td><td>Has fine level or not </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Resolution </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_order</td><td>Interpolation order for modified gradients. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_weighting</td><td>Weighting factor least squares. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostVect</td><td>Number of ghost cells in the input data </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="af649484360e9d98cfce28ae623ba73a9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af649484360e9d98cfce28ae623ba73a9">&#9670;&nbsp;</a></span>defineIteratorsEBCF()</h2>
+<a id="a9a54de3bfff43ae4528cb4affecce5e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a54de3bfff43ae4528cb4affecce5e7">&#9670;&nbsp;</a></span>defineIteratorsEBCF()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -528,7 +613,7 @@ This class requires at least one ghost cell. </dd></dl>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -544,8 +629,8 @@ This class requires at least one ghost cell. </dd></dl>
 
 </div>
 </div>
-<a id="a0a1372add0de5bcd75c3db377e1750b0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0a1372add0de5bcd75c3db377e1750b0">&#9670;&nbsp;</a></span>defineMasks()</h2>
+<a id="ad73f867c27cdb3947688a0da3b39409e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad73f867c27cdb3947688a0da3b39409e">&#9670;&nbsp;</a></span>defineMasks()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -573,7 +658,7 @@ This class requires at least one ghost cell. </dd></dl>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -589,8 +674,8 @@ This class requires at least one ghost cell. </dd></dl>
 
 </div>
 </div>
-<a id="a954001537d5ab2048c38e9cfff4bb79d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a954001537d5ab2048c38e9cfff4bb79d">&#9670;&nbsp;</a></span>defineStencilsEBCF()</h2>
+<a id="a46d9f842d77033a59b1fc3156946bac6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46d9f842d77033a59b1fc3156946bac6">&#9670;&nbsp;</a></span>defineStencilsEBCF()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -602,13 +687,13 @@ This class requires at least one ghost cell. </dd></dl>
           <td class="memname">void EBGradient::defineStencilsEBCF </td>
           <td>(</td>
           <td class="paramtype">const LevelData&lt; FArrayBox &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_bufferCoarMaskInvalid</em></td><td>)</td>
+          <td class="paramname"><em>a_coarMaskInvalid</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -623,8 +708,8 @@ This class requires at least one ghost cell. </dd></dl>
 
 </div>
 </div>
-<a id="a786082a66231ac3b2f53f867756fbab1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a786082a66231ac3b2f53f867756fbab1">&#9670;&nbsp;</a></span>getFiniteDifferenceStencil()</h2>
+<a id="af2fcd316661bb52b71c69d2c4317d40c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2fcd316661bb52b71c69d2c4317d40c">&#9670;&nbsp;</a></span>getFiniteDifferenceStencil()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -665,12 +750,12 @@ This class requires at least one ghost cell. </dd></dl>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -689,8 +774,8 @@ This class requires at least one ghost cell. </dd></dl>
 
 </div>
 </div>
-<a id="afa2bb2986efa540801716858771221a4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afa2bb2986efa540801716858771221a4">&#9670;&nbsp;</a></span>getLeastSquaresStencil()</h2>
+<a id="a496636504abed6115ff9a3f8cb3ec555"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a496636504abed6115ff9a3f8cb3ec555">&#9670;&nbsp;</a></span>getLeastSquaresStencil()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -779,12 +864,12 @@ This class requires at least one ghost cell. </dd></dl>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -811,8 +896,8 @@ This class requires at least one ghost cell. </dd></dl>
 
 </div>
 </div>
-<a id="a79126929be7ad2252fa9106cc75edb74"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a79126929be7ad2252fa9106cc75edb74">&#9670;&nbsp;</a></span>isFiniteDifferenceStencilValid()</h2>
+<a id="a27817d8ff9b015e221359d4a18e64c91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27817d8ff9b015e221359d4a18e64c91">&#9670;&nbsp;</a></span>isFiniteDifferenceStencilValid()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -841,12 +926,12 @@ This class requires at least one ghost cell. </dd></dl>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -864,8 +949,8 @@ This class requires at least one ghost cell. </dd></dl>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a id="a6c6a8f4798ed68652a3aba20cdc81b4b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6c6a8f4798ed68652a3aba20cdc81b4b">&#9670;&nbsp;</a></span>m_bufferCoar</h2>
+<a id="a8f4bc48da84c63cc8054a2d30c9e7499"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f4bc48da84c63cc8054a2d30c9e7499">&#9670;&nbsp;</a></span>m_aggLevelStencils</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -874,82 +959,7 @@ This class requires at least one ghost cell. </dd></dl>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">LevelData&lt;EBCellFAB&gt; EBGradient::m_bufferCoar</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Buffer for putting coarse-grid data on the buffer layout. </p>
-<dl class="section note"><dt>Note</dt><dd>Lives on the buffer layout. </dd></dl>
-
-</div>
-</div>
-<a id="a7236c39883d5140182eca9ea35e81392"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7236c39883d5140182eca9ea35e81392">&#9670;&nbsp;</a></span>m_bufferFine</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">LevelData&lt;EBCellFAB&gt; EBGradient::m_bufferFine</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Buffer for putting fine-grid data on the buffer layout. </p>
-<dl class="section note"><dt>Note</dt><dd>Lives on the buffer layout. </dd></dl>
-
-</div>
-</div>
-<a id="ac96e78a72fa9670928cb18245093c52c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac96e78a72fa9670928cb18245093c52c">&#9670;&nbsp;</a></span>m_bufferGradient</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">LevelData&lt;BaseIVFAB&lt;Real&gt; &gt; EBGradient::m_bufferGradient</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Storage for corrected gradient. </p>
-<dl class="section note"><dt>Note</dt><dd>Lives on the buffer layout. </dd></dl>
-
-</div>
-</div>
-<a id="a80ca2d2ec38f8ff2c7f90a60fd767afe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a80ca2d2ec38f8ff2c7f90a60fd767afe">&#9670;&nbsp;</a></span>m_bufferStencilsCoar</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">LayoutData&lt;BaseIVFAB&lt;VoFStencil&gt; &gt; EBGradient::m_bufferStencilsCoar</td>
+          <td class="memname">LayoutData&lt;RefCountedPtr&lt;AggStencil&lt;EBCellFAB, EBCellFAB&gt; &gt; &gt; EBGradient::m_aggLevelStencils[SpaceDim]</td>
         </tr>
       </table>
   </td>
@@ -959,58 +969,8 @@ This class requires at least one ghost cell. </dd></dl>
 </table>
 </div><div class="memdoc">
 
-<p>Part of EBCF gradient stencil which reaches into the coarse level. </p>
-<dl class="section note"><dt>Note</dt><dd>Lives on the buffer layout. </dd></dl>
-
-</div>
-</div>
-<a id="a93095bcea9ce535a05c51e65546dd75e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a93095bcea9ce535a05c51e65546dd75e">&#9670;&nbsp;</a></span>m_bufferStencilsFine</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">LayoutData&lt;BaseIVFAB&lt;VoFStencil&gt; &gt; EBGradient::m_bufferStencilsFine</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Part of EBCF gradient stencil which reaches into the fine level. </p>
-<dl class="section note"><dt>Note</dt><dd>Lives on the buffer layout. </dd></dl>
-
-</div>
-</div>
-<a id="a05a32b060af69fd02dc966cce06c60c6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a05a32b060af69fd02dc966cce06c60c6">&#9670;&nbsp;</a></span>m_ebcfGradient</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">LevelData&lt;BaseIVFAB&lt;Real&gt; &gt; EBGradient::m_ebcfGradient</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Storage for corrected gradient. </p>
-<dl class="section note"><dt>Note</dt><dd>Lives on the coarse layout. </dd></dl>
+<p>AggStencils for boundaries and cut-cells. Provides faster application of m_levelStencils. </p>
+<dl class="section note"><dt>Note</dt><dd>Lives on the coarse layout and only has one component. </dd></dl>
 
 </div>
 </div>

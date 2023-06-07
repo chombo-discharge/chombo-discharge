@@ -177,22 +177,22 @@ $(function() {
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160; </div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;      <span class="comment">// Instantiate the FieldSolver and set it up.</span></div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;      m_fieldSolver = RefCountedPtr&lt;FieldSolver&gt;(<span class="keyword">new</span> T());</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;      m_fieldSolver-&gt;setVerbosity(m_verbosity);</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;      m_fieldSolver-&gt;parseOptions();</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;      m_fieldSolver-&gt;setAmr(m_amr);</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;      m_fieldSolver-&gt;setComputationalGeometry(m_computationalGeometry);</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;      m_fieldSolver-&gt;setVoltage(voltage);</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;      m_fieldSolver-&gt;setRealm(m_realm);</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;      m_fieldSolver-&gt;setTime(0, 0.0, 0.0);</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;      m_fieldSolver-&gt;parseOptions();</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;      m_fieldSolver-&gt;setAmr(m_amr);</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;      m_fieldSolver-&gt;setComputationalGeometry(m_computationalGeometry);</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;      m_fieldSolver-&gt;setVoltage(voltage);</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;      m_fieldSolver-&gt;setRealm(m_realm);</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;      m_fieldSolver-&gt;setTime(0, 0.0, 0.0);</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;      m_fieldSolver-&gt;setVerbosity(m_verbosity);</div>
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160; </div>
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;      <span class="comment">// Instantiate the surface charge solver and set it up.</span></div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;      m_sigma = RefCountedPtr&lt;SurfaceODESolver&lt;1&gt;&gt;(<span class="keyword">new</span> <a class="code" href="classSurfaceODESolver.html">SurfaceODESolver&lt;1&gt;</a>(m_amr));</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;      m_sigma-&gt;setVerbosity(m_verbosity);</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;      m_sigma-&gt;setPhase(phase::gas);</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;      m_sigma-&gt;setRealm(m_realm);</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;      m_sigma-&gt;setName(<span class="stringliteral">&quot;Surface charge&quot;</span>);</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;      m_sigma-&gt;parseOptions();</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;      m_sigma-&gt;setTime(0, 0.0, 0.0);</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;      m_sigma-&gt;setPhase(phase::gas);</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;      m_sigma-&gt;setRealm(m_realm);</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;      m_sigma-&gt;setName(<span class="stringliteral">&quot;Surface charge&quot;</span>);</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;      m_sigma-&gt;parseOptions();</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;      m_sigma-&gt;setTime(0, 0.0, 0.0);</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;      m_sigma-&gt;setVerbosity(m_verbosity);</div>
 <div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;    }</div>
 <div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160; </div>
 <div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
@@ -253,54 +253,54 @@ $(function() {
 <div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
 <div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::initialData&quot;</span> &lt;&lt; endl;</div>
 <div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;      }</div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160; </div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;      <span class="comment">// Fetch the potential and surface/space charges and initialize them. The potential is set to zero</span></div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;      <span class="comment">// and the space/surface charge set from m_rhoGas, m_rhoDielectric, and m_surfaceChargeDensity</span></div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;      <a class="code" href="classEBAMRData.html">MFAMRCellData</a>&amp; state = m_fieldSolver-&gt;getPotential();</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRIVData</a>&amp;   sigma = m_sigma-&gt;getPhi();</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160; </div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;      <a class="code" href="classDataOps.html#a4429514331ff31eb2f7a0bfb896884e3">DataOps::setValue</a>(state, 0.0);</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;      <a class="code" href="classDataOps.html#a4429514331ff31eb2f7a0bfb896884e3">DataOps::setValue</a>(sigma, m_surfaceChargeDensity, m_amr-&gt;getProbLo(), m_amr-&gt;getDx(), 0);</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;      m_sigma-&gt;resetElectrodes(sigma, 0.0);</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;      m_fieldSolver-&gt;setRho(m_rhoGas);</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;    }</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160; </div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;    <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00188"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6db1ef2d30ca64c2563546414a150a8f">  188</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6db1ef2d30ca64c2563546414a150a8f">FieldStepper&lt;T&gt;::solvePoisson</a>()</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;    {</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::solvePoisson&quot;</span>);</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::solvePoisson&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;      }</div>
 <div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160; </div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;      <span class="comment">// Solve Poisson equation.</span></div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;      this-&gt;solvePoisson();</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;    }</div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160; </div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;    <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00201"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6db1ef2d30ca64c2563546414a150a8f">  201</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6db1ef2d30ca64c2563546414a150a8f">FieldStepper&lt;T&gt;::solvePoisson</a>()</div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;    {</div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::solvePoisson&quot;</span>);</div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::solvePoisson&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;      }</div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160; </div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;      <span class="comment">// Solve using rho from fieldsolver and sigma from SurfaceODESolver.</span></div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;      <a class="code" href="classEBAMRData.html">MFAMRCellData</a>&amp; phi   = m_fieldSolver-&gt;getPotential();</div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;      <a class="code" href="classEBAMRData.html">MFAMRCellData</a>&amp; rho   = m_fieldSolver-&gt;getRho();</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRIVData</a>&amp;   sigma = m_sigma-&gt;getPhi();</div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160; </div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;      <span class="comment">// Solve and issue error message if we did not converge.</span></div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">bool</span> converged = m_fieldSolver-&gt;solve(phi, rho, sigma);</div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160; </div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;      <span class="keywordflow">if</span> (!converged) {</div>
-<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;        MayDay::Warning(<span class="stringliteral">&quot;FieldStepper&lt;T&gt;::solvePoisson - did not converge&quot;</span>);</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;      <span class="comment">// Solve using rho from fieldsolver and sigma from SurfaceODESolver.</span></div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;      <a class="code" href="classEBAMRData.html">MFAMRCellData</a>&amp; phi   = m_fieldSolver-&gt;getPotential();</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;      <a class="code" href="classEBAMRData.html">MFAMRCellData</a>&amp; rho   = m_fieldSolver-&gt;getRho();</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRIVData</a>&amp;   sigma = m_sigma-&gt;getPhi();</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160; </div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;      <span class="comment">// Solve and issue error message if we did not converge.</span></div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">bool</span> converged = m_fieldSolver-&gt;solve(phi, rho, sigma);</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160; </div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;      <span class="keywordflow">if</span> (!converged) {</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;        MayDay::Warning(<span class="stringliteral">&quot;FieldStepper&lt;T&gt;::solvePoisson - did not converge&quot;</span>);</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;      }</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160; </div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;      <span class="comment">// Compute the electric field.</span></div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;      m_fieldSolver-&gt;computeElectricField();</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;    }</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160; </div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;    <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00213"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a7ce51088e5ed2127f60f0b6f9ef8b8c6">  213</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a7ce51088e5ed2127f60f0b6f9ef8b8c6">FieldStepper&lt;T&gt;::postInitialize</a>()</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;    {</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::postInitialize&quot;</span>);</div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::postInitialize&quot;</span> &lt;&lt; endl;</div>
 <div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;      }</div>
 <div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160; </div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;      <span class="comment">// Compute the electric field.</span></div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;      m_fieldSolver-&gt;computeElectricField();</div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;    }</div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160; </div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;    <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00226"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a7ce51088e5ed2127f60f0b6f9ef8b8c6">  226</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a7ce51088e5ed2127f60f0b6f9ef8b8c6">FieldStepper&lt;T&gt;::postInitialize</a>()</div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;    {</div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::postInitialize&quot;</span>);</div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::postInitialize&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;      }</div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;      <span class="comment">// Fetch the potential and surface/space charges and initialize them. The potential is set to zero</span></div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;      <span class="comment">// and the space/surface charge set from m_rhoGas, m_rhoDielectric, and m_surfaceChargeDensity</span></div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;      <a class="code" href="classEBAMRData.html">MFAMRCellData</a>&amp; state = m_fieldSolver-&gt;getPotential();</div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRIVData</a>&amp;   sigma = m_sigma-&gt;getPhi();</div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160; </div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;      <a class="code" href="classDataOps.html#a4429514331ff31eb2f7a0bfb896884e3">DataOps::setValue</a>(state, 0.0);</div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;      <a class="code" href="classDataOps.html#a4429514331ff31eb2f7a0bfb896884e3">DataOps::setValue</a>(sigma, m_surfaceChargeDensity, m_amr-&gt;getProbLo(), m_amr-&gt;getDx(), 0);</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;      m_sigma-&gt;resetElectrodes(sigma, 0.0);</div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;      m_fieldSolver-&gt;setRho(m_rhoGas);</div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160; </div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;      <span class="comment">// Solve Poisson equation.</span></div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;      this-&gt;solvePoisson();</div>
 <div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;    }</div>
 <div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160; </div>
 <div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
@@ -361,168 +361,182 @@ $(function() {
 <div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;    }</div>
 <div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160; </div>
 <div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;    <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00293"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a13c9f07f64ba35b03526892159a36936">  293</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a13c9f07f64ba35b03526892159a36936">FieldStepper&lt;T&gt;::writePlotData</a>(<a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp;       a_output,</div>
-<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;                                   Vector&lt;std::string&gt;&amp; a_plotVariableNames,</div>
-<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;                                   <span class="keywordtype">int</span>&amp;                 a_icomp)<span class="keyword"> const</span></div>
-<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;<span class="keyword">    </span>{</div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::writePlotData&quot;</span>);</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::writePlotData&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;      }</div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;    Vector&lt;std::string&gt;</div>
+<div class="line"><a name="l00293"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a31125e8c68988fb181d3ff0b2bc1ed7a">  293</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a31125e8c68988fb181d3ff0b2bc1ed7a">FieldStepper&lt;T&gt;::getPlotVariableNames</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;<span class="keyword">    </span>{</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::getPlotVariableNames&quot;</span>);</div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::getPlotVariableNames&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;      }</div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160; </div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;      Vector&lt;std::string&gt; plotVars;</div>
 <div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160; </div>
-<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;      <span class="comment">// Append plot variable names.</span></div>
-<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;      a_plotVariableNames.append(m_fieldSolver-&gt;getPlotVariableNames());</div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;      a_plotVariableNames.append(m_sigma-&gt;getPlotVariableNames());</div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160; </div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;      <span class="comment">// Write into plot data holder memory.</span></div>
-<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;      m_fieldSolver-&gt;writePlotData(a_output, a_icomp);</div>
-<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;      m_sigma-&gt;writePlotData(a_output, a_icomp);</div>
-<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;    }</div>
-<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160; </div>
-<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;    <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00313"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aaaacc313eb378a8faf7c0b40f2a604b5">  313</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aaaacc313eb378a8faf7c0b40f2a604b5">FieldStepper&lt;T&gt;::synchronizeSolverTimes</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_step, <span class="keyword">const</span> Real a_time, <span class="keyword">const</span> Real a_dt)</div>
-<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;    {</div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::synchronizeSolverTimes&quot;</span>);</div>
-<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::synchronizeSolverTimes&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;      }</div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;      plotVars.append(m_fieldSolver-&gt;getPlotVariableNames());</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;      plotVars.append(m_sigma-&gt;getPlotVariableNames());</div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160; </div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;      <span class="keywordflow">return</span> plotVars;</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;    }</div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160; </div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;    <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00310"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#af108cc88047fe807ee5add3ae65fe279">  310</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#af108cc88047fe807ee5add3ae65fe279">FieldStepper&lt;T&gt;::writePlotData</a>(LevelData&lt;EBCellFAB&gt;&amp; a_output, <span class="keywordtype">int</span>&amp; a_icomp, <span class="keyword">const</span> <span class="keywordtype">int</span> a_level)<span class="keyword"> const</span></div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;<span class="keyword">    </span>{</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::writePlotData&quot;</span>);</div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::writePlotData&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;      }</div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160; </div>
+<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;      CH_assert(a_level &gt;= 0);</div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;      CH_assert(a_level &lt;= m_amr-&gt;getFinestLevel());</div>
 <div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160; </div>
-<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;      m_timeStep = a_step;</div>
-<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;      m_time     = a_time;</div>
-<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;      m_dt       = a_dt;</div>
-<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160; </div>
-<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;      m_fieldSolver-&gt;setTime(a_step, a_time, a_dt);</div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;    }</div>
-<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160; </div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;    <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00329"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a171f624d3e49660443790e6f44482da9">  329</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a171f624d3e49660443790e6f44482da9">FieldStepper&lt;T&gt;::preRegrid</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_lbase, <span class="keyword">const</span> <span class="keywordtype">int</span> a_oldFinestLevel)</div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;    {</div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::preRegrid&quot;</span>);</div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::preRegrid&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;      }</div>
-<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160; </div>
-<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;      m_fieldSolver-&gt;preRegrid(a_lbase, a_oldFinestLevel);</div>
-<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;      m_sigma-&gt;preRegrid(a_lbase, a_oldFinestLevel);</div>
-<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;    }</div>
-<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160; </div>
-<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;    <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00342"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a420b5a59ff42e4b73eb3ddcb73983f2a">  342</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a420b5a59ff42e4b73eb3ddcb73983f2a">FieldStepper&lt;T&gt;::regrid</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_lmin, <span class="keyword">const</span> <span class="keywordtype">int</span> a_oldFinestLevel, <span class="keyword">const</span> <span class="keywordtype">int</span> a_newFinestLevel)</div>
-<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;    {</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::regrid&quot;</span>);</div>
-<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::regrid&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;      }</div>
-<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160; </div>
-<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;      <span class="comment">// TLDR: The FieldSolver regrid methods just regrids the data -- it does not re-solve the Poisson equation. Here,</span></div>
-<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;      <span class="comment">//       that is done in postRegrid.</span></div>
-<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160; </div>
-<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;      m_fieldSolver-&gt;regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);</div>
-<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;      m_sigma-&gt;regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);</div>
-<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;    }</div>
-<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160; </div>
-<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;    <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00358"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#ab4dca3cdef4f17a0590d3697e395b014">  358</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#ab4dca3cdef4f17a0590d3697e395b014">FieldStepper&lt;T&gt;::postRegrid</a>()</div>
-<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;    {</div>
-<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::postRegrid&quot;</span>);</div>
-<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::postRegrid&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;      }</div>
-<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160; </div>
-<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;      this-&gt;solvePoisson();</div>
-<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;    }</div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160; </div>
-<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;    <span class="keywordtype">bool</span></div>
-<div class="line"><a name="l00370"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aec040eb4eaf3fb529c8d601a7b1cba53">  370</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aec040eb4eaf3fb529c8d601a7b1cba53">FieldStepper&lt;T&gt;::loadBalanceThisRealm</a>(<span class="keyword">const</span> std::string a_realm)<span class="keyword"> const</span></div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;<span class="keyword">    </span>{</div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::loadBalanceThisRealm&quot;</span>);</div>
-<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::loadBalanceThisRealm&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;      }</div>
-<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160; </div>
-<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;      <span class="keywordflow">return</span> (a_realm == m_realm) &amp;&amp; m_loadBalance;</div>
-<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;    }</div>
-<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160; </div>
-<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;    <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00382"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a00f64d5dbd87049fb17e200ee532c24e">  382</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a00f64d5dbd87049fb17e200ee532c24e">FieldStepper&lt;T&gt;::loadBalanceBoxes</a>(Vector&lt;Vector&lt;int&gt;&gt;&amp;             a_procs,</div>
-<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;                                      Vector&lt;Vector&lt;Box&gt;&gt;&amp;             a_boxes,</div>
-<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;                                      <span class="keyword">const</span> std::string                a_realm,</div>
-<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;                                      <span class="keyword">const</span> Vector&lt;DisjointBoxLayout&gt;&amp; a_grids,</div>
-<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;                                      <span class="keyword">const</span> <span class="keywordtype">int</span>                        a_lmin,</div>
-<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;                                      <span class="keyword">const</span> <span class="keywordtype">int</span>                        a_finestLevel)</div>
-<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;    {</div>
-<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::loadBalanceBoxes&quot;</span>);</div>
-<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::loadBalanceBoxes&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;      }</div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;      <span class="comment">// Write into plot data holder memory.</span></div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;      m_fieldSolver-&gt;writePlotData(a_output, a_icomp, a_level);</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;      m_sigma-&gt;writePlotData(a_output, a_icomp, a_level);</div>
+<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;    }</div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160; </div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;    <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00327"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aaaacc313eb378a8faf7c0b40f2a604b5">  327</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aaaacc313eb378a8faf7c0b40f2a604b5">FieldStepper&lt;T&gt;::synchronizeSolverTimes</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_step, <span class="keyword">const</span> Real a_time, <span class="keyword">const</span> Real a_dt)</div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;    {</div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::synchronizeSolverTimes&quot;</span>);</div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::synchronizeSolverTimes&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;      }</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160; </div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;      m_timeStep = a_step;</div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;      m_time     = a_time;</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;      m_dt       = a_dt;</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160; </div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;      m_fieldSolver-&gt;setTime(a_step, a_time, a_dt);</div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;    }</div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160; </div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;    <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00343"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a171f624d3e49660443790e6f44482da9">  343</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a171f624d3e49660443790e6f44482da9">FieldStepper&lt;T&gt;::preRegrid</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_lbase, <span class="keyword">const</span> <span class="keywordtype">int</span> a_oldFinestLevel)</div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;    {</div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::preRegrid&quot;</span>);</div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::preRegrid&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;      }</div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160; </div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;      m_fieldSolver-&gt;preRegrid(a_lbase, a_oldFinestLevel);</div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;      m_sigma-&gt;preRegrid(a_lbase, a_oldFinestLevel);</div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;    }</div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160; </div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;    <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00356"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a420b5a59ff42e4b73eb3ddcb73983f2a">  356</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a420b5a59ff42e4b73eb3ddcb73983f2a">FieldStepper&lt;T&gt;::regrid</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_lmin, <span class="keyword">const</span> <span class="keywordtype">int</span> a_oldFinestLevel, <span class="keyword">const</span> <span class="keywordtype">int</span> a_newFinestLevel)</div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;    {</div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::regrid&quot;</span>);</div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::regrid&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;      }</div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160; </div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;      <span class="comment">// TLDR: The FieldSolver regrid methods just regrids the data -- it does not re-solve the Poisson equation. Here,</span></div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;      <span class="comment">//       that is done in postRegrid.</span></div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160; </div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;      m_fieldSolver-&gt;regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);</div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;      m_sigma-&gt;regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);</div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;    }</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160; </div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;    <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00372"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#ab4dca3cdef4f17a0590d3697e395b014">  372</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#ab4dca3cdef4f17a0590d3697e395b014">FieldStepper&lt;T&gt;::postRegrid</a>()</div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;    {</div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::postRegrid&quot;</span>);</div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::postRegrid&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;      }</div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160; </div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;      this-&gt;solvePoisson();</div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;    }</div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160; </div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;    <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00384"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aec040eb4eaf3fb529c8d601a7b1cba53">  384</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aec040eb4eaf3fb529c8d601a7b1cba53">FieldStepper&lt;T&gt;::loadBalanceThisRealm</a>(<span class="keyword">const</span> std::string a_realm)<span class="keyword"> const</span></div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;<span class="keyword">    </span>{</div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::loadBalanceThisRealm&quot;</span>);</div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::loadBalanceThisRealm&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;      }</div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160; </div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;      <span class="keywordflow">return</span> (a_realm == m_realm) &amp;&amp; m_loadBalance;</div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;    }</div>
 <div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160; </div>
-<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;      CH_assert(m_loadBalance &amp;&amp; a_realm == m_realm);</div>
-<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160; </div>
-<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;      <span class="comment">// TLDR: This code tries to compute a load for each grid patch by applying a relaxation operator to each box. This means that the load</span></div>
-<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;      <span class="comment">//       should be a decent estimate that takes into account boundary conditions, coarse-fine interface arithmetic, and enlargened stencils</span></div>
-<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;      <span class="comment">//       near the embedded boundary.</span></div>
-<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160; </div>
-<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;      a_procs.resize(1 + a_finestLevel);</div>
-<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;      a_boxes.resize(1 + a_finestLevel);</div>
-<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160; </div>
-<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;      <span class="comment">// We need to make AmrMesh restore some operators that we need in order to create a multigrid object. Fortunately, FieldSolver has routines</span></div>
-<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;      <span class="comment">// for doing that but it will not know if AmrMesh has updated it&#39;s operators or not. So, we need to regrid them.</span></div>
-<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;      m_amr-&gt;regridOperators(a_lmin);</div>
-<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160; </div>
-<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;      <span class="comment">// Field solver implementation gets the responsibility of computing loads on each level.</span></div>
-<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_finestLevel; lvl++) {</div>
-<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;        Vector&lt;long long&gt; loads = m_fieldSolver-&gt;computeLoads(a_grids[lvl], lvl);</div>
-<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160; </div>
-<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;        <span class="comment">// Do the desired sorting and load balancing</span></div>
-<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;        a_boxes[lvl] = a_grids[lvl].boxArray();</div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;    <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00396"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a00f64d5dbd87049fb17e200ee532c24e">  396</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a00f64d5dbd87049fb17e200ee532c24e">FieldStepper&lt;T&gt;::loadBalanceBoxes</a>(Vector&lt;Vector&lt;int&gt;&gt;&amp;             a_procs,</div>
+<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;                                      Vector&lt;Vector&lt;Box&gt;&gt;&amp;             a_boxes,</div>
+<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;                                      <span class="keyword">const</span> std::string                a_realm,</div>
+<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;                                      <span class="keyword">const</span> Vector&lt;DisjointBoxLayout&gt;&amp; a_grids,</div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;                                      <span class="keyword">const</span> <span class="keywordtype">int</span>                        a_lmin,</div>
+<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;                                      <span class="keyword">const</span> <span class="keywordtype">int</span>                        a_finestLevel)</div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;    {</div>
+<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::loadBalanceBoxes&quot;</span>);</div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::loadBalanceBoxes&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;      }</div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160; </div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;      CH_assert(m_loadBalance &amp;&amp; a_realm == m_realm);</div>
+<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160; </div>
+<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;      <span class="comment">// TLDR: This code tries to compute a load for each grid patch by applying a relaxation operator to each box. This means that the load</span></div>
+<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;      <span class="comment">//       should be a decent estimate that takes into account boundary conditions, coarse-fine interface arithmetic, and enlargened stencils</span></div>
+<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;      <span class="comment">//       near the embedded boundary.</span></div>
 <div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160; </div>
-<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;        <a class="code" href="classLoadBalancing.html#a704ca1a8c6c621d5d6a010ce09344881">LoadBalancing::sort</a>(a_boxes[lvl], loads, m_boxSort);</div>
-<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;        <a class="code" href="classLoadBalancing.html#a4cef3b9e67877b6719d14014b00265ea">LoadBalancing::makeBalance</a>(a_procs[lvl], loads, a_boxes[lvl]);</div>
-<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;      }</div>
-<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;    }</div>
-<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160; </div>
-<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;    <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00421"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a072f57d466beb0bcb2f9b0bfb98d917a">  421</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a072f57d466beb0bcb2f9b0bfb98d917a">FieldStepper&lt;T&gt;::setRho</a>(<span class="keyword">const</span> std::function&lt;Real(<span class="keyword">const</span> RealVect&amp; a_pos)&gt;&amp; a_rho,</div>
-<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;                            <span class="keyword">const</span> phase::which_phase                          a_phase) noexcept</div>
-<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;    {</div>
-<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::setRho&quot;</span>);</div>
-<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::setRho&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;      }</div>
-<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160; </div>
-<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;      <span class="keywordflow">if</span> (a_phase == phase::gas) {</div>
-<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;        m_rhoGas = a_rho;</div>
-<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;      }</div>
-<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;      <span class="keywordflow">else</span> <span class="keywordflow">if</span> (a_phase == phase::solid) {</div>
-<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;        m_rhoDielectric = a_rho;</div>
-<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;      }</div>
-<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;    }</div>
-<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160; </div>
-<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;    <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00439"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6951c397632139bf575665086fd321d6">  439</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6951c397632139bf575665086fd321d6">FieldStepper&lt;T&gt;::setSigma</a>(<span class="keyword">const</span> std::function&lt;Real(<span class="keyword">const</span> RealVect&amp; a_pos)&gt;&amp; a_sigma) noexcept</div>
-<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;    {</div>
-<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::setSigma&quot;</span>);</div>
-<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::setSigma&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;      }</div>
-<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160; </div>
-<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;      m_surfaceChargeDensity = a_sigma;</div>
-<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;    }</div>
-<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;  } <span class="comment">// namespace Electrostatics</span></div>
-<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;} <span class="comment">// namespace Physics</span></div>
+<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;      a_procs.resize(1 + a_finestLevel);</div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;      a_boxes.resize(1 + a_finestLevel);</div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160; </div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;      <span class="comment">// We need to make AmrMesh restore some operators that we need in order to create a multigrid object. Fortunately, FieldSolver has routines</span></div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;      <span class="comment">// for doing that but it will not know if AmrMesh has updated it&#39;s operators or not. So, we need to regrid them.</span></div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;      m_amr-&gt;regridOperators(a_lmin);</div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160; </div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;      <span class="comment">// Field solver implementation gets the responsibility of computing loads on each level.</span></div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= a_finestLevel; lvl++) {</div>
+<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;        Vector&lt;long long&gt; loads = m_fieldSolver-&gt;computeLoads(a_grids[lvl], lvl);</div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160; </div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;        <span class="comment">// Do the desired sorting and load balancing</span></div>
+<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;        a_boxes[lvl] = a_grids[lvl].boxArray();</div>
+<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160; </div>
+<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;        <a class="code" href="classLoadBalancing.html#a704ca1a8c6c621d5d6a010ce09344881">LoadBalancing::sort</a>(a_boxes[lvl], loads, m_boxSort);</div>
+<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;        <a class="code" href="classLoadBalancing.html#a4cef3b9e67877b6719d14014b00265ea">LoadBalancing::makeBalance</a>(a_procs[lvl], loads, a_boxes[lvl]);</div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;      }</div>
+<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;    }</div>
+<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160; </div>
+<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;    <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00435"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a072f57d466beb0bcb2f9b0bfb98d917a">  435</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a072f57d466beb0bcb2f9b0bfb98d917a">FieldStepper&lt;T&gt;::setRho</a>(<span class="keyword">const</span> std::function&lt;Real(<span class="keyword">const</span> RealVect&amp; a_pos)&gt;&amp; a_rho,</div>
+<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;                            <span class="keyword">const</span> phase::which_phase                          a_phase) noexcept</div>
+<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;    {</div>
+<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::setRho&quot;</span>);</div>
+<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::setRho&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;      }</div>
+<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160; </div>
+<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;      <span class="keywordflow">if</span> (a_phase == phase::gas) {</div>
+<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;        m_rhoGas = a_rho;</div>
+<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;      }</div>
+<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;      <span class="keywordflow">else</span> <span class="keywordflow">if</span> (a_phase == phase::solid) {</div>
+<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;        m_rhoDielectric = a_rho;</div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;      }</div>
+<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;    }</div>
 <div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160; </div>
-<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160; </div>
-<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;    <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00453"></a><span class="lineno"><a class="line" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6951c397632139bf575665086fd321d6">  453</a></span>&#160;    <a class="code" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6951c397632139bf575665086fd321d6">FieldStepper&lt;T&gt;::setSigma</a>(<span class="keyword">const</span> std::function&lt;Real(<span class="keyword">const</span> RealVect&amp; a_pos)&gt;&amp; a_sigma) noexcept</div>
+<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;    {</div>
+<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;      CH_TIME(<span class="stringliteral">&quot;FieldStepper::setSigma&quot;</span>);</div>
+<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;      <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;        pout() &lt;&lt; <span class="stringliteral">&quot;FieldStepper&lt;T&gt;::setSigma&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;      }</div>
+<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160; </div>
+<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;      m_surfaceChargeDensity = a_sigma;</div>
+<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;    }</div>
+<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;  } <span class="comment">// namespace Electrostatics</span></div>
+<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;} <span class="comment">// namespace Physics</span></div>
+<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160; </div>
+<div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160; </div>
+<div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__DataOps_8H_html"><div class="ttname"><a href="CD__DataOps_8H.html">CD_DataOps.H</a></div><div class="ttdoc">Agglomeration of useful data operations.</div></div>
 <div class="ttc" id="aCD__FieldStepper_8H_html"><div class="ttname"><a href="CD__FieldStepper_8H.html">CD_FieldStepper.H</a></div><div class="ttdoc">TimeStepper class for only solving the Poisson equation (with surface charge)</div></div>
 <div class="ttc" id="aclassDataOps_html_a4429514331ff31eb2f7a0bfb896884e3"><div class="ttname"><a href="classDataOps.html#a4429514331ff31eb2f7a0bfb896884e3">DataOps::setValue</a></div><div class="ttdeci">static void setValue(LevelData&lt; MFInterfaceFAB&lt; T &gt;&gt; &amp;a_lhs, const T &amp;a_value)</div><div class="ttdoc">Set value in an MFInterfaceFAB data holder.</div><div class="ttdef"><b>Definition:</b> CD_DataOpsImplem.H:23</div></div>
@@ -530,29 +544,30 @@ $(function() {
 <div class="ttc" id="aclassLoadBalancing_html_a4cef3b9e67877b6719d14014b00265ea"><div class="ttname"><a href="classLoadBalancing.html#a4cef3b9e67877b6719d14014b00265ea">LoadBalancing::makeBalance</a></div><div class="ttdeci">static void makeBalance(Vector&lt; int &gt; &amp;a_ranks, const Vector&lt; T &gt; &amp;a_loads, const Vector&lt; Box &gt; &amp;a_boxes)</div><div class="ttdoc">Load balancing, assigning ranks to boxes.</div><div class="ttdef"><b>Definition:</b> CD_LoadBalancingImplem.H:31</div></div>
 <div class="ttc" id="aclassLoadBalancing_html_a704ca1a8c6c621d5d6a010ce09344881"><div class="ttname"><a href="classLoadBalancing.html#a704ca1a8c6c621d5d6a010ce09344881">LoadBalancing::sort</a></div><div class="ttdeci">static void sort(Vector&lt; Vector&lt; Box &gt;&gt; &amp;a_boxes, Vector&lt; Vector&lt; T &gt;&gt; &amp;a_loads, const BoxSorting a_whichSorting)</div><div class="ttdoc">Sorts boxes and loads over a hierarchy according to some sorting criterion.</div><div class="ttdef"><b>Definition:</b> CD_LoadBalancingImplem.H:136</div></div>
 <div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html">Physics::Electrostatics::FieldStepper</a></div><div class="ttdoc">Implementation of TimeStepper for solving electrostatic problems. The template parameter is the Field...</div><div class="ttdef"><b>Definition:</b> CD_FieldStepper.H:36</div></div>
-<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a00f64d5dbd87049fb17e200ee532c24e"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a00f64d5dbd87049fb17e200ee532c24e">Physics::Electrostatics::FieldStepper::loadBalanceBoxes</a></div><div class="ttdeci">void loadBalanceBoxes(Vector&lt; Vector&lt; int &gt;&gt; &amp;a_procs, Vector&lt; Vector&lt; Box &gt;&gt; &amp;a_boxes, const std::string a_realm, const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const int a_lmin, const int a_finestLevel) override</div><div class="ttdoc">Load balance grid boxes for a specified realm.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:382</div></div>
-<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a072f57d466beb0bcb2f9b0bfb98d917a"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a072f57d466beb0bcb2f9b0bfb98d917a">Physics::Electrostatics::FieldStepper::setRho</a></div><div class="ttdeci">void setRho(const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;a_rho, const phase::which_phase a_phase) noexcept</div><div class="ttdoc">Set space charge.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:421</div></div>
-<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a13c9f07f64ba35b03526892159a36936"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a13c9f07f64ba35b03526892159a36936">Physics::Electrostatics::FieldStepper::writePlotData</a></div><div class="ttdeci">void writePlotData(EBAMRCellData &amp;a_output, Vector&lt; std::string &gt; &amp;a_plotVariableNames, int &amp;a_icomp) const override</div><div class="ttdoc">Write plot data to file.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:293</div></div>
-<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a171f624d3e49660443790e6f44482da9"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a171f624d3e49660443790e6f44482da9">Physics::Electrostatics::FieldStepper::preRegrid</a></div><div class="ttdeci">void preRegrid(const int a_lbase, const int a_finestLevel) override</div><div class="ttdoc">Perform pre-regrid operations.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:329</div></div>
+<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a00f64d5dbd87049fb17e200ee532c24e"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a00f64d5dbd87049fb17e200ee532c24e">Physics::Electrostatics::FieldStepper::loadBalanceBoxes</a></div><div class="ttdeci">void loadBalanceBoxes(Vector&lt; Vector&lt; int &gt;&gt; &amp;a_procs, Vector&lt; Vector&lt; Box &gt;&gt; &amp;a_boxes, const std::string a_realm, const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const int a_lmin, const int a_finestLevel) override</div><div class="ttdoc">Load balance grid boxes for a specified realm.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:396</div></div>
+<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a072f57d466beb0bcb2f9b0bfb98d917a"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a072f57d466beb0bcb2f9b0bfb98d917a">Physics::Electrostatics::FieldStepper::setRho</a></div><div class="ttdeci">void setRho(const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;a_rho, const phase::which_phase a_phase) noexcept</div><div class="ttdoc">Set space charge.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:435</div></div>
+<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a171f624d3e49660443790e6f44482da9"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a171f624d3e49660443790e6f44482da9">Physics::Electrostatics::FieldStepper::preRegrid</a></div><div class="ttdeci">void preRegrid(const int a_lbase, const int a_finestLevel) override</div><div class="ttdoc">Perform pre-regrid operations.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:343</div></div>
+<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a31125e8c68988fb181d3ff0b2bc1ed7a"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a31125e8c68988fb181d3ff0b2bc1ed7a">Physics::Electrostatics::FieldStepper::getPlotVariableNames</a></div><div class="ttdeci">Vector&lt; std::string &gt; getPlotVariableNames() const override</div><div class="ttdoc">Get plot variable names.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:293</div></div>
 <div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a3848157d77ba8cce0949f6227eda2113"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a3848157d77ba8cce0949f6227eda2113">Physics::Electrostatics::FieldStepper::initialData</a></div><div class="ttdeci">void initialData() override</div><div class="ttdoc">Set initial data – this sets the space and surface charges.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:178</div></div>
-<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a420b5a59ff42e4b73eb3ddcb73983f2a"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a420b5a59ff42e4b73eb3ddcb73983f2a">Physics::Electrostatics::FieldStepper::regrid</a></div><div class="ttdeci">void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override</div><div class="ttdoc">Regrid method – regrids the potential distribution in FieldSolver (but does not solve the Poisson equ...</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:342</div></div>
-<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a6951c397632139bf575665086fd321d6"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6951c397632139bf575665086fd321d6">Physics::Electrostatics::FieldStepper::setSigma</a></div><div class="ttdeci">void setSigma(const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;a_sigma) noexcept</div><div class="ttdoc">Set surface charge.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:439</div></div>
-<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a6db1ef2d30ca64c2563546414a150a8f"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6db1ef2d30ca64c2563546414a150a8f">Physics::Electrostatics::FieldStepper::solvePoisson</a></div><div class="ttdeci">void solvePoisson()</div><div class="ttdoc">Internal routine for solving the Poisson equation.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:201</div></div>
-<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a7ce51088e5ed2127f60f0b6f9ef8b8c6"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a7ce51088e5ed2127f60f0b6f9ef8b8c6">Physics::Electrostatics::FieldStepper::postInitialize</a></div><div class="ttdeci">void postInitialize() override</div><div class="ttdoc">Post-initialization routine. This solves the Poisson equation.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:226</div></div>
+<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a420b5a59ff42e4b73eb3ddcb73983f2a"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a420b5a59ff42e4b73eb3ddcb73983f2a">Physics::Electrostatics::FieldStepper::regrid</a></div><div class="ttdeci">void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override</div><div class="ttdoc">Regrid method – regrids the potential distribution in FieldSolver (but does not solve the Poisson equ...</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:356</div></div>
+<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a6951c397632139bf575665086fd321d6"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6951c397632139bf575665086fd321d6">Physics::Electrostatics::FieldStepper::setSigma</a></div><div class="ttdeci">void setSigma(const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;a_sigma) noexcept</div><div class="ttdoc">Set surface charge.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:453</div></div>
+<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a6db1ef2d30ca64c2563546414a150a8f"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6db1ef2d30ca64c2563546414a150a8f">Physics::Electrostatics::FieldStepper::solvePoisson</a></div><div class="ttdeci">void solvePoisson()</div><div class="ttdoc">Internal routine for solving the Poisson equation.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:188</div></div>
+<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a7ce51088e5ed2127f60f0b6f9ef8b8c6"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a7ce51088e5ed2127f60f0b6f9ef8b8c6">Physics::Electrostatics::FieldStepper::postInitialize</a></div><div class="ttdeci">void postInitialize() override</div><div class="ttdoc">Post-initialization routine. This solves the Poisson equation.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:213</div></div>
 <div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a81027a95578ab93cf1d28ada04dadf9b"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a81027a95578ab93cf1d28ada04dadf9b">Physics::Electrostatics::FieldStepper::getNumberOfPlotVariables</a></div><div class="ttdeci">int getNumberOfPlotVariables() const override</div><div class="ttdoc">Get number of plot variables.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:276</div></div>
 <div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a8ab9d9f68e75fff21bf6d1c823fcfdf0"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a8ab9d9f68e75fff21bf6d1c823fcfdf0">Physics::Electrostatics::FieldStepper::registerRealms</a></div><div class="ttdeci">void registerRealms() override</div><div class="ttdoc">Register simulation realms to be used for this simulation module.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:141</div></div>
 <div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_a9aef1ddbf3a3e5e63d7bbc1e649bc20f"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a9aef1ddbf3a3e5e63d7bbc1e649bc20f">Physics::Electrostatics::FieldStepper::allocate</a></div><div class="ttdeci">void allocate() override</div><div class="ttdoc">Allocation method – allocates memory and internal data for solvers.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:153</div></div>
 <div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_aa381bb06f7e7b971f4c87da724a02299"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aa381bb06f7e7b971f4c87da724a02299">Physics::Electrostatics::FieldStepper::registerOperators</a></div><div class="ttdeci">void registerOperators() override</div><div class="ttdoc">Register operators for this simulation module.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:128</div></div>
-<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_aaaacc313eb378a8faf7c0b40f2a604b5"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aaaacc313eb378a8faf7c0b40f2a604b5">Physics::Electrostatics::FieldStepper::synchronizeSolverTimes</a></div><div class="ttdeci">void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override</div><div class="ttdoc">Synchronzie solver times and time steps.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:313</div></div>
-<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_ab42f63a82b6d92fb44301fca75962656"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#ab42f63a82b6d92fb44301fca75962656">Physics::Electrostatics::FieldStepper::~FieldStepper</a></div><div class="ttdeci">~FieldStepper()</div><div class="ttdoc">Destructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:87</div></div>
-<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_ab4dca3cdef4f17a0590d3697e395b014"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#ab4dca3cdef4f17a0590d3697e395b014">Physics::Electrostatics::FieldStepper::postRegrid</a></div><div class="ttdeci">void postRegrid() override</div><div class="ttdoc">Perform post-regrid operations – this will resolve the Poisson equation.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:358</div></div>
+<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_aaaacc313eb378a8faf7c0b40f2a604b5"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aaaacc313eb378a8faf7c0b40f2a604b5">Physics::Electrostatics::FieldStepper::synchronizeSolverTimes</a></div><div class="ttdeci">void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override</div><div class="ttdoc">Synchronzie solver times and time steps.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:327</div></div>
+<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_ab42f63a82b6d92fb44301fca75962656"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#ab42f63a82b6d92fb44301fca75962656">Physics::Electrostatics::FieldStepper::~FieldStepper</a></div><div class="ttdeci">virtual ~FieldStepper()</div><div class="ttdoc">Destructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:87</div></div>
+<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_ab4dca3cdef4f17a0590d3697e395b014"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#ab4dca3cdef4f17a0590d3697e395b014">Physics::Electrostatics::FieldStepper::postRegrid</a></div><div class="ttdeci">void postRegrid() override</div><div class="ttdoc">Perform post-regrid operations – this will resolve the Poisson equation.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:372</div></div>
 <div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_ac5d0fd7222504256ada91e19fcc308aa"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#ac5d0fd7222504256ada91e19fcc308aa">Physics::Electrostatics::FieldStepper::getPotential</a></div><div class="ttdeci">MFAMRCellData &amp; getPotential()</div><div class="ttdoc">Get the potential.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:166</div></div>
 <div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_adc0783625665ddf1b868e3a45de642a2"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#adc0783625665ddf1b868e3a45de642a2">Physics::Electrostatics::FieldStepper::FieldStepper</a></div><div class="ttdeci">FieldStepper()</div><div class="ttdoc">Constructor – parses some input options.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:31</div></div>
-<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_aec040eb4eaf3fb529c8d601a7b1cba53"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aec040eb4eaf3fb529c8d601a7b1cba53">Physics::Electrostatics::FieldStepper::loadBalanceThisRealm</a></div><div class="ttdeci">bool loadBalanceThisRealm(const std::string a_realm) const override</div><div class="ttdoc">Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines...</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:370</div></div>
+<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_aec040eb4eaf3fb529c8d601a7b1cba53"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aec040eb4eaf3fb529c8d601a7b1cba53">Physics::Electrostatics::FieldStepper::loadBalanceThisRealm</a></div><div class="ttdeci">bool loadBalanceThisRealm(const std::string a_realm) const override</div><div class="ttdoc">Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines...</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:384</div></div>
 <div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_aee9984c17bdf54130c755612073b2ddd"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aee9984c17bdf54130c755612073b2ddd">Physics::Electrostatics::FieldStepper::advance</a></div><div class="ttdeci">Real advance(const Real a_dt) override</div><div class="ttdoc">Perform a single time step with step a_dt.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:236</div></div>
+<div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_af108cc88047fe807ee5add3ae65fe279"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#af108cc88047fe807ee5add3ae65fe279">Physics::Electrostatics::FieldStepper::writePlotData</a></div><div class="ttdeci">void writePlotData(LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const override</div><div class="ttdoc">Write plot data to file.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:310</div></div>
 <div class="ttc" id="aclassPhysics_1_1Electrostatics_1_1FieldStepper_html_af143239290ca75e9cdbb8ceee44c21bc"><div class="ttname"><a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#af143239290ca75e9cdbb8ceee44c21bc">Physics::Electrostatics::FieldStepper::setupSolvers</a></div><div class="ttdeci">void setupSolvers() override</div><div class="ttdoc">Solver setup routine. This instantiates the FieldSolver and parses input options.</div><div class="ttdef"><b>Definition:</b> CD_FieldStepperImplem.H:94</div></div>
 <div class="ttc" id="aclassSurfaceODESolver_html"><div class="ttname"><a href="classSurfaceODESolver.html">SurfaceODESolver</a></div><div class="ttdoc">Surface ODE solver.</div><div class="ttdef"><b>Definition:</b> CD_SurfaceODESolver.H:28</div></div>
-<div class="ttc" id="anamespaceParallelOps_html_a1e1c7f162c522c6fecace086d6cdd10d"><div class="ttname"><a href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">ParallelOps::max</a></div><div class="ttdeci">Real max(const Real &amp;a_input) noexcept</div><div class="ttdoc">Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)</div><div class="ttdef"><b>Definition:</b> CD_ParallelOpsImplem.H:142</div></div>
+<div class="ttc" id="anamespaceParallelOps_html_a1e1c7f162c522c6fecace086d6cdd10d"><div class="ttname"><a href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">ParallelOps::max</a></div><div class="ttdeci">Real max(const Real &amp;a_input) noexcept</div><div class="ttdoc">Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)</div><div class="ttdef"><b>Definition:</b> CD_ParallelOpsImplem.H:157</div></div>
 <div class="ttc" id="anamespacePhysics_html"><div class="ttname"><a href="namespacePhysics.html">Physics</a></div><div class="ttdoc">Name containing various physics models for running chombo-discharge code.</div><div class="ttdef"><b>Definition:</b> CD_AdvectionDiffusion.H:15</div></div>
 <div class="ttc" id="anamespaceUnits_html_aeb867ff161ea992af060bf128f7ffdf3"><div class="ttname"><a href="namespaceUnits.html#aeb867ff161ea992af060bf128f7ffdf3">Units::c</a></div><div class="ttdeci">constexpr Real c</div><div class="ttdoc">Speed of light.</div><div class="ttdef"><b>Definition:</b> CD_Units.H:36</div></div>
 </div><!-- fragment --></div><!-- contents -->

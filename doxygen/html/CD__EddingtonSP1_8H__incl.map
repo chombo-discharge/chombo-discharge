@@ -1,52 +1,52 @@
 <map id="Source/RadiativeTransfer/CD_EddingtonSP1.H" name="Source/RadiativeTransfer/CD_EddingtonSP1.H">
-<area shape="rect" id="node1" title="Declaration of a first order Eddington solver for radiative transfer." alt="" coords="760,5,944,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,77,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="102,95,229,121"/>
-<area shape="rect" id="node4" title=" " alt="" coords="253,95,345,121"/>
-<area shape="rect" id="node5" title=" " alt="" coords="369,95,519,121"/>
-<area shape="rect" id="node6" title=" " alt="" coords="543,95,681,121"/>
-<area shape="rect" id="node7" title=" " alt="" coords="706,95,843,121"/>
-<area shape="rect" id="node8" title=" " alt="" coords="868,95,991,121"/>
-<area shape="rect" id="node9" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="1267,95,1383,121"/>
-<area shape="rect" id="node18" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2739,393,2925,420"/>
-<area shape="rect" id="node19" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="2224,393,2403,420"/>
-<area shape="rect" id="node41" href="$CD__EBHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making Poisson operators for multigrid." alt="" coords="3522,169,3731,196"/>
-<area shape="rect" id="node49" href="$CD__EddingtonSP1DomainBc_8H_source.html" title=" " alt="" coords="569,319,788,345"/>
-<area shape="rect" id="node10" title=" " alt="" coords="858,393,945,420"/>
-<area shape="rect" id="node11" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="1019,244,1240,271"/>
-<area shape="rect" id="node23" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="2059,169,2183,196"/>
-<area shape="rect" id="node39" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="965,319,1091,345"/>
-<area shape="rect" id="node40" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="3029,319,3147,345"/>
-<area shape="rect" id="node12" title=" " alt="" coords="1433,393,1511,420"/>
-<area shape="rect" id="node13" title=" " alt="" coords="1267,393,1397,420"/>
-<area shape="rect" id="node14" title=" " alt="" coords="1135,393,1196,420"/>
-<area shape="rect" id="node15" title=" " alt="" coords="975,393,1068,420"/>
-<area shape="rect" id="node16" title=" " alt="" coords="2135,319,2276,345"/>
-<area shape="rect" id="node17" href="$CD__Dielectric_8H.html" title="Dielectric class." alt="" coords="1410,319,1534,345"/>
-<area shape="rect" id="node20" href="$CD__Electrode_8H.html" title="Declaration of an electrode class." alt="" coords="1836,319,1959,345"/>
-<area shape="rect" id="node21" href="$CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="1559,319,1761,345"/>
-<area shape="rect" id="node22" href="$CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="1167,319,1283,345"/>
-<area shape="rect" id="node24" title=" " alt="" coords="1877,244,2032,271"/>
-<area shape="rect" id="node25" title=" " alt="" coords="2870,319,3005,345"/>
-<area shape="rect" id="node26" title=" " alt="" coords="2057,244,2186,271"/>
-<area shape="rect" id="node27" title=" " alt="" coords="2211,244,2376,271"/>
-<area shape="rect" id="node28" title=" " alt="" coords="2401,244,2514,271"/>
-<area shape="rect" id="node29" title=" " alt="" coords="2539,244,2707,271"/>
-<area shape="rect" id="node30" title=" " alt="" coords="1467,244,1632,271"/>
-<area shape="rect" id="node31" title=" " alt="" coords="1656,244,1803,271"/>
-<area shape="rect" id="node32" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="4379,319,4519,345"/>
-<area shape="rect" id="node36" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="3272,319,3405,345"/>
-<area shape="rect" id="node38" href="$CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="2832,244,2995,271"/>
-<area shape="rect" id="node33" title=" " alt="" coords="4334,393,4437,420"/>
-<area shape="rect" id="node34" title=" " alt="" coords="4461,393,4566,420"/>
-<area shape="rect" id="node35" title=" " alt="" coords="4590,393,4695,420"/>
-<area shape="rect" id="node37" title=" " alt="" coords="3932,393,4047,420"/>
-<area shape="rect" id="node42" title=" " alt="" coords="4352,244,4571,271"/>
-<area shape="rect" id="node43" title=" " alt="" coords="3430,319,3533,345"/>
-<area shape="rect" id="node44" href="$CD__EBMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="4143,319,4355,345"/>
-<area shape="rect" id="node45" href="$CD__EBHelmholtzOp_8H.html" title="Declaration of Helmholtz multigrid operators." alt="" coords="3273,244,3437,271"/>
-<area shape="rect" id="node47" href="$CD__EBHelmholtzEBBCFactory_8H_source.html" title=" " alt="" coords="3608,319,3835,345"/>
-<area shape="rect" id="node48" href="$CD__EBHelmholtzDomainBCFactory_8H_source.html" title=" " alt="" coords="3859,319,4119,345"/>
-<area shape="rect" id="node46" title=" " alt="" coords="772,393,823,420"/>
-<area shape="rect" id="node50" title=" " alt="" coords="632,393,725,420"/>
+<area shape="rect" id="node1" title="Declaration of a first order Eddington solver for radiative transfer." alt="" coords="1368,5,1552,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="613,95,685,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="710,95,836,121"/>
+<area shape="rect" id="node4" title=" " alt="" coords="860,95,952,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="977,95,1126,121"/>
+<area shape="rect" id="node6" title=" " alt="" coords="1150,95,1289,121"/>
+<area shape="rect" id="node7" title=" " alt="" coords="1314,95,1451,121"/>
+<area shape="rect" id="node8" title=" " alt="" coords="1476,95,1598,121"/>
+<area shape="rect" id="node9" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="3486,95,3602,121"/>
+<area shape="rect" id="node18" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2143,483,2328,509"/>
+<area shape="rect" id="node19" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="3028,483,3206,509"/>
+<area shape="rect" id="node42" href="$CD__EBHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making Poisson operators for multigrid." alt="" coords="1050,244,1259,271"/>
+<area shape="rect" id="node49" href="$CD__EddingtonSP1DomainBc_8H_source.html" title=" " alt="" coords="2861,401,3080,427"/>
+<area shape="rect" id="node10" title=" " alt="" coords="4147,483,4234,509"/>
+<area shape="rect" id="node11" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="4041,319,4262,345"/>
+<area shape="rect" id="node23" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="3080,169,3204,196"/>
+<area shape="rect" id="node40" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="3939,401,4066,427"/>
+<area shape="rect" id="node41" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="1825,401,1942,427"/>
+<area shape="rect" id="node12" title=" " alt="" coords="4260,483,4339,509"/>
+<area shape="rect" id="node13" title=" " alt="" coords="3986,483,4117,509"/>
+<area shape="rect" id="node14" title=" " alt="" coords="4562,483,4624,509"/>
+<area shape="rect" id="node15" title=" " alt="" coords="3858,483,3952,509"/>
+<area shape="rect" id="node16" title=" " alt="" coords="4796,483,4937,509"/>
+<area shape="rect" id="node17" href="$CD__Dielectric_8H.html" title="Dielectric class." alt="" coords="4238,401,4362,427"/>
+<area shape="rect" id="node20" href="$CD__Electrode_8H.html" title="Declaration of an electrode class." alt="" coords="4090,401,4213,427"/>
+<area shape="rect" id="node21" href="$CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="3458,401,3661,427"/>
+<area shape="rect" id="node22" href="$CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="4386,401,4502,427"/>
+<area shape="rect" id="node24" title=" " alt="" coords="4988,483,5142,509"/>
+<area shape="rect" id="node25" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="2451,319,2591,345"/>
+<area shape="rect" id="node29" href="$CD__DomainFluxIFFAB_8H.html" title="Declaration of a BaseIFFAB wrapper that holds domain fluxes." alt="" coords="3155,401,3332,427"/>
+<area shape="rect" id="node30" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="698,401,832,427"/>
+<area shape="rect" id="node32" href="$CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="2450,244,2613,271"/>
+<area shape="rect" id="node33" href="$CD__LoadBalancing_8H.html" title="Declaration of a static class for various load balancing operations." alt="" coords="2948,319,3105,345"/>
+<area shape="rect" id="node34" href="$CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="1978,319,2122,345"/>
+<area shape="rect" id="node36" href="$CD__EBReflux_8H.html" title="Declaration of a class which can reflux over the coarse&#45;fine interface." alt="" coords="453,401,573,427"/>
+<area shape="rect" id="node37" href="$CD__DomainFluxIFFABFactory_8H.html" title="Declaration of factory class for DomainFluxIFFAB." alt="" coords="3179,319,3402,345"/>
+<area shape="rect" id="node38" href="$CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="4780,401,4952,427"/>
+<area shape="rect" id="node39" href="$CD__NonConservativeDivergenceStencil_8H.html" title="Implementation of IrregStencil that can perform the nonconservative divergence averaging." alt="" coords="2501,393,2736,435"/>
+<area shape="rect" id="node26" title=" " alt="" coords="128,483,231,509"/>
+<area shape="rect" id="node27" title=" " alt="" coords="1966,401,2071,427"/>
+<area shape="rect" id="node28" title=" " alt="" coords="856,401,962,427"/>
+<area shape="rect" id="node31" title=" " alt="" coords="708,483,822,509"/>
+<area shape="rect" id="node35" title=" " alt="" coords="1202,483,1253,509"/>
+<area shape="rect" id="node43" title=" " alt="" coords="1045,319,1264,345"/>
+<area shape="rect" id="node44" title=" " alt="" coords="39,401,142,427"/>
+<area shape="rect" id="node45" href="$CD__EBMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="216,401,428,427"/>
+<area shape="rect" id="node46" href="$CD__EBHelmholtzOp_8H.html" title="Declaration of Helmholtz multigrid operators." alt="" coords="662,319,826,345"/>
+<area shape="rect" id="node47" href="$CD__EBHelmholtzEBBCFactory_8H_source.html" title=" " alt="" coords="1321,401,1548,427"/>
+<area shape="rect" id="node48" href="$CD__EBHelmholtzDomainBCFactory_8H_source.html" title=" " alt="" coords="1036,401,1296,427"/>
+<area shape="rect" id="node50" title=" " alt="" coords="2910,483,3004,509"/>
 </map>

@@ -1,52 +1,52 @@
 <map id="Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp" name="Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp">
-<area shape="rect" id="node1" title="Implementation of CD_CdrSolver.H." alt="" coords="2151,5,2352,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5350,319,5454,345"/>
-<area shape="rect" id="node3" title=" " alt="" coords="1151,95,1248,121"/>
-<area shape="rect" id="node4" title=" " alt="" coords="1272,95,1356,121"/>
-<area shape="rect" id="node5" href="$CD__CdrSolver_8H.html" title="Declaration of an abstract class for solving scalar convection&#45;diffusion&#45;reaction problems." alt="" coords="1003,95,1127,121"/>
-<area shape="rect" id="node20" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2815,319,3000,345"/>
-<area shape="rect" id="node21" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1862,319,2041,345"/>
-<area shape="rect" id="node27" href="$CD__DataOps_8H.html" title="Agglomeration of useful data operations." alt="" coords="2192,169,2311,196"/>
-<area shape="rect" id="node33" href="$CD__BoxLoops_8H.html" title="Declaration of a namespace for proto&#45;typing grid and EB loops." alt="" coords="3432,169,3557,196"/>
-<area shape="rect" id="node39" href="$CD__ParallelOps_8H.html" title="Agglomeration of basic MPI reductions." alt="" coords="1668,169,1803,196"/>
-<area shape="rect" id="node41" href="$CD__DischargeIO_8H.html" title="Silly, but useful functions that override standard Chombo HDF5 IO." alt="" coords="4096,169,4237,196"/>
-<area shape="rect" id="node46" href="$CD__Random_8H.html" title="File containing some useful static methods related to random number generation." alt="" coords="4838,169,4954,196"/>
-<area shape="rect" id="node6" title=" " alt="" coords="4736,244,4808,271"/>
-<area shape="rect" id="node7" title=" " alt="" coords="998,169,1062,196"/>
-<area shape="rect" id="node8" title=" " alt="" coords="5076,319,5142,345"/>
-<area shape="rect" id="node9" title=" " alt="" coords="34,244,120,271"/>
-<area shape="rect" id="node10" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="839,169,963,196"/>
-<area shape="rect" id="node22" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="989,244,1210,271"/>
-<area shape="rect" id="node25" href="$CD__CdrSpecies_8H.html" title="Declaration of a class that passes information into CdrSolver (e.g., initial conditions)." alt="" coords="3066,244,3200,271"/>
-<area shape="rect" id="node26" href="$CD__CdrDomainBC_8H.html" title="Declaration of domain boundary condition types for CdrSolver." alt="" coords="526,169,679,196"/>
-<area shape="rect" id="node11" title=" " alt="" coords="2346,244,2501,271"/>
-<area shape="rect" id="node12" title=" " alt="" coords="728,244,863,271"/>
-<area shape="rect" id="node13" title=" " alt="" coords="247,244,376,271"/>
-<area shape="rect" id="node14" title=" " alt="" coords="401,244,566,271"/>
-<area shape="rect" id="node15" title=" " alt="" coords="591,244,704,271"/>
-<area shape="rect" id="node16" title=" " alt="" coords="881,319,1022,345"/>
-<area shape="rect" id="node17" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="3276,244,3416,271"/>
-<area shape="rect" id="node18" title=" " alt="" coords="3988,319,4091,345"/>
-<area shape="rect" id="node19" title=" " alt="" coords="3578,319,3680,345"/>
-<area shape="rect" id="node23" title=" " alt="" coords="1244,319,1305,345"/>
-<area shape="rect" id="node24" title=" " alt="" coords="3453,319,3546,345"/>
-<area shape="rect" id="node28" href="$CD__Average_8H.html" title="Declaration of averaging methods." alt="" coords="1749,244,1864,271"/>
-<area shape="rect" id="node29" href="$CD__Decorations_8H_source.html" title=" " alt="" coords="2182,244,2322,271"/>
-<area shape="rect" id="node30" href="$CD__MFInterfaceFAB_8H.html" title="Declaration of a class that allocates irregular data holders over the interface between two phases." alt="" coords="2826,244,2990,271"/>
-<area shape="rect" id="node32" href="$CD__DataOpsImplem_8H.html" title="Implementation of CD_DataOps.H." alt="" coords="1989,244,2157,271"/>
-<area shape="rect" id="node31" title=" " alt="" coords="3314,319,3416,345"/>
-<area shape="rect" id="node34" title=" " alt="" coords="3707,244,3850,271"/>
-<area shape="rect" id="node35" title=" " alt="" coords="3441,244,3548,271"/>
-<area shape="rect" id="node36" title=" " alt="" coords="3572,244,3684,271"/>
-<area shape="rect" id="node37" title=" " alt="" coords="4027,244,4103,271"/>
-<area shape="rect" id="node38" href="$CD__BoxLoopsImplem_8H.html" title="Implementation of CD_BoxLoops.H." alt="" coords="2627,244,2802,271"/>
-<area shape="rect" id="node40" href="$CD__ParallelOpsImplem_8H.html" title="Implementation of CD_ParallelOps.H." alt="" coords="1488,244,1674,271"/>
-<area shape="rect" id="node42" title=" " alt="" coords="4229,244,4288,271"/>
-<area shape="rect" id="node43" title=" " alt="" coords="4642,244,4712,271"/>
-<area shape="rect" id="node44" title=" " alt="" coords="4312,244,4394,271"/>
-<area shape="rect" id="node45" title=" " alt="" coords="4418,244,4517,271"/>
-<area shape="rect" id="node47" title=" " alt="" coords="5125,244,5202,271"/>
-<area shape="rect" id="node48" title=" " alt="" coords="5226,244,5290,271"/>
-<area shape="rect" id="node49" title=" " alt="" coords="5315,244,5407,271"/>
-<area shape="rect" id="node50" href="$CD__RandomImplem_8H.html" title="Implementation of CD_Random.H." alt="" coords="4934,244,5100,271"/>
+<area shape="rect" id="node1" title="Implementation of CD_CdrSolver.H." alt="" coords="3537,5,3738,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="185,393,289,420"/>
+<area shape="rect" id="node3" title=" " alt="" coords="4639,95,4737,121"/>
+<area shape="rect" id="node4" title=" " alt="" coords="4761,95,4845,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="4869,95,5013,121"/>
+<area shape="rect" id="node6" href="$CD__CdrSolver_8H.html" title="Declaration of an abstract class for solving scalar convection&#45;diffusion&#45;reaction problems." alt="" coords="2270,95,2394,121"/>
+<area shape="rect" id="node17" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2645,393,2830,420"/>
+<area shape="rect" id="node18" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="3575,393,3753,420"/>
+<area shape="rect" id="node30" href="$CD__DataOps_8H.html" title="Agglomeration of useful data operations." alt="" coords="3378,169,3497,196"/>
+<area shape="rect" id="node35" href="$CD__BoxLoops_8H.html" title="Declaration of a namespace for proto&#45;typing grid and EB loops." alt="" coords="3873,244,3999,271"/>
+<area shape="rect" id="node39" href="$CD__ParallelOps_8H.html" title="Agglomeration of basic MPI reductions." alt="" coords="4609,244,4743,271"/>
+<area shape="rect" id="node41" href="$CD__DischargeIO_8H.html" title="Silly, but useful functions that override standard Chombo HDF5 IO." alt="" coords="1145,244,1287,271"/>
+<area shape="rect" id="node46" href="$CD__Random_8H.html" title="File containing some useful static methods related to random number generation." alt="" coords="643,244,759,271"/>
+<area shape="rect" id="node7" title=" " alt="" coords="93,319,165,345"/>
+<area shape="rect" id="node8" title=" " alt="" coords="2300,169,2364,196"/>
+<area shape="rect" id="node9" title=" " alt="" coords="431,393,497,420"/>
+<area shape="rect" id="node10" title=" " alt="" coords="2706,244,2793,271"/>
+<area shape="rect" id="node11" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="2389,169,2513,196"/>
+<area shape="rect" id="node23" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="2172,244,2393,271"/>
+<area shape="rect" id="node28" href="$CD__CdrSpecies_8H.html" title="Declaration of a class that passes information into CdrSolver (e.g., initial conditions)." alt="" coords="1894,319,2029,345"/>
+<area shape="rect" id="node29" href="$CD__CdrDomainBC_8H.html" title="Declaration of domain boundary condition types for CdrSolver." alt="" coords="2714,169,2867,196"/>
+<area shape="rect" id="node12" title=" " alt="" coords="1448,319,1603,345"/>
+<area shape="rect" id="node13" title=" " alt="" coords="2104,319,2245,345"/>
+<area shape="rect" id="node14" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="1678,319,1818,345"/>
+<area shape="rect" id="node19" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="3597,244,3731,271"/>
+<area shape="rect" id="node26" href="$CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="2472,319,2675,345"/>
+<area shape="rect" id="node27" href="$CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="2519,244,2681,271"/>
+<area shape="rect" id="node15" title=" " alt="" coords="1022,393,1125,420"/>
+<area shape="rect" id="node16" title=" " alt="" coords="1327,393,1430,420"/>
+<area shape="rect" id="node20" title=" " alt="" coords="3749,319,3856,345"/>
+<area shape="rect" id="node21" title=" " alt="" coords="3880,319,3992,345"/>
+<area shape="rect" id="node22" href="$CD__Average_8H.html" title="Declaration of averaging methods." alt="" coords="3560,319,3675,345"/>
+<area shape="rect" id="node24" title=" " alt="" coords="3104,319,3165,345"/>
+<area shape="rect" id="node25" title=" " alt="" coords="1809,393,1903,420"/>
+<area shape="rect" id="node31" href="$CD__Decorations_8H_source.html" title=" " alt="" coords="4433,319,4573,345"/>
+<area shape="rect" id="node32" href="$CD__MFInterfaceFAB_8H.html" title="Declaration of a class that allocates irregular data holders over the interface between two phases." alt="" coords="2985,244,3149,271"/>
+<area shape="rect" id="node34" href="$CD__DataOpsImplem_8H.html" title="Implementation of CD_DataOps.H." alt="" coords="3240,319,3408,345"/>
+<area shape="rect" id="node33" title=" " alt="" coords="3433,319,3535,345"/>
+<area shape="rect" id="node36" title=" " alt="" coords="4266,319,4409,345"/>
+<area shape="rect" id="node37" title=" " alt="" coords="2902,319,2978,345"/>
+<area shape="rect" id="node38" href="$CD__BoxLoopsImplem_8H.html" title="Implementation of CD_BoxLoops.H." alt="" coords="4067,319,4242,345"/>
+<area shape="rect" id="node40" href="$CD__ParallelOpsImplem_8H.html" title="Implementation of CD_ParallelOps.H." alt="" coords="4649,319,4834,345"/>
+<area shape="rect" id="node42" title=" " alt="" coords="1035,319,1093,345"/>
+<area shape="rect" id="node43" title=" " alt="" coords="789,319,859,345"/>
+<area shape="rect" id="node44" title=" " alt="" coords="1118,319,1199,345"/>
+<area shape="rect" id="node45" title=" " alt="" coords="1224,319,1323,345"/>
+<area shape="rect" id="node47" title=" " alt="" coords="307,319,384,345"/>
+<area shape="rect" id="node48" title=" " alt="" coords="408,319,472,345"/>
+<area shape="rect" id="node49" title=" " alt="" coords="190,319,282,345"/>
+<area shape="rect" id="node50" href="$CD__RandomImplem_8H.html" title="Implementation of CD_Random.H." alt="" coords="497,319,663,345"/>
 </map>

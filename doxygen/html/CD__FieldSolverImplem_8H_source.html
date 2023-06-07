@@ -92,50 +92,46 @@ $(function() {
 <div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="classFieldSolver.html#a69a5391352e10c7991f1b9fe1c533899">   20</a></span>&#160;<a class="code" href="classFieldSolver.html#a69a5391352e10c7991f1b9fe1c533899">FieldSolver::getDielectricPermittivity</a>(<span class="keyword">const</span> RealVect&amp; a_pos)<span class="keyword"> const</span></div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keyword"></span>{</div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;  CH_TIME(<span class="stringliteral">&quot;FieldSolver::getDielectricPermittivity(RealVect a_pos)&quot;</span>);</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;  <span class="keywordflow">if</span> (<a class="code" href="classFieldSolver.html#ad3c8b8e2c96833404a1d8562819bc7ea">m_verbosity</a> &gt; 5) {</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;FieldSolver::getDielectricPermittivity(RealVect a_pos)&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;  }</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;  <span class="keyword">const</span> Vector&lt;Dielectric&gt;&amp; dielectrics = <a class="code" href="classFieldSolver.html#a44ccf2a9e4ad62089f283047bee143fc">m_computationalGeometry</a>-&gt;getDielectrics();</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;  Real relPerm = 0.0;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  <span class="keywordflow">if</span> (<a class="code" href="classFieldSolver.html#a1979413602e716c0865492d526c4b289">m_multifluidIndexSpace</a>-&gt;numPhases() &gt; 1 &amp;&amp; dielectrics.size() &gt; 0) {</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <span class="comment">// Find the closest dielectric to position a_pos. This procedure might fail if</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="comment">// the user has two overlapping dielectrics, but those cases are not supported</span></div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="comment">// anyways.</span></div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    Real minDist = std::numeric_limits&lt;Real&gt;::infinity();</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordtype">int</span>  closest = 0;</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; </div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;  <span class="keyword">const</span> Vector&lt;Dielectric&gt;&amp; dielectrics = <a class="code" href="classFieldSolver.html#a44ccf2a9e4ad62089f283047bee143fc">m_computationalGeometry</a>-&gt;getDielectrics();</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160; </div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;  Real relPerm = 0.0;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;  <span class="keywordflow">if</span> (<a class="code" href="classFieldSolver.html#a1979413602e716c0865492d526c4b289">m_multifluidIndexSpace</a>-&gt;numPhases() &gt; 1 &amp;&amp; dielectrics.size() &gt; 0) {</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <span class="comment">// Find the closest dielectric to position a_pos. This procedure might fail if</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="comment">// the user has two overlapping dielectrics, but those cases are not supported</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="comment">// anyways.</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    Real minDist = std::numeric_limits&lt;Real&gt;::infinity();</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keywordtype">int</span>  closest = 0;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; dielectrics.size(); i++) {</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;      <span class="keyword">const</span> RefCountedPtr&lt;BaseIF&gt; func = dielectrics[i].getImplicitFunction();</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160; </div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; dielectrics.size(); i++) {</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;      <span class="keyword">const</span> RefCountedPtr&lt;BaseIF&gt; func = dielectrics[i].getImplicitFunction();</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;      <span class="keyword">const</span> Real curDist = func-&gt;value(a_pos);</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;      <span class="keywordflow">if</span> (std::abs(curDist) &lt;= std::abs(minDist)) {</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        minDist = curDist;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        closest = i;</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;      }</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    }</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;      <span class="keyword">const</span> Real curDist = func-&gt;value(a_pos);</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;      <span class="keywordflow">if</span> (std::abs(curDist) &lt;= std::abs(minDist)) {</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        minDist = curDist;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        closest = i;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;      }</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    }</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    relPerm = dielectrics[closest].getPermittivity(a_pos);</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  }</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    relPerm = dielectrics[closest].getPermittivity(a_pos);</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  }</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;  CH_assert(dielectrics.size() &gt; 0);</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  CH_assert(relPerm &gt; 0.0);</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  CH_assert(dielectrics.size() &gt; 0);</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;  CH_assert(relPerm &gt; 0.0);</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <span class="keywordflow">return</span> relPerm;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;}</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  <span class="keywordflow">return</span> relPerm;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;}</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__FieldSolver_8H_html"><div class="ttname"><a href="CD__FieldSolver_8H.html">CD_FieldSolver.H</a></div><div class="ttdoc">Contains declaration of a base electrostatics solver class.</div></div>
-<div class="ttc" id="aclassFieldSolver_html_a1979413602e716c0865492d526c4b289"><div class="ttname"><a href="classFieldSolver.html#a1979413602e716c0865492d526c4b289">FieldSolver::m_multifluidIndexSpace</a></div><div class="ttdeci">RefCountedPtr&lt; MultiFluidIndexSpace &gt; m_multifluidIndexSpace</div><div class="ttdoc">Multifluid index space.</div><div class="ttdef"><b>Definition:</b> CD_FieldSolver.H:540</div></div>
-<div class="ttc" id="aclassFieldSolver_html_a44ccf2a9e4ad62089f283047bee143fc"><div class="ttname"><a href="classFieldSolver.html#a44ccf2a9e4ad62089f283047bee143fc">FieldSolver::m_computationalGeometry</a></div><div class="ttdeci">RefCountedPtr&lt; ComputationalGeometry &gt; m_computationalGeometry</div><div class="ttdoc">Computational geometry.</div><div class="ttdef"><b>Definition:</b> CD_FieldSolver.H:545</div></div>
+<div class="ttc" id="aclassFieldSolver_html_a1979413602e716c0865492d526c4b289"><div class="ttname"><a href="classFieldSolver.html#a1979413602e716c0865492d526c4b289">FieldSolver::m_multifluidIndexSpace</a></div><div class="ttdeci">RefCountedPtr&lt; MultiFluidIndexSpace &gt; m_multifluidIndexSpace</div><div class="ttdoc">Multifluid index space.</div><div class="ttdef"><b>Definition:</b> CD_FieldSolver.H:546</div></div>
+<div class="ttc" id="aclassFieldSolver_html_a44ccf2a9e4ad62089f283047bee143fc"><div class="ttname"><a href="classFieldSolver.html#a44ccf2a9e4ad62089f283047bee143fc">FieldSolver::m_computationalGeometry</a></div><div class="ttdeci">RefCountedPtr&lt; ComputationalGeometry &gt; m_computationalGeometry</div><div class="ttdoc">Computational geometry.</div><div class="ttdef"><b>Definition:</b> CD_FieldSolver.H:551</div></div>
 <div class="ttc" id="aclassFieldSolver_html_a69a5391352e10c7991f1b9fe1c533899"><div class="ttname"><a href="classFieldSolver.html#a69a5391352e10c7991f1b9fe1c533899">FieldSolver::getDielectricPermittivity</a></div><div class="ttdeci">Real getDielectricPermittivity(const RealVect &amp;a_pos) const</div><div class="ttdoc">Get relative permittivity at some point in space.</div><div class="ttdef"><b>Definition:</b> CD_FieldSolverImplem.H:20</div></div>
-<div class="ttc" id="aclassFieldSolver_html_ad3c8b8e2c96833404a1d8562819bc7ea"><div class="ttname"><a href="classFieldSolver.html#ad3c8b8e2c96833404a1d8562819bc7ea">FieldSolver::m_verbosity</a></div><div class="ttdeci">int m_verbosity</div><div class="ttdoc">Verbosity for this calss.</div><div class="ttdef"><b>Definition:</b> CD_FieldSolver.H:645</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

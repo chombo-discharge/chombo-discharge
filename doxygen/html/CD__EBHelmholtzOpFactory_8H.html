@@ -83,7 +83,6 @@ $(function() {
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;RealVect.H&gt;</code><br />
 <code>#include &lt;EBLevelGrid.H&gt;</code><br />
-<code>#include &lt;EBFluxRegister.H&gt;</code><br />
 <code>#include &lt;EBCellFAB.H&gt;</code><br />
 <code>#include &lt;EBFluxFAB.H&gt;</code><br />
 <code>#include &lt;BaseIVFAB.H&gt;</code><br />
@@ -91,6 +90,7 @@ $(function() {
 <code>#include &lt;BaseEBBC.H&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__Location_8H_source.html">CD_Location.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__EBCoarAve_8H_source.html">CD_EBCoarAve.H</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__EBReflux_8H_source.html">CD_EBReflux.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__EBMultigridInterpolator_8H_source.html">CD_EBMultigridInterpolator.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__EBHelmholtzOp_8H_source.html">CD_EBHelmholtzOp.H</a>&gt;</code><br />
 <code>#include &lt;CD_EBHelmholtzEBBCFactory.H&gt;</code><br />
@@ -102,48 +102,52 @@ Include dependency graph for CD_EBHelmholtzOpFactory.H:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__EBHelmholtzOpFactory_8H__incl.png" border="0" usemap="#aSource_2Elliptic_2CD__EBHelmholtzOpFactory_8H" alt=""/></div>
 <map name="aSource_2Elliptic_2CD__EBHelmholtzOpFactory_8H" id="aSource_2Elliptic_2CD__EBHelmholtzOpFactory_8H">
-<area shape="rect" title="Declaration of a factory class for making Poisson operators for multigrid." alt="" coords="1443,5,1634,47"/>
-<area shape="rect" title=" " alt="" coords="5,95,99,121"/>
-<area shape="rect" title=" " alt="" coords="1361,244,1476,271"/>
-<area shape="rect" title=" " alt="" coords="2643,169,2778,196"/>
-<area shape="rect" title=" " alt="" coords="2034,244,2137,271"/>
-<area shape="rect" title=" " alt="" coords="402,244,507,271"/>
-<area shape="rect" title=" " alt="" coords="2542,244,2647,271"/>
-<area shape="rect" title=" " alt="" coords="3081,95,3300,121"/>
-<area shape="rect" title=" " alt="" coords="2802,169,2905,196"/>
-<area shape="rect" href="CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="863,244,980,271"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1147,393,1333,420"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1768,393,1947,420"/>
-<area shape="rect" href="CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="1375,169,1508,196"/>
-<area shape="rect" href="CD__EBMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="1533,169,1745,196"/>
-<area shape="rect" href="CD__EBHelmholtzOp_8H.html" title="Declaration of Helmholtz multigrid operators." alt="" coords="1926,95,2090,121"/>
-<area shape="rect" href="CD__EBHelmholtzEBBCFactory_8H_source.html" title=" " alt="" coords="995,95,1221,121"/>
-<area shape="rect" href="CD__EBHelmholtzDomainBCFactory_8H_source.html" title=" " alt="" coords="585,95,845,121"/>
-<area shape="rect" title=" " alt="" coords="819,319,909,345"/>
-<area shape="rect" href="CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="934,319,1101,345"/>
-<area shape="rect" href="CD__Average_8H.html" title="Declaration of averaging methods." alt="" coords="1800,319,1915,345"/>
-<area shape="rect" title=" " alt="" coords="2479,319,2529,345"/>
-<area shape="rect" title=" " alt="" coords="2045,169,2144,196"/>
-<area shape="rect" title=" " alt="" coords="2168,169,2291,196"/>
-<area shape="rect" href="CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="2672,244,2771,271"/>
-<area shape="rect" href="CD__EBMGRestrict_8H.html" title="Declaration of a restriction operator for EB geometric multigrid." alt="" coords="2315,169,2466,196"/>
-<area shape="rect" href="CD__EBMGProlong_8H.html" title="Declaration of a prolongation operator for EB geometric multigrid." alt="" coords="1819,169,1970,196"/>
-<area shape="rect" href="CD__EBHelmholtzEBBC_8H_source.html" title=" " alt="" coords="1017,169,1199,196"/>
-<area shape="rect" href="CD__EBHelmholtzDomainBC_8H_source.html" title=" " alt="" coords="563,169,778,196"/>
-<area shape="rect" title=" " alt="" coords="2748,319,2815,345"/>
-<area shape="rect" title=" " alt="" coords="2839,319,2894,345"/>
-<area shape="rect" title=" " alt="" coords="2655,319,2724,345"/>
-<area shape="rect" href="CD__TimerImplem_8H.html" title="Implementation of CD_Timer.H." alt="" coords="2970,319,3121,345"/>
-<area shape="rect" title=" " alt="" coords="2856,393,2931,420"/>
-<area shape="rect" title=" " alt="" coords="2955,393,3035,420"/>
-<area shape="rect" title=" " alt="" coords="3059,393,3133,420"/>
-<area shape="rect" title=" " alt="" coords="3157,393,3232,420"/>
-<area shape="rect" title=" " alt="" coords="2161,244,2303,271"/>
-<area shape="rect" title=" " alt="" coords="1501,244,1603,271"/>
-<area shape="rect" title=" " alt="" coords="709,244,838,271"/>
-<area shape="rect" href="CD__EBHelmholtzEBBCImplem_8H_source.html" title=" " alt="" coords="1055,244,1286,271"/>
-<area shape="rect" title=" " alt="" coords="1278,319,1421,345"/>
-<area shape="rect" href="CD__EBHelmholtzDomainBCImplem_8H_source.html" title=" " alt="" coords="427,319,693,345"/>
+<area shape="rect" title="Declaration of a factory class for making Poisson operators for multigrid." alt="" coords="1679,5,1869,47"/>
+<area shape="rect" title=" " alt="" coords="42,95,135,121"/>
+<area shape="rect" title=" " alt="" coords="1885,244,1999,271"/>
+<area shape="rect" title=" " alt="" coords="1339,244,1441,271"/>
+<area shape="rect" title=" " alt="" coords="3111,244,3216,271"/>
+<area shape="rect" title=" " alt="" coords="2651,244,2756,271"/>
+<area shape="rect" title=" " alt="" coords="1209,95,1427,121"/>
+<area shape="rect" title=" " alt="" coords="481,169,584,196"/>
+<area shape="rect" href="CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="2151,244,2269,271"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1476,393,1661,420"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1837,393,2015,420"/>
+<area shape="rect" href="CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="609,169,742,196"/>
+<area shape="rect" href="CD__EBReflux_8H.html" title="Declaration of a class which can reflux over the coarse&#45;fine interface." alt="" coords="766,169,886,196"/>
+<area shape="rect" href="CD__EBMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="1783,169,1995,196"/>
+<area shape="rect" href="CD__EBHelmholtzOp_8H.html" title="Declaration of Helmholtz multigrid operators." alt="" coords="1503,95,1667,121"/>
+<area shape="rect" href="CD__EBHelmholtzEBBCFactory_8H_source.html" title=" " alt="" coords="2578,95,2805,121"/>
+<area shape="rect" href="CD__EBHelmholtzDomainBCFactory_8H_source.html" title=" " alt="" coords="2829,95,3089,121"/>
+<area shape="rect" title=" " alt="" coords="2121,319,2211,345"/>
+<area shape="rect" href="CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="1929,319,2096,345"/>
+<area shape="rect" title=" " alt="" coords="211,244,316,271"/>
+<area shape="rect" title=" " alt="" coords="391,244,498,271"/>
+<area shape="rect" title=" " alt="" coords="522,244,634,271"/>
+<area shape="rect" href="CD__Average_8H.html" title="Declaration of averaging methods." alt="" coords="643,319,758,345"/>
+<area shape="rect" title=" " alt="" coords="1249,319,1299,345"/>
+<area shape="rect" title=" " alt="" coords="759,244,837,271"/>
+<area shape="rect" title=" " alt="" coords="1610,169,1709,196"/>
+<area shape="rect" title=" " alt="" coords="1011,169,1134,196"/>
+<area shape="rect" href="CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="962,244,1061,271"/>
+<area shape="rect" href="CD__EBMGRestrict_8H.html" title="Declaration of a restriction operator for EB geometric multigrid." alt="" coords="1435,169,1585,196"/>
+<area shape="rect" href="CD__EBMGProlong_8H.html" title="Declaration of a prolongation operator for EB geometric multigrid." alt="" coords="1260,169,1411,196"/>
+<area shape="rect" href="CD__EBHelmholtzEBBC_8H_source.html" title=" " alt="" coords="2271,169,2453,196"/>
+<area shape="rect" href="CD__EBHelmholtzDomainBC_8H_source.html" title=" " alt="" coords="2852,169,3067,196"/>
+<area shape="rect" title=" " alt="" coords="934,319,1001,345"/>
+<area shape="rect" title=" " alt="" coords="1025,319,1080,345"/>
+<area shape="rect" title=" " alt="" coords="1105,319,1174,345"/>
+<area shape="rect" href="CD__TimerImplem_8H.html" title="Implementation of CD_Timer.H." alt="" coords="115,319,265,345"/>
+<area shape="rect" title=" " alt="" coords="202,393,277,420"/>
+<area shape="rect" title=" " alt="" coords="301,393,381,420"/>
+<area shape="rect" title=" " alt="" coords="5,393,79,420"/>
+<area shape="rect" title=" " alt="" coords="103,393,178,420"/>
+<area shape="rect" title=" " alt="" coords="1466,244,1607,271"/>
+<area shape="rect" title=" " alt="" coords="2024,244,2127,271"/>
+<area shape="rect" title=" " alt="" coords="2780,244,2909,271"/>
+<area shape="rect" href="CD__EBHelmholtzEBBCImplem_8H_source.html" title=" " alt="" coords="2344,244,2575,271"/>
+<area shape="rect" title=" " alt="" coords="2388,319,2531,345"/>
+<area shape="rect" href="CD__EBHelmholtzDomainBCImplem_8H_source.html" title=" " alt="" coords="2877,319,3143,345"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">

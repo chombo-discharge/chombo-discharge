@@ -69,6 +69,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
@@ -83,75 +84,108 @@ $(function() {
 
 <p><code>#include &lt;<a class="el" href="CD__EBCoarAve_8H_source.html">CD_EBCoarAve.H</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:aaad02114b1d0b79431286efae54e7e83"><td class="memItemLeft" align="right" valign="top"><a id="aaad02114b1d0b79431286efae54e7e83"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#aaad02114b1d0b79431286efae54e7e83">Type</a> { <b>Arithmetic</b>
+, <b>Conservative</b>
+, <b>Harmonic</b>
+ }</td></tr>
+<tr class="memdesc:aaad02114b1d0b79431286efae54e7e83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type of coarsening supported. <br /></td></tr>
+<tr class="separator:aaad02114b1d0b79431286efae54e7e83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad413bf3d9ce0cd88ce173c21c13ee55f"><td class="memItemLeft" align="right" valign="top"><a id="ad413bf3d9ce0cd88ce173c21c13ee55f"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#ad413bf3d9ce0cd88ce173c21c13ee55f">EBCoarAve</a> ()</td></tr>
-<tr class="memdesc:ad413bf3d9ce0cd88ce173c21c13ee55f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Must call define afterwards. <br /></td></tr>
-<tr class="separator:ad413bf3d9ce0cd88ce173c21c13ee55f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a935436fd3ffa7f506cf0c75c03ebd3c0"><td class="memItemLeft" align="right" valign="top"><a id="a935436fd3ffa7f506cf0c75c03ebd3c0"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a935436fd3ffa7f506cf0c75c03ebd3c0">EBCoarAve</a> () noexcept</td></tr>
+<tr class="memdesc:a935436fd3ffa7f506cf0c75c03ebd3c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Must call define afterwards. <br /></td></tr>
+<tr class="separator:a935436fd3ffa7f506cf0c75c03ebd3c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92eae1f8b9a996224dff85eb2f1fe309"><td class="memItemLeft" align="right" valign="top"><a id="a92eae1f8b9a996224dff85eb2f1fe309"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a92eae1f8b9a996224dff85eb2f1fe309">EBCoarAve</a> (const <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &amp;a_other)=delete</td></tr>
 <tr class="memdesc:a92eae1f8b9a996224dff85eb2f1fe309"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor not allowed. <br /></td></tr>
 <tr class="separator:a92eae1f8b9a996224dff85eb2f1fe309"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7dae883dab4ba1c81114c3c3c23c732f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a7dae883dab4ba1c81114c3c3c23c732f">EBCoarAve</a> (const DisjointBoxLayout &amp;a_dblFine, const DisjointBoxLayout &amp;a_dblCoar, const EBISLayout &amp;a_ebislFine, const EBISLayout &amp;a_ebislCoar, const ProblemDomain &amp;a_domainCoar, const int &amp;a_refRat, const EBIndexSpace *a_ebisPtr)</td></tr>
-<tr class="memdesc:a7dae883dab4ba1c81114c3c3c23c732f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defining constructor.  <a href="classEBCoarAve.html#a7dae883dab4ba1c81114c3c3c23c732f">More...</a><br /></td></tr>
-<tr class="separator:a7dae883dab4ba1c81114c3c3c23c732f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0b60ef24118d9c766d9075c7c06c423f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a0b60ef24118d9c766d9075c7c06c423f">EBCoarAve</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoFi, const int &amp;a_refRat)</td></tr>
-<tr class="memdesc:a0b60ef24118d9c766d9075c7c06c423f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defining constructor. Calls the define function.  <a href="classEBCoarAve.html#a0b60ef24118d9c766d9075c7c06c423f">More...</a><br /></td></tr>
-<tr class="separator:a0b60ef24118d9c766d9075c7c06c423f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a24f8ee58d118b80eb529d56bd71dc7be"><td class="memItemLeft" align="right" valign="top"><a id="a24f8ee58d118b80eb529d56bd71dc7be"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a24f8ee58d118b80eb529d56bd71dc7be">~EBCoarAve</a> ()</td></tr>
-<tr class="memdesc:a24f8ee58d118b80eb529d56bd71dc7be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing) <br /></td></tr>
-<tr class="separator:a24f8ee58d118b80eb529d56bd71dc7be"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9a7f94d5a8ba26ab70f2a390b99f6ff3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a9a7f94d5a8ba26ab70f2a390b99f6ff3">define</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoFi, const int &amp;a_refRat)</td></tr>
-<tr class="memdesc:a9a7f94d5a8ba26ab70f2a390b99f6ff3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function &ndash; puts operator in usable state.  <a href="classEBCoarAve.html#a9a7f94d5a8ba26ab70f2a390b99f6ff3">More...</a><br /></td></tr>
-<tr class="separator:a9a7f94d5a8ba26ab70f2a390b99f6ff3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbaea87e7dd019e8f0e83a9e03813014"><td class="memItemLeft" align="right" valign="top"><a id="adbaea87e7dd019e8f0e83a9e03813014"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#adbaea87e7dd019e8f0e83a9e03813014">operator=</a> (const <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &amp;fabin)=delete</td></tr>
-<tr class="memdesc:adbaea87e7dd019e8f0e83a9e03813014"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assignement not allowed. <br /></td></tr>
-<tr class="separator:adbaea87e7dd019e8f0e83a9e03813014"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a321f632ceff0644214e7d8498db45205"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a321f632ceff0644214e7d8498db45205">averageData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_coarData, const LevelData&lt; EBCellFAB &gt; &amp;a_fineData, const Interval &amp;a_variables, const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;a_average)</td></tr>
-<tr class="memdesc:a321f632ceff0644214e7d8498db45205"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an average of cell data.  <a href="classEBCoarAve.html#a321f632ceff0644214e7d8498db45205">More...</a><br /></td></tr>
-<tr class="separator:a321f632ceff0644214e7d8498db45205"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a075ae3f2f9897ce26cfcbccb6e98d04f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a075ae3f2f9897ce26cfcbccb6e98d04f">averageData</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_coarData, const LevelData&lt; EBFluxFAB &gt; &amp;a_fineData, const Interval &amp;a_variables, const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;a_average)</td></tr>
-<tr class="memdesc:a075ae3f2f9897ce26cfcbccb6e98d04f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an average of face data.  <a href="classEBCoarAve.html#a075ae3f2f9897ce26cfcbccb6e98d04f">More...</a><br /></td></tr>
-<tr class="separator:a075ae3f2f9897ce26cfcbccb6e98d04f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac4aad218b7f9a1d3becb8296523716cf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#ac4aad218b7f9a1d3becb8296523716cf">averageData</a> (LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_coarData, const LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_fineData, const Interval &amp;a_variables, const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;a_average)</td></tr>
-<tr class="memdesc:ac4aad218b7f9a1d3becb8296523716cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an average of EB data.  <a href="classEBCoarAve.html#ac4aad218b7f9a1d3becb8296523716cf">More...</a><br /></td></tr>
-<tr class="separator:ac4aad218b7f9a1d3becb8296523716cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6b6318f893dd71a8511b8933a3edd85"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#af6b6318f893dd71a8511b8933a3edd85">EBCoarAve</a> (const DisjointBoxLayout &amp;a_dblFine, const DisjointBoxLayout &amp;a_dblCoar, const EBISLayout &amp;a_ebislFine, const EBISLayout &amp;a_ebislCoar, const ProblemDomain &amp;a_domainCoar, const int &amp;a_refRat, const EBIndexSpace *a_ebisPtr) noexcept</td></tr>
+<tr class="memdesc:af6b6318f893dd71a8511b8933a3edd85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defining constructor.  <a href="classEBCoarAve.html#af6b6318f893dd71a8511b8933a3edd85">More...</a><br /></td></tr>
+<tr class="separator:af6b6318f893dd71a8511b8933a3edd85"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a442f12d0899cc4cfd282235970d600"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a8a442f12d0899cc4cfd282235970d600">EBCoarAve</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoFi, const int &amp;a_refRat) noexcept</td></tr>
+<tr class="memdesc:a8a442f12d0899cc4cfd282235970d600"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defining constructor. Calls the define function.  <a href="classEBCoarAve.html#a8a442f12d0899cc4cfd282235970d600">More...</a><br /></td></tr>
+<tr class="separator:a8a442f12d0899cc4cfd282235970d600"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7b40c4822be50ce1466c5261df1ef0f"><td class="memItemLeft" align="right" valign="top"><a id="ac7b40c4822be50ce1466c5261df1ef0f"></a>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#ac7b40c4822be50ce1466c5261df1ef0f">~EBCoarAve</a> () noexcept</td></tr>
+<tr class="memdesc:ac7b40c4822be50ce1466c5261df1ef0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing) <br /></td></tr>
+<tr class="separator:ac7b40c4822be50ce1466c5261df1ef0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f498c611d22502e1aec6910c38f5cb4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a2f498c611d22502e1aec6910c38f5cb4">define</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoFi, const int &amp;a_refRat) noexcept</td></tr>
+<tr class="memdesc:a2f498c611d22502e1aec6910c38f5cb4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function &ndash; puts operator in usable state.  <a href="classEBCoarAve.html#a2f498c611d22502e1aec6910c38f5cb4">More...</a><br /></td></tr>
+<tr class="separator:a2f498c611d22502e1aec6910c38f5cb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00983438d13b51d4012984fa4864d0cb"><td class="memItemLeft" align="right" valign="top"><a id="a00983438d13b51d4012984fa4864d0cb"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a00983438d13b51d4012984fa4864d0cb">operator=</a> (const <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &amp;fabin)=delete</td></tr>
+<tr class="memdesc:a00983438d13b51d4012984fa4864d0cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assignement not allowed. <br /></td></tr>
+<tr class="separator:a00983438d13b51d4012984fa4864d0cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad08fc881cf045cc06e7d16c95209c035"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#ad08fc881cf045cc06e7d16c95209c035">averageData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_coarData, const LevelData&lt; EBCellFAB &gt; &amp;a_fineData, const Interval &amp;a_variables, const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;a_average) const noexcept</td></tr>
+<tr class="memdesc:ad08fc881cf045cc06e7d16c95209c035"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an average of cell data.  <a href="classEBCoarAve.html#ad08fc881cf045cc06e7d16c95209c035">More...</a><br /></td></tr>
+<tr class="separator:ad08fc881cf045cc06e7d16c95209c035"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0bb7ba6b5c43e386ca6d19131f01378"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#ae0bb7ba6b5c43e386ca6d19131f01378">averageData</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_coarData, const LevelData&lt; EBFluxFAB &gt; &amp;a_fineData, const Interval &amp;a_variables, const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;a_average) const noexcept</td></tr>
+<tr class="memdesc:ae0bb7ba6b5c43e386ca6d19131f01378"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an average of face data.  <a href="classEBCoarAve.html#ae0bb7ba6b5c43e386ca6d19131f01378">More...</a><br /></td></tr>
+<tr class="separator:ae0bb7ba6b5c43e386ca6d19131f01378"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd13fd7ae7a1c2f435b2f236095fefbe"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#abd13fd7ae7a1c2f435b2f236095fefbe">averageData</a> (LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_coarData, const LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_fineData, const Interval &amp;a_variables, const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;a_average) const noexcept</td></tr>
+<tr class="memdesc:abd13fd7ae7a1c2f435b2f236095fefbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an average of EB data.  <a href="classEBCoarAve.html#abd13fd7ae7a1c2f435b2f236095fefbe">More...</a><br /></td></tr>
+<tr class="separator:abd13fd7ae7a1c2f435b2f236095fefbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:aa911a6fb3435c5c8c3aa20bc8a336297"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#aa911a6fb3435c5c8c3aa20bc8a336297">arithmeticAverage</a> (EBCellFAB &amp;a_coarData, const EBCellFAB &amp;a_fineData, const DataIndex &amp;a_datInd, const Interval &amp;a_coarInterv, const Interval &amp;a_fineInterv)</td></tr>
-<tr class="memdesc:aa911a6fb3435c5c8c3aa20bc8a336297"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an arithmetic average of cell-centered data when coarsening.  <a href="classEBCoarAve.html#aa911a6fb3435c5c8c3aa20bc8a336297">More...</a><br /></td></tr>
-<tr class="separator:aa911a6fb3435c5c8c3aa20bc8a336297"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d27f83ad2c2daf81279a7a22f7041a7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a6d27f83ad2c2daf81279a7a22f7041a7">harmonicAverage</a> (EBCellFAB &amp;a_coarData, const EBCellFAB &amp;a_fineData, const DataIndex &amp;a_datInd, const Interval &amp;a_coarInterv, const Interval &amp;a_fineInterv)</td></tr>
-<tr class="memdesc:a6d27f83ad2c2daf81279a7a22f7041a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do a harmonic average of cell-centered data when coarsening.  <a href="classEBCoarAve.html#a6d27f83ad2c2daf81279a7a22f7041a7">More...</a><br /></td></tr>
-<tr class="separator:a6d27f83ad2c2daf81279a7a22f7041a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0c9a64d294a38bdf21a7f5b5a49fd376"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a0c9a64d294a38bdf21a7f5b5a49fd376">conservativeAverage</a> (EBCellFAB &amp;a_coarData, const EBCellFAB &amp;a_fineData, const DataIndex &amp;a_datInd, const Interval &amp;a_coarInterv, const Interval &amp;a_fineInterv)</td></tr>
-<tr class="memdesc:a0c9a64d294a38bdf21a7f5b5a49fd376"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do a conservative average of cell-centered data when coarsening.  <a href="classEBCoarAve.html#a0c9a64d294a38bdf21a7f5b5a49fd376">More...</a><br /></td></tr>
-<tr class="separator:a0c9a64d294a38bdf21a7f5b5a49fd376"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a77bc5572134fcc6ea54911cb5bf70aaa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a77bc5572134fcc6ea54911cb5bf70aaa">arithmeticAverage</a> (EBFaceFAB &amp;a_coarData, const EBFaceFAB &amp;a_fineData, const DataIndex &amp;a_datInd, const Interval &amp;a_fineInterv, const Interval &amp;a_coarInterv, const int &amp;a_dir)</td></tr>
-<tr class="memdesc:a77bc5572134fcc6ea54911cb5bf70aaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an arithmetic average of face-centered data when coarsening.  <a href="classEBCoarAve.html#a77bc5572134fcc6ea54911cb5bf70aaa">More...</a><br /></td></tr>
-<tr class="separator:a77bc5572134fcc6ea54911cb5bf70aaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaeafe5893c90cdd7442e52a640175d5a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#aaeafe5893c90cdd7442e52a640175d5a">harmonicAverage</a> (EBFaceFAB &amp;a_coarData, const EBFaceFAB &amp;a_fineData, const DataIndex &amp;a_datInd, const Interval &amp;a_coarInterv, const Interval &amp;a_fineInterv, const int &amp;a_dir)</td></tr>
-<tr class="memdesc:aaeafe5893c90cdd7442e52a640175d5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do a harmonic average of face-centered data when coarsening.  <a href="classEBCoarAve.html#aaeafe5893c90cdd7442e52a640175d5a">More...</a><br /></td></tr>
-<tr class="separator:aaeafe5893c90cdd7442e52a640175d5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acc0d1e0ca7a1d95c80aafa2592c451f1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#acc0d1e0ca7a1d95c80aafa2592c451f1">conservativeAverage</a> (EBFaceFAB &amp;a_coarData, const EBFaceFAB &amp;a_fineData, const DataIndex &amp;a_datInd, const Interval &amp;a_coarInterv, const Interval &amp;a_fineInterv, const int &amp;a_dir)</td></tr>
-<tr class="memdesc:acc0d1e0ca7a1d95c80aafa2592c451f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do a conservative average of face-centered data when coarsening.  <a href="classEBCoarAve.html#acc0d1e0ca7a1d95c80aafa2592c451f1">More...</a><br /></td></tr>
-<tr class="separator:acc0d1e0ca7a1d95c80aafa2592c451f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae42d7447170bf6eed1612eda159035f4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#ae42d7447170bf6eed1612eda159035f4">arithmeticAverage</a> (BaseIVFAB&lt; Real &gt; &amp;a_coarData, const BaseIVFAB&lt; Real &gt; &amp;a_fineData, const DataIndex &amp;a_datInd, const Interval &amp;a_coarInterv, const Interval &amp;a_fineINterv) const</td></tr>
-<tr class="memdesc:ae42d7447170bf6eed1612eda159035f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Arithmetic average data defined on irregular cells.  <a href="classEBCoarAve.html#ae42d7447170bf6eed1612eda159035f4">More...</a><br /></td></tr>
-<tr class="separator:ae42d7447170bf6eed1612eda159035f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba84ab32d3c46ecf8d1ba0ee5f072420"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#aba84ab32d3c46ecf8d1ba0ee5f072420">harmonicAverage</a> (BaseIVFAB&lt; Real &gt; &amp;a_coarData, const BaseIVFAB&lt; Real &gt; &amp;a_fineData, const DataIndex &amp;a_datInd, const Interval &amp;a_coarInterv, const Interval &amp;a_fineInterv) const</td></tr>
-<tr class="memdesc:aba84ab32d3c46ecf8d1ba0ee5f072420"><td class="mdescLeft">&#160;</td><td class="mdescRight">Harmonic average data defined on irregular cells.  <a href="classEBCoarAve.html#aba84ab32d3c46ecf8d1ba0ee5f072420">More...</a><br /></td></tr>
-<tr class="separator:aba84ab32d3c46ecf8d1ba0ee5f072420"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a686fce230f08fbefdac325ade5609d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a6a686fce230f08fbefdac325ade5609d">conservativeAverage</a> (BaseIVFAB&lt; Real &gt; &amp;a_coarData, const BaseIVFAB&lt; Real &gt; &amp;a_fineData, const DataIndex &amp;a_datInd, const Interval &amp;a_coarInterv, const Interval &amp;a_fineInterv) const</td></tr>
-<tr class="memdesc:a6a686fce230f08fbefdac325ade5609d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conservatively average data defined on irregular cells.  <a href="classEBCoarAve.html#a6a686fce230f08fbefdac325ade5609d">More...</a><br /></td></tr>
-<tr class="separator:a6a686fce230f08fbefdac325ade5609d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0adee89505630772065bc74e36ae3b35"><td class="memItemLeft" align="right" valign="top"><a id="a0adee89505630772065bc74e36ae3b35"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a0adee89505630772065bc74e36ae3b35">defineCellStencils</a> () noexcept</td></tr>
+<tr class="memdesc:a0adee89505630772065bc74e36ae3b35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define stencils for the various coarsening functions of cell data. <br /></td></tr>
+<tr class="separator:a0adee89505630772065bc74e36ae3b35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d163effbccc38c0555737b3af987e7a"><td class="memItemLeft" align="right" valign="top"><a id="a4d163effbccc38c0555737b3af987e7a"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a4d163effbccc38c0555737b3af987e7a">defineFaceStencils</a> () noexcept</td></tr>
+<tr class="memdesc:a4d163effbccc38c0555737b3af987e7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define stencils for the various coarsening functions of face data. <br /></td></tr>
+<tr class="separator:a4d163effbccc38c0555737b3af987e7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6af7cd0c31843484e0163e7b2d251593"><td class="memItemLeft" align="right" valign="top"><a id="a6af7cd0c31843484e0163e7b2d251593"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a6af7cd0c31843484e0163e7b2d251593">defineEBStencils</a> () noexcept</td></tr>
+<tr class="memdesc:a6af7cd0c31843484e0163e7b2d251593"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define stencils for the various coarsening functions of EB data. <br /></td></tr>
+<tr class="separator:a6af7cd0c31843484e0163e7b2d251593"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af31116766596f0839d21a1e791374bff"><td class="memItemLeft" align="right" valign="top"><a id="af31116766596f0839d21a1e791374bff"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#af31116766596f0839d21a1e791374bff">defineBuffers</a> () noexcept</td></tr>
+<tr class="memdesc:af31116766596f0839d21a1e791374bff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define buffer storage. <br /></td></tr>
+<tr class="separator:af31116766596f0839d21a1e791374bff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf85e26af94e1c9a62675a778e64a378"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#adf85e26af94e1c9a62675a778e64a378">arithmeticAverage</a> (EBCellFAB &amp;a_coarData, const EBCellFAB &amp;a_fineData, const DataIndex &amp;a_datInd, const int &amp;a_coarVar, const int &amp;a_fineVar) const noexcept</td></tr>
+<tr class="memdesc:adf85e26af94e1c9a62675a778e64a378"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an arithmetic average of cell-centered data when coarsening.  <a href="classEBCoarAve.html#adf85e26af94e1c9a62675a778e64a378">More...</a><br /></td></tr>
+<tr class="separator:adf85e26af94e1c9a62675a778e64a378"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a266aac2279610ef2b4b8172dc03078b9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a266aac2279610ef2b4b8172dc03078b9">harmonicAverage</a> (EBCellFAB &amp;a_coarData, const EBCellFAB &amp;a_fineData, const DataIndex &amp;a_datInd, const int &amp;a_coarVar, const int &amp;a_fineVar) const noexcept</td></tr>
+<tr class="memdesc:a266aac2279610ef2b4b8172dc03078b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do a harmonic average of cell-centered data when coarsening.  <a href="classEBCoarAve.html#a266aac2279610ef2b4b8172dc03078b9">More...</a><br /></td></tr>
+<tr class="separator:a266aac2279610ef2b4b8172dc03078b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa73e01f3331cbe8c78ca34bdb7f514a7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#aa73e01f3331cbe8c78ca34bdb7f514a7">conservativeAverage</a> (EBCellFAB &amp;a_coarData, const EBCellFAB &amp;a_fineData, const DataIndex &amp;a_datInd, const int &amp;a_coarVar, const int &amp;a_fineVar) const noexcept</td></tr>
+<tr class="memdesc:aa73e01f3331cbe8c78ca34bdb7f514a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do a conservative average of cell-centered data when coarsening.  <a href="classEBCoarAve.html#aa73e01f3331cbe8c78ca34bdb7f514a7">More...</a><br /></td></tr>
+<tr class="separator:aa73e01f3331cbe8c78ca34bdb7f514a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa529a6056cf59fa19d939e5e632a3a81"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#aa529a6056cf59fa19d939e5e632a3a81">arithmeticAverage</a> (EBFaceFAB &amp;a_coarData, const EBFaceFAB &amp;a_fineData, const DataIndex &amp;a_datInd, const int &amp;a_fineVar, const int &amp;a_coarVar, const int &amp;a_dir) const noexcept</td></tr>
+<tr class="memdesc:aa529a6056cf59fa19d939e5e632a3a81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an arithmetic average of face-centered data when coarsening.  <a href="classEBCoarAve.html#aa529a6056cf59fa19d939e5e632a3a81">More...</a><br /></td></tr>
+<tr class="separator:aa529a6056cf59fa19d939e5e632a3a81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63ff07cdb71057c95f0ce9a46d0929c1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a63ff07cdb71057c95f0ce9a46d0929c1">harmonicAverage</a> (EBFaceFAB &amp;a_coarData, const EBFaceFAB &amp;a_fineData, const DataIndex &amp;a_datInd, const int &amp;a_coarVar, const int &amp;a_fineVar, const int &amp;a_dir) const noexcept</td></tr>
+<tr class="memdesc:a63ff07cdb71057c95f0ce9a46d0929c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do a harmonic average of face-centered data when coarsening.  <a href="classEBCoarAve.html#a63ff07cdb71057c95f0ce9a46d0929c1">More...</a><br /></td></tr>
+<tr class="separator:a63ff07cdb71057c95f0ce9a46d0929c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7c49c215d8447a4fba6126c82f5ded4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#ac7c49c215d8447a4fba6126c82f5ded4">conservativeAverage</a> (EBFaceFAB &amp;a_coarData, const EBFaceFAB &amp;a_fineData, const DataIndex &amp;a_datInd, const int &amp;a_coarVar, const int &amp;a_fineVar, const int &amp;a_dir) const noexcept</td></tr>
+<tr class="memdesc:ac7c49c215d8447a4fba6126c82f5ded4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do a conservative average of face-centered data when coarsening.  <a href="classEBCoarAve.html#ac7c49c215d8447a4fba6126c82f5ded4">More...</a><br /></td></tr>
+<tr class="separator:ac7c49c215d8447a4fba6126c82f5ded4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac5760750fc67266e22e4bf3943713833"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#ac5760750fc67266e22e4bf3943713833">arithmeticAverage</a> (BaseIVFAB&lt; Real &gt; &amp;a_coarData, const BaseIVFAB&lt; Real &gt; &amp;a_fineData, const DataIndex &amp;a_datInd, const int &amp;a_coarVar, const int &amp;a_fineVar) const noexcept</td></tr>
+<tr class="memdesc:ac5760750fc67266e22e4bf3943713833"><td class="mdescLeft">&#160;</td><td class="mdescRight">Arithmetic average data defined on irregular cells.  <a href="classEBCoarAve.html#ac5760750fc67266e22e4bf3943713833">More...</a><br /></td></tr>
+<tr class="separator:ac5760750fc67266e22e4bf3943713833"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91b5beeea646fcc3bc67595787fe11ee"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a91b5beeea646fcc3bc67595787fe11ee">harmonicAverage</a> (BaseIVFAB&lt; Real &gt; &amp;a_coarData, const BaseIVFAB&lt; Real &gt; &amp;a_fineData, const DataIndex &amp;a_datInd, const int &amp;a_coarVar, const int &amp;a_fineVar) const noexcept</td></tr>
+<tr class="memdesc:a91b5beeea646fcc3bc67595787fe11ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Harmonic average data defined on irregular cells.  <a href="classEBCoarAve.html#a91b5beeea646fcc3bc67595787fe11ee">More...</a><br /></td></tr>
+<tr class="separator:a91b5beeea646fcc3bc67595787fe11ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ef94e94bb1c7f91816b5e05c6d80598"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a5ef94e94bb1c7f91816b5e05c6d80598">conservativeAverage</a> (BaseIVFAB&lt; Real &gt; &amp;a_coarData, const BaseIVFAB&lt; Real &gt; &amp;a_fineData, const DataIndex &amp;a_datInd, const int &amp;a_coarVar, const int &amp;a_fineVar) const noexcept</td></tr>
+<tr class="memdesc:a5ef94e94bb1c7f91816b5e05c6d80598"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conservatively average data defined on irregular cells.  <a href="classEBCoarAve.html#a5ef94e94bb1c7f91816b5e05c6d80598">More...</a><br /></td></tr>
+<tr class="separator:a5ef94e94bb1c7f91816b5e05c6d80598"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
+<tr class="memitem:ae494db4c8dee213f03a7047c843c299c"><td class="memItemLeft" align="right" valign="top"><a id="ae494db4c8dee213f03a7047c843c299c"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#ae494db4c8dee213f03a7047c843c299c">m_isDefined</a></td></tr>
+<tr class="memdesc:ae494db4c8dee213f03a7047c843c299c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defined or not. <br /></td></tr>
+<tr class="separator:ae494db4c8dee213f03a7047c843c299c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e46f492f3e34cb7d6943129e86c2ed3"><td class="memItemLeft" align="right" valign="top"><a id="a1e46f492f3e34cb7d6943129e86c2ed3"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a1e46f492f3e34cb7d6943129e86c2ed3">m_refRat</a></td></tr>
+<tr class="memdesc:a1e46f492f3e34cb7d6943129e86c2ed3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refinement ratio. <br /></td></tr>
+<tr class="separator:a1e46f492f3e34cb7d6943129e86c2ed3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac25d4750365d2f2328d48f1125e7945"><td class="memItemLeft" align="right" valign="top"><a id="aac25d4750365d2f2328d48f1125e7945"></a>
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#aac25d4750365d2f2328d48f1125e7945">m_eblgFine</a></td></tr>
 <tr class="memdesc:aac25d4750365d2f2328d48f1125e7945"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fine grids. <br /></td></tr>
@@ -164,27 +198,70 @@ EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a2ec7b557cb7ce21626b76a85d2e5f323">m_eblgCoFi</a></td></tr>
 <tr class="memdesc:a2ec7b557cb7ce21626b76a85d2e5f323"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsened fine grids. <br /></td></tr>
 <tr class="separator:a2ec7b557cb7ce21626b76a85d2e5f323"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99fe3e8d006e83a071da07e1bbdd4725"><td class="memItemLeft" align="right" valign="top"><a id="a99fe3e8d006e83a071da07e1bbdd4725"></a>
+Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a99fe3e8d006e83a071da07e1bbdd4725">m_copier</a></td></tr>
+<tr class="memdesc:a99fe3e8d006e83a071da07e1bbdd4725"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pre-built copier for copying from m_eblgCoFi to m_eblgCoar. <br /></td></tr>
+<tr class="separator:a99fe3e8d006e83a071da07e1bbdd4725"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac8776ce2889f721ce2a5bf735f1caac"><td class="memItemLeft" align="right" valign="top"><a id="aac8776ce2889f721ce2a5bf735f1caac"></a>
 LayoutData&lt; IntVectSet &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#aac8776ce2889f721ce2a5bf735f1caac">m_irregSetsCoFi</a></td></tr>
 <tr class="memdesc:aac8776ce2889f721ce2a5bf735f1caac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Irregular cells on the coarsened fine layout. <br /></td></tr>
 <tr class="separator:aac8776ce2889f721ce2a5bf735f1caac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1e46f492f3e34cb7d6943129e86c2ed3"><td class="memItemLeft" align="right" valign="top"><a id="a1e46f492f3e34cb7d6943129e86c2ed3"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a1e46f492f3e34cb7d6943129e86c2ed3">m_refRat</a></td></tr>
-<tr class="memdesc:a1e46f492f3e34cb7d6943129e86c2ed3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refinement ratio. <br /></td></tr>
-<tr class="separator:a1e46f492f3e34cb7d6943129e86c2ed3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae494db4c8dee213f03a7047c843c299c"><td class="memItemLeft" align="right" valign="top"><a id="ae494db4c8dee213f03a7047c843c299c"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#ae494db4c8dee213f03a7047c843c299c">m_isDefined</a></td></tr>
-<tr class="memdesc:ae494db4c8dee213f03a7047c843c299c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defined or not. <br /></td></tr>
-<tr class="separator:ae494db4c8dee213f03a7047c843c299c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8749d159960c8a69a75edd8714ccebba"><td class="memItemLeft" align="right" valign="top"><a id="a8749d159960c8a69a75edd8714ccebba"></a>
+LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a8749d159960c8a69a75edd8714ccebba">m_irregCellsCoFi</a></td></tr>
+<tr class="memdesc:a8749d159960c8a69a75edd8714ccebba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Irregular cells on the coarsened fine layout. <br /></td></tr>
+<tr class="separator:a8749d159960c8a69a75edd8714ccebba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30cc21e9965f48b37275454c509eae06"><td class="memItemLeft" align="right" valign="top"><a id="a30cc21e9965f48b37275454c509eae06"></a>
+LayoutData&lt; std::map&lt; int, FaceIterator &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a30cc21e9965f48b37275454c509eae06">m_irregFacesCoFi</a></td></tr>
+<tr class="memdesc:a30cc21e9965f48b37275454c509eae06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Irregular faces on the coarsened fine layout. <br /></td></tr>
+<tr class="separator:a30cc21e9965f48b37275454c509eae06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acfe7522c748d9fdef5daf5b60a827526"><td class="memItemLeft" align="right" valign="top"><a id="acfe7522c748d9fdef5daf5b60a827526"></a>
+LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#acfe7522c748d9fdef5daf5b60a827526">m_cellArithmeticStencils</a></td></tr>
+<tr class="memdesc:acfe7522c748d9fdef5daf5b60a827526"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for arithmetic coarsening of volume data. <br /></td></tr>
+<tr class="separator:acfe7522c748d9fdef5daf5b60a827526"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad81753a715c9b3a9582e6b048f0a45dd"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#ad81753a715c9b3a9582e6b048f0a45dd">m_cellHarmonicStencils</a></td></tr>
+<tr class="memdesc:ad81753a715c9b3a9582e6b048f0a45dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for harmonic coarsening of volume data.  <a href="classEBCoarAve.html#ad81753a715c9b3a9582e6b048f0a45dd">More...</a><br /></td></tr>
+<tr class="separator:ad81753a715c9b3a9582e6b048f0a45dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05c04957bf4ebc0159de71d67d8b4c7d"><td class="memItemLeft" align="right" valign="top"><a id="a05c04957bf4ebc0159de71d67d8b4c7d"></a>
+LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a05c04957bf4ebc0159de71d67d8b4c7d">m_cellConservativeStencils</a></td></tr>
+<tr class="memdesc:a05c04957bf4ebc0159de71d67d8b4c7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for conservative coarsening of volume data. <br /></td></tr>
+<tr class="separator:a05c04957bf4ebc0159de71d67d8b4c7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae21505d63841c4868d1bacadb5d00013"><td class="memItemLeft" align="right" valign="top"><a id="ae21505d63841c4868d1bacadb5d00013"></a>
+LayoutData&lt; std::map&lt; int, BaseIFFAB&lt; FaceStencil &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#ae21505d63841c4868d1bacadb5d00013">m_faceArithmeticStencils</a></td></tr>
+<tr class="memdesc:ae21505d63841c4868d1bacadb5d00013"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for arithmetic coarsening of face data. <br /></td></tr>
+<tr class="separator:ae21505d63841c4868d1bacadb5d00013"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae20be5d3c2beb189b0183ea8d86593be"><td class="memItemLeft" align="right" valign="top"><a id="ae20be5d3c2beb189b0183ea8d86593be"></a>
+LayoutData&lt; std::map&lt; int, BaseIFFAB&lt; FaceStencil &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#ae20be5d3c2beb189b0183ea8d86593be">m_faceHarmonicStencils</a></td></tr>
+<tr class="memdesc:ae20be5d3c2beb189b0183ea8d86593be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for harmonic coarsening of face data. <br /></td></tr>
+<tr class="separator:ae20be5d3c2beb189b0183ea8d86593be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afaa8c15f24a2d47a711040194c9c6ad3"><td class="memItemLeft" align="right" valign="top"><a id="afaa8c15f24a2d47a711040194c9c6ad3"></a>
+LayoutData&lt; std::map&lt; int, BaseIFFAB&lt; FaceStencil &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#afaa8c15f24a2d47a711040194c9c6ad3">m_faceConservativeStencils</a></td></tr>
+<tr class="memdesc:afaa8c15f24a2d47a711040194c9c6ad3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for conservative coarsening of face data. <br /></td></tr>
+<tr class="separator:afaa8c15f24a2d47a711040194c9c6ad3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adae93b97baddd930659d651291d2257a"><td class="memItemLeft" align="right" valign="top"><a id="adae93b97baddd930659d651291d2257a"></a>
+LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#adae93b97baddd930659d651291d2257a">m_ebArithmeticStencils</a></td></tr>
+<tr class="memdesc:adae93b97baddd930659d651291d2257a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for arithmetic coarsening of EB data. <br /></td></tr>
+<tr class="separator:adae93b97baddd930659d651291d2257a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51d72ef85951dccf4d4f1a091f289603"><td class="memItemLeft" align="right" valign="top"><a id="a51d72ef85951dccf4d4f1a091f289603"></a>
+LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a51d72ef85951dccf4d4f1a091f289603">m_ebHarmonicStencils</a></td></tr>
+<tr class="memdesc:a51d72ef85951dccf4d4f1a091f289603"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for harmonic coarsening of EB data. <br /></td></tr>
+<tr class="separator:a51d72ef85951dccf4d4f1a091f289603"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a200121704f9677f66aa1922b045bcb13"><td class="memItemLeft" align="right" valign="top"><a id="a200121704f9677f66aa1922b045bcb13"></a>
+LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarAve.html#a200121704f9677f66aa1922b045bcb13">m_ebConservativeStencils</a></td></tr>
+<tr class="memdesc:a200121704f9677f66aa1922b045bcb13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for conservative coarsening of EB data. <br /></td></tr>
+<tr class="separator:a200121704f9677f66aa1922b045bcb13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class which replaces data at coarse level of refinement with average at fine level of refinement. </p>
+<p>When defining this class, use the EBLevelGrid-based constructors if the coarsened grids are available. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a7dae883dab4ba1c81114c3c3c23c732f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7dae883dab4ba1c81114c3c3c23c732f">&#9670;&nbsp;</a></span>EBCoarAve() <span class="overload">[1/2]</span></h2>
+<a id="af6b6318f893dd71a8511b8933a3edd85"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6b6318f893dd71a8511b8933a3edd85">&#9670;&nbsp;</a></span>EBCoarAve() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">EBCoarAve::EBCoarAve </td>
@@ -234,6 +311,11 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Defining constructor. </p>
@@ -252,11 +334,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 
 </div>
 </div>
-<a id="a0b60ef24118d9c766d9075c7c06c423f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0b60ef24118d9c766d9075c7c06c423f">&#9670;&nbsp;</a></span>EBCoarAve() <span class="overload">[2/2]</span></h2>
+<a id="a8a442f12d0899cc4cfd282235970d600"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a442f12d0899cc4cfd282235970d600">&#9670;&nbsp;</a></span>EBCoarAve() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">EBCoarAve::EBCoarAve </td>
@@ -288,6 +373,11 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Defining constructor. Calls the define function. </p>
@@ -304,8 +394,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="ae42d7447170bf6eed1612eda159035f4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae42d7447170bf6eed1612eda159035f4">&#9670;&nbsp;</a></span>arithmeticAverage() <span class="overload">[1/3]</span></h2>
+<a id="ac5760750fc67266e22e4bf3943713833"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5760750fc67266e22e4bf3943713833">&#9670;&nbsp;</a></span>arithmeticAverage() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -334,14 +424,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_coarInterv</em>, </td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_coarVar</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_fineINterv</em>&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_fineVar</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -351,7 +441,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -362,16 +452,16 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineData</td><td>Fine data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_datInd</td><td>Grid index </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarInterv</td><td>Coarse variables </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineInterv</td><td>Fine variables </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarVar</td><td>Coarse variable </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finevar</td><td>Fine Variable </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="aa911a6fb3435c5c8c3aa20bc8a336297"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa911a6fb3435c5c8c3aa20bc8a336297">&#9670;&nbsp;</a></span>arithmeticAverage() <span class="overload">[2/3]</span></h2>
+<a id="adf85e26af94e1c9a62675a778e64a378"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf85e26af94e1c9a62675a778e64a378">&#9670;&nbsp;</a></span>arithmeticAverage() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -400,24 +490,24 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_coarInterv</em>, </td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_coarVar</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_fineInterv</em>&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_fineVar</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -428,16 +518,16 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineData</td><td>Fine data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_datInd</td><td>Grid index </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineInterv</td><td>Fine interval </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarInterv</td><td>Coarse interval </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarVar</td><td>Coarse variables </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineVar</td><td>Fine variable </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a77bc5572134fcc6ea54911cb5bf70aaa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a77bc5572134fcc6ea54911cb5bf70aaa">&#9670;&nbsp;</a></span>arithmeticAverage() <span class="overload">[3/3]</span></h2>
+<a id="aa529a6056cf59fa19d939e5e632a3a81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa529a6056cf59fa19d939e5e632a3a81">&#9670;&nbsp;</a></span>arithmeticAverage() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -466,14 +556,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_fineInterv</em>, </td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_fineVar</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_coarInterv</em>, </td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_coarVar</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -484,12 +574,12 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -500,8 +590,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineData</td><td>Fine data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_datInd</td><td>Grid index </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineInterv</td><td>Fine interval </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarInterv</td><td>Coarse interval </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarVar</td><td>Coarse variable </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineVar</td><td>Fine variable </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Face direction </td></tr>
   </table>
   </dd>
@@ -509,11 +599,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 
 </div>
 </div>
-<a id="ac4aad218b7f9a1d3becb8296523716cf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac4aad218b7f9a1d3becb8296523716cf">&#9670;&nbsp;</a></span>averageData() <span class="overload">[1/3]</span></h2>
+<a id="abd13fd7ae7a1c2f435b2f236095fefbe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd13fd7ae7a1c2f435b2f236095fefbe">&#9670;&nbsp;</a></span>averageData() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBCoarAve::averageData </td>
@@ -542,9 +635,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Do an average of EB data. </p>
@@ -557,15 +655,17 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>Input data holders should be defined over the input grids. </dd></dl>
 
 </div>
 </div>
-<a id="a321f632ceff0644214e7d8498db45205"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a321f632ceff0644214e7d8498db45205">&#9670;&nbsp;</a></span>averageData() <span class="overload">[2/3]</span></h2>
+<a id="ad08fc881cf045cc06e7d16c95209c035"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad08fc881cf045cc06e7d16c95209c035">&#9670;&nbsp;</a></span>averageData() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBCoarAve::averageData </td>
@@ -594,9 +694,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Do an average of cell data. </p>
@@ -609,15 +714,17 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>Input data holders should be defined over the input grids. </dd></dl>
 
 </div>
 </div>
-<a id="a075ae3f2f9897ce26cfcbccb6e98d04f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a075ae3f2f9897ce26cfcbccb6e98d04f">&#9670;&nbsp;</a></span>averageData() <span class="overload">[3/3]</span></h2>
+<a id="ae0bb7ba6b5c43e386ca6d19131f01378"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0bb7ba6b5c43e386ca6d19131f01378">&#9670;&nbsp;</a></span>averageData() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBCoarAve::averageData </td>
@@ -646,9 +753,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Do an average of face data. </p>
@@ -661,12 +773,11 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>Input data holders should be defined over the input grids. </dd></dl>
 
 </div>
 </div>
-<a id="a6a686fce230f08fbefdac325ade5609d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6a686fce230f08fbefdac325ade5609d">&#9670;&nbsp;</a></span>conservativeAverage() <span class="overload">[1/3]</span></h2>
+<a id="a5ef94e94bb1c7f91816b5e05c6d80598"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ef94e94bb1c7f91816b5e05c6d80598">&#9670;&nbsp;</a></span>conservativeAverage() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -695,14 +806,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_coarInterv</em>, </td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_coarVar</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_fineInterv</em>&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_fineVar</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -712,7 +823,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -723,16 +834,16 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineData</td><td>Fine data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_datInd</td><td>Grid index </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarInterv</td><td>Coarse variables </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineInterv</td><td>Fine variables </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarVar</td><td>Coarse variable </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finevar</td><td>Fine Variable </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a0c9a64d294a38bdf21a7f5b5a49fd376"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0c9a64d294a38bdf21a7f5b5a49fd376">&#9670;&nbsp;</a></span>conservativeAverage() <span class="overload">[2/3]</span></h2>
+<a id="aa73e01f3331cbe8c78ca34bdb7f514a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa73e01f3331cbe8c78ca34bdb7f514a7">&#9670;&nbsp;</a></span>conservativeAverage() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -761,24 +872,24 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_coarInterv</em>, </td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_coarVar</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_fineInterv</em>&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_fineVar</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -789,16 +900,16 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineData</td><td>Fine data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_datInd</td><td>Grid index </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineInterv</td><td>Fine interval </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarInterv</td><td>Coarse interval </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarVar</td><td>Coarse variables </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineVar</td><td>Fine variable </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="acc0d1e0ca7a1d95c80aafa2592c451f1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acc0d1e0ca7a1d95c80aafa2592c451f1">&#9670;&nbsp;</a></span>conservativeAverage() <span class="overload">[3/3]</span></h2>
+<a id="ac7c49c215d8447a4fba6126c82f5ded4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7c49c215d8447a4fba6126c82f5ded4">&#9670;&nbsp;</a></span>conservativeAverage() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -827,14 +938,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_coarInterv</em>, </td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_coarVar</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_fineInterv</em>, </td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_fineVar</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -845,12 +956,12 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -861,8 +972,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineData</td><td>Fine data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_datInd</td><td>Grid index </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarInterv</td><td>Coarse interval </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineInterv</td><td>Fine interval </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarVar</td><td>Coarse variable </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineVar</td><td>Fine variable </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Face direction </td></tr>
   </table>
   </dd>
@@ -870,11 +981,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 
 </div>
 </div>
-<a id="a9a7f94d5a8ba26ab70f2a390b99f6ff3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9a7f94d5a8ba26ab70f2a390b99f6ff3">&#9670;&nbsp;</a></span>define()</h2>
+<a id="a2f498c611d22502e1aec6910c38f5cb4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f498c611d22502e1aec6910c38f5cb4">&#9670;&nbsp;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBCoarAve::define </td>
@@ -906,6 +1020,11 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Define function &ndash; puts operator in usable state. </p>
@@ -921,8 +1040,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 
 </div>
 </div>
-<a id="aba84ab32d3c46ecf8d1ba0ee5f072420"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aba84ab32d3c46ecf8d1ba0ee5f072420">&#9670;&nbsp;</a></span>harmonicAverage() <span class="overload">[1/3]</span></h2>
+<a id="a91b5beeea646fcc3bc67595787fe11ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91b5beeea646fcc3bc67595787fe11ee">&#9670;&nbsp;</a></span>harmonicAverage() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -951,14 +1070,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_coarInterv</em>, </td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_coarVar</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_fineInterv</em>&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_fineVar</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -968,7 +1087,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -979,16 +1098,16 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineData</td><td>Fine data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_datInd</td><td>Grid index </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarInterv</td><td>Coarse variables </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineInterv</td><td>Fine variables </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarVar</td><td>Coarse variable </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finevar</td><td>Fine Variable </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a6d27f83ad2c2daf81279a7a22f7041a7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6d27f83ad2c2daf81279a7a22f7041a7">&#9670;&nbsp;</a></span>harmonicAverage() <span class="overload">[2/3]</span></h2>
+<a id="a266aac2279610ef2b4b8172dc03078b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a266aac2279610ef2b4b8172dc03078b9">&#9670;&nbsp;</a></span>harmonicAverage() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1017,24 +1136,24 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_coarInterv</em>, </td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_coarVar</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_fineInterv</em>&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_fineVar</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -1045,16 +1164,16 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineData</td><td>Fine data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_datInd</td><td>Grid index </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineInterv</td><td>Fine interval </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarInterv</td><td>Coarse interval </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarVar</td><td>Coarse variables </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineVar</td><td>Fine variable </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="aaeafe5893c90cdd7442e52a640175d5a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaeafe5893c90cdd7442e52a640175d5a">&#9670;&nbsp;</a></span>harmonicAverage() <span class="overload">[3/3]</span></h2>
+<a id="a63ff07cdb71057c95f0ce9a46d0929c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a63ff07cdb71057c95f0ce9a46d0929c1">&#9670;&nbsp;</a></span>harmonicAverage() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1083,14 +1202,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_coarInterv</em>, </td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_coarVar</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Interval &amp;&#160;</td>
-          <td class="paramname"><em>a_fineInterv</em>, </td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_fineVar</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1101,12 +1220,12 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -1117,12 +1236,38 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineData</td><td>Fine data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_datInd</td><td>Grid index </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarInterv</td><td>Coarse interval </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineInterv</td><td>Fine interval </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarVar</td><td>Coarse variable </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineVar</td><td>Fine variable </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Face direction </td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ad81753a715c9b3a9582e6b048f0a45dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad81753a715c9b3a9582e6b048f0a45dd">&#9670;&nbsp;</a></span>m_cellHarmonicStencils</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">LayoutData&lt;BaseIVFAB&lt;VoFStencil&gt; &gt; EBCoarAve::m_cellHarmonicStencils</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stencils for harmonic coarsening of volume data. </p>
+<dl class="section note"><dt>Note</dt><dd>This is different than the cellConservative and cellArithmetic stencils because its weights are all one and the harmonic average is applied differently. </dd></dl>
 
 </div>
 </div>

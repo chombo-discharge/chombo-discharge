@@ -1,9 +1,9 @@
 <map id="EddingtonSP1" name="EddingtonSP1">
-<area shape="rect" id="node1" title="Radiative tranfer equation solver in the SP1 (diffusion) approximation." alt="" coords="1000,185,1111,212"/>
-<area shape="rect" id="node2" href="$classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="735,185,812,212"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="362,134,546,175"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,141,144,168"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="356,80,552,107"/>
-<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="355,204,553,231"/>
-<area shape="rect" id="node7" href="$classEddingtonSP1DomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="684,309,863,336"/>
+<area shape="rect" id="node1" title="Radiative tranfer equation solver in the SP1 (diffusion) approximation." alt="" coords="1000,156,1111,183"/>
+<area shape="rect" id="node2" href="$classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="735,156,812,183"/>
+<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="362,105,546,146"/>
+<area shape="rect" id="node4" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,112,144,139"/>
+<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="356,51,552,77"/>
+<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="355,175,553,201"/>
+<area shape="rect" id="node7" href="$classEddingtonSP1DomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="684,280,863,307"/>
 </map>

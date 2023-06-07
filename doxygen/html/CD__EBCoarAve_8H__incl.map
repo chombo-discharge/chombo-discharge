@@ -1,7 +1,10 @@
 <map id="Source/AmrMesh/CD_EBCoarAve.H" name="Source/AmrMesh/CD_EBCoarAve.H">
-<area shape="rect" id="node1" title="Declaration of conservative coarsening utility." alt="" coords="99,5,309,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,120,121"/>
-<area shape="rect" id="node3" href="$CD__Average_8H.html" title="Declaration of averaging methods." alt="" coords="195,95,309,121"/>
-<area shape="rect" id="node4" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="59,169,245,196"/>
-<area shape="rect" id="node5" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="269,169,448,196"/>
+<area shape="rect" id="node1" title="Declaration of conservative coarsening utility." alt="" coords="356,5,565,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,95,111,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="135,95,250,121"/>
+<area shape="rect" id="node4" title=" " alt="" coords="274,95,381,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="405,95,517,121"/>
+<area shape="rect" id="node6" href="$CD__Average_8H.html" title="Declaration of averaging methods." alt="" coords="591,95,706,121"/>
+<area shape="rect" id="node7" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="456,169,641,196"/>
+<area shape="rect" id="node8" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="666,169,845,196"/>
 </map>

@@ -101,59 +101,75 @@ Inheritance diagram for EBAMRData&lt; T &gt;:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a779f9241c81f1b96f258de1155c9ea70"><td class="memItemLeft" align="right" valign="top"><a id="a779f9241c81f1b96f258de1155c9ea70"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a779f9241c81f1b96f258de1155c9ea70">EBAMRData</a> ()</td></tr>
-<tr class="memdesc:a779f9241c81f1b96f258de1155c9ea70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Does nothing. <br /></td></tr>
-<tr class="separator:a779f9241c81f1b96f258de1155c9ea70"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0e9977cae2886af6158a2b147063a655"><td class="memItemLeft" align="right" valign="top"><a id="a0e9977cae2886af6158a2b147063a655"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a0e9977cae2886af6158a2b147063a655">EBAMRData</a> (const int a_size)</td></tr>
-<tr class="memdesc:a0e9977cae2886af6158a2b147063a655"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. Sets m_data to size a_size but does not allocate anything. <br /></td></tr>
-<tr class="separator:a0e9977cae2886af6158a2b147063a655"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aec98c4960a67e340ad23faf6fec838de"><td class="memItemLeft" align="right" valign="top"><a id="aec98c4960a67e340ad23faf6fec838de"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#aec98c4960a67e340ad23faf6fec838de">~EBAMRData</a> ()</td></tr>
-<tr class="memdesc:aec98c4960a67e340ad23faf6fec838de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. Does nothing. <br /></td></tr>
-<tr class="separator:aec98c4960a67e340ad23faf6fec838de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac4ae2f862a51af4ff4886185f55313ad"><td class="memItemLeft" align="right" valign="top">RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#ac4ae2f862a51af4ff4886185f55313ad">operator[]</a> (int a_level)</td></tr>
-<tr class="memdesc:ac4ae2f862a51af4ff4886185f55313ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indexing operators. Returns m_data[a_level].  <a href="classEBAMRData.html#ac4ae2f862a51af4ff4886185f55313ad">More...</a><br /></td></tr>
-<tr class="separator:ac4ae2f862a51af4ff4886185f55313ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adaea3ec8f9c929dad561549c5c10fcd8"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#adaea3ec8f9c929dad561549c5c10fcd8">operator[]</a> (int a_level) const</td></tr>
-<tr class="memdesc:adaea3ec8f9c929dad561549c5c10fcd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indexing operators. Returns const m_data[a_level].  <a href="classEBAMRData.html#adaea3ec8f9c929dad561549c5c10fcd8">More...</a><br /></td></tr>
-<tr class="separator:adaea3ec8f9c929dad561549c5c10fcd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a80a80a64898c2aac7d216408d6b6fa6e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a80a80a64898c2aac7d216408d6b6fa6e">resize</a> (const int a_size)</td></tr>
-<tr class="memdesc:a80a80a64898c2aac7d216408d6b6fa6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resize m_data to having size a_size.  <a href="classEBAMRData.html#a80a80a64898c2aac7d216408d6b6fa6e">More...</a><br /></td></tr>
-<tr class="separator:a80a80a64898c2aac7d216408d6b6fa6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab95bfbf4cba32f8082a808e2038074ce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#ab95bfbf4cba32f8082a808e2038074ce">setRealm</a> (const std::string a_realm)</td></tr>
-<tr class="memdesc:ab95bfbf4cba32f8082a808e2038074ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the realm for this object.  <a href="classEBAMRData.html#ab95bfbf4cba32f8082a808e2038074ce">More...</a><br /></td></tr>
-<tr class="separator:ab95bfbf4cba32f8082a808e2038074ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac7f8981650aa8283a7e003310fd3fcb8"><td class="memItemLeft" align="right" valign="top"><a id="ac7f8981650aa8283a7e003310fd3fcb8"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#ac7f8981650aa8283a7e003310fd3fcb8">size</a> () const</td></tr>
-<tr class="memdesc:ac7f8981650aa8283a7e003310fd3fcb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get size of m_data. <br /></td></tr>
-<tr class="separator:ac7f8981650aa8283a7e003310fd3fcb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a005e0a7d3b650b0a85c39376770f2f76"><td class="memItemLeft" align="right" valign="top"><a id="a005e0a7d3b650b0a85c39376770f2f76"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a005e0a7d3b650b0a85c39376770f2f76">EBAMRData</a> () noexcept</td></tr>
+<tr class="memdesc:a005e0a7d3b650b0a85c39376770f2f76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Does nothing. <br /></td></tr>
+<tr class="separator:a005e0a7d3b650b0a85c39376770f2f76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a300db40cfdd2d6c6cb53deb87f706660"><td class="memItemLeft" align="right" valign="top"><a id="a300db40cfdd2d6c6cb53deb87f706660"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a300db40cfdd2d6c6cb53deb87f706660">EBAMRData</a> (const int a_size) noexcept</td></tr>
+<tr class="memdesc:a300db40cfdd2d6c6cb53deb87f706660"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. Sets m_data to size a_size but does not allocate anything. <br /></td></tr>
+<tr class="separator:a300db40cfdd2d6c6cb53deb87f706660"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e295369cd82f326ef0a4b80bf90e1d9"><td class="memItemLeft" align="right" valign="top"><a id="a7e295369cd82f326ef0a4b80bf90e1d9"></a>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a7e295369cd82f326ef0a4b80bf90e1d9">~EBAMRData</a> () noexcept</td></tr>
+<tr class="memdesc:a7e295369cd82f326ef0a4b80bf90e1d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. Does nothing. <br /></td></tr>
+<tr class="separator:a7e295369cd82f326ef0a4b80bf90e1d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa4e1b7d6ec550bf338183204bdc9017"><td class="memItemLeft" align="right" valign="top">RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#afa4e1b7d6ec550bf338183204bdc9017">operator[]</a> (int a_level) noexcept</td></tr>
+<tr class="memdesc:afa4e1b7d6ec550bf338183204bdc9017"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indexing operators. Returns m_data[a_level].  <a href="classEBAMRData.html#afa4e1b7d6ec550bf338183204bdc9017">More...</a><br /></td></tr>
+<tr class="separator:afa4e1b7d6ec550bf338183204bdc9017"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea0acd419b832ddde5c3f67a4a3bf886"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#aea0acd419b832ddde5c3f67a4a3bf886">operator[]</a> (int a_level) const noexcept</td></tr>
+<tr class="memdesc:aea0acd419b832ddde5c3f67a4a3bf886"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indexing operators. Returns const m_data[a_level].  <a href="classEBAMRData.html#aea0acd419b832ddde5c3f67a4a3bf886">More...</a><br /></td></tr>
+<tr class="separator:aea0acd419b832ddde5c3f67a4a3bf886"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a778d6acd8c4d9fa56624714c7624fd5b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a778d6acd8c4d9fa56624714c7624fd5b">resize</a> (const int a_size) noexcept</td></tr>
+<tr class="memdesc:a778d6acd8c4d9fa56624714c7624fd5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resize m_data to having size a_size.  <a href="classEBAMRData.html#a778d6acd8c4d9fa56624714c7624fd5b">More...</a><br /></td></tr>
+<tr class="separator:a778d6acd8c4d9fa56624714c7624fd5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a278c2dce4bf9e82e09aecad19f9a6f45"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a278c2dce4bf9e82e09aecad19f9a6f45">setRealm</a> (const std::string a_realm) noexcept</td></tr>
+<tr class="memdesc:a278c2dce4bf9e82e09aecad19f9a6f45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the realm for this object.  <a href="classEBAMRData.html#a278c2dce4bf9e82e09aecad19f9a6f45">More...</a><br /></td></tr>
+<tr class="separator:a278c2dce4bf9e82e09aecad19f9a6f45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a959f38f7adb9f012ce1ddf4efc855bde"><td class="memItemLeft" align="right" valign="top"><a id="a959f38f7adb9f012ce1ddf4efc855bde"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a959f38f7adb9f012ce1ddf4efc855bde">size</a> () const noexcept</td></tr>
+<tr class="memdesc:a959f38f7adb9f012ce1ddf4efc855bde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get size of m_data. <br /></td></tr>
+<tr class="separator:a959f38f7adb9f012ce1ddf4efc855bde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5b94dee364b74d56756fa45a848e7fa4"><td class="memItemLeft" align="right" valign="top"><a id="a5b94dee364b74d56756fa45a848e7fa4"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a5b94dee364b74d56756fa45a848e7fa4">exchange</a> () noexcept</td></tr>
 <tr class="memdesc:a5b94dee364b74d56756fa45a848e7fa4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exchange on all AMR levels. <br /></td></tr>
 <tr class="separator:a5b94dee364b74d56756fa45a848e7fa4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac65eaa5d20dc6d16f9706d18216a2462"><td class="memItemLeft" align="right" valign="top"><a id="ac65eaa5d20dc6d16f9706d18216a2462"></a>
-Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#ac65eaa5d20dc6d16f9706d18216a2462">getData</a> ()</td></tr>
-<tr class="memdesc:ac65eaa5d20dc6d16f9706d18216a2462"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get underlying data. Returns m_data. <br /></td></tr>
-<tr class="separator:ac65eaa5d20dc6d16f9706d18216a2462"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a86f027e7fa436a90bdddcad8e5ba4de5"><td class="memItemLeft" align="right" valign="top"><a id="a86f027e7fa436a90bdddcad8e5ba4de5"></a>
-const Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a86f027e7fa436a90bdddcad8e5ba4de5">getData</a> () const</td></tr>
-<tr class="memdesc:a86f027e7fa436a90bdddcad8e5ba4de5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get underlying data. Returns const m_data. <br /></td></tr>
-<tr class="separator:a86f027e7fa436a90bdddcad8e5ba4de5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaaa7d0927e8ff954d52070cc3999f94b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#aaaa7d0927e8ff954d52070cc3999f94b">copy</a> (const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_other)</td></tr>
-<tr class="memdesc:aaaa7d0927e8ff954d52070cc3999f94b"><td class="mdescLeft">&#160;</td><td class="mdescRight">General copying of another object. This does a local copy if the two realms are the same. Otherwise it does a communication copy. In Chombo-speak this is localCopyTo versus copyTo.  <a href="classEBAMRData.html#aaaa7d0927e8ff954d52070cc3999f94b">More...</a><br /></td></tr>
-<tr class="separator:aaaa7d0927e8ff954d52070cc3999f94b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aee9bfe083aedcaf965d3f5af08858c65"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#aee9bfe083aedcaf965d3f5af08858c65">copy</a> (const Interval a_srcInterval, const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_other, const Interval a_dstInterval)</td></tr>
-<tr class="memdesc:aee9bfe083aedcaf965d3f5af08858c65"><td class="mdescLeft">&#160;</td><td class="mdescRight">General copying of another object. This does a local copy if the two realms are the same. Otherwise it does a communication copy. In Chombo-speak this is localCopyTo versus copyTo.  <a href="classEBAMRData.html#aee9bfe083aedcaf965d3f5af08858c65">More...</a><br /></td></tr>
-<tr class="separator:aee9bfe083aedcaf965d3f5af08858c65"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a16e998681490d9cfb37079e915942262"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a16e998681490d9cfb37079e915942262">push_back</a> (RefCountedPtr&lt; LevelData&lt; T &gt;&gt; &amp;a_levelData)</td></tr>
-<tr class="memdesc:a16e998681490d9cfb37079e915942262"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push a LevelData&lt;T&gt; object to the back of the data vector.  <a href="classEBAMRData.html#a16e998681490d9cfb37079e915942262">More...</a><br /></td></tr>
-<tr class="separator:a16e998681490d9cfb37079e915942262"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:addf6043b930cf1890381782164d50882"><td class="memItemLeft" align="right" valign="top"><a id="addf6043b930cf1890381782164d50882"></a>
-const std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#addf6043b930cf1890381782164d50882">getRealm</a> () const</td></tr>
-<tr class="memdesc:addf6043b930cf1890381782164d50882"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the string identifier for whatever realm this data is supposed to be allocated over. <br /></td></tr>
-<tr class="separator:addf6043b930cf1890381782164d50882"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1dd364444444ec8b5361a9766b1e979"><td class="memItemLeft" align="right" valign="top"><a id="aa1dd364444444ec8b5361a9766b1e979"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#aa1dd364444444ec8b5361a9766b1e979">clear</a> () noexcept</td></tr>
+<tr class="memdesc:aa1dd364444444ec8b5361a9766b1e979"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delete all data. <br /></td></tr>
+<tr class="separator:aa1dd364444444ec8b5361a9766b1e979"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15cbdc605f116b83f6defb8d943e97cd"><td class="memItemLeft" align="right" valign="top"><a id="a15cbdc605f116b83f6defb8d943e97cd"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a15cbdc605f116b83f6defb8d943e97cd">reserve</a> () noexcept</td></tr>
+<tr class="memdesc:a15cbdc605f116b83f6defb8d943e97cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reserve data. <br /></td></tr>
+<tr class="separator:a15cbdc605f116b83f6defb8d943e97cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade763fbedf99b6a1897ab18229f534ba"><td class="memItemLeft" align="right" valign="top"><a id="ade763fbedf99b6a1897ab18229f534ba"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#ade763fbedf99b6a1897ab18229f534ba">release</a> () noexcept</td></tr>
+<tr class="memdesc:ade763fbedf99b6a1897ab18229f534ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Release data. <br /></td></tr>
+<tr class="separator:ade763fbedf99b6a1897ab18229f534ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1c35283d111e57c0208830819c56ba8"><td class="memItemLeft" align="right" valign="top"><a id="aa1c35283d111e57c0208830819c56ba8"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#aa1c35283d111e57c0208830819c56ba8">isReserved</a> () const noexcept</td></tr>
+<tr class="memdesc:aa1c35283d111e57c0208830819c56ba8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if data is reserved. <br /></td></tr>
+<tr class="separator:aa1c35283d111e57c0208830819c56ba8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cd751591c1b6c7df68fe6de16e0d998"><td class="memItemLeft" align="right" valign="top"><a id="a4cd751591c1b6c7df68fe6de16e0d998"></a>
+Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a4cd751591c1b6c7df68fe6de16e0d998">getData</a> () noexcept</td></tr>
+<tr class="memdesc:a4cd751591c1b6c7df68fe6de16e0d998"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get underlying data. Returns m_data. <br /></td></tr>
+<tr class="separator:a4cd751591c1b6c7df68fe6de16e0d998"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a518e63efc37c46c5897ddb47e2ee62bf"><td class="memItemLeft" align="right" valign="top"><a id="a518e63efc37c46c5897ddb47e2ee62bf"></a>
+const Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a518e63efc37c46c5897ddb47e2ee62bf">getData</a> () const noexcept</td></tr>
+<tr class="memdesc:a518e63efc37c46c5897ddb47e2ee62bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get underlying data. Returns const m_data. <br /></td></tr>
+<tr class="separator:a518e63efc37c46c5897ddb47e2ee62bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f6067b2e50d67967f669715ece47a84"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a1f6067b2e50d67967f669715ece47a84">copy</a> (const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_other) noexcept</td></tr>
+<tr class="memdesc:a1f6067b2e50d67967f669715ece47a84"><td class="mdescLeft">&#160;</td><td class="mdescRight">General copying of another object. This does a local copy if the two realms are the same. Otherwise it does a communication copy. In Chombo-speak this is localCopyTo versus copyTo.  <a href="classEBAMRData.html#a1f6067b2e50d67967f669715ece47a84">More...</a><br /></td></tr>
+<tr class="separator:a1f6067b2e50d67967f669715ece47a84"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7cc71b2376b506269fd5a43442ba14c1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a7cc71b2376b506269fd5a43442ba14c1">copy</a> (const Interval a_srcInterval, const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_other, const Interval a_dstInterval) noexcept</td></tr>
+<tr class="memdesc:a7cc71b2376b506269fd5a43442ba14c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">General copying of another object. This does a local copy if the two realms are the same. Otherwise it does a communication copy. In Chombo-speak this is localCopyTo versus copyTo.  <a href="classEBAMRData.html#a7cc71b2376b506269fd5a43442ba14c1">More...</a><br /></td></tr>
+<tr class="separator:a7cc71b2376b506269fd5a43442ba14c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a284d1a781796c0878d5fbad1a8f406ff"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a284d1a781796c0878d5fbad1a8f406ff">push_back</a> (RefCountedPtr&lt; LevelData&lt; T &gt;&gt; &amp;a_levelData) noexcept</td></tr>
+<tr class="memdesc:a284d1a781796c0878d5fbad1a8f406ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push a LevelData&lt;T&gt; object to the back of the data vector.  <a href="classEBAMRData.html#a284d1a781796c0878d5fbad1a8f406ff">More...</a><br /></td></tr>
+<tr class="separator:a284d1a781796c0878d5fbad1a8f406ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae21af3fabcaa3364bbcaf641b63798e0"><td class="memItemLeft" align="right" valign="top"><a id="ae21af3fabcaa3364bbcaf641b63798e0"></a>
+const std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#ae21af3fabcaa3364bbcaf641b63798e0">getRealm</a> () const noexcept</td></tr>
+<tr class="memdesc:ae21af3fabcaa3364bbcaf641b63798e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the string identifier for whatever realm this data is supposed to be allocated over. <br /></td></tr>
+<tr class="separator:ae21af3fabcaa3364bbcaf641b63798e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -161,6 +177,10 @@ Protected Attributes</h2></td></tr>
 std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a79179654f3e46665092cef2a59885fe6">m_realm</a></td></tr>
 <tr class="memdesc:a79179654f3e46665092cef2a59885fe6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Identifier for realm. <br /></td></tr>
 <tr class="separator:a79179654f3e46665092cef2a59885fe6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17dabd86e8fd96df61e26ccf2c2bbd6c"><td class="memItemLeft" align="right" valign="top"><a id="a17dabd86e8fd96df61e26ccf2c2bbd6c"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a17dabd86e8fd96df61e26ccf2c2bbd6c">m_reserved</a></td></tr>
+<tr class="memdesc:a17dabd86e8fd96df61e26ccf2c2bbd6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reserved or not. <br /></td></tr>
+<tr class="separator:a17dabd86e8fd96df61e26ccf2c2bbd6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae7331f5ac75760e7519b84b5b4a84560"><td class="memItemLeft" align="right" valign="top"><a id="ae7331f5ac75760e7519b84b5b4a84560"></a>
 Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#ae7331f5ac75760e7519b84b5b4a84560">m_data</a></td></tr>
 <tr class="memdesc:ae7331f5ac75760e7519b84b5b4a84560"><td class="mdescLeft">&#160;</td><td class="mdescRight">Underlying data. <br /></td></tr>
@@ -173,13 +193,16 @@ class EBAMRData&lt; T &gt;</h3>
 <p>Default class for holding LevelData&lt;T&gt; data across an EBAMR realm. </p>
 <p>This class is a base class for holding LevelData&lt;T&gt; over a realm. The class does not have arithmetic operators or assignment operators because LevelData&lt;T&gt; does not have them. Manipulating the data is done directly by fetching the data on a level through the indexing operator [], or by fetching all the data through getData. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="aaaa7d0927e8ff954d52070cc3999f94b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaaa7d0927e8ff954d52070cc3999f94b">&#9670;&nbsp;</a></span>copy() <span class="overload">[1/2]</span></h2>
+<a id="a1f6067b2e50d67967f669715ece47a84"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f6067b2e50d67967f669715ece47a84">&#9670;&nbsp;</a></span>copy() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::copy </td>
@@ -189,6 +212,11 @@ template&lt;typename T &gt; </div>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>General copying of another object. This does a local copy if the two realms are the same. Otherwise it does a communication copy. In Chombo-speak this is localCopyTo versus copyTo. </p>
@@ -201,13 +229,16 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="aee9bfe083aedcaf965d3f5af08858c65"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aee9bfe083aedcaf965d3f5af08858c65">&#9670;&nbsp;</a></span>copy() <span class="overload">[2/2]</span></h2>
+<a id="a7cc71b2376b506269fd5a43442ba14c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7cc71b2376b506269fd5a43442ba14c1">&#9670;&nbsp;</a></span>copy() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::copy </td>
@@ -233,6 +264,11 @@ template&lt;typename T &gt; </div>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>General copying of another object. This does a local copy if the two realms are the same. Otherwise it does a communication copy. In Chombo-speak this is localCopyTo versus copyTo. </p>
@@ -247,41 +283,16 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="ac4ae2f862a51af4ff4886185f55313ad"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac4ae2f862a51af4ff4886185f55313ad">&#9670;&nbsp;</a></span>operator[]() <span class="overload">[1/2]</span></h2>
+<a id="aea0acd419b832ddde5c3f67a4a3bf886"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea0acd419b832ddde5c3f67a4a3bf886">&#9670;&nbsp;</a></span>operator[]() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;typename T &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &amp; <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::operator[] </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>a_level</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Indexing operators. Returns m_data[a_level]. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="adaea3ec8f9c929dad561549c5c10fcd8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adaea3ec8f9c929dad561549c5c10fcd8">&#9670;&nbsp;</a></span>operator[]() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">const RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &amp; <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::operator[] </td>
@@ -291,6 +302,11 @@ template&lt;typename T &gt; </div>
           <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Indexing operators. Returns const m_data[a_level]. </p>
@@ -303,13 +319,52 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a16e998681490d9cfb37079e915942262"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a16e998681490d9cfb37079e915942262">&#9670;&nbsp;</a></span>push_back()</h2>
+<a id="afa4e1b7d6ec550bf338183204bdc9017"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa4e1b7d6ec550bf338183204bdc9017">&#9670;&nbsp;</a></span>operator[]() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &amp; <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::operator[] </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>a_level</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Indexing operators. Returns m_data[a_level]. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a284d1a781796c0878d5fbad1a8f406ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a284d1a781796c0878d5fbad1a8f406ff">&#9670;&nbsp;</a></span>push_back()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::push_back </td>
@@ -319,6 +374,11 @@ template&lt;typename T &gt; </div>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Push a LevelData&lt;T&gt; object to the back of the data vector. </p>
@@ -331,13 +391,16 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a80a80a64898c2aac7d216408d6b6fa6e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a80a80a64898c2aac7d216408d6b6fa6e">&#9670;&nbsp;</a></span>resize()</h2>
+<a id="a778d6acd8c4d9fa56624714c7624fd5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a778d6acd8c4d9fa56624714c7624fd5b">&#9670;&nbsp;</a></span>resize()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::resize </td>
@@ -347,6 +410,11 @@ template&lt;typename T &gt; </div>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Resize m_data to having size a_size. </p>
@@ -359,13 +427,16 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="ab95bfbf4cba32f8082a808e2038074ce"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab95bfbf4cba32f8082a808e2038074ce">&#9670;&nbsp;</a></span>setRealm()</h2>
+<a id="a278c2dce4bf9e82e09aecad19f9a6f45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a278c2dce4bf9e82e09aecad19f9a6f45">&#9670;&nbsp;</a></span>setRealm()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::setRealm </td>
@@ -375,6 +446,11 @@ template&lt;typename T &gt; </div>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Sets the realm for this object. </p>

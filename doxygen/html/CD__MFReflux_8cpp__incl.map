@@ -1,0 +1,11 @@
+<map id="Source/Multifluid/CD_MFReflux.cpp" name="Source/Multifluid/CD_MFReflux.cpp">
+<area shape="rect" id="node1" title="Implementation of CD_MFReflux.H." alt="" coords="287,5,442,47"/>
+<area shape="rect" id="node2" href="$CD__MFReflux_8H.html" title="Declaration of a class for refluxing in a multiphase context." alt="" coords="303,95,426,121"/>
+<area shape="rect" id="node8" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,244,191,271"/>
+<area shape="rect" id="node9" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="530,244,709,271"/>
+<area shape="rect" id="node3" title=" " alt="" coords="452,169,581,196"/>
+<area shape="rect" id="node4" href="$CD__EBReflux_8H.html" title="Declaration of a class which can reflux over the coarse&#45;fine interface." alt="" coords="257,169,377,196"/>
+<area shape="rect" id="node5" title=" " alt="" coords="455,244,506,271"/>
+<area shape="rect" id="node6" title=" " alt="" coords="215,244,293,271"/>
+<area shape="rect" id="node7" title=" " alt="" coords="317,244,431,271"/>
+</map>

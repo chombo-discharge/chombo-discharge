@@ -114,7 +114,7 @@ $(function() {
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> Functor&gt;</div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;ALWAYS_INLINE <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="namespaceBoxLoops.html#ad7f0d44d79ff5e1d2ae08b864acb9958">   45</a></span>&#160;<a class="code" href="namespaceBoxLoops.html#a40314d94a5cf135ef38a52eb42424eaf">BoxLoops::loop</a>(IntVectSet&amp; a_ivs, Functor&amp;&amp; a_kernel)</div>
+<div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="namespaceBoxLoops.html#ac7d0eabe8d59b5fed0b65ac750885c5b">   45</a></span>&#160;<a class="code" href="namespaceBoxLoops.html#a40314d94a5cf135ef38a52eb42424eaf">BoxLoops::loop</a>(<span class="keyword">const</span> IntVectSet&amp; a_ivs, Functor&amp;&amp; a_kernel)</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;{</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;  <span class="keywordflow">for</span> (IVSIterator iter(a_ivs); iter.ok(); ++iter) {</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    a_kernel(iter());</div>
@@ -123,7 +123,7 @@ $(function() {
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> Functor&gt;</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;ALWAYS_INLINE <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00054"></a><span class="lineno"><a class="line" href="namespaceBoxLoops.html#a940e16c7b83c869b418139619983081f">   54</a></span>&#160;<a class="code" href="namespaceBoxLoops.html#a40314d94a5cf135ef38a52eb42424eaf">BoxLoops::loop</a>(DenseIntVectSet&amp; a_ivs, Functor&amp;&amp; a_kernel)</div>
+<div class="line"><a name="l00054"></a><span class="lineno"><a class="line" href="namespaceBoxLoops.html#ab569000805ee3ecd9d701ecae343d725">   54</a></span>&#160;<a class="code" href="namespaceBoxLoops.html#a40314d94a5cf135ef38a52eb42424eaf">BoxLoops::loop</a>(<span class="keyword">const</span> DenseIntVectSet&amp; a_ivs, Functor&amp;&amp; a_kernel)</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;{</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  <span class="keywordflow">for</span> (DenseIntVectSetIterator iter(a_ivs); iter.ok(); ++iter) {</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    a_kernel(iter());</div>

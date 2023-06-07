@@ -83,10 +83,16 @@ $(function() {
 , <a class="el" href="classRtSolver.html#a293ee41b9c7b130b156fc27494bd33dc">RtSolver</a>
 , <a class="el" href="classSurfaceODESolver.html#add3563f50e834474da82a19a3b2a2c2e">SurfaceODESolver&lt; N &gt;</a>
 </li>
+<li>deallocateFlux()
+: <a class="el" href="classEBHelmholtzOp.html#a92f3c231c5b3def2eecf565810f646de">EBHelmholtzOp</a>
+</li>
 <li>deallocateInternals()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a017afcb3a6356cf43091b902f9fb6da2">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html#a872c99d0fa2801ae5a041b6ea183f63a">Physics::CdrPlasma::CdrPlasmaImExSdcStepper</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a4ccdb3360528dd5b54e10748a13cdf05">Physics::CdrPlasma::CdrPlasmaStepper</a>
+</li>
+<li>deallocateScratch()
+: <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a940f3dc7891133a20eb4ae762a6cc38b">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
 </li>
 <li>deallocateSolverInternals()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ae2bf8a82f3e13cc3faa19b57db5b48ca">Physics::CdrPlasma::CdrPlasmaStepper</a>
@@ -100,17 +106,19 @@ $(function() {
 , <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCFieldTagger.html#afc64f7e633a3b5046c139acfd4e3fa53">Physics::ItoKMC::ItoKMCFieldTagger&lt; S &gt;</a>
 </li>
 <li>define()
-: <a class="el" href="classDielectric.html#a3fb805dc6a658d4a4b247617810019ef">Dielectric</a>
+: <a class="el" href="classCoarseInterpQuadCF.html#abf35af817722f9dc88c17c8a669003b4">CoarseInterpQuadCF</a>
+, <a class="el" href="classDielectric.html#a51f4a34749bac13dea8e477c5a747656">Dielectric</a>
 , <a class="el" href="classDomainFluxIFFAB.html#af2cf36c60a324f25084cff8184c9194f">DomainFluxIFFAB</a>
 , <a class="el" href="classEBAMRParticleMesh.html#a69540e8dafd1fa7e62e4caa0a79fbd09">EBAMRParticleMesh</a>
 , <a class="el" href="classEBAMRSurfaceDeposition.html#a12c43d62a237a44de6f1605d7ab22d1e">EBAMRSurfaceDeposition</a>
-, <a class="el" href="classEBCoarAve.html#a9a7f94d5a8ba26ab70f2a390b99f6ff3">EBCoarAve</a>
-, <a class="el" href="classEBCoarseFineParticleMesh.html#aa40cb0d20c6f86d9f634dba086c15d6f">EBCoarseFineParticleMesh</a>
-, <a class="el" href="classEbFastFluxRegister.html#a34991e5d47112be3218e4cdaa377e71a">EbFastFluxRegister</a>
-, <a class="el" href="classEBFineInterp.html#aee4e443e726f0dde02e8e63b77b9b7a0">EBFineInterp</a>
+, <a class="el" href="classEBCoarAve.html#a2f498c611d22502e1aec6910c38f5cb4">EBCoarAve</a>
+, <a class="el" href="classEBCoarseFineParticleMesh.html#a9e351ed56180a1bb49aaf58a4edc092e">EBCoarseFineParticleMesh</a>
+, <a class="el" href="classEBCoarseToFineInterp.html#a85834557cba5e137e459af35f35e25a0">EBCoarseToFineInterp</a>
+, <a class="el" href="classEBGhostCellInterpolator.html#a612f7a5919ae1b8ed4dde073048f82ef">EBGhostCellInterpolator</a>
+, <a class="el" href="classEBGradient.html#a305b9c6e9ec0256f28dd17ec6f159822">EBGradient</a>
 , <a class="el" href="classEBHelmholtzDirichletEBBC.html#aa1fd5965352e99a245bdf687c979fe07">EBHelmholtzDirichletEBBC</a>
 , <a class="el" href="classEBHelmholtzDomainBC.html#af68ec9f9fce88bcd4a2cfd9deb642ceb">EBHelmholtzDomainBC</a>
-, <a class="el" href="classEBHelmholtzEBBC.html#a454165be7a031f5019772e24c2afc62f">EBHelmholtzEBBC</a>
+, <a class="el" href="classEBHelmholtzEBBC.html#ab23f3820efd32f53a101f77615dd6817">EBHelmholtzEBBC</a>
 , <a class="el" href="classEBHelmholtzEddingtonSP1DomainBC.html#ad4a797bf1dd6aca3a7bd8b1f7faa2e5a">EBHelmholtzEddingtonSP1DomainBC</a>
 , <a class="el" href="classEBHelmholtzElectrostaticDomainBC.html#a045ab60ba7347e173c0b8428a83ebc3a">EBHelmholtzElectrostaticDomainBC</a>
 , <a class="el" href="classEBHelmholtzNeumannEBBC.html#a01bfcf4cb555cc05f00b724b5afb515f">EBHelmholtzNeumannEBBC</a>
@@ -118,6 +126,8 @@ $(function() {
 , <a class="el" href="classEBMGProlong.html#a2399ac7ce1f858235045dc6e157c3bb5">EBMGProlong</a>
 , <a class="el" href="classEBMGRestrict.html#a7e91d46439750aef5ad5177785049df5">EBMGRestrict</a>
 , <a class="el" href="classEBParticleMesh.html#aad56ce575013118a307f3a2875c7cda5">EBParticleMesh</a>
+, <a class="el" href="classEBRedistribution.html#aeff8a4bb6af5df14de342da841a4924c">EBRedistribution</a>
+, <a class="el" href="classEBReflux.html#a15297578586adb374b8736527db48093">EBReflux</a>
 , <a class="el" href="classElectrode.html#a29a63a20e07ca6470d60800270824662">Electrode</a>
 , <a class="el" href="classIrregAmrStencil.html#a1fe18e32cc7fea9703f00574f2a32c8c">IrregAmrStencil&lt; IrregSten &gt;</a>
 , <a class="el" href="classIrregStencil.html#a4abe6131ba0fc33789eea0b0044da73b">IrregStencil</a>
@@ -127,11 +137,11 @@ $(function() {
 , <a class="el" href="classKMCSolver.html#a417f88c97e0a749e566fca2b7db7dbe5">KMCSolver&lt; R, State, T &gt;</a>
 , <a class="el" href="classMFBaseIVFABFactory.html#aed1beab7bacf43c2a331263a7896b321">MFBaseIVFABFactory</a>
 , <a class="el" href="classMFCoarAve.html#a5b370af6777d2359e9a328e611646f4f">MFCoarAve</a>
-, <a class="el" href="classMFFluxReg.html#af6ac3790fc6fe115884b4062047fc770">MFFluxReg</a>
 , <a class="el" href="classMFHelmholtzEBBC.html#ae0f8cbec97783a1fdb03faffac1ec5eb">MFHelmholtzEBBC</a>
 , <a class="el" href="classMFInterfaceFAB.html#a3d6296cbe037063292db83c2a3ca1734">MFInterfaceFAB&lt; T &gt;</a>
 , <a class="el" href="classMFLevelGrid.html#ac3e0e1afc6070ff2d8c78a93c31a0cf0">MFLevelGrid</a>
 , <a class="el" href="classMFMultigridInterpolator.html#a9a49bfafe9ed40a3bf1c7d6714355017">MFMultigridInterpolator</a>
+, <a class="el" href="classMFReflux.html#af98fb57bb8151a5e8f2506bb85a71159">MFReflux</a>
 , <a class="el" href="classMultiFluidIndexSpace.html#a1f147bd989883ee522d9f3a9221f70ae">MultiFluidIndexSpace</a>
 , <a class="el" href="classMultiIndex.html#ac6337b80566f09468ebdb919bdb15868">MultiIndex</a>
 , <a class="el" href="classParticleContainer.html#a2db7e8cb941c386e5dc2b8ca2bd3a2ca">ParticleContainer&lt; P &gt;</a>
@@ -150,12 +160,23 @@ $(function() {
 </li>
 <li>defineBuffers()
 : <a class="el" href="classEBAMRSurfaceDeposition.html#a19e526596ad7e42cff6f0ea74f9db532">EBAMRSurfaceDeposition</a>
-, <a class="el" href="classEBGradient.html#a43493855791aa92d6212319210aaf885">EBGradient</a>
-, <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a370ef6b5fd90407d3838eba3eed3ecf1">EBLeastSquaresMultigridInterpolator</a>
+, <a class="el" href="classEBCoarAve.html#af31116766596f0839d21a1e791374bff">EBCoarAve</a>
+, <a class="el" href="classEBCoarseToFineInterp.html#ac00431e8eb111385d89d4181c13684fc">EBCoarseToFineInterp</a>
+, <a class="el" href="classEBGhostCellInterpolator.html#a3d70444fbc659ca605b3ad3cd4985ec9">EBGhostCellInterpolator</a>
+, <a class="el" href="classEBGradient.html#ab3062394417d58d028ebe55931735436">EBGradient</a>
+, <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#ad523dd4d64565364f232ffb0253295c4">EBLeastSquaresMultigridInterpolator</a>
 , <a class="el" href="classEBMultigridInterpolator.html#a98d1600da6be0a36f2aea3587a1238dd">EBMultigridInterpolator</a>
+, <a class="el" href="classEBRedistribution.html#a23e6600b92694c604a300307ff943caa">EBRedistribution</a>
+, <a class="el" href="classEBReflux.html#a676a0159046c5d92e162293fa2ae800c">EBReflux</a>
+</li>
+<li>defineCellStencils()
+: <a class="el" href="classEBCoarAve.html#a0adee89505630772065bc74e36ae3b35">EBCoarAve</a>
 </li>
 <li>defineCoarseFineMotion()
 : <a class="el" href="classEBAMRParticleMesh.html#af42bd65a697b9fe12d4637b13df2cd24">EBAMRParticleMesh</a>
+</li>
+<li>defineCoarseInterp()
+: <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#afd718498aba3c66f480a238c1048e208">EBLeastSquaresMultigridInterpolator</a>
 </li>
 <li>defineCoarseToFineStencils()
 : <a class="el" href="classEBAMRSurfaceDeposition.html#a4b8a29543abda64a2a3c8fa8e5d6dcc3">EBAMRSurfaceDeposition</a>
@@ -178,8 +199,8 @@ $(function() {
 <li>defineEBCoarAve()
 : <a class="el" href="classPhaseRealm.html#a2234f52cd42f490265227f495ed915fd">PhaseRealm</a>
 </li>
-<li>defineEBFineInterp()
-: <a class="el" href="classPhaseRealm.html#ad758ef01e7922efd8f7e8625574bf8bd">PhaseRealm</a>
+<li>defineEBCoarseToFineInterp()
+: <a class="el" href="classPhaseRealm.html#a9914aaa9d57fc0b08feda4144b756e57">PhaseRealm</a>
 </li>
 <li>defineEBLevelGrid()
 : <a class="el" href="classPhaseRealm.html#a562ed6816530335b95ea2f54ee8d5c1a">PhaseRealm</a>
@@ -190,8 +211,14 @@ $(function() {
 <li>defineEBParticleMesh()
 : <a class="el" href="classEBAMRParticleMesh.html#a6d1da335a1ae9076481b3365f0d35ae9">EBAMRParticleMesh</a>
 </li>
+<li>defineEBStencils()
+: <a class="el" href="classEBCoarAve.html#a6af7cd0c31843484e0163e7b2d251593">EBCoarAve</a>
+</li>
 <li>defineElectrode()
 : <a class="el" href="classDiskProfiledPlane.html#a89592a567d5da7b2c6e80647228a559b">DiskProfiledPlane</a>
+</li>
+<li>defineFaceStencils()
+: <a class="el" href="classEBCoarAve.html#a4d163effbccc38c0555737b3af987e7a">EBCoarAve</a>
 </li>
 <li>defineFillPatch()
 : <a class="el" href="classPhaseRealm.html#ab05aedd32d7f6c1bed5aeceef65eba82">PhaseRealm</a>
@@ -206,21 +233,24 @@ $(function() {
 : <a class="el" href="classPhaseRealm.html#a6aa948d2a5860a7d94ae759c08bb270c">PhaseRealm</a>
 </li>
 <li>defineGhostRegions()
-: <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a092889d088fd53341e16b269f2207f43">EBLeastSquaresMultigridInterpolator</a>
+: <a class="el" href="classEBGhostCellInterpolator.html#a91ace67276ea0d7e6d1c6bf150333b81">EBGhostCellInterpolator</a>
+, <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a0e7b1e2d43b86f081c3a6d9f1927fd8c">EBLeastSquaresMultigridInterpolator</a>
 , <a class="el" href="classEBMultigridInterpolator.html#a721cda72b15aab0de41ecd5590a770d6">EBMultigridInterpolator</a>
 </li>
 <li>defineGradSten()
 : <a class="el" href="classPhaseRealm.html#a9facdbdb95642b48e3b57a93d4775c26">PhaseRealm</a>
 </li>
 <li>defineGrids()
-: <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a894f1a48ef6fd6e2d4d8784978dfa883">EBLeastSquaresMultigridInterpolator</a>
-, <a class="el" href="classEBMultigridInterpolator.html#a8454975558fd654b490d601253d09ec1">EBMultigridInterpolator</a>
+: <a class="el" href="classEBMultigridInterpolator.html#a8454975558fd654b490d601253d09ec1">EBMultigridInterpolator</a>
 </li>
 <li>defineHaloMask()
 : <a class="el" href="classRealm.html#a65f1bde90fdd8838db9a2979515239bb">Realm</a>
 </li>
 <li>defineHaloMasks()
 : <a class="el" href="classRealm.html#acf98254553c4cde4e7468eee204964ca">Realm</a>
+</li>
+<li>defineInterfaceCells()
+: <a class="el" href="classEBRedistribution.html#aecdaf7290dfe2a0479bc619292fd935c">EBRedistribution</a>
 </li>
 <li>defineInterpolationStencils()
 : <a class="el" href="classCdrSolver.html#ab965dcd94518ca2b80b4348d2a67a63c">CdrSolver</a>
@@ -232,7 +262,7 @@ $(function() {
 : <a class="el" href="classMFHelmholtzJumpBC.html#a9464bd40dd48eb0bb2605adc77499de4">MFHelmholtzJumpBC</a>
 </li>
 <li>defineIteratorsEBCF()
-: <a class="el" href="classEBGradient.html#af649484360e9d98cfce28ae623ba73a9">EBGradient</a>
+: <a class="el" href="classEBGradient.html#a9a54de3bfff43ae4528cb4affecce5e7">EBGradient</a>
 </li>
 <li>defineJump()
 : <a class="el" href="classMFHelmholtzOpFactory.html#af6cbb7553fc0a38978cb109a329baca3">MFHelmholtzOpFactory</a>
@@ -250,15 +280,17 @@ $(function() {
 : <a class="el" href="classPhaseRealm.html#a5fb73c63426c1af3d83b1074cb86cef0">PhaseRealm</a>
 </li>
 <li>defineLevelStencils()
-: <a class="el" href="classEBGradient.html#a6665be159ed68d86cb68d16fda20db20">EBGradient</a>
+: <a class="el" href="classEBGradient.html#af5d682a65aabd72ca6c03f00383471dc">EBGradient</a>
 </li>
 <li>defineMasks()
-: <a class="el" href="classEbFastFluxRegister.html#a25c124d7972706768e96def9e1c58fc5">EbFastFluxRegister</a>
-, <a class="el" href="classEBGradient.html#a0a1372add0de5bcd75c3db377e1750b0">EBGradient</a>
+: <a class="el" href="classEBGradient.html#ad73f867c27cdb3947688a0da3b39409e">EBGradient</a>
 , <a class="el" href="classRealm.html#abb6cf81762ae24e529d42a0b34c88420">Realm</a>
 </li>
 <li>defineMFLevelGrid()
 : <a class="el" href="classRealm.html#a121eeb8eea20764b86fd6bb3b919a739">Realm</a>
+</li>
+<li>defineMixedDerivStencils()
+: <a class="el" href="classCoarseInterpQuadCF.html#af2af226a28df58b39a0d0746701ca1f8">CoarseInterpQuadCF</a>
 </li>
 <li>defineMultigridInjection()
 : <a class="el" href="classPhaseRealm.html#a6c54dc8303bbeb482dd387737de0555c">PhaseRealm</a>
@@ -272,9 +304,6 @@ $(function() {
 </li>
 <li>defineNeedle()
 : <a class="el" href="classRodNeedlePlane.html#a83aea9c004c3a040baf2653fb1324096">RodNeedlePlane</a>
-</li>
-<li>defineNeighbors()
-: <a class="el" href="classPhaseRealm.html#abc93b61e1205ee772d44e58aa72503c2">PhaseRealm</a>
 </li>
 <li>defineNonConsDivSten()
 : <a class="el" href="classPhaseRealm.html#a614d65c9ce8d51df19e1788aec74875f">PhaseRealm</a>
@@ -294,6 +323,9 @@ $(function() {
 <li>defineRedistOper()
 : <a class="el" href="classPhaseRealm.html#a394c6bb1bcda8f0d38dda56f7228c257">PhaseRealm</a>
 </li>
+<li>defineRegionsCF()
+: <a class="el" href="classEBReflux.html#aebd837ddb164139443d45212c5813ccd">EBReflux</a>
+</li>
 <li>defineRod()
 : <a class="el" href="classRodNeedlePlane.html#a89628c437364f2c7224be226ef7270a8">RodNeedlePlane</a>
 </li>
@@ -311,32 +343,36 @@ $(function() {
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a65c372cadba68f3c56b7a98e6250d090">Physics::ItoKMC::ItoKMCPhysics</a>
 </li>
 <li>defineStencils()
-: <a class="el" href="classEBHelmholtzOp.html#af1e883965165f53ff42eb0312c835788">EBHelmholtzOp</a>
+: <a class="el" href="classCoarseInterpQuadCF.html#af19236675fcf8b8a92640c54bbf3582f">CoarseInterpQuadCF</a>
+, <a class="el" href="classEBHelmholtzOp.html#af1e883965165f53ff42eb0312c835788">EBHelmholtzOp</a>
+, <a class="el" href="classEBRedistribution.html#ad6132593bcf40cad6a4e4f9674b41754">EBRedistribution</a>
+, <a class="el" href="classEBReflux.html#a3d73e784ea643a893e1f4ab46f845db6">EBReflux</a>
 , <a class="el" href="classMFHelmholtzJumpBC.html#a9a69e50750b3b789a1e29ea52543ca98">MFHelmholtzJumpBC</a>
 </li>
 <li>defineStencilsEBCF()
-: <a class="el" href="classEBGradient.html#a954001537d5ab2048c38e9cfff4bb79d">EBGradient</a>
-, <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a49993083ee91b4a7ac94ff82bc8ad565">EBLeastSquaresMultigridInterpolator</a>
+: <a class="el" href="classEBGradient.html#a46d9f842d77033a59b1fc3156946bac6">EBGradient</a>
+, <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#abe1346e7c8bb76ea0c2fe13eb99bc447">EBLeastSquaresMultigridInterpolator</a>
 , <a class="el" href="classEBMultigridInterpolator.html#a1aa28379c1b2bc0a4ca6505b68e937a6">EBMultigridInterpolator</a>
 </li>
 <li>defineValidCells()
-: <a class="el" href="classRealm.html#a5f2289a6d36fe1f903b4a05dde660e04">Realm</a>
+: <a class="el" href="classEBRedistribution.html#abfca8e84e7dd3a820f48f826fbc48fd5">EBRedistribution</a>
+, <a class="el" href="classRealm.html#a5f2289a6d36fe1f903b4a05dde660e04">Realm</a>
 </li>
 <li>defineVofIterator()
 : <a class="el" href="classPhaseRealm.html#af096f4bf383d166b40391a9ea17b1e49">PhaseRealm</a>
 </li>
 <li>defineVoFIterators()
-: <a class="el" href="classEBCoarseFineParticleMesh.html#a08440610fc01e993c870b9b0359b46bd">EBCoarseFineParticleMesh</a>
+: <a class="el" href="classEBCoarseFineParticleMesh.html#a2bad69ac0ae797e12ea4c833abcbf969">EBCoarseFineParticleMesh</a>
 , <a class="el" href="classSurfaceODESolver.html#af47d45d32e2e3c84137db98bb0b844cf">SurfaceODESolver&lt; N &gt;</a>
 </li>
 <li>defineWeights()
-: <a class="el" href="classEBFineInterp.html#ae664f89c46a2adbcf3fb26f9065c25e0">EBFineInterp</a>
+: <a class="el" href="classEBCoarseToFineInterp.html#a05bc32ed920d98e8803c5a6f7f63d347">EBCoarseToFineInterp</a>
 </li>
 <li>deposit()
 : <a class="el" href="classEBAMRParticleMesh.html#ac4ff2ad7b21f0131730b17c93a6f5843">EBAMRParticleMesh</a>
 , <a class="el" href="classEBAMRSurfaceDeposition.html#aafac00ad3ef46dff2b4fb9fde6e576ef">EBAMRSurfaceDeposition</a>
 , <a class="el" href="classEBParticleMesh.html#a594e7bfdf37f0cfa2335d4c19df50553">EBParticleMesh</a>
-, <a class="el" href="classTracerParticleSolver.html#a55f044d37d2553b89b0fec368507ff63">TracerParticleSolver&lt; P &gt;</a>
+, <a class="el" href="classTracerParticleSolver.html#a5be376a0d90160ca293b5318914c8bdf">TracerParticleSolver&lt; P &gt;</a>
 </li>
 <li>deposit2()
 : <a class="el" href="classEBParticleMesh.html#a3d2b72163c558763c817384a066383d1">EBParticleMesh</a>
@@ -348,7 +384,7 @@ $(function() {
 : <a class="el" href="classItoSolver.html#a55cc85c3c9a7a0327f0a3c6fff256065">ItoSolver</a>
 </li>
 <li>depositDiffusivity()
-: <a class="el" href="classItoSolver.html#a92fcaf6625351303b1b856ebc6d4c48d">ItoSolver</a>
+: <a class="el" href="classItoSolver.html#ad21a6fcfd7c586497131343aa00efff5">ItoSolver</a>
 </li>
 <li>depositEnergyDensity()
 : <a class="el" href="classItoSolver.html#ab173a4bede9c8cebe09fc7c2d8ec1dc6">ItoSolver</a>
@@ -388,10 +424,16 @@ $(function() {
 , <a class="el" href="classItoLayout.html#abafc762fe43f647bcb2f316f715550db">ItoLayout&lt; T &gt;</a>
 , <a class="el" href="classItoSolver.html#a18a43e827b7b8e1776cf9e4572ccf6a0">ItoSolver</a>
 , <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a68690c283c56311d8440a70b8008a7fa">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
-, <a class="el" href="classTracerParticleSolver.html#af9a50d7c5b6a39cb6f7a8708516c3a68">TracerParticleSolver&lt; P &gt;</a>
+, <a class="el" href="classTracerParticleSolver.html#a5e6dd3cc19ca265da03daac6778c8a8c">TracerParticleSolver&lt; P &gt;</a>
+</li>
+<li>depositParticlesNGP()
+: <a class="el" href="classItoSolver.html#a538607e6b1f3f2c9e45b8def6d264bcc">ItoSolver</a>
 </li>
 <li>depositPhotons()
 : <a class="el" href="classMcPhoto.html#ab43303c3391364188cf423c8b9e1d4ae">McPhoto</a>
+</li>
+<li>depositPhotonsNGP()
+: <a class="el" href="classMcPhoto.html#afb69d6354e2b8a8a3f6966e505ab28c1">McPhoto</a>
 </li>
 <li>depositPointParticles()
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a39d0e4c663654c0cdac5ecf285d67179">Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;</a>

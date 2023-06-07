@@ -103,8 +103,10 @@ Collaboration diagram for Physics::CdrPlasma::CdrPlasmaStepper:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper__coll__graph.png" border="0" usemap="#aPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper_coll__map" alt="Collaboration graph"/></div>
 <map name="aPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper_coll__map" id="aPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper_coll__map">
-<area shape="rect" title="Abstract class for evolving the minimal plasma model in time." alt="" coords="5,80,156,121"/>
-<area shape="rect" href="classTimeStepper.html" title="Base class for advancing equations." alt="" coords="28,5,133,32"/>
+<area shape="rect" title="Abstract class for evolving the minimal plasma model in time." alt="" coords="37,199,188,240"/>
+<area shape="rect" href="classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,95,111,121"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="135,95,331,121"/>
+<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="163,5,302,32"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -153,12 +155,20 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a5f461c7cc9fa5767ab25555508a43f09">parseRuntimeOptions</a> ()=0</td></tr>
 <tr class="memdesc:a5f461c7cc9fa5767ab25555508a43f09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse runtime options. Subclasses must implement this. <br /></td></tr>
 <tr class="separator:a5f461c7cc9fa5767ab25555508a43f09"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7b32196ab443203d87d542a2db30d7fd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a7b32196ab443203d87d542a2db30d7fd">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, Vector&lt; std::string &gt; &amp;a_plotVariableNames, int &amp;a_icomp) const override</td></tr>
-<tr class="memdesc:a7b32196ab443203d87d542a2db30d7fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a7b32196ab443203d87d542a2db30d7fd">More...</a><br /></td></tr>
-<tr class="separator:a7b32196ab443203d87d542a2db30d7fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad930e4f040981b805591c9bfc6e7f8f3"><td class="memItemLeft" align="right" valign="top"><a id="ad930e4f040981b805591c9bfc6e7f8f3"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ad930e4f040981b805591c9bfc6e7f8f3">prePlot</a> () override</td></tr>
+<tr class="memdesc:ad930e4f040981b805591c9bfc6e7f8f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute some thing that go into plot files. <br /></td></tr>
+<tr class="separator:ad930e4f040981b805591c9bfc6e7f8f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae95dbdc6d94e7cb3afb56488f25ccf22"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ae95dbdc6d94e7cb3afb56488f25ccf22">getNumberOfPlotVariables</a> () const override</td></tr>
 <tr class="memdesc:ae95dbdc6d94e7cb3afb56488f25ccf22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of plot variables for this time stepper.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ae95dbdc6d94e7cb3afb56488f25ccf22">More...</a><br /></td></tr>
 <tr class="separator:ae95dbdc6d94e7cb3afb56488f25ccf22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af20e6910c46428c07111edd473f7b873"><td class="memItemLeft" align="right" valign="top"><a id="af20e6910c46428c07111edd473f7b873"></a>
+virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#af20e6910c46428c07111edd473f7b873">getPlotVariableNames</a> () const override</td></tr>
+<tr class="memdesc:af20e6910c46428c07111edd473f7b873"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names. <br /></td></tr>
+<tr class="separator:af20e6910c46428c07111edd473f7b873"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a800d8e978c0c5443e31a51d8183d1b4f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a800d8e978c0c5443e31a51d8183d1b4f">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const override</td></tr>
+<tr class="memdesc:a800d8e978c0c5443e31a51d8183d1b4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a800d8e978c0c5443e31a51d8183d1b4f">More...</a><br /></td></tr>
+<tr class="separator:a800d8e978c0c5443e31a51d8183d1b4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8fb79765ae0355d13eedbe16c72693f"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ab8fb79765ae0355d13eedbe16c72693f">computeDt</a> ()=0</td></tr>
 <tr class="memdesc:ab8fb79765ae0355d13eedbe16c72693f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the time step.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ab8fb79765ae0355d13eedbe16c72693f">More...</a><br /></td></tr>
 <tr class="separator:ab8fb79765ae0355d13eedbe16c72693f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -210,8 +220,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:aabf51052edebc8a4de1c4653a2ab0f12"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#aabf51052edebc8a4de1c4653a2ab0f12">stationaryRTE</a> ()</td></tr>
 <tr class="memdesc:aabf51052edebc8a4de1c4653a2ab0f12"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if RTE solvers are stationary.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#aabf51052edebc8a4de1c4653a2ab0f12">More...</a><br /></td></tr>
 <tr class="separator:aabf51052edebc8a4de1c4653a2ab0f12"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adf044da433791d634a9f4543e43b4812"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#adf044da433791d634a9f4543e43b4812">allocateInternals</a> ()=0</td></tr>
-<tr class="memdesc:adf044da433791d634a9f4543e43b4812"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage. Must be implemented by subclasses.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#adf044da433791d634a9f4543e43b4812">More...</a><br /></td></tr>
+<tr class="memitem:adf044da433791d634a9f4543e43b4812"><td class="memItemLeft" align="right" valign="top"><a id="adf044da433791d634a9f4543e43b4812"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#adf044da433791d634a9f4543e43b4812">allocateInternals</a> ()=0</td></tr>
+<tr class="memdesc:adf044da433791d634a9f4543e43b4812"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage. Must be implemented by subclasses. <br /></td></tr>
 <tr class="separator:adf044da433791d634a9f4543e43b4812"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4ccdb3360528dd5b54e10748a13cdf05"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a4ccdb3360528dd5b54e10748a13cdf05">deallocateInternals</a> ()=0</td></tr>
 <tr class="memdesc:a4ccdb3360528dd5b54e10748a13cdf05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate internals. Must be implemented by subclasses.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a4ccdb3360528dd5b54e10748a13cdf05">More...</a><br /></td></tr>
@@ -547,12 +558,16 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a7f56d62a23c3d13fce1808f3e4d4e99f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a7f56d62a23c3d13fce1808f3e4d4e99f">parseSourceComputation</a> ()</td></tr>
 <tr class="memdesc:a7f56d62a23c3d13fce1808f3e4d4e99f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse how we compute the source terms.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a7f56d62a23c3d13fce1808f3e4d4e99f">More...</a><br /></td></tr>
 <tr class="separator:a7f56d62a23c3d13fce1808f3e4d4e99f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad2007586b31538427973299fa9913720"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ad2007586b31538427973299fa9913720">writeJ</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp) const</td></tr>
-<tr class="memdesc:ad2007586b31538427973299fa9913720"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute and put the current density in output data holder.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ad2007586b31538427973299fa9913720">More...</a><br /></td></tr>
-<tr class="separator:ad2007586b31538427973299fa9913720"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abdee75a3a3f8cfecab2e6998a87a3351"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#abdee75a3a3f8cfecab2e6998a87a3351">writePhysics</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp) const</td></tr>
-<tr class="memdesc:abdee75a3a3f8cfecab2e6998a87a3351"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write physics data to output data holder.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#abdee75a3a3f8cfecab2e6998a87a3351">More...</a><br /></td></tr>
-<tr class="separator:abdee75a3a3f8cfecab2e6998a87a3351"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a46f0234c393c7b99b65e9e793e89b1ae"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a46f0234c393c7b99b65e9e793e89b1ae">writeJ</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const int a_level) const</td></tr>
+<tr class="memdesc:a46f0234c393c7b99b65e9e793e89b1ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute and put the current density in output data holder.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a46f0234c393c7b99b65e9e793e89b1ae">More...</a><br /></td></tr>
+<tr class="separator:a46f0234c393c7b99b65e9e793e89b1ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16e966c6d8268235b38d160473f4e070"><td class="memItemLeft" align="right" valign="top"><a id="a16e966c6d8268235b38d160473f4e070"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a16e966c6d8268235b38d160473f4e070">computePhysicsPlotVars</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_physicsPlotVars) const noexcept</td></tr>
+<tr class="memdesc:a16e966c6d8268235b38d160473f4e070"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the user-supplied plot variables. <br /></td></tr>
+<tr class="separator:a16e966c6d8268235b38d160473f4e070"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76b7bb416be340ecaf8130deefea6f31"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a76b7bb416be340ecaf8130deefea6f31">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
+<tr class="memdesc:a76b7bb416be340ecaf8130deefea6f31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a76b7bb416be340ecaf8130deefea6f31">More...</a><br /></td></tr>
+<tr class="separator:a76b7bb416be340ecaf8130deefea6f31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -595,6 +610,14 @@ RefCountedPtr&lt; <a class="el" href="classFieldSolver.html">FieldSolver</a> &gt
 RefCountedPtr&lt; <a class="el" href="classSurfaceODESolver.html">SurfaceODESolver</a>&lt; 1 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a2a62a6b2bf39641c3b779b0326160fed">m_sigma</a></td></tr>
 <tr class="memdesc:a2a62a6b2bf39641c3b779b0326160fed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface charge solver. <br /></td></tr>
 <tr class="separator:a2a62a6b2bf39641c3b779b0326160fed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a7387a86c7bfbc42255bb8ac57a5feb"><td class="memItemLeft" align="right" valign="top"><a id="a7a7387a86c7bfbc42255bb8ac57a5feb"></a>
+<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a7a7387a86c7bfbc42255bb8ac57a5feb">m_currentDensity</a></td></tr>
+<tr class="memdesc:a7a7387a86c7bfbc42255bb8ac57a5feb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for the current. <br /></td></tr>
+<tr class="separator:a7a7387a86c7bfbc42255bb8ac57a5feb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71601ac7fee7d410562b7a046a66399e"><td class="memItemLeft" align="right" valign="top"><a id="a71601ac7fee7d410562b7a046a66399e"></a>
+<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a71601ac7fee7d410562b7a046a66399e">m_physicsPlotVars</a></td></tr>
+<tr class="memdesc:a71601ac7fee7d410562b7a046a66399e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for physics-observables. <br /></td></tr>
+<tr class="separator:a71601ac7fee7d410562b7a046a66399e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acc9efff66a85a54e3bd13455c0bf0a8a"><td class="memItemLeft" align="right" valign="top"><a id="acc9efff66a85a54e3bd13455c0bf0a8a"></a>
 std::function&lt; Real(const Real a_time)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#acc9efff66a85a54e3bd13455c0bf0a8a">m_voltage</a></td></tr>
 <tr class="memdesc:acc9efff66a85a54e3bd13455c0bf0a8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the potential. <br /></td></tr>
@@ -1658,36 +1681,6 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a id="adf044da433791d634a9f4543e43b4812"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adf044da433791d634a9f4543e43b4812">&#9670;&nbsp;</a></span>allocateInternals()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void CdrPlasmaStepper::allocateInternals </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Allocate internal storage. Must be implemented by subclasses. </p>
-<p>Do nothing</p>
-
-<p>Implemented in <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html#aea4d5681a932418c831997faea4e912d">Physics::CdrPlasma::CdrPlasmaImExSdcStepper</a>, and <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#ad7c184e7721bac7200172dde8006b8ff">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>.</p>
 
 </div>
 </div>
@@ -5279,8 +5272,81 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 
 </div>
 </div>
-<a id="ad2007586b31538427973299fa9913720"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad2007586b31538427973299fa9913720">&#9670;&nbsp;</a></span>writeJ()</h2>
+<a id="a76b7bb416be340ecaf8130deefea6f31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76b7bb416be340ecaf8130deefea6f31">&#9670;&nbsp;</a></span>writeData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CdrPlasmaStepper::writeData </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>a_comp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_interpToCentroids</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_interpGhost</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write data to output. Convenience function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where this solver begins writing the output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data to write. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpToCentroids</td><td>If true, a_data will be interpolated to cell centroids before writing to a_output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpGhost</td><td>If true, interpolate ghost cells </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a46f0234c393c7b99b65e9e793e89b1ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46f0234c393c7b99b65e9e793e89b1ae">&#9670;&nbsp;</a></span>writeJ()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5291,14 +5357,20 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
         <tr>
           <td class="memname">void CdrPlasmaStepper::writeJ </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>a_comp</em>&#160;</td>
+          <td class="paramname"><em>a_comp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -5318,59 +5390,15 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. On output this is incremented by SpaceDim. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="abdee75a3a3f8cfecab2e6998a87a3351"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abdee75a3a3f8cfecab2e6998a87a3351">&#9670;&nbsp;</a></span>writePhysics()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void CdrPlasmaStepper::writePhysics </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_output</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>a_comp</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Write physics data to output data holder. </p>
-<p>This will fetch plot variables from m_physics and put them in the data holder. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. On output this is incremented by the number of plot variables from m_physics. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a7b32196ab443203d87d542a2db30d7fd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7b32196ab443203d87d542a2db30d7fd">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a800d8e978c0c5443e31a51d8183d1b4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a800d8e978c0c5443e31a51d8183d1b4f">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5381,20 +5409,20 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
         <tr>
           <td class="memname">void CdrPlasmaStepper::writePlotData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Vector&lt; std::string &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_plotVariableNames</em>, </td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>a_icomp</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>a_icomp</em>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -5413,13 +5441,13 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_plotVariableNames</td><td>Plot variable names. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#ac465856ae495a5842352ba530254793c">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#ae858739b259e499d5ce03e9b3c9baa0e">TimeStepper</a>.</p>
 
 </div>
 </div>

@@ -164,12 +164,17 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a2f15d32e686db0ffa118b736793aab85">parseRuntimeOptions</a> () override</td></tr>
 <tr class="memdesc:a2f15d32e686db0ffa118b736793aab85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse runtime options. <br /></td></tr>
 <tr class="separator:a2f15d32e686db0ffa118b736793aab85"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a72cf59ef6cca7f36be69b18aa56f9391"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a72cf59ef6cca7f36be69b18aa56f9391">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, Vector&lt; std::string &gt; &amp;a_plotVariableNames, int &amp;a_icomp) const override</td></tr>
-<tr class="memdesc:a72cf59ef6cca7f36be69b18aa56f9391"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a72cf59ef6cca7f36be69b18aa56f9391">More...</a><br /></td></tr>
-<tr class="separator:a72cf59ef6cca7f36be69b18aa56f9391"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a44a568056be5192992b2dcffad282d46"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a44a568056be5192992b2dcffad282d46">getNumberOfPlotVariables</a> () const override</td></tr>
-<tr class="memdesc:a44a568056be5192992b2dcffad282d46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of plot variables for this time stepper.  <a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a44a568056be5192992b2dcffad282d46">More...</a><br /></td></tr>
+<tr class="memitem:a44a568056be5192992b2dcffad282d46"><td class="memItemLeft" align="right" valign="top"><a id="a44a568056be5192992b2dcffad282d46"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a44a568056be5192992b2dcffad282d46">getNumberOfPlotVariables</a> () const override</td></tr>
+<tr class="memdesc:a44a568056be5192992b2dcffad282d46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of plot variables for this physics module. <br /></td></tr>
 <tr class="separator:a44a568056be5192992b2dcffad282d46"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1a63c515c50694b95bec62006a95ec7"><td class="memItemLeft" align="right" valign="top"><a id="ad1a63c515c50694b95bec62006a95ec7"></a>
+Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#ad1a63c515c50694b95bec62006a95ec7">getPlotVariableNames</a> () const override</td></tr>
+<tr class="memdesc:ad1a63c515c50694b95bec62006a95ec7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names. <br /></td></tr>
+<tr class="separator:ad1a63c515c50694b95bec62006a95ec7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ee51274b2e3469c5961623959d960e4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a2ee51274b2e3469c5961623959d960e4">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const override</td></tr>
+<tr class="memdesc:a2ee51274b2e3469c5961623959d960e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a2ee51274b2e3469c5961623959d960e4">More...</a><br /></td></tr>
+<tr class="separator:a2ee51274b2e3469c5961623959d960e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a381069b83a5f02a85e1333e21c002bfe"><td class="memItemLeft" align="right" valign="top"><a id="a381069b83a5f02a85e1333e21c002bfe"></a>
 virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a381069b83a5f02a85e1333e21c002bfe">computeDt</a> () override</td></tr>
 <tr class="memdesc:a381069b83a5f02a85e1333e21c002bfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>. <br /></td></tr>
@@ -207,6 +212,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a2da29e7e5a5ac98dc2316f3439725289">setComputationalGeometry</a> (const RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> &gt; &amp;a_computationalGeometry)</td></tr>
 <tr class="memdesc:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the computational geometry.  <a href="classTimeStepper.html#a2da29e7e5a5ac98dc2316f3439725289">More...</a><br /></td></tr>
 <tr class="separator:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20cc9ee90664ed9614bd5d18a7104d24 inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top"><a id="a20cc9ee90664ed9614bd5d18a7104d24"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a20cc9ee90664ed9614bd5d18a7104d24">prePlot</a> ()</td></tr>
+<tr class="memdesc:a20cc9ee90664ed9614bd5d18a7104d24 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">An option for calling special functions prior to plotting data. Called by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> in the IMMEDIATELY before writing the plot file. <br /></td></tr>
+<tr class="separator:a20cc9ee90664ed9614bd5d18a7104d24 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a078de2c883b297d696f2e3d40bc270be inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; long int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a078de2c883b297d696f2e3d40bc270be">getCheckpointLoads</a> (const std::string a_realm, const int a_level) const</td></tr>
 <tr class="memdesc:a078de2c883b297d696f2e3d40bc270be inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get computational loads to be checkpointed.  <a href="classTimeStepper.html#a078de2c883b297d696f2e3d40bc270be">More...</a><br /></td></tr>
 <tr class="separator:a078de2c883b297d696f2e3d40bc270be inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -539,35 +548,6 @@ template&lt;typename P &gt; </div>
 
 </div>
 </div>
-<a id="a44a568056be5192992b2dcffad282d46"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a44a568056be5192992b2dcffad282d46">&#9670;&nbsp;</a></span>getNumberOfPlotVariables()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename P &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">int TracerParticleStepper::getNumberOfPlotVariables</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get the number of plot variables for this time stepper. </p>
-<p>This is necessary because <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>, not <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a>, is responsible for allocating the necessary memory. </p><dl class="section return"><dt>Returns</dt><dd>Returns number of plot variables that will be written during writePlotData </dd></dl>
-
-<p>Implements <a class="el" href="classTimeStepper.html#a914746cb3a04bcbd965f1fdd09631ce4">TimeStepper</a>.</p>
-
-</div>
-</div>
 <a id="af461141ccc746c59100af3bd57597b8b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af461141ccc746c59100af3bd57597b8b">&#9670;&nbsp;</a></span>operator=() <span class="overload">[1/2]</span></h2>
 
@@ -891,8 +871,8 @@ template&lt;typename P &gt; </div>
 
 </div>
 </div>
-<a id="a72cf59ef6cca7f36be69b18aa56f9391"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a72cf59ef6cca7f36be69b18aa56f9391">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a2ee51274b2e3469c5961623959d960e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ee51274b2e3469c5961623959d960e4">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -905,20 +885,20 @@ template&lt;typename P &gt; </div>
         <tr>
           <td class="memname">void TracerParticleStepper::writePlotData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Vector&lt; std::string &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_plotVariableNames</em>, </td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>a_icomp</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>a_icomp</em>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -937,13 +917,13 @@ template&lt;typename P &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_plotVariableNames</td><td>Plot variable names. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#ac465856ae495a5842352ba530254793c">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#ae858739b259e499d5ce03e9b3c9baa0e">TimeStepper</a>.</p>
 
 </div>
 </div>

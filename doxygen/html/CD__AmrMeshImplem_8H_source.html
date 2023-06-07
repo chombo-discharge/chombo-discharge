@@ -134,7 +134,7 @@ $(function() {
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;AmrMesh::deallocate(EBAMRData&lt;T&gt;)&quot;</span> &lt;&lt; endl;</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  }</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <span class="keywordflow">return</span> this-&gt;<a class="code" href="classAmrMesh.html#ae5ab65c2e423aaa581d3adb4fd883b92">deallocate</a>(a_data.<a class="code" href="classEBAMRData.html#ac65eaa5d20dc6d16f9706d18216a2462">getData</a>());</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <span class="keywordflow">return</span> this-&gt;<a class="code" href="classAmrMesh.html#ae5ab65c2e423aaa581d3adb4fd883b92">deallocate</a>(a_data.<a class="code" href="classEBAMRData.html#a4cd751591c1b6c7df68fe6de16e0d998">getData</a>());</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;}</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
@@ -162,7 +162,7 @@ $(function() {
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;AmrMesh::alias(Vector&lt;T*&gt;, EBAMRData&lt;S&gt;&quot;</span> &lt;&lt; endl;</div>
 <div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  }</div>
 <div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;  <span class="keywordflow">return</span> this-&gt;<a class="code" href="classAmrMesh.html#ae1420f5b9c853b5e09334f15966a36f6">alias</a>(a_alias, a_data.<a class="code" href="classEBAMRData.html#ac65eaa5d20dc6d16f9706d18216a2462">getData</a>());</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;  <span class="keywordflow">return</span> this-&gt;<a class="code" href="classAmrMesh.html#ae1420f5b9c853b5e09334f15966a36f6">alias</a>(a_alias, a_data.<a class="code" href="classEBAMRData.html#a4cd751591c1b6c7df68fe6de16e0d998">getData</a>());</div>
 <div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;}</div>
 <div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160; </div>
 <div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
@@ -269,9 +269,9 @@ $(function() {
 <div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;AmrMesh::allocatePointer(EBAMRData&lt;T&gt;, std::string)&quot;</span> &lt;&lt; endl;</div>
 <div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;  }</div>
 <div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160; </div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;  this-&gt;<a class="code" href="classAmrMesh.html#ac4c266b32bccaf75389e17bb093f35e0">allocatePointer</a>(a_data.<a class="code" href="classEBAMRData.html#ac65eaa5d20dc6d16f9706d18216a2462">getData</a>());</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;  this-&gt;<a class="code" href="classAmrMesh.html#ac4c266b32bccaf75389e17bb093f35e0">allocatePointer</a>(a_data.<a class="code" href="classEBAMRData.html#a4cd751591c1b6c7df68fe6de16e0d998">getData</a>());</div>
 <div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160; </div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;  a_data.<a class="code" href="classEBAMRData.html#ab95bfbf4cba32f8082a808e2038074ce">setRealm</a>(a_realm);</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;  a_data.<a class="code" href="classEBAMRData.html#a278c2dce4bf9e82e09aecad19f9a6f45">setRealm</a>(a_realm);</div>
 <div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;}</div>
 <div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160; </div>
 <div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
@@ -283,9 +283,9 @@ $(function() {
 <div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;AmrMesh::allocatePointer(EBAMRData&lt;T&gt;, std::string, int)&quot;</span> &lt;&lt; endl;</div>
 <div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;  }</div>
 <div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160; </div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;  this-&gt;<a class="code" href="classAmrMesh.html#ac4c266b32bccaf75389e17bb093f35e0">allocatePointer</a>(a_data.<a class="code" href="classEBAMRData.html#ac65eaa5d20dc6d16f9706d18216a2462">getData</a>(), a_finestLevel);</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;  this-&gt;<a class="code" href="classAmrMesh.html#ac4c266b32bccaf75389e17bb093f35e0">allocatePointer</a>(a_data.<a class="code" href="classEBAMRData.html#a4cd751591c1b6c7df68fe6de16e0d998">getData</a>(), a_finestLevel);</div>
 <div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160; </div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;  a_data.<a class="code" href="classEBAMRData.html#ab95bfbf4cba32f8082a808e2038074ce">setRealm</a>(a_realm);</div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;  a_data.<a class="code" href="classEBAMRData.html#a278c2dce4bf9e82e09aecad19f9a6f45">setRealm</a>(a_realm);</div>
 <div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;}</div>
 <div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160; </div>
 <div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> P&gt;</div>
@@ -393,7 +393,7 @@ $(function() {
 <div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;  }</div>
 <div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160; </div>
 <div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;  CH_assert(a_meshData[0]-&gt;nComp() == 1);</div>
-<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;  CH_assert(a_meshData.<a class="code" href="classEBAMRData.html#addf6043b930cf1890381782164d50882">getRealm</a>() == a_particles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>());</div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;  CH_assert(a_meshData.<a class="code" href="classEBAMRData.html#ae21af3fabcaa3364bbcaf641b63798e0">getRealm</a>() == a_particles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>());</div>
 <div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160; </div>
 <div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;  <a class="code" href="classEBAMRSurfaceDeposition.html">EBAMRSurfaceDeposition</a>&amp; surfaceDeposition = this-&gt;getSurfaceDeposition(a_realm, a_phase);</div>
 <div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160; </div>
@@ -413,7 +413,7 @@ $(function() {
 <div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;  }</div>
 <div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160; </div>
 <div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;  CH_assert(a_meshData[0]-&gt;nComp() == 1);</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;  CH_assert(a_meshData.<a class="code" href="classEBAMRData.html#addf6043b930cf1890381782164d50882">getRealm</a>() == a_particles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>());</div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;  CH_assert(a_meshData.<a class="code" href="classEBAMRData.html#ae21af3fabcaa3364bbcaf641b63798e0">getRealm</a>() == a_particles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>());</div>
 <div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160; </div>
 <div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;  <a class="code" href="classEBAMRSurfaceDeposition.html">EBAMRSurfaceDeposition</a>&amp; surfaceDeposition = this-&gt;getSurfaceDeposition(a_realm, a_phase);</div>
 <div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160; </div>
@@ -435,7 +435,7 @@ $(function() {
 <div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;  }</div>
 <div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160; </div>
 <div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;  CH_assert(a_realm == a_particles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>());</div>
-<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;  CH_assert(a_realm == a_meshScalarField.<a class="code" href="classEBAMRData.html#addf6043b930cf1890381782164d50882">getRealm</a>());</div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;  CH_assert(a_realm == a_meshScalarField.<a class="code" href="classEBAMRData.html#ae21af3fabcaa3364bbcaf641b63798e0">getRealm</a>());</div>
 <div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160; </div>
 <div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;  <a class="code" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a>&amp; particleMesh = this-&gt;<a class="code" href="classAmrMesh.html#ae01ad6d63e8fed8c1615a06a9ccb534a">getParticleMesh</a>(a_realm, a_phase);</div>
 <div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160; </div>
@@ -457,7 +457,7 @@ $(function() {
 <div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;  }</div>
 <div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160; </div>
 <div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;  CH_assert(a_realm == a_particles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>());</div>
-<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;  CH_assert(a_realm == a_meshVectorField.<a class="code" href="classEBAMRData.html#addf6043b930cf1890381782164d50882">getRealm</a>());</div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;  CH_assert(a_realm == a_meshVectorField.<a class="code" href="classEBAMRData.html#ae21af3fabcaa3364bbcaf641b63798e0">getRealm</a>());</div>
 <div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160; </div>
 <div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;  <a class="code" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a>&amp; particleMesh = this-&gt;<a class="code" href="classAmrMesh.html#ae01ad6d63e8fed8c1615a06a9ccb534a">getParticleMesh</a>(a_realm, a_phase);</div>
 <div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160; </div>
@@ -923,389 +923,390 @@ $(function() {
 <div class="line"><a name="l00851"></a><span class="lineno">  851</span>&#160;        <span class="keyword">const</span> IntVect iv = <a class="code" href="classParticleOps.html#aeaf3f380db95aa0395d8985da86fc547">ParticleOps::getParticleCellIndex</a>(p.position(), probLo, dx);</div>
 <div class="line"><a name="l00852"></a><span class="lineno">  852</span>&#160; </div>
 <div class="line"><a name="l00853"></a><span class="lineno">  853</span>&#160;        <span class="keywordflow">if</span> (!(cellBox.contains(iv))) {</div>
-<div class="line"><a name="l00854"></a><span class="lineno">  854</span>&#160;          MayDay::Error(<span class="stringliteral">&quot;CD_AmrMeshImplem.H in routine &#39;transferIrregularParticles&#39; - particle not in box!&quot;</span>);</div>
-<div class="line"><a name="l00855"></a><span class="lineno">  855</span>&#160;        }</div>
-<div class="line"><a name="l00856"></a><span class="lineno">  856</span>&#160; </div>
-<div class="line"><a name="l00857"></a><span class="lineno">  857</span>&#160;        <span class="comment">// If the particle is inside any vof, we keep it.</span></div>
-<div class="line"><a name="l00858"></a><span class="lineno">  858</span>&#160;        <span class="keywordflow">if</span> (ebisbox.isIrregular(iv)) {</div>
-<div class="line"><a name="l00859"></a><span class="lineno">  859</span>&#160;          <span class="keywordtype">bool</span> insideAnyVoF = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00860"></a><span class="lineno">  860</span>&#160; </div>
-<div class="line"><a name="l00861"></a><span class="lineno">  861</span>&#160;          <span class="keyword">const</span> Vector&lt;VolIndex&gt; allVoFs = ebisbox.getVoFs(iv);</div>
-<div class="line"><a name="l00862"></a><span class="lineno">  862</span>&#160; </div>
-<div class="line"><a name="l00863"></a><span class="lineno">  863</span>&#160;          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; allVoFs.size(); i++) {</div>
-<div class="line"><a name="l00864"></a><span class="lineno">  864</span>&#160;            <span class="keyword">const</span> VolIndex&amp; vof    = allVoFs[i];</div>
-<div class="line"><a name="l00865"></a><span class="lineno">  865</span>&#160;            <span class="keyword">const</span> RealVect  normal = ebisbox.normal(vof);</div>
-<div class="line"><a name="l00866"></a><span class="lineno">  866</span>&#160;            <span class="keyword">const</span> RealVect  ebPos  = probLo + <a class="code" href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710">Location::position</a>(Location::Cell::Boundary, vof, ebisbox, dx);</div>
-<div class="line"><a name="l00867"></a><span class="lineno">  867</span>&#160; </div>
-<div class="line"><a name="l00868"></a><span class="lineno">  868</span>&#160;            <span class="comment">// Note: Can have normal = 0!</span></div>
-<div class="line"><a name="l00869"></a><span class="lineno">  869</span>&#160;            <span class="keywordflow">if</span> ((p.position() - ebPos).dotProduct(normal) &gt;= 0.0) {</div>
-<div class="line"><a name="l00870"></a><span class="lineno">  870</span>&#160;              insideAnyVoF = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00871"></a><span class="lineno">  871</span>&#160;            }</div>
-<div class="line"><a name="l00872"></a><span class="lineno">  872</span>&#160;          }</div>
-<div class="line"><a name="l00873"></a><span class="lineno">  873</span>&#160; </div>
-<div class="line"><a name="l00874"></a><span class="lineno">  874</span>&#160;          <span class="keywordflow">if</span> (!insideAnyVoF) {</div>
-<div class="line"><a name="l00875"></a><span class="lineno">  875</span>&#160;            <span class="keyword">const</span> VolIndex&amp; vof   = allVoFs[0];</div>
-<div class="line"><a name="l00876"></a><span class="lineno">  876</span>&#160;            <span class="keyword">const</span> RealVect  ebPos = probLo + <a class="code" href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710">Location::position</a>(Location::Cell::Boundary, vof, ebisbox, dx);</div>
-<div class="line"><a name="l00877"></a><span class="lineno">  877</span>&#160; </div>
-<div class="line"><a name="l00878"></a><span class="lineno">  878</span>&#160;            p.position() = ebPos;</div>
-<div class="line"><a name="l00879"></a><span class="lineno">  879</span>&#160; </div>
-<div class="line"><a name="l00880"></a><span class="lineno">  880</span>&#160;            a_transferModifier(p);</div>
-<div class="line"><a name="l00881"></a><span class="lineno">  881</span>&#160; </div>
-<div class="line"><a name="l00882"></a><span class="lineno">  882</span>&#160;            dstParticles.transfer(lit);</div>
-<div class="line"><a name="l00883"></a><span class="lineno">  883</span>&#160;          }</div>
-<div class="line"><a name="l00884"></a><span class="lineno">  884</span>&#160;          <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00885"></a><span class="lineno">  885</span>&#160;            ++lit;</div>
-<div class="line"><a name="l00886"></a><span class="lineno">  886</span>&#160;          }</div>
-<div class="line"><a name="l00887"></a><span class="lineno">  887</span>&#160;        }</div>
-<div class="line"><a name="l00888"></a><span class="lineno">  888</span>&#160;        <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00889"></a><span class="lineno">  889</span>&#160;          ++lit;</div>
-<div class="line"><a name="l00890"></a><span class="lineno">  890</span>&#160;        }</div>
-<div class="line"><a name="l00891"></a><span class="lineno">  891</span>&#160;      }</div>
-<div class="line"><a name="l00892"></a><span class="lineno">  892</span>&#160;    }</div>
-<div class="line"><a name="l00893"></a><span class="lineno">  893</span>&#160;  }</div>
-<div class="line"><a name="l00894"></a><span class="lineno">  894</span>&#160;}</div>
-<div class="line"><a name="l00895"></a><span class="lineno">  895</span>&#160; </div>
-<div class="line"><a name="l00896"></a><span class="lineno">  896</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> P&gt;</div>
-<div class="line"><a name="l00897"></a><span class="lineno">  897</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00898"></a><span class="lineno"><a class="line" href="classAmrMesh.html#a60a68b7e8b0a7d9062db13f1b002cc39">  898</a></span>&#160;<a class="code" href="classAmrMesh.html#a60a68b7e8b0a7d9062db13f1b002cc39">AmrMesh::intersectParticlesRaycastIF</a>(<a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;         a_activeParticles,</div>
-<div class="line"><a name="l00899"></a><span class="lineno">  899</span>&#160;                                     <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;         a_ebParticles,</div>
-<div class="line"><a name="l00900"></a><span class="lineno">  900</span>&#160;                                     <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;         a_domainParticles,</div>
-<div class="line"><a name="l00901"></a><span class="lineno">  901</span>&#160;                                     <span class="keyword">const</span> phase::which_phase      a_phase,</div>
-<div class="line"><a name="l00902"></a><span class="lineno">  902</span>&#160;                                     <span class="keyword">const</span> Real                    a_tolerance,</div>
-<div class="line"><a name="l00903"></a><span class="lineno">  903</span>&#160;                                     <span class="keyword">const</span> <span class="keywordtype">bool</span>                    a_deleteParticles,</div>
-<div class="line"><a name="l00904"></a><span class="lineno">  904</span>&#160;                                     <span class="keyword">const</span> std::function&lt;<span class="keywordtype">void</span>(P&amp;)&gt; a_nonDeletionModifier) <span class="keyword">const</span> noexcept</div>
-<div class="line"><a name="l00905"></a><span class="lineno">  905</span>&#160;{</div>
-<div class="line"><a name="l00906"></a><span class="lineno">  906</span>&#160;  CH_TIME(<span class="stringliteral">&quot;AmrMesh::intersectParticlesRaycastIF&quot;</span>);</div>
-<div class="line"><a name="l00907"></a><span class="lineno">  907</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00908"></a><span class="lineno">  908</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;AmrMesh::intersectParticlesRaycastIF&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00909"></a><span class="lineno">  909</span>&#160;  }</div>
-<div class="line"><a name="l00910"></a><span class="lineno">  910</span>&#160; </div>
-<div class="line"><a name="l00911"></a><span class="lineno">  911</span>&#160;  CH_assert(a_activeParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>() == a_ebParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>());</div>
-<div class="line"><a name="l00912"></a><span class="lineno">  912</span>&#160;  CH_assert(a_activeParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>() == a_domainParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>());</div>
-<div class="line"><a name="l00913"></a><span class="lineno">  913</span>&#160; </div>
-<div class="line"><a name="l00914"></a><span class="lineno">  914</span>&#160;  a_ebParticles.<a class="code" href="classParticleContainer.html#a8677866e8070b8925e3f98689faba582">clearParticles</a>();</div>
-<div class="line"><a name="l00915"></a><span class="lineno">  915</span>&#160;  a_domainParticles.<a class="code" href="classParticleContainer.html#a8677866e8070b8925e3f98689faba582">clearParticles</a>();</div>
-<div class="line"><a name="l00916"></a><span class="lineno">  916</span>&#160; </div>
-<div class="line"><a name="l00917"></a><span class="lineno">  917</span>&#160;  <span class="keyword">const</span> std::string whichRealm = a_activeParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>();</div>
-<div class="line"><a name="l00918"></a><span class="lineno">  918</span>&#160; </div>
-<div class="line"><a name="l00919"></a><span class="lineno">  919</span>&#160;  <span class="comment">// Figure out the implicit function</span></div>
-<div class="line"><a name="l00920"></a><span class="lineno">  920</span>&#160;  RefCountedPtr&lt;BaseIF&gt; implicitFunction;</div>
-<div class="line"><a name="l00921"></a><span class="lineno">  921</span>&#160; </div>
-<div class="line"><a name="l00922"></a><span class="lineno">  922</span>&#160;  <span class="keywordflow">switch</span> (a_phase) {</div>
-<div class="line"><a name="l00923"></a><span class="lineno">  923</span>&#160;  <span class="keywordflow">case</span> phase::gas: {</div>
-<div class="line"><a name="l00924"></a><span class="lineno">  924</span>&#160;    implicitFunction = m_baseif.at(phase::gas);</div>
-<div class="line"><a name="l00925"></a><span class="lineno">  925</span>&#160; </div>
-<div class="line"><a name="l00926"></a><span class="lineno">  926</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00927"></a><span class="lineno">  927</span>&#160;  }</div>
-<div class="line"><a name="l00928"></a><span class="lineno">  928</span>&#160;  <span class="keywordflow">case</span> phase::solid: {</div>
-<div class="line"><a name="l00929"></a><span class="lineno">  929</span>&#160;    implicitFunction = m_baseif.at(phase::solid);</div>
-<div class="line"><a name="l00930"></a><span class="lineno">  930</span>&#160; </div>
-<div class="line"><a name="l00931"></a><span class="lineno">  931</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00932"></a><span class="lineno">  932</span>&#160;  }</div>
-<div class="line"><a name="l00933"></a><span class="lineno">  933</span>&#160;  <span class="keywordflow">default</span>: {</div>
-<div class="line"><a name="l00934"></a><span class="lineno">  934</span>&#160;    MayDay::Error(<span class="stringliteral">&quot;AmrMesh::intersectParticlesRaycastIF - logic bust&quot;</span>);</div>
-<div class="line"><a name="l00935"></a><span class="lineno">  935</span>&#160; </div>
-<div class="line"><a name="l00936"></a><span class="lineno">  936</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00937"></a><span class="lineno">  937</span>&#160;  }</div>
+<div class="line"><a name="l00854"></a><span class="lineno">  854</span>&#160;          MayDay::Warning(<span class="stringliteral">&quot;CD_AmrMeshImplem.H in routine &#39;transferIrregularParticles&#39; - particle not in box!&quot;</span>);</div>
+<div class="line"><a name="l00855"></a><span class="lineno">  855</span>&#160; </div>
+<div class="line"><a name="l00856"></a><span class="lineno">  856</span>&#160;          ++lit;</div>
+<div class="line"><a name="l00857"></a><span class="lineno">  857</span>&#160;        }</div>
+<div class="line"><a name="l00858"></a><span class="lineno">  858</span>&#160; </div>
+<div class="line"><a name="l00859"></a><span class="lineno">  859</span>&#160;        <span class="keywordflow">if</span> (ebisbox.isIrregular(iv)) {</div>
+<div class="line"><a name="l00860"></a><span class="lineno">  860</span>&#160;          <span class="keywordtype">bool</span> insideAnyVoF = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00861"></a><span class="lineno">  861</span>&#160; </div>
+<div class="line"><a name="l00862"></a><span class="lineno">  862</span>&#160;          <span class="keyword">const</span> Vector&lt;VolIndex&gt; allVoFs = ebisbox.getVoFs(iv);</div>
+<div class="line"><a name="l00863"></a><span class="lineno">  863</span>&#160; </div>
+<div class="line"><a name="l00864"></a><span class="lineno">  864</span>&#160;          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; allVoFs.size(); i++) {</div>
+<div class="line"><a name="l00865"></a><span class="lineno">  865</span>&#160;            <span class="keyword">const</span> VolIndex&amp; vof    = allVoFs[i];</div>
+<div class="line"><a name="l00866"></a><span class="lineno">  866</span>&#160;            <span class="keyword">const</span> RealVect  normal = ebisbox.normal(vof);</div>
+<div class="line"><a name="l00867"></a><span class="lineno">  867</span>&#160;            <span class="keyword">const</span> RealVect  ebPos  = probLo + <a class="code" href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710">Location::position</a>(Location::Cell::Boundary, vof, ebisbox, dx);</div>
+<div class="line"><a name="l00868"></a><span class="lineno">  868</span>&#160; </div>
+<div class="line"><a name="l00869"></a><span class="lineno">  869</span>&#160;            <span class="comment">// Note: Can have normal = 0!</span></div>
+<div class="line"><a name="l00870"></a><span class="lineno">  870</span>&#160;            <span class="keywordflow">if</span> ((p.position() - ebPos).dotProduct(normal) &gt;= 0.0) {</div>
+<div class="line"><a name="l00871"></a><span class="lineno">  871</span>&#160;              insideAnyVoF = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00872"></a><span class="lineno">  872</span>&#160;            }</div>
+<div class="line"><a name="l00873"></a><span class="lineno">  873</span>&#160;          }</div>
+<div class="line"><a name="l00874"></a><span class="lineno">  874</span>&#160; </div>
+<div class="line"><a name="l00875"></a><span class="lineno">  875</span>&#160;          <span class="keywordflow">if</span> (!insideAnyVoF) {</div>
+<div class="line"><a name="l00876"></a><span class="lineno">  876</span>&#160;            <span class="keyword">const</span> VolIndex&amp; vof   = allVoFs[0];</div>
+<div class="line"><a name="l00877"></a><span class="lineno">  877</span>&#160;            <span class="keyword">const</span> RealVect  ebPos = probLo + <a class="code" href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710">Location::position</a>(Location::Cell::Boundary, vof, ebisbox, dx);</div>
+<div class="line"><a name="l00878"></a><span class="lineno">  878</span>&#160; </div>
+<div class="line"><a name="l00879"></a><span class="lineno">  879</span>&#160;            p.position() = ebPos;</div>
+<div class="line"><a name="l00880"></a><span class="lineno">  880</span>&#160; </div>
+<div class="line"><a name="l00881"></a><span class="lineno">  881</span>&#160;            a_transferModifier(p);</div>
+<div class="line"><a name="l00882"></a><span class="lineno">  882</span>&#160; </div>
+<div class="line"><a name="l00883"></a><span class="lineno">  883</span>&#160;            dstParticles.transfer(lit);</div>
+<div class="line"><a name="l00884"></a><span class="lineno">  884</span>&#160;          }</div>
+<div class="line"><a name="l00885"></a><span class="lineno">  885</span>&#160;          <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00886"></a><span class="lineno">  886</span>&#160;            ++lit;</div>
+<div class="line"><a name="l00887"></a><span class="lineno">  887</span>&#160;          }</div>
+<div class="line"><a name="l00888"></a><span class="lineno">  888</span>&#160;        }</div>
+<div class="line"><a name="l00889"></a><span class="lineno">  889</span>&#160;        <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00890"></a><span class="lineno">  890</span>&#160;          ++lit;</div>
+<div class="line"><a name="l00891"></a><span class="lineno">  891</span>&#160;        }</div>
+<div class="line"><a name="l00892"></a><span class="lineno">  892</span>&#160;      }</div>
+<div class="line"><a name="l00893"></a><span class="lineno">  893</span>&#160;    }</div>
+<div class="line"><a name="l00894"></a><span class="lineno">  894</span>&#160;  }</div>
+<div class="line"><a name="l00895"></a><span class="lineno">  895</span>&#160;}</div>
+<div class="line"><a name="l00896"></a><span class="lineno">  896</span>&#160; </div>
+<div class="line"><a name="l00897"></a><span class="lineno">  897</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> P&gt;</div>
+<div class="line"><a name="l00898"></a><span class="lineno">  898</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00899"></a><span class="lineno"><a class="line" href="classAmrMesh.html#a60a68b7e8b0a7d9062db13f1b002cc39">  899</a></span>&#160;<a class="code" href="classAmrMesh.html#a60a68b7e8b0a7d9062db13f1b002cc39">AmrMesh::intersectParticlesRaycastIF</a>(<a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;         a_activeParticles,</div>
+<div class="line"><a name="l00900"></a><span class="lineno">  900</span>&#160;                                     <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;         a_ebParticles,</div>
+<div class="line"><a name="l00901"></a><span class="lineno">  901</span>&#160;                                     <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;         a_domainParticles,</div>
+<div class="line"><a name="l00902"></a><span class="lineno">  902</span>&#160;                                     <span class="keyword">const</span> phase::which_phase      a_phase,</div>
+<div class="line"><a name="l00903"></a><span class="lineno">  903</span>&#160;                                     <span class="keyword">const</span> Real                    a_tolerance,</div>
+<div class="line"><a name="l00904"></a><span class="lineno">  904</span>&#160;                                     <span class="keyword">const</span> <span class="keywordtype">bool</span>                    a_deleteParticles,</div>
+<div class="line"><a name="l00905"></a><span class="lineno">  905</span>&#160;                                     <span class="keyword">const</span> std::function&lt;<span class="keywordtype">void</span>(P&amp;)&gt; a_nonDeletionModifier) <span class="keyword">const</span> noexcept</div>
+<div class="line"><a name="l00906"></a><span class="lineno">  906</span>&#160;{</div>
+<div class="line"><a name="l00907"></a><span class="lineno">  907</span>&#160;  CH_TIME(<span class="stringliteral">&quot;AmrMesh::intersectParticlesRaycastIF&quot;</span>);</div>
+<div class="line"><a name="l00908"></a><span class="lineno">  908</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00909"></a><span class="lineno">  909</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;AmrMesh::intersectParticlesRaycastIF&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00910"></a><span class="lineno">  910</span>&#160;  }</div>
+<div class="line"><a name="l00911"></a><span class="lineno">  911</span>&#160; </div>
+<div class="line"><a name="l00912"></a><span class="lineno">  912</span>&#160;  CH_assert(a_activeParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>() == a_ebParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>());</div>
+<div class="line"><a name="l00913"></a><span class="lineno">  913</span>&#160;  CH_assert(a_activeParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>() == a_domainParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>());</div>
+<div class="line"><a name="l00914"></a><span class="lineno">  914</span>&#160; </div>
+<div class="line"><a name="l00915"></a><span class="lineno">  915</span>&#160;  a_ebParticles.<a class="code" href="classParticleContainer.html#a8677866e8070b8925e3f98689faba582">clearParticles</a>();</div>
+<div class="line"><a name="l00916"></a><span class="lineno">  916</span>&#160;  a_domainParticles.<a class="code" href="classParticleContainer.html#a8677866e8070b8925e3f98689faba582">clearParticles</a>();</div>
+<div class="line"><a name="l00917"></a><span class="lineno">  917</span>&#160; </div>
+<div class="line"><a name="l00918"></a><span class="lineno">  918</span>&#160;  <span class="keyword">const</span> std::string whichRealm = a_activeParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>();</div>
+<div class="line"><a name="l00919"></a><span class="lineno">  919</span>&#160; </div>
+<div class="line"><a name="l00920"></a><span class="lineno">  920</span>&#160;  <span class="comment">// Figure out the implicit function</span></div>
+<div class="line"><a name="l00921"></a><span class="lineno">  921</span>&#160;  RefCountedPtr&lt;BaseIF&gt; implicitFunction;</div>
+<div class="line"><a name="l00922"></a><span class="lineno">  922</span>&#160; </div>
+<div class="line"><a name="l00923"></a><span class="lineno">  923</span>&#160;  <span class="keywordflow">switch</span> (a_phase) {</div>
+<div class="line"><a name="l00924"></a><span class="lineno">  924</span>&#160;  <span class="keywordflow">case</span> phase::gas: {</div>
+<div class="line"><a name="l00925"></a><span class="lineno">  925</span>&#160;    implicitFunction = m_baseif.at(phase::gas);</div>
+<div class="line"><a name="l00926"></a><span class="lineno">  926</span>&#160; </div>
+<div class="line"><a name="l00927"></a><span class="lineno">  927</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00928"></a><span class="lineno">  928</span>&#160;  }</div>
+<div class="line"><a name="l00929"></a><span class="lineno">  929</span>&#160;  <span class="keywordflow">case</span> phase::solid: {</div>
+<div class="line"><a name="l00930"></a><span class="lineno">  930</span>&#160;    implicitFunction = m_baseif.at(phase::solid);</div>
+<div class="line"><a name="l00931"></a><span class="lineno">  931</span>&#160; </div>
+<div class="line"><a name="l00932"></a><span class="lineno">  932</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00933"></a><span class="lineno">  933</span>&#160;  }</div>
+<div class="line"><a name="l00934"></a><span class="lineno">  934</span>&#160;  <span class="keywordflow">default</span>: {</div>
+<div class="line"><a name="l00935"></a><span class="lineno">  935</span>&#160;    MayDay::Error(<span class="stringliteral">&quot;AmrMesh::intersectParticlesRaycastIF - logic bust&quot;</span>);</div>
+<div class="line"><a name="l00936"></a><span class="lineno">  936</span>&#160; </div>
+<div class="line"><a name="l00937"></a><span class="lineno">  937</span>&#160;    <span class="keywordflow">break</span>;</div>
 <div class="line"><a name="l00938"></a><span class="lineno">  938</span>&#160;  }</div>
-<div class="line"><a name="l00939"></a><span class="lineno">  939</span>&#160; </div>
-<div class="line"><a name="l00940"></a><span class="lineno">  940</span>&#160;  <span class="comment">// Safety factor to prevent particles falling off the domain if they intersect the high-side of the domain</span></div>
-<div class="line"><a name="l00941"></a><span class="lineno">  941</span>&#160;  constexpr Real safety = 1.E-12;</div>
-<div class="line"><a name="l00942"></a><span class="lineno">  942</span>&#160; </div>
-<div class="line"><a name="l00943"></a><span class="lineno">  943</span>&#160;  <span class="comment">// Level loop -- go through each AMR level</span></div>
-<div class="line"><a name="l00944"></a><span class="lineno">  944</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_finestLevel; lvl++) {</div>
-<div class="line"><a name="l00945"></a><span class="lineno">  945</span>&#160; </div>
-<div class="line"><a name="l00946"></a><span class="lineno">  946</span>&#160;    <span class="comment">// Handle to various grid stuff.</span></div>
-<div class="line"><a name="l00947"></a><span class="lineno">  947</span>&#160;    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = this-&gt;getGrids(whichRealm)[lvl];</div>
-<div class="line"><a name="l00948"></a><span class="lineno">  948</span>&#160; </div>
-<div class="line"><a name="l00949"></a><span class="lineno">  949</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(dbl); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l00950"></a><span class="lineno">  950</span>&#160; </div>
-<div class="line"><a name="l00951"></a><span class="lineno">  951</span>&#160;      List&lt;P&gt;&amp; activeParticles = a_activeParticles[lvl][dit()].listItems();</div>
-<div class="line"><a name="l00952"></a><span class="lineno">  952</span>&#160;      List&lt;P&gt;&amp; ebParticles     = a_ebParticles[lvl][dit()].listItems();</div>
-<div class="line"><a name="l00953"></a><span class="lineno">  953</span>&#160;      List&lt;P&gt;&amp; domainParticles = a_domainParticles[lvl][dit()].listItems();</div>
-<div class="line"><a name="l00954"></a><span class="lineno">  954</span>&#160; </div>
-<div class="line"><a name="l00955"></a><span class="lineno">  955</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(activeParticles); lit.ok();) {</div>
-<div class="line"><a name="l00956"></a><span class="lineno">  956</span>&#160;        P&amp; particle = lit();</div>
-<div class="line"><a name="l00957"></a><span class="lineno">  957</span>&#160; </div>
-<div class="line"><a name="l00958"></a><span class="lineno">  958</span>&#160;        <span class="keyword">const</span> RealVect newPos = particle.position();</div>
-<div class="line"><a name="l00959"></a><span class="lineno">  959</span>&#160;        <span class="keyword">const</span> RealVect oldPos = particle.oldPosition();</div>
-<div class="line"><a name="l00960"></a><span class="lineno">  960</span>&#160;        <span class="keyword">const</span> RealVect path   = newPos - oldPos;</div>
-<div class="line"><a name="l00961"></a><span class="lineno">  961</span>&#160; </div>
-<div class="line"><a name="l00962"></a><span class="lineno">  962</span>&#160;        <span class="comment">// Cheap initial tests that allow us to skip some intersections tests.</span></div>
-<div class="line"><a name="l00963"></a><span class="lineno">  963</span>&#160;        <span class="keywordtype">bool</span> checkEB     = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00964"></a><span class="lineno">  964</span>&#160;        <span class="keywordtype">bool</span> checkDomain = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00965"></a><span class="lineno">  965</span>&#160; </div>
-<div class="line"><a name="l00966"></a><span class="lineno">  966</span>&#160;        <span class="keywordflow">if</span> (!implicitFunction.isNull()) {</div>
-<div class="line"><a name="l00967"></a><span class="lineno">  967</span>&#160;          checkEB = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00968"></a><span class="lineno">  968</span>&#160;        }</div>
-<div class="line"><a name="l00969"></a><span class="lineno">  969</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
-<div class="line"><a name="l00970"></a><span class="lineno">  970</span>&#160;          <span class="keyword">const</span> <span class="keywordtype">bool</span> outsideLo = newPos[dir] &lt; m_probLo[dir];</div>
-<div class="line"><a name="l00971"></a><span class="lineno">  971</span>&#160;          <span class="keyword">const</span> <span class="keywordtype">bool</span> outsideHi = newPos[dir] &gt; m_probHi[dir];</div>
-<div class="line"><a name="l00972"></a><span class="lineno">  972</span>&#160; </div>
-<div class="line"><a name="l00973"></a><span class="lineno">  973</span>&#160;          <span class="keywordflow">if</span> (outsideLo || outsideHi) {</div>
-<div class="line"><a name="l00974"></a><span class="lineno">  974</span>&#160;            checkDomain = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00975"></a><span class="lineno">  975</span>&#160;          }</div>
-<div class="line"><a name="l00976"></a><span class="lineno">  976</span>&#160;        }</div>
-<div class="line"><a name="l00977"></a><span class="lineno">  977</span>&#160; </div>
-<div class="line"><a name="l00978"></a><span class="lineno">  978</span>&#160;        <span class="comment">// Do the intersection tests.</span></div>
-<div class="line"><a name="l00979"></a><span class="lineno">  979</span>&#160;        <span class="keywordflow">if</span> (checkEB || checkDomain) {</div>
-<div class="line"><a name="l00980"></a><span class="lineno">  980</span>&#160; </div>
-<div class="line"><a name="l00981"></a><span class="lineno">  981</span>&#160;          <span class="comment">// These are the solution</span></div>
-<div class="line"><a name="l00982"></a><span class="lineno">  982</span>&#160;          Real sDomain = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::numeric_limits&lt;Real&gt;::max</a>();</div>
-<div class="line"><a name="l00983"></a><span class="lineno">  983</span>&#160;          Real sEB     = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::numeric_limits&lt;Real&gt;::max</a>();</div>
-<div class="line"><a name="l00984"></a><span class="lineno">  984</span>&#160; </div>
-<div class="line"><a name="l00985"></a><span class="lineno">  985</span>&#160;          <span class="keywordtype">bool</span> contactDomain = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00986"></a><span class="lineno">  986</span>&#160;          <span class="keywordtype">bool</span> contactEB     = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00987"></a><span class="lineno">  987</span>&#160; </div>
-<div class="line"><a name="l00988"></a><span class="lineno">  988</span>&#160;          <span class="comment">// Check if the particle intersected the domain. If it did, we compute sDomain such that the intersection</span></div>
-<div class="line"><a name="l00989"></a><span class="lineno">  989</span>&#160;          <span class="comment">// point with the domain is X = X0 + sDomain * (X1-X0) where X1=newPos and X0=oldPos</span></div>
-<div class="line"><a name="l00990"></a><span class="lineno">  990</span>&#160;          <span class="keywordflow">if</span> (checkDomain) {</div>
-<div class="line"><a name="l00991"></a><span class="lineno">  991</span>&#160;            contactDomain = <a class="code" href="classParticleOps.html#afc924720c8332e493951fec08881ef3d">ParticleOps::domainIntersection</a>(oldPos, newPos, m_probLo, m_probHi, sDomain);</div>
-<div class="line"><a name="l00992"></a><span class="lineno">  992</span>&#160;          }</div>
-<div class="line"><a name="l00993"></a><span class="lineno">  993</span>&#160; </div>
-<div class="line"><a name="l00994"></a><span class="lineno">  994</span>&#160;          <span class="comment">// Check if the particle intersected the EB. If it did, we compute sEB such that the intersection</span></div>
-<div class="line"><a name="l00995"></a><span class="lineno">  995</span>&#160;          <span class="comment">// point with the domain is X = X0 + sEB * (X1-X0) where X1=newPos and X0=oldPos</span></div>
-<div class="line"><a name="l00996"></a><span class="lineno">  996</span>&#160;          <span class="keywordflow">if</span> (checkEB) {</div>
-<div class="line"><a name="l00997"></a><span class="lineno">  997</span>&#160;            contactEB = <a class="code" href="classParticleOps.html#a3e95a39f57c9272a20ef9411efdff221">ParticleOps::ebIntersectionRaycast</a>(implicitFunction, oldPos, newPos, a_tolerance, sEB);</div>
-<div class="line"><a name="l00998"></a><span class="lineno">  998</span>&#160;          }</div>
-<div class="line"><a name="l00999"></a><span class="lineno">  999</span>&#160; </div>
-<div class="line"><a name="l01000"></a><span class="lineno"> 1000</span>&#160;          <span class="comment">// Particle bumped into something.</span></div>
-<div class="line"><a name="l01001"></a><span class="lineno"> 1001</span>&#160;          <span class="keywordflow">if</span> (contactDomain || contactEB) {</div>
-<div class="line"><a name="l01002"></a><span class="lineno"> 1002</span>&#160;            <span class="keywordflow">if</span> (sEB &lt;= sDomain) { <span class="comment">// Crashed with EB &quot;first&quot;.</span></div>
-<div class="line"><a name="l01003"></a><span class="lineno"> 1003</span>&#160;              <span class="keyword">const</span> RealVect intersectionPos = oldPos + sEB * path;</div>
-<div class="line"><a name="l01004"></a><span class="lineno"> 1004</span>&#160; </div>
-<div class="line"><a name="l01005"></a><span class="lineno"> 1005</span>&#160;              <span class="comment">// If we delete the original particles we can just transfer the one we have. Otherwise we create</span></div>
-<div class="line"><a name="l01006"></a><span class="lineno"> 1006</span>&#160;              <span class="comment">// a new particle.</span></div>
-<div class="line"><a name="l01007"></a><span class="lineno"> 1007</span>&#160;              <span class="keywordflow">if</span> (a_deleteParticles) {</div>
-<div class="line"><a name="l01008"></a><span class="lineno"> 1008</span>&#160;                particle.position() = intersectionPos;</div>
-<div class="line"><a name="l01009"></a><span class="lineno"> 1009</span>&#160; </div>
-<div class="line"><a name="l01010"></a><span class="lineno"> 1010</span>&#160;                ebParticles.transfer(lit);</div>
-<div class="line"><a name="l01011"></a><span class="lineno"> 1011</span>&#160;              }</div>
-<div class="line"><a name="l01012"></a><span class="lineno"> 1012</span>&#160;              <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l01013"></a><span class="lineno"> 1013</span>&#160;                P p = lit();</div>
-<div class="line"><a name="l01014"></a><span class="lineno"> 1014</span>&#160; </div>
-<div class="line"><a name="l01015"></a><span class="lineno"> 1015</span>&#160;                p.position() = intersectionPos;</div>
-<div class="line"><a name="l01016"></a><span class="lineno"> 1016</span>&#160; </div>
-<div class="line"><a name="l01017"></a><span class="lineno"> 1017</span>&#160;                ebParticles.add(p);</div>
-<div class="line"><a name="l01018"></a><span class="lineno"> 1018</span>&#160; </div>
-<div class="line"><a name="l01019"></a><span class="lineno"> 1019</span>&#160;                a_nonDeletionModifier(particle);</div>
-<div class="line"><a name="l01020"></a><span class="lineno"> 1020</span>&#160; </div>
-<div class="line"><a name="l01021"></a><span class="lineno"> 1021</span>&#160;                lit++;</div>
-<div class="line"><a name="l01022"></a><span class="lineno"> 1022</span>&#160;              }</div>
-<div class="line"><a name="l01023"></a><span class="lineno"> 1023</span>&#160;            }</div>
-<div class="line"><a name="l01024"></a><span class="lineno"> 1024</span>&#160;            <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l01025"></a><span class="lineno"> 1025</span>&#160;              <span class="comment">// Crashed with domain &quot;first&quot;. Safety factor is to prevent particles falling off the high side of the domain</span></div>
-<div class="line"><a name="l01026"></a><span class="lineno"> 1026</span>&#160;              <span class="keyword">const</span> Real sSafety = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::max</a>((Real)0.0, sDomain - safety);</div>
-<div class="line"><a name="l01027"></a><span class="lineno"> 1027</span>&#160; </div>
-<div class="line"><a name="l01028"></a><span class="lineno"> 1028</span>&#160;              <span class="keyword">const</span> RealVect intersectionPos = oldPos + sSafety * path;</div>
-<div class="line"><a name="l01029"></a><span class="lineno"> 1029</span>&#160; </div>
-<div class="line"><a name="l01030"></a><span class="lineno"> 1030</span>&#160;              <span class="keywordflow">if</span> (a_deleteParticles) {</div>
-<div class="line"><a name="l01031"></a><span class="lineno"> 1031</span>&#160;                particle.position() = intersectionPos;</div>
-<div class="line"><a name="l01032"></a><span class="lineno"> 1032</span>&#160; </div>
-<div class="line"><a name="l01033"></a><span class="lineno"> 1033</span>&#160;                domainParticles.transfer(lit);</div>
-<div class="line"><a name="l01034"></a><span class="lineno"> 1034</span>&#160;              }</div>
-<div class="line"><a name="l01035"></a><span class="lineno"> 1035</span>&#160;              <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l01036"></a><span class="lineno"> 1036</span>&#160;                P p = lit();</div>
-<div class="line"><a name="l01037"></a><span class="lineno"> 1037</span>&#160; </div>
-<div class="line"><a name="l01038"></a><span class="lineno"> 1038</span>&#160;                p.position() = intersectionPos;</div>
-<div class="line"><a name="l01039"></a><span class="lineno"> 1039</span>&#160; </div>
-<div class="line"><a name="l01040"></a><span class="lineno"> 1040</span>&#160;                domainParticles.add(p);</div>
-<div class="line"><a name="l01041"></a><span class="lineno"> 1041</span>&#160; </div>
-<div class="line"><a name="l01042"></a><span class="lineno"> 1042</span>&#160;                a_nonDeletionModifier(particle);</div>
-<div class="line"><a name="l01043"></a><span class="lineno"> 1043</span>&#160; </div>
-<div class="line"><a name="l01044"></a><span class="lineno"> 1044</span>&#160;                ++lit;</div>
-<div class="line"><a name="l01045"></a><span class="lineno"> 1045</span>&#160;              }</div>
-<div class="line"><a name="l01046"></a><span class="lineno"> 1046</span>&#160;            }</div>
-<div class="line"><a name="l01047"></a><span class="lineno"> 1047</span>&#160;          }</div>
-<div class="line"><a name="l01048"></a><span class="lineno"> 1048</span>&#160;          <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l01049"></a><span class="lineno"> 1049</span>&#160;            ++lit;</div>
-<div class="line"><a name="l01050"></a><span class="lineno"> 1050</span>&#160;          }</div>
-<div class="line"><a name="l01051"></a><span class="lineno"> 1051</span>&#160;        }</div>
-<div class="line"><a name="l01052"></a><span class="lineno"> 1052</span>&#160;        <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l01053"></a><span class="lineno"> 1053</span>&#160;          ++lit;</div>
-<div class="line"><a name="l01054"></a><span class="lineno"> 1054</span>&#160;        }</div>
-<div class="line"><a name="l01055"></a><span class="lineno"> 1055</span>&#160;      }</div>
-<div class="line"><a name="l01056"></a><span class="lineno"> 1056</span>&#160;    }</div>
-<div class="line"><a name="l01057"></a><span class="lineno"> 1057</span>&#160;  }</div>
-<div class="line"><a name="l01058"></a><span class="lineno"> 1058</span>&#160; </div>
-<div class="line"><a name="l01059"></a><span class="lineno"> 1059</span>&#160;  <span class="comment">// These need to be remapped.</span></div>
-<div class="line"><a name="l01060"></a><span class="lineno"> 1060</span>&#160;  a_ebParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
-<div class="line"><a name="l01061"></a><span class="lineno"> 1061</span>&#160;  a_domainParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
-<div class="line"><a name="l01062"></a><span class="lineno"> 1062</span>&#160;}</div>
-<div class="line"><a name="l01063"></a><span class="lineno"> 1063</span>&#160; </div>
-<div class="line"><a name="l01064"></a><span class="lineno"> 1064</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> P&gt;</div>
-<div class="line"><a name="l01065"></a><span class="lineno"> 1065</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l01066"></a><span class="lineno"><a class="line" href="classAmrMesh.html#a785050ce35bae77bac1d1bfa3358a7cb"> 1066</a></span>&#160;<a class="code" href="classAmrMesh.html#a785050ce35bae77bac1d1bfa3358a7cb">AmrMesh::intersectParticlesBisectIF</a>(<a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;         a_activeParticles,</div>
-<div class="line"><a name="l01067"></a><span class="lineno"> 1067</span>&#160;                                    <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;         a_ebParticles,</div>
-<div class="line"><a name="l01068"></a><span class="lineno"> 1068</span>&#160;                                    <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;         a_domainParticles,</div>
-<div class="line"><a name="l01069"></a><span class="lineno"> 1069</span>&#160;                                    <span class="keyword">const</span> phase::which_phase      a_phase,</div>
-<div class="line"><a name="l01070"></a><span class="lineno"> 1070</span>&#160;                                    <span class="keyword">const</span> Real                    a_bisectionStep,</div>
-<div class="line"><a name="l01071"></a><span class="lineno"> 1071</span>&#160;                                    <span class="keyword">const</span> <span class="keywordtype">bool</span>                    a_deleteParticles,</div>
-<div class="line"><a name="l01072"></a><span class="lineno"> 1072</span>&#160;                                    <span class="keyword">const</span> std::function&lt;<span class="keywordtype">void</span>(P&amp;)&gt; a_nonDeletionModifier) <span class="keyword">const</span> noexcept</div>
-<div class="line"><a name="l01073"></a><span class="lineno"> 1073</span>&#160;{</div>
-<div class="line"><a name="l01074"></a><span class="lineno"> 1074</span>&#160;  CH_TIME(<span class="stringliteral">&quot;AmrMesh::intersectParticlesBisectIF&quot;</span>);</div>
-<div class="line"><a name="l01075"></a><span class="lineno"> 1075</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l01076"></a><span class="lineno"> 1076</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;AmrMesh::intersectParticlesBisectIF&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l01077"></a><span class="lineno"> 1077</span>&#160;  }</div>
-<div class="line"><a name="l01078"></a><span class="lineno"> 1078</span>&#160; </div>
-<div class="line"><a name="l01079"></a><span class="lineno"> 1079</span>&#160;  CH_assert(a_activeParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>() == a_ebParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>());</div>
-<div class="line"><a name="l01080"></a><span class="lineno"> 1080</span>&#160;  CH_assert(a_activeParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>() == a_domainParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>());</div>
-<div class="line"><a name="l01081"></a><span class="lineno"> 1081</span>&#160; </div>
-<div class="line"><a name="l01082"></a><span class="lineno"> 1082</span>&#160;  <span class="comment">// TLDR: This is pretty much a hard-copy of intersectParticlesRaycastIF, with the exception that the EB intersection</span></div>
-<div class="line"><a name="l01083"></a><span class="lineno"> 1083</span>&#160;  <span class="comment">//       test is replaced by a bisection test.</span></div>
-<div class="line"><a name="l01084"></a><span class="lineno"> 1084</span>&#160; </div>
-<div class="line"><a name="l01085"></a><span class="lineno"> 1085</span>&#160;  a_ebParticles.<a class="code" href="classParticleContainer.html#a8677866e8070b8925e3f98689faba582">clearParticles</a>();</div>
-<div class="line"><a name="l01086"></a><span class="lineno"> 1086</span>&#160;  a_domainParticles.<a class="code" href="classParticleContainer.html#a8677866e8070b8925e3f98689faba582">clearParticles</a>();</div>
-<div class="line"><a name="l01087"></a><span class="lineno"> 1087</span>&#160; </div>
-<div class="line"><a name="l01088"></a><span class="lineno"> 1088</span>&#160;  <span class="keyword">const</span> std::string whichRealm = a_activeParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>();</div>
-<div class="line"><a name="l01089"></a><span class="lineno"> 1089</span>&#160; </div>
-<div class="line"><a name="l01090"></a><span class="lineno"> 1090</span>&#160;  <span class="comment">// Figure out the implicit function</span></div>
-<div class="line"><a name="l01091"></a><span class="lineno"> 1091</span>&#160;  RefCountedPtr&lt;BaseIF&gt; implicitFunction;</div>
-<div class="line"><a name="l01092"></a><span class="lineno"> 1092</span>&#160; </div>
-<div class="line"><a name="l01093"></a><span class="lineno"> 1093</span>&#160;  <span class="keywordflow">switch</span> (a_phase) {</div>
-<div class="line"><a name="l01094"></a><span class="lineno"> 1094</span>&#160;  <span class="keywordflow">case</span> phase::gas: {</div>
-<div class="line"><a name="l01095"></a><span class="lineno"> 1095</span>&#160;    implicitFunction = m_baseif.at(phase::gas);</div>
-<div class="line"><a name="l01096"></a><span class="lineno"> 1096</span>&#160; </div>
-<div class="line"><a name="l01097"></a><span class="lineno"> 1097</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l01098"></a><span class="lineno"> 1098</span>&#160;  }</div>
-<div class="line"><a name="l01099"></a><span class="lineno"> 1099</span>&#160;  <span class="keywordflow">case</span> phase::solid: {</div>
-<div class="line"><a name="l01100"></a><span class="lineno"> 1100</span>&#160;    implicitFunction = m_baseif.at(phase::solid);</div>
-<div class="line"><a name="l01101"></a><span class="lineno"> 1101</span>&#160; </div>
-<div class="line"><a name="l01102"></a><span class="lineno"> 1102</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l01103"></a><span class="lineno"> 1103</span>&#160;  }</div>
-<div class="line"><a name="l01104"></a><span class="lineno"> 1104</span>&#160;  <span class="keywordflow">default</span>: {</div>
-<div class="line"><a name="l01105"></a><span class="lineno"> 1105</span>&#160;    MayDay::Error(<span class="stringliteral">&quot;AmrMesh::intersectParticlesBisectIF - logic bust&quot;</span>);</div>
-<div class="line"><a name="l01106"></a><span class="lineno"> 1106</span>&#160; </div>
-<div class="line"><a name="l01107"></a><span class="lineno"> 1107</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l01108"></a><span class="lineno"> 1108</span>&#160;  }</div>
+<div class="line"><a name="l00939"></a><span class="lineno">  939</span>&#160;  }</div>
+<div class="line"><a name="l00940"></a><span class="lineno">  940</span>&#160; </div>
+<div class="line"><a name="l00941"></a><span class="lineno">  941</span>&#160;  <span class="comment">// Safety factor to prevent particles falling off the domain if they intersect the high-side of the domain</span></div>
+<div class="line"><a name="l00942"></a><span class="lineno">  942</span>&#160;  constexpr Real safety = 1.E-12;</div>
+<div class="line"><a name="l00943"></a><span class="lineno">  943</span>&#160; </div>
+<div class="line"><a name="l00944"></a><span class="lineno">  944</span>&#160;  <span class="comment">// Level loop -- go through each AMR level</span></div>
+<div class="line"><a name="l00945"></a><span class="lineno">  945</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_finestLevel; lvl++) {</div>
+<div class="line"><a name="l00946"></a><span class="lineno">  946</span>&#160; </div>
+<div class="line"><a name="l00947"></a><span class="lineno">  947</span>&#160;    <span class="comment">// Handle to various grid stuff.</span></div>
+<div class="line"><a name="l00948"></a><span class="lineno">  948</span>&#160;    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = this-&gt;getGrids(whichRealm)[lvl];</div>
+<div class="line"><a name="l00949"></a><span class="lineno">  949</span>&#160; </div>
+<div class="line"><a name="l00950"></a><span class="lineno">  950</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(dbl); dit.ok(); ++dit) {</div>
+<div class="line"><a name="l00951"></a><span class="lineno">  951</span>&#160; </div>
+<div class="line"><a name="l00952"></a><span class="lineno">  952</span>&#160;      List&lt;P&gt;&amp; activeParticles = a_activeParticles[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00953"></a><span class="lineno">  953</span>&#160;      List&lt;P&gt;&amp; ebParticles     = a_ebParticles[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00954"></a><span class="lineno">  954</span>&#160;      List&lt;P&gt;&amp; domainParticles = a_domainParticles[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00955"></a><span class="lineno">  955</span>&#160; </div>
+<div class="line"><a name="l00956"></a><span class="lineno">  956</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(activeParticles); lit.ok();) {</div>
+<div class="line"><a name="l00957"></a><span class="lineno">  957</span>&#160;        P&amp; particle = lit();</div>
+<div class="line"><a name="l00958"></a><span class="lineno">  958</span>&#160; </div>
+<div class="line"><a name="l00959"></a><span class="lineno">  959</span>&#160;        <span class="keyword">const</span> RealVect newPos = particle.position();</div>
+<div class="line"><a name="l00960"></a><span class="lineno">  960</span>&#160;        <span class="keyword">const</span> RealVect oldPos = particle.oldPosition();</div>
+<div class="line"><a name="l00961"></a><span class="lineno">  961</span>&#160;        <span class="keyword">const</span> RealVect path   = newPos - oldPos;</div>
+<div class="line"><a name="l00962"></a><span class="lineno">  962</span>&#160; </div>
+<div class="line"><a name="l00963"></a><span class="lineno">  963</span>&#160;        <span class="comment">// Cheap initial tests that allow us to skip some intersections tests.</span></div>
+<div class="line"><a name="l00964"></a><span class="lineno">  964</span>&#160;        <span class="keywordtype">bool</span> checkEB     = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00965"></a><span class="lineno">  965</span>&#160;        <span class="keywordtype">bool</span> checkDomain = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00966"></a><span class="lineno">  966</span>&#160; </div>
+<div class="line"><a name="l00967"></a><span class="lineno">  967</span>&#160;        <span class="keywordflow">if</span> (!implicitFunction.isNull()) {</div>
+<div class="line"><a name="l00968"></a><span class="lineno">  968</span>&#160;          checkEB = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00969"></a><span class="lineno">  969</span>&#160;        }</div>
+<div class="line"><a name="l00970"></a><span class="lineno">  970</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
+<div class="line"><a name="l00971"></a><span class="lineno">  971</span>&#160;          <span class="keyword">const</span> <span class="keywordtype">bool</span> outsideLo = newPos[dir] &lt; m_probLo[dir];</div>
+<div class="line"><a name="l00972"></a><span class="lineno">  972</span>&#160;          <span class="keyword">const</span> <span class="keywordtype">bool</span> outsideHi = newPos[dir] &gt; m_probHi[dir];</div>
+<div class="line"><a name="l00973"></a><span class="lineno">  973</span>&#160; </div>
+<div class="line"><a name="l00974"></a><span class="lineno">  974</span>&#160;          <span class="keywordflow">if</span> (outsideLo || outsideHi) {</div>
+<div class="line"><a name="l00975"></a><span class="lineno">  975</span>&#160;            checkDomain = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00976"></a><span class="lineno">  976</span>&#160;          }</div>
+<div class="line"><a name="l00977"></a><span class="lineno">  977</span>&#160;        }</div>
+<div class="line"><a name="l00978"></a><span class="lineno">  978</span>&#160; </div>
+<div class="line"><a name="l00979"></a><span class="lineno">  979</span>&#160;        <span class="comment">// Do the intersection tests.</span></div>
+<div class="line"><a name="l00980"></a><span class="lineno">  980</span>&#160;        <span class="keywordflow">if</span> (checkEB || checkDomain) {</div>
+<div class="line"><a name="l00981"></a><span class="lineno">  981</span>&#160; </div>
+<div class="line"><a name="l00982"></a><span class="lineno">  982</span>&#160;          <span class="comment">// These are the solution</span></div>
+<div class="line"><a name="l00983"></a><span class="lineno">  983</span>&#160;          Real sDomain = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::numeric_limits&lt;Real&gt;::max</a>();</div>
+<div class="line"><a name="l00984"></a><span class="lineno">  984</span>&#160;          Real sEB     = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::numeric_limits&lt;Real&gt;::max</a>();</div>
+<div class="line"><a name="l00985"></a><span class="lineno">  985</span>&#160; </div>
+<div class="line"><a name="l00986"></a><span class="lineno">  986</span>&#160;          <span class="keywordtype">bool</span> contactDomain = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00987"></a><span class="lineno">  987</span>&#160;          <span class="keywordtype">bool</span> contactEB     = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00988"></a><span class="lineno">  988</span>&#160; </div>
+<div class="line"><a name="l00989"></a><span class="lineno">  989</span>&#160;          <span class="comment">// Check if the particle intersected the domain. If it did, we compute sDomain such that the intersection</span></div>
+<div class="line"><a name="l00990"></a><span class="lineno">  990</span>&#160;          <span class="comment">// point with the domain is X = X0 + sDomain * (X1-X0) where X1=newPos and X0=oldPos</span></div>
+<div class="line"><a name="l00991"></a><span class="lineno">  991</span>&#160;          <span class="keywordflow">if</span> (checkDomain) {</div>
+<div class="line"><a name="l00992"></a><span class="lineno">  992</span>&#160;            contactDomain = <a class="code" href="classParticleOps.html#afc924720c8332e493951fec08881ef3d">ParticleOps::domainIntersection</a>(oldPos, newPos, m_probLo, m_probHi, sDomain);</div>
+<div class="line"><a name="l00993"></a><span class="lineno">  993</span>&#160;          }</div>
+<div class="line"><a name="l00994"></a><span class="lineno">  994</span>&#160; </div>
+<div class="line"><a name="l00995"></a><span class="lineno">  995</span>&#160;          <span class="comment">// Check if the particle intersected the EB. If it did, we compute sEB such that the intersection</span></div>
+<div class="line"><a name="l00996"></a><span class="lineno">  996</span>&#160;          <span class="comment">// point with the domain is X = X0 + sEB * (X1-X0) where X1=newPos and X0=oldPos</span></div>
+<div class="line"><a name="l00997"></a><span class="lineno">  997</span>&#160;          <span class="keywordflow">if</span> (checkEB) {</div>
+<div class="line"><a name="l00998"></a><span class="lineno">  998</span>&#160;            contactEB = <a class="code" href="classParticleOps.html#a3e95a39f57c9272a20ef9411efdff221">ParticleOps::ebIntersectionRaycast</a>(implicitFunction, oldPos, newPos, a_tolerance, sEB);</div>
+<div class="line"><a name="l00999"></a><span class="lineno">  999</span>&#160;          }</div>
+<div class="line"><a name="l01000"></a><span class="lineno"> 1000</span>&#160; </div>
+<div class="line"><a name="l01001"></a><span class="lineno"> 1001</span>&#160;          <span class="comment">// Particle bumped into something.</span></div>
+<div class="line"><a name="l01002"></a><span class="lineno"> 1002</span>&#160;          <span class="keywordflow">if</span> (contactDomain || contactEB) {</div>
+<div class="line"><a name="l01003"></a><span class="lineno"> 1003</span>&#160;            <span class="keywordflow">if</span> (sEB &lt;= sDomain) { <span class="comment">// Crashed with EB &quot;first&quot;.</span></div>
+<div class="line"><a name="l01004"></a><span class="lineno"> 1004</span>&#160;              <span class="keyword">const</span> RealVect intersectionPos = oldPos + sEB * path;</div>
+<div class="line"><a name="l01005"></a><span class="lineno"> 1005</span>&#160; </div>
+<div class="line"><a name="l01006"></a><span class="lineno"> 1006</span>&#160;              <span class="comment">// If we delete the original particles we can just transfer the one we have. Otherwise we create</span></div>
+<div class="line"><a name="l01007"></a><span class="lineno"> 1007</span>&#160;              <span class="comment">// a new particle.</span></div>
+<div class="line"><a name="l01008"></a><span class="lineno"> 1008</span>&#160;              <span class="keywordflow">if</span> (a_deleteParticles) {</div>
+<div class="line"><a name="l01009"></a><span class="lineno"> 1009</span>&#160;                particle.position() = intersectionPos;</div>
+<div class="line"><a name="l01010"></a><span class="lineno"> 1010</span>&#160; </div>
+<div class="line"><a name="l01011"></a><span class="lineno"> 1011</span>&#160;                ebParticles.transfer(lit);</div>
+<div class="line"><a name="l01012"></a><span class="lineno"> 1012</span>&#160;              }</div>
+<div class="line"><a name="l01013"></a><span class="lineno"> 1013</span>&#160;              <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l01014"></a><span class="lineno"> 1014</span>&#160;                P p = lit();</div>
+<div class="line"><a name="l01015"></a><span class="lineno"> 1015</span>&#160; </div>
+<div class="line"><a name="l01016"></a><span class="lineno"> 1016</span>&#160;                p.position() = intersectionPos;</div>
+<div class="line"><a name="l01017"></a><span class="lineno"> 1017</span>&#160; </div>
+<div class="line"><a name="l01018"></a><span class="lineno"> 1018</span>&#160;                ebParticles.add(p);</div>
+<div class="line"><a name="l01019"></a><span class="lineno"> 1019</span>&#160; </div>
+<div class="line"><a name="l01020"></a><span class="lineno"> 1020</span>&#160;                a_nonDeletionModifier(particle);</div>
+<div class="line"><a name="l01021"></a><span class="lineno"> 1021</span>&#160; </div>
+<div class="line"><a name="l01022"></a><span class="lineno"> 1022</span>&#160;                lit++;</div>
+<div class="line"><a name="l01023"></a><span class="lineno"> 1023</span>&#160;              }</div>
+<div class="line"><a name="l01024"></a><span class="lineno"> 1024</span>&#160;            }</div>
+<div class="line"><a name="l01025"></a><span class="lineno"> 1025</span>&#160;            <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l01026"></a><span class="lineno"> 1026</span>&#160;              <span class="comment">// Crashed with domain &quot;first&quot;. Safety factor is to prevent particles falling off the high side of the domain</span></div>
+<div class="line"><a name="l01027"></a><span class="lineno"> 1027</span>&#160;              <span class="keyword">const</span> Real sSafety = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::max</a>((Real)0.0, sDomain - safety);</div>
+<div class="line"><a name="l01028"></a><span class="lineno"> 1028</span>&#160; </div>
+<div class="line"><a name="l01029"></a><span class="lineno"> 1029</span>&#160;              <span class="keyword">const</span> RealVect intersectionPos = oldPos + sSafety * path;</div>
+<div class="line"><a name="l01030"></a><span class="lineno"> 1030</span>&#160; </div>
+<div class="line"><a name="l01031"></a><span class="lineno"> 1031</span>&#160;              <span class="keywordflow">if</span> (a_deleteParticles) {</div>
+<div class="line"><a name="l01032"></a><span class="lineno"> 1032</span>&#160;                particle.position() = intersectionPos;</div>
+<div class="line"><a name="l01033"></a><span class="lineno"> 1033</span>&#160; </div>
+<div class="line"><a name="l01034"></a><span class="lineno"> 1034</span>&#160;                domainParticles.transfer(lit);</div>
+<div class="line"><a name="l01035"></a><span class="lineno"> 1035</span>&#160;              }</div>
+<div class="line"><a name="l01036"></a><span class="lineno"> 1036</span>&#160;              <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l01037"></a><span class="lineno"> 1037</span>&#160;                P p = lit();</div>
+<div class="line"><a name="l01038"></a><span class="lineno"> 1038</span>&#160; </div>
+<div class="line"><a name="l01039"></a><span class="lineno"> 1039</span>&#160;                p.position() = intersectionPos;</div>
+<div class="line"><a name="l01040"></a><span class="lineno"> 1040</span>&#160; </div>
+<div class="line"><a name="l01041"></a><span class="lineno"> 1041</span>&#160;                domainParticles.add(p);</div>
+<div class="line"><a name="l01042"></a><span class="lineno"> 1042</span>&#160; </div>
+<div class="line"><a name="l01043"></a><span class="lineno"> 1043</span>&#160;                a_nonDeletionModifier(particle);</div>
+<div class="line"><a name="l01044"></a><span class="lineno"> 1044</span>&#160; </div>
+<div class="line"><a name="l01045"></a><span class="lineno"> 1045</span>&#160;                ++lit;</div>
+<div class="line"><a name="l01046"></a><span class="lineno"> 1046</span>&#160;              }</div>
+<div class="line"><a name="l01047"></a><span class="lineno"> 1047</span>&#160;            }</div>
+<div class="line"><a name="l01048"></a><span class="lineno"> 1048</span>&#160;          }</div>
+<div class="line"><a name="l01049"></a><span class="lineno"> 1049</span>&#160;          <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l01050"></a><span class="lineno"> 1050</span>&#160;            ++lit;</div>
+<div class="line"><a name="l01051"></a><span class="lineno"> 1051</span>&#160;          }</div>
+<div class="line"><a name="l01052"></a><span class="lineno"> 1052</span>&#160;        }</div>
+<div class="line"><a name="l01053"></a><span class="lineno"> 1053</span>&#160;        <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l01054"></a><span class="lineno"> 1054</span>&#160;          ++lit;</div>
+<div class="line"><a name="l01055"></a><span class="lineno"> 1055</span>&#160;        }</div>
+<div class="line"><a name="l01056"></a><span class="lineno"> 1056</span>&#160;      }</div>
+<div class="line"><a name="l01057"></a><span class="lineno"> 1057</span>&#160;    }</div>
+<div class="line"><a name="l01058"></a><span class="lineno"> 1058</span>&#160;  }</div>
+<div class="line"><a name="l01059"></a><span class="lineno"> 1059</span>&#160; </div>
+<div class="line"><a name="l01060"></a><span class="lineno"> 1060</span>&#160;  <span class="comment">// These need to be remapped.</span></div>
+<div class="line"><a name="l01061"></a><span class="lineno"> 1061</span>&#160;  a_ebParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
+<div class="line"><a name="l01062"></a><span class="lineno"> 1062</span>&#160;  a_domainParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
+<div class="line"><a name="l01063"></a><span class="lineno"> 1063</span>&#160;}</div>
+<div class="line"><a name="l01064"></a><span class="lineno"> 1064</span>&#160; </div>
+<div class="line"><a name="l01065"></a><span class="lineno"> 1065</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> P&gt;</div>
+<div class="line"><a name="l01066"></a><span class="lineno"> 1066</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l01067"></a><span class="lineno"><a class="line" href="classAmrMesh.html#a785050ce35bae77bac1d1bfa3358a7cb"> 1067</a></span>&#160;<a class="code" href="classAmrMesh.html#a785050ce35bae77bac1d1bfa3358a7cb">AmrMesh::intersectParticlesBisectIF</a>(<a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;         a_activeParticles,</div>
+<div class="line"><a name="l01068"></a><span class="lineno"> 1068</span>&#160;                                    <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;         a_ebParticles,</div>
+<div class="line"><a name="l01069"></a><span class="lineno"> 1069</span>&#160;                                    <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;         a_domainParticles,</div>
+<div class="line"><a name="l01070"></a><span class="lineno"> 1070</span>&#160;                                    <span class="keyword">const</span> phase::which_phase      a_phase,</div>
+<div class="line"><a name="l01071"></a><span class="lineno"> 1071</span>&#160;                                    <span class="keyword">const</span> Real                    a_bisectionStep,</div>
+<div class="line"><a name="l01072"></a><span class="lineno"> 1072</span>&#160;                                    <span class="keyword">const</span> <span class="keywordtype">bool</span>                    a_deleteParticles,</div>
+<div class="line"><a name="l01073"></a><span class="lineno"> 1073</span>&#160;                                    <span class="keyword">const</span> std::function&lt;<span class="keywordtype">void</span>(P&amp;)&gt; a_nonDeletionModifier) <span class="keyword">const</span> noexcept</div>
+<div class="line"><a name="l01074"></a><span class="lineno"> 1074</span>&#160;{</div>
+<div class="line"><a name="l01075"></a><span class="lineno"> 1075</span>&#160;  CH_TIME(<span class="stringliteral">&quot;AmrMesh::intersectParticlesBisectIF&quot;</span>);</div>
+<div class="line"><a name="l01076"></a><span class="lineno"> 1076</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l01077"></a><span class="lineno"> 1077</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;AmrMesh::intersectParticlesBisectIF&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l01078"></a><span class="lineno"> 1078</span>&#160;  }</div>
+<div class="line"><a name="l01079"></a><span class="lineno"> 1079</span>&#160; </div>
+<div class="line"><a name="l01080"></a><span class="lineno"> 1080</span>&#160;  CH_assert(a_activeParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>() == a_ebParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>());</div>
+<div class="line"><a name="l01081"></a><span class="lineno"> 1081</span>&#160;  CH_assert(a_activeParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>() == a_domainParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>());</div>
+<div class="line"><a name="l01082"></a><span class="lineno"> 1082</span>&#160; </div>
+<div class="line"><a name="l01083"></a><span class="lineno"> 1083</span>&#160;  <span class="comment">// TLDR: This is pretty much a hard-copy of intersectParticlesRaycastIF, with the exception that the EB intersection</span></div>
+<div class="line"><a name="l01084"></a><span class="lineno"> 1084</span>&#160;  <span class="comment">//       test is replaced by a bisection test.</span></div>
+<div class="line"><a name="l01085"></a><span class="lineno"> 1085</span>&#160; </div>
+<div class="line"><a name="l01086"></a><span class="lineno"> 1086</span>&#160;  a_ebParticles.<a class="code" href="classParticleContainer.html#a8677866e8070b8925e3f98689faba582">clearParticles</a>();</div>
+<div class="line"><a name="l01087"></a><span class="lineno"> 1087</span>&#160;  a_domainParticles.<a class="code" href="classParticleContainer.html#a8677866e8070b8925e3f98689faba582">clearParticles</a>();</div>
+<div class="line"><a name="l01088"></a><span class="lineno"> 1088</span>&#160; </div>
+<div class="line"><a name="l01089"></a><span class="lineno"> 1089</span>&#160;  <span class="keyword">const</span> std::string whichRealm = a_activeParticles.<a class="code" href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">getRealm</a>();</div>
+<div class="line"><a name="l01090"></a><span class="lineno"> 1090</span>&#160; </div>
+<div class="line"><a name="l01091"></a><span class="lineno"> 1091</span>&#160;  <span class="comment">// Figure out the implicit function</span></div>
+<div class="line"><a name="l01092"></a><span class="lineno"> 1092</span>&#160;  RefCountedPtr&lt;BaseIF&gt; implicitFunction;</div>
+<div class="line"><a name="l01093"></a><span class="lineno"> 1093</span>&#160; </div>
+<div class="line"><a name="l01094"></a><span class="lineno"> 1094</span>&#160;  <span class="keywordflow">switch</span> (a_phase) {</div>
+<div class="line"><a name="l01095"></a><span class="lineno"> 1095</span>&#160;  <span class="keywordflow">case</span> phase::gas: {</div>
+<div class="line"><a name="l01096"></a><span class="lineno"> 1096</span>&#160;    implicitFunction = m_baseif.at(phase::gas);</div>
+<div class="line"><a name="l01097"></a><span class="lineno"> 1097</span>&#160; </div>
+<div class="line"><a name="l01098"></a><span class="lineno"> 1098</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l01099"></a><span class="lineno"> 1099</span>&#160;  }</div>
+<div class="line"><a name="l01100"></a><span class="lineno"> 1100</span>&#160;  <span class="keywordflow">case</span> phase::solid: {</div>
+<div class="line"><a name="l01101"></a><span class="lineno"> 1101</span>&#160;    implicitFunction = m_baseif.at(phase::solid);</div>
+<div class="line"><a name="l01102"></a><span class="lineno"> 1102</span>&#160; </div>
+<div class="line"><a name="l01103"></a><span class="lineno"> 1103</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l01104"></a><span class="lineno"> 1104</span>&#160;  }</div>
+<div class="line"><a name="l01105"></a><span class="lineno"> 1105</span>&#160;  <span class="keywordflow">default</span>: {</div>
+<div class="line"><a name="l01106"></a><span class="lineno"> 1106</span>&#160;    MayDay::Error(<span class="stringliteral">&quot;AmrMesh::intersectParticlesBisectIF - logic bust&quot;</span>);</div>
+<div class="line"><a name="l01107"></a><span class="lineno"> 1107</span>&#160; </div>
+<div class="line"><a name="l01108"></a><span class="lineno"> 1108</span>&#160;    <span class="keywordflow">break</span>;</div>
 <div class="line"><a name="l01109"></a><span class="lineno"> 1109</span>&#160;  }</div>
-<div class="line"><a name="l01110"></a><span class="lineno"> 1110</span>&#160; </div>
-<div class="line"><a name="l01111"></a><span class="lineno"> 1111</span>&#160;  <span class="comment">// Safety factor to prevent particles falling off the domain if they intersect the high-side of the domain</span></div>
-<div class="line"><a name="l01112"></a><span class="lineno"> 1112</span>&#160;  constexpr Real safety = 1.E-12;</div>
-<div class="line"><a name="l01113"></a><span class="lineno"> 1113</span>&#160; </div>
-<div class="line"><a name="l01114"></a><span class="lineno"> 1114</span>&#160;  <span class="comment">// Level loop -- go through each AMR level</span></div>
-<div class="line"><a name="l01115"></a><span class="lineno"> 1115</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_finestLevel; lvl++) {</div>
-<div class="line"><a name="l01116"></a><span class="lineno"> 1116</span>&#160; </div>
-<div class="line"><a name="l01117"></a><span class="lineno"> 1117</span>&#160;    <span class="comment">// Handle to various grid stuff.</span></div>
-<div class="line"><a name="l01118"></a><span class="lineno"> 1118</span>&#160;    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = this-&gt;getGrids(whichRealm)[lvl];</div>
-<div class="line"><a name="l01119"></a><span class="lineno"> 1119</span>&#160; </div>
-<div class="line"><a name="l01120"></a><span class="lineno"> 1120</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(dbl); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l01121"></a><span class="lineno"> 1121</span>&#160; </div>
-<div class="line"><a name="l01122"></a><span class="lineno"> 1122</span>&#160;      List&lt;P&gt;&amp; activeParticles = a_activeParticles[lvl][dit()].listItems();</div>
-<div class="line"><a name="l01123"></a><span class="lineno"> 1123</span>&#160;      List&lt;P&gt;&amp; ebParticles     = a_ebParticles[lvl][dit()].listItems();</div>
-<div class="line"><a name="l01124"></a><span class="lineno"> 1124</span>&#160;      List&lt;P&gt;&amp; domainParticles = a_domainParticles[lvl][dit()].listItems();</div>
-<div class="line"><a name="l01125"></a><span class="lineno"> 1125</span>&#160; </div>
-<div class="line"><a name="l01126"></a><span class="lineno"> 1126</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(activeParticles); lit.ok();) {</div>
-<div class="line"><a name="l01127"></a><span class="lineno"> 1127</span>&#160;        P&amp; particle = lit();</div>
-<div class="line"><a name="l01128"></a><span class="lineno"> 1128</span>&#160; </div>
-<div class="line"><a name="l01129"></a><span class="lineno"> 1129</span>&#160;        <span class="keyword">const</span> RealVect newPos = particle.position();</div>
-<div class="line"><a name="l01130"></a><span class="lineno"> 1130</span>&#160;        <span class="keyword">const</span> RealVect oldPos = particle.oldPosition();</div>
-<div class="line"><a name="l01131"></a><span class="lineno"> 1131</span>&#160;        <span class="keyword">const</span> RealVect path   = newPos - oldPos;</div>
-<div class="line"><a name="l01132"></a><span class="lineno"> 1132</span>&#160; </div>
-<div class="line"><a name="l01133"></a><span class="lineno"> 1133</span>&#160;        <span class="comment">// Cheap initial tests that allow us to skip some intersections tests.</span></div>
-<div class="line"><a name="l01134"></a><span class="lineno"> 1134</span>&#160;        <span class="keywordtype">bool</span> checkEB     = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l01135"></a><span class="lineno"> 1135</span>&#160;        <span class="keywordtype">bool</span> checkDomain = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l01136"></a><span class="lineno"> 1136</span>&#160; </div>
-<div class="line"><a name="l01137"></a><span class="lineno"> 1137</span>&#160;        <span class="keywordflow">if</span> (!implicitFunction.isNull()) {</div>
-<div class="line"><a name="l01138"></a><span class="lineno"> 1138</span>&#160;          checkEB = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l01139"></a><span class="lineno"> 1139</span>&#160;        }</div>
-<div class="line"><a name="l01140"></a><span class="lineno"> 1140</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
-<div class="line"><a name="l01141"></a><span class="lineno"> 1141</span>&#160;          <span class="keyword">const</span> <span class="keywordtype">bool</span> outsideLo = newPos[dir] &lt; m_probLo[dir];</div>
-<div class="line"><a name="l01142"></a><span class="lineno"> 1142</span>&#160;          <span class="keyword">const</span> <span class="keywordtype">bool</span> outsideHi = newPos[dir] &gt; m_probHi[dir];</div>
-<div class="line"><a name="l01143"></a><span class="lineno"> 1143</span>&#160; </div>
-<div class="line"><a name="l01144"></a><span class="lineno"> 1144</span>&#160;          <span class="keywordflow">if</span> (outsideLo || outsideHi) {</div>
-<div class="line"><a name="l01145"></a><span class="lineno"> 1145</span>&#160;            checkDomain = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l01146"></a><span class="lineno"> 1146</span>&#160;          }</div>
-<div class="line"><a name="l01147"></a><span class="lineno"> 1147</span>&#160;        }</div>
-<div class="line"><a name="l01148"></a><span class="lineno"> 1148</span>&#160; </div>
-<div class="line"><a name="l01149"></a><span class="lineno"> 1149</span>&#160;        <span class="comment">// Do the intersection tests.</span></div>
-<div class="line"><a name="l01150"></a><span class="lineno"> 1150</span>&#160;        <span class="keywordflow">if</span> (checkEB || checkDomain) {</div>
-<div class="line"><a name="l01151"></a><span class="lineno"> 1151</span>&#160; </div>
-<div class="line"><a name="l01152"></a><span class="lineno"> 1152</span>&#160;          <span class="comment">// These are the solution</span></div>
-<div class="line"><a name="l01153"></a><span class="lineno"> 1153</span>&#160;          Real sDomain = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::numeric_limits&lt;Real&gt;::max</a>();</div>
-<div class="line"><a name="l01154"></a><span class="lineno"> 1154</span>&#160;          Real sEB     = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::numeric_limits&lt;Real&gt;::max</a>();</div>
-<div class="line"><a name="l01155"></a><span class="lineno"> 1155</span>&#160; </div>
-<div class="line"><a name="l01156"></a><span class="lineno"> 1156</span>&#160;          <span class="keywordtype">bool</span> contactDomain = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l01157"></a><span class="lineno"> 1157</span>&#160;          <span class="keywordtype">bool</span> contactEB     = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l01158"></a><span class="lineno"> 1158</span>&#160; </div>
-<div class="line"><a name="l01159"></a><span class="lineno"> 1159</span>&#160;          <span class="comment">// Check if the particle intersected the domain. If it did, we compute sDomain such that the intersection</span></div>
-<div class="line"><a name="l01160"></a><span class="lineno"> 1160</span>&#160;          <span class="comment">// point with the domain is X = X0 + sDomain * (X1-X0) where X1=newPos and X0=oldPos</span></div>
-<div class="line"><a name="l01161"></a><span class="lineno"> 1161</span>&#160;          <span class="keywordflow">if</span> (checkDomain) {</div>
-<div class="line"><a name="l01162"></a><span class="lineno"> 1162</span>&#160;            contactDomain = <a class="code" href="classParticleOps.html#afc924720c8332e493951fec08881ef3d">ParticleOps::domainIntersection</a>(oldPos, newPos, m_probLo, m_probHi, sDomain);</div>
-<div class="line"><a name="l01163"></a><span class="lineno"> 1163</span>&#160;          }</div>
-<div class="line"><a name="l01164"></a><span class="lineno"> 1164</span>&#160; </div>
-<div class="line"><a name="l01165"></a><span class="lineno"> 1165</span>&#160;          <span class="comment">// Check if the particle intersected the EB. If it did, we compute sEB such that the intersection</span></div>
-<div class="line"><a name="l01166"></a><span class="lineno"> 1166</span>&#160;          <span class="comment">// point with the domain is X = X0 + sEB * (X1-X0) where X1=newPos and X0=oldPos</span></div>
-<div class="line"><a name="l01167"></a><span class="lineno"> 1167</span>&#160;          <span class="keywordflow">if</span> (checkEB) {</div>
-<div class="line"><a name="l01168"></a><span class="lineno"> 1168</span>&#160;            contactEB = <a class="code" href="classParticleOps.html#a4f2914cd2dc872d5ec05a7d250a677ff">ParticleOps::ebIntersectionBisect</a>(implicitFunction, oldPos, newPos, a_bisectionStep, sEB);</div>
-<div class="line"><a name="l01169"></a><span class="lineno"> 1169</span>&#160;          }</div>
-<div class="line"><a name="l01170"></a><span class="lineno"> 1170</span>&#160; </div>
-<div class="line"><a name="l01171"></a><span class="lineno"> 1171</span>&#160;          <span class="comment">// Particle bumped into something.</span></div>
-<div class="line"><a name="l01172"></a><span class="lineno"> 1172</span>&#160;          <span class="keywordflow">if</span> (contactDomain || contactEB) {</div>
-<div class="line"><a name="l01173"></a><span class="lineno"> 1173</span>&#160;            <span class="keywordflow">if</span> (sEB &lt;= sDomain) {</div>
-<div class="line"><a name="l01174"></a><span class="lineno"> 1174</span>&#160;              <span class="comment">// Crashed with EB &quot;first&quot;.</span></div>
-<div class="line"><a name="l01175"></a><span class="lineno"> 1175</span>&#160;              <span class="keyword">const</span> RealVect intersectionPos = oldPos + sEB * path;</div>
-<div class="line"><a name="l01176"></a><span class="lineno"> 1176</span>&#160; </div>
-<div class="line"><a name="l01177"></a><span class="lineno"> 1177</span>&#160;              <span class="keywordflow">if</span> (a_deleteParticles) {</div>
-<div class="line"><a name="l01178"></a><span class="lineno"> 1178</span>&#160;                particle.position() = intersectionPos;</div>
-<div class="line"><a name="l01179"></a><span class="lineno"> 1179</span>&#160; </div>
-<div class="line"><a name="l01180"></a><span class="lineno"> 1180</span>&#160;                ebParticles.transfer(lit);</div>
-<div class="line"><a name="l01181"></a><span class="lineno"> 1181</span>&#160;              }</div>
-<div class="line"><a name="l01182"></a><span class="lineno"> 1182</span>&#160;              <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l01183"></a><span class="lineno"> 1183</span>&#160;                P p = particle;</div>
-<div class="line"><a name="l01184"></a><span class="lineno"> 1184</span>&#160; </div>
-<div class="line"><a name="l01185"></a><span class="lineno"> 1185</span>&#160;                p.position() = intersectionPos;</div>
-<div class="line"><a name="l01186"></a><span class="lineno"> 1186</span>&#160; </div>
-<div class="line"><a name="l01187"></a><span class="lineno"> 1187</span>&#160;                ebParticles.add(p);</div>
-<div class="line"><a name="l01188"></a><span class="lineno"> 1188</span>&#160; </div>
-<div class="line"><a name="l01189"></a><span class="lineno"> 1189</span>&#160;                ++lit;</div>
-<div class="line"><a name="l01190"></a><span class="lineno"> 1190</span>&#160; </div>
-<div class="line"><a name="l01191"></a><span class="lineno"> 1191</span>&#160;                a_nonDeletionModifier(particle);</div>
-<div class="line"><a name="l01192"></a><span class="lineno"> 1192</span>&#160;              }</div>
-<div class="line"><a name="l01193"></a><span class="lineno"> 1193</span>&#160;            }</div>
-<div class="line"><a name="l01194"></a><span class="lineno"> 1194</span>&#160;            <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l01195"></a><span class="lineno"> 1195</span>&#160;              <span class="comment">// Crashed with domain &quot;first&quot;.</span></div>
-<div class="line"><a name="l01196"></a><span class="lineno"> 1196</span>&#160;              <span class="keyword">const</span> Real sSafety = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::max</a>((Real)0.0, sDomain - safety);</div>
-<div class="line"><a name="l01197"></a><span class="lineno"> 1197</span>&#160; </div>
-<div class="line"><a name="l01198"></a><span class="lineno"> 1198</span>&#160;              <span class="keyword">const</span> RealVect intersectionPos = oldPos + sSafety * path;</div>
-<div class="line"><a name="l01199"></a><span class="lineno"> 1199</span>&#160; </div>
-<div class="line"><a name="l01200"></a><span class="lineno"> 1200</span>&#160;              <span class="keywordflow">if</span> (a_deleteParticles) {</div>
-<div class="line"><a name="l01201"></a><span class="lineno"> 1201</span>&#160;                particle.position() = intersectionPos;</div>
-<div class="line"><a name="l01202"></a><span class="lineno"> 1202</span>&#160; </div>
-<div class="line"><a name="l01203"></a><span class="lineno"> 1203</span>&#160;                domainParticles.transfer(lit);</div>
-<div class="line"><a name="l01204"></a><span class="lineno"> 1204</span>&#160;              }</div>
-<div class="line"><a name="l01205"></a><span class="lineno"> 1205</span>&#160;              <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l01206"></a><span class="lineno"> 1206</span>&#160;                P p = particle;</div>
-<div class="line"><a name="l01207"></a><span class="lineno"> 1207</span>&#160; </div>
-<div class="line"><a name="l01208"></a><span class="lineno"> 1208</span>&#160;                p.position() = intersectionPos;</div>
-<div class="line"><a name="l01209"></a><span class="lineno"> 1209</span>&#160; </div>
-<div class="line"><a name="l01210"></a><span class="lineno"> 1210</span>&#160;                domainParticles.add(p);</div>
-<div class="line"><a name="l01211"></a><span class="lineno"> 1211</span>&#160; </div>
-<div class="line"><a name="l01212"></a><span class="lineno"> 1212</span>&#160;                ++lit;</div>
-<div class="line"><a name="l01213"></a><span class="lineno"> 1213</span>&#160; </div>
-<div class="line"><a name="l01214"></a><span class="lineno"> 1214</span>&#160;                a_nonDeletionModifier(particle);</div>
-<div class="line"><a name="l01215"></a><span class="lineno"> 1215</span>&#160;              }</div>
-<div class="line"><a name="l01216"></a><span class="lineno"> 1216</span>&#160;            }</div>
-<div class="line"><a name="l01217"></a><span class="lineno"> 1217</span>&#160;          }</div>
-<div class="line"><a name="l01218"></a><span class="lineno"> 1218</span>&#160;          <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l01219"></a><span class="lineno"> 1219</span>&#160;            ++lit;</div>
-<div class="line"><a name="l01220"></a><span class="lineno"> 1220</span>&#160;          }</div>
-<div class="line"><a name="l01221"></a><span class="lineno"> 1221</span>&#160;        }</div>
-<div class="line"><a name="l01222"></a><span class="lineno"> 1222</span>&#160;        <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l01223"></a><span class="lineno"> 1223</span>&#160;          ++lit;</div>
-<div class="line"><a name="l01224"></a><span class="lineno"> 1224</span>&#160;        }</div>
-<div class="line"><a name="l01225"></a><span class="lineno"> 1225</span>&#160;      }</div>
-<div class="line"><a name="l01226"></a><span class="lineno"> 1226</span>&#160;    }</div>
-<div class="line"><a name="l01227"></a><span class="lineno"> 1227</span>&#160;  }</div>
-<div class="line"><a name="l01228"></a><span class="lineno"> 1228</span>&#160; </div>
-<div class="line"><a name="l01229"></a><span class="lineno"> 1229</span>&#160;  <span class="comment">// These need to be remapped.</span></div>
-<div class="line"><a name="l01230"></a><span class="lineno"> 1230</span>&#160;  a_ebParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
-<div class="line"><a name="l01231"></a><span class="lineno"> 1231</span>&#160;  a_domainParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
-<div class="line"><a name="l01232"></a><span class="lineno"> 1232</span>&#160;}</div>
-<div class="line"><a name="l01233"></a><span class="lineno"> 1233</span>&#160; </div>
-<div class="line"><a name="l01234"></a><span class="lineno"> 1234</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l01235"></a><span class="lineno"> 1235</span>&#160; </div>
-<div class="line"><a name="l01236"></a><span class="lineno"> 1236</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l01110"></a><span class="lineno"> 1110</span>&#160;  }</div>
+<div class="line"><a name="l01111"></a><span class="lineno"> 1111</span>&#160; </div>
+<div class="line"><a name="l01112"></a><span class="lineno"> 1112</span>&#160;  <span class="comment">// Safety factor to prevent particles falling off the domain if they intersect the high-side of the domain</span></div>
+<div class="line"><a name="l01113"></a><span class="lineno"> 1113</span>&#160;  constexpr Real safety = 1.E-12;</div>
+<div class="line"><a name="l01114"></a><span class="lineno"> 1114</span>&#160; </div>
+<div class="line"><a name="l01115"></a><span class="lineno"> 1115</span>&#160;  <span class="comment">// Level loop -- go through each AMR level</span></div>
+<div class="line"><a name="l01116"></a><span class="lineno"> 1116</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_finestLevel; lvl++) {</div>
+<div class="line"><a name="l01117"></a><span class="lineno"> 1117</span>&#160; </div>
+<div class="line"><a name="l01118"></a><span class="lineno"> 1118</span>&#160;    <span class="comment">// Handle to various grid stuff.</span></div>
+<div class="line"><a name="l01119"></a><span class="lineno"> 1119</span>&#160;    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = this-&gt;getGrids(whichRealm)[lvl];</div>
+<div class="line"><a name="l01120"></a><span class="lineno"> 1120</span>&#160; </div>
+<div class="line"><a name="l01121"></a><span class="lineno"> 1121</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(dbl); dit.ok(); ++dit) {</div>
+<div class="line"><a name="l01122"></a><span class="lineno"> 1122</span>&#160; </div>
+<div class="line"><a name="l01123"></a><span class="lineno"> 1123</span>&#160;      List&lt;P&gt;&amp; activeParticles = a_activeParticles[lvl][dit()].listItems();</div>
+<div class="line"><a name="l01124"></a><span class="lineno"> 1124</span>&#160;      List&lt;P&gt;&amp; ebParticles     = a_ebParticles[lvl][dit()].listItems();</div>
+<div class="line"><a name="l01125"></a><span class="lineno"> 1125</span>&#160;      List&lt;P&gt;&amp; domainParticles = a_domainParticles[lvl][dit()].listItems();</div>
+<div class="line"><a name="l01126"></a><span class="lineno"> 1126</span>&#160; </div>
+<div class="line"><a name="l01127"></a><span class="lineno"> 1127</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(activeParticles); lit.ok();) {</div>
+<div class="line"><a name="l01128"></a><span class="lineno"> 1128</span>&#160;        P&amp; particle = lit();</div>
+<div class="line"><a name="l01129"></a><span class="lineno"> 1129</span>&#160; </div>
+<div class="line"><a name="l01130"></a><span class="lineno"> 1130</span>&#160;        <span class="keyword">const</span> RealVect newPos = particle.position();</div>
+<div class="line"><a name="l01131"></a><span class="lineno"> 1131</span>&#160;        <span class="keyword">const</span> RealVect oldPos = particle.oldPosition();</div>
+<div class="line"><a name="l01132"></a><span class="lineno"> 1132</span>&#160;        <span class="keyword">const</span> RealVect path   = newPos - oldPos;</div>
+<div class="line"><a name="l01133"></a><span class="lineno"> 1133</span>&#160; </div>
+<div class="line"><a name="l01134"></a><span class="lineno"> 1134</span>&#160;        <span class="comment">// Cheap initial tests that allow us to skip some intersections tests.</span></div>
+<div class="line"><a name="l01135"></a><span class="lineno"> 1135</span>&#160;        <span class="keywordtype">bool</span> checkEB     = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l01136"></a><span class="lineno"> 1136</span>&#160;        <span class="keywordtype">bool</span> checkDomain = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l01137"></a><span class="lineno"> 1137</span>&#160; </div>
+<div class="line"><a name="l01138"></a><span class="lineno"> 1138</span>&#160;        <span class="keywordflow">if</span> (!implicitFunction.isNull()) {</div>
+<div class="line"><a name="l01139"></a><span class="lineno"> 1139</span>&#160;          checkEB = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l01140"></a><span class="lineno"> 1140</span>&#160;        }</div>
+<div class="line"><a name="l01141"></a><span class="lineno"> 1141</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
+<div class="line"><a name="l01142"></a><span class="lineno"> 1142</span>&#160;          <span class="keyword">const</span> <span class="keywordtype">bool</span> outsideLo = newPos[dir] &lt; m_probLo[dir];</div>
+<div class="line"><a name="l01143"></a><span class="lineno"> 1143</span>&#160;          <span class="keyword">const</span> <span class="keywordtype">bool</span> outsideHi = newPos[dir] &gt; m_probHi[dir];</div>
+<div class="line"><a name="l01144"></a><span class="lineno"> 1144</span>&#160; </div>
+<div class="line"><a name="l01145"></a><span class="lineno"> 1145</span>&#160;          <span class="keywordflow">if</span> (outsideLo || outsideHi) {</div>
+<div class="line"><a name="l01146"></a><span class="lineno"> 1146</span>&#160;            checkDomain = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l01147"></a><span class="lineno"> 1147</span>&#160;          }</div>
+<div class="line"><a name="l01148"></a><span class="lineno"> 1148</span>&#160;        }</div>
+<div class="line"><a name="l01149"></a><span class="lineno"> 1149</span>&#160; </div>
+<div class="line"><a name="l01150"></a><span class="lineno"> 1150</span>&#160;        <span class="comment">// Do the intersection tests.</span></div>
+<div class="line"><a name="l01151"></a><span class="lineno"> 1151</span>&#160;        <span class="keywordflow">if</span> (checkEB || checkDomain) {</div>
+<div class="line"><a name="l01152"></a><span class="lineno"> 1152</span>&#160; </div>
+<div class="line"><a name="l01153"></a><span class="lineno"> 1153</span>&#160;          <span class="comment">// These are the solution</span></div>
+<div class="line"><a name="l01154"></a><span class="lineno"> 1154</span>&#160;          Real sDomain = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::numeric_limits&lt;Real&gt;::max</a>();</div>
+<div class="line"><a name="l01155"></a><span class="lineno"> 1155</span>&#160;          Real sEB     = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::numeric_limits&lt;Real&gt;::max</a>();</div>
+<div class="line"><a name="l01156"></a><span class="lineno"> 1156</span>&#160; </div>
+<div class="line"><a name="l01157"></a><span class="lineno"> 1157</span>&#160;          <span class="keywordtype">bool</span> contactDomain = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l01158"></a><span class="lineno"> 1158</span>&#160;          <span class="keywordtype">bool</span> contactEB     = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l01159"></a><span class="lineno"> 1159</span>&#160; </div>
+<div class="line"><a name="l01160"></a><span class="lineno"> 1160</span>&#160;          <span class="comment">// Check if the particle intersected the domain. If it did, we compute sDomain such that the intersection</span></div>
+<div class="line"><a name="l01161"></a><span class="lineno"> 1161</span>&#160;          <span class="comment">// point with the domain is X = X0 + sDomain * (X1-X0) where X1=newPos and X0=oldPos</span></div>
+<div class="line"><a name="l01162"></a><span class="lineno"> 1162</span>&#160;          <span class="keywordflow">if</span> (checkDomain) {</div>
+<div class="line"><a name="l01163"></a><span class="lineno"> 1163</span>&#160;            contactDomain = <a class="code" href="classParticleOps.html#afc924720c8332e493951fec08881ef3d">ParticleOps::domainIntersection</a>(oldPos, newPos, m_probLo, m_probHi, sDomain);</div>
+<div class="line"><a name="l01164"></a><span class="lineno"> 1164</span>&#160;          }</div>
+<div class="line"><a name="l01165"></a><span class="lineno"> 1165</span>&#160; </div>
+<div class="line"><a name="l01166"></a><span class="lineno"> 1166</span>&#160;          <span class="comment">// Check if the particle intersected the EB. If it did, we compute sEB such that the intersection</span></div>
+<div class="line"><a name="l01167"></a><span class="lineno"> 1167</span>&#160;          <span class="comment">// point with the domain is X = X0 + sEB * (X1-X0) where X1=newPos and X0=oldPos</span></div>
+<div class="line"><a name="l01168"></a><span class="lineno"> 1168</span>&#160;          <span class="keywordflow">if</span> (checkEB) {</div>
+<div class="line"><a name="l01169"></a><span class="lineno"> 1169</span>&#160;            contactEB = <a class="code" href="classParticleOps.html#a4f2914cd2dc872d5ec05a7d250a677ff">ParticleOps::ebIntersectionBisect</a>(implicitFunction, oldPos, newPos, a_bisectionStep, sEB);</div>
+<div class="line"><a name="l01170"></a><span class="lineno"> 1170</span>&#160;          }</div>
+<div class="line"><a name="l01171"></a><span class="lineno"> 1171</span>&#160; </div>
+<div class="line"><a name="l01172"></a><span class="lineno"> 1172</span>&#160;          <span class="comment">// Particle bumped into something.</span></div>
+<div class="line"><a name="l01173"></a><span class="lineno"> 1173</span>&#160;          <span class="keywordflow">if</span> (contactDomain || contactEB) {</div>
+<div class="line"><a name="l01174"></a><span class="lineno"> 1174</span>&#160;            <span class="keywordflow">if</span> (sEB &lt;= sDomain) {</div>
+<div class="line"><a name="l01175"></a><span class="lineno"> 1175</span>&#160;              <span class="comment">// Crashed with EB &quot;first&quot;.</span></div>
+<div class="line"><a name="l01176"></a><span class="lineno"> 1176</span>&#160;              <span class="keyword">const</span> RealVect intersectionPos = oldPos + sEB * path;</div>
+<div class="line"><a name="l01177"></a><span class="lineno"> 1177</span>&#160; </div>
+<div class="line"><a name="l01178"></a><span class="lineno"> 1178</span>&#160;              <span class="keywordflow">if</span> (a_deleteParticles) {</div>
+<div class="line"><a name="l01179"></a><span class="lineno"> 1179</span>&#160;                particle.position() = intersectionPos;</div>
+<div class="line"><a name="l01180"></a><span class="lineno"> 1180</span>&#160; </div>
+<div class="line"><a name="l01181"></a><span class="lineno"> 1181</span>&#160;                ebParticles.transfer(lit);</div>
+<div class="line"><a name="l01182"></a><span class="lineno"> 1182</span>&#160;              }</div>
+<div class="line"><a name="l01183"></a><span class="lineno"> 1183</span>&#160;              <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l01184"></a><span class="lineno"> 1184</span>&#160;                P p = particle;</div>
+<div class="line"><a name="l01185"></a><span class="lineno"> 1185</span>&#160; </div>
+<div class="line"><a name="l01186"></a><span class="lineno"> 1186</span>&#160;                p.position() = intersectionPos;</div>
+<div class="line"><a name="l01187"></a><span class="lineno"> 1187</span>&#160; </div>
+<div class="line"><a name="l01188"></a><span class="lineno"> 1188</span>&#160;                ebParticles.add(p);</div>
+<div class="line"><a name="l01189"></a><span class="lineno"> 1189</span>&#160; </div>
+<div class="line"><a name="l01190"></a><span class="lineno"> 1190</span>&#160;                ++lit;</div>
+<div class="line"><a name="l01191"></a><span class="lineno"> 1191</span>&#160; </div>
+<div class="line"><a name="l01192"></a><span class="lineno"> 1192</span>&#160;                a_nonDeletionModifier(particle);</div>
+<div class="line"><a name="l01193"></a><span class="lineno"> 1193</span>&#160;              }</div>
+<div class="line"><a name="l01194"></a><span class="lineno"> 1194</span>&#160;            }</div>
+<div class="line"><a name="l01195"></a><span class="lineno"> 1195</span>&#160;            <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l01196"></a><span class="lineno"> 1196</span>&#160;              <span class="comment">// Crashed with domain &quot;first&quot;.</span></div>
+<div class="line"><a name="l01197"></a><span class="lineno"> 1197</span>&#160;              <span class="keyword">const</span> Real sSafety = <a class="code" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">std::max</a>((Real)0.0, sDomain - safety);</div>
+<div class="line"><a name="l01198"></a><span class="lineno"> 1198</span>&#160; </div>
+<div class="line"><a name="l01199"></a><span class="lineno"> 1199</span>&#160;              <span class="keyword">const</span> RealVect intersectionPos = oldPos + sSafety * path;</div>
+<div class="line"><a name="l01200"></a><span class="lineno"> 1200</span>&#160; </div>
+<div class="line"><a name="l01201"></a><span class="lineno"> 1201</span>&#160;              <span class="keywordflow">if</span> (a_deleteParticles) {</div>
+<div class="line"><a name="l01202"></a><span class="lineno"> 1202</span>&#160;                particle.position() = intersectionPos;</div>
+<div class="line"><a name="l01203"></a><span class="lineno"> 1203</span>&#160; </div>
+<div class="line"><a name="l01204"></a><span class="lineno"> 1204</span>&#160;                domainParticles.transfer(lit);</div>
+<div class="line"><a name="l01205"></a><span class="lineno"> 1205</span>&#160;              }</div>
+<div class="line"><a name="l01206"></a><span class="lineno"> 1206</span>&#160;              <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l01207"></a><span class="lineno"> 1207</span>&#160;                P p = particle;</div>
+<div class="line"><a name="l01208"></a><span class="lineno"> 1208</span>&#160; </div>
+<div class="line"><a name="l01209"></a><span class="lineno"> 1209</span>&#160;                p.position() = intersectionPos;</div>
+<div class="line"><a name="l01210"></a><span class="lineno"> 1210</span>&#160; </div>
+<div class="line"><a name="l01211"></a><span class="lineno"> 1211</span>&#160;                domainParticles.add(p);</div>
+<div class="line"><a name="l01212"></a><span class="lineno"> 1212</span>&#160; </div>
+<div class="line"><a name="l01213"></a><span class="lineno"> 1213</span>&#160;                ++lit;</div>
+<div class="line"><a name="l01214"></a><span class="lineno"> 1214</span>&#160; </div>
+<div class="line"><a name="l01215"></a><span class="lineno"> 1215</span>&#160;                a_nonDeletionModifier(particle);</div>
+<div class="line"><a name="l01216"></a><span class="lineno"> 1216</span>&#160;              }</div>
+<div class="line"><a name="l01217"></a><span class="lineno"> 1217</span>&#160;            }</div>
+<div class="line"><a name="l01218"></a><span class="lineno"> 1218</span>&#160;          }</div>
+<div class="line"><a name="l01219"></a><span class="lineno"> 1219</span>&#160;          <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l01220"></a><span class="lineno"> 1220</span>&#160;            ++lit;</div>
+<div class="line"><a name="l01221"></a><span class="lineno"> 1221</span>&#160;          }</div>
+<div class="line"><a name="l01222"></a><span class="lineno"> 1222</span>&#160;        }</div>
+<div class="line"><a name="l01223"></a><span class="lineno"> 1223</span>&#160;        <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l01224"></a><span class="lineno"> 1224</span>&#160;          ++lit;</div>
+<div class="line"><a name="l01225"></a><span class="lineno"> 1225</span>&#160;        }</div>
+<div class="line"><a name="l01226"></a><span class="lineno"> 1226</span>&#160;      }</div>
+<div class="line"><a name="l01227"></a><span class="lineno"> 1227</span>&#160;    }</div>
+<div class="line"><a name="l01228"></a><span class="lineno"> 1228</span>&#160;  }</div>
+<div class="line"><a name="l01229"></a><span class="lineno"> 1229</span>&#160; </div>
+<div class="line"><a name="l01230"></a><span class="lineno"> 1230</span>&#160;  <span class="comment">// These need to be remapped.</span></div>
+<div class="line"><a name="l01231"></a><span class="lineno"> 1231</span>&#160;  a_ebParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
+<div class="line"><a name="l01232"></a><span class="lineno"> 1232</span>&#160;  a_domainParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
+<div class="line"><a name="l01233"></a><span class="lineno"> 1233</span>&#160;}</div>
+<div class="line"><a name="l01234"></a><span class="lineno"> 1234</span>&#160; </div>
+<div class="line"><a name="l01235"></a><span class="lineno"> 1235</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l01236"></a><span class="lineno"> 1236</span>&#160; </div>
+<div class="line"><a name="l01237"></a><span class="lineno"> 1237</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__AmrMesh_8H_html"><div class="ttname"><a href="CD__AmrMesh_8H.html">CD_AmrMesh.H</a></div><div class="ttdoc">Declaration of core class for handling AMR-related operations (with embedded boundaries)</div></div>
 <div class="ttc" id="aCD__CoarseFineDeposition_8H_html_a187d926e3e73dcdb6fe988f652cd3a0c"><div class="ttname"><a href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a></div><div class="ttdeci">CoarseFineDeposition</div><div class="ttdoc">Coarse-fine deposition types (see CD_EBAMRParticleMesh for how these are handled).</div><div class="ttdef"><b>Definition:</b> CD_CoarseFineDeposition.H:26</div></div>
 <div class="ttc" id="aCD__DepositionType_8H_html_a3e0386e57e39a4ba4ec16c3d7734a486"><div class="ttname"><a href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a></div><div class="ttdeci">DepositionType</div><div class="ttdoc">Deposition types.</div><div class="ttdef"><b>Definition:</b> CD_DepositionType.H:23</div></div>
@@ -1313,40 +1314,40 @@ $(function() {
 <div class="ttc" id="aCD__Realm_8H_html_a906b67939aa45e674c3a94d40c0e5e34"><div class="ttname"><a href="CD__Realm_8H.html#a906b67939aa45e674c3a94d40c0e5e34">AMRMask</a></div><div class="ttdeci">Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt;&gt; &gt; AMRMask</div><div class="ttdoc">Alias for cutting down on the typic of booleans defined over AMR grids.</div><div class="ttdef"><b>Definition:</b> CD_Realm.H:35</div></div>
 <div class="ttc" id="aclassAmrMesh_html_a036c315af1e9c46ba5320a3de0017927"><div class="ttname"><a href="classAmrMesh.html#a036c315af1e9c46ba5320a3de0017927">AmrMesh::removeCoveredParticlesVoxels</a></div><div class="ttdeci">void removeCoveredParticlesVoxels(ParticleContainer&lt; P &gt; &amp;a_particles, const phase::which_phase &amp;a_phase) const</div><div class="ttdoc">Function which removes particles from the domain if they fall inside the EB.</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:544</div></div>
 <div class="ttc" id="aclassAmrMesh_html_a06b91aa63e558054ea913b05e797ec50"><div class="ttname"><a href="classAmrMesh.html#a06b91aa63e558054ea913b05e797ec50">AmrMesh::transferCoveredParticlesDiscrete</a></div><div class="ttdeci">void transferCoveredParticlesDiscrete(ParticleContainer&lt; P &gt; &amp;a_particlesFrom, ParticleContainer&lt; P &gt; &amp;a_particlesTo, const phase::which_phase &amp;a_phase, const Real a_tolerance=0.0) const</div><div class="ttdoc">Function which transferse particles from one particle container to another if they fall inside the EB...</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:669</div></div>
-<div class="ttc" id="aclassAmrMesh_html_a1492043709c933fca6e7c51a42aebf40"><div class="ttname"><a href="classAmrMesh.html#a1492043709c933fca6e7c51a42aebf40">AmrMesh::getValidCells</a></div><div class="ttdeci">const AMRMask &amp; getValidCells(const std::string a_realm) const</div><div class="ttdoc">Get a map of all valid cells on a specified realm.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:2794</div></div>
+<div class="ttc" id="aclassAmrMesh_html_a1492043709c933fca6e7c51a42aebf40"><div class="ttname"><a href="classAmrMesh.html#a1492043709c933fca6e7c51a42aebf40">AmrMesh::getValidCells</a></div><div class="ttdeci">const AMRMask &amp; getValidCells(const std::string a_realm) const</div><div class="ttdoc">Get a map of all valid cells on a specified realm.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:2836</div></div>
 <div class="ttc" id="aclassAmrMesh_html_a25c75449e9996805572bc01bd43042b2"><div class="ttname"><a href="classAmrMesh.html#a25c75449e9996805572bc01bd43042b2">AmrMesh::transferCoveredParticlesIF</a></div><div class="ttdeci">void transferCoveredParticlesIF(ParticleContainer&lt; P &gt; &amp;a_particlesFrom, ParticleContainer&lt; P &gt; &amp;a_particlesTo, const phase::which_phase &amp;a_phase, const Real a_tolerance=0.0) const</div><div class="ttdoc">Function which transferse particles from one particle container to another if they fall inside the EB...</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:599</div></div>
-<div class="ttc" id="aclassAmrMesh_html_a2b355417f9a9dca3aaabdc0c3aae47f3"><div class="ttname"><a href="classAmrMesh.html#a2b355417f9a9dca3aaabdc0c3aae47f3">AmrMesh::m_maxBoxSize</a></div><div class="ttdeci">int m_maxBoxSize</div><div class="ttdoc">Max box size.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1855</div></div>
-<div class="ttc" id="aclassAmrMesh_html_a32c4af19deea668e528e1539492ba6a7"><div class="ttname"><a href="classAmrMesh.html#a32c4af19deea668e528e1539492ba6a7">AmrMesh::m_probLo</a></div><div class="ttdeci">RealVect m_probLo</div><div class="ttdoc">Domain simulation corner.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1820</div></div>
+<div class="ttc" id="aclassAmrMesh_html_a2b355417f9a9dca3aaabdc0c3aae47f3"><div class="ttname"><a href="classAmrMesh.html#a2b355417f9a9dca3aaabdc0c3aae47f3">AmrMesh::m_maxBoxSize</a></div><div class="ttdeci">int m_maxBoxSize</div><div class="ttdoc">Max box size.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1854</div></div>
+<div class="ttc" id="aclassAmrMesh_html_a32c4af19deea668e528e1539492ba6a7"><div class="ttname"><a href="classAmrMesh.html#a32c4af19deea668e528e1539492ba6a7">AmrMesh::m_probLo</a></div><div class="ttdeci">RealVect m_probLo</div><div class="ttdoc">Domain simulation corner.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1819</div></div>
 <div class="ttc" id="aclassAmrMesh_html_a33518b8e6bc4daf6ce94d33d5905c357"><div class="ttname"><a href="classAmrMesh.html#a33518b8e6bc4daf6ce94d33d5905c357">AmrMesh::remapToNewGrids</a></div><div class="ttdeci">void remapToNewGrids(ParticleContainer&lt; P &gt; &amp;a_particles, const int a_lmin, const int a_newFinestLevel) const noexcept</div><div class="ttdoc">Regrid particle to new grids.</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:221</div></div>
 <div class="ttc" id="aclassAmrMesh_html_a3ef231600b61769b61c6fb4e07db725c"><div class="ttname"><a href="classAmrMesh.html#a3ef231600b61769b61c6fb4e07db725c">AmrMesh::transferIrregularParticles</a></div><div class="ttdeci">void transferIrregularParticles(ParticleContainer&lt; P &gt; &amp;a_dstParticles, ParticleContainer&lt; P &gt; &amp;a_srcParticles, const phase::which_phase a_phase, const std::function&lt; void(P &amp;)&gt; a_transferModifier=[](P &amp;) -&gt; void { return;}) const noexcept</div><div class="ttdoc">Transfer particles that are on the wrong side of the EB to a different container.</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:820</div></div>
-<div class="ttc" id="aclassAmrMesh_html_a3f7105b45dc3d5db23e1029f9fa95ef2"><div class="ttname"><a href="classAmrMesh.html#a3f7105b45dc3d5db23e1029f9fa95ef2">AmrMesh::queryRealm</a></div><div class="ttdeci">bool queryRealm(const std::string a_realm) const</div><div class="ttdoc">Query if a realm exists.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:3099</div></div>
+<div class="ttc" id="aclassAmrMesh_html_a3f7105b45dc3d5db23e1029f9fa95ef2"><div class="ttname"><a href="classAmrMesh.html#a3f7105b45dc3d5db23e1029f9fa95ef2">AmrMesh::queryRealm</a></div><div class="ttdeci">bool queryRealm(const std::string a_realm) const</div><div class="ttdoc">Query if a realm exists.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:3090</div></div>
 <div class="ttc" id="aclassAmrMesh_html_a412d58b270f56e04aa17127c0fcf5f46"><div class="ttname"><a href="classAmrMesh.html#a412d58b270f56e04aa17127c0fcf5f46">AmrMesh::removeCoveredParticlesIF</a></div><div class="ttdeci">void removeCoveredParticlesIF(ParticleContainer&lt; P &gt; &amp;a_particles, const phase::which_phase &amp;a_phase, const Real a_tolerance=0.0) const</div><div class="ttdoc">Function which removes particles from the domain if they fall inside the EB.</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:397</div></div>
 <div class="ttc" id="aclassAmrMesh_html_a5032e0accfccfbc5c77cd8d4e6bbe578"><div class="ttname"><a href="classAmrMesh.html#a5032e0accfccfbc5c77cd8d4e6bbe578">AmrMesh::depositParticles</a></div><div class="ttdeci">void depositParticles(EBAMRCellData &amp;a_meshData, const std::string &amp;a_realm, const phase::which_phase &amp;a_phase, const ParticleContainer&lt; P &gt; &amp;a_particles, const DepositionType a_depositionType, const CoarseFineDeposition a_coarseFineDeposition, const bool a_forceIrregNGP=false)</div><div class="ttdoc">Deposit scalar particle quantities on the mesh.</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:241</div></div>
-<div class="ttc" id="aclassAmrMesh_html_a50336ab4f43dc66bf6f5ee8fde4a9acd"><div class="ttname"><a href="classAmrMesh.html#a50336ab4f43dc66bf6f5ee8fde4a9acd">AmrMesh::m_verbosity</a></div><div class="ttdeci">int m_verbosity</div><div class="ttdoc">Verbosity.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1835</div></div>
-<div class="ttc" id="aclassAmrMesh_html_a60a68b7e8b0a7d9062db13f1b002cc39"><div class="ttname"><a href="classAmrMesh.html#a60a68b7e8b0a7d9062db13f1b002cc39">AmrMesh::intersectParticlesRaycastIF</a></div><div class="ttdeci">void intersectParticlesRaycastIF(ParticleContainer&lt; P &gt; &amp;a_activeParticles, ParticleContainer&lt; P &gt; &amp;a_ebParticles, ParticleContainer&lt; P &gt; &amp;a_domainParticles, const phase::which_phase a_phase, const Real a_tolerance, const bool a_deleteParticles, const std::function&lt; void(P &amp;)&gt; a_nonDeletionModifier=[](P &amp;) -&gt; void { return;}) const noexcept</div><div class="ttdoc">Particle intersection algorithm based on ray-casting.</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:898</div></div>
+<div class="ttc" id="aclassAmrMesh_html_a50336ab4f43dc66bf6f5ee8fde4a9acd"><div class="ttname"><a href="classAmrMesh.html#a50336ab4f43dc66bf6f5ee8fde4a9acd">AmrMesh::m_verbosity</a></div><div class="ttdeci">int m_verbosity</div><div class="ttdoc">Verbosity.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1834</div></div>
+<div class="ttc" id="aclassAmrMesh_html_a60a68b7e8b0a7d9062db13f1b002cc39"><div class="ttname"><a href="classAmrMesh.html#a60a68b7e8b0a7d9062db13f1b002cc39">AmrMesh::intersectParticlesRaycastIF</a></div><div class="ttdeci">void intersectParticlesRaycastIF(ParticleContainer&lt; P &gt; &amp;a_activeParticles, ParticleContainer&lt; P &gt; &amp;a_ebParticles, ParticleContainer&lt; P &gt; &amp;a_domainParticles, const phase::which_phase a_phase, const Real a_tolerance, const bool a_deleteParticles, const std::function&lt; void(P &amp;)&gt; a_nonDeletionModifier=[](P &amp;) -&gt; void { return;}) const noexcept</div><div class="ttdoc">Particle intersection algorithm based on ray-casting.</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:899</div></div>
 <div class="ttc" id="aclassAmrMesh_html_a6fb1b3008526e53b38e09e96e0e88487"><div class="ttname"><a href="classAmrMesh.html#a6fb1b3008526e53b38e09e96e0e88487">AmrMesh::removeCoveredParticlesDiscrete</a></div><div class="ttdeci">void removeCoveredParticlesDiscrete(ParticleContainer&lt; P &gt; &amp;a_particles, const phase::which_phase &amp;a_phase, const Real a_tolerance=0.0) const</div><div class="ttdoc">Function which removes particles from the domain if they fall inside the EB.</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:458</div></div>
-<div class="ttc" id="aclassAmrMesh_html_a7496a7ae2b97d7e6b609c82a22586433"><div class="ttname"><a href="classAmrMesh.html#a7496a7ae2b97d7e6b609c82a22586433">AmrMesh::m_dx</a></div><div class="ttdeci">Vector&lt; Real &gt; m_dx</div><div class="ttdoc">Level resolutions.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1960</div></div>
-<div class="ttc" id="aclassAmrMesh_html_a758abcbca57d397805fcc6ad4b6fa632"><div class="ttname"><a href="classAmrMesh.html#a758abcbca57d397805fcc6ad4b6fa632">AmrMesh::getGrids</a></div><div class="ttdeci">const Vector&lt; DisjointBoxLayout &gt; &amp; getGrids(const std::string a_realm) const</div><div class="ttdoc">Get the grids.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:2711</div></div>
-<div class="ttc" id="aclassAmrMesh_html_a785050ce35bae77bac1d1bfa3358a7cb"><div class="ttname"><a href="classAmrMesh.html#a785050ce35bae77bac1d1bfa3358a7cb">AmrMesh::intersectParticlesBisectIF</a></div><div class="ttdeci">void intersectParticlesBisectIF(ParticleContainer&lt; P &gt; &amp;a_activeParticles, ParticleContainer&lt; P &gt; &amp;a_ebParticles, ParticleContainer&lt; P &gt; &amp;a_domainParticles, const phase::which_phase a_phase, const Real a_bisectionStep, const bool a_deleteParticles, const std::function&lt; void(P &amp;)&gt; a_nonDeletionModifier=[](P &amp;) -&gt; void { return;}) const noexcept</div><div class="ttdoc">Particle intersection algorithm based on bisection.</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:1066</div></div>
-<div class="ttc" id="aclassAmrMesh_html_a836d00237da8ce294102747a9ad27439"><div class="ttname"><a href="classAmrMesh.html#a836d00237da8ce294102747a9ad27439">AmrMesh::m_finestLevel</a></div><div class="ttdeci">int m_finestLevel</div><div class="ttdoc">Finest level.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1840</div></div>
-<div class="ttc" id="aclassAmrMesh_html_a8db2254121059379e82f6569b2c6641a"><div class="ttname"><a href="classAmrMesh.html#a8db2254121059379e82f6569b2c6641a">AmrMesh::getEBISLayout</a></div><div class="ttdeci">const Vector&lt; EBISLayout &gt; &amp; getEBISLayout(const std::string a_realm, const phase::which_phase a_phase) const</div><div class="ttdoc">Get EBISLayouts for a Realm and phase.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:2727</div></div>
-<div class="ttc" id="aclassAmrMesh_html_a93c109ce8345145d8d5373abf9c6280b"><div class="ttname"><a href="classAmrMesh.html#a93c109ce8345145d8d5373abf9c6280b">AmrMesh::m_baseif</a></div><div class="ttdeci">std::map&lt; phase::which_phase, RefCountedPtr&lt; BaseIF &gt; &gt; m_baseif</div><div class="ttdoc">Implicit functions.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1775</div></div>
+<div class="ttc" id="aclassAmrMesh_html_a7496a7ae2b97d7e6b609c82a22586433"><div class="ttname"><a href="classAmrMesh.html#a7496a7ae2b97d7e6b609c82a22586433">AmrMesh::m_dx</a></div><div class="ttdeci">Vector&lt; Real &gt; m_dx</div><div class="ttdoc">Level resolutions.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1959</div></div>
+<div class="ttc" id="aclassAmrMesh_html_a758abcbca57d397805fcc6ad4b6fa632"><div class="ttname"><a href="classAmrMesh.html#a758abcbca57d397805fcc6ad4b6fa632">AmrMesh::getGrids</a></div><div class="ttdeci">const Vector&lt; DisjointBoxLayout &gt; &amp; getGrids(const std::string a_realm) const</div><div class="ttdoc">Get the grids.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:2770</div></div>
+<div class="ttc" id="aclassAmrMesh_html_a785050ce35bae77bac1d1bfa3358a7cb"><div class="ttname"><a href="classAmrMesh.html#a785050ce35bae77bac1d1bfa3358a7cb">AmrMesh::intersectParticlesBisectIF</a></div><div class="ttdeci">void intersectParticlesBisectIF(ParticleContainer&lt; P &gt; &amp;a_activeParticles, ParticleContainer&lt; P &gt; &amp;a_ebParticles, ParticleContainer&lt; P &gt; &amp;a_domainParticles, const phase::which_phase a_phase, const Real a_bisectionStep, const bool a_deleteParticles, const std::function&lt; void(P &amp;)&gt; a_nonDeletionModifier=[](P &amp;) -&gt; void { return;}) const noexcept</div><div class="ttdoc">Particle intersection algorithm based on bisection.</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:1067</div></div>
+<div class="ttc" id="aclassAmrMesh_html_a836d00237da8ce294102747a9ad27439"><div class="ttname"><a href="classAmrMesh.html#a836d00237da8ce294102747a9ad27439">AmrMesh::m_finestLevel</a></div><div class="ttdeci">int m_finestLevel</div><div class="ttdoc">Finest level.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1839</div></div>
+<div class="ttc" id="aclassAmrMesh_html_a8db2254121059379e82f6569b2c6641a"><div class="ttname"><a href="classAmrMesh.html#a8db2254121059379e82f6569b2c6641a">AmrMesh::getEBISLayout</a></div><div class="ttdeci">const Vector&lt; EBISLayout &gt; &amp; getEBISLayout(const std::string a_realm, const phase::which_phase a_phase) const</div><div class="ttdoc">Get EBISLayouts for a Realm and phase.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:2786</div></div>
+<div class="ttc" id="aclassAmrMesh_html_a93c109ce8345145d8d5373abf9c6280b"><div class="ttname"><a href="classAmrMesh.html#a93c109ce8345145d8d5373abf9c6280b">AmrMesh::m_baseif</a></div><div class="ttdeci">std::map&lt; phase::which_phase, RefCountedPtr&lt; BaseIF &gt; &gt; m_baseif</div><div class="ttdoc">Implicit functions.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1774</div></div>
 <div class="ttc" id="aclassAmrMesh_html_aa07d5998e160d5430c49bc238e819e77"><div class="ttname"><a href="classAmrMesh.html#aa07d5998e160d5430c49bc238e819e77">AmrMesh::interpolateParticles</a></div><div class="ttdeci">void interpolateParticles(ParticleContainer&lt; P &gt; &amp;a_particles, const std::string &amp;a_realm, const phase::which_phase &amp;a_phase, const EBAMRCellData &amp;a_meshScalarField, const DepositionType a_interpType, const bool a_forceIrregNGP=false) const</div><div class="ttdoc">Interpolate a scalar field onto the particle position.</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:353</div></div>
-<div class="ttc" id="aclassAmrMesh_html_aa8dc8db2ef220a83ac5dc391d1a1ce79"><div class="ttname"><a href="classAmrMesh.html#aa8dc8db2ef220a83ac5dc391d1a1ce79">AmrMesh::getDx</a></div><div class="ttdeci">const Vector&lt; Real &gt; &amp; getDx() const</div><div class="ttdoc">Get spatial resolutions.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:2656</div></div>
-<div class="ttc" id="aclassAmrMesh_html_aacde379809f5856a15d71f6d5c0056d6"><div class="ttname"><a href="classAmrMesh.html#aacde379809f5856a15d71f6d5c0056d6">AmrMesh::m_realms</a></div><div class="ttdeci">std::map&lt; std::string, RefCountedPtr&lt; Realm &gt; &gt; m_realms</div><div class="ttdoc">These are all the Realms.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1770</div></div>
-<div class="ttc" id="aclassAmrMesh_html_ab6b28d2dedb85c12c6f4cd7ec0fc7325"><div class="ttname"><a href="classAmrMesh.html#ab6b28d2dedb85c12c6f4cd7ec0fc7325">AmrMesh::m_blockingFactor</a></div><div class="ttdeci">int m_blockingFactor</div><div class="ttdoc">Blocking factor.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1870</div></div>
+<div class="ttc" id="aclassAmrMesh_html_aa8dc8db2ef220a83ac5dc391d1a1ce79"><div class="ttname"><a href="classAmrMesh.html#aa8dc8db2ef220a83ac5dc391d1a1ce79">AmrMesh::getDx</a></div><div class="ttdeci">const Vector&lt; Real &gt; &amp; getDx() const</div><div class="ttdoc">Get spatial resolutions.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:2715</div></div>
+<div class="ttc" id="aclassAmrMesh_html_aacde379809f5856a15d71f6d5c0056d6"><div class="ttname"><a href="classAmrMesh.html#aacde379809f5856a15d71f6d5c0056d6">AmrMesh::m_realms</a></div><div class="ttdeci">std::map&lt; std::string, RefCountedPtr&lt; Realm &gt; &gt; m_realms</div><div class="ttdoc">These are all the Realms.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1769</div></div>
+<div class="ttc" id="aclassAmrMesh_html_ab6b28d2dedb85c12c6f4cd7ec0fc7325"><div class="ttname"><a href="classAmrMesh.html#ab6b28d2dedb85c12c6f4cd7ec0fc7325">AmrMesh::m_blockingFactor</a></div><div class="ttdeci">int m_blockingFactor</div><div class="ttdoc">Blocking factor.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.H:1869</div></div>
 <div class="ttc" id="aclassAmrMesh_html_ac4c266b32bccaf75389e17bb093f35e0"><div class="ttname"><a href="classAmrMesh.html#ac4c266b32bccaf75389e17bb093f35e0">AmrMesh::allocatePointer</a></div><div class="ttdeci">void allocatePointer(Vector&lt; RefCountedPtr&lt; T &gt;&gt; &amp;a_data) const</div><div class="ttdoc">Allocate pointer but not any memory blocks.</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:162</div></div>
 <div class="ttc" id="aclassAmrMesh_html_ad7fffb758e5b66b09bed3d194d99d94c"><div class="ttname"><a href="classAmrMesh.html#ad7fffb758e5b66b09bed3d194d99d94c">AmrMesh::allocate</a></div><div class="ttdeci">void allocate(Vector&lt; RefCountedPtr&lt; ParticleData&lt; T &gt;&gt;&gt; &amp;a_particles, const std::string a_realm) const</div><div class="ttdoc">Template class for generic allocation of particle data.</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:98</div></div>
 <div class="ttc" id="aclassAmrMesh_html_adccc54b19b8398a8c48c4ef8b2ea026c"><div class="ttname"><a href="classAmrMesh.html#adccc54b19b8398a8c48c4ef8b2ea026c">AmrMesh::transferCoveredParticlesVoxels</a></div><div class="ttdeci">void transferCoveredParticlesVoxels(ParticleContainer&lt; P &gt; &amp;a_particlesFrom, ParticleContainer&lt; P &gt; &amp;a_particlesTo, const phase::which_phase &amp;a_phase) const</div><div class="ttdoc">Function which transferse particles from one particle container to another if they fall inside the EB...</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:759</div></div>
-<div class="ttc" id="aclassAmrMesh_html_ae01ad6d63e8fed8c1615a06a9ccb534a"><div class="ttname"><a href="classAmrMesh.html#ae01ad6d63e8fed8c1615a06a9ccb534a">AmrMesh::getParticleMesh</a></div><div class="ttdeci">EBAMRParticleMesh &amp; getParticleMesh(const std::string a_realm, const phase::which_phase a_phase) const</div><div class="ttdoc">Get EBAMRParticleMesh operator.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:2860</div></div>
+<div class="ttc" id="aclassAmrMesh_html_ae01ad6d63e8fed8c1615a06a9ccb534a"><div class="ttname"><a href="classAmrMesh.html#ae01ad6d63e8fed8c1615a06a9ccb534a">AmrMesh::getParticleMesh</a></div><div class="ttdeci">EBAMRParticleMesh &amp; getParticleMesh(const std::string a_realm, const phase::which_phase a_phase) const</div><div class="ttdoc">Get EBAMRParticleMesh operator.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:2919</div></div>
 <div class="ttc" id="aclassAmrMesh_html_ae1420f5b9c853b5e09334f15966a36f6"><div class="ttname"><a href="classAmrMesh.html#ae1420f5b9c853b5e09334f15966a36f6">AmrMesh::alias</a></div><div class="ttdeci">void alias(Vector&lt; T * &gt; &amp;a_alias, const Vector&lt; RefCountedPtr&lt; T &gt;&gt; &amp;a_data) const</div><div class="ttdoc">Turn smart-pointer data structure into regular-pointer data structure.</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:70</div></div>
 <div class="ttc" id="aclassAmrMesh_html_ae5ab65c2e423aaa581d3adb4fd883b92"><div class="ttname"><a href="classAmrMesh.html#ae5ab65c2e423aaa581d3adb4fd883b92">AmrMesh::deallocate</a></div><div class="ttdeci">void deallocate(Vector&lt; T * &gt; &amp;a_data) const</div><div class="ttdoc">Deallocate data.</div><div class="ttdef"><b>Definition:</b> CD_AmrMeshImplem.H:22</div></div>
-<div class="ttc" id="aclassAmrMesh_html_aea9e442e363ef5f63143d438619cd334"><div class="ttname"><a href="classAmrMesh.html#aea9e442e363ef5f63143d438619cd334">AmrMesh::getRefinementRatios</a></div><div class="ttdeci">const Vector&lt; int &gt; &amp; getRefinementRatios() const</div><div class="ttdoc">Get refinement ratios.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:2667</div></div>
-<div class="ttc" id="aclassAmrMesh_html_aff6bd8d2bc234f35a6f54d86ce485f05"><div class="ttname"><a href="classAmrMesh.html#aff6bd8d2bc234f35a6f54d86ce485f05">AmrMesh::getDomains</a></div><div class="ttdeci">const Vector&lt; ProblemDomain &gt; &amp; getDomains() const</div><div class="ttdoc">Get domains.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:2689</div></div>
+<div class="ttc" id="aclassAmrMesh_html_aea9e442e363ef5f63143d438619cd334"><div class="ttname"><a href="classAmrMesh.html#aea9e442e363ef5f63143d438619cd334">AmrMesh::getRefinementRatios</a></div><div class="ttdeci">const Vector&lt; int &gt; &amp; getRefinementRatios() const</div><div class="ttdoc">Get refinement ratios.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:2726</div></div>
+<div class="ttc" id="aclassAmrMesh_html_aff6bd8d2bc234f35a6f54d86ce485f05"><div class="ttname"><a href="classAmrMesh.html#aff6bd8d2bc234f35a6f54d86ce485f05">AmrMesh::getDomains</a></div><div class="ttdeci">const Vector&lt; ProblemDomain &gt; &amp; getDomains() const</div><div class="ttdoc">Get domains.</div><div class="ttdef"><b>Definition:</b> CD_AmrMesh.cpp:2748</div></div>
 <div class="ttc" id="aclassEBAMRData_html"><div class="ttname"><a href="classEBAMRData.html">EBAMRData</a></div><div class="ttdoc">Default class for holding LevelData&lt;T&gt; data across an EBAMR realm.</div><div class="ttdef"><b>Definition:</b> CD_EBAMRData.H:40</div></div>
-<div class="ttc" id="aclassEBAMRData_html_ab95bfbf4cba32f8082a808e2038074ce"><div class="ttname"><a href="classEBAMRData.html#ab95bfbf4cba32f8082a808e2038074ce">EBAMRData::setRealm</a></div><div class="ttdeci">void setRealm(const std::string a_realm)</div><div class="ttdoc">Sets the realm for this object.</div><div class="ttdef"><b>Definition:</b> CD_EBAMRDataImplem.H:100</div></div>
-<div class="ttc" id="aclassEBAMRData_html_ac65eaa5d20dc6d16f9706d18216a2462"><div class="ttname"><a href="classEBAMRData.html#ac65eaa5d20dc6d16f9706d18216a2462">EBAMRData::getData</a></div><div class="ttdeci">Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt; &amp; getData()</div><div class="ttdoc">Get underlying data. Returns m_data.</div><div class="ttdef"><b>Definition:</b> CD_EBAMRDataImplem.H:72</div></div>
-<div class="ttc" id="aclassEBAMRData_html_addf6043b930cf1890381782164d50882"><div class="ttname"><a href="classEBAMRData.html#addf6043b930cf1890381782164d50882">EBAMRData::getRealm</a></div><div class="ttdeci">const std::string getRealm() const</div><div class="ttdoc">Returns the string identifier for whatever realm this data is supposed to be allocated over.</div><div class="ttdef"><b>Definition:</b> CD_EBAMRDataImplem.H:93</div></div>
+<div class="ttc" id="aclassEBAMRData_html_a278c2dce4bf9e82e09aecad19f9a6f45"><div class="ttname"><a href="classEBAMRData.html#a278c2dce4bf9e82e09aecad19f9a6f45">EBAMRData::setRealm</a></div><div class="ttdeci">void setRealm(const std::string a_realm) noexcept</div><div class="ttdoc">Sets the realm for this object.</div><div class="ttdef"><b>Definition:</b> CD_EBAMRDataImplem.H:142</div></div>
+<div class="ttc" id="aclassEBAMRData_html_a4cd751591c1b6c7df68fe6de16e0d998"><div class="ttname"><a href="classEBAMRData.html#a4cd751591c1b6c7df68fe6de16e0d998">EBAMRData::getData</a></div><div class="ttdeci">Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt; &amp; getData() noexcept</div><div class="ttdoc">Get underlying data. Returns m_data.</div><div class="ttdef"><b>Definition:</b> CD_EBAMRDataImplem.H:114</div></div>
+<div class="ttc" id="aclassEBAMRData_html_ae21af3fabcaa3364bbcaf641b63798e0"><div class="ttname"><a href="classEBAMRData.html#ae21af3fabcaa3364bbcaf641b63798e0">EBAMRData::getRealm</a></div><div class="ttdeci">const std::string getRealm() const noexcept</div><div class="ttdoc">Returns the string identifier for whatever realm this data is supposed to be allocated over.</div><div class="ttdef"><b>Definition:</b> CD_EBAMRDataImplem.H:135</div></div>
 <div class="ttc" id="aclassEBAMRParticleMesh_html"><div class="ttname"><a href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a></div><div class="ttdoc">Class for handling particle-mesh operations with AMR.</div><div class="ttdef"><b>Definition:</b> CD_EBAMRParticleMesh.H:47</div></div>
 <div class="ttc" id="aclassEBAMRParticleMesh_html_a972d83d6fd441d62ca8068a122cbc5fd"><div class="ttname"><a href="classEBAMRParticleMesh.html#a972d83d6fd441d62ca8068a122cbc5fd">EBAMRParticleMesh::interpolate</a></div><div class="ttdeci">void interpolate(ParticleContainer&lt; P &gt; &amp;a_particles, const EBAMRCellData &amp;a_meshVectorField, const DepositionType a_interpType, const bool a_forceIrregNGP=false) const</div><div class="ttdoc">Interpolate a scalar field onto the particle position.</div><div class="ttdef"><b>Definition:</b> CD_EBAMRParticleMeshImplem.H:575</div></div>
 <div class="ttc" id="aclassEBAMRParticleMesh_html_ac4ff2ad7b21f0131730b17c93a6f5843"><div class="ttname"><a href="classEBAMRParticleMesh.html#ac4ff2ad7b21f0131730b17c93a6f5843">EBAMRParticleMesh::deposit</a></div><div class="ttdeci">void deposit(EBAMRCellData &amp;a_meshData, const ParticleContainer&lt; P &gt; &amp;a_particles, const DepositionType a_depositionType, const CoarseFineDeposition a_coarseFineDeposition, const bool a_forceIrregNGP=false)</div><div class="ttdoc">Class for deposition of particles of a type P to the mesh. This does scalar quantities.</div><div class="ttdef"><b>Definition:</b> CD_EBAMRParticleMeshImplem.H:29</div></div>
@@ -1354,9 +1355,9 @@ $(function() {
 <div class="ttc" id="aclassEBAMRSurfaceDeposition_html_aafac00ad3ef46dff2b4fb9fde6e576ef"><div class="ttname"><a href="classEBAMRSurfaceDeposition.html#aafac00ad3ef46dff2b4fb9fde6e576ef">EBAMRSurfaceDeposition::deposit</a></div><div class="ttdeci">void deposit(EBAMRIVData &amp;a_meshData, const ParticleContainer&lt; P &gt; &amp;a_particles) const noexcept</div><div class="ttdoc">Deposit function. Deposits particle on surface.</div><div class="ttdef"><b>Definition:</b> CD_EBAMRSurfaceDepositionImplem.H:28</div></div>
 <div class="ttc" id="aclassParticleContainer_html"><div class="ttname"><a href="classParticleContainer.html">ParticleContainer</a></div><div class="ttdoc">Templated class for holding particles on an AMR hierarchy with particle remapping.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainer.H:48</div></div>
 <div class="ttc" id="aclassParticleContainer_html_a2db7e8cb941c386e5dc2b8ca2bd3a2ca"><div class="ttname"><a href="classParticleContainer.html#a2db7e8cb941c386e5dc2b8ca2bd3a2ca">ParticleContainer::define</a></div><div class="ttdeci">void define(const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; ValidMask &gt; &amp;a_validMask, const RealVect &amp;a_probLo, const int a_blockingFactor, const int a_finestLevel, const std::string a_realm)</div><div class="ttdoc">Define the container. This will do a clear-out of all particles.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:58</div></div>
-<div class="ttc" id="aclassParticleContainer_html_a80b57db3f1493057168d10712d051437"><div class="ttname"><a href="classParticleContainer.html#a80b57db3f1493057168d10712d051437">ParticleContainer::clear</a></div><div class="ttdeci">void clear(AMRParticles&lt; P &gt; &amp;a_particles) const</div><div class="ttdoc">Clear particles on input data holder.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:1254</div></div>
-<div class="ttc" id="aclassParticleContainer_html_a81d7610978813e98b3c5e968d4495139"><div class="ttname"><a href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">ParticleContainer::remap</a></div><div class="ttdeci">void remap()</div><div class="ttdoc">Remap over the entire AMR hierarchy.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:776</div></div>
-<div class="ttc" id="aclassParticleContainer_html_a8677866e8070b8925e3f98689faba582"><div class="ttname"><a href="classParticleContainer.html#a8677866e8070b8925e3f98689faba582">ParticleContainer::clearParticles</a></div><div class="ttdeci">void clearParticles()</div><div class="ttdoc">Clear all particles.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:1227</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a80b57db3f1493057168d10712d051437"><div class="ttname"><a href="classParticleContainer.html#a80b57db3f1493057168d10712d051437">ParticleContainer::clear</a></div><div class="ttdeci">void clear(AMRParticles&lt; P &gt; &amp;a_particles) const</div><div class="ttdoc">Clear particles on input data holder.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:1237</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a81d7610978813e98b3c5e968d4495139"><div class="ttname"><a href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">ParticleContainer::remap</a></div><div class="ttdeci">void remap()</div><div class="ttdoc">Remap over the entire AMR hierarchy.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:777</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a8677866e8070b8925e3f98689faba582"><div class="ttname"><a href="classParticleContainer.html#a8677866e8070b8925e3f98689faba582">ParticleContainer::clearParticles</a></div><div class="ttdeci">void clearParticles()</div><div class="ttdoc">Clear all particles.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:1210</div></div>
 <div class="ttc" id="aclassParticleContainer_html_ab0548dcb2f569be06bbd5c760a87d36f"><div class="ttname"><a href="classParticleContainer.html#ab0548dcb2f569be06bbd5c760a87d36f">ParticleContainer::getRealm</a></div><div class="ttdeci">const std::string getRealm() const</div><div class="ttdoc">Get the realm where this ParticleContainer lives.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:199</div></div>
 <div class="ttc" id="aclassParticleContainer_html_ab49192bc51e952ca1331a2df18f1017d"><div class="ttname"><a href="classParticleContainer.html#ab49192bc51e952ca1331a2df18f1017d">ParticleContainer::isOrganizedByCell</a></div><div class="ttdeci">bool isOrganizedByCell() const</div><div class="ttdoc">Is cell-sorted or not.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:183</div></div>
 <div class="ttc" id="aclassParticleOps_html_a3e95a39f57c9272a20ef9411efdff221"><div class="ttname"><a href="classParticleOps.html#a3e95a39f57c9272a20ef9411efdff221">ParticleOps::ebIntersectionRaycast</a></div><div class="ttdeci">static bool ebIntersectionRaycast(const RefCountedPtr&lt; BaseIF &gt; &amp;a_impFunc, const RealVect &amp;a_oldPos, const RealVect &amp;a_newPos, const Real &amp;a_tolerance, Real &amp;a_s)</div><div class="ttdoc">Compute the intersection point between a particle path and an implicit function using a ray-casting a...</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:205</div></div>
@@ -1364,7 +1365,7 @@ $(function() {
 <div class="ttc" id="aclassParticleOps_html_aeaf3f380db95aa0395d8985da86fc547"><div class="ttname"><a href="classParticleOps.html#aeaf3f380db95aa0395d8985da86fc547">ParticleOps::getParticleCellIndex</a></div><div class="ttdeci">static IntVect getParticleCellIndex(const RealVect &amp;a_particlePosition, const RealVect &amp;a_probLo, const Real &amp;a_dx) noexcept</div><div class="ttdoc">Get the cell index corresponding to the particle position.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:26</div></div>
 <div class="ttc" id="aclassParticleOps_html_afc924720c8332e493951fec08881ef3d"><div class="ttname"><a href="classParticleOps.html#afc924720c8332e493951fec08881ef3d">ParticleOps::domainIntersection</a></div><div class="ttdeci">static bool domainIntersection(const RealVect &amp;a_oldPos, const RealVect &amp;a_newPos, const RealVect &amp;a_probLo, const RealVect &amp;a_probHi, Real &amp;a_s)</div><div class="ttdoc">Compute the intersection point between a particle path and a domain side.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:115</div></div>
 <div class="ttc" id="anamespaceLocation_html_a303c39a31d7afb2dd5650a9117a7d710"><div class="ttname"><a href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710">Location::position</a></div><div class="ttdeci">RealVect position(const Location::Cell a_location, const VolIndex &amp;a_vof, const EBISBox &amp;a_ebisbox, const Real &amp;a_dx)</div><div class="ttdoc">Compute the position (ignoring the &quot;origin) of a Vof.</div><div class="ttdef"><b>Definition:</b> CD_LocationImplem.H:20</div></div>
-<div class="ttc" id="anamespaceParallelOps_html_a1e1c7f162c522c6fecace086d6cdd10d"><div class="ttname"><a href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">ParallelOps::max</a></div><div class="ttdeci">Real max(const Real &amp;a_input) noexcept</div><div class="ttdoc">Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)</div><div class="ttdef"><b>Definition:</b> CD_ParallelOpsImplem.H:142</div></div>
+<div class="ttc" id="anamespaceParallelOps_html_a1e1c7f162c522c6fecace086d6cdd10d"><div class="ttname"><a href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">ParallelOps::max</a></div><div class="ttdeci">Real max(const Real &amp;a_input) noexcept</div><div class="ttdoc">Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)</div><div class="ttdef"><b>Definition:</b> CD_ParallelOpsImplem.H:157</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

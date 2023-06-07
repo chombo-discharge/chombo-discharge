@@ -112,6 +112,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMGRestrict.html#a995677698561aca3ae9bfdc26e1756bb">m_refRat</a></td></tr>
 <tr class="memdesc:a995677698561aca3ae9bfdc26e1756bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refinement ratio. <br /></td></tr>
 <tr class="separator:a995677698561aca3ae9bfdc26e1756bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52a9651d7016ea7d032253eefa227e25"><td class="memItemLeft" align="right" valign="top"><a id="a52a9651d7016ea7d032253eefa227e25"></a>
+IntVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMGRestrict.html#a52a9651d7016ea7d032253eefa227e25">m_ghostPhi</a></td></tr>
+<tr class="memdesc:a52a9651d7016ea7d032253eefa227e25"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of ghost cells in data holders. <br /></td></tr>
+<tr class="separator:a52a9651d7016ea7d032253eefa227e25"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a218cb6ccde84192b2a266558e93f4589"><td class="memItemLeft" align="right" valign="top"><a id="a218cb6ccde84192b2a266558e93f4589"></a>
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMGRestrict.html#a218cb6ccde84192b2a266558e93f4589">m_eblgFine</a></td></tr>
 <tr class="memdesc:a218cb6ccde84192b2a266558e93f4589"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fine grid. <br /></td></tr>
@@ -124,10 +128,10 @@ EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMGRestrict.html#acd34ee61b160ec00b23b5d2bdfefc2ee">m_eblgCoFi</a></td></tr>
 <tr class="memdesc:acd34ee61b160ec00b23b5d2bdfefc2ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsened fine grids. <br /></td></tr>
 <tr class="separator:acd34ee61b160ec00b23b5d2bdfefc2ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe90cb1cbb6993772095173561852683"><td class="memItemLeft" align="right" valign="top"><a id="afe90cb1cbb6993772095173561852683"></a>
-LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMGRestrict.html#afe90cb1cbb6993772095173561852683">m_dataCoFi</a></td></tr>
-<tr class="memdesc:afe90cb1cbb6993772095173561852683"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer data on the coarsened fine grids. <br /></td></tr>
-<tr class="separator:afe90cb1cbb6993772095173561852683"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3736f845e881d0a098a919d5f756fcc2"><td class="memItemLeft" align="right" valign="top"><a id="a3736f845e881d0a098a919d5f756fcc2"></a>
+Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMGRestrict.html#a3736f845e881d0a098a919d5f756fcc2">m_copier</a></td></tr>
+<tr class="memdesc:a3736f845e881d0a098a919d5f756fcc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for making copying from the coarsened fine grids to the coarse grid go faster. <br /></td></tr>
+<tr class="separator:a3736f845e881d0a098a919d5f756fcc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abbc1a86f8e261af18de6e773a3579da8"><td class="memItemLeft" align="right" valign="top"><a id="abbc1a86f8e261af18de6e773a3579da8"></a>
 LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMGRestrict.html#abbc1a86f8e261af18de6e773a3579da8">m_vofitCoar</a></td></tr>
 <tr class="memdesc:abbc1a86f8e261af18de6e773a3579da8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterator for iterating over cut-cells on the coarse level. <br /></td></tr>

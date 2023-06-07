@@ -84,14 +84,14 @@ Functions</h2></td></tr>
 <tr class="memitem:a40314d94a5cf135ef38a52eb42424eaf"><td class="memTemplItemLeft" align="right" valign="top">ALWAYS_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceBoxLoops.html#a40314d94a5cf135ef38a52eb42424eaf">loop</a> (const Box &amp;a_computeBox, Functor &amp;&amp;kernel, const IntVect &amp;a_stride=IntVect::Unit)</td></tr>
 <tr class="memdesc:a40314d94a5cf135ef38a52eb42424eaf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Launch a C++ kernel over a regular grid.  <a href="namespaceBoxLoops.html#a40314d94a5cf135ef38a52eb42424eaf">More...</a><br /></td></tr>
 <tr class="separator:a40314d94a5cf135ef38a52eb42424eaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad7f0d44d79ff5e1d2ae08b864acb9958"><td class="memTemplParams" colspan="2">template&lt;typename Functor &gt; </td></tr>
-<tr class="memitem:ad7f0d44d79ff5e1d2ae08b864acb9958"><td class="memTemplItemLeft" align="right" valign="top">ALWAYS_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceBoxLoops.html#ad7f0d44d79ff5e1d2ae08b864acb9958">loop</a> (IntVectSet &amp;a_ivs, Functor &amp;&amp;a_kernel)</td></tr>
-<tr class="memdesc:ad7f0d44d79ff5e1d2ae08b864acb9958"><td class="mdescLeft">&#160;</td><td class="mdescRight">Launch a C++ kernel over a subset of cells.  <a href="namespaceBoxLoops.html#ad7f0d44d79ff5e1d2ae08b864acb9958">More...</a><br /></td></tr>
-<tr class="separator:ad7f0d44d79ff5e1d2ae08b864acb9958"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a940e16c7b83c869b418139619983081f"><td class="memTemplParams" colspan="2">template&lt;typename Functor &gt; </td></tr>
-<tr class="memitem:a940e16c7b83c869b418139619983081f"><td class="memTemplItemLeft" align="right" valign="top">ALWAYS_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceBoxLoops.html#a940e16c7b83c869b418139619983081f">loop</a> (DenseIntVectSet &amp;a_ivs, Functor &amp;&amp;a_kernel)</td></tr>
-<tr class="memdesc:a940e16c7b83c869b418139619983081f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Launch a C++ kernel over a subset of cells.  <a href="namespaceBoxLoops.html#a940e16c7b83c869b418139619983081f">More...</a><br /></td></tr>
-<tr class="separator:a940e16c7b83c869b418139619983081f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7d0eabe8d59b5fed0b65ac750885c5b"><td class="memTemplParams" colspan="2">template&lt;typename Functor &gt; </td></tr>
+<tr class="memitem:ac7d0eabe8d59b5fed0b65ac750885c5b"><td class="memTemplItemLeft" align="right" valign="top">ALWAYS_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceBoxLoops.html#ac7d0eabe8d59b5fed0b65ac750885c5b">loop</a> (const IntVectSet &amp;a_ivs, Functor &amp;&amp;a_kernel)</td></tr>
+<tr class="memdesc:ac7d0eabe8d59b5fed0b65ac750885c5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Launch a C++ kernel over a subset of cells.  <a href="namespaceBoxLoops.html#ac7d0eabe8d59b5fed0b65ac750885c5b">More...</a><br /></td></tr>
+<tr class="separator:ac7d0eabe8d59b5fed0b65ac750885c5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab569000805ee3ecd9d701ecae343d725"><td class="memTemplParams" colspan="2">template&lt;typename Functor &gt; </td></tr>
+<tr class="memitem:ab569000805ee3ecd9d701ecae343d725"><td class="memTemplItemLeft" align="right" valign="top">ALWAYS_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceBoxLoops.html#ab569000805ee3ecd9d701ecae343d725">loop</a> (const DenseIntVectSet &amp;a_ivs, Functor &amp;&amp;a_kernel)</td></tr>
+<tr class="memdesc:ab569000805ee3ecd9d701ecae343d725"><td class="mdescLeft">&#160;</td><td class="mdescRight">Launch a C++ kernel over a subset of cells.  <a href="namespaceBoxLoops.html#ab569000805ee3ecd9d701ecae343d725">More...</a><br /></td></tr>
+<tr class="separator:ab569000805ee3ecd9d701ecae343d725"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e602b491eaf133e4277eed8c681577e"><td class="memTemplParams" colspan="2">template&lt;typename Functor &gt; </td></tr>
 <tr class="memitem:a8e602b491eaf133e4277eed8c681577e"><td class="memTemplItemLeft" align="right" valign="top">ALWAYS_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceBoxLoops.html#a8e602b491eaf133e4277eed8c681577e">loop</a> (VoFIterator &amp;a_iter, Functor &amp;&amp;a_kernel)</td></tr>
 <tr class="memdesc:a8e602b491eaf133e4277eed8c681577e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Launch a C++ kernel over cut-cells.  <a href="namespaceBoxLoops.html#a8e602b491eaf133e4277eed8c681577e">More...</a><br /></td></tr>
@@ -154,8 +154,86 @@ template&lt;typename Functor &gt; </div>
 
 </div>
 </div>
+<a id="ab569000805ee3ecd9d701ecae343d725"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab569000805ee3ecd9d701ecae343d725">&#9670;&nbsp;</a></span>loop() <span class="overload">[2/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Functor &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">ALWAYS_INLINE void BoxLoops::loop </td>
+          <td>(</td>
+          <td class="paramtype">const DenseIntVectSet &amp;&#160;</td>
+          <td class="paramname"><em>a_ivs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Functor &amp;&amp;&#160;</td>
+          <td class="paramname"><em>a_kernel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Launch a C++ kernel over a subset of cells. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cells</td><td>Grid cells where we launch the kernel. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_kernel</td><td>Kernel to launch </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac7d0eabe8d59b5fed0b65ac750885c5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7d0eabe8d59b5fed0b65ac750885c5b">&#9670;&nbsp;</a></span>loop() <span class="overload">[3/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Functor &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">ALWAYS_INLINE void BoxLoops::loop </td>
+          <td>(</td>
+          <td class="paramtype">const IntVectSet &amp;&#160;</td>
+          <td class="paramname"><em>a_ivs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Functor &amp;&amp;&#160;</td>
+          <td class="paramname"><em>a_kernel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Launch a C++ kernel over a subset of cells. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cells</td><td>Grid cells where we launch the kernel. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_kernel</td><td>Kernel to launch </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="aae7973745b75a78b5d815ef238c21361"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aae7973745b75a78b5d815ef238c21361">&#9670;&nbsp;</a></span>loop() <span class="overload">[2/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aae7973745b75a78b5d815ef238c21361">&#9670;&nbsp;</a></span>loop() <span class="overload">[4/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -193,47 +271,8 @@ template&lt;typename T , typename Functor &gt; </div>
 
 </div>
 </div>
-<a id="a940e16c7b83c869b418139619983081f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a940e16c7b83c869b418139619983081f">&#9670;&nbsp;</a></span>loop() <span class="overload">[3/6]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Functor &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">ALWAYS_INLINE void BoxLoops::loop </td>
-          <td>(</td>
-          <td class="paramtype">DenseIntVectSet &amp;&#160;</td>
-          <td class="paramname"><em>a_ivs</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Functor &amp;&amp;&#160;</td>
-          <td class="paramname"><em>a_kernel</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Launch a C++ kernel over a subset of cells. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cells</td><td>Grid cells where we launch the kernel. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_kernel</td><td>Kernel to launch </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="af7d7a92effdf9060e5642b5a7e63edef"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af7d7a92effdf9060e5642b5a7e63edef">&#9670;&nbsp;</a></span>loop() <span class="overload">[4/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#af7d7a92effdf9060e5642b5a7e63edef">&#9670;&nbsp;</a></span>loop() <span class="overload">[5/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -264,45 +303,6 @@ template&lt;typename Functor &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_faceit</td><td>Grid faces where we launch the kernel. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_kernel</td><td>Kernel to launch </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ad7f0d44d79ff5e1d2ae08b864acb9958"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad7f0d44d79ff5e1d2ae08b864acb9958">&#9670;&nbsp;</a></span>loop() <span class="overload">[5/6]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Functor &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">ALWAYS_INLINE void BoxLoops::loop </td>
-          <td>(</td>
-          <td class="paramtype">IntVectSet &amp;&#160;</td>
-          <td class="paramname"><em>a_ivs</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Functor &amp;&amp;&#160;</td>
-          <td class="paramname"><em>a_kernel</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Launch a C++ kernel over a subset of cells. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cells</td><td>Grid cells where we launch the kernel. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_kernel</td><td>Kernel to launch </td></tr>
   </table>
   </dd>

@@ -167,15 +167,27 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a93fa304cc98ebf4e157a1c2464bb75d0">parseRuntimeOptions</a> () override</td></tr>
 <tr class="memdesc:a93fa304cc98ebf4e157a1c2464bb75d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse runtime options. <br /></td></tr>
 <tr class="separator:a93fa304cc98ebf4e157a1c2464bb75d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a34d70f2b9234112e159560cad840c9db"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a34d70f2b9234112e159560cad840c9db">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, Vector&lt; std::string &gt; &amp;a_plotVariableNames, int &amp;a_icomp) const override</td></tr>
-<tr class="memdesc:a34d70f2b9234112e159560cad840c9db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a34d70f2b9234112e159560cad840c9db">More...</a><br /></td></tr>
-<tr class="separator:a34d70f2b9234112e159560cad840c9db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a265c455ead32115c7059c75b626992e5"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> *const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a265c455ead32115c7059c75b626992e5">getElectricField</a> () const noexcept</td></tr>
-<tr class="memdesc:a265c455ead32115c7059c75b626992e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the electric field.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a265c455ead32115c7059c75b626992e5">More...</a><br /></td></tr>
-<tr class="separator:a265c455ead32115c7059c75b626992e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3ed78c8c7dfac6e327fc24a5294317ed"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3ed78c8c7dfac6e327fc24a5294317ed">getNumberOfPlotVariables</a> () const override</td></tr>
 <tr class="memdesc:a3ed78c8c7dfac6e327fc24a5294317ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of plot variables for this time stepper.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3ed78c8c7dfac6e327fc24a5294317ed">More...</a><br /></td></tr>
 <tr class="separator:a3ed78c8c7dfac6e327fc24a5294317ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a885e9d054956373effda1617f3a80dc9"><td class="memItemLeft" align="right" valign="top"><a id="a885e9d054956373effda1617f3a80dc9"></a>
+virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a885e9d054956373effda1617f3a80dc9">getPlotVariableNames</a> () const override</td></tr>
+<tr class="memdesc:a885e9d054956373effda1617f3a80dc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names. <br /></td></tr>
+<tr class="separator:a885e9d054956373effda1617f3a80dc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7905456ac47f24afe43e5e0ef5c2780"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ac7905456ac47f24afe43e5e0ef5c2780">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const override</td></tr>
+<tr class="memdesc:ac7905456ac47f24afe43e5e0ef5c2780"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ac7905456ac47f24afe43e5e0ef5c2780">More...</a><br /></td></tr>
+<tr class="separator:ac7905456ac47f24afe43e5e0ef5c2780"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdb48afa82da6d02a80320d7406910c6"><td class="memItemLeft" align="right" valign="top"><a id="afdb48afa82da6d02a80320d7406910c6"></a>
+virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#afdb48afa82da6d02a80320d7406910c6">getStationaryPlotVariableNames</a> () const noexcept</td></tr>
+<tr class="memdesc:afdb48afa82da6d02a80320d7406910c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names for stationary mode. <br /></td></tr>
+<tr class="separator:afdb48afa82da6d02a80320d7406910c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4d0ae558832aa4c5ae19898bf37e0e5"><td class="memItemLeft" align="right" valign="top"><a id="ab4d0ae558832aa4c5ae19898bf37e0e5"></a>
+virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ab4d0ae558832aa4c5ae19898bf37e0e5">getTransientPlotVariableNames</a> () const noexcept</td></tr>
+<tr class="memdesc:ab4d0ae558832aa4c5ae19898bf37e0e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names for transient mode. <br /></td></tr>
+<tr class="separator:ab4d0ae558832aa4c5ae19898bf37e0e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a265c455ead32115c7059c75b626992e5"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> *const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a265c455ead32115c7059c75b626992e5">getElectricField</a> () const noexcept</td></tr>
+<tr class="memdesc:a265c455ead32115c7059c75b626992e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the electric field.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a265c455ead32115c7059c75b626992e5">More...</a><br /></td></tr>
+<tr class="separator:a265c455ead32115c7059c75b626992e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad592f398421a4a7321fbb5ee6f73352e"><td class="memItemLeft" align="right" valign="top"><a id="ad592f398421a4a7321fbb5ee6f73352e"></a>
 virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ad592f398421a4a7321fbb5ee6f73352e">computeDt</a> () override</td></tr>
 <tr class="memdesc:ad592f398421a4a7321fbb5ee6f73352e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>. <br /></td></tr>
@@ -261,6 +273,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a2da29e7e5a5ac98dc2316f3439725289">setComputationalGeometry</a> (const RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> &gt; &amp;a_computationalGeometry)</td></tr>
 <tr class="memdesc:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the computational geometry.  <a href="classTimeStepper.html#a2da29e7e5a5ac98dc2316f3439725289">More...</a><br /></td></tr>
 <tr class="separator:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20cc9ee90664ed9614bd5d18a7104d24 inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top"><a id="a20cc9ee90664ed9614bd5d18a7104d24"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a20cc9ee90664ed9614bd5d18a7104d24">prePlot</a> ()</td></tr>
+<tr class="memdesc:a20cc9ee90664ed9614bd5d18a7104d24 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">An option for calling special functions prior to plotting data. Called by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> in the IMMEDIATELY before writing the plot file. <br /></td></tr>
+<tr class="separator:a20cc9ee90664ed9614bd5d18a7104d24 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a078de2c883b297d696f2e3d40bc270be inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; long int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a078de2c883b297d696f2e3d40bc270be">getCheckpointLoads</a> (const std::string a_realm, const int a_level) const</td></tr>
 <tr class="memdesc:a078de2c883b297d696f2e3d40bc270be inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get computational loads to be checkpointed.  <a href="classTimeStepper.html#a078de2c883b297d696f2e3d40bc270be">More...</a><br /></td></tr>
 <tr class="separator:a078de2c883b297d696f2e3d40bc270be inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -319,12 +335,18 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a1189f03bf3f5bdc85b31c1c313eb3698"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a1189f03bf3f5bdc85b31c1c313eb3698">computeFieldEmission</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_emissionRate, const Real &amp;a_voltage) const noexcept</td></tr>
 <tr class="memdesc:a1189f03bf3f5bdc85b31c1c313eb3698"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute field emission rates.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a1189f03bf3f5bdc85b31c1c313eb3698">More...</a><br /></td></tr>
 <tr class="separator:a1189f03bf3f5bdc85b31c1c313eb3698"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36c3867c5192e9e09a10aa0d730341ed"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a36c3867c5192e9e09a10aa0d730341ed">evaluateFunction</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_emissionRate, const Real &amp;a_voltage, const std::function&lt; Real(const Real E)&gt; &amp;a_func) const noexcept</td></tr>
-<tr class="memdesc:a36c3867c5192e9e09a10aa0d730341ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate a function f = f(E) in a volume.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a36c3867c5192e9e09a10aa0d730341ed">More...</a><br /></td></tr>
-<tr class="separator:a36c3867c5192e9e09a10aa0d730341ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abde4724940dd4f4725547d4a76ff00fc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#abde4724940dd4f4725547d4a76ff00fc">evaluateFunction</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_emissionRate, const Real &amp;a_voltage, const std::function&lt; Real(const Real E, const RealVect x)&gt; &amp;a_func) const noexcept</td></tr>
-<tr class="memdesc:abde4724940dd4f4725547d4a76ff00fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate a function f = f(E, x) in a volume.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#abde4724940dd4f4725547d4a76ff00fc">More...</a><br /></td></tr>
-<tr class="separator:abde4724940dd4f4725547d4a76ff00fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a503015e4693ed05c390dbf8a3de61f05"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a503015e4693ed05c390dbf8a3de61f05">evaluateFunction</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const Real &amp;a_voltage, const std::function&lt; Real(const Real E)&gt; &amp;a_func) const noexcept</td></tr>
+<tr class="memdesc:a503015e4693ed05c390dbf8a3de61f05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate a function f = f(E) in a volume.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a503015e4693ed05c390dbf8a3de61f05">More...</a><br /></td></tr>
+<tr class="separator:a503015e4693ed05c390dbf8a3de61f05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ec3bc08e2554d8d324caa39c5567636"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a2ec3bc08e2554d8d324caa39c5567636">evaluateFunction</a> (LevelData&lt; EBCellFAB &gt; &amp;a_data, const Real &amp;a_voltage, const std::function&lt; Real(const Real E)&gt; &amp;a_func, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a2ec3bc08e2554d8d324caa39c5567636"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate a function f = f(E) in a volume.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a2ec3bc08e2554d8d324caa39c5567636">More...</a><br /></td></tr>
+<tr class="separator:a2ec3bc08e2554d8d324caa39c5567636"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a48ec1facf8bb2722dd4f7c5709b0c6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a7a48ec1facf8bb2722dd4f7c5709b0c6">evaluateFunction</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const Real &amp;a_voltage, const std::function&lt; Real(const Real E, const RealVect x)&gt; &amp;a_func) const noexcept</td></tr>
+<tr class="memdesc:a7a48ec1facf8bb2722dd4f7c5709b0c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate a function f = f(E, x) in a volume.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a7a48ec1facf8bb2722dd4f7c5709b0c6">More...</a><br /></td></tr>
+<tr class="separator:a7a48ec1facf8bb2722dd4f7c5709b0c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9484150a63f83e5b02a00fafe701d90"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ad9484150a63f83e5b02a00fafe701d90">evaluateFunction</a> (LevelData&lt; EBCellFAB &gt; &amp;a_data, const Real &amp;a_voltage, const std::function&lt; Real(const Real E, const RealVect x)&gt; &amp;a_func, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:ad9484150a63f83e5b02a00fafe701d90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate a function f = f(E,x) in a volume.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ad9484150a63f83e5b02a00fafe701d90">More...</a><br /></td></tr>
+<tr class="separator:ad9484150a63f83e5b02a00fafe701d90"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0e26e868b1c99b949df36dd6beceb664"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a0e26e868b1c99b949df36dd6beceb664">computeInceptionVoltageVolume</a> () noexcept</td></tr>
 <tr class="memdesc:a0e26e868b1c99b949df36dd6beceb664"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a0e26e868b1c99b949df36dd6beceb664">More...</a><br /></td></tr>
 <tr class="separator:a0e26e868b1c99b949df36dd6beceb664"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -347,12 +369,12 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a4304a22c46c535fe775fe056a1a7061e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a4304a22c46c535fe775fe056a1a7061e">writeReportTransient</a> () const noexcept</td></tr>
 <tr class="memdesc:a4304a22c46c535fe775fe056a1a7061e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print report to the terminal.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a4304a22c46c535fe775fe056a1a7061e">More...</a><br /></td></tr>
 <tr class="separator:a4304a22c46c535fe775fe056a1a7061e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a137bf1b8116a54b9d34ef5455aff0db3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a137bf1b8116a54b9d34ef5455aff0db3">writePlotDataStationary</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, Vector&lt; std::string &gt; &amp;a_plotVariableNames, int &amp;a_icomp) const noexcept</td></tr>
-<tr class="memdesc:a137bf1b8116a54b9d34ef5455aff0db3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data for the 'stationary' mode.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a137bf1b8116a54b9d34ef5455aff0db3">More...</a><br /></td></tr>
-<tr class="separator:a137bf1b8116a54b9d34ef5455aff0db3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3c1967326759257c11b3193ea88cbfbc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3c1967326759257c11b3193ea88cbfbc">writePlotDataTransient</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, Vector&lt; std::string &gt; &amp;a_plotVariableNames, int &amp;a_icomp) const noexcept</td></tr>
-<tr class="memdesc:a3c1967326759257c11b3193ea88cbfbc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data for the 'stationary' mode.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3c1967326759257c11b3193ea88cbfbc">More...</a><br /></td></tr>
-<tr class="separator:a3c1967326759257c11b3193ea88cbfbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a614cb8e30bf8ea4b332e94edeac20745"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a614cb8e30bf8ea4b332e94edeac20745">writePlotDataStationary</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a614cb8e30bf8ea4b332e94edeac20745"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data for the 'stationary' mode.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a614cb8e30bf8ea4b332e94edeac20745">More...</a><br /></td></tr>
+<tr class="separator:a614cb8e30bf8ea4b332e94edeac20745"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72c7ecd3531c0e295f252ecac0b41bd6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a72c7ecd3531c0e295f252ecac0b41bd6">writePlotDataTransient</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a72c7ecd3531c0e295f252ecac0b41bd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data for the 'transient' mode.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a72c7ecd3531c0e295f252ecac0b41bd6">More...</a><br /></td></tr>
+<tr class="separator:a72c7ecd3531c0e295f252ecac0b41bd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4aac3f6470a55a3f3c92676975f6b32e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a4aac3f6470a55a3f3c92676975f6b32e">particleOutsideGrid</a> (const RealVect &amp;a_pos, const RealVect &amp;a_probLo, const RealVect &amp;a_probHi) const noexcept</td></tr>
 <tr class="memdesc:a4aac3f6470a55a3f3c92676975f6b32e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if particle is outside grid boundaries.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a4aac3f6470a55a3f3c92676975f6b32e">More...</a><br /></td></tr>
 <tr class="separator:a4aac3f6470a55a3f3c92676975f6b32e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -393,6 +415,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#af43849097e02a9686b2dfc757f0fda95">parsePlotVariables</a> () noexcept</td></tr>
 <tr class="memdesc:af43849097e02a9686b2dfc757f0fda95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse plot variables. <br /></td></tr>
 <tr class="separator:af43849097e02a9686b2dfc757f0fda95"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06f5094e18652abf1bf191cffc0a428e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a06f5094e18652abf1bf191cffc0a428e">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
+<tr class="memdesc:a06f5094e18652abf1bf191cffc0a428e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function used for IO.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a06f5094e18652abf1bf191cffc0a428e">More...</a><br /></td></tr>
+<tr class="separator:a06f5094e18652abf1bf191cffc0a428e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -515,6 +540,10 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3486da060b5cefbf79acd20720d79298">m_inceptionK</a></td></tr>
 <tr class="memdesc:a3486da060b5cefbf79acd20720d79298"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inception criteria (read from input) <br /></td></tr>
 <tr class="separator:a3486da060b5cefbf79acd20720d79298"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c0e1237e5f590be7e338831a11c3f38"><td class="memItemLeft" align="right" valign="top"><a id="a7c0e1237e5f590be7e338831a11c3f38"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a7c0e1237e5f590be7e338831a11c3f38">m_profile</a></td></tr>
+<tr class="memdesc:a7c0e1237e5f590be7e338831a11c3f38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Profile calculation or not. <br /></td></tr>
+<tr class="separator:a7c0e1237e5f590be7e338831a11c3f38"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada3aaf0c1d19133c8ed3a68f04e729be"><td class="memItemLeft" align="right" valign="top"><a id="ada3aaf0c1d19133c8ed3a68f04e729be"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ada3aaf0c1d19133c8ed3a68f04e729be">m_useFixedInceptionStep</a></td></tr>
 <tr class="memdesc:ada3aaf0c1d19133c8ed3a68f04e729be"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, used fixed integration step for inception integration. <br /></td></tr>
@@ -1105,8 +1134,8 @@ template&lt;typename P , typename F , typename C &gt; </div>
 
 </div>
 </div>
-<a id="a36c3867c5192e9e09a10aa0d730341ed"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a36c3867c5192e9e09a10aa0d730341ed">&#9670;&nbsp;</a></span>evaluateFunction() <span class="overload">[1/2]</span></h2>
+<a id="a503015e4693ed05c390dbf8a3de61f05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a503015e4693ed05c390dbf8a3de61f05">&#9670;&nbsp;</a></span>evaluateFunction() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1120,7 +1149,7 @@ template&lt;typename P , typename F , typename C &gt; </div>
           <td class="memname">void StreamerInceptionStepper::evaluateFunction </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_emissionRate</em>, </td>
+          <td class="paramname"><em>a_data</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1152,7 +1181,7 @@ template&lt;typename P , typename F , typename C &gt; </div>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_data</td><td>Mesh data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_voltage</td><td>Voltage multiplier </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">[im]</td><td>a_func Function to evaluate </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_func</td><td>Function to evaluate </td></tr>
   </table>
   </dd>
 </dl>
@@ -1160,8 +1189,8 @@ template&lt;typename P , typename F , typename C &gt; </div>
 
 </div>
 </div>
-<a id="abde4724940dd4f4725547d4a76ff00fc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abde4724940dd4f4725547d4a76ff00fc">&#9670;&nbsp;</a></span>evaluateFunction() <span class="overload">[2/2]</span></h2>
+<a id="a7a48ec1facf8bb2722dd4f7c5709b0c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a48ec1facf8bb2722dd4f7c5709b0c6">&#9670;&nbsp;</a></span>evaluateFunction() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1175,7 +1204,7 @@ template&lt;typename P , typename F , typename C &gt; </div>
           <td class="memname">void StreamerInceptionStepper::evaluateFunction </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_emissionRate</em>, </td>
+          <td class="paramname"><em>a_data</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1206,8 +1235,132 @@ template&lt;typename P , typename F , typename C &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_data</td><td>Mesh data </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_voltage</td><td>Voltage multiplier</td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">[im]</td><td>a_func Function to evaluate </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_voltage</td><td>Voltage multiplier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_func</td><td>Function to evaluate </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>For plotting the emission rate in transient simulations. </dd></dl>
+
+</div>
+</div>
+<a id="a2ec3bc08e2554d8d324caa39c5567636"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ec3bc08e2554d8d324caa39c5567636">&#9670;&nbsp;</a></span>evaluateFunction() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename F , typename C &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void StreamerInceptionStepper::evaluateFunction </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real &amp;&#160;</td>
+          <td class="paramname"><em>a_voltage</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::function&lt; Real(const Real E)&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_func</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Evaluate a function f = f(E) in a volume. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_data</td><td>Mesh data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_voltage</td><td>Voltage multiplier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_func</td><td>Function to evaluate </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>For plotting the emission rate in transient simulations. </dd></dl>
+
+</div>
+</div>
+<a id="ad9484150a63f83e5b02a00fafe701d90"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9484150a63f83e5b02a00fafe701d90">&#9670;&nbsp;</a></span>evaluateFunction() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename F , typename C &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void StreamerInceptionStepper::evaluateFunction </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real &amp;&#160;</td>
+          <td class="paramname"><em>a_voltage</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::function&lt; Real(const Real E, const RealVect x)&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_func</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Evaluate a function f = f(E,x) in a volume. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_data</td><td>Mesh data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_voltage</td><td>Voltage multiplier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_func</td><td>Function to evaluate </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
@@ -2010,8 +2163,83 @@ template&lt;typename P , typename F , typename C &gt; </div>
 
 </div>
 </div>
-<a id="a34d70f2b9234112e159560cad840c9db"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a34d70f2b9234112e159560cad840c9db">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a06f5094e18652abf1bf191cffc0a428e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06f5094e18652abf1bf191cffc0a428e">&#9670;&nbsp;</a></span>writeData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename F , typename C &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void StreamerInceptionStepper::writeData </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>a_comp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_interpToCentroids</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_interpGhost</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write data to output. Convenience function used for IO. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where this solver begins writing the output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data to write. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpToCentroids</td><td>If true, a_data will be interpolated to cell centroids before writing to a_output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpGhost</td><td>If true, interpolate ghost cells </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac7905456ac47f24afe43e5e0ef5c2780"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7905456ac47f24afe43e5e0ef5c2780">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2024,20 +2252,20 @@ template&lt;typename P , typename F , typename C &gt; </div>
         <tr>
           <td class="memname">void StreamerInceptionStepper::writePlotData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Vector&lt; std::string &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_plotVariableNames</em>, </td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>a_icomp</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>a_icomp</em>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2056,18 +2284,18 @@ template&lt;typename P , typename F , typename C &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_plotVariableNames</td><td>Plot variable names. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#ac465856ae495a5842352ba530254793c">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#ae858739b259e499d5ce03e9b3c9baa0e">TimeStepper</a>.</p>
 
 </div>
 </div>
-<a id="a137bf1b8116a54b9d34ef5455aff0db3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a137bf1b8116a54b9d34ef5455aff0db3">&#9670;&nbsp;</a></span>writePlotDataStationary()</h2>
+<a id="a614cb8e30bf8ea4b332e94edeac20745"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a614cb8e30bf8ea4b332e94edeac20745">&#9670;&nbsp;</a></span>writePlotDataStationary()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2080,20 +2308,20 @@ template&lt;typename P , typename F , typename C &gt; </div>
         <tr>
           <td class="memname">void StreamerInceptionStepper::writePlotDataStationary </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Vector&lt; std::string &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_plotVariableNames</em>, </td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>a_icomp</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>a_icomp</em>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2112,16 +2340,16 @@ template&lt;typename P , typename F , typename C &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_plotVariableNames</td><td>Plot variable names. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a3c1967326759257c11b3193ea88cbfbc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3c1967326759257c11b3193ea88cbfbc">&#9670;&nbsp;</a></span>writePlotDataTransient()</h2>
+<a id="a72c7ecd3531c0e295f252ecac0b41bd6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72c7ecd3531c0e295f252ecac0b41bd6">&#9670;&nbsp;</a></span>writePlotDataTransient()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2134,20 +2362,20 @@ template&lt;typename P , typename F , typename C &gt; </div>
         <tr>
           <td class="memname">void StreamerInceptionStepper::writePlotDataTransient </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Vector&lt; std::string &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_plotVariableNames</em>, </td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>a_icomp</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>a_icomp</em>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2162,7 +2390,7 @@ template&lt;typename P , typename F , typename C &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Write plot data for the 'stationary' mode. </p>
+<p>Write plot data for the 'transient' mode. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>

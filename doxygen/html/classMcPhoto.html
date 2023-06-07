@@ -238,9 +238,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:ab228cfc01dd6fe62c7148471b9f8daae"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ab228cfc01dd6fe62c7148471b9f8daae">writePlotFile</a> () override</td></tr>
 <tr class="memdesc:ab228cfc01dd6fe62c7148471b9f8daae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot file.  <a href="classMcPhoto.html#ab228cfc01dd6fe62c7148471b9f8daae">More...</a><br /></td></tr>
 <tr class="separator:ab228cfc01dd6fe62c7148471b9f8daae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1aa5f5245b53a16d3b41bc36c9b9fab9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a1aa5f5245b53a16d3b41bc36c9b9fab9">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_icomp) override</td></tr>
-<tr class="memdesc:a1aa5f5245b53a16d3b41bc36c9b9fab9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <a href="classMcPhoto.html#a1aa5f5245b53a16d3b41bc36c9b9fab9">More...</a><br /></td></tr>
-<tr class="separator:a1aa5f5245b53a16d3b41bc36c9b9fab9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92359eab02dad80bd1510db6051d36a2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a92359eab02dad80bd1510db6051d36a2">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const noexcept override</td></tr>
+<tr class="memdesc:a92359eab02dad80bd1510db6051d36a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <a href="classMcPhoto.html#a92359eab02dad80bd1510db6051d36a2">More...</a><br /></td></tr>
+<tr class="separator:a92359eab02dad80bd1510db6051d36a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b982cfadf26e4b63c241540e5b5a935"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a8b982cfadf26e4b63c241540e5b5a935">getPlotVariableNames</a> () const override</td></tr>
 <tr class="memdesc:a8b982cfadf26e4b63c241540e5b5a935"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write checkpoint data into handle.  <a href="classMcPhoto.html#a8b982cfadf26e4b63c241540e5b5a935">More...</a><br /></td></tr>
 <tr class="separator:a8b982cfadf26e4b63c241540e5b5a935"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -335,9 +335,6 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:ac4737b50759400092d1fb2e78c2f0451 inherit pub_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#ac4737b50759400092d1fb2e78c2f0451">setSource</a> (const std::function&lt; Real(const RealVect a_pos)&gt; a_source)</td></tr>
 <tr class="memdesc:ac4737b50759400092d1fb2e78c2f0451 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set source.  <a href="classRtSolver.html#ac4737b50759400092d1fb2e78c2f0451">More...</a><br /></td></tr>
 <tr class="separator:ac4737b50759400092d1fb2e78c2f0451 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8637ffaa5e61e4768ba6ea39358a1fed inherit pub_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a8637ffaa5e61e4768ba6ea39358a1fed">writeData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const bool a_interp)</td></tr>
-<tr class="memdesc:a8637ffaa5e61e4768ba6ea39358a1fed inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classRtSolver.html#a8637ffaa5e61e4768ba6ea39358a1fed">More...</a><br /></td></tr>
-<tr class="separator:a8637ffaa5e61e4768ba6ea39358a1fed inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ff3b079fde1768aa6f7b951020c0a63 inherit pub_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a0ff3b079fde1768aa6f7b951020c0a63">getTime</a> () const</td></tr>
 <tr class="memdesc:a0ff3b079fde1768aa6f7b951020c0a63 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current time.  <a href="classRtSolver.html#a0ff3b079fde1768aa6f7b951020c0a63">More...</a><br /></td></tr>
 <tr class="separator:a0ff3b079fde1768aa6f7b951020c0a63 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -401,18 +398,6 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a89144138a9fc8f288075678df8a3ed33"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a89144138a9fc8f288075678df8a3ed33">depositHybrid</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_depositionH, <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_massDifference, const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_depositionNC)</td></tr>
 <tr class="memdesc:a89144138a9fc8f288075678df8a3ed33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make the hybrid deposition. Also compute the mass difference.  <a href="classMcPhoto.html#a89144138a9fc8f288075678df8a3ed33">More...</a><br /></td></tr>
 <tr class="separator:a89144138a9fc8f288075678df8a3ed33"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa064677ecdcc0e8a20f70871187c36a1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aa064677ecdcc0e8a20f70871187c36a1">incrementRedist</a> (const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_massDifference)</td></tr>
-<tr class="memdesc:aa064677ecdcc0e8a20f70871187c36a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increment redistribution objects with mass to be redistributed.  <a href="classMcPhoto.html#aa064677ecdcc0e8a20f70871187c36a1">More...</a><br /></td></tr>
-<tr class="separator:aa064677ecdcc0e8a20f70871187c36a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7286137ad8099f30f4097767db287223"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a7286137ad8099f30f4097767db287223">levelRedist</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi)</td></tr>
-<tr class="memdesc:a7286137ad8099f30f4097767db287223"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do redistribution on all levels, no coarse-fine EB magic.  <a href="classMcPhoto.html#a7286137ad8099f30f4097767db287223">More...</a><br /></td></tr>
-<tr class="separator:a7286137ad8099f30f4097767db287223"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5259d2ee1729617991af00dbcbcf9975"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a5259d2ee1729617991af00dbcbcf9975">coarseFineIncrement</a> (const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;m_massDifference)</td></tr>
-<tr class="memdesc:a5259d2ee1729617991af00dbcbcf9975"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increment the coarse-fine redist with mass difference (only for EB x CF)  <a href="classMcPhoto.html#a5259d2ee1729617991af00dbcbcf9975">More...</a><br /></td></tr>
-<tr class="separator:a5259d2ee1729617991af00dbcbcf9975"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab0f8cabb352c05c351cb53c6a6514eb0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ab0f8cabb352c05c351cb53c6a6514eb0">coarseFineRedistribution</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi)</td></tr>
-<tr class="memdesc:ab0f8cabb352c05c351cb53c6a6514eb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do coarse-fine redistribution.  <a href="classMcPhoto.html#ab0f8cabb352c05c351cb53c6a6514eb0">More...</a><br /></td></tr>
-<tr class="separator:ab0f8cabb352c05c351cb53c6a6514eb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65acbf58522501756e8e944ca006ff45"><td class="memItemLeft" align="right" valign="top"><a id="a65acbf58522501756e8e944ca006ff45"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a65acbf58522501756e8e944ca006ff45">parseTransparentBoundaries</a> ()</td></tr>
 <tr class="memdesc:a65acbf58522501756e8e944ca006ff45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn on/off transparent boundaries. <br /></td></tr>
@@ -449,6 +434,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ad0e8145b5850c2739886793bb6ec36a2">parsePlotVariables</a> ()</td></tr>
 <tr class="memdesc:ad0e8145b5850c2739886793bb6ec36a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse plot variables. <br /></td></tr>
 <tr class="separator:ad0e8145b5850c2739886793bb6ec36a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb69d6354e2b8a8a3f6966e505ab28c1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#afb69d6354e2b8a8a3f6966e505ab28c1">depositPhotonsNGP</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_particles, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:afb69d6354e2b8a8a3f6966e505ab28c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an NGP deposit on a specific grid level. Used for IO.  <a href="classMcPhoto.html#afb69d6354e2b8a8a3f6966e505ab28c1">More...</a><br /></td></tr>
+<tr class="separator:afb69d6354e2b8a8a3f6966e505ab28c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_classRtSolver"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_classRtSolver')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="classRtSolver.html">RtSolver</a></td></tr>
 <tr class="memitem:a0bde04785c5e7d9dca2537391d5ead5a inherit pro_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top"><a id="a0bde04785c5e7d9dca2537391d5ead5a"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a0bde04785c5e7d9dca2537391d5ead5a">setEbIndexSpace</a> (const RefCountedPtr&lt; EBIndexSpace &gt; &amp;a_ebis)</td></tr>
@@ -458,6 +446,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a431f024c83df8b2b33c11e6a675a37e3">parseVerbosity</a> () noexcept</td></tr>
 <tr class="memdesc:a431f024c83df8b2b33c11e6a675a37e3 inherit pro_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse verbosity. <br /></td></tr>
 <tr class="separator:a431f024c83df8b2b33c11e6a675a37e3 inherit pro_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af08ea755a7bf62b54a17d00d29807356 inherit pro_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#af08ea755a7bf62b54a17d00d29807356">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
+<tr class="memdesc:af08ea755a7bf62b54a17d00d29807356 inherit pro_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classRtSolver.html#af08ea755a7bf62b54a17d00d29807356">More...</a><br /></td></tr>
+<tr class="separator:af08ea755a7bf62b54a17d00d29807356 inherit pro_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -536,10 +527,6 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aab0a91bc1e8343dd91ff07daa52b44ce">m_coarseFineDeposition</a></td></tr>
 <tr class="memdesc:aab0a91bc1e8343dd91ff07daa52b44ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarse-fine deposition strategy. <br /></td></tr>
 <tr class="separator:aab0a91bc1e8343dd91ff07daa52b44ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeb94dbecaa58bcf48a62a816c8d104d6"><td class="memItemLeft" align="right" valign="top"><a id="aeb94dbecaa58bcf48a62a816c8d104d6"></a>
-<a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aeb94dbecaa58bcf48a62a816c8d104d6">m_plotDeposition</a></td></tr>
-<tr class="memdesc:aeb94dbecaa58bcf48a62a816c8d104d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plot deposition type. <br /></td></tr>
-<tr class="separator:aeb94dbecaa58bcf48a62a816c8d104d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee98ffcf85890b1e101d475b74e39099"><td class="memItemLeft" align="right" valign="top"><a id="aee98ffcf85890b1e101d475b74e39099"></a>
 <a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aee98ffcf85890b1e101d475b74e39099">m_scratch</a></td></tr>
 <tr class="memdesc:aee98ffcf85890b1e101d475b74e39099"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarse data for interpolation of deposition clouds. <br /></td></tr>
@@ -983,74 +970,6 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_photons</td><td>Which container to clear </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a5259d2ee1729617991af00dbcbcf9975"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5259d2ee1729617991af00dbcbcf9975">&#9670;&nbsp;</a></span>coarseFineIncrement()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void McPhoto::coarseFineIncrement </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
-          <td class="paramname"><em>m_massDifference</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Increment the coarse-fine redist with mass difference (only for EB x CF) </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">m_massDifference</td><td>Mass difference </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ab0f8cabb352c05c351cb53c6a6514eb0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab0f8cabb352c05c351cb53c6a6514eb0">&#9670;&nbsp;</a></span>coarseFineRedistribution()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void McPhoto::coarseFineRedistribution </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_phi</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Do coarse-fine redistribution. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">Data</td><td>to be redistributed (with whatever has been put in the redistribution registers) </td></tr>
   </table>
   </dd>
 </dl>
@@ -1553,6 +1472,58 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
+<a id="afb69d6354e2b8a8a3f6966e505ab28c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb69d6354e2b8a8a3f6966e505ab28c1">&#9670;&nbsp;</a></span>depositPhotonsNGP()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void McPhoto::depositPhotonsNGP </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Do an NGP deposit on a specific grid level. Used for IO. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_output</td><td>Contains NGP deposition of photons. Ignores cut-cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_photons</td><td>photons </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a9202da5518777b2e7de354acd0b7625e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9202da5518777b2e7de354acd0b7625e">&#9670;&nbsp;</a></span>domainBcMap()</h2>
 
@@ -1700,7 +1671,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
   </table>
   </dd>
 </dl>
-<p>This will generate photons and put them in a_particles </p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>Implementation could use a lambda to avoid the double definition. </dd></dl>
+<p>This will generate photons and put them in a_particles </p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo:</a></b></dt><dd>Implementation could use a lambda to avoid the double definition. </dd></dl>
 
 </div>
 </div>
@@ -1915,74 +1886,6 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 <p>Get source photons. </p>
 <dl class="section return"><dt>Returns</dt><dd>m_sourcePhotons </dd></dl>
-
-</div>
-</div>
-<a id="aa064677ecdcc0e8a20f70871187c36a1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa064677ecdcc0e8a20f70871187c36a1">&#9670;&nbsp;</a></span>incrementRedist()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void McPhoto::incrementRedist </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_massDifference</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Increment redistribution objects with mass to be redistributed. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_massDifference</td><td>Mass difference </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a7286137ad8099f30f4097767db287223"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7286137ad8099f30f4097767db287223">&#9670;&nbsp;</a></span>levelRedist()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void McPhoto::levelRedist </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_phi</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Do redistribution on all levels, no coarse-fine EB magic. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Data to be redistributed (with whatever has been put in the redistribution registers) </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -2223,8 +2126,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a1aa5f5245b53a16d3b41bc36c9b9fab9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1aa5f5245b53a16d3b41bc36c9b9fab9">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a92359eab02dad80bd1510db6051d36a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92359eab02dad80bd1510db6051d36a2">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2235,24 +2138,30 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="memname">void McPhoto::writePlotData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>a_icomp</em>&#160;</td>
+          <td class="paramname"><em>a_icomp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -2262,11 +2171,12 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_ouput</td><td>Output data holder </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where we begin to write data to a_output </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Reimplemented from <a class="el" href="classRtSolver.html#a45f2b6248bc27e777d657e02aab12167">RtSolver</a>.</p>
+<p>Reimplemented from <a class="el" href="classRtSolver.html#ad5aacc3d3f53c04da92779869a873932">RtSolver</a>.</p>
 
 </div>
 </div>

@@ -110,6 +110,10 @@ Public Member Functions</h2></td></tr>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#ac93d5e6271bbcc83cca11ad059bb1ee7">~CellTagger</a> ()</td></tr>
 <tr class="memdesc:ac93d5e6271bbcc83cca11ad059bb1ee7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing). <br /></td></tr>
 <tr class="separator:ac93d5e6271bbcc83cca11ad059bb1ee7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac88ddeab46e82ae9c80a5f0e58d08641"><td class="memItemLeft" align="right" valign="top"><a id="ac88ddeab46e82ae9c80a5f0e58d08641"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#ac88ddeab46e82ae9c80a5f0e58d08641">preRegrid</a> () noexcept</td></tr>
+<tr class="memdesc:ac88ddeab46e82ae9c80a5f0e58d08641"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pre-regrid function for cell-tagger. <br /></td></tr>
+<tr class="separator:ac88ddeab46e82ae9c80a5f0e58d08641"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a54463bd60239b0bc88ca224bc4aa3319"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#a54463bd60239b0bc88ca224bc4aa3319">regrid</a> ()=0</td></tr>
 <tr class="memdesc:a54463bd60239b0bc88ca224bc4aa3319"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid function for cell tagger (in case it uses transient storage to do things)  <a href="classCellTagger.html#a54463bd60239b0bc88ca224bc4aa3319">More...</a><br /></td></tr>
 <tr class="separator:a54463bd60239b0bc88ca224bc4aa3319"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -122,12 +126,20 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a3f3b58c56a2570c9bb24b1b8f4cb8a75"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#a3f3b58c56a2570c9bb24b1b8f4cb8a75">tagCells</a> (<a class="el" href="CD__EBAMRTags_8H.html#a23ff4c2bc0ca3002cc8c0cde60fe9181">EBAMRTags</a> &amp;a_tags)=0</td></tr>
 <tr class="memdesc:a3f3b58c56a2570c9bb24b1b8f4cb8a75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tag cells.  <a href="classCellTagger.html#a3f3b58c56a2570c9bb24b1b8f4cb8a75">More...</a><br /></td></tr>
 <tr class="separator:a3f3b58c56a2570c9bb24b1b8f4cb8a75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac50c558a3999ab1627289dc564b92fca"><td class="memItemLeft" align="right" valign="top"><a id="ac50c558a3999ab1627289dc564b92fca"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#ac50c558a3999ab1627289dc564b92fca">prePlot</a> () const noexcept</td></tr>
+<tr class="memdesc:ac50c558a3999ab1627289dc564b92fca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform pre-plotting operations (if necessary) <br /></td></tr>
+<tr class="separator:ac50c558a3999ab1627289dc564b92fca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa87baee458d22fecd0786ba4ab1ceda3"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#aa87baee458d22fecd0786ba4ab1ceda3">getNumberOfPlotVariables</a> () const</td></tr>
 <tr class="memdesc:aa87baee458d22fecd0786ba4ab1ceda3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of plot variables that will be written to file (by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>).  <a href="classCellTagger.html#aa87baee458d22fecd0786ba4ab1ceda3">More...</a><br /></td></tr>
 <tr class="separator:aa87baee458d22fecd0786ba4ab1ceda3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a39f5bf307e7500dea615697de79da9e5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#a39f5bf307e7500dea615697de79da9e5">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, Vector&lt; std::string &gt; &amp;a_plotVariableNames, int &amp;a_icomp) const</td></tr>
-<tr class="memdesc:a39f5bf307e7500dea615697de79da9e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <a href="classCellTagger.html#a39f5bf307e7500dea615697de79da9e5">More...</a><br /></td></tr>
-<tr class="separator:a39f5bf307e7500dea615697de79da9e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29d8f87b38dd9d3ad38f2cfdc0ab055e"><td class="memItemLeft" align="right" valign="top"><a id="a29d8f87b38dd9d3ad38f2cfdc0ab055e"></a>
+virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#a29d8f87b38dd9d3ad38f2cfdc0ab055e">getPlotVariableNames</a> () const</td></tr>
+<tr class="memdesc:a29d8f87b38dd9d3ad38f2cfdc0ab055e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names. <br /></td></tr>
+<tr class="separator:a29d8f87b38dd9d3ad38f2cfdc0ab055e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0608b85a4a089ca76f3e7659089a542"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#ad0608b85a4a089ca76f3e7659089a542">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const</td></tr>
+<tr class="memdesc:ad0608b85a4a089ca76f3e7659089a542"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <a href="classCellTagger.html#ad0608b85a4a089ca76f3e7659089a542">More...</a><br /></td></tr>
+<tr class="separator:ad0608b85a4a089ca76f3e7659089a542"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a483e64129b074374cb8601c84c387147"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#a483e64129b074374cb8601c84c387147">getBuffer</a> () const</td></tr>
 <tr class="memdesc:a483e64129b074374cb8601c84c387147"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get tag buffer.  <a href="classCellTagger.html#a483e64129b074374cb8601c84c387147">More...</a><br /></td></tr>
 <tr class="separator:a483e64129b074374cb8601c84c387147"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -180,7 +192,7 @@ std::vector&lt; std::pair&lt; <a class="el" href="classRealBox.html">RealBox</a>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Base class for tagging cells across an AMR hierarchy. </p>
-<p>This is a pure class that users must implemented in order to enable refinement/coarsening of grid cells. This class will require implementing at least three functions, one for parsing options, one for regridding, and one which flags/removes cell for refinement. This class can also provide data to plot files, in which case the user must overwrite <a class="el" href="classCellTagger.html#aa87baee458d22fecd0786ba4ab1ceda3" title="Get number of plot variables that will be written to file (by Driver).">getNumberOfPlotVariables()</a> and <a class="el" href="classCellTagger.html#a39f5bf307e7500dea615697de79da9e5" title="Write plot data.">writePlotData()</a>. A supporting utility for <a class="el" href="classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy.">CellTagger</a> is that the parent class provides functionality for restricting cell refinement to specified regions in space. This can be used to prune tags where it is (heuristically) known that cell refinement is unnecessary. </p>
+<p>This is a pure class that users must implemented in order to enable refinement/coarsening of grid cells. This class will require implementing at least three functions, one for parsing options, one for regridding, and one which flags/removes cell for refinement. This class can also provide data to plot files, in which case the user must overwrite <a class="el" href="classCellTagger.html#aa87baee458d22fecd0786ba4ab1ceda3" title="Get number of plot variables that will be written to file (by Driver).">getNumberOfPlotVariables()</a> and <a class="el" href="classCellTagger.html#ad0608b85a4a089ca76f3e7659089a542" title="Write plot data.">writePlotData()</a>. A supporting utility for <a class="el" href="classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy.">CellTagger</a> is that the parent class provides functionality for restricting cell refinement to specified regions in space. This can be used to prune tags where it is (heuristically) known that cell refinement is unnecessary. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a483e64129b074374cb8601c84c387147"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a483e64129b074374cb8601c84c387147">&#9670;&nbsp;</a></span>getBuffer()</h2>
@@ -237,7 +249,7 @@ std::vector&lt; std::pair&lt; <a class="el" href="classRealBox.html">RealBox</a>
 <p>Get number of plot variables that will be written to file (by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>). </p>
 <dl class="section return"><dt>Returns</dt><dd>Returns number of plot variables that <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> will write to plot files. </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#ad828c434b216a28523205e962c7dfa4c">Physics::CdrPlasma::CdrPlasmaTagger</a>, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html#aa306b8949f534fe16df550d8a6a0b21d">Physics::ItoKMC::ItoKMCTagger&lt; S &gt;</a>, and <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#ac3db74ccd794387267a0af2b394409f7">Physics::StreamerInception::StreamerInceptionTagger</a>.</p>
+<p>Reimplemented in <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#ad828c434b216a28523205e962c7dfa4c">Physics::CdrPlasma::CdrPlasmaTagger</a>, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html#a5dc2340c872cbe5b39debb2d80f2b76a">Physics::ItoKMC::ItoKMCTagger&lt; S &gt;</a>, and <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#ac3db74ccd794387267a0af2b394409f7">Physics::StreamerInception::StreamerInceptionTagger</a>.</p>
 
 </div>
 </div>
@@ -487,8 +499,8 @@ std::vector&lt; std::pair&lt; <a class="el" href="classRealBox.html">RealBox</a>
 
 </div>
 </div>
-<a id="a39f5bf307e7500dea615697de79da9e5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a39f5bf307e7500dea615697de79da9e5">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="ad0608b85a4a089ca76f3e7659089a542"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0608b85a4a089ca76f3e7659089a542">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -499,20 +511,20 @@ std::vector&lt; std::pair&lt; <a class="el" href="classRealBox.html">RealBox</a>
         <tr>
           <td class="memname">void CellTagger::writePlotData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Vector&lt; std::string &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_plotVariableNames</em>, </td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>a_icomp</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>a_icomp</em>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -531,13 +543,13 @@ std::vector&lt; std::pair&lt; <a class="el" href="classRealBox.html">RealBox</a>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_plotVariableNames</td><td>Plot variable names </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting variable in a_output where we begin appending data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Reimplemented in <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#a42e2879aaff4e1ed0469836275c8f68d">Physics::CdrPlasma::CdrPlasmaTagger</a>, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html#a1bae4c09e1a1f6052f591fa0129d7013">Physics::ItoKMC::ItoKMCTagger&lt; S &gt;</a>, and <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#a7844041c47094c69081dd8301f63be50">Physics::StreamerInception::StreamerInceptionTagger</a>.</p>
+<p>Reimplemented in <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#a7695cf4a5aa773a495a683f5cc3ad23f">Physics::CdrPlasma::CdrPlasmaTagger</a>, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html#a7b06da2f75723b1b379a401084c615d4">Physics::ItoKMC::ItoKMCTagger&lt; S &gt;</a>.</p>
 
 </div>
 </div>

@@ -60,6 +60,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#automated-testing">Automated testing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#convergence-testing">Convergence testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-profiling">Performance profiling</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Acknowledgements.html">Acknowledgements</a></li>
@@ -250,6 +251,32 @@ They usually take 1-2 hours to complete.</p>
 These are located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence</span></code>.
 The tests are too extensive to include in continuous integration, and they must be run locally like a regular <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> application.
 Our approach for convergence testing is found in <a class="reference internal" href="../Source/VV.html#chap-vv"><span class="std std-ref">Verification and validation</span></a>.</p>
+</section>
+<section id="performance-profiling">
+<h2>Performance profiling<a class="headerlink" href="#performance-profiling" title="Permalink to this heading"></a></h2>
+<p>There are two ways to run performance profiling of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>:</p>
+<ul>
+<li><p>A posteriori profiling using Chombo macros.
+Most routines in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> use these macros and they will compute the wall clock time spent in each routine.</p>
+<p>To enable these timers, set <code class="docutils literal notranslate"><span class="pre">CH_TIMER=1</span></code> in the shell where you run your application.
+E.g,</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">CH_TIMER</span><span class="o">=</span><span class="m">1</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">Chombo</span></code>’s timers are not meant to use with many time steps.
+For efficient use, it is best to use it for a single time step.</p>
+</div>
+</li>
+<li><p>In-place profiling using the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> Timer class.
+Some classes in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> use the <code class="docutils literal notranslate"><span class="pre">Timer</span></code> class, which also computes on-the-fly calculations of potential load imbalance.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Timer</span></code> class incurs large performance penalties at high concurrencies (1K CPU cores and above).</p>
+</div>
+</li>
+</ul>
 </section>
 </section>
 

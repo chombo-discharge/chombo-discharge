@@ -1,10 +1,10 @@
 <map id="Source/AmrMesh/CD_EBGradient.H" name="Source/AmrMesh/CD_EBGradient.H">
-<area shape="rect" id="node1" title="Declaration of a class which computes gradients in an EBAMR context." alt="" coords="107,5,357,32"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,80,56,107"/>
-<area shape="rect" id="node3" title=" " alt="" coords="80,80,195,107"/>
-<area shape="rect" id="node4" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="383,80,500,107"/>
-<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="547,229,733,256"/>
-<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="193,229,372,256"/>
-<area shape="rect" id="node5" title=" " alt="" coords="320,155,411,181"/>
-<area shape="rect" id="node8" href="$CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="435,155,602,181"/>
+<area shape="rect" id="node1" title="Declaration of a class which computes gradients in an EBAMR context." alt="" coords="163,5,413,32"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,80,120,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="145,80,250,107"/>
+<area shape="rect" id="node4" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="439,80,556,107"/>
+<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="603,229,789,256"/>
+<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="249,229,428,256"/>
+<area shape="rect" id="node5" title=" " alt="" coords="376,155,467,181"/>
+<area shape="rect" id="node8" href="$CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="491,155,658,181"/>
 </map>

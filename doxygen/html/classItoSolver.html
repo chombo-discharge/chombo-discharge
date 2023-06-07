@@ -90,7 +90,7 @@ Collaboration diagram for ItoSolver:</div>
 <div class="dyncontent">
 <div class="center"><img src="classItoSolver__coll__graph.png" border="0" usemap="#aItoSolver_coll__map" alt="Collaboration graph"/></div>
 <map name="aItoSolver_coll__map" id="aItoSolver_coll__map">
-<area shape="rect" title="Base class for Ito diffusion particle models." alt="" coords="164,257,244,284"/>
+<area shape="rect" title="Base class for Ito diffusion particle models." alt="" coords="164,243,244,269"/>
 <area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="5,95,189,136"/>
 <area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="135,5,273,32"/>
 <area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="214,102,410,129"/>
@@ -139,9 +139,6 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#abd193ec875bfd612861cd833cd28fce4">parseRuntimeOptions</a> ()</td></tr>
 <tr class="memdesc:abd193ec875bfd612861cd833cd28fce4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse class runtime configurable options. <br /></td></tr>
 <tr class="separator:abd193ec875bfd612861cd833cd28fce4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a113c01d977f92e8048729f259cf32b81"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a113c01d977f92e8048729f259cf32b81">getPlotVariableNames</a> () const</td></tr>
-<tr class="memdesc:a113c01d977f92e8048729f259cf32b81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get output plot names.  <a href="classItoSolver.html#a113c01d977f92e8048729f259cf32b81">More...</a><br /></td></tr>
-<tr class="separator:a113c01d977f92e8048729f259cf32b81"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae4db75d50c479cd8990a3711e7910c24"><td class="memItemLeft" align="right" valign="top"><a id="ae4db75d50c479cd8990a3711e7910c24"></a>
 virtual <a class="el" href="CD__EBIntersection_8H.html#ad8aa543cfc22c9b4f2a6a6dab88ea1e9">EBIntersection</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ae4db75d50c479cd8990a3711e7910c24">getIntersectionAlgorithm</a> () const noexcept</td></tr>
 <tr class="memdesc:ae4db75d50c479cd8990a3711e7910c24"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the EB-particle intersection algorithm. <br /></td></tr>
@@ -197,6 +194,14 @@ virtual <a class="el" href="CD__EBIntersection_8H.html#ad8aa543cfc22c9b4f2a6a6da
 <tr class="memitem:a83fa3e39b93d9f4abf3c8ca352c61d02"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a83fa3e39b93d9f4abf3c8ca352c61d02">depositParticles</a> (const <a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">WhichContainer</a> a_container)</td></tr>
 <tr class="memdesc:a83fa3e39b93d9f4abf3c8ca352c61d02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit particles on to mesh.  <a href="classItoSolver.html#a83fa3e39b93d9f4abf3c8ca352c61d02">More...</a><br /></td></tr>
 <tr class="separator:a83fa3e39b93d9f4abf3c8ca352c61d02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a538607e6b1f3f2c9e45b8def6d264bcc"><td class="memTemplParams" colspan="2">template&lt;class P , const Real &amp;(P ::*)() const particleScalarField&gt; </td></tr>
+<tr class="memitem:a538607e6b1f3f2c9e45b8def6d264bcc"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a538607e6b1f3f2c9e45b8def6d264bcc">depositParticlesNGP</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a538607e6b1f3f2c9e45b8def6d264bcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an NGP deposit on a specific grid level. Used for IO.  <a href="classItoSolver.html#a538607e6b1f3f2c9e45b8def6d264bcc">More...</a><br /></td></tr>
+<tr class="separator:a538607e6b1f3f2c9e45b8def6d264bcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a538607e6b1f3f2c9e45b8def6d264bcc"><td class="memTemplParams" colspan="2">template&lt;class P , Real(P ::*)() const particleScalarField&gt; </td></tr>
+<tr class="memitem:a538607e6b1f3f2c9e45b8def6d264bcc"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a538607e6b1f3f2c9e45b8def6d264bcc">depositParticlesNGP</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a538607e6b1f3f2c9e45b8def6d264bcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an NGP deposit on a specific grid level. Used for IO.  <a href="classItoSolver.html#a538607e6b1f3f2c9e45b8def6d264bcc">More...</a><br /></td></tr>
+<tr class="separator:a538607e6b1f3f2c9e45b8def6d264bcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6209d584e115b2ae1958409f064bb668"><td class="memTemplParams" colspan="2">template&lt;class P , const Real &amp;(P::*)() const particleScalarField&gt; </td></tr>
 <tr class="memitem:a6209d584e115b2ae1958409f064bb668"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a6209d584e115b2ae1958409f064bb668">depositParticles</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles) const</td></tr>
 <tr class="memdesc:a6209d584e115b2ae1958409f064bb668"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic deposition function which deposits a particle field onto the mesh using a specified deposition method.  <a href="classItoSolver.html#a6209d584e115b2ae1958409f064bb668">More...</a><br /></td></tr>
@@ -242,6 +247,12 @@ virtual <a class="el" href="CD__EBIntersection_8H.html#ad8aa543cfc22c9b4f2a6a6da
 <tr class="memitem:ad0938b394aa25ddeac394ecce5d2b474"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad0938b394aa25ddeac394ecce5d2b474">getNumberOfPlotVariables</a> () const</td></tr>
 <tr class="memdesc:ad0938b394aa25ddeac394ecce5d2b474"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of plot variables.  <a href="classItoSolver.html#ad0938b394aa25ddeac394ecce5d2b474">More...</a><br /></td></tr>
 <tr class="separator:ad0938b394aa25ddeac394ecce5d2b474"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a113c01d977f92e8048729f259cf32b81"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a113c01d977f92e8048729f259cf32b81">getPlotVariableNames</a> () const</td></tr>
+<tr class="memdesc:a113c01d977f92e8048729f259cf32b81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get output plot names.  <a href="classItoSolver.html#a113c01d977f92e8048729f259cf32b81">More...</a><br /></td></tr>
+<tr class="separator:a113c01d977f92e8048729f259cf32b81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7bf5e3f46df1683fce0ac491d4efd67"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ac7bf5e3f46df1683fce0ac491d4efd67">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:ac7bf5e3f46df1683fce0ac491d4efd67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <a href="classItoSolver.html#ac7bf5e3f46df1683fce0ac491d4efd67">More...</a><br /></td></tr>
+<tr class="separator:ac7bf5e3f46df1683fce0ac491d4efd67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acfe37223efd84b9a1f174a600bd795df"><td class="memItemLeft" align="right" valign="top">virtual unsigned long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#acfe37223efd84b9a1f174a600bd795df">getNumParticles</a> (const <a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">WhichContainer</a> a_container, const bool a_localOnly) const</td></tr>
 <tr class="memdesc:acfe37223efd84b9a1f174a600bd795df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of particles in a specified particle container.  <a href="classItoSolver.html#acfe37223efd84b9a1f174a600bd795df">More...</a><br /></td></tr>
 <tr class="separator:acfe37223efd84b9a1f174a600bd795df"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -263,9 +274,6 @@ virtual <a class="el" href="CD__EBIntersection_8H.html#ad8aa543cfc22c9b4f2a6a6da
 <tr class="memitem:a2293d2a6db7b36a451100e2e8400698f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a2293d2a6db7b36a451100e2e8400698f">setTime</a> (const int a_step, const Real a_time, const Real a_dt)</td></tr>
 <tr class="memdesc:a2293d2a6db7b36a451100e2e8400698f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the time for this solver.  <a href="classItoSolver.html#a2293d2a6db7b36a451100e2e8400698f">More...</a><br /></td></tr>
 <tr class="separator:a2293d2a6db7b36a451100e2e8400698f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa5f69cb37a904c22bf2b3f31d6e67d1a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aa5f69cb37a904c22bf2b3f31d6e67d1a">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp)</td></tr>
-<tr class="memdesc:aa5f69cb37a904c22bf2b3f31d6e67d1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <a href="classItoSolver.html#aa5f69cb37a904c22bf2b3f31d6e67d1a">More...</a><br /></td></tr>
-<tr class="separator:aa5f69cb37a904c22bf2b3f31d6e67d1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a134feb52bf6e0fdb4b0b25cd76b4ef91"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a134feb52bf6e0fdb4b0b25cd76b4ef91">setSpecies</a> (const RefCountedPtr&lt; <a class="el" href="classItoSpecies.html">ItoSpecies</a> &gt; &amp;a_species)</td></tr>
 <tr class="memdesc:a134feb52bf6e0fdb4b0b25cd76b4ef91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the species.  <a href="classItoSolver.html#a134feb52bf6e0fdb4b0b25cd76b4ef91">More...</a><br /></td></tr>
 <tr class="separator:a134feb52bf6e0fdb4b0b25cd76b4ef91"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -306,12 +314,6 @@ virtual <a class="el" href="CD__EBIntersection_8H.html#ad8aa543cfc22c9b4f2a6a6da
 <tr class="memitem:afcecd78eb94c06eacb8b4aaae2376dd2"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#afcecd78eb94c06eacb8b4aaae2376dd2">getDiffusionFunction</a> () const</td></tr>
 <tr class="memdesc:afcecd78eb94c06eacb8b4aaae2376dd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the diffusion function.  <a href="classItoSolver.html#afcecd78eb94c06eacb8b4aaae2376dd2">More...</a><br /></td></tr>
 <tr class="separator:afcecd78eb94c06eacb8b4aaae2376dd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a883519cb3a55b967d15228b868bbbbcb"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a883519cb3a55b967d15228b868bbbbcb">getScratch</a> ()</td></tr>
-<tr class="memdesc:a883519cb3a55b967d15228b868bbbbcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get scratch storage.  <a href="classItoSolver.html#a883519cb3a55b967d15228b868bbbbcb">More...</a><br /></td></tr>
-<tr class="separator:a883519cb3a55b967d15228b868bbbbcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac347b06940c9633871c7a792ecf534c2"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ac347b06940c9633871c7a792ecf534c2">getScratch</a> () const</td></tr>
-<tr class="memdesc:ac347b06940c9633871c7a792ecf534c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get scratch storage.  <a href="classItoSolver.html#ac347b06940c9633871c7a792ecf534c2">More...</a><br /></td></tr>
-<tr class="separator:ac347b06940c9633871c7a792ecf534c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae614b9a9accb81aba62bce6435e52ebf"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ae614b9a9accb81aba62bce6435e52ebf">getMobilityFunction</a> ()</td></tr>
 <tr class="memdesc:ae614b9a9accb81aba62bce6435e52ebf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get mobility function.  <a href="classItoSolver.html#ae614b9a9accb81aba62bce6435e52ebf">More...</a><br /></td></tr>
 <tr class="separator:ae614b9a9accb81aba62bce6435e52ebf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -339,27 +341,15 @@ virtual <a class="el" href="CD__EBIntersection_8H.html#ad8aa543cfc22c9b4f2a6a6da
 <tr class="memitem:a06df3eb32ebb71b1858298b2b0d7dd0b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a06df3eb32ebb71b1858298b2b0d7dd0b">interpolateMobilities</a> ()</td></tr>
 <tr class="memdesc:a06df3eb32ebb71b1858298b2b0d7dd0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate mobilities.  <a href="classItoSolver.html#a06df3eb32ebb71b1858298b2b0d7dd0b">More...</a><br /></td></tr>
 <tr class="separator:a06df3eb32ebb71b1858298b2b0d7dd0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe6615c33886b26c602e0908b6069a1e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#afe6615c33886b26c602e0908b6069a1e">interpolateMobilities</a> (const int a_level, const DataIndex &amp;a_dit)</td></tr>
-<tr class="memdesc:afe6615c33886b26c602e0908b6069a1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate mobilities &ndash; this will switch between the two ways of computing the particle mobility.  <a href="classItoSolver.html#afe6615c33886b26c602e0908b6069a1e">More...</a><br /></td></tr>
-<tr class="separator:afe6615c33886b26c602e0908b6069a1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a877960fbdde4e57f9ce3061fc0bb703f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a877960fbdde4e57f9ce3061fc0bb703f">updateMobilities</a> ()</td></tr>
 <tr class="memdesc:a877960fbdde4e57f9ce3061fc0bb703f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update mobilities parametrically from the particle energy.  <a href="classItoSolver.html#a877960fbdde4e57f9ce3061fc0bb703f">More...</a><br /></td></tr>
 <tr class="separator:a877960fbdde4e57f9ce3061fc0bb703f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac7a9256055022575daeceafe643972f2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ac7a9256055022575daeceafe643972f2">updateMobilities</a> (const int a_level, const DataIndex a_dit)</td></tr>
-<tr class="memdesc:ac7a9256055022575daeceafe643972f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update mobilities parametrically from the particle energy.  <a href="classItoSolver.html#ac7a9256055022575daeceafe643972f2">More...</a><br /></td></tr>
-<tr class="separator:ac7a9256055022575daeceafe643972f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64b5e34d86ab0286807678c7f753f57e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a64b5e34d86ab0286807678c7f753f57e">interpolateDiffusion</a> ()</td></tr>
 <tr class="memdesc:a64b5e34d86ab0286807678c7f753f57e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate the diffusion field to the particle positions.  <a href="classItoSolver.html#a64b5e34d86ab0286807678c7f753f57e">More...</a><br /></td></tr>
 <tr class="separator:a64b5e34d86ab0286807678c7f753f57e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef3ef423300841c7a94bdb2ccd248189"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aef3ef423300841c7a94bdb2ccd248189">interpolateDiffusion</a> (const int a_level, const DataIndex &amp;a_dit)</td></tr>
-<tr class="memdesc:aef3ef423300841c7a94bdb2ccd248189"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate the diffusion field to the particle positions.  <a href="classItoSolver.html#aef3ef423300841c7a94bdb2ccd248189">More...</a><br /></td></tr>
-<tr class="separator:aef3ef423300841c7a94bdb2ccd248189"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d8246f963aa976e49c808a9d963b464"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a4d8246f963aa976e49c808a9d963b464">updateDiffusion</a> ()</td></tr>
 <tr class="memdesc:a4d8246f963aa976e49c808a9d963b464"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update mobilities parametrically from the particle energy.  <a href="classItoSolver.html#a4d8246f963aa976e49c808a9d963b464">More...</a><br /></td></tr>
 <tr class="separator:a4d8246f963aa976e49c808a9d963b464"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad686ec03d1b90c1f9b2e2bb2e45126bf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad686ec03d1b90c1f9b2e2bb2e45126bf">updateDiffusion</a> (const int a_level, const DataIndex a_dit)</td></tr>
-<tr class="memdesc:ad686ec03d1b90c1f9b2e2bb2e45126bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update mobilities parametrically from the particle energy.  <a href="classItoSolver.html#ad686ec03d1b90c1f9b2e2bb2e45126bf">More...</a><br /></td></tr>
-<tr class="separator:ad686ec03d1b90c1f9b2e2bb2e45126bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a105469be7e9f0bda74d6e3ce523bd9bf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a105469be7e9f0bda74d6e3ce523bd9bf">organizeParticlesByCell</a> (const <a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">WhichContainer</a> a_container)</td></tr>
 <tr class="memdesc:a105469be7e9f0bda74d6e3ce523bd9bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sort the input particle container by cell.  <a href="classItoSolver.html#a105469be7e9f0bda74d6e3ce523bd9bf">More...</a><br /></td></tr>
 <tr class="separator:a105469be7e9f0bda74d6e3ce523bd9bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -519,30 +509,30 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:aac2b82ed36f44539366b43564e352846"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aac2b82ed36f44539366b43564e352846">depositHybrid</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_depositionH, <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_massDifference, const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_depositionNC) const</td></tr>
 <tr class="memdesc:aac2b82ed36f44539366b43564e352846"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make the "hybrid" deposition phiH = kappa*phiC + (1-kappa)*phiNC. On input, a_depositionH should contain phiC.  <a href="classItoSolver.html#aac2b82ed36f44539366b43564e352846">More...</a><br /></td></tr>
 <tr class="separator:aac2b82ed36f44539366b43564e352846"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af150e243cbc08c6359b9218338676d30"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#af150e243cbc08c6359b9218338676d30">incrementRedist</a> (const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_massDifference) const</td></tr>
-<tr class="memdesc:af150e243cbc08c6359b9218338676d30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increment redistribution objects with mass to be redistributed.  <a href="classItoSolver.html#af150e243cbc08c6359b9218338676d30">More...</a><br /></td></tr>
-<tr class="separator:af150e243cbc08c6359b9218338676d30"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad163ae5e22e548b23e2e932f05b57392"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad163ae5e22e548b23e2e932f05b57392">levelRedist</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi) const</td></tr>
-<tr class="memdesc:ad163ae5e22e548b23e2e932f05b57392"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do redistribution on all levels, no coarse-fine stuff.  <a href="classItoSolver.html#ad163ae5e22e548b23e2e932f05b57392">More...</a><br /></td></tr>
-<tr class="separator:ad163ae5e22e548b23e2e932f05b57392"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae8db7d60bcd16f77dd52d064b231be4f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ae8db7d60bcd16f77dd52d064b231be4f">coarseFineIncrement</a> (const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;m_massDifference) const</td></tr>
-<tr class="memdesc:ae8db7d60bcd16f77dd52d064b231be4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increment the coarse-fine redist with mass difference (only for EB x CF)  <a href="classItoSolver.html#ae8db7d60bcd16f77dd52d064b231be4f">More...</a><br /></td></tr>
-<tr class="separator:ae8db7d60bcd16f77dd52d064b231be4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac3ac7d9fa5f802806c12d667c1892a5d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ac3ac7d9fa5f802806c12d667c1892a5d">coarseFineRedistribution</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi) const</td></tr>
-<tr class="memdesc:ac3ac7d9fa5f802806c12d667c1892a5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do coarse-fine mass redistribution.  <a href="classItoSolver.html#ac3ac7d9fa5f802806c12d667c1892a5d">More...</a><br /></td></tr>
-<tr class="separator:ac3ac7d9fa5f802806c12d667c1892a5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a05f1a0fcf4c8a6cb67745a9a3b21c0a9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a05f1a0fcf4c8a6cb67745a9a3b21c0a9">makeSuperparticles</a> (List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const int a_particlesPerCell)</td></tr>
+<tr class="memitem:a05f1a0fcf4c8a6cb67745a9a3b21c0a9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a05f1a0fcf4c8a6cb67745a9a3b21c0a9">makeSuperparticles</a> (List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const int a_particlesPerCell)</td></tr>
 <tr class="memdesc:a05f1a0fcf4c8a6cb67745a9a3b21c0a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Superparticle merging with BVH trees.  <a href="classItoSolver.html#a05f1a0fcf4c8a6cb67745a9a3b21c0a9">More...</a><br /></td></tr>
 <tr class="separator:a05f1a0fcf4c8a6cb67745a9a3b21c0a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac04b4155dcf2543bd538e27669e47518"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ac04b4155dcf2543bd538e27669e47518">writeData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const bool a_interpToCentroids) const</td></tr>
-<tr class="memdesc:ac04b4155dcf2543bd538e27669e47518"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function which just copies data from one data holder to the output data holder.  <a href="classItoSolver.html#ac04b4155dcf2543bd538e27669e47518">More...</a><br /></td></tr>
-<tr class="separator:ac04b4155dcf2543bd538e27669e47518"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a23f7f9fdcaf5fcca2917480d9896b621"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a23f7f9fdcaf5fcca2917480d9896b621">interpolateMobilitiesDirect</a> (const int a_level, const DataIndex &amp;a_dit)</td></tr>
-<tr class="memdesc:a23f7f9fdcaf5fcca2917480d9896b621"><td class="mdescLeft">&#160;</td><td class="mdescRight">Directly interpolate mobilities. Interpolates for all particles in the specified grid patch.  <a href="classItoSolver.html#a23f7f9fdcaf5fcca2917480d9896b621">More...</a><br /></td></tr>
-<tr class="separator:a23f7f9fdcaf5fcca2917480d9896b621"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a11980419f7695d872a83885be0f20494"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a11980419f7695d872a83885be0f20494">interpolateMobilitiesVelocity</a> (const int a_level, const DataIndex &amp;a_dit)</td></tr>
-<tr class="memdesc:a11980419f7695d872a83885be0f20494"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate mobilities through the velocity. Interpolates for all particles in the specified grid patch.  <a href="classItoSolver.html#a11980419f7695d872a83885be0f20494">More...</a><br /></td></tr>
-<tr class="separator:a11980419f7695d872a83885be0f20494"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2e2869b2f9907251a682b7d25198207"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad2e2869b2f9907251a682b7d25198207">interpolateMobilities</a> (const int a_level, const DataIndex &amp;a_dit, const EBCellFAB &amp;a_velocityMagnitude) noexcept</td></tr>
+<tr class="memdesc:ad2e2869b2f9907251a682b7d25198207"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate mobilities &ndash; this will switch between the two ways of computing the particle mobility.  <a href="classItoSolver.html#ad2e2869b2f9907251a682b7d25198207">More...</a><br /></td></tr>
+<tr class="separator:ad2e2869b2f9907251a682b7d25198207"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5934ada9e1588736018ece31217d6404"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a5934ada9e1588736018ece31217d6404">interpolateMobilitiesDirect</a> (const int a_level, const DataIndex &amp;a_dit) noexcept</td></tr>
+<tr class="memdesc:a5934ada9e1588736018ece31217d6404"><td class="mdescLeft">&#160;</td><td class="mdescRight">Directly interpolate mobilities. Interpolates for all particles in the specified grid patch.  <a href="classItoSolver.html#a5934ada9e1588736018ece31217d6404">More...</a><br /></td></tr>
+<tr class="separator:a5934ada9e1588736018ece31217d6404"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2be7c7592bca502599911c75fc376a4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#af2be7c7592bca502599911c75fc376a4">interpolateMobilitiesVelocity</a> (const int a_level, const DataIndex &amp;a_dit, const EBCellFAB &amp;a_velocityMagnitude) noexcept</td></tr>
+<tr class="memdesc:af2be7c7592bca502599911c75fc376a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate mobilities through the velocity. Interpolates for all particles in the specified grid patch.  <a href="classItoSolver.html#af2be7c7592bca502599911c75fc376a4">More...</a><br /></td></tr>
+<tr class="separator:af2be7c7592bca502599911c75fc376a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7a9256055022575daeceafe643972f2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ac7a9256055022575daeceafe643972f2">updateMobilities</a> (const int a_level, const DataIndex a_dit)</td></tr>
+<tr class="memdesc:ac7a9256055022575daeceafe643972f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update mobilities parametrically from the particle energy.  <a href="classItoSolver.html#ac7a9256055022575daeceafe643972f2">More...</a><br /></td></tr>
+<tr class="separator:ac7a9256055022575daeceafe643972f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef3ef423300841c7a94bdb2ccd248189"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aef3ef423300841c7a94bdb2ccd248189">interpolateDiffusion</a> (const int a_level, const DataIndex &amp;a_dit)</td></tr>
+<tr class="memdesc:aef3ef423300841c7a94bdb2ccd248189"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate the diffusion field to the particle positions.  <a href="classItoSolver.html#aef3ef423300841c7a94bdb2ccd248189">More...</a><br /></td></tr>
+<tr class="separator:aef3ef423300841c7a94bdb2ccd248189"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad686ec03d1b90c1f9b2e2bb2e45126bf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad686ec03d1b90c1f9b2e2bb2e45126bf">updateDiffusion</a> (const int a_level, const DataIndex a_dit)</td></tr>
+<tr class="memdesc:ad686ec03d1b90c1f9b2e2bb2e45126bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update mobilities parametrically from the particle energy.  <a href="classItoSolver.html#ad686ec03d1b90c1f9b2e2bb2e45126bf">More...</a><br /></td></tr>
+<tr class="separator:ad686ec03d1b90c1f9b2e2bb2e45126bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0fd350e59f01ddda0629a65299ef2fcb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a0fd350e59f01ddda0629a65299ef2fcb">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
+<tr class="memdesc:a0fd350e59f01ddda0629a65299ef2fcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classItoSolver.html#a0fd350e59f01ddda0629a65299ef2fcb">More...</a><br /></td></tr>
+<tr class="separator:a0fd350e59f01ddda0629a65299ef2fcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -712,10 +702,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a1530feac364fec71833a2cc367538577">m_diffusionFunction</a></td></tr>
 <tr class="memdesc:a1530feac364fec71833a2cc367538577"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion-centerer field used for interpolating diffusion coefficients. <br /></td></tr>
 <tr class="separator:a1530feac364fec71833a2cc367538577"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8659ea3416421f5adccbea134449f46f"><td class="memItemLeft" align="right" valign="top"><a id="a8659ea3416421f5adccbea134449f46f"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a8659ea3416421f5adccbea134449f46f">m_scratch</a></td></tr>
-<tr class="memdesc:a8659ea3416421f5adccbea134449f46f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch data. <br /></td></tr>
-<tr class="separator:a8659ea3416421f5adccbea134449f46f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a49dc43db44eb8cb98f208c66162d5e7b"><td class="memItemLeft" align="right" valign="top"><a id="a49dc43db44eb8cb98f208c66162d5e7b"></a>
 <a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a49dc43db44eb8cb98f208c66162d5e7b">m_depositionNC</a></td></tr>
 <tr class="memdesc:a49dc43db44eb8cb98f208c66162d5e7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for holding the non-conservative deposition. <br /></td></tr>
@@ -1001,74 +987,6 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particle container to be emptied. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ae8db7d60bcd16f77dd52d064b231be4f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae8db7d60bcd16f77dd52d064b231be4f">&#9670;&nbsp;</a></span>coarseFineIncrement()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoSolver::coarseFineIncrement </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
-          <td class="paramname"><em>m_massDifference</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Increment the coarse-fine redist with mass difference (only for EB x CF) </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_massDifference</td><td>mass to be redistributed. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ac3ac7d9fa5f802806c12d667c1892a5d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac3ac7d9fa5f802806c12d667c1892a5d">&#9670;&nbsp;</a></span>coarseFineRedistribution()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoSolver::coarseFineRedistribution </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_phi</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Do coarse-fine mass redistribution. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Data to be redistributed into. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2399,6 +2317,114 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
+<a id="a538607e6b1f3f2c9e45b8def6d264bcc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a538607e6b1f3f2c9e45b8def6d264bcc">&#9670;&nbsp;</a></span>depositParticlesNGP() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class P , Real(P ::*)() const particleScalarField&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoSolver::depositParticlesNGP </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Do an NGP deposit on a specific grid level. Used for IO. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_output</td><td>Contains NGP deposition of particles. Ignores cut-cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a538607e6b1f3f2c9e45b8def6d264bcc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a538607e6b1f3f2c9e45b8def6d264bcc">&#9670;&nbsp;</a></span>depositParticlesNGP() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class P , Real(P ::*)() const particleScalarField&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoSolver::depositParticlesNGP </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Do an NGP deposit on a specific grid level. Used for IO. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_output</td><td>Contains NGP deposition of particles. Ignores cut-cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a803e769f2adeed3b1a2f2b9d40c2422f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a803e769f2adeed3b1a2f2b9d40c2422f">&#9670;&nbsp;</a></span>drawNewParticles()</h2>
 
@@ -2856,62 +2882,6 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="a883519cb3a55b967d15228b868bbbbcb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a883519cb3a55b967d15228b868bbbbcb">&#9670;&nbsp;</a></span>getScratch() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp; ItoSolver::getScratch </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get scratch storage. </p>
-<dl class="section return"><dt>Returns</dt><dd>Returns m_scratch </dd></dl>
-
-</div>
-</div>
-<a id="ac347b06940c9633871c7a792ecf534c2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac347b06940c9633871c7a792ecf534c2">&#9670;&nbsp;</a></span>getScratch() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp; ItoSolver::getScratch </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get scratch storage. </p>
-<dl class="section return"><dt>Returns</dt><dd>Returns m_scratch </dd></dl>
-
-</div>
-</div>
 <a id="acab7ee2c7496bdad4c5331b4ccf84952"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acab7ee2c7496bdad4c5331b4ccf84952">&#9670;&nbsp;</a></span>getSpecies()</h2>
 
@@ -2993,40 +2963,6 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 <p>Get cell-centered velocity mesh data. </p>
 <dl class="section return"><dt>Returns</dt><dd>m_velocityFunction </dd></dl>
-
-</div>
-</div>
-<a id="af150e243cbc08c6359b9218338676d30"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af150e243cbc08c6359b9218338676d30">&#9670;&nbsp;</a></span>incrementRedist()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoSolver::incrementRedist </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_massDifference</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Increment redistribution objects with mass to be redistributed. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_massDifference</td><td>mass to be redistributed. </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -3115,7 +3051,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -3159,8 +3095,8 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="afe6615c33886b26c602e0908b6069a1e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afe6615c33886b26c602e0908b6069a1e">&#9670;&nbsp;</a></span>interpolateMobilities() <span class="overload">[2/2]</span></h2>
+<a id="ad2e2869b2f9907251a682b7d25198207"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2e2869b2f9907251a682b7d25198207">&#9670;&nbsp;</a></span>interpolateMobilities() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3178,7 +3114,13 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const DataIndex &amp;&#160;</td>
-          <td class="paramname"><em>a_dit</em>&#160;</td>
+          <td class="paramname"><em>a_dit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_velocityMagnitude</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -3188,7 +3130,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -3196,16 +3138,17 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 <p>Interpolate mobilities &ndash; this will switch between the two ways of computing the particle mobility. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Grid index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Grid index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_velocityMagnitude</td><td>Velocity magnitude. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a23f7f9fdcaf5fcca2917480d9896b621"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a23f7f9fdcaf5fcca2917480d9896b621">&#9670;&nbsp;</a></span>interpolateMobilitiesDirect()</h2>
+<a id="a5934ada9e1588736018ece31217d6404"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5934ada9e1588736018ece31217d6404">&#9670;&nbsp;</a></span>interpolateMobilitiesDirect()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3233,7 +3176,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -3249,8 +3192,8 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="a11980419f7695d872a83885be0f20494"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a11980419f7695d872a83885be0f20494">&#9670;&nbsp;</a></span>interpolateMobilitiesVelocity()</h2>
+<a id="af2be7c7592bca502599911c75fc376a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2be7c7592bca502599911c75fc376a4">&#9670;&nbsp;</a></span>interpolateMobilitiesVelocity()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3268,7 +3211,13 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const DataIndex &amp;&#160;</td>
-          <td class="paramname"><em>a_dit</em>&#160;</td>
+          <td class="paramname"><em>a_dit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_velocityMagnitude</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -3278,7 +3227,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -3288,6 +3237,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Grid index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_velocityMagnitude</td><td>Velocity magnitude. </td></tr>
   </table>
   </dd>
 </dl>
@@ -3623,40 +3573,6 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="ad163ae5e22e548b23e2e932f05b57392"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad163ae5e22e548b23e2e932f05b57392">&#9670;&nbsp;</a></span>levelRedist()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoSolver::levelRedist </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_phi</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Do redistribution on all levels, no coarse-fine stuff. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Data to be redistributed into. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a90e0d074046485949984c3c074d1fe58"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a90e0d074046485949984c3c074d1fe58">&#9670;&nbsp;</a></span>makeSuperparticles() <span class="overload">[1/5]</span></h2>
 
@@ -3887,7 +3803,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -4985,7 +4901,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -5059,7 +4975,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -5075,8 +4991,8 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="ac04b4155dcf2543bd538e27669e47518"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac04b4155dcf2543bd538e27669e47518">&#9670;&nbsp;</a></span>writeData()</h2>
+<a id="a0fd350e59f01ddda0629a65299ef2fcb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0fd350e59f01ddda0629a65299ef2fcb">&#9670;&nbsp;</a></span>writeData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5087,7 +5003,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
         <tr>
           <td class="memname">void ItoSolver::writeData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
@@ -5105,8 +5021,20 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const bool&#160;</td>
-          <td class="paramname"><em>a_interpToCentroids</em>&#160;</td>
+          <td class="paramname"><em>a_interpToCentroids</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_interpGhost</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -5116,26 +5044,28 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Write data to output. Convenience function which just copies data from one data holder to the output data holder. </p>
+<p>Write data to output. Convenience function. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where this solver begins writing the output. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data to write. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_interpToCentroids</td><td>If true, a_data will be interpolated to cell centroids before writing to a_output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpGhost</td><td>If true, interpolate ghost cells </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="aa5f69cb37a904c22bf2b3f31d6e67d1a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa5f69cb37a904c22bf2b3f31d6e67d1a">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="ac7bf5e3f46df1683fce0ac491d4efd67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7bf5e3f46df1683fce0ac491d4efd67">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5146,24 +5076,30 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
         <tr>
           <td class="memname">void ItoSolver::writePlotData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>a_comp</em>&#160;</td>
+          <td class="paramname"><em>a_comp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -5173,6 +5109,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where this solver begins writing the output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>

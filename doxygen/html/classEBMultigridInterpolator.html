@@ -156,9 +156,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMultigridInterpolator.html#a82dbe484ab2d13dddf72d2ed2cf4b69c">getGhostCF</a> () const =0</td></tr>
 <tr class="memdesc:a82dbe484ab2d13dddf72d2ed2cf4b69c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return number of ghost cells across CF interface. <br /></td></tr>
 <tr class="separator:a82dbe484ab2d13dddf72d2ed2cf4b69c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a41904418bb9409f09ab6aa76b60f621d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMultigridInterpolator.html#a41904418bb9409f09ab6aa76b60f621d">coarseFineInterp</a> (LevelData&lt; EBCellFAB &gt; &amp;a_phiFine, const LevelData&lt; EBCellFAB &gt; &amp;a_phiCoar, const Interval a_variables)=0</td></tr>
-<tr class="memdesc:a41904418bb9409f09ab6aa76b60f621d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do inhomogeneous interpolation.  <a href="classEBMultigridInterpolator.html#a41904418bb9409f09ab6aa76b60f621d">More...</a><br /></td></tr>
-<tr class="separator:a41904418bb9409f09ab6aa76b60f621d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4e679ca5a00f5f7a53010145a62e767"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMultigridInterpolator.html#af4e679ca5a00f5f7a53010145a62e767">coarseFineInterp</a> (LevelData&lt; EBCellFAB &gt; &amp;a_phiFine, const LevelData&lt; EBCellFAB &gt; &amp;a_phiCoar, const Interval a_variables) const =0</td></tr>
+<tr class="memdesc:af4e679ca5a00f5f7a53010145a62e767"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do inhomogeneous interpolation.  <a href="classEBMultigridInterpolator.html#af4e679ca5a00f5f7a53010145a62e767">More...</a><br /></td></tr>
+<tr class="separator:af4e679ca5a00f5f7a53010145a62e767"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac4cf5999231432e8b48bbcb04df99ff1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMultigridInterpolator.html#ac4cf5999231432e8b48bbcb04df99ff1">coarseFineInterpH</a> (LevelData&lt; EBCellFAB &gt; &amp;a_phiFine, const Interval a_variables) const =0</td></tr>
 <tr class="memdesc:ac4cf5999231432e8b48bbcb04df99ff1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do homogeneous interpolation.  <a href="classEBMultigridInterpolator.html#ac4cf5999231432e8b48bbcb04df99ff1">More...</a><br /></td></tr>
 <tr class="separator:ac4cf5999231432e8b48bbcb04df99ff1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -415,8 +415,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a41904418bb9409f09ab6aa76b60f621d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a41904418bb9409f09ab6aa76b60f621d">&#9670;&nbsp;</a></span>coarseFineInterp() <span class="overload">[2/2]</span></h2>
+<a id="af4e679ca5a00f5f7a53010145a62e767"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4e679ca5a00f5f7a53010145a62e767">&#9670;&nbsp;</a></span>coarseFineInterp() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -445,7 +445,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -465,7 +465,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a4b01415fad88a5212c09bf38c920e5dc">EBLeastSquaresMultigridInterpolator</a>.</p>
+<p>Implemented in <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a5ae332cb264e56eeb4658c1548744d93">EBLeastSquaresMultigridInterpolator</a>.</p>
 
 </div>
 </div>
@@ -565,7 +565,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This is the kernel version. The constructor guarantees that the fine-grid stencil will not out of the ghost region defined by a_ghostVector. However, this is the direct kernel version which is public because multigrid operators might need it for performance reasons. This routine does NOT warn against input data that do not contain enough ghost cells. </dd></dl>
 
-<p>Implemented in <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a8adc6155f6d72a39e9c52b13e178affe">EBLeastSquaresMultigridInterpolator</a>.</p>
+<p>Implemented in <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a3c5b25fa631bce104644427af46b872f">EBLeastSquaresMultigridInterpolator</a>.</p>
 
 </div>
 </div>
@@ -649,7 +649,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a06e37b936e8e5033441ab8fa980ed151">EBLeastSquaresMultigridInterpolator</a>.</p>
+<p>Implemented in <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a0473e847560f1fb476594a49f92e04e3">EBLeastSquaresMultigridInterpolator</a>.</p>
 
 </div>
 </div>

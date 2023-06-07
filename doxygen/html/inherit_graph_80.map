@@ -1,3 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classMFFluxReg.html" title="Class which wraps EBFluxRegisters in multiphase." alt="" coords="5,5,100,32"/>
+<area shape="rect" id="node1" href="$classMFHelmholtzDomainBCFactory.html" title="Base class for creating domain boundary condition objects in MFHelmholtzOp." alt="" coords="5,111,231,138"/>
+<area shape="rect" id="node2" href="$classMFHelmholtzDirichletDomainBCFactory.html" title="Factory class for passing Dirichlet domain boundary conditions into MFHelmholtzOp." alt="" coords="303,5,517,47"/>
+<area shape="rect" id="node3" href="$classMFHelmholtzElectrostaticDomainBCFactory.html" title="Class for passing electrostatic boundary conditions into MFHelmholtzOp." alt="" coords="315,71,505,112"/>
+<area shape="rect" id="node4" href="$classMFHelmholtzNeumannDomainBCFactory.html" title="Class for passing Neumann boundary domain boundary conditions into MFHelmholtzOp." alt="" coords="299,136,521,177"/>
+<area shape="rect" id="node5" href="$classMFHelmholtzRobinDomainBCFactory.html" title="Base class for making Robin domain boundary conditions with MFHelmholtzOp." alt="" coords="279,202,541,229"/>
 </map>

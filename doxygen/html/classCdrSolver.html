@@ -100,13 +100,13 @@ Collaboration diagram for CdrSolver:</div>
 <div class="dyncontent">
 <div class="center"><img src="classCdrSolver__coll__graph.png" border="0" usemap="#aCdrSolver_coll__map" alt="Collaboration graph"/></div>
 <map name="aCdrSolver_coll__map" id="aCdrSolver_coll__map">
-<area shape="rect" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="888,187,973,213"/>
-<area shape="rect" href="classCdrDomainBC.html" title="Class for encapsulating possible domain boundary conditions for CdrSolver." alt="" coords="421,23,534,49"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="385,149,569,190"/>
-<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,301,144,328"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="355,229,600,256"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="379,331,575,357"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="378,408,577,435"/>
+<area shape="rect" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="888,188,973,215"/>
+<area shape="rect" href="classCdrDomainBC.html" title="Class for encapsulating possible domain boundary conditions for CdrSolver." alt="" coords="421,24,534,51"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="385,147,569,189"/>
+<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,289,144,316"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="355,225,600,252"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="379,319,575,345"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="378,381,577,408"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -258,15 +258,12 @@ virtual const RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpe
 <tr class="memitem:ae5ff5275be09e06043378eae81f89267"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ae5ff5275be09e06043378eae81f89267">writePlotFile</a> ()</td></tr>
 <tr class="memdesc:ae5ff5275be09e06043378eae81f89267"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot file.  <a href="classCdrSolver.html#ae5ff5275be09e06043378eae81f89267">More...</a><br /></td></tr>
 <tr class="separator:ae5ff5275be09e06043378eae81f89267"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afae1ef6f463bded79a599bbe60505fb6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#afae1ef6f463bded79a599bbe60505fb6">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_icomp)</td></tr>
-<tr class="memdesc:afae1ef6f463bded79a599bbe60505fb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write output data to a_output.  <a href="classCdrSolver.html#afae1ef6f463bded79a599bbe60505fb6">More...</a><br /></td></tr>
-<tr class="separator:afae1ef6f463bded79a599bbe60505fb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0afca5f24b820aa16abf2ed3fdcd7333"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a0afca5f24b820aa16abf2ed3fdcd7333">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a0afca5f24b820aa16abf2ed3fdcd7333"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write output data to a_output.  <a href="classCdrSolver.html#a0afca5f24b820aa16abf2ed3fdcd7333">More...</a><br /></td></tr>
+<tr class="separator:a0afca5f24b820aa16abf2ed3fdcd7333"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ace7446a0ff354cbd7b4ce57066b97e20"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ace7446a0ff354cbd7b4ce57066b97e20">regrid</a> (const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)</td></tr>
 <tr class="memdesc:ace7446a0ff354cbd7b4ce57066b97e20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write checkpoint data into HDF5 file. @paramo[out] a_handle HDF5 file.  <a href="classCdrSolver.html#ace7446a0ff354cbd7b4ce57066b97e20">More...</a><br /></td></tr>
 <tr class="separator:ace7446a0ff354cbd7b4ce57066b97e20"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae7e0e2a4f74395f38bd403c98970979a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ae7e0e2a4f74395f38bd403c98970979a">setRedistWeights</a> (const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_weights)</td></tr>
-<tr class="memdesc:ae7e0e2a4f74395f38bd403c98970979a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set redistribution weights.  <a href="classCdrSolver.html#ae7e0e2a4f74395f38bd403c98970979a">More...</a><br /></td></tr>
-<tr class="separator:ae7e0e2a4f74395f38bd403c98970979a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9c5259c827a4fb56c2e57d3db3f13d9f"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a9c5259c827a4fb56c2e57d3db3f13d9f">getRealm</a> () const</td></tr>
 <tr class="memdesc:a9c5259c827a4fb56c2e57d3db3f13d9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the realm where this solver is registered.  <a href="classCdrSolver.html#a9c5259c827a4fb56c2e57d3db3f13d9f">More...</a><br /></td></tr>
 <tr class="separator:a9c5259c827a4fb56c2e57d3db3f13d9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -348,14 +345,13 @@ virtual <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</
 <tr class="memitem:a8022eea83998f3d752797efd45d372ba"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a8022eea83998f3d752797efd45d372ba">extrapolateAdvectiveFluxToEB</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_ebFlux) const noexcept</td></tr>
 <tr class="memdesc:a8022eea83998f3d752797efd45d372ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extrapolate advective flux to EB.  <a href="classCdrSolver.html#a8022eea83998f3d752797efd45d372ba">More...</a><br /></td></tr>
 <tr class="separator:a8022eea83998f3d752797efd45d372ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae361afb82d90aff52cf8a55e8a005436"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ae361afb82d90aff52cf8a55e8a005436">redistribute</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_delta) noexcept</td></tr>
-<tr class="memdesc:ae361afb82d90aff52cf8a55e8a005436"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribute the mass differente into the data holder.  <a href="classCdrSolver.html#ae361afb82d90aff52cf8a55e8a005436">More...</a><br /></td></tr>
-<tr class="separator:ae361afb82d90aff52cf8a55e8a005436"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47a132e38a23a5c13c3cb901f623cb0e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a47a132e38a23a5c13c3cb901f623cb0e">redistribute</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_delta) const noexcept</td></tr>
+<tr class="memdesc:a47a132e38a23a5c13c3cb901f623cb0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add data through redistribution into cell-centered holders.  <a href="classCdrSolver.html#a47a132e38a23a5c13c3cb901f623cb0e">More...</a><br /></td></tr>
+<tr class="separator:a47a132e38a23a5c13c3cb901f623cb0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-types"></a>
 Protected Types</h2></td></tr>
 <tr class="memitem:a6c2cfa627dd07e57cb07c4ae896e3090"><td class="memItemLeft" align="right" valign="top"><a id="a6c2cfa627dd07e57cb07c4ae896e3090"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a6c2cfa627dd07e57cb07c4ae896e3090">Redistribution</a> { <b>VolumeWeighted</b>
-, <b>MassWeighted</b>
 , <b>None</b>
  }</td></tr>
 <tr class="memdesc:a6c2cfa627dd07e57cb07c4ae896e3090"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribution method. <br /></td></tr>
@@ -417,34 +413,6 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:af3f16898f7e11431a6dcb26d842a91a7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#af3f16898f7e11431a6dcb26d842a91a7">computeDivergenceIrregular</a> (LevelData&lt; EBCellFAB &gt; &amp;a_divG, const LevelData&lt; EBFluxFAB &gt; &amp;a_centroidFluxes, const LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_ebFlux, const int a_lvl)</td></tr>
 <tr class="memdesc:af3f16898f7e11431a6dcb26d842a91a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute conservative divergence on irregular cells (not kappa divided)  <a href="classCdrSolver.html#af3f16898f7e11431a6dcb26d842a91a7">More...</a><br /></td></tr>
 <tr class="separator:af3f16898f7e11431a6dcb26d842a91a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa1c00568baee2b2cf76d4fba24af9423"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#aa1c00568baee2b2cf76d4fba24af9423">incrementFluxRegister</a> (const <a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_flux)</td></tr>
-<tr class="memdesc:aa1c00568baee2b2cf76d4fba24af9423"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increment flux registers.  <a href="classCdrSolver.html#aa1c00568baee2b2cf76d4fba24af9423">More...</a><br /></td></tr>
-<tr class="separator:aa1c00568baee2b2cf76d4fba24af9423"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9c8f5bd76e99d2e55746176942d4a84e"><td class="memItemLeft" align="right" valign="top"><a id="a9c8f5bd76e99d2e55746176942d4a84e"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a9c8f5bd76e99d2e55746176942d4a84e">resetFluxRegister</a> ()</td></tr>
-<tr class="memdesc:a9c8f5bd76e99d2e55746176942d4a84e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set flux registers to zero (so they can be increment later). <br /></td></tr>
-<tr class="separator:a9c8f5bd76e99d2e55746176942d4a84e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a44d9fcff15b936cd81802873cbd5ddb6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a44d9fcff15b936cd81802873cbd5ddb6">coarseFineIncrement</a> (const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;<a class="el" href="classCdrSolver.html#a33f71250c8b1ef93999310c109e765c4">m_massDifference</a>)</td></tr>
-<tr class="memdesc:a44d9fcff15b936cd81802873cbd5ddb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increment the coarse-fine redist with mass difference (only for EB x CF)  <a href="classCdrSolver.html#a44d9fcff15b936cd81802873cbd5ddb6">More...</a><br /></td></tr>
-<tr class="separator:a44d9fcff15b936cd81802873cbd5ddb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a553fa6ca44573f91cc0522b971c0084f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a553fa6ca44573f91cc0522b971c0084f">hyperbolicRedistribution</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_stableDivergence)</td></tr>
-<tr class="memdesc:a553fa6ca44573f91cc0522b971c0084f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do mass redistribution on each level.  <a href="classCdrSolver.html#a553fa6ca44573f91cc0522b971c0084f">More...</a><br /></td></tr>
-<tr class="separator:a553fa6ca44573f91cc0522b971c0084f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a22c3c2ed50dd5146070c9d73157f6b44"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a22c3c2ed50dd5146070c9d73157f6b44">incrementRedistFlux</a> ()</td></tr>
-<tr class="memdesc:a22c3c2ed50dd5146070c9d73157f6b44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increment redistribution flux registers.  <a href="classCdrSolver.html#a22c3c2ed50dd5146070c9d73157f6b44">More...</a><br /></td></tr>
-<tr class="separator:a22c3c2ed50dd5146070c9d73157f6b44"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9435b5365d81a1fdcbc2b37a2822149a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a9435b5365d81a1fdcbc2b37a2822149a">incrementRedist</a> (const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_massDifference)</td></tr>
-<tr class="memdesc:a9435b5365d81a1fdcbc2b37a2822149a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increment redistribution objects with mass to be redistributed.  <a href="classCdrSolver.html#a9435b5365d81a1fdcbc2b37a2822149a">More...</a><br /></td></tr>
-<tr class="separator:a9435b5365d81a1fdcbc2b37a2822149a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4b718047e2c9bcc3810875dae9cf12f5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a4b718047e2c9bcc3810875dae9cf12f5">coarseFineRedistribution</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi)</td></tr>
-<tr class="memdesc:a4b718047e2c9bcc3810875dae9cf12f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do coarse-fine redistribution.  <a href="classCdrSolver.html#a4b718047e2c9bcc3810875dae9cf12f5">More...</a><br /></td></tr>
-<tr class="separator:a4b718047e2c9bcc3810875dae9cf12f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abfde982543d29db88613accff9d567b5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#abfde982543d29db88613accff9d567b5">reflux</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi)</td></tr>
-<tr class="memdesc:abfde982543d29db88613accff9d567b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reflux across refinement boundaries, using whatever is inside the flux registers.  <a href="classCdrSolver.html#abfde982543d29db88613accff9d567b5">More...</a><br /></td></tr>
-<tr class="separator:abfde982543d29db88613accff9d567b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a01f2ddd14ef7e7a38d9e3a7b2f9eb780"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a01f2ddd14ef7e7a38d9e3a7b2f9eb780">setEbIndexSpace</a> (const RefCountedPtr&lt; EBIndexSpace &gt; &amp;a_ebis)</td></tr>
-<tr class="memdesc:a01f2ddd14ef7e7a38d9e3a7b2f9eb780"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set ebis.  <a href="classCdrSolver.html#a01f2ddd14ef7e7a38d9e3a7b2f9eb780">More...</a><br /></td></tr>
-<tr class="separator:a01f2ddd14ef7e7a38d9e3a7b2f9eb780"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5b253df11825b4901b35bd6415262cb5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a5b253df11825b4901b35bd6415262cb5">initialDataDistribution</a> ()</td></tr>
 <tr class="memdesc:a5b253df11825b4901b35bd6415262cb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill initial data from a distribution function.  <a href="classCdrSolver.html#a5b253df11825b4901b35bd6415262cb5">More...</a><br /></td></tr>
 <tr class="separator:a5b253df11825b4901b35bd6415262cb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -483,16 +451,12 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a717520ff49df061821a7411db2b00123"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a717520ff49df061821a7411db2b00123">smoothHeavisideFaces</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_facePhi, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_cellPhi)</td></tr>
 <tr class="memdesc:a717520ff49df061821a7411db2b00123"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use Heaviside smoothing for computing face-centered states.  <a href="classCdrSolver.html#a717520ff49df061821a7411db2b00123">More...</a><br /></td></tr>
 <tr class="separator:a717520ff49df061821a7411db2b00123"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a13e5cf3b317437037e25187136d7ab0e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a13e5cf3b317437037e25187136d7ab0e">writeData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const bool a_interp)</td></tr>
-<tr class="memdesc:a13e5cf3b317437037e25187136d7ab0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classCdrSolver.html#a13e5cf3b317437037e25187136d7ab0e">More...</a><br /></td></tr>
-<tr class="separator:a13e5cf3b317437037e25187136d7ab0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e0ff5aea3015440094f24aeaac800e0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a4e0ff5aea3015440094f24aeaac800e0">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
+<tr class="memdesc:a4e0ff5aea3015440094f24aeaac800e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classCdrSolver.html#a4e0ff5aea3015440094f24aeaac800e0">More...</a><br /></td></tr>
+<tr class="separator:a4e0ff5aea3015440094f24aeaac800e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:af8479fa2eb98cbdd31f7e76de0d5118e"><td class="memItemLeft" align="right" valign="top"><a id="af8479fa2eb98cbdd31f7e76de0d5118e"></a>
-RefCountedPtr&lt; EBIndexSpace &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#af8479fa2eb98cbdd31f7e76de0d5118e">m_ebis</a></td></tr>
-<tr class="memdesc:af8479fa2eb98cbdd31f7e76de0d5118e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index space. <br /></td></tr>
-<tr class="separator:af8479fa2eb98cbdd31f7e76de0d5118e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43c1c25b5a5042ef46a6dc2e5ad31a6d"><td class="memItemLeft" align="right" valign="top"><a id="a43c1c25b5a5042ef46a6dc2e5ad31a6d"></a>
 RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a43c1c25b5a5042ef46a6dc2e5ad31a6d">m_species</a></td></tr>
 <tr class="memdesc:a43c1c25b5a5042ef46a6dc2e5ad31a6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Species through which e.g. mobility/diffusion and initial conditions is passed. <br /></td></tr>
@@ -536,26 +500,15 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a203db9398f39a725c45f08e3d570ab61">m_source</a></td></tr>
 <tr class="memdesc:a203db9398f39a725c45f08e3d570ab61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Source term. <br /></td></tr>
 <tr class="separator:a203db9398f39a725c45f08e3d570ab61"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6cf91a2533184cf27893c1aebbcb6628"><td class="memItemLeft" align="right" valign="top"><a id="a6cf91a2533184cf27893c1aebbcb6628"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a6cf91a2533184cf27893c1aebbcb6628">m_cellVelocity</a></td></tr>
-<tr class="memdesc:a6cf91a2533184cf27893c1aebbcb6628"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-centered velocities. <br /></td></tr>
+<tr class="memitem:a6cf91a2533184cf27893c1aebbcb6628"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a6cf91a2533184cf27893c1aebbcb6628">m_cellVelocity</a></td></tr>
+<tr class="memdesc:a6cf91a2533184cf27893c1aebbcb6628"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-centered velocities.  <a href="classCdrSolver.html#a6cf91a2533184cf27893c1aebbcb6628">More...</a><br /></td></tr>
 <tr class="separator:a6cf91a2533184cf27893c1aebbcb6628"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a689092a6402573991df81b7ad3821a6a"><td class="memItemLeft" align="right" valign="top"><a id="a689092a6402573991df81b7ad3821a6a"></a>
-<a class="el" href="classEBAMRData.html">EBAMRFluxData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a689092a6402573991df81b7ad3821a6a">m_faceStates</a></td></tr>
-<tr class="memdesc:a689092a6402573991df81b7ad3821a6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holder for face centered states. <br /></td></tr>
+<tr class="memitem:a689092a6402573991df81b7ad3821a6a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a689092a6402573991df81b7ad3821a6a">m_faceStates</a></td></tr>
+<tr class="memdesc:a689092a6402573991df81b7ad3821a6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holder for face centered states.  <a href="classCdrSolver.html#a689092a6402573991df81b7ad3821a6a">More...</a><br /></td></tr>
 <tr class="separator:a689092a6402573991df81b7ad3821a6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af00b83b3a5db90215a862a639c282593"><td class="memItemLeft" align="right" valign="top"><a id="af00b83b3a5db90215a862a639c282593"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#af00b83b3a5db90215a862a639c282593">m_scratch</a></td></tr>
-<tr class="memdesc:af00b83b3a5db90215a862a639c282593"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage. <br /></td></tr>
-<tr class="separator:af00b83b3a5db90215a862a639c282593"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbc5d3c2d9c4c541be1d20abc986b087"><td class="memItemLeft" align="right" valign="top"><a id="adbc5d3c2d9c4c541be1d20abc986b087"></a>
-<a class="el" href="classEBAMRData.html">EBAMRFluxData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#adbc5d3c2d9c4c541be1d20abc986b087">m_scratchFluxOne</a></td></tr>
-<tr class="memdesc:adbc5d3c2d9c4c541be1d20abc986b087"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for flux. <br /></td></tr>
-<tr class="separator:adbc5d3c2d9c4c541be1d20abc986b087"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4ed4c055cb19becb3bc7cb342c23144"><td class="memItemLeft" align="right" valign="top"><a id="af4ed4c055cb19becb3bc7cb342c23144"></a>
-<a class="el" href="classEBAMRData.html">EBAMRFluxData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#af4ed4c055cb19becb3bc7cb342c23144">m_scratchFluxTwo</a></td></tr>
-<tr class="memdesc:af4ed4c055cb19becb3bc7cb342c23144"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for flux. <br /></td></tr>
-<tr class="separator:af4ed4c055cb19becb3bc7cb342c23144"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acfb689a4b309c028ae33c39feb261f88"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#acfb689a4b309c028ae33c39feb261f88">m_faceVelocity</a></td></tr>
+<tr class="memdesc:acfb689a4b309c028ae33c39feb261f88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Face-centered velocities (only normal components)  <a href="classCdrSolver.html#acfb689a4b309c028ae33c39feb261f88">More...</a><br /></td></tr>
+<tr class="separator:acfb689a4b309c028ae33c39feb261f88"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5228df358369ae320bd65349bb4beee8"><td class="memItemLeft" align="right" valign="top"><a id="a5228df358369ae320bd65349bb4beee8"></a>
 <a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a5228df358369ae320bd65349bb4beee8">m_nonConservativeDivG</a></td></tr>
 <tr class="memdesc:a5228df358369ae320bd65349bb4beee8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for the non-conservative divergence. <br /></td></tr>
@@ -576,10 +529,6 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ad15216dfe727bdab4c9d527ad439eec4">m_cacheSource</a></td></tr>
 <tr class="memdesc:ad15216dfe727bdab4c9d527ad439eec4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cached source term for regrids. <br /></td></tr>
 <tr class="separator:ad15216dfe727bdab4c9d527ad439eec4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acfb689a4b309c028ae33c39feb261f88"><td class="memItemLeft" align="right" valign="top"><a id="acfb689a4b309c028ae33c39feb261f88"></a>
-<a class="el" href="classEBAMRData.html">EBAMRFluxData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#acfb689a4b309c028ae33c39feb261f88">m_faceVelocity</a></td></tr>
-<tr class="memdesc:acfb689a4b309c028ae33c39feb261f88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Face-centered velocities (only normal components) <br /></td></tr>
-<tr class="separator:acfb689a4b309c028ae33c39feb261f88"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac8711ef32b9ee6a8c00c53d8d8b493b0"><td class="memItemLeft" align="right" valign="top"><a id="ac8711ef32b9ee6a8c00c53d8d8b493b0"></a>
 <a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ac8711ef32b9ee6a8c00c53d8d8b493b0">m_ebVelocity</a></td></tr>
 <tr class="memdesc:ac8711ef32b9ee6a8c00c53d8d8b493b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">EB-centered velocities. <br /></td></tr>
@@ -592,17 +541,14 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <a class="el" href="classEBAMRData.html">EBAMRIFData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ad2fb9302465592fc1a65491a5b9d6ae9">m_domainFlux</a></td></tr>
 <tr class="memdesc:ad2fb9302465592fc1a65491a5b9d6ae9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain flux. <br /></td></tr>
 <tr class="separator:ad2fb9302465592fc1a65491a5b9d6ae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8db79ebe9dc8c4e9cef90a0eebcff564"><td class="memItemLeft" align="right" valign="top"><a id="a8db79ebe9dc8c4e9cef90a0eebcff564"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a8db79ebe9dc8c4e9cef90a0eebcff564">m_cellCenteredDiffusionCoefficient</a></td></tr>
-<tr class="memdesc:a8db79ebe9dc8c4e9cef90a0eebcff564"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion coefficients on cell centers. <br /></td></tr>
+<tr class="memitem:a8db79ebe9dc8c4e9cef90a0eebcff564"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a8db79ebe9dc8c4e9cef90a0eebcff564">m_cellCenteredDiffusionCoefficient</a></td></tr>
+<tr class="memdesc:a8db79ebe9dc8c4e9cef90a0eebcff564"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion coefficients on cell centers.  <a href="classCdrSolver.html#a8db79ebe9dc8c4e9cef90a0eebcff564">More...</a><br /></td></tr>
 <tr class="separator:a8db79ebe9dc8c4e9cef90a0eebcff564"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a297ba2dee22bc598e880686e353faeb5"><td class="memItemLeft" align="right" valign="top"><a id="a297ba2dee22bc598e880686e353faeb5"></a>
-<a class="el" href="classEBAMRData.html">EBAMRFluxData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a297ba2dee22bc598e880686e353faeb5">m_faceCenteredDiffusionCoefficient</a></td></tr>
-<tr class="memdesc:a297ba2dee22bc598e880686e353faeb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion coefficients on face centers. <br /></td></tr>
+<tr class="memitem:a297ba2dee22bc598e880686e353faeb5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a297ba2dee22bc598e880686e353faeb5">m_faceCenteredDiffusionCoefficient</a></td></tr>
+<tr class="memdesc:a297ba2dee22bc598e880686e353faeb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion coefficients on face centers.  <a href="classCdrSolver.html#a297ba2dee22bc598e880686e353faeb5">More...</a><br /></td></tr>
 <tr class="separator:a297ba2dee22bc598e880686e353faeb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a671be5eecf5ae4e148104905d1a2d984"><td class="memItemLeft" align="right" valign="top"><a id="a671be5eecf5ae4e148104905d1a2d984"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a671be5eecf5ae4e148104905d1a2d984">m_ebCenteredDiffusionCoefficient</a></td></tr>
-<tr class="memdesc:a671be5eecf5ae4e148104905d1a2d984"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion coefficients on EB faces. <br /></td></tr>
+<tr class="memitem:a671be5eecf5ae4e148104905d1a2d984"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a671be5eecf5ae4e148104905d1a2d984">m_ebCenteredDiffusionCoefficient</a></td></tr>
+<tr class="memdesc:a671be5eecf5ae4e148104905d1a2d984"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion coefficients on EB faces.  <a href="classCdrSolver.html#a671be5eecf5ae4e148104905d1a2d984">More...</a><br /></td></tr>
 <tr class="separator:a671be5eecf5ae4e148104905d1a2d984"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7179cbf866842d59f826f8bb30469a45"><td class="memItemLeft" align="right" valign="top">std::map&lt; <a class="el" href="classCdrDomainBC.html#ab012a2d05bf927e27dd38aafaf2dba2d">CdrDomainBC::DomainSide</a>, <a class="el" href="classCdrDomainBC.html#a6ffe2fab3e0f415bf30fb5d68efdcb51">CdrDomainBC::FluxFunction</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a7179cbf866842d59f826f8bb30469a45">m_domainFluxFunctions</a></td></tr>
 <tr class="memdesc:a7179cbf866842d59f826f8bb30469a45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain flux functions.  <a href="classCdrSolver.html#a7179cbf866842d59f826f8bb30469a45">More...</a><br /></td></tr>
@@ -1163,76 +1109,6 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <dl class="section note"><dt>Note</dt><dd>This sets the velocity component normal to the face to be the arithmetic average of the cell center velocities on the low/high side of the face. </dd>
 <dd>
 Virtual because some solvers might want to do this differently. </dd></dl>
-
-</div>
-</div>
-<a id="a44d9fcff15b936cd81802873cbd5ddb6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a44d9fcff15b936cd81802873cbd5ddb6">&#9670;&nbsp;</a></span>coarseFineIncrement()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void CdrSolver::coarseFineIncrement </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
-          <td class="paramname"><em>m_massDifference</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Increment the coarse-fine redist with mass difference (only for EB x CF) </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_massDifference</td><td>Mass difference </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section note"><dt>Note</dt><dd>This increments the so-called redistribution registers for ensuring that redistributed mass around the cut cells ends up in the right place. </dd></dl>
-
-</div>
-</div>
-<a id="a4b718047e2c9bcc3810875dae9cf12f5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4b718047e2c9bcc3810875dae9cf12f5">&#9670;&nbsp;</a></span>coarseFineRedistribution()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void CdrSolver::coarseFineRedistribution </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_phi</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Do coarse-fine redistribution. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>On output, this will be incremented with redistributed mass across refinement boundaries. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section note"><dt>Note</dt><dd>This redistributes mass around the CF region, using the coarse-fine redistribution registers </dd></dl>
 
 </div>
 </div>
@@ -2108,7 +1984,7 @@ Virtual because some solvers might want to do this differently. </dd></dl>
   </table>
   </dd>
 </dl>
-<p>This computes dt = phi/source, but only for cells where phi lies within a_tolerance*a_max (and source &gt; 0) </p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000005">Todo:</a></b></dt><dd>An old routine which we could (probably) remove. </dd></dl>
+<p>This computes dt = phi/source, but only for cells where phi lies within a_tolerance*a_max (and source &gt; 0) </p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000004">Todo:</a></b></dt><dd>An old routine which we could (probably) remove. </dd></dl>
 
 </div>
 </div>
@@ -2708,7 +2584,7 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 </div><div class="memdoc">
 
 <p>Get number of output fields. </p>
-<dl class="section return"><dt>Returns</dt><dd>Returns number of plot variables include in <a class="el" href="classCdrSolver.html#ae5ff5275be09e06043378eae81f89267" title="Write plot file.">writePlotFile()</a> and <a class="el" href="classCdrSolver.html#afae1ef6f463bded79a599bbe60505fb6" title="Write output data to a_output.">writePlotData()</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns number of plot variables include in <a class="el" href="classCdrSolver.html#ae5ff5275be09e06043378eae81f89267" title="Write plot file.">writePlotFile()</a> and <a class="el" href="classCdrSolver.html#a0afca5f24b820aa16abf2ed3fdcd7333" title="Write output data to a_output.">writePlotData()</a> </dd></dl>
 
 </div>
 </div>
@@ -2978,138 +2854,6 @@ Virtual because some solvers might want to do this differently. </dd></dl>
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a id="a553fa6ca44573f91cc0522b971c0084f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a553fa6ca44573f91cc0522b971c0084f">&#9670;&nbsp;</a></span>hyperbolicRedistribution()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void CdrSolver::hyperbolicRedistribution </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_stableDivergence</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Do mass redistribution on each level. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_stableDivergence</td><td>Hybrid divergence on input, stable and conservative divergence on output. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section note"><dt>Note</dt><dd>This only redistributes on the level &ndash; it does not account for distribution across refinement boundaries (need the other routines for that). </dd></dl>
-
-</div>
-</div>
-<a id="aa1c00568baee2b2cf76d4fba24af9423"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa1c00568baee2b2cf76d4fba24af9423">&#9670;&nbsp;</a></span>incrementFluxRegister()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void CdrSolver::incrementFluxRegister </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_flux</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Increment flux registers. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_flux</td><td>Face centered fluxes </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a9435b5365d81a1fdcbc2b37a2822149a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9435b5365d81a1fdcbc2b37a2822149a">&#9670;&nbsp;</a></span>incrementRedist()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void CdrSolver::incrementRedist </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_massDifference</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Increment redistribution objects with mass to be redistributed. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_massDifference</td><td>Mass to be redistributed. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section note"><dt>Note</dt><dd>This only increments the level-register &ndash; must call coarseFineIncrement to do the other registers. </dd></dl>
-
-</div>
-</div>
-<a id="a22c3c2ed50dd5146070c9d73157f6b44"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a22c3c2ed50dd5146070c9d73157f6b44">&#9670;&nbsp;</a></span>incrementRedistFlux()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void CdrSolver::incrementRedistFlux </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Increment redistribution flux registers. </p>
-<dl class="section note"><dt>Note</dt><dd>This just tells the flux registers about whats going on near EB refinement boundaries. </dd></dl>
 
 </div>
 </div>
@@ -3482,10 +3226,12 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This stores m_phi and m_source. </dd></dl>
 
+<p>Reimplemented in <a class="el" href="classCdrMultigrid.html#a73ed7f3e655d15541fefdf6d621b8092">CdrMultigrid</a>.</p>
+
 </div>
 </div>
-<a id="ae361afb82d90aff52cf8a55e8a005436"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae361afb82d90aff52cf8a55e8a005436">&#9670;&nbsp;</a></span>redistribute()</h2>
+<a id="a47a132e38a23a5c13c3cb901f623cb0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a47a132e38a23a5c13c3cb901f623cb0e">&#9670;&nbsp;</a></span>redistribute()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3508,7 +3254,7 @@ Virtual because some solvers might want to do this differently. </dd></dl>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -3518,45 +3264,11 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 </table>
 </div><div class="memdoc">
 
-<p>Redistribute the mass differente into the data holder. </p>
+<p>Add data through redistribution into cell-centered holders. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Cell data </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_delta</td><td>Mass to be re-distributed. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="abfde982543d29db88613accff9d567b5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abfde982543d29db88613accff9d567b5">&#9670;&nbsp;</a></span>reflux()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void CdrSolver::reflux </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_phi</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Reflux across refinement boundaries, using whatever is inside the flux registers. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Cell-centered state </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Target data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_delta</td><td>Data to be redistributed </td></tr>
   </table>
   </dd>
 </dl>
@@ -4042,40 +3754,6 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 
 </div>
 </div>
-<a id="a01f2ddd14ef7e7a38d9e3a7b2f9eb780"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a01f2ddd14ef7e7a38d9e3a7b2f9eb780">&#9670;&nbsp;</a></span>setEbIndexSpace()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void CdrSolver::setEbIndexSpace </td>
-          <td>(</td>
-          <td class="paramtype">const RefCountedPtr&lt; EBIndexSpace &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_ebis</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set ebis. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebis</td><td>EBIndexspace </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a3cec5c237cc89b6bc520aa86e189c45e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3cec5c237cc89b6bc520aa86e189c45e">&#9670;&nbsp;</a></span>setPhase()</h2>
 
@@ -4138,40 +3816,6 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> identifier </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ae7e0e2a4f74395f38bd403c98970979a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae7e0e2a4f74395f38bd403c98970979a">&#9670;&nbsp;</a></span>setRedistWeights()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void CdrSolver::setRedistWeights </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_weights</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set redistribution weights. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_weights</td><td>Weights to use for redistribution (e.g., mass) </td></tr>
   </table>
   </dd>
 </dl>
@@ -4599,8 +4243,8 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 
 </div>
 </div>
-<a id="a13e5cf3b317437037e25187136d7ab0e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a13e5cf3b317437037e25187136d7ab0e">&#9670;&nbsp;</a></span>writeData()</h2>
+<a id="a4e0ff5aea3015440094f24aeaac800e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e0ff5aea3015440094f24aeaac800e0">&#9670;&nbsp;</a></span>writeData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4611,7 +4255,7 @@ Virtual because some solvers might want to do this differently. </dd></dl>
         <tr>
           <td class="memname">void CdrSolver::writeData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
@@ -4629,18 +4273,30 @@ Virtual because some solvers might want to do this differently. </dd></dl>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const bool&#160;</td>
-          <td class="paramname"><em>a_interp</em>&#160;</td>
+          <td class="paramname"><em>a_interpToCentroids</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_interpGhost</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -4651,15 +4307,17 @@ Virtual because some solvers might want to do this differently. </dd></dl>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where this solver begins writing the output. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data to write. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_interp</td><td>If true, a_data will be interpolated to cell centroids before writing to a_output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpToCentroids</td><td>If true, a_data will be interpolated to cell centroids before writing to a_output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpGhost</td><td>If true, interpolate ghost cells </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="afae1ef6f463bded79a599bbe60505fb6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afae1ef6f463bded79a599bbe60505fb6">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a0afca5f24b820aa16abf2ed3fdcd7333"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0afca5f24b820aa16abf2ed3fdcd7333">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4670,24 +4328,30 @@ Virtual because some solvers might want to do this differently. </dd></dl>
         <tr>
           <td class="memname">void CdrSolver::writePlotData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>a_icomp</em>&#160;</td>
+          <td class="paramname"><em>a_icomp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -4697,14 +4361,13 @@ Virtual because some solvers might want to do this differently. </dd></dl>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where this solver begins writing the output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This will write the plot data in this solver to a_output, starting on a_comp </dd>
 <dd>
 This routine writes m_phi on centroids (and not cell-centers). </dd></dl>
-
-<p>Reimplemented in <a class="el" href="classCdrMultigrid.html#aa4ef76ca5e21090769881055fd1dd5a5">CdrMultigrid</a>.</p>
 
 </div>
 </div>
@@ -4737,6 +4400,56 @@ This routine writes m_phi on centroids (and not cell-centers). </dd></dl>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="a8db79ebe9dc8c4e9cef90a0eebcff564"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8db79ebe9dc8c4e9cef90a0eebcff564">&#9670;&nbsp;</a></span>m_cellCenteredDiffusionCoefficient</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> CdrSolver::m_cellCenteredDiffusionCoefficient</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Diffusion coefficients on cell centers. </p>
+<dl class="section note"><dt>Note</dt><dd>Memory is only allocated if the solver is diffusive </dd></dl>
+
+</div>
+</div>
+<a id="a6cf91a2533184cf27893c1aebbcb6628"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6cf91a2533184cf27893c1aebbcb6628">&#9670;&nbsp;</a></span>m_cellVelocity</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> CdrSolver::m_cellVelocity</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cell-centered velocities. </p>
+<dl class="section note"><dt>Note</dt><dd>Memory is only allocated if the solver is mobile. </dd></dl>
+
+</div>
+</div>
 <a id="a8a70b05d0a25a38e8bca59579251a12a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8a70b05d0a25a38e8bca59579251a12a">&#9670;&nbsp;</a></span>m_className</h2>
 
@@ -4784,6 +4497,106 @@ This routine writes m_phi on centroids (and not cell-centers). </dd></dl>
 
 <p>Domain flux functions. </p>
 <p>Used when the user specifies that the domain flux is function-based </p>
+
+</div>
+</div>
+<a id="a671be5eecf5ae4e148104905d1a2d984"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a671be5eecf5ae4e148104905d1a2d984">&#9670;&nbsp;</a></span>m_ebCenteredDiffusionCoefficient</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRIVData</a> CdrSolver::m_ebCenteredDiffusionCoefficient</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Diffusion coefficients on EB faces. </p>
+<dl class="section note"><dt>Note</dt><dd>Memory is only allocated if the solver is diffusive </dd></dl>
+
+</div>
+</div>
+<a id="a297ba2dee22bc598e880686e353faeb5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a297ba2dee22bc598e880686e353faeb5">&#9670;&nbsp;</a></span>m_faceCenteredDiffusionCoefficient</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a> CdrSolver::m_faceCenteredDiffusionCoefficient</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Diffusion coefficients on face centers. </p>
+<dl class="section note"><dt>Note</dt><dd>Memory is only allocated if the solver is diffusive </dd></dl>
+
+</div>
+</div>
+<a id="a689092a6402573991df81b7ad3821a6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a689092a6402573991df81b7ad3821a6a">&#9670;&nbsp;</a></span>m_faceStates</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a> CdrSolver::m_faceStates</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Holder for face centered states. </p>
+<dl class="section note"><dt>Note</dt><dd>Memory is only allocated if the solver is mobile. </dd></dl>
+
+</div>
+</div>
+<a id="acfb689a4b309c028ae33c39feb261f88"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acfb689a4b309c028ae33c39feb261f88">&#9670;&nbsp;</a></span>m_faceVelocity</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a> CdrSolver::m_faceVelocity</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Face-centered velocities (only normal components) </p>
+<dl class="section note"><dt>Note</dt><dd>Memory is only allocated if the solver is mobile. </dd></dl>
 
 </div>
 </div>

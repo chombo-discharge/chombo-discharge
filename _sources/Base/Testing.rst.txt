@@ -122,3 +122,30 @@ To ensure that the various components in ``chombo-discharge`` converge at desire
 These are located in :file:`$DISCHARGE_HOME/Exec/Convergence`.
 The tests are too extensive to include in continuous integration, and they must be run locally like a regular ``chombo-discharge`` application.
 Our approach for convergence testing is found in :ref:`Chap:VV`.
+
+Performance profiling
+---------------------
+
+There are two ways to run performance profiling of ``chombo-discharge``:
+
+* A posteriori profiling using Chombo macros.
+  Most routines in ``chombo-discharge`` use these macros and they will compute the wall clock time spent in each routine.
+
+  To enable these timers, set ``CH_TIMER=1`` in the shell where you run your application.
+  E.g,
+
+  .. code-block:: bash
+
+     export CH_TIMER=1
+
+  .. warning::
+
+     ``Chombo``'s timers are not meant to use with many time steps.
+     For efficient use, it is best to use it for a single time step.
+
+* In-place profiling using the ``chombo-discharge`` Timer class.
+  Some classes in ``chombo-discharge`` use the ``Timer`` class, which also computes on-the-fly calculations of potential load imbalance.
+
+  .. warning::
+
+     The ``Timer`` class incurs large performance penalties at high concurrencies (1K CPU cores and above).

@@ -215,9 +215,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a83d7523f112723ad7b036527589375b3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a83d7523f112723ad7b036527589375b3">postCheckpoint</a> ()</td></tr>
 <tr class="memdesc:a83d7523f112723ad7b036527589375b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write checkpoint data for a level @paramo[out] a_handle HDF5 handle.  <a href="classFieldSolver.html#a83d7523f112723ad7b036527589375b3">More...</a><br /></td></tr>
 <tr class="separator:a83d7523f112723ad7b036527589375b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a52c0ac9548d87ba8684fe01f9e27c071"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a52c0ac9548d87ba8684fe01f9e27c071">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp, const bool a_forceNoInterp=false)</td></tr>
-<tr class="memdesc:a52c0ac9548d87ba8684fe01f9e27c071"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write output data to a_output.  <a href="classFieldSolver.html#a52c0ac9548d87ba8684fe01f9e27c071">More...</a><br /></td></tr>
-<tr class="separator:a52c0ac9548d87ba8684fe01f9e27c071"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5827e0db4fc45a44401041f6c84010b0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a5827e0db4fc45a44401041f6c84010b0">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const int a_level, const bool a_forceNoInterp=false) const noexcept</td></tr>
+<tr class="memdesc:a5827e0db4fc45a44401041f6c84010b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write output data to a_output.  <a href="classFieldSolver.html#a5827e0db4fc45a44401041f6c84010b0">More...</a><br /></td></tr>
+<tr class="separator:a5827e0db4fc45a44401041f6c84010b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a68c536ce91b20aadb60afd29518e4109"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a68c536ce91b20aadb60afd29518e4109">writeMultifluidData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_data, const phase::which_phase a_phase, const int a_level, const bool a_interp) const noexcept</td></tr>
+<tr class="memdesc:a68c536ce91b20aadb60afd29518e4109"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write multifluid data to single-fluid data holders.  <a href="classFieldSolver.html#a68c536ce91b20aadb60afd29518e4109">More...</a><br /></td></tr>
+<tr class="separator:a68c536ce91b20aadb60afd29518e4109"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23561315186bb33eb58899a4fe545f90"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a23561315186bb33eb58899a4fe545f90">setRealm</a> (const std::string a_realm)</td></tr>
 <tr class="memdesc:a23561315186bb33eb58899a4fe545f90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a>.  <a href="classFieldSolver.html#a23561315186bb33eb58899a4fe545f90">More...</a><br /></td></tr>
 <tr class="separator:a23561315186bb33eb58899a4fe545f90"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -301,9 +304,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a37f560df4bb28e832891a74893bd115c">getDataLocation</a> () const</td></tr>
 <tr class="memdesc:a37f560df4bb28e832891a74893bd115c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get data location. <br /></td></tr>
 <tr class="separator:a37f560df4bb28e832891a74893bd115c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4a41799caf6e7027ba765b2a30839b59"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a4a41799caf6e7027ba765b2a30839b59">writeMultifluidData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_data, const phase::which_phase a_phase, const bool a_interp) const</td></tr>
-<tr class="memdesc:a4a41799caf6e7027ba765b2a30839b59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write multifluid data to single-fluid data holders.  <a href="classFieldSolver.html#a4a41799caf6e7027ba765b2a30839b59">More...</a><br /></td></tr>
-<tr class="separator:a4a41799caf6e7027ba765b2a30839b59"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -342,9 +342,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a0f209367f32a6c4a8afa2b26b7cf681d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a0f209367f32a6c4a8afa2b26b7cf681d">setEbPermittivities</a> (BaseIVFAB&lt; Real &gt; &amp;a_perm, const Box &amp;a_cellBox, const EBISBox &amp;a_ebisbox, const RealVect &amp;a_origin, const Real &amp;a_dx)</td></tr>
 <tr class="memdesc:a0f209367f32a6c4a8afa2b26b7cf681d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set EB-centered permittivities.  <a href="classFieldSolver.html#a0f209367f32a6c4a8afa2b26b7cf681d">More...</a><br /></td></tr>
 <tr class="separator:a0f209367f32a6c4a8afa2b26b7cf681d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa78e7e79984fd55bf24d39b4773d989a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#aa78e7e79984fd55bf24d39b4773d989a">writeSurfaceData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_data)</td></tr>
-<tr class="memdesc:aa78e7e79984fd55bf24d39b4773d989a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write surface data to volume data holder.  <a href="classFieldSolver.html#aa78e7e79984fd55bf24d39b4773d989a">More...</a><br /></td></tr>
-<tr class="separator:aa78e7e79984fd55bf24d39b4773d989a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e719b8fd943ce745c34ee14b4d1b2e3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a2e719b8fd943ce745c34ee14b4d1b2e3">writeSurfaceData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_data, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a2e719b8fd943ce745c34ee14b4d1b2e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write surface data to volume data holder.  <a href="classFieldSolver.html#a2e719b8fd943ce745c34ee14b4d1b2e3">More...</a><br /></td></tr>
+<tr class="separator:a2e719b8fd943ce745c34ee14b4d1b2e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a07d5385f7fc47518c1a89f42124e2385"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classElectrostaticDomainBc.html#a313bf6a5f5d16731a6b0349835ebb934">ElectrostaticDomainBc::BcType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a07d5385f7fc47518c1a89f42124e2385">parseBcString</a> (const std::string a_str) const</td></tr>
 <tr class="memdesc:a07d5385f7fc47518c1a89f42124e2385"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns BC type based on string.  <a href="classFieldSolver.html#a07d5385f7fc47518c1a89f42124e2385">More...</a><br /></td></tr>
 <tr class="separator:a07d5385f7fc47518c1a89f42124e2385"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1368,6 +1368,8 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 </dl>
 <p>This allocates m_cache which gets a copy of m_potential </p>
 
+<p>Reimplemented in <a class="el" href="classFieldSolverMultigrid.html#a5527b37ad1f660d7e22c42f543377ac9">FieldSolverMultigrid</a>.</p>
+
 </div>
 </div>
 <a id="a3dc5a56250e5391f959a67e55e854b97"></a>
@@ -2243,8 +2245,8 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a4a41799caf6e7027ba765b2a30839b59"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4a41799caf6e7027ba765b2a30839b59">&#9670;&nbsp;</a></span>writeMultifluidData()</h2>
+<a id="a68c536ce91b20aadb60afd29518e4109"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a68c536ce91b20aadb60afd29518e4109">&#9670;&nbsp;</a></span>writeMultifluidData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2255,7 +2257,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="memname">void FieldSolver::writeMultifluidData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
@@ -2279,6 +2281,12 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const bool&#160;</td>
           <td class="paramname"><em>a_interp</em>&#160;</td>
         </tr>
@@ -2290,7 +2298,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -2302,6 +2310,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_comp</td><td>Current component in a_output. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Multifluid data holder </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Main phase in cut-cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_interp</td><td>Special flag which, if true, tells <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> to interpolate the data to centroids (in irregular cells). </td></tr>
   </table>
   </dd>
@@ -2309,8 +2318,8 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a52c0ac9548d87ba8684fe01f9e27c071"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a52c0ac9548d87ba8684fe01f9e27c071">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a5827e0db4fc45a44401041f6c84010b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5827e0db4fc45a44401041f6c84010b0">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2321,7 +2330,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="memname">void FieldSolver::writePlotData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
@@ -2333,18 +2342,24 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const bool&#160;</td>
           <td class="paramname"><em>a_forceNoInterp</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -2354,6 +2369,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_comp</td><td>Current component in a_output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_forceNoInterp</td><td>Forces data to be written using native centering </td></tr>
   </table>
   </dd>
@@ -2390,8 +2406,8 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="aa78e7e79984fd55bf24d39b4773d989a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa78e7e79984fd55bf24d39b4773d989a">&#9670;&nbsp;</a></span>writeSurfaceData()</h2>
+<a id="a2e719b8fd943ce745c34ee14b4d1b2e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e719b8fd943ce745c34ee14b4d1b2e3">&#9670;&nbsp;</a></span>writeSurfaceData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2402,7 +2418,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="memname">void FieldSolver::writeSurfaceData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
@@ -2414,18 +2430,24 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_data</em>&#160;</td>
+          <td class="paramtype">const LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">

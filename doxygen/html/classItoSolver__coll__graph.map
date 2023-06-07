@@ -1,5 +1,5 @@
 <map id="ItoSolver" name="ItoSolver">
-<area shape="rect" id="node1" title="Base class for Ito diffusion particle models." alt="" coords="164,257,244,284"/>
+<area shape="rect" id="node1" title="Base class for Ito diffusion particle models." alt="" coords="164,243,244,269"/>
 <area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="5,95,189,136"/>
 <area shape="rect" id="node3" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="135,5,273,32"/>
 <area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="214,102,410,129"/>

@@ -152,13 +152,17 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad7064e3fa9403565485fc9d86ce1a65c">postInitialize</a> () noexcept override</td></tr>
 <tr class="memdesc:ad7064e3fa9403565485fc9d86ce1a65c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Post-initialization operations. Default does nothing. <br /></td></tr>
 <tr class="separator:ad7064e3fa9403565485fc9d86ce1a65c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a836fcdb2b29f1ff45b8e5aae5a21631e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a836fcdb2b29f1ff45b8e5aae5a21631e">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, Vector&lt; std::string &gt; &amp;a_plotVariableNames, int &amp;a_icomp) const noexcept override</td></tr>
-<tr class="memdesc:a836fcdb2b29f1ff45b8e5aae5a21631e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a836fcdb2b29f1ff45b8e5aae5a21631e">More...</a><br /></td></tr>
-<tr class="separator:a836fcdb2b29f1ff45b8e5aae5a21631e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a39b03821aa407650a2546abf54c40af3"><td class="memItemLeft" align="right" valign="top"><a id="a39b03821aa407650a2546abf54c40af3"></a>
 virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a39b03821aa407650a2546abf54c40af3">getNumberOfPlotVariables</a> () const noexcept override</td></tr>
 <tr class="memdesc:a39b03821aa407650a2546abf54c40af3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of plot variables for the output file. <br /></td></tr>
 <tr class="separator:a39b03821aa407650a2546abf54c40af3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8176f7a3875c0cf9ad0b676fdaddf575"><td class="memItemLeft" align="right" valign="top"><a id="a8176f7a3875c0cf9ad0b676fdaddf575"></a>
+virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a8176f7a3875c0cf9ad0b676fdaddf575">getPlotVariableNames</a> () const noexcept override</td></tr>
+<tr class="memdesc:a8176f7a3875c0cf9ad0b676fdaddf575"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names. <br /></td></tr>
+<tr class="separator:a8176f7a3875c0cf9ad0b676fdaddf575"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad86e1ef1874a3fcd827accf1e75948dd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad86e1ef1874a3fcd827accf1e75948dd">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const noexcept override</td></tr>
+<tr class="memdesc:ad86e1ef1874a3fcd827accf1e75948dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad86e1ef1874a3fcd827accf1e75948dd">More...</a><br /></td></tr>
+<tr class="separator:ad86e1ef1874a3fcd827accf1e75948dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9ff31e5708607f0714b5aa594324318d"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; long int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a9ff31e5708607f0714b5aa594324318d">getCheckpointLoads</a> (const std::string a_realm, const int a_level) const override</td></tr>
 <tr class="memdesc:a9ff31e5708607f0714b5aa594324318d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get computational loads to be checkpointed.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a9ff31e5708607f0714b5aa594324318d">More...</a><br /></td></tr>
 <tr class="separator:a9ff31e5708607f0714b5aa594324318d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -224,6 +228,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a2da29e7e5a5ac98dc2316f3439725289">setComputationalGeometry</a> (const RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> &gt; &amp;a_computationalGeometry)</td></tr>
 <tr class="memdesc:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the computational geometry.  <a href="classTimeStepper.html#a2da29e7e5a5ac98dc2316f3439725289">More...</a><br /></td></tr>
 <tr class="separator:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20cc9ee90664ed9614bd5d18a7104d24 inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top"><a id="a20cc9ee90664ed9614bd5d18a7104d24"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a20cc9ee90664ed9614bd5d18a7104d24">prePlot</a> ()</td></tr>
+<tr class="memdesc:a20cc9ee90664ed9614bd5d18a7104d24 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">An option for calling special functions prior to plotting data. Called by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> in the IMMEDIATELY before writing the plot file. <br /></td></tr>
+<tr class="separator:a20cc9ee90664ed9614bd5d18a7104d24 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba1d6a5006558bc0e0029a89e88e9899 inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#aba1d6a5006558bc0e0029a89e88e9899">needToRegrid</a> ()</td></tr>
 <tr class="memdesc:aba1d6a5006558bc0e0029a89e88e9899 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fuction which can have <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> do regrids at arbitrary points in the simulation.  <a href="classTimeStepper.html#aba1d6a5006558bc0e0029a89e88e9899">More...</a><br /></td></tr>
 <tr class="separator:aba1d6a5006558bc0e0029a89e88e9899 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -288,9 +296,12 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a6d16f558c3df157dab69acb7451985fc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a6d16f558c3df157dab69acb7451985fc">transferCoveredParticles</a> (const <a class="el" href="CD__ItoKMCStepper_8H.html#accf761d0f0fb5024d561b4499c349967">SpeciesSubset</a> a_speciesSubset, const <a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">ItoSolver::WhichContainer</a> a_containerFrom, const <a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">ItoSolver::WhichContainer</a> a_containerTo, const <a class="el" href="CD__EBRepresentation_8H.html#ac839237a887a079963372760880f908f">EBRepresentation</a> a_representation, const Real a_tolerance) noexcept</td></tr>
 <tr class="memdesc:a6d16f558c3df157dab69acb7451985fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transfer covered particles (i.e., particles inside the EB) from the <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a> bulk container to EB container.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a6d16f558c3df157dab69acb7451985fc">More...</a><br /></td></tr>
 <tr class="separator:a6d16f558c3df157dab69acb7451985fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab9b697342d17234030d4d922918ff202"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ab9b697342d17234030d4d922918ff202">writeNumberOfParticlesPerPatch</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_icomp) const noexcept</td></tr>
-<tr class="memdesc:ab9b697342d17234030d4d922918ff202"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write number of particles per patch to output holder.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ab9b697342d17234030d4d922918ff202">More...</a><br /></td></tr>
-<tr class="separator:ab9b697342d17234030d4d922918ff202"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a3804c8e80500b958a590f46e5c9976"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a9a3804c8e80500b958a590f46e5c9976">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
+<tr class="memdesc:a9a3804c8e80500b958a590f46e5c9976"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a9a3804c8e80500b958a590f46e5c9976">More...</a><br /></td></tr>
+<tr class="separator:a9a3804c8e80500b958a590f46e5c9976"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6f1aa16aad6bac24266b90ac8c3dace"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ab6f1aa16aad6bac24266b90ac8c3dace">writeNumberOfParticlesPerPatch</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:ab6f1aa16aad6bac24266b90ac8c3dace"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write number of particles per patch to output holder.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ab6f1aa16aad6bac24266b90ac8c3dace">More...</a><br /></td></tr>
+<tr class="separator:ab6f1aa16aad6bac24266b90ac8c3dace"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6aa76e790c4d312847a8eace74c6c498"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a6aa76e790c4d312847a8eace74c6c498">getMaxMinItoDensity</a> (Real &amp;a_maxDensity, Real &amp;a_minDensity, std::string &amp;a_maxSolver, std::string &amp;a_minSolver) const noexcept</td></tr>
 <tr class="memdesc:a6aa76e790c4d312847a8eace74c6c498"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum density of the Ito species.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a6aa76e790c4d312847a8eace74c6c498">More...</a><br /></td></tr>
 <tr class="separator:a6aa76e790c4d312847a8eace74c6c498"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -5005,8 +5016,83 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 
 </div>
 </div>
-<a id="ab9b697342d17234030d4d922918ff202"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab9b697342d17234030d4d922918ff202">&#9670;&nbsp;</a></span>writeNumberOfParticlesPerPatch()</h2>
+<a id="a9a3804c8e80500b958a590f46e5c9976"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a3804c8e80500b958a590f46e5c9976">&#9670;&nbsp;</a></span>writeData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I , typename C , typename R , typename F &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::writeData </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>a_comp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_interpToCentroids</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_interpGhost</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write data to output. Convenience function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where this solver begins writing the output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data to write. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpToCentroids</td><td>If true, a_data will be interpolated to cell centroids before writing to a_output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpGhost</td><td>If true, interpolate ghost cells </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab6f1aa16aad6bac24266b90ac8c3dace"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6f1aa16aad6bac24266b90ac8c3dace">&#9670;&nbsp;</a></span>writeNumberOfParticlesPerPatch()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5019,14 +5105,20 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
         <tr>
           <td class="memname">void ItoKMCStepper::writeNumberOfParticlesPerPatch </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>a_icomp</em>&#160;</td>
+          <td class="paramname"><em>a_icomp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -5046,14 +5138,15 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a836fcdb2b29f1ff45b8e5aae5a21631e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a836fcdb2b29f1ff45b8e5aae5a21631e">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="ad86e1ef1874a3fcd827accf1e75948dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad86e1ef1874a3fcd827accf1e75948dd">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5066,20 +5159,20 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
         <tr>
           <td class="memname">void ItoKMCStepper::writePlotData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Vector&lt; std::string &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_plotVariableNames</em>, </td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>a_icomp</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>a_icomp</em>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -5098,13 +5191,13 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_plotVariableNames</td><td>Plot variable names. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#ac465856ae495a5842352ba530254793c">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#ae858739b259e499d5ce03e9b3c9baa0e">TimeStepper</a>.</p>
 
 </div>
 </div>

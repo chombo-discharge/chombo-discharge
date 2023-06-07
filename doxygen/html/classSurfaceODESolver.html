@@ -233,9 +233,6 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:ae85363eb84009537c03e63a1cd1c9802"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSurfaceODESolver.html#ae85363eb84009537c03e63a1cd1c9802">writePlotFile</a> () const noexcept</td></tr>
 <tr class="memdesc:ae85363eb84009537c03e63a1cd1c9802"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a plot file.  <a href="classSurfaceODESolver.html#ae85363eb84009537c03e63a1cd1c9802">More...</a><br /></td></tr>
 <tr class="separator:ae85363eb84009537c03e63a1cd1c9802"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5b3a39c1e4e12fb6dd7010fb157122f2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSurfaceODESolver.html#a5b3a39c1e4e12fb6dd7010fb157122f2">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp) const noexcept</td></tr>
-<tr class="memdesc:a5b3a39c1e4e12fb6dd7010fb157122f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write output data to a_output.  <a href="classSurfaceODESolver.html#a5b3a39c1e4e12fb6dd7010fb157122f2">More...</a><br /></td></tr>
-<tr class="separator:a5b3a39c1e4e12fb6dd7010fb157122f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af92396a184e1a25cb40ad798bdeb0e20"><td class="memItemLeft" align="right" valign="top"><a id="af92396a184e1a25cb40ad798bdeb0e20"></a>
 virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSurfaceODESolver.html#af92396a184e1a25cb40ad798bdeb0e20">getNumberOfPlotVariables</a> () const noexcept</td></tr>
 <tr class="memdesc:af92396a184e1a25cb40ad798bdeb0e20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of variables to be plotted. <br /></td></tr>
@@ -243,6 +240,9 @@ virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <tr class="memitem:ab41e8ef90c3741552805b6f163392368"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSurfaceODESolver.html#ab41e8ef90c3741552805b6f163392368">getPlotVariableNames</a> () const noexcept</td></tr>
 <tr class="memdesc:ab41e8ef90c3741552805b6f163392368"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get output plot names.  <a href="classSurfaceODESolver.html#ab41e8ef90c3741552805b6f163392368">More...</a><br /></td></tr>
 <tr class="separator:ab41e8ef90c3741552805b6f163392368"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3198e659e18c90a42daf9cf30502bd97"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSurfaceODESolver.html#a3198e659e18c90a42daf9cf30502bd97">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a3198e659e18c90a42daf9cf30502bd97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write output data to a_output.  <a href="classSurfaceODESolver.html#a3198e659e18c90a42daf9cf30502bd97">More...</a><br /></td></tr>
+<tr class="separator:a3198e659e18c90a42daf9cf30502bd97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -1527,8 +1527,8 @@ template&lt;int N&gt; </div>
 
 </div>
 </div>
-<a id="a5b3a39c1e4e12fb6dd7010fb157122f2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5b3a39c1e4e12fb6dd7010fb157122f2">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a3198e659e18c90a42daf9cf30502bd97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3198e659e18c90a42daf9cf30502bd97">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1541,14 +1541,20 @@ template&lt;int N&gt; </div>
         <tr>
           <td class="memname">void <a class="el" href="classSurfaceODESolver.html">SurfaceODESolver</a>&lt; N &gt;::writePlotData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>a_comp</em>&#160;</td>
+          <td class="paramname"><em>a_comp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1568,6 +1574,7 @@ template&lt;int N&gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where this solver begins writing the output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>

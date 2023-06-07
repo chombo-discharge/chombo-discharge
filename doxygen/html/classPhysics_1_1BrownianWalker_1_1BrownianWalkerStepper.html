@@ -101,8 +101,10 @@ Collaboration diagram for Physics::BrownianWalker::BrownianWalkerStepper:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper__coll__graph.png" border="0" usemap="#aPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper_coll__map" alt="Collaboration graph"/></div>
 <map name="aPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper_coll__map" id="aPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper_coll__map">
-<area shape="rect" title="Implementation of TimeStepper which advances an ItoSolver." alt="" coords="5,80,191,121"/>
-<area shape="rect" href="classTimeStepper.html" title="Base class for advancing equations." alt="" coords="45,5,151,32"/>
+<area shape="rect" title="Implementation of TimeStepper which advances an ItoSolver." alt="" coords="20,184,205,225"/>
+<area shape="rect" href="classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,95,111,121"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="135,95,331,121"/>
+<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="163,5,302,32"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -117,7 +119,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a36367e4360ca3b4352537d8c0eadb4ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calls the basic constructor and sets solver. <br /></td></tr>
 <tr class="separator:a36367e4360ca3b4352537d8c0eadb4ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac24cc1a05120e88bbdba4332c08b3bf6"><td class="memItemLeft" align="right" valign="top"><a id="ac24cc1a05120e88bbdba4332c08b3bf6"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#ac24cc1a05120e88bbdba4332c08b3bf6">~BrownianWalkerStepper</a> ()</td></tr>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#ac24cc1a05120e88bbdba4332c08b3bf6">~BrownianWalkerStepper</a> ()</td></tr>
 <tr class="memdesc:ac24cc1a05120e88bbdba4332c08b3bf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing) <br /></td></tr>
 <tr class="separator:ac24cc1a05120e88bbdba4332c08b3bf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada74bc7c5a418213e15f740652e9ff16"><td class="memItemLeft" align="right" valign="top"><a id="ada74bc7c5a418213e15f740652e9ff16"></a>
@@ -147,9 +149,13 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a3ad63eb14cd9097725521808239841d4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a3ad63eb14cd9097725521808239841d4">getNumberOfPlotVariables</a> () const override</td></tr>
 <tr class="memdesc:a3ad63eb14cd9097725521808239841d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of plot variables for this time stepper.  <a href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a3ad63eb14cd9097725521808239841d4">More...</a><br /></td></tr>
 <tr class="separator:a3ad63eb14cd9097725521808239841d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2b5dc7038e4e5f7a179ad0e311309c89"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a2b5dc7038e4e5f7a179ad0e311309c89">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, Vector&lt; std::string &gt; &amp;a_plotVariableNames, int &amp;a_icomp) const override</td></tr>
-<tr class="memdesc:a2b5dc7038e4e5f7a179ad0e311309c89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to file. Only the solver writes plot data so this just calls the solver methods.  <a href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a2b5dc7038e4e5f7a179ad0e311309c89">More...</a><br /></td></tr>
-<tr class="separator:a2b5dc7038e4e5f7a179ad0e311309c89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e5055acd6e6838d49a2e15a9ec79300"><td class="memItemLeft" align="right" valign="top"><a id="a9e5055acd6e6838d49a2e15a9ec79300"></a>
+Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a9e5055acd6e6838d49a2e15a9ec79300">getPlotVariableNames</a> () const override</td></tr>
+<tr class="memdesc:a9e5055acd6e6838d49a2e15a9ec79300"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names. <br /></td></tr>
+<tr class="separator:a9e5055acd6e6838d49a2e15a9ec79300"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a671a14721404e0ea5ac0d05a9c8c211b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a671a14721404e0ea5ac0d05a9c8c211b">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const override</td></tr>
+<tr class="memdesc:a671a14721404e0ea5ac0d05a9c8c211b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a671a14721404e0ea5ac0d05a9c8c211b">More...</a><br /></td></tr>
+<tr class="separator:a671a14721404e0ea5ac0d05a9c8c211b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af3351573a907f6e27521edaa24e01fab"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#af3351573a907f6e27521edaa24e01fab">computeDt</a> () override</td></tr>
 <tr class="memdesc:af3351573a907f6e27521edaa24e01fab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>.  <a href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#af3351573a907f6e27521edaa24e01fab">More...</a><br /></td></tr>
 <tr class="separator:af3351573a907f6e27521edaa24e01fab"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -206,6 +212,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a2da29e7e5a5ac98dc2316f3439725289">setComputationalGeometry</a> (const RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> &gt; &amp;a_computationalGeometry)</td></tr>
 <tr class="memdesc:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the computational geometry.  <a href="classTimeStepper.html#a2da29e7e5a5ac98dc2316f3439725289">More...</a><br /></td></tr>
 <tr class="separator:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20cc9ee90664ed9614bd5d18a7104d24 inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top"><a id="a20cc9ee90664ed9614bd5d18a7104d24"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a20cc9ee90664ed9614bd5d18a7104d24">prePlot</a> ()</td></tr>
+<tr class="memdesc:a20cc9ee90664ed9614bd5d18a7104d24 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">An option for calling special functions prior to plotting data. Called by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> in the IMMEDIATELY before writing the plot file. <br /></td></tr>
+<tr class="separator:a20cc9ee90664ed9614bd5d18a7104d24 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-types"></a>
 Protected Types</h2></td></tr>
@@ -266,6 +276,10 @@ RefCountedPtr&lt; <a class="el" href="classItoSolver.html">ItoSolver</a> &gt;&#1
 RefCountedPtr&lt; <a class="el" href="classItoSpecies.html">ItoSpecies</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#aaf071c5edf302c01ad24dccee7697c71">m_species</a></td></tr>
 <tr class="memdesc:aaf071c5edf302c01ad24dccee7697c71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to underlying species. <br /></td></tr>
 <tr class="separator:aaf071c5edf302c01ad24dccee7697c71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a356a3282924e1ef2b5c3bae2c41ecea9"><td class="memItemLeft" align="right" valign="top"><a id="a356a3282924e1ef2b5c3bae2c41ecea9"></a>
+<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a356a3282924e1ef2b5c3bae2c41ecea9">m_regridPPC</a></td></tr>
+<tr class="memdesc:a356a3282924e1ef2b5c3bae2c41ecea9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of particles per cell. Used only during regrids. <br /></td></tr>
+<tr class="separator:a356a3282924e1ef2b5c3bae2c41ecea9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a10040da62de80da13f7b0a4e8b2607d8"><td class="memItemLeft" align="right" valign="top"><a id="a10040da62de80da13f7b0a4e8b2607d8"></a>
 Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a10040da62de80da13f7b0a4e8b2607d8">m_diffCo</a></td></tr>
 <tr class="memdesc:a10040da62de80da13f7b0a4e8b2607d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fluid diffusion coefficient. <br /></td></tr>
@@ -962,8 +976,8 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 
 </div>
 </div>
-<a id="a2b5dc7038e4e5f7a179ad0e311309c89"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2b5dc7038e4e5f7a179ad0e311309c89">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a671a14721404e0ea5ac0d05a9c8c211b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a671a14721404e0ea5ac0d05a9c8c211b">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -974,20 +988,20 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
         <tr>
           <td class="memname">void BrownianWalkerStepper::writePlotData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Vector&lt; std::string &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_plotVariableNames</em>, </td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>a_icomp</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>a_icomp</em>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1002,17 +1016,17 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 </table>
 </div><div class="memdoc">
 
-<p>Write plot data to file. Only the solver writes plot data so this just calls the solver methods. </p>
+<p>Write plot data to output holder. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_plotVariableNames</td><td>Plot variable names. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#ac465856ae495a5842352ba530254793c">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#ae858739b259e499d5ce03e9b3c9baa0e">TimeStepper</a>.</p>
 
 </div>
 </div>

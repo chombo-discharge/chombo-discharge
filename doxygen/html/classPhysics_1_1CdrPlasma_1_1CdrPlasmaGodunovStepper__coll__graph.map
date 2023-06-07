@@ -1,9 +1,9 @@
 <map id="Physics::CdrPlasma::CdrPlasmaGodunovStepper" name="Physics::CdrPlasma::CdrPlasmaGodunovStepper">
-<area shape="rect" id="node1" title="Class for evolving plasma equations using a split step Godunov method." alt="" coords="776,87,984,128"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract class for evolving the minimal plasma model in time." alt="" coords="379,5,529,47"/>
-<area shape="rect" id="node3" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="22,13,127,39"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="362,71,546,112"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,137,144,163"/>
-<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="356,137,552,163"/>
-<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="355,187,553,214"/>
+<area shape="rect" id="node1" title="Class for evolving plasma equations using a split step Godunov method." alt="" coords="1021,141,1229,183"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract class for evolving the minimal plasma model in time." alt="" coords="809,5,960,47"/>
+<area shape="rect" id="node3" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="400,13,505,39"/>
+<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="355,117,551,143"/>
+<area shape="rect" id="node5" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,179,144,206"/>
+<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="582,172,766,213"/>
+<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="575,238,773,265"/>
 </map>

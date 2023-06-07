@@ -112,6 +112,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad3caaf4a8867b472534db7698306b671"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ad3caaf4a8867b472534db7698306b671">setGrids</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const int a_finestLevel)</td></tr>
 <tr class="memdesc:ad3caaf4a8867b472534db7698306b671"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set grid method.  <a href="classRealm.html#ad3caaf4a8867b472534db7698306b671">More...</a><br /></td></tr>
 <tr class="separator:ad3caaf4a8867b472534db7698306b671"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed9086405be6381b7c82e4b0800614a3"><td class="memItemLeft" align="right" valign="top"><a id="aed9086405be6381b7c82e4b0800614a3"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#aed9086405be6381b7c82e4b0800614a3">preRegrid</a> ()</td></tr>
+<tr class="memdesc:aed9086405be6381b7c82e4b0800614a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform pre-regrid operations. <br /></td></tr>
+<tr class="separator:aed9086405be6381b7c82e4b0800614a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7b956b920638c56071e9957e78090be"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#af7b956b920638c56071e9957e78090be">regridBase</a> (const int a_lmin)</td></tr>
 <tr class="memdesc:af7b956b920638c56071e9957e78090be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid method for EBAMR base.  <a href="classRealm.html#af7b956b920638c56071e9957e78090be">More...</a><br /></td></tr>
 <tr class="separator:af7b956b920638c56071e9957e78090be"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -156,9 +160,9 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelG
 <tr class="memitem:a8671b03ed2cf884d51ee3ed329b99741"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a8671b03ed2cf884d51ee3ed329b99741">getEBLevelGrid</a> (const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a8671b03ed2cf884d51ee3ed329b99741"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get EBLevelGrid for particular phase.  <a href="classRealm.html#a8671b03ed2cf884d51ee3ed329b99741">More...</a><br /></td></tr>
 <tr class="separator:a8671b03ed2cf884d51ee3ed329b99741"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa8e4442b7036da6a03e18157bf573f7c"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; LayoutData&lt; Vector&lt; LayoutIndex &gt; &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#aa8e4442b7036da6a03e18157bf573f7c">getNeighbors</a> (const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:aa8e4442b7036da6a03e18157bf573f7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get neighbors for particular phase.  <a href="classRealm.html#aa8e4442b7036da6a03e18157bf573f7c">More...</a><br /></td></tr>
-<tr class="separator:aa8e4442b7036da6a03e18157bf573f7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac685891187e16971239379a26744a490"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ac685891187e16971239379a26744a490">getEBLevelGridCoFi</a> (const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:ac685891187e16971239379a26744a490"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get coarsened fine EBLevelGrid for particular phase.  <a href="classRealm.html#ac685891187e16971239379a26744a490">More...</a><br /></td></tr>
+<tr class="separator:ac685891187e16971239379a26744a490"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a784a904143d940d32bb5be1cea8e2663"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; LayoutData&lt; VoFIterator &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a784a904143d940d32bb5be1cea8e2663">getVofIterator</a> (const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a784a904143d940d32bb5be1cea8e2663"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get VoFIterators for particular phase.  <a href="classRealm.html#a784a904143d940d32bb5be1cea8e2663">More...</a><br /></td></tr>
 <tr class="separator:a784a904143d940d32bb5be1cea8e2663"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -186,27 +190,18 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelG
 <tr class="memitem:a796422371d5c85d74019c7d570bbd5b5"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBGradient.html">EBGradient</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a796422371d5c85d74019c7d570bbd5b5">getGradientOp</a> (const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a796422371d5c85d74019c7d570bbd5b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get gradient operator.  <a href="classRealm.html#a796422371d5c85d74019c7d570bbd5b5">More...</a><br /></td></tr>
 <tr class="separator:a796422371d5c85d74019c7d570bbd5b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa7a6cbe1e10a669d03328095f0076924"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; AggEBPWLFillPatch &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#aa7a6cbe1e10a669d03328095f0076924">getFillPatch</a> (const phase::which_phase a_phase)</td></tr>
-<tr class="memdesc:aa7a6cbe1e10a669d03328095f0076924"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get piecewise linear regrid utility.  <a href="classRealm.html#aa7a6cbe1e10a669d03328095f0076924">More...</a><br /></td></tr>
-<tr class="separator:aa7a6cbe1e10a669d03328095f0076924"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad36018c90c23e0a47fab6b8c0a3703dc"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFineInterp.html">EBFineInterp</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ad36018c90c23e0a47fab6b8c0a3703dc">getFineInterp</a> (const phase::which_phase a_phase)</td></tr>
-<tr class="memdesc:ad36018c90c23e0a47fab6b8c0a3703dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get piecewise linear ghost cell interpolation utility.  <a href="classRealm.html#ad36018c90c23e0a47fab6b8c0a3703dc">More...</a><br /></td></tr>
-<tr class="separator:ad36018c90c23e0a47fab6b8c0a3703dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8d64dca55750cf073bf0ae2568287ad"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBFluxRegister &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ac8d64dca55750cf073bf0ae2568287ad">getFluxRegister</a> (const phase::which_phase a_phase)</td></tr>
-<tr class="memdesc:ac8d64dca55750cf073bf0ae2568287ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flux register utility.  <a href="classRealm.html#ac8d64dca55750cf073bf0ae2568287ad">More...</a><br /></td></tr>
-<tr class="separator:ac8d64dca55750cf073bf0ae2568287ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a42d44c42da1f9df349ce138dfdaa54aa"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBLevelRedist &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a42d44c42da1f9df349ce138dfdaa54aa">getLevelRedist</a> (const phase::which_phase a_phase)</td></tr>
-<tr class="memdesc:a42d44c42da1f9df349ce138dfdaa54aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get level redistribution utility.  <a href="classRealm.html#a42d44c42da1f9df349ce138dfdaa54aa">More...</a><br /></td></tr>
-<tr class="separator:a42d44c42da1f9df349ce138dfdaa54aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a52859d159f1030104c7dd9d89f2e8f2d"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBCoarToFineRedist &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a52859d159f1030104c7dd9d89f2e8f2d">getCoarToFineRedist</a> (const phase::which_phase a_phase)</td></tr>
-<tr class="memdesc:a52859d159f1030104c7dd9d89f2e8f2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get coarse-to-fine redistribution utility.  <a href="classRealm.html#a52859d159f1030104c7dd9d89f2e8f2d">More...</a><br /></td></tr>
-<tr class="separator:a52859d159f1030104c7dd9d89f2e8f2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa3f900beb575f99f8c365ee5f6cbcede"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBCoarToCoarRedist &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#aa3f900beb575f99f8c365ee5f6cbcede">getCoarToCoarRedist</a> (const phase::which_phase a_phase)</td></tr>
-<tr class="memdesc:aa3f900beb575f99f8c365ee5f6cbcede"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get coarse-to-coarse redistribution utility.  <a href="classRealm.html#aa3f900beb575f99f8c365ee5f6cbcede">More...</a><br /></td></tr>
-<tr class="separator:aa3f900beb575f99f8c365ee5f6cbcede"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0b3843a6eb357e147930485c2a5e06f3"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBFineToCoarRedist &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a0b3843a6eb357e147930485c2a5e06f3">getFineToCoarRedist</a> (const phase::which_phase a_phase)</td></tr>
-<tr class="memdesc:a0b3843a6eb357e147930485c2a5e06f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get fine-to-coarse redistribution utility.  <a href="classRealm.html#a0b3843a6eb357e147930485c2a5e06f3">More...</a><br /></td></tr>
-<tr class="separator:a0b3843a6eb357e147930485c2a5e06f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9068b67e50844ab08b2f9ac2ded4c1c9"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBGhostCellInterpolator.html">EBGhostCellInterpolator</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a9068b67e50844ab08b2f9ac2ded4c1c9">getGhostCellInterpolator</a> (const phase::which_phase a_phase)</td></tr>
+<tr class="memdesc:a9068b67e50844ab08b2f9ac2ded4c1c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get ghost cell interpolator.  <a href="classRealm.html#a9068b67e50844ab08b2f9ac2ded4c1c9">More...</a><br /></td></tr>
+<tr class="separator:a9068b67e50844ab08b2f9ac2ded4c1c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18d2006aab8d36d78940aea3d102c7b6"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarseToFineInterp.html">EBCoarseToFineInterp</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a18d2006aab8d36d78940aea3d102c7b6">getFineInterp</a> (const phase::which_phase a_phase)</td></tr>
+<tr class="memdesc:a18d2006aab8d36d78940aea3d102c7b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get piecewise linear ghost cell interpolation utility.  <a href="classRealm.html#a18d2006aab8d36d78940aea3d102c7b6">More...</a><br /></td></tr>
+<tr class="separator:a18d2006aab8d36d78940aea3d102c7b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0dd36c01178a96b46811b48b08a9a245"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBReflux.html">EBReflux</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a0dd36c01178a96b46811b48b08a9a245">getFluxRegister</a> (const phase::which_phase a_phase)</td></tr>
+<tr class="memdesc:a0dd36c01178a96b46811b48b08a9a245"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flux register utility.  <a href="classRealm.html#a0dd36c01178a96b46811b48b08a9a245">More...</a><br /></td></tr>
+<tr class="separator:a0dd36c01178a96b46811b48b08a9a245"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a532c0dd1f283854215110632e41c9d50"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBRedistribution.html">EBRedistribution</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a532c0dd1f283854215110632e41c9d50">getRedistributionOp</a> (const phase::which_phase a_phase)</td></tr>
+<tr class="memdesc:a532c0dd1f283854215110632e41c9d50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the redistribution operators.  <a href="classRealm.html#a532c0dd1f283854215110632e41c9d50">More...</a><br /></td></tr>
+<tr class="separator:a532c0dd1f283854215110632e41c9d50"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aef59f419df25c884be5dc0b9d29e367e"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classEBAMRData.html">EBAMRFAB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#aef59f419df25c884be5dc0b9d29e367e">getLevelset</a> (const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:aef59f419df25c884be5dc0b9d29e367e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get level-set function.  <a href="classRealm.html#aef59f419df25c884be5dc0b9d29e367e">More...</a><br /></td></tr>
 <tr class="separator:aef59f419df25c884be5dc0b9d29e367e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -789,58 +784,6 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 
 </div>
 </div>
-<a id="aa3f900beb575f99f8c365ee5f6cbcede"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa3f900beb575f99f8c365ee5f6cbcede">&#9670;&nbsp;</a></span>getCoarToCoarRedist()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; EBCoarToCoarRedist &gt; &gt; &amp; Realm::getCoarToCoarRedist </td>
-          <td>(</td>
-          <td class="paramtype">const phase::which_phase&#160;</td>
-          <td class="paramname"><em>a_phase</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get coarse-to-coarse redistribution utility. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a52859d159f1030104c7dd9d89f2e8f2d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a52859d159f1030104c7dd9d89f2e8f2d">&#9670;&nbsp;</a></span>getCoarToFineRedist()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; EBCoarToFineRedist &gt; &gt; &amp; Realm::getCoarToFineRedist </td>
-          <td>(</td>
-          <td class="paramtype">const phase::which_phase&#160;</td>
-          <td class="paramname"><em>a_phase</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get coarse-to-fine redistribution utility. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="acd8f20899b6b5246d28a1df19ca8e7bd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acd8f20899b6b5246d28a1df19ca8e7bd">&#9670;&nbsp;</a></span>getDx()</h2>
 
@@ -965,23 +908,23 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 
 </div>
 </div>
-<a id="aa7a6cbe1e10a669d03328095f0076924"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa7a6cbe1e10a669d03328095f0076924">&#9670;&nbsp;</a></span>getFillPatch()</h2>
+<a id="ac685891187e16971239379a26744a490"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac685891187e16971239379a26744a490">&#9670;&nbsp;</a></span>getEBLevelGridCoFi()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; AggEBPWLFillPatch &gt; &gt; &amp; Realm::getFillPatch </td>
+          <td class="memname">const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp; Realm::getEBLevelGridCoFi </td>
           <td>(</td>
           <td class="paramtype">const phase::which_phase&#160;</td>
           <td class="paramname"><em>a_phase</em></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Get piecewise linear regrid utility. </p>
+<p>Get coarsened fine EBLevelGrid for particular phase. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
@@ -991,14 +934,14 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 
 </div>
 </div>
-<a id="ad36018c90c23e0a47fab6b8c0a3703dc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad36018c90c23e0a47fab6b8c0a3703dc">&#9670;&nbsp;</a></span>getFineInterp()</h2>
+<a id="a18d2006aab8d36d78940aea3d102c7b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a18d2006aab8d36d78940aea3d102c7b6">&#9670;&nbsp;</a></span>getFineInterp()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFineInterp.html">EBFineInterp</a> &gt; &gt; &amp; Realm::getFineInterp </td>
+          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarseToFineInterp.html">EBCoarseToFineInterp</a> &gt; &gt; &amp; Realm::getFineInterp </td>
           <td>(</td>
           <td class="paramtype">const phase::which_phase&#160;</td>
           <td class="paramname"><em>a_phase</em></td><td>)</td>
@@ -1017,40 +960,14 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 
 </div>
 </div>
-<a id="a0b3843a6eb357e147930485c2a5e06f3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0b3843a6eb357e147930485c2a5e06f3">&#9670;&nbsp;</a></span>getFineToCoarRedist()</h2>
+<a id="a0dd36c01178a96b46811b48b08a9a245"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0dd36c01178a96b46811b48b08a9a245">&#9670;&nbsp;</a></span>getFluxRegister()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; EBFineToCoarRedist &gt; &gt; &amp; Realm::getFineToCoarRedist </td>
-          <td>(</td>
-          <td class="paramtype">const phase::which_phase&#160;</td>
-          <td class="paramname"><em>a_phase</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get fine-to-coarse redistribution utility. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ac8d64dca55750cf073bf0ae2568287ad"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac8d64dca55750cf073bf0ae2568287ad">&#9670;&nbsp;</a></span>getFluxRegister()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; EBFluxRegister &gt; &gt; &amp; Realm::getFluxRegister </td>
+          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBReflux.html">EBReflux</a> &gt; &gt; &amp; Realm::getFluxRegister </td>
           <td>(</td>
           <td class="paramtype">const phase::which_phase&#160;</td>
           <td class="paramname"><em>a_phase</em></td><td>)</td>
@@ -1060,6 +977,32 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 </div><div class="memdoc">
 
 <p>Get flux register utility. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a9068b67e50844ab08b2f9ac2ded4c1c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9068b67e50844ab08b2f9ac2ded4c1c9">&#9670;&nbsp;</a></span>getGhostCellInterpolator()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBGhostCellInterpolator.html">EBGhostCellInterpolator</a> &gt; &gt; &amp; Realm::getGhostCellInterpolator </td>
+          <td>(</td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get ghost cell interpolator. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
@@ -1112,32 +1055,6 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 
 <p>Get AMR grids. </p>
 <dl class="section return"><dt>Returns</dt><dd>m_grids </dd></dl>
-
-</div>
-</div>
-<a id="a42d44c42da1f9df349ce138dfdaa54aa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a42d44c42da1f9df349ce138dfdaa54aa">&#9670;&nbsp;</a></span>getLevelRedist()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; EBLevelRedist &gt; &gt; &amp; Realm::getLevelRedist </td>
-          <td>(</td>
-          <td class="paramtype">const phase::which_phase&#160;</td>
-          <td class="paramname"><em>a_phase</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get level redistribution utility. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -1229,32 +1146,6 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 
 </div>
 </div>
-<a id="aa8e4442b7036da6a03e18157bf573f7c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa8e4442b7036da6a03e18157bf573f7c">&#9670;&nbsp;</a></span>getNeighbors()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const Vector&lt; RefCountedPtr&lt; LayoutData&lt; Vector&lt; LayoutIndex &gt; &gt; &gt; &gt; &amp; Realm::getNeighbors </td>
-          <td>(</td>
-          <td class="paramtype">const phase::which_phase&#160;</td>
-          <td class="paramname"><em>a_phase</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get neighbors for particular phase. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a28492038b5988a18f152355263f906b0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a28492038b5988a18f152355263f906b0">&#9670;&nbsp;</a></span>getNonConservativeDivergenceStencils()</h2>
 
@@ -1335,6 +1226,32 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a532c0dd1f283854215110632e41c9d50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a532c0dd1f283854215110632e41c9d50">&#9670;&nbsp;</a></span>getRedistributionOp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBRedistribution.html">EBRedistribution</a> &gt; &gt; &amp; Realm::getRedistributionOp </td>
+          <td>(</td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the redistribution operators. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
   </table>
   </dd>
 </dl>
