@@ -64,7 +64,7 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   m_time     = 0.0;
   m_dt       = 0.0;
 
-  // Default is always to do the coarsening
+  m_profile      = false;
   m_doCoarsening = true;
 
   // Parse some class options and create the output directories for the simulation.
@@ -221,9 +221,8 @@ Driver::getGeometryTags()
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
-  for (
-    int lvl = 0; lvl < maxAmrDepth;
-    lvl++) { // Note that we only need tags up to maxAmrDepth-1 since the grid on maxAmrDepth are generated from tags on maxAmrDepth-1
+  // Note that we only need tags up to maxAmrDepth-1 since the grid on maxAmrDepth are generated from tags on maxAmrDepth-1
+  for (int lvl = 0; lvl < maxAmrDepth; lvl++) {
 
     // Our level indexing disagrees with EBIS level indexing (where the finest level is on index 0). This is
     // a way to get the EBIndexSpace level from the current AMR Level.
@@ -559,9 +558,10 @@ Driver::gridReport()
 void
 Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
 {
-  CH_TIME("Driver::regrid(int, int, bool)");
+  CH_TIMERS("Driver::regrid");
+  CH_TIMER("Driver::regrid::compact_tags", t1);
   if (m_verbosity > 2) {
-    pout() << "Driver::regrid(int, int, bool)" << endl;
+    pout() << "Driver::regrid" << endl;
   }
 
   // Use a timer here because I want to be able to put some diagnostics into this function.
@@ -592,9 +592,11 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
     return;
   }
   else { // Compact tags
+    CH_START(t1);
     for (int i = 0; i < tags.size(); i++) {
       tags[i].compact();
     }
+    CH_STOP(t1);
   }
 
   // Store things that need to be regridded
@@ -658,8 +660,8 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
 
   m_needsNewGeometricTags = false;
 
-  if (m_verbosity > 1) {
-    timer.eventReport(pout());
+  if (m_profile) {
+    timer.eventReport(pout(), true);
   }
 }
 
@@ -998,6 +1000,7 @@ Driver::parseOptions()
   ParmParse pp("Driver");
 
   pp.get("verbosity", m_verbosity);
+  pp.query("profile", m_profile);
   if (m_verbosity > 5) {
     pout() << "Driver::parseOptions()" << endl;
   }
@@ -2028,8 +2031,8 @@ Driver::writeGeometry()
   names[1] = "levelset_2";
 
   // Write levelsets
-  int icomp = 0;
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    int icomp = 0;
     this->writeLevelset(*output[lvl], icomp, lvl);
   }
 
@@ -2157,7 +2160,7 @@ Driver::writePlotFile(const std::string a_filename)
   CH_TIMER("Driver::writePlotFile::copy_internal", t4);
   CH_TIMER("Driver::writePlotFile::hdf5_write", t5);
 
-  if (m_verbosity > 2) {
+  if (m_verbosity >= 1) {
     pout() << "Driver::writePlotFile(string)" << endl;
   }
 
@@ -2238,8 +2241,8 @@ Driver::writePlotFile(const std::string a_filename)
 #endif
     }
 
-    if (m_verbosity >= 2) {
-      timer.eventReport(pout(), false);
+    if (m_profile) {
+      timer.eventReport(pout(), true);
     }
   }
   else {
@@ -2391,7 +2394,7 @@ void
 Driver::writeCheckpointFile()
 {
   CH_TIME("Driver::writeCheckpointFile()");
-  if (m_verbosity > 3) {
+  if (m_verbosity >= 1) {
     pout() << "Driver::writeCheckpointFile()" << endl;
   }
 
@@ -2448,9 +2451,9 @@ Driver::writeCheckpointFile()
     this->writeCheckpointLevel(handleOut, lvl);
   }
 
-  if (m_verbosity >= 3) {
+  if (m_profile) {
     timer.stopEvent("Write data");
-    timer.eventReport(pout());
+    timer.eventReport(pout(), true);
   }
 
   handleOut.close();

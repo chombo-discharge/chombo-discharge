@@ -12,12 +12,17 @@
 #ifndef CD_TiledMeshRefine_H
 #define CD_TiledMeshRefine_H
 
+// Std includes
+#include <vector>
+#include <set>
+
 // Chombo includes
 #include <IntVectSet.H>
 #include <ProblemDomain.H>
 #include <Box.H>
 
 // Our includes
+#include <CD_Tile.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -39,34 +44,40 @@ public:
     @param[in] a_refRatios      Refinement ratios
     @param[in] a_tileSize       Tile size
   */
-  TiledMeshRefine(const ProblemDomain& a_coarsestDomain, const Vector<int>& a_refRatios, const IntVect& a_tileSize);
+  TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
+                  const Vector<int>&   a_refRatios,
+                  const IntVect&       a_tileSize) noexcept;
 
   /*!
     @brief Destructor (does nothing)
   */
-  ~TiledMeshRefine();
+  virtual ~TiledMeshRefine() noexcept;
 
   /*!
     @brief Regrid using the tile clustering algorithm.
     @param[out] a_newBoxes  The new grid boxes
     @param[in]  a_tagsLevel Grid tags on each level
-    @param[in]  a_baseLevel Coarsest level which does not change
-    @param[in]  a_topLevel  Finest level which has tags
-    @param[in]  a_oldBoxes  Previous grid boxes
     @return Returns the new finest grid level. 
   */
-  int
-  regrid(Vector<Vector<Box>>&       a_newBoxes,
-         const Vector<IntVectSet>&  a_tagsLevel,
-         const int                  a_baseLevel,
-         const int                  a_topLevel,
-         const Vector<Vector<Box>>& a_oldBoxes) const;
+  virtual int
+  regrid(Vector<Vector<Box>>& a_newBoxes, const Vector<IntVectSet>& a_tagsLevel) const noexcept;
 
 protected:
   /*!
-    @brief Computational domains on each level
+    @brief Tile representation
   */
-  Vector<ProblemDomain> m_vectDomains;
+  using Tile = TileI<int, SpaceDim>;
+
+  /*!
+    @brief Tile set representation
+  */
+  using TileSet = std::set<Tile>;
+
+  /*!
+    @brief Computational domains on each level
+    @note This are the domains for the grid.
+  */
+  Vector<ProblemDomain> m_amrDomains;
 
   /*!
     @brief Refinement ratios
@@ -79,38 +90,21 @@ protected:
   IntVect m_tileSize;
 
   /*!
-    @brief Sanity check, performs some basic assertions
+    @brief Make tiles on the current level from tags and tile coarsening from finer levels
   */
-  void
-  sanityCheck() const;
+  virtual void
+  makeLevelTiles(TileSet&             a_tiles,
+                 const TileSet&       a_fineTiles,
+                 const IntVectSet&    a_coarTags,
+                 const ProblemDomain& a_domain,
+                 const int            a_refToFine,
+                 const int            a_refToCoar) const noexcept;
 
   /*!
-    @brief Make tiles on the current level from a_levelTags and coarsenings of the finer level tiles
-    @param[out] a_levelTiles
-    @param[in]  a_fineLevelTiles Finer grid level tiles
-    @param[in]  a_coarLevel      Coarser grid level tiles
-    @param[in]  a_levelDomain    Computational domain for current level
-    @param[in]  a_refFine        Refinement factor to fine level
-    @param[in]  a_refCoar        Refinement factor to coarse level
+    @brief Turn tiles into boxes
   */
-  void
-  makeLevelTiles(IntVectSet&          a_levelTiles,
-                 const IntVectSet&    a_fineLevelTiles,
-                 const IntVectSet&    a_coarLevelTags,
-                 const ProblemDomain& a_levelDomain,
-                 const int            a_refFine,
-                 const int            a_refCoar) const;
-
-  /*!
-    @brief Given tiles, generate the corresponding boxes
-    @param[out] a_levelBoxes  Boxes corresponding to tiles
-    @param[in]  a_levelTiles  Tiles on level
-    @param[in]  a_leveLDomain Computational domain on level
-  */
-  void
-  makeBoxesFromTiles(Vector<Box>&         a_levelBoxes,
-                     const IntVectSet&    a_levelTiles,
-                     const ProblemDomain& a_levelDomain) const;
+  virtual void
+  makeBoxesFromTiles(Vector<Box>& a_boxes, const TileSet& a_tiles, const ProblemDomain& a_domain) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -1121,7 +1121,8 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
     case GridGenerationMethod::Tiled: {
       TiledMeshRefine meshRefine(m_domains[0], m_refinementRatios, m_blockingFactor * IntVect::Unit);
 
-      newFinestLevel = meshRefine.regrid(newBoxes, a_tags, baseLevel, topLevel, oldBoxes);
+      newFinestLevel = meshRefine.regrid(newBoxes, a_tags);
+      newBoxes[0]    = oldBoxes[0];
 
       break;
     }
