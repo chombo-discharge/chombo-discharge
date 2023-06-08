@@ -2030,8 +2030,8 @@ Driver::writeGeometry()
   names[1] = "levelset_2";
 
   // Write levelsets
-  int icomp = 0;
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    int icomp = 0;
     this->writeLevelset(*output[lvl], icomp, lvl);
   }
 

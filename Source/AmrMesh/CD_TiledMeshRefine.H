@@ -44,12 +44,14 @@ public:
     @param[in] a_refRatios      Refinement ratios
     @param[in] a_tileSize       Tile size
   */
-  TiledMeshRefine(const ProblemDomain& a_coarsestDomain, const Vector<int>& a_refRatios, const IntVect& a_tileSize);
+  TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
+                  const Vector<int>&   a_refRatios,
+                  const IntVect&       a_tileSize) noexcept;
 
   /*!
     @brief Destructor (does nothing)
   */
-  virtual ~TiledMeshRefine();
+  virtual ~TiledMeshRefine() noexcept;
 
   /*!
     @brief Regrid using the tile clustering algorithm.
@@ -57,8 +59,8 @@ public:
     @param[in]  a_tagsLevel Grid tags on each level
     @return Returns the new finest grid level. 
   */
-  int
-  regrid(Vector<Vector<Box>>& a_newBoxes, const Vector<IntVectSet>& a_tagsLevel) const;
+  virtual int
+  regrid(Vector<Vector<Box>>& a_newBoxes, const Vector<IntVectSet>& a_tagsLevel) const noexcept;
 
 protected:
   /*!

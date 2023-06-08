@@ -23,7 +23,7 @@
 
 TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
                                  const Vector<int>&   a_refRatios,
-                                 const IntVect&       a_tileSize)
+                                 const IntVect&       a_tileSize) noexcept
 {
   CH_TIME("TiledMeshRefine::TiledMeshRefine");
 
@@ -39,10 +39,10 @@ TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
   }
 }
 
-TiledMeshRefine::~TiledMeshRefine() { CH_TIME("TiledMeshRefine::~TiledMeshRefine"); }
+TiledMeshRefine::~TiledMeshRefine() noexcept { CH_TIME("TiledMeshRefine::~TiledMeshRefine"); }
 
 int
-TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet>& a_tags) const
+TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet>& a_tags) const noexcept
 {
   CH_TIME("TiledMeshRefine::regrid");
 
