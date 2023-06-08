@@ -34,7 +34,11 @@ TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
 
   m_amrDomains.push_back(a_coarsestDomain);
   for (int lvl = 1; lvl < a_refRatios.size(); lvl++) {
+    CH_assert(a_refRatios[lvl - 1] >= 2);
+    CH_assert(a_refRatios[lvl - 1] % 2 == 0);
+
     const ProblemDomain domainFine = refine(m_amrDomains[lvl - 1], m_refRatios[lvl - 1]);
+
     m_amrDomains.push_back(domainFine);
   }
 }
@@ -65,7 +69,7 @@ TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet
     newFinestLevel = 1 + topLevel;
 
     // Extra level of empty tiles so we can use makeLevelTiles for all levels
-    AMRTiles amrTiles(2 + newFinestLevel);
+    std::vector<TileSet> amrTiles(2 + newFinestLevel);
 
     for (int lvl = newFinestLevel; lvl > 0; lvl--) {
       this->makeLevelTiles(amrTiles[lvl],
@@ -76,14 +80,17 @@ TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet
                            m_refRatios[lvl - 1]);
     }
 
-    // Coarsest grid just consists of proper nesting around the finer grids.
-    this->makeLevelTiles(amrTiles[0], amrTiles[1], IntVectSet(), m_amrDomains[0], m_refRatios[0], -1);
+    // Coarsest grid just consists of proper nesting around the finer grids. Last argument is dummy.
+    this->makeLevelTiles(amrTiles[0], amrTiles[1], IntVectSet(), m_amrDomains[0], m_refRatios[0], 1);
 
     // Make tiles into boxes
     a_newGrids.resize(1 + newFinestLevel);
     for (int lvl = 0; lvl <= newFinestLevel; lvl++) {
       this->makeBoxesFromTiles(a_newGrids[lvl], amrTiles[lvl], m_amrDomains[lvl]);
     }
+  }
+  else {
+    a_newGrids.resize(0);
   }
 
   return newFinestLevel;
@@ -108,9 +115,11 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
   const ProblemDomain fineDomain = refine(a_domain, a_refToFine);
 
   const IntVect coarProbLo = coarDomain.domainBox().smallEnd();
-
   a_tiles.clear();
   for (IVSIterator ivsIt(a_coarTags); ivsIt.ok(); ++ivsIt) {
+    CH_assert(a_refToCoar >= 2);
+    CH_assert(a_refToCoar % 2 == 0);
+
     const IntVect tag = ivsIt();
 
     const Tile curTile(D_DECL((tag[0] - coarProbLo[0]) / (m_tileSize[0] / a_refToCoar),
@@ -172,6 +181,9 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
   const Box tileBoxFine = refine(tileBox, a_refToFine);
 
   for (const Tile& fineTile : a_fineTiles) {
+    CH_assert(a_refToFine >= 2);
+    CH_assert(a_refToFine % 2 == 0);
+
     const IntVect fineTileIV = IntVect(D_DECL(fineTile[0], fineTile[1], fineTile[2]));
     const Box     fineBox    = grow(Box(fineTileIV, fineTileIV), 1) & tileBoxFine;
     const Box     box        = coarsen(fineBox, a_refToFine);
@@ -182,6 +194,7 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
       a_tiles.emplace(Tile(D_DECL(iv[0], iv[1], iv[2])));
     }
   }
+
   CH_STOP(t3);
 }
 

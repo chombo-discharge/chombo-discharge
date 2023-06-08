@@ -74,11 +74,6 @@ protected:
   using TileSet = std::set<Tile>;
 
   /*!
-    @brief Typedef for AMR tile sets
-  */
-  using AMRTiles = std::vector<TileSet>;
-
-  /*!
     @brief Computational domains on each level
     @note This are the domains for the grid.
   */
