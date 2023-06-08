@@ -221,9 +221,8 @@ Driver::getGeometryTags()
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
-  for (
-    int lvl = 0; lvl < maxAmrDepth;
-    lvl++) { // Note that we only need tags up to maxAmrDepth-1 since the grid on maxAmrDepth are generated from tags on maxAmrDepth-1
+  // Note that we only need tags up to maxAmrDepth-1 since the grid on maxAmrDepth are generated from tags on maxAmrDepth-1
+  for (int lvl = 0; lvl < maxAmrDepth; lvl++) {
 
     // Our level indexing disagrees with EBIS level indexing (where the finest level is on index 0). This is
     // a way to get the EBIndexSpace level from the current AMR Level.
@@ -559,9 +558,10 @@ Driver::gridReport()
 void
 Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
 {
-  CH_TIME("Driver::regrid(int, int, bool)");
+  CH_TIMERS("Driver::regrid");
+  CH_TIMER("Driver::regrid::compact_tags", t1);
   if (m_verbosity > 2) {
-    pout() << "Driver::regrid(int, int, bool)" << endl;
+    pout() << "Driver::regrid" << endl;
   }
 
   // Use a timer here because I want to be able to put some diagnostics into this function.
@@ -592,9 +592,11 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
     return;
   }
   else { // Compact tags
+    CH_START(t1);
     for (int i = 0; i < tags.size(); i++) {
       tags[i].compact();
     }
+    CH_STOP(t1);
   }
 
   // Store things that need to be regridded
