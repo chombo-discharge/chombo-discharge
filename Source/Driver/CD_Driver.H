@@ -287,6 +287,11 @@ protected:
   Real m_refineAngle;
 
   /*!
+    @brief Profile or not
+  */
+  bool m_profile;
+
+  /*!
     @brief Turn on/off geometry coarsening below the base level
   */
   bool m_doCoarsening;

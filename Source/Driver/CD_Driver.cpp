@@ -64,7 +64,7 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   m_time     = 0.0;
   m_dt       = 0.0;
 
-  // Default is always to do the coarsening
+  m_profile      = false;
   m_doCoarsening = true;
 
   // Parse some class options and create the output directories for the simulation.
@@ -660,8 +660,8 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
 
   m_needsNewGeometricTags = false;
 
-  if (m_verbosity > 1) {
-    timer.eventReport(pout());
+  if (m_profile) {
+    timer.eventReport(pout(), true);
   }
 }
 
@@ -1000,6 +1000,7 @@ Driver::parseOptions()
   ParmParse pp("Driver");
 
   pp.get("verbosity", m_verbosity);
+  pp.query("profile", m_profile);
   if (m_verbosity > 5) {
     pout() << "Driver::parseOptions()" << endl;
   }
@@ -2159,7 +2160,7 @@ Driver::writePlotFile(const std::string a_filename)
   CH_TIMER("Driver::writePlotFile::copy_internal", t4);
   CH_TIMER("Driver::writePlotFile::hdf5_write", t5);
 
-  if (m_verbosity > 2) {
+  if (m_verbosity >= 1) {
     pout() << "Driver::writePlotFile(string)" << endl;
   }
 
@@ -2240,8 +2241,8 @@ Driver::writePlotFile(const std::string a_filename)
 #endif
     }
 
-    if (m_verbosity >= 2) {
-      timer.eventReport(pout(), false);
+    if (m_profile) {
+      timer.eventReport(pout(), true);
     }
   }
   else {
@@ -2393,7 +2394,7 @@ void
 Driver::writeCheckpointFile()
 {
   CH_TIME("Driver::writeCheckpointFile()");
-  if (m_verbosity > 3) {
+  if (m_verbosity >= 1) {
     pout() << "Driver::writeCheckpointFile()" << endl;
   }
 
@@ -2450,9 +2451,9 @@ Driver::writeCheckpointFile()
     this->writeCheckpointLevel(handleOut, lvl);
   }
 
-  if (m_verbosity >= 3) {
+  if (m_profile) {
     timer.stopEvent("Write data");
-    timer.eventReport(pout());
+    timer.eventReport(pout(), true);
   }
 
   handleOut.close();
