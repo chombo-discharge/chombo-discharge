@@ -111,6 +111,8 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
 
   // Generate tiles from tags on the coarser level.
   CH_START(t1);
+  const Box tileBox = Box(IntVect::Zero, a_domain.size() / m_tileSize - IntVect::Unit);
+
   const ProblemDomain coarDomain = coarsen(a_domain, a_refToCoar);
   const ProblemDomain fineDomain = refine(a_domain, a_refToFine);
 
@@ -121,12 +123,13 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
     CH_assert(a_refToCoar % 2 == 0);
 
     const IntVect tag = ivsIt();
+    const IntVect iv  = IntVect(D_DECL((tag[0] - coarProbLo[0]) / (m_tileSize[0] / a_refToCoar),
+                                      (tag[1] - coarProbLo[1]) / (m_tileSize[1] / a_refToCoar),
+                                      (tag[2] - coarProbLo[2]) / (m_tileSize[2] / a_refToCoar)));
 
-    const Tile curTile(D_DECL((tag[0] - coarProbLo[0]) / (m_tileSize[0] / a_refToCoar),
-                              (tag[1] - coarProbLo[1]) / (m_tileSize[1] / a_refToCoar),
-                              (tag[2] - coarProbLo[2]) / (m_tileSize[2] / a_refToCoar)));
-
-    a_tiles.emplace(curTile);
+    if (tileBox.contains(iv)) {
+      a_tiles.emplace(Tile(D_DECL(iv[0], iv[1], iv[2])));
+    }
   }
   CH_STOP(t1);
 
@@ -177,7 +180,7 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
   // Ensure proper nesting by adding coarsened tiles from the fine level. We grow by one tile (one the fine level) in order
   // to ensure that we're nesting correctly.
   CH_START(t3);
-  const Box tileBox     = Box(IntVect::Zero, a_domain.size() / m_tileSize - 1);
+
   const Box tileBoxFine = refine(tileBox, a_refToFine);
 
   for (const Tile& fineTile : a_fineTiles) {
@@ -214,8 +217,9 @@ TiledMeshRefine::makeBoxesFromTiles(Vector<Box>&         a_boxes,
     for (int dir = 0; dir < SpaceDim; dir++) {
       boxLo[dir] += tile[dir] * m_tileSize[dir];
     }
-
     const IntVect boxHi = boxLo + m_tileSize - IntVect::Unit;
+
+    const Box box(boxLo, boxHi);
 
     a_boxes.push_back(Box(boxLo, boxHi));
   }
