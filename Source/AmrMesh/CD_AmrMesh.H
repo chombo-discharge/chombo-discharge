@@ -62,7 +62,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~AmrMesh();
+  virtual ~AmrMesh();
 
   /*!
     @brief Disallowed copy assignment
@@ -1429,6 +1429,12 @@ public:
               const int                  a_lmin);
 
   /*!
+    @brief Run post-regrid operations. 
+  */
+  void
+  postRegrid();
+
+  /*!
     @brief Set grids from boxes and computational loads.
     @param[in] a_boxes          Grid boxes
     @param[in] a_realmsAndLoads Realm names and computational loads for realms
@@ -1772,6 +1778,12 @@ protected:
     @brief Implicit functions
   */
   std::map<phase::which_phase, RefCountedPtr<BaseIF>> m_baseif;
+
+  /*!
+    @brief Storage for copiers from the old grids to the new ones
+    @note Defined in the realm regrid routine. Cleared in the postRegrid routine. 
+  */
+  std::map<std::string, Vector<Copier>> m_oldToNewCopiers;
 
   /*!
     @brief Grid generation method

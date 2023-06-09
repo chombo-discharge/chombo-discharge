@@ -57,6 +57,7 @@ EBCoarseToFineInterp::define(const EBLevelGrid& a_eblgFine,
   m_eblgFine = a_eblgFine;
   m_eblgCoar = a_eblgCoar;
   m_eblgCoFi = a_eblgCoFi;
+  m_cellCopiers.clear();
 
   CH_START(t1);
   // Define the irreg data holder.
@@ -86,7 +87,6 @@ EBCoarseToFineInterp::define(const EBLevelGrid& a_eblgFine,
   CH_STOP(t1);
 
   this->defineWeights();
-  this->defineBuffers();
 
   m_isDefined = true;
 }
@@ -144,15 +144,6 @@ EBCoarseToFineInterp::defineWeights() noexcept
 }
 
 void
-EBCoarseToFineInterp::defineBuffers() noexcept
-{
-  CH_TIME("EBCoarseToFineInterp::defineBuffers");
-
-  // Note --same number of ghost cells as in EBCoarseToFineInterp. Must be one because of the slopes!
-  m_copier.define(m_eblgCoar.getDBL(), m_eblgCoFi.getDBL(), IntVect::Unit);
-}
-
-void
 EBCoarseToFineInterp::interpolate(LevelData<EBCellFAB>&             a_fineData,
                                   const LevelData<EBCellFAB>&       a_coarData,
                                   const Interval&                   a_variables,
@@ -167,11 +158,21 @@ EBCoarseToFineInterp::interpolate(LevelData<EBCellFAB>&             a_fineData,
 
   LevelData<EBCellFAB> m_coFiData(m_eblgCoFi.getDBL(), 1, IntVect::Unit, EBCellFactory(m_eblgCoFi.getEBISL()));
 
+  // Define the copier that we need if we don't already have it.
+  Copier& cellCopier = m_cellCopiers[a_coarData.ghostVect()];
+  if (!(cellCopier.isDefined())) {
+    cellCopier.ghostDefine(a_coarData.disjointBoxLayout(),
+                           m_eblgCoFi.getDBL(),
+                           m_eblgCoar.getDomain(),
+                           a_coarData.ghostVect(),
+                           IntVect::Unit);
+  }
+
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
     const Interval srcInterv = Interval(ivar, ivar);
     const Interval dstInterv = Interval(0, 0);
 
-    a_coarData.copyTo(srcInterv, m_coFiData, dstInterv, m_copier);
+    a_coarData.copyTo(srcInterv, m_coFiData, dstInterv, cellCopier);
 
     CH_START(t1);
     for (DataIterator dit(m_eblgCoFi.getDBL()); dit.ok(); ++dit) {
@@ -228,9 +229,13 @@ EBCoarseToFineInterp::interpolate(LevelData<BaseIVFAB<Real>>&       a_fineData,
 
   const DisjointBoxLayout& dblCoFi = m_eblgCoFi.getDBL();
 
+  if (!(m_ebCopier.isDefined())) {
+    m_ebCopier.define(a_coarData.disjointBoxLayout(), dblCoFi);
+  }
+
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
     CH_START(t1);
-    a_coarData.copyTo(Interval(ivar, ivar), m_irregCoFi, Interval(0, 0));
+    a_coarData.copyTo(Interval(ivar, ivar), m_irregCoFi, Interval(0, 0), m_ebCopier);
     CH_STOP(t1);
 
     for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {

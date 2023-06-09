@@ -601,9 +601,9 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
 
   // Store things that need to be regridded
   timer.startEvent("Pre-regrid");
+  m_amr->preRegrid();
   this->cacheTags(m_tags); // Cache m_tags because after regrid, ownership will change
   m_timeStepper->preRegrid(a_lmin, m_amr->getFinestLevel());
-  m_amr->preRegrid();
   if (!(m_cellTagger.isNull())) {
     m_cellTagger->preRegrid();
   }
@@ -656,6 +656,7 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
   // If it wants to, TimeStepper can do a postRegrid operation.
   timer.startEvent("Post-regrid");
   m_timeStepper->postRegrid();
+  m_amr->postRegrid();
   timer.stopEvent("Post-regrid");
 
   m_needsNewGeometricTags = false;

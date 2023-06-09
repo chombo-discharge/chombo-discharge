@@ -492,8 +492,8 @@ SurfaceODESolver<N>::allocate() noexcept
 
   CH_assert(!(m_amr.isNull()));
 
-  m_amr->allocate(m_phi, m_realm, m_phase, N, 0);
-  m_amr->allocate(m_rhs, m_realm, m_phase, N, 0);
+  m_amr->allocate(m_phi, m_realm, m_phase, N);
+  m_amr->allocate(m_rhs, m_realm, m_phase, N);
 
   this->defineVoFIterators();
 }
@@ -582,6 +582,8 @@ SurfaceODESolver<N>::preRegrid(const int a_lbase, const int a_oldFinestLevel) no
   m_amr->allocate(m_cache, m_realm, m_phase, N);
 
   DataOps::copy(m_cache, m_phi);
+
+  m_phi.clear();
 }
 
 template <int N>

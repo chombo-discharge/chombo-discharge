@@ -158,7 +158,12 @@ protected:
   /*!
     @brief Copier for making copying from m_eblg to m_eblgCoFi go faster
   */
-  Copier m_copier;
+  mutable Copier m_ebCopier;
+
+  /*!
+    @brief Map of Copiers that we need for going from valid+ghost -> valid+ghost. 
+  */
+  mutable std::map<IntVect, Copier> m_cellCopiers;
 
   /*!
     @brief Fine grid.
@@ -209,12 +214,6 @@ protected:
   */
   virtual void
   defineWeights() noexcept;
-
-  /*!
-    @brief Define buffer storage
-  */
-  virtual void
-  defineBuffers() noexcept;
 
   /*!
     @brief Piecewise constant interpolation of an EBCellFAB. This ignores the volume fraction. This sets
