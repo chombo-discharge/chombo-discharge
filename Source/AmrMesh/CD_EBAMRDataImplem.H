@@ -148,7 +148,7 @@ template <typename T>
 void
 EBAMRData<T>::copy(const EBAMRData<T>& a_other) noexcept
 {
-
+  MayDay::Abort("EBAMRData::copy -- should have Copier in here for efficiency!");
   for (int lvl = 0; lvl < m_data.size(); lvl++) {
     RefCountedPtr<LevelData<T>>&       src = m_data[lvl];
     const RefCountedPtr<LevelData<T>>& dst = a_other[lvl];
@@ -167,7 +167,7 @@ template <typename T>
 void
 EBAMRData<T>::copy(const Interval a_srcInterval, const EBAMRData<T>& a_other, const Interval a_dstInterval) noexcept
 {
-
+  MayDay::Abort("EBAMRData::copy -- should have Copier in here for efficiency!");
   for (int lvl = 0; lvl < m_data.size(); lvl++) {
     RefCountedPtr<LevelData<T>>&       src = m_data[lvl];
     const RefCountedPtr<LevelData<T>>& dst = a_other[lvl];

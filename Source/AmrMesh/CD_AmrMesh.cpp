@@ -1020,6 +1020,8 @@ AmrMesh::postRegrid()
   for (const auto& r : m_realms) {
     m_oldToNewCopiers.clear();
   }
+
+  this->buildCopiers();
 }
 
 void
@@ -1199,6 +1201,33 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   }
 
   m_hasGrids = true;
+}
+
+void
+AmrMesh::buildCopiers()
+{
+  CH_TIME("AmrMesh::buildCopiers");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::buildCopiers" << endl;
+  }
+
+  m_realmCopiers.clear();
+
+  for (const auto& fromRealm : m_realms) {
+    for (const auto& toRealm : m_realms) {
+
+      Vector<Copier>& copiers = m_realmCopiers[std::make_pair(fromRealm.first, toRealm.first)];
+
+      copiers.resize(1 + m_finestLevel);
+
+      for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+        const DisjointBoxLayout& fromDBL = this->getGrids(fromRealm.first)[lvl];
+        const DisjointBoxLayout& toDBL   = this->getGrids(toRealm.first)[lvl];
+
+        copiers[lvl].define(fromDBL, toDBL);
+      }
+    }
+  }
 }
 
 void
@@ -2807,6 +2836,24 @@ AmrMesh::getDomains() const
   }
 
   return m_domains;
+}
+
+const Vector<Copier>&
+AmrMesh::getCopiers(const std::string a_fromRealm, const std::string a_toRealm) const noexcept
+{
+  CH_TIME("AmrMesh::getCopiers()");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getCopiers()" << endl;
+  }
+
+  const Vector<Copier>& copiers = m_realmCopiers.at(std::make_pair(a_fromRealm, a_toRealm));
+
+  CH_assert(copiers.size() == 1 + m_finestLevel);
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    CH_assert(copiers[lvl].isDefined());
+  }
+
+  return copiers;
 }
 
 const Vector<DisjointBoxLayout>&

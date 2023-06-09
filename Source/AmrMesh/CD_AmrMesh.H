@@ -1596,6 +1596,13 @@ public:
   getDomains() const;
 
   /*!
+    @brief Get copiers from going between realms
+    @note This returns the copiers for copying data between realms. The data motion is from valid -> to valid (no ghost exchanges!)
+  */
+  const Vector<Copier>&
+  getCopiers(const std::string a_fromRealm, const std::string a_toRealm) const noexcept;
+
+  /*!
     @brief Get a registered mask.
     @param[in] a_mask   Mask name
     @param[in] a_buffer Buffer (used when registering mask)
@@ -1784,6 +1791,12 @@ protected:
     @note Defined in the realm regrid routine. Cleared in the postRegrid routine. 
   */
   std::map<std::string, Vector<Copier>> m_oldToNewCopiers;
+
+  /*!
+    @brief Map for copying between various Realms.
+    @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
+  */
+  std::map<std::pair<std::string, std::string>, Vector<Copier>> m_realmCopiers;
 
   /*!
     @brief Grid generation method
@@ -1985,6 +1998,12 @@ protected:
   */
   void
   buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
+
+  /*!
+    @brief Build copiers for copying between realms
+  */
+  void
+  buildCopiers();
 
   /*!
     @brief Parse the low/high corners of the computational domain. 
