@@ -415,9 +415,6 @@ FieldSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_ne
   // Recompute E from the new potential.
   this->computeElectricField();
 
-  // Set permittivities
-  this->setPermittivities();
-
   // Deallocate the scratch storage.
   m_cache.clear();
 }
