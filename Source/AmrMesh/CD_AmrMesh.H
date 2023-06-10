@@ -32,6 +32,7 @@
 #include <CD_ParticleContainer.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_Realm.H>
+#include <CD_CopyStrategy.H>
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
 
@@ -1596,13 +1597,6 @@ public:
   getDomains() const;
 
   /*!
-    @brief Get copiers from going between realms
-    @note This returns the copiers for copying data between realms. The data motion is from valid -> to valid (no ghost exchanges!)
-  */
-  const Vector<Copier>&
-  getCopiers(const std::string a_fromRealm, const std::string a_toRealm) const noexcept;
-
-  /*!
     @brief Get a registered mask.
     @param[in] a_mask   Mask name
     @param[in] a_buffer Buffer (used when registering mask)
@@ -1796,7 +1790,24 @@ protected:
     @brief Map for copying between various Realms.
     @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
   */
-  std::map<std::pair<std::string, std::string>, Vector<Copier>> m_realmCopiers;
+  std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validToValidRealmCopiers;
+
+  /*!
+    @brief Map for copying between various Realms.
+    @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
+  */
+  std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validToValidGhostRealmCopiers;
+
+  /*!
+    @brief Map for copying between various Realms.
+    @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
+  */
+  std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validGhostToValidRealmCopiers;
+  /*!
+    @brief Map for copying between various Realms.
+    @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
+  */
+  std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validGhostToValidGhostRealmCopiers;
 
   /*!
     @brief Grid generation method

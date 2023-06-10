@@ -1211,20 +1211,38 @@ AmrMesh::buildCopiers()
     pout() << "AmrMesh::buildCopiers" << endl;
   }
 
-  m_realmCopiers.clear();
+  m_validToValidRealmCopiers.clear();
 
   for (const auto& fromRealm : m_realms) {
     for (const auto& toRealm : m_realms) {
 
-      Vector<Copier>& copiers = m_realmCopiers[std::make_pair(fromRealm.first, toRealm.first)];
+      const std::pair<std::string, std::string> toFrom = std::make_pair(fromRealm.first, toRealm.first);
 
-      copiers.resize(1 + m_finestLevel);
+      Vector<Copier>& validToValidCopiers           = m_validToValidRealmCopiers[toFrom];
+      Vector<Copier>& validToValidGhostCopiers      = m_validToValidGhostRealmCopiers[toFrom];
+      Vector<Copier>& validGhostToValidCopiers      = m_validGhostToValidRealmCopiers[toFrom];
+      Vector<Copier>& validGhostToValidGhostCopiers = m_validGhostToValidGhostRealmCopiers[toFrom];
+
+      validToValidCopiers.clear();
+      validToValidGhostCopiers.clear();
+      validGhostToValidCopiers.clear();
+      validGhostToValidGhostCopiers.clear();
+
+      validToValidCopiers.resize(1 + m_finestLevel);
+      validToValidGhostCopiers.resize(1 + m_finestLevel);
+      validGhostToValidCopiers.resize(1 + m_finestLevel);
+      validGhostToValidGhostCopiers.resize(1 + m_finestLevel);
 
       for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
         const DisjointBoxLayout& fromDBL = this->getGrids(fromRealm.first)[lvl];
         const DisjointBoxLayout& toDBL   = this->getGrids(toRealm.first)[lvl];
+        const ProblemDomain&     domain  = this->getDomains()[lvl];
+        const IntVect            ghost   = m_numGhostCells * IntVect::Unit;
 
-        copiers[lvl].define(fromDBL, toDBL);
+        validToValidCopiers[lvl].define(fromDBL, toDBL);
+        validToValidGhostCopiers[lvl].define(fromDBL, toDBL, ghost);
+        validGhostToValidCopiers[lvl].ghostDefine(fromDBL, toDBL, domain, ghost);
+        validGhostToValidGhostCopiers[lvl].ghostDefine(fromDBL, toDBL, domain, ghost, ghost);
       }
     }
   }
@@ -2836,24 +2854,6 @@ AmrMesh::getDomains() const
   }
 
   return m_domains;
-}
-
-const Vector<Copier>&
-AmrMesh::getCopiers(const std::string a_fromRealm, const std::string a_toRealm) const noexcept
-{
-  CH_TIME("AmrMesh::getCopiers()");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getCopiers()" << endl;
-  }
-
-  const Vector<Copier>& copiers = m_realmCopiers.at(std::make_pair(a_fromRealm, a_toRealm));
-
-  CH_assert(copiers.size() == 1 + m_finestLevel);
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    CH_assert(copiers[lvl].isDefined());
-  }
-
-  return copiers;
 }
 
 const Vector<DisjointBoxLayout>&
