@@ -773,7 +773,7 @@ CdrPlasmaGodunovStepper::computeCdrGradients()
     EBAMRCellData& grad    = storage->getGradient();
 
     // Update the ghost cells so we can compute the gradient.
-    m_amr->copyData(scratch,solver->getPhi());
+    m_amr->copyData(scratch, solver->getPhi());
 
     m_amr->arithmeticAverage(scratch, m_realm, m_phase);
     m_amr->interpGhostPwl(scratch, m_realm, m_phase);

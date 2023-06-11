@@ -750,13 +750,13 @@ ItoKMCStepper<I, C, R, F>::postCheckpointPoisson() noexcept
   const EBAMRCellData E = m_amr->alias(m_plasmaPhase, m_fieldSolver->getElectricField());
 
   // Copy onto the storage holding the electric field on the fluid realm. Then interpolate to centroids.
-  m_amr->copyData(m_electricFieldFluid,E);
+  m_amr->copyData(m_electricFieldFluid, E);
   m_amr->conservativeAverage(m_electricFieldFluid, m_fluidRealm, m_plasmaPhase);
   m_amr->interpGhostPwl(m_electricFieldFluid, m_fluidRealm, m_plasmaPhase);
   m_amr->interpToCentroids(m_electricFieldFluid, m_fluidRealm, m_plasmaPhase);
 
   // Copy onto the storage holding the electric field on the particle realm.
-  m_amr->copyData(m_electricFieldParticle,E);
+  m_amr->copyData(m_electricFieldParticle, E);
   m_amr->conservativeAverage(m_electricFieldParticle, m_particleRealm, m_plasmaPhase);
   m_amr->interpGhostPwl(m_electricFieldParticle, m_particleRealm, m_plasmaPhase);
   m_amr->interpToCentroids(m_electricFieldParticle, m_particleRealm, m_plasmaPhase);
@@ -1092,7 +1092,7 @@ ItoKMCStepper<I, C, R, F>::writeNumberOfParticlesPerPatch(LevelData<EBCellFAB>& 
     }
   }
 
-  m_particleScratch1[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_icomp, a_icomp));  
+  m_particleScratch1[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_icomp, a_icomp));
 
   a_icomp += 1;
 }
@@ -1653,7 +1653,7 @@ ItoKMCStepper<I, C, R, F>::computeSpaceChargeDensity(MFAMRCellData&             
     const int                        Z       = species->getChargeNumber();
 
     if (Z != 0) {
-      m_amr->copyData(m_fluidScratch1,*a_itoDensities[idx]);
+      m_amr->copyData(m_fluidScratch1, *a_itoDensities[idx]);
 
       DataOps::incr(rhoPhase, m_fluidScratch1, 1.0 * Z);
     }
@@ -1715,7 +1715,7 @@ ItoKMCStepper<I, C, R, F>::computeConductivityCell(EBAMRCellData&               
       solver->depositConductivity(m_particleScratch1, *a_particles[idx]);
 
       // Add to the fluid realm.
-      m_amr->copyData(m_fluidScratch1,m_particleScratch1);
+      m_amr->copyData(m_fluidScratch1, m_particleScratch1);
       DataOps::incr(a_conductivity, m_fluidScratch1, 1.0 * std::abs(Z));
     }
   }
@@ -1763,7 +1763,7 @@ ItoKMCStepper<I, C, R, F>::computeDensityGradients() noexcept
     const int idx = it.index();
 
     // Update ghost cells and coarsenings. Then compute the gradient.
-    m_amr->copyData(m_fluidPhiIto[idx],solver->getPhi());
+    m_amr->copyData(m_fluidPhiIto[idx], solver->getPhi());
 
     m_amr->arithmeticAverage(m_fluidPhiIto[idx], m_fluidRealm, m_plasmaPhase);
     m_amr->interpGhostPwl(m_fluidPhiIto[idx], m_fluidRealm, m_plasmaPhase);
@@ -1778,7 +1778,7 @@ ItoKMCStepper<I, C, R, F>::computeDensityGradients() noexcept
     const int idx = it.index();
 
     // Update ghost cells and coarsenings. Then compute the gradient.
-    m_amr->copyData(m_fluidScratch1,solver->getPhi());
+    m_amr->copyData(m_fluidScratch1, solver->getPhi());
 
     m_amr->arithmeticAverage(m_fluidScratch1, m_fluidRealm, m_plasmaPhase);
     m_amr->interpGhostPwl(m_fluidScratch1, m_fluidRealm, m_plasmaPhase);

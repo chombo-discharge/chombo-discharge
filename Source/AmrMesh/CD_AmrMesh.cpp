@@ -1042,7 +1042,6 @@ AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags, const int a_lmin, const int
     r.second->regridBase(a_lmin);
   }
 
-
   this->buildCopiers();
 }
 
@@ -1213,6 +1212,9 @@ AmrMesh::buildCopiers()
   }
 
   m_validToValidRealmCopiers.clear();
+  m_validToValidGhostRealmCopiers.clear();
+  m_validGhostToValidRealmCopiers.clear();
+  m_validGhostToValidGhostRealmCopiers.clear();
 
   for (const auto& fromRealm : m_realms) {
     for (const auto& toRealm : m_realms) {

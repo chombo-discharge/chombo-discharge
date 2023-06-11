@@ -76,6 +76,7 @@ AmrMesh::copyData(EBAMRData<T>&       a_dst,
     if (a_fromRegion == CopyStrategy::Valid) {
       if (a_toRegion == CopyStrategy::Valid) {
         copiers = m_validToValidRealmCopiers.at(id);
+        pout() << "getting valid-valid copiers" << endl;
       }
       else if (a_toRegion == CopyStrategy::ValidGhost) {
         copiers = m_validToValidGhostRealmCopiers.at(id);
@@ -103,7 +104,7 @@ AmrMesh::copyData(EBAMRData<T>&       a_dst,
       CH_assert(a_dst[lvl]->nComp() > a_dstComps.end());
       CH_assert(a_src[lvl]->nComp() > a_srcComps.end());
 
-      a_src[lvl]->copyTo(a_srcComps, *a_dst[lvl], a_dstComps, copiers[lvl]);
+      a_src[lvl]->copyTo(a_srcComps, *a_dst[lvl], a_dstComps); //, copiers[lvl]);
     }
   }
   else {
