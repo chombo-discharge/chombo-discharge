@@ -681,7 +681,7 @@ Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLevel)
   this->allocateInternals();
 
   // Copy cached tags back over to m_tags
-  for (int lvl = 0; lvl <= Min(a_oldFinestLevel, a_newFinestLevel); lvl++) {
+  for (int lvl = 0; lvl <= std::min(a_oldFinestLevel, a_newFinestLevel); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
     // Copy mask
@@ -2316,7 +2316,7 @@ Driver::writeTags(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level
   const Interval srcInterv(0, 0);
   const Interval dstInterv(a_comp, a_comp);
 
-  scratch.localCopyTo(srcInterv, a_output, dstInterv);
+  m_amr->copyData(scratch, a_output, a_level, m_realm, m_realm, dstInterv, srcInterv);
 
   a_comp++;
 }
@@ -2340,10 +2340,10 @@ Driver::writeRanks(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_leve
 
     DataOps::setValue(scratch, 1.0 * procID());
 
-    const Interval scrInterv(0, 0);
+    const Interval srcInterv(0, 0);
     const Interval dstInterv(a_comp, a_comp);
 
-    scratch.copyTo(scrInterv, a_output, dstInterv);
+    m_amr->copyData(scratch, a_output, a_level, m_realm, r, dstInterv, srcInterv);
 
     a_comp++;
   }

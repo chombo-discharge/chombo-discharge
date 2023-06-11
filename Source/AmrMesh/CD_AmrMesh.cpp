@@ -1024,7 +1024,7 @@ AmrMesh::postRegrid()
   }
 
   // Define copiers for making regrids go faster.
-  for (auto& r : m_realms) {
+  for (const auto& r : m_realms) {
     const Vector<DisjointBoxLayout>& oldGrids = m_oldGrids.at(r.first);
     const Vector<DisjointBoxLayout>& newGrids = this->getGrids(r.first);
 

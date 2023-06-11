@@ -81,12 +81,13 @@ public:
 
   /*!
     @brief Method for copying from a source container to a destination container. User supplies information
-    about from/to regions. If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT
-    NUMBER OF GHOST CELLS!
+    about from/to regions. 
     @param[inout] a_dst        Destination data 
     @param[in]    a_src        Source data
     @param[in]    a_toRegion   Region we copy into
     @param[in]    a_fromRegion Region we copy from
+    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
+    @note This routine will not work if copying between grids before/after regrids. 
   */
   template <typename T>
   void
@@ -97,13 +98,14 @@ public:
 
   /*!
     @brief Method for copying from a source container to a destination container. User supplies information
-    about from/to regions. If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT
-    NUMBER OF GHOST CELLS!
+    about from/to regions. 
     @param[inout] a_dst        Destination data 
     @param[in]    a_src        Source data
     @param[in]    a_level      Grid level
     @param[in]    a_fromRegion Region we copy from
     @param[in]    a_toRegion   Region we copy into
+    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
+    @note This routine will not work if copying between grids before/after regrids. 
   */
   template <typename T>
   void
@@ -115,14 +117,14 @@ public:
 
   /*!
     @brief Method for copying from a source container to a destination container. User supplies information
-    about from/to regions. If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT
-    NUMBER OF GHOST CELLS!
     @param[inout] a_dst        Destination data 
     @param[in]    a_src        Source data
     @param[in]    a_dstComps   Destination components
     @param[in]    a_srcComps   Source components
     @param[in]    a_toRegion   Region we copy into
     @param[in]    a_fromRegion Region we copy from
+    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
+    @note This routine will not work if copying between grids before/after regrids. 
   */
   template <typename T>
   void
@@ -135,8 +137,7 @@ public:
 
   /*!
     @brief Method for copying from a source container to a destination container. User supplies information
-    about from/to regions. If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT
-    NUMBER OF GHOST CELLS!
+    about from/to regions. 
     @param[inout] a_dst        Destination data 
     @param[in]    a_src        Source data
     @param[in]    a_level      Grid level
@@ -144,6 +145,8 @@ public:
     @param[in]    a_fromRealm  Source realm
     @param[in]    a_fromRegion Region we copy from
     @param[in]    a_toRegion   Region we copy into
+    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
+    @note This routine will not work if copying between grids before/after regrids. 
   */
   template <typename T>
   void
@@ -157,8 +160,7 @@ public:
 
   /*!
     @brief Method for copying from a source container to a destination container. User supplies information
-    about from/to regions. If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT
-    NUMBER OF GHOST CELLS!
+    about from/to regions. 
     @param[inout] a_dst        Destination data 
     @param[in]    a_src        Source data
     @param[in]    a_level      Grid level
@@ -168,6 +170,8 @@ public:
     @param[in]    a_srcComps   Source components
     @param[in]    a_fromRegion Region we copy from
     @param[in]    a_toRegion   Region we copy into
+    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
+    @note This routine will not work if copying between grids before/after regrids. 
   */
   template <typename T>
   void
@@ -180,6 +184,37 @@ public:
            const Interval&     a_srcComps,
            const CopyStrategy& a_toRegion   = CopyStrategy::Valid,
            const CopyStrategy& a_fromRegion = CopyStrategy::Valid) const noexcept;
+  /*!
+    @brief Method for copying data from the old grids to the new ones. Can be used during regrids. 
+    @param[inout] a_newData    Data on new grids
+    @param[in]    a_oldData    Data on old grids
+    @param[in]    a_level      Grid level
+    @param[in]    a_realm      Realm where data lives
+  */
+  template <typename T>
+  void
+  copyDataOldToNew(LevelData<T>&       a_newData,
+                   const LevelData<T>& a_oldData,
+                   const int           a_level,
+                   const std::string   a_realm) const noexcept;
+
+  /*!
+    @brief Method for copying data from the old grids to the new ones. Can be used during regrids. 
+    @param[inout] a_newData    Data on new grids
+    @param[in]    a_oldData    Data on old grids
+    @param[in]    a_level      Grid level
+    @param[in]    a_realm      Realm where data lives
+    @param[in]    a_newComps   Components in a_newData
+    @param[in]    a_oldComps   Components in a_oldData
+  */
+  template <typename T>
+  void
+  copyDataOldToNew(LevelData<T>&       a_newData,
+                   const LevelData<T>& a_oldData,
+                   const int           a_level,
+                   const std::string   a_realm,
+                   const Interval&     a_dstComps,
+                   const Interval&     a_srcComps) const noexcept;
 
   /*!
     @brief Deallocate data. 
