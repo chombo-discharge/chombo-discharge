@@ -872,7 +872,7 @@ FieldSolverMultigrid::computeElectricField(MFAMRCellData& a_electricField, const
   // than interpGhostPwl or interpGhost here.
   MFAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_nComp);
-  scratch.copy(a_potential);
+  m_amr->copyData(scratch,a_potential);
   m_amr->interpGhostMG(scratch, m_realm);
 
   // Compute the cell-centered gradient everywhere.
@@ -900,7 +900,7 @@ FieldSolverMultigrid::computeElectricField(MFAMRFluxData& a_electricField, const
   // than interpGhostPwl or interpGhost here.
   MFAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_nComp);
-  scratch.copy(a_potential);
+  m_amr->copyData(scratch,a_potential);
   m_amr->interpGhostMG(scratch, m_realm);
 
   // Compute the cell-centered gradient everywhere.
@@ -931,7 +931,7 @@ FieldSolverMultigrid::computeElectricField(EBAMRCellData&           a_electricFi
   m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
   m_amr->alias(potentialPhase, a_phase, a_potential);
 
-  scratch.copy(potentialPhase);
+  m_amr->copyData(scratch,potentialPhase);
   m_amr->interpGhostMG(scratch, m_realm, a_phase);
 
   // Use EBGradient for computing the gradient.
@@ -966,7 +966,7 @@ FieldSolverMultigrid::computeElectricField(EBAMRFluxData&           a_electricFi
   m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
   m_amr->alias(potentialPhase, a_phase, a_potential);
 
-  scratch.copy(potentialPhase);
+  m_amr->copyData(scratch,potentialPhase);
   m_amr->interpGhostMG(scratch, m_realm, a_phase);
 
   // Use EBGradient for computing the gradient.

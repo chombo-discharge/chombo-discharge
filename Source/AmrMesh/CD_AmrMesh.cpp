@@ -1020,8 +1020,6 @@ AmrMesh::postRegrid()
   for (const auto& r : m_realms) {
     m_oldToNewCopiers.clear();
   }
-
-  this->buildCopiers();
 }
 
 void
@@ -1043,6 +1041,9 @@ AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags, const int a_lmin, const int
   for (auto& r : m_realms) {
     r.second->regridBase(a_lmin);
   }
+
+
+  this->buildCopiers();
 }
 
 void

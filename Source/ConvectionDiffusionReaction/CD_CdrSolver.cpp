@@ -1507,8 +1507,8 @@ CdrSolver::setDiffusionCoefficient(const EBAMRFluxData& a_diffusionCoefficient,
   CH_assert(a_ebDiffusionCoefficient[0]->nComp() == 1);
 
   // Do a copy -- realms do not have to be the same.
-  m_faceCenteredDiffusionCoefficient.copy(a_diffusionCoefficient);
-  m_ebCenteredDiffusionCoefficient.copy(a_ebDiffusionCoefficient);
+  m_amr->copyData(m_faceCenteredDiffusionCoefficient,a_diffusionCoefficient);
+  m_amr->copyData(m_ebCenteredDiffusionCoefficient,a_ebDiffusionCoefficient);
 
   m_amr->conservativeAverage(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
   m_amr->conservativeAverage(m_ebCenteredDiffusionCoefficient, m_realm, m_phase);
@@ -1554,7 +1554,7 @@ CdrSolver::setEbFlux(const EBAMRIVData& a_ebFlux)
 
   CH_assert(a_ebFlux[0]->nComp() == 1);
 
-  m_ebFlux.copy(a_ebFlux);
+  m_amr->copyData(m_ebFlux,a_ebFlux);
 }
 
 void
@@ -1594,7 +1594,7 @@ CdrSolver::setSource(const EBAMRCellData& a_source)
 
   CH_assert(a_source[0]->nComp() == 1);
 
-  m_source.copy(a_source);
+  m_amr->copyData(m_source,a_source);
 
   m_amr->conservativeAverage(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
@@ -1651,7 +1651,7 @@ CdrSolver::setVelocity(const EBAMRCellData& a_velo)
 
   CH_assert(a_velo[0]->nComp() == SpaceDim);
 
-  m_cellVelocity.copy(a_velo);
+  m_amr->copyData(m_cellVelocity,a_velo);
 
   m_amr->conservativeAverage(m_cellVelocity, m_realm, m_phase);
   m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);

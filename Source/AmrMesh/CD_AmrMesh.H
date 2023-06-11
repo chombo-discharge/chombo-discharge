@@ -80,6 +80,42 @@ public:
   operator=(const AmrMesh&& a_other) = delete;
 
   /*!
+    @brief Method for copying from a source container to a destination container. User supplies information
+    about from/to regions. If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT
+    NUMBER OF GHOST CELLS!
+    @param[inout] a_dst        Destination data 
+    @param[in]    a_src        Source data
+    @param[in]    a_fromRegion Region we copy from
+    @param[in]    a_toRegion   Region we copy into
+  */
+  template <typename T>
+  void
+  copyData(EBAMRData<T>&       a_dst,
+           const EBAMRData<T>& a_src,
+           const CopyStrategy& a_fromRegion = CopyStrategy::Valid,
+           const CopyStrategy& a_toRegion   = CopyStrategy::Valid) const noexcept;
+
+  /*!
+    @brief Method for copying from a source container to a destination container. User supplies information
+    about from/to regions. If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT
+    NUMBER OF GHOST CELLS!
+    @param[inout] a_dst        Destination data 
+    @param[in]    a_dstComps   Destination components
+    @param[in]    a_src        Source data
+    @param[in]    a_srcComps   Source components
+    @param[in]    a_fromRegion Region we copy from
+    @param[in]    a_toRegion   Region we copy into
+  */
+  template <typename T>
+  void
+  copyData(EBAMRData<T>&       a_dst,
+           const EBAMRData<T>& a_src,
+           const Interval&     a_dstComps,
+           const Interval&     a_srcComps,
+           const CopyStrategy& a_fromRegion = CopyStrategy::Valid,
+           const CopyStrategy& a_toRegion   = CopyStrategy::Valid) const noexcept;
+
+  /*!
     @brief Deallocate data. 
     @param[inout] a_data Data to be deleted. 
   */
@@ -1787,24 +1823,25 @@ protected:
   std::map<std::string, Vector<Copier>> m_oldToNewCopiers;
 
   /*!
-    @brief Map for copying between various Realms.
+    @brief Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm
     @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
   */
   std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validToValidRealmCopiers;
 
   /*!
-    @brief Map for copying between various Realms.
+    @brief Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm
     @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
   */
   std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validToValidGhostRealmCopiers;
 
   /*!
-    @brief Map for copying between various Realms.
+    @brief Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm
     @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
   */
   std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validGhostToValidRealmCopiers;
+
   /*!
-    @brief Map for copying between various Realms.
+    @brief Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm
     @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
   */
   std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validGhostToValidGhostRealmCopiers;

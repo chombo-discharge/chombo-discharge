@@ -19,6 +19,105 @@
 
 template <typename T>
 void
+AmrMesh::copyData(EBAMRData<T>&       a_dst,
+                  const EBAMRData<T>& a_src,
+                  const CopyStrategy& a_fromRegion,
+                  const CopyStrategy& a_toRegion) const noexcept
+{
+  CH_TIME("AmrMesh::copyData");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::copyData" << endl;
+  }
+
+  const int nCompDst = a_dst[0]->nComp();
+  const int nCompSrc = a_src[0]->nComp();
+
+  const Interval dstComps = Interval(0, nCompDst - 1);
+  const Interval srcComps = Interval(0, nCompSrc - 1);
+
+  this->copyData(a_dst, a_src, dstComps, srcComps, a_fromRegion, a_toRegion);
+}
+
+template <typename T>
+void
+AmrMesh::copyData(EBAMRData<T>&       a_dst,
+                  const EBAMRData<T>& a_src,
+                  const Interval&     a_dstComps,
+                  const Interval&     a_srcComps,
+                  const CopyStrategy& a_fromRegion,
+                  const CopyStrategy& a_toRegion) const noexcept
+{
+  CH_TIME("AmrMesh::copyData");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::copyData" << endl;
+  }
+
+  const std::string toRealm   = a_dst.getRealm();
+  const std::string fromRealm = a_src.getRealm();
+
+  CH_assert(a_dstComps.size() == a_srcComps.size());
+
+  if (toRealm != fromRealm) {
+    const auto id = std::make_pair(fromRealm, toRealm);
+
+    if (a_toRegion == CopyStrategy::ValidGhost) {
+      for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+        CH_assert(a_dst[lvl]->ghostVect() == m_numGhostCell * IntVect::Unit);
+      }
+    }
+    if (a_fromRegion == CopyStrategy::ValidGhost) {
+      for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+        CH_assert(a_src[lvl]->ghostVect() == m_numGhostCell * IntVect::Unit);
+      }
+    }
+
+    Vector<Copier> copiers;
+
+    if (a_fromRegion == CopyStrategy::Valid) {
+      if (a_toRegion == CopyStrategy::Valid) {
+        copiers = m_validToValidRealmCopiers.at(id);
+      }
+      else if (a_toRegion == CopyStrategy::ValidGhost) {
+        copiers = m_validToValidGhostRealmCopiers.at(id);
+      }
+      else {
+        MayDay::Abort("AmrMesh::copyData - logic bust 1");
+      }
+    }
+    else if (a_fromRegion == CopyStrategy::ValidGhost) {
+      if (a_toRegion == CopyStrategy::Valid) {
+        copiers = m_validGhostToValidRealmCopiers.at(id);
+      }
+      else if (a_toRegion == CopyStrategy::ValidGhost) {
+        copiers = m_validGhostToValidGhostRealmCopiers.at(id);
+      }
+      else {
+        MayDay::Abort("AmrMesh::copyData - logic bust 2");
+      }
+    }
+    else {
+      MayDay::Abort("AmrMesh::copyData - logic bust 3");
+    }
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      CH_assert(a_dst[lvl]->nComp() > a_dstComps.end());
+      CH_assert(a_src[lvl]->nComp() > a_srcComps.end());
+
+      a_src[lvl]->copyTo(a_srcComps, *a_dst[lvl], a_dstComps, copiers[lvl]);
+    }
+  }
+  else {
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      CH_assert(a_dst[lvl]->nComp() > a_dstComps.end());
+      CH_assert(a_src[lvl]->nComp() > a_srcComps.end());
+
+      a_src[lvl]->localCopyTo(a_srcComps, *a_dst[lvl], a_dstComps);
+    }
+  }
+}
+
+template <typename T>
+void
 AmrMesh::deallocate(Vector<T*>& a_data) const
 {
   CH_TIME("AmrMesh::deallocate(Vector<T*>)");

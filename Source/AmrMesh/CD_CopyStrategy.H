@@ -16,17 +16,13 @@
 
 /*!
   @brief Enum for distinguishing how we copy data
-  LocalCopy => local copying from valid+ghost to valid+ghost.
   Valid => valid region
   ValidGhost => valid+ghost region
 */
 enum class CopyStrategy
 {
-  LocalCopy,
-  FromValidToValid,
-  FromValidToValidGhost,
-  FromValidGhostToValid,
-  FromValidGhostToValidGhost
+  Valid,
+  ValidGhost
 };
 #include <CD_NamespaceFooter.H>
 
