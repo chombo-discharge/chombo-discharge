@@ -635,6 +635,7 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
   // Regrid the operators
   timer.startEvent("Regrid operators");
   m_amr->regridOperators(a_lmin);
+  m_amr->postRegrid();
   timer.stopEvent("Regrid operators");
 
   // Regrid Driver, timestepper, and celltagger
@@ -656,7 +657,6 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
   // If it wants to, TimeStepper can do a postRegrid operation.
   timer.startEvent("Post-regrid");
   m_timeStepper->postRegrid();
-  m_amr->postRegrid();
   timer.stopEvent("Post-regrid");
 
   m_needsNewGeometricTags = false;

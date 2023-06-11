@@ -21,21 +21,27 @@ template <typename T>
 void
 AmrMesh::copyData(EBAMRData<T>&       a_dst,
                   const EBAMRData<T>& a_src,
-                  const CopyStrategy& a_fromRegion,
-                  const CopyStrategy& a_toRegion) const noexcept
+                  const CopyStrategy& a_toRegion,
+                  const CopyStrategy& a_fromRegion) const noexcept
 {
-  CH_TIME("AmrMesh::copyData");
+  CH_TIME("AmrMesh::copyData(EBAMRData, simple)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::copyData" << endl;
+    pout() << "AmrMesh::copyData(EBAMRData, simple)" << endl;
   }
 
-  const int nCompDst = a_dst[0]->nComp();
-  const int nCompSrc = a_src[0]->nComp();
+  const int      nComp    = a_dst[0]->nComp();
+  const Interval dstComps = Interval(0, nComp - 1);
+  const Interval srcComps = Interval(0, nComp - 1);
 
-  const Interval dstComps = Interval(0, nCompDst - 1);
-  const Interval srcComps = Interval(0, nCompSrc - 1);
+  const std::string toRealm   = a_dst.getRealm();
+  const std::string fromRealm = a_src.getRealm();
 
-  this->copyData(a_dst, a_src, dstComps, srcComps, a_fromRegion, a_toRegion);
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    CH_assert(!(a_dst[lvl].isNull()));
+    CH_assert(!(a_src[lvl].isNull()));
+
+    this->copyData(*a_dst[lvl], *a_src[lvl], lvl, toRealm, fromRealm, dstComps, srcComps, a_toRegion, a_fromRegion);
+  }
 }
 
 template <typename T>
@@ -44,41 +50,85 @@ AmrMesh::copyData(EBAMRData<T>&       a_dst,
                   const EBAMRData<T>& a_src,
                   const Interval&     a_dstComps,
                   const Interval&     a_srcComps,
-                  const CopyStrategy& a_fromRegion,
-                  const CopyStrategy& a_toRegion) const noexcept
+                  const CopyStrategy& a_toRegion,
+                  const CopyStrategy& a_fromRegion) const noexcept
 {
-  CH_TIME("AmrMesh::copyData");
+  CH_TIME("AmrMesh::copyData(EBAMRData, full)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::copyData" << endl;
+    pout() << "AmrMesh::copyData(EBAMRData, full)" << endl;
   }
 
   const std::string toRealm   = a_dst.getRealm();
   const std::string fromRealm = a_src.getRealm();
 
-  CH_assert(a_dstComps.size() == a_srcComps.size());
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    CH_assert(!(a_dst[lvl].isNull()));
+    CH_assert(!(a_src[lvl].isNull()));
 
-  if (toRealm != fromRealm) {
-    const auto id = std::make_pair(fromRealm, toRealm);
+    this->copyData(*a_dst[lvl], *a_src[lvl], lvl, toRealm, fromRealm, a_dstComps, a_srcComps, a_toRegion, a_fromRegion);
+  }
+}
+
+template <typename T>
+void
+AmrMesh::copyData(LevelData<T>&       a_dst,
+                  const LevelData<T>& a_src,
+                  const int           a_level,
+                  const std::string   a_toRealm,
+                  const std::string   a_fromRealm,
+                  const CopyStrategy& a_toRegion,
+                  const CopyStrategy& a_fromRegion) const noexcept
+{
+  CH_TIME("AmrMesh::copyData(LD<T>_full)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::copyData(LD<T>_full)" << endl;
+  }
+
+  const Interval dstComps = Interval(0, a_dst.nComp() - 1);
+  const Interval srcComps = Interval(0, a_src.nComp() - 1);
+
+  this->copyData(a_dst, a_src, a_level, a_toRealm, a_fromRealm, dstComps, srcComps, a_toRegion, a_fromRegion);
+}
+
+template <typename T>
+void
+AmrMesh::copyData(LevelData<T>&       a_dst,
+                  const LevelData<T>& a_src,
+                  const int           a_level,
+                  const std::string   a_toRealm,
+                  const std::string   a_fromRealm,
+                  const Interval&     a_dstComps,
+                  const Interval&     a_srcComps,
+                  const CopyStrategy& a_toRegion,
+                  const CopyStrategy& a_fromRegion) const noexcept
+{
+  CH_TIME("AmrMesh::copyData(LD<T>_full)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::copyData(LD<T>_full)" << endl;
+  }
+
+  CH_assert(a_dstComps.size() == a_srcComps.size());
+  CH_assert(a_dst.nComp() > a_dstComps.end());
+  CH_assert(a_src.nComp() > a_srcComps.end());
+
+  if (a_toRealm != a_fromRealm) {
+    const auto id = std::make_pair(a_fromRealm, a_toRealm);
 
     if (a_toRegion == CopyStrategy::ValidGhost) {
-      for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-        CH_assert(a_dst[lvl]->ghostVect() == m_numGhostCell * IntVect::Unit);
-      }
+      CH_assert(a_dst.ghostVect() == m_numGhostCell * IntVect::Unit);
     }
     if (a_fromRegion == CopyStrategy::ValidGhost) {
-      for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-        CH_assert(a_src[lvl]->ghostVect() == m_numGhostCell * IntVect::Unit);
-      }
+      CH_assert(a_src.ghostVect() == m_numGhostCell * IntVect::Unit);
     }
 
-    Vector<Copier> copiers;
+    Copier copier;
 
     if (a_fromRegion == CopyStrategy::Valid) {
       if (a_toRegion == CopyStrategy::Valid) {
-        copiers = m_validToValidRealmCopiers.at(id);
+        copier = m_validToValidRealmCopiers.at(id)[a_level];
       }
       else if (a_toRegion == CopyStrategy::ValidGhost) {
-        copiers = m_validToValidGhostRealmCopiers.at(id);
+        copier = m_validToValidGhostRealmCopiers.at(id)[a_level];
       }
       else {
         MayDay::Abort("AmrMesh::copyData - logic bust 1");
@@ -86,10 +136,10 @@ AmrMesh::copyData(EBAMRData<T>&       a_dst,
     }
     else if (a_fromRegion == CopyStrategy::ValidGhost) {
       if (a_toRegion == CopyStrategy::Valid) {
-        copiers = m_validGhostToValidRealmCopiers.at(id);
+        copier = m_validGhostToValidRealmCopiers.at(id)[a_level];
       }
       else if (a_toRegion == CopyStrategy::ValidGhost) {
-        copiers = m_validGhostToValidGhostRealmCopiers.at(id);
+        copier = m_validGhostToValidGhostRealmCopiers.at(id)[a_level];
       }
       else {
         MayDay::Abort("AmrMesh::copyData - logic bust 2");
@@ -99,20 +149,10 @@ AmrMesh::copyData(EBAMRData<T>&       a_dst,
       MayDay::Abort("AmrMesh::copyData - logic bust 3");
     }
 
-    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-      CH_assert(a_dst[lvl]->nComp() > a_dstComps.end());
-      CH_assert(a_src[lvl]->nComp() > a_srcComps.end());
-
-      a_src[lvl]->copyTo(a_srcComps, *a_dst[lvl], a_dstComps, copiers[lvl]);
-    }
+    a_src.copyTo(a_srcComps, a_dst, a_dstComps, copier);
   }
   else {
-    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-      CH_assert(a_dst[lvl]->nComp() > a_dstComps.end());
-      CH_assert(a_src[lvl]->nComp() > a_srcComps.end());
-
-      a_src[lvl]->localCopyTo(a_srcComps, *a_dst[lvl], a_dstComps);
-    }
+    a_src.localCopyTo(a_srcComps, a_dst, a_dstComps);
   }
 }
 

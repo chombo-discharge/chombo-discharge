@@ -1008,10 +1008,11 @@ AmrMesh::preRegrid()
 
   for (auto& r : m_realms) {
     m_oldGrids[r.first] = this->getGrids(r.first);
-    m_oldToNewCopiers.clear();
 
     r.second->preRegrid();
   }
+
+  m_oldToNewCopiers.clear();
 }
 
 void
@@ -1022,6 +1023,7 @@ AmrMesh::postRegrid()
     pout() << "AmrMesh::postRegrid" << endl;
   }
 
+  // Define copiers for making regrids go faster.
   for (auto& r : m_realms) {
     const Vector<DisjointBoxLayout>& oldGrids = m_oldGrids.at(r.first);
     const Vector<DisjointBoxLayout>& newGrids = this->getGrids(r.first);
@@ -1038,7 +1040,12 @@ AmrMesh::postRegrid()
     }
   }
 
+#if 1 // Original code
   m_hasRegridCopiers = true;
+#else
+  pout() << "AmrMesh::postRegrid - something is wrong with regrid copiers" << endl;
+  m_hasRegridCopiers = false;
+#endif
 }
 
 void
@@ -2099,7 +2106,7 @@ AmrMesh::interpToNewGrids(EBAMRCellData&                   a_newData,
     RefCountedPtr<EBCoarseToFineInterp>& interpolator = this->getFineInterp(a_newData.getRealm(), a_phase)[lvl];
 
     // Interpolate the data.
-    interpolator->interpolate(*a_newData[lvl], *a_newData[lvl - 1], Interval(0, nComp - 1), a_type);
+    interpolator->interpolate(*a_newData[lvl], *a_newData[lvl - 1], interv, a_type);
 
     // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
     // to pollute the solution with interpolation there since we already have valid data.
@@ -2145,7 +2152,7 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
 
       CH_assert(copier.isDefined());
 
-      a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
+      a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv); //, copier);
     }
     else {
       a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv);
@@ -2155,9 +2162,7 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
   for (int lvl = std::max(1, a_lmin); lvl <= a_newFinestLevel; lvl++) {
     RefCountedPtr<EBCoarseToFineInterp>& interpolator = this->getFineInterp(a_newData.getRealm(), a_phase)[lvl];
 
-    const int nComp = a_newData[lvl]->nComp();
-
-    interpolator->interpolate(*a_newData[lvl], *a_newData[lvl - 1], Interval(0, nComp - 1), a_type);
+    interpolator->interpolate(*a_newData[lvl], *a_newData[lvl - 1], interv, a_type);
 
     // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
     // to pollute the solution with interpolation errors there since we already have valid data.
@@ -2167,7 +2172,7 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
 
         CH_assert(copier.isDefined());
 
-        a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
+        a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv); //, copier);
       }
       else {
         a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv);
