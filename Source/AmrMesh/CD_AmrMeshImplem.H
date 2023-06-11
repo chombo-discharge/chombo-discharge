@@ -103,7 +103,7 @@ AmrMesh::copyData(EBAMRData<T>&       a_dst,
       CH_assert(a_dst[lvl]->nComp() > a_dstComps.end());
       CH_assert(a_src[lvl]->nComp() > a_srcComps.end());
 
-      a_src[lvl]->copyTo(a_srcComps, *a_dst[lvl], a_dstComps); //, copiers[lvl]);
+      a_src[lvl]->copyTo(a_srcComps, *a_dst[lvl], a_dstComps, copiers[lvl]);
     }
   }
   else {

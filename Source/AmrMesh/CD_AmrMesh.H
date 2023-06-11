@@ -1817,6 +1817,11 @@ protected:
   std::map<phase::which_phase, RefCountedPtr<BaseIF>> m_baseif;
 
   /*!
+    @brief Old grids
+  */
+  std::map<std::string, Vector<DisjointBoxLayout>> m_oldGrids;
+
+  /*!
     @brief Storage for copiers from the old grids to the new ones
     @note Defined in the realm regrid routine. Cleared in the postRegrid routine. 
   */
@@ -2010,6 +2015,11 @@ protected:
     @brief Has grids or not
   */
   bool m_hasGrids;
+
+  /*!
+    @brief Has regrid copiers or not
+  */
+  bool m_hasRegridCopiers;
 
   /*!
     @brief Grids

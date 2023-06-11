@@ -1004,7 +1004,12 @@ AmrMesh::preRegrid()
     pout() << "AmrMesh::preRegrid" << endl;
   }
 
+  m_hasRegridCopiers = false;
+
   for (auto& r : m_realms) {
+    m_oldGrids[r.first] = this->getGrids(r.first);
+    m_oldToNewCopiers.clear();
+
     r.second->preRegrid();
   }
 }
@@ -1017,9 +1022,23 @@ AmrMesh::postRegrid()
     pout() << "AmrMesh::postRegrid" << endl;
   }
 
-  for (const auto& r : m_realms) {
-    m_oldToNewCopiers.clear();
+  for (auto& r : m_realms) {
+    const Vector<DisjointBoxLayout>& oldGrids = m_oldGrids.at(r.first);
+    const Vector<DisjointBoxLayout>& newGrids = this->getGrids(r.first);
+
+    const int oldFinestLevel  = oldGrids.size() - 1;
+    const int minOldNewFinest = std::min(oldFinestLevel, m_finestLevel);
+
+    Vector<Copier>& oldNewCopiers = m_oldToNewCopiers[r.first];
+
+    oldNewCopiers.resize(1 + minOldNewFinest);
+
+    for (int lvl = 0; lvl <= minOldNewFinest; lvl++) {
+      oldNewCopiers[lvl].define(oldGrids[lvl], newGrids[lvl]);
+    }
   }
+
+  m_hasRegridCopiers = true;
 }
 
 void
@@ -1041,8 +1060,6 @@ AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags, const int a_lmin, const int
   for (auto& r : m_realms) {
     r.second->regridBase(a_lmin);
   }
-
-  this->buildCopiers();
 }
 
 void
@@ -1056,6 +1073,8 @@ AmrMesh::regridOperators(const int a_lmin)
   for (auto& r : m_realms) {
     this->regridOperators(r.first, a_lmin);
   }
+
+  this->buildCopiers();
 }
 
 void
@@ -1072,11 +1091,6 @@ AmrMesh::regridOperators(const std::string a_realm, const int a_lmin)
   }
 
   m_realms[a_realm]->regridOperators(a_lmin);
-
-  // Allocate space for regrid copiers.
-  Vector<Copier>& oldToNewCopiers = m_oldToNewCopiers[a_realm];
-
-  oldToNewCopiers.resize(1 + m_finestLevel);
 }
 
 void
@@ -2062,20 +2076,22 @@ AmrMesh::interpToNewGrids(EBAMRCellData&                   a_newData,
   CH_assert(a_newData.getRealm() == a_oldData.getRealm());
   CH_assert(a_newData[0]->nComp() == a_oldData[0]->nComp());
 
-  const int nComp = a_newData[0]->nComp();
+  const int      nComp  = a_newData[0]->nComp();
+  const Interval interv = Interval(0, nComp - 1);
 
   // These levels have not changed but ownership MIGHT have changed. We use a pre-defined Copier here if we can. This really matters
   // for performance at large scales (> 1M boxes and 10k ranks).
   for (int lvl = 0; lvl <= std::max(0, a_lmin - 1); lvl++) {
-    Copier& copier = m_oldToNewCopiers[a_newData.getRealm()][lvl];
+    if (m_hasRegridCopiers) {
+      const Copier& copier = m_oldToNewCopiers.at(a_newData.getRealm())[lvl];
 
-    if (!copier.isDefined()) {
-      copier.define(a_oldData[lvl]->disjointBoxLayout(), a_newData[lvl]->disjointBoxLayout());
+      CH_assert(copier.isDefined());
+
+      a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
     }
-
-    const Interval interv = Interval(0, nComp - 1);
-
-    a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
+    else {
+      a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv);
+    }
   }
 
   // These levels have changed.
@@ -2088,15 +2104,16 @@ AmrMesh::interpToNewGrids(EBAMRCellData&                   a_newData,
     // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
     // to pollute the solution with interpolation there since we already have valid data.
     if (lvl <= std::min(a_oldFinestLevel, a_newFinestLevel)) {
-      Copier& copier = m_oldToNewCopiers[a_newData.getRealm()][lvl];
+      if (m_hasRegridCopiers) {
+        const Copier& copier = m_oldToNewCopiers.at(a_newData.getRealm())[lvl];
 
-      if (!copier.isDefined()) {
-        copier.define(a_oldData[lvl]->disjointBoxLayout(), a_newData[lvl]->disjointBoxLayout());
+        CH_assert(copier.isDefined());
+
+        a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
       }
-
-      const Interval interv = Interval(0, nComp - 1);
-
-      a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
+      else {
+        a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv);
+      }
     }
   }
 }
@@ -2118,19 +2135,21 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
   CH_assert(a_newData.getRealm() == a_oldData.getRealm());
   CH_assert(a_newData[0]->nComp() == a_oldData[0]->nComp());
 
-  const int nComp = a_newData[0]->nComp();
+  const int      nComp  = a_newData[0]->nComp();
+  const Interval interv = Interval(0, nComp - 1);
 
   // These levels have not changed but ownership might have changed so we still need to copy.
   for (int lvl = 0; lvl <= std::max(0, a_lmin - 1); lvl++) {
-    Copier& copier = m_oldToNewCopiers[a_newData.getRealm()][lvl];
+    if (m_hasRegridCopiers) {
+      const Copier& copier = m_oldToNewCopiers.at(a_newData.getRealm())[lvl];
 
-    if (!copier.isDefined()) {
-      copier.define(a_oldData[lvl]->disjointBoxLayout(), a_newData[lvl]->disjointBoxLayout());
+      CH_assert(copier.isDefined());
+
+      a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
     }
-
-    const Interval interv = Interval(0, nComp - 1);
-
-    a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
+    else {
+      a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv);
+    }
   }
 
   for (int lvl = std::max(1, a_lmin); lvl <= a_newFinestLevel; lvl++) {
@@ -2143,15 +2162,16 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
     // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
     // to pollute the solution with interpolation errors there since we already have valid data.
     if (lvl <= std::min(a_oldFinestLevel, a_newFinestLevel)) {
-      Copier& copier = m_oldToNewCopiers[a_newData.getRealm()][lvl];
+      if (m_hasRegridCopiers) {
+        const Copier& copier = m_oldToNewCopiers.at(a_newData.getRealm())[lvl];
 
-      if (!copier.isDefined()) {
-        copier.define(a_oldData[lvl]->disjointBoxLayout(), a_newData[lvl]->disjointBoxLayout());
+        CH_assert(copier.isDefined());
+
+        a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
       }
-
-      const Interval interv = Interval(0, nComp - 1);
-
-      a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
+      else {
+        a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv);
+      }
     }
   }
 }
