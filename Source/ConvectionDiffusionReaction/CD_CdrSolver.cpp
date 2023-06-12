@@ -408,7 +408,7 @@ CdrSolver::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   m_amr->allocate(m_cacheSource, m_realm, m_phase, m_nComp);
 
   m_amr->copyData(m_cachePhi, m_phi);
-  m_amr->copyData(m_cacheSource, m_source);  
+  m_amr->copyData(m_cacheSource, m_source);
 
   this->deallocate();
 }

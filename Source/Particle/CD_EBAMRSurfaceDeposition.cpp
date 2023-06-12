@@ -223,7 +223,7 @@ EBAMRSurfaceDeposition::defineDataMotion() noexcept
 
     const bool doExchange = true;
 
-    // Valid to valid copier. 
+    // Valid to valid copier.
     m_validToValidCopiers[lvl].define(dbl, dbl, domain);
 
     // Define Copier as going from valid -> valid+ghost.
