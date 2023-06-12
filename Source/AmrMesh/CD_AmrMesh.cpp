@@ -2113,7 +2113,10 @@ AmrMesh::interpToNewGrids(EBAMRCellData&                   a_newData,
       a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
     }
     else {
-      a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv);
+      pout() << "AmrMesh::interpToNewGrids - using on-the-fly copier (performance hit expected)" << endl;
+      Copier copier(a_oldData[lvl]->disjointBoxLayout(), a_newData[lvl]->disjointBoxLayout());
+
+      a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
     }
   }
 
@@ -2135,7 +2138,10 @@ AmrMesh::interpToNewGrids(EBAMRCellData&                   a_newData,
         a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
       }
       else {
-        a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv);
+        pout() << "AmrMesh::interpToNewGrids - using on-the-fly copier (performance hit expected)" << endl;
+        Copier copier(a_oldData[lvl]->disjointBoxLayout(), a_newData[lvl]->disjointBoxLayout());
+
+        a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
       }
     }
   }
@@ -2171,7 +2177,10 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
       a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
     }
     else {
-      a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv);
+      pout() << "AmrMesh::interpToNewGrids - using on-the-fly copier (performance hit expected)" << endl;
+      Copier copier(a_oldData[lvl]->disjointBoxLayout(), a_newData[lvl]->disjointBoxLayout());
+
+      a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
     }
   }
 
@@ -2191,7 +2200,10 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
         a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
       }
       else {
-        a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv);
+        pout() << "AmrMesh::interpToNewGrids - using on-the-fly copier (performance hit expected)" << endl;
+        Copier copier(a_oldData[lvl]->disjointBoxLayout(), a_newData[lvl]->disjointBoxLayout());
+
+        a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
       }
     }
   }
