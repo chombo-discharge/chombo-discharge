@@ -943,7 +943,7 @@ ItoKMCStepper<I, C, R, F>::getPlotVariableNames() const noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const noexcept
+ItoKMCStepper<I, C, R, F>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_outputRealm, const int a_level) const noexcept
 {
   CH_TIME("ItoKMCStepper::writePlotData");
   if (m_verbosity > 5) {
@@ -951,24 +951,24 @@ ItoKMCStepper<I, C, R, F>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_
   }
 
   // Poisson solver copies over its output data
-  m_fieldSolver->writePlotData(a_output, a_icomp, a_level);
+  m_fieldSolver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
 
   // Surface charge solver writes
-  m_sigmaSolver->writePlotData(a_output, a_icomp, a_level);
+  m_sigmaSolver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
 
   // Ito solvers copy their output data
   for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->writePlotData(a_output, a_icomp, a_level);
+    solverIt()->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
   }
 
   // Cdr solvers output their data
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->writePlotData(a_output, a_icomp, a_level);
+    solverIt()->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
   }
 
   // RTE solvers copy their output data
   for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->writePlotData(a_output, a_icomp, a_level);
+    solverIt()->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
   }
 
   // Write the conductivity to the output

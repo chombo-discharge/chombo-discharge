@@ -119,10 +119,11 @@ namespace Physics {
 	@brief Write plot data to output holder (does nothing since there's no IO form this class)
 	@param[inout] a_output            Output data holder.
 	@param[inout] a_icomp             Starting component in a_output to begin at. 
+	@param[in]    a_outputRealm       Output realm
 	@param[in]    a_level             Grid level
       */
       virtual void
-      writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const override;
+      writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_realm, const int a_level) const override;
 
       /*!
 	@brief Compute a time step to be used by Driver. 

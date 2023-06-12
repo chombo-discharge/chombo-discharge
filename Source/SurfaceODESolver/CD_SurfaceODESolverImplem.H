@@ -759,7 +759,7 @@ SurfaceODESolver<N>::writePlotFile() const noexcept
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       int icomp = 0;
-      this->writePlotData(*output[lvl], icomp, lvl);
+      this->writePlotData(*output[lvl], icomp, m_realm, lvl);
     }
 
     // Filename
@@ -792,7 +792,7 @@ SurfaceODESolver<N>::writePlotFile() const noexcept
 
 template <int N>
 void
-SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
+SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const std::string a_outputRealm, const int a_level) const noexcept
 {
   CH_TIME("SurfaceODESolver::writePlotData");
   if (m_verbosity > 5) {

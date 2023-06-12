@@ -174,10 +174,7 @@ FieldSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel)
   //       the new grid (in the regrid routine).
 
   m_amr->allocate(m_cache, m_realm, m_nComp);
-
-  for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++) {
-    m_potential[lvl]->localCopyTo(*m_cache[lvl]);
-  }
+  m_amr->copyData(m_cache, m_potential);
 
   this->deallocate();
 }
@@ -1013,7 +1010,7 @@ FieldSolver::writePlotFile()
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     int icomp = 0;
 
-    this->writePlotData(*output[lvl], icomp, lvl, true);
+    this->writePlotData(*output[lvl], icomp, m_realm, lvl, true);
   }
 
   // Filename
@@ -1133,6 +1130,7 @@ FieldSolver::postCheckpoint()
 void
 FieldSolver::writePlotData(LevelData<EBCellFAB>& a_output,
                            int&                  a_comp,
+                           const std::string     a_outputRealm,
                            const int             a_level,
                            const bool            a_forceNoInterp) const noexcept
 {
@@ -1149,25 +1147,25 @@ FieldSolver::writePlotData(LevelData<EBCellFAB>& a_output,
 
   // Add phi to output
   if (m_plotPotential) {
-    this->writeMultifluidData(a_output, a_comp, m_potential, phase::gas, a_level, doInterp);
+    this->writeMultifluidData(a_output, a_comp, m_potential, phase::gas, a_outputRealm, a_level, doInterp);
   }
   if (m_plotRho) {
-    this->writeMultifluidData(a_output, a_comp, m_rho, phase::gas, a_level, false);
+    this->writeMultifluidData(a_output, a_comp, m_rho, phase::gas, a_outputRealm, a_level, false);
   }
   if (m_plotSigma) {
-    this->writeSurfaceData(a_output, a_comp, *m_sigma[a_level], a_level);
+    this->writeSurfaceData(a_output, a_comp, *m_sigma[a_level], a_outputRealm, a_level);
   }
   if (m_plotResidue) {
-    this->writeMultifluidData(a_output, a_comp, m_residue, phase::gas, a_level, false);
+    this->writeMultifluidData(a_output, a_comp, m_residue, phase::gas, a_outputRealm, a_level, false);
   }
   if (m_plotPermittivity) {
-    this->writeMultifluidData(a_output, a_comp, m_permittivityCell, phase::gas, a_level, false);
+    this->writeMultifluidData(a_output, a_comp, m_permittivityCell, phase::gas, a_outputRealm, a_level, false);
   }
   if (m_plotElectricField) {
-    this->writeMultifluidData(a_output, a_comp, m_electricField, phase::gas, a_level, doInterp);
+    this->writeMultifluidData(a_output, a_comp, m_electricField, phase::gas, a_outputRealm, a_level, doInterp);
   }
   if (m_plotElectricFieldSolid) {
-    this->writeMultifluidData(a_output, a_comp, m_electricField, phase::solid, a_level, doInterp);
+    this->writeMultifluidData(a_output, a_comp, m_electricField, phase::solid, a_outputRealm, a_level, doInterp);
   }
 }
 
@@ -1176,6 +1174,7 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
                                  int&                     a_comp,
                                  const MFAMRCellData&     a_data,
                                  const phase::which_phase a_phase,
+                                 const std::string        a_outputRealm,
                                  const int                a_level,
                                  const bool               a_interp) const noexcept
 
@@ -1242,6 +1241,7 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
     MultifluidAlias::aliasMF(aliasGas, phase::gas, *a_data[a_level]);
     MultifluidAlias::aliasMF(aliasSolid, phase::solid, *a_data[a_level]);
 
+    //    m_amr->copyData(scratchGas, aliasGas, a_level, m_realm, m_realm, CopyStrategy::ValidG
     aliasGas.localCopyTo(scratchGas);
     aliasSolid.localCopyTo(scratchSolid);
 
@@ -1401,6 +1401,7 @@ void
 FieldSolver::writeSurfaceData(LevelData<EBCellFAB>&             a_output,
                               int&                              a_comp,
                               const LevelData<BaseIVFAB<Real>>& a_data,
+                              const std::string                 a_outputRealm,
                               const int                         a_level) const noexcept
 {
   CH_TIME("FieldSolver::writeSurfaceData");

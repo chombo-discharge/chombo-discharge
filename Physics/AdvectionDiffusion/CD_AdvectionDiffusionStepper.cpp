@@ -301,7 +301,7 @@ AdvectionDiffusionStepper::getPlotVariableNames() const
 }
 
 void
-AdvectionDiffusionStepper::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const
+AdvectionDiffusionStepper::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_outputRealm, const int a_level) const
 {
   CH_TIME("AdvectionDiffusionStepper::writePlotData");
   if (m_verbosity > 5) {
@@ -311,7 +311,7 @@ AdvectionDiffusionStepper::writePlotData(LevelData<EBCellFAB>& a_output, int& a_
   CH_assert(a_level >= 0);
   CH_assert(a_level <= m_amr->getFinestLevel());
 
-  m_solver->writePlotData(a_output, a_icomp, a_level);
+  m_solver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
 }
 
 Real

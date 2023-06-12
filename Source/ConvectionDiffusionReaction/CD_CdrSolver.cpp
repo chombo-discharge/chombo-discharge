@@ -1732,7 +1732,7 @@ CdrSolver::writePlotFile()
   // Copy internal data to be plotted over to 'output'
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     int icomp = 0;
-    this->writePlotData(*output[lvl], icomp, lvl);
+    this->writePlotData(*output[lvl], icomp, m_realm, lvl);
   }
 
   // Filename
@@ -1763,7 +1763,7 @@ CdrSolver::writePlotFile()
 }
 
 void
-CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const noexcept
+CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_outputRealm, const int a_level) const noexcept
 {
   CH_TIME("CdrSolver::writePlotData");
   if (m_verbosity > 5) {

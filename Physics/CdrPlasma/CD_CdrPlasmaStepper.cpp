@@ -4563,7 +4563,7 @@ CdrPlasmaStepper::getPlotVariableNames() const
 }
 
 void
-CdrPlasmaStepper::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const
+CdrPlasmaStepper::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_outputRealm, const int a_level) const
 {
   CH_TIME("CdrPlasmaStepper::writePlotData");
   if (m_verbosity > 3) {
@@ -4574,19 +4574,19 @@ CdrPlasmaStepper::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, co
   CH_assert(a_level <= m_amr->getFinestLevel());
 
   // Poisson solver copies over its output data
-  m_fieldSolver->writePlotData(a_output, a_icomp, a_level);
+  m_fieldSolver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
 
   // Surface charge solver writes
-  m_sigma->writePlotData(a_output, a_icomp, a_level);
+  m_sigma->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
 
   // CDR solvers output their data
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->writePlotData(a_output, a_icomp, a_level);
+    solverIt()->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
   }
 
   // RTE solvers output their data
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->writePlotData(a_output, a_icomp, a_level);
+    solverIt()->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
   }
 
   // CdrPlasmaStepper adds the current to the output file.

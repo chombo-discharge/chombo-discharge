@@ -2208,7 +2208,7 @@ Driver::writePlotFile(const std::string a_filename)
       if (m_verbosity > 2) {
         pout() << "Driver::writePlotFile -- assembling data on level = " << lvl << endl;
       }
-      m_timeStepper->writePlotData(outputData, comp, lvl);
+      m_timeStepper->writePlotData(outputData, comp, m_realm, lvl);
       if (!(m_cellTagger.isNull())) {
         m_cellTagger->writePlotData(outputData, comp, lvl);
       }
