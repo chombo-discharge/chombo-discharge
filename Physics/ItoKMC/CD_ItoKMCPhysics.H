@@ -104,6 +104,14 @@ namespace Physics {
       computeAlpha(const RealVect a_E) const = 0;
 
       /*!
+	@brief Compute Townsend attachment coefficient
+	@param[in] a_E Electric field. 
+	@return Should return the Townsend attachment coefficient. 
+      */
+      virtual Real
+      computeEta(const RealVect a_E) const = 0;
+
+      /*!
 	@brief Get all particle drift-diffusion species
 	@return m_itoSpecies
       */
