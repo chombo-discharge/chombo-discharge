@@ -2018,6 +2018,11 @@ protected:
   int m_finestLevel;
 
   /*!
+    @brief Finest level before a regrid
+  */
+  int m_oldFinestLevel;
+
+  /*!
     @brief Maximum amr depth
   */
   int m_maxAmrDepth;

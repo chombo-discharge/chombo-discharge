@@ -189,12 +189,17 @@ AmrMesh::copyDataOldToNew(LevelData<T>&       a_newData,
   }
 
   CH_assert(m_hasRegridCopiers);
+  CH_assert(a_level <= m_oldFinestLevel);
 
   const Copier& copier = m_oldToNewCopiers.at(a_realm)[a_level];
 
   CH_assert(copier.isDefined());
 
+#if 0 // For some reason this does not work. 
   a_oldData.copyTo(a_srcComps, a_newData, a_dstComps, copier);
+#else
+  a_oldData.copyTo(a_srcComps, a_newData, a_dstComps);
+#endif
 }
 
 template <typename T>

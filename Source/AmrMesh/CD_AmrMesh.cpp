@@ -35,8 +35,9 @@ AmrMesh::AmrMesh()
   // Default things
   this->parseOptions();
 
-  m_finestLevel = 0;
-  m_hasGrids    = false;
+  m_finestLevel    = 0;
+  m_oldFinestLevel = -1;
+  m_hasGrids       = false;
 
   // Some things might require a vector which is just a tiny bit longer.
   m_refinementRatios.resize(m_maxAmrDepth);
@@ -1005,14 +1006,24 @@ AmrMesh::preRegrid()
   }
 
   m_hasRegridCopiers = false;
+  m_oldFinestLevel   = m_finestLevel;
 
+  // Save the old grids and clear the old copiers.
   for (auto& r : m_realms) {
-    m_oldGrids[r.first] = this->getGrids(r.first);
+    Vector<DisjointBoxLayout>& oldGrids = m_oldGrids[r.first];
+    Vector<Copier>&            copiers  = m_oldToNewCopiers[r.first];
 
-    r.second->preRegrid();
+    copiers.resize(0);
+    oldGrids.resize(1 + m_oldFinestLevel);
+    for (int lvl = 0; lvl <= m_oldFinestLevel; lvl++) {
+      oldGrids[lvl] = this->getGrids(r.first)[lvl];
+    }
   }
 
-  m_oldToNewCopiers.clear();
+  // Each realm enters pre-regrid mode.
+  for (auto& r : m_realms) {
+    r.second->preRegrid();
+  }
 }
 
 void
@@ -1028,15 +1039,15 @@ AmrMesh::postRegrid()
     const Vector<DisjointBoxLayout>& oldGrids = m_oldGrids.at(r.first);
     const Vector<DisjointBoxLayout>& newGrids = this->getGrids(r.first);
 
-    const int oldFinestLevel  = oldGrids.size() - 1;
-    const int minOldNewFinest = std::min(oldFinestLevel, m_finestLevel);
+    const int minOldNewFinest = std::min(m_oldFinestLevel, m_finestLevel);
 
     Vector<Copier>& oldNewCopiers = m_oldToNewCopiers[r.first];
 
     oldNewCopiers.resize(1 + minOldNewFinest);
 
     for (int lvl = 0; lvl <= minOldNewFinest; lvl++) {
-      oldNewCopiers[lvl].define(oldGrids[lvl], newGrids[lvl]);
+      oldNewCopiers[lvl].clear();
+      oldNewCopiers[lvl].define(oldGrids[lvl], (const BoxLayout&)newGrids[lvl], m_domains[lvl]);
     }
   }
 
