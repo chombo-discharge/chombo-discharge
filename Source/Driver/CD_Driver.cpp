@@ -601,12 +601,12 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
 
   // Store things that need to be regridded
   timer.startEvent("Pre-regrid");
-  m_amr->preRegrid();
   this->cacheTags(m_tags); // Cache m_tags because after regrid, ownership will change
   m_timeStepper->preRegrid(a_lmin, m_amr->getFinestLevel());
   if (!(m_cellTagger.isNull())) {
     m_cellTagger->preRegrid();
   }
+  m_amr->preRegrid();
   timer.stopEvent("Pre-regrid");
 
   // Regrid AMR. Only levels [lmin, lmax] are allowed to change.
