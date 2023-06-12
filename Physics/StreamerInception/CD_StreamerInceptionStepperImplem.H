@@ -832,7 +832,10 @@ StreamerInceptionStepper<P, F, C>::getTransientPlotVariableNames() const noexcep
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const
+StreamerInceptionStepper<P, F, C>::writePlotData(LevelData<EBCellFAB>& a_output,
+                                                 int&                  a_icomp,
+                                                 const std::string     a_outputRealm,
+                                                 const int             a_level) const
 {
   CH_TIME("StreamerInceptionStepper::writePlotData");
   if (m_verbosity > 5) {
@@ -840,26 +843,26 @@ StreamerInceptionStepper<P, F, C>::writePlotData(LevelData<EBCellFAB>& a_output,
   }
 
   if (m_plotPoisson) {
-    m_fieldSolver->writePlotData(a_output, a_icomp, a_level);
+    m_fieldSolver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
   }
 
   if (m_plotTracer) {
-    m_tracerParticleSolver->writePlotData(a_output, a_icomp, a_level);
+    m_tracerParticleSolver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
   }
 
   if (m_plotNegativeIons) {
-    m_ionSolver->writePlotData(a_output, a_icomp, a_level);
+    m_ionSolver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
   }
 
   // Write internal data -- this differs between the 'stationary' and 'transient' modes
   switch (m_mode) {
   case Mode::Stationary: {
-    this->writePlotDataStationary(a_output, a_icomp, a_level);
+    this->writePlotDataStationary(a_output, a_icomp, a_outputRealm, a_level);
 
     break;
   }
   case Mode::Transient:
-    this->writePlotDataTransient(a_output, a_icomp, a_level);
+    this->writePlotDataTransient(a_output, a_icomp, a_outputRealm, a_level);
 
     break;
   default: {
@@ -874,6 +877,7 @@ template <typename P, typename F, typename C>
 void
 StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>& a_output,
                                                            int&                  a_icomp,
+                                                           const std::string     a_outputRealm,
                                                            const int             a_level) const noexcept
 {
   CH_TIME("StreamerInceptionStepper::writePlotDataStationary");
@@ -941,6 +945,7 @@ template <typename P, typename F, typename C>
 void
 StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& a_output,
                                                           int&                  a_icomp,
+                                                          const std::string     a_outputRealm,
                                                           const int             a_level) const noexcept
 {
   CH_TIME("StreamerInceptionStepper::writePlotDataTransient");
@@ -955,8 +960,15 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
   LevelData<EBCellFAB> aliasData;
   aliasLevelData<EBCellFAB>(aliasData, &a_output, Interval(a_icomp, a_icomp + SpaceDim));
 
-  m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_fieldSolver->getPotential(), phase::gas, a_level, true);
-  m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_fieldSolver->getElectricField(), phase::gas, a_level, true);
+  m_fieldSolver
+    ->writeMultifluidData(a_output, a_icomp, m_fieldSolver->getPotential(), phase::gas, a_outputRealm, a_level, true);
+  m_fieldSolver->writeMultifluidData(a_output,
+                                     a_icomp,
+                                     m_fieldSolver->getElectricField(),
+                                     phase::gas,
+                                     a_outputRealm,
+                                     a_level,
+                                     true);
 
   DataOps::scale(aliasData, m_voltageCurve(m_time));
 

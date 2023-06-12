@@ -193,10 +193,14 @@ namespace Physics {
 	@brief Write plot data to output holder. 
 	@param[inout] a_output Output data holder.
 	@param[inout] a_icomp  Starting component in a_output to begin at. 
+	@param[in]    a_outputRealm Realm where a_output belongs
 	@param[in]    a_level  Grid level
       */
       virtual void
-      writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const override;
+      writePlotData(LevelData<EBCellFAB>& a_output,
+                    int&                  a_icomp,
+                    const std::string     a_outputRealm,
+                    const int             a_level) const override;
 
       /*!
 	@brief Get plot variable names for stationary mode
@@ -887,19 +891,27 @@ namespace Physics {
 	@brief Write plot data for the 'stationary' mode
 	@param[inout] a_output Output data holder.
 	@param[inout] a_icomp  Starting component in a_output to begin at. 
+	@param[in]    a_outputRealm Realm where a_output belongs
 	@param[in]    a_level  Grid level
       */
       virtual void
-      writePlotDataStationary(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const noexcept;
+      writePlotDataStationary(LevelData<EBCellFAB>& a_output,
+                              int&                  a_icomp,
+                              const std::string     a_outputRealm,
+                              const int             a_level) const noexcept;
 
       /*!
 	@brief Write plot data for the 'transient' mode
 	@param[inout] a_output            Output data holder.
 	@param[in]    a_plotVariableNames Plot variable names.
+	@param[in]    a_outputRealm Realm where a_output belongs
 	@param[inout] a_icomp             Starting component in a_output to begin at. 
       */
       virtual void
-      writePlotDataTransient(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const noexcept;
+      writePlotDataTransient(LevelData<EBCellFAB>& a_output,
+                             int&                  a_icomp,
+                             const std::string     a_outputRealm,
+                             const int             a_level) const noexcept;
 
       /*!
 	@brief Check if particle is outside grid boundaries

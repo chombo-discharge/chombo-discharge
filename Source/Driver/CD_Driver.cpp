@@ -2344,7 +2344,7 @@ Driver::writeRanks(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_leve
     const Interval srcInterv(0, 0);
     const Interval dstInterv(a_comp, a_comp);
 
-    m_amr->copyData(scratch, a_output, a_level, m_realm, r, dstInterv, srcInterv);
+    m_amr->copyData(a_output, scratch, a_level, m_realm, r, dstInterv, srcInterv);
 
     a_comp++;
   }
