@@ -1241,20 +1241,19 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
     MultifluidAlias::aliasMF(aliasGas, phase::gas, *a_data[a_level]);
     MultifluidAlias::aliasMF(aliasSolid, phase::solid, *a_data[a_level]);
 
-    //    m_amr->copyData(scratchGas, aliasGas, a_level, m_realm, m_realm, CopyStrategy::ValidG
-    aliasGas.localCopyTo(scratchGas);
-    aliasSolid.localCopyTo(scratchSolid);
+    m_amr->copyData(scratchGas, aliasGas, a_level, m_realm, m_realm, CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);
+    m_amr->copyData(scratchSolid, aliasSolid, a_level, m_realm, m_realm, CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);
+
+    scratchGas.exchange();
+    scratchSolid.exchange();    
 
     if (a_level > 0) {
       MultifluidAlias::aliasMF(aliasGasCoar, phase::gas, *a_data[a_level - 1]);
       MultifluidAlias::aliasMF(aliasSolidCoar, phase::solid, *a_data[a_level - 1]);
 
-      aliasGasCoar.localCopyTo(scratchGasCoar);
-      aliasSolidCoar.localCopyTo(scratchSolidCoar);
+      m_amr->copyData(scratchGasCoar, aliasGasCoar, a_level-1, m_realm, m_realm, CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);
+      m_amr->copyData(scratchSolidCoar, aliasSolidCoar, a_level-1, m_realm, m_realm, CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);      
     }
-
-    scratchGas.exchange();
-    scratchSolid.exchange();
   }
   else {
     LevelData<EBCellFAB> aliasGas;
@@ -1262,12 +1261,12 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
 
     MultifluidAlias::aliasMF(aliasGas, phase::gas, *a_data[a_level]);
 
-    aliasGas.localCopyTo(scratchGas);
+    m_amr->copyData(scratchGas, aliasGas, a_level, m_realm, m_realm, CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);
 
     if (a_level > 0) {
       MultifluidAlias::aliasMF(aliasGasCoar, phase::gas, *a_data[a_level - 1]);
 
-      aliasGasCoar.localCopyTo(scratchGasCoar);
+      m_amr->copyData(scratchGasCoar, aliasGasCoar, a_level-1, m_realm, m_realm, CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);      
     }
 
     scratchGas.exchange();
@@ -1390,8 +1389,7 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
   CH_STOP(t6);
 
   CH_START(t7);
-  scratchGas.exchange();
-  scratchGas.copyTo(srcInterv, a_output, dstInterv, copier);
+  m_amr->copyData(a_output, scratchGas, a_level, a_outputRealm, m_realm, CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);
   CH_STOP(t7);
 
   a_comp += numComp;
@@ -1422,7 +1420,7 @@ FieldSolver::writeSurfaceData(LevelData<EBCellFAB>&             a_output,
   DataOps::incr(scratch, a_data, 1.0);
 
   // Copy to a_output
-  scratch.copyTo(Interval(0, numComp - 1), a_output, Interval(a_comp, a_comp));
+  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);
 
   a_comp += numComp;
 }
