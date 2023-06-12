@@ -183,7 +183,7 @@ protected:
   /*!
     @brief Pre-built copier for copying from m_eblgCoFi to m_eblgCoar
   */
-  mutable std::map<IntVect,Copier> m_ebCopiers;
+  mutable std::map<IntVect, Copier> m_ebCopiers;
 
   /*!
     @brief Irregular cells on the coarsened fine layout

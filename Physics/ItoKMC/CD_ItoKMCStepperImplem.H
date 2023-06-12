@@ -943,7 +943,10 @@ ItoKMCStepper<I, C, R, F>::getPlotVariableNames() const noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_outputRealm, const int a_level) const noexcept
+ItoKMCStepper<I, C, R, F>::writePlotData(LevelData<EBCellFAB>& a_output,
+                                         int&                  a_icomp,
+                                         const std::string     a_outputRealm,
+                                         const int             a_level) const noexcept
 {
   CH_TIME("ItoKMCStepper::writePlotData");
   if (m_verbosity > 5) {

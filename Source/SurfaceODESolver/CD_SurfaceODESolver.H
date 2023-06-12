@@ -383,7 +383,10 @@ public:
     @note This routine writes m_phi and m_rhs into a_ouput. 
   */
   virtual void
-  writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const std::string a_outputRealm, const int a_level) const noexcept;
+  writePlotData(LevelData<EBCellFAB>& a_output,
+                int&                  a_comp,
+                const std::string     a_outputRealm,
+                const int             a_level) const noexcept;
 
 protected:
   /*!

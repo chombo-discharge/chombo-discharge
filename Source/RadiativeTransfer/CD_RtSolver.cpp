@@ -317,7 +317,7 @@ void
 RtSolver::writeData(LevelData<EBCellFAB>& a_output,
                     int&                  a_comp,
                     const EBAMRCellData&  a_data,
-		    const std::string     a_outputRealm,		    
+                    const std::string     a_outputRealm,
                     const int             a_level,
                     const bool            a_interpToCentroids,
                     const bool            a_interpGhost) const noexcept

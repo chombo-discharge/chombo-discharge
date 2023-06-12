@@ -1301,7 +1301,10 @@ ItoSolver::getPlotVariableNames() const
 }
 
 void
-ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const std::string a_outputRealm, const int a_level) const noexcept
+ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output,
+                         int&                  a_comp,
+                         const std::string     a_outputRealm,
+                         const int             a_level) const noexcept
 {
   CH_TIMERS("ItoSolver::writePlotData");
   CH_TIMER("ItoSolver::writePlotData::mesh_data", t1);

@@ -487,7 +487,10 @@ public:
     @note This will write the plot data in this solver to a_output, starting on a_comp
   */
   virtual void
-  writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const std::string a_outputRealm, const int a_level) const noexcept;
+  writePlotData(LevelData<EBCellFAB>& a_output,
+                int&                  a_comp,
+                const std::string     a_outputRealm,
+                const int             a_level) const noexcept;
 
   /*!
     @brief Get number of particles in a specified particle container

@@ -123,7 +123,10 @@ namespace Physics {
 	@param[in]    a_level             Grid level
       */
       void
-      writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_outputRealm, const int a_level) const override;
+      writePlotData(LevelData<EBCellFAB>& a_output,
+                    int&                  a_icomp,
+                    const std::string     a_outputRealm,
+                    const int             a_level) const override;
 
       /*!
 	@brief Compute time step

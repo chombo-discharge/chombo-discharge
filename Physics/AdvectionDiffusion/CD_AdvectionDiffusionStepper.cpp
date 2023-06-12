@@ -301,7 +301,10 @@ AdvectionDiffusionStepper::getPlotVariableNames() const
 }
 
 void
-AdvectionDiffusionStepper::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_outputRealm, const int a_level) const
+AdvectionDiffusionStepper::writePlotData(LevelData<EBCellFAB>& a_output,
+                                         int&                  a_icomp,
+                                         const std::string     a_outputRealm,
+                                         const int             a_level) const
 {
   CH_TIME("AdvectionDiffusionStepper::writePlotData");
   if (m_verbosity > 5) {

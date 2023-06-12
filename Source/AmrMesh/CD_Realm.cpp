@@ -421,7 +421,7 @@ Realm::defineValidCells()
 
       // Copy from fine to coarse.
       Copier copier(dblCoFi, dblCoar);
-      coFiData.copyTo(Interval(0,0), coarData, Interval(0,0), copier);
+      coFiData.copyTo(Interval(0, 0), coarData, Interval(0, 0), copier);
 
       // Go through the coarse grid -- wherever we find a value of 1 there is also a fine grid.
       for (DataIterator dit(dblCoar); dit.ok(); ++dit) {

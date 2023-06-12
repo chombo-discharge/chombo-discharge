@@ -288,7 +288,10 @@ public:
     @note This routine writes m_phi on centroids (and not cell-centers). 
   */
   virtual void
-  writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const std::string a_outputRealm, const int a_level) const noexcept;
+  writePlotData(LevelData<EBCellFAB>& a_output,
+                int&                  a_comp,
+                const std::string     a_outputRealm,
+                const int             a_level) const noexcept;
 
 #ifdef CH_USE_HDF5
   /*!
@@ -504,7 +507,7 @@ protected:
   writeData(LevelData<EBCellFAB>& a_output,
             int&                  a_comp,
             const EBAMRCellData&  a_data,
-	    const std::string     a_outputRealm,
+            const std::string     a_outputRealm,
             const int             a_level,
             const bool            a_interpToCentroids,
             const bool            a_interpGhost) const noexcept;

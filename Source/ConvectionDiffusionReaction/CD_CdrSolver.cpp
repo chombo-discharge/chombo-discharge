@@ -1763,7 +1763,10 @@ CdrSolver::writePlotFile()
 }
 
 void
-CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_outputRealm, const int a_level) const noexcept
+CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
+                         int&                  a_icomp,
+                         const std::string     a_outputRealm,
+                         const int             a_level) const noexcept
 {
   CH_TIME("CdrSolver::writePlotData");
   if (m_verbosity > 5) {

@@ -444,7 +444,10 @@ public:
     @note This routine writes m_phi on centroids (and not cell-centers). 
   */
   virtual void
-  writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_outputRealm, const int a_level) const noexcept;
+  writePlotData(LevelData<EBCellFAB>& a_output,
+                int&                  a_icomp,
+                const std::string     a_outputRealm,
+                const int             a_level) const noexcept;
 
   /*!
     @brief Write checkpoint data into HDF5 file. 

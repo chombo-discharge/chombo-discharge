@@ -1050,9 +1050,11 @@ AmrMesh::postRegrid()
     oldNewCellCopiers.resize(1 + minOldNewFinest);
     oldNewEBCopiers.resize(1 + minOldNewFinest);
 
+    const IntVect numGhost = m_numGhostCells * IntVect::Unit;
+
     for (int lvl = 0; lvl <= minOldNewFinest; lvl++) {
-      oldNewCellCopiers[lvl].define(oldGrids[lvl], newGrids[lvl]);
-      oldNewEBCopiers[lvl].define(oldGrids[lvl], newGrids[lvl]);
+      oldNewCellCopiers[lvl].define(oldGrids[lvl], newGrids[lvl], numGhost);
+      oldNewEBCopiers[lvl].define(oldGrids[lvl], newGrids[lvl], numGhost);
     }
   }
 
@@ -2101,11 +2103,12 @@ AmrMesh::interpToNewGrids(EBAMRCellData&                   a_newData,
 
   const int      nComp  = a_newData[0]->nComp();
   const Interval interv = Interval(0, nComp - 1);
+  const IntVect  ghost  = m_numGhostCells * IntVect::Unit;
 
   // These levels have not changed but ownership MIGHT have changed. We use a pre-defined Copier here if we can. This really matters
   // for performance at large scales (> 1M boxes and 10k ranks).
   for (int lvl = 0; lvl <= std::max(0, a_lmin - 1); lvl++) {
-    if (m_hasRegridCopiers) {
+    if (m_hasRegridCopiers && a_newData[lvl]->ghostVect() == ghost) {
       const Copier& copier = m_oldToNewCellCopiers.at(a_newData.getRealm())[lvl];
 
       CH_assert(copier.isDefined());
@@ -2114,7 +2117,9 @@ AmrMesh::interpToNewGrids(EBAMRCellData&                   a_newData,
     }
     else {
       pout() << "AmrMesh::interpToNewGrids - using on-the-fly copier (performance hit expected)" << endl;
-      Copier copier(a_oldData[lvl]->disjointBoxLayout(), a_newData[lvl]->disjointBoxLayout());
+      Copier copier(a_oldData[lvl]->disjointBoxLayout(),
+                    a_newData[lvl]->disjointBoxLayout(),
+                    a_newData[lvl]->ghostVect());
 
       a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
     }
@@ -2130,7 +2135,7 @@ AmrMesh::interpToNewGrids(EBAMRCellData&                   a_newData,
     // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
     // to pollute the solution with interpolation there since we already have valid data.
     if (lvl <= std::min(a_oldFinestLevel, a_newFinestLevel)) {
-      if (m_hasRegridCopiers) {
+      if (m_hasRegridCopiers && a_newData[lvl]->ghostVect() == ghost) {
         const Copier& copier = m_oldToNewCellCopiers.at(a_newData.getRealm())[lvl];
 
         CH_assert(copier.isDefined());
@@ -2139,7 +2144,9 @@ AmrMesh::interpToNewGrids(EBAMRCellData&                   a_newData,
       }
       else {
         pout() << "AmrMesh::interpToNewGrids - using on-the-fly copier (performance hit expected)" << endl;
-        Copier copier(a_oldData[lvl]->disjointBoxLayout(), a_newData[lvl]->disjointBoxLayout());
+        Copier copier(a_oldData[lvl]->disjointBoxLayout(),
+                      a_newData[lvl]->disjointBoxLayout(),
+                      a_newData[lvl]->ghostVect());
 
         a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
       }
@@ -2166,10 +2173,11 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
 
   const int      nComp  = a_newData[0]->nComp();
   const Interval interv = Interval(0, nComp - 1);
+  const IntVect  ghost  = m_numGhostCells * IntVect::Unit;
 
   // These levels have not changed but ownership might have changed so we still need to copy.
   for (int lvl = 0; lvl <= std::max(0, a_lmin - 1); lvl++) {
-    if (m_hasRegridCopiers) {
+    if (m_hasRegridCopiers && a_newData[lvl]->ghostVect() == ghost) {
       const Copier& copier = m_oldToNewEBCopiers.at(a_newData.getRealm())[lvl];
 
       CH_assert(copier.isDefined());
@@ -2178,7 +2186,9 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
     }
     else {
       pout() << "AmrMesh::interpToNewGrids - using on-the-fly copier (performance hit expected)" << endl;
-      Copier copier(a_oldData[lvl]->disjointBoxLayout(), a_newData[lvl]->disjointBoxLayout());
+      Copier copier(a_oldData[lvl]->disjointBoxLayout(),
+                    a_newData[lvl]->disjointBoxLayout(),
+                    a_newData[lvl]->ghostVect());
 
       a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
     }
@@ -2192,7 +2202,7 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
     // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
     // to pollute the solution with interpolation errors there since we already have valid data.
     if (lvl <= std::min(a_oldFinestLevel, a_newFinestLevel)) {
-      if (m_hasRegridCopiers) {
+      if (m_hasRegridCopiers && a_newData[lvl]->ghostVect() == ghost) {
         const Copier& copier = m_oldToNewEBCopiers.at(a_newData.getRealm())[lvl];
 
         CH_assert(copier.isDefined());
@@ -2201,7 +2211,9 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
       }
       else {
         pout() << "AmrMesh::interpToNewGrids - using on-the-fly copier (performance hit expected)" << endl;
-        Copier copier(a_oldData[lvl]->disjointBoxLayout(), a_newData[lvl]->disjointBoxLayout());
+        Copier copier(a_oldData[lvl]->disjointBoxLayout(),
+                      a_newData[lvl]->disjointBoxLayout(),
+                      a_newData[lvl]->ghostVect());
 
         a_oldData[lvl]->copyTo(interv, *a_newData[lvl], interv, copier);
       }

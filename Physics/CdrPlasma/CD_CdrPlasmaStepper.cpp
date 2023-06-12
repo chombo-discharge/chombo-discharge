@@ -4563,7 +4563,10 @@ CdrPlasmaStepper::getPlotVariableNames() const
 }
 
 void
-CdrPlasmaStepper::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_outputRealm, const int a_level) const
+CdrPlasmaStepper::writePlotData(LevelData<EBCellFAB>& a_output,
+                                int&                  a_icomp,
+                                const std::string     a_outputRealm,
+                                const int             a_level) const
 {
   CH_TIME("CdrPlasmaStepper::writePlotData");
   if (m_verbosity > 3) {

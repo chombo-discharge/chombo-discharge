@@ -792,7 +792,10 @@ SurfaceODESolver<N>::writePlotFile() const noexcept
 
 template <int N>
 void
-SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const std::string a_outputRealm, const int a_level) const noexcept
+SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output,
+                                   int&                  a_comp,
+                                   const std::string     a_outputRealm,
+                                   const int             a_level) const noexcept
 {
   CH_TIME("SurfaceODESolver::writePlotData");
   if (m_verbosity > 5) {

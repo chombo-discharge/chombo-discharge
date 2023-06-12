@@ -165,7 +165,10 @@ public:
     @param[in]    a_level       Grid level
   */
   virtual void
-  writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_outputRealm, const int a_level) const = 0;
+  writePlotData(LevelData<EBCellFAB>& a_output,
+                int&                  a_icomp,
+                const std::string     a_outputRealm,
+                const int             a_level) const = 0;
 
   /*!
     @brief An option for calling special functions prior to plotting data. 

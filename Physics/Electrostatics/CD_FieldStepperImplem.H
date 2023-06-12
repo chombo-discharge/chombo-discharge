@@ -307,7 +307,10 @@ namespace Physics {
 
     template <class T>
     void
-    FieldStepper<T>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_outputRealm, const int a_level) const
+    FieldStepper<T>::writePlotData(LevelData<EBCellFAB>& a_output,
+                                   int&                  a_icomp,
+                                   const std::string     a_outputRealm,
+                                   const int             a_level) const
     {
       CH_TIME("FieldStepper::writePlotData");
       if (m_verbosity > 5) {

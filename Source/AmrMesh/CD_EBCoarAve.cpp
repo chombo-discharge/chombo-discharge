@@ -26,11 +26,13 @@ EBCoarAve::EBCoarAve() noexcept
   m_isDefined = false;
 }
 
-EBCoarAve::~EBCoarAve() noexcept { CH_TIME("EBCoarAve::~EBCoarAve");
+EBCoarAve::~EBCoarAve() noexcept
+{
+  CH_TIME("EBCoarAve::~EBCoarAve");
 
   m_cellCopiers.clear();
   m_faceCopiers.clear();
-  m_ebCopiers.clear();    
+  m_ebCopiers.clear();
 }
 
 EBCoarAve::EBCoarAve(const DisjointBoxLayout& a_dblFine,
@@ -85,7 +87,7 @@ EBCoarAve::define(const EBLevelGrid& a_eblgFine,
 
   m_cellCopiers.clear();
   m_faceCopiers.clear();
-  m_ebCopiers.clear();      
+  m_ebCopiers.clear();
 
   m_eblgFine = a_eblgFine;
   m_eblgCoar = a_eblgCoar;
@@ -389,7 +391,7 @@ EBCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
     const Interval dstInterv = Interval(ivar, ivar);
 
     Copier& cellCopier = m_cellCopiers[a_coarData.ghostVect()];
-    if(!cellCopier.isDefined()){
+    if (!cellCopier.isDefined()) {
       cellCopier.define(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(), a_coarData.ghostVect());
     }
 
@@ -637,11 +639,11 @@ EBCoarAve::averageData(LevelData<EBFluxFAB>&       a_coarData,
     const Interval dstInterv = Interval(ivar, ivar);
 
     Copier& faceCopier = m_faceCopiers[a_coarData.ghostVect()];
-    if(!faceCopier.isDefined()){
+    if (!faceCopier.isDefined()) {
       faceCopier.define(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(), a_coarData.ghostVect());
     }
 
-    coFiData.copyTo(srcInterv, a_coarData, dstInterv, faceCopier);    
+    coFiData.copyTo(srcInterv, a_coarData, dstInterv, faceCopier);
   }
 }
 
@@ -922,9 +924,9 @@ EBCoarAve::averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
     CH_STOP(t1);
 
     Copier& ebCopier = m_ebCopiers[a_coarData.ghostVect()];
-    if(!ebCopier.isDefined()){
+    if (!ebCopier.isDefined()) {
       ebCopier.define(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(), a_coarData.ghostVect());
-    }    
+    }
 
     coFiData.copyTo(Interval(0, 0), a_coarData, Interval(ivar, ivar), ebCopier);
   }
