@@ -691,8 +691,8 @@ Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLevel)
       tmp[dit()].setVal(false);
     }
 
-    //    m_cachedTags[lvl]->copyTo(tmp);
-    m_amr->copyDataOldToNew(tmp, *m_cachedTags[lvl], lvl, m_realm, Interval(0,0), Interval(0,0));
+    // Ideally we'd use a pre-defined Copier here. But since this is only called once per regrid it should be fine.
+    m_cachedTags[lvl]->copyTo(tmp);
 
     // m_cachedTags was allocated on the grids while tmp is allocated on the new. Look through
     // the bools in tmp and reconstruct the tags.

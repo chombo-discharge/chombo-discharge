@@ -184,37 +184,6 @@ public:
            const Interval&     a_srcComps,
            const CopyStrategy& a_toRegion   = CopyStrategy::Valid,
            const CopyStrategy& a_fromRegion = CopyStrategy::Valid) const noexcept;
-  /*!
-    @brief Method for copying data from the old grids to the new ones. Can be used during regrids. 
-    @param[inout] a_newData    Data on new grids
-    @param[in]    a_oldData    Data on old grids
-    @param[in]    a_level      Grid level
-    @param[in]    a_realm      Realm where data lives
-  */
-  template <typename T>
-  void
-  copyDataOldToNew(LevelData<T>&       a_newData,
-                   const LevelData<T>& a_oldData,
-                   const int           a_level,
-                   const std::string   a_realm) const noexcept;
-
-  /*!
-    @brief Method for copying data from the old grids to the new ones. Can be used during regrids. 
-    @param[inout] a_newData    Data on new grids
-    @param[in]    a_oldData    Data on old grids
-    @param[in]    a_level      Grid level
-    @param[in]    a_realm      Realm where data lives
-    @param[in]    a_newComps   Components in a_newData
-    @param[in]    a_oldComps   Components in a_oldData
-  */
-  template <typename T>
-  void
-  copyDataOldToNew(LevelData<T>&       a_newData,
-                   const LevelData<T>& a_oldData,
-                   const int           a_level,
-                   const std::string   a_realm,
-                   const Interval&     a_dstComps,
-                   const Interval&     a_srcComps) const noexcept;
 
   /*!
     @brief Deallocate data. 
@@ -1926,7 +1895,13 @@ protected:
     @brief Storage for copiers from the old grids to the new ones
     @note Defined in the realm regrid routine. Cleared in the postRegrid routine. 
   */
-  std::map<std::string, Vector<Copier>> m_oldToNewCopiers;
+  std::map<std::string, Vector<Copier>> m_oldToNewCellCopiers;
+
+  /*!
+    @brief Storage for copiers from the old grids to the new ones
+    @note Defined in the realm regrid routine. Cleared in the postRegrid routine. 
+  */
+  std::map<std::string, Vector<Copier>> m_oldToNewEBCopiers;
 
   /*!
     @brief Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm

@@ -325,7 +325,9 @@ EBCoarAve::defineBuffers() noexcept
 {
   CH_TIME("EBCoarAve::defineBuffers");
 
-  m_copier.ghostDefine(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(), m_eblgCoar.getDomain(), IntVect::Zero);
+  m_cellCopier.define(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL());
+  m_faceCopier.define(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL());
+  m_ebCopier.define(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL());
 }
 
 void
@@ -381,7 +383,7 @@ EBCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
     const Interval srcInterv = Interval(0, 0);
     const Interval dstInterv = Interval(ivar, ivar);
 
-    coFiData.copyTo(srcInterv, a_coarData, dstInterv, m_copier);
+    coFiData.copyTo(srcInterv, a_coarData, dstInterv, m_cellCopier);
     CH_STOP(t2);
   }
 }
@@ -621,14 +623,10 @@ EBCoarAve::averageData(LevelData<EBFluxFAB>&       a_coarData,
     }
     CH_STOP(t1);
 
-    // Copy back to input data. If the input data had the specified number of ghost cells we can use a faster
-    // copying version which does not build the copier every time.
     const Interval srcInterv = Interval(0, 0);
     const Interval dstInterv = Interval(ivar, ivar);
 
-    // Doesn't work for some reason. Needs to be investigated.
-    //    coFiData.copyTo(srcInterv, a_coarData, dstInterv, m_copier);
-    coFiData.copyTo(srcInterv, a_coarData, dstInterv);
+    coFiData.copyTo(srcInterv, a_coarData, dstInterv, m_faceCopier);
   }
 }
 
@@ -908,7 +906,7 @@ EBCoarAve::averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
     }
     CH_STOP(t1);
 
-    coFiData.copyTo(Interval(0, 0), a_coarData, Interval(ivar, ivar));
+    coFiData.copyTo(Interval(0, 0), a_coarData, Interval(ivar, ivar), m_ebCopier);
   }
 }
 

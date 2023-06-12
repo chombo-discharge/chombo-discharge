@@ -158,52 +158,6 @@ AmrMesh::copyData(LevelData<T>&       a_dst,
 
 template <typename T>
 void
-AmrMesh::copyDataOldToNew(LevelData<T>&       a_newData,
-                          const LevelData<T>& a_oldData,
-                          const int           a_level,
-                          const std::string   a_realm) const noexcept
-{
-  CH_TIME("AmrMesh::copyDataOldToNew(LD<T> simple)");
-  if (m_verbosity > 5) {
-    pout() << "AmrMesh::copyDataOldToNew(LD<T> simple)" << endl;
-  }
-
-  const Interval newComps = Interval(0, a_newData.nComp() - 1);
-  const Interval oldComps = Interval(0, a_oldData.nComp() - 1);
-
-  this->copyDataOldToNew(a_newData, a_oldData, a_level, a_realm, newComps, oldComps);
-}
-
-template <typename T>
-void
-AmrMesh::copyDataOldToNew(LevelData<T>&       a_newData,
-                          const LevelData<T>& a_oldData,
-                          const int           a_level,
-                          const std::string   a_realm,
-                          const Interval&     a_dstComps,
-                          const Interval&     a_srcComps) const noexcept
-{
-  CH_TIME("AmrMesh::copyDataOldToNew(LD<T> full)");
-  if (m_verbosity > 5) {
-    pout() << "AmrMesh::copyDataOldToNew(LD<T> full)" << endl;
-  }
-
-  CH_assert(m_hasRegridCopiers);
-  CH_assert(a_level <= m_oldFinestLevel);
-
-  const Copier& copier = m_oldToNewCopiers.at(a_realm)[a_level];
-
-  CH_assert(copier.isDefined());
-
-#if 0 // For some reason this does not work. 
-  a_oldData.copyTo(a_srcComps, a_newData, a_dstComps, copier);
-#else
-  a_oldData.copyTo(a_srcComps, a_newData, a_dstComps);
-#endif
-}
-
-template <typename T>
-void
 AmrMesh::deallocate(Vector<T*>& a_data) const
 {
   CH_TIME("AmrMesh::deallocate(Vector<T*>)");

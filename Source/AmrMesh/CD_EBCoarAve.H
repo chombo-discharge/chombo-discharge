@@ -173,7 +173,17 @@ protected:
   /*!
     @brief Pre-built copier for copying from m_eblgCoFi to m_eblgCoar
   */
-  Copier m_copier;
+  Copier m_cellCopier;
+
+  /*!
+    @brief Pre-built copier for copying from m_eblgCoFi to m_eblgCoar
+  */
+  Copier m_faceCopier;
+
+  /*!
+    @brief Pre-built copier for copying from m_eblgCoFi to m_eblgCoar
+  */
+  Copier m_ebCopier;
 
   /*!
     @brief Irregular cells on the coarsened fine layout
