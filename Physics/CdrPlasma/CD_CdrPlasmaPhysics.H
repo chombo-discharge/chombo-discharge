@@ -117,7 +117,7 @@ namespace Physics {
 	@param[in] a_position Physical coordinates
       */
       virtual Real
-      computeEta(const Real a_E, const RealVect a_position) const = 0;      
+      computeEta(const Real a_E, const RealVect a_position) const = 0;
 
       /*!
 	@brief Routine intended for advancing a reaction network over a time a_dt. 

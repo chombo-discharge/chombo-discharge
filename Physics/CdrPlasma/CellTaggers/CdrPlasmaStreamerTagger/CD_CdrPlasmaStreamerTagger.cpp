@@ -95,9 +95,7 @@ CdrPlasmaStreamerTagger::tracer(const RealVect a_pos,
   // Set tracer fields
   tracers[0] = E / a_maxElectricField;
   tracers[1] = m_physics->computeAlpha(E, a_pos);
-  tracers[1] -= m_physics->computeEta(E, a_pos);  
-
-
+  tracers[1] -= m_physics->computeEta(E, a_pos);
 
   return tracers;
 }
