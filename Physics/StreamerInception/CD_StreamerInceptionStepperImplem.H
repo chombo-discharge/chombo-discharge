@@ -888,26 +888,26 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
   const std::string prefix = "StreamerInceptionStepper/";
 
   if (m_plotInceptionVoltage) {
-    this->writeData(a_output, a_icomp, m_inceptionVoltagePlus, a_level, false, true);
-    this->writeData(a_output, a_icomp, m_inceptionVoltageMinu, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_inceptionVoltagePlus, a_outputRealm, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_inceptionVoltageMinu, a_outputRealm, a_level, false, true);
   }
 
   if (m_plotInceptionIntegral) {
-    this->writeData(a_output, a_icomp, m_inceptionIntegralPlus, a_level, false, true);
-    this->writeData(a_output, a_icomp, m_inceptionIntegralMinu, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_inceptionIntegralPlus, a_outputRealm, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_inceptionIntegralMinu, a_outputRealm, a_level, false, true);
   }
 
   if (m_plotBackgroundIonization) {
-    this->writeData(a_output, a_icomp, m_backgroundIonization, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_backgroundIonization, a_outputRealm, a_level, false, true);
   }
 
   if (m_plotDetachment) {
-    this->writeData(a_output, a_icomp, m_detachment, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_detachment, a_outputRealm, a_level, false, true);
   }
 
   if (m_plotFieldEmission) {
-    this->writeData(a_output, a_icomp, m_emissionRatesPlus, a_level, false, true);
-    this->writeData(a_output, a_icomp, m_emissionRatesMinu, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_emissionRatesPlus, a_outputRealm, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_emissionRatesMinu, a_outputRealm, a_level, false, true);
   }
 
   if (m_plotAlpha) {
@@ -919,7 +919,7 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
 
       // Do a copy, but note that this does not include ghost cells across the CF interface since
       // we are only computing for a single grid level.
-      alpha.copyTo(Interval(0, 0), a_output, Interval(a_icomp, a_icomp));
+      m_amr->copyData(a_output, alpha, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
       a_icomp++;
     }
@@ -934,7 +934,7 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
 
       // Do a copy, but note that this does not include ghost cells across the CF interface since
       // we are only computing for a single grid level.
-      eta.copyTo(Interval(0, 0), a_output, Interval(a_icomp, a_icomp));
+      m_amr->copyData(a_output, eta, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
       a_icomp++;
     }
@@ -973,7 +973,7 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
   DataOps::scale(aliasData, m_voltageCurve(m_time));
 
   if (m_plotInceptionIntegral) {
-    this->writeData(a_output, a_icomp, m_inceptionIntegral, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_inceptionIntegral, a_outputRealm, a_level, false, true);
   }
 
   if (m_plotBackgroundIonization) {
@@ -984,7 +984,8 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
     // Do a copy, but note that this does not include ghost cells across the CF interface since
     // we are only computing for a single grid level.
-    bgIonization.copyTo(Interval(0, 0), a_output, Interval(a_icomp, a_icomp));
+    m_amr
+      ->copyData(a_output, bgIonization, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
     a_icomp++;
   }
@@ -997,13 +998,13 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
     // Do a copy, but note that this does not include ghost cells across the CF interface since
     // we are only computing for a single grid level.
-    detachRate.copyTo(Interval(0, 0), a_output, Interval(a_icomp, a_icomp));
+    m_amr->copyData(a_output, detachRate, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
     a_icomp++;
   }
 
   if (m_plotFieldEmission) {
-    this->writeData(a_output, a_icomp, m_emissionRate, a_level, false, false);
+    this->writeData(a_output, a_icomp, m_emissionRate, a_outputRealm, a_level, false, false);
   }
 
   if (m_plotAlpha) {
@@ -1014,7 +1015,7 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
     // Do a copy, but note that this does not include ghost cells across the CF interface since
     // we are only computing for a single grid level.
-    alpha.copyTo(Interval(0, 0), a_output, Interval(a_icomp, a_icomp));
+    m_amr->copyData(a_output, alpha, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
     a_icomp++;
   }
@@ -1027,7 +1028,7 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
     // Do a copy, but note that this does not include ghost cells across the CF interface since
     // we are only computing for a single grid level.
-    eta.copyTo(Interval(0, 0), a_output, Interval(a_icomp, a_icomp));
+    m_amr->copyData(a_output, eta, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
     a_icomp++;
   }
@@ -3374,6 +3375,7 @@ void
 StreamerInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
                                              int&                  a_comp,
                                              const EBAMRCellData&  a_data,
+                                             const std::string     a_outputRealm,
                                              const int             a_level,
                                              const bool            a_interpToCentroids,
                                              const bool            a_interpGhost) const noexcept
@@ -3384,8 +3386,7 @@ StreamerInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
   CH_TIMER("StreamerInceptionStepper::writeData::local_copy", t2);
   CH_TIMER("StreamerInceptionStepper::writeData::interp_ghost", t3);
   CH_TIMER("StreamerInceptionStepper::writeData::interp_centroid", t4);
-  CH_TIMER("StreamerInceptionStepper::writeData::define_copier", t5);
-  CH_TIMER("StreamerInceptionStepper::writeData::final_copy", t6);
+  CH_TIMER("StreamerInceptionStepper::writeData::final_copy", t5);
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::writeData" << endl;
   }
@@ -3403,23 +3404,13 @@ StreamerInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
   CH_STOP(t1);
 
   CH_START(t2);
-  a_data[a_level]->localCopyTo(scratch);
-  scratch.exchange();
+  m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
   CH_START(t2);
 
   // Interpolate ghost cells
   CH_START(t3);
   if (a_level > 0 && a_interpGhost) {
-
-    for (int icomp = 0; icomp < numComp; icomp++) {
-      LevelData<EBCellFAB> fineData;
-      LevelData<EBCellFAB> coarData;
-
-      aliasLevelData<EBCellFAB>(fineData, &scratch, Interval(icomp, icomp));
-      aliasLevelData<EBCellFAB>(coarData, &(*a_data[a_level - 1]), Interval(icomp, icomp));
-
-      m_amr->interpGhost(fineData, coarData, a_level, m_realm, m_phase);
-    }
+    m_amr->interpGhost(scratch, *a_data[a_level - 1], a_level, m_realm, m_phase);
   }
   CH_STOP(t3);
 
@@ -3429,22 +3420,11 @@ StreamerInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
   }
   CH_STOP(t4);
 
-  // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
-  // we can't call EBAMRData<T>::copy either (because components don't align). So -- general type of copy here.
-  CH_START(t5);
-  Copier copier;
-  copier.ghostDefine(scratch.disjointBoxLayout(),
-                     a_output.disjointBoxLayout(),
-                     m_amr->getDomains()[a_level],
-                     scratch.ghostVect(),
-                     a_output.ghostVect());
-  CH_STOP(t5);
-
   DataOps::setCoveredValue(scratch, 0.0);
 
-  CH_START(t6);
-  scratch.copyTo(srcInterv, a_output, dstInterv, copier);
-  CH_STOP(t6);
+  CH_START(t5);
+  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  CH_STOP(t5);
 
   a_comp += numComp;
 }

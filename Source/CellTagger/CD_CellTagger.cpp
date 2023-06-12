@@ -72,7 +72,10 @@ CellTagger::getPlotVariableNames() const
 }
 
 void
-CellTagger::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const
+CellTagger::writePlotData(LevelData<EBCellFAB>& a_output,
+                          int&                  a_icomp,
+                          const std::string     a_outputRealm,
+                          const int             a_level) const
 {
   CH_TIME("CellTagger::writePlotData)");
   if (m_verbosity > 5) {

@@ -992,6 +992,7 @@ namespace Physics {
 	@param[inout] a_output Output data holder.
 	@param[inout] a_icomp  Starting component where this solver begins writing the output. 
 	@param[in]    a_data   Data to write. 
+	@param[in]    a_outputRealm Realm where a_output belongs
 	@param[in]    a_level  Grid level
 	@param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
 	@param[in]    a_interpGhost If true, interpolate ghost cells
@@ -1000,6 +1001,7 @@ namespace Physics {
       writeData(LevelData<EBCellFAB>& a_output,
                 int&                  a_comp,
                 const EBAMRCellData&  a_data,
+                const std::string     a_outputRealm,
                 const int             a_level,
                 const bool            a_interpToCentroids,
                 const bool            a_interpGhost) const noexcept;

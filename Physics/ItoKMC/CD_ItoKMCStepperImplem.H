@@ -976,17 +976,17 @@ ItoKMCStepper<I, C, R, F>::writePlotData(LevelData<EBCellFAB>& a_output,
 
   // Write the conductivity to the output
   if (m_plotConductivity) {
-    this->writeData(a_output, a_icomp, m_conductivityCell, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_conductivityCell, a_outputRealm, a_level, false, true);
   }
 
   // Write the current to the output
   if (m_plotCurrentDensity) {
-    this->writeData(a_output, a_icomp, m_currentDensity, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_currentDensity, a_outputRealm, a_level, false, true);
   }
 
   // Write the number of particles per patch
   if (m_plotParticlesPerPatch) {
-    this->writeNumberOfParticlesPerPatch(a_output, a_icomp, a_level);
+    this->writeNumberOfParticlesPerPatch(a_output, a_icomp, a_outputRealm, a_level);
   }
 }
 
@@ -995,6 +995,7 @@ void
 ItoKMCStepper<I, C, R, F>::writeData(LevelData<EBCellFAB>& a_output,
                                      int&                  a_comp,
                                      const EBAMRCellData&  a_data,
+                                     const std::string     a_outputRealm,
                                      const int             a_level,
                                      const bool            a_interpToCentroids,
                                      const bool            a_interpGhost) const noexcept
@@ -1005,8 +1006,7 @@ ItoKMCStepper<I, C, R, F>::writeData(LevelData<EBCellFAB>& a_output,
   CH_TIMER("ItoKMCStepper::writeData::local_copy", t2);
   CH_TIMER("ItoKMCStepper::writeData::interp_ghost", t3);
   CH_TIMER("ItoKMCStepper::writeData::interp_centroid", t4);
-  CH_TIMER("ItoKMCStepper::writeData::define_copier", t5);
-  CH_TIMER("ItoKMCStepper::writeData::final_copy", t6);
+  CH_TIMER("ItoKMCStepper::writeData::final_copy", t5);
   if (m_verbosity > 5) {
     pout() << m_name + "::writeData" << endl;
   }
@@ -1024,22 +1024,13 @@ ItoKMCStepper<I, C, R, F>::writeData(LevelData<EBCellFAB>& a_output,
   CH_STOP(t1);
 
   CH_START(t2);
-  a_data[a_level]->localCopyTo(scratch);
-  scratch.exchange();
+  m_amr->copyData(scratch, *a_data[a_level], a_level, a_data.getRealm(), a_data.getRealm());
   CH_START(t2);
 
   // Interpolate ghost cells
   CH_START(t3);
   if (a_level > 0 && a_interpGhost) {
-    for (int icomp = 0; icomp < numComp; icomp++) {
-      LevelData<EBCellFAB> fineData;
-      LevelData<EBCellFAB> coarData;
-
-      aliasLevelData<EBCellFAB>(fineData, &scratch, Interval(icomp, icomp));
-      aliasLevelData<EBCellFAB>(coarData, &(*a_data[a_level - 1]), Interval(icomp, icomp));
-
-      m_amr->interpGhost(scratch, coarData, a_level, a_data.getRealm(), m_plasmaPhase);
-    }
+    m_amr->interpGhost(scratch, *a_data[a_level - 1], a_level, a_data.getRealm(), m_plasmaPhase);
   }
   CH_STOP(t3);
 
@@ -1049,22 +1040,11 @@ ItoKMCStepper<I, C, R, F>::writeData(LevelData<EBCellFAB>& a_output,
   }
   CH_STOP(t4);
 
-  // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
-  // we can't call EBAMRData<T>::copy either (because components don't align). So -- general type of copy here.
-  CH_START(t5);
-  Copier copier;
-  copier.ghostDefine(scratch.disjointBoxLayout(),
-                     a_output.disjointBoxLayout(),
-                     m_amr->getDomains()[a_level],
-                     scratch.ghostVect(),
-                     a_output.ghostVect());
-  CH_STOP(t5);
-
   DataOps::setCoveredValue(scratch, 0.0);
 
-  CH_START(t6);
-  scratch.copyTo(srcInterv, a_output, dstInterv, copier);
-  CH_STOP(t6);
+  CH_START(t5);
+  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, a_data.getRealm(), dstInterv, srcInterv);
+  CH_STOP(t5);
 
   a_comp += numComp;
 }
@@ -1073,6 +1053,7 @@ template <typename I, typename C, typename R, typename F>
 void
 ItoKMCStepper<I, C, R, F>::writeNumberOfParticlesPerPatch(LevelData<EBCellFAB>& a_output,
                                                           int&                  a_icomp,
+                                                          const std::string     a_outputRealm,
                                                           const int             a_level) const noexcept
 {
   CH_TIME("ItoKMCStepper::writeNumberOfParticlesPerPatch");
@@ -1095,7 +1076,13 @@ ItoKMCStepper<I, C, R, F>::writeNumberOfParticlesPerPatch(LevelData<EBCellFAB>& 
     }
   }
 
-  m_particleScratch1[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_icomp, a_icomp));
+  m_amr->copyData(a_output,
+                  *m_particleScratch1[a_level],
+                  a_level,
+                  a_outputRealm,
+                  m_particleRealm,
+                  Interval(a_icomp, a_icomp),
+                  Interval(0, 0));
 
   a_icomp += 1;
 }

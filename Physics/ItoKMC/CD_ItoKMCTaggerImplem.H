@@ -152,7 +152,10 @@ ItoKMCTagger<S>::getTagFields() noexcept
 
 template <typename S>
 void
-ItoKMCTagger<S>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const noexcept
+ItoKMCTagger<S>::writePlotData(LevelData<EBCellFAB>& a_output,
+                               int&                  a_icomp,
+                               const std::string     a_outputRealm,
+                               const int             a_level) const noexcept
 {
   CH_TIME("ItoKMCTagger::writePlotData");
   if (m_verbosity > 5) {
@@ -170,7 +173,7 @@ ItoKMCTagger<S>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, con
       const Interval srcInterv(0, 0);
       const Interval dstInterv(a_icomp, a_icomp);
 
-      tagField[a_level]->copyTo(srcInterv, a_output, dstInterv);
+      m_amr->copyData(a_output, *tagField[a_level], a_level, a_outputRealm, tagField.getRealm(), dstInterv, srcInterv);
 
       DataOps::setCoveredValue(a_output, a_icomp, 0.0);
 

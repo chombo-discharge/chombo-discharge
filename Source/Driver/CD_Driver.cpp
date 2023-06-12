@@ -2210,7 +2210,7 @@ Driver::writePlotFile(const std::string a_filename)
       }
       m_timeStepper->writePlotData(outputData, comp, m_realm, lvl);
       if (!(m_cellTagger.isNull())) {
-        m_cellTagger->writePlotData(outputData, comp, lvl);
+        m_cellTagger->writePlotData(outputData, comp, m_realm, lvl);
       }
       this->writePlotData(outputData, comp, lvl);
       timer.stopEvent("Assemble data");

@@ -4593,11 +4593,11 @@ CdrPlasmaStepper::writePlotData(LevelData<EBCellFAB>& a_output,
   }
 
   // CdrPlasmaStepper adds the current to the output file.
-  this->writeData(a_output, a_icomp, m_currentDensity, a_level, false, true);
+  this->writeData(a_output, a_icomp, m_currentDensity, a_outputRealm, a_level, false, true);
 
   // CdrPlasmaPhysics outputs its variable.
   if (m_physics->getNumberOfPlotVariables() > 0) {
-    this->writeData(a_output, a_icomp, m_physicsPlotVars, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_physicsPlotVars, a_outputRealm, a_level, false, true);
   }
 }
 
@@ -4605,6 +4605,7 @@ void
 CdrPlasmaStepper::writeData(LevelData<EBCellFAB>& a_output,
                             int&                  a_comp,
                             const EBAMRCellData&  a_data,
+                            const std::string     a_outputRealm,
                             const int             a_level,
                             const bool            a_interpToCentroids,
                             const bool            a_interpGhost) const noexcept
@@ -4615,8 +4616,7 @@ CdrPlasmaStepper::writeData(LevelData<EBCellFAB>& a_output,
   CH_TIMER("CdrPlasmaStepper::writeData::local_copy", t2);
   CH_TIMER("CdrPlasmaStepper::writeData::interp_ghost", t3);
   CH_TIMER("CdrPlasmaStepper::writeData::interp_centroid", t4);
-  CH_TIMER("CdrPlasmaStepper::writeData::define_copier", t5);
-  CH_TIMER("CdrPlasmaStepper::writeData::final_copy", t6);
+  CH_TIMER("CdrPlasmaStepper::writeData::final_copy", t5);
   if (m_verbosity > 5) {
     pout() << "CdrPlasmaStepper::writeData" << endl;
   }
@@ -4638,23 +4638,13 @@ CdrPlasmaStepper::writeData(LevelData<EBCellFAB>& a_output,
   CH_STOP(t1);
 
   CH_START(t2);
-  a_data[a_level]->localCopyTo(scratch);
-  scratch.exchange();
+  m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, a_data.getRealm());
   CH_START(t2);
 
   // Interpolate ghost cells
   CH_START(t3);
   if (a_level > 0 && a_interpGhost) {
-
-    for (int icomp = 0; icomp < numComp; icomp++) {
-      LevelData<EBCellFAB> fineData;
-      LevelData<EBCellFAB> coarData;
-
-      aliasLevelData<EBCellFAB>(fineData, &(*a_data[a_level]), Interval(icomp, icomp));
-      aliasLevelData<EBCellFAB>(coarData, &(*a_data[a_level - 1]), Interval(icomp, icomp));
-
-      m_amr->interpGhost(fineData, coarData, a_level, m_realm, m_phase);
-    }
+    m_amr->interpGhost(scratch, *a_data[a_level - 1], a_level, m_realm, m_phase);
   }
   CH_STOP(t3);
 
@@ -4664,28 +4654,20 @@ CdrPlasmaStepper::writeData(LevelData<EBCellFAB>& a_output,
   }
   CH_STOP(t4);
 
-  // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
-  // we can't call EBAMRData<T>::copy either (because components don't align). So -- general type of copy here.
-  CH_START(t5);
-  Copier copier;
-  copier.ghostDefine(scratch.disjointBoxLayout(),
-                     a_output.disjointBoxLayout(),
-                     m_amr->getDomains()[a_level],
-                     scratch.ghostVect(),
-                     a_output.ghostVect());
-  CH_STOP(t5);
-
   DataOps::setCoveredValue(scratch, 0.0);
 
-  CH_START(t6);
-  scratch.copyTo(srcInterv, a_output, dstInterv, copier);
-  CH_STOP(t6);
+  CH_START(t5);
+  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  CH_STOP(t5);
 
   a_comp += numComp;
 }
 
 void
-CdrPlasmaStepper::writeJ(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const
+CdrPlasmaStepper::writeJ(LevelData<EBCellFAB>& a_output,
+                         int&                  a_icomp,
+                         const std::string     a_outputRealm,
+                         const int             a_level) const
 {
   CH_TIMERS("CdrPlasmaStepper::writeJ");
   CH_TIMER("CdrPlasmaStepper::writeJ::allocate", t1);
@@ -4706,7 +4688,7 @@ CdrPlasmaStepper::writeJ(LevelData<EBCellFAB>& a_output, int& a_icomp, const int
   // Add the current density to the a_output data holder, starting on component a_icomp.
   const Interval srcInterv(0, SpaceDim - 1);
   const Interval dstInterv(a_icomp, a_icomp + SpaceDim - 1);
-  scratch[a_level]->localCopyTo(srcInterv, a_output, dstInterv);
+  m_amr->copyData(a_output, *scratch[a_level], a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
 
   // Need to inform the outside world about the change in starting component.
   a_icomp += SpaceDim;
