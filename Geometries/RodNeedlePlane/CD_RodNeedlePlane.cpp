@@ -95,7 +95,6 @@ RodNeedlePlane::defineRodWNeedle()
   rodParts.push_back((BaseIF*)new RodIF(rodE1, rodMp, rodSmallRadius, false));
   rodParts.push_back((BaseIF*)new RodIF(rodMp, rodE2, rodBigRadius, false));
 
-
   Vector<BaseIF*> electrodeParts;
   electrodeParts.push_back((BaseIF*)new SmoothIntersection(rodParts, rodBendRadius));
   electrodeParts.push_back((BaseIF*)new NeedleIF(length, needleRadius, false, tipRadius, angle, cornerCurve));
