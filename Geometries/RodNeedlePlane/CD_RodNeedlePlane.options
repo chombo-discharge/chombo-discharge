@@ -7,7 +7,7 @@ RodNeedlePlane.rod.midpoint		= 0 0.055 0 		# The point where the radius has full
 RodNeedlePlane.rod.endpoint2		= 0 0.08 0		# Other endpoint
 RodNeedlePlane.rod.smallRadius		= 0.0035		# Rod radius at the end with the needle
 RodNeedlePlane.rod.bigRadius		= 0.008			# Rod radius at the end that is connected to the tank
-RodNeedkePlane.rod.rodBendRadius	= 0.02			# corner curve between narrow and wide part of the rod
+RodNeedlePlane.rod.rodBendRadius        = 0.02			# corner curve between narrow and wide part of the rod
 RodNeedlePlane.rod.live			= false			# Live or not
 
 RodNeedlePlane.needle.on		= true 			# Use needle or not
