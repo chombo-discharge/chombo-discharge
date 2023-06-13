@@ -214,6 +214,14 @@ ItoKMCAir3LFA::computeAlpha(const RealVect a_E) const
   return m_tables.at("alpha").getEntry<1>(a_E.vectorLength());
 }
 
+Real
+ItoKMCAir3LFA::computeEta(const RealVect a_E) const
+{
+  CH_TIME("ItoKMCAir3LFA::computeEta");
+
+  return m_tables.at("eta").getEntry<1>(a_E.vectorLength());
+}
+
 Vector<Real>
 ItoKMCAir3LFA::computeMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept
 {

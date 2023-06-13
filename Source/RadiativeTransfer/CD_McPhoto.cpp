@@ -1582,7 +1582,10 @@ McPhoto::countOutcast(const AMRParticles<Photon>& a_photons) const
 }
 
 void
-McPhoto::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
+McPhoto::writePlotData(LevelData<EBCellFAB>& a_output,
+                       int&                  a_comp,
+                       const std::string     a_outputRealm,
+                       const int             a_level) const noexcept
 {
   CH_TIMERS("McPhoto::writePlotData");
   CH_TIMER("McPhoto::writePlotData::mesh_data", t1);
@@ -1596,10 +1599,10 @@ McPhoto::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_
 
   CH_START(t1);
   if (m_plotPhi) {
-    this->writeData(a_output, a_comp, m_phi, a_level, false, true);
+    this->writeData(a_output, a_comp, m_phi, a_outputRealm, a_level, false, true);
   }
   if (m_plotSource) {
-    this->writeData(a_output, a_comp, m_source, a_level, false, true);
+    this->writeData(a_output, a_comp, m_source, a_outputRealm, a_level, false, true);
   }
   CH_STOP(t1);
 
@@ -1607,35 +1610,90 @@ McPhoto::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_
   if (m_plotPhotons) {
     this->depositPhotonsNGP(*m_scratch[a_level], m_photons, a_level);
 
-    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    const Interval srcInterv = Interval(0, 0);
+    const Interval dstInterv = Interval(a_comp, a_comp);
+
+    m_amr->copyData(a_output,
+                    *m_scratch[a_level],
+                    a_level,
+                    a_outputRealm,
+                    m_realm,
+                    dstInterv,
+                    srcInterv,
+                    CopyStrategy::ValidGhost,
+                    CopyStrategy::ValidGhost);
 
     a_comp++;
   }
   if (m_plotBulkPhotons) {
     this->depositPhotonsNGP(*m_scratch[a_level], m_bulkPhotons, a_level);
 
-    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    const Interval srcInterv = Interval(0, 0);
+    const Interval dstInterv = Interval(a_comp, a_comp);
+
+    m_amr->copyData(a_output,
+                    *m_scratch[a_level],
+                    a_level,
+                    a_outputRealm,
+                    m_realm,
+                    dstInterv,
+                    srcInterv,
+                    CopyStrategy::ValidGhost,
+                    CopyStrategy::ValidGhost);
 
     a_comp++;
   }
   if (m_plotEBPhotons) {
     this->depositPhotonsNGP(*m_scratch[a_level], m_ebPhotons, a_level);
 
-    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    const Interval srcInterv = Interval(0, 0);
+    const Interval dstInterv = Interval(a_comp, a_comp);
+
+    m_amr->copyData(a_output,
+                    *m_scratch[a_level],
+                    a_level,
+                    a_outputRealm,
+                    m_realm,
+                    dstInterv,
+                    srcInterv,
+                    CopyStrategy::ValidGhost,
+                    CopyStrategy::ValidGhost);
 
     a_comp++;
   }
   if (m_plotDomainPhotons) {
     this->depositPhotonsNGP(*m_scratch[a_level], m_domainPhotons, a_level);
 
-    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    const Interval srcInterv = Interval(0, 0);
+    const Interval dstInterv = Interval(a_comp, a_comp);
+
+    m_amr->copyData(a_output,
+                    *m_scratch[a_level],
+                    a_level,
+                    a_outputRealm,
+                    m_realm,
+                    dstInterv,
+                    srcInterv,
+                    CopyStrategy::ValidGhost,
+                    CopyStrategy::ValidGhost);
 
     a_comp++;
   }
   if (m_plotSourcePhotons) {
     this->depositPhotonsNGP(*m_scratch[a_level], m_sourcePhotons, a_level);
 
-    m_scratch[a_level]->copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    const Interval srcInterv = Interval(0, 0);
+    const Interval dstInterv = Interval(a_comp, a_comp);
+
+    m_amr->copyData(a_output,
+                    *m_scratch[a_level],
+                    a_level,
+                    a_outputRealm,
+                    m_realm,
+                    dstInterv,
+                    srcInterv,
+                    CopyStrategy::ValidGhost,
+                    CopyStrategy::ValidGhost);
 
     a_comp++;
   }

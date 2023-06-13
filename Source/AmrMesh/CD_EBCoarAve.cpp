@@ -26,7 +26,14 @@ EBCoarAve::EBCoarAve() noexcept
   m_isDefined = false;
 }
 
-EBCoarAve::~EBCoarAve() noexcept { CH_TIME("EBCoarAve::~EBCoarAve"); }
+EBCoarAve::~EBCoarAve() noexcept
+{
+  CH_TIME("EBCoarAve::~EBCoarAve");
+
+  m_cellCopiers.clear();
+  m_faceCopiers.clear();
+  m_ebCopiers.clear();
+}
 
 EBCoarAve::EBCoarAve(const DisjointBoxLayout& a_dblFine,
                      const DisjointBoxLayout& a_dblCoar,
@@ -77,6 +84,10 @@ EBCoarAve::define(const EBLevelGrid& a_eblgFine,
 
   CH_assert(a_refRat >= 2);
   CH_assert(a_refRat % 2 == 0);
+
+  m_cellCopiers.clear();
+  m_faceCopiers.clear();
+  m_ebCopiers.clear();
 
   m_eblgFine = a_eblgFine;
   m_eblgCoar = a_eblgCoar;
@@ -324,8 +335,6 @@ void
 EBCoarAve::defineBuffers() noexcept
 {
   CH_TIME("EBCoarAve::defineBuffers");
-
-  m_copier.ghostDefine(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(), m_eblgCoar.getDomain(), IntVect::Zero);
 }
 
 void
@@ -381,7 +390,12 @@ EBCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
     const Interval srcInterv = Interval(0, 0);
     const Interval dstInterv = Interval(ivar, ivar);
 
-    coFiData.copyTo(srcInterv, a_coarData, dstInterv, m_copier);
+    Copier& cellCopier = m_cellCopiers[a_coarData.ghostVect()];
+    if (!cellCopier.isDefined()) {
+      cellCopier.define(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(), a_coarData.ghostVect());
+    }
+
+    coFiData.copyTo(srcInterv, a_coarData, dstInterv, cellCopier);
     CH_STOP(t2);
   }
 }
@@ -621,14 +635,15 @@ EBCoarAve::averageData(LevelData<EBFluxFAB>&       a_coarData,
     }
     CH_STOP(t1);
 
-    // Copy back to input data. If the input data had the specified number of ghost cells we can use a faster
-    // copying version which does not build the copier every time.
     const Interval srcInterv = Interval(0, 0);
     const Interval dstInterv = Interval(ivar, ivar);
 
-    // Doesn't work for some reason. Needs to be investigated.
-    //    coFiData.copyTo(srcInterv, a_coarData, dstInterv, m_copier);
-    coFiData.copyTo(srcInterv, a_coarData, dstInterv);
+    Copier& faceCopier = m_faceCopiers[a_coarData.ghostVect()];
+    if (!faceCopier.isDefined()) {
+      faceCopier.define(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(), a_coarData.ghostVect());
+    }
+
+    coFiData.copyTo(srcInterv, a_coarData, dstInterv, faceCopier);
   }
 }
 
@@ -908,7 +923,12 @@ EBCoarAve::averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
     }
     CH_STOP(t1);
 
-    coFiData.copyTo(Interval(0, 0), a_coarData, Interval(ivar, ivar));
+    Copier& ebCopier = m_ebCopiers[a_coarData.ghostVect()];
+    if (!ebCopier.isDefined()) {
+      ebCopier.define(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(), a_coarData.ghostVect());
+    }
+
+    coFiData.copyTo(Interval(0, 0), a_coarData, Interval(ivar, ivar), ebCopier);
   }
 }
 

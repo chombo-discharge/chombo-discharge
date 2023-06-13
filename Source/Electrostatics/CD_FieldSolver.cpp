@@ -174,10 +174,7 @@ FieldSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel)
   //       the new grid (in the regrid routine).
 
   m_amr->allocate(m_cache, m_realm, m_nComp);
-
-  for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++) {
-    m_potential[lvl]->localCopyTo(*m_cache[lvl]);
-  }
+  m_amr->copyData(m_cache, m_potential);
 
   this->deallocate();
 }
@@ -414,9 +411,6 @@ FieldSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_ne
 
   // Recompute E from the new potential.
   this->computeElectricField();
-
-  // Set permittivities
-  this->setPermittivities();
 
   // Deallocate the scratch storage.
   m_cache.clear();
@@ -1016,7 +1010,7 @@ FieldSolver::writePlotFile()
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     int icomp = 0;
 
-    this->writePlotData(*output[lvl], icomp, lvl, true);
+    this->writePlotData(*output[lvl], icomp, m_realm, lvl, true);
   }
 
   // Filename
@@ -1136,6 +1130,7 @@ FieldSolver::postCheckpoint()
 void
 FieldSolver::writePlotData(LevelData<EBCellFAB>& a_output,
                            int&                  a_comp,
+                           const std::string     a_outputRealm,
                            const int             a_level,
                            const bool            a_forceNoInterp) const noexcept
 {
@@ -1152,25 +1147,25 @@ FieldSolver::writePlotData(LevelData<EBCellFAB>& a_output,
 
   // Add phi to output
   if (m_plotPotential) {
-    this->writeMultifluidData(a_output, a_comp, m_potential, phase::gas, a_level, doInterp);
+    this->writeMultifluidData(a_output, a_comp, m_potential, phase::gas, a_outputRealm, a_level, doInterp);
   }
   if (m_plotRho) {
-    this->writeMultifluidData(a_output, a_comp, m_rho, phase::gas, a_level, false);
+    this->writeMultifluidData(a_output, a_comp, m_rho, phase::gas, a_outputRealm, a_level, false);
   }
   if (m_plotSigma) {
-    this->writeSurfaceData(a_output, a_comp, *m_sigma[a_level], a_level);
+    this->writeSurfaceData(a_output, a_comp, *m_sigma[a_level], a_outputRealm, a_level);
   }
   if (m_plotResidue) {
-    this->writeMultifluidData(a_output, a_comp, m_residue, phase::gas, a_level, false);
+    this->writeMultifluidData(a_output, a_comp, m_residue, phase::gas, a_outputRealm, a_level, false);
   }
   if (m_plotPermittivity) {
-    this->writeMultifluidData(a_output, a_comp, m_permittivityCell, phase::gas, a_level, false);
+    this->writeMultifluidData(a_output, a_comp, m_permittivityCell, phase::gas, a_outputRealm, a_level, false);
   }
   if (m_plotElectricField) {
-    this->writeMultifluidData(a_output, a_comp, m_electricField, phase::gas, a_level, doInterp);
+    this->writeMultifluidData(a_output, a_comp, m_electricField, phase::gas, a_outputRealm, a_level, doInterp);
   }
   if (m_plotElectricFieldSolid) {
-    this->writeMultifluidData(a_output, a_comp, m_electricField, phase::solid, a_level, doInterp);
+    this->writeMultifluidData(a_output, a_comp, m_electricField, phase::solid, a_outputRealm, a_level, doInterp);
   }
 }
 
@@ -1179,6 +1174,7 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
                                  int&                     a_comp,
                                  const MFAMRCellData&     a_data,
                                  const phase::which_phase a_phase,
+                                 const std::string        a_outputRealm,
                                  const int                a_level,
                                  const bool               a_interp) const noexcept
 
@@ -1245,19 +1241,19 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
     MultifluidAlias::aliasMF(aliasGas, phase::gas, *a_data[a_level]);
     MultifluidAlias::aliasMF(aliasSolid, phase::solid, *a_data[a_level]);
 
-    aliasGas.localCopyTo(scratchGas);
-    aliasSolid.localCopyTo(scratchSolid);
+    m_amr->copyData(scratchGas, aliasGas, a_level, m_realm, m_realm);
+    m_amr->copyData(scratchSolid, aliasSolid, a_level, m_realm, m_realm);
+
+    scratchGas.exchange();
+    scratchSolid.exchange();
 
     if (a_level > 0) {
       MultifluidAlias::aliasMF(aliasGasCoar, phase::gas, *a_data[a_level - 1]);
       MultifluidAlias::aliasMF(aliasSolidCoar, phase::solid, *a_data[a_level - 1]);
 
-      aliasGasCoar.localCopyTo(scratchGasCoar);
-      aliasSolidCoar.localCopyTo(scratchSolidCoar);
+      m_amr->copyData(scratchGasCoar, aliasGasCoar, a_level - 1, m_realm, m_realm);
+      m_amr->copyData(scratchSolidCoar, aliasSolidCoar, a_level - 1, m_realm, m_realm);
     }
-
-    scratchGas.exchange();
-    scratchSolid.exchange();
   }
   else {
     LevelData<EBCellFAB> aliasGas;
@@ -1265,12 +1261,12 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
 
     MultifluidAlias::aliasMF(aliasGas, phase::gas, *a_data[a_level]);
 
-    aliasGas.localCopyTo(scratchGas);
+    m_amr->copyData(scratchGas, aliasGas, a_level, m_realm, m_realm);
 
     if (a_level > 0) {
       MultifluidAlias::aliasMF(aliasGasCoar, phase::gas, *a_data[a_level - 1]);
 
-      aliasGasCoar.localCopyTo(scratchGasCoar);
+      m_amr->copyData(scratchGasCoar, aliasGasCoar, a_level - 1, m_realm, m_realm);
     }
 
     scratchGas.exchange();
@@ -1393,8 +1389,7 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
   CH_STOP(t6);
 
   CH_START(t7);
-  scratchGas.exchange();
-  scratchGas.copyTo(srcInterv, a_output, dstInterv, copier);
+  m_amr->copyData(a_output, scratchGas, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
   CH_STOP(t7);
 
   a_comp += numComp;
@@ -1404,6 +1399,7 @@ void
 FieldSolver::writeSurfaceData(LevelData<EBCellFAB>&             a_output,
                               int&                              a_comp,
                               const LevelData<BaseIVFAB<Real>>& a_data,
+                              const std::string                 a_outputRealm,
                               const int                         a_level) const noexcept
 {
   CH_TIME("FieldSolver::writeSurfaceData");
@@ -1424,7 +1420,17 @@ FieldSolver::writeSurfaceData(LevelData<EBCellFAB>&             a_output,
   DataOps::incr(scratch, a_data, 1.0);
 
   // Copy to a_output
-  scratch.copyTo(Interval(0, numComp - 1), a_output, Interval(a_comp, a_comp));
+  const Interval srcInterv = Interval(0, 0);
+  const Interval dstInterv = Interval(a_comp, a_comp);
+  m_amr->copyData(a_output,
+                  scratch,
+                  a_level,
+                  a_outputRealm,
+                  m_realm,
+                  dstInterv,
+                  srcInterv,
+                  CopyStrategy::ValidGhost,
+                  CopyStrategy::ValidGhost);
 
   a_comp += numComp;
 }

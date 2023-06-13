@@ -205,14 +205,17 @@ RadiativeTransferStepper<T>::getPlotVariableNames() const
 
 template <typename T>
 void
-RadiativeTransferStepper<T>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const
+RadiativeTransferStepper<T>::writePlotData(LevelData<EBCellFAB>& a_output,
+                                           int&                  a_icomp,
+                                           const std::string     a_outputRealm,
+                                           const int             a_level) const
 {
   CH_TIME("RadiativeTransferStepper::writePlotData");
   if (m_verbosity > 5) {
     pout() << "RadiativeTransferStepper::writePlotData" << endl;
   }
 
-  m_solver->writePlotData(a_output, a_icomp, a_level);
+  m_solver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
 }
 
 template <typename T>

@@ -131,24 +131,6 @@ public:
   getData() const noexcept;
 
   /*!
-    @brief General copying of another object. This does a local copy if the two realms are the same. Otherwise it does
-    a communication copy. In Chombo-speak this is localCopyTo versus copyTo. 
-    @param[in] a_other Other EBAMRData object
-  */
-  void
-  copy(const EBAMRData<T>& a_other) noexcept;
-
-  /*!
-    @brief General copying of another object. This does a local copy if the two realms are the same. Otherwise it does
-    a communication copy. In Chombo-speak this is localCopyTo versus copyTo. 
-    @param[in] a_srcInterval Source interval in a_other
-    @param[in] a_other Other EBAMRData object
-    @param[in] a_stInterval  Destination interval in *this
-  */
-  void
-  copy(const Interval a_srcInterval, const EBAMRData<T>& a_other, const Interval a_dstInterval) noexcept;
-
-  /*!
     @brief Push a LevelData<T> object to the back of the data vector
     @param[in] a_levelData Data to append to vector
   */

@@ -409,7 +409,7 @@ TracerParticleSolver<P>::writePlotFile()
   // Copy internal data to be plotted over to 'output'
   int icomp = 0;
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    this->writePlotData(*output[lvl], icomp, lvl);
+    this->writePlotData(*output[lvl], icomp, m_realm, lvl);
   }
 
   // Filename
@@ -491,7 +491,10 @@ TracerParticleSolver<P>::getPlotVariableNames() const
 
 template <typename P>
 inline void
-TracerParticleSolver<P>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
+TracerParticleSolver<P>::writePlotData(LevelData<EBCellFAB>& a_output,
+                                       int&                  a_comp,
+                                       const std::string     a_outputRealm,
+                                       const int             a_level) const noexcept
 {
   CH_TIME("TracerParticleSolver::writePlotData");
   if (m_verbosity > 5) {
@@ -505,14 +508,14 @@ TracerParticleSolver<P>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_co
 
     this->deposit(weight);
 
-    this->writeData(a_output, a_comp, weight, a_level, false, true);
+    this->writeData(a_output, a_comp, weight, a_outputRealm, a_level, false, true);
   }
 
   // Write the velocity field to the output data holder.
   if (m_plotVelocity) {
     CH_assert(!(m_velocityField == nullptr));
 
-    this->writeData(a_output, a_comp, *m_velocityField, a_level, true, true);
+    this->writeData(a_output, a_comp, *m_velocityField, a_outputRealm, a_level, true, true);
   }
 }
 
@@ -521,6 +524,7 @@ void
 TracerParticleSolver<P>::writeData(LevelData<EBCellFAB>& a_output,
                                    int&                  a_comp,
                                    const EBAMRCellData&  a_data,
+                                   const std::string     a_outputRealm,
                                    const int             a_level,
                                    const bool            a_interpToCentroids,
                                    const bool            a_interpGhost) const noexcept
@@ -530,8 +534,7 @@ TracerParticleSolver<P>::writeData(LevelData<EBCellFAB>& a_output,
   CH_TIMER("TracerParticleSolver::writeData::local_copy", t2);
   CH_TIMER("TracerParticleSolver::writeData::interp_ghost", t3);
   CH_TIMER("TracerParticleSolver::writeData::interp_centroid", t4);
-  CH_TIMER("TracerParticleSolver::writeData::define_copier", t5);
-  CH_TIMER("TracerParticleSolver::writeData::final_copy", t6);
+  CH_TIMER("TracerParticleSolver::writeData::final_copy", t5);
   if (m_verbosity > 5) {
     pout() << m_name + "::writeData" << endl;
   }
@@ -545,7 +548,7 @@ TracerParticleSolver<P>::writeData(LevelData<EBCellFAB>& a_output,
   CH_STOP(t1);
 
   CH_START(t2);
-  a_data[a_level]->localCopyTo(scratch);
+  m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
   CH_START(t2);
 
   // Interpolate ghost cells
@@ -561,25 +564,13 @@ TracerParticleSolver<P>::writeData(LevelData<EBCellFAB>& a_output,
   }
   CH_STOP(t4);
 
-  // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
-  // we can't call EBAMRData<T>::copy either (because components don't align). So -- general type of copy here.
-  CH_START(t5);
-  Copier copier;
-  copier.ghostDefine(scratch.disjointBoxLayout(),
-                     a_output.disjointBoxLayout(),
-                     m_amr->getDomains()[a_level],
-                     scratch.ghostVect(),
-                     a_output.ghostVect());
-  CH_STOP(t5);
-
   DataOps::setCoveredValue(scratch, 0.0);
 
-  CH_START(t6);
+  CH_START(t5);
   const Interval srcInterv(0, numComp - 1);
   const Interval dstInterv(a_comp, a_comp + numComp - 1);
-
-  scratch.copyTo(srcInterv, a_output, dstInterv, copier);
-  CH_STOP(t6);
+  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  CH_STOP(t5);
 
   a_comp += numComp;
 }

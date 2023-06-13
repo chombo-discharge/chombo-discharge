@@ -475,15 +475,11 @@ EddingtonSP1::preRegrid(const int a_base, const int a_oldFinestLevel)
     pout() << m_name + "::preRegrid" << endl;
   }
 
-  const int finestLevel = m_amr->getFinestLevel();
-
   m_amr->allocate(m_cachePhi, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_cacheSrc, m_realm, m_phase, m_nComp);
 
-  for (int lvl = 0; lvl <= finestLevel; lvl++) { //
-    m_phi[lvl]->localCopyTo(*m_cachePhi[lvl]);
-    m_source[lvl]->localCopyTo(*m_cacheSrc[lvl]);
-  }
+  m_amr->copyData(m_cachePhi, m_phi);
+  m_amr->copyData(m_cacheSrc, m_source);
 
   this->deallocate();
 }
@@ -1163,11 +1159,8 @@ EddingtonSP1::computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_
   }
 
   // For EddingtonSP1, the solution vector is only the isotropic part of the RTE, so just copy over.
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Interval interv(m_comp, m_comp);
-    a_phi[lvl]->localCopyTo(interv, *a_isotropic[lvl], interv);
-  }
+  const Interval interv(m_comp, m_comp);
+  m_amr->copyData(a_isotropic, a_phi, interv, interv, CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);
 }
 
 void
@@ -1205,17 +1198,26 @@ EddingtonSP1::writePlotFile()
   EBAMRCellData output;
   m_amr->allocate(output, m_realm, m_phase, ncomps, 1);
 
-  for (int lvl = 0; lvl < output.size(); lvl++) {
-    LevelData<EBCellFAB>& state  = *m_phi[lvl];
-    LevelData<EBCellFAB>& source = *m_source[lvl];
-    LevelData<EBCellFAB>& flx    = *flux[lvl];
-    LevelData<EBCellFAB>& res    = *m_resid[lvl];
-
-    state.localCopyTo(Interval(0, 0), *output[lvl], Interval(0, 0));
-    flx.localCopyTo(Interval(0, SpaceDim - 1), *output[lvl], Interval(1, SpaceDim));
-    source.localCopyTo(Interval(0, 0), *output[lvl], Interval(1 + SpaceDim, 1 + SpaceDim));
-    res.localCopyTo(Interval(0, 0), *output[lvl], Interval(2 + SpaceDim, 2 + SpaceDim));
-  }
+  // Copy data to put data holder
+  m_amr->copyData(output, m_phi, Interval(0, 0), Interval(0, 0), CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);
+  m_amr->copyData(output,
+                  flux,
+                  Interval(0, SpaceDim - 1),
+                  Interval(1, SpaceDim),
+                  CopyStrategy::ValidGhost,
+                  CopyStrategy::ValidGhost);
+  m_amr->copyData(output,
+                  m_source,
+                  Interval(0, 0),
+                  Interval(1 + SpaceDim, 1 + SpaceDim),
+                  CopyStrategy::ValidGhost,
+                  CopyStrategy::ValidGhost);
+  m_amr->copyData(output,
+                  m_resid,
+                  Interval(0, 0),
+                  Interval(2 + SpaceDim, 2 + SpaceDim),
+                  CopyStrategy::ValidGhost,
+                  CopyStrategy::ValidGhost);
 
   // Transform to centroid-centered
   const IrregAmrStencil<CentroidInterpolationStencil>& sten = m_amr->getCentroidInterpolationStencils(m_realm,

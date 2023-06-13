@@ -312,7 +312,9 @@ EBRedistribution::defineValidCells(LevelData<BaseFab<bool>>& a_validCells) const
       dataCoFi[dit()].setVal(1.0);
     }
 
-    dataCoFi.copyTo(data);
+    // Need a new Copier here.
+    Copier copier(dblCoFi, dbl);
+    dataCoFi.copyTo(Interval(0, 0), data, Interval(0, 0), copier);
 
     // Go through the coarse grid and set cells to false wherever we find data > 0.0
     for (DataIterator dit(dbl); dit.ok(); ++dit) {

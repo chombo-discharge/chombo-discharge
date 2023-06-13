@@ -307,7 +307,10 @@ namespace Physics {
 
     template <class T>
     void
-    FieldStepper<T>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const
+    FieldStepper<T>::writePlotData(LevelData<EBCellFAB>& a_output,
+                                   int&                  a_icomp,
+                                   const std::string     a_outputRealm,
+                                   const int             a_level) const
     {
       CH_TIME("FieldStepper::writePlotData");
       if (m_verbosity > 5) {
@@ -318,8 +321,8 @@ namespace Physics {
       CH_assert(a_level <= m_amr->getFinestLevel());
 
       // Write into plot data holder memory.
-      m_fieldSolver->writePlotData(a_output, a_icomp, a_level);
-      m_sigma->writePlotData(a_output, a_icomp, a_level);
+      m_fieldSolver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
+      m_sigma->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
     }
 
     template <class T>

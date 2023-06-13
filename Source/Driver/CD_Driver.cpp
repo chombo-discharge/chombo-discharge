@@ -603,10 +603,10 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
   timer.startEvent("Pre-regrid");
   this->cacheTags(m_tags); // Cache m_tags because after regrid, ownership will change
   m_timeStepper->preRegrid(a_lmin, m_amr->getFinestLevel());
-  m_amr->preRegrid();
   if (!(m_cellTagger.isNull())) {
     m_cellTagger->preRegrid();
   }
+  m_amr->preRegrid();
   timer.stopEvent("Pre-regrid");
 
   // Regrid AMR. Only levels [lmin, lmax] are allowed to change.
@@ -635,6 +635,7 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
   // Regrid the operators
   timer.startEvent("Regrid operators");
   m_amr->regridOperators(a_lmin);
+  m_amr->postRegrid();
   timer.stopEvent("Regrid operators");
 
   // Regrid Driver, timestepper, and celltagger
@@ -680,7 +681,7 @@ Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLevel)
   this->allocateInternals();
 
   // Copy cached tags back over to m_tags
-  for (int lvl = 0; lvl <= Min(a_oldFinestLevel, a_newFinestLevel); lvl++) {
+  for (int lvl = 0; lvl <= std::min(a_oldFinestLevel, a_newFinestLevel); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
     // Copy mask
@@ -690,6 +691,7 @@ Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLevel)
       tmp[dit()].setVal(false);
     }
 
+    // Ideally we'd use a pre-defined Copier here. But since this is only called once per regrid it should be fine.
     m_cachedTags[lvl]->copyTo(tmp);
 
     // m_cachedTags was allocated on the grids while tmp is allocated on the new. Look through
@@ -2206,9 +2208,9 @@ Driver::writePlotFile(const std::string a_filename)
       if (m_verbosity > 2) {
         pout() << "Driver::writePlotFile -- assembling data on level = " << lvl << endl;
       }
-      m_timeStepper->writePlotData(outputData, comp, lvl);
+      m_timeStepper->writePlotData(outputData, comp, m_realm, lvl);
       if (!(m_cellTagger.isNull())) {
-        m_cellTagger->writePlotData(outputData, comp, lvl);
+        m_cellTagger->writePlotData(outputData, comp, m_realm, lvl);
       }
       this->writePlotData(outputData, comp, lvl);
       timer.stopEvent("Assemble data");
@@ -2315,7 +2317,7 @@ Driver::writeTags(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level
   const Interval srcInterv(0, 0);
   const Interval dstInterv(a_comp, a_comp);
 
-  scratch.localCopyTo(srcInterv, a_output, dstInterv);
+  m_amr->copyData(scratch, a_output, a_level, m_realm, m_realm, dstInterv, srcInterv);
 
   a_comp++;
 }
@@ -2339,10 +2341,10 @@ Driver::writeRanks(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_leve
 
     DataOps::setValue(scratch, 1.0 * procID());
 
-    const Interval scrInterv(0, 0);
+    const Interval srcInterv(0, 0);
     const Interval dstInterv(a_comp, a_comp);
 
-    scratch.copyTo(scrInterv, a_output, dstInterv);
+    m_amr->copyData(a_output, scratch, a_level, m_realm, r, dstInterv, srcInterv);
 
     a_comp++;
   }

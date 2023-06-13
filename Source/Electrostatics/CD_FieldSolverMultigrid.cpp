@@ -342,9 +342,8 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
     CH_START(t3);
     for (int i = 0; i < m_numFilterSmooth; i++) {
 
-      // Must do the piecewise linear interpolator rather than the MG interpolator (which only does one layer across the CF, except near the EB)
       m_amr->conservativeAverage(a_phi, m_realm);
-      m_amr->interpGhostPwl(a_phi, m_realm);
+      m_amr->interpGhostMG(a_phi, m_realm);
 
       const Real alpha  = 0.5;
       const int  stride = 1;
@@ -872,7 +871,7 @@ FieldSolverMultigrid::computeElectricField(MFAMRCellData& a_electricField, const
   // than interpGhostPwl or interpGhost here.
   MFAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_nComp);
-  scratch.copy(a_potential);
+  m_amr->copyData(scratch, a_potential);
   m_amr->interpGhostMG(scratch, m_realm);
 
   // Compute the cell-centered gradient everywhere.
@@ -900,7 +899,7 @@ FieldSolverMultigrid::computeElectricField(MFAMRFluxData& a_electricField, const
   // than interpGhostPwl or interpGhost here.
   MFAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_nComp);
-  scratch.copy(a_potential);
+  m_amr->copyData(scratch, a_potential);
   m_amr->interpGhostMG(scratch, m_realm);
 
   // Compute the cell-centered gradient everywhere.
@@ -931,7 +930,7 @@ FieldSolverMultigrid::computeElectricField(EBAMRCellData&           a_electricFi
   m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
   m_amr->alias(potentialPhase, a_phase, a_potential);
 
-  scratch.copy(potentialPhase);
+  m_amr->copyData(scratch, potentialPhase);
   m_amr->interpGhostMG(scratch, m_realm, a_phase);
 
   // Use EBGradient for computing the gradient.
@@ -966,7 +965,7 @@ FieldSolverMultigrid::computeElectricField(EBAMRFluxData&           a_electricFi
   m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
   m_amr->alias(potentialPhase, a_phase, a_potential);
 
-  scratch.copy(potentialPhase);
+  m_amr->copyData(scratch, potentialPhase);
   m_amr->interpGhostMG(scratch, m_realm, a_phase);
 
   // Use EBGradient for computing the gradient.

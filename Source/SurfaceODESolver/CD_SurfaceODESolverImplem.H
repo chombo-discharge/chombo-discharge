@@ -492,8 +492,8 @@ SurfaceODESolver<N>::allocate() noexcept
 
   CH_assert(!(m_amr.isNull()));
 
-  m_amr->allocate(m_phi, m_realm, m_phase, N, 0);
-  m_amr->allocate(m_rhs, m_realm, m_phase, N, 0);
+  m_amr->allocate(m_phi, m_realm, m_phase, N);
+  m_amr->allocate(m_rhs, m_realm, m_phase, N);
 
   this->defineVoFIterators();
 }
@@ -582,6 +582,8 @@ SurfaceODESolver<N>::preRegrid(const int a_lbase, const int a_oldFinestLevel) no
   m_amr->allocate(m_cache, m_realm, m_phase, N);
 
   DataOps::copy(m_cache, m_phi);
+
+  m_phi.clear();
 }
 
 template <int N>
@@ -757,7 +759,7 @@ SurfaceODESolver<N>::writePlotFile() const noexcept
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       int icomp = 0;
-      this->writePlotData(*output[lvl], icomp, lvl);
+      this->writePlotData(*output[lvl], icomp, m_realm, lvl);
     }
 
     // Filename
@@ -790,7 +792,10 @@ SurfaceODESolver<N>::writePlotFile() const noexcept
 
 template <int N>
 void
-SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
+SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output,
+                                   int&                  a_comp,
+                                   const std::string     a_outputRealm,
+                                   const int             a_level) const noexcept
 {
   CH_TIME("SurfaceODESolver::writePlotData");
   if (m_verbosity > 5) {
@@ -813,7 +818,7 @@ SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, 
     const Interval srcInterv(0, N - 1);
     const Interval dstInterv(a_comp, a_comp + N - 1);
 
-    scratch.copyTo(srcInterv, a_output, dstInterv);
+    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
 
     a_output.exchange(dstInterv);
 
@@ -828,7 +833,7 @@ SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, 
     const Interval srcInterv(0, N - 1);
     const Interval dstInterv(a_comp, a_comp + N - 1);
 
-    scratch.copyTo(srcInterv, a_output, dstInterv);
+    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
 
     a_output.exchange(dstInterv);
 

@@ -463,10 +463,8 @@ CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
       EBAMRCellData data;
       m_amr->allocate(data, m_realm, m_phase, 2);
 
-      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-        m_conductivityFactorCell[lvl]->copyTo(Interval(0, 0), *data[lvl], Interval(0, 0));
-        m_semiImplicitRho[lvl]->copyTo(Interval(0, 0), *data[lvl], Interval(1, 1));
-      }
+      m_amr->copyData(data, m_conductivityFactorCell, Interval(0, 0), Interval(0, 0));
+      m_amr->copyData(data, m_semiImplicitRho, Interval(1, 1), Interval(0, 0));
 
       DischargeIO::writeEBHDF5(data, "semi_implicit_debug.hdf5");
 #endif
@@ -773,7 +771,7 @@ CdrPlasmaGodunovStepper::computeCdrGradients()
     EBAMRCellData& grad    = storage->getGradient();
 
     // Update the ghost cells so we can compute the gradient.
-    scratch.copy(solver->getPhi());
+    m_amr->copyData(scratch, solver->getPhi());
 
     m_amr->arithmeticAverage(scratch, m_realm, m_phase);
     m_amr->interpGhostPwl(scratch, m_realm, m_phase);

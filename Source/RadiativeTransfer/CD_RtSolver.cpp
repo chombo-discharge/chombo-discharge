@@ -207,9 +207,7 @@ RtSolver::setSource(const EBAMRCellData& a_source)
 
   const int finestLevel = m_amr->getFinestLevel();
 
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    a_source[lvl]->localCopyTo(*m_source[lvl]);
-  }
+  m_amr->copyData(m_source, a_source);
 
   m_amr->conservativeAverage(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
@@ -294,7 +292,10 @@ RtSolver::getPlotVariableNames() const
 }
 
 void
-RtSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
+RtSolver::writePlotData(LevelData<EBCellFAB>& a_output,
+                        int&                  a_comp,
+                        const std::string     a_outputRealm,
+                        const int             a_level) const noexcept
 {
   CH_TIME("RtSolver::writePlotData");
   if (m_verbosity > 5) {
@@ -305,10 +306,10 @@ RtSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a
   CH_assert(a_level <= m_amr->getFinestLevel());
 
   if (m_plotPhi) {
-    this->writeData(a_output, a_comp, m_phi, a_level, true, true);
+    this->writeData(a_output, a_comp, m_phi, a_outputRealm, a_level, true, true);
   }
   if (m_plotSource) {
-    this->writeData(a_output, a_comp, m_source, a_level, false, true);
+    this->writeData(a_output, a_comp, m_source, a_outputRealm, a_level, false, true);
   }
 }
 
@@ -316,6 +317,7 @@ void
 RtSolver::writeData(LevelData<EBCellFAB>& a_output,
                     int&                  a_comp,
                     const EBAMRCellData&  a_data,
+                    const std::string     a_outputRealm,
                     const int             a_level,
                     const bool            a_interpToCentroids,
                     const bool            a_interpGhost) const noexcept
@@ -345,14 +347,14 @@ RtSolver::writeData(LevelData<EBCellFAB>& a_output,
   CH_STOP(t1);
 
   CH_START(t2);
-  a_data[a_level]->localCopyTo(scratch);
+  m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
+
   scratch.exchange();
   CH_START(t2);
 
   // Interpolate ghost cells
   CH_START(t3);
   if (a_level > 0 && a_interpGhost) {
-
     for (int icomp = 0; icomp < numComp; icomp++) {
       LevelData<EBCellFAB> coarData;
 
@@ -383,7 +385,7 @@ RtSolver::writeData(LevelData<EBCellFAB>& a_output,
   DataOps::setCoveredValue(scratch, 0.0);
 
   CH_START(t6);
-  scratch.copyTo(srcInterv, a_output, dstInterv, copier);
+  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
   CH_STOP(t6);
 
   a_comp += numComp;

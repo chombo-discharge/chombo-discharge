@@ -407,10 +407,8 @@ CdrSolver::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   m_amr->allocate(m_cachePhi, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_cacheSource, m_realm, m_phase, m_nComp);
 
-  for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++) {
-    m_phi[lvl]->localCopyTo(*m_cachePhi[lvl]);
-    m_source[lvl]->localCopyTo(*m_cacheSource[lvl]);
-  }
+  m_amr->copyData(m_cachePhi, m_phi);
+  m_amr->copyData(m_cacheSource, m_source);
 
   this->deallocate();
 }
@@ -1507,8 +1505,8 @@ CdrSolver::setDiffusionCoefficient(const EBAMRFluxData& a_diffusionCoefficient,
   CH_assert(a_ebDiffusionCoefficient[0]->nComp() == 1);
 
   // Do a copy -- realms do not have to be the same.
-  m_faceCenteredDiffusionCoefficient.copy(a_diffusionCoefficient);
-  m_ebCenteredDiffusionCoefficient.copy(a_ebDiffusionCoefficient);
+  m_amr->copyData(m_faceCenteredDiffusionCoefficient, a_diffusionCoefficient);
+  m_amr->copyData(m_ebCenteredDiffusionCoefficient, a_ebDiffusionCoefficient);
 
   m_amr->conservativeAverage(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
   m_amr->conservativeAverage(m_ebCenteredDiffusionCoefficient, m_realm, m_phase);
@@ -1554,7 +1552,7 @@ CdrSolver::setEbFlux(const EBAMRIVData& a_ebFlux)
 
   CH_assert(a_ebFlux[0]->nComp() == 1);
 
-  m_ebFlux.copy(a_ebFlux);
+  m_amr->copyData(m_ebFlux, a_ebFlux);
 }
 
 void
@@ -1594,7 +1592,7 @@ CdrSolver::setSource(const EBAMRCellData& a_source)
 
   CH_assert(a_source[0]->nComp() == 1);
 
-  m_source.copy(a_source);
+  m_amr->copyData(m_source, a_source);
 
   m_amr->conservativeAverage(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
@@ -1651,7 +1649,7 @@ CdrSolver::setVelocity(const EBAMRCellData& a_velo)
 
   CH_assert(a_velo[0]->nComp() == SpaceDim);
 
-  m_cellVelocity.copy(a_velo);
+  m_amr->copyData(m_cellVelocity, a_velo);
 
   m_amr->conservativeAverage(m_cellVelocity, m_realm, m_phase);
   m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);
@@ -1732,7 +1730,7 @@ CdrSolver::writePlotFile()
   // Copy internal data to be plotted over to 'output'
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     int icomp = 0;
-    this->writePlotData(*output[lvl], icomp, lvl);
+    this->writePlotData(*output[lvl], icomp, m_realm, lvl);
   }
 
   // Filename
@@ -1763,7 +1761,10 @@ CdrSolver::writePlotFile()
 }
 
 void
-CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const noexcept
+CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
+                         int&                  a_icomp,
+                         const std::string     a_outputRealm,
+                         const int             a_level) const noexcept
 {
   CH_TIME("CdrSolver::writePlotData");
   if (m_verbosity > 5) {
@@ -1779,7 +1780,7 @@ CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int
 
   // Plot state
   if (m_plotPhi) {
-    this->writeData(a_output, a_icomp, m_phi, a_level, true, true);
+    this->writeData(a_output, a_icomp, m_phi, a_outputRealm, a_level, true, true);
     if (m_plotNumbers) {
       LevelData<EBCellFAB> alias;
 
@@ -1802,12 +1803,12 @@ CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int
                                  m_amr->getDomains()[a_level - 1]);
     }
 
-    this->writeData(a_output, a_icomp, scratch, a_level, false, true);
+    this->writeData(a_output, a_icomp, scratch, a_outputRealm, a_level, false, true);
   }
 
   // Plot source terms
   if (m_plotSource) {
-    this->writeData(a_output, a_icomp, m_source, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_source, a_outputRealm, a_level, false, true);
 
     if (m_plotNumbers) {
       LevelData<EBCellFAB> alias;
@@ -1820,14 +1821,14 @@ CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int
 
   // Plot velocities
   if (m_plotVelocity && m_isMobile) {
-    this->writeData(a_output, a_icomp, m_cellVelocity, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_cellVelocity, a_outputRealm, a_level, false, true);
   }
 
   // Plot EB fluxes. These are stored on sparse data structures but we need them on cell centers. So copy them to scratch and write data.
   if (m_plotEbFlux && m_isMobile) {
     DataOps::setValue(*scratch[a_level], 0.0);
     DataOps::incr(*scratch[a_level], *m_ebFlux[a_level], 1.0);
-    this->writeData(a_output, a_icomp, scratch, a_level, false, false);
+    this->writeData(a_output, a_icomp, scratch, a_outputRealm, a_level, false, false);
   }
 }
 
@@ -1835,6 +1836,7 @@ void
 CdrSolver::writeData(LevelData<EBCellFAB>& a_output,
                      int&                  a_comp,
                      const EBAMRCellData&  a_data,
+                     const std::string     a_outputRealm,
                      const int             a_level,
                      const bool            a_interpToCentroids,
                      const bool            a_interpGhost) const noexcept
@@ -1845,8 +1847,7 @@ CdrSolver::writeData(LevelData<EBCellFAB>& a_output,
   CH_TIMER("CdrSolver::writeData::local_copy", t2);
   CH_TIMER("CdrSolver::writeData::interp_ghost", t3);
   CH_TIMER("CdrSolver::writeData::interp_centroid", t4);
-  CH_TIMER("CdrSolver::writeData::define_copier", t5);
-  CH_TIMER("CdrSolver::writeData::final_copy", t6);
+  CH_TIMER("CdrSolver::writeData::final_copy", t5);
   if (m_verbosity > 5) {
     pout() << m_name + "::writeData" << endl;
   }
@@ -1864,8 +1865,7 @@ CdrSolver::writeData(LevelData<EBCellFAB>& a_output,
   CH_STOP(t1);
 
   CH_START(t2);
-  a_data[a_level]->localCopyTo(scratch);
-  scratch.exchange();
+  m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
   CH_START(t2);
 
   // Interpolate ghost cells
@@ -1881,22 +1881,11 @@ CdrSolver::writeData(LevelData<EBCellFAB>& a_output,
   }
   CH_STOP(t4);
 
-  // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
-  // we can't call EBAMRData<T>::copy either (because components don't align). So -- general type of copy here.
-  CH_START(t5);
-  Copier copier;
-  copier.ghostDefine(scratch.disjointBoxLayout(),
-                     a_output.disjointBoxLayout(),
-                     m_amr->getDomains()[a_level],
-                     scratch.ghostVect(),
-                     a_output.ghostVect());
-  CH_STOP(t5);
-
   DataOps::setCoveredValue(scratch, 0.0);
 
-  CH_START(t6);
-  scratch.copyTo(srcInterv, a_output, dstInterv, copier);
-  CH_STOP(t6);
+  CH_START(t5);
+  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  CH_STOP(t5);
 
   a_comp += numComp;
 }

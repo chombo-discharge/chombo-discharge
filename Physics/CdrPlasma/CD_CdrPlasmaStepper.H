@@ -144,12 +144,16 @@ namespace Physics {
 
       /*!
 	@brief Write plot data to output holder. 
-	@param[inout] a_output            Output data holder.
-	@param[inout] a_icomp             Starting component in a_output to begin at. 
-	@param[in]    a_level             Grid level
+	@param[inout] a_output      Output data holder.
+	@param[inout] a_icomp       Starting component in a_output to begin at. 
+	@param[in]    a_outputRealm Realm where a_output belongs
+	@param[in]    a_level       Grid level
       */
       virtual void
-      writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const override;
+      writePlotData(LevelData<EBCellFAB>& a_output,
+                    int&                  a_icomp,
+                    const std::string     a_outputRealm,
+                    const int             a_level) const override;
 
       /*!
 	@brief Compute the time step.
@@ -1455,10 +1459,11 @@ namespace Physics {
 	@brief Compute and put the current density in output data holder
 	@param[inout] a_output Output data holder.
 	@param[inout] a_icomp  Starting component in a_output to begin at. On output this is incremented by SpaceDim.
+	@param[in]    a_outputRealm Realm where a_output lives    
 	@param[in]    a_level  Grid level
       */
       virtual void
-      writeJ(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const;
+      writeJ(LevelData<EBCellFAB>& a_output, int& a_comp, const std::string a_outputRealm, const int a_level) const;
 
       /*!
 	@brief Calculate the user-supplied plot variables
@@ -1471,6 +1476,7 @@ namespace Physics {
 	@param[inout] a_output Output data holder.
 	@param[inout] a_icomp  Starting component where this solver begins writing the output. 
 	@param[in]    a_data   Data to write. 
+	@param[in]    a_outputRealm Realm where a_output lives
 	@param[in]    a_level  Grid level
 	@param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
 	@param[in]    a_interpGhost If true, interpolate ghost cells
@@ -1479,6 +1485,7 @@ namespace Physics {
       writeData(LevelData<EBCellFAB>& a_output,
                 int&                  a_comp,
                 const EBAMRCellData&  a_data,
+                const std::string     a_outputRealm,
                 const int             a_level,
                 const bool            a_interpToCentroids,
                 const bool            a_interpGhost) const noexcept;

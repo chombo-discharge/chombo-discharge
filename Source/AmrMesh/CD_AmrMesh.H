@@ -32,6 +32,7 @@
 #include <CD_ParticleContainer.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_Realm.H>
+#include <CD_CopyStrategy.H>
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
 
@@ -62,7 +63,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~AmrMesh();
+  virtual ~AmrMesh();
 
   /*!
     @brief Disallowed copy assignment
@@ -77,6 +78,112 @@ public:
   */
   AmrMesh&
   operator=(const AmrMesh&& a_other) = delete;
+
+  /*!
+    @brief Method for copying from a source container to a destination container. User supplies information
+    about from/to regions. 
+    @param[inout] a_dst        Destination data 
+    @param[in]    a_src        Source data
+    @param[in]    a_toRegion   Region we copy into
+    @param[in]    a_fromRegion Region we copy from
+    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
+    @note This routine will not work if copying between grids before/after regrids. 
+  */
+  template <typename T>
+  void
+  copyData(EBAMRData<T>&       a_dst,
+           const EBAMRData<T>& a_src,
+           const CopyStrategy& a_toRegion   = CopyStrategy::Valid,
+           const CopyStrategy& a_fromRegion = CopyStrategy::Valid) const noexcept;
+
+  /*!
+    @brief Method for copying from a source container to a destination container. User supplies information
+    about from/to regions. 
+    @param[inout] a_dst        Destination data 
+    @param[in]    a_src        Source data
+    @param[in]    a_level      Grid level
+    @param[in]    a_fromRegion Region we copy from
+    @param[in]    a_toRegion   Region we copy into
+    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
+    @note This routine will not work if copying between grids before/after regrids. 
+  */
+  template <typename T>
+  void
+  copyData(LevelData<T>&       a_dst,
+           const LevelData<T>& a_src,
+           const int           a_level,
+           const CopyStrategy& a_toRegion   = CopyStrategy::Valid,
+           const CopyStrategy& a_fromRegion = CopyStrategy::Valid) const noexcept;
+
+  /*!
+    @brief Method for copying from a source container to a destination container. User supplies information
+    @param[inout] a_dst        Destination data 
+    @param[in]    a_src        Source data
+    @param[in]    a_dstComps   Destination components
+    @param[in]    a_srcComps   Source components
+    @param[in]    a_toRegion   Region we copy into
+    @param[in]    a_fromRegion Region we copy from
+    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
+    @note This routine will not work if copying between grids before/after regrids. 
+  */
+  template <typename T>
+  void
+  copyData(EBAMRData<T>&       a_dst,
+           const EBAMRData<T>& a_src,
+           const Interval&     a_dstComps,
+           const Interval&     a_srcComps,
+           const CopyStrategy& a_toRegion   = CopyStrategy::Valid,
+           const CopyStrategy& a_fromRegion = CopyStrategy::Valid) const noexcept;
+
+  /*!
+    @brief Method for copying from a source container to a destination container. User supplies information
+    about from/to regions. 
+    @param[inout] a_dst        Destination data 
+    @param[in]    a_src        Source data
+    @param[in]    a_level      Grid level
+    @param[in]    a_toRealm    Destination realm
+    @param[in]    a_fromRealm  Source realm
+    @param[in]    a_fromRegion Region we copy from
+    @param[in]    a_toRegion   Region we copy into
+    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
+    @note This routine will not work if copying between grids before/after regrids. 
+  */
+  template <typename T>
+  void
+  copyData(LevelData<T>&       a_dst,
+           const LevelData<T>& a_src,
+           const int           a_level,
+           const std::string   a_toRealm,
+           const std::string   a_fromRealm,
+           const CopyStrategy& a_toRegion   = CopyStrategy::Valid,
+           const CopyStrategy& a_fromRegion = CopyStrategy::Valid) const noexcept;
+
+  /*!
+    @brief Method for copying from a source container to a destination container. User supplies information
+    about from/to regions. 
+    @param[inout] a_dst        Destination data 
+    @param[in]    a_src        Source data
+    @param[in]    a_level      Grid level
+    @param[in]    a_toRealm    Destination realm
+    @param[in]    a_fromRealm  Source realm
+    @param[in]    a_dstComps   Destination components
+    @param[in]    a_srcComps   Source components
+    @param[in]    a_fromRegion Region we copy from
+    @param[in]    a_toRegion   Region we copy into
+    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
+    @note This routine will not work if copying between grids before/after regrids. 
+  */
+  template <typename T>
+  void
+  copyData(LevelData<T>&       a_dst,
+           const LevelData<T>& a_src,
+           const int           a_level,
+           const std::string   a_toRealm,
+           const std::string   a_fromRealm,
+           const Interval&     a_dstComps,
+           const Interval&     a_srcComps,
+           const CopyStrategy& a_toRegion   = CopyStrategy::Valid,
+           const CopyStrategy& a_fromRegion = CopyStrategy::Valid) const noexcept;
 
   /*!
     @brief Deallocate data. 
@@ -1429,6 +1536,12 @@ public:
               const int                  a_lmin);
 
   /*!
+    @brief Run post-regrid operations. 
+  */
+  void
+  postRegrid();
+
+  /*!
     @brief Set grids from boxes and computational loads.
     @param[in] a_boxes          Grid boxes
     @param[in] a_realmsAndLoads Realm names and computational loads for realms
@@ -1774,6 +1887,47 @@ protected:
   std::map<phase::which_phase, RefCountedPtr<BaseIF>> m_baseif;
 
   /*!
+    @brief Old grids
+  */
+  std::map<std::string, Vector<DisjointBoxLayout>> m_oldGrids;
+
+  /*!
+    @brief Storage for copiers from the old grids to the new ones
+    @note Defined in the realm regrid routine. Cleared in the postRegrid routine. 
+  */
+  std::map<std::string, Vector<Copier>> m_oldToNewCellCopiers;
+
+  /*!
+    @brief Storage for copiers from the old grids to the new ones
+    @note Defined in the realm regrid routine. Cleared in the postRegrid routine. 
+  */
+  std::map<std::string, Vector<Copier>> m_oldToNewEBCopiers;
+
+  /*!
+    @brief Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm
+    @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
+  */
+  std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validToValidRealmCopiers;
+
+  /*!
+    @brief Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm
+    @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
+  */
+  std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validToValidGhostRealmCopiers;
+
+  /*!
+    @brief Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm
+    @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
+  */
+  std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validGhostToValidRealmCopiers;
+
+  /*!
+    @brief Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm
+    @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
+  */
+  std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validGhostToValidGhostRealmCopiers;
+
+  /*!
     @brief Grid generation method
   */
   GridGenerationMethod m_gridGenerationMethod;
@@ -1837,6 +1991,11 @@ protected:
     @brief Finest level
   */
   int m_finestLevel;
+
+  /*!
+    @brief Finest level before a regrid
+  */
+  int m_oldFinestLevel;
 
   /*!
     @brief Maximum amr depth
@@ -1939,6 +2098,11 @@ protected:
   bool m_hasGrids;
 
   /*!
+    @brief Has regrid copiers or not
+  */
+  bool m_hasRegridCopiers;
+
+  /*!
     @brief Grids
   */
   Vector<DisjointBoxLayout> m_grids;
@@ -1973,6 +2137,12 @@ protected:
   */
   void
   buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
+
+  /*!
+    @brief Build copiers for copying between realms
+  */
+  void
+  buildCopiers();
 
   /*!
     @brief Parse the low/high corners of the computational domain. 

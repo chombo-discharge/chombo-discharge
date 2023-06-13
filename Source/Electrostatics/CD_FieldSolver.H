@@ -298,7 +298,8 @@ public:
   /*!
     @brief Write output data to a_output
     @param[inout] a_output Output data holder
-    @param[inout] a_comp   Current component in a_output. 
+    @param[inout] a_comp Current component in a_output. 
+    @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level Grid level
     @param[in]    a_forceNoInterp Forces data to be written using native centering
     @return On output, the solver will have written its plot variables to a_output and increment a_comp by the number of plotted variables. 
@@ -306,6 +307,7 @@ public:
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
                 int&                  a_comp,
+                const std::string     a_outputRealm,
                 const int             a_level,
                 const bool            a_forceNoInterp = false) const noexcept;
 
@@ -316,6 +318,7 @@ public:
     @param[inout] a_comp   Current component in a_output. 
     @param[in]    a_data   Multifluid data holder
     @param[in]    a_phase  Main phase in cut-cells. 
+    @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level  Grid level
     @param[in]    a_interp Special flag which, if true, tells AmrMesh to interpolate the data to centroids (in irregular cells). 
   */
@@ -324,6 +327,7 @@ public:
                       int&                     a_comp,
                       const MFAMRCellData&     a_data,
                       const phase::which_phase a_phase,
+                      const std::string        a_outputRealm,
                       const int                a_level,
                       const bool               a_interp) const noexcept;
 
@@ -786,12 +790,14 @@ protected:
     @param[inout] a_output Output data holder
     @param[inout] a_comp   Current component in a_output. 
     @param[in]    a_data   Surface data. 
-    @param[in]    a_interp Special flag which, if true, tells AmrMesh to interpolate the data to centroids (in irregular cells). 
+    @param[in]    a_outputRealm Realm where a_output belongs
+    @param[in]    a_level Grid level
   */
   virtual void
   writeSurfaceData(LevelData<EBCellFAB>&             a_output,
                    int&                              a_comp,
                    const LevelData<BaseIVFAB<Real>>& a_data,
+                   const std::string                 a_outputRealm,
                    const int                         a_level) const noexcept;
 
   /*!

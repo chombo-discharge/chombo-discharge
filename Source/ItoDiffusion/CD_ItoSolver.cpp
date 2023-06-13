@@ -1301,7 +1301,10 @@ ItoSolver::getPlotVariableNames() const
 }
 
 void
-ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
+ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output,
+                         int&                  a_comp,
+                         const std::string     a_outputRealm,
+                         const int             a_level) const noexcept
 {
   CH_TIMERS("ItoSolver::writePlotData");
   CH_TIMER("ItoSolver::writePlotData::mesh_data", t1);
@@ -1323,7 +1326,7 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int 
     const Interval srcInterval(m_comp, m_comp);
     const Interval dstInterval(a_comp, a_comp);
 
-    this->writeData(a_output, a_comp, m_phi, a_level, false, true);
+    this->writeData(a_output, a_comp, m_phi, a_outputRealm, a_level, false, true);
   }
 
   // Plot diffusion coefficient
@@ -1331,7 +1334,7 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int 
     const Interval srcInterval(m_comp, m_comp);
     const Interval dstInterval(a_comp, a_comp);
 
-    this->writeData(a_output, a_comp, m_diffusionFunction, a_level, false, true);
+    this->writeData(a_output, a_comp, m_diffusionFunction, a_outputRealm, a_level, false, true);
   }
 
   // Write velocities
@@ -1339,7 +1342,7 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int 
     const Interval srcInterval(m_comp, SpaceDim - 1);
     const Interval dstInterval(a_comp, a_comp + SpaceDim - 1);
 
-    this->writeData(a_output, a_comp, m_velocityFunction, a_level, false, true);
+    this->writeData(a_output, a_comp, m_velocityFunction, a_outputRealm, a_level, false, true);
   }
   CH_STOP(t1);
 
@@ -1349,7 +1352,7 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int 
                                                                  m_particleContainers.at(WhichContainer::Bulk),
                                                                  a_level);
 
-    scratch.copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
 
     a_comp++;
   }
@@ -1358,7 +1361,7 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int 
                                                                  m_particleContainers.at(WhichContainer::EB),
                                                                  a_level);
 
-    scratch.copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
 
     a_comp++;
   }
@@ -1367,7 +1370,7 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int 
                                                                  m_particleContainers.at(WhichContainer::Domain),
                                                                  a_level);
 
-    scratch.copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
 
     a_comp++;
   }
@@ -1376,7 +1379,7 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int 
                                                                  m_particleContainers.at(WhichContainer::Source),
                                                                  a_level);
 
-    scratch.copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
 
     a_comp++;
   }
@@ -1385,7 +1388,7 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int 
                                                                       m_particleContainers.at(WhichContainer::Bulk),
                                                                       a_level);
 
-    scratch.copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
 
     a_comp++;
   }
@@ -1403,7 +1406,7 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int 
     // Set scratch = totalEnergy/totalWeight
     DataOps::divideFallback(scratch, weight, 0.0);
 
-    scratch.copyTo(Interval(0, 0), a_output, Interval(a_comp, a_comp));
+    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
 
     a_comp++;
   }
@@ -1414,6 +1417,7 @@ void
 ItoSolver::writeData(LevelData<EBCellFAB>& a_output,
                      int&                  a_comp,
                      const EBAMRCellData&  a_data,
+                     const std::string     a_outputRealm,
                      const int             a_level,
                      const bool            a_interpToCentroids,
                      const bool            a_interpGhost) const noexcept
@@ -1423,8 +1427,7 @@ ItoSolver::writeData(LevelData<EBCellFAB>& a_output,
   CH_TIMER("ItoSolver::writeData::local_copy", t2);
   CH_TIMER("ItoSolver::writeData::interp_ghost", t3);
   CH_TIMER("ItoSolver::writeData::interp_centroid", t4);
-  CH_TIMER("ItoSolver::writeData::define_copier", t5);
-  CH_TIMER("ItoSolver::writeData::final_copy", t6);
+  CH_TIMER("ItoSolver::writeData::final_copy", t5);
   if (m_verbosity > 5) {
     pout() << m_name + "::writeData" << endl;
   }
@@ -1438,7 +1441,7 @@ ItoSolver::writeData(LevelData<EBCellFAB>& a_output,
   CH_STOP(t1);
 
   CH_START(t2);
-  a_data[a_level]->localCopyTo(scratch);
+  m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
   CH_START(t2);
 
   // Interpolate ghost cells
@@ -1454,25 +1457,14 @@ ItoSolver::writeData(LevelData<EBCellFAB>& a_output,
   }
   CH_STOP(t4);
 
-  // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
-  // we can't call EBAMRData<T>::copy either (because components don't align). So -- general type of copy here.
-  CH_START(t5);
-  Copier copier;
-  copier.ghostDefine(scratch.disjointBoxLayout(),
-                     a_output.disjointBoxLayout(),
-                     m_amr->getDomains()[a_level],
-                     scratch.ghostVect(),
-                     a_output.ghostVect());
-  CH_STOP(t5);
-
   DataOps::setCoveredValue(scratch, 0.0);
 
-  CH_START(t6);
+  CH_START(t5);
   const Interval srcInterv(0, numComp - 1);
   const Interval dstInterv(a_comp, a_comp + numComp - 1);
 
-  scratch.copyTo(srcInterv, a_output, dstInterv, copier);
-  CH_STOP(t6);
+  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  CH_STOP(t5);
 
   a_comp += numComp;
 }

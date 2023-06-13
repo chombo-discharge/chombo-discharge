@@ -152,7 +152,10 @@ CdrPlasmaTagger::getPlotVariableNames() const
 }
 
 void
-CdrPlasmaTagger::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const int a_level) const
+CdrPlasmaTagger::writePlotData(LevelData<EBCellFAB>& a_output,
+                               int&                  a_icomp,
+                               const std::string     a_outputRealm,
+                               const int             a_level) const
 {
   CH_TIME("CdrPlasmaTagger::writePlotData");
   if (m_verbosity > 5) {
@@ -167,8 +170,10 @@ CdrPlasmaTagger::writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, con
     const Interval srcInterv(0, 0);
     const Interval dstInterv(a_icomp, a_icomp);
 
+    const EBAMRCellData& tagField = m_tracers[i];
+
     // Copy data to the ouput data holder. Covered data is bogus.
-    (m_tracers[i])[a_level]->localCopyTo(srcInterv, a_output, dstInterv);
+    m_amr->copyData(a_output, *tagField[a_level], a_level, a_outputRealm, tagField.getRealm(), dstInterv, srcInterv);
 
     DataOps::setCoveredValue(a_output, a_icomp, 0.0);
 
