@@ -137,9 +137,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#a29d8f87b38dd9d3ad38f2cfdc0ab055e">getPlotVariableNames</a> () const</td></tr>
 <tr class="memdesc:a29d8f87b38dd9d3ad38f2cfdc0ab055e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names. <br /></td></tr>
 <tr class="separator:a29d8f87b38dd9d3ad38f2cfdc0ab055e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad0608b85a4a089ca76f3e7659089a542"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#ad0608b85a4a089ca76f3e7659089a542">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const</td></tr>
-<tr class="memdesc:ad0608b85a4a089ca76f3e7659089a542"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <a href="classCellTagger.html#ad0608b85a4a089ca76f3e7659089a542">More...</a><br /></td></tr>
-<tr class="separator:ad0608b85a4a089ca76f3e7659089a542"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06edfc8c441cde0cc2d27ddf6eac4678"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#a06edfc8c441cde0cc2d27ddf6eac4678">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const std::string a_outputRealm, const int a_level) const</td></tr>
+<tr class="memdesc:a06edfc8c441cde0cc2d27ddf6eac4678"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <a href="classCellTagger.html#a06edfc8c441cde0cc2d27ddf6eac4678">More...</a><br /></td></tr>
+<tr class="separator:a06edfc8c441cde0cc2d27ddf6eac4678"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a483e64129b074374cb8601c84c387147"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#a483e64129b074374cb8601c84c387147">getBuffer</a> () const</td></tr>
 <tr class="memdesc:a483e64129b074374cb8601c84c387147"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get tag buffer.  <a href="classCellTagger.html#a483e64129b074374cb8601c84c387147">More...</a><br /></td></tr>
 <tr class="separator:a483e64129b074374cb8601c84c387147"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -192,7 +192,7 @@ std::vector&lt; std::pair&lt; <a class="el" href="classRealBox.html">RealBox</a>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Base class for tagging cells across an AMR hierarchy. </p>
-<p>This is a pure class that users must implemented in order to enable refinement/coarsening of grid cells. This class will require implementing at least three functions, one for parsing options, one for regridding, and one which flags/removes cell for refinement. This class can also provide data to plot files, in which case the user must overwrite <a class="el" href="classCellTagger.html#aa87baee458d22fecd0786ba4ab1ceda3" title="Get number of plot variables that will be written to file (by Driver).">getNumberOfPlotVariables()</a> and <a class="el" href="classCellTagger.html#ad0608b85a4a089ca76f3e7659089a542" title="Write plot data.">writePlotData()</a>. A supporting utility for <a class="el" href="classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy.">CellTagger</a> is that the parent class provides functionality for restricting cell refinement to specified regions in space. This can be used to prune tags where it is (heuristically) known that cell refinement is unnecessary. </p>
+<p>This is a pure class that users must implemented in order to enable refinement/coarsening of grid cells. This class will require implementing at least three functions, one for parsing options, one for regridding, and one which flags/removes cell for refinement. This class can also provide data to plot files, in which case the user must overwrite <a class="el" href="classCellTagger.html#aa87baee458d22fecd0786ba4ab1ceda3" title="Get number of plot variables that will be written to file (by Driver).">getNumberOfPlotVariables()</a> and <a class="el" href="classCellTagger.html#a06edfc8c441cde0cc2d27ddf6eac4678" title="Write plot data.">writePlotData()</a>. A supporting utility for <a class="el" href="classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy.">CellTagger</a> is that the parent class provides functionality for restricting cell refinement to specified regions in space. This can be used to prune tags where it is (heuristically) known that cell refinement is unnecessary. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a483e64129b074374cb8601c84c387147"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a483e64129b074374cb8601c84c387147">&#9670;&nbsp;</a></span>getBuffer()</h2>
@@ -499,8 +499,8 @@ std::vector&lt; std::pair&lt; <a class="el" href="classRealBox.html">RealBox</a>
 
 </div>
 </div>
-<a id="ad0608b85a4a089ca76f3e7659089a542"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad0608b85a4a089ca76f3e7659089a542">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a06edfc8c441cde0cc2d27ddf6eac4678"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06edfc8c441cde0cc2d27ddf6eac4678">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -519,6 +519,12 @@ std::vector&lt; std::pair&lt; <a class="el" href="classRealBox.html">RealBox</a>
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_icomp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -544,12 +550,13 @@ std::vector&lt; std::pair&lt; <a class="el" href="classRealBox.html">RealBox</a>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting variable in a_output where we begin appending data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output belongs </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Reimplemented in <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#a7695cf4a5aa773a495a683f5cc3ad23f">Physics::CdrPlasma::CdrPlasmaTagger</a>, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html#a7b06da2f75723b1b379a401084c615d4">Physics::ItoKMC::ItoKMCTagger&lt; S &gt;</a>.</p>
+<p>Reimplemented in <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#aae0c97cf7a4b6961295772a1274f8a41">Physics::CdrPlasma::CdrPlasmaTagger</a>, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html#a73e6fa40fa0d175b5a8863d75c1a15a5">Physics::ItoKMC::ItoKMCTagger&lt; S &gt;</a>.</p>
 
 </div>
 </div>

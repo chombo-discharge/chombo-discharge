@@ -148,9 +148,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1Geometry_1_1GeometryStepper.html#a900860b7de35bdcc49453603fa5e10e1">getPlotVariableNames</a> () const override</td></tr>
 <tr class="memdesc:a900860b7de35bdcc49453603fa5e10e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names (returns empty vector) <br /></td></tr>
 <tr class="separator:a900860b7de35bdcc49453603fa5e10e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a320ffd4c800114f56a234b942a68488b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1Geometry_1_1GeometryStepper.html#a320ffd4c800114f56a234b942a68488b">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const override</td></tr>
-<tr class="memdesc:a320ffd4c800114f56a234b942a68488b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder (does nothing since there's no IO form this class)  <a href="classPhysics_1_1Geometry_1_1GeometryStepper.html#a320ffd4c800114f56a234b942a68488b">More...</a><br /></td></tr>
-<tr class="separator:a320ffd4c800114f56a234b942a68488b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3cf8b8d768cd9e337d95255350bffb6a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1Geometry_1_1GeometryStepper.html#a3cf8b8d768cd9e337d95255350bffb6a">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const std::string a_realm, const int a_level) const override</td></tr>
+<tr class="memdesc:a3cf8b8d768cd9e337d95255350bffb6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder (does nothing since there's no IO form this class)  <a href="classPhysics_1_1Geometry_1_1GeometryStepper.html#a3cf8b8d768cd9e337d95255350bffb6a">More...</a><br /></td></tr>
+<tr class="separator:a3cf8b8d768cd9e337d95255350bffb6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afec01af3d62aec6fb3523c186d258740"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1Geometry_1_1GeometryStepper.html#afec01af3d62aec6fb3523c186d258740">computeDt</a> () override</td></tr>
 <tr class="memdesc:afec01af3d62aec6fb3523c186d258740"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>.  <a href="classPhysics_1_1Geometry_1_1GeometryStepper.html#afec01af3d62aec6fb3523c186d258740">More...</a><br /></td></tr>
 <tr class="separator:afec01af3d62aec6fb3523c186d258740"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -559,8 +559,8 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 
 </div>
 </div>
-<a id="a320ffd4c800114f56a234b942a68488b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a320ffd4c800114f56a234b942a68488b">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a3cf8b8d768cd9e337d95255350bffb6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3cf8b8d768cd9e337d95255350bffb6a">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -579,6 +579,12 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_icomp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -604,12 +610,13 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td>Output realm </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#ae858739b259e499d5ce03e9b3c9baa0e">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#a22859f521ede9fac08fe05a06f929193">TimeStepper</a>.</p>
 
 </div>
 </div>

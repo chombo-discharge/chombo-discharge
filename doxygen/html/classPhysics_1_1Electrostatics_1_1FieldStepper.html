@@ -146,9 +146,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a31125e8c68988fb181d3ff0b2bc1ed7a">getPlotVariableNames</a> () const override</td></tr>
 <tr class="memdesc:a31125e8c68988fb181d3ff0b2bc1ed7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names. <br /></td></tr>
 <tr class="separator:a31125e8c68988fb181d3ff0b2bc1ed7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af108cc88047fe807ee5add3ae65fe279"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#af108cc88047fe807ee5add3ae65fe279">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const override</td></tr>
-<tr class="memdesc:af108cc88047fe807ee5add3ae65fe279"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to file.  <a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#af108cc88047fe807ee5add3ae65fe279">More...</a><br /></td></tr>
-<tr class="separator:af108cc88047fe807ee5add3ae65fe279"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cee14e40aa3f2551d9eeac9baae1837"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a0cee14e40aa3f2551d9eeac9baae1837">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const std::string a_outputRealm, const int a_level) const override</td></tr>
+<tr class="memdesc:a0cee14e40aa3f2551d9eeac9baae1837"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to file.  <a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a0cee14e40aa3f2551d9eeac9baae1837">More...</a><br /></td></tr>
+<tr class="separator:a0cee14e40aa3f2551d9eeac9baae1837"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a16ff6211c4053887f91e0cab58bc12bf"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a16ff6211c4053887f91e0cab58bc12bf">computeDt</a> () override</td></tr>
 <tr class="memdesc:a16ff6211c4053887f91e0cab58bc12bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute time step.  <a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a16ff6211c4053887f91e0cab58bc12bf">More...</a><br /></td></tr>
 <tr class="separator:a16ff6211c4053887f91e0cab58bc12bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -784,8 +784,8 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
-<a id="af108cc88047fe807ee5add3ae65fe279"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af108cc88047fe807ee5add3ae65fe279">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a0cee14e40aa3f2551d9eeac9baae1837"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0cee14e40aa3f2551d9eeac9baae1837">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -806,6 +806,12 @@ template&lt;class T &gt; </div>
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_icomp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -831,12 +837,13 @@ template&lt;class T &gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">{in]</td><td>a_outputRealm <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output belongs </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#ae858739b259e499d5ce03e9b3c9baa0e">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#a22859f521ede9fac08fe05a06f929193">TimeStepper</a>.</p>
 
 </div>
 </div>

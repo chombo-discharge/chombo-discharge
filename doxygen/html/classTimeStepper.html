@@ -158,9 +158,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#aa45917cc5ae65283a7a758f0008e8e70">getPlotVariableNames</a> () const =0</td></tr>
 <tr class="memdesc:aa45917cc5ae65283a7a758f0008e8e70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names. <br /></td></tr>
 <tr class="separator:aa45917cc5ae65283a7a758f0008e8e70"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae858739b259e499d5ce03e9b3c9baa0e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#ae858739b259e499d5ce03e9b3c9baa0e">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const =0</td></tr>
-<tr class="memdesc:ae858739b259e499d5ce03e9b3c9baa0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classTimeStepper.html#ae858739b259e499d5ce03e9b3c9baa0e">More...</a><br /></td></tr>
-<tr class="separator:ae858739b259e499d5ce03e9b3c9baa0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22859f521ede9fac08fe05a06f929193"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a22859f521ede9fac08fe05a06f929193">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const std::string a_outputRealm, const int a_level) const =0</td></tr>
+<tr class="memdesc:a22859f521ede9fac08fe05a06f929193"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classTimeStepper.html#a22859f521ede9fac08fe05a06f929193">More...</a><br /></td></tr>
+<tr class="separator:a22859f521ede9fac08fe05a06f929193"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20cc9ee90664ed9614bd5d18a7104d24"><td class="memItemLeft" align="right" valign="top"><a id="a20cc9ee90664ed9614bd5d18a7104d24"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a20cc9ee90664ed9614bd5d18a7104d24">prePlot</a> ()</td></tr>
 <tr class="memdesc:a20cc9ee90664ed9614bd5d18a7104d24"><td class="mdescLeft">&#160;</td><td class="mdescRight">An option for calling special functions prior to plotting data. Called by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> in the IMMEDIATELY before writing the plot file. <br /></td></tr>
@@ -787,8 +787,8 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 
 </div>
 </div>
-<a id="ae858739b259e499d5ce03e9b3c9baa0e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae858739b259e499d5ce03e9b3c9baa0e">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a22859f521ede9fac08fe05a06f929193"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22859f521ede9fac08fe05a06f929193">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -807,6 +807,12 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_icomp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -832,12 +838,13 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output belongs </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a2ee51274b2e3469c5961623959d960e4">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ac7905456ac47f24afe43e5e0ef5c2780">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>, <a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a0e80e35a10f599e35e4dae15707ec3de">Physics::RadiativeTransfer::RadiativeTransferStepper&lt; T &gt;</a>, <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a2131b8bca1fc7025fa3dfb077f51b7db">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>, <a class="el" href="classPhysics_1_1Geometry_1_1GeometryStepper.html#a320ffd4c800114f56a234b942a68488b">Physics::Geometry::GeometryStepper</a>, <a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#af108cc88047fe807ee5add3ae65fe279">Physics::Electrostatics::FieldStepper&lt; T &gt;</a>, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a800d8e978c0c5443e31a51d8183d1b4f">Physics::CdrPlasma::CdrPlasmaStepper</a>, <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a671a14721404e0ea5ac0d05a9c8c211b">Physics::BrownianWalker::BrownianWalkerStepper</a>, <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#aeadd9f3c444f33fce051a90eedab5701">Physics::AdvectionDiffusion::AdvectionDiffusionStepper</a>, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad86e1ef1874a3fcd827accf1e75948dd">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad86e1ef1874a3fcd827accf1e75948dd">Physics::ItoKMC::ItoKMCStepper&lt; ItoSolver, CdrCTU, McPhoto, FieldSolverMultigrid &gt;</a>.</p>
+<p>Implemented in <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a38f9c9f9b8fa22cf0488025124b5e100">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>, <a class="el" href="classPhysics_1_1Geometry_1_1GeometryStepper.html#a3cf8b8d768cd9e337d95255350bffb6a">Physics::Geometry::GeometryStepper</a>, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3e7e74887994f93402e2a3a7304e87f3">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>, <a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a3396482eb902894cb703bb28fa7edd6b">Physics::RadiativeTransfer::RadiativeTransferStepper&lt; T &gt;</a>, <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a336f5b490f0e11fec2035e96b4039c74">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>, <a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a0cee14e40aa3f2551d9eeac9baae1837">Physics::Electrostatics::FieldStepper&lt; T &gt;</a>, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#aeeed6f9f1a177c0a849a2197e0c95483">Physics::CdrPlasma::CdrPlasmaStepper</a>, <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#af5f5670d1dfd035ef765be3c846a7766">Physics::BrownianWalker::BrownianWalkerStepper</a>, <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#ac64d05fb563b2fedbd3a6529bed8db62">Physics::AdvectionDiffusion::AdvectionDiffusionStepper</a>, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#abe1268eb3a3e2fe1e3b666404be0b95d">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#abe1268eb3a3e2fe1e3b666404be0b95d">Physics::ItoKMC::ItoKMCStepper&lt; ItoSolver, CdrCTU, McPhoto, FieldSolverMultigrid &gt;</a>.</p>
 
 </div>
 </div>

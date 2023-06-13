@@ -153,10 +153,6 @@ Protected Member Functions</h2></td></tr>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseToFineInterp.html#a05bc32ed920d98e8803c5a6f7f63d347">defineWeights</a> () noexcept</td></tr>
 <tr class="memdesc:a05bc32ed920d98e8803c5a6f7f63d347"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define weights for cut-cell conservative regridding. <br /></td></tr>
 <tr class="separator:a05bc32ed920d98e8803c5a6f7f63d347"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac00431e8eb111385d89d4181c13684fc"><td class="memItemLeft" align="right" valign="top"><a id="ac00431e8eb111385d89d4181c13684fc"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseToFineInterp.html#ac00431e8eb111385d89d4181c13684fc">defineBuffers</a> () noexcept</td></tr>
-<tr class="memdesc:ac00431e8eb111385d89d4181c13684fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define buffer storage. <br /></td></tr>
-<tr class="separator:ac00431e8eb111385d89d4181c13684fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6016e4c56d9e629d136ae6674e3779ca"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseToFineInterp.html#a6016e4c56d9e629d136ae6674e3779ca">interpolatePWC</a> (EBCellFAB &amp;a_fineData, const EBCellFAB &amp;a_coarData, const DataIndex &amp;a_dit, const int &amp;a_fineVar, const int &amp;a_coarVar) const noexcept</td></tr>
 <tr class="memdesc:a6016e4c56d9e629d136ae6674e3779ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Piecewise constant interpolation of an EBCellFAB. This ignores the volume fraction. This sets the fine-grid data to the coarse-grid data, so it is not conservative.  <a href="classEBCoarseToFineInterp.html#a6016e4c56d9e629d136ae6674e3779ca">More...</a><br /></td></tr>
 <tr class="separator:a6016e4c56d9e629d136ae6674e3779ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -189,10 +185,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseToFineInterp.html#ac6bced031307d26bcbf96069d997f39b">m_refRat</a></td></tr>
 <tr class="memdesc:ac6bced031307d26bcbf96069d997f39b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refinement factor. <br /></td></tr>
 <tr class="separator:ac6bced031307d26bcbf96069d997f39b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a22c71df6290c486f2723f4c91148dc1d"><td class="memItemLeft" align="right" valign="top"><a id="a22c71df6290c486f2723f4c91148dc1d"></a>
-Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseToFineInterp.html#a22c71df6290c486f2723f4c91148dc1d">m_copier</a></td></tr>
-<tr class="memdesc:a22c71df6290c486f2723f4c91148dc1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for making copying from m_eblg to m_eblgCoFi go faster. <br /></td></tr>
-<tr class="separator:a22c71df6290c486f2723f4c91148dc1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b0a2ba44c2adbb8db5ca74e471cd783"><td class="memItemLeft" align="right" valign="top"><a id="a6b0a2ba44c2adbb8db5ca74e471cd783"></a>
+Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseToFineInterp.html#a6b0a2ba44c2adbb8db5ca74e471cd783">m_ebCopier</a></td></tr>
+<tr class="memdesc:a6b0a2ba44c2adbb8db5ca74e471cd783"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for making copying from m_eblg to m_eblgCoFi go faster. <br /></td></tr>
+<tr class="separator:a6b0a2ba44c2adbb8db5ca74e471cd783"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e1921f61bad51b03a66bb71e17a6343"><td class="memItemLeft" align="right" valign="top"><a id="a3e1921f61bad51b03a66bb71e17a6343"></a>
+std::map&lt; IntVect, Copier &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseToFineInterp.html#a3e1921f61bad51b03a66bb71e17a6343">m_cellCopiers</a></td></tr>
+<tr class="memdesc:a3e1921f61bad51b03a66bb71e17a6343"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map of Copiers that we need for going from valid+ghost -&gt; valid+ghost. <br /></td></tr>
+<tr class="separator:a3e1921f61bad51b03a66bb71e17a6343"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7338d5d91e41723527ef1b1ad03e355e"><td class="memItemLeft" align="right" valign="top"><a id="a7338d5d91e41723527ef1b1ad03e355e"></a>
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseToFineInterp.html#a7338d5d91e41723527ef1b1ad03e355e">m_eblgFine</a></td></tr>
 <tr class="memdesc:a7338d5d91e41723527ef1b1ad03e355e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fine grid. <br /></td></tr>

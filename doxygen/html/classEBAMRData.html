@@ -157,12 +157,6 @@ Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt; &amp;&#160;</td><td 
 const Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a518e63efc37c46c5897ddb47e2ee62bf">getData</a> () const noexcept</td></tr>
 <tr class="memdesc:a518e63efc37c46c5897ddb47e2ee62bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get underlying data. Returns const m_data. <br /></td></tr>
 <tr class="separator:a518e63efc37c46c5897ddb47e2ee62bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1f6067b2e50d67967f669715ece47a84"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a1f6067b2e50d67967f669715ece47a84">copy</a> (const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_other) noexcept</td></tr>
-<tr class="memdesc:a1f6067b2e50d67967f669715ece47a84"><td class="mdescLeft">&#160;</td><td class="mdescRight">General copying of another object. This does a local copy if the two realms are the same. Otherwise it does a communication copy. In Chombo-speak this is localCopyTo versus copyTo.  <a href="classEBAMRData.html#a1f6067b2e50d67967f669715ece47a84">More...</a><br /></td></tr>
-<tr class="separator:a1f6067b2e50d67967f669715ece47a84"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7cc71b2376b506269fd5a43442ba14c1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a7cc71b2376b506269fd5a43442ba14c1">copy</a> (const Interval a_srcInterval, const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_other, const Interval a_dstInterval) noexcept</td></tr>
-<tr class="memdesc:a7cc71b2376b506269fd5a43442ba14c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">General copying of another object. This does a local copy if the two realms are the same. Otherwise it does a communication copy. In Chombo-speak this is localCopyTo versus copyTo.  <a href="classEBAMRData.html#a7cc71b2376b506269fd5a43442ba14c1">More...</a><br /></td></tr>
-<tr class="separator:a7cc71b2376b506269fd5a43442ba14c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a284d1a781796c0878d5fbad1a8f406ff"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a284d1a781796c0878d5fbad1a8f406ff">push_back</a> (RefCountedPtr&lt; LevelData&lt; T &gt;&gt; &amp;a_levelData) noexcept</td></tr>
 <tr class="memdesc:a284d1a781796c0878d5fbad1a8f406ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push a LevelData&lt;T&gt; object to the back of the data vector.  <a href="classEBAMRData.html#a284d1a781796c0878d5fbad1a8f406ff">More...</a><br /></td></tr>
 <tr class="separator:a284d1a781796c0878d5fbad1a8f406ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -193,96 +187,6 @@ class EBAMRData&lt; T &gt;</h3>
 <p>Default class for holding LevelData&lt;T&gt; data across an EBAMR realm. </p>
 <p>This class is a base class for holding LevelData&lt;T&gt; over a realm. The class does not have arithmetic operators or assignment operators because LevelData&lt;T&gt; does not have them. Manipulating the data is done directly by fetching the data on a level through the indexing operator [], or by fetching all the data through getData. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a1f6067b2e50d67967f669715ece47a84"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1f6067b2e50d67967f669715ece47a84">&#9670;&nbsp;</a></span>copy() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::copy </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_other</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>General copying of another object. This does a local copy if the two realms are the same. Otherwise it does a communication copy. In Chombo-speak this is localCopyTo versus copyTo. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Other <a class="el" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm.">EBAMRData</a> object </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a7cc71b2376b506269fd5a43442ba14c1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7cc71b2376b506269fd5a43442ba14c1">&#9670;&nbsp;</a></span>copy() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::copy </td>
-          <td>(</td>
-          <td class="paramtype">const Interval&#160;</td>
-          <td class="paramname"><em>a_srcInterval</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_other</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Interval&#160;</td>
-          <td class="paramname"><em>a_dstInterval</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>General copying of another object. This does a local copy if the two realms are the same. Otherwise it does a communication copy. In Chombo-speak this is localCopyTo versus copyTo. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_srcInterval</td><td>Source interval in a_other </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Other <a class="el" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm.">EBAMRData</a> object </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_stInterval</td><td>Destination interval in *this </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="aea0acd419b832ddde5c3f67a4a3bf886"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aea0acd419b832ddde5c3f67a4a3bf886">&#9670;&nbsp;</a></span>operator[]() <span class="overload">[1/2]</span></h2>
 

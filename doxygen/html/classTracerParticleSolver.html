@@ -187,9 +187,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:aa5a96369e37075ca8ffa20d4ff59215b"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#aa5a96369e37075ca8ffa20d4ff59215b">getPlotVariableNames</a> () const</td></tr>
 <tr class="memdesc:aa5a96369e37075ca8ffa20d4ff59215b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names.  <a href="classTracerParticleSolver.html#aa5a96369e37075ca8ffa20d4ff59215b">More...</a><br /></td></tr>
 <tr class="separator:aa5a96369e37075ca8ffa20d4ff59215b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a222b09de0730c3e6be73a800e1b213bf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a222b09de0730c3e6be73a800e1b213bf">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const int a_level) const noexcept</td></tr>
-<tr class="memdesc:a222b09de0730c3e6be73a800e1b213bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <a href="classTracerParticleSolver.html#a222b09de0730c3e6be73a800e1b213bf">More...</a><br /></td></tr>
-<tr class="separator:a222b09de0730c3e6be73a800e1b213bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9736500e6a0e09cf5024e74131f47ebe"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a9736500e6a0e09cf5024e74131f47ebe">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const std::string a_outputRealm, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a9736500e6a0e09cf5024e74131f47ebe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <a href="classTracerParticleSolver.html#a9736500e6a0e09cf5024e74131f47ebe">More...</a><br /></td></tr>
+<tr class="separator:a9736500e6a0e09cf5024e74131f47ebe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afdb7559e0018020567faa6185a57a2a3"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#afdb7559e0018020567faa6185a57a2a3">computeDt</a> () const</td></tr>
 <tr class="memdesc:afdb7559e0018020567faa6185a57a2a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write checkpoint data into HDF5 file. @paramo[out] a_handle HDF5 file.  <a href="classTracerParticleSolver.html#afdb7559e0018020567faa6185a57a2a3">More...</a><br /></td></tr>
 <tr class="separator:afdb7559e0018020567faa6185a57a2a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -221,9 +221,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a5e6dd3cc19ca265da03daac6778c8a8c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a5e6dd3cc19ca265da03daac6778c8a8c">depositParticles</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; T &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_baseDeposition, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition) const noexcept</td></tr>
 <tr class="memdesc:a5e6dd3cc19ca265da03daac6778c8a8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic particle deposition method for putting a scalar field onto the mesh.  <a href="classTracerParticleSolver.html#a5e6dd3cc19ca265da03daac6778c8a8c">More...</a><br /></td></tr>
 <tr class="separator:a5e6dd3cc19ca265da03daac6778c8a8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a97a86b13fca6d12ca990c0b21e9b2446"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a97a86b13fca6d12ca990c0b21e9b2446">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
-<tr class="memdesc:a97a86b13fca6d12ca990c0b21e9b2446"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classTracerParticleSolver.html#a97a86b13fca6d12ca990c0b21e9b2446">More...</a><br /></td></tr>
-<tr class="separator:a97a86b13fca6d12ca990c0b21e9b2446"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6776b7b6d44129e3b7d337eb322ad9eb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a6776b7b6d44129e3b7d337eb322ad9eb">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_outputRealm, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
+<tr class="memdesc:a6776b7b6d44129e3b7d337eb322ad9eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classTracerParticleSolver.html#a6776b7b6d44129e3b7d337eb322ad9eb">More...</a><br /></td></tr>
+<tr class="separator:a6776b7b6d44129e3b7d337eb322ad9eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -1188,8 +1188,8 @@ template&lt;typename P &gt; </div>
 
 </div>
 </div>
-<a id="a97a86b13fca6d12ca990c0b21e9b2446"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a97a86b13fca6d12ca990c0b21e9b2446">&#9670;&nbsp;</a></span>writeData()</h2>
+<a id="a6776b7b6d44129e3b7d337eb322ad9eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6776b7b6d44129e3b7d337eb322ad9eb">&#9670;&nbsp;</a></span>writeData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1216,6 +1216,12 @@ template&lt;typename P &gt; </div>
           <td></td>
           <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1254,6 +1260,7 @@ template&lt;typename P &gt; </div>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where this solver begins writing the output. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data to write. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output belongs </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_interpToCentroids</td><td>If true, a_data will be interpolated to cell centroids before writing to a_output. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_interpGhost</td><td>If true, interpolate ghost cells </td></tr>
@@ -1263,8 +1270,8 @@ template&lt;typename P &gt; </div>
 
 </div>
 </div>
-<a id="a222b09de0730c3e6be73a800e1b213bf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a222b09de0730c3e6be73a800e1b213bf">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a9736500e6a0e09cf5024e74131f47ebe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9736500e6a0e09cf5024e74131f47ebe">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1285,6 +1292,12 @@ template&lt;typename P &gt; </div>
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_comp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1310,6 +1323,7 @@ template&lt;typename P &gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where this solver begins writing the output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output belongs </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>

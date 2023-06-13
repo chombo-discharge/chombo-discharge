@@ -240,9 +240,9 @@ virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <tr class="memitem:ab41e8ef90c3741552805b6f163392368"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSurfaceODESolver.html#ab41e8ef90c3741552805b6f163392368">getPlotVariableNames</a> () const noexcept</td></tr>
 <tr class="memdesc:ab41e8ef90c3741552805b6f163392368"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get output plot names.  <a href="classSurfaceODESolver.html#ab41e8ef90c3741552805b6f163392368">More...</a><br /></td></tr>
 <tr class="separator:ab41e8ef90c3741552805b6f163392368"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3198e659e18c90a42daf9cf30502bd97"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSurfaceODESolver.html#a3198e659e18c90a42daf9cf30502bd97">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const int a_level) const noexcept</td></tr>
-<tr class="memdesc:a3198e659e18c90a42daf9cf30502bd97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write output data to a_output.  <a href="classSurfaceODESolver.html#a3198e659e18c90a42daf9cf30502bd97">More...</a><br /></td></tr>
-<tr class="separator:a3198e659e18c90a42daf9cf30502bd97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9683e773ce0da489984c73bb7aeca2ba"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSurfaceODESolver.html#a9683e773ce0da489984c73bb7aeca2ba">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const std::string a_outputRealm, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a9683e773ce0da489984c73bb7aeca2ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write output data to a_output.  <a href="classSurfaceODESolver.html#a9683e773ce0da489984c73bb7aeca2ba">More...</a><br /></td></tr>
+<tr class="separator:a9683e773ce0da489984c73bb7aeca2ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -1527,8 +1527,8 @@ template&lt;int N&gt; </div>
 
 </div>
 </div>
-<a id="a3198e659e18c90a42daf9cf30502bd97"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3198e659e18c90a42daf9cf30502bd97">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a9683e773ce0da489984c73bb7aeca2ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9683e773ce0da489984c73bb7aeca2ba">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1549,6 +1549,12 @@ template&lt;int N&gt; </div>
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_comp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1574,6 +1580,7 @@ template&lt;int N&gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where this solver begins writing the output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output belongs </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>

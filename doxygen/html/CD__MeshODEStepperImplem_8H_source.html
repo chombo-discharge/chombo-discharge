@@ -321,250 +321,253 @@ $(function() {
 <div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160; </div>
 <div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
 <div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00252"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a2131b8bca1fc7025fa3dfb077f51b7db">  252</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a2131b8bca1fc7025fa3dfb077f51b7db">MeshODEStepper&lt;N&gt;::writePlotData</a>(LevelData&lt;EBCellFAB&gt;&amp; a_output, <span class="keywordtype">int</span>&amp; a_icomp, <span class="keyword">const</span> <span class="keywordtype">int</span> a_level)<span class="keyword"> const</span></div>
-<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;<span class="keyword"></span>{</div>
-<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::writePlotData&quot;</span>);</div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::writePlotData&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;  }</div>
-<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160; </div>
-<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;  m_solver-&gt;writePlotData(a_output, a_icomp, a_level);</div>
-<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;}</div>
+<div class="line"><a name="l00252"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a336f5b490f0e11fec2035e96b4039c74">  252</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a336f5b490f0e11fec2035e96b4039c74">MeshODEStepper&lt;N&gt;::writePlotData</a>(LevelData&lt;EBCellFAB&gt;&amp; a_output,</div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;                                 <span class="keywordtype">int</span>&amp;                  a_icomp,</div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;                                 <span class="keyword">const</span> std::string     a_outputRealm,</div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;                                 <span class="keyword">const</span> <span class="keywordtype">int</span>             a_level)<span class="keyword"> const</span></div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;<span class="keyword"></span>{</div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::writePlotData&quot;</span>);</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::writePlotData&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;  }</div>
 <div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160; </div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;Real</div>
-<div class="line"><a name="l00264"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#af2f37a14647f5c455bba6ff096124eee">  264</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#af2f37a14647f5c455bba6ff096124eee">MeshODEStepper&lt;N&gt;::computeDt</a>()</div>
-<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;{</div>
-<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::computeDt()&quot;</span>);</div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::computeDt()&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;  }</div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160; </div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;  <span class="keywordflow">return</span> m_dt;</div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;}</div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;  m_solver-&gt;writePlotData(a_output, a_icomp, a_outputRealm, a_level);</div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;}</div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160; </div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;Real</div>
+<div class="line"><a name="l00267"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#af2f37a14647f5c455bba6ff096124eee">  267</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#af2f37a14647f5c455bba6ff096124eee">MeshODEStepper&lt;N&gt;::computeDt</a>()</div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;{</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::computeDt()&quot;</span>);</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::computeDt()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;  }</div>
 <div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160; </div>
-<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
-<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;Real</div>
-<div class="line"><a name="l00276"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a1a06df878801cf23189547818a26daa3">  276</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a1a06df878801cf23189547818a26daa3">MeshODEStepper&lt;N&gt;::advance</a>(<span class="keyword">const</span> Real a_dt)</div>
-<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;{</div>
-<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::avdvance(Real)&quot;</span>);</div>
-<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::advance(Real)&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;  }</div>
-<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160; </div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;  <span class="keywordflow">switch</span> (m_algorithm) {</div>
-<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;  <span class="keywordflow">case</span> IntegrationAlgorithm::Euler: {</div>
-<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;    this-&gt;advanceEuler(a_dt);</div>
-<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160; </div>
-<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;  }</div>
-<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;  <span class="keywordflow">case</span> IntegrationAlgorithm::RK2: {</div>
-<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;    this-&gt;advanceRK2(a_dt);</div>
-<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160; </div>
-<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;  }</div>
-<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;  <span class="keywordflow">case</span> IntegrationAlgorithm::RK4: {</div>
-<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;    this-&gt;advanceRK4(a_dt);</div>
-<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160; </div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;  }</div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;  <span class="keywordflow">default</span>: {</div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;    MayDay::Error(<span class="stringliteral">&quot;MeshODEStepper::advance -- logic bust&quot;</span>);</div>
-<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160; </div>
-<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;  }</div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;  }</div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160; </div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;  <span class="comment">// Update the source term.</span></div>
-<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;  m_solver-&gt;computeRHS(m_rhsFunction);</div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;  <span class="keywordflow">return</span> m_dt;</div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;}</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160; </div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;Real</div>
+<div class="line"><a name="l00279"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a1a06df878801cf23189547818a26daa3">  279</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a1a06df878801cf23189547818a26daa3">MeshODEStepper&lt;N&gt;::advance</a>(<span class="keyword">const</span> Real a_dt)</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;{</div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::avdvance(Real)&quot;</span>);</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::advance(Real)&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;  }</div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160; </div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;  <span class="keywordflow">switch</span> (m_algorithm) {</div>
+<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;  <span class="keywordflow">case</span> IntegrationAlgorithm::Euler: {</div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;    this-&gt;advanceEuler(a_dt);</div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160; </div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;  }</div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;  <span class="keywordflow">case</span> IntegrationAlgorithm::RK2: {</div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;    this-&gt;advanceRK2(a_dt);</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160; </div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;  }</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;  <span class="keywordflow">case</span> IntegrationAlgorithm::RK4: {</div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;    this-&gt;advanceRK4(a_dt);</div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160; </div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;  }</div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;  <span class="keywordflow">default</span>: {</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;    MayDay::Error(<span class="stringliteral">&quot;MeshODEStepper::advance -- logic bust&quot;</span>);</div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160; </div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;  }</div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;  }</div>
 <div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160; </div>
-<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;  <span class="keywordflow">return</span> a_dt;</div>
-<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;}</div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;  <span class="comment">// Update the source term.</span></div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;  m_solver-&gt;computeRHS(m_rhsFunction);</div>
 <div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160; </div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
-<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00314"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7fe3bf12869dec09592f83d630e2b1be">  314</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7fe3bf12869dec09592f83d630e2b1be">MeshODEStepper&lt;N&gt;::synchronizeSolverTimes</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_step, <span class="keyword">const</span> Real a_time, <span class="keyword">const</span> Real a_dt)</div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;{</div>
-<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::synchronizeSolverTimes(int, Real, Real)&quot;</span>);</div>
-<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::synchronizeSolverTimes(int, Real, Real)&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;  }</div>
-<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160; </div>
-<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;  m_timeStep = a_step;</div>
-<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;  m_time     = a_time;</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;  <span class="keywordflow">return</span> a_dt;</div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;}</div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160; </div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00317"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7fe3bf12869dec09592f83d630e2b1be">  317</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7fe3bf12869dec09592f83d630e2b1be">MeshODEStepper&lt;N&gt;::synchronizeSolverTimes</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_step, <span class="keyword">const</span> Real a_time, <span class="keyword">const</span> Real a_dt)</div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;{</div>
+<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::synchronizeSolverTimes(int, Real, Real)&quot;</span>);</div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::synchronizeSolverTimes(int, Real, Real)&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;  }</div>
 <div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160; </div>
-<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;  m_solver-&gt;setTime(a_step, a_time, a_dt);</div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;}</div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;  m_timeStep = a_step;</div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;  m_time     = a_time;</div>
 <div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160; </div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00329"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#aa89bc23ec63484a1dfdc93c0e545a457">  329</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#aa89bc23ec63484a1dfdc93c0e545a457">MeshODEStepper&lt;N&gt;::preRegrid</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_lmin, <span class="keyword">const</span> <span class="keywordtype">int</span> a_oldFinestLevel)</div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;{</div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::preRegrid(int, int)&quot;</span>);</div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::preRegrid(int, int)&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;  }</div>
-<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160; </div>
-<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;  m_solver-&gt;preRegrid(a_lmin, a_oldFinestLevel);</div>
-<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;}</div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;  m_solver-&gt;setTime(a_step, a_time, a_dt);</div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;}</div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160; </div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00332"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#aa89bc23ec63484a1dfdc93c0e545a457">  332</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#aa89bc23ec63484a1dfdc93c0e545a457">MeshODEStepper&lt;N&gt;::preRegrid</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_lmin, <span class="keyword">const</span> <span class="keywordtype">int</span> a_oldFinestLevel)</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;{</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::preRegrid(int, int)&quot;</span>);</div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::preRegrid(int, int)&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;  }</div>
 <div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160; </div>
-<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
-<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00341"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7910a63153b8314dd5747df46519b801">  341</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7910a63153b8314dd5747df46519b801">MeshODEStepper&lt;N&gt;::regrid</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_lmin, <span class="keyword">const</span> <span class="keywordtype">int</span> a_oldFinestLevel, <span class="keyword">const</span> <span class="keywordtype">int</span> a_newFinestLevel)</div>
-<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;{</div>
-<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::regrid(int, int, int)&quot;</span>);</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::regrid(int, int, int)&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;  }</div>
-<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160; </div>
-<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;  m_solver-&gt;regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);</div>
-<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;}</div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;  m_solver-&gt;preRegrid(a_lmin, a_oldFinestLevel);</div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;}</div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160; </div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00344"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7910a63153b8314dd5747df46519b801">  344</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7910a63153b8314dd5747df46519b801">MeshODEStepper&lt;N&gt;::regrid</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_lmin, <span class="keyword">const</span> <span class="keywordtype">int</span> a_oldFinestLevel, <span class="keyword">const</span> <span class="keywordtype">int</span> a_newFinestLevel)</div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;{</div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::regrid(int, int, int)&quot;</span>);</div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::regrid(int, int, int)&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;  }</div>
 <div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160; </div>
-<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
-<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00353"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#ae5f913b4b707731bdcb9178434a53ec4">  353</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#ae5f913b4b707731bdcb9178434a53ec4">MeshODEStepper&lt;N&gt;::postRegrid</a>()</div>
-<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;{</div>
-<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::postRegrid()&quot;</span>);</div>
-<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::postRegrid()&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;  }</div>
-<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160; </div>
-<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;  <span class="comment">// Compute new right-hand side.</span></div>
-<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;  m_solver-&gt;computeRHS(m_rhsFunction);</div>
-<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;}</div>
-<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160; </div>
-<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
-<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00366"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7a805ad5d022b48878012c5008200205">  366</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7a805ad5d022b48878012c5008200205">MeshODEStepper&lt;N&gt;::parseIntegrator</a>()</div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;{</div>
-<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::parseIntegrator()&quot;</span>);</div>
-<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::parseIntegrator()&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;  }</div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160; </div>
-<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;  ParmParse pp(<span class="stringliteral">&quot;MeshODEStepper&quot;</span>);</div>
-<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160; </div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;  std::string str;</div>
-<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160; </div>
-<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;  pp.get(<span class="stringliteral">&quot;integration&quot;</span>, str);</div>
-<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;  <span class="keywordflow">if</span> (str == <span class="stringliteral">&quot;euler&quot;</span>) {</div>
-<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;    m_algorithm = IntegrationAlgorithm::Euler;</div>
-<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;  }</div>
-<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;  <span class="keywordflow">else</span> <span class="keywordflow">if</span> (str == <span class="stringliteral">&quot;rk2&quot;</span>) {</div>
-<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;    m_algorithm = IntegrationAlgorithm::RK2;</div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;  m_solver-&gt;regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);</div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;}</div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160; </div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00356"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#ae5f913b4b707731bdcb9178434a53ec4">  356</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#ae5f913b4b707731bdcb9178434a53ec4">MeshODEStepper&lt;N&gt;::postRegrid</a>()</div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;{</div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::postRegrid()&quot;</span>);</div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::postRegrid()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;  }</div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160; </div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;  <span class="comment">// Compute new right-hand side.</span></div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;  m_solver-&gt;computeRHS(m_rhsFunction);</div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;}</div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160; </div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00369"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7a805ad5d022b48878012c5008200205">  369</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7a805ad5d022b48878012c5008200205">MeshODEStepper&lt;N&gt;::parseIntegrator</a>()</div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;{</div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::parseIntegrator()&quot;</span>);</div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::parseIntegrator()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;  }</div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160; </div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;  ParmParse pp(<span class="stringliteral">&quot;MeshODEStepper&quot;</span>);</div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160; </div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;  std::string str;</div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160; </div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;  pp.get(<span class="stringliteral">&quot;integration&quot;</span>, str);</div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;  <span class="keywordflow">if</span> (str == <span class="stringliteral">&quot;euler&quot;</span>) {</div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;    m_algorithm = IntegrationAlgorithm::Euler;</div>
 <div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;  }</div>
-<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;  <span class="keywordflow">else</span> <span class="keywordflow">if</span> (str == <span class="stringliteral">&quot;rk4&quot;</span>) {</div>
-<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;    m_algorithm = IntegrationAlgorithm::RK4;</div>
+<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;  <span class="keywordflow">else</span> <span class="keywordflow">if</span> (str == <span class="stringliteral">&quot;rk2&quot;</span>) {</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;    m_algorithm = IntegrationAlgorithm::RK2;</div>
 <div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;  }</div>
-<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;  <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;    MayDay::Error(<span class="stringliteral">&quot;MeshODEStepper::parseIntegrator -- logic bust&quot;</span>);</div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;  <span class="keywordflow">else</span> <span class="keywordflow">if</span> (str == <span class="stringliteral">&quot;rk4&quot;</span>) {</div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;    m_algorithm = IntegrationAlgorithm::RK4;</div>
 <div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;  }</div>
-<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;}</div>
-<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160; </div>
-<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
-<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00394"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a85ff7c19f055e933f51dbb3e60787200">  394</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a85ff7c19f055e933f51dbb3e60787200">MeshODEStepper&lt;N&gt;::parseVerbosity</a>()</div>
-<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;{</div>
-<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::parseVerbosity()&quot;</span>);</div>
-<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::parseVerbosity()&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;  }</div>
-<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160; </div>
-<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;  ParmParse pp(<span class="stringliteral">&quot;MeshODEStepper&quot;</span>);</div>
-<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160; </div>
-<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;  pp.get(<span class="stringliteral">&quot;verbosity&quot;</span>, m_verbosity);</div>
-<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;}</div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;  <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;    MayDay::Error(<span class="stringliteral">&quot;MeshODEStepper::parseIntegrator -- logic bust&quot;</span>);</div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;  }</div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;}</div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160; </div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00397"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a85ff7c19f055e933f51dbb3e60787200">  397</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a85ff7c19f055e933f51dbb3e60787200">MeshODEStepper&lt;N&gt;::parseVerbosity</a>()</div>
+<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;{</div>
+<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::parseVerbosity()&quot;</span>);</div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::parseVerbosity()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;  }</div>
+<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160; </div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;  ParmParse pp(<span class="stringliteral">&quot;MeshODEStepper&quot;</span>);</div>
 <div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160; </div>
-<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
-<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00408"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a04178ed9a8b1a146905950b210254f8d">  408</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a04178ed9a8b1a146905950b210254f8d">MeshODEStepper&lt;N&gt;::advanceEuler</a>(<span class="keyword">const</span> Real a_dt)</div>
-<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;{</div>
-<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::advanceEuler()&quot;</span>);</div>
-<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::advanceEuler()&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;  }</div>
-<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160; </div>
-<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;  <span class="comment">// Let Y = Y + S * dt</span></div>
-<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;  <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; phi = m_solver-&gt;getPhi();</div>
-<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;  <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; rhs = m_solver-&gt;getRHS();</div>
-<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160; </div>
-<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;  m_solver-&gt;computeRHS(rhs, m_rhsFunction);</div>
-<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160; </div>
-<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;  <a class="code" href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">DataOps::incr</a>(phi, rhs, a_dt);</div>
-<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;}</div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;  pp.get(<span class="stringliteral">&quot;verbosity&quot;</span>, m_verbosity);</div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;}</div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160; </div>
+<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
+<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00411"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a04178ed9a8b1a146905950b210254f8d">  411</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a04178ed9a8b1a146905950b210254f8d">MeshODEStepper&lt;N&gt;::advanceEuler</a>(<span class="keyword">const</span> Real a_dt)</div>
+<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;{</div>
+<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::advanceEuler()&quot;</span>);</div>
+<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::advanceEuler()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;  }</div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160; </div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;  <span class="comment">// Let Y = Y + S * dt</span></div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;  <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; phi = m_solver-&gt;getPhi();</div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;  <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; rhs = m_solver-&gt;getRHS();</div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160; </div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;  m_solver-&gt;computeRHS(rhs, m_rhsFunction);</div>
 <div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160; </div>
-<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
-<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00426"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a768decf0c75e014c10956b87c26e917f">  426</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a768decf0c75e014c10956b87c26e917f">MeshODEStepper&lt;N&gt;::advanceRK2</a>(<span class="keyword">const</span> Real a_dt)</div>
-<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;{</div>
-<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::advanceRK2()&quot;</span>);</div>
-<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::advanceRK2()&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;  }</div>
-<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160; </div>
-<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;  <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; phi = m_solver-&gt;getPhi();</div>
-<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160; </div>
-<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;  <a class="code" href="classEBAMRData.html">EBAMRCellData</a> k1;</div>
-<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;  <a class="code" href="classEBAMRData.html">EBAMRCellData</a> k2;</div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;  <a class="code" href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">DataOps::incr</a>(phi, rhs, a_dt);</div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;}</div>
+<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160; </div>
+<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
+<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00429"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a768decf0c75e014c10956b87c26e917f">  429</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a768decf0c75e014c10956b87c26e917f">MeshODEStepper&lt;N&gt;::advanceRK2</a>(<span class="keyword">const</span> Real a_dt)</div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;{</div>
+<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::advanceRK2()&quot;</span>);</div>
+<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::advanceRK2()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;  }</div>
+<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160; </div>
+<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;  <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; phi = m_solver-&gt;getPhi();</div>
 <div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160; </div>
-<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;  m_amr-&gt;allocate(k1, m_realm, m_phase, N);</div>
-<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;  m_amr-&gt;allocate(k2, m_realm, m_phase, N);</div>
+<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;  <a class="code" href="classEBAMRData.html">EBAMRCellData</a> k1;</div>
+<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;  <a class="code" href="classEBAMRData.html">EBAMRCellData</a> k2;</div>
 <div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160; </div>
-<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;  m_solver-&gt;computeRHS(k1, m_rhsFunction);</div>
-<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;  <a class="code" href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">DataOps::incr</a>(phi, k1, a_dt);</div>
+<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;  m_amr-&gt;allocate(k1, m_realm, m_phase, N);</div>
+<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;  m_amr-&gt;allocate(k2, m_realm, m_phase, N);</div>
 <div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160; </div>
-<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;  m_solver-&gt;computeRHS(k2, m_rhsFunction);</div>
-<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;  <a class="code" href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">DataOps::incr</a>(phi, k2, 0.5 * a_dt);</div>
-<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;  <a class="code" href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">DataOps::incr</a>(phi, k1, -0.5 * a_dt);</div>
-<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;}</div>
-<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160; </div>
-<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
-<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00451"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#aa7b7c146361d083e26d3d3a6054a5584">  451</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#aa7b7c146361d083e26d3d3a6054a5584">MeshODEStepper&lt;N&gt;::advanceRK4</a>(<span class="keyword">const</span> Real a_dt)</div>
-<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;{</div>
-<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::advanceRK4()&quot;</span>);</div>
-<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::advanceRK4()&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;  }</div>
-<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160; </div>
-<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;  MayDay::Error(<span class="stringliteral">&quot;MeshODEStepper::advanceRK4 -- not implemented&quot;</span>);</div>
-<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;}</div>
+<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;  m_solver-&gt;computeRHS(k1, m_rhsFunction);</div>
+<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;  <a class="code" href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">DataOps::incr</a>(phi, k1, a_dt);</div>
+<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160; </div>
+<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;  m_solver-&gt;computeRHS(k2, m_rhsFunction);</div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;  <a class="code" href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">DataOps::incr</a>(phi, k2, 0.5 * a_dt);</div>
+<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;  <a class="code" href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">DataOps::incr</a>(phi, k1, -0.5 * a_dt);</div>
+<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;}</div>
+<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160; </div>
+<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
+<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00454"></a><span class="lineno"><a class="line" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#aa7b7c146361d083e26d3d3a6054a5584">  454</a></span>&#160;<a class="code" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#aa7b7c146361d083e26d3d3a6054a5584">MeshODEStepper&lt;N&gt;::advanceRK4</a>(<span class="keyword">const</span> Real a_dt)</div>
+<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;{</div>
+<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;  CH_TIME(<span class="stringliteral">&quot;MeshODEStepper::advanceRK4()&quot;</span>);</div>
+<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;MeshODEStepper::advanceRK4()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;  }</div>
 <div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160; </div>
-<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160; </div>
-<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;  MayDay::Error(<span class="stringliteral">&quot;MeshODEStepper::advanceRK4 -- not implemented&quot;</span>);</div>
+<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;}</div>
+<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160; </div>
+<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160; </div>
+<div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__MeshODESolver_8H_html"><div class="ttname"><a href="CD__MeshODESolver_8H.html">CD_MeshODESolver.H</a></div><div class="ttdoc">Encapsulation of an ODE solver on the mesh.</div></div>
 <div class="ttc" id="aCD__TimeStepper_8H_html"><div class="ttname"><a href="CD__TimeStepper_8H.html">CD_TimeStepper.H</a></div><div class="ttdoc">Declaration of main (abstract) time stepper class.</div></div>
 <div class="ttc" id="aclassDataOps_html_a77d3d9b487c6182b3941fcab221e727f"><div class="ttname"><a href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">DataOps::incr</a></div><div class="ttdeci">static void incr(MFAMRCellData &amp;a_lhs, const MFAMRCellData &amp;a_rhs, const Real a_scale)</div><div class="ttdoc">Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.</div><div class="ttdef"><b>Definition:</b> CD_DataOps.cpp:689</div></div>
 <div class="ttc" id="aclassEBAMRData_html"><div class="ttname"><a href="classEBAMRData.html">EBAMRData&lt; EBCellFAB &gt;</a></div></div>
 <div class="ttc" id="aclassMeshODESolver_html"><div class="ttname"><a href="classMeshODESolver.html">MeshODESolver</a></div><div class="ttdoc">Class for solving dy/dt = f on an AMR hierarchy.</div><div class="ttdef"><b>Definition:</b> CD_MeshODESolver.H:28</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html">Physics::MeshODE::MeshODEStepper</a></div><div class="ttdoc">Implementation of TimeStepper for solving an ODE on a mesh. N is the number of variables.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepper.H:41</div></div>
-<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a04178ed9a8b1a146905950b210254f8d"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a04178ed9a8b1a146905950b210254f8d">Physics::MeshODE::MeshODEStepper::advanceEuler</a></div><div class="ttdeci">virtual void advanceEuler(const Real a_dt)</div><div class="ttdoc">Advance using the explicit Euler rule.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:408</div></div>
-<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a1a06df878801cf23189547818a26daa3"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a1a06df878801cf23189547818a26daa3">Physics::MeshODE::MeshODEStepper::advance</a></div><div class="ttdeci">virtual Real advance(const Real a_dt) override</div><div class="ttdoc">Advancement method. Swaps between various kernels.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:276</div></div>
+<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a04178ed9a8b1a146905950b210254f8d"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a04178ed9a8b1a146905950b210254f8d">Physics::MeshODE::MeshODEStepper::advanceEuler</a></div><div class="ttdeci">virtual void advanceEuler(const Real a_dt)</div><div class="ttdoc">Advance using the explicit Euler rule.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:411</div></div>
+<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a1a06df878801cf23189547818a26daa3"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a1a06df878801cf23189547818a26daa3">Physics::MeshODE::MeshODEStepper::advance</a></div><div class="ttdeci">virtual Real advance(const Real a_dt) override</div><div class="ttdoc">Advancement method. Swaps between various kernels.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:279</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a1cb60ebdbd9e7fa62a48ef0e99bd4806"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a1cb60ebdbd9e7fa62a48ef0e99bd4806">Physics::MeshODE::MeshODEStepper::registerOperators</a></div><div class="ttdeci">void registerOperators() override</div><div class="ttdoc">Register operators.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:120</div></div>
-<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a2131b8bca1fc7025fa3dfb077f51b7db"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a2131b8bca1fc7025fa3dfb077f51b7db">Physics::MeshODE::MeshODEStepper::writePlotData</a></div><div class="ttdeci">virtual void writePlotData(LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const override</div><div class="ttdoc">Write plot data to output holder.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:252</div></div>
+<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a336f5b490f0e11fec2035e96b4039c74"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a336f5b490f0e11fec2035e96b4039c74">Physics::MeshODE::MeshODEStepper::writePlotData</a></div><div class="ttdeci">virtual void writePlotData(LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const std::string a_outputRealm, const int a_level) const override</div><div class="ttdoc">Write plot data to output holder.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:252</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a552b90ba834800965304b945cef386eb"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a552b90ba834800965304b945cef386eb">Physics::MeshODE::MeshODEStepper::parseRuntimeOptions</a></div><div class="ttdeci">void parseRuntimeOptions() override</div><div class="ttdoc">Parse runtime options.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:146</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a5c9071713e98648756d6404643536f9a"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a5c9071713e98648756d6404643536f9a">Physics::MeshODE::MeshODEStepper::getPlotVariableNames</a></div><div class="ttdeci">virtual Vector&lt; std::string &gt; getPlotVariableNames() const override</div><div class="ttdoc">Get plot variable names.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:240</div></div>
-<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a768decf0c75e014c10956b87c26e917f"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a768decf0c75e014c10956b87c26e917f">Physics::MeshODE::MeshODEStepper::advanceRK2</a></div><div class="ttdeci">virtual void advanceRK2(const Real a_dt)</div><div class="ttdoc">Advance using a second-order Runge-Kutta method.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:426</div></div>
-<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a7910a63153b8314dd5747df46519b801"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7910a63153b8314dd5747df46519b801">Physics::MeshODE::MeshODEStepper::regrid</a></div><div class="ttdeci">virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override</div><div class="ttdoc">Time stepper regrid method.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:341</div></div>
-<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a7a805ad5d022b48878012c5008200205"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7a805ad5d022b48878012c5008200205">Physics::MeshODE::MeshODEStepper::parseIntegrator</a></div><div class="ttdeci">virtual void parseIntegrator()</div><div class="ttdoc">Parse integrator.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:366</div></div>
+<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a768decf0c75e014c10956b87c26e917f"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a768decf0c75e014c10956b87c26e917f">Physics::MeshODE::MeshODEStepper::advanceRK2</a></div><div class="ttdeci">virtual void advanceRK2(const Real a_dt)</div><div class="ttdoc">Advance using a second-order Runge-Kutta method.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:429</div></div>
+<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a7910a63153b8314dd5747df46519b801"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7910a63153b8314dd5747df46519b801">Physics::MeshODE::MeshODEStepper::regrid</a></div><div class="ttdeci">virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override</div><div class="ttdoc">Time stepper regrid method.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:344</div></div>
+<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a7a805ad5d022b48878012c5008200205"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7a805ad5d022b48878012c5008200205">Physics::MeshODE::MeshODEStepper::parseIntegrator</a></div><div class="ttdeci">virtual void parseIntegrator()</div><div class="ttdoc">Parse integrator.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:369</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a7a9c853063371e5be4d53264e6dc7b3a"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7a9c853063371e5be4d53264e6dc7b3a">Physics::MeshODE::MeshODEStepper::initialData</a></div><div class="ttdeci">void initialData() override</div><div class="ttdoc">Fill problem with initial data.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:73</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a7d467b80cd6a1a9db4aa8b1d2dfb595d"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7d467b80cd6a1a9db4aa8b1d2dfb595d">Physics::MeshODE::MeshODEStepper::allocate</a></div><div class="ttdeci">void allocate() override</div><div class="ttdoc">Allocate storage for solvers and time stepper.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:61</div></div>
-<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a7fe3bf12869dec09592f83d630e2b1be"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7fe3bf12869dec09592f83d630e2b1be">Physics::MeshODE::MeshODEStepper::synchronizeSolverTimes</a></div><div class="ttdeci">virtual void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override</div><div class="ttdoc">Synchronize solver times and time steps.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:314</div></div>
+<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a7fe3bf12869dec09592f83d630e2b1be"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7fe3bf12869dec09592f83d630e2b1be">Physics::MeshODE::MeshODEStepper::synchronizeSolverTimes</a></div><div class="ttdeci">virtual void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override</div><div class="ttdoc">Synchronize solver times and time steps.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:317</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a82feb9aa7620871f16f784eb3499e0a2"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a82feb9aa7620871f16f784eb3499e0a2">Physics::MeshODE::MeshODEStepper::~MeshODEStepper</a></div><div class="ttdeci">virtual ~MeshODEStepper()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:35</div></div>
-<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a85ff7c19f055e933f51dbb3e60787200"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a85ff7c19f055e933f51dbb3e60787200">Physics::MeshODE::MeshODEStepper::parseVerbosity</a></div><div class="ttdeci">virtual void parseVerbosity()</div><div class="ttdoc">Parse chattiness.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:394</div></div>
+<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a85ff7c19f055e933f51dbb3e60787200"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a85ff7c19f055e933f51dbb3e60787200">Physics::MeshODE::MeshODEStepper::parseVerbosity</a></div><div class="ttdeci">virtual void parseVerbosity()</div><div class="ttdoc">Parse chattiness.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:397</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a984d4875b54c16019dca5e27371d2ac2"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a984d4875b54c16019dca5e27371d2ac2">Physics::MeshODE::MeshODEStepper::parseProblem</a></div><div class="ttdeci">virtual void parseProblem()</div><div class="ttdoc">Parse the problem type.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:161</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_a9ea6843dec7daa349cb6c6b75d06f14f"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a9ea6843dec7daa349cb6c6b75d06f14f">Physics::MeshODE::MeshODEStepper::setupSolvers</a></div><div class="ttdeci">void setupSolvers() override</div><div class="ttdoc">Instantiate the ODE solver.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:45</div></div>
-<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_aa7b7c146361d083e26d3d3a6054a5584"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#aa7b7c146361d083e26d3d3a6054a5584">Physics::MeshODE::MeshODEStepper::advanceRK4</a></div><div class="ttdeci">virtual void advanceRK4(const Real a_dt)</div><div class="ttdoc">Advance using a fourth order Runge-Kutta method.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:451</div></div>
-<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_aa89bc23ec63484a1dfdc93c0e545a457"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#aa89bc23ec63484a1dfdc93c0e545a457">Physics::MeshODE::MeshODEStepper::preRegrid</a></div><div class="ttdeci">virtual void preRegrid(const int a_lmin, const int a_oldFinestLevel) override</div><div class="ttdoc">Perform pre-regrid operations.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:329</div></div>
+<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_aa7b7c146361d083e26d3d3a6054a5584"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#aa7b7c146361d083e26d3d3a6054a5584">Physics::MeshODE::MeshODEStepper::advanceRK4</a></div><div class="ttdeci">virtual void advanceRK4(const Real a_dt)</div><div class="ttdoc">Advance using a fourth order Runge-Kutta method.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:454</div></div>
+<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_aa89bc23ec63484a1dfdc93c0e545a457"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#aa89bc23ec63484a1dfdc93c0e545a457">Physics::MeshODE::MeshODEStepper::preRegrid</a></div><div class="ttdeci">virtual void preRegrid(const int a_lmin, const int a_oldFinestLevel) override</div><div class="ttdoc">Perform pre-regrid operations.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:332</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_ab9c73d69666d78903d1e26228ebba450"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#ab9c73d69666d78903d1e26228ebba450">Physics::MeshODE::MeshODEStepper::postCheckpointSetup</a></div><div class="ttdeci">void postCheckpointSetup() override</div><div class="ttdoc">Post checkpoint operations.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:96</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_abbe79424d9b5afa98366269eb45cdc53"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#abbe79424d9b5afa98366269eb45cdc53">Physics::MeshODE::MeshODEStepper::getNumberOfPlotVariables</a></div><div class="ttdeci">virtual int getNumberOfPlotVariables() const override</div><div class="ttdoc">Get the number of plot variables for this time stepper.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:228</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_ac131c15e12c323c0fc5b749110ea5422"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#ac131c15e12c323c0fc5b749110ea5422">Physics::MeshODE::MeshODEStepper::registerRealms</a></div><div class="ttdeci">void registerRealms() override</div><div class="ttdoc">Register realms. Primal is the only realm we need.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:108</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_ad3d071b809da22c1dc9f9457138bf31d"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#ad3d071b809da22c1dc9f9457138bf31d">Physics::MeshODE::MeshODEStepper::parseOptions</a></div><div class="ttdeci">void parseOptions()</div><div class="ttdoc">Parse options.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:132</div></div>
-<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_ae5f913b4b707731bdcb9178434a53ec4"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#ae5f913b4b707731bdcb9178434a53ec4">Physics::MeshODE::MeshODEStepper::postRegrid</a></div><div class="ttdeci">virtual void postRegrid() override</div><div class="ttdoc">Perform post-regrid operations.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:353</div></div>
+<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_ae5f913b4b707731bdcb9178434a53ec4"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#ae5f913b4b707731bdcb9178434a53ec4">Physics::MeshODE::MeshODEStepper::postRegrid</a></div><div class="ttdeci">virtual void postRegrid() override</div><div class="ttdoc">Perform post-regrid operations.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:356</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_aeb42bce4fc6a779085004879abe6b983"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#aeb42bce4fc6a779085004879abe6b983">Physics::MeshODE::MeshODEStepper::postInitialize</a></div><div class="ttdeci">void postInitialize() override</div><div class="ttdoc">Perform any post-initialization steps.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:86</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_af27c3d40ffa283e4c07727af3ce84834"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#af27c3d40ffa283e4c07727af3ce84834">Physics::MeshODE::MeshODEStepper::MeshODEStepper</a></div><div class="ttdeci">MeshODEStepper()</div><div class="ttdoc">Constructor. Does nothing.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:23</div></div>
-<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_af2f37a14647f5c455bba6ff096124eee"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#af2f37a14647f5c455bba6ff096124eee">Physics::MeshODE::MeshODEStepper::computeDt</a></div><div class="ttdeci">virtual Real computeDt() override</div><div class="ttdoc">Compute a time step to be used by Driver.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:264</div></div>
+<div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html_af2f37a14647f5c455bba6ff096124eee"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#af2f37a14647f5c455bba6ff096124eee">Physics::MeshODE::MeshODEStepper::computeDt</a></div><div class="ttdeci">virtual Real computeDt() override</div><div class="ttdoc">Compute a time step to be used by Driver.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepperImplem.H:267</div></div>
 <div class="ttc" id="aclassRealm_html_ae7b66527325a72d0b3aa2db67d34078e"><div class="ttname"><a href="classRealm.html#ae7b66527325a72d0b3aa2db67d34078e">Realm::Primal</a></div><div class="ttdeci">static const std::string Primal</div><div class="ttdoc">Identifier for perimal realm.</div><div class="ttdef"><b>Definition:</b> CD_Realm.H:46</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

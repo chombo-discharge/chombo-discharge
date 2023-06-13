@@ -226,9 +226,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a804f78527ec2e9d5a1079e5d84b7a19b">getPlotVariableNames</a> () const</td></tr>
 <tr class="memdesc:a804f78527ec2e9d5a1079e5d84b7a19b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get output plot names. <br /></td></tr>
 <tr class="separator:a804f78527ec2e9d5a1079e5d84b7a19b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad5aacc3d3f53c04da92779869a873932"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#ad5aacc3d3f53c04da92779869a873932">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const int a_level) const noexcept</td></tr>
-<tr class="memdesc:ad5aacc3d3f53c04da92779869a873932"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write output data to a_output.  <a href="classRtSolver.html#ad5aacc3d3f53c04da92779869a873932">More...</a><br /></td></tr>
-<tr class="separator:ad5aacc3d3f53c04da92779869a873932"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f2b90f183af78630cdd7211d962b9c3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a1f2b90f183af78630cdd7211d962b9c3">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const std::string a_outputRealm, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a1f2b90f183af78630cdd7211d962b9c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write output data to a_output.  <a href="classRtSolver.html#a1f2b90f183af78630cdd7211d962b9c3">More...</a><br /></td></tr>
+<tr class="separator:a1f2b90f183af78630cdd7211d962b9c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ff3b079fde1768aa6f7b951020c0a63"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a0ff3b079fde1768aa6f7b951020c0a63">getTime</a> () const</td></tr>
 <tr class="memdesc:a0ff3b079fde1768aa6f7b951020c0a63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current time.  <a href="classRtSolver.html#a0ff3b079fde1768aa6f7b951020c0a63">More...</a><br /></td></tr>
 <tr class="separator:a0ff3b079fde1768aa6f7b951020c0a63"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -262,9 +262,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a431f024c83df8b2b33c11e6a675a37e3">parseVerbosity</a> () noexcept</td></tr>
 <tr class="memdesc:a431f024c83df8b2b33c11e6a675a37e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse verbosity. <br /></td></tr>
 <tr class="separator:a431f024c83df8b2b33c11e6a675a37e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af08ea755a7bf62b54a17d00d29807356"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#af08ea755a7bf62b54a17d00d29807356">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
-<tr class="memdesc:af08ea755a7bf62b54a17d00d29807356"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classRtSolver.html#af08ea755a7bf62b54a17d00d29807356">More...</a><br /></td></tr>
-<tr class="separator:af08ea755a7bf62b54a17d00d29807356"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acec6324d8518126de3cc196b4fa53d51"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#acec6324d8518126de3cc196b4fa53d51">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_outputRealm, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
+<tr class="memdesc:acec6324d8518126de3cc196b4fa53d51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classRtSolver.html#acec6324d8518126de3cc196b4fa53d51">More...</a><br /></td></tr>
+<tr class="separator:acec6324d8518126de3cc196b4fa53d51"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -1433,8 +1433,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="af08ea755a7bf62b54a17d00d29807356"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af08ea755a7bf62b54a17d00d29807356">&#9670;&nbsp;</a></span>writeData()</h2>
+<a id="acec6324d8518126de3cc196b4fa53d51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acec6324d8518126de3cc196b4fa53d51">&#9670;&nbsp;</a></span>writeData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1459,6 +1459,12 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td></td>
           <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1498,6 +1504,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where this solver begins writing the output. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data to write. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> to which a_output belongs </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_interpToCentroids</td><td>If true, a_data will be interpolated to cell centroids before writing to a_output. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_interpGhost</td><td>If true, interpolate ghost cells </td></tr>
   </table>
@@ -1506,8 +1513,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="ad5aacc3d3f53c04da92779869a873932"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad5aacc3d3f53c04da92779869a873932">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a1f2b90f183af78630cdd7211d962b9c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f2b90f183af78630cdd7211d962b9c3">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1526,6 +1533,12 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_comp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1551,13 +1564,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where this solver begins writing the output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output belongs </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This routine writes m_phi on centroids (and not cell-centers). </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classMcPhoto.html#a92359eab02dad80bd1510db6051d36a2">McPhoto</a>.</p>
+<p>Reimplemented in <a class="el" href="classMcPhoto.html#ac92ea0a12fc857448b303bbceeb10df9">McPhoto</a>.</p>
 
 </div>
 </div>

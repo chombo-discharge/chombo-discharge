@@ -166,9 +166,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#af20e6910c46428c07111edd473f7b873">getPlotVariableNames</a> () const override</td></tr>
 <tr class="memdesc:af20e6910c46428c07111edd473f7b873"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names. <br /></td></tr>
 <tr class="separator:af20e6910c46428c07111edd473f7b873"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a800d8e978c0c5443e31a51d8183d1b4f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a800d8e978c0c5443e31a51d8183d1b4f">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const override</td></tr>
-<tr class="memdesc:a800d8e978c0c5443e31a51d8183d1b4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a800d8e978c0c5443e31a51d8183d1b4f">More...</a><br /></td></tr>
-<tr class="separator:a800d8e978c0c5443e31a51d8183d1b4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeeed6f9f1a177c0a849a2197e0c95483"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#aeeed6f9f1a177c0a849a2197e0c95483">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const std::string a_outputRealm, const int a_level) const override</td></tr>
+<tr class="memdesc:aeeed6f9f1a177c0a849a2197e0c95483"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#aeeed6f9f1a177c0a849a2197e0c95483">More...</a><br /></td></tr>
+<tr class="separator:aeeed6f9f1a177c0a849a2197e0c95483"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8fb79765ae0355d13eedbe16c72693f"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ab8fb79765ae0355d13eedbe16c72693f">computeDt</a> ()=0</td></tr>
 <tr class="memdesc:ab8fb79765ae0355d13eedbe16c72693f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the time step.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ab8fb79765ae0355d13eedbe16c72693f">More...</a><br /></td></tr>
 <tr class="separator:ab8fb79765ae0355d13eedbe16c72693f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -558,16 +558,16 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a7f56d62a23c3d13fce1808f3e4d4e99f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a7f56d62a23c3d13fce1808f3e4d4e99f">parseSourceComputation</a> ()</td></tr>
 <tr class="memdesc:a7f56d62a23c3d13fce1808f3e4d4e99f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse how we compute the source terms.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a7f56d62a23c3d13fce1808f3e4d4e99f">More...</a><br /></td></tr>
 <tr class="separator:a7f56d62a23c3d13fce1808f3e4d4e99f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a46f0234c393c7b99b65e9e793e89b1ae"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a46f0234c393c7b99b65e9e793e89b1ae">writeJ</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const int a_level) const</td></tr>
-<tr class="memdesc:a46f0234c393c7b99b65e9e793e89b1ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute and put the current density in output data holder.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a46f0234c393c7b99b65e9e793e89b1ae">More...</a><br /></td></tr>
-<tr class="separator:a46f0234c393c7b99b65e9e793e89b1ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74a3b21ea49a259d0a26cb7c015772f6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a74a3b21ea49a259d0a26cb7c015772f6">writeJ</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const std::string a_outputRealm, const int a_level) const</td></tr>
+<tr class="memdesc:a74a3b21ea49a259d0a26cb7c015772f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute and put the current density in output data holder.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a74a3b21ea49a259d0a26cb7c015772f6">More...</a><br /></td></tr>
+<tr class="separator:a74a3b21ea49a259d0a26cb7c015772f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a16e966c6d8268235b38d160473f4e070"><td class="memItemLeft" align="right" valign="top"><a id="a16e966c6d8268235b38d160473f4e070"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a16e966c6d8268235b38d160473f4e070">computePhysicsPlotVars</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_physicsPlotVars) const noexcept</td></tr>
 <tr class="memdesc:a16e966c6d8268235b38d160473f4e070"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the user-supplied plot variables. <br /></td></tr>
 <tr class="separator:a16e966c6d8268235b38d160473f4e070"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a76b7bb416be340ecaf8130deefea6f31"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a76b7bb416be340ecaf8130deefea6f31">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
-<tr class="memdesc:a76b7bb416be340ecaf8130deefea6f31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a76b7bb416be340ecaf8130deefea6f31">More...</a><br /></td></tr>
-<tr class="separator:a76b7bb416be340ecaf8130deefea6f31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51db0ce319799457f3f804c9f1e65c59"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a51db0ce319799457f3f804c9f1e65c59">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_outputRealm, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
+<tr class="memdesc:a51db0ce319799457f3f804c9f1e65c59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a51db0ce319799457f3f804c9f1e65c59">More...</a><br /></td></tr>
+<tr class="separator:a51db0ce319799457f3f804c9f1e65c59"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -5272,8 +5272,8 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 
 </div>
 </div>
-<a id="a76b7bb416be340ecaf8130deefea6f31"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a76b7bb416be340ecaf8130deefea6f31">&#9670;&nbsp;</a></span>writeData()</h2>
+<a id="a51db0ce319799457f3f804c9f1e65c59"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51db0ce319799457f3f804c9f1e65c59">&#9670;&nbsp;</a></span>writeData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5298,6 +5298,12 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
           <td></td>
           <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -5336,6 +5342,7 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where this solver begins writing the output. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data to write. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output lives </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_interpToCentroids</td><td>If true, a_data will be interpolated to cell centroids before writing to a_output. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_interpGhost</td><td>If true, interpolate ghost cells </td></tr>
@@ -5345,8 +5352,8 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 
 </div>
 </div>
-<a id="a46f0234c393c7b99b65e9e793e89b1ae"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a46f0234c393c7b99b65e9e793e89b1ae">&#9670;&nbsp;</a></span>writeJ()</h2>
+<a id="a74a3b21ea49a259d0a26cb7c015772f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74a3b21ea49a259d0a26cb7c015772f6">&#9670;&nbsp;</a></span>writeJ()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5365,6 +5372,12 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_comp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -5390,6 +5403,8 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. On output this is incremented by SpaceDim. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output lives <br  />
+ </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
@@ -5397,8 +5412,8 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 
 </div>
 </div>
-<a id="a800d8e978c0c5443e31a51d8183d1b4f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a800d8e978c0c5443e31a51d8183d1b4f">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="aeeed6f9f1a177c0a849a2197e0c95483"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeeed6f9f1a177c0a849a2197e0c95483">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5417,6 +5432,12 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_icomp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -5442,12 +5463,13 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output belongs </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#ae858739b259e499d5ce03e9b3c9baa0e">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#a22859f521ede9fac08fe05a06f929193">TimeStepper</a>.</p>
 
 </div>
 </div>

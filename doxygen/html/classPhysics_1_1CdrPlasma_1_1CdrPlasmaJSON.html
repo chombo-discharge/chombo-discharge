@@ -157,9 +157,9 @@ virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="b
 <tr class="memitem:a85fa40d8ff617b330c2d6d154ca912a0"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a85fa40d8ff617b330c2d6d154ca912a0">computeAlpha</a> (const Real E, const RealVect a_position) const override</td></tr>
 <tr class="memdesc:a85fa40d8ff617b330c2d6d154ca912a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute alpha. Should return Townsend ionization coefficient.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a85fa40d8ff617b330c2d6d154ca912a0">More...</a><br /></td></tr>
 <tr class="separator:a85fa40d8ff617b330c2d6d154ca912a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae52c587a4eea338eb0e2a8ba3866b29d"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#ae52c587a4eea338eb0e2a8ba3866b29d">computeEta</a> (const Real a_E, const RealVect a_position) const</td></tr>
-<tr class="memdesc:ae52c587a4eea338eb0e2a8ba3866b29d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute eta. Should return Townsend attachment coefficient.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#ae52c587a4eea338eb0e2a8ba3866b29d">More...</a><br /></td></tr>
-<tr class="separator:ae52c587a4eea338eb0e2a8ba3866b29d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd4eb0d40d861ba42b4f88abaf6a7cb3"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#afd4eb0d40d861ba42b4f88abaf6a7cb3">computeEta</a> (const Real a_E, const RealVect a_position) const override</td></tr>
+<tr class="memdesc:afd4eb0d40d861ba42b4f88abaf6a7cb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute eta. Should return Townsend attachment coefficient.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#afd4eb0d40d861ba42b4f88abaf6a7cb3">More...</a><br /></td></tr>
+<tr class="separator:afd4eb0d40d861ba42b4f88abaf6a7cb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e67d54426124de2c25fb2659ba5e29f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a8e67d54426124de2c25fb2659ba5e29f">advanceReactionNetwork</a> (Vector&lt; Real &gt; &amp;a_cdrSources, Vector&lt; Real &gt; &amp;a_rteSources, const Vector&lt; Real &gt; a_cdrDensities, const Vector&lt; RealVect &gt; a_cdrGradients, const Vector&lt; Real &gt; a_rteDensities, const RealVect a_E, const RealVect a_pos, const Real a_dx, const Real a_dt, const Real a_time, const Real a_kappa) const override</td></tr>
 <tr class="memdesc:a8e67d54426124de2c25fb2659ba5e29f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine intended for advancing a reaction network over a time a_dt.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a8e67d54426124de2c25fb2659ba5e29f">More...</a><br /></td></tr>
 <tr class="separator:a8e67d54426124de2c25fb2659ba5e29f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1625,8 +1625,8 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 
 </div>
 </div>
-<a id="ae52c587a4eea338eb0e2a8ba3866b29d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae52c587a4eea338eb0e2a8ba3866b29d">&#9670;&nbsp;</a></span>computeEta()</h2>
+<a id="afd4eb0d40d861ba42b4f88abaf6a7cb3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd4eb0d40d861ba42b4f88abaf6a7cb3">&#9670;&nbsp;</a></span>computeEta()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1654,7 +1654,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -1667,6 +1667,8 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
   </table>
   </dd>
 </dl>
+
+<p>Implements <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html#aae81f22f986391acbe793eba865c87fc">Physics::CdrPlasma::CdrPlasmaPhysics</a>.</p>
 
 </div>
 </div>

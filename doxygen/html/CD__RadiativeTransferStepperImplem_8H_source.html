@@ -277,205 +277,208 @@ $(function() {
 <div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160; </div>
 <div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00208"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a0e80e35a10f599e35e4dae15707ec3de">  208</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a0e80e35a10f599e35e4dae15707ec3de">RadiativeTransferStepper&lt;T&gt;::writePlotData</a>(LevelData&lt;EBCellFAB&gt;&amp; a_output, <span class="keywordtype">int</span>&amp; a_icomp, <span class="keyword">const</span> <span class="keywordtype">int</span> a_level)<span class="keyword"> const</span></div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;<span class="keyword"></span>{</div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::writePlotData&quot;</span>);</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::writePlotData&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;  }</div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160; </div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;  m_solver-&gt;writePlotData(a_output, a_icomp, a_level);</div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;}</div>
+<div class="line"><a name="l00208"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a3396482eb902894cb703bb28fa7edd6b">  208</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a3396482eb902894cb703bb28fa7edd6b">RadiativeTransferStepper&lt;T&gt;::writePlotData</a>(LevelData&lt;EBCellFAB&gt;&amp; a_output,</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;                                           <span class="keywordtype">int</span>&amp;                  a_icomp,</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;                                           <span class="keyword">const</span> std::string     a_outputRealm,</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;                                           <span class="keyword">const</span> <span class="keywordtype">int</span>             a_level)<span class="keyword"> const</span></div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;<span class="keyword"></span>{</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::writePlotData&quot;</span>);</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::writePlotData&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;  }</div>
 <div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160; </div>
-<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;Real</div>
-<div class="line"><a name="l00220"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#aa1ac5dad6e2e210132062e6c945ed17c">  220</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#aa1ac5dad6e2e210132062e6c945ed17c">RadiativeTransferStepper&lt;T&gt;::computeDt</a>()</div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;{</div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::computeDt&quot;</span>);</div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::computeDt&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;  }</div>
-<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160; </div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;  Real dt = m_dt;</div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160; </div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;  <span class="keywordflow">if</span> (m_forceDt &gt; 0.0) {</div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;    dt = m_forceDt;</div>
-<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;  }</div>
-<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160; </div>
-<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;  <span class="keywordflow">return</span> dt;</div>
-<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;}</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;  m_solver-&gt;writePlotData(a_output, a_icomp, a_outputRealm, a_level);</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;}</div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160; </div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;Real</div>
+<div class="line"><a name="l00223"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#aa1ac5dad6e2e210132062e6c945ed17c">  223</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#aa1ac5dad6e2e210132062e6c945ed17c">RadiativeTransferStepper&lt;T&gt;::computeDt</a>()</div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;{</div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::computeDt&quot;</span>);</div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::computeDt&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;  }</div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160; </div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;  Real dt = m_dt;</div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160; </div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;  <span class="keywordflow">if</span> (m_forceDt &gt; 0.0) {</div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;    dt = m_forceDt;</div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;  }</div>
 <div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160; </div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;Real</div>
-<div class="line"><a name="l00238"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a6be891e4077d9946373e3229d1e14a89">  238</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a6be891e4077d9946373e3229d1e14a89">RadiativeTransferStepper&lt;T&gt;::advance</a>(<span class="keyword">const</span> Real a_dt)</div>
-<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;{</div>
-<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::advance&quot;</span>);</div>
-<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::advance&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;  }</div>
-<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160; </div>
-<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;  m_solver-&gt;advance(a_dt);</div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160; </div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;  <span class="keywordflow">return</span> a_dt;</div>
-<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;}</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;  <span class="keywordflow">return</span> dt;</div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;}</div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160; </div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;Real</div>
+<div class="line"><a name="l00241"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a6be891e4077d9946373e3229d1e14a89">  241</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a6be891e4077d9946373e3229d1e14a89">RadiativeTransferStepper&lt;T&gt;::advance</a>(<span class="keyword">const</span> Real a_dt)</div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;{</div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::advance&quot;</span>);</div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::advance&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;  }</div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160; </div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;  m_solver-&gt;advance(a_dt);</div>
 <div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160; </div>
-<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00252"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#af3f0940f307ac333cbee523efd6aaccb">  252</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#af3f0940f307ac333cbee523efd6aaccb">RadiativeTransferStepper&lt;T&gt;::synchronizeSolverTimes</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_step, <span class="keyword">const</span> Real a_time, <span class="keyword">const</span> Real a_dt)</div>
-<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;{</div>
-<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::synchronizeSolverTimes&quot;</span>);</div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::synchronizeSolverTimes&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;  }</div>
-<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160; </div>
-<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;  m_timeStep = a_step;</div>
-<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;  m_time     = a_time;</div>
-<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;  m_dt       = a_dt;</div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160; </div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;  m_solver-&gt;setTime(m_timeStep, m_time, m_dt);</div>
-<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;}</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;  <span class="keywordflow">return</span> a_dt;</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;}</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160; </div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00255"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#af3f0940f307ac333cbee523efd6aaccb">  255</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#af3f0940f307ac333cbee523efd6aaccb">RadiativeTransferStepper&lt;T&gt;::synchronizeSolverTimes</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_step, <span class="keyword">const</span> Real a_time, <span class="keyword">const</span> Real a_dt)</div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;{</div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::synchronizeSolverTimes&quot;</span>);</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::synchronizeSolverTimes&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;  }</div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160; </div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;  m_timeStep = a_step;</div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;  m_time     = a_time;</div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;  m_dt       = a_dt;</div>
 <div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160; </div>
-<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00268"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ac61f8497b3b3b7989756cba0bec2fabd">  268</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ac61f8497b3b3b7989756cba0bec2fabd">RadiativeTransferStepper&lt;T&gt;::printStepReport</a>()</div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;{</div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::printStepReport&quot;</span>);</div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::printStepReport&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;  }</div>
-<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;}</div>
-<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160; </div>
-<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00278"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a04e975d76b4a07628a75d3a9acf40f49">  278</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a04e975d76b4a07628a75d3a9acf40f49">RadiativeTransferStepper&lt;T&gt;::registerRealms</a>()</div>
-<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;{</div>
-<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::registerRealms&quot;</span>);</div>
-<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::registerRealms&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;  }</div>
-<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160; </div>
-<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;  m_amr-&gt;registerRealm(m_realm);</div>
-<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;}</div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;  m_solver-&gt;setTime(m_timeStep, m_time, m_dt);</div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;}</div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160; </div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00271"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ac61f8497b3b3b7989756cba0bec2fabd">  271</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ac61f8497b3b3b7989756cba0bec2fabd">RadiativeTransferStepper&lt;T&gt;::printStepReport</a>()</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;{</div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::printStepReport&quot;</span>);</div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::printStepReport&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;  }</div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;}</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160; </div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00281"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a04e975d76b4a07628a75d3a9acf40f49">  281</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a04e975d76b4a07628a75d3a9acf40f49">RadiativeTransferStepper&lt;T&gt;::registerRealms</a>()</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;{</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::registerRealms&quot;</span>);</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::registerRealms&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;  }</div>
 <div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160; </div>
-<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00290"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a0126610cf9deae093a9a49ec36a4dfc0">  290</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a0126610cf9deae093a9a49ec36a4dfc0">RadiativeTransferStepper&lt;T&gt;::registerOperators</a>()</div>
-<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;{</div>
-<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::registerOperators&quot;</span>);</div>
-<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::registerOperators&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;  }</div>
-<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160; </div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;  m_solver-&gt;registerOperators();</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;}</div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;  m_amr-&gt;registerRealm(m_realm);</div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;}</div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160; </div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00293"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a0126610cf9deae093a9a49ec36a4dfc0">  293</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a0126610cf9deae093a9a49ec36a4dfc0">RadiativeTransferStepper&lt;T&gt;::registerOperators</a>()</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;{</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::registerOperators&quot;</span>);</div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::registerOperators&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;  }</div>
 <div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160; </div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00302"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a839ea4b0579c3705ecd5cd157b83b7cf">  302</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a839ea4b0579c3705ecd5cd157b83b7cf">RadiativeTransferStepper&lt;T&gt;::preRegrid</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_base, <span class="keyword">const</span> <span class="keywordtype">int</span> a_oldFinestLevel)</div>
-<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;{</div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::preRegrid&quot;</span>);</div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::preRegrid&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;  }</div>
-<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160; </div>
-<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;  m_solver-&gt;preRegrid(a_base, a_oldFinestLevel);</div>
-<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;}</div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;  m_solver-&gt;registerOperators();</div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;}</div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160; </div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00305"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a839ea4b0579c3705ecd5cd157b83b7cf">  305</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a839ea4b0579c3705ecd5cd157b83b7cf">RadiativeTransferStepper&lt;T&gt;::preRegrid</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_base, <span class="keyword">const</span> <span class="keywordtype">int</span> a_oldFinestLevel)</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;{</div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::preRegrid&quot;</span>);</div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::preRegrid&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;  }</div>
 <div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160; </div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00314"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a10999d870ae87a4adf4872cca9479e94">  314</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a10999d870ae87a4adf4872cca9479e94">RadiativeTransferStepper&lt;T&gt;::regrid</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_lmin, <span class="keyword">const</span> <span class="keywordtype">int</span> a_oldFinestLevel, <span class="keyword">const</span> <span class="keywordtype">int</span> a_newFinestLevel)</div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;{</div>
-<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::regrid&quot;</span>);</div>
-<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::regrid&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;  }</div>
-<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160; </div>
-<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;  m_solver-&gt;regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);</div>
-<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;}</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;  m_solver-&gt;preRegrid(a_base, a_oldFinestLevel);</div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;}</div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160; </div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00317"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a10999d870ae87a4adf4872cca9479e94">  317</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a10999d870ae87a4adf4872cca9479e94">RadiativeTransferStepper&lt;T&gt;::regrid</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_lmin, <span class="keyword">const</span> <span class="keywordtype">int</span> a_oldFinestLevel, <span class="keyword">const</span> <span class="keywordtype">int</span> a_newFinestLevel)</div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;{</div>
+<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::regrid&quot;</span>);</div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::regrid&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;  }</div>
 <div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160; </div>
-<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00326"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ae29077b3817845bc05ab35b0609b38ea">  326</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ae29077b3817845bc05ab35b0609b38ea">RadiativeTransferStepper&lt;T&gt;::postRegrid</a>()</div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;{</div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::postRegrid&quot;</span>);</div>
-<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::postRegrid&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;  }</div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160; </div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;  this-&gt;setGaussianSource();</div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;}</div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;  m_solver-&gt;regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);</div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;}</div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160; </div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00329"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ae29077b3817845bc05ab35b0609b38ea">  329</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ae29077b3817845bc05ab35b0609b38ea">RadiativeTransferStepper&lt;T&gt;::postRegrid</a>()</div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;{</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::postRegrid&quot;</span>);</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::postRegrid&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;  }</div>
 <div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160; </div>
-<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;<span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp;</div>
-<div class="line"><a name="l00338"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#afe63e91fc214250129e9482190662fad">  338</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#afe63e91fc214250129e9482190662fad">RadiativeTransferStepper&lt;T&gt;::getPhi</a>()<span class="keyword"> const</span></div>
-<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;<span class="keyword"></span>{</div>
-<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::getPhi&quot;</span>);</div>
-<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::getPhi&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;  }</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160; </div>
-<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;  <span class="keywordflow">return</span> m_solver-&gt;getPhi();</div>
-<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;}</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;  this-&gt;setGaussianSource();</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;}</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160; </div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;<span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp;</div>
+<div class="line"><a name="l00341"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#afe63e91fc214250129e9482190662fad">  341</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#afe63e91fc214250129e9482190662fad">RadiativeTransferStepper&lt;T&gt;::getPhi</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;<span class="keyword"></span>{</div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::getPhi&quot;</span>);</div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::getPhi&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;  }</div>
 <div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160; </div>
-<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00350"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ab02809e76d079702f3b7f6efed3b6fbe">  350</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ab02809e76d079702f3b7f6efed3b6fbe">RadiativeTransferStepper&lt;T&gt;::setGaussianSource</a>()</div>
-<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;{</div>
-<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::setGaussianSource&quot;</span>);</div>
-<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::setGaussianSource&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;  }</div>
-<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160; </div>
-<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;  ParmParse pp(<span class="stringliteral">&quot;RadiativeTransferStepper&quot;</span>);</div>
-<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160; </div>
-<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;  Vector&lt;Real&gt; v(SpaceDim);</div>
-<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;  RealVect     blobCenter;</div>
-<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;  Real         blobAmp;</div>
-<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;  Real         blobRad;</div>
-<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160; </div>
-<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;  pp.get(<span class="stringliteral">&quot;blob_amplitude&quot;</span>, blobAmp);</div>
-<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;  pp.get(<span class="stringliteral">&quot;blob_radius&quot;</span>, blobRad);</div>
-<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;  pp.getarr(<span class="stringliteral">&quot;blob_center&quot;</span>, v, 0, SpaceDim);</div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;  blobCenter = RealVect(D_DECL(v[0], v[1], v[2]));</div>
-<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160; </div>
-<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;  <span class="keyword">auto</span> sourceFunction = [blobAmp, blobRad, blobCenter](<span class="keyword">const</span> RealVect a_position) -&gt; Real {</div>
-<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;    <span class="keyword">const</span> RealVect dist  = a_position - blobCenter;</div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;    <span class="keyword">const</span> Real     dist2 = dist.dotProduct(dist);</div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;    <span class="keywordflow">return</span> blobAmp * exp(-dist2 / (2 * blobRad * blobRad));</div>
-<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;  };</div>
-<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160; </div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;  m_solver-&gt;setSource(sourceFunction);</div>
-<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;}</div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;  <span class="keywordflow">return</span> m_solver-&gt;getPhi();</div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;}</div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160; </div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00353"></a><span class="lineno"><a class="line" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ab02809e76d079702f3b7f6efed3b6fbe">  353</a></span>&#160;<a class="code" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ab02809e76d079702f3b7f6efed3b6fbe">RadiativeTransferStepper&lt;T&gt;::setGaussianSource</a>()</div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;{</div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;  CH_TIME(<span class="stringliteral">&quot;RadiativeTransferStepper::setGaussianSource&quot;</span>);</div>
+<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;RadiativeTransferStepper::setGaussianSource&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;  }</div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160; </div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;  ParmParse pp(<span class="stringliteral">&quot;RadiativeTransferStepper&quot;</span>);</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160; </div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;  Vector&lt;Real&gt; v(SpaceDim);</div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;  RealVect     blobCenter;</div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;  Real         blobAmp;</div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;  Real         blobRad;</div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160; </div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;  pp.get(<span class="stringliteral">&quot;blob_amplitude&quot;</span>, blobAmp);</div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;  pp.get(<span class="stringliteral">&quot;blob_radius&quot;</span>, blobRad);</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;  pp.getarr(<span class="stringliteral">&quot;blob_center&quot;</span>, v, 0, SpaceDim);</div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;  blobCenter = RealVect(D_DECL(v[0], v[1], v[2]));</div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160; </div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;  <span class="keyword">auto</span> sourceFunction = [blobAmp, blobRad, blobCenter](<span class="keyword">const</span> RealVect a_position) -&gt; Real {</div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;    <span class="keyword">const</span> RealVect dist  = a_position - blobCenter;</div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;    <span class="keyword">const</span> Real     dist2 = dist.dotProduct(dist);</div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;    <span class="keywordflow">return</span> blobAmp * exp(-dist2 / (2 * blobRad * blobRad));</div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;  };</div>
 <div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160; </div>
-<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;  m_solver-&gt;setSource(sourceFunction);</div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;}</div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160; </div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
 <div class="ttc" id="aCD__RadiativeTransferSpecies_8H_html"><div class="ttname"><a href="CD__RadiativeTransferSpecies_8H.html">CD_RadiativeTransferSpecies.H</a></div><div class="ttdoc">Simple species for Physics/RadiativeTransfer.</div></div>
 <div class="ttc" id="aCD__RadiativeTransferStepper_8H_html"><div class="ttname"><a href="CD__RadiativeTransferStepper_8H.html">CD_RadiativeTransferStepper.H</a></div><div class="ttdoc">TimeStepper class for only evolving radiative transfer modules.</div></div>
 <div class="ttc" id="aclassEBAMRData_html"><div class="ttname"><a href="classEBAMRData.html">EBAMRData&lt; EBCellFAB &gt;</a></div></div>
 <div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferSpecies_html"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferSpecies.html">Physics::RadiativeTransfer::RadiativeTransferSpecies</a></div><div class="ttdoc">Implementation of RtSpecies for usage in RadiativeTransfer module.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferSpecies.H:28</div></div>
 <div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html">Physics::RadiativeTransfer::RadiativeTransferStepper</a></div><div class="ttdoc">Implementation of TimeStepper for solving for a single radiative transfer species....</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepper.H:33</div></div>
-<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a0126610cf9deae093a9a49ec36a4dfc0"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a0126610cf9deae093a9a49ec36a4dfc0">Physics::RadiativeTransfer::RadiativeTransferStepper::registerOperators</a></div><div class="ttdeci">void registerOperators() override</div><div class="ttdoc">Register operators – calls the solver registration routine.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:290</div></div>
+<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a0126610cf9deae093a9a49ec36a4dfc0"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a0126610cf9deae093a9a49ec36a4dfc0">Physics::RadiativeTransfer::RadiativeTransferStepper::registerOperators</a></div><div class="ttdeci">void registerOperators() override</div><div class="ttdoc">Register operators – calls the solver registration routine.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:293</div></div>
 <div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a03e6954e763ae22f73dc2e5d17157947"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a03e6954e763ae22f73dc2e5d17157947">Physics::RadiativeTransfer::RadiativeTransferStepper::postCheckpointSetup</a></div><div class="ttdeci">void postCheckpointSetup() override</div><div class="ttdoc">Perform post-checkpoint setup routines (sets the source in the solver)</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:172</div></div>
-<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a04e975d76b4a07628a75d3a9acf40f49"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a04e975d76b4a07628a75d3a9acf40f49">Physics::RadiativeTransfer::RadiativeTransferStepper::registerRealms</a></div><div class="ttdeci">void registerRealms() override</div><div class="ttdoc">Register realms.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:278</div></div>
-<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a0e80e35a10f599e35e4dae15707ec3de"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a0e80e35a10f599e35e4dae15707ec3de">Physics::RadiativeTransfer::RadiativeTransferStepper::writePlotData</a></div><div class="ttdeci">void writePlotData(LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const override</div><div class="ttdoc">Write plot data to output holder.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:208</div></div>
-<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a10999d870ae87a4adf4872cca9479e94"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a10999d870ae87a4adf4872cca9479e94">Physics::RadiativeTransfer::RadiativeTransferStepper::regrid</a></div><div class="ttdeci">void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override</div><div class="ttdoc">Regrid function. Calls the solver function.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:314</div></div>
+<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a04e975d76b4a07628a75d3a9acf40f49"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a04e975d76b4a07628a75d3a9acf40f49">Physics::RadiativeTransfer::RadiativeTransferStepper::registerRealms</a></div><div class="ttdeci">void registerRealms() override</div><div class="ttdoc">Register realms.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:281</div></div>
+<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a10999d870ae87a4adf4872cca9479e94"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a10999d870ae87a4adf4872cca9479e94">Physics::RadiativeTransfer::RadiativeTransferStepper::regrid</a></div><div class="ttdeci">void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override</div><div class="ttdoc">Regrid function. Calls the solver function.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:317</div></div>
 <div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a1252d9617d6a2e44a9eae08c9bc51b4a"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a1252d9617d6a2e44a9eae08c9bc51b4a">Physics::RadiativeTransfer::RadiativeTransferStepper::allocate</a></div><div class="ttdeci">void allocate() override</div><div class="ttdoc">Allocate necessary memory for solvers.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:93</div></div>
 <div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a191fb4e8f2918734e3d65a15a6a6fdf7"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a191fb4e8f2918734e3d65a15a6a6fdf7">Physics::RadiativeTransfer::RadiativeTransferStepper::RadiativeTransferStepper</a></div><div class="ttdeci">RadiativeTransferStepper()</div><div class="ttdoc">Constructor. Reads a couple of input options.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:28</div></div>
+<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a3396482eb902894cb703bb28fa7edd6b"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a3396482eb902894cb703bb28fa7edd6b">Physics::RadiativeTransfer::RadiativeTransferStepper::writePlotData</a></div><div class="ttdeci">void writePlotData(LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const std::string a_outputRealm, const int a_level) const override</div><div class="ttdoc">Write plot data to output holder.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:208</div></div>
 <div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a5d2c94ab8430e3f516abff736a53190e"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a5d2c94ab8430e3f516abff736a53190e">Physics::RadiativeTransfer::RadiativeTransferStepper::postInitialize</a></div><div class="ttdeci">void postInitialize() override</div><div class="ttdoc">Post-initialization functionality – sets the source term.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:122</div></div>
-<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a6be891e4077d9946373e3229d1e14a89"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a6be891e4077d9946373e3229d1e14a89">Physics::RadiativeTransfer::RadiativeTransferStepper::advance</a></div><div class="ttdeci">Real advance(const Real a_dt) override</div><div class="ttdoc">Advancement method. Calls the solver function.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:238</div></div>
+<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a6be891e4077d9946373e3229d1e14a89"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a6be891e4077d9946373e3229d1e14a89">Physics::RadiativeTransfer::RadiativeTransferStepper::advance</a></div><div class="ttdeci">Real advance(const Real a_dt) override</div><div class="ttdoc">Advancement method. Calls the solver function.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:241</div></div>
 <div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a7004d1ee43bdd62a34d1f7424974b9ee"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a7004d1ee43bdd62a34d1f7424974b9ee">Physics::RadiativeTransfer::RadiativeTransferStepper::getPlotVariableNames</a></div><div class="ttdeci">Vector&lt; std::string &gt; getPlotVariableNames() const override</div><div class="ttdoc">Get plot variable names.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:196</div></div>
 <div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a82b1b42f285558f8c8654f1f360701e9"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a82b1b42f285558f8c8654f1f360701e9">Physics::RadiativeTransfer::RadiativeTransferStepper::getNumberOfPlotVariables</a></div><div class="ttdeci">int getNumberOfPlotVariables() const override</div><div class="ttdoc">Get number of plot variables for this physics module.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:184</div></div>
-<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a839ea4b0579c3705ecd5cd157b83b7cf"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a839ea4b0579c3705ecd5cd157b83b7cf">Physics::RadiativeTransfer::RadiativeTransferStepper::preRegrid</a></div><div class="ttdeci">void preRegrid(const int a_lmin, const int a_oldFinestLevel) override</div><div class="ttdoc">Perform pre-regrid operations – calls the solver function. operation takes a lot of memory.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:302</div></div>
+<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a839ea4b0579c3705ecd5cd157b83b7cf"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a839ea4b0579c3705ecd5cd157b83b7cf">Physics::RadiativeTransfer::RadiativeTransferStepper::preRegrid</a></div><div class="ttdeci">void preRegrid(const int a_lmin, const int a_oldFinestLevel) override</div><div class="ttdoc">Perform pre-regrid operations – calls the solver function. operation takes a lot of memory.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:305</div></div>
 <div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_a86192e96bedc87c1600e81b9b4279a36"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a86192e96bedc87c1600e81b9b4279a36">Physics::RadiativeTransfer::RadiativeTransferStepper::parseRuntimeOptions</a></div><div class="ttdeci">void parseRuntimeOptions() override</div><div class="ttdoc">Parse runtime options.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:76</div></div>
-<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_aa1ac5dad6e2e210132062e6c945ed17c"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#aa1ac5dad6e2e210132062e6c945ed17c">Physics::RadiativeTransfer::RadiativeTransferStepper::computeDt</a></div><div class="ttdeci">Real computeDt() override</div><div class="ttdoc">Compute a time step to be used by Driver.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:220</div></div>
-<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_ab02809e76d079702f3b7f6efed3b6fbe"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ab02809e76d079702f3b7f6efed3b6fbe">Physics::RadiativeTransfer::RadiativeTransferStepper::setGaussianSource</a></div><div class="ttdeci">void setGaussianSource()</div><div class="ttdoc">For setting a Gaussian source in the radiative transfer equation solver.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:350</div></div>
+<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_aa1ac5dad6e2e210132062e6c945ed17c"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#aa1ac5dad6e2e210132062e6c945ed17c">Physics::RadiativeTransfer::RadiativeTransferStepper::computeDt</a></div><div class="ttdeci">Real computeDt() override</div><div class="ttdoc">Compute a time step to be used by Driver.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:223</div></div>
+<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_ab02809e76d079702f3b7f6efed3b6fbe"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ab02809e76d079702f3b7f6efed3b6fbe">Physics::RadiativeTransfer::RadiativeTransferStepper::setGaussianSource</a></div><div class="ttdeci">void setGaussianSource()</div><div class="ttdoc">For setting a Gaussian source in the radiative transfer equation solver.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:353</div></div>
 <div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_ab4de1a40959a4745c1a62fb847e51ca1"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ab4de1a40959a4745c1a62fb847e51ca1">Physics::RadiativeTransfer::RadiativeTransferStepper::forceDt</a></div><div class="ttdeci">void forceDt(const Real a_dt)</div><div class="ttdoc">Force usage of a time step.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:132</div></div>
-<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_ac61f8497b3b3b7989756cba0bec2fabd"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ac61f8497b3b3b7989756cba0bec2fabd">Physics::RadiativeTransfer::RadiativeTransferStepper::printStepReport</a></div><div class="ttdeci">void printStepReport() override</div><div class="ttdoc">Print a step report (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:268</div></div>
+<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_ac61f8497b3b3b7989756cba0bec2fabd"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ac61f8497b3b3b7989756cba0bec2fabd">Physics::RadiativeTransfer::RadiativeTransferStepper::printStepReport</a></div><div class="ttdeci">void printStepReport() override</div><div class="ttdoc">Print a step report (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:271</div></div>
 <div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_ac7e23612c3e9a3ba496f716de45100b1"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ac7e23612c3e9a3ba496f716de45100b1">Physics::RadiativeTransfer::RadiativeTransferStepper::setupSolvers</a></div><div class="ttdeci">void setupSolvers() override</div><div class="ttdoc">Set up the solver.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:54</div></div>
-<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_ae29077b3817845bc05ab35b0609b38ea"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ae29077b3817845bc05ab35b0609b38ea">Physics::RadiativeTransfer::RadiativeTransferStepper::postRegrid</a></div><div class="ttdeci">void postRegrid() override</div><div class="ttdoc">Post-regrid function. Sets a Gaussian source.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:326</div></div>
+<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_ae29077b3817845bc05ab35b0609b38ea"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ae29077b3817845bc05ab35b0609b38ea">Physics::RadiativeTransfer::RadiativeTransferStepper::postRegrid</a></div><div class="ttdeci">void postRegrid() override</div><div class="ttdoc">Post-regrid function. Sets a Gaussian source.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:329</div></div>
 <div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_af224a04b55e6b5703afdd908939dec06"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#af224a04b55e6b5703afdd908939dec06">Physics::RadiativeTransfer::RadiativeTransferStepper::initialData</a></div><div class="ttdeci">void initialData() override</div><div class="ttdoc">Fill simulation with initial data.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:105</div></div>
-<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_af3f0940f307ac333cbee523efd6aaccb"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#af3f0940f307ac333cbee523efd6aaccb">Physics::RadiativeTransfer::RadiativeTransferStepper::synchronizeSolverTimes</a></div><div class="ttdeci">void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override</div><div class="ttdoc">Synchronzie solver times and time steps.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:252</div></div>
+<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_af3f0940f307ac333cbee523efd6aaccb"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#af3f0940f307ac333cbee523efd6aaccb">Physics::RadiativeTransfer::RadiativeTransferStepper::synchronizeSolverTimes</a></div><div class="ttdeci">void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override</div><div class="ttdoc">Synchronzie solver times and time steps.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:255</div></div>
 <div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_af6cc5e5877617f35d73668b10864a027"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#af6cc5e5877617f35d73668b10864a027">Physics::RadiativeTransfer::RadiativeTransferStepper::~RadiativeTransferStepper</a></div><div class="ttdeci">virtual ~RadiativeTransferStepper()</div><div class="ttdoc">Destructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:44</div></div>
-<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_afe63e91fc214250129e9482190662fad"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#afe63e91fc214250129e9482190662fad">Physics::RadiativeTransfer::RadiativeTransferStepper::getPhi</a></div><div class="ttdeci">const EBAMRCellData &amp; getPhi() const</div><div class="ttdoc">Get the solver solution.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:338</div></div>
+<div class="ttc" id="aclassPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_html_afe63e91fc214250129e9482190662fad"><div class="ttname"><a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#afe63e91fc214250129e9482190662fad">Physics::RadiativeTransfer::RadiativeTransferStepper::getPhi</a></div><div class="ttdeci">const EBAMRCellData &amp; getPhi() const</div><div class="ttdoc">Get the solver solution.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferStepperImplem.H:341</div></div>
 <div class="ttc" id="anamespacePhysics_1_1RadiativeTransfer_html"><div class="ttname"><a href="namespacePhysics_1_1RadiativeTransfer.html">Physics::RadiativeTransfer</a></div><div class="ttdoc">Namespace for encapsulating the radiative transfer physics module.</div><div class="ttdef"><b>Definition:</b> CD_RadiativeTransferSpecies.H:21</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

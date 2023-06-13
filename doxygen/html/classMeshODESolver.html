@@ -215,15 +215,15 @@ const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td
 <tr class="memitem:a14272084bb398f800af6c9ec19d03aab"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a14272084bb398f800af6c9ec19d03aab">getPlotVariableNames</a> () const noexcept</td></tr>
 <tr class="memdesc:a14272084bb398f800af6c9ec19d03aab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get output plot names.  <a href="classMeshODESolver.html#a14272084bb398f800af6c9ec19d03aab">More...</a><br /></td></tr>
 <tr class="separator:a14272084bb398f800af6c9ec19d03aab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acb06314840c7467ba6819ced218f6431"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#acb06314840c7467ba6819ced218f6431">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const int a_level) const noexcept</td></tr>
-<tr class="memdesc:acb06314840c7467ba6819ced218f6431"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classMeshODESolver.html#acb06314840c7467ba6819ced218f6431">More...</a><br /></td></tr>
-<tr class="separator:acb06314840c7467ba6819ced218f6431"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13236be6500910451f6ef6a1b329ed44"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a13236be6500910451f6ef6a1b329ed44">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const std::string a_outputRealm, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a13236be6500910451f6ef6a1b329ed44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classMeshODESolver.html#a13236be6500910451f6ef6a1b329ed44">More...</a><br /></td></tr>
+<tr class="separator:a13236be6500910451f6ef6a1b329ed44"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:ab31488cafa8cc136cada5b3a0194b6f0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#ab31488cafa8cc136cada5b3a0194b6f0">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
-<tr class="memdesc:ab31488cafa8cc136cada5b3a0194b6f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classMeshODESolver.html#ab31488cafa8cc136cada5b3a0194b6f0">More...</a><br /></td></tr>
-<tr class="separator:ab31488cafa8cc136cada5b3a0194b6f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af39578d778b032947f49532e80bc5fea"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#af39578d778b032947f49532e80bc5fea">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_outputRealm, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
+<tr class="memdesc:af39578d778b032947f49532e80bc5fea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <a href="classMeshODESolver.html#af39578d778b032947f49532e80bc5fea">More...</a><br /></td></tr>
+<tr class="separator:af39578d778b032947f49532e80bc5fea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3e7341aca6d11275f70d827101710ee"><td class="memItemLeft" align="right" valign="top"><a id="ac3e7341aca6d11275f70d827101710ee"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#ac3e7341aca6d11275f70d827101710ee">parsePlotVariables</a> () noexcept</td></tr>
 <tr class="memdesc:ac3e7341aca6d11275f70d827101710ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse plot variables. <br /></td></tr>
@@ -467,7 +467,7 @@ template&lt;size_t N&gt; </div>
 </div><div class="memdoc">
 
 <p>Get number of output fields. </p>
-<dl class="section return"><dt>Returns</dt><dd>Returns number of plot variables include in <a class="el" href="classMeshODESolver.html#a227be4c0de4afb7e9b68ebb2b4e0ee2c" title="Write plot file.">writePlotFile()</a> and <a class="el" href="classMeshODESolver.html#acb06314840c7467ba6819ced218f6431" title="Write plot data to output holder.">writePlotData()</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns number of plot variables include in <a class="el" href="classMeshODESolver.html#a227be4c0de4afb7e9b68ebb2b4e0ee2c" title="Write plot file.">writePlotFile()</a> and <a class="el" href="classMeshODESolver.html#a13236be6500910451f6ef6a1b329ed44" title="Write plot data to output holder.">writePlotData()</a> </dd></dl>
 
 </div>
 </div>
@@ -1020,8 +1020,8 @@ template&lt;size_t N&gt; </div>
 
 </div>
 </div>
-<a id="ab31488cafa8cc136cada5b3a0194b6f0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab31488cafa8cc136cada5b3a0194b6f0">&#9670;&nbsp;</a></span>writeData()</h2>
+<a id="af39578d778b032947f49532e80bc5fea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af39578d778b032947f49532e80bc5fea">&#9670;&nbsp;</a></span>writeData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1048,6 +1048,12 @@ template&lt;size_t N&gt; </div>
           <td></td>
           <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1086,6 +1092,7 @@ template&lt;size_t N&gt; </div>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where this solver begins writing the output. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data to write. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output belongs </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_interpToCentroids</td><td>If true, a_data will be interpolated to cell centroids before writing to a_output. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_interpGhost</td><td>If true, interpolate ghost cells </td></tr>
@@ -1095,8 +1102,8 @@ template&lt;size_t N&gt; </div>
 
 </div>
 </div>
-<a id="acb06314840c7467ba6819ced218f6431"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acb06314840c7467ba6819ced218f6431">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="a13236be6500910451f6ef6a1b329ed44"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13236be6500910451f6ef6a1b329ed44">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1117,6 +1124,12 @@ template&lt;size_t N&gt; </div>
           <td></td>
           <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_icomp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1142,6 +1155,7 @@ template&lt;size_t N&gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output belongs </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>

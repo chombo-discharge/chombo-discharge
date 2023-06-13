@@ -1,52 +1,52 @@
 <map id="Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStorage.H" name="Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStorage.H">
-<area shape="rect" id="node1" title="Declaration of scratch storage for CdrPlasmaGodunovStepper." alt="" coords="4573,5,4811,61"/>
-<area shape="rect" id="node2" href="$CD__CdrPlasmaGodunovStepper_8H.html" title="Declaration of the Godunov time stepper method." alt="" coords="4029,109,4267,136"/>
-<area shape="rect" id="node4" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="2378,333,2502,360"/>
-<area shape="rect" id="node19" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1767,647,1953,673"/>
-<area shape="rect" id="node20" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="4275,647,4453,673"/>
-<area shape="rect" id="node3" title=" " alt="" coords="93,184,171,211"/>
-<area shape="rect" id="node34" href="$CD__CdrPlasmaStepper_8H.html" title="Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time." alt="" coords="2055,184,2236,211"/>
-<area shape="rect" id="node42" href="$CD__CdrIterator_8H.html" title="Declaration of an iterator class for CdrLayout (for iterating through subsets of solvers)." alt="" coords="2660,483,2791,509"/>
-<area shape="rect" id="node44" href="$CD__RtIterator_8H.html" title="Iterator class for RtLayout." alt="" coords="4240,483,4363,509"/>
-<area shape="rect" id="node46" href="$CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="5173,483,5272,509"/>
-<area shape="rect" id="node5" title=" " alt="" coords="2533,565,2688,591"/>
-<area shape="rect" id="node6" title=" " alt="" coords="289,647,431,673"/>
-<area shape="rect" id="node7" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="1686,483,1826,509"/>
-<area shape="rect" id="node18" href="$CD__DomainFluxIFFAB_8H.html" title="Declaration of a BaseIFFAB wrapper that holds domain fluxes." alt="" coords="398,565,575,591"/>
-<area shape="rect" id="node21" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="3173,565,3307,591"/>
-<area shape="rect" id="node22" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="499,408,720,435"/>
-<area shape="rect" id="node23" href="$CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="3691,565,3893,591"/>
-<area shape="rect" id="node24" href="$CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="1783,408,1945,435"/>
-<area shape="rect" id="node25" href="$CD__LoadBalancing_8H.html" title="Declaration of a static class for various load balancing operations." alt="" coords="3313,483,3471,509"/>
-<area shape="rect" id="node26" href="$CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="3913,483,4057,509"/>
-<area shape="rect" id="node28" href="$CD__EBReflux_8H.html" title="Declaration of a class which can reflux over the coarse&#45;fine interface." alt="" coords="4631,483,4751,509"/>
-<area shape="rect" id="node29" href="$CD__DomainFluxIFFABFactory_8H.html" title="Declaration of factory class for DomainFluxIFFAB." alt="" coords="447,483,670,509"/>
-<area shape="rect" id="node30" href="$CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="2370,483,2542,509"/>
-<area shape="rect" id="node31" href="$CD__NonConservativeDivergenceStencil_8H.html" title="Implementation of IrregStencil that can perform the nonconservative divergence averaging." alt="" coords="3381,557,3616,599"/>
-<area shape="rect" id="node32" href="$CD__Realm_8H.html" title="Declaration of the Realm class." alt="" coords="3855,408,3959,435"/>
-<area shape="rect" id="node33" href="$CD__AmrMeshImplem_8H.html" title="Implementation of CD_AmrMesh.H." alt="" coords="2290,408,2465,435"/>
-<area shape="rect" id="node8" title=" " alt="" coords="1965,565,2067,591"/>
-<area shape="rect" id="node9" title=" " alt="" coords="955,565,1085,591"/>
-<area shape="rect" id="node10" title=" " alt="" coords="2091,565,2194,591"/>
-<area shape="rect" id="node11" title=" " alt="" coords="1313,565,1418,591"/>
-<area shape="rect" id="node12" title=" " alt="" coords="1443,565,1549,591"/>
-<area shape="rect" id="node13" title=" " alt="" coords="1574,565,1679,591"/>
-<area shape="rect" id="node14" title=" " alt="" coords="763,647,867,673"/>
-<area shape="rect" id="node15" title=" " alt="" coords="1703,565,1809,591"/>
-<area shape="rect" id="node16" title=" " alt="" coords="1833,565,1941,591"/>
-<area shape="rect" id="node17" title=" " alt="" coords="2270,565,2357,591"/>
-<area shape="rect" id="node27" title=" " alt="" coords="4616,565,4667,591"/>
-<area shape="rect" id="node35" title=" " alt="" coords="398,333,485,360"/>
-<area shape="rect" id="node36" href="$CD__CdrPlasmaPhysics_8H.html" title="Declaration of basic physics coupling functions for Physics/CdrPlasma." alt="" coords="947,483,1128,509"/>
-<area shape="rect" id="node37" href="$CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="2971,565,3099,591"/>
-<area shape="rect" id="node38" href="$CD__RtLayout_8H.html" title="Declaration of a class that holds a set of RtSolvers." alt="" coords="4069,565,4189,591"/>
-<area shape="rect" id="node39" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="479,259,612,285"/>
-<area shape="rect" id="node40" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="2351,259,2529,285"/>
-<area shape="rect" id="node41" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="2183,259,2327,285"/>
-<area shape="rect" id="node43" href="$CD__CdrIteratorImplem_8H.html" title="Implementation of CdrIterator.H." alt="" coords="2763,565,2946,591"/>
-<area shape="rect" id="node45" href="$CD__RtIteratorImplem_8H.html" title="Implementation of RtIterator.H." alt="" coords="4214,565,4389,591"/>
-<area shape="rect" id="node47" title=" " alt="" coords="5467,565,5533,591"/>
-<area shape="rect" id="node48" title=" " alt="" coords="5558,565,5613,591"/>
-<area shape="rect" id="node49" title=" " alt="" coords="5373,565,5443,591"/>
-<area shape="rect" id="node50" href="$CD__TimerImplem_8H.html" title="Implementation of CD_Timer.H." alt="" coords="5147,565,5298,591"/>
+<area shape="rect" id="node1" title="Declaration of scratch storage for CdrPlasmaGodunovStepper." alt="" coords="4142,5,4381,61"/>
+<area shape="rect" id="node2" href="$CD__CdrPlasmaGodunovStepper_8H.html" title="Declaration of the Godunov time stepper method." alt="" coords="4417,109,4655,136"/>
+<area shape="rect" id="node4" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="2573,333,2697,360"/>
+<area shape="rect" id="node18" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2337,647,2522,673"/>
+<area shape="rect" id="node19" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="4191,647,4369,673"/>
+<area shape="rect" id="node3" title=" " alt="" coords="4497,184,4575,211"/>
+<area shape="rect" id="node34" href="$CD__CdrPlasmaStepper_8H.html" title="Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time." alt="" coords="2544,184,2725,211"/>
+<area shape="rect" id="node42" href="$CD__CdrIterator_8H.html" title="Declaration of an iterator class for CdrLayout (for iterating through subsets of solvers)." alt="" coords="3765,483,3896,509"/>
+<area shape="rect" id="node44" href="$CD__RtIterator_8H.html" title="Iterator class for RtLayout." alt="" coords="4219,483,4341,509"/>
+<area shape="rect" id="node46" href="$CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="5203,483,5301,509"/>
+<area shape="rect" id="node5" title=" " alt="" coords="656,647,811,673"/>
+<area shape="rect" id="node6" title=" " alt="" coords="137,647,279,673"/>
+<area shape="rect" id="node7" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="1815,483,1955,509"/>
+<area shape="rect" id="node17" href="$CD__DomainFluxIFFAB_8H.html" title="Declaration of a BaseIFFAB wrapper that holds domain fluxes." alt="" coords="347,565,525,591"/>
+<area shape="rect" id="node20" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="2776,565,2909,591"/>
+<area shape="rect" id="node21" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="483,408,704,435"/>
+<area shape="rect" id="node22" href="$CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="3208,565,3411,591"/>
+<area shape="rect" id="node23" href="$CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="1920,408,2083,435"/>
+<area shape="rect" id="node24" href="$CD__LoadBalancing_8H.html" title="Declaration of a static class for various load balancing operations." alt="" coords="2960,483,3117,509"/>
+<area shape="rect" id="node25" href="$CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="3436,483,3580,509"/>
+<area shape="rect" id="node27" href="$CD__EBReflux_8H.html" title="Declaration of a class which can reflux over the coarse&#45;fine interface." alt="" coords="4627,483,4747,509"/>
+<area shape="rect" id="node28" href="$CD__DomainFluxIFFABFactory_8H.html" title="Declaration of factory class for DomainFluxIFFAB." alt="" coords="451,483,674,509"/>
+<area shape="rect" id="node29" href="$CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="753,565,925,591"/>
+<area shape="rect" id="node30" href="$CD__NonConservativeDivergenceStencil_8H.html" title="Implementation of IrregStencil that can perform the nonconservative divergence averaging." alt="" coords="2467,557,2701,599"/>
+<area shape="rect" id="node31" href="$CD__Realm_8H.html" title="Declaration of the Realm class." alt="" coords="3371,408,3475,435"/>
+<area shape="rect" id="node32" href="$CD__CopyStrategy_8H.html" title="Simple enum for distinguishing copying strategies." alt="" coords="2934,565,3082,591"/>
+<area shape="rect" id="node33" href="$CD__AmrMeshImplem_8H.html" title="Implementation of CD_AmrMesh.H." alt="" coords="2673,408,2847,435"/>
+<area shape="rect" id="node8" title=" " alt="" coords="1771,565,1874,591"/>
+<area shape="rect" id="node9" title=" " alt="" coords="1305,565,1434,591"/>
+<area shape="rect" id="node10" title=" " alt="" coords="1898,565,2001,591"/>
+<area shape="rect" id="node11" title=" " alt="" coords="2025,565,2130,591"/>
+<area shape="rect" id="node12" title=" " alt="" coords="2155,565,2261,591"/>
+<area shape="rect" id="node13" title=" " alt="" coords="2286,565,2391,591"/>
+<area shape="rect" id="node14" title=" " alt="" coords="491,647,595,673"/>
+<area shape="rect" id="node15" title=" " alt="" coords="1510,565,1615,591"/>
+<area shape="rect" id="node16" title=" " alt="" coords="1639,565,1747,591"/>
+<area shape="rect" id="node26" title=" " alt="" coords="4645,565,4696,591"/>
+<area shape="rect" id="node35" title=" " alt="" coords="367,333,454,360"/>
+<area shape="rect" id="node36" href="$CD__CdrPlasmaPhysics_8H.html" title="Declaration of basic physics coupling functions for Physics/CdrPlasma." alt="" coords="1164,483,1345,509"/>
+<area shape="rect" id="node37" href="$CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="3587,565,3715,591"/>
+<area shape="rect" id="node38" href="$CD__RtLayout_8H.html" title="Declaration of a class that holds a set of RtSolvers." alt="" coords="4048,565,4168,591"/>
+<area shape="rect" id="node39" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="520,259,653,285"/>
+<area shape="rect" id="node40" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="2731,259,2909,285"/>
+<area shape="rect" id="node41" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="2563,259,2707,285"/>
+<area shape="rect" id="node43" href="$CD__CdrIteratorImplem_8H.html" title="Implementation of CdrIterator.H." alt="" coords="3739,565,3922,591"/>
+<area shape="rect" id="node45" href="$CD__RtIteratorImplem_8H.html" title="Implementation of RtIterator.H." alt="" coords="4193,565,4367,591"/>
+<area shape="rect" id="node47" title=" " alt="" coords="5496,565,5563,591"/>
+<area shape="rect" id="node48" title=" " alt="" coords="5587,565,5642,591"/>
+<area shape="rect" id="node49" title=" " alt="" coords="5403,565,5472,591"/>
+<area shape="rect" id="node50" href="$CD__TimerImplem_8H.html" title="Implementation of CD_Timer.H." alt="" coords="5177,565,5327,591"/>
 </map>

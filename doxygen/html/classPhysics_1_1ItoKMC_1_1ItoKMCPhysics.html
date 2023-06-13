@@ -125,6 +125,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:ae1f48100b3c5ed18fec51bfc83bcadc1"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ae1f48100b3c5ed18fec51bfc83bcadc1">computeAlpha</a> (const RealVect a_E) const =0</td></tr>
 <tr class="memdesc:ae1f48100b3c5ed18fec51bfc83bcadc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute Townsend ionization coefficient.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ae1f48100b3c5ed18fec51bfc83bcadc1">More...</a><br /></td></tr>
 <tr class="separator:ae1f48100b3c5ed18fec51bfc83bcadc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92e4ae097343bdeaa96db0f61daef6e8"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a92e4ae097343bdeaa96db0f61daef6e8">computeEta</a> (const RealVect a_E) const =0</td></tr>
+<tr class="memdesc:a92e4ae097343bdeaa96db0f61daef6e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute Townsend attachment coefficient.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a92e4ae097343bdeaa96db0f61daef6e8">More...</a><br /></td></tr>
+<tr class="separator:a92e4ae097343bdeaa96db0f61daef6e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6a40e664a6f09e13cb6787205101f8c6"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classItoSpecies.html">ItoSpecies</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a6a40e664a6f09e13cb6787205101f8c6">getItoSpecies</a> () const</td></tr>
 <tr class="memdesc:a6a40e664a6f09e13cb6787205101f8c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all particle drift-diffusion species.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a6a40e664a6f09e13cb6787205101f8c6">More...</a><br /></td></tr>
 <tr class="separator:a6a40e664a6f09e13cb6787205101f8c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -577,6 +580,43 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 <dl class="section return"><dt>Returns</dt><dd>Default returns infinity but user can implement a physics based time step. </dd></dl>
 
 <p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#ae0adae2fba678405d26fa7e69c0e1d7b">Physics::ItoKMC::ItoKMCAir3LFA</a>.</p>
+
+</div>
+</div>
+<a id="a92e4ae097343bdeaa96db0f61daef6e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92e4ae097343bdeaa96db0f61daef6e8">&#9670;&nbsp;</a></span>computeEta()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual Real Physics::ItoKMC::ItoKMCPhysics::computeEta </td>
+          <td>(</td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_E</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute Townsend attachment coefficient. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Should return the Townsend attachment coefficient. </dd></dl>
+
+<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#aa3ea991da78472f698c354df554b3e87">Physics::ItoKMC::ItoKMCAir3LFA</a>.</p>
 
 </div>
 </div>

@@ -121,6 +121,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a2fbe64919d46474009f696dbd4713b1e"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html#a2fbe64919d46474009f696dbd4713b1e">computeAlpha</a> (const Real a_E, const RealVect a_position) const =0</td></tr>
 <tr class="memdesc:a2fbe64919d46474009f696dbd4713b1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute alpha. Should return Townsend ionization coefficient.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html#a2fbe64919d46474009f696dbd4713b1e">More...</a><br /></td></tr>
 <tr class="separator:a2fbe64919d46474009f696dbd4713b1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae81f22f986391acbe793eba865c87fc"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html#aae81f22f986391acbe793eba865c87fc">computeEta</a> (const Real a_E, const RealVect a_position) const =0</td></tr>
+<tr class="memdesc:aae81f22f986391acbe793eba865c87fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute eta. Should return Townsend attachment coefficient.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html#aae81f22f986391acbe793eba865c87fc">More...</a><br /></td></tr>
+<tr class="separator:aae81f22f986391acbe793eba865c87fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc4e0c717e12d18ffea46e06d3f64b44"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html#abc4e0c717e12d18ffea46e06d3f64b44">advanceReactionNetwork</a> (Vector&lt; Real &gt; &amp;a_cdrSources, Vector&lt; Real &gt; &amp;a_rteSources, const Vector&lt; Real &gt; a_cdrDensities, const Vector&lt; RealVect &gt; a_cdrGradients, const Vector&lt; Real &gt; a_rteDensities, const RealVect a_E, const RealVect a_pos, const Real a_dx, const Real a_dt, const Real a_time, const Real a_kappa) const =0</td></tr>
 <tr class="memdesc:abc4e0c717e12d18ffea46e06d3f64b44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine intended for advancing a reaction network over a time a_dt.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html#abc4e0c717e12d18ffea46e06d3f64b44">More...</a><br /></td></tr>
 <tr class="separator:abc4e0c717e12d18ffea46e06d3f64b44"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -759,6 +762,53 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 <dl class="section note"><dt>Note</dt><dd>A positive flux is a flux INTO the domain. </dd></dl>
 
 <p>Implemented in <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a7f6b92b3164662f1c77764d46bbb7b58">Physics::CdrPlasma::CdrPlasmaJSON</a>.</p>
+
+</div>
+</div>
+<a id="aae81f22f986391acbe793eba865c87fc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae81f22f986391acbe793eba865c87fc">&#9670;&nbsp;</a></span>computeEta()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual Real Physics::CdrPlasma::CdrPlasmaPhysics::computeEta </td>
+          <td>(</td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_E</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_position</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute eta. Should return Townsend attachment coefficient. </p>
+<p>This function is mostly used for the cell tagging classes </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_position</td><td>Physical coordinates </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implemented in <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#afd4eb0d40d861ba42b4f88abaf6a7cb3">Physics::CdrPlasma::CdrPlasmaJSON</a>.</p>
 
 </div>
 </div>

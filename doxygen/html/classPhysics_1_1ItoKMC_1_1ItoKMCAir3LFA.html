@@ -143,6 +143,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a17cb0c3054610b42fbd5b39c66beafbe"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#a17cb0c3054610b42fbd5b39c66beafbe">computeAlpha</a> (const RealVect a_E) const override</td></tr>
 <tr class="memdesc:a17cb0c3054610b42fbd5b39c66beafbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute Townsend ionization coefficient.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#a17cb0c3054610b42fbd5b39c66beafbe">More...</a><br /></td></tr>
 <tr class="separator:a17cb0c3054610b42fbd5b39c66beafbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3ea991da78472f698c354df554b3e87"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#aa3ea991da78472f698c354df554b3e87">computeEta</a> (const RealVect a_E) const override</td></tr>
+<tr class="memdesc:aa3ea991da78472f698c354df554b3e87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute Townsend attachment coefficient.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#aa3ea991da78472f698c354df554b3e87">More...</a><br /></td></tr>
+<tr class="separator:aa3ea991da78472f698c354df554b3e87"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abcc42883d764c4ab01d3c18d542878f2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#abcc42883d764c4ab01d3c18d542878f2">updateReactionRates</a> (const RealVect a_E, const Vector&lt; Real &gt; &amp;a_phi, const Vector&lt; RealVect &gt; &amp;a_gradPhi, const Real a_dx, const Real a_kappa) const noexcept override</td></tr>
 <tr class="memdesc:abcc42883d764c4ab01d3c18d542878f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update reaction rates.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#abcc42883d764c4ab01d3c18d542878f2">More...</a><br /></td></tr>
 <tr class="separator:abcc42883d764c4ab01d3c18d542878f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -619,6 +622,42 @@ Additional Inherited Members</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns m_deltaX/k where k is Townsend ionization coefficient and m_deltaX is user-specified. </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a1e2dcd8a6ff5383a612681c90f649dd3">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
+
+</div>
+</div>
+<a id="aa3ea991da78472f698c354df554b3e87"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3ea991da78472f698c354df554b3e87">&#9670;&nbsp;</a></span>computeEta()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real ItoKMCAir3LFA::computeEta </td>
+          <td>(</td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_E</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute Townsend attachment coefficient. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implements <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a92e4ae097343bdeaa96db0f61daef6e8">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
 
 </div>
 </div>

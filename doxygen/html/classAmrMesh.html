@@ -97,7 +97,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a169cb0dcdb19e5bf08061ac7fd6b5780"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move constructor.  <a href="classAmrMesh.html#a169cb0dcdb19e5bf08061ac7fd6b5780">More...</a><br /></td></tr>
 <tr class="separator:a169cb0dcdb19e5bf08061ac7fd6b5780"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3fcc6b58e9fc585510258ae7c3c9332a"><td class="memItemLeft" align="right" valign="top"><a id="a3fcc6b58e9fc585510258ae7c3c9332a"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a3fcc6b58e9fc585510258ae7c3c9332a">~AmrMesh</a> ()</td></tr>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a3fcc6b58e9fc585510258ae7c3c9332a">~AmrMesh</a> ()</td></tr>
 <tr class="memdesc:a3fcc6b58e9fc585510258ae7c3c9332a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:a3fcc6b58e9fc585510258ae7c3c9332a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8c7cd5f8fa15a16eebfe28f2547ef685"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a8c7cd5f8fa15a16eebfe28f2547ef685">operator=</a> (const <a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_other)=delete</td></tr>
@@ -106,6 +106,26 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a62abb1c10ff8d78a358316db0288b140"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a62abb1c10ff8d78a358316db0288b140">operator=</a> (const <a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;&amp;a_other)=delete</td></tr>
 <tr class="memdesc:a62abb1c10ff8d78a358316db0288b140"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move assignment.  <a href="classAmrMesh.html#a62abb1c10ff8d78a358316db0288b140">More...</a><br /></td></tr>
 <tr class="separator:a62abb1c10ff8d78a358316db0288b140"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2354431a853db080b55495a7b20f4512"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a2354431a853db080b55495a7b20f4512"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a2354431a853db080b55495a7b20f4512">copyData</a> (<a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_dst, const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_src, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_toRegion=CopyStrategy::Valid, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_fromRegion=CopyStrategy::Valid) const noexcept</td></tr>
+<tr class="memdesc:a2354431a853db080b55495a7b20f4512"><td class="mdescLeft">&#160;</td><td class="mdescRight">Method for copying from a source container to a destination container. User supplies information about from/to regions.  <a href="classAmrMesh.html#a2354431a853db080b55495a7b20f4512">More...</a><br /></td></tr>
+<tr class="separator:a2354431a853db080b55495a7b20f4512"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74ab0580b7ff28128fc5c1051badd862"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a74ab0580b7ff28128fc5c1051badd862"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a74ab0580b7ff28128fc5c1051badd862">copyData</a> (LevelData&lt; T &gt; &amp;a_dst, const LevelData&lt; T &gt; &amp;a_src, const int a_level, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_toRegion=CopyStrategy::Valid, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_fromRegion=CopyStrategy::Valid) const noexcept</td></tr>
+<tr class="memdesc:a74ab0580b7ff28128fc5c1051badd862"><td class="mdescLeft">&#160;</td><td class="mdescRight">Method for copying from a source container to a destination container. User supplies information about from/to regions.  <a href="classAmrMesh.html#a74ab0580b7ff28128fc5c1051badd862">More...</a><br /></td></tr>
+<tr class="separator:a74ab0580b7ff28128fc5c1051badd862"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66c261aa8445bbe634131faf865dee15"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a66c261aa8445bbe634131faf865dee15"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a66c261aa8445bbe634131faf865dee15">copyData</a> (<a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_dst, const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_src, const Interval &amp;a_dstComps, const Interval &amp;a_srcComps, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_toRegion=CopyStrategy::Valid, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_fromRegion=CopyStrategy::Valid) const noexcept</td></tr>
+<tr class="memdesc:a66c261aa8445bbe634131faf865dee15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Method for copying from a source container to a destination container. User supplies information.  <a href="classAmrMesh.html#a66c261aa8445bbe634131faf865dee15">More...</a><br /></td></tr>
+<tr class="separator:a66c261aa8445bbe634131faf865dee15"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e2fbca514264f27a0106a49df839ae5"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a6e2fbca514264f27a0106a49df839ae5"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a6e2fbca514264f27a0106a49df839ae5">copyData</a> (LevelData&lt; T &gt; &amp;a_dst, const LevelData&lt; T &gt; &amp;a_src, const int a_level, const std::string a_toRealm, const std::string a_fromRealm, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_toRegion=CopyStrategy::Valid, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_fromRegion=CopyStrategy::Valid) const noexcept</td></tr>
+<tr class="memdesc:a6e2fbca514264f27a0106a49df839ae5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Method for copying from a source container to a destination container. User supplies information about from/to regions.  <a href="classAmrMesh.html#a6e2fbca514264f27a0106a49df839ae5">More...</a><br /></td></tr>
+<tr class="separator:a6e2fbca514264f27a0106a49df839ae5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f0ceb890b1dde44995215e93f514180"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a7f0ceb890b1dde44995215e93f514180"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a7f0ceb890b1dde44995215e93f514180">copyData</a> (LevelData&lt; T &gt; &amp;a_dst, const LevelData&lt; T &gt; &amp;a_src, const int a_level, const std::string a_toRealm, const std::string a_fromRealm, const Interval &amp;a_dstComps, const Interval &amp;a_srcComps, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_toRegion=CopyStrategy::Valid, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_fromRegion=CopyStrategy::Valid) const noexcept</td></tr>
+<tr class="memdesc:a7f0ceb890b1dde44995215e93f514180"><td class="mdescLeft">&#160;</td><td class="mdescRight">Method for copying from a source container to a destination container. User supplies information about from/to regions.  <a href="classAmrMesh.html#a7f0ceb890b1dde44995215e93f514180">More...</a><br /></td></tr>
+<tr class="separator:a7f0ceb890b1dde44995215e93f514180"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae5ab65c2e423aaa581d3adb4fd883b92"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:ae5ab65c2e423aaa581d3adb4fd883b92"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ae5ab65c2e423aaa581d3adb4fd883b92">deallocate</a> (Vector&lt; T * &gt; &amp;a_data) const</td></tr>
 <tr class="memdesc:ae5ab65c2e423aaa581d3adb4fd883b92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate data.  <a href="classAmrMesh.html#ae5ab65c2e423aaa581d3adb4fd883b92">More...</a><br /></td></tr>
@@ -472,6 +492,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a3183dc6d7db9eae4ed1af8c80ea0c893"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a3183dc6d7db9eae4ed1af8c80ea0c893">regridRealm</a> (const std::string a_realm, const Vector&lt; Vector&lt; int &gt;&gt; &amp;a_procs, const Vector&lt; Vector&lt; Box &gt;&gt; &amp;a_boxes, const int a_lmin)</td></tr>
 <tr class="memdesc:a3183dc6d7db9eae4ed1af8c80ea0c893"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid a realm. This generates the grids for the realm, but does not do the operators on the realm.  <a href="classAmrMesh.html#a3183dc6d7db9eae4ed1af8c80ea0c893">More...</a><br /></td></tr>
 <tr class="separator:a3183dc6d7db9eae4ed1af8c80ea0c893"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a275a50e9c39fca6ad59cf5eaa7a0ca40"><td class="memItemLeft" align="right" valign="top"><a id="a275a50e9c39fca6ad59cf5eaa7a0ca40"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a275a50e9c39fca6ad59cf5eaa7a0ca40">postRegrid</a> ()</td></tr>
+<tr class="memdesc:a275a50e9c39fca6ad59cf5eaa7a0ca40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run post-regrid operations. <br /></td></tr>
+<tr class="separator:a275a50e9c39fca6ad59cf5eaa7a0ca40"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4a1dedaf7d55ced2c775b32d401a08fd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a4a1dedaf7d55ced2c775b32d401a08fd">setGrids</a> (const Vector&lt; Vector&lt; Box &gt;&gt; &amp;a_boxes, const std::map&lt; std::string, Vector&lt; Vector&lt; long int &gt;&gt;&gt; &amp;a_realmsAndLoads)</td></tr>
 <tr class="memdesc:a4a1dedaf7d55ced2c775b32d401a08fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set grids from boxes and computational loads.  <a href="classAmrMesh.html#a4a1dedaf7d55ced2c775b32d401a08fd">More...</a><br /></td></tr>
 <tr class="separator:a4a1dedaf7d55ced2c775b32d401a08fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -648,6 +672,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a69e4f0db7383a8a926a9bcb59defb67e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a69e4f0db7383a8a926a9bcb59defb67e">buildGrids</a> (const Vector&lt; IntVectSet &gt; &amp;a_tags, const int a_lmin, const int a_hardcap=-1)</td></tr>
 <tr class="memdesc:a69e4f0db7383a8a926a9bcb59defb67e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build new internal AMR grids.  <a href="classAmrMesh.html#a69e4f0db7383a8a926a9bcb59defb67e">More...</a><br /></td></tr>
 <tr class="separator:a69e4f0db7383a8a926a9bcb59defb67e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d384fb87bd71ccdc5ee53673685ce48"><td class="memItemLeft" align="right" valign="top"><a id="a7d384fb87bd71ccdc5ee53673685ce48"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a7d384fb87bd71ccdc5ee53673685ce48">buildCopiers</a> ()</td></tr>
+<tr class="memdesc:a7d384fb87bd71ccdc5ee53673685ce48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build copiers for copying between realms. <br /></td></tr>
+<tr class="separator:a7d384fb87bd71ccdc5ee53673685ce48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad64b6dda8135d3f53ec299c945ad5b4b"><td class="memItemLeft" align="right" valign="top"><a id="ad64b6dda8135d3f53ec299c945ad5b4b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ad64b6dda8135d3f53ec299c945ad5b4b">parseProbLoHiCorners</a> ()</td></tr>
 <tr class="memdesc:ad64b6dda8135d3f53ec299c945ad5b4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the low/high corners of the computational domain. <br /></td></tr>
@@ -732,6 +760,28 @@ std::map&lt; std::string, RefCountedPtr&lt; <a class="el" href="classRealm.html"
 std::map&lt; phase::which_phase, RefCountedPtr&lt; BaseIF &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a93c109ce8345145d8d5373abf9c6280b">m_baseif</a></td></tr>
 <tr class="memdesc:a93c109ce8345145d8d5373abf9c6280b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implicit functions. <br /></td></tr>
 <tr class="separator:a93c109ce8345145d8d5373abf9c6280b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7dee8155ef6b291c9a5ff85b39b4155"><td class="memItemLeft" align="right" valign="top"><a id="ac7dee8155ef6b291c9a5ff85b39b4155"></a>
+std::map&lt; std::string, Vector&lt; DisjointBoxLayout &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ac7dee8155ef6b291c9a5ff85b39b4155">m_oldGrids</a></td></tr>
+<tr class="memdesc:ac7dee8155ef6b291c9a5ff85b39b4155"><td class="mdescLeft">&#160;</td><td class="mdescRight">Old grids. <br /></td></tr>
+<tr class="separator:ac7dee8155ef6b291c9a5ff85b39b4155"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e2169012fe5dc50728c7e9053483362"><td class="memItemLeft" align="right" valign="top">std::map&lt; std::string, Vector&lt; Copier &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a0e2169012fe5dc50728c7e9053483362">m_oldToNewCellCopiers</a></td></tr>
+<tr class="memdesc:a0e2169012fe5dc50728c7e9053483362"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for copiers from the old grids to the new ones.  <a href="classAmrMesh.html#a0e2169012fe5dc50728c7e9053483362">More...</a><br /></td></tr>
+<tr class="separator:a0e2169012fe5dc50728c7e9053483362"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c3919497262c0bbae39e0ca65ec1aa4"><td class="memItemLeft" align="right" valign="top">std::map&lt; std::string, Vector&lt; Copier &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a8c3919497262c0bbae39e0ca65ec1aa4">m_oldToNewEBCopiers</a></td></tr>
+<tr class="memdesc:a8c3919497262c0bbae39e0ca65ec1aa4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for copiers from the old grids to the new ones.  <a href="classAmrMesh.html#a8c3919497262c0bbae39e0ca65ec1aa4">More...</a><br /></td></tr>
+<tr class="separator:a8c3919497262c0bbae39e0ca65ec1aa4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e4c06b25de01bb1be380e84dc93dbc8"><td class="memItemLeft" align="right" valign="top">std::map&lt; std::pair&lt; std::string, std::string &gt;, Vector&lt; Copier &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a5e4c06b25de01bb1be380e84dc93dbc8">m_validToValidRealmCopiers</a></td></tr>
+<tr class="memdesc:a5e4c06b25de01bb1be380e84dc93dbc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm.  <a href="classAmrMesh.html#a5e4c06b25de01bb1be380e84dc93dbc8">More...</a><br /></td></tr>
+<tr class="separator:a5e4c06b25de01bb1be380e84dc93dbc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa74f5894b9a4eeebaa3cbb12ac2d0ab2"><td class="memItemLeft" align="right" valign="top">std::map&lt; std::pair&lt; std::string, std::string &gt;, Vector&lt; Copier &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aa74f5894b9a4eeebaa3cbb12ac2d0ab2">m_validToValidGhostRealmCopiers</a></td></tr>
+<tr class="memdesc:aa74f5894b9a4eeebaa3cbb12ac2d0ab2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm.  <a href="classAmrMesh.html#aa74f5894b9a4eeebaa3cbb12ac2d0ab2">More...</a><br /></td></tr>
+<tr class="separator:aa74f5894b9a4eeebaa3cbb12ac2d0ab2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e8d11b276504693095d4336c2b77c72"><td class="memItemLeft" align="right" valign="top">std::map&lt; std::pair&lt; std::string, std::string &gt;, Vector&lt; Copier &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a5e8d11b276504693095d4336c2b77c72">m_validGhostToValidRealmCopiers</a></td></tr>
+<tr class="memdesc:a5e8d11b276504693095d4336c2b77c72"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm.  <a href="classAmrMesh.html#a5e8d11b276504693095d4336c2b77c72">More...</a><br /></td></tr>
+<tr class="separator:a5e8d11b276504693095d4336c2b77c72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ce4c98a9de19649eafaa1abd68e2866"><td class="memItemLeft" align="right" valign="top">std::map&lt; std::pair&lt; std::string, std::string &gt;, Vector&lt; Copier &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a6ce4c98a9de19649eafaa1abd68e2866">m_validGhostToValidGhostRealmCopiers</a></td></tr>
+<tr class="memdesc:a6ce4c98a9de19649eafaa1abd68e2866"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm.  <a href="classAmrMesh.html#a6ce4c98a9de19649eafaa1abd68e2866">More...</a><br /></td></tr>
+<tr class="separator:a6ce4c98a9de19649eafaa1abd68e2866"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45cb87ee604d972a4afabc46eb48e2c4"><td class="memItemLeft" align="right" valign="top"><a id="a45cb87ee604d972a4afabc46eb48e2c4"></a>
 <a class="el" href="classAmrMesh.html#a6b1adbb06620c67d0b168f649c796289">GridGenerationMethod</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a45cb87ee604d972a4afabc46eb48e2c4">m_gridGenerationMethod</a></td></tr>
 <tr class="memdesc:a45cb87ee604d972a4afabc46eb48e2c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grid generation method. <br /></td></tr>
@@ -784,6 +834,10 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a836d00237da8ce294102747a9ad27439">m_finestLevel</a></td></tr>
 <tr class="memdesc:a836d00237da8ce294102747a9ad27439"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finest level. <br /></td></tr>
 <tr class="separator:a836d00237da8ce294102747a9ad27439"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a234e7a64df9cdfe0cba4bc8375c9c9f2"><td class="memItemLeft" align="right" valign="top"><a id="a234e7a64df9cdfe0cba4bc8375c9c9f2"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a234e7a64df9cdfe0cba4bc8375c9c9f2">m_oldFinestLevel</a></td></tr>
+<tr class="memdesc:a234e7a64df9cdfe0cba4bc8375c9c9f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finest level before a regrid. <br /></td></tr>
+<tr class="separator:a234e7a64df9cdfe0cba4bc8375c9c9f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82395aa042ef543322cbfee5b05be1d3"><td class="memItemLeft" align="right" valign="top"><a id="a82395aa042ef543322cbfee5b05be1d3"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a82395aa042ef543322cbfee5b05be1d3">m_maxAmrDepth</a></td></tr>
 <tr class="memdesc:a82395aa042ef543322cbfee5b05be1d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum amr depth. <br /></td></tr>
@@ -864,6 +918,10 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ae2fb5e315cfc9e853def28d39c4259f1">m_hasGrids</a></td></tr>
 <tr class="memdesc:ae2fb5e315cfc9e853def28d39c4259f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Has grids or not. <br /></td></tr>
 <tr class="separator:ae2fb5e315cfc9e853def28d39c4259f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a561e57718876fd11fcf3129004b4a27e"><td class="memItemLeft" align="right" valign="top"><a id="a561e57718876fd11fcf3129004b4a27e"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a561e57718876fd11fcf3129004b4a27e">m_hasRegridCopiers</a></td></tr>
+<tr class="memdesc:a561e57718876fd11fcf3129004b4a27e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Has regrid copiers or not. <br /></td></tr>
+<tr class="separator:a561e57718876fd11fcf3129004b4a27e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a30b7f70026f6bcf705bcfc9770730417"><td class="memItemLeft" align="right" valign="top"><a id="a30b7f70026f6bcf705bcfc9770730417"></a>
 Vector&lt; DisjointBoxLayout &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a30b7f70026f6bcf705bcfc9770730417">m_grids</a></td></tr>
 <tr class="memdesc:a30b7f70026f6bcf705bcfc9770730417"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grids. <br /></td></tr>
@@ -3249,6 +3307,403 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a2354431a853db080b55495a7b20f4512"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2354431a853db080b55495a7b20f4512">&#9670;&nbsp;</a></span>copyData() <span class="overload">[1/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::copyData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_toRegion</em> = <code>CopyStrategy::Valid</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_fromRegion</em> = <code>CopyStrategy::Valid</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Method for copying from a source container to a destination container. User supplies information about from/to regions. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_dst</td><td>Destination data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_src</td><td>Source data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_toRegion</td><td>Region we copy into </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fromRegion</td><td>Region we copy from </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS </dd>
+<dd>
+This routine will not work if copying between grids before/after regrids. </dd></dl>
+
+</div>
+</div>
+<a id="a66c261aa8445bbe634131faf865dee15"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66c261aa8445bbe634131faf865dee15">&#9670;&nbsp;</a></span>copyData() <span class="overload">[2/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::copyData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
+          <td class="paramname"><em>a_dstComps</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
+          <td class="paramname"><em>a_srcComps</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_toRegion</em> = <code>CopyStrategy::Valid</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_fromRegion</em> = <code>CopyStrategy::Valid</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Method for copying from a source container to a destination container. User supplies information. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_dst</td><td>Destination data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_src</td><td>Source data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dstComps</td><td>Destination components </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_srcComps</td><td>Source components </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_toRegion</td><td>Region we copy into </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fromRegion</td><td>Region we copy from </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS </dd>
+<dd>
+This routine will not work if copying between grids before/after regrids. </dd></dl>
+
+</div>
+</div>
+<a id="a74ab0580b7ff28128fc5c1051badd862"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74ab0580b7ff28128fc5c1051badd862">&#9670;&nbsp;</a></span>copyData() <span class="overload">[3/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::copyData </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_toRegion</em> = <code>CopyStrategy::Valid</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_fromRegion</em> = <code>CopyStrategy::Valid</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Method for copying from a source container to a destination container. User supplies information about from/to regions. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_dst</td><td>Destination data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_src</td><td>Source data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fromRegion</td><td>Region we copy from </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_toRegion</td><td>Region we copy into </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS </dd>
+<dd>
+This routine will not work if copying between grids before/after regrids. </dd></dl>
+
+</div>
+</div>
+<a id="a6e2fbca514264f27a0106a49df839ae5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e2fbca514264f27a0106a49df839ae5">&#9670;&nbsp;</a></span>copyData() <span class="overload">[4/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::copyData </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_toRealm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_fromRealm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_toRegion</em> = <code>CopyStrategy::Valid</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_fromRegion</em> = <code>CopyStrategy::Valid</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Method for copying from a source container to a destination container. User supplies information about from/to regions. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_dst</td><td>Destination data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_src</td><td>Source data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_toRealm</td><td>Destination realm </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fromRealm</td><td>Source realm </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fromRegion</td><td>Region we copy from </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_toRegion</td><td>Region we copy into </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS </dd>
+<dd>
+This routine will not work if copying between grids before/after regrids. </dd></dl>
+
+</div>
+</div>
+<a id="a7f0ceb890b1dde44995215e93f514180"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f0ceb890b1dde44995215e93f514180">&#9670;&nbsp;</a></span>copyData() <span class="overload">[5/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::copyData </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_toRealm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_fromRealm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
+          <td class="paramname"><em>a_dstComps</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
+          <td class="paramname"><em>a_srcComps</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_toRegion</em> = <code>CopyStrategy::Valid</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_fromRegion</em> = <code>CopyStrategy::Valid</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Method for copying from a source container to a destination container. User supplies information about from/to regions. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_dst</td><td>Destination data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_src</td><td>Source data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_toRealm</td><td>Destination realm </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fromRealm</td><td>Source realm </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dstComps</td><td>Destination components </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_srcComps</td><td>Source components </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fromRegion</td><td>Region we copy from </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_toRegion</td><td>Region we copy into </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS </dd>
+<dd>
+This routine will not work if copying between grids before/after regrids. </dd></dl>
 
 </div>
 </div>
@@ -7127,6 +7582,157 @@ template&lt;class P &gt; </div>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a0e2169012fe5dc50728c7e9053483362"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e2169012fe5dc50728c7e9053483362">&#9670;&nbsp;</a></span>m_oldToNewCellCopiers</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;std::string, Vector&lt;Copier&gt; &gt; AmrMesh::m_oldToNewCellCopiers</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Storage for copiers from the old grids to the new ones. </p>
+<dl class="section note"><dt>Note</dt><dd>Defined in the realm regrid routine. Cleared in the postRegrid routine. </dd></dl>
+
+</div>
+</div>
+<a id="a8c3919497262c0bbae39e0ca65ec1aa4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c3919497262c0bbae39e0ca65ec1aa4">&#9670;&nbsp;</a></span>m_oldToNewEBCopiers</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;std::string, Vector&lt;Copier&gt; &gt; AmrMesh::m_oldToNewEBCopiers</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Storage for copiers from the old grids to the new ones. </p>
+<dl class="section note"><dt>Note</dt><dd>Defined in the realm regrid routine. Cleared in the postRegrid routine. </dd></dl>
+
+</div>
+</div>
+<a id="a6ce4c98a9de19649eafaa1abd68e2866"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ce4c98a9de19649eafaa1abd68e2866">&#9670;&nbsp;</a></span>m_validGhostToValidGhostRealmCopiers</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;std::pair&lt;std::string, std::string&gt;, Vector&lt;Copier&gt; &gt; AmrMesh::m_validGhostToValidGhostRealmCopiers</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm. </p>
+<dl class="section note"><dt>Note</dt><dd>This is important at scale when you have &gt; 1M boxes since Copier definitions become costly. </dd></dl>
+
+</div>
+</div>
+<a id="a5e8d11b276504693095d4336c2b77c72"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e8d11b276504693095d4336c2b77c72">&#9670;&nbsp;</a></span>m_validGhostToValidRealmCopiers</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;std::pair&lt;std::string, std::string&gt;, Vector&lt;Copier&gt; &gt; AmrMesh::m_validGhostToValidRealmCopiers</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm. </p>
+<dl class="section note"><dt>Note</dt><dd>This is important at scale when you have &gt; 1M boxes since Copier definitions become costly. </dd></dl>
+
+</div>
+</div>
+<a id="aa74f5894b9a4eeebaa3cbb12ac2d0ab2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa74f5894b9a4eeebaa3cbb12ac2d0ab2">&#9670;&nbsp;</a></span>m_validToValidGhostRealmCopiers</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;std::pair&lt;std::string, std::string&gt;, Vector&lt;Copier&gt; &gt; AmrMesh::m_validToValidGhostRealmCopiers</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm. </p>
+<dl class="section note"><dt>Note</dt><dd>This is important at scale when you have &gt; 1M boxes since Copier definitions become costly. </dd></dl>
+
+</div>
+</div>
+<a id="a5e4c06b25de01bb1be380e84dc93dbc8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e4c06b25de01bb1be380e84dc93dbc8">&#9670;&nbsp;</a></span>m_validToValidRealmCopiers</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;std::pair&lt;std::string, std::string&gt;, Vector&lt;Copier&gt; &gt; AmrMesh::m_validToValidRealmCopiers</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm. </p>
+<dl class="section note"><dt>Note</dt><dd>This is important at scale when you have &gt; 1M boxes since Copier definitions become costly. </dd></dl>
 
 </div>
 </div>

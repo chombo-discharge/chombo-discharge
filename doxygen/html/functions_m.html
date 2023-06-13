@@ -433,6 +433,10 @@ $(function() {
 <li>m_cellConservativeStencils
 : <a class="el" href="classEBCoarAve.html#a05c04957bf4ebc0159de71d67d8b4c7d">EBCoarAve</a>
 </li>
+<li>m_cellCopiers
+: <a class="el" href="classEBCoarAve.html#adfc2a86fb7f3cec1679fd148408b772f">EBCoarAve</a>
+, <a class="el" href="classEBCoarseToFineInterp.html#a3e1921f61bad51b03a66bb71e17a6343">EBCoarseToFineInterp</a>
+</li>
 <li>m_cellExtr
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#ace6619cb0e01216f44ea013973a78bb2">Physics::CdrPlasma::CdrPlasmaGodunovStepper::CdrStorage</a>
 </li>
@@ -686,9 +690,7 @@ $(function() {
 , <a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#a625e49fa0fc1ea573d080627940e8f5d">MFHelmholtzDirichletEBBCFactory</a>
 </li>
 <li>m_copier
-: <a class="el" href="classEBCoarAve.html#a99fe3e8d006e83a071da07e1bbdd4725">EBCoarAve</a>
-, <a class="el" href="classEBCoarseToFineInterp.html#a22c71df6290c486f2723f4c91148dc1d">EBCoarseToFineInterp</a>
-, <a class="el" href="classEBGhostCellInterpolator.html#a7d566e872edc76b2ca138bfe010be5fb">EBGhostCellInterpolator</a>
+: <a class="el" href="classEBGhostCellInterpolator.html#a7d566e872edc76b2ca138bfe010be5fb">EBGhostCellInterpolator</a>
 , <a class="el" href="classEBGradient.html#a973fe445e8ca135397ae1c43429f142e">EBGradient</a>
 , <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a1bebdcad6cb9c28ef9fba57c9afd0504">EBLeastSquaresMultigridInterpolator</a>
 , <a class="el" href="classEBMGProlong.html#a31749a97204737e011e6c70711e370c8">EBMGProlong</a>
@@ -1048,6 +1050,12 @@ $(function() {
 <li>m_ebConservativeStencils
 : <a class="el" href="classEBCoarAve.html#a200121704f9677f66aa1922b045bcb13">EBCoarAve</a>
 </li>
+<li>m_ebCopier
+: <a class="el" href="classEBCoarseToFineInterp.html#a6b0a2ba44c2adbb8db5ca74e471cd783">EBCoarseToFineInterp</a>
+</li>
+<li>m_ebCopiers
+: <a class="el" href="classEBCoarAve.html#a69152b7c1c329f477a6a2e5226fcdcca">EBCoarAve</a>
+</li>
 <li>m_ebFineInterp
 : <a class="el" href="classPhaseRealm.html#a17f140ec139a8e294cf6d079ff76c15f">PhaseRealm</a>
 </li>
@@ -1321,6 +1329,9 @@ $(function() {
 </li>
 <li>m_faceConservativeStencils
 : <a class="el" href="classEBCoarAve.html#afaa8c15f24a2d47a711040194c9c6ad3">EBCoarAve</a>
+</li>
+<li>m_faceCopiers
+: <a class="el" href="classEBCoarAve.html#a69288fad080f0b2b24a29aeaddac9679">EBCoarAve</a>
 </li>
 <li>m_faceHarmonicStencils
 : <a class="el" href="classEBCoarAve.html#ae20be5d3c2beb189b0183ea8d86593be">EBCoarAve</a>
@@ -1705,6 +1716,9 @@ $(function() {
 </li>
 <li>m_hasMultigridSolver
 : <a class="el" href="classCdrMultigrid.html#a2ddb74bf4828f58af35cc1c6bebe21ec">CdrMultigrid</a>
+</li>
+<li>m_hasRegridCopiers
+: <a class="el" href="classAmrMesh.html#a561e57718876fd11fcf3129004b4a27e">AmrMesh</a>
 </li>
 <li>m_hasScanLevel
 : <a class="el" href="classScanShop.html#adde87ed2bca8917edd2a0fac10b08e77">ScanShop</a>
@@ -2601,11 +2615,21 @@ $(function() {
 <li>m_octaves
 : <a class="el" href="classPerlinSdf.html#ad0292e2659fff73392b77514c1514db7">PerlinSdf</a>
 </li>
+<li>m_oldFinestLevel
+: <a class="el" href="classAmrMesh.html#a234e7a64df9cdfe0cba4bc8375c9c9f2">AmrMesh</a>
+</li>
 <li>m_oldGrids
-: <a class="el" href="classParticleContainer.html#ac19ab1218435bde090d4ea275f7258f3">ParticleContainer&lt; P &gt;</a>
+: <a class="el" href="classAmrMesh.html#ac7dee8155ef6b291c9a5ff85b39b4155">AmrMesh</a>
+, <a class="el" href="classParticleContainer.html#ac19ab1218435bde090d4ea275f7258f3">ParticleContainer&lt; P &gt;</a>
 </li>
 <li>m_oldPPC
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a61d3b5253c2ca095b226ae82ce017fb1">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
+</li>
+<li>m_oldToNewCellCopiers
+: <a class="el" href="classAmrMesh.html#a0e2169012fe5dc50728c7e9053483362">AmrMesh</a>
+</li>
+<li>m_oldToNewEBCopiers
+: <a class="el" href="classAmrMesh.html#a8c3919497262c0bbae39e0ca65ec1aa4">AmrMesh</a>
 </li>
 <li>m_omega
 : <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a93131e04dc8f59c7c109876f0b18df4d">Physics::BrownianWalker::BrownianWalkerStepper</a>
@@ -3541,11 +3565,11 @@ $(function() {
 <li>m_shroom_live
 : <a class="el" href="classVessel.html#aa2add00ec06e29cd6482fbc95bdb03a9">Vessel</a>
 </li>
-<li>m_shroom_r
-: <a class="el" href="classVessel.html#adc6b2dd667bb3ab8a90b4b18489ef992">Vessel</a>
-</li>
 <li>m_shroom_R
 : <a class="el" href="classVessel.html#acaa7e92cf60b067ab42ac485d438901d">Vessel</a>
+</li>
+<li>m_shroom_r
+: <a class="el" href="classVessel.html#adc6b2dd667bb3ab8a90b4b18489ef992">Vessel</a>
 </li>
 <li>m_sideBox
 : <a class="el" href="classEBHelmholtzOp.html#ac102826540a335e1087e506e6c87a38d">EBHelmholtzOp</a>
@@ -3871,8 +3895,23 @@ $(function() {
 <li>m_validCells
 : <a class="el" href="classRealm.html#a1acd12b6e89a96865cf6dc35edc344f4">Realm</a>
 </li>
+<li>m_validGhostToValidGhostRealmCopiers
+: <a class="el" href="classAmrMesh.html#a6ce4c98a9de19649eafaa1abd68e2866">AmrMesh</a>
+</li>
+<li>m_validGhostToValidRealmCopiers
+: <a class="el" href="classAmrMesh.html#a5e8d11b276504693095d4336c2b77c72">AmrMesh</a>
+</li>
 <li>m_validRegion
 : <a class="el" href="classParticleContainer.html#a289dcfb868c974f9c0818c9977fde34c">ParticleContainer&lt; P &gt;</a>
+</li>
+<li>m_validToValidCopiers
+: <a class="el" href="classEBAMRSurfaceDeposition.html#a1d6c5b28ee3f5b63ce7fdf30bfdd993a">EBAMRSurfaceDeposition</a>
+</li>
+<li>m_validToValidGhostRealmCopiers
+: <a class="el" href="classAmrMesh.html#aa74f5894b9a4eeebaa3cbb12ac2d0ab2">AmrMesh</a>
+</li>
+<li>m_validToValidRealmCopiers
+: <a class="el" href="classAmrMesh.html#a5e4c06b25de01bb1be380e84dc93dbc8">AmrMesh</a>
 </li>
 <li>m_variablePermittivity
 : <a class="el" href="classDielectric.html#ae24bf31061fffbefddc61d4b1b014bf2">Dielectric</a>
@@ -4080,7 +4119,7 @@ $(function() {
 </li>
 <li>makeSuperparticles()
 : <a class="el" href="classItoLayout.html#a1ce54d1788882b20dbeff5cd3a61b6b2">ItoLayout&lt; T &gt;</a>
-, <a class="el" href="classItoSolver.html#a05f1a0fcf4c8a6cb67745a9a3b21c0a9">ItoSolver</a>
+, <a class="el" href="classItoSolver.html#a90e0d074046485949984c3c074d1fe58">ItoSolver</a>
 </li>
 <li>makeSuperParticles()
 : <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a5ca4b5d910f842b23cad9ebe90fe088d">Physics::BrownianWalker::BrownianWalkerStepper</a>
