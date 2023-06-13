@@ -342,9 +342,8 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
     CH_START(t3);
     for (int i = 0; i < m_numFilterSmooth; i++) {
 
-      // Must do the piecewise linear interpolator rather than the MG interpolator (which only does one layer across the CF, except near the EB)
       m_amr->conservativeAverage(a_phi, m_realm);
-      m_amr->interpGhostPwl(a_phi, m_realm);
+      m_amr->interpGhostMG(a_phi, m_realm);
 
       const Real alpha  = 0.5;
       const int  stride = 1;
