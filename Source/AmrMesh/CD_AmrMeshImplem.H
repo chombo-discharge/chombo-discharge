@@ -115,10 +115,10 @@ AmrMesh::copyData(LevelData<T>&       a_dst,
     const auto id = std::make_pair(a_fromRealm, a_toRealm);
 
     if (a_toRegion == CopyStrategy::ValidGhost) {
-      CH_assert(a_dst.ghostVect() == m_numGhostCell * IntVect::Unit);
+      CH_assert(a_dst.ghostVect() == m_numGhostCells * IntVect::Unit);
     }
     if (a_fromRegion == CopyStrategy::ValidGhost) {
-      CH_assert(a_src.ghostVect() == m_numGhostCell * IntVect::Unit);
+      CH_assert(a_src.ghostVect() == m_numGhostCells * IntVect::Unit);
     }
 
     Copier copier;

@@ -1420,8 +1420,17 @@ FieldSolver::writeSurfaceData(LevelData<EBCellFAB>&             a_output,
   DataOps::incr(scratch, a_data, 1.0);
 
   // Copy to a_output
-  m_amr
-    ->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);
+  const Interval srcInterv = Interval(0, 0);
+  const Interval dstInterv = Interval(a_comp, a_comp);
+  m_amr->copyData(a_output,
+                  scratch,
+                  a_level,
+                  a_outputRealm,
+                  m_realm,
+                  dstInterv,
+                  srcInterv,
+                  CopyStrategy::ValidGhost,
+                  CopyStrategy::ValidGhost);
 
   a_comp += numComp;
 }
