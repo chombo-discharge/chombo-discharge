@@ -1,7 +1,8 @@
 # ====================================================================================================
 # StreamerInceptionStepper class options
 # ====================================================================================================
-StreamerInceptionStepper.verbosity     = -1                            # Chattiness. 
+StreamerInceptionStepper.verbosity     = -1                            # Chattiness.
+StreamerInceptionStepper.profile       = false                         # Turn on/off run-time profiling
 StreamerInceptionStepper.mode          = stationary                    # Mode (stationary or transient)
 StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
 StreamerInceptionStepper.output_file   = report.txt                    # Output file
@@ -15,10 +16,8 @@ StreamerInceptionStepper.voltage_steps = 3                             # Number 
 
 # Dynamic mode
 StreamerInceptionStepper.ion_transport = true                          # Turn on/off ion transport
-StreamerInceptionStepper.transport_alg = heun                          # Transport algorithm.
+StreamerInceptionStepper.transport_alg = heun                          # Transport algorithm. 'euler', 'heun', or 'imex'
 StreamerInceptionStepper.cfl           = 0.8                           # CFL time step for dynamic mode
-StreamerInceptionStepper.min_dt        = 0.0001E-06                           # Minimum permitted time step
-StreamerInceptionStepper.max_dt        = 0.0001                          # Maximum permitted time step
-StreamerInceptionStepper.delta_v_percent = 0.1                        # Value between 0 and 1. The maximum deviation from V(t) in percent, i.e. deltaVPercent=deltaV/V
-StreamerInceptionStepper.end_time        = 0.000169                    # Time at the end of the input voltage curve
-StreamerInceptionStepper.peak_time       = 3.272E-07                    # Time at the peak of the input voltage curve
+StreamerInceptionStepper.min_dt        = 0.0                           # Minimum permitted time step
+StreamerInceptionStepper.max_dt        = 1E99                          # Maximum permitted time step
+

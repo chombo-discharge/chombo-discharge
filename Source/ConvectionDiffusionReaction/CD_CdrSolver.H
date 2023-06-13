@@ -438,11 +438,16 @@ public:
     @brief Write output data to a_output
     @param[inout] a_output Output data holder.
     @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in]    a_outputRealm Realm where a_output belongs
+    @param[in]    a_level  Grid level
     @note This will write the plot data in this solver to a_output, starting on a_comp
     @note This routine writes m_phi on centroids (and not cell-centers). 
   */
   virtual void
-  writePlotData(EBAMRCellData& a_output, int& a_icomp);
+  writePlotData(LevelData<EBCellFAB>& a_output,
+                int&                  a_icomp,
+                const std::string     a_outputRealm,
+                const int             a_level) const noexcept;
 
   /*!
     @brief Write checkpoint data into HDF5 file. 
@@ -473,13 +478,6 @@ public:
   */
   virtual void
   regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
-
-  /*!
-    @brief Set redistribution weights
-    @param[in] a_weights Weights to use for redistribution (e.g., mass)
-  */
-  virtual void
-  setRedistWeights(const EBAMRCellData& a_weights);
 
   /*!
     @brief Get the realm where this solver is registered. 
@@ -676,12 +674,12 @@ public:
   extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept;
 
   /*!
-    @brief Redistribute the mass differente into the data holder.
-    @param[inout] a_phi Cell data
-    @param[in]    a_delta Mass to be re-distributed.
+    @brief Add data through redistribution into cell-centered holders
+    @param[inout] a_phi   Target data
+    @param[in]    a_delta Data to be redistributed
   */
   virtual void
-  redistribute(EBAMRCellData& a_phi, const EBAMRIVData& a_delta) noexcept;
+  redistribute(EBAMRCellData& a_phi, const EBAMRIVData& a_delta) const noexcept;
 
 protected:
   /*!
@@ -690,7 +688,6 @@ protected:
   enum class Redistribution
   {
     VolumeWeighted,
-    MassWeighted,
     None
   };
 
@@ -703,11 +700,6 @@ protected:
     @brief Number of components that this solver solves for
   */
   static constexpr int m_nComp = 1;
-
-  /*!
-    @brief Index space
-  */
-  RefCountedPtr<EBIndexSpace> m_ebis;
 
   /*!
     @brief Species through which e.g. mobility/diffusion and initial conditions is passed. 
@@ -767,28 +759,21 @@ protected:
 
   /*!
     @brief Cell-centered velocities
+    @note Memory is only allocated if the solver is mobile. 
   */
   EBAMRCellData m_cellVelocity;
 
   /*!
     @brief Holder for face centered states
+    @note Memory is only allocated if the solver is mobile. 
   */
   EBAMRFluxData m_faceStates;
 
   /*!
-    @brief Scratch storage. 
+    @brief Face-centered velocities (only normal components)
+    @note Memory is only allocated if the solver is mobile. 
   */
-  EBAMRCellData m_scratch;
-
-  /*!
-    @brief Scratch storage for flux
-  */
-  EBAMRFluxData m_scratchFluxOne;
-
-  /*!
-    @brief Scratch storage for flux
-  */
-  EBAMRFluxData m_scratchFluxTwo;
+  EBAMRFluxData m_faceVelocity;
 
   /*!
     @brief Scratch storage for the non-conservative divergence
@@ -816,11 +801,6 @@ protected:
   EBAMRCellData m_cacheSource;
 
   /*!
-    @brief Face-centered velocities (only normal components)
-  */
-  EBAMRFluxData m_faceVelocity;
-
-  /*!
     @brief EB-centered velocities
   */
   EBAMRIVData m_ebVelocity;
@@ -837,16 +817,19 @@ protected:
 
   /*!
     @brief Diffusion coefficients on cell centers
+    @note Memory is only allocated if the solver is diffusive
   */
   EBAMRCellData m_cellCenteredDiffusionCoefficient;
 
   /*!
     @brief Diffusion coefficients on face centers
+    @note Memory is only allocated if the solver is diffusive
   */
   EBAMRFluxData m_faceCenteredDiffusionCoefficient;
 
   /*!
     @brief Diffusion coefficients on EB faces
+    @note Memory is only allocated if the solver is diffusive
   */
   EBAMRIVData m_ebCenteredDiffusionCoefficient;
 
@@ -1134,72 +1117,6 @@ protected:
                              const int                         a_lvl);
 
   /*!
-    @brief Increment flux registers
-    @param[in] a_flux Face centered fluxes
-  */
-  virtual void
-  incrementFluxRegister(const EBAMRFluxData& a_flux);
-
-  /*!
-    @brief Set flux registers to zero (so they can be increment later). 
-  */
-  virtual void
-  resetFluxRegister();
-
-  /*!
-    @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
-    @param[in] a_massDifference Mass difference
-    @note This increments the so-called redistribution registers for ensuring that redistributed mass around the cut cells ends up in the right place. 
-  */
-  virtual void
-  coarseFineIncrement(const EBAMRIVData& m_massDifference);
-
-  /*!
-    @brief Do mass redistribution on each level. 
-    @param[inout] a_stableDivergence Hybrid divergence on input, stable and conservative divergence on output. 
-    @note This only redistributes on the level -- it does not account for distribution across refinement boundaries (need the other routines for that). 
-  */
-  virtual void
-  hyperbolicRedistribution(EBAMRCellData& a_stableDivergence);
-
-  /*!
-    @brief Increment redistribution flux registers. 
-    @note This just tells the flux registers about whats going on near EB refinement boundaries. 
-  */
-  virtual void
-  incrementRedistFlux();
-
-  /*!
-    @brief Increment redistribution objects with mass to be redistributed.
-    @param[in] a_massDifference Mass to be redistributed. 
-    @note This only increments the level-register -- must call coarseFineIncrement to do the other registers. 
-  */
-  virtual void
-  incrementRedist(const EBAMRIVData& a_massDifference);
-
-  /*!
-    @brief Do coarse-fine redistribution
-    @param[inout] a_phi On output, this will be incremented with redistributed mass across refinement boundaries. 
-    @note This redistributes mass around the CF region, using the coarse-fine redistribution registers
-  */
-  virtual void
-  coarseFineRedistribution(EBAMRCellData& a_phi);
-
-  /*!
-    @brief Reflux across refinement boundaries, using whatever is inside the flux registers. 
-    @param[inout] a_phi Cell-centered state
-  */
-  virtual void
-  reflux(EBAMRCellData& a_phi);
-
-  /*!
-    @brief Set ebis
-    @param[in] a_ebis EBIndexspace
-  */
-  virtual void
-  setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis);
-
-  /*!
     @brief Fill initial data from a distribution function
     @note This increments m_phi on the mesh with data from m_species->initialData().
   */
@@ -1281,10 +1198,19 @@ protected:
     @param[inout] a_output Output data holder.
     @param[inout] a_icomp  Starting component where this solver begins writing the output. 
     @param[in]    a_data   Data to write. 
-    @param[in]    a_interp If true, a_data will be interpolated to cell centroids before writing to a_output. 
+    @param[in]    a_outputRealm Realm where a_output belongs
+    @param[in]    a_level  Grid level
+    @param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
+    @param[in]    a_interpGhost If true, interpolate ghost cells
   */
   virtual void
-  writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);
+  writeData(LevelData<EBCellFAB>& a_output,
+            int&                  a_comp,
+            const EBAMRCellData&  a_data,
+            const std::string     a_outputRealm,
+            const int             a_level,
+            const bool            a_interpToCentroids,
+            const bool            a_interpGhost) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

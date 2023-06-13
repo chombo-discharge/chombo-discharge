@@ -87,7 +87,9 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
     CH_assert(!(a_meshData[lvl].isNull()));
     CH_assert(a_meshData[lvl]->nComp() == 1);
 
-    m_data[lvl]->copyTo(*a_meshData[lvl]);
+    const Interval interv = Interval(0, 0);
+
+    m_data[lvl]->copyTo(interv, *a_meshData[lvl], interv, m_validToValidCopiers[lvl]);
   }
 }
 
@@ -155,7 +157,9 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
     CH_assert(!(a_meshData[lvl].isNull()));
     CH_assert(a_meshData[lvl]->nComp() == 1);
 
-    m_data[lvl]->copyTo(*a_meshData[lvl]);
+    const Interval interv = Interval(0, 0);
+
+    m_data[lvl]->copyTo(interv, *a_meshData[lvl], interv, m_validToValidCopiers[lvl]);
   }
 }
 

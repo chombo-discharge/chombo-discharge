@@ -163,7 +163,8 @@ NoisePlane.clamp_dx          =  100E-6      # Noise clamp falloff
 # ====================================================================================================
 # StreamerInceptionStepper class options
 # ====================================================================================================
-StreamerInceptionStepper.verbosity     = -1                            # Chattiness. 
+StreamerInceptionStepper.verbosity     = -1                            # Chattiness.
+StreamerInceptionStepper.profile       = false
 StreamerInceptionStepper.mode          = stationary                    # Mode (stationary or transient)
 StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
 StreamerInceptionStepper.output_file   = report.txt                    # Output file

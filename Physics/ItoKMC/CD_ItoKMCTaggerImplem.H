@@ -117,6 +117,26 @@ ItoKMCTagger<S>::getNumberOfPlotVariables() const noexcept
 }
 
 template <typename S>
+Vector<std::string>
+ItoKMCTagger<S>::getPlotVariableNames() const noexcept
+{
+  CH_TIME("ItoKMCTagger::getPlotVariableNames");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getPlotVariableNames" << endl;
+  }
+
+  Vector<std::string> plotVars;
+
+  if (m_plotData) {
+    for (int i = 0; i < m_numTagFields; i++) {
+      plotVars.push_back("Tag field-" + std::to_string(i));
+    }
+  }
+
+  return plotVars;
+}
+
+template <typename S>
 Vector<EBAMRCellData>&
 ItoKMCTagger<S>::getTagFields() noexcept
 {
@@ -132,9 +152,10 @@ ItoKMCTagger<S>::getTagFields() noexcept
 
 template <typename S>
 void
-ItoKMCTagger<S>::writePlotData(EBAMRCellData&       a_output,
-                               Vector<std::string>& a_plotVariableNames,
-                               int&                 a_icomp) const noexcept
+ItoKMCTagger<S>::writePlotData(LevelData<EBCellFAB>& a_output,
+                               int&                  a_icomp,
+                               const std::string     a_outputRealm,
+                               const int             a_level) const noexcept
 {
   CH_TIME("ItoKMCTagger::writePlotData");
   if (m_verbosity > 5) {
@@ -152,11 +173,9 @@ ItoKMCTagger<S>::writePlotData(EBAMRCellData&       a_output,
       const Interval srcInterv(0, 0);
       const Interval dstInterv(a_icomp, a_icomp);
 
-      a_output.copy(srcInterv, tagField, dstInterv);
+      m_amr->copyData(a_output, *tagField[a_level], a_level, a_outputRealm, tagField.getRealm(), dstInterv, srcInterv);
 
       DataOps::setCoveredValue(a_output, a_icomp, 0.0);
-
-      a_plotVariableNames.push_back("Tag field-" + std::to_string(i));
 
       a_icomp++;
     }

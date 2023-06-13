@@ -42,7 +42,7 @@ BoxLoops::loop(const Box& computeBox, Functor&& func, const IntVect& a_stride)
 
 template <typename Functor>
 ALWAYS_INLINE void
-BoxLoops::loop(IntVectSet& a_ivs, Functor&& a_kernel)
+BoxLoops::loop(const IntVectSet& a_ivs, Functor&& a_kernel)
 {
   for (IVSIterator iter(a_ivs); iter.ok(); ++iter) {
     a_kernel(iter());
@@ -51,7 +51,7 @@ BoxLoops::loop(IntVectSet& a_ivs, Functor&& a_kernel)
 
 template <typename Functor>
 ALWAYS_INLINE void
-BoxLoops::loop(DenseIntVectSet& a_ivs, Functor&& a_kernel)
+BoxLoops::loop(const DenseIntVectSet& a_ivs, Functor&& a_kernel)
 {
   for (DenseIntVectSetIterator iter(a_ivs); iter.ok(); ++iter) {
     a_kernel(iter());

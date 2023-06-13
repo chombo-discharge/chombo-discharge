@@ -9,12 +9,15 @@ Currently, if you use ``chombo-discharge`` you should cite the following methodo
 
 .. code-block:: none
 
-   @article{chombo-discharge,
-     author   = {Marskar, Robert},
-     doi      = {10.1016/j.jcp.2019.03.036},
-     issn     = {10902716},
-     journal  = {Journal of Computational Physics},
-     keywords = {Cartesian AMR,Complex geometry,HPC,Plasma,Streamer},
-     title    = {{An adaptive Cartesian embedded boundary approach for fluid simulations of two- and three-dimensional low temperature plasma filaments in complex geometries}},
-     year     = {2019}
-   }		
+   @article{Marskar_chombo-discharge_2023,
+      author = {Marskar, Robert},
+      doi = {10.21105/joss.05335},
+      journal = {Journal of Open Source Software},
+      month = may,
+      number = {85},
+      pages = {5335},
+      title = {{chombo-discharge: An AMR code for gas discharge simulations in complex geometries}},
+      url = {https://joss.theoj.org/papers/10.21105/joss.05335},
+      volume = {8},
+      year = {2023}
+   } 

@@ -111,6 +111,15 @@ namespace Physics {
       computeAlpha(const Real a_E, const RealVect a_position) const = 0;
 
       /*!
+	@brief Compute eta. Should return Townsend attachment coefficient. 
+	@details This function is mostly used for the cell tagging classes
+	@param[in] a_E        Electric field.
+	@param[in] a_position Physical coordinates
+      */
+      virtual Real
+      computeEta(const Real a_E, const RealVect a_position) const = 0;
+
+      /*!
 	@brief Routine intended for advancing a reaction network over a time a_dt. 
 	@details This routine assumes that the subsequent advance is in the form phi^(k+1) = phi^k + S*a_dt. Thus, this routine exists such that users can EITHER
 	fill a_cdrSources and a_rteSources directly with an explicit rule, OR they can perform a fully implicit advance within this routine and set S from that. 

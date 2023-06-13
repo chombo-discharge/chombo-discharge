@@ -347,7 +347,7 @@ TracerParticleSolver<P>::remap()
 
 template <typename P>
 inline void
-TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi)
+TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const noexcept
 {
   CH_TIME("TracerParticleSolver::deposit(EBAMRCellData)");
   if (m_verbosity > 5) {
@@ -386,6 +386,57 @@ TracerParticleSolver<P>::interpolateVelocities()
   CH_assert(!(m_velocityField == nullptr));
 
   m_amr->interpolateParticles<P, &P::velocity>(m_particles, m_realm, m_phase, *m_velocityField, m_interpolation, false);
+}
+
+template <typename P>
+inline void
+TracerParticleSolver<P>::writePlotFile()
+{
+  CH_TIME("TracerParticleSolver::writePlotFile()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::writePlotFile()" << endl;
+  }
+
+  // Number of output components and their names
+  const int                 numPlotVars  = this->getNumberOfPlotVariables();
+  const Vector<std::string> plotVarNames = this->getPlotVariableNames();
+
+  // Allocate storage
+  EBAMRCellData output;
+  m_amr->allocate(output, m_realm, m_phase, numPlotVars);
+  DataOps::setValue(output, 0.0);
+
+  // Copy internal data to be plotted over to 'output'
+  int icomp = 0;
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    this->writePlotData(*output[lvl], icomp, m_realm, lvl);
+  }
+
+  // Filename
+  char filename[100];
+  sprintf(filename, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_timeStep, SpaceDim);
+  std::string fname(filename);
+
+  // Alias, because Chombo's EBAMRIO wants raw pointers (but we stick to smart pointers, like God intended).
+  Vector<LevelData<EBCellFAB>*> outputPtr;
+  m_amr->alias(outputPtr, output);
+
+#ifdef CH_USE_HDF5
+  constexpr int numPlotGhost = 0;
+
+  DischargeIO::writeEBHDF5(fname,
+                           plotVarNames,
+                           m_amr->getGrids(m_realm),
+                           outputPtr,
+                           m_amr->getDomains(),
+                           m_amr->getDx(),
+                           m_amr->getRefinementRatios(),
+                           m_dt,
+                           m_time,
+                           m_amr->getProbLo(),
+                           m_amr->getFinestLevel() + 1,
+                           numPlotGhost);
+#endif
 }
 
 template <typename P>
@@ -440,60 +491,14 @@ TracerParticleSolver<P>::getPlotVariableNames() const
 
 template <typename P>
 inline void
-TracerParticleSolver<P>::writePlotFile()
+TracerParticleSolver<P>::writePlotData(LevelData<EBCellFAB>& a_output,
+                                       int&                  a_comp,
+                                       const std::string     a_outputRealm,
+                                       const int             a_level) const noexcept
 {
-  CH_TIME("TracerParticleSolver::writePlotFile()");
+  CH_TIME("TracerParticleSolver::writePlotData");
   if (m_verbosity > 5) {
-    pout() << m_name + "::writePlotFile()" << endl;
-  }
-
-  // Number of output components and their names
-  const int                 numPlotVars  = this->getNumberOfPlotVariables();
-  const Vector<std::string> plotVarNames = this->getPlotVariableNames();
-
-  // Allocate storage
-  EBAMRCellData output;
-  m_amr->allocate(output, m_realm, m_phase, numPlotVars);
-  DataOps::setValue(output, 0.0);
-
-  // Copy internal data to be plotted over to 'output'
-  int icomp = 0;
-  this->writePlotData(output, icomp);
-
-  // Filename
-  char filename[100];
-  sprintf(filename, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_timeStep, SpaceDim);
-  std::string fname(filename);
-
-  // Alias, because Chombo's EBAMRIO wants raw pointers (but we stick to smart pointers, like God intended).
-  Vector<LevelData<EBCellFAB>*> outputPtr;
-  m_amr->alias(outputPtr, output);
-
-#ifdef CH_USE_HDF5
-  constexpr int numPlotGhost = 0;
-
-  DischargeIO::writeEBHDF5(fname,
-                           plotVarNames,
-                           m_amr->getGrids(m_realm),
-                           outputPtr,
-                           m_amr->getDomains(),
-                           m_amr->getDx(),
-                           m_amr->getRefinementRatios(),
-                           m_dt,
-                           m_time,
-                           m_amr->getProbLo(),
-                           m_amr->getFinestLevel() + 1,
-                           numPlotGhost);
-#endif
-}
-
-template <typename P>
-inline void
-TracerParticleSolver<P>::writePlotData(EBAMRCellData& a_output, int& a_icomp)
-{
-  CH_TIME("TracerParticleSolver::writePlotData(EBAMRCellData, int)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::writePlotData(EBAMRCellData, int)" << endl;
+    pout() << m_name + "::writePlotData" << endl;
   }
 
   // Write the particle scalars.
@@ -503,29 +508,71 @@ TracerParticleSolver<P>::writePlotData(EBAMRCellData& a_output, int& a_icomp)
 
     this->deposit(weight);
 
-    const Interval srcInterval(0, 0);
-    const Interval dstInterval(a_icomp, a_icomp);
-
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      weight[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
-    }
-
-    a_icomp++;
+    this->writeData(a_output, a_comp, weight, a_outputRealm, a_level, false, true);
   }
 
   // Write the velocity field to the output data holder.
   if (m_plotVelocity) {
     CH_assert(!(m_velocityField == nullptr));
 
-    const Interval srcInterval(0, SpaceDim - 1);
-    const Interval dstInterval(a_icomp, a_icomp + SpaceDim - 1);
-
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      (*m_velocityField)[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
-    }
-
-    a_icomp += SpaceDim;
+    this->writeData(a_output, a_comp, *m_velocityField, a_outputRealm, a_level, true, true);
   }
+}
+
+template <typename P>
+void
+TracerParticleSolver<P>::writeData(LevelData<EBCellFAB>& a_output,
+                                   int&                  a_comp,
+                                   const EBAMRCellData&  a_data,
+                                   const std::string     a_outputRealm,
+                                   const int             a_level,
+                                   const bool            a_interpToCentroids,
+                                   const bool            a_interpGhost) const noexcept
+{
+  CH_TIMERS("TracerParticleSolver::writeData");
+  CH_TIMER("TracerParticleSolver::writeData::allocate", t1);
+  CH_TIMER("TracerParticleSolver::writeData::local_copy", t2);
+  CH_TIMER("TracerParticleSolver::writeData::interp_ghost", t3);
+  CH_TIMER("TracerParticleSolver::writeData::interp_centroid", t4);
+  CH_TIMER("TracerParticleSolver::writeData::final_copy", t5);
+  if (m_verbosity > 5) {
+    pout() << m_name + "::writeData" << endl;
+  }
+
+  // Number of components we are working with.
+  const int numComp = a_data[a_level]->nComp();
+
+  CH_START(t1);
+  LevelData<EBCellFAB> scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, a_level, numComp);
+  CH_STOP(t1);
+
+  CH_START(t2);
+  m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
+  CH_START(t2);
+
+  // Interpolate ghost cells
+  CH_START(t3);
+  if (a_level > 0 && a_interpGhost) {
+    m_amr->interpGhost(scratch, *a_data[a_level - 1], a_level, m_realm, m_phase);
+  }
+  CH_STOP(t3);
+
+  CH_START(t4);
+  if (a_interpToCentroids) {
+    m_amr->interpToCentroids(scratch, m_realm, m_phase, a_level);
+  }
+  CH_STOP(t4);
+
+  DataOps::setCoveredValue(scratch, 0.0);
+
+  CH_START(t5);
+  const Interval srcInterv(0, numComp - 1);
+  const Interval dstInterv(a_comp, a_comp + numComp - 1);
+  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  CH_STOP(t5);
+
+  a_comp += numComp;
 }
 
 #ifdef CH_USE_HDF5
@@ -631,10 +678,10 @@ TracerParticleSolver<P>::getVelocityField() const
 template <typename P>
 template <typename T, const Real& (T::*particleScalarFunction)() const>
 void
-TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
-                                          ParticleContainer<T>&      a_particles,
-                                          const DepositionType       a_baseDeposition,
-                                          const CoarseFineDeposition a_coarseFineDeposition)
+TracerParticleSolver<P>::depositParticles(EBAMRCellData&              a_phi,
+                                          const ParticleContainer<T>& a_particles,
+                                          const DepositionType        a_baseDeposition,
+                                          const CoarseFineDeposition  a_coarseFineDeposition) const noexcept
 {
   CH_TIME("TracerParticleSolver::depositParticles()");
   if (m_verbosity > 5) {
@@ -642,6 +689,9 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
   }
 
   CH_assert(a_phi[0]->nComp() == 1);
+
+  // I HATE it when other people do this. Yet I keep doing it.
+  ParticleContainer<T>& mutableParticles = (ParticleContainer<T>&)a_particles;
 
   switch (a_coarseFineDeposition) {
   case CoarseFineDeposition::Interp: {
@@ -659,7 +709,8 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
 
     // Copy particles living on the mask.
     const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
-    a_particles.copyMaskParticles(mask);
+
+    mutableParticles.copyMaskParticles(mask);
 
     m_amr->depositParticles<T, particleScalarFunction>(a_phi,
                                                        m_realm,
@@ -670,7 +721,7 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
                                                        false);
 
     // Clear out the mask particles.
-    a_particles.clearMaskParticles();
+    mutableParticles.clearMaskParticles();
 
     break;
   }
@@ -678,7 +729,7 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
     const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
 
     // Transfer particles living on the mask.
-    a_particles.transferMaskParticles(mask);
+    mutableParticles.transferMaskParticles(mask);
 
     m_amr->depositParticles<T, particleScalarFunction>(a_phi,
                                                        m_realm,
@@ -689,7 +740,7 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
                                                        false);
 
     // Transfer them back.
-    a_particles.transferParticles(a_particles.getMaskParticles());
+    mutableParticles.transferParticles(mutableParticles.getMaskParticles());
 
     break;
   }

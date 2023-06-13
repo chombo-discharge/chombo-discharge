@@ -48,7 +48,7 @@ namespace BoxLoops {
   */
   template <typename Functor>
   ALWAYS_INLINE void
-  loop(IntVectSet& a_ivs, Functor&& a_kernel);
+  loop(const IntVectSet& a_ivs, Functor&& a_kernel);
 
   /*!
     @brief Launch a C++ kernel over a subset of cells. 
@@ -57,7 +57,7 @@ namespace BoxLoops {
   */
   template <typename Functor>
   ALWAYS_INLINE void
-  loop(DenseIntVectSet& a_ivs, Functor&& a_kernel);
+  loop(const DenseIntVectSet& a_ivs, Functor&& a_kernel);
 
   /*!
     @brief Launch a C++ kernel over cut-cells. 

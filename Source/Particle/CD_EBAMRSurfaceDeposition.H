@@ -189,6 +189,11 @@ protected:
   mutable EBAMRIVData m_coarsenedFineData;
 
   /*!
+    @brief Valid to valid copiers
+  */
+  Vector<Copier> m_validToValidCopiers;
+
+  /*!
     @brief Level copier for adding data from valid+ghost -> valid. 
     @details Needed when adding ghost-deposited data back into valid cells
   */

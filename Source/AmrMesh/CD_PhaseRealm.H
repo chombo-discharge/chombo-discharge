@@ -14,16 +14,6 @@
 
 // Chombo includes
 #include <DisjointBoxLayout.H>
-#include <AggEBPWLFillPatch.H>
-#include <CD_EBCoarAve.H>
-#include <EBFluxRegister.H>
-#include <EBFluxRegister.H>
-#include <EBLevelRedist.H>
-#include <EBCoarToFineRedist.H>
-#include <EBMGInterp.H>
-#include <EBCoarToCoarRedist.H>
-#include <EBFineToCoarRedist.H>
-#include <EBPWLFineInterp.H>
 #include <ProblemDomain.H>
 
 // Our includes
@@ -33,18 +23,20 @@
 #include <CD_LoadBalancing.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_EBCoarAve.H>
+#include <CD_EBReflux.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBGradient.H>
+#include <CD_EBRedistribution.H>
 #include <CD_EBAMRParticleMesh.H>
 #include <CD_EBAMRSurfaceDeposition.H>
-#include <CD_EBFineInterp.H>
+#include <CD_EBCoarseToFineInterp.H>
+#include <CD_EBGhostCellInterpolator.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_EbCentroidInterpolationStencil.H>
 #include <CD_CentroidInterpolationStencil.H>
-#include <CD_EbFastFluxRegister.H>
 #include <CD_NamespaceHeader.H>
 
 // These are operator that can be defined.
@@ -107,7 +99,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~PhaseRealm();
+  virtual ~PhaseRealm();
 
   /*!
     @brief Full define function
@@ -156,6 +148,12 @@ public:
   */
   void
   setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLevel);
+
+  /*!
+    @brief Perform pre-regrid operations
+  */
+  void
+  preRegrid();
 
   /*!
     @brief Regrid method for EBAMR base
@@ -238,11 +236,11 @@ public:
   getEBLevelGrid() const;
 
   /*!
-    @brief Get neighbor boxes to grid boxes
-    @return Immutable m_neighbors
+    @brief Get coarsened fine grids
+    @return Immutable m_eblg
   */
-  const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>>&
-  getNeighbors() const;
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGridCoFi() const;
 
   /*!
     @brief Return vof iterator for iterating over irregular cells in each grid patch
@@ -306,46 +304,29 @@ public:
   getMultigridInterpolator() const;
 
   /*!
-    @brief Get patch regridding utility
+    @brief Get ghost cell interpolation utility
   */
-  Vector<RefCountedPtr<AggEBPWLFillPatch>>&
-  getFillPatch() const;
+  Vector<RefCountedPtr<EBGhostCellInterpolator>>&
+  getGhostCellInterpolator() const;
 
   /*!
     @brief Get piecewise linear ghost cell interpolation utility
   */
-  Vector<RefCountedPtr<EBFineInterp>>&
+  Vector<RefCountedPtr<EBCoarseToFineInterp>>&
   getFineInterp() const;
 
   /*!
     @brief Get flux register utility
   */
-  Vector<RefCountedPtr<EBFluxRegister>>&
+  Vector<RefCountedPtr<EBReflux>>&
   getFluxRegister() const;
 
   /*!
-    @brief Get level redistribution utility
+    @brief Get the redistribution operators
+    @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBLevelRedist>>&
-  getLevelRedist() const;
-
-  /*!
-    @brief Get coarse-to-fine redistribution utility
-  */
-  Vector<RefCountedPtr<EBCoarToFineRedist>>&
-  getCoarToFineRedist() const;
-
-  /*!
-    @brief Get coarse-to-coarse redistribution utility
-  */
-  Vector<RefCountedPtr<EBCoarToCoarRedist>>&
-  getCoarToCoarRedist() const;
-
-  /*!
-    @brief Get fine-to-coarse redistribution utility
-  */
-  Vector<RefCountedPtr<EBFineToCoarRedist>>&
-  getFineToCoarRedist() const;
+  Vector<RefCountedPtr<EBRedistribution>>&
+  getRedistributionOp() const;
 
   /*!
     @brief Get level-set function
@@ -487,11 +468,6 @@ protected:
   Vector<RefCountedPtr<EBLevelGrid>> m_eblgFiCo;
 
   /*!
-    @brief Weird but true thing that indexces neighboring boxes
-  */
-  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>> m_neighbors;
-
-  /*!
     @brief Level-set function
   */
   EBAMRFAB m_levelset;
@@ -512,39 +488,24 @@ protected:
   mutable Vector<RefCountedPtr<EBMultigridInterpolator>> m_multigridInterpolator;
 
   /*!
-    @brief Regridding utility (for filling new grid patches)
-  */
-  mutable Vector<RefCountedPtr<AggEBPWLFillPatch>> m_pwlFillPatch;
-
-  /*!
     @brief Ghost cell interpolation utility
   */
-  mutable Vector<RefCountedPtr<EBFineInterp>> m_ebFineInterp;
+  mutable Vector<RefCountedPtr<EBGhostCellInterpolator>> m_ghostCellInterpolator;
+
+  /*!
+    @brief Regridding utility (for filling new grid patches)
+  */
+  mutable Vector<RefCountedPtr<EBCoarseToFineInterp>> m_ebFineInterp;
 
   /*!
     @brief Flux register utility
   */
-  mutable Vector<RefCountedPtr<EBFluxRegister>> m_fluxReg;
+  mutable Vector<RefCountedPtr<EBReflux>> m_ebReflux;
 
   /*!
-    @brief Level redistribution utility
+    @brief Redistribution utilities
   */
-  mutable Vector<RefCountedPtr<EBLevelRedist>> m_levelRedist;
-
-  /*!
-    @brief Coarse-to-fine redistribution utility
-  */
-  mutable Vector<RefCountedPtr<EBCoarToFineRedist>> m_coarToFineRedist;
-
-  /*!
-    @brief Coarse-to-coarse redistribution utility
-  */
-  mutable Vector<RefCountedPtr<EBCoarToCoarRedist>> m_coarToCoarRedist;
-
-  /*!
-    @brief Fine-to-coarse redistribution utility
-  */
-  mutable Vector<RefCountedPtr<EBFineToCoarRedist>> m_fineToCoarRedist;
+  mutable Vector<RefCountedPtr<EBRedistribution>> m_redistributionOp;
 
   /*!
     @brief Gradient operator
@@ -591,13 +552,6 @@ protected:
   defineVofIterator(const int a_lmin);
 
   /*!
-    @brief Define patch neighbors
-    @param[in] a_lmin Coarsest grid level that changes
-  */
-  void
-  defineNeighbors(const int a_lmin);
-
-  /*!
     @brief Define coarsening utility
     @param[in] a_lmin Coarsest grid level that changes
   */
@@ -623,7 +577,7 @@ protected:
     @param[in] a_lmin Coarsest grid level that changes
   */
   void
-  defineEBFineInterp(const int a_lmin);
+  defineEBCoarseToFineInterp(const int a_lmin);
 
   /*!
     @brief Define multigrid injection utility

@@ -392,7 +392,19 @@ CdrPlasmaStepper::allocateInternals()
     pout() << "CdrPlasmaStepper::allocateInternals" << endl;
   }
 
-  /// Do nothing
+  m_amr->allocate(m_currentDensity, m_realm, phase::gas, SpaceDim);
+  DataOps::setValue(m_currentDensity, 0.0);
+
+  const int numPhysPlotVars = m_physics->getNumberOfPlotVariables();
+
+  if (numPhysPlotVars > 0) {
+    m_amr->allocate(m_physicsPlotVars, m_realm, phase::gas, numPhysPlotVars);
+
+    DataOps::setValue(m_physicsPlotVars, 0.0);
+  }
+  else {
+    m_amr->allocatePointer(m_physicsPlotVars, m_realm);
+  }
 }
 
 void
@@ -2953,6 +2965,9 @@ CdrPlasmaStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_rte->preRegrid(a_lmin, a_oldFinestLevel);
   m_sigma->preRegrid(a_lmin, a_oldFinestLevel);
+
+  m_currentDensity.clear();
+  m_physicsPlotVars.clear();
 }
 
 void
@@ -3658,26 +3673,30 @@ CdrPlasmaStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int
   this->regridSolvers(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   this->regridInternals(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
-  // Solvers have been regridded. Now resolve the Poisson equation with the new data
-  const bool converged = this->solvePoisson();
+  // Solvers have been regridded. Now resolve the Poisson equation with the new data. If this
+  // is the first time step, we can skip this call because it's done in the initialData routine.
+  if (m_timeStep > 0) {
+    const bool converged = this->solvePoisson();
 
-  // If we don't converge, try new Poisson solver settings
-  if (!converged) {
-    if (m_verbosity > 0) {
-      pout() << "CdrPlasmaStepper::regrid - Poisson solver failed to converge." << endl;
+    // If we don't converge, try new Poisson solver settings
+    if (!converged) {
+      if (m_verbosity > 0) {
+        pout() << "CdrPlasmaStepper::regrid - Poisson solver failed to converge." << endl;
+      }
     }
-  }
 
-  // Compute stuff that is important for the CDR solvers.
-  this->computeCdrDriftVelocities();
-  this->computeCdrDiffusion();
+    // Compute stuff that is important for the CDR solvers.
+    this->computeCdrDriftVelocities();
+    this->computeCdrDiffusion();
 
-  // If we're doing a stationary RTE, we should update the elliptic equations. The RTE solvers should
-  // have regridded the source term in that case.
-  if (this->stationaryRTE()) {
-    constexpr Real dummyDt = 0.0;
+    // If we're doing a stationary RTE, we should update the elliptic equations. The RTE solvers should
+    // have regridded the source term in that case.
+    if (this->stationaryRTE()) {
+      MayDay::Abort("crap");
+      constexpr Real dummyDt = 0.0;
 
-    this->solveRadiativeTransfer(dummyDt);
+      this->solveRadiativeTransfer(dummyDt);
+    }
   }
 }
 
@@ -4508,56 +4527,156 @@ CdrPlasmaStepper::getNumberOfPlotVariables() const
   return numVars;
 }
 
-void
-CdrPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const
+Vector<std::string>
+CdrPlasmaStepper::getPlotVariableNames() const
 {
-  CH_TIME("CdrPlasmaStepper::writePlotData(EBAMRCellData, Vector<std::string>, int)");
+  CH_TIME("CdrPlasmaStepper::getPlotVariableNames");
   if (m_verbosity > 3) {
-    pout() << "CdrPlasmaStepper::writePlotData(EBAMRCellData, Vector<std::string>, int)" << endl;
+    pout() << "CdrPlasmaStepper::getPlotVariableNames" << endl;
   }
 
+  Vector<std::string> plotVars;
+
+  plotVars.append(m_fieldSolver->getPlotVariableNames());
+  plotVars.append(m_sigma->getPlotVariableNames());
+
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<CdrSolver>& solver = solverIt();
+    plotVars.append(solver->getPlotVariableNames());
+  }
+
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<RtSolver>& solver = solverIt();
+    plotVars.append(solver->getPlotVariableNames());
+  }
+
+  plotVars.push_back("x-J");
+  plotVars.push_back("y-J");
+  if (SpaceDim == 3) {
+    plotVars.push_back("z-J");
+  }
+
+  // CdrPlasmaPhysics outputs its variable.
+  plotVars.append(m_physics->getPlotVariableNames());
+
+  return plotVars;
+}
+
+void
+CdrPlasmaStepper::writePlotData(LevelData<EBCellFAB>& a_output,
+                                int&                  a_icomp,
+                                const std::string     a_outputRealm,
+                                const int             a_level) const
+{
+  CH_TIME("CdrPlasmaStepper::writePlotData");
+  if (m_verbosity > 3) {
+    pout() << "CdrPlasmaStepper::writePlotData" << endl;
+  }
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
   // Poisson solver copies over its output data
-  a_plotVariableNames.append(m_fieldSolver->getPlotVariableNames());
-  m_fieldSolver->writePlotData(a_output, a_icomp);
+  m_fieldSolver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
 
   // Surface charge solver writes
-  a_plotVariableNames.append(m_sigma->getPlotVariableNames());
-  m_sigma->writePlotData(a_output, a_icomp);
+  m_sigma->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
 
   // CDR solvers output their data
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    RefCountedPtr<CdrSolver>& solver = solverIt();
-    a_plotVariableNames.append(solver->getPlotVariableNames());
-    solver->writePlotData(a_output, a_icomp);
+    solverIt()->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
   }
 
   // RTE solvers output their data
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-    RefCountedPtr<RtSolver>& solver = solverIt();
-    a_plotVariableNames.append(solver->getPlotVariableNames());
-    solver->writePlotData(a_output, a_icomp);
+    solverIt()->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
   }
 
   // CdrPlasmaStepper adds the current to the output file.
-  this->writeJ(a_output, a_icomp);
-  a_plotVariableNames.push_back("x-J");
-  a_plotVariableNames.push_back("y-J");
-  if (SpaceDim == 3) {
-    a_plotVariableNames.push_back("z-J");
-  }
+  this->writeData(a_output, a_icomp, m_currentDensity, a_outputRealm, a_level, false, true);
 
   // CdrPlasmaPhysics outputs its variable.
-  a_plotVariableNames.append(m_physics->getPlotVariableNames());
-  this->writePhysics(a_output, a_icomp);
+  if (m_physics->getNumberOfPlotVariables() > 0) {
+    this->writeData(a_output, a_icomp, m_physicsPlotVars, a_outputRealm, a_level, false, true);
+  }
 }
 
 void
-CdrPlasmaStepper::writeJ(EBAMRCellData& a_output, int& a_icomp) const
+CdrPlasmaStepper::writeData(LevelData<EBCellFAB>& a_output,
+                            int&                  a_comp,
+                            const EBAMRCellData&  a_data,
+                            const std::string     a_outputRealm,
+                            const int             a_level,
+                            const bool            a_interpToCentroids,
+                            const bool            a_interpGhost) const noexcept
+
 {
-  CH_TIME("CdrPlasmaStepper::writeJ(EBAMRCellData, int)");
-  if (m_verbosity > 3) {
-    pout() << "CdrPlasmaStepper::writeJ(EBAMRCellData, int)" << endl;
+  CH_TIMERS("CdrPlasmaStepper::writeData");
+  CH_TIMER("CdrPlasmaStepper::writeData::allocate", t1);
+  CH_TIMER("CdrPlasmaStepper::writeData::local_copy", t2);
+  CH_TIMER("CdrPlasmaStepper::writeData::interp_ghost", t3);
+  CH_TIMER("CdrPlasmaStepper::writeData::interp_centroid", t4);
+  CH_TIMER("CdrPlasmaStepper::writeData::final_copy", t5);
+  if (m_verbosity > 5) {
+    pout() << "CdrPlasmaStepper::writeData" << endl;
   }
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+  CH_assert(a_data[a_level]->nComp() > 0);
+
+  // Number of components we are working with.
+  const int numComp = a_data[a_level]->nComp();
+
+  // Component ranges that we copy to/from.
+  const Interval srcInterv(0, numComp - 1);
+  const Interval dstInterv(a_comp, a_comp + numComp - 1);
+
+  CH_START(t1);
+  LevelData<EBCellFAB> scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, a_level, numComp);
+  CH_STOP(t1);
+
+  CH_START(t2);
+  m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, a_data.getRealm());
+  CH_START(t2);
+
+  // Interpolate ghost cells
+  CH_START(t3);
+  if (a_level > 0 && a_interpGhost) {
+    m_amr->interpGhost(scratch, *a_data[a_level - 1], a_level, m_realm, m_phase);
+  }
+  CH_STOP(t3);
+
+  CH_START(t4);
+  if (a_interpToCentroids) {
+    m_amr->interpToCentroids(scratch, m_realm, m_phase, a_level);
+  }
+  CH_STOP(t4);
+
+  DataOps::setCoveredValue(scratch, 0.0);
+
+  CH_START(t5);
+  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  CH_STOP(t5);
+
+  a_comp += numComp;
+}
+
+void
+CdrPlasmaStepper::writeJ(LevelData<EBCellFAB>& a_output,
+                         int&                  a_icomp,
+                         const std::string     a_outputRealm,
+                         const int             a_level) const
+{
+  CH_TIMERS("CdrPlasmaStepper::writeJ");
+  CH_TIMER("CdrPlasmaStepper::writeJ::allocate", t1);
+  if (m_verbosity > 3) {
+    pout() << "CdrPlasmaStepper::writeJ" << endl;
+  }
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
 
   // Allocates storage for computing J.
   EBAMRCellData scratch;
@@ -4569,20 +4688,28 @@ CdrPlasmaStepper::writeJ(EBAMRCellData& a_output, int& a_icomp) const
   // Add the current density to the a_output data holder, starting on component a_icomp.
   const Interval srcInterv(0, SpaceDim - 1);
   const Interval dstInterv(a_icomp, a_icomp + SpaceDim - 1);
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    scratch[lvl]->localCopyTo(srcInterv, *a_output[lvl], dstInterv);
-  }
+  m_amr->copyData(a_output, *scratch[a_level], a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
 
   // Need to inform the outside world about the change in starting component.
   a_icomp += SpaceDim;
 }
 
 void
-CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
+CdrPlasmaStepper::prePlot()
 {
-  CH_TIME("CdrPlasmaStepper::writePhysics(EBAMRCellData, int)");
+  CH_TIME("CdrPlasmaStepper::prePlot");
   if (m_verbosity > 3) {
-    pout() << "CdrPlasmaStepper::writePhysics(EBAMRCellData, int)" << endl;
+    pout() << "CdrPlasmaStepper::prePlot" << endl;
+  }
+  this->computePhysicsPlotVars(m_physicsPlotVars);
+}
+
+void
+CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexcept
+{
+  CH_TIME("CdrPlasmaStepper::computePhysicsPlotVars");
+  if (m_verbosity > 3) {
+    pout() << "CdrPlasmaStepper::computePhysicsPlotVars" << endl;
   }
 
   // Number of output variables from CdrPlasmaPhysics
@@ -4655,8 +4782,8 @@ CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
         VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 
         // Output data holder.
-        EBCellFAB&     output      = (*a_output[lvl])[dit()];
-        BaseFab<Real>& regularData = (*a_output[lvl])[dit()].getSingleValuedFAB();
+        EBCellFAB&     output      = (*a_plotVars[lvl])[dit()];
+        BaseFab<Real>& regularData = (*a_plotVars[lvl])[dit()].getSingleValuedFAB();
 
         // Regular kernel.
         auto regularKernel = [&](const IntVect& iv) -> void {
@@ -4691,7 +4818,7 @@ CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
                                                                     1.0);
 
           for (int icomp = 0; icomp < numVars; icomp++) {
-            regularData(iv, a_icomp + icomp) = plotVars[icomp];
+            regularData(iv, icomp) = plotVars[icomp];
           }
         };
 
@@ -4726,7 +4853,7 @@ CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
                                                                     ebisBox.volFrac(vof));
 
           for (int icomp = 0; icomp < numVars; icomp++) {
-            output(vof, a_icomp + icomp) = plotVars[icomp];
+            output(vof, icomp) = plotVars[icomp];
           }
         };
 
@@ -4737,11 +4864,9 @@ CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
     }
 
     // I want to coarsen and interpolate this data because it might otherwise contain bogus values.
-    const Interval interv(a_icomp, a_icomp + numVars - 1);
-    m_amr->arithmeticAverage(a_output, m_realm, phase::gas, interv);
-
-    // Need to let the outside world know that we've written to some of the variables.
-    a_icomp += numVars;
+    const Interval interv(0, numVars - 1);
+    m_amr->arithmeticAverage(a_plotVars, m_realm, phase::gas, interv);
+    m_amr->interpGhostPwl(a_plotVars, m_realm, phase::gas);
   }
 }
 

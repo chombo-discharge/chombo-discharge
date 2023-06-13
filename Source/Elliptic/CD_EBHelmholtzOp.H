@@ -20,13 +20,13 @@
 #include <LevelTGA.H>
 #include <BaseIVFAB.H>
 #include <VCAggStencil.H>
-#include <EBFluxRegister.H>
 
 // Our includes
 #include <CD_Timer.H>
 #include <CD_Location.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBCoarAve.H>
+#include <CD_EBReflux.H>
 #include <CD_EBMGRestrict.H>
 #include <CD_EBMGProlong.H>
 #include <CD_EBHelmholtzEBBC.H>
@@ -104,7 +104,7 @@ public:
                 const EBLevelGrid&                               a_eblgCoar,
                 const EBLevelGrid&                               a_eblgCoarMG,
                 const RefCountedPtr<EBMultigridInterpolator>&    a_interpolator,
-                const RefCountedPtr<EBFluxRegister>&             a_fluxReg,
+                const RefCountedPtr<EBReflux>&                   a_fluxReg,
                 const RefCountedPtr<EBCoarAve>&                  a_coarAve,
                 const RefCountedPtr<EBHelmholtzDomainBC>&        a_domainBC,
                 const RefCountedPtr<EBHelmholtzEBBC>&            a_ebBC,
@@ -223,7 +223,7 @@ public:
     @note This routine is used in AMROperator to ensure that EB fluxes which are described by stencils get consistent data under the fine level. 
   */
   void
-  coarsen(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiFine);
+  coarsenCell(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiFine);
 
   /*!
     @brief Coarsen fluxes on the fine level onto this level. 
@@ -233,7 +233,7 @@ public:
     @note This routine is used in the reflux-free AMROperator
   */
   void
-  coarsen(LevelData<EBFluxFAB>& a_flux, const LevelData<EBFluxFAB>& a_fineFlux);
+  coarsenFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBFluxFAB>& a_fineFlux);
 
   /*!
     @brief Point Jacobi kernel. 
@@ -444,11 +444,39 @@ public:
   create(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
 
   /*!
-    @brief Assign data. 
-    @details This does a local copy from rhs to lhs
+    @brief Assign data.
+    @details This does a copy from rhs to lhs
   */
   void
   assign(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
+
+  /*!
+    @brief Assign lhs
+    @details This is the version that is called by AMRMultiGrid::VCycle. Note that the other version
+    might be called by other operators (e.g., EBBackwardEuler)
+    @param[out] a_lhs    Outgoing data
+    @param[in]  a_rhs    Incoming data
+    @param[in]  a_copier Copier
+  */
+  void
+  assignCopier(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Copier& a_copier) override final;
+
+  /*!
+    @brief Local assignment function
+    @param[out] a_lhs. Equal to a_rhs on output
+    @param[in]  a_rhs. Data
+  */
+  void
+  assignLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
+
+  /*!
+    @brief Build copier
+    @param[out] a_copier Copier for copying between a_lhs and a_rhs
+    @param[in]  a_lhs    Copying from
+    @param[in]  a_rhs    Copying to
+  */
+  void
+  buildCopier(Copier& a_copier, const LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override;
 
   /*!
     @brief Compute the dot product??
@@ -758,6 +786,18 @@ public:
           Real                        a_scale) override final;
 
   /*!
+    @brief Allocate m_flux
+  */
+  void
+  allocateFlux() const noexcept;
+
+  /*!
+    @brief Deallocate m_flux
+  */
+  void
+  deallocateFlux() const noexcept;
+
+  /*!
     @brief Returns m_flux. This is used in refluxing routines. 
   */
   LevelData<EBFluxFAB>&
@@ -945,7 +985,7 @@ protected:
   /*!
     @brief Flux register
   */
-  RefCountedPtr<EBFluxRegister> m_fluxReg;
+  RefCountedPtr<EBReflux> m_fluxReg;
 
   /*!
     @brief Conservative coarsener
@@ -975,7 +1015,7 @@ protected:
   /*!
     @brief For holding fluxes
   */
-  mutable LevelData<EBFluxFAB> m_flux;
+  mutable LevelData<EBFluxFAB>* m_flux;
 
   /*!
     @brief Interpolant for when we want centroid fluxes
@@ -1130,11 +1170,11 @@ protected:
     @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. 
   */
   void
-  getFaceCentroidFlux(EBFaceFAB&       a_fluxCentroid,
-                      const EBCellFAB& a_phi,
-                      const Box&       a_cellBox,
-                      const DataIndex& a_dit,
-                      const int        a_dir);
+  computeFlux(EBFaceFAB&       a_fluxCentroid,
+              const EBCellFAB& a_phi,
+              const Box&       a_cellBox,
+              const DataIndex& a_dit,
+              const int        a_dir);
 
   /*!
     @brief Compute face-centered fluxes
@@ -1173,24 +1213,6 @@ protected:
   */
   void
   computeFlux(const LevelData<EBCellFAB>& a_phi);
-
-  /*!
-    @brief Increment coarse flux register
-    @param[in] a_phi Cell-centered data on the coarse level. 
-  */
-  void
-  incrementFRCoar(const LevelData<EBCellFAB>& a_phi);
-
-  /*!
-    @brief Increment coarse flux register
-    @param[in] a_phiFine Cell-centered data on the fine level
-    @param[in] a_phi     Cell-centered data on the coarse level
-    @param[in] a_finerOp Finer operator
-  */
-  void
-  incrementFRFine(const LevelData<EBCellFAB>&       a_phiFine,
-                  const LevelData<EBCellFAB>&       a_phi,
-                  AMRLevelOp<LevelData<EBCellFAB>>& a_finerOp);
 
   /*!
     @brief Reflux algorithm.

@@ -105,22 +105,22 @@ namespace Physics {
 
       // Instantiate the FieldSolver and set it up.
       m_fieldSolver = RefCountedPtr<FieldSolver>(new T());
-      m_fieldSolver->setVerbosity(m_verbosity);
       m_fieldSolver->parseOptions();
       m_fieldSolver->setAmr(m_amr);
       m_fieldSolver->setComputationalGeometry(m_computationalGeometry);
       m_fieldSolver->setVoltage(voltage);
       m_fieldSolver->setRealm(m_realm);
       m_fieldSolver->setTime(0, 0.0, 0.0);
+      m_fieldSolver->setVerbosity(m_verbosity);
 
       // Instantiate the surface charge solver and set it up.
       m_sigma = RefCountedPtr<SurfaceODESolver<1>>(new SurfaceODESolver<1>(m_amr));
-      m_sigma->setVerbosity(m_verbosity);
       m_sigma->setPhase(phase::gas);
       m_sigma->setRealm(m_realm);
       m_sigma->setName("Surface charge");
       m_sigma->parseOptions();
       m_sigma->setTime(0, 0.0, 0.0);
+      m_sigma->setVerbosity(m_verbosity);
     }
 
     template <class T>
@@ -181,19 +181,6 @@ namespace Physics {
       if (m_verbosity > 5) {
         pout() << "FieldStepper<T>::initialData" << endl;
       }
-
-      // Fetch the potential and surface/space charges and initialize them. The potential is set to zero
-      // and the space/surface charge set from m_rhoGas, m_rhoDielectric, and m_surfaceChargeDensity
-      MFAMRCellData& state = m_fieldSolver->getPotential();
-      EBAMRIVData&   sigma = m_sigma->getPhi();
-
-      DataOps::setValue(state, 0.0);
-      DataOps::setValue(sigma, m_surfaceChargeDensity, m_amr->getProbLo(), m_amr->getDx(), 0);
-      m_sigma->resetElectrodes(sigma, 0.0);
-      m_fieldSolver->setRho(m_rhoGas);
-
-      // Solve Poisson equation.
-      this->solvePoisson();
     }
 
     template <class T>
@@ -229,6 +216,19 @@ namespace Physics {
       if (m_verbosity > 5) {
         pout() << "FieldStepper<T>::postInitialize" << endl;
       }
+
+      // Fetch the potential and surface/space charges and initialize them. The potential is set to zero
+      // and the space/surface charge set from m_rhoGas, m_rhoDielectric, and m_surfaceChargeDensity
+      MFAMRCellData& state = m_fieldSolver->getPotential();
+      EBAMRIVData&   sigma = m_sigma->getPhi();
+
+      DataOps::setValue(state, 0.0);
+      DataOps::setValue(sigma, m_surfaceChargeDensity, m_amr->getProbLo(), m_amr->getDx(), 0);
+      m_sigma->resetElectrodes(sigma, 0.0);
+      m_fieldSolver->setRho(m_rhoGas);
+
+      // Solve Poisson equation.
+      this->solvePoisson();
     }
 
     template <class T>
@@ -289,23 +289,40 @@ namespace Physics {
     }
 
     template <class T>
+    Vector<std::string>
+    FieldStepper<T>::getPlotVariableNames() const
+    {
+      CH_TIME("FieldStepper::getPlotVariableNames");
+      if (m_verbosity > 5) {
+        pout() << "FieldStepper<T>::getPlotVariableNames" << endl;
+      }
+
+      Vector<std::string> plotVars;
+
+      plotVars.append(m_fieldSolver->getPlotVariableNames());
+      plotVars.append(m_sigma->getPlotVariableNames());
+
+      return plotVars;
+    }
+
+    template <class T>
     void
-    FieldStepper<T>::writePlotData(EBAMRCellData&       a_output,
-                                   Vector<std::string>& a_plotVariableNames,
-                                   int&                 a_icomp) const
+    FieldStepper<T>::writePlotData(LevelData<EBCellFAB>& a_output,
+                                   int&                  a_icomp,
+                                   const std::string     a_outputRealm,
+                                   const int             a_level) const
     {
       CH_TIME("FieldStepper::writePlotData");
       if (m_verbosity > 5) {
         pout() << "FieldStepper<T>::writePlotData" << endl;
       }
 
-      // Append plot variable names.
-      a_plotVariableNames.append(m_fieldSolver->getPlotVariableNames());
-      a_plotVariableNames.append(m_sigma->getPlotVariableNames());
+      CH_assert(a_level >= 0);
+      CH_assert(a_level <= m_amr->getFinestLevel());
 
       // Write into plot data holder memory.
-      m_fieldSolver->writePlotData(a_output, a_icomp);
-      m_sigma->writePlotData(a_output, a_icomp);
+      m_fieldSolver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
+      m_sigma->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
     }
 
     template <class T>

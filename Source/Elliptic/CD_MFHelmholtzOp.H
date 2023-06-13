@@ -23,7 +23,7 @@
 #include <CD_Location.H>
 #include <CD_MFMultigridInterpolator.H>
 #include <CD_MFCoarAve.H>
-#include <CD_MFFluxReg.H>
+#include <CD_MFReflux.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_MFBaseIVFAB.H>
 #include <CD_MFHelmholtzJumpBC.H>
@@ -106,7 +106,7 @@ public:
                 const MFLevelGrid&                               a_mflgCoar,
                 const MFLevelGrid&                               a_mflgCoarMG,
                 const MFMultigridInterpolator&                   a_interpolator,
-                const MFFluxReg&                                 a_fluxReg,
+                const MFReflux&                                  a_fluxReg,
                 const MFCoarAve&                                 a_coarAve,
                 const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBC,
                 const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBC,
@@ -380,6 +380,34 @@ public:
   assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
 
   /*!
+    @brief Assign lhs
+    @details This is the version that is called by AMRMultiGrid::VCycle. Note that the other version
+    might be called by other operators (e.g., EBBackwardEuler)
+    @param[out] a_lhs    Outgoing data
+    @param[in]  a_rhs    Incoming data
+    @param[in]  a_copier Copier
+  */
+  void
+  assignCopier(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Copier& a_copier) override final;
+
+  /*!
+    @brief Local assignment function
+    @param[out] a_lhs. Equal to a_rhs on output
+    @param[in]  a_rhs. Data
+  */
+  void
+  assignLocal(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
+
+  /*!
+    @brief Build copier
+    @param[out] a_copier Copier for copying between a_lhs and a_rhs
+    @param[in]  a_lhs    Copying from
+    @param[in]  a_rhs    Copying to
+  */
+  void
+  buildCopier(Copier& a_copier, const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override;
+
+  /*!
     @brief Compute solution norm. 
     @param[in] a_lhs   Data
     @param[in] a_order Norm order. Not used. 
@@ -650,6 +678,16 @@ protected:
     @brief Refinement factor to coarser AMR level
   */
   int m_refToCoar;
+
+  /*!
+    @brief Number of ghost cells
+  */
+  IntVect m_ghostPhi;
+
+  /*!
+    @brief Number of ghost cells
+  */
+  IntVect m_ghostRhs;
 
   /*!
     @brief True if there is a coarser AMR level

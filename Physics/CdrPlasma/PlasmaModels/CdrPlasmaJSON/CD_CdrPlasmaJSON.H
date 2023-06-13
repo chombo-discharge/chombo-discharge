@@ -158,7 +158,7 @@ namespace Physics {
 	@param[in] a_position Position
       */
       virtual Real
-      computeEta(const Real a_E, const RealVect a_position) const;
+      computeEta(const Real a_E, const RealVect a_position) const override;
 
       /*!
 	@brief Routine intended for advancing a reaction network over a time a_dt. 

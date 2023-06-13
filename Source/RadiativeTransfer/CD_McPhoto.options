@@ -8,7 +8,6 @@ McPhoto.blend_conservation = false         # Switch for blending with the noncon
 McPhoto.transparent_eb     = false         # Turn on/off transparent boundaries. Only for instantaneous=true
 McPhoto.random_kappa       = true          # Randomize absorption length (taken from Photon implementation)
 McPhoto.plt_vars           = phi src phot  # Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot', 'src_phot'
-McPhoto.plot_deposition    = cic           # Cloud-in-cell for plotting particles. 
 McPhoto.intersection_alg   = bisection     # EB intersection algorithm. Supported are: 'raycast' 'bisection'
 McPhoto.bisect_step        = 1.E-4         # Bisection step length for intersection tests
 McPhoto.seed               = 0             # Seed for RNG

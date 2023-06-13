@@ -9,249 +9,219 @@
   @author Robert Marskar
 */
 
+// Std includes
+#include <set>
+
 // Chombo includes
+#include <BoxIterator.H>
 #include <CH_Timer.H>
 
 // Our includes
+#include <CD_Tile.H>
 #include <CD_TiledMeshRefine.H>
 #include <CD_NamespaceHeader.H>
 
 TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
                                  const Vector<int>&   a_refRatios,
-                                 const IntVect&       a_tileSize)
+                                 const IntVect&       a_tileSize) noexcept
 {
   CH_TIME("TiledMeshRefine::TiledMeshRefine");
 
   m_refRatios = a_refRatios;
   m_tileSize  = a_tileSize;
 
-  m_vectDomains.resize(0);
+  m_amrDomains.resize(0);
 
-  m_vectDomains.push_back(a_coarsestDomain);
+  m_amrDomains.push_back(a_coarsestDomain);
   for (int lvl = 1; lvl < a_refRatios.size(); lvl++) {
-    ProblemDomain domain = m_vectDomains[lvl - 1];
-    domain.refine(a_refRatios[lvl - 1]);
-    m_vectDomains.push_back(domain);
-  }
+    CH_assert(a_refRatios[lvl - 1] >= 2);
+    CH_assert(a_refRatios[lvl - 1] % 2 == 0);
 
-  this->sanityCheck();
-}
+    const ProblemDomain domainFine = refine(m_amrDomains[lvl - 1], m_refRatios[lvl - 1]);
 
-TiledMeshRefine::~TiledMeshRefine() { CH_TIME("TiledMeshRefine::~TiledMeshRefine"); }
-
-void
-TiledMeshRefine::sanityCheck() const
-{
-  CH_TIME("TiledMeshRefine::sanityCheck");
-
-  for (int lvl = 0; lvl < m_vectDomains.size(); lvl++) {
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      if (m_vectDomains[lvl].domainBox().size(dir) % m_tileSize[dir] != 0) {
-        MayDay::Abort("TiledMeshRefine::sanityCheck - domainBox%tileSize != 0");
-      }
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        if (m_tileSize[dir] % m_refRatios[lvl] != 0) {
-          MayDay::Abort("TiledMeshRefine::sanityCheck - tileSize%refRat != 0");
-        }
-      }
-    }
+    m_amrDomains.push_back(domainFine);
   }
 }
+
+TiledMeshRefine::~TiledMeshRefine() noexcept { CH_TIME("TiledMeshRefine::~TiledMeshRefine"); }
 
 int
-TiledMeshRefine::regrid(Vector<Vector<Box>>&       a_newGrids,
-                        const Vector<IntVectSet>&  a_tags,
-                        const int                  a_baseLevel,
-                        const int                  a_topLevel,
-                        const Vector<Vector<Box>>& a_oldGrids) const
+TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet>& a_tags) const noexcept
 {
   CH_TIME("TiledMeshRefine::regrid");
 
-  // CH_assert(a_topLevel >= 0 );
-  // CH_assert(a_baseLevel < (a_topLevel+1) && a_baseLevel >= 0 );
-  // CH_assert(a_OldGrids.size() >= a_topLevel + 1 );
-  // CH_assert(m_vectDomains.size() >= a_topLevel + 1 );
-  // CH_assert(m_nRefVect.size() >= a_topLevel + 1 );
-  // CH_assert(a_tags.size() >= a_topLevel+1 );
-  // CH_assert(a_topLevel >= 0 );
-  // CH_assert(a_baseLevel < (a_topLevel+1) && a_baseLevel >= 0 );
-
-  if (a_baseLevel > 0) {
-    MayDay::Error("TiledMeshRefine::regrid - a_baseLevel>0 not yet supported");
-  }
-
-  // Set the top level to be the finest level which actually has tags. Ranks may disagree on what is the "top level".
-  int myTopLevel = 0;
+  // Figure out the highest level which has tags. This needs to be the same for every rank.
+  int topLevel = 0;
 
   for (int lvl = 0; lvl < a_tags.size(); lvl++) {
     if (!a_tags[lvl].isEmpty()) {
-      myTopLevel = lvl;
+      topLevel = lvl;
     }
   }
 
 #ifdef CH_MPI
-  int topLevel = -1;
-  MPI_Allreduce(&myTopLevel, &topLevel, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-#else
-  int topLevel = myTopLevel;
+  MPI_Allreduce(MPI_IN_PLACE, &topLevel, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
 #endif
 
   int newFinestLevel = 0;
-  if (topLevel >= a_baseLevel) { // We have something that can change
+
+  if (topLevel >= 0) {
     newFinestLevel = 1 + topLevel;
 
     // Extra level of empty tiles so we can use makeLevelTiles for all levels
-    Vector<IntVectSet> tiles(2 + newFinestLevel, IntVectSet());
+    std::vector<TileSet> amrTiles(2 + newFinestLevel);
 
-    // Make tiles on all levels above a_baseLevel
-    for (int lvl = newFinestLevel; lvl > a_baseLevel; lvl--) {
-      //      pout() << "making tiles on level = " << lvl << endl;
-      this->makeLevelTiles(tiles[lvl],
-                           tiles[lvl + 1],
+    for (int lvl = newFinestLevel; lvl > 0; lvl--) {
+      this->makeLevelTiles(amrTiles[lvl],
+                           amrTiles[lvl + 1],
                            a_tags[lvl - 1],
-                           m_vectDomains[lvl],
+                           m_amrDomains[lvl],
                            m_refRatios[lvl],
                            m_refRatios[lvl - 1]);
     }
 
+    // Coarsest grid just consists of proper nesting around the finer grids. Last argument is dummy.
+    this->makeLevelTiles(amrTiles[0], amrTiles[1], IntVectSet(), m_amrDomains[0], m_refRatios[0], 1);
+
     // Make tiles into boxes
     a_newGrids.resize(1 + newFinestLevel);
-    for (int lvl = 0; lvl <= a_baseLevel; lvl++) {
-      //      pout() << "copying old grids on level = " << lvl << endl;
-      a_newGrids[lvl] = a_oldGrids[lvl];
-    }
-
-    for (int lvl = a_baseLevel + 1; lvl <= newFinestLevel; lvl++) {
-      //      pout() << "making boxes from tiles on level = " << lvl << endl;
-      this->makeBoxesFromTiles(a_newGrids[lvl], tiles[lvl], m_vectDomains[lvl]);
+    for (int lvl = 0; lvl <= newFinestLevel; lvl++) {
+      this->makeBoxesFromTiles(a_newGrids[lvl], amrTiles[lvl], m_amrDomains[lvl]);
     }
   }
-  else { // If we don't have any tags, just return the old boxes
-    newFinestLevel = a_baseLevel;
-    a_newGrids.resize(a_oldGrids.size());
-    for (int lvl = 0; lvl <= a_baseLevel; lvl++) {
-      a_newGrids[lvl] = a_oldGrids[lvl];
-    }
+  else {
+    a_newGrids.resize(0);
   }
 
-  //  MayDay::Abort("TiledMeshRefine::regrid - not implemented");
-  //  pout() << "TiledMeshRefine::regrid - done" << endl;
   return newFinestLevel;
 }
 
 void
-TiledMeshRefine::makeLevelTiles(IntVectSet&          a_levelTiles,
-                                const IntVectSet&    a_fineLevelTiles,
-                                const IntVectSet&    a_coarLevelTags,
-                                const ProblemDomain& a_levelDomain,
-                                const int            a_refFine,
-                                const int            a_refCoar) const
+TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
+                                const TileSet&       a_fineTiles,
+                                const IntVectSet&    a_coarTags,
+                                const ProblemDomain& a_domain,
+                                const int            a_refToFine,
+                                const int            a_refToCoar) const noexcept
 {
-  CH_TIME("TiledMeshRefine::makeLevelTiles");
+  CH_TIMERS("TiledMeshRefine::makeLevelTiles");
+  CH_TIMER("TiledMeshRefine::makeLevelTiles::tag_tiles", t1);
+  CH_TIMER("TiledMeshRefine::makeLevelTiles::gather_tiles", t2);
+  CH_TIMER("TiledMeshRefine::makeLevelTiles::add_fine_tiles", t3);
 
-  // Lo/Hi corners and number of tiles in each direction
+  // Generate tiles from tags on the coarser level.
+  CH_START(t1);
+  const Box tileBox = Box(IntVect::Zero, a_domain.size() / m_tileSize - IntVect::Unit);
 
-  const IntVect numLevelTiles = a_levelDomain.domainBox().size() / m_tileSize;
-  const Box     levelTileBox(IntVect::Zero, numLevelTiles - 1);
+  const ProblemDomain coarDomain = coarsen(a_domain, a_refToCoar);
+  const ProblemDomain fineDomain = refine(a_domain, a_refToFine);
 
-  // 1. Generate tiles on this level from tags on the coarser level
-  Box coarBox = a_levelDomain.domainBox();
-  coarBox.coarsen(a_refCoar);
-  const IntVect probLo       = coarBox.smallEnd();
-  IntVectSet    myLevelTiles = IntVectSet();
+  const IntVect coarProbLo = coarDomain.domainBox().smallEnd();
+  a_tiles.clear();
+  for (IVSIterator ivsIt(a_coarTags); ivsIt.ok(); ++ivsIt) {
+    CH_assert(a_refToCoar >= 2);
+    CH_assert(a_refToCoar % 2 == 0);
 
-  for (IVSIterator ivsIt(a_coarLevelTags); ivsIt.ok(); ++ivsIt) {
-    const IntVect iv = ivsIt();
+    const IntVect tag = ivsIt();
+    const IntVect iv  = IntVect(D_DECL((tag[0] - coarProbLo[0]) / (m_tileSize[0] / a_refToCoar),
+                                      (tag[1] - coarProbLo[1]) / (m_tileSize[1] / a_refToCoar),
+                                      (tag[2] - coarProbLo[2]) / (m_tileSize[2] / a_refToCoar)));
 
-    IntVect curTile;
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      curTile[dir] = (iv[dir] - probLo[dir]) / (m_tileSize[dir] / a_refCoar);
-    }
-    if (levelTileBox.contains(curTile)) {
-      myLevelTiles |= curTile;
-    }
-  }
-
-  // 2. If the domain is periodic, add symmetry tiles
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    if (a_levelDomain.isPeriodic(dir)) {
-      IntVectSet periodicTiles;
-      for (IVSIterator ivsIt(myLevelTiles); ivsIt.ok(); ++ivsIt) {
-        const IntVect tile = ivsIt();
-
-        IntVect mirrorTile = tile;
-        if (tile[dir] == 0) {
-          mirrorTile[dir] = numLevelTiles[dir];
-          periodicTiles |= mirrorTile;
-        }
-        else if (tile[dir] == numLevelTiles[dir]) {
-          mirrorTile[dir] = 0;
-          periodicTiles |= mirrorTile;
-        }
-      }
-      myLevelTiles |= periodicTiles;
+    if (tileBox.contains(iv)) {
+      a_tiles.emplace(Tile(D_DECL(iv[0], iv[1], iv[2])));
     }
   }
+  CH_STOP(t1);
 
-  // 3. Gather tiles globally
+  // Gather tiles globally
 #ifdef CH_MPI
-  const int          destProc = uniqueProc(SerialTask::compute);
-  Vector<IntVectSet> allTaggedTiles;
-  gather(allTaggedTiles, myLevelTiles, destProc);
-  if (procID() == destProc) {
-    a_levelTiles.makeEmpty();
-    for (int i = 0; i < allTaggedTiles.size(); i++) {
-      a_levelTiles |= allTaggedTiles[i];
+  CH_START(t2);
+  const int mySendCount  = a_tiles.size() * SpaceDim;
+  int*      mySendBuffer = new int[mySendCount];
+
+  // Get the number of elements sent by each MPI rank and compute the offset array which is required by Allgatherv
+  int  recvCount  = mySendCount;
+  int* sendCounts = new int[numProc()];
+  int* offsets    = new int[numProc()];
+
+  MPI_Allreduce(MPI_IN_PLACE, &recvCount, 1, MPI_INT, MPI_SUM, Chombo_MPI::comm);
+  MPI_Allgather(&mySendCount, 1, MPI_INT, sendCounts, 1, MPI_INT, Chombo_MPI::comm);
+  offsets[0] = 0;
+  for (int i = 0; i < numProc() - 1; i++) {
+    offsets[i + 1] = offsets[i] + sendCounts[i];
+  }
+
+  // Linearize the tiles as integers onto the send buffer
+  int idx = 0;
+  for (const auto& t : a_tiles) {
+    for (int dir = 0; dir < SpaceDim; dir++, idx++) {
+      mySendBuffer[idx] = t[dir];
     }
   }
-  broadcast(a_levelTiles, destProc);
-#else
-  a_levelTiles = myLevelTiles;
+  a_tiles.clear();
+
+  // Allocate storage and gather tiles
+  int* recvBuffer = new int[recvCount];
+  MPI_Allgatherv(mySendBuffer, mySendCount, MPI_INT, recvBuffer, sendCounts, offsets, MPI_INT, Chombo_MPI::comm);
+
+  // de-linearize the received data back into tiles
+  for (int i = 0; i < recvCount; i += SpaceDim) {
+    a_tiles.emplace(Tile(D_DECL(recvBuffer[i], recvBuffer[i + 1], recvBuffer[i + 2])));
+  }
+
+  delete[] recvBuffer;
+  delete[] offsets;
+  delete[] sendCounts;
+  delete[] mySendBuffer;
+
+  CH_STOP(t2);
 #endif
 
-  // 4. Add finer level tiles to this level to ensure proper nesting. We do this by adding all the neighboring tiles to a tile
-  //    on the finer level, coarsening all those tiles and adding them to this level
-  if (a_fineLevelTiles.numPts() > 0) {
-    //    MayDay::Abort("wtf");
-    Box fineTileBox = levelTileBox;
-    fineTileBox.refine(a_refFine);
+  // Ensure proper nesting by adding coarsened tiles from the fine level. We grow by one tile (one the fine level) in order
+  // to ensure that we're nesting correctly.
+  CH_START(t3);
 
-    for (IVSIterator ivsIt(a_fineLevelTiles); ivsIt.ok(); ++ivsIt) {
-      const IntVect iv = ivsIt();
+  const Box tileBoxFine = refine(tileBox, a_refToFine);
 
-      // Grow tiles and restrict to fine domain
-      Box box(iv, iv);
-      box.grow(1);
-      IntVectSet grownFineLevelTiles(box);
-      grownFineLevelTiles &= fineTileBox;
+  for (const Tile& fineTile : a_fineTiles) {
+    CH_assert(a_refToFine >= 2);
+    CH_assert(a_refToFine % 2 == 0);
 
-      a_levelTiles |= coarsen(grownFineLevelTiles, a_refFine);
+    const IntVect fineTileIV = IntVect(D_DECL(fineTile[0], fineTile[1], fineTile[2]));
+    const Box     fineBox    = grow(Box(fineTileIV, fineTileIV), 1) & tileBoxFine;
+    const Box     box        = coarsen(fineBox, a_refToFine);
+
+    for (BoxIterator bit(box); bit.ok(); ++bit) {
+      const IntVect iv = bit();
+
+      a_tiles.emplace(Tile(D_DECL(iv[0], iv[1], iv[2])));
     }
   }
 
-  // 5. Restrict tiles to problem domains. Shouldn't be necessary
-  //  a_levelTiles &= levelTileBox;
+  CH_STOP(t3);
 }
 
 void
-TiledMeshRefine::makeBoxesFromTiles(Vector<Box>&         a_levelBoxes,
-                                    const IntVectSet&    a_levelTiles,
-                                    const ProblemDomain& a_levelDomain) const
+TiledMeshRefine::makeBoxesFromTiles(Vector<Box>&         a_boxes,
+                                    const TileSet&       a_tileSet,
+                                    const ProblemDomain& a_domain) const noexcept
 {
   CH_TIME("TiledMeshRefine::makeBoxesFromTiles");
 
-  a_levelBoxes.resize(0);
+  a_boxes.resize(0);
 
-  const IntVect probLo = a_levelDomain.domainBox().smallEnd();
-  const IntVect probHi = a_levelDomain.domainBox().bigEnd();
+  const IntVect probLo = a_domain.domainBox().smallEnd();
 
-  for (IVSIterator ivsIt(a_levelTiles); ivsIt.ok(); ++ivsIt) {
-    const IntVect iv = ivsIt();
+  for (const auto& tile : a_tileSet) {
+    IntVect boxLo = probLo;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      boxLo[dir] += tile[dir] * m_tileSize[dir];
+    }
+    const IntVect boxHi = boxLo + m_tileSize - IntVect::Unit;
 
-    const IntVect lo = probLo + iv * m_tileSize;
-    const IntVect hi = lo + m_tileSize - IntVect::Unit;
+    const Box box(boxLo, boxHi);
 
-    a_levelBoxes.push_back(Box(lo, hi));
+    a_boxes.push_back(Box(boxLo, boxHi));
   }
 }
 

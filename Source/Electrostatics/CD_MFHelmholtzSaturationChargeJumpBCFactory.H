@@ -48,6 +48,7 @@ public:
     @param[in] a_weight       Weighting factor for least squares
     @param[in] a_radius       Stencil radius
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
+    @param[in] a_ghostPhi     Number of ghost cells in phi
     @return Returns an MFHelmholtzJumpBC for encapsulating boundary conditions on multiphase cells. 
   */
   virtual RefCountedPtr<MFHelmholtzJumpBC>
@@ -58,7 +59,8 @@ public:
          const int            a_order,
          const int            a_weight,
          const int            a_radius,
-         const int            a_ghostCF) override;
+         const int            a_ghostCF,
+         const IntVect        a_ghostPhi) override;
 
 protected:
   /*!

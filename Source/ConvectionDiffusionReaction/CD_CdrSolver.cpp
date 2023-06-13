@@ -13,6 +13,7 @@
 #include <ParmParse.H>
 #include <EBAMRIO.H>
 #include <EBArith.H>
+#include <EBLevelDataOps.H>
 
 // Our includes
 #include <CD_CdrSolver.H>
@@ -279,11 +280,9 @@ CdrSolver::allocate()
   // These three are allocated no matter what -- we will always need the state (and probably also the source term)
   m_amr->allocate(m_phi, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_source, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_scratch, m_realm, m_phase, m_nComp);
 
   DataOps::setValue(m_phi, 0.0);
   DataOps::setValue(m_source, 0.0);
-  DataOps::setValue(m_scratch, 0.0);
 
   // Only allocate memory for cell-centered and face-centered velocities if the solver is mobile. Otherwise, allocate
   // a NULL pointer that we can pass around in TimeStepper in order to handle special cases
@@ -322,8 +321,6 @@ CdrSolver::allocate()
 
   // Allocate stuff for holding fluxes -- this data is used when computing advection and diffusion fluxes.
   if (m_isDiffusive || m_isMobile) {
-    m_amr->allocate(m_scratchFluxOne, m_realm, m_phase, m_nComp);
-    m_amr->allocate(m_scratchFluxTwo, m_realm, m_phase, m_nComp);
   }
 
   // These don't consume (much) memory so we always allocate them.
@@ -351,19 +348,15 @@ CdrSolver::deallocate()
     pout() << m_name + "::deallocate()" << endl;
   }
 
-  // TLDR: This deallocates a bunch of storage. This can be used during regrids to trim memory (because the Berger-Rigoutsous algorithm eats memory).
-  m_amr->deallocate(m_phi);
-  m_amr->deallocate(m_source);
-  m_amr->deallocate(m_faceVelocity);
-  m_amr->deallocate(m_cellVelocity);
-  m_amr->deallocate(m_ebFlux);
-  m_amr->deallocate(m_cellCenteredDiffusionCoefficient);
-  m_amr->deallocate(m_faceCenteredDiffusionCoefficient);
-  m_amr->deallocate(m_ebCenteredDiffusionCoefficient);
-  m_amr->deallocate(m_scratch);
-  m_amr->deallocate(m_scratchFluxOne);
-  m_amr->deallocate(m_scratchFluxTwo);
-  m_amr->deallocate(m_faceStates);
+  m_phi.clear();
+  m_source.clear();
+  m_faceVelocity.clear();
+  m_faceStates.clear();
+  m_cellVelocity.clear();
+  m_ebFlux.clear();
+  m_cellCenteredDiffusionCoefficient.clear();
+  m_faceCenteredDiffusionCoefficient.clear();
+  m_ebCenteredDiffusionCoefficient.clear();
 }
 
 void
@@ -414,101 +407,10 @@ CdrSolver::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   m_amr->allocate(m_cachePhi, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_cacheSource, m_realm, m_phase, m_nComp);
 
-  for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++) {
-    m_phi[lvl]->localCopyTo(*m_cachePhi[lvl]);
-    m_source[lvl]->localCopyTo(*m_cacheSource[lvl]);
-  }
-}
+  m_amr->copyData(m_cachePhi, m_phi);
+  m_amr->copyData(m_cacheSource, m_source);
 
-void
-CdrSolver::coarseFineIncrement(const EBAMRIVData& a_massDifference)
-{
-  CH_TIME("CdrSolver::coarseFineIncrement(EBAMRIVData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::coarseFineIncrement(EBAMRIVData)" << endl;
-  }
-
-  CH_assert(a_massDifference[0]->nComp() == 1);
-
-  // TLDR: This routine increments masses for the coarse-fine redistribution. In the algorithm we can have an EBCF situation
-  //       where we 1) redistribute mass to ghost cells, 2) redistribute mass into the part under the fine grid. Fortunately,
-  //       there are registers in Chombo that let us do this kind of redistribution magic.
-
-  const Interval interv(m_comp, m_comp);
-
-  const int finestLevel = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-    RefCountedPtr<EBFineToCoarRedist>& fine2coarRedist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToFineRedist>& coar2fineRedist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coarRedist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-
-    const bool hasCoar = lvl > 0;
-    const bool hasFine = lvl < finestLevel;
-
-    if (hasCoar) {
-      fine2coarRedist->setToZero();
-    }
-    if (hasFine) {
-      coar2fineRedist->setToZero();
-      coar2coarRedist->setToZero();
-    }
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      if (hasCoar) {
-        fine2coarRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
-      }
-
-      if (hasFine) {
-        coar2fineRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
-        coar2coarRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
-      }
-    }
-  }
-}
-
-void
-CdrSolver::coarseFineRedistribution(EBAMRCellData& a_phi)
-{
-  CH_TIME("CdrSolver::coarseFineRedistribution(EBAMRCellData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::coarseFineRedistribution(EBAMRCellData)" << endl;
-  }
-
-  CH_assert(a_phi[0]->nComp() == 1);
-
-  // TLDR: This routine does the coarse-fine redistribution. In the algorithm we can have an EBCF situation
-  //       where we 1) redistribute mass to ghost cells, 2) redistribute mass into the part under the fine grid. Fortunately,
-  //       there are registers in Chombo that let us do precisely this kind of redistribution magic.
-
-  const Interval interv(m_comp, m_comp);
-
-  const int finestLevel = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-
-    const bool hasCoar = lvl > 0;
-    const bool hasFine = lvl < finestLevel;
-
-    RefCountedPtr<EBCoarToFineRedist>& coar2fineRedist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coarRedist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBFineToCoarRedist>& fine2coarRedist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
-
-    if (hasCoar) {
-      fine2coarRedist->redistribute(*a_phi[lvl - 1], interv);
-      fine2coarRedist->setToZero();
-    }
-
-    if (hasFine) {
-      coar2fineRedist->redistribute(*a_phi[lvl + 1], interv);
-      coar2coarRedist->redistribute(*a_phi[lvl], interv);
-
-      coar2fineRedist->setToZero();
-      coar2coarRedist->setToZero();
-    }
-  }
+  this->deallocate();
 }
 
 void
@@ -528,7 +430,7 @@ CdrSolver::computeDivG(EBAMRCellData&     a_divG,
 
   // TLDR: This routine computes a finite volume approximation to Div(G) where G is a flux, stored on face centers and eb faces. The routine uses
   //       flux matching on refinement boundaries and the so-called hybrid divergence in the cut-cells. The mass which is missed by the hybrid
-  //       divergence is smooshed back in through Chombo's redistribution registers.
+  //       divergence is smooshed back in through through redistribution.
 
   DataOps::setValue(a_divG, 0.0);
 
@@ -548,13 +450,59 @@ CdrSolver::computeDivG(EBAMRCellData&     a_divG,
     this->hybridDivergence(a_divG, m_massDifference, m_nonConservativeDivG);
 
     if (m_whichRedistribution != Redistribution::None) {
-      // Increment redistribution registers with the mass difference.
-      this->incrementRedist(m_massDifference);
-      this->coarseFineIncrement(m_massDifference);
 
-      // Redistribute mass on the level and across the coarse-fine boundaries.
-      this->hyperbolicRedistribution(a_divG); // Level redistribution.
-      this->coarseFineRedistribution(a_divG); // Coarse-fine redistribution
+      Vector<RefCountedPtr<EBRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
+
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+        const Real     scale     = 1.0;
+        const Interval variables = Interval(0, 0);
+        const bool     hasCoar   = lvl > 0;
+        const bool     hasFine   = lvl < m_amr->getFinestLevel();
+
+        if (hasCoar) {
+          redistOps[lvl]->redistributeCoar(*a_divG[lvl - 1], *m_massDifference[lvl], scale, variables);
+        }
+
+        redistOps[lvl]->redistributeLevel(*a_divG[lvl], *m_massDifference[lvl], scale, variables);
+
+        if (hasFine) {
+          redistOps[lvl]->redistributeFine(*a_divG[lvl + 1], *m_massDifference[lvl], scale, variables);
+        }
+      }
+    }
+  }
+}
+
+void
+CdrSolver::redistribute(EBAMRCellData& a_phi, const EBAMRIVData& a_delta) const noexcept
+{
+  CH_TIME("CdrSolver::redistribute");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::redistribute" << endl;
+  }
+
+  CH_assert(a_phi.getRealm() == m_realm);
+  CH_assert(a_delta.getRealm() == m_realm);
+
+  Vector<RefCountedPtr<EBRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const Real     scale     = 1.0;
+    const Interval variables = Interval(0, 0);
+    const bool     hasCoar   = lvl > 0;
+    const bool     hasFine   = lvl < m_amr->getFinestLevel();
+
+    CH_assert(a_phi[lvl]->nComp() == 1);
+    CH_assert(a_delta[lvl]->nComp() == 1);
+
+    if (hasCoar) {
+      redistOps[lvl]->redistributeCoar(*a_phi[lvl - 1], *a_delta[lvl], scale, variables);
+    }
+
+    redistOps[lvl]->redistributeLevel(*a_phi[lvl], *a_delta[lvl], scale, variables);
+
+    if (hasFine) {
+      redistOps[lvl]->redistributeFine(*a_phi[lvl + 1], *a_delta[lvl], scale, variables);
     }
   }
 }
@@ -1197,38 +1145,6 @@ CdrSolver::defineInterpolationStencils()
 }
 
 void
-CdrSolver::incrementRedistFlux()
-{
-  CH_TIME("CdrSolver::incrementRedistFlux()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::incrementRedistFlux()" << endl;
-  }
-
-  // This routine lets the flux register know what is going on with the cut-cell mass redistribution
-  // across the coarse-fine boundary.
-
-  const int finestLevel = m_amr->getFinestLevel();
-
-  const Interval interv(m_comp, m_comp);
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    const Real dx      = m_amr->getDx()[lvl];
-    const bool hasFine = lvl < finestLevel;
-
-    if (hasFine) {
-      RefCountedPtr<EBFluxRegister>&     fluxReg         = m_amr->getFluxRegister(m_realm, m_phase)[lvl];
-      RefCountedPtr<EBCoarToFineRedist>& coar2fineRedist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-      RefCountedPtr<EBCoarToCoarRedist>& coar2coarRedist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-
-      const Real scale = -dx;
-
-      fluxReg->incrementRedistRegister(*coar2fineRedist, interv, scale);
-      fluxReg->incrementRedistRegister(*coar2coarRedist, interv, scale);
-    }
-  }
-}
-
-void
 CdrSolver::initialData()
 {
   CH_TIME("CdrSolver::initialData()");
@@ -1261,16 +1177,18 @@ CdrSolver::initialDataDistribution()
     pout() << m_name + "::initialDataDistribution()" << endl;
   }
 
-  // TLDR: We just run through every cell in the grid and increment by m_species->initialData
+  // TLDR: We just run through every cell in the grid and increment by m_species->initialData.
 
   // Expose the initial data function to something DataOps can use.
   auto initFunc = [&](const RealVect& pos) -> Real {
     return m_species->initialData(pos, m_time);
   };
 
-  // Call the initial data function and stored on m_scratch. Increment, then synchronize and set covered to zero.
-  DataOps::setValue(m_scratch, initFunc, m_amr->getProbLo(), m_amr->getDx(), m_comp);
-  DataOps::incr(m_phi, m_scratch, 1.0);
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, m_nComp);
+
+  DataOps::setValue(scratch, initFunc, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+  DataOps::incr(m_phi, scratch, 1.0);
   DataOps::setCoveredValue(m_phi, 0, 0.0);
 
   m_amr->conservativeAverage(m_phi, m_realm, m_phase);
@@ -1398,68 +1316,6 @@ CdrSolver::hybridDivergence(LevelData<EBCellFAB>&             a_hybridDivergence
 }
 
 void
-CdrSolver::setRedistWeights(const EBAMRCellData& a_weights)
-{
-  CH_TIME("CdrSolver::setRedistWeights(EBAMRCellData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setRedistWeights(EBAMRCellData)" << endl;
-  }
-
-  CH_assert(a_weights[0]->nComp() == 1);
-
-  // This function sets the weights for redistribution (the default is to use volume-weighted). This applies
-  // to level-redistribution, fine-to-coar redistribution, coarse-to-fine redistribution, and the heinous
-  // re-redistribution.
-
-  const int finestLevel = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-
-    // Level redistribution
-    EBLevelRedist& redist = *m_amr->getLevelRedist(m_realm, m_phase)[lvl];
-    redist.resetWeights(*a_weights[lvl], m_comp);
-
-    const bool hasCoar = lvl > 0;
-    const bool hasFine = lvl < finestLevel;
-
-    if (hasCoar) {
-      EBFineToCoarRedist& fine2coarRedist = *m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
-      fine2coarRedist.resetWeights(*a_weights[lvl - 1], m_comp);
-    }
-    if (hasFine) {
-      EBCoarToCoarRedist& coar2coarRedist = *m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-      EBCoarToFineRedist& coar2fineRedist = *m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-
-      coar2coarRedist.resetWeights(*a_weights[lvl], m_comp);
-      coar2fineRedist.resetWeights(*a_weights[lvl], m_comp);
-    }
-  }
-}
-
-void
-CdrSolver::hyperbolicRedistribution(EBAMRCellData& a_divF)
-{
-  CH_TIME("CdrSolver::hyberbolicRedistribution(EBAMRCellData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::hyperbolicRedistribution(EBAMRCellData)" << endl;
-  }
-
-  CH_assert(a_divF[0]->nComp() == 1);
-
-  // This function ONLY redistributes on a grid level. If you don't have EBxCF crossings, thats the end of the story but in
-  // general we also need to account for mass that redistributes over refinement boundaries.
-
-  const Interval interv(m_comp, m_comp);
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    EBLevelRedist& levelRedist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
-
-    levelRedist.redistribute(*a_divF[lvl], interv);
-    levelRedist.setToZero();
-  }
-}
-
-void
 CdrSolver::interpolateFluxToFaceCentroids(EBAMRFluxData& a_flux)
 {
   CH_TIME("CdrSolver::interpolateFluxToFaceCentroids(EBAMRFluxData)");
@@ -1535,111 +1391,6 @@ CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const in
 }
 
 void
-CdrSolver::resetFluxRegister()
-{
-  CH_TIME("CdrSolver::resetFluxRegister()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::resetFluxRegister()" << endl;
-  }
-
-  // Function just sets the flux register to zero (so we can increment it later).
-  const int finestLevel = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    if (lvl < finestLevel) { // Because flux registers between level l and level l+1 live on level l.
-      RefCountedPtr<EBFluxRegister>& fluxReg = m_amr->getFluxRegister(m_realm, m_phase)[lvl];
-
-      fluxReg->setToZero();
-    }
-  }
-}
-
-void
-CdrSolver::incrementFluxRegister(const EBAMRFluxData& a_flux)
-{
-  CH_TIME("CdrSolver::incrementFluxRegister(EBAMRFluxData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::incrementFluxRegister(EBAMRFluxData)" << endl;
-  }
-
-  CH_assert(a_flux[0]->nComp() == 1);
-
-  // TLDR: To enforce flux matching on refinement boundaries we must have coarse flux = sum(fine fluxes). Fortunately
-  //       Chombo has operators to handle that choreography, and this function provides the necessary fluxes to that operator.
-
-  const int finestLevel = m_amr->getFinestLevel();
-
-  const Interval interv(m_comp, m_comp);
-
-  Vector<RefCountedPtr<EBFluxRegister>>& fluxReg = m_amr->getFluxRegister(m_realm, m_phase);
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-    const bool hasCoar = lvl > 0;
-    const bool hasFine = lvl < finestLevel;
-
-    // Reset flux register first.
-    if (hasFine) {
-      fluxReg[lvl]->setToZero();
-    }
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        const Real       scale = 1.0;
-        const EBFaceFAB& flux  = (*a_flux[lvl])[dit()][dir];
-
-        // Increment flux register for irregular/regular. Add both from coarse to fine and from fine to coarse.
-        if (hasFine) {
-          for (SideIterator sit; sit.ok(); ++sit) {
-            fluxReg[lvl]->incrementCoarseBoth(flux, scale, dit(), interv, dir, sit()); // Register between lvl and lvl+1
-          }
-        }
-
-        if (hasCoar) {
-          for (SideIterator sit; sit.ok(); ++sit) {
-            fluxReg[lvl - 1]->incrementFineBoth(flux,
-                                                scale,
-                                                dit(),
-                                                interv,
-                                                dir,
-                                                sit()); // Register between lvl-1 and lvl.
-          }
-        }
-      }
-    }
-  }
-}
-
-void
-CdrSolver::incrementRedist(const EBAMRIVData& a_massDifference)
-{
-  CH_TIME("CdrSolver::incrementRedist(EBAMRIVData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::incrementRedist(EBAMRIVData)" << endl;
-  }
-
-  CH_assert(a_massDifference[0]->nComp() == 1);
-
-  // a_massDifference is the mass to be smooshed back onto the grid through redistribution. Here, we increment the level-only
-  // redistribution object with that mass.
-
-  const Interval interv(m_comp, m_comp);
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-    EBLevelRedist& levelRedist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
-
-    levelRedist.setToZero();
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      levelRedist.increment((*a_massDifference[lvl])[dit()], dit(), interv);
-    }
-  }
-}
-
-void
 CdrSolver::nonConservativeDivergence(EBAMRIVData& a_nonConservativeDivergence, const EBAMRCellData& a_divG)
 {
   CH_TIME("CdrSolver::nonConservativeDivergence(EBAMRIVData, EBAMRCellData)");
@@ -1676,9 +1427,12 @@ CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
   // prior to this routine so the old m_phi (before the regrid) is stored in m_cachedPhi.
   this->allocate();
 
+  const EBCoarseToFineInterp::Type interpType = m_regridSlopes ? EBCoarseToFineInterp::Type::ConservativeMinMod
+                                                               : EBCoarseToFineInterp::Type::ConservativePWC;
+
   // Interpolate to the new grids.
-  m_amr->interpToNewGrids(m_phi, m_cachePhi, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
-  m_amr->interpToNewGrids(m_source, m_cacheSource, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
+  m_amr->interpToNewGrids(m_phi, m_cachePhi, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);
+  m_amr->interpToNewGrids(m_source, m_cacheSource, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);
 
   // Coarsen data and update ghost cells.
   m_amr->conservativeAverage(m_phi, m_realm, m_phase);
@@ -1688,37 +1442,8 @@ CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
   m_amr->interpGhost(m_source, m_realm, m_phase);
 
   // Deallocate the scratch storage.
-  m_amr->deallocate(m_cachePhi);
-  m_amr->deallocate(m_cacheSource);
-}
-
-void
-CdrSolver::reflux(EBAMRCellData& a_phi)
-{
-  CH_TIME("CdrSolver::reflux(EBAMRCellData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::reflux(EBAMRCellData)" << endl;
-  }
-
-  CH_assert(a_phi[0]->nComp() == 1);
-
-  const int finestLevel = m_amr->getFinestLevel();
-
-  const Interval interv(m_comp, m_comp);
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    if (lvl < finestLevel) {
-      RefCountedPtr<EBFluxRegister>& fluxReg =
-        m_amr->getFluxRegister(m_realm,
-                               m_phase)[lvl]; // Flux matching between lvl and lvl-1 lives on lvl-1
-
-      const Real dx    = m_amr->getDx()[lvl];
-      const Real scale = 1.0 / dx;
-
-      fluxReg->reflux(*a_phi[lvl], interv, scale);
-      fluxReg->setToZero();
-    }
-  }
+  m_cachePhi.clear();
+  m_cacheSource.clear();
 }
 
 void
@@ -1747,7 +1472,6 @@ CdrSolver::registerOperators()
   m_amr->registerOperator(s_eb_coar_ave, m_realm, m_phase);
   m_amr->registerOperator(s_eb_fill_patch, m_realm, m_phase);
   m_amr->registerOperator(s_eb_fine_interp, m_realm, m_phase);
-  m_amr->registerOperator(s_eb_flux_reg, m_realm, m_phase);
   m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
   m_amr->registerOperator(s_eb_irreg_interp, m_realm, m_phase);
   m_amr->registerOperator(s_noncons_div, m_realm, m_phase);
@@ -1766,8 +1490,6 @@ CdrSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& 
   m_computationalGeometry = a_computationalGeometry;
 
   const RefCountedPtr<MultiFluidIndexSpace> MultiFluidIndexSpace = m_computationalGeometry->getMfIndexSpace();
-
-  this->setEbIndexSpace(MultiFluidIndexSpace->getEBIndexSpace(m_phase));
 }
 
 void
@@ -1783,8 +1505,8 @@ CdrSolver::setDiffusionCoefficient(const EBAMRFluxData& a_diffusionCoefficient,
   CH_assert(a_ebDiffusionCoefficient[0]->nComp() == 1);
 
   // Do a copy -- realms do not have to be the same.
-  m_faceCenteredDiffusionCoefficient.copy(a_diffusionCoefficient);
-  m_ebCenteredDiffusionCoefficient.copy(a_ebDiffusionCoefficient);
+  m_amr->copyData(m_faceCenteredDiffusionCoefficient, a_diffusionCoefficient);
+  m_amr->copyData(m_ebCenteredDiffusionCoefficient, a_ebDiffusionCoefficient);
 
   m_amr->conservativeAverage(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
   m_amr->conservativeAverage(m_ebCenteredDiffusionCoefficient, m_realm, m_phase);
@@ -1830,7 +1552,7 @@ CdrSolver::setEbFlux(const EBAMRIVData& a_ebFlux)
 
   CH_assert(a_ebFlux[0]->nComp() == 1);
 
-  m_ebFlux.copy(a_ebFlux);
+  m_amr->copyData(m_ebFlux, a_ebFlux);
 }
 
 void
@@ -1842,19 +1564,6 @@ CdrSolver::setEbFlux(const Real a_ebFlux)
   }
 
   DataOps::setValue(m_ebFlux, a_ebFlux);
-}
-
-void
-CdrSolver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis)
-{
-  CH_TIME("CdrSolver::setEbIndexSpace(RefCountedPtr<EBIndexSpace>)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setEbIndexSpace(RefCountedPtr<EBIndexSpace>)" << endl;
-  }
-
-  CH_assert(!a_ebis.isNull());
-
-  m_ebis = a_ebis;
 }
 
 void
@@ -1883,7 +1592,7 @@ CdrSolver::setSource(const EBAMRCellData& a_source)
 
   CH_assert(a_source[0]->nComp() == 1);
 
-  m_source.copy(a_source);
+  m_amr->copyData(m_source, a_source);
 
   m_amr->conservativeAverage(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
@@ -1940,7 +1649,7 @@ CdrSolver::setVelocity(const EBAMRCellData& a_velo)
 
   CH_assert(a_velo[0]->nComp() == SpaceDim);
 
-  m_cellVelocity.copy(a_velo);
+  m_amr->copyData(m_cellVelocity, a_velo);
 
   m_amr->conservativeAverage(m_cellVelocity, m_realm, m_phase);
   m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);
@@ -2019,8 +1728,10 @@ CdrSolver::writePlotFile()
   DataOps::setValue(output, 0.0);
 
   // Copy internal data to be plotted over to 'output'
-  int icomp = 0;
-  this->writePlotData(output, icomp);
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    int icomp = 0;
+    this->writePlotData(*output[lvl], icomp, m_realm, lvl);
+  }
 
   // Filename
   char filename[100];
@@ -2050,91 +1761,133 @@ CdrSolver::writePlotFile()
 }
 
 void
-CdrSolver::writePlotData(EBAMRCellData& a_output, int& a_icomp)
+CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
+                         int&                  a_icomp,
+                         const std::string     a_outputRealm,
+                         const int             a_level) const noexcept
 {
-  CH_TIME("CdrSolver::writePlotData(EBAMRCellData, int)");
+  CH_TIME("CdrSolver::writePlotData");
   if (m_verbosity > 5) {
-    pout() << m_name + "::writePlotData(EBAMRCellData, int)" << endl;
+    pout() << m_name + "::writePlotData" << endl;
   }
 
   // TLDR: This routine writes plot data to an "external" data holder a_output, starting on a_icomp. The intention
   //       behind that is that a_output is a plot file which accumulates data over many solvers. Note that because
   //       this solver is cell-centered, we interpolate m_phi to centroids when outputting it.
 
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, 1);
+
   // Plot state
   if (m_plotPhi) {
-    this->writeData(a_output, a_icomp, m_phi, true);
+    this->writeData(a_output, a_icomp, m_phi, a_outputRealm, a_level, true, true);
+    if (m_plotNumbers) {
+      LevelData<EBCellFAB> alias;
+
+      aliasLevelData<EBCellFAB>(alias, &a_output, Interval(a_icomp - 1, a_icomp - 1));
+
+      DataOps::scale(alias, std::pow(m_amr->getDx()[a_level], SpaceDim));
+    }
   }
 
   // Plot diffusion coefficients. These are stored on face centers but we need cell-centered data for output.
   if (m_plotDiffusionCoefficient && m_isDiffusive) {
-    DataOps::setValue(m_scratch, 0.0);
-    DataOps::averageFaceToCell(m_scratch, m_faceCenteredDiffusionCoefficient, m_amr->getDomains());
-    this->writeData(a_output, a_icomp, m_scratch, false);
+    DataOps::averageFaceToCell(*scratch[a_level],
+                               *m_faceCenteredDiffusionCoefficient[a_level],
+                               m_amr->getDomains()[a_level]);
+
+    // Do the previous because we need the ghost cells too.
+    if (a_level > 0) {
+      DataOps::averageFaceToCell(*scratch[a_level - 1],
+                                 *m_faceCenteredDiffusionCoefficient[a_level - 1],
+                                 m_amr->getDomains()[a_level - 1]);
+    }
+
+    this->writeData(a_output, a_icomp, scratch, a_outputRealm, a_level, false, true);
   }
 
   // Plot source terms
   if (m_plotSource) {
-    this->writeData(a_output, a_icomp, m_source, false);
+    this->writeData(a_output, a_icomp, m_source, a_outputRealm, a_level, false, true);
+
+    if (m_plotNumbers) {
+      LevelData<EBCellFAB> alias;
+
+      aliasLevelData<EBCellFAB>(alias, &a_output, Interval(a_icomp - 1, a_icomp - 1));
+
+      DataOps::scale(alias, std::pow(m_amr->getDx()[a_level], SpaceDim));
+    }
   }
 
   // Plot velocities
   if (m_plotVelocity && m_isMobile) {
-    this->writeData(a_output, a_icomp, m_cellVelocity, false);
+    this->writeData(a_output, a_icomp, m_cellVelocity, a_outputRealm, a_level, false, true);
   }
 
   // Plot EB fluxes. These are stored on sparse data structures but we need them on cell centers. So copy them to scratch and write data.
   if (m_plotEbFlux && m_isMobile) {
-    DataOps::setValue(m_scratch, 0.0);
-    DataOps::incr(m_scratch, m_ebFlux, 1.0);
-    this->writeData(a_output, a_icomp, m_scratch, false);
+    DataOps::setValue(*scratch[a_level], 0.0);
+    DataOps::incr(*scratch[a_level], *m_ebFlux[a_level], 1.0);
+    this->writeData(a_output, a_icomp, scratch, a_outputRealm, a_level, false, false);
   }
 }
 
 void
-CdrSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp)
-{
-  CH_TIME("CdrSolver::writeData(EBAMRCellData, int, EBAMRCellData, bool)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::writeData(EBAMRCellData, int, EBAMRCellData, bool)" << endl;
-  }
+CdrSolver::writeData(LevelData<EBCellFAB>& a_output,
+                     int&                  a_comp,
+                     const EBAMRCellData&  a_data,
+                     const std::string     a_outputRealm,
+                     const int             a_level,
+                     const bool            a_interpToCentroids,
+                     const bool            a_interpGhost) const noexcept
 
-  // TLDR: This routine copies from a data holder to another data, but in a general way where components don't align (which prevents
-  //       us from using one-line methods). A special flag (a_interp) tells us to interpolate to cell centroids or not.
+{
+  CH_TIMERS("CdrSolver::writeData");
+  CH_TIMER("CdrSolver::writeData::allocate", t1);
+  CH_TIMER("CdrSolver::writeData::local_copy", t2);
+  CH_TIMER("CdrSolver::writeData::interp_ghost", t3);
+  CH_TIMER("CdrSolver::writeData::interp_centroid", t4);
+  CH_TIMER("CdrSolver::writeData::final_copy", t5);
+  if (m_verbosity > 5) {
+    pout() << m_name + "::writeData" << endl;
+  }
 
   // Number of components we are working with.
-  const int ncomp = a_data[0]->nComp();
+  const int numComp = a_data[a_level]->nComp();
 
   // Component ranges that we copy to/from.
-  const Interval srcInterv(0, ncomp - 1);
-  const Interval dstInterv(a_comp, a_comp + ncomp - 1);
+  const Interval srcInterv(0, numComp - 1);
+  const Interval dstInterv(a_comp, a_comp + numComp - 1);
 
-  // Copy data to scratch and interpolate scratch to cell centroids if we are asked to.
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, ncomp);
-  DataOps::copy(scratch, a_data);
+  CH_START(t1);
+  LevelData<EBCellFAB> scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, a_level, numComp);
+  CH_STOP(t1);
 
-  if (a_interp) {
-    m_amr->interpToCentroids(scratch, m_realm, phase::gas);
+  CH_START(t2);
+  m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
+  CH_START(t2);
+
+  // Interpolate ghost cells
+  CH_START(t3);
+  if (a_level > 0 && a_interpGhost) {
+    m_amr->interpGhost(scratch, *a_data[a_level - 1], a_level, m_realm, m_phase);
   }
+  CH_STOP(t3);
 
-  m_amr->conservativeAverage(scratch, m_realm, m_phase);
-  m_amr->interpGhost(scratch, m_realm, m_phase);
-
-  // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
-  // we can't call EBAMRData<T>::copy either (because components don't align). So -- general type of copy here.
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    if (m_realm == a_output.getRealm()) {
-      scratch[lvl]->localCopyTo(srcInterv, *a_output[lvl], dstInterv);
-    }
-    else {
-      scratch[lvl]->copyTo(srcInterv, *a_output[lvl], dstInterv);
-    }
+  CH_START(t4);
+  if (a_interpToCentroids) {
+    m_amr->interpToCentroids(scratch, m_realm, m_phase, a_level);
   }
+  CH_STOP(t4);
 
-  DataOps::setCoveredValue(a_output, a_comp, 0.0);
+  DataOps::setCoveredValue(scratch, 0.0);
 
-  a_comp += ncomp;
+  CH_START(t5);
+  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  CH_STOP(t5);
+
+  a_comp += numComp;
 }
 
 #ifdef CH_USE_HDF5
@@ -2496,6 +2249,9 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
   }
 
   if (m_isMobile) {
+    EBAMRCellData scratch;
+    m_amr->allocate(scratch, m_realm, m_phase, 1);
+
     m_amr->conservativeAverage(m_cellVelocity, m_realm, m_phase);
     m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);
 
@@ -2506,7 +2262,7 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
     this->averageVelocityToFaces(m_faceVelocity, m_cellVelocity);
     this->advectToFaces(m_faceStates, m_phi, 0.0);
 
-    DataOps::setValue(m_scratch, 0.0); // Used to store sum(alpha*v)
+    DataOps::setValue(scratch, 0.0); // Used to store sum(alpha*v)
 
     // Grid loop.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -2520,7 +2276,7 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
         VoFIterator&   vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 
         EBCellFAB&       sumPhi    = (*a_weightedUpwindPhi[lvl])[dit()];
-        EBCellFAB&       sumWeight = (*m_scratch[lvl])[dit()];
+        EBCellFAB&       sumWeight = (*scratch[lvl])[dit()];
         const EBFluxFAB& facePhi   = (*m_faceStates[lvl])[dit()];
         const EBFluxFAB& faceVel   = (*m_faceVelocity[lvl])[dit()];
 
@@ -2637,7 +2393,7 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
     EBAMRCellData zero;
     m_amr->allocate(zero, m_realm, m_phase, m_nComp);
     DataOps::setValue(zero, 0.0);
-    DataOps::divideFallback(a_weightedUpwindPhi, m_scratch, zero);
+    DataOps::divideFallback(a_weightedUpwindPhi, scratch, zero);
 
     m_amr->conservativeAverage(a_weightedUpwindPhi, m_realm, m_phase);
     m_amr->interpGhost(a_weightedUpwindPhi, m_realm, m_phase);
@@ -2929,20 +2685,6 @@ CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
   }
 }
 
-void
-CdrSolver::redistribute(EBAMRCellData& a_phi, const EBAMRIVData& a_delta) noexcept
-{
-  CH_TIME("CdrSolver::redistribute");
-  if (m_verbosity > 5) {
-    pout() << "CdrSolver::redistribute" << endl;
-  }
-
-  this->incrementRedist(a_delta);
-  this->coarseFineIncrement(a_delta);
-  this->hyperbolicRedistribution(a_phi);
-  this->coarseFineRedistribution(a_phi);
-}
-
 std::string
 CdrSolver::makeBcString(const int a_dir, const Side::LoHiSide a_side) const
 {
@@ -3037,14 +2779,11 @@ CdrSolver::parseDivergenceComputation()
   if (str == "volume") {
     m_whichRedistribution = Redistribution::VolumeWeighted;
   }
-  else if (str == "mass") {
-    m_whichRedistribution = Redistribution::MassWeighted;
-  }
   else if (str == "none") {
     m_whichRedistribution = Redistribution::None;
   }
   else {
-    MayDay::Error("CdrSolver::parseDivergenceComputation -- logic bust. Must specify 'volume', 'mass', or 'none'");
+    MayDay::Error("CdrSolver::parseDivergenceComputation -- logic bust. Must specify 'volume' or 'none'");
   }
 
   // Blend conservation or not.
@@ -3119,18 +2858,23 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
   // compute Div(G).
 
   if (m_isDiffusive) {
+    EBAMRFluxData scratchFluxOne;
+    EBAMRFluxData scratchFluxTwo;
 
-    // m_scratchFluxOne = phis on faces (smoothing as to avoid negative densities)
-    this->smoothHeavisideFaces(m_scratchFluxOne, a_cellPhi);
-    DataOps::multiply(m_scratchFluxOne, m_faceCenteredDiffusionCoefficient); // m_scratchFluxOne = D*phis
-    DataOps::scale(m_scratchFluxOne, 2.0);                                   // m_scratchFluxOne = 2*D*phis
-    DataOps::squareRoot(m_scratchFluxOne);                                   // m_scratchFluxOne = sqrt(2*D*phis)
+    m_amr->allocate(scratchFluxOne, m_realm, m_phase, m_nComp);
+    m_amr->allocate(scratchFluxTwo, m_realm, m_phase, m_nComp);
+
+    // scratchFluxOne = phis on faces (smoothing as to avoid negative densities)
+    this->smoothHeavisideFaces(scratchFluxOne, a_cellPhi);
+    DataOps::multiply(scratchFluxOne, m_faceCenteredDiffusionCoefficient); // scratchFluxOne = D*phis
+    DataOps::scale(scratchFluxOne, 2.0);                                   // scratchFluxOne = 2*D*phis
+    DataOps::squareRoot(scratchFluxOne);                                   // scratchFluxOne = sqrt(2*D*phis)
 
 #if 0 // Debug, check if we have negative face values
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       for (int dir = 0; dir <SpaceDim; dir++){
 	Real max, min;
-	EBLevelDataOps::getMaxMin(max, min, *m_scratchFluxOne[lvl], 0, dir);
+	EBLevelDataOps::getMaxMin(max, min, *scratchFluxOne[lvl], 0, dir);
 	if(min < 0.0 || max < 0.0){
 	  MayDay::Abort("CdrSolver::gwnDiffusionSource - negative face value");
 	}
@@ -3138,12 +2882,11 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
     }
 #endif
 
-    this->fillGwn(m_scratchFluxTwo, 1.0); // Gaussian White Noise = W/sqrt(dV)
-    DataOps::
-      multiply(m_scratchFluxOne,
-               m_scratchFluxTwo); // Now m_scratchFluxOne holds the fluctuating cell-centered flux Z*sqrt(2*D*phi).
+    this->fillGwn(scratchFluxTwo, 1.0); // Gaussian White Noise = W/sqrt(dV)
+    DataOps::multiply(scratchFluxOne,
+                      scratchFluxTwo); // Now scratchFluxOne holds the fluctuating cell-centered flux Z*sqrt(2*D*phi).
     this->computeDivG(a_noiseSource,
-                      m_scratchFluxOne,
+                      scratchFluxOne,
                       m_ebZero,
                       false); // Compute the finite volume approximation and make it into a source term.
 
