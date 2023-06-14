@@ -1,5 +1,5 @@
 #include "CD_Driver.H"
-#include "CD_RodNeedlePlane.H"
+#include "CD_RodNeedleDisk.H"
 #include <CD_GeometryStepper.H>
 #include "ParmParse.H"
 
@@ -19,7 +19,7 @@ main(int argc, char* argv[])
   ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
 
   // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodNeedlePlane());
+  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodNeedleDisk());
   RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
   RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
   RefCountedPtr<CellTagger>            tagger     = RefCountedPtr<CellTagger>(NULL);

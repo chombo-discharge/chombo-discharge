@@ -477,7 +477,7 @@ namespace ParticleManagement {
 
     a_particles.clear();
 
-    const T numParticles = ParticleManagement::partitionParticles(a_numParticles);
+    const T numParticles = partitionParticles(a_numParticles);
 
     for (T t = 0; t < numParticles; t++) {
       P p;
@@ -498,7 +498,7 @@ namespace ParticleManagement {
 
     a_particles.clear();
 
-    const T numParticles = ParticleManagement::partitionParticles(a_numParticles);
+    const T numParticles = partitionParticles(a_numParticles);
 
     for (T t = 0; t < numParticles; t++) {
       P p;
@@ -536,7 +536,7 @@ namespace ParticleManagement {
                              a_loCorner[2] + (a_hiCorner[2] - a_loCorner[2]) * Random::getUniformReal01()));
     };
 
-    ParticleManagement::drawRandomParticles(a_particles, a_numParticles, ranBox);
+    drawRandomParticles(a_particles, a_numParticles, ranBox);
   }
 
   template <typename P, typename T, typename>
@@ -554,7 +554,7 @@ namespace ParticleManagement {
       return a_center + Random::get(gauss) * Random::getDirection();
     };
 
-    ParticleManagement::drawRandomParticles(a_particles, a_numParticles, ranGauss);
+    drawRandomParticles(a_particles, a_numParticles, ranGauss);
   }
 } // namespace ParticleManagement
 
