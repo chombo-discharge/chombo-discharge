@@ -9,15 +9,15 @@ AmrMesh.max_amr_depth    = 1           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
-AmrMesh.grid_algorithm   = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+AmrMesh.grid_algorithm   = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting      = morton      # 'none', 'shuffle', 'morton'
-AmrMesh.blocking_factor  = 16          # Blocking factor. 
-AmrMesh.max_box_size     = 16          # Maximum allowed box size
+AmrMesh.blocking_factor  = 8          # Blocking factor. 
+AmrMesh.max_box_size     = 8          # Maximum allowed box size
 AmrMesh.max_ebis_box     = 16          # Maximum allowed box size for EBIS generation. 
 AmrMesh.ref_rat          = 2 2 2 2 2 2 # Refinement ratios (mixed ratios are allowed). 
 AmrMesh.num_ghost        = 2           # Number of ghost cells. 
 AmrMesh.lsf_ghost        = 2           # Number of ghost cells when writing level-set to grid
-AmrMesh.eb_ghost         = 4           # Set number of of ghost cells for EB stuff
+AmrMesh.eb_ghost         = 2           # Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
 AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
@@ -31,7 +31,7 @@ AmrMesh.redist_radius    = 1           # Redistribution radius for hyperbolic co
 # ====================================================================================================
 Driver.verbosity                       = 2                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
-Driver.geometry_scan_level             = 2                # Geometry scan level for chombo-discharge geometry generator
+Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
 Driver.plot_interval                   = 10               # Plot interval
 Driver.checkpoint_interval             = 100              # Checkpoint interval
@@ -54,9 +54,9 @@ Driver.num_plot_ghost                  = 1                # Number of ghost cell
 Driver.plt_vars                        = levelset         # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
-Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 15.              # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = 2                # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.grow_geo_tags                   = 0                # How much to grow tags when using geometry-based refinement. 
+Driver.refine_angles                   = 30.              # Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes               = 1                # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = 0                # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
@@ -70,30 +70,30 @@ GeoCoarsener.box1_lvl    = 0            # up to this level
 GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
-# RodNeedlePlane geometry class options
+# RodNeedleDisk geometry class options
 # ====================================================================================================
-RodNeedlePlane.rod.on			= false			# Use rod or not
-RodNeedlePlane.rod.endpoint1		= 0 0.25 0		# One endpoint
-RodNeedlePlane.rod.midpoint		= 0 0.75 0 		# The point where the radius has fully changed to big radius
-RodNeedlePlane.rod.endpoint2		= 0 2.0 0		# Other endpoint
-RodNeedlePlane.rod.smallRadius          = 0.1                   # Rod radius at the end with the needle
-RodNeedlePlane.rod.bigRadius		= 0.4			# Rod radius at the end that is connected to the tank
-RodNeedlePlane.rod.rodBendRadius	= 0.3			# corner curve between narrow and wide part of the rod
-RodNeedlePlane.rod.live			= false			# Live or not
+RodNeedleDisk.use_rod              = true       # Turn on/off rod
+RodNeedleDisk.use_needle           = true       # Turn on/off needle
+RodNeedleDisk.use_disk             = true       # Turn on/off disk
+RodNeedleDisk.orientation          = "-y"       # Orientation
+RodNeedleDisk.translate            = 0 0 0      # Geometric translation
+RodNeedleDisk.rod_live             = false      # Rod/needle live or not
+RodNeedleDisk.disk_live            = true       # Disk live or not
 
-RodNeedlePlane.needle.on		= true			# Use needle or not
-RodNeedlePlane.needle.length		= 0.75			# Length of the needle
-RodNeedlePlane.needle.radius		= 0.2		# Needle radius
-RodNeedlePlane.needle.tipRadius		= 0.05				# Needle tip radius (curve radius of the tip)
-RodNeedlePlane.needle.angle		= 30			# Opening angle of needle tip (in degrees) (NB! Opening of "entire" tip)
-RodNeedlePlane.needle.cornerCurve	= 0.000001		# Corner curve between rod and needle
-RodNeedlePlane.needle.live		= false			# Live or not
+RodNeedleDisk.rod_begin            = 0.25       # Start position for part of rod with small radius
+RodNeedleDisk.rod_midpoint         = 0.75       # Crossing point between small-radius portion with large-radius portion
+RodNeedleDisk.rod_end              = 1.75       # Stop position for rod
+RodNeedleDisk.rod_small_radius     = 0.1        # Radius for small-radius part of rod
+RodNeedleDisk.rod_big_radius       = 0.2        # Radius for large-radius part of rod
+RodNeedleDisk.rod_smooth           = 0.1        # Transition length between small/big radius parts
+RodNeedleDisk.rod_needle_smooth    = 0.00       # Transition length between needle and actual rod
 
-RodNeedlePlane.plane.on			= false			# Use plane or not
-RodNeedlePlane.plane.point		= 0 -0.5 0		# Plane point
-RodNeedlePlane.plane.normal		= 0 1 0			# Plane normal vector (outward)
-RodNeedlePlane.plane.radius		= 0.5			# Plane radius
-RodNeedlePlane.plane.thickness		= 0.1			# Plane thickness
-RodNeedlePlane.plane.curve		= 0.05			# Plane curve (edge)
-RodNeedlePlane.plane.live		= true			# Live or not
+RodNeedleDisk.needle_length        = 0.4        # Needle length (from some origin)
+RodNeedleDisk.needle_radius        = 0.025      # Needle radius
+RodNeedleDisk.needle_tip_radius    = 0.01       # Needle tip radius
+RodNeedleDisk.needle_angle         = 30         # Full opening angle of needle tip (in degrees)
 
+RodNeedleDisk.disk_point           = -0.5       # Top position of disk
+RodNeedleDisk.disk_radius          = 0.5        # Disk radius
+RodNeedleDisk.disk_curvature       = 0.05       # Disk edge curvature (also the minimum disk thickness)
+RodNeedleDisk.disk_extra_thickness = 0.0        # Extra disk thickness
