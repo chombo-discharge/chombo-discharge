@@ -97,7 +97,7 @@ RodNeedlePlane::defineRodWNeedle()
 
   Vector<BaseIF*> electrodeParts;
   electrodeParts.push_back((BaseIF*)new SmoothIntersection(rodParts, rodBendRadius));
-  electrodeParts.push_back((BaseIF*)new NeedleIF(length, needleRadius, false, tipRadius, angle, cornerCurve));
+  electrodeParts.push_back((BaseIF*)new NeedleIF(length, needleRadius, tipRadius, angle, cornerCurve,false));
 
   RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF>(new SmoothIntersection(electrodeParts, cornerCurve));
 
@@ -168,7 +168,7 @@ RodNeedlePlane::defineNeedle()
   pp.get("cornerCurve", cornerCurve);
   pp.get("live", live);
 
-  RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF>(new NeedleIF(length, radius, false, tipRadius, angle, cornerCurve));
+  RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF>(new NeedleIF(length, radius, tipRadius, angle, cornerCurve, false));
 
   m_electrodes.push_back(Electrode(bif, live));
 }

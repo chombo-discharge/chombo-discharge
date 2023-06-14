@@ -30,7 +30,7 @@ public:
   /*!
     @brief Destructor. Destroys the object and cleans up when the object goes out of scope.
   */
-  ~RodNeedlePlane();
+  virtual ~RodNeedlePlane();
 
 protected:
   /*!

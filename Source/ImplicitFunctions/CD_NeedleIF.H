@@ -15,32 +15,32 @@
 
 // Chombo includes
 #include <BaseIF.H>
-#include <IntersectionIF.H>
+#include <RefCountedPtr.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Cylinder with one pointed end and one flat end
+  @brief Cylinder with one pointed end and one circular end. 
 */
 class NeedleIF : public BaseIF
 {
 public:
   /*!
     @brief Constructor
-    @param[in] a_length        Needle length
-    @param[in] a_radius        Needle radius
-    @param[in] a_fluidInside   Fluid inside cylinder-part of needle, true/false
-    @param[in] a_tipRadius     Radius of needle tip curvature           
-    @param[in] a_angle         Needle tip (cone) opening angle
-    @param[in] a_cornerCurve   Corner curve between rod and needle
+    @param[in] a_length      Needle length
+    @param[in] a_radius      Needle radius
+    @param[in] a_tipRadius   Radius of needle tip curvature           
+    @param[in] a_angle       Needle tip (cone) opening angle
+    @param[in] a_cornerCurve Corner curve between rod and needle
+    @param[in] flipInside    Flip inside to outside
   */
   NeedleIF(const Real& a_length,
            const Real& a_radius,
-           const bool& a_fluidInside,
            const Real& a_tipRadius,
            const Real& a_angle,
-           const Real& a_cornerCurve);
+           const Real& a_cornerCurve,
+           const bool& a_flipInside);
 
   /*!
     @brief Copy constructor
@@ -62,7 +62,11 @@ public:
   newImplicitFunction() const override;
 
 protected:
-  RefCountedPtr<BaseIF> m_baseif;
+  /*!
+    @brief Base implicit function. This is a union between a cylinder and a cone.
+  */
+  RefCountedPtr<BaseIF> m_implicitFunction;
+
   /*!
     @brief curvature-radius of needle tip
   */
