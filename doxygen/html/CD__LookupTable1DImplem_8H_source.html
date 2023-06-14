@@ -624,45 +624,73 @@ $(function() {
 <div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160;      }</div>
 <div class="line"><a name="l00553"></a><span class="lineno">  553</span>&#160;      }</div>
 <div class="line"><a name="l00554"></a><span class="lineno">  554</span>&#160; </div>
-<div class="line"><a name="l00555"></a><span class="lineno">  555</span>&#160;      <span class="comment">// Now linearly interpolate the data.</span></div>
-<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160;      std::vector&lt;std::array&lt;Real, N&gt;&gt; newData;</div>
-<div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160; </div>
-<div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160;      <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; x : xValues) {</div>
-<div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;        newData.emplace_back(this-&gt;directLookup(x));</div>
-<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;      }</div>
-<div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160; </div>
-<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;      <span class="comment">// Now replace the data with the freshly interpolated data.</span></div>
-<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;      m_data = newData;</div>
-<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160; </div>
-<div class="line"><a name="l00565"></a><span class="lineno">  565</span>&#160;      <span class="comment">// Set the state flag for uniform spacing to true.</span></div>
-<div class="line"><a name="l00566"></a><span class="lineno">  566</span>&#160;      std::get&lt;Uniform&gt;(m_state) = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00567"></a><span class="lineno">  567</span>&#160;    }</div>
-<div class="line"><a name="l00568"></a><span class="lineno">  568</span>&#160;    <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00569"></a><span class="lineno">  569</span>&#160;      std::cerr &lt;&lt; <span class="stringliteral">&quot;LookupTable1D&lt;N&gt;::makeUniform -- must have at least two rows!\n&quot;</span>;</div>
-<div class="line"><a name="l00570"></a><span class="lineno">  570</span>&#160;    }</div>
-<div class="line"><a name="l00571"></a><span class="lineno">  571</span>&#160;  }</div>
-<div class="line"><a name="l00572"></a><span class="lineno">  572</span>&#160;  <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00573"></a><span class="lineno">  573</span>&#160;    std::cerr &lt;&lt; <span class="stringliteral">&quot;LookupTable1D&lt;N&gt;::makeUniform -- must sort the column along one of the coordinates first!\n&quot;</span>;</div>
-<div class="line"><a name="l00574"></a><span class="lineno">  574</span>&#160;  }</div>
-<div class="line"><a name="l00575"></a><span class="lineno">  575</span>&#160;}</div>
-<div class="line"><a name="l00576"></a><span class="lineno">  576</span>&#160; </div>
-<div class="line"><a name="l00577"></a><span class="lineno">  577</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">int</span> N&gt;</div>
-<div class="line"><a name="l00578"></a><span class="lineno">  578</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">int</span></div>
-<div class="line"><a name="l00579"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#a1c624112793c72890dd7ed022680f260">  579</a></span>&#160;<a class="code" href="classLookupTable1D.html#a1c624112793c72890dd7ed022680f260">LookupTable1D&lt;N&gt;::getNumEntries</a>()<span class="keyword"> const</span></div>
-<div class="line"><a name="l00580"></a><span class="lineno">  580</span>&#160;<span class="keyword"></span>{</div>
-<div class="line"><a name="l00581"></a><span class="lineno">  581</span>&#160;  <span class="keywordflow">return</span> m_data.size();</div>
-<div class="line"><a name="l00582"></a><span class="lineno">  582</span>&#160;}</div>
-<div class="line"><a name="l00583"></a><span class="lineno">  583</span>&#160; </div>
-<div class="line"><a name="l00584"></a><span class="lineno">  584</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00585"></a><span class="lineno">  585</span>&#160; </div>
-<div class="line"><a name="l00586"></a><span class="lineno">  586</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00555"></a><span class="lineno">  555</span>&#160;      <span class="comment">// Linearly interpolate the data.</span></div>
+<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160;      std::array&lt;Real, N&gt;              interpRow;</div>
+<div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160;      std::vector&lt;std::array&lt;Real, N&gt;&gt; interpData;</div>
+<div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160; </div>
+<div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;      <span class="keywordtype">int</span> irow = 0;</div>
+<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160; </div>
+<div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">int</span> column = std::get&lt;Column&gt;(m_state);</div>
+<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160; </div>
+<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;      <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; x : xValues) {</div>
+<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160;        <span class="keywordflow">while</span> (<span class="keyword">true</span>) {</div>
+<div class="line"><a name="l00565"></a><span class="lineno">  565</span>&#160;          <span class="keyword">const</span> std::array&lt;Real, N&gt;&amp; row1 = m_data[irow];</div>
+<div class="line"><a name="l00566"></a><span class="lineno">  566</span>&#160;          <span class="keyword">const</span> std::array&lt;Real, N&gt;&amp; row2 = m_data[irow + 1];</div>
+<div class="line"><a name="l00567"></a><span class="lineno">  567</span>&#160; </div>
+<div class="line"><a name="l00568"></a><span class="lineno">  568</span>&#160;          <span class="keyword">const</span> Real x1 = row1[column];</div>
+<div class="line"><a name="l00569"></a><span class="lineno">  569</span>&#160;          <span class="keyword">const</span> Real x2 = row2[column];</div>
+<div class="line"><a name="l00570"></a><span class="lineno">  570</span>&#160; </div>
+<div class="line"><a name="l00571"></a><span class="lineno">  571</span>&#160;          <span class="keywordflow">if</span> (x &gt;= x1 &amp;&amp; x &lt;= x2) {</div>
+<div class="line"><a name="l00572"></a><span class="lineno">  572</span>&#160;            <span class="keyword">const</span> Real t = (x - x1) / (x2 - x1);</div>
+<div class="line"><a name="l00573"></a><span class="lineno">  573</span>&#160; </div>
+<div class="line"><a name="l00574"></a><span class="lineno">  574</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; N; j++) {</div>
+<div class="line"><a name="l00575"></a><span class="lineno">  575</span>&#160;              interpRow[j] = row1[j] + t * (row2[j] - row1[j]);</div>
+<div class="line"><a name="l00576"></a><span class="lineno">  576</span>&#160;            }</div>
+<div class="line"><a name="l00577"></a><span class="lineno">  577</span>&#160; </div>
+<div class="line"><a name="l00578"></a><span class="lineno">  578</span>&#160;            interpData.emplace_back(interpRow);</div>
+<div class="line"><a name="l00579"></a><span class="lineno">  579</span>&#160; </div>
+<div class="line"><a name="l00580"></a><span class="lineno">  580</span>&#160;            <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00581"></a><span class="lineno">  581</span>&#160;          }</div>
+<div class="line"><a name="l00582"></a><span class="lineno">  582</span>&#160;          <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00583"></a><span class="lineno">  583</span>&#160;            <span class="keywordflow">if</span> (irow &gt;= m_data.size() - 1) {</div>
+<div class="line"><a name="l00584"></a><span class="lineno">  584</span>&#160;              MayDay::Abort(<span class="stringliteral">&quot;LookupTable1D&lt;N&gt;::makeUniform - logic bust. Interpolated row is out-of-range&quot;</span>);</div>
+<div class="line"><a name="l00585"></a><span class="lineno">  585</span>&#160;            }</div>
+<div class="line"><a name="l00586"></a><span class="lineno">  586</span>&#160; </div>
+<div class="line"><a name="l00587"></a><span class="lineno">  587</span>&#160;            irow++;</div>
+<div class="line"><a name="l00588"></a><span class="lineno">  588</span>&#160;          }</div>
+<div class="line"><a name="l00589"></a><span class="lineno">  589</span>&#160;        }</div>
+<div class="line"><a name="l00590"></a><span class="lineno">  590</span>&#160;      }</div>
+<div class="line"><a name="l00591"></a><span class="lineno">  591</span>&#160; </div>
+<div class="line"><a name="l00592"></a><span class="lineno">  592</span>&#160;      m_data = interpData;</div>
+<div class="line"><a name="l00593"></a><span class="lineno">  593</span>&#160; </div>
+<div class="line"><a name="l00594"></a><span class="lineno">  594</span>&#160;      std::get&lt;Uniform&gt;(m_state) = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00595"></a><span class="lineno">  595</span>&#160;    }</div>
+<div class="line"><a name="l00596"></a><span class="lineno">  596</span>&#160;    <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00597"></a><span class="lineno">  597</span>&#160;      std::cerr &lt;&lt; <span class="stringliteral">&quot;LookupTable1D&lt;N&gt;::makeUniform -- must have at least two rows!\n&quot;</span>;</div>
+<div class="line"><a name="l00598"></a><span class="lineno">  598</span>&#160;    }</div>
+<div class="line"><a name="l00599"></a><span class="lineno">  599</span>&#160;  }</div>
+<div class="line"><a name="l00600"></a><span class="lineno">  600</span>&#160;  <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00601"></a><span class="lineno">  601</span>&#160;    std::cerr &lt;&lt; <span class="stringliteral">&quot;LookupTable1D&lt;N&gt;::makeUniform -- must sort the column along one of the coordinates first!\n&quot;</span>;</div>
+<div class="line"><a name="l00602"></a><span class="lineno">  602</span>&#160;  }</div>
+<div class="line"><a name="l00603"></a><span class="lineno">  603</span>&#160;}</div>
+<div class="line"><a name="l00604"></a><span class="lineno">  604</span>&#160; </div>
+<div class="line"><a name="l00605"></a><span class="lineno">  605</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">int</span> N&gt;</div>
+<div class="line"><a name="l00606"></a><span class="lineno">  606</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">int</span></div>
+<div class="line"><a name="l00607"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#a1c624112793c72890dd7ed022680f260">  607</a></span>&#160;<a class="code" href="classLookupTable1D.html#a1c624112793c72890dd7ed022680f260">LookupTable1D&lt;N&gt;::getNumEntries</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00608"></a><span class="lineno">  608</span>&#160;<span class="keyword"></span>{</div>
+<div class="line"><a name="l00609"></a><span class="lineno">  609</span>&#160;  <span class="keywordflow">return</span> m_data.size();</div>
+<div class="line"><a name="l00610"></a><span class="lineno">  610</span>&#160;}</div>
+<div class="line"><a name="l00611"></a><span class="lineno">  611</span>&#160; </div>
+<div class="line"><a name="l00612"></a><span class="lineno">  612</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00613"></a><span class="lineno">  613</span>&#160; </div>
+<div class="line"><a name="l00614"></a><span class="lineno">  614</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__LookupTable1D_8H_html"><div class="ttname"><a href="CD__LookupTable1D_8H.html">CD_LookupTable1D.H</a></div><div class="ttdoc">Declaration of a table for looking up coefficients etc.</div></div>
 <div class="ttc" id="aCD__LookupTable1D_8H_html_a68acea554b689ac41c0b13388ed03572"><div class="ttname"><a href="CD__LookupTable1D_8H.html#a68acea554b689ac41c0b13388ed03572">OutOfRangeStrategy</a></div><div class="ttdeci">OutOfRangeStrategy</div><div class="ttdoc">Strategy for obtaining data when requesting data that is out of range. We can use either constant (i....</div><div class="ttdef"><b>Definition:</b> CD_LookupTable1D.H:34</div></div>
 <div class="ttc" id="aCD__LookupTable1D_8H_html_acffc6eccff44c2e022a96233f052e5de"><div class="ttname"><a href="CD__LookupTable1D_8H.html#acffc6eccff44c2e022a96233f052e5de">TableSpacing</a></div><div class="ttdeci">TableSpacing</div><div class="ttdoc">Enum for classifying how table is spaced.</div><div class="ttdef"><b>Definition:</b> CD_LookupTable1D.H:53</div></div>
 <div class="ttc" id="aclassLookupTable1D_html"><div class="ttname"><a href="classLookupTable1D.html">LookupTable1D</a></div><div class="ttdoc">Class for looking up and interpolation (x,y) data.</div><div class="ttdef"><b>Definition:</b> CD_LookupTable1D.H:63</div></div>
 <div class="ttc" id="aclassLookupTable1D_html_a04d37542f1244396868676ed4553771e"><div class="ttname"><a href="classLookupTable1D.html#a04d37542f1244396868676ed4553771e">LookupTable1D::m_spacing</a></div><div class="ttdeci">TableSpacing m_spacing</div><div class="ttdoc">For setting the table spacing.</div><div class="ttdef"><b>Definition:</b> CD_LookupTable1D.H:212</div></div>
 <div class="ttc" id="aclassLookupTable1D_html_a18a755050b218de186c47fe61fd4686c"><div class="ttname"><a href="classLookupTable1D.html#a18a755050b218de186c47fe61fd4686c">LookupTable1D::scale</a></div><div class="ttdeci">void scale(const Real a_scale)</div><div class="ttdoc">Scale data in column by a specified factor.</div><div class="ttdef"><b>Definition:</b> CD_LookupTable1DImplem.H:87</div></div>
-<div class="ttc" id="aclassLookupTable1D_html_a1c624112793c72890dd7ed022680f260"><div class="ttname"><a href="classLookupTable1D.html#a1c624112793c72890dd7ed022680f260">LookupTable1D::getNumEntries</a></div><div class="ttdeci">int getNumEntries() const</div><div class="ttdoc">Get size of the table.</div><div class="ttdef"><b>Definition:</b> CD_LookupTable1DImplem.H:579</div></div>
+<div class="ttc" id="aclassLookupTable1D_html_a1c624112793c72890dd7ed022680f260"><div class="ttname"><a href="classLookupTable1D.html#a1c624112793c72890dd7ed022680f260">LookupTable1D::getNumEntries</a></div><div class="ttdeci">int getNumEntries() const</div><div class="ttdoc">Get size of the table.</div><div class="ttdef"><b>Definition:</b> CD_LookupTable1DImplem.H:607</div></div>
 <div class="ttc" id="aclassLookupTable1D_html_a200b4cb16ae6f92c1063676025831cc6"><div class="ttname"><a href="classLookupTable1D.html#a200b4cb16ae6f92c1063676025831cc6">LookupTable1D::sort</a></div><div class="ttdeci">void sort(const int a_whichColumn=0)</div><div class="ttdoc">Sort the table. Useful if the input data was not already sorted.</div><div class="ttdef"><b>Definition:</b> CD_LookupTable1DImplem.H:71</div></div>
 <div class="ttc" id="aclassLookupTable1D_html_a598e96cdd3ddf4220937486e6d258ac4"><div class="ttname"><a href="classLookupTable1D.html#a598e96cdd3ddf4220937486e6d258ac4">LookupTable1D::makeUniform</a></div><div class="ttdeci">void makeUniform(const int a_numRows)</div><div class="ttdoc">Make the table into a uniform table with the number of entries.</div><div class="ttdef"><b>Definition:</b> CD_LookupTable1DImplem.H:512</div></div>
 <div class="ttc" id="aclassLookupTable1D_html_a5efc986a0720ef1e27a9f8c9ec753fab"><div class="ttname"><a href="classLookupTable1D.html#a5efc986a0720ef1e27a9f8c9ec753fab">LookupTable1D::m_strategyHi</a></div><div class="ttdeci">OutOfRangeStrategy m_strategyHi</div><div class="ttdoc">End point stategy on the high end of the data.</div><div class="ttdef"><b>Definition:</b> CD_LookupTable1D.H:207</div></div>
@@ -684,7 +712,7 @@ $(function() {
 <div class="ttc" id="aclassLookupTable1D_html_af4959cc9ecdfdb9102550d9583e0c554"><div class="ttname"><a href="classLookupTable1D.html#af4959cc9ecdfdb9102550d9583e0c554">LookupTable1D::clear</a></div><div class="ttdeci">void clear()</div><div class="ttdoc">Clear all data.</div><div class="ttdef"><b>Definition:</b> CD_LookupTable1DImplem.H:122</div></div>
 <div class="ttc" id="aclassLookupTable1D_html_af754a0dd04b25802f91c81748fd51226"><div class="ttname"><a href="classLookupTable1D.html#af754a0dd04b25802f91c81748fd51226">LookupTable1D::getEntry</a></div><div class="ttdeci">Real getEntry(const Real a_x) const</div><div class="ttdoc">Get entry.</div><div class="ttdef"><b>Definition:</b> CD_LookupTable1DImplem.H:244</div></div>
 <div class="ttc" id="aclassLookupTable1D_html_afd7a6ac332d5f5e0827a5312479fabfe"><div class="ttname"><a href="classLookupTable1D.html#afd7a6ac332d5f5e0827a5312479fabfe">LookupTable1D::setOutOfRangeStrategyLow</a></div><div class="ttdeci">void setOutOfRangeStrategyLow(const OutOfRangeStrategy a_strategy)</div><div class="ttdoc">Set the strategy when retrieving data that is out of range on the low side.</div><div class="ttdef"><b>Definition:</b> CD_LookupTable1DImplem.H:148</div></div>
-<div class="ttc" id="anamespaceUnits_html_aeb867ff161ea992af060bf128f7ffdf3"><div class="ttname"><a href="namespaceUnits.html#aeb867ff161ea992af060bf128f7ffdf3">Units::c</a></div><div class="ttdeci">constexpr Real c</div><div class="ttdoc">Speed of light.</div><div class="ttdef"><b>Definition:</b> CD_Units.H:36</div></div>
+<div class="ttc" id="anamespaceUnits_html_aeb867ff161ea992af060bf128f7ffdf3"><div class="ttname"><a href="namespaceUnits.html#aeb867ff161ea992af060bf128f7ffdf3">Units::c</a></div><div class="ttdeci">constexpr Real c</div><div class="ttdoc">Speed of light.</div><div class="ttdef"><b>Definition:</b> CD_Units.H:39</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

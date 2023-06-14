@@ -77,7 +77,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p><a class="el" href="classCylinder.html" title="This is a class that defines a cylinder geometry.">Cylinder</a> with one pointed end and one flat end.  
+<p><a class="el" href="classCylinder.html" title="This is a class that defines a cylinder geometry.">Cylinder</a> with one pointed end and one circular end.  
  <a href="classNeedleIF.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__NeedleIF_8H_source.html">CD_NeedleIF.H</a>&gt;</code></p>
@@ -86,7 +86,7 @@ Inheritance diagram for NeedleIF:</div>
 <div class="dyncontent">
 <div class="center"><img src="classNeedleIF__inherit__graph.png" border="0" usemap="#aNeedleIF_inherit__map" alt="Inheritance graph"/></div>
 <map name="aNeedleIF_inherit__map" id="aNeedleIF_inherit__map">
-<area shape="rect" title="Cylinder with one pointed end and one flat end." alt="" coords="5,80,85,107"/>
+<area shape="rect" title="Cylinder with one pointed end and one circular end." alt="" coords="5,80,85,107"/>
 <area shape="rect" title=" " alt="" coords="12,5,79,32"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
@@ -95,16 +95,16 @@ Collaboration diagram for NeedleIF:</div>
 <div class="dyncontent">
 <div class="center"><img src="classNeedleIF__coll__graph.png" border="0" usemap="#aNeedleIF_coll__map" alt="Collaboration graph"/></div>
 <map name="aNeedleIF_coll__map" id="aNeedleIF_coll__map">
-<area shape="rect" title="Cylinder with one pointed end and one flat end." alt="" coords="5,80,85,107"/>
+<area shape="rect" title="Cylinder with one pointed end and one circular end." alt="" coords="5,80,85,107"/>
 <area shape="rect" title=" " alt="" coords="12,5,79,32"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a21e444015d99cbf39a5dc96aa1956203"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classNeedleIF.html#a21e444015d99cbf39a5dc96aa1956203">NeedleIF</a> (const Real &amp;a_length, const Real &amp;a_radius, const bool &amp;a_fluidInside, const Real &amp;a_tipRadius, const Real &amp;a_angle, const Real &amp;a_cornerCurve)</td></tr>
-<tr class="memdesc:a21e444015d99cbf39a5dc96aa1956203"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="classNeedleIF.html#a21e444015d99cbf39a5dc96aa1956203">More...</a><br /></td></tr>
-<tr class="separator:a21e444015d99cbf39a5dc96aa1956203"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8943e1b740f5d8a0fa593be0d228fef6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classNeedleIF.html#a8943e1b740f5d8a0fa593be0d228fef6">NeedleIF</a> (const Real &amp;a_length, const Real &amp;a_radius, const Real &amp;a_tipRadius, const Real &amp;a_angle, const bool &amp;a_flipInside)</td></tr>
+<tr class="memdesc:a8943e1b740f5d8a0fa593be0d228fef6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="classNeedleIF.html#a8943e1b740f5d8a0fa593be0d228fef6">More...</a><br /></td></tr>
+<tr class="separator:a8943e1b740f5d8a0fa593be0d228fef6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5046fc31e3e613c7f92146429f905015"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classNeedleIF.html#a5046fc31e3e613c7f92146429f905015">NeedleIF</a> (const <a class="el" href="classNeedleIF.html">NeedleIF</a> &amp;a_inputIF)</td></tr>
 <tr class="memdesc:a5046fc31e3e613c7f92146429f905015"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor.  <a href="classNeedleIF.html#a5046fc31e3e613c7f92146429f905015">More...</a><br /></td></tr>
 <tr class="separator:a5046fc31e3e613c7f92146429f905015"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -118,19 +118,20 @@ virtual BaseIF *&#160;</td><td class="memItemRight" valign="bottom"><a class="el
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:a81333e0aa3b6fc21826b85dccdc3428d"><td class="memItemLeft" align="right" valign="top"><a id="a81333e0aa3b6fc21826b85dccdc3428d"></a>
-RefCountedPtr&lt; BaseIF &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_baseif</b></td></tr>
-<tr class="separator:a81333e0aa3b6fc21826b85dccdc3428d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a0c452abc3f3c0ead7c10f22d15a645"><td class="memItemLeft" align="right" valign="top"><a id="a3a0c452abc3f3c0ead7c10f22d15a645"></a>
+RefCountedPtr&lt; BaseIF &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classNeedleIF.html#a3a0c452abc3f3c0ead7c10f22d15a645">m_implicitFunction</a></td></tr>
+<tr class="memdesc:a3a0c452abc3f3c0ead7c10f22d15a645"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base implicit function. This is a union between a cylinder and a cone. <br /></td></tr>
+<tr class="separator:a3a0c452abc3f3c0ead7c10f22d15a645"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9dd6ad160d4f9dad26fa1702ce159223"><td class="memItemLeft" align="right" valign="top"><a id="a9dd6ad160d4f9dad26fa1702ce159223"></a>
 Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classNeedleIF.html#a9dd6ad160d4f9dad26fa1702ce159223">m_tipRadius</a></td></tr>
 <tr class="memdesc:a9dd6ad160d4f9dad26fa1702ce159223"><td class="mdescLeft">&#160;</td><td class="mdescRight">curvature-radius of needle tip <br /></td></tr>
 <tr class="separator:a9dd6ad160d4f9dad26fa1702ce159223"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p><a class="el" href="classCylinder.html" title="This is a class that defines a cylinder geometry.">Cylinder</a> with one pointed end and one flat end. </p>
+<div class="textblock"><p><a class="el" href="classCylinder.html" title="This is a class that defines a cylinder geometry.">Cylinder</a> with one pointed end and one circular end. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a21e444015d99cbf39a5dc96aa1956203"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a21e444015d99cbf39a5dc96aa1956203">&#9670;&nbsp;</a></span>NeedleIF() <span class="overload">[1/2]</span></h2>
+<a id="a8943e1b740f5d8a0fa593be0d228fef6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8943e1b740f5d8a0fa593be0d228fef6">&#9670;&nbsp;</a></span>NeedleIF() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -150,12 +151,6 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const bool &amp;&#160;</td>
-          <td class="paramname"><em>a_fluidInside</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">const Real &amp;&#160;</td>
           <td class="paramname"><em>a_tipRadius</em>, </td>
         </tr>
@@ -168,8 +163,8 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Real &amp;&#160;</td>
-          <td class="paramname"><em>a_cornerCurve</em>&#160;</td>
+          <td class="paramtype">const bool &amp;&#160;</td>
+          <td class="paramname"><em>a_flipInside</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -184,11 +179,9 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_length</td><td>Needle length </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_radius</td><td>Needle radius </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fluidInside</td><td>Fluid inside cylinder-part of needle, true/false </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_tipRadius</td><td>Radius of needle tip curvature <br  />
- </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_tipRadius</td><td>Smoothing radius for tip and transition </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_angle</td><td>Needle tip (cone) opening angle </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_cornerCurve</td><td>Corner curve between rod and needle </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">flipInside</td><td>Flip inside to outside </td></tr>
   </table>
   </dd>
 </dl>

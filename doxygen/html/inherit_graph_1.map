@@ -9,7 +9,7 @@
 <area shape="rect" id="node8" href="$classHyperboloidOneIF.html" title="Declaration of a one&#45;sheet hyperboloid." alt="" coords="148,309,287,336"/>
 <area shape="rect" id="node9" href="$classHyperboloidTwoIF.html" title="Declaration of a two&#45;sheet hyperboloid." alt="" coords="148,360,287,387"/>
 <area shape="rect" id="node10" href="$classMushroomIF.html" title="&quot;Mushroom&quot; implicit function. Consists of a cylinder with a circular plate on top." alt="" coords="166,411,269,437"/>
-<area shape="rect" id="node11" href="$classNeedleIF.html" title="Cylinder with one pointed end and one flat end." alt="" coords="177,461,257,488"/>
+<area shape="rect" id="node11" href="$classNeedleIF.html" title="Cylinder with one pointed end and one circular end." alt="" coords="177,461,257,488"/>
 <area shape="rect" id="node12" href="$classNewIntersectionIF.html" title="New intersection IF which does not mess up the return value function when there are no implicit funct..." alt="" coords="147,512,287,539"/>
 <area shape="rect" id="node13" href="$classPerlinPlaneSdf.html" title="Infinite plane with surface noise (Perlin noise)." alt="" coords="159,563,275,589"/>
 <area shape="rect" id="node14" href="$classPerlinSdf.html" title="Class that implements the improved Perlin noise function." alt="" coords="177,613,257,640"/>
