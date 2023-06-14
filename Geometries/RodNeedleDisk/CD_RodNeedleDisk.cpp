@@ -219,7 +219,6 @@ RodNeedleDisk::defineDisk()
     translate[dir] = v[dir];
   }
 
-  CH_assert(diskThickness > 0.0);
   CH_assert(diskCurvature > 0.0);
   CH_assert(diskRadius > 0.0);
   CH_assert(diskThickness >= 0.0);
