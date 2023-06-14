@@ -24,7 +24,6 @@ NeedleIF::NeedleIF(const Real& a_length,
                    const Real& a_radius,
                    const Real& a_tipRadius,
                    const Real& a_angle,
-                   const Real& a_cornerCurve,
                    const bool& a_flipInside)
 {
   CH_TIME("NeedleIF::NeedleIF");
@@ -36,17 +35,17 @@ NeedleIF::NeedleIF(const Real& a_length,
   const Real tipLength  = bodyRadius / std::tan((0.5 * a_angle) * Units::pi / 180.0);
 
   // The center of the needle tip is set to origo in order for the rotation to work more easily
-  const Vec3 bodyBackPosition(0.0, 0.0, -a_length + a_tipRadius);
-  const Vec3 bodyFrontPosition(0.0, 0.0, -tipLength);
+  const Vec3 bodyBackPosition(0.0, 0.0, 0.0);
+  const Vec3 bodyFrontPosition(0.0, 0.0, -a_length + a_tipRadius);
   const Vec3 needleTipCenter(0.0, 0.0, -a_tipRadius);
 
   std::shared_ptr<EBGeometry::ImplicitFunction<Real>> cone;
   std::shared_ptr<EBGeometry::ImplicitFunction<Real>> cylinder;
   std::shared_ptr<EBGeometry::ImplicitFunction<Real>> needle;
 
-  cylinder = std::make_shared<EBGeometry::CapsuleSDF<Real>>(bodyBackPosition, bodyFrontPosition, bodyRadius);
-  cone     = std::make_shared<EBGeometry::ConeSDF<Real>>(needleTipCenter, tipLength, a_angle);
-  needle   = EBGeometry::SmoothUnion(cylinder, cone, a_cornerCurve);
+  cylinder = std::make_shared<EBGeometry::CylinderSDF<Real>>(bodyBackPosition, bodyFrontPosition, bodyRadius);
+  cone     = std::make_shared<EBGeometry::InfiniteConeSDF<Real>>(needleTipCenter, a_angle);
+  needle   = EBGeometry::Intersection<Real>(cylinder, cone);
 
   // Rotate so that geometry aligns with the y-axis.
   needle = EBGeometry::Rotate<Real>(needle, 90.0, 0);

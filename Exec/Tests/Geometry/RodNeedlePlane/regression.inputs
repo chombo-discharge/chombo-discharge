@@ -82,8 +82,8 @@ RodNeedlePlane.rod.rodBendRadius	= 0.3			# corner curve between narrow and wide 
 RodNeedlePlane.rod.live			= false			# Live or not
 
 RodNeedlePlane.needle.on		= true			# Use needle or not
-RodNeedlePlane.needle.length		= 100.0			# Length of the needle
-RodNeedlePlane.needle.radius		= 0.1		# Needle radius
+RodNeedlePlane.needle.length		= 0.75			# Length of the needle
+RodNeedlePlane.needle.radius		= 0.2		# Needle radius
 RodNeedlePlane.needle.tipRadius		= 0.05				# Needle tip radius (curve radius of the tip)
 RodNeedlePlane.needle.angle		= 30			# Opening angle of needle tip (in degrees) (NB! Opening of "entire" tip)
 RodNeedlePlane.needle.cornerCurve	= 0.000001		# Corner curve between rod and needle

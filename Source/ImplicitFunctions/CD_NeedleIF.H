@@ -30,16 +30,14 @@ public:
     @brief Constructor
     @param[in] a_length      Needle length
     @param[in] a_radius      Needle radius
-    @param[in] a_tipRadius   Radius of needle tip curvature           
+    @param[in] a_tipRadius   Smoothing radius for tip and transition
     @param[in] a_angle       Needle tip (cone) opening angle
-    @param[in] a_cornerCurve Corner curve between rod and needle
     @param[in] flipInside    Flip inside to outside
   */
   NeedleIF(const Real& a_length,
            const Real& a_radius,
            const Real& a_tipRadius,
            const Real& a_angle,
-           const Real& a_cornerCurve,
            const bool& a_flipInside);
 
   /*!
