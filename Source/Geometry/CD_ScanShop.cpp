@@ -258,6 +258,9 @@ ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize)
 
       const GeometryService::InOut& boxType = (*m_boxMap[coarLvl])[dit()];
 
+      const int  yiv       = coarBox.bigEnd()[1];
+      const Real y         = m_probLo[1] + yiv * m_dx[coarLvl];
+      const bool doThisBox = y < 0.5;
       if (boxType == GeometryService::Covered) {
         coveredBoxes.push_back(fineBox);
       }
@@ -281,7 +284,9 @@ ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize)
             regularBoxes.push_back(box);
           }
           else if (!isRegular && !isCovered) {
-            cutCellBoxes.push_back(box);
+            if (doThisBox) {
+              cutCellBoxes.push_back(box);
+            }
           }
           else {
             MayDay::Error("ScanShop::buildFinerLevels - logic bust!");
@@ -427,7 +432,7 @@ ScanShop::InsideOutside(const Box&           a_region,
                         const DataIndex&     a_dit) const
 {
   CH_TIME("ScanShop::InsideOutSide(Box, ProblemDomain, RealVect, Real, DataIndex)");
-
+  return GeometryService::InsideOutside(a_region, a_domain, a_probLo, a_dx, a_dit);
   // Find the level corresponding to a_domain
   int  whichLevel = -1;
   bool foundLevel = false;
