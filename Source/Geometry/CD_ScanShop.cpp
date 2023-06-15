@@ -367,8 +367,8 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   allTypes.append(cutCellTypes);
   m_timer.stopEvent("Vector append");
 
-  // This is something that I fucking HATE, but DisjointBoxLayout sorts the boxes using lexicographical sorting, and we must do the same if
-  // we want to be able to globally index correctly into the box types. So, create a view of the boxes and box types that is consistent with
+  // DisjointBoxLayout sorts the boxes using lexicographical sorting, and we must do the same if we want to be able
+  // to globally index correctly into the box types. So, create a view of the boxes and box types that is consistent with
   // what we will have in the DataIterator. This means that we must lexicographically sort the boxes.
   m_timer.startEvent("Lexi-sort");
   const std::vector<std::pair<Box, int>> sortedBoxesAndTypes = this->getSortedBoxesAndTypes(allBoxes, allTypes);
