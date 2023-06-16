@@ -260,7 +260,7 @@ ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize)
 
       const int  yiv       = coarBox.bigEnd()[1];
       const Real y         = m_probLo[1] + yiv * m_dx[coarLvl];
-      const bool doThisBox = y < 0.5 || true;
+      const bool doThisBox = y < 0.5;
       if (doThisBox) {
         if (boxType == GeometryService::Covered) {
           coveredBoxes.push_back(fineBox);
@@ -285,7 +285,6 @@ ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize)
               regularBoxes.push_back(box);
             }
             else if (!isRegular && !isCovered) {
-
               cutCellBoxes.push_back(box);
             }
             else {
