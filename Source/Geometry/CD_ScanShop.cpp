@@ -260,36 +260,37 @@ ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize)
 
       const int  yiv       = coarBox.bigEnd()[1];
       const Real y         = m_probLo[1] + yiv * m_dx[coarLvl];
-      const bool doThisBox = y < 0.5;
-      if (boxType == GeometryService::Covered) {
-        coveredBoxes.push_back(fineBox);
-      }
-      else if (boxType == GeometryService::Regular) {
-        regularBoxes.push_back(fineBox);
-      }
-      else if (boxType == GeometryService::Irregular) {
-        Vector<Box> boxes;
-        domainSplit(fineBox, boxes, a_maxGridSize, a_maxGridSize);
+      const bool doThisBox = y < 0.5 || true;
+      if (doThisBox) {
+        if (boxType == GeometryService::Covered) {
+          coveredBoxes.push_back(fineBox);
+        }
+        else if (boxType == GeometryService::Regular) {
+          regularBoxes.push_back(fineBox);
+        }
+        else if (boxType == GeometryService::Irregular) {
+          Vector<Box> boxes;
+          domainSplit(fineBox, boxes, a_maxGridSize, a_maxGridSize);
 
-        for (const auto& box : boxes.stdVector()) {
-          const Box grownBox = grow(box, m_ebGhost) & m_domains[fineLvl];
+          for (const auto& box : boxes.stdVector()) {
+            const Box grownBox = grow(box, m_ebGhost) & m_domains[fineLvl];
 
-          const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[fineLvl]);
-          const bool isCovered = ScanShop::isCovered(grownBox, m_probLo, m_dx[fineLvl]);
+            const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[fineLvl]);
+            const bool isCovered = ScanShop::isCovered(grownBox, m_probLo, m_dx[fineLvl]);
 
-          if (isCovered) {
-            coveredBoxes.push_back(box);
-          }
-          else if (isRegular) {
-            regularBoxes.push_back(box);
-          }
-          else if (!isRegular && !isCovered) {
-            if (doThisBox) {
+            if (isCovered) {
+              coveredBoxes.push_back(box);
+            }
+            else if (isRegular) {
+              regularBoxes.push_back(box);
+            }
+            else if (!isRegular && !isCovered) {
+
               cutCellBoxes.push_back(box);
             }
-          }
-          else {
-            MayDay::Error("ScanShop::buildFinerLevels - logic bust!");
+            else {
+              MayDay::Error("ScanShop::buildFinerLevels - logic bust!");
+            }
           }
         }
       }
