@@ -492,8 +492,8 @@ ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
 
   const RealVect vectDx = a_dx * RealVect::Unit;
 
-  IntVectSet ivsIrreg = IntVectSet(DenseIntVectSet(a_ghostRegion, false));
-  IntVectSet ivsDrop  = IntVectSet(DenseIntVectSet(a_ghostRegion, false)); // CP
+  DenseIntVectSet ivsIrreg(a_ghostRegion, false);
+  DenseIntVectSet ivsDrop(a_ghostRegion, false);
 
   CH_START(t1);
   for (BoxIterator bit(a_ghostRegion); bit.ok(); ++bit) {
@@ -528,7 +528,7 @@ ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   // now loop through irregular cells and make nodes for each  one.
   CH_START(t2);
 
-  for (IVSIterator ivsit(ivsIrreg); ivsit.ok(); ++ivsit) {
+  for (DenseIntVectSetIterator ivsit(ivsIrreg); ivsit.ok(); ++ivsit) {
     const IntVect iv = ivsit();
     VolIndex      vof(iv, 0);
 
@@ -552,7 +552,7 @@ ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
                         loFaceCentroid,
                         hiFaceCentroid,
                         a_regIrregCovered,
-                        ivsIrreg,
+                        IntVectSet(ivsIrreg),
                         vof,
                         a_domain,
                         a_probLo,
@@ -590,7 +590,7 @@ ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
 
   CH_START(t3);
   // Sweep that removes cells with volFrac less than a certain threshold
-  for (IVSIterator ivsit(ivsDrop); ivsit.ok(); ++ivsit) {
+  for (DenseIntVectSetIterator ivsit(ivsDrop); ivsit.ok(); ++ivsit) {
     VolIndex vof(ivsit(), 0);
     IntVect  iv = vof.gridIndex();
     for (int faceDir = 0; faceDir < SpaceDim; faceDir++) {
