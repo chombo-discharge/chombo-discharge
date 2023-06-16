@@ -42,6 +42,7 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
   m_ebGhost      = a_ebGhost;
   m_fileName     = "ScanShopReport.dat";
   m_boxSorting   = BoxSorting::Morton;
+  m_threshold    = a_thrshdVoF;
 
   // EBISLevel doesn't give resolution, origin, and problem domains through makeGrids, so we
   // need to construct these here, and then extract the proper resolution when we actually call makeGrids
@@ -432,7 +433,7 @@ ScanShop::InsideOutside(const Box&           a_region,
                         const DataIndex&     a_dit) const
 {
   CH_TIME("ScanShop::InsideOutSide(Box, ProblemDomain, RealVect, Real, DataIndex)");
-  return GeometryService::InsideOutside(a_region, a_domain, a_probLo, a_dx, a_dit);
+
   // Find the level corresponding to a_domain
   int  whichLevel = -1;
   bool foundLevel = false;
@@ -475,19 +476,211 @@ ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
                     const ProblemDomain& a_domain,
                     const RealVect&      a_probLo,
                     const Real&          a_dx,
-                    const DataIndex&     a_di) const
+                    const DataIndex&     a_dit) const
 {
-  CH_TIME("ScanShop::fillGraph");
+  CH_TIMERS("ScanShop::fillGraph");
+  CH_TIMER("ScanShop::fillGraph::part1", t1);
+  CH_TIMER("ScanShop::fillGraph::part2", t2);
+  CH_TIMER("ScanShop::fillGraph::part3", t3);
+  CH_TIMER("ScanShop::fillGraph::part4", t4);
+
+  CH_assert(a_domain.contains(a_ghostRegion));
 
   if (m_profile) {
     m_timer.startEvent("Fill graph");
   }
 
-  GeometryShop::fillGraph(a_regIrregCovered, a_nodes, a_validRegion, a_ghostRegion, a_domain, a_probLo, a_dx, a_di);
+  CH_START(t1);
+  const RealVect vectDx = a_dx * RealVect::Unit;
+
+  IntVectSet ivsIrreg = IntVectSet(DenseIntVectSet(a_ghostRegion, false));
+  IntVectSet ivsDrop  = IntVectSet(DenseIntVectSet(a_ghostRegion, false)); // CP
+
+  long int numCovered = 0;
+  long int numReg     = 0;
+  long int numIrreg   = 0;
+  CH_STOP(t1);
+
+  CH_START(t2);
+  for (BoxIterator bit(a_ghostRegion); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    const GeometryService::InOut inout = this->insideOutside(iv, a_domain, a_probLo, vectDx);
+
+    if (inout == GeometryService::Covered) {
+      a_regIrregCovered(iv, 0) = -1;
+
+      numCovered++;
+    }
+    else if (inout == GeometryService::Regular) {
+      a_regIrregCovered(iv, 0) = 1;
+
+      numReg++;
+    }
+    else {
+      a_regIrregCovered(iv, 0) = 0;
+      if (a_validRegion.contains(iv)) {
+        ivsIrreg |= iv;
+
+        numIrreg++;
+      }
+    }
+  }
+
+  //if a regular is next to a  covered, change to irregular with correct arcs and so on.
+  for (BoxIterator bit(a_ghostRegion); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    if (a_regIrregCovered(iv, 0) == -1) {
+      fixRegularCellsNextToCovered(a_nodes, a_regIrregCovered, a_validRegion, a_domain, iv, a_dx);
+    }
+  }
+  CH_STOP(t2);
+
+  // now loop through irregular cells and make nodes for each  one.
+  CH_START(t3);
+
+  for (IVSIterator ivsit(ivsIrreg); ivsit.ok(); ++ivsit) {
+    const IntVect iv = ivsit();
+    VolIndex      vof(iv, 0);
+
+    Real             volFrac, bndryArea;
+    RealVect         normal, volCentroid, bndryCentroid;
+    Vector<int>      loArc[SpaceDim];
+    Vector<int>      hiArc[SpaceDim];
+    Vector<Real>     loAreaFrac[SpaceDim];
+    Vector<Real>     hiAreaFrac[SpaceDim];
+    Vector<RealVect> loFaceCentroid[SpaceDim];
+    Vector<RealVect> hiFaceCentroid[SpaceDim];
+    computeVoFInternals(volFrac,
+                        loArc,
+                        hiArc,
+                        loAreaFrac,
+                        hiAreaFrac,
+                        bndryArea,
+                        normal,
+                        volCentroid,
+                        bndryCentroid,
+                        loFaceCentroid,
+                        hiFaceCentroid,
+                        a_regIrregCovered,
+                        ivsIrreg,
+                        vof,
+                        a_domain,
+                        a_probLo,
+                        a_dx,
+                        vectDx,
+                        ivsit());
+
+    if (m_threshold > 0. && volFrac < m_threshold) {
+      ivsDrop |= ivsit();
+      a_regIrregCovered(ivsit(), 0) = -1;
+      pout() << "Removing vof " << vof << " with volFrac " << volFrac << endl;
+    }
+    else {
+      IrregNode newNode;
+      newNode.m_cell          = ivsit();
+      newNode.m_volFrac       = volFrac;
+      newNode.m_cellIndex     = 0;
+      newNode.m_volCentroid   = volCentroid;
+      newNode.m_bndryCentroid = bndryCentroid;
+
+      for (int faceDir = 0; faceDir < SpaceDim; faceDir++) {
+        int loNodeInd                     = newNode.index(faceDir, Side::Lo);
+        int hiNodeInd                     = newNode.index(faceDir, Side::Hi);
+        newNode.m_arc[loNodeInd]          = loArc[faceDir];
+        newNode.m_arc[hiNodeInd]          = hiArc[faceDir];
+        newNode.m_areaFrac[loNodeInd]     = loAreaFrac[faceDir];
+        newNode.m_areaFrac[hiNodeInd]     = hiAreaFrac[faceDir];
+        newNode.m_faceCentroid[loNodeInd] = loFaceCentroid[faceDir];
+        newNode.m_faceCentroid[hiNodeInd] = hiFaceCentroid[faceDir];
+      }
+      a_nodes.push_back(newNode);
+    }
+  }
+  CH_STOP(t3);
+
+  CH_START(t4);
+  // Sweep that removes cells with volFrac less than a certain threshold
+  for (IVSIterator ivsit(ivsDrop); ivsit.ok(); ++ivsit) {
+    VolIndex vof(ivsit(), 0);
+    IntVect  iv = vof.gridIndex();
+    for (int faceDir = 0; faceDir < SpaceDim; faceDir++) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        int     isign   = sign(sit());
+        IntVect otherIV = iv + isign * BASISV(faceDir);
+        if (a_validRegion.contains(otherIV)) {
+          if (a_regIrregCovered(otherIV, 0) == 0) {
+            // i am in the case where the other cell
+            // is also irregular.   I just made a previously
+            // irregular cell covered so I have to check to
+            // see if it had any faces pointed this way.
+            int  inode = -1;
+            bool found = false;
+            for (int ivec = 0; ivec < a_nodes.size() && !found; ivec++) {
+              if (a_nodes[ivec].m_cell == otherIV) {
+                inode = ivec;
+                found = true;
+              }
+            }
+            if (!found && a_validRegion.contains(otherIV)) {
+              MayDay::Error("something wrong in our logic");
+            }
+            if (found) {
+              int arcindex = a_nodes[inode].index(faceDir, flip(sit()));
+              a_nodes[inode].m_arc[arcindex].resize(0);
+              a_nodes[inode].m_areaFrac[arcindex].resize(0);
+              a_nodes[inode].m_faceCentroid[arcindex].resize(0);
+            }
+          }
+        }
+      }
+    }
+
+    fixRegularCellsNextToCovered(a_nodes, a_regIrregCovered, a_validRegion, a_domain, iv, a_dx);
+  }
+  CH_STOP(t4);
 
   if (m_profile) {
     m_timer.stopEvent("Fill graph");
   }
+}
+
+GeometryService::InOut
+ScanShop::insideOutside(const IntVect        a_iv,
+                        const ProblemDomain& a_domain,
+                        const RealVect       a_probLo,
+                        const RealVect       a_dx) const noexcept
+{
+  CH_TIME("ScanShop::insideOutside");
+
+  // TLDR: To classify a cell as completely inside/outside we assume that the value of the implicit function at all edges must be the same.
+  GeometryService::InOut inOut = GeometryService::Irregular;
+
+  // Compute implicit function value at all corners
+  const Box  corners    = surroundingNodes(Box(a_iv, a_iv));
+  const Real firstValue = m_baseIF->value(a_probLo + corners.smallEnd() * a_dx);
+
+  if (firstValue < 0.0) {
+    inOut = GeometryService::Regular;
+  }
+  else if (firstValue > 0.0) {
+    inOut = GeometryService::Covered;
+  }
+
+  if (inOut != GeometryService::Irregular) {
+    for (BoxIterator bit(corners); bit.ok(); ++bit) {
+      const Real value = m_baseIF->value(a_probLo + bit() * a_dx);
+
+      if (firstValue * value <= 0.0) {
+        inOut = GeometryService::Irregular;
+
+        break;
+      }
+    }
+  }
+
+  return inOut;
 }
 
 #include <CD_NamespaceFooter.H>

@@ -106,7 +106,7 @@ public:
     @param[in]    a_domain          Domain
     @param[in]    a_probLo          Lower-left corner of computational domain
     @param[in]    a_dx              Grid resolution
-    @param[in]    a_di              Grid index
+    @param[in]    a_dit             Grid index
   */
   virtual void
   fillGraph(BaseFab<int>&        a_regIrregCovered,
@@ -116,10 +116,10 @@ public:
             const ProblemDomain& a_domain,
             const RealVect&      a_probLo,
             const Real&          a_dx,
-            const DataIndex&     a_di) const override;
+            const DataIndex&     a_dit) const override;
 
 protected:
-  /*!
+  /*! 
     @brief Set output file name (if doing profiling)
   */
   std::string m_fileName;
@@ -148,6 +148,11 @@ protected:
     @brief Maximum number of ghost cells near the EB
   */
   int m_ebGhost;
+
+  /*!
+    @brief Threshold
+  */
+  Real m_threshold;
 
   /*!
     @brief Lower-left corner of simulation domain. 
@@ -251,6 +256,19 @@ protected:
   */
   void
   defineLevel(Vector<Box>& coveredBoxes, Vector<Box>& regularBoxes, Vector<Box>& cutCellBoxes, const int a_level);
+
+  /*!
+    @brief Check if a cell point is completely inside/outside
+    @param[in] a_iv     Grid index
+    @param[in] a_domain Problem domain
+    @param[in] a_probLo Lower-left corner of problem domain
+    @param[in] a_dx     Grid resolution
+  */
+  GeometryService::InOut
+  insideOutside(const IntVect        a_iv,
+                const ProblemDomain& a_domain,
+                const RealVect       a_probLo,
+                const RealVect       a_dx) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
