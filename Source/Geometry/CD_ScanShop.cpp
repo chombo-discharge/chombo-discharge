@@ -479,29 +479,23 @@ ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
                     const DataIndex&     a_dit) const
 {
   CH_TIMERS("ScanShop::fillGraph");
-  CH_TIMER("ScanShop::fillGraph::part1", t1);
-  CH_TIMER("ScanShop::fillGraph::part2", t2);
-  CH_TIMER("ScanShop::fillGraph::part3", t3);
-  CH_TIMER("ScanShop::fillGraph::part4", t4);
+  CH_TIMER("ScanShop::fillGraph::identify_cells", t1);
+  CH_TIMER("ScanShop::fillGraph::make_ndoes", t2);
+  CH_TIMER("ScanShop::fillGraph::remove_threshold_vofs", t3);
 
   CH_assert(a_domain.contains(a_ghostRegion));
+  CH_assert(a_ghostRegion.contains(a_validRegion));
 
   if (m_profile) {
     m_timer.startEvent("Fill graph");
   }
 
-  CH_START(t1);
   const RealVect vectDx = a_dx * RealVect::Unit;
 
   IntVectSet ivsIrreg = IntVectSet(DenseIntVectSet(a_ghostRegion, false));
   IntVectSet ivsDrop  = IntVectSet(DenseIntVectSet(a_ghostRegion, false)); // CP
 
-  long int numCovered = 0;
-  long int numReg     = 0;
-  long int numIrreg   = 0;
-  CH_STOP(t1);
-
-  CH_START(t2);
+  CH_START(t1);
   for (BoxIterator bit(a_ghostRegion); bit.ok(); ++bit) {
     const IntVect iv = bit();
 
@@ -509,20 +503,14 @@ ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
 
     if (inout == GeometryService::Covered) {
       a_regIrregCovered(iv, 0) = -1;
-
-      numCovered++;
     }
     else if (inout == GeometryService::Regular) {
       a_regIrregCovered(iv, 0) = 1;
-
-      numReg++;
     }
     else {
       a_regIrregCovered(iv, 0) = 0;
       if (a_validRegion.contains(iv)) {
         ivsIrreg |= iv;
-
-        numIrreg++;
       }
     }
   }
@@ -535,10 +523,10 @@ ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
       fixRegularCellsNextToCovered(a_nodes, a_regIrregCovered, a_validRegion, a_domain, iv, a_dx);
     }
   }
-  CH_STOP(t2);
+  CH_STOP(t1);
 
   // now loop through irregular cells and make nodes for each  one.
-  CH_START(t3);
+  CH_START(t2);
 
   for (IVSIterator ivsit(ivsIrreg); ivsit.ok(); ++ivsit) {
     const IntVect iv = ivsit();
@@ -598,9 +586,9 @@ ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
       a_nodes.push_back(newNode);
     }
   }
-  CH_STOP(t3);
+  CH_STOP(t2);
 
-  CH_START(t4);
+  CH_START(t3);
   // Sweep that removes cells with volFrac less than a certain threshold
   for (IVSIterator ivsit(ivsDrop); ivsit.ok(); ++ivsit) {
     VolIndex vof(ivsit(), 0);
@@ -639,7 +627,7 @@ ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
 
     fixRegularCellsNextToCovered(a_nodes, a_regIrregCovered, a_validRegion, a_domain, iv, a_dx);
   }
-  CH_STOP(t4);
+  CH_STOP(t3);
 
   if (m_profile) {
     m_timer.stopEvent("Fill graph");
