@@ -5,7 +5,7 @@ AmrMesh.lo_corner        = -1 -1 -1    # Low corner of problem domain
 AmrMesh.hi_corner        =  1  1  1    # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 128 128 # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 13           # Maximum amr depth
+AmrMesh.max_amr_depth    = 12           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -90,8 +90,8 @@ RodNeedleDisk.rod_needle_smooth    = 0.00       # Transition length between need
 
 RodNeedleDisk.needle_length        = 0.4        # Needle length (from some origin)
 RodNeedleDisk.needle_radius        = 0.025      # Needle radius
-RodNeedleDisk.needle_tip_radius    = 0.001       # Needle tip radius
-RodNeedleDisk.needle_smooth        = 0.001      # Smoothing between needle body and tip
+RodNeedleDisk.needle_tip_radius    = 0.005       # Needle tip radius
+RodNeedleDisk.needle_smooth        = 0.005      # Smoothing between needle body and tip
 RodNeedleDisk.needle_angle         = 30         # Full opening angle of needle tip (in degrees)
 
 RodNeedleDisk.disk_point           = -0.5       # Top position of disk
