@@ -5,7 +5,7 @@ AmrMesh.lo_corner        = -1 -1 -1    # Low corner of problem domain
 AmrMesh.hi_corner        =  1  1  1    # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 128 128 # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 1           # Maximum amr depth
+AmrMesh.max_amr_depth    = 13           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -54,18 +54,18 @@ Driver.num_plot_ghost                  = 1                # Number of ghost cell
 Driver.plt_vars                        = levelset         # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
-Driver.grow_geo_tags                   = 5                # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 30.              # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = 99                # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.grow_geo_tags                   = 8                # How much to grow tags when using geometry-based refinement. 
+Driver.refine_angles                   = 0.5             # Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes               = 0                # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = 0                # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
 # ====================================================================================================
 # GeoCoarsener class options
 # ====================================================================================================
-GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
-GeoCoarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 
-GeoCoarsener.box1_hi     = 0.0 0.0 0.0  # between these two corners
+GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
+GeoCoarsener.box1_lo     = -1.0 .2 0.0  # Remove irregular cell tags 
+GeoCoarsener.box1_hi     = 1.0 1.0 0.0  # between these two corners
 GeoCoarsener.box1_lvl    = 0            # up to this level
 GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 
@@ -74,7 +74,7 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 RodNeedleDisk.use_rod              = true       # Turn on/off rod
 RodNeedleDisk.use_needle           = true       # Turn on/off needle
-RodNeedleDisk.use_disk             = true       # Turn on/off disk
+RodNeedleDisk.use_disk             = false       # Turn on/off disk
 RodNeedleDisk.orientation          = "-y"       # Orientation
 RodNeedleDisk.translate            = 0 0 0      # Geometric translation
 RodNeedleDisk.rod_live             = false      # Rod/needle live or not
@@ -90,7 +90,8 @@ RodNeedleDisk.rod_needle_smooth    = 0.00       # Transition length between need
 
 RodNeedleDisk.needle_length        = 0.4        # Needle length (from some origin)
 RodNeedleDisk.needle_radius        = 0.025      # Needle radius
-RodNeedleDisk.needle_tip_radius    = 0.01       # Needle tip radius
+RodNeedleDisk.needle_tip_radius    = 0.001       # Needle tip radius
+RodNeedleDisk.needle_smooth        = 0.001      # Smoothing between needle body and tip
 RodNeedleDisk.needle_angle         = 30         # Full opening angle of needle tip (in degrees)
 
 RodNeedleDisk.disk_point           = -0.5       # Top position of disk

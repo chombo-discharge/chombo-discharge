@@ -55,6 +55,7 @@ RodNeedleDisk::defineRodNeedle() noexcept
   Real needleRadius    = 0.0;
   Real needleAngle     = 0.0;
   Real needleTipRadius = 0.0;
+  Real needleSmooth    = 0.0;
   Real bigRadius       = -1.0;
   Real smallRadius     = -1.0;
   Real rodSmooth       = -1.0;
@@ -74,6 +75,7 @@ RodNeedleDisk::defineRodNeedle() noexcept
   pp.get("needle_radius", needleRadius);
   pp.get("needle_angle", needleAngle);
   pp.get("needle_tip_radius", needleTipRadius);
+  pp.get("needle_smooth", needleSmooth);
   pp.get("rod_small_radius", smallRadius);
   pp.get("rod_big_radius", bigRadius);
   pp.get("rod_begin", smallBegin);
@@ -95,6 +97,7 @@ RodNeedleDisk::defineRodNeedle() noexcept
   CH_assert(midpoint < bigEnd);
   CH_assert(rodSmooth > 0.0);
   CH_assert(rodNeedleSmooth >= 0.0);
+  CH_assert(needleSmooth >= 0.0);
   CH_assert(needleRadius > needleTipRadius);
   CH_assert(needleTipRadius > 0.0);
 
@@ -117,7 +120,7 @@ RodNeedleDisk::defineRodNeedle() noexcept
 
     cylinder = std::make_shared<EBGeometry::CylinderSDF<Real>>(bodyBackPosition, bodyFrontPosition, bodyRadius);
     cone     = std::make_shared<EBGeometry::InfiniteConeSDF<Real>>(needleTipCenter, needleAngle);
-    needle   = EBGeometry::Intersection<Real>(cylinder, cone);
+    needle   = EBGeometry::SmoothIntersection<Real>(cylinder, cone, needleSmooth);
     needle   = EBGeometry::Offset<Real>(needle, needleTipRadius);
 
     implicitFunctions.emplace_back(needle);
