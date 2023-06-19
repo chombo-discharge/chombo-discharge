@@ -38,10 +38,6 @@ AmrMesh::AmrMesh()
   m_finestLevel    = 0;
   m_oldFinestLevel = -1;
   m_hasGrids       = false;
-
-  // Some things might require a vector which is just a tiny bit longer.
-  m_refinementRatios.resize(m_maxDepthEB);
-  m_refinementRatios.push_back(2);
 }
 
 AmrMesh::~AmrMesh() {}
@@ -924,7 +920,6 @@ AmrMesh::parseOptions()
   this->parseBrBufferSize();
   this->parseBrFillRatio();
   this->parseRedistributionRadius();
-  ;
   this->parseNumGhostCells();
   this->parseEbGhostCells();
   this->parseProbLoHiCorners();
@@ -932,8 +927,8 @@ AmrMesh::parseOptions()
   this->parseEbCentroidStencils();
   this->parseMultigridInterpolator();
 
-  this->sanityCheck();
   this->buildDomains();
+  this->sanityCheck();
 }
 
 void
@@ -983,20 +978,25 @@ AmrMesh::buildDomains()
     pout() << "AmrMesh::buildDomains()" << endl;
   }
 
-  const int numLevels = 1 + m_maxDepthEB;
+  const int numLevels = 1 + std::max(m_maxDepthEB, m_maxSimulationDepth);
 
   m_domains.resize(numLevels);
   m_dx.resize(numLevels);
   m_grids.resize(numLevels);
+  m_refinementRatios.resize(numLevels);
 
   m_dx[0]      = (m_probHi[0] - m_probLo[0]) / m_numCells[0];
   m_domains[0] = ProblemDomain(IntVect::Zero, m_numCells - IntVect::Unit);
 
-  for (int lvl = 1; lvl <= m_maxSimulationDepth; lvl++) {
+  for (int lvl = 1; lvl <= std::max(m_maxSimulationDepth, m_maxDepthEB); lvl++) {
+    if (lvl < m_inputRefinementRatios.size()) {
+      m_refinementRatios[lvl - 1] = m_inputRefinementRatios[lvl - 1];
+    }
+    else {
+      m_refinementRatios[lvl - 1] = 2;
+    }
     m_dx[lvl]      = m_dx[lvl - 1] / m_refinementRatios[lvl - 1];
-    m_domains[lvl] = m_domains[lvl - 1];
-
-    m_domains[lvl].refine(m_refinementRatios[lvl - 1]);
+    m_domains[lvl] = refine(m_domains[lvl - 1], m_refinementRatios[lvl - 1]);
   }
 }
 
@@ -1131,12 +1131,22 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
 
   // TLDR: a_lmin is the coarsest level that changes and a_hardcap is a hardcap for the maximum grid level that can
   //       be generated. If a_hardcap < 0 the restriction is m_maxDepthEB.
-
-  // baseLevel is the coarsest level which does not change. topLevel is the finest level where we have tags. We should never
-  // have tags on max_amr_depth, and we make that restriction here.
   const int baseLevel = std::max(0, a_lmin - 1);
-  const int topLevel  = (m_finestLevel == m_maxDepthEB) ? m_finestLevel - 1 : a_tags.size() - 1;
   const int hardcap   = (a_hardcap < 0) ? m_maxSimulationDepth : a_hardcap;
+
+  // Figure out the highest level which has tags. We resize the input tags just in case we are putting in
+  // tags that will cause us to exceed the allowed maximum grid size.
+  Vector<IntVectSet> tags = a_tags;
+  tags.resize(m_maxSimulationDepth);
+
+  int topLevel = -1;
+  for (int lvl = 0; lvl < tags.size(); lvl++) {
+    if (!(tags[lvl].isEmpty())) {
+      topLevel = lvl;
+    }
+  }
+
+  topLevel = ParallelOps::max(topLevel);
 
   // New and old grid boxes
   Vector<Vector<Box>> newBoxes(1 + topLevel);
@@ -1148,13 +1158,13 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
 
     // If have old grids, we can use the old boxes as input to the grid generators (since they don't necessarily regrid all levels).
     if (!m_hasGrids) {
-      for (int lvl = 1; lvl <= topLevel; lvl++) {
+      for (int lvl = 1; lvl <= std::min(topLevel, m_maxSimulationDepth); lvl++) {
         oldBoxes[lvl].resize(0);
         oldBoxes[lvl].push_back(m_domains[lvl].domainBox());
       }
     }
     else {
-      for (int lvl = 0; lvl <= topLevel; lvl++) {
+      for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
         oldBoxes[lvl] = m_grids[lvl].boxArray();
       }
     }
@@ -1164,8 +1174,6 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
 
     switch (m_gridGenerationMethod) {
     case GridGenerationMethod::BergerRigoutsous: {
-      // BRMeshRefine destroys tags.
-      Vector<IntVectSet> tags = a_tags;
 
       BRMeshRefine meshRefine(m_domains[0],
                               m_refinementRatios,
@@ -1181,7 +1189,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
     case GridGenerationMethod::Tiled: {
       TiledMeshRefine meshRefine(m_domains[0], m_refinementRatios, m_blockingFactor * IntVect::Unit);
 
-      newFinestLevel = meshRefine.regrid(newBoxes, a_tags);
+      newFinestLevel = meshRefine.regrid(newBoxes, tags);
       newBoxes[0]    = oldBoxes[0];
 
       break;
@@ -1197,6 +1205,8 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
     m_finestLevel = newFinestLevel;
     m_finestLevel = std::min(m_finestLevel, m_maxSimulationDepth); // Don't exceed maximum simulation depth
     m_finestLevel = std::min(m_finestLevel, hardcap);              // Don't exceed hardcap
+
+    newBoxes.resize(1 + m_finestLevel);
   }
   else { // Only end up here if we have a single grid level, i.e. just single-level grid decomposition.
     newBoxes.resize(1);
@@ -1241,6 +1251,8 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   }
 
   m_hasGrids = true;
+
+  pout() << "made it out" << endl;
 }
 
 void
@@ -2312,6 +2324,9 @@ AmrMesh::parseMaxDepthEB()
 
   ParmParse pp("AmrMesh");
   pp.get("max_eb_depth", m_maxDepthEB);
+  if (m_maxDepthEB < 0) {
+    pp.get("max_sim_depth", m_maxDepthEB);
+  }
 }
 
 void
@@ -2334,18 +2349,8 @@ AmrMesh::parseRefinementRatios()
     pout() << "AmrMesh::parseRefinementRatios()" << endl;
   }
 
-  ParmParse   pp("AmrMesh");
-  Vector<int> ratios;
-  ratios.resize(pp.countval("ref_rat"));
-  pp.getarr("ref_rat", ratios, 0, ratios.size());
-
-  // Pad with whatever was last specified if user didn't supply enough refinement factors
-  while (ratios.size() < m_maxSimulationDepth) {
-    //    ratios.push_back(2);
-    ratios.push_back(ratios.back());
-  }
-
-  m_refinementRatios = ratios;
+  ParmParse pp("AmrMesh");
+  pp.getarr("ref_rat", m_inputRefinementRatios, 0, pp.countval("ref_rat"));
 }
 
 void
@@ -2851,7 +2856,7 @@ AmrMesh::getFinestDomain() const
     pout() << "AmrMesh::getFinestDomain()" << endl;
   }
 
-  return m_domains[m_maxDepthEB];
+  return m_domains[m_maxSimulationDepth];
 }
 
 Real

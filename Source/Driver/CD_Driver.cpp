@@ -213,16 +213,16 @@ Driver::getGeometryTags()
 
   // TLDR: This routine fetches cut-cell indexes using various criteria (supplied through the input script). It will also
   //       remove some of those tags if a GeoCoarsener object was supplied to Driver.
+  const int maxDepthEB  = m_amr->getMaxDepthEB();
+  const int maxDepthSim = m_amr->getMaxSimulationDepth();
 
-  const int maxAmrDepth = m_amr->getMaxSimulationDepth();
-
-  m_geomTags.resize(maxAmrDepth);
+  m_geomTags.resize(std::max(maxDepthSim, maxDepthEB));
 
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
-  // Note that we only need tags up to maxAmrDepth-1 since the grid on maxAmrDepth are generated from tags on maxAmrDepth-1
-  for (int lvl = 0; lvl < maxAmrDepth; lvl++) {
+  // Note that we only need tags up to maxDepthEB-1 since the grid on maxDepthEB are generated from tags on maxDepthEB-1
+  for (int lvl = 0; lvl <= std::min(maxDepthSim - 1, maxDepthEB); lvl++) {
 
     // Our level indexing disagrees with EBIS level indexing (where the finest level is on index 0). This is
     // a way to get the EBIndexSpace level from the current AMR Level.
@@ -302,7 +302,7 @@ Driver::getGeometryTags()
   }
 
   // Grow tags with specified factor.
-  for (int lvl = 0; lvl < maxAmrDepth; lvl++) {
+  for (int lvl = 0; lvl <= maxDepthEB; lvl++) {
     m_geomTags[lvl].grow(m_irregTagGrowth);
   }
 
@@ -758,10 +758,9 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
 
     while (m_time < a_endTime && m_timeStep < a_maxSteps && !isLastStep) {
       const int maxSimDepth = m_amr->getMaxSimulationDepth();
-      const int maxAmrDepth = m_amr->getMaxSimulationDepth();
 
       // Check if we should regrid. This can be due to regular intervals, or the TimeStepper can call for it.
-      const bool canRegrid         = maxSimDepth > 0 && maxAmrDepth > 0 && m_regridInterval > 0;
+      const bool canRegrid         = maxSimDepth > 0 && m_regridInterval > 0;
       const bool regridStep        = m_timeStep % m_regridInterval == 0;
       const bool regridTimeStepper = m_timeStepper->needToRegrid();
       if (canRegrid && (regridStep || regridTimeStepper)) {
@@ -1344,7 +1343,7 @@ Driver::setupGeometryOnly()
       }
     }
     else {
-      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxSimulationDepth());
+      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxDepthEB());
       scanDomain         = m_amr->getDomains()[amrLevel];
     }
 
@@ -1365,12 +1364,11 @@ Driver::setupGeometryOnly()
 
   const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxSimulationDepth();
 
-  m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
+  m_computationalGeometry->buildGeometries(m_amr->getDomains()[m_amr->getMaxDepthEB()],
                                            m_amr->getProbLo(),
                                            m_amr->getFinestDx(),
                                            m_amr->getMaxEbisBoxSize(),
-                                           m_amr->getNumberOfEbGhostCells(),
-                                           numCoarsenings);
+                                           m_amr->getNumberOfEbGhostCells());
   const Real t1 = Timer::wallClock();
   if (procID() == 0)
     std::cout << "geotime = " << t1 - t0 << std::endl;
@@ -1428,7 +1426,7 @@ Driver::setupFresh(const int a_initialRegrids)
       }
     }
     else {
-      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxSimulationDepth());
+      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxDepthEB());
       scanDomain         = m_amr->getDomains()[amrLevel];
     }
 
@@ -1446,13 +1444,11 @@ Driver::setupFresh(const int a_initialRegrids)
     m_computationalGeometry->useChomboShop();
   }
 
-  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxSimulationDepth();
-  m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
+  m_computationalGeometry->buildGeometries(m_amr->getDomains()[m_amr->getMaxDepthEB()],
                                            m_amr->getProbLo(),
                                            m_amr->getFinestDx(),
                                            m_amr->getMaxEbisBoxSize(),
-                                           m_amr->getNumberOfEbGhostCells(),
-                                           numCoarsenings);
+                                           m_amr->getNumberOfEbGhostCells());
 
   // Register Realms
   m_timeStepper->setAmr(m_amr);
@@ -1867,25 +1863,10 @@ Driver::tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags)
   else {
     // Loop only goes to the current finest level because we only add one level at a time
     for (int lvl = 0; lvl <= finestLevel; lvl++) {
-      if (lvl < m_amr->getMaxSimulationDepth()) { // Geometric tags don't exist on AmrMesh.m_maxAmrDepth
+      if (lvl < m_amr->getMaxSimulationDepth()) {
         a_allTags[lvl] |= m_geomTags[lvl];
       }
     }
-  }
-
-#if 0 // Debug - if this fails, you have tags on m_amr->m_maxAmrDepth and something has gone wrong. 
-  if(finestLevel == m_amr->getMaxSimulationDepth()){
-    for (int lvl = 0; lvl <= finestLevel; lvl++){
-      pout() << "level = " << lvl << "\t num_pts = " << a_allTags[lvl].numPts() << endl;
-    }
-    CH_assert(a_allTags[finestLevel].isEmpty());
-  }
-#endif
-
-  // Get the total number of tags
-  Vector<int> num_local_tags(1 + finestLevel);
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    num_local_tags[lvl] = a_allTags[lvl].numPts();
   }
 
   return got_new_tags;

@@ -2118,6 +2118,11 @@ protected:
   Vector<int> m_refinementRatios;
 
   /*!
+    @brief AMR resolutions. This is the part that is added in parseRefinementRatios. 
+  */
+  Vector<int> m_inputRefinementRatios;
+
+  /*!
     @brief Level resolutions
   */
   Vector<Real> m_dx;
