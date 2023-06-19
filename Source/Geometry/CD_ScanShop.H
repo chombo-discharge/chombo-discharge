@@ -254,7 +254,7 @@ protected:
   /*!
     @brief Define the "box map" on a specified level
   */
-  void
+  virtual void
   defineLevel(Vector<Box>& coveredBoxes, Vector<Box>& regularBoxes, Vector<Box>& cutCellBoxes, const int a_level);
 
   /*!
@@ -264,7 +264,7 @@ protected:
     @param[in] a_probLo Lower-left corner of problem domain
     @param[in] a_dx     Grid resolution
   */
-  GeometryService::InOut
+  virtual GeometryService::InOut
   insideOutside(const IntVect        a_iv,
                 const ProblemDomain& a_domain,
                 const RealVect       a_probLo,

@@ -278,7 +278,7 @@ Driver::getGeometryTags()
         // Check the angle between the normal vector in this irregular cell and neighboring irregular cells. If the
         // angle exceeds a specified threshold the cell is refined.
         const Vector<VolIndex> otherVofs =
-          VofUtils::getVofsInRadius(vof, ebisbox, 1, VofUtils::Connectivity::MonotonePath, false);
+          VofUtils::getVofsInRadius(vof, ebisbox, 1, VofUtils::Connectivity::All, false);
 
         for (int i = 0; i < otherVofs.size(); i++) {
           const VolIndex& curVof = otherVofs[i];

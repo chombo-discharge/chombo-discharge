@@ -261,7 +261,7 @@ ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize)
 
       const int  yiv       = coarBox.bigEnd()[1];
       const Real y         = m_probLo[1] + yiv * m_dx[coarLvl];
-      const bool doThisBox = y < 0.3;
+      const bool doThisBox = true; //y < 0.3;
       if (doThisBox) {
         if (boxType == GeometryService::Covered) {
           coveredBoxes.push_back(fineBox);
@@ -480,7 +480,7 @@ ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
 {
   CH_TIMERS("ScanShop::fillGraph");
   CH_TIMER("ScanShop::fillGraph::identify_cells", t1);
-  CH_TIMER("ScanShop::fillGraph::make_ndoes", t2);
+  CH_TIMER("ScanShop::fillGraph::compute_internals", t2);
   CH_TIMER("ScanShop::fillGraph::remove_threshold_vofs", t3);
 
   CH_assert(a_domain.contains(a_ghostRegion));
@@ -520,14 +520,13 @@ ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     const IntVect iv = bit();
 
     if (a_regIrregCovered(iv, 0) == -1) {
-      fixRegularCellsNextToCovered(a_nodes, a_regIrregCovered, a_validRegion, a_domain, iv, a_dx);
+      this->fixRegularCellsNextToCovered(a_nodes, a_regIrregCovered, a_validRegion, a_domain, iv, a_dx);
     }
   }
   CH_STOP(t1);
 
   // now loop through irregular cells and make nodes for each  one.
   CH_START(t2);
-
   for (DenseIntVectSetIterator ivsit(ivsIrreg); ivsit.ok(); ++ivsit) {
     const IntVect iv = ivsit();
     VolIndex      vof(iv, 0);
@@ -540,25 +539,25 @@ ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     Vector<Real>     hiAreaFrac[SpaceDim];
     Vector<RealVect> loFaceCentroid[SpaceDim];
     Vector<RealVect> hiFaceCentroid[SpaceDim];
-    computeVoFInternals(volFrac,
-                        loArc,
-                        hiArc,
-                        loAreaFrac,
-                        hiAreaFrac,
-                        bndryArea,
-                        normal,
-                        volCentroid,
-                        bndryCentroid,
-                        loFaceCentroid,
-                        hiFaceCentroid,
-                        a_regIrregCovered,
-                        IntVectSet(ivsIrreg),
-                        vof,
-                        a_domain,
-                        a_probLo,
-                        a_dx,
-                        vectDx,
-                        ivsit());
+    this->computeVoFInternals(volFrac,
+                              loArc,
+                              hiArc,
+                              loAreaFrac,
+                              hiAreaFrac,
+                              bndryArea,
+                              normal,
+                              volCentroid,
+                              bndryCentroid,
+                              loFaceCentroid,
+                              hiFaceCentroid,
+                              a_regIrregCovered,
+                              IntVectSet(ivsIrreg),
+                              vof,
+                              a_domain,
+                              a_probLo,
+                              a_dx,
+                              vectDx,
+                              ivsit());
 
     if (m_threshold > 0. && volFrac < m_threshold) {
       ivsDrop |= ivsit();
