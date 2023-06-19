@@ -1136,17 +1136,15 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   // have tags on max_amr_depth, and we make that restriction here.
   const int baseLevel = std::max(0, a_lmin - 1);
   const int topLevel  = (m_finestLevel == m_maxDepthEB) ? m_finestLevel - 1 : a_tags.size() - 1;
+  const int hardcap   = (a_hardcap < 0) ? m_maxSimulationDepth : a_hardcap;
 
   // New and old grid boxes
   Vector<Vector<Box>> newBoxes(1 + topLevel);
   Vector<Vector<Box>> oldBoxes(1 + topLevel);
 
-  // Enforce potential hardcap.
-  const int hardcap = (a_hardcap < 0) ? m_maxDepthEB : a_hardcap;
-
   // Inside this loop we make the boxes.
   if (m_maxSimulationDepth > 0 && hardcap > 0) {
-    domainSplit(m_domains[0], oldBoxes[0], m_maxBoxSize, m_blockingFactor);
+    domainSplit(m_domains[0], oldBoxes[0], m_blockingFactor, m_blockingFactor);
 
     // If have old grids, we can use the old boxes as input to the grid generators (since they don't necessarily regrid all levels).
     if (!m_hasGrids) {
@@ -1196,6 +1194,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
     }
 
     // Identify the new finest grid level.
+    m_finestLevel = newFinestLevel;
     m_finestLevel = std::min(m_finestLevel, m_maxSimulationDepth); // Don't exceed maximum simulation depth
     m_finestLevel = std::min(m_finestLevel, hardcap);              // Don't exceed hardcap
   }
@@ -1209,7 +1208,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   // Coarsest level also changes in this case, but that's not actually caught by the regridders. We have to do this because the blocking
   // factor could have been changed during runtime option parsing.
   if (a_lmin == 0) {
-    domainSplit(m_domains[0], newBoxes[0], m_maxBoxSize, m_blockingFactor);
+    domainSplit(m_domains[0], newBoxes[0], m_blockingFactor, m_blockingFactor);
   }
 
   // Sort the boxes and then load balance them, using the patch volume as an initial proxy.
