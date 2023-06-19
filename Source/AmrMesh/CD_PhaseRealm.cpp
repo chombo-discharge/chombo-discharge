@@ -15,6 +15,8 @@
 #include <BaseIVFactory.H>
 #include <EBCellFactory.H>
 #include <EBFluxFactory.H>
+#include <EBGraphFactory.H>
+#include <EBDataFactory.H>
 
 // Our includes
 #include <CD_PhaseRealm.H>
@@ -391,9 +393,56 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
   m_ebisl.resize(1 + m_finestLevel);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
-    
-    if(lvl > m_maxDepthEB) {
-      MayDay::Error("PhaseRealm::defineEBLevelGrid - stop here, we must define the EB EB interpolation not yet supported!");
+
+    if (lvl > m_maxDepthEB && lvl > 0) {
+
+      const EBISLayout& ebislCoar = m_ebisl[lvl - 1];
+      const IntVect     ghostEB   = m_numEbGhostsCells * IntVect::Unit;
+
+      const DisjointBoxLayout& coarGrids = m_grids[lvl - 1];
+      const DisjointBoxLayout& fineGrids = m_grids[lvl];
+
+      DisjointBoxLayout coFiGrids;
+      coarsen(coFiGrids, fineGrids, m_refinementRatios[lvl - 1]);
+
+      EBGraphFactory coarGraphFactory(m_domains[lvl - 1]);
+      EBGraphFactory fineGraphFactory(m_domains[lvl]);
+
+      EBDataFactory coarDataFactory;
+      EBDataFactory fineDataFactory;
+
+      LevelData<EBGraph> coarGraphsEB(coarGrids, 1, ghostEB, coarGraphFactory);
+      LevelData<EBGraph> coFiGraphsEB(fineGrids, 1, ghostEB, fineGraphFactory);
+      LevelData<EBGraph> fineGraphsEB(coFiGrids, 1, ghostEB, fineGraphFactory);
+
+      LevelData<EBData> coarDataEB(coarGrids, 1, ghostEB, coarDataFactory);
+      LevelData<EBData> coFiDataEB(fineGrids, 1, ghostEB, fineDataFactory);
+      LevelData<EBData> fineDataEB(coFiGrids, 1, ghostEB, fineDataFactory);
+
+      // Fill the coarse graphs and copy to coarsened fine grids.
+      for (DataIterator dit(coarGrids); dit.ok(); ++dit) {
+        const EBISBox& coarEBISBox = ebislCoar[dit()];
+        const EBGraph& coarEBGraph = coarEBISBox.getEBGraph();
+        const EBData&  coarEBData  = coarEBISBox.getEBData();
+
+        coarGraphsEB[dit()] = coarEBGraph;
+        coarDataEB[dit()]   = coarEBData;
+      }
+
+      coarGraphsEB.copyTo(coFiGraphsEB);
+      coarDataEB.copyTo(coFiDataEB);
+
+      // Now interpolate the EB data to the fine grids
+      for (DataIterator dit(fineGrids); dit.ok(); ++dit) {
+        const EBGraph& coarGraph = coFiGraphsEB[dit()];
+        const EBData&  coarData  = coFiDataEB[dit()];
+
+        EBGraph& fineGraph = fineGraphsEB[dit()];
+        EBData&  fineData  = fineDataEB[dit()];
+      }
+
+      MayDay::Error(
+        "PhaseRealm::defineEBLevelGrid - stop here, we must define the EB EB interpolation not yet supported!");
     }
 
     m_ebis->fillEBISLayout(m_ebisl[lvl], m_grids[lvl], m_domains[lvl], m_numEbGhostsCells);
