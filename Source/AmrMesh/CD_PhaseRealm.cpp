@@ -395,12 +395,14 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
 
     if (lvl > m_maxDepthEB && lvl > 0) {
-
-      const EBISLayout& ebislCoar = m_ebisl[lvl - 1];
-      const IntVect     ghostEB   = m_numEbGhostsCells * IntVect::Unit;
+      const IntVect ghostEB = m_numEbGhostsCells * IntVect::Unit;
 
       const DisjointBoxLayout& coarGrids = m_grids[lvl - 1];
       const DisjointBoxLayout& fineGrids = m_grids[lvl];
+
+      if (procID() == 0) {
+        std::cout << fineGrids << std::endl;
+      }
 
       DisjointBoxLayout coFiGrids;
       coarsen(coFiGrids, fineGrids, m_refinementRatios[lvl - 1]);
@@ -412,16 +414,16 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
       EBDataFactory fineDataFactory;
 
       LevelData<EBGraph> coarGraphsEB(coarGrids, 1, ghostEB, coarGraphFactory);
-      LevelData<EBGraph> coFiGraphsEB(fineGrids, 1, ghostEB, fineGraphFactory);
-      LevelData<EBGraph> fineGraphsEB(coFiGrids, 1, ghostEB, fineGraphFactory);
+      LevelData<EBGraph> coFiGraphsEB(coFiGrids, 1, ghostEB, coarGraphFactory);
+      LevelData<EBGraph> fineGraphsEB(fineGrids, 1, ghostEB, fineGraphFactory);
 
-      LevelData<EBData> coarDataEB(coarGrids, 1, ghostEB, coarDataFactory);
-      LevelData<EBData> coFiDataEB(fineGrids, 1, ghostEB, fineDataFactory);
-      LevelData<EBData> fineDataEB(coFiGrids, 1, ghostEB, fineDataFactory);
+      LevelData<EBData> coarDataEB(coarGrids, 1, ghostEB, EBDataFactory());
+      LevelData<EBData> coFiDataEB(coFiGrids, 1, ghostEB, EBDataFactory());
+      LevelData<EBData> fineDataEB(fineGrids, 1, ghostEB, EBDataFactory());
 
       // Fill the coarse graphs and copy to coarsened fine grids.
       for (DataIterator dit(coarGrids); dit.ok(); ++dit) {
-        const EBISBox& coarEBISBox = ebislCoar[dit()];
+        const EBISBox& coarEBISBox = m_ebisl[lvl - 1][dit()];
         const EBGraph& coarEBGraph = coarEBISBox.getEBGraph();
         const EBData&  coarEBData  = coarEBISBox.getEBData();
 
@@ -439,6 +441,20 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
 
         EBGraph& fineGraph = fineGraphsEB[dit()];
         EBData&  fineData  = fineDataEB[dit()];
+
+        if (coarGraph.isAllCovered()) {
+          fineGraph.setToAllCovered();
+
+          pout() << "setting to all covered" << endl;
+        }
+        else if (coarGraph.isAllRegular()) {
+          fineGraph.setToAllRegular();
+
+          pout() << "setting to all regular" << endl;
+        }
+        else {
+          pout() << "setting to all irregular" << endl;
+        }
       }
 
       MayDay::Error(
