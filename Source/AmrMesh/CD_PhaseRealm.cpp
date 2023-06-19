@@ -52,6 +52,7 @@ PhaseRealm::define(const Vector<DisjointBoxLayout>&   a_grids,
                    const Vector<Real>&                a_dx,
                    const RealVect                     a_probLo,
                    const int                          a_finestLevel,
+                   const int                          a_maxDepthEB,
                    const int                          a_ebGhost,
                    const int                          a_numGhost,
                    const int                          a_lsfGhost,
@@ -72,6 +73,7 @@ PhaseRealm::define(const Vector<DisjointBoxLayout>&   a_grids,
   m_dx                           = a_dx;
   m_probLo                       = a_probLo;
   m_finestLevel                  = a_finestLevel;
+  m_maxDepthEB                   = a_maxDepthEB;
   m_numEbGhostsCells             = a_ebGhost;
   m_numGhostCells                = a_numGhost;
   m_numLsfGhostCells             = a_lsfGhost;
@@ -389,12 +391,22 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
   m_ebisl.resize(1 + m_finestLevel);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
+    
+    if(lvl > m_maxDepthEB) {
+      MayDay::Error("PhaseRealm::defineEBLevelGrid - stop here, we must define the EB EB interpolation not yet supported!");
+    }
 
     m_ebis->fillEBISLayout(m_ebisl[lvl], m_grids[lvl], m_domains[lvl], m_numEbGhostsCells);
     m_eblg[lvl] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid(m_grids[lvl], m_ebisl[lvl], m_domains[lvl]));
 
+#if 1
+    pout() << "PhaseRealm::defineEBLevelGrid - entering debug hook" << endl;
+    const bool hasCoar = false;
+    const bool hasFine = false;
+#else
     const bool hasCoar = lvl > 0;
     const bool hasFine = lvl < m_finestLevel;
+#endif
 
     if (hasCoar) {
       m_eblg[lvl]->setMaxCoarseningRatio(m_refinementRatios[lvl - 1], &(*m_ebis));
@@ -405,7 +417,7 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
     }
 
     // Define the coarsened grids.
-    if (lvl > 0) {
+    if (hasCoar) {
       m_eblgCoFi[lvl - 1] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
 
       coarsen(*m_eblgCoFi[lvl - 1], *m_eblg[lvl], m_refinementRatios[lvl - 1]);
@@ -413,13 +425,15 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
     }
 
     // Define the refined grids. Here m_eblgFiCo contains grids on level lvl
-    if (lvl < m_finestLevel) {
+    if (hasFine) {
       m_eblgFiCo[lvl + 1] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
 
       refine(*m_eblgFiCo[lvl + 1], *m_eblg[lvl], m_refinementRatios[lvl]);
       m_eblgFiCo[lvl + 1]->getEBISL().setMaxCoarseningRatio(m_refinementRatios[lvl], m_eblg[lvl]->getEBIS());
     }
   }
+
+  MayDay::Error("PhaseRealm::defineEBLevelGrid - stop here");
 }
 
 void
@@ -533,9 +547,7 @@ PhaseRealm::defineEBMultigrid(const int a_lmin)
   m_multigridInterpolator.resize(1 + m_finestLevel);
 
   if (doThisOperator) {
-
     for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
-
       const bool hasCoar = lvl > 0;
 
       // Interpolator for ghost cells on level l is stored on level l.

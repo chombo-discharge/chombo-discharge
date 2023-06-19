@@ -45,6 +45,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
               const Vector<Real>&                                       a_dx,
               const RealVect                                            a_probLo,
               const int                                                 a_finestLevel,
+              const int                                                 a_maxDepthEB,
               const int                                                 a_ebGhost,
               const int                                                 a_numGhost,
               const int                                                 a_lsfGhost,
@@ -68,6 +69,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
   m_dx                   = a_dx;
   m_probLo               = a_probLo;
   m_finestLevel          = a_finestLevel;
+  m_maxDepthEB           = a_maxDepthEB;
   m_baseif               = a_baseif;
   m_multifluidIndexSpace = a_mfis;
 
@@ -80,6 +82,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
                                a_dx,
                                m_probLo,
                                a_finestLevel,
+                               a_maxDepthEB,
                                a_ebGhost,
                                a_numGhost,
                                a_lsfGhost,
@@ -98,6 +101,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
                                  a_dx,
                                  m_probLo,
                                  a_finestLevel,
+                                 a_maxDepthEB,
                                  a_ebGhost,
                                  a_numGhost,
                                  a_lsfGhost,

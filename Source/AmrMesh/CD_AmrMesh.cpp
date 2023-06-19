@@ -1251,8 +1251,6 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   }
 
   m_hasGrids = true;
-
-  pout() << "made it out" << endl;
 }
 
 void
@@ -3334,6 +3332,7 @@ AmrMesh::defineRealms()
                      m_dx,
                      m_probLo,
                      m_finestLevel,
+                     m_maxDepthEB,
                      m_numEbGhostsCells,
                      m_numGhostCells,
                      m_numLsfGhostCells,
@@ -3389,6 +3388,7 @@ AmrMesh::regridRealm(const std::string          a_realm,
                             m_dx,
                             m_probLo,
                             m_finestLevel,
+                            m_maxDepthEB,
                             m_numEbGhostsCells,
                             m_numGhostCells,
                             m_numLsfGhostCells,

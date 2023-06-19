@@ -94,6 +94,7 @@ public:
     @param[in] a_dx               Grid resolutions
     @param[in] a_probLo           Lower-left corner of physical domain
     @param[in] a_finestLevel      Finest grid level
+    @param[in] a_maxDepthEB       Finest grid where we generated cut-cell moments
     @param[in] a_ebGhost          Number of ghost cells used for geometric information when making operators
     @param[in] a_numGhost         Number of ghost cells in data holders
     @param[in] a_lsfGhost         Number of ghost cells used when computing the level set on the mesh
@@ -113,6 +114,7 @@ public:
          const Vector<Real>&                                       a_dx,
          const RealVect                                            a_probLo,
          const int                                                 a_finestLevel,
+         const int                                                 a_maxDepthEB,
          const int                                                 a_ebGhost,
          const int                                                 a_numGhost,
          const int                                                 a_lsfGhost,
@@ -378,6 +380,11 @@ protected:
     @brief Finest AMR level
   */
   int m_finestLevel;
+
+  /*!
+    @brief Finest level where we generated cut-cells
+  */
+  int m_maxDepthEB;
 
   /*!
     @brief Physical coordinates of lower-left corner in simulation domain
