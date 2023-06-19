@@ -214,7 +214,7 @@ Driver::getGeometryTags()
   // TLDR: This routine fetches cut-cell indexes using various criteria (supplied through the input script). It will also
   //       remove some of those tags if a GeoCoarsener object was supplied to Driver.
 
-  const int maxAmrDepth = m_amr->getMaxAmrDepth();
+  const int maxAmrDepth = m_amr->getMaxSimulationDepth();
 
   m_geomTags.resize(maxAmrDepth);
 
@@ -758,7 +758,7 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
 
     while (m_time < a_endTime && m_timeStep < a_maxSteps && !isLastStep) {
       const int maxSimDepth = m_amr->getMaxSimulationDepth();
-      const int maxAmrDepth = m_amr->getMaxAmrDepth();
+      const int maxAmrDepth = m_amr->getMaxSimulationDepth();
 
       // Check if we should regrid. This can be due to regular intervals, or the TimeStepper can call for it.
       const bool canRegrid         = maxSimDepth > 0 && maxAmrDepth > 0 && m_regridInterval > 0;
@@ -1154,10 +1154,10 @@ Driver::parseGeometryRefinement()
   pp.get("refine_dielectrics", m_dielectricTagsDepth);
 
   if (m_conductorTagsDepth < 0) {
-    m_conductorTagsDepth = m_amr->getMaxAmrDepth();
+    m_conductorTagsDepth = m_amr->getMaxSimulationDepth();
   }
   if (m_dielectricTagsDepth < 0) {
-    m_dielectricTagsDepth = m_amr->getMaxAmrDepth();
+    m_dielectricTagsDepth = m_amr->getMaxSimulationDepth();
   }
 
   // We are also allowing geometry refinement criteria to change as simulations progress (i.e. m_timeStep > 0) where we call this routine again. But we need
@@ -1344,7 +1344,7 @@ Driver::setupGeometryOnly()
       }
     }
     else {
-      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxAmrDepth());
+      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxSimulationDepth());
       scanDomain         = m_amr->getDomains()[amrLevel];
     }
 
@@ -1363,7 +1363,7 @@ Driver::setupGeometryOnly()
     }
   }
 
-  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
+  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxSimulationDepth();
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
                                            m_amr->getProbLo(),
@@ -1428,7 +1428,7 @@ Driver::setupFresh(const int a_initialRegrids)
       }
     }
     else {
-      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxAmrDepth());
+      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxSimulationDepth());
       scanDomain         = m_amr->getDomains()[amrLevel];
     }
 
@@ -1446,7 +1446,7 @@ Driver::setupFresh(const int a_initialRegrids)
     m_computationalGeometry->useChomboShop();
   }
 
-  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
+  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxSimulationDepth();
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
                                            m_amr->getProbLo(),
                                            m_amr->getFinestDx(),
@@ -1582,7 +1582,7 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string a_restartF
     }
   }
 
-  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
+  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxSimulationDepth();
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
                                            m_amr->getProbLo(),
@@ -1867,14 +1867,14 @@ Driver::tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags)
   else {
     // Loop only goes to the current finest level because we only add one level at a time
     for (int lvl = 0; lvl <= finestLevel; lvl++) {
-      if (lvl < m_amr->getMaxAmrDepth()) { // Geometric tags don't exist on AmrMesh.m_maxAmrDepth
+      if (lvl < m_amr->getMaxSimulationDepth()) { // Geometric tags don't exist on AmrMesh.m_maxAmrDepth
         a_allTags[lvl] |= m_geomTags[lvl];
       }
     }
   }
 
 #if 0 // Debug - if this fails, you have tags on m_amr->m_maxAmrDepth and something has gone wrong. 
-  if(finestLevel == m_amr->getMaxAmrDepth()){
+  if(finestLevel == m_amr->getMaxSimulationDepth()){
     for (int lvl = 0; lvl <= finestLevel; lvl++){
       pout() << "level = " << lvl << "\t num_pts = " << a_allTags[lvl].numPts() << endl;
     }
@@ -2409,7 +2409,7 @@ Driver::writeCheckpointFile()
 
   // Write header containing time step information, grid resolution, etc.
   HDF5HeaderData header;
-  header.m_int["finest_eb_lvl"] = m_amr->getMaxAmrDepth();
+  header.m_int["finest_eb_lvl"] = m_amr->getMaxSimulationDepth();
   header.m_real["coarsest_dx"]  = m_amr->getDx()[0];
   header.m_real["time"]         = m_time;
   header.m_real["dt"]           = m_dt;
@@ -2577,7 +2577,7 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
   const int  finestLevel = header.m_int["finestLevel"];
   const int  prevMaxEB   = header.m_int["finest_eb_lvl"];
 
-  if (prevMaxEB != m_amr->getMaxAmrDepth()) {
+  if (prevMaxEB != m_amr->getMaxSimulationDepth()) {
     const std::string err = "Driver::readCheckpointFile -- max EB level changed. Proceed at your own peril";
 
     MayDay::Warning(err.c_str());

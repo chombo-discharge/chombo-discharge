@@ -197,7 +197,7 @@ CdrPlasmaTagger::tagCells(EBAMRTags& a_tags)
 
   // Determine how deep we should flag cells for refinement. We will never flag cells on AmrMesh's maximum AMR depth, so we restrict to that.
   const int finestLevel    = m_amr->getFinestLevel();
-  const int maxDepth       = m_amr->getMaxAmrDepth();
+  const int maxDepth       = m_amr->getMaxSimulationDepth();
   const int finestTagLevel = (finestLevel == maxDepth) ? maxDepth - 1 : finestLevel;
 
   if (m_numTracers > 0) {

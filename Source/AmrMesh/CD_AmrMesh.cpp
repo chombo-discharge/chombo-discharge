@@ -40,7 +40,7 @@ AmrMesh::AmrMesh()
   m_hasGrids       = false;
 
   // Some things might require a vector which is just a tiny bit longer.
-  m_refinementRatios.resize(m_maxAmrDepth);
+  m_refinementRatios.resize(m_maxDepthEB);
   m_refinementRatios.push_back(2);
 }
 
@@ -914,7 +914,7 @@ AmrMesh::parseOptions()
   }
 
   this->parseCoarsestLevelNumCells();
-  this->parseMaxAmrDepth();
+  this->parseMaxDepthEB();
   this->parseMaxSimulationDepth();
   this->parseRefinementRatios();
   this->parseBlockingFactor();
@@ -952,6 +952,9 @@ AmrMesh::parseRuntimeOptions()
   this->parseBrBufferSize();
   this->parseBrFillRatio();
   this->parseMultigridInterpolator();
+
+  // Build these again since maximum depths might have changed.
+  this->buildDomains();
 }
 
 void
@@ -980,7 +983,7 @@ AmrMesh::buildDomains()
     pout() << "AmrMesh::buildDomains()" << endl;
   }
 
-  const int numLevels = 1 + m_maxAmrDepth;
+  const int numLevels = 1 + m_maxDepthEB;
 
   m_domains.resize(numLevels);
   m_dx.resize(numLevels);
@@ -989,7 +992,7 @@ AmrMesh::buildDomains()
   m_dx[0]      = (m_probHi[0] - m_probLo[0]) / m_numCells[0];
   m_domains[0] = ProblemDomain(IntVect::Zero, m_numCells - IntVect::Unit);
 
-  for (int lvl = 1; lvl <= m_maxAmrDepth; lvl++) {
+  for (int lvl = 1; lvl <= m_maxSimulationDepth; lvl++) {
     m_dx[lvl]      = m_dx[lvl - 1] / m_refinementRatios[lvl - 1];
     m_domains[lvl] = m_domains[lvl - 1];
 
@@ -1127,22 +1130,22 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   }
 
   // TLDR: a_lmin is the coarsest level that changes and a_hardcap is a hardcap for the maximum grid level that can
-  //       be generated. If a_hardcap < 0 the restriction is m_maxAmrDepth.
+  //       be generated. If a_hardcap < 0 the restriction is m_maxDepthEB.
 
   // baseLevel is the coarsest level which does not change. topLevel is the finest level where we have tags. We should never
   // have tags on max_amr_depth, and we make that restriction here.
   const int baseLevel = std::max(0, a_lmin - 1);
-  const int topLevel  = (m_finestLevel == m_maxAmrDepth) ? m_finestLevel - 1 : a_tags.size() - 1;
+  const int topLevel  = (m_finestLevel == m_maxDepthEB) ? m_finestLevel - 1 : a_tags.size() - 1;
 
   // New and old grid boxes
   Vector<Vector<Box>> newBoxes(1 + topLevel);
   Vector<Vector<Box>> oldBoxes(1 + topLevel);
 
   // Enforce potential hardcap.
-  const int hardcap = (a_hardcap < 0) ? m_maxAmrDepth : a_hardcap;
+  const int hardcap = (a_hardcap < 0) ? m_maxDepthEB : a_hardcap;
 
   // Inside this loop we make the boxes.
-  if (m_maxAmrDepth > 0 && hardcap > 0) {
+  if (m_maxSimulationDepth > 0 && hardcap > 0) {
     domainSplit(m_domains[0], oldBoxes[0], m_maxBoxSize, m_blockingFactor);
 
     // If have old grids, we can use the old boxes as input to the grid generators (since they don't necessarily regrid all levels).
@@ -1193,7 +1196,6 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
     }
 
     // Identify the new finest grid level.
-    m_finestLevel = std::min(newFinestLevel, m_maxAmrDepth);       // Don't exceed m_maxAmrDepth
     m_finestLevel = std::min(m_finestLevel, m_maxSimulationDepth); // Don't exceed maximum simulation depth
     m_finestLevel = std::min(m_finestLevel, hardcap);              // Don't exceed hardcap
   }
@@ -2302,22 +2304,15 @@ AmrMesh::parseCoarsestLevelNumCells()
 }
 
 void
-AmrMesh::parseMaxAmrDepth()
+AmrMesh::parseMaxDepthEB()
 {
-  CH_TIME("AmrMesh::parseMaxAmrDepth()");
+  CH_TIME("AmrMesh::parseMaxDepthEB()");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::parseMaxAmrDepth()" << endl;
+    pout() << "AmrMesh::parseMaxDepthEB()" << endl;
   }
 
   ParmParse pp("AmrMesh");
-  int       depth;
-  pp.get("max_amr_depth", depth);
-  if (depth >= 0) {
-    m_maxAmrDepth = depth;
-  }
-  else {
-    m_maxAmrDepth = 0;
-  }
+  pp.get("max_eb_depth", m_maxDepthEB);
 }
 
 void
@@ -2329,14 +2324,7 @@ AmrMesh::parseMaxSimulationDepth()
   }
 
   ParmParse pp("AmrMesh");
-  int       depth;
-  pp.get("max_sim_depth", depth);
-  if (depth >= 0) {
-    m_maxSimulationDepth = depth;
-  }
-  else {
-    m_maxSimulationDepth = m_maxAmrDepth;
-  }
+  pp.get("max_sim_depth", m_maxSimulationDepth);
 }
 
 void
@@ -2353,7 +2341,7 @@ AmrMesh::parseRefinementRatios()
   pp.getarr("ref_rat", ratios, 0, ratios.size());
 
   // Pad with whatever was last specified if user didn't supply enough refinement factors
-  while (ratios.size() < m_maxAmrDepth) {
+  while (ratios.size() < m_maxSimulationDepth) {
     //    ratios.push_back(2);
     ratios.push_back(ratios.back());
   }
@@ -2386,8 +2374,7 @@ AmrMesh::setFinestLevel(const int a_finestLevel)
   }
 
   m_finestLevel = a_finestLevel;
-  m_finestLevel = Min(m_finestLevel, m_maxAmrDepth);        // Don't exceed m_maxAmrDepth
-  m_finestLevel = Min(m_finestLevel, m_maxSimulationDepth); // Don't exceed maximum simulation depth
+  m_finestLevel = std::min(m_finestLevel, m_maxSimulationDepth);
 }
 
 void
@@ -2688,7 +2675,6 @@ AmrMesh::sanityCheck() const
     pout() << "AmrMesh::sanityCheck()" << endl;
   }
 
-  CH_assert(m_maxAmrDepth >= 0);
   for (int lvl = 0; lvl < m_refinementRatios.size(); lvl++) {
     CH_assert(m_refinementRatios[lvl] == 2 || m_refinementRatios[lvl] == 4);
     CH_assert(m_blockingFactor >= 4 && m_blockingFactor % m_refinementRatios[lvl] == 0);
@@ -2698,8 +2684,8 @@ AmrMesh::sanityCheck() const
   CH_assert(m_fillRatioBR > 0. && m_fillRatioBR <= 1.0);
   CH_assert(m_bufferSizeBR > 0);
 
-  if (m_maxAmrDepth > 0) {
-    for (int lvl = 0; lvl < m_maxAmrDepth; lvl++) {
+  if (m_maxSimulationDepth > 0) {
+    for (int lvl = 0; lvl < m_maxSimulationDepth; lvl++) {
       if (m_refinementRatios[lvl] > 2 && m_blockingFactor < 8) {
         MayDay::Abort("AmrMesh::sanityCheck -- can't use blocking factor < 8 with factor 4 refinement!");
       }
@@ -2741,14 +2727,14 @@ AmrMesh::getFinestLevel() const
 }
 
 int
-AmrMesh::getMaxAmrDepth() const
+AmrMesh::getMaxDepthEB() const
 {
-  CH_TIME("AmrMesh::getMaxAmrDepth()");
+  CH_TIME("AmrMesh::getMaxDepthEB()");
   if (m_verbosity > 1) {
-    pout() << "AmrMesh::getMaxAmrDepth()" << endl;
+    pout() << "AmrMesh::getMaxDepthEB()" << endl;
   }
 
-  return m_maxAmrDepth;
+  return m_maxDepthEB;
 }
 
 int
@@ -2866,7 +2852,7 @@ AmrMesh::getFinestDomain() const
     pout() << "AmrMesh::getFinestDomain()" << endl;
   }
 
-  return m_domains[m_maxAmrDepth];
+  return m_domains[m_maxDepthEB];
 }
 
 Real
@@ -2877,7 +2863,7 @@ AmrMesh::getFinestDx() const
     pout() << "AmrMesh::getFinestDx()" << endl;
   }
 
-  return m_dx[m_maxAmrDepth];
+  return m_dx[m_maxDepthEB];
 }
 
 const Vector<Real>&

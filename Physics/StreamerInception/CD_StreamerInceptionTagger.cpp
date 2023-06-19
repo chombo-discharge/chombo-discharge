@@ -94,7 +94,7 @@ StreamerInceptionTagger::tagCells(EBAMRTags& a_tags)
   int foundTags = -1;
 
   const int finestLevel    = m_amr->getFinestLevel();
-  const int maxLevel       = m_amr->getMaxAmrDepth();
+  const int maxLevel       = m_amr->getMaxSimulationDepth();
   const int finestTagLevel = (finestLevel == maxLevel) ? maxLevel - 1 : finestLevel;
 
   for (int lvl = 0; lvl <= finestTagLevel; lvl++) {

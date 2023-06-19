@@ -198,7 +198,7 @@ ItoKMCTagger<S>::tagCells(EBAMRTags& a_tags) noexcept
   const RealVect probLo         = m_amr->getProbLo();
   const Real     curTime        = m_timeStepper->getTime();
   const int      finestLevel    = m_amr->getFinestLevel();
-  const int      maxAmrDepth    = m_amr->getMaxAmrDepth();
+  const int      maxAmrDepth    = m_amr->getMaxSimulationDepth();
   const int      finestTagLevel = (finestLevel == maxAmrDepth) ? maxAmrDepth - 1 : finestLevel;
 
   if (m_numTagFields > 0) {

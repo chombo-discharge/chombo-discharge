@@ -1578,10 +1578,10 @@ public:
   getFinestLevel() const;
 
   /*!
-    @brief Get maximum permitted amr depth.
+    @brief Get maximum permitted EB depth
   */
   int
-  getMaxAmrDepth() const;
+  getMaxDepthEB() const;
 
   /*!
     @brief Get maximum permitted simulation depth.
@@ -1998,9 +1998,9 @@ protected:
   int m_oldFinestLevel;
 
   /*!
-    @brief Maximum amr depth
+    @brief Maximum depth to which we generate cut-cells.
   */
-  int m_maxAmrDepth;
+  int m_maxDepthEB;
 
   /*!
     @brief Maximum allowed depth for simulation
@@ -2169,10 +2169,10 @@ protected:
   parseCoarsestLevelNumCells();
 
   /*!
-    @brief Parse the maximum permitted AMR depth
+    @brief Parse the maximum permitted EB depth
   */
   void
-  parseMaxAmrDepth();
+  parseMaxDepthEB();
 
   /*!
     @brief Set maximum simulation depth. 
