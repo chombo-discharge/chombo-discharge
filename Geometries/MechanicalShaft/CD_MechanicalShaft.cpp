@@ -282,7 +282,7 @@ MechanicalShaft::getPolygon() const noexcept
     const Vec3 normal = Vec3(cos(theta + 0.5 * dTheta), sin(theta + 0.5 * dTheta), 0.0);
     const Vec3 point  = R * Vec3(cos(theta), sin(theta), 0.0);
 
-    planes.emplace_back(std::make_shared<EBGeometry::PlaneSDF<Real>>(point, -normal));
+    planes.emplace_back(std::make_shared<EBGeometry::PlaneSDF<Real>>(point, normal));
   }
 
   return EBGeometry::SmoothUnion(planes, curv);
@@ -333,8 +333,8 @@ MechanicalShaft::getCircularProfiles() const noexcept
 
   cylinder = std::make_shared<EBGeometry::InfiniteCylinderSDF<Real>>(center, cylinderRadius, 2);
   profile  = std::make_shared<EBGeometry::TorusSDF<Real>>(center, profileMajorRadius, profileMinorRadius);
-  profile  = EBGeometry::Translate<Real>(profile, transl);
   profile  = EBGeometry::FiniteRepetition<Real>(profile, period, repLo, repHi);
+  profile  = EBGeometry::Translate<Real>(profile, transl);  
 
   return EBGeometry::SmoothDifference(cylinder, profile, profileSmooth);
 }
