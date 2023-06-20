@@ -304,9 +304,8 @@ MechanicalShaft::getCircularProfiles() const noexcept
   Real profileTranslate   = -1.0;
   Real profilePeriod      = -1.0;
   Real profileSmooth      = -1.0;
-
-  int profileRepLo = -1;
-  int profileRepHi = -1;
+  Real profileRepLo       = -1.0;
+  Real profileRepHi       = -1.0;
 
   pp.get("dielectric.profile.circular.cylinder_radius", cylinderRadius);
   pp.get("dielectric.profile.circular.profile_major_radius", profileMajorRadius);
@@ -326,20 +325,22 @@ MechanicalShaft::getCircularProfiles() const noexcept
   CH_assert(profileSmooth >= 0.0);
 
   std::shared_ptr<ImpFunc> cylinder;
-  std::shared_ptr<ImpFunc> profile;
+  std::shared_ptr<ImpFunc> profiles;
+
+  const Real inf = std::numeric_limits<Real>::max();
 
   const Vec3 center = Vec3::zero();
   const Vec3 transl = profileTranslate * Vec3::unit(2);
-  const Vec3 period = profilePeriod * Vec3::unit(2);
+  const Vec3 period = Vec3(inf, inf, profilePeriod);
   const Vec3 repLo  = profileRepLo * Vec3::unit(2);
   const Vec3 repHi  = profileRepHi * Vec3::unit(2);
 
   cylinder = std::make_shared<EBGeometry::InfiniteCylinderSDF<Real>>(center, cylinderRadius, 2);
-  profile  = std::make_shared<EBGeometry::TorusSDF<Real>>(center, profileMajorRadius, profileMinorRadius);
-  profile  = EBGeometry::FiniteRepetition<Real>(profile, period, repLo, repHi);
-  profile  = EBGeometry::Translate<Real>(profile, transl);
+  profiles = std::make_shared<EBGeometry::TorusSDF<Real>>(center, profileMajorRadius, profileMinorRadius);
+  profiles = EBGeometry::FiniteRepetition<Real>(profiles, period, repLo, repHi);
+  profiles = EBGeometry::Translate<Real>(profiles, transl);
 
-  return EBGeometry::SmoothDifference(cylinder, profile, profileSmooth);
+  return EBGeometry::SmoothDifference(cylinder, profiles, profileSmooth);
 }
 
 #include <CD_NamespaceFooter.H>
