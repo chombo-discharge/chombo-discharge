@@ -38,7 +38,7 @@ Driver.checkpoint_interval             = -1               # Checkpoint interval
 Driver.regrid_interval                 = -1               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 0                # Number of initial regrids
+Driver.initial_regrids                 = 4                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
@@ -163,33 +163,35 @@ Vessel.live_shroom   = false          # Mushroom is live or not
 # ====================================================================================================
 # StreamerInceptionStepper class options
 # ====================================================================================================
-StreamerInceptionStepper.verbosity     = -1                            # Chattiness.
-StreamerInceptionStepper.profile       = false
-StreamerInceptionStepper.mode          = transient                     # Mode (stationary or transient)
-StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
-StreamerInceptionStepper.output_file   = report.txt                    # Output file
-StreamerInceptionStepper.K_inception   = 10                            # User-specified inception value
-StreamerInceptionStepper.plt_vars      = K ions Uinc bg_rate detachment alpha eta poisson # Plot variables
+StreamerInceptionStepper.verbosity     = -1                      # Chattiness.
+StreamerInceptionStepper.profile       = false                   # Turn on/off run-time profiling
+StreamerInceptionStepper.mode          = transient               # Mode (stationary or transient)
+StreamerInceptionStepper.inception_alg = trapz dx 0.2            # Integration algorithm for inception integral.
+StreamerInceptionStepper.output_file   = report.txt              # Output file
+StreamerInceptionStepper.K_inception   = 12                      # User-specified inception value
+StreamerInceptionStepper.plt_vars      = K ions Uinc bg_rate emission # Plot variables
 
 # Static mode
-StreamerInceptionStepper.voltage_lo    = 10E3                          # Low voltage multiplier
-StreamerInceptionStepper.voltage_hi    = 30E3                          # Highest voltage multiplier
-StreamerInceptionStepper.voltage_steps = 10                            # Number of voltage steps
+StreamerInceptionStepper.voltage_lo    = 10E3                     # Low voltage multiplier
+StreamerInceptionStepper.voltage_hi    = 30E3                     # Highest voltage multiplier
+StreamerInceptionStepper.voltage_steps = 9                       # Number of voltage steps
 
 # Dynamic mode
-StreamerInceptionStepper.ion_transport = true                          # Turn on/off ion transport
-StreamerInceptionStepper.transport_alg = heun                           # Advection algorithm. 
-StreamerInceptionStepper.cfl           = 0.8                           # CFL time step for dynamic mode
-StreamerInceptionStepper.min_dt        = 0.0                           # Minimum permitted time step
-StreamerInceptionStepper.max_dt        = 250E-9                        # Maximum permitted time step
-
+StreamerInceptionStepper.ion_transport = true                    # Turn on/off ion transport
+StreamerInceptionStepper.transport_alg = heun                    # Transport algorithm. 'euler', 'heun', or 'imex'
+StreamerInceptionStepper.cfl           = 0.8                     # CFL time step for dynamic mode
+StreamerInceptionStepper.first_dt      = 1.E-9                   # First time step to be used. 
+StreamerInceptionStepper.min_dt        = 1.E-9                   # Minimum permitted time step
+StreamerInceptionStepper.max_dt        = 1.E99                   # Maximum permitted time step
+StreamerInceptionStepper.voltage_eps   = 0.05                    # Permitted relative change in V(t) when computing dt
+StreamerInceptionStepper.max_dt_growth = 0.15                    # Maximum relative change in dt when computing dt
 
 # ====================================================================================================
 # StreamerInceptionTagger class options
 # ====================================================================================================
 StreamerInceptionTagger.verbosity   = -1    # Tagger chattiness. 
 StreamerInceptionTagger.buffer      = 0     # Grown buffer around flagged cells
-StreamerInceptionTagger.max_voltage = 50E3 # Maximum applied voltage 
+StreamerInceptionTagger.max_voltage = 30E3 # Maximum applied voltage 
 StreamerInceptionTagger.ref_alpha   = 5.0   # Refinement curvature criterion. Lower => more mesh
 StreamerInceptionTagger.plot        = false # Plot tagging field or not.
 

@@ -575,6 +575,11 @@ namespace Physics {
       Real m_cfl;
 
       /*!
+	@brief First time step
+      */
+      Real m_firstDt;
+
+      /*!
 	@brief Maximum permitted time step
       */
       Real m_maxDt;
@@ -583,25 +588,16 @@ namespace Physics {
 	@brief Minimum permitted time step.
       */
       Real m_minDt;
-      /*!
-	@brief Value between 0 and 1. The maximum deviation from V(t) in percent, i.e. deltaVPercent=deltaV/V
-      */
-      Real m_deltaVPercent;
 
       /*!
-	@brief Time at the end of the input voltage curve
+	@brief Permitted relative deviation in V(t) when computing voltage-curve based time steps.
       */
-      Real m_endTime;
+      Real m_epsVoltage;
 
       /*!
-	@brief Time at the peak of the input voltage curve
+	@brief Maximum permitted time step growth 
       */
-      Real m_peakTime;
-
-      /*!
-	@brief previous time step
-      */
-      Real m_prevDt;
+      Real m_maxDtGrowth;
 
       /*!
 	@brief Variable step size for K-integration algorithm (factor of dx)

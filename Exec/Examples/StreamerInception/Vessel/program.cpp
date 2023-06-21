@@ -79,12 +79,12 @@ main(int argc, char* argv[])
     return alpha(E) - eta(E);
   };
   auto bgRate = [&](const Real& E, const RealVect& x) -> Real {
-    return 1.E7;
+    return 0.0;
   };
   auto detachRate = [&](const Real& E, const RealVect& x) -> Real {
-    return (N2 * 1.13E-25 + O2 * 2.2E-24) * N;
+    const Real Etd = E / (N * 1E-21);
+    return 1.24E-11 * 1E-6 * N * exp(-std::pow((179.0 / (8.8 + Etd)), 2));
   };
-
   auto ionMobility = [&](const Real& E) -> Real {
     return 2E-4;
   };
@@ -92,12 +92,11 @@ main(int argc, char* argv[])
     return ionMobility(E) * Units::kb * T / Units::Qe;
   };
   auto ionDensity = [&](const RealVect& x) -> Real {
-    return 1.E10;
+    return 4.E6;
   };
   auto voltageCurve = [&](const Real& t) -> Real {
     return peak * (exp(-(t + t0) / t1) - exp(-(t + t0) / t2));
   };
-
   auto fieldEmission = [&](const Real& E, const RealVect& x) -> Real {
     const Real beta = 1.0; // Field enhancement factor
     const Real phi  = 4.5;

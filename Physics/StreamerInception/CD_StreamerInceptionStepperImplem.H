@@ -48,8 +48,6 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
 
   this->parseOptions();
 
-  m_prevDt = 0.0;
-
   m_rho = [](const RealVect x) -> Real {
     return 0.0;
   };
@@ -453,13 +451,15 @@ StreamerInceptionStepper<P, F, C>::parseTransportAlgorithm() noexcept
   pp.get("transport_alg", str);
   pp.get("ion_transport", m_ionTransport);
   pp.get("cfl", m_cfl);
-  pp.get("max_dt", m_maxDt);
+  pp.get("first_dt", m_firstDt);
   pp.get("min_dt", m_minDt);
-  pp.get("delta_v_percent", m_deltaVPercent);
-  pp.get("end_time", m_endTime);
-  pp.get("peak_time", m_peakTime);
+  pp.get("max_dt", m_maxDt);
+  pp.get("max_dt_growth", m_maxDtGrowth);
+  pp.get("voltage_eps", m_epsVoltage);
 
-  m_minDt = std::max(m_minDt, 0.0);
+  CH_assert(m_minDt >= 0.0);
+  CH_assert(m_maxDt >= 0.0);
+  CH_assert(m_firstDt > 0.0);
 
   if (str == "euler") {
     m_transportAlgorithm == TransportAlgorithm::Euler;
@@ -1066,19 +1066,22 @@ StreamerInceptionStepper<P, F, C>::computeDt()
 
   if (m_mode == Mode::Transient) {
 
+    // Compute time step from ion solver.
+    Real ionDt = std::numeric_limits<Real>::max();
+
     switch (m_transportAlgorithm) {
     case TransportAlgorithm::Euler: {
-      dt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
+      ionDt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
 
       break;
     }
     case TransportAlgorithm::Heun: {
-      dt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
+      ionDt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
 
       break;
     }
     case TransportAlgorithm::ImExCTU: {
-      dt = m_cfl * m_ionSolver->computeAdvectionDt();
+      ionDt = m_cfl * m_ionSolver->computeAdvectionDt();
 
       break;
     }
@@ -1089,40 +1092,29 @@ StreamerInceptionStepper<P, F, C>::computeDt()
     }
     }
 
-    auto computeGradient = [this](const Real& a_timeStep) {
-      return (m_voltageCurve(m_time + a_timeStep) - m_voltageCurve(m_time)) / a_timeStep;
-    };
-
-    if (m_time <= m_peakTime) {
-      Real       currDt       = 2 * m_minDt;
-      Real       currGradient = computeGradient(currDt);
-      const Real currVoltage  = m_voltageCurve(m_time);
-      Real       deltaV       = currGradient * currDt;
-
-      while (std::abs(deltaV) <= std::abs(m_deltaVPercent * currVoltage) && (m_time + currDt) < m_endTime) {
-        currDt += m_minDt;
-        currGradient = computeGradient(currDt);
-        deltaV       = currGradient * currDt;
-      }
-
-      dt = currDt - m_minDt;
+    // Compute time step that resolves the voltage curve.
+    Real curveDt = std::numeric_limits<Real>::max();
+    if (m_timeStep == 0) {
+      curveDt = m_firstDt;
     }
     else {
-      if (m_prevDt == 0) {
-        m_prevDt = m_minDt;
+      const Real preU = m_voltageCurve(m_time - m_dt);
+      const Real curU = m_voltageCurve(m_time);
+      const Real dVdt = std::abs(curU - preU) / dt;
+
+      if (dVdt > std::numeric_limits<Real>::epsilon()) {
+        curveDt = m_epsVoltage * std::abs(curU) / dVdt;
       }
-      Real currGradient = computeGradient(m_prevDt);
-      while (currGradient == 0) {
-        m_prevDt += m_minDt;
-        currGradient = computeGradient(m_prevDt);
-      }
-      Real currVoltage = m_voltageCurve(m_time);
-      if (currVoltage == 0) {
-        currVoltage = m_voltageCurve(m_time + m_prevDt);
-      }
-      dt = std::abs(m_deltaVPercent * currVoltage / currGradient);
+
+      // Do not grow too fast.
+      curveDt = std::min(m_dt * (1.0 + m_maxDtGrowth), curveDt);
+      curveDt = std::max(m_dt * (1.0 - m_maxDtGrowth), curveDt);
     }
 
+    dt = std::min(dt, ionDt);
+    dt = std::min(dt, curveDt);
+
+    // Also restrict by hardcaps.
     dt = std::min(dt, m_maxDt);
     dt = std::max(dt, m_minDt);
   }
@@ -1139,8 +1131,6 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
   }
 
   if (m_mode == Mode::Transient) {
-    m_prevDt = a_dt;
-
     Timer timer("StreamerInceptionStepper::advance");
 
     const Real curTime    = m_time + a_dt;
@@ -1171,7 +1161,7 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
     // Compute the critical volume, critical area, the ionization volume and the electron appearance rate.
     timer.startEvent("Compute Vcr");
     const Real Vcr  = this->computeCriticalVolumeTransient();
-    const Real Acr = this->computeCriticalAreaTransient();
+    const Real Acr  = this->computeCriticalAreaTransient();
     const Real Vion = this->computeIonizationVolumeTransient(curVoltage);
     const Real Rdot = this->computeRdot(curVoltage);
     timer.stopEvent("Compute Vcr");
@@ -1208,7 +1198,7 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
     this->writeReportTransient();
     timer.stopEvent("Write report");
 
-    if(m_profile) {
+    if (m_profile) {
       timer.eventReport(pout(), false);
     }
   }
