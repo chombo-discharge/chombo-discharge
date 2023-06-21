@@ -1,8 +1,10 @@
 <map id="Source/ImplicitFunctions/CD_EBGeometryIF.H" name="Source/ImplicitFunctions/CD_EBGeometryIF.H">
-<area shape="rect" id="node1" title="Binding of EBGeometry signed distance functions to Chombo objcts." alt="" coords="336,5,517,47"/>
+<area shape="rect" id="node1" title="Binding of EBGeometry signed distance functions to Chombo objcts." alt="" coords="491,5,672,47"/>
 <area shape="rect" id="node2" href="$CD__EBGeometryIFImplem_8H.html" title="Implementation of CD_EBGeometryIF.H." alt="" coords="5,95,216,136"/>
 <area shape="rect" id="node3" href="$CD__NeedleIF_8cpp.html" title="Implementation of CD_NeedleIF.H." alt="" coords="240,95,421,136"/>
 <area shape="rect" id="node4" href="$CD__Cylinder_8cpp.html" title="Implementation of CD_Cylinder.H." alt="" coords="446,95,602,136"/>
-<area shape="rect" id="node5" href="$CD__RodNeedleDisk_8cpp.html" title="Implementation of CD_RodNeedleDisk.H." alt="" coords="627,95,829,136"/>
-<area shape="rect" id="node6" href="$CD__Tesselation_8cpp.html" title="Implementation of CD_Tesselation.H." alt="" coords="854,95,1029,136"/>
+<area shape="rect" id="node5" href="$CD__MechanicalShaft_8cpp.html" title="Implementation of CD_MechanicalShaft.H." alt="" coords="606,184,815,225"/>
+<area shape="rect" id="node6" href="$CD__MechanicalShaft_8H.html" title="Declaration of a mechanical shaft geometry." alt="" coords="678,95,887,136"/>
+<area shape="rect" id="node7" href="$CD__RodNeedleDisk_8cpp.html" title="Implementation of CD_RodNeedleDisk.H." alt="" coords="912,95,1115,136"/>
+<area shape="rect" id="node8" href="$CD__Tesselation_8cpp.html" title="Implementation of CD_Tesselation.H." alt="" coords="1139,95,1314,136"/>
 </map>

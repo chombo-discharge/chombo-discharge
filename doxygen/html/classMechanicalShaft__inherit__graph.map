@@ -1,4 +1,4 @@
 <map id="MechanicalShaft" name="MechanicalShaft">
-<area shape="rect" id="node1" title="Mechanical shaft class." alt="" coords="32,80,161,107"/>
+<area shape="rect" id="node1" title="Mechanical shaft class. Consists of a single ring electrode and an infinitely long&gt; shaft with variou..." alt="" coords="32,80,161,107"/>
 <area shape="rect" id="node2" href="$classComputationalGeometry.html" title="Abstract base class for geometries." alt="" coords="5,5,188,32"/>
 </map>

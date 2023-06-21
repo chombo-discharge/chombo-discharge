@@ -86,34 +86,47 @@ $(function() {
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160; </div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment">// Our includes</span></div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="CD__ComputationalGeometry_8H.html">CD_ComputationalGeometry.H</a>&gt;</span></div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; </div>
-<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="classMechanicalShaft.html">   22</a></span>&#160;<span class="keyword">class </span><a class="code" href="classMechanicalShaft.html">MechanicalShaft</a> : <span class="keyword">public</span> <a class="code" href="classComputationalGeometry.html">ComputationalGeometry</a></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;{</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;  <a class="code" href="classMechanicalShaft.html">MechanicalShaft</a>();</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;  ~<a class="code" href="classMechanicalShaft.html">MechanicalShaft</a>();</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;  <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  defineElectrode();</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;  defineDielectric();</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160; </div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  RefCountedPtr&lt;BaseIF&gt;</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  getPolygon();</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;  RefCountedPtr&lt;BaseIF&gt;</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;  getCylinder();</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;  RefCountedPtr&lt;BaseIF&gt;</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  getCylinderProfile();</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;};</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="CD__EBGeometryIF_8H.html">CD_EBGeometryIF.H</a>&gt;</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160; </div>
+<div class="line"><a name="l00023"></a><span class="lineno"><a class="line" href="classMechanicalShaft.html">   23</a></span>&#160;<span class="keyword">class </span><a class="code" href="classMechanicalShaft.html">MechanicalShaft</a> : <span class="keyword">public</span> <a class="code" href="classComputationalGeometry.html">ComputationalGeometry</a></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;{</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;  <a class="code" href="classMechanicalShaft.html#a7086ed08c8fcaae296fa7a4e3be5b5b8">MechanicalShaft</a>() noexcept;</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classMechanicalShaft.html#a5fd2208fbe825972b8fe8c8e83494140">~MechanicalShaft</a>() noexcept;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;  <a class="code" href="classMechanicalShaft.html#ac7db702ec226e0c55fb3a74708eeddf0">defineElectrode</a>() noexcept;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;  <a class="code" href="classMechanicalShaft.html#a55efc0276f5134aadbc166687b188a32">defineDielectric</a>() noexcept;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160; </div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;  <span class="keyword">virtual</span> std::shared_ptr&lt;EBGeometry::ImplicitFunction&lt;Real&gt;&gt;</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <a class="code" href="classMechanicalShaft.html#aa66176d4218e1862762a8d245fec1945">getSimpleCylinder</a>() <span class="keyword">const</span> noexcept;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  <span class="keyword">virtual</span> std::shared_ptr&lt;EBGeometry::ImplicitFunction&lt;Real&gt;&gt;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  <a class="code" href="classMechanicalShaft.html#a6c3797aed664498f0a573799d01a6754">getPolygon</a>() <span class="keyword">const</span> noexcept;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  <span class="keyword">virtual</span> std::shared_ptr&lt;EBGeometry::ImplicitFunction&lt;Real&gt;&gt;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <a class="code" href="classMechanicalShaft.html#a1e91aeaeef1333d597cb052e69172b59">getCircularProfiles</a>() <span class="keyword">const</span> noexcept;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;};</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__ComputationalGeometry_8H_html"><div class="ttname"><a href="CD__ComputationalGeometry_8H.html">CD_ComputationalGeometry.H</a></div><div class="ttdoc">Declaration of base class for defining geometries.</div></div>
+<div class="ttc" id="aCD__EBGeometryIF_8H_html"><div class="ttname"><a href="CD__EBGeometryIF_8H.html">CD_EBGeometryIF.H</a></div><div class="ttdoc">Binding of EBGeometry signed distance functions to Chombo objcts.</div></div>
 <div class="ttc" id="aclassComputationalGeometry_html"><div class="ttname"><a href="classComputationalGeometry.html">ComputationalGeometry</a></div><div class="ttdoc">Abstract base class for geometries.</div><div class="ttdef"><b>Definition:</b> CD_ComputationalGeometry.H:36</div></div>
-<div class="ttc" id="aclassMechanicalShaft_html"><div class="ttname"><a href="classMechanicalShaft.html">MechanicalShaft</a></div><div class="ttdoc">Mechanical shaft class.</div><div class="ttdef"><b>Definition:</b> CD_MechanicalShaft.H:23</div></div>
+<div class="ttc" id="aclassMechanicalShaft_html"><div class="ttname"><a href="classMechanicalShaft.html">MechanicalShaft</a></div><div class="ttdoc">Mechanical shaft class. Consists of a single ring electrode and an infinitely long&gt; shaft with variou...</div><div class="ttdef"><b>Definition:</b> CD_MechanicalShaft.H:24</div></div>
+<div class="ttc" id="aclassMechanicalShaft_html_a1e91aeaeef1333d597cb052e69172b59"><div class="ttname"><a href="classMechanicalShaft.html#a1e91aeaeef1333d597cb052e69172b59">MechanicalShaft::getCircularProfiles</a></div><div class="ttdeci">virtual std::shared_ptr&lt; EBGeometry::ImplicitFunction&lt; Real &gt; &gt; getCircularProfiles() const noexcept</div><div class="ttdoc">Get a profiled shaft oriented along the z-axis.</div><div class="ttdef"><b>Definition:</b> CD_MechanicalShaft.cpp:295</div></div>
+<div class="ttc" id="aclassMechanicalShaft_html_a55efc0276f5134aadbc166687b188a32"><div class="ttname"><a href="classMechanicalShaft.html#a55efc0276f5134aadbc166687b188a32">MechanicalShaft::defineDielectric</a></div><div class="ttdeci">virtual void defineDielectric() noexcept</div><div class="ttdoc">Define the dielectric.</div><div class="ttdef"><b>Definition:</b> CD_MechanicalShaft.cpp:161</div></div>
+<div class="ttc" id="aclassMechanicalShaft_html_a5fd2208fbe825972b8fe8c8e83494140"><div class="ttname"><a href="classMechanicalShaft.html#a5fd2208fbe825972b8fe8c8e83494140">MechanicalShaft::~MechanicalShaft</a></div><div class="ttdeci">virtual ~MechanicalShaft() noexcept</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition:</b> CD_MechanicalShaft.cpp:65</div></div>
+<div class="ttc" id="aclassMechanicalShaft_html_a6c3797aed664498f0a573799d01a6754"><div class="ttname"><a href="classMechanicalShaft.html#a6c3797aed664498f0a573799d01a6754">MechanicalShaft::getPolygon</a></div><div class="ttdeci">virtual std::shared_ptr&lt; EBGeometry::ImplicitFunction&lt; Real &gt; &gt; getPolygon() const noexcept</div><div class="ttdoc">Get a polygonal shaft oriented along the z-axis.</div><div class="ttdef"><b>Definition:</b> CD_MechanicalShaft.cpp:255</div></div>
+<div class="ttc" id="aclassMechanicalShaft_html_a7086ed08c8fcaae296fa7a4e3be5b5b8"><div class="ttname"><a href="classMechanicalShaft.html#a7086ed08c8fcaae296fa7a4e3be5b5b8">MechanicalShaft::MechanicalShaft</a></div><div class="ttdeci">MechanicalShaft() noexcept</div><div class="ttdoc">Constructor. Does nothing.</div><div class="ttdef"><b>Definition:</b> CD_MechanicalShaft.cpp:37</div></div>
+<div class="ttc" id="aclassMechanicalShaft_html_aa66176d4218e1862762a8d245fec1945"><div class="ttname"><a href="classMechanicalShaft.html#aa66176d4218e1862762a8d245fec1945">MechanicalShaft::getSimpleCylinder</a></div><div class="ttdeci">virtual std::shared_ptr&lt; EBGeometry::ImplicitFunction&lt; Real &gt; &gt; getSimpleCylinder() const noexcept</div><div class="ttdoc">Get a cylinder oriented along the z-axis.</div><div class="ttdef"><b>Definition:</b> CD_MechanicalShaft.cpp:239</div></div>
+<div class="ttc" id="aclassMechanicalShaft_html_ac7db702ec226e0c55fb3a74708eeddf0"><div class="ttname"><a href="classMechanicalShaft.html#ac7db702ec226e0c55fb3a74708eeddf0">MechanicalShaft::defineElectrode</a></div><div class="ttdeci">virtual void defineElectrode() noexcept</div><div class="ttdoc">Define the electrode.</div><div class="ttdef"><b>Definition:</b> CD_MechanicalShaft.cpp:68</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
