@@ -16,6 +16,7 @@
 // Our includes
 #include <CD_Realm.H>
 #include <CD_BoxLoops.H>
+#include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
 const std::string Realm::Primal = "primal";
@@ -126,6 +127,28 @@ Realm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLeve
 }
 
 void
+Realm::preRegrid()
+{
+  CH_TIME("Realm::preRegrid");
+  if (m_verbosity > 5) {
+    pout() << "Realm::preRegrid" << endl;
+  }
+
+  m_grids.resize(0);
+  m_mflg.resize(0);
+  m_validCells.resize(0);
+
+  for (auto& mask : m_masks) {
+    mask.second.resize(0);
+  }
+  //  m_masks.clear();
+
+  for (auto& r : m_realms) {
+    r.second->preRegrid();
+  }
+}
+
+void
 Realm::regridBase(const int a_lmin)
 {
   CH_TIME("Realm::regridBase");
@@ -136,6 +159,7 @@ Realm::regridBase(const int a_lmin)
   for (auto& r : m_realms) {
     r.second->regridBase(a_lmin);
   }
+
   this->defineMFLevelGrid(a_lmin);
   this->defineValidCells();
 }
@@ -396,7 +420,8 @@ Realm::defineValidCells()
       }
 
       // Copy from fine to coarse.
-      coFiData.copyTo(coarData);
+      Copier copier(dblCoFi, dblCoar);
+      coFiData.copyTo(Interval(0, 0), coarData, Interval(0, 0), copier);
 
       // Go through the coarse grid -- wherever we find a value of 1 there is also a fine grid.
       for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
@@ -411,7 +436,7 @@ Realm::defineValidCells()
           }
         };
 
-        BoxLoops::loop(cellBox, kernel);
+        BoxLoops::loop(fabMask.box(), kernel);
       }
     }
   }
@@ -524,10 +549,10 @@ Realm::getEBLevelGrid(const phase::which_phase a_phase) const
   return m_realms[a_phase]->getEBLevelGrid();
 }
 
-const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>>&
-Realm::getNeighbors(const phase::which_phase a_phase) const
+const Vector<RefCountedPtr<EBLevelGrid>>&
+Realm::getEBLevelGridCoFi(const phase::which_phase a_phase) const
 {
-  return m_realms[a_phase]->getNeighbors();
+  return m_realms[a_phase]->getEBLevelGridCoFi();
 }
 
 Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
@@ -584,46 +609,28 @@ Realm::getGradientOp(const phase::which_phase a_phase) const
   return m_realms[a_phase]->getGradientOp();
 }
 
-Vector<RefCountedPtr<AggEBPWLFillPatch>>&
-Realm::getFillPatch(const phase::which_phase a_phase)
+Vector<RefCountedPtr<EBGhostCellInterpolator>>&
+Realm::getGhostCellInterpolator(const phase::which_phase a_phase)
 {
-  return m_realms[a_phase]->getFillPatch();
+  return m_realms[a_phase]->getGhostCellInterpolator();
 }
 
-Vector<RefCountedPtr<EBFineInterp>>&
+Vector<RefCountedPtr<EBCoarseToFineInterp>>&
 Realm::getFineInterp(const phase::which_phase a_phase)
 {
   return m_realms[a_phase]->getFineInterp();
 }
 
-Vector<RefCountedPtr<EBFluxRegister>>&
+Vector<RefCountedPtr<EBReflux>>&
 Realm::getFluxRegister(const phase::which_phase a_phase)
 {
   return m_realms[a_phase]->getFluxRegister();
 }
 
-Vector<RefCountedPtr<EBLevelRedist>>&
-Realm::getLevelRedist(const phase::which_phase a_phase)
+Vector<RefCountedPtr<EBRedistribution>>&
+Realm::getRedistributionOp(const phase::which_phase a_phase)
 {
-  return m_realms[a_phase]->getLevelRedist();
-}
-
-Vector<RefCountedPtr<EBCoarToFineRedist>>&
-Realm::getCoarToFineRedist(const phase::which_phase a_phase)
-{
-  return m_realms[a_phase]->getCoarToFineRedist();
-}
-
-Vector<RefCountedPtr<EBCoarToCoarRedist>>&
-Realm::getCoarToCoarRedist(const phase::which_phase a_phase)
-{
-  return m_realms[a_phase]->getCoarToCoarRedist();
-}
-
-Vector<RefCountedPtr<EBFineToCoarRedist>>&
-Realm::getFineToCoarRedist(const phase::which_phase a_phase)
-{
-  return m_realms[a_phase]->getFineToCoarRedist();
+  return m_realms[a_phase]->getRedistributionOp();
 }
 
 const EBAMRFAB&

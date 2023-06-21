@@ -89,6 +89,8 @@ RoundedCylinderIF::makeBaseIF()
     transif->translate(m_center2);
   }
 
+  delete bif;
+
   m_baseIF = RefCountedPtr<BaseIF>(transif);
 }
 
@@ -135,7 +137,13 @@ RoundedCylinderIF::makeBaseIF3D()
   parts.push_back(torusBottom);
   parts.push_back(torusTop);
 
-  return (BaseIF*)(new IntersectionIF(parts));
+  BaseIF* isectIF = (BaseIF*)(new IntersectionIF(parts));
+
+  for (int i = 0; i < parts.size(); i++) {
+    delete parts[i];
+  }
+
+  return isectIF;
 }
 #endif
 

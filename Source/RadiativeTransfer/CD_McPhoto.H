@@ -311,11 +311,16 @@ public:
 
   /*!
     @brief Write plot data
-    @param[inout] a_ouput Output data holder
-    @param[inout] a_icomp Starting component where we begin to write data to a_output
+    @param[inout] a_ouput       Output data holder
+    @param[inout] a_icomp       Starting component where we begin to write data to a_output
+    @param[in]    a_outputRealm Realm where a_output belongs
+    @param[in]    a_level       Grid level
   */
   virtual void
-  writePlotData(EBAMRCellData& a_output, int& a_icomp) override;
+  writePlotData(LevelData<EBCellFAB>& a_output,
+                int&                  a_icomp,
+                const std::string     a_outputRealm,
+                const int             a_level) const noexcept override;
 
   /*!
     @brief Write checkpoint data into handle
@@ -528,14 +533,9 @@ protected:
   CoarseFineDeposition m_coarseFineDeposition;
 
   /*!
-    @brief Plot deposition type
-  */
-  DepositionType m_plotDeposition;
-
-  /*!
     @brief Coarse data for interpolation of deposition clouds
   */
-  EBAMRCellData m_scratch;
+  mutable EBAMRCellData m_scratch;
 
   /*!
     @brief Scratch storage for holding the non-conservative deposition
@@ -628,34 +628,6 @@ protected:
   depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC);
 
   /*!
-    @brief Increment redistribution objects with mass to be redistributed
-    @param[in] a_massDifference Mass difference
-  */
-  void
-  incrementRedist(const EBAMRIVData& a_massDifference);
-
-  /*!
-    @brief Do redistribution on all levels, no coarse-fine EB magic. 
-    @param[in] a_phi Data to be redistributed (with whatever has been put in the redistribution registers)
-  */
-  void
-  levelRedist(EBAMRCellData& a_phi);
-
-  /*!
-    @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
-    @param[in] m_massDifference Mass difference
-  */
-  void
-  coarseFineIncrement(const EBAMRIVData& m_massDifference);
-
-  /*!
-    @brief Do coarse-fine redistribution
-    @param[inout] Data to be redistributed (with whatever has been put in the redistribution registers)
-  */
-  void
-  coarseFineRedistribution(EBAMRCellData& a_phi);
-
-  /*!
     @brief Turn on/off transparent boundaries
   */
   void
@@ -708,6 +680,17 @@ protected:
   */
   void
   parsePlotVariables();
+
+  /*!
+    @brief Do an NGP deposit on a specific grid level. Used for IO.
+    @param[out] a_output Contains NGP deposition of photons. Ignores cut-cells.
+    @param[in] a_photons photons
+    @param[in] a_level Grid level
+  */
+  virtual void
+  depositPhotonsNGP(LevelData<EBCellFAB>&            a_output,
+                    const ParticleContainer<Photon>& a_particles,
+                    const int                        a_level) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

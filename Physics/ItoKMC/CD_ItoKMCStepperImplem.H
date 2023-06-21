@@ -19,7 +19,7 @@
 #include <ParmParse.H>
 
 // Our includes
-#include <CD_EBFineInterp.H>
+#include <CD_EBCoarseToFineInterp.H>
 #include <CD_ItoKMCStepper.H>
 #include <CD_ParticleOps.H>
 #include <CD_DataOps.H>
@@ -716,9 +716,6 @@ ItoKMCStepper<I, C, R, F>::postCheckpointSetup() noexcept
     pout() << m_name + "::postCheckpointSetup" << endl;
   }
 
-  // Allocate internal storage.
-  this->allocateInternals();
-
   m_ito->remap();
 
   // Recompute the electric field.
@@ -753,13 +750,13 @@ ItoKMCStepper<I, C, R, F>::postCheckpointPoisson() noexcept
   const EBAMRCellData E = m_amr->alias(m_plasmaPhase, m_fieldSolver->getElectricField());
 
   // Copy onto the storage holding the electric field on the fluid realm. Then interpolate to centroids.
-  m_electricFieldFluid.copy(E);
+  m_amr->copyData(m_electricFieldFluid, E);
   m_amr->conservativeAverage(m_electricFieldFluid, m_fluidRealm, m_plasmaPhase);
   m_amr->interpGhostPwl(m_electricFieldFluid, m_fluidRealm, m_plasmaPhase);
   m_amr->interpToCentroids(m_electricFieldFluid, m_fluidRealm, m_plasmaPhase);
 
   // Copy onto the storage holding the electric field on the particle realm.
-  m_electricFieldParticle.copy(E);
+  m_amr->copyData(m_electricFieldParticle, E);
   m_amr->conservativeAverage(m_electricFieldParticle, m_particleRealm, m_plasmaPhase);
   m_amr->interpGhostPwl(m_electricFieldParticle, m_particleRealm, m_plasmaPhase);
   m_amr->interpToCentroids(m_electricFieldParticle, m_particleRealm, m_plasmaPhase);
@@ -847,10 +844,109 @@ ItoKMCStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const int a_
 #endif
 
 template <typename I, typename C, typename R, typename F>
+int
+ItoKMCStepper<I, C, R, F>::getNumberOfPlotVariables() const noexcept
+{
+  CH_TIME("ItoKMCStepper::getNumberOfPlotVariables");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getNumberOfPlotVariables" << endl;
+  }
+
+  int numComp = 0;
+
+  // Ito solver variables.
+  for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    numComp += solverIt()->getNumberOfPlotVariables();
+  }
+
+  // Cdr solver variables
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    numComp += solverIt()->getNumberOfPlotVariables();
+  }
+
+  // RTE solver variables.
+  for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+    numComp += solverIt()->getNumberOfPlotVariables();
+  }
+
+  // Field solver variables.
+  numComp += m_fieldSolver->getNumberOfPlotVariables();
+
+  // Surface charge solver variables.
+  numComp += m_sigmaSolver->getNumberOfPlotVariables();
+
+  // Conductivity
+  if (m_plotConductivity) {
+    numComp += 1;
+  }
+
+  // Current density.
+  if (m_plotCurrentDensity) {
+    numComp += SpaceDim;
+  }
+
+  // Number of particles per patch
+  if (m_plotParticlesPerPatch) {
+    numComp += 1;
+  }
+
+  return numComp;
+}
+
+template <typename I, typename C, typename R, typename F>
+Vector<std::string>
+ItoKMCStepper<I, C, R, F>::getPlotVariableNames() const noexcept
+{
+  CH_TIME("ItoKMCStepper::getPlotVariableNames");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getPlotVariableNames" << endl;
+  }
+
+  Vector<std::string> plotVarNames;
+
+  plotVarNames.append(m_fieldSolver->getPlotVariableNames());
+  plotVarNames.append(m_sigmaSolver->getPlotVariableNames());
+
+  for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    plotVarNames.append(solverIt()->getPlotVariableNames());
+  }
+
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    plotVarNames.append(solverIt()->getPlotVariableNames());
+  }
+
+  for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+    plotVarNames.append(solverIt()->getPlotVariableNames());
+  }
+
+  // Write the conductivity to the output
+  if (m_plotConductivity) {
+    plotVarNames.push_back("Conductivity");
+  }
+
+  // Write the current to the output
+  if (m_plotCurrentDensity) {
+    plotVarNames.push_back("x-J");
+    plotVarNames.push_back("y-J");
+    if (SpaceDim == 3) {
+      plotVarNames.push_back("z-J");
+    }
+  }
+
+  // Write the number of particles per patch
+  if (m_plotParticlesPerPatch) {
+    plotVarNames.push_back("Particles per patch");
+  }
+
+  return plotVarNames;
+}
+
+template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::writePlotData(EBAMRCellData&       a_output,
-                                         Vector<std::string>& a_plotVariableNames,
-                                         int&                 a_icomp) const noexcept
+ItoKMCStepper<I, C, R, F>::writePlotData(LevelData<EBCellFAB>& a_output,
+                                         int&                  a_icomp,
+                                         const std::string     a_outputRealm,
+                                         const int             a_level) const noexcept
 {
   CH_TIME("ItoKMCStepper::writePlotData");
   if (m_verbosity > 5) {
@@ -858,78 +954,117 @@ ItoKMCStepper<I, C, R, F>::writePlotData(EBAMRCellData&       a_output,
   }
 
   // Poisson solver copies over its output data
-  a_plotVariableNames.append(m_fieldSolver->getPlotVariableNames());
-  m_fieldSolver->writePlotData(a_output, a_icomp);
+  m_fieldSolver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
 
   // Surface charge solver writes
-  a_plotVariableNames.append(m_sigmaSolver->getPlotVariableNames());
-  m_sigmaSolver->writePlotData(a_output, a_icomp);
+  m_sigmaSolver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
 
   // Ito solvers copy their output data
-  m_ito->depositParticles();
   for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    RefCountedPtr<ItoSolver>& solver = solverIt();
-
-    a_plotVariableNames.append(solver->getPlotVariableNames());
-    solver->writePlotData(a_output, a_icomp);
+    solverIt()->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
   }
 
   // Cdr solvers output their data
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    RefCountedPtr<CdrSolver>& solver = solverIt();
-
-    a_plotVariableNames.append(solver->getPlotVariableNames());
-    solver->writePlotData(a_output, a_icomp);
+    solverIt()->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
   }
 
   // RTE solvers copy their output data
   for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-    RefCountedPtr<McPhoto>& solver = solverIt();
-
-    a_plotVariableNames.append(solver->getPlotVariableNames());
-    solver->writePlotData(a_output, a_icomp);
+    solverIt()->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
   }
 
   // Write the conductivity to the output
   if (m_plotConductivity) {
-    a_output.copy(Interval(0, 0), m_conductivityCell, Interval(a_icomp, a_icomp));
-    a_plotVariableNames.push_back("Conductivity");
-    a_icomp++;
+    this->writeData(a_output, a_icomp, m_conductivityCell, a_outputRealm, a_level, false, true);
   }
 
   // Write the current to the output
   if (m_plotCurrentDensity) {
-    const Interval srcInterv(0, SpaceDim - 1);
-    const Interval dstInterv(a_icomp, a_icomp + SpaceDim - 1);
-    a_output.copy(srcInterv, m_currentDensity, dstInterv);
-
-    a_plotVariableNames.push_back("x-J");
-    a_plotVariableNames.push_back("y-J");
-    if (SpaceDim == 3) {
-      a_plotVariableNames.push_back("z-J");
-    }
-
-    a_icomp += SpaceDim;
+    this->writeData(a_output, a_icomp, m_currentDensity, a_outputRealm, a_level, false, true);
   }
 
   // Write the number of particles per patch
   if (m_plotParticlesPerPatch) {
-    this->writeNumberOfParticlesPerPatch(a_output, a_icomp);
-    a_plotVariableNames.push_back("Particles per patch");
-    a_icomp++;
+    this->writeNumberOfParticlesPerPatch(a_output, a_icomp, a_outputRealm, a_level);
   }
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::writeNumberOfParticlesPerPatch(EBAMRCellData& a_output, int& a_icomp) const noexcept
+ItoKMCStepper<I, C, R, F>::writeData(LevelData<EBCellFAB>& a_output,
+                                     int&                  a_comp,
+                                     const EBAMRCellData&  a_data,
+                                     const std::string     a_outputRealm,
+                                     const int             a_level,
+                                     const bool            a_interpToCentroids,
+                                     const bool            a_interpGhost) const noexcept
+
+{
+  CH_TIMERS("ItoKMCStepper::writeData");
+  CH_TIMER("ItoKMCStepper::writeData::allocate", t1);
+  CH_TIMER("ItoKMCStepper::writeData::local_copy", t2);
+  CH_TIMER("ItoKMCStepper::writeData::interp_ghost", t3);
+  CH_TIMER("ItoKMCStepper::writeData::interp_centroid", t4);
+  CH_TIMER("ItoKMCStepper::writeData::final_copy", t5);
+  if (m_verbosity > 5) {
+    pout() << m_name + "::writeData" << endl;
+  }
+
+  // Number of components we are working with.
+  const int numComp = a_data[a_level]->nComp();
+
+  // Component ranges that we copy to/from.
+  const Interval srcInterv(0, numComp - 1);
+  const Interval dstInterv(a_comp, a_comp + numComp - 1);
+
+  CH_START(t1);
+  LevelData<EBCellFAB> scratch;
+  m_amr->allocate(scratch, a_data.getRealm(), m_plasmaPhase, a_level, numComp);
+  CH_STOP(t1);
+
+  CH_START(t2);
+  m_amr->copyData(scratch, *a_data[a_level], a_level, a_data.getRealm(), a_data.getRealm());
+  CH_START(t2);
+
+  // Interpolate ghost cells
+  CH_START(t3);
+  if (a_level > 0 && a_interpGhost) {
+    m_amr->interpGhost(scratch, *a_data[a_level - 1], a_level, a_data.getRealm(), m_plasmaPhase);
+  }
+  CH_STOP(t3);
+
+  CH_START(t4);
+  if (a_interpToCentroids) {
+    m_amr->interpToCentroids(scratch, a_data.getRealm(), m_plasmaPhase, a_level);
+  }
+  CH_STOP(t4);
+
+  DataOps::setCoveredValue(scratch, 0.0);
+
+  CH_START(t5);
+  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, a_data.getRealm(), dstInterv, srcInterv);
+  CH_STOP(t5);
+
+  a_comp += numComp;
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::writeNumberOfParticlesPerPatch(LevelData<EBCellFAB>& a_output,
+                                                          int&                  a_icomp,
+                                                          const std::string     a_outputRealm,
+                                                          const int             a_level) const noexcept
 {
   CH_TIME("ItoKMCStepper::writeNumberOfParticlesPerPatch");
   if (m_verbosity > 5) {
     pout() << m_name + "::writeNumberOfParticlesPerPatch" << endl;
   }
 
-  DataOps::setValue(m_particleScratch1, 0.0);
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
+  DataOps::setValue(*m_particleScratch1[a_level], 0.0, a_icomp);
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     const ParticleContainer<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk);
@@ -941,7 +1076,13 @@ ItoKMCStepper<I, C, R, F>::writeNumberOfParticlesPerPatch(EBAMRCellData& a_outpu
     }
   }
 
-  a_output.copy(Interval(0, 0), m_particleScratch1, Interval(a_icomp, a_icomp));
+  m_amr->copyData(a_output,
+                  *m_particleScratch1[a_level],
+                  a_level,
+                  a_outputRealm,
+                  m_particleRealm,
+                  Interval(a_icomp, a_icomp),
+                  Interval(0, 0));
 
   a_icomp += 1;
 }
@@ -1395,56 +1536,6 @@ ItoKMCStepper<I, C, R, F>::postRegrid() noexcept
 }
 
 template <typename I, typename C, typename R, typename F>
-int
-ItoKMCStepper<I, C, R, F>::getNumberOfPlotVariables() const noexcept
-{
-  CH_TIME("ItoKMCStepper::getNumberOfPlotVariables");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getNumberOfPlotVariables" << endl;
-  }
-
-  int numComp = 0;
-
-  // Ito solver variables.
-  for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    numComp += solverIt()->getNumberOfPlotVariables();
-  }
-
-  // Cdr solver variables
-  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    numComp += solverIt()->getNumberOfPlotVariables();
-  }
-
-  // RTE solver variables.
-  for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-    numComp += solverIt()->getNumberOfPlotVariables();
-  }
-
-  // Field solver variables.
-  numComp += m_fieldSolver->getNumberOfPlotVariables();
-
-  // Surface charge solver variables.
-  numComp += m_sigmaSolver->getNumberOfPlotVariables();
-
-  // Conductivity
-  if (m_plotConductivity) {
-    numComp += 1;
-  }
-
-  // Current density.
-  if (m_plotCurrentDensity) {
-    numComp += SpaceDim;
-  }
-
-  // Number of particles per patch
-  if (m_plotParticlesPerPatch) {
-    numComp += 1;
-  }
-
-  return numComp;
-}
-
-template <typename I, typename C, typename R, typename F>
 void
 ItoKMCStepper<I, C, R, F>::setVoltage(const std::function<Real(const Real a_time)>& a_voltage) noexcept
 {
@@ -1552,7 +1643,7 @@ ItoKMCStepper<I, C, R, F>::computeSpaceChargeDensity(MFAMRCellData&             
     const int                        Z       = species->getChargeNumber();
 
     if (Z != 0) {
-      m_fluidScratch1.copy(*a_itoDensities[idx]);
+      m_amr->copyData(m_fluidScratch1, *a_itoDensities[idx]);
 
       DataOps::incr(rhoPhase, m_fluidScratch1, 1.0 * Z);
     }
@@ -1614,7 +1705,7 @@ ItoKMCStepper<I, C, R, F>::computeConductivityCell(EBAMRCellData&               
       solver->depositConductivity(m_particleScratch1, *a_particles[idx]);
 
       // Add to the fluid realm.
-      m_fluidScratch1.copy(m_particleScratch1);
+      m_amr->copyData(m_fluidScratch1, m_particleScratch1);
       DataOps::incr(a_conductivity, m_fluidScratch1, 1.0 * std::abs(Z));
     }
   }
@@ -1662,7 +1753,7 @@ ItoKMCStepper<I, C, R, F>::computeDensityGradients() noexcept
     const int idx = it.index();
 
     // Update ghost cells and coarsenings. Then compute the gradient.
-    m_fluidPhiIto[idx].copy(solver->getPhi());
+    m_amr->copyData(m_fluidPhiIto[idx], solver->getPhi());
 
     m_amr->arithmeticAverage(m_fluidPhiIto[idx], m_fluidRealm, m_plasmaPhase);
     m_amr->interpGhostPwl(m_fluidPhiIto[idx], m_fluidRealm, m_plasmaPhase);
@@ -1677,7 +1768,7 @@ ItoKMCStepper<I, C, R, F>::computeDensityGradients() noexcept
     const int idx = it.index();
 
     // Update ghost cells and coarsenings. Then compute the gradient.
-    m_fluidScratch1.copy(solver->getPhi());
+    m_amr->copyData(m_fluidScratch1, solver->getPhi());
 
     m_amr->arithmeticAverage(m_fluidScratch1, m_fluidRealm, m_plasmaPhase);
     m_amr->interpGhostPwl(m_fluidScratch1, m_fluidRealm, m_plasmaPhase);
@@ -1763,13 +1854,13 @@ ItoKMCStepper<I, C, R, F>::solvePoisson() noexcept
   m_amr->alias(E, m_plasmaPhase, m_fieldSolver->getElectricField());
 
   // Fluid realm
-  m_electricFieldFluid.copy(E);
+  m_amr->copyData(m_electricFieldFluid, E);
   m_amr->conservativeAverage(m_electricFieldFluid, m_fluidRealm, m_plasmaPhase);
   m_amr->interpGhostPwl(m_electricFieldFluid, m_fluidRealm, m_plasmaPhase);
   m_amr->interpToCentroids(m_electricFieldFluid, m_fluidRealm, m_plasmaPhase);
 
   // Particle realm
-  m_electricFieldParticle.copy(E);
+  m_amr->copyData(m_electricFieldParticle, E);
   m_amr->conservativeAverage(m_electricFieldParticle, m_particleRealm, m_plasmaPhase);
   m_amr->interpGhostPwl(m_electricFieldParticle, m_particleRealm, m_plasmaPhase);
   m_amr->interpToCentroids(m_electricFieldParticle, m_particleRealm, m_plasmaPhase);
@@ -2449,7 +2540,7 @@ ItoKMCStepper<I, C, R, F>::setItoVelocityFunctions() noexcept
 
     if (solver->isMobile() && Z != 0) {
       EBAMRCellData& velocityFunction = solver->getVelocityFunction();
-      velocityFunction.copy(m_electricFieldParticle);
+      m_amr->copyData(velocityFunction, m_electricFieldParticle);
 
       const int Z = species->getChargeNumber();
 
@@ -2480,7 +2571,7 @@ ItoKMCStepper<I, C, R, F>::setCdrVelocityFunctions() noexcept
 
     if (solver->isMobile() && Z != 0) {
       EBAMRCellData& velocity = solver->getCellCenteredVelocity();
-      velocity.copy(m_electricFieldFluid);
+      m_amr->copyData(velocity, m_electricFieldFluid);
 
       const int Z = species->getChargeNumber();
 
@@ -2615,8 +2706,7 @@ ItoKMCStepper<I, C, R, F>::computeMobilities(Vector<EBAMRCellData*>& a_itoMobili
     if (solver->isMobile()) {
       const int idx = solverIt.index();
 
-      a_itoMobilities[idx]->copy(fluidScratchMobilities[idx]);
-
+      m_amr->copyData(*a_itoMobilities[idx], fluidScratchMobilities[idx]);
       m_amr->conservativeAverage(*a_itoMobilities[idx], m_particleRealm, m_plasmaPhase);
       m_amr->interpGhostPwl(*a_itoMobilities[idx], m_particleRealm, m_plasmaPhase);
 
@@ -2845,8 +2935,7 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<EBAMRCellData*>& 
     if (solver->isDiffusive()) {
       const int idx = solverIt.index();
 
-      a_itoDiffusionCoefficients[idx]->copy(fluidScratchDiffusion[idx]);
-
+      m_amr->copyData(*a_itoDiffusionCoefficients[idx], fluidScratchDiffusion[idx]);
       m_amr->conservativeAverage(*a_itoDiffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);
       m_amr->interpGhostPwl(*a_itoDiffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);
 
@@ -3489,7 +3578,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
     const Interval srcInterv(0, numItoSpecies - 1);
     const Interval dstInterv(0, numItoSpecies - 1);
 
-    m_fluidPPC.copy(srcInterv, m_particleItoPPC, dstInterv);
+    m_amr->copyData(m_fluidPPC, m_particleItoPPC, dstInterv, srcInterv);
 
     DataOps::copy(m_particleOldItoPPC, m_particleItoPPC);
   }
@@ -3499,7 +3588,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
     const Interval srcInterv(0, numCdrSpecies - 1);
     const Interval dstInterv(numItoSpecies, numItoSpecies + numCdrSpecies - 1);
 
-    m_fluidPPC.copy(srcInterv, m_fluidCdrPPC, dstInterv);
+    m_amr->copyData(m_fluidPPC, m_fluidCdrPPC, dstInterv, srcInterv);
 
     DataOps::copy(m_fluidOldCdrPPC, m_fluidCdrPPC);
   }
@@ -3518,16 +3607,16 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
     const Interval srcInterv(0, numItoSpecies - 1);
     const Interval dstInterv(0, numItoSpecies - 1);
 
-    m_particleItoPPC.copy(srcInterv, m_fluidPPC, dstInterv);
+    m_amr->copyData(m_particleItoPPC, m_fluidPPC, dstInterv, srcInterv);
   }
   if (numCdrSpecies > 0) {
     const Interval srcInterv(numItoSpecies, numItoSpecies + numCdrSpecies - 1);
     const Interval dstInterv(0, numCdrSpecies - 1);
 
-    m_fluidCdrPPC.copy(srcInterv, m_fluidPPC, dstInterv);
+    m_amr->copyData(m_fluidCdrPPC, m_fluidPPC, dstInterv, srcInterv);
   }
   if (numPhotonSpecies > 0) {
-    m_particleYPC.copy(m_fluidYPC);
+    m_amr->copyData(m_particleYPC, m_fluidYPC);
   }
 
   // If we have photoionization reactions and CDR solvers we need to put the resulting particles on the mesh first,
@@ -3554,7 +3643,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
                                                                    DepositionType::NGP,
                                                                    CoarseFineDeposition::Halo);
 
-    m_fluidScratch1.copy(m_particleScratch1);
+    m_amr->copyData(m_fluidScratch1, m_particleScratch1);
     DataOps::volumeScale(m_fluidScratch1, m_amr->getDx());
 
     EBAMRCellData fluidCdrPPC = m_amr->slice(m_fluidCdrPPC, Interval(i, i));
@@ -4312,7 +4401,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(const Real a_dt) noexcept
     if (solver->isMobile()) {
       solver->extrapolateAdvectiveFluxToEB(tmp);
 
-      extrapFlux.copy(tmp);
+      m_amr->copyData(extrapFlux, tmp);
     }
     else {
       DataOps::setValue(extrapFlux, 0.0);
@@ -4571,7 +4660,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(const Real a_dt) noexcept
 
     EBAMRIVData& ebFlux = solver->getEbFlux();
 
-    ebFlux.copy(m_cdrFluxes[idx]);
+    m_amr->copyData(ebFlux, m_cdrFluxes[idx]);
 
     m_amr->arithmeticAverage(ebFlux, m_fluidRealm, m_plasmaPhase);
 
@@ -4634,7 +4723,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
                                                                  m_plasmaPhase,
                                                                  *a_primaryParticles[idx]);
 
-      m_fluidScratchEB.copy(m_particleScratchEB);
+      m_amr->copyData(m_fluidScratchEB, m_particleScratchEB);
       DataOps::incr(a_surfaceChargeDensity, m_fluidScratchEB, 1.0 * Z * Units::Qe);
 
       // Subtract charge from secondary particles
@@ -4643,7 +4732,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
                                                                  m_plasmaPhase,
                                                                  *a_secondaryParticles[idx]);
 
-      m_fluidScratchEB.copy(m_particleScratchEB);
+      m_amr->copyData(m_fluidScratchEB, m_particleScratchEB);
       DataOps::incr(a_surfaceChargeDensity, m_fluidScratchEB, -1.0 * Z * Units::Qe);
     }
 
@@ -4731,7 +4820,7 @@ ItoKMCStepper<I, C, R, F>::computePhysicsDt(const EBAMRCellData& a_electricField
     const Interval srcInterv(0, numItoSpecies - 1);
     const Interval dstInterv(0, numItoSpecies - 1);
 
-    m_fluidPPC.copy(srcInterv, m_particleItoPPC, dstInterv);
+    m_amr->copyData(m_fluidPPC, m_particleItoPPC, dstInterv, srcInterv);
   }
   if (numCdrSpecies > 0) {
     this->computeReactiveCdrParticlesPerCell(m_fluidCdrPPC);
@@ -4739,7 +4828,7 @@ ItoKMCStepper<I, C, R, F>::computePhysicsDt(const EBAMRCellData& a_electricField
     const Interval srcInterv(0, numCdrSpecies - 1);
     const Interval dstInterv(numItoSpecies, numItoSpecies + numCdrSpecies - 1);
 
-    m_fluidPPC.copy(srcInterv, m_fluidCdrPPC, dstInterv);
+    m_amr->copyData(m_fluidPPC, m_fluidCdrPPC, dstInterv, srcInterv);
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -5122,17 +5211,16 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
   DataOps::setValue(totalPPC, 0.0);
   DataOps::setValue(speciesPPC, 0.0);
 
-  // 2. EBFineInterp is not a part of the registry for ItoSolver so we just define it here ourselves. Note that
+  // 2. EBCoarseToFineInterp is not a part of the registry for ItoSolver so we just define it here ourselves. Note that
   // it is stored on the same level that we interpolate to.
-  Vector<RefCountedPtr<EBFineInterp>> interpOp(1 + a_finestLevel);
+  Vector<RefCountedPtr<EBCoarseToFineInterp>> interpOp(1 + a_finestLevel);
   for (int lvl = 1; lvl <= a_finestLevel; lvl++) {
     const EBLevelGrid& eblgFine = *m_amr->getEBLevelGrid(m_particleRealm, m_plasmaPhase)[lvl];
+    const EBLevelGrid& eblgCoFi = *m_amr->getEBLevelGridCoFi(m_particleRealm, m_plasmaPhase)[lvl - 1];
     const EBLevelGrid& eblgCoar = *m_amr->getEBLevelGrid(m_particleRealm, m_plasmaPhase)[lvl - 1];
     const int          refRat   = m_amr->getRefinementRatios()[lvl - 1];
-    const int          nComp    = 1;
 
-    interpOp[lvl] = RefCountedPtr<EBFineInterp>(
-      new EBFineInterp(eblgFine, eblgCoar, refRat, nComp, eblgFine.getEBIS()));
+    interpOp[lvl] = RefCountedPtr<EBCoarseToFineInterp>(new EBCoarseToFineInterp(eblgFine, eblgCoFi, eblgCoar, refRat));
   }
 
   // 3. Go through each solver and figure out the number of particles on the new grids. Add
@@ -5148,9 +5236,12 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
 
     // These levels have changed.
     for (int lvl = std::max(1, a_lmin); lvl <= a_finestLevel; lvl++) {
-      RefCountedPtr<EBFineInterp>& interpolator = interpOp[lvl];
+      RefCountedPtr<EBCoarseToFineInterp>& interpolator = interpOp[lvl];
 
-      interpolator->regridNoSlopes(*speciesPPC[lvl], *speciesPPC[lvl - 1], Interval(0, 0));
+      interpolator->interpolate(*speciesPPC[lvl],
+                                *speciesPPC[lvl - 1],
+                                Interval(0, 0),
+                                EBCoarseToFineInterp::Type::ConservativePWC);
 
       // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
       // to pollute the solution with interpolation there since we already have valid data.
@@ -5337,7 +5428,7 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
   // Electrostatic potential on appropriate phase. This is defined on the fluid realm
   // but we need it on the particle realm.
   const EBAMRCellData potentialPhase = m_amr->alias(m_plasmaPhase, m_fieldSolver->getPotential());
-  m_particleScratch1.copy(potentialPhase);
+  m_amr->copyData(m_particleScratch1, potentialPhase);
 
   m_amr->conservativeAverage(m_particleScratch1, m_particleRealm, m_plasmaPhase);
   m_amr->interpGhost(m_particleScratch1, m_particleRealm, m_plasmaPhase);
@@ -5445,7 +5536,7 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
                                                                              solver->getCoarseFineDeposition());
 
       // Copy data back onto the fluid realm.
-      m_fluidScratch1.copy(m_particleScratch1);
+      m_amr->copyData(m_fluidScratch1, m_particleScratch1);
       DataOps::scale(m_fluidScratch1, Z * Units::Qe / a_dt);
       DataOps::plus(m_EdotJ, m_fluidScratch1, 0, idx, 1);
     }

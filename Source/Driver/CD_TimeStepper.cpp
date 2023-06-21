@@ -132,4 +132,8 @@ TimeStepper::writeCheckpointHeader(HDF5HeaderData& a_header) const
 {}
 #endif
 
+void
+TimeStepper::prePlot()
+{}
+
 #include <CD_NamespaceFooter.H>

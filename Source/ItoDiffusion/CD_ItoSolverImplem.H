@@ -80,6 +80,74 @@ ItoSolver::depositParticles(EBAMRCellData& a_phi, ParticleContainer<P>& a_partic
   this->depositParticles<P, particleScalarField>(a_phi, a_particles, m_deposition, m_coarseFineDeposition);
 }
 
+template <class P, const Real& (P ::*particleScalarField)() const>
+void
+ItoSolver::depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
+                               const ParticleContainer<P>& a_particles,
+                               const int                   a_level) const noexcept
+{
+  CH_TIME("ItoSolver::depositParticles(NGP)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::depositParticles(NGP)" << endl;
+  }
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
+  const DisjointBoxLayout& dbl    = m_amr->getGrids(a_particles.getRealm())[a_level];
+  const EBISLayout&        ebisl  = m_amr->getEBISLayout(a_particles.getRealm(), m_phase)[a_level];
+  const Real               dx     = m_amr->getDx()[a_level];
+  const RealVect           probLo = m_amr->getProbLo();
+
+  CH_assert(a_output.disjointBoxLayout() == dbl);
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const Box      cellBox = dbl[dit()];
+    const EBISBox& ebisbox = ebisl[dit()];
+
+    EBParticleMesh particleMesh(cellBox, ebisbox, dx * RealVect::Unit, probLo);
+
+    EBCellFAB&     output    = a_output[dit()];
+    const List<P>& particles = a_particles[a_level][dit()].listItems();
+
+    particleMesh.deposit<P, particleScalarField>(particles, output, DepositionType::NGP, true);
+  }
+}
+
+template <class P, Real (P ::*particleScalarField)() const>
+void
+ItoSolver::depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
+                               const ParticleContainer<P>& a_particles,
+                               const int                   a_level) const noexcept
+{
+  CH_TIME("ItoSolver::depositParticles(NGP)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::depositParticles(NGP)" << endl;
+  }
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
+  const DisjointBoxLayout& dbl    = m_amr->getGrids(a_particles.getRealm())[a_level];
+  const EBISLayout&        ebisl  = m_amr->getEBISLayout(a_particles.getRealm(), m_phase)[a_level];
+  const Real               dx     = m_amr->getDx()[a_level];
+  const RealVect           probLo = m_amr->getProbLo();
+
+  CH_assert(a_output.disjointBoxLayout() == dbl);
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const Box      cellBox = dbl[dit()];
+    const EBISBox& ebisbox = ebisl[dit()];
+
+    EBParticleMesh particleMesh(cellBox, ebisbox, dx * RealVect::Unit, probLo);
+
+    EBCellFAB&     output    = a_output[dit()];
+    const List<P>& particles = a_particles[a_level][dit()].listItems();
+
+    particleMesh.deposit<P, particleScalarField>(particles, output, DepositionType::NGP, true);
+  }
+}
+
 template <class P, const Real& (P::*particleScalarField)() const>
 void
 ItoSolver::depositParticles(EBAMRCellData&             a_phi,

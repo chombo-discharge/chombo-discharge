@@ -19,6 +19,145 @@
 
 template <typename T>
 void
+AmrMesh::copyData(EBAMRData<T>&       a_dst,
+                  const EBAMRData<T>& a_src,
+                  const CopyStrategy& a_toRegion,
+                  const CopyStrategy& a_fromRegion) const noexcept
+{
+  CH_TIME("AmrMesh::copyData(EBAMRData, simple)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::copyData(EBAMRData, simple)" << endl;
+  }
+
+  const int      nComp    = a_dst[0]->nComp();
+  const Interval dstComps = Interval(0, nComp - 1);
+  const Interval srcComps = Interval(0, nComp - 1);
+
+  const std::string toRealm   = a_dst.getRealm();
+  const std::string fromRealm = a_src.getRealm();
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    CH_assert(!(a_dst[lvl].isNull()));
+    CH_assert(!(a_src[lvl].isNull()));
+
+    this->copyData(*a_dst[lvl], *a_src[lvl], lvl, toRealm, fromRealm, dstComps, srcComps, a_toRegion, a_fromRegion);
+  }
+}
+
+template <typename T>
+void
+AmrMesh::copyData(EBAMRData<T>&       a_dst,
+                  const EBAMRData<T>& a_src,
+                  const Interval&     a_dstComps,
+                  const Interval&     a_srcComps,
+                  const CopyStrategy& a_toRegion,
+                  const CopyStrategy& a_fromRegion) const noexcept
+{
+  CH_TIME("AmrMesh::copyData(EBAMRData, full)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::copyData(EBAMRData, full)" << endl;
+  }
+
+  const std::string toRealm   = a_dst.getRealm();
+  const std::string fromRealm = a_src.getRealm();
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    CH_assert(!(a_dst[lvl].isNull()));
+    CH_assert(!(a_src[lvl].isNull()));
+
+    this->copyData(*a_dst[lvl], *a_src[lvl], lvl, toRealm, fromRealm, a_dstComps, a_srcComps, a_toRegion, a_fromRegion);
+  }
+}
+
+template <typename T>
+void
+AmrMesh::copyData(LevelData<T>&       a_dst,
+                  const LevelData<T>& a_src,
+                  const int           a_level,
+                  const std::string   a_toRealm,
+                  const std::string   a_fromRealm,
+                  const CopyStrategy& a_toRegion,
+                  const CopyStrategy& a_fromRegion) const noexcept
+{
+  CH_TIME("AmrMesh::copyData(LD<T>_full)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::copyData(LD<T>_full)" << endl;
+  }
+
+  const Interval dstComps = Interval(0, a_dst.nComp() - 1);
+  const Interval srcComps = Interval(0, a_src.nComp() - 1);
+
+  this->copyData(a_dst, a_src, a_level, a_toRealm, a_fromRealm, dstComps, srcComps, a_toRegion, a_fromRegion);
+}
+
+template <typename T>
+void
+AmrMesh::copyData(LevelData<T>&       a_dst,
+                  const LevelData<T>& a_src,
+                  const int           a_level,
+                  const std::string   a_toRealm,
+                  const std::string   a_fromRealm,
+                  const Interval&     a_dstComps,
+                  const Interval&     a_srcComps,
+                  const CopyStrategy& a_toRegion,
+                  const CopyStrategy& a_fromRegion) const noexcept
+{
+  CH_TIME("AmrMesh::copyData(LD<T>_full)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::copyData(LD<T>_full)" << endl;
+  }
+
+  CH_assert(a_dstComps.size() == a_srcComps.size());
+  CH_assert(a_dst.nComp() > a_dstComps.end());
+  CH_assert(a_src.nComp() > a_srcComps.end());
+
+  if (a_toRealm != a_fromRealm) {
+    const auto id = std::make_pair(a_fromRealm, a_toRealm);
+
+    if (a_toRegion == CopyStrategy::ValidGhost) {
+      CH_assert(a_dst.ghostVect() == m_numGhostCells * IntVect::Unit);
+    }
+    if (a_fromRegion == CopyStrategy::ValidGhost) {
+      CH_assert(a_src.ghostVect() == m_numGhostCells * IntVect::Unit);
+    }
+
+    Copier copier;
+
+    if (a_fromRegion == CopyStrategy::Valid) {
+      if (a_toRegion == CopyStrategy::Valid) {
+        copier = m_validToValidRealmCopiers.at(id)[a_level];
+      }
+      else if (a_toRegion == CopyStrategy::ValidGhost) {
+        copier = m_validToValidGhostRealmCopiers.at(id)[a_level];
+      }
+      else {
+        MayDay::Abort("AmrMesh::copyData - logic bust 1");
+      }
+    }
+    else if (a_fromRegion == CopyStrategy::ValidGhost) {
+      if (a_toRegion == CopyStrategy::Valid) {
+        copier = m_validGhostToValidRealmCopiers.at(id)[a_level];
+      }
+      else if (a_toRegion == CopyStrategy::ValidGhost) {
+        copier = m_validGhostToValidGhostRealmCopiers.at(id)[a_level];
+      }
+      else {
+        MayDay::Abort("AmrMesh::copyData - logic bust 2");
+      }
+    }
+    else {
+      MayDay::Abort("AmrMesh::copyData - logic bust 3");
+    }
+
+    a_src.copyTo(a_srcComps, a_dst, a_dstComps, copier);
+  }
+  else {
+    a_src.localCopyTo(a_srcComps, a_dst, a_dstComps);
+  }
+}
+
+template <typename T>
+void
 AmrMesh::deallocate(Vector<T*>& a_data) const
 {
   CH_TIME("AmrMesh::deallocate(Vector<T*>)");
@@ -851,10 +990,11 @@ AmrMesh::transferIrregularParticles(ParticleContainer<P>&         a_dstParticles
         const IntVect iv = ParticleOps::getParticleCellIndex(p.position(), probLo, dx);
 
         if (!(cellBox.contains(iv))) {
-          MayDay::Error("CD_AmrMeshImplem.H in routine 'transferIrregularParticles' - particle not in box!");
+          MayDay::Warning("CD_AmrMeshImplem.H in routine 'transferIrregularParticles' - particle not in box!");
+
+          ++lit;
         }
 
-        // If the particle is inside any vof, we keep it.
         if (ebisbox.isIrregular(iv)) {
           bool insideAnyVoF = false;
 

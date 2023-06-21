@@ -55,7 +55,7 @@ public:
   virtual void
   coarseFineInterp(LevelData<EBCellFAB>&       a_phiFine,
                    const LevelData<EBCellFAB>& a_phiCoar,
-                   const Interval              a_variables) = 0;
+                   const Interval              a_variables) const = 0;
 
   /*!
     @brief Do homogeneous interpolation

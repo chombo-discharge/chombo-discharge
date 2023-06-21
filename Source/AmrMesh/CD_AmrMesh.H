@@ -16,13 +16,6 @@
 
 // Chombo includes
 #include <DisjointBoxLayout.H>
-#include <EBFluxRegister.H>
-#include <EBLevelRedist.H>
-#include <EBCoarToFineRedist.H>
-#include <EBMGInterp.H>
-#include <EBCoarToCoarRedist.H>
-#include <EBFineToCoarRedist.H>
-#include <EBPWLFineInterp.H>
 #include <ProblemDomain.H>
 
 // Our includes
@@ -33,11 +26,13 @@
 #include <CD_IrregAmrStencil.H>
 #include <CD_LoadBalancing.H>
 #include <CD_MFLevelGrid.H>
+#include <CD_EBReflux.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_Realm.H>
+#include <CD_CopyStrategy.H>
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
 
@@ -68,7 +63,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~AmrMesh();
+  virtual ~AmrMesh();
 
   /*!
     @brief Disallowed copy assignment
@@ -83,6 +78,112 @@ public:
   */
   AmrMesh&
   operator=(const AmrMesh&& a_other) = delete;
+
+  /*!
+    @brief Method for copying from a source container to a destination container. User supplies information
+    about from/to regions. 
+    @param[inout] a_dst        Destination data 
+    @param[in]    a_src        Source data
+    @param[in]    a_toRegion   Region we copy into
+    @param[in]    a_fromRegion Region we copy from
+    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
+    @note This routine will not work if copying between grids before/after regrids. 
+  */
+  template <typename T>
+  void
+  copyData(EBAMRData<T>&       a_dst,
+           const EBAMRData<T>& a_src,
+           const CopyStrategy& a_toRegion   = CopyStrategy::Valid,
+           const CopyStrategy& a_fromRegion = CopyStrategy::Valid) const noexcept;
+
+  /*!
+    @brief Method for copying from a source container to a destination container. User supplies information
+    about from/to regions. 
+    @param[inout] a_dst        Destination data 
+    @param[in]    a_src        Source data
+    @param[in]    a_level      Grid level
+    @param[in]    a_fromRegion Region we copy from
+    @param[in]    a_toRegion   Region we copy into
+    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
+    @note This routine will not work if copying between grids before/after regrids. 
+  */
+  template <typename T>
+  void
+  copyData(LevelData<T>&       a_dst,
+           const LevelData<T>& a_src,
+           const int           a_level,
+           const CopyStrategy& a_toRegion   = CopyStrategy::Valid,
+           const CopyStrategy& a_fromRegion = CopyStrategy::Valid) const noexcept;
+
+  /*!
+    @brief Method for copying from a source container to a destination container. User supplies information
+    @param[inout] a_dst        Destination data 
+    @param[in]    a_src        Source data
+    @param[in]    a_dstComps   Destination components
+    @param[in]    a_srcComps   Source components
+    @param[in]    a_toRegion   Region we copy into
+    @param[in]    a_fromRegion Region we copy from
+    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
+    @note This routine will not work if copying between grids before/after regrids. 
+  */
+  template <typename T>
+  void
+  copyData(EBAMRData<T>&       a_dst,
+           const EBAMRData<T>& a_src,
+           const Interval&     a_dstComps,
+           const Interval&     a_srcComps,
+           const CopyStrategy& a_toRegion   = CopyStrategy::Valid,
+           const CopyStrategy& a_fromRegion = CopyStrategy::Valid) const noexcept;
+
+  /*!
+    @brief Method for copying from a source container to a destination container. User supplies information
+    about from/to regions. 
+    @param[inout] a_dst        Destination data 
+    @param[in]    a_src        Source data
+    @param[in]    a_level      Grid level
+    @param[in]    a_toRealm    Destination realm
+    @param[in]    a_fromRealm  Source realm
+    @param[in]    a_fromRegion Region we copy from
+    @param[in]    a_toRegion   Region we copy into
+    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
+    @note This routine will not work if copying between grids before/after regrids. 
+  */
+  template <typename T>
+  void
+  copyData(LevelData<T>&       a_dst,
+           const LevelData<T>& a_src,
+           const int           a_level,
+           const std::string   a_toRealm,
+           const std::string   a_fromRealm,
+           const CopyStrategy& a_toRegion   = CopyStrategy::Valid,
+           const CopyStrategy& a_fromRegion = CopyStrategy::Valid) const noexcept;
+
+  /*!
+    @brief Method for copying from a source container to a destination container. User supplies information
+    about from/to regions. 
+    @param[inout] a_dst        Destination data 
+    @param[in]    a_src        Source data
+    @param[in]    a_level      Grid level
+    @param[in]    a_toRealm    Destination realm
+    @param[in]    a_fromRealm  Source realm
+    @param[in]    a_dstComps   Destination components
+    @param[in]    a_srcComps   Source components
+    @param[in]    a_fromRegion Region we copy from
+    @param[in]    a_toRegion   Region we copy into
+    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
+    @note This routine will not work if copying between grids before/after regrids. 
+  */
+  template <typename T>
+  void
+  copyData(LevelData<T>&       a_dst,
+           const LevelData<T>& a_src,
+           const int           a_level,
+           const std::string   a_toRealm,
+           const std::string   a_fromRealm,
+           const Interval&     a_dstComps,
+           const Interval&     a_srcComps,
+           const CopyStrategy& a_toRegion   = CopyStrategy::Valid,
+           const CopyStrategy& a_fromRegion = CopyStrategy::Valid) const noexcept;
 
   /*!
     @brief Deallocate data. 
@@ -426,6 +527,24 @@ public:
   allocate(EBAMRCellData&           a_data,
            const std::string        a_realm,
            const phase::which_phase a_phase,
+           const int                a_nComp,
+           const int                a_nGhost = -1) const;
+
+  /*!
+    @brief Allocate data on specific level
+    @param[out] a_data   Data holder to be allocated
+    @param[in]  a_realm  Realm of the name where the data will be allocated. 
+    @param[in]  a_phase  Phase (gas or solid)
+    @param[in]  a_level  AMR level
+    @param[in]  a_nComp  Number of components in a_data
+    @param[in]  a_nGhost Number of ghost cells for a_data
+    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
+  */
+  void
+  allocate(LevelData<EBCellFAB>&    a_data,
+           const std::string        a_realm,
+           const phase::which_phase a_phase,
+           const int                a_level,
            const int                a_nComp,
            const int                a_nGhost = -1) const;
 
@@ -1288,15 +1407,15 @@ public:
     @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed). 
     @param[in]  a_oldFinestLevel Previous finest level.
     @param[in]  a_newFinestLevel New finest level. 
-    @param[in]  a_useSlopes      If true, use slopes when regridding the data. 
+    @param[in]  a_type Interpolation type
   */
   void
-  interpToNewGrids(MFAMRCellData&       a_newData,
-                   const MFAMRCellData& a_oldData,
-                   const int            a_lmin,
-                   const int            a_oldFinestLevel,
-                   const int            a_newFinestLevel,
-                   const bool           a_useSlopes);
+  interpToNewGrids(MFAMRCellData&                   a_newData,
+                   const MFAMRCellData&             a_oldData,
+                   const int                        a_lmin,
+                   const int                        a_oldFinestLevel,
+                   const int                        a_newFinestLevel,
+                   const EBCoarseToFineInterp::Type a_type);
 
   /*!
     @brief Interpolate data to new grids
@@ -1308,16 +1427,16 @@ public:
     @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed). 
     @param[in]  a_oldFinestLevel Previous finest level.
     @param[in]  a_newFinestLevel New finest level. 
-    @param[in]  a_useSlopes      If true, use slopes when regridding the data. 
+    @param[in]  a_type Interpolation type
   */
   void
-  interpToNewGrids(EBAMRCellData&           a_newData,
-                   const EBAMRCellData&     a_oldData,
-                   const phase::which_phase a_phase,
-                   const int                a_lmin,
-                   const int                a_oldFinestLevel,
-                   const int                a_newFinestLevel,
-                   const bool               a_useSlopes);
+  interpToNewGrids(EBAMRCellData&                   a_newData,
+                   const EBAMRCellData&             a_oldData,
+                   const phase::which_phase         a_phase,
+                   const int                        a_lmin,
+                   const int                        a_oldFinestLevel,
+                   const int                        a_newFinestLevel,
+                   const EBCoarseToFineInterp::Type a_type);
 
   /*!
     @brief Interpolate data to new grids
@@ -1329,16 +1448,16 @@ public:
     @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed). 
     @param[in]  a_oldFinestLevel Previous finest level.
     @param[in]  a_newFinestLevel New finest level. 
-    @param[in]  a_conservative   If true, do conservative regridding. 
+    @param[in]  a_type           Interpolation type
   */
   void
-  interpToNewGrids(EBAMRIVData&             a_newData,
-                   const EBAMRIVData&       a_oldData,
-                   const phase::which_phase a_phase,
-                   const int                a_lmin,
-                   const int                a_oldFinestLevel,
-                   const int                a_newFinestLevel,
-                   const bool               a_conservative);
+  interpToNewGrids(EBAMRIVData&                     a_newData,
+                   const EBAMRIVData&               a_oldData,
+                   const phase::which_phase         a_phase,
+                   const int                        a_lmin,
+                   const int                        a_oldFinestLevel,
+                   const int                        a_newFinestLevel,
+                   const EBCoarseToFineInterp::Type a_type);
 
   /*!
     @brief Regrid particle to new grids. 
@@ -1361,6 +1480,19 @@ public:
   interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
+    @brief Interpolate data to centroids
+    @param[inout] a_data  Data to be interpolated
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+    @param[in]    a_level Grid level
+  */
+  void
+  interpToCentroids(LevelData<EBCellFAB>&    a_data,
+                    const std::string        a_realm,
+                    const phase::which_phase a_phase,
+                    const int                a_level) const;
+
+  /*!
     @brief Sets multifluid index space. 
     @param[in] a_multiFluidIndexSpace Multifluid index space wrapper. 
   */
@@ -1374,6 +1506,12 @@ public:
   */
   void
   setBaseImplicitFunction(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseIF);
+
+  /*!
+    @brief Run pre-regrid operations. 
+  */
+  void
+  preRegrid();
 
   /*!
     @brief Regrid AMR. This versions generates the grids and Realms, but not the operator. 
@@ -1396,6 +1534,12 @@ public:
               const Vector<Vector<int>>& a_procs,
               const Vector<Vector<Box>>& a_boxes,
               const int                  a_lmin);
+
+  /*!
+    @brief Run post-regrid operations. 
+  */
+  void
+  postRegrid();
 
   /*!
     @brief Set grids from boxes and computational loads.
@@ -1583,6 +1727,14 @@ public:
   getEBLevelGrid(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
+    @brief Get the coarsened fine EBLevelGrid for a Realm and phase
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+  */
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGridCoFi(const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
     @brief Get EBISLayouts for a Realm and phase
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
@@ -1603,14 +1755,6 @@ public:
   */
   Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
   getVofIterator(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get neighboring boxes
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>>&
-  getNeighbors(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get levelset function, allocated over a grid for a Realm and phase
@@ -1651,19 +1795,11 @@ public:
   getMultigridInterpolator(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get piecewise linear ghost cell interpolator
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  Vector<RefCountedPtr<AggEBPWLFillPatch>>&
-  getFillPatch(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
     @brief Get interpolator 
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBFineInterp>>&
+  Vector<RefCountedPtr<EBCoarseToFineInterp>>&
   getFineInterp(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
@@ -1671,40 +1807,16 @@ public:
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBFluxRegister>>&
+  Vector<RefCountedPtr<EBReflux>>&
   getFluxRegister(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get redistribution
+    @brief Get the redistribution operators
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBLevelRedist>>&
-  getLevelRedist(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get coar-to-fine redistribution for a Realm and phase
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  Vector<RefCountedPtr<EBCoarToFineRedist>>&
-  getCoarToFineRedist(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get coar-to-coar redistribution objects
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  Vector<RefCountedPtr<EBCoarToCoarRedist>>&
-  getCoarToCoarRedist(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get coar-to-coar redistribution redistribution objects
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  Vector<RefCountedPtr<EBFineToCoarRedist>>&
-  getFineToCoarRedist(const std::string a_realm, const phase::which_phase a_phase) const;
+  Vector<RefCountedPtr<EBRedistribution>>&
+  getRedistributionOp(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get interpolation stencils for going from cell center to cell centroid
@@ -1775,6 +1887,47 @@ protected:
   std::map<phase::which_phase, RefCountedPtr<BaseIF>> m_baseif;
 
   /*!
+    @brief Old grids
+  */
+  std::map<std::string, Vector<DisjointBoxLayout>> m_oldGrids;
+
+  /*!
+    @brief Storage for copiers from the old grids to the new ones
+    @note Defined in the realm regrid routine. Cleared in the postRegrid routine. 
+  */
+  std::map<std::string, Vector<Copier>> m_oldToNewCellCopiers;
+
+  /*!
+    @brief Storage for copiers from the old grids to the new ones
+    @note Defined in the realm regrid routine. Cleared in the postRegrid routine. 
+  */
+  std::map<std::string, Vector<Copier>> m_oldToNewEBCopiers;
+
+  /*!
+    @brief Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm
+    @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
+  */
+  std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validToValidRealmCopiers;
+
+  /*!
+    @brief Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm
+    @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
+  */
+  std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validToValidGhostRealmCopiers;
+
+  /*!
+    @brief Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm
+    @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
+  */
+  std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validGhostToValidRealmCopiers;
+
+  /*!
+    @brief Map for copying between various Realms. First index is the "from" realm and second index is the "to" realm
+    @note This is important at scale when you have > 1M boxes since Copier definitions become costly.
+  */
+  std::map<std::pair<std::string, std::string>, Vector<Copier>> m_validGhostToValidGhostRealmCopiers;
+
+  /*!
     @brief Grid generation method
   */
   GridGenerationMethod m_gridGenerationMethod;
@@ -1838,6 +1991,11 @@ protected:
     @brief Finest level
   */
   int m_finestLevel;
+
+  /*!
+    @brief Finest level before a regrid
+  */
+  int m_oldFinestLevel;
 
   /*!
     @brief Maximum amr depth
@@ -1940,6 +2098,11 @@ protected:
   bool m_hasGrids;
 
   /*!
+    @brief Has regrid copiers or not
+  */
+  bool m_hasRegridCopiers;
+
+  /*!
     @brief Grids
   */
   Vector<DisjointBoxLayout> m_grids;
@@ -1973,7 +2136,13 @@ protected:
     @details This will call the specified grid generation method and fill m_grids with the new grids. 
   */
   void
-  buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
+  buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
+
+  /*!
+    @brief Build copiers for copying between realms
+  */
+  void
+  buildCopiers();
 
   /*!
     @brief Parse the low/high corners of the computational domain. 

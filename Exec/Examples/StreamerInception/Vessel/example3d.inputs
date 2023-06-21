@@ -17,7 +17,7 @@ AmrMesh.max_ebis_box     = 16          # Maximum allowed box size for EBIS gener
 AmrMesh.ref_rat          = 2 2 2 2 2 2 # Refinement ratios (mixed ratios are allowed). 
 AmrMesh.num_ghost        = 2           # Number of ghost cells. 
 AmrMesh.lsf_ghost        = 2           # Number of ghost cells when writing level-set to grid
-AmrMesh.eb_ghost         = 4           # Set number of of ghost cells for EB stuff
+AmrMesh.eb_ghost         = 2           # Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
 AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
@@ -65,7 +65,7 @@ Driver.refine_dielectrics              = 2                # Refine dielectric su
 # ====================================================================================================
 TracerParticleSolver.verbosity     = -1     # Solver verbosity level. 
 TracerParticleSolver.deposition    = ngp    # Deposition method. Must be 'ngp' or 'cic'
-TracerParticleSolver.interpolation = ngp    # Interpolation method. Must be 'ngp' or 'cic'
+TracerParticleSolver.interpolation = cic    # Interpolation method. Must be 'ngp' or 'cic'
 TracerParticleSolver.deposition_cf = halo   # Coarse-fine deposition. Must be interp or halo
 TracerParticleSolver.plot_weight   = true   # Turn on/off plotting of the particle weight.
 TracerParticleSolver.plot_velocity = true   # Turn on/off plotting of the particle velocities.
@@ -89,14 +89,14 @@ FieldSolverMultigrid.kappa_source      = true              # Volume weighted spa
 FieldSolverMultigrid.filter            = 0                 # Number of filterings after Poisson solve
 
 FieldSolverMultigrid.gmg_verbosity     = 10                # GMG verbosity
-FieldSolverMultigrid.gmg_pre_smooth    = 12                # Number of relaxations in downsweep
-FieldSolverMultigrid.gmg_post_smooth   = 12                # Number of relaxations in upsweep
-FieldSolverMultigrid.gmg_bott_smooth   = 12                # Number of at bottom level (before dropping to bottom solver)
+FieldSolverMultigrid.gmg_pre_smooth    = 16                # Number of relaxations in downsweep
+FieldSolverMultigrid.gmg_post_smooth   = 16                # Number of relaxations in upsweep
+FieldSolverMultigrid.gmg_bott_smooth   = 16                # Number of at bottom level (before dropping to bottom solver)
 FieldSolverMultigrid.gmg_min_iter      = 5                 # Minimum number of iterations
 FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2               # Solver hang
-FieldSolverMultigrid.gmg_min_cells     = 16                # Bottom drop
+FieldSolverMultigrid.gmg_min_cells     = 16                 # Bottom drop
 FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2                 # Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight     = 2                 # Boundary condition weights (for least squares)
@@ -163,12 +163,13 @@ Vessel.live_shroom   = false          # Mushroom is live or not
 # ====================================================================================================
 # StreamerInceptionStepper class options
 # ====================================================================================================
-StreamerInceptionStepper.verbosity     = -1                            # Chattiness. 
+StreamerInceptionStepper.verbosity     = -1                            # Chattiness.
+StreamerInceptionStepper.profile       = false
 StreamerInceptionStepper.mode          = transient                     # Mode (stationary or transient)
 StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
 StreamerInceptionStepper.output_file   = report.txt                    # Output file
 StreamerInceptionStepper.K_inception   = 10                            # User-specified inception value
-StreamerInceptionStepper.plt_vars      = K ions Uinc bg_rate detachment poisson alpha eta # Plot variables
+StreamerInceptionStepper.plt_vars      = K ions Uinc bg_rate detachment alpha eta poisson # Plot variables
 
 # Static mode
 StreamerInceptionStepper.voltage_lo    = 10E3                          # Low voltage multiplier

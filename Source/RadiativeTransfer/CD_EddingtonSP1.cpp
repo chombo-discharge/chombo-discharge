@@ -50,8 +50,8 @@ EddingtonSP1::EddingtonSP1() : RtSolver()
   m_dataLocation  = Location::Cell::Center;
   m_regridSlopes  = true;
 
-  this
-    ->setDefaultDomainBcFunctions(); // This fills m_domainBcFunctions with s_defaultDomainBcFunction on every domain side.
+  // This fills m_domainBcFunctions with s_defaultDomainBcFunction on every domain side.
+  this->setDefaultDomainBcFunctions();
 }
 
 EddingtonSP1::~EddingtonSP1() {}
@@ -320,7 +320,6 @@ EddingtonSP1::parseStationary()
   std::string str;
 
   pp.get("stationary", m_stationary);
-  pp.get("use_tga", m_useTGA);
 }
 
 void
@@ -476,15 +475,13 @@ EddingtonSP1::preRegrid(const int a_base, const int a_oldFinestLevel)
     pout() << m_name + "::preRegrid" << endl;
   }
 
-  const int finestLevel = m_amr->getFinestLevel();
-
   m_amr->allocate(m_cachePhi, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_cacheSrc, m_realm, m_phase, m_nComp);
 
-  for (int lvl = 0; lvl <= finestLevel; lvl++) { //
-    m_phi[lvl]->localCopyTo(*m_cachePhi[lvl]);
-    m_source[lvl]->localCopyTo(*m_cacheSrc[lvl]);
-  }
+  m_amr->copyData(m_cachePhi, m_phi);
+  m_amr->copyData(m_cacheSrc, m_source);
+
+  this->deallocate();
 }
 
 void
@@ -501,14 +498,10 @@ EddingtonSP1::allocate()
   m_amr->allocate(m_phi, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_source, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_resid, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_zero, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_scaledSource, m_realm, m_phase, m_nComp);
 
   DataOps::setValue(m_resid, 0.0);
   DataOps::setValue(m_phi, 0.0);
   DataOps::setValue(m_source, 0.0);
-  DataOps::setValue(m_zero, 0.0);
-  DataOps::setValue(m_scaledSource, 0.0);
 
   this->setHelmholtzCoefficients();
 }
@@ -516,12 +509,17 @@ EddingtonSP1::allocate()
 void
 EddingtonSP1::deallocate()
 {
-  m_amr->deallocate(m_helmAco);
-  m_amr->deallocate(m_helmBco);
-  m_amr->deallocate(m_helmBcoIrreg);
-  m_amr->deallocate(m_phi);
-  m_amr->deallocate(m_source);
-  m_amr->deallocate(m_resid);
+  CH_TIME("EddingtonSP1::deallocate");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::deallocate" << endl;
+  }
+
+  m_helmAco.clear();
+  m_helmBco.clear();
+  m_helmBcoIrreg.clear();
+  m_phi.clear();
+  m_source.clear();
+  m_resid.clear();
 }
 
 void
@@ -537,9 +535,12 @@ EddingtonSP1::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_n
   // Allocate storage.
   this->allocate();
 
+  const EBCoarseToFineInterp::Type interpType = m_regridSlopes ? EBCoarseToFineInterp::Type::ConservativeMinMod
+                                                               : EBCoarseToFineInterp::Type::ConservativePWC;
+
   // Regrid phi and source
-  m_amr->interpToNewGrids(m_phi, m_cachePhi, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
-  m_amr->interpToNewGrids(m_source, m_cacheSrc, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
+  m_amr->interpToNewGrids(m_phi, m_cachePhi, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);
+  m_amr->interpToNewGrids(m_source, m_cacheSrc, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);
 
   // Coarsen and update ghost cells.
   m_amr->conservativeAverage(m_phi, m_realm, m_phase);
@@ -548,8 +549,8 @@ EddingtonSP1::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_n
   m_isSolverSetup = false;
 
   // Deallocate the scratch data.
-  m_amr->deallocate(m_cachePhi);
-  m_amr->deallocate(m_cacheSrc);
+  m_cachePhi.clear();
+  m_cacheSrc.clear();
 }
 
 void
@@ -596,42 +597,54 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     this->setupSolver();
   }
 
+  EBAMRCellData zero;
+  EBAMRCellData scaledSource;
+
+  m_amr->allocate(zero, m_realm, m_phase, 1);
+  m_amr->allocate(scaledSource, m_realm, m_phase, 1);
+
   // Modify the source term.  Operator is scaled by kappa and source term might also have to be scaled by kappa
-  DataOps::copy(m_scaledSource, a_source); // Copy source term
-  DataOps::scale(m_scaledSource,
-                 1. /
-                   Units::c); // Source should be scaled by 1./c0 (due to the way we do the EBHelmholtzOp coefficients)
-  if (m_kappaScale) {
-    DataOps::kappaScale(m_scaledSource);
-  }
-
-  // Aliasing, because Chombo is not too smart.
-  Vector<LevelData<EBCellFAB>*> phi;
-  Vector<LevelData<EBCellFAB>*> rhs;
-  Vector<LevelData<EBCellFAB>*> res;
-  Vector<LevelData<EBCellFAB>*> zero;
-
-  m_amr->alias(phi, a_phi);
-  m_amr->alias(rhs, m_scaledSource);
-  m_amr->alias(res, m_resid);
-  m_amr->alias(zero, m_zero);
-
-  const int finestLevel = m_amr->getFinestLevel();
+  // Source should be scaled by 1./c0 (due to the way we do the EBHelmholtzOp coefficients)
+  DataOps::copy(scaledSource, a_source); // Copy source term
+  DataOps::scale(scaledSource, 1. / Units::c);
 
   if (m_stationary) {
-    const Real phiResid  = m_multigridSolver->computeAMRResidual(phi, rhs, finestLevel, 0);  // Incoming residual
-    const Real zeroResid = m_multigridSolver->computeAMRResidual(zero, rhs, finestLevel, 0); // Zero residual
 
-    if (phiResid > zeroResid * m_multigridExitTolerance) { // Residual is too large
+    // If we're doing a stationary solve, we must scale the source term by kappa (unless it's otherwise been done).
+    if (m_kappaScale) {
+      DataOps::kappaScale(scaledSource);
+    }
+
+    // Aliasing, because Chombo is not too smart.
+    Vector<LevelData<EBCellFAB>*> phi;
+    Vector<LevelData<EBCellFAB>*> rhs;
+    Vector<LevelData<EBCellFAB>*> res;
+    Vector<LevelData<EBCellFAB>*> zer;
+
+    m_amr->alias(phi, a_phi);
+    m_amr->alias(rhs, scaledSource);
+    m_amr->alias(res, m_resid);
+    m_amr->alias(zer, zero);
+
+    const int coarsestLevel = 0;
+    const int finestLevel   = m_amr->getFinestLevel();
+
+    // Compute the residual and determine if we must enter multigrid.
+    const Real phiResid  = m_multigridSolver->computeAMRResidual(phi, rhs, finestLevel, coarsestLevel);
+    const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, rhs, finestLevel, coarsestLevel);
+
+    if (phiResid > zeroResid * m_multigridExitTolerance) {
+      // Residual is too large, solve.
       m_multigridSolver->m_convergenceMetric = zeroResid;
-      m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, 0, a_zeroPhi);
+      m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, a_zeroPhi);
 
       const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
       if (status == 1 || status == 8 || status == 9) {    // 8 => Norm sufficiently small
         converged = true;
       }
     }
-    else { // Solution is already good enough
+    else {
+      // Solution is already good enough
       converged = true;
     }
     m_multigridSolver->revert(phi, rhs, finestLevel, 0);
@@ -639,26 +652,86 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     DataOps::setCoveredValue(a_phi, 0, 0.0);
   }
   else {
-    if (m_useTGA) {
-      m_tgaSolver->oneStep(res, phi, rhs, Units::c * a_dt, 0, finestLevel, m_time);
-    }
-    else {
-      m_eulerSolver->oneStep(res, phi, rhs, Units::c * a_dt, 0, finestLevel, false);
-    }
+    this->advanceEuler(a_phi, scaledSource, Units::c * a_dt, a_zeroPhi);
 
     const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
     if (status == 1 || status == 8 || status == 9) {    // 8 => Norm sufficiently small
       converged = true;
     }
-
-    // We solve onto res, copy back to state
-    DataOps::copy(a_phi, m_resid);
   }
+
+  DataOps::setCoveredValue(a_phi, 0.0);
 
   m_amr->conservativeAverage(a_phi, m_realm, m_phase);
   m_amr->interpGhost(a_phi, m_realm, m_phase);
 
   return converged;
+}
+
+void
+EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
+                           const EBAMRCellData& a_source,
+                           const Real           a_dt,
+                           const bool           a_zeroPhi) noexcept
+{
+  CH_TIME("EddingtonSP1::advanceEuler");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::advanceEuler" << endl;
+  }
+
+  // Set up the multigrid solver
+  if (!m_isSolverSetup) {
+    this->setupSolver();
+  }
+
+  EBAMRCellData zero;
+  EBAMRCellData scratch;
+
+  m_amr->allocate(zero, m_realm, m_phase, 1);
+  m_amr->allocate(scratch, m_realm, m_phase, 1);
+
+  // Make the right-hand side for the Euler equation advance. First compute kappa*acoef*(phi^k) + dt*kappa*S, which
+  // is the right-hand side of our system.
+  DataOps::setValue(zero, 0.0);
+  DataOps::copy(scratch, a_phi);
+
+  // Compute the diagonal scaling of the operator.
+  Vector<AMRLevelOp<LevelData<EBCellFAB>>*> amrOps = m_multigridSolver->getAMROperators();
+  Vector<MGLevelOp<LevelData<EBCellFAB>>*>  mgOps  = m_multigridSolver->getAllOperators();
+  for (int i = 0; i < amrOps.size(); i++) {
+    TGAHelmOp<LevelData<EBCellFAB>>* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)amrOps[i];
+
+    helmholtzOperator->diagonalScale(*scratch[i], false);
+  }
+
+  // Set coefficients for multigrid solve.
+  for (int i = 0; i < mgOps.size(); i++) {
+    TGAHelmOp<LevelData<EBCellFAB>>* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)mgOps[i];
+
+    helmholtzOperator->setAlphaAndBeta(1.0, -a_dt);
+  }
+
+  DataOps::incr(scratch, a_source, a_dt);
+  if (m_kappaScale) {
+    DataOps::kappaScale(scratch);
+  }
+
+  Vector<LevelData<EBCellFAB>*> newPhi;
+  Vector<LevelData<EBCellFAB>*> eulerRHS;
+  Vector<LevelData<EBCellFAB>*> zer;
+
+  m_amr->alias(newPhi, a_phi);
+  m_amr->alias(eulerRHS, scratch);
+  m_amr->alias(zer, zero);
+
+  const int coarsestLevel = 0;
+  const int finestLevel   = m_amr->getFinestLevel();
+
+  // Figure out how far away we are from a "converged" solution and set the convergence metric. Then solve.
+  const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, eulerRHS, finestLevel, coarsestLevel);
+
+  m_multigridSolver->m_convergenceMetric = zeroResid;
+  m_multigridSolver->solve(newPhi, eulerRHS, finestLevel, coarsestLevel, a_zeroPhi);
 }
 
 void
@@ -672,15 +745,6 @@ EddingtonSP1::setupSolver()
   this->setHelmholtzCoefficients(); // Set coefficients, kappa, aco, bco
   this->setupHelmholtzFactory();    // Set up the Helmholtz operator factory
   this->setupMultigrid();           // Set up the AMR multigrid solver
-
-  if (!m_stationary) {
-    if (m_useTGA) {
-      this->setupTGA(); // Set up TGA integrator
-    }
-    else {
-      this->setupEuler(); // Set up backward Euler integrator
-    }
-  }
 
   m_isSolverSetup = true;
 }
@@ -830,7 +894,7 @@ EddingtonSP1::setupHelmholtzFactory()
 
   const Vector<RefCountedPtr<EBLevelGrid>>&             levelGrids   = m_amr->getEBLevelGrid(m_realm, m_phase);
   const Vector<RefCountedPtr<EBCoarAve>>&               coarAve      = m_amr->getCoarseAverage(m_realm, m_phase);
-  const Vector<RefCountedPtr<EBFluxRegister>>&          fluxReg      = m_amr->getFluxRegister(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBReflux>>&                fluxReg      = m_amr->getFluxRegister(m_realm, m_phase);
   const Vector<RefCountedPtr<EBMultigridInterpolator>>& interpolator = m_amr->getMultigridInterpolator(m_realm,
                                                                                                        m_phase);
 
@@ -973,47 +1037,6 @@ EddingtonSP1::setupMultigrid()
 }
 
 void
-EddingtonSP1::setupTGA()
-{
-  CH_TIME("EddingtonSP1::setupTGA");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setupTGA" << endl;
-  }
-
-  const int           finestLevel    = m_amr->getFinestLevel();
-  const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
-  const Vector<int>   refRat         = m_amr->getRefinementRatios();
-
-  m_tgaSolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB>>>(
-    new AMRTGA<LevelData<EBCellFAB>>(m_multigridSolver,
-                                     *m_helmholtzOpFactory,
-                                     coarsestDomain,
-                                     refRat,
-                                     1 + finestLevel,
-                                     m_multigridSolver->m_verbosity));
-}
-
-void
-EddingtonSP1::setupEuler()
-{
-  CH_TIME("EddingtonSP1::setupEuler");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setupEuler" << endl;
-  }
-
-  const int           finestLevel    = m_amr->getFinestLevel();
-  const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
-  const Vector<int>   refRat         = m_amr->getRefinementRatios();
-
-  m_eulerSolver = RefCountedPtr<EBBackwardEuler>(new EBBackwardEuler(m_multigridSolver,
-                                                                     *m_helmholtzOpFactory,
-                                                                     coarsestDomain,
-                                                                     refRat,
-                                                                     1 + finestLevel,
-                                                                     m_multigridSolver->m_verbosity));
-}
-
-void
 EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi)
 {
   CH_TIME("EddingtonSP1::computeBoundaryFlux");
@@ -1136,11 +1159,8 @@ EddingtonSP1::computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_
   }
 
   // For EddingtonSP1, the solution vector is only the isotropic part of the RTE, so just copy over.
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Interval interv(m_comp, m_comp);
-    a_phi[lvl]->localCopyTo(interv, *a_isotropic[lvl], interv);
-  }
+  const Interval interv(m_comp, m_comp);
+  m_amr->copyData(a_isotropic, a_phi, interv, interv, CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);
 }
 
 void
@@ -1178,17 +1198,26 @@ EddingtonSP1::writePlotFile()
   EBAMRCellData output;
   m_amr->allocate(output, m_realm, m_phase, ncomps, 1);
 
-  for (int lvl = 0; lvl < output.size(); lvl++) {
-    LevelData<EBCellFAB>& state  = *m_phi[lvl];
-    LevelData<EBCellFAB>& source = *m_source[lvl];
-    LevelData<EBCellFAB>& flx    = *flux[lvl];
-    LevelData<EBCellFAB>& res    = *m_resid[lvl];
-
-    state.localCopyTo(Interval(0, 0), *output[lvl], Interval(0, 0));
-    flx.localCopyTo(Interval(0, SpaceDim - 1), *output[lvl], Interval(1, SpaceDim));
-    source.localCopyTo(Interval(0, 0), *output[lvl], Interval(1 + SpaceDim, 1 + SpaceDim));
-    res.localCopyTo(Interval(0, 0), *output[lvl], Interval(2 + SpaceDim, 2 + SpaceDim));
-  }
+  // Copy data to put data holder
+  m_amr->copyData(output, m_phi, Interval(0, 0), Interval(0, 0), CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);
+  m_amr->copyData(output,
+                  flux,
+                  Interval(0, SpaceDim - 1),
+                  Interval(1, SpaceDim),
+                  CopyStrategy::ValidGhost,
+                  CopyStrategy::ValidGhost);
+  m_amr->copyData(output,
+                  m_source,
+                  Interval(0, 0),
+                  Interval(1 + SpaceDim, 1 + SpaceDim),
+                  CopyStrategy::ValidGhost,
+                  CopyStrategy::ValidGhost);
+  m_amr->copyData(output,
+                  m_resid,
+                  Interval(0, 0),
+                  Interval(2 + SpaceDim, 2 + SpaceDim),
+                  CopyStrategy::ValidGhost,
+                  CopyStrategy::ValidGhost);
 
   // Transform to centroid-centered
   const IrregAmrStencil<CentroidInterpolationStencil>& sten = m_amr->getCentroidInterpolationStencils(m_realm,

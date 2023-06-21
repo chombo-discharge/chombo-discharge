@@ -224,19 +224,6 @@ MeshODEStepper<N>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
 #endif
 
 template <size_t N>
-void
-MeshODEStepper<N>::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const
-{
-  CH_TIME("MeshODEStepper::writePlotData(EBAMRCellData, Vector<std::string>, int)");
-  if (m_verbosity > 5) {
-    pout() << "MeshODEStepper::writePlotData(EBAMRCellData, Vector<std::string>, int)" << endl;
-  }
-
-  m_solver->writePlotData(a_output, a_icomp);
-  a_plotVariableNames.append(m_solver->getPlotVariableNames());
-}
-
-template <size_t N>
 int
 MeshODEStepper<N>::getNumberOfPlotVariables() const
 {
@@ -246,6 +233,33 @@ MeshODEStepper<N>::getNumberOfPlotVariables() const
   }
 
   return m_solver->getNumberOfPlotVariables();
+}
+
+template <size_t N>
+Vector<std::string>
+MeshODEStepper<N>::getPlotVariableNames() const
+{
+  CH_TIME("MeshODEStepper::getPlotVariableNames()");
+  if (m_verbosity > 5) {
+    pout() << "MeshODEStepper::getPlotVariableNames()" << endl;
+  }
+
+  return m_solver->getPlotVariableNames();
+}
+
+template <size_t N>
+void
+MeshODEStepper<N>::writePlotData(LevelData<EBCellFAB>& a_output,
+                                 int&                  a_icomp,
+                                 const std::string     a_outputRealm,
+                                 const int             a_level) const
+{
+  CH_TIME("MeshODEStepper::writePlotData");
+  if (m_verbosity > 5) {
+    pout() << "MeshODEStepper::writePlotData" << endl;
+  }
+
+  m_solver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
 }
 
 template <size_t N>

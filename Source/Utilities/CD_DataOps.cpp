@@ -139,6 +139,8 @@ DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&       a_faceDat
       }
     }
   }
+
+  a_faceData.exchange();
 }
 
 void
@@ -347,6 +349,8 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
       }
     }
   }
+
+  a_faceData.exchange();
 }
 
 void
@@ -409,9 +413,11 @@ DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
         int numFaces = 0;
         for (int dir = 0; dir < SpaceDim; dir++) {
           for (SideIterator sit; sit.ok(); ++sit) {
-            const std::vector<FaceIndex>& faces = ebisbox.getFaces(vof, dir, sit()).stdVector();
+            const Vector<FaceIndex>& faces = ebisbox.getFaces(vof, dir, sit());
 
-            for (const auto& face : faces) {
+            for (int i = 0; i < faces.size(); i++) {
+              const FaceIndex& face = faces[i];
+
               cellData(vof, comp) += fluxData[dir](face, comp);
             }
 
@@ -427,6 +433,8 @@ DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
+
+  a_cellData.exchange();
 }
 
 void
@@ -563,6 +571,7 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
   CH_assert(a_alpha >= 0.0);
   CH_assert(a_alpha <= 0.0);
   CH_assert(a_stride > 0);
+  CH_assert(a_stride <= ghostVec[0]);
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (ghostVec[dir] < a_stride) {
@@ -578,14 +587,6 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
     const Box            cellBox = dbl[dit()];
     const EBISBox&       ebisbox = a_data[dit()].getEBISBox();
     const ProblemDomain& domain  = ebisbox.getDomain();
-
-    // Compute box -- don't filter data that is too close to the domain boundary
-    // since we don't have enough cells there. This is an interior-only box, not reaching
-    // out of the domain.
-    Box interiorBox = cellBox;
-    interiorBox.grow(a_stride);
-    interiorBox &= domain;
-    interiorBox.grow(-a_stride);
 
     // Make a copy of the input data.
     FArrayBox phi;
@@ -616,8 +617,19 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
 
     for (int icomp = 0; icomp < nComp; icomp++) {
 
-      // Copy current compnent into transient storage.
+      // Copy current compnent into transient storage and then fill ghost cells outside of the domain.
       phi.copy(data, icomp, 0);
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        for (SideIterator sit; sit.ok(); ++sit) {
+          const Box insideBox = adjCellBox(domain.domainBox(), dir, sit(), -1) & cellBox;
+
+          for (BoxIterator bit(insideBox); bit.ok(); ++bit) {
+            for (int s = 1; s <= a_stride; s++) {
+              phi(bit() + sign(sit()) * BASISV(dir), icomp) = data(bit(), icomp);
+            }
+          }
+        }
+      }
 
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (doThisCell(iv)) {
@@ -630,7 +642,7 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
         }
       };
 
-      BoxLoops::loop(interiorBox, regularKernel);
+      BoxLoops::loop(cellBox, regularKernel);
     }
 #elif CH_SPACEDIM == 3
 
@@ -665,7 +677,7 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
         }
       };
 
-      BoxLoops::loop(interiorBox, regularKernel);
+      BoxLoops::loop(cellBox, regularKernel);
     }
 #else
     MayDay::Error("DataOps::filterSmooth -- dimensionality logic bust");

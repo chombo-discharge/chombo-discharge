@@ -52,6 +52,7 @@ namespace DischargeIO {
 
   /*!
     @brief A shameless copy of Chombo's writeEBHDF5 but including the lower-left corner of the physical domain as well.
+    @details User are not supported to call this. Driver will perform calls to writeEBHDF5Header and writeEBHDF5Level
     @param[in] a_filename         File name
     @param[in] a_variableNames    Grid variable names
     @param[in] a_grids            Grids on each AMR level
@@ -64,7 +65,6 @@ namespace DischargeIO {
     @param[in] a_probLo           Lower-left physical corner
     @param[in] a_numLevels        Number of AMR levels
     @param[in] a_numGhost         Number of ghost cells included in the output. 
-    @todo The current implementation doubles the memory in the output data. We should look into more general aliasing functions. 
    */
 #ifdef CH_USE_HDF5
   void
@@ -79,7 +79,48 @@ namespace DischargeIO {
               const Real                           a_time,
               const RealVect                       a_probLo,
               const int                            a_numLevels,
-              const int                            a_numGhost);
+              const int                            a_numGhost) noexcept;
+#endif
+
+#ifdef CH_USE_HDF5
+  /*!
+    @brief Write HDF5 header to the input handle
+    @param[inout] a_handleH5 Handle to HDF5 file
+    @param[in] a_numLevels Number of levels to write
+    @param[in] a_probLo Lower-left corner of problem domain
+    @param[in] a_variableNames Variable names
+  */
+  void
+  writeEBHDF5Header(HDF5Handle&                a_handleH5,
+                    const int                  a_numLevels,
+                    const RealVect&            a_probLo,
+                    const Vector<std::string>& a_variableNames) noexcept;
+
+#endif
+
+#ifdef CH_USE_HDF5
+  /*!
+    @brief Write data to output handle. Meant to be called on each level after calling writeEBHDF5 header.
+    @param[in] a_handleH5 Handle to HDF5 data
+    @param[in] a_outputData Data to write
+    @param[in] a_domain Problem domain
+    @param[in] a_dx Grid resolution
+    @param[in] a_dt Time step
+    @param[in] a_time Time
+    @param[in] a_level AMR level
+    @param[in] a_refRatio Refinement ratio
+    @param[in] a_numGhost Number of ghost cells to fill. 
+  */
+  void
+  writeEBHDF5Level(HDF5Handle&                 a_handleH5,
+                   const LevelData<EBCellFAB>& a_outputData,
+                   const ProblemDomain         a_domain,
+                   const Real                  a_dx,
+                   const Real                  a_dt,
+                   const Real                  a_time,
+                   const int                   a_level,
+                   const int                   a_refRatio,
+                   const int                   a_numGhost) noexcept;
 #endif
 
 #ifdef CH_USE_HDF5

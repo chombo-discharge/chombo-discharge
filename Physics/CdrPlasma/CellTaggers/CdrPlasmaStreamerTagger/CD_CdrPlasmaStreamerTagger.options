@@ -15,6 +15,6 @@ CdrPlasmaStreamerTagger.ref_box1_lvl      = 0            # Refine to this level.
 
 CdrPlasmaStreamerTagger.refine_curvature  = 10.0         # Curvature refinement
 CdrPlasmaStreamerTagger.coarsen_curvature = 10.0         # Curvature coarsening	
-CdrPlasmaStreamerTagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
-CdrPlasmaStreamerTagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
+CdrPlasmaStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
+CdrPlasmaStreamerTagger.coarsen_alpha     = -0.5         # Set alpha coarsening. Higher => Less mesh
 CdrPlasmaStreamerTagger.max_coarsen_lvl   = 0            # Set max coarsening depth

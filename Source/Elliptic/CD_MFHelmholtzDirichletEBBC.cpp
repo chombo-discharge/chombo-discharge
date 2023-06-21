@@ -175,6 +175,12 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
       }
       else {
         // Dead cell. No flux.
+        // const std::string baseErr = "MFHelmholtzDirichletEBBC::defineSinglePhase - dead cell on domain = ";
+        // const std::string vofErr  = " on vof = ";
+        // const std::string impErr  = " (this may cause multigrid divergence)";
+
+        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << std::endl;
+
         weights(vof, m_comp) = 0.0;
         stencils(vof, m_comp).clear();
       }

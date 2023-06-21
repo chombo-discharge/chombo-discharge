@@ -53,7 +53,7 @@ public:
   /*!
     @brief Destructor (does nothing)
   */
-  ~Driver();
+  virtual ~Driver();
 
   /*!
     @brief Setup and run simulations
@@ -199,7 +199,7 @@ protected:
   /*!
     @brief Maximum plot depth
   */
-  int m_maxPlotDepth;
+  int m_maxPlotLevel;
 
   /*!
     @brief Maximum plot depth
@@ -285,6 +285,11 @@ protected:
     @brief Angle refinement threshold
   */
   Real m_refineAngle;
+
+  /*!
+    @brief Profile or not
+  */
+  bool m_profile;
 
   /*!
     @brief Turn on/off geometry coarsening below the base level
@@ -704,28 +709,31 @@ protected:
     @brief Write internal plot data
     @param[inout] a_output Output data holder
     @param[inout] a_comp   Starting component
+    @param[in]    a_level  AMR level
     @details This will copy Driver's plot data into a_output, starting on component a_comp. 
   */
-  void
-  writePlotData(EBAMRCellData& a_output, int& a_comp);
+  virtual void
+  writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept;
 
   /*!
     @brief Write cell tags to file
     @param[inout] a_output Output data holder
     @param[inout] a_comp   Starting component
+    @param[in]    a_level  AMR level
     @details This will write cell tags data into a_output, starting on component a_comp. 
   */
-  void
-  writeTags(EBAMRCellData& a_output, int& a_comp);
+  virtual void
+  writeTags(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept;
 
   /*!
     @brief Write MPI ranks to output
     @param[inout] a_output Output data holder
     @param[inout] a_comp   Starting component
+    @param[in]    a_level  AMR level
     @details This adds data to a_output where the data in each grid patch is the MPI rank. 
   */
-  void
-  writeRanks(EBAMRCellData& a_output, int& a_comp);
+  virtual void
+  writeRanks(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept;
 
   /*!
     @brief Write level sets
@@ -734,8 +742,8 @@ protected:
     @details This adds data to a_output where the cell-centered data is the level-set value. 
     @note This writes directly to a_output.
   */
-  void
-  writeLevelset(EBAMRCellData& a_output, int& a_comp);
+  virtual void
+  writeLevelset(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept;
 
   /*!
     @brief Return the finest tag level

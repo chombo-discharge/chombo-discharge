@@ -89,6 +89,15 @@ public:
   allocate() override;
 
   /*!
+    @brief Perform pre-regrid operations. 
+    @param[in] a_lbase          Coarsest level that changed during regrid. 
+    @param[in] a_oldFinestLevel Finest grid level before the regrid operation. 
+    @note This stores m_phi and m_source. 
+  */
+  virtual void
+  preRegrid(const int a_lbase, const int a_oldFinestLevel) override;
+
+  /*!
     @brief Compute div(J) explicitly, where J = nV - D*grad(n)
     @param[out] a_divJ             Divergence term, i.e. finite volume approximation to 
     @param[in]  a_phi              Cell-centered state
@@ -206,9 +215,9 @@ protected:
   GMRESSolver<LevelData<EBCellFAB>> m_gmres;
 
   /*!
-    @brief Data which is always zero. 
+    @brief Is multigrid solver defined or not?
   */
-  EBAMRCellData m_zero;
+  bool m_hasMultigridSolver;
 
   /*!
     @brief Storage for Helmholtz a-coefficient. Always 1. 
@@ -300,6 +309,13 @@ protected:
   setupMultigrid();
 
   /*!
+    @brief Set the multigrid solver coefficients. 
+    @details Useful when coefficients change underneath us, but we don't want to set up multigrid again.
+  */
+  virtual void
+  setMultigridSolverCoefficients();
+
+  /*!
     @brief Reset alpha and beta-coefficients in the multigrid solvers
     @param[in] a_alpha Alpha-coefficient for EBHelmholtzOp
     @param[in] a_beta  Beta-coefficient for EBHelmholtzOp
@@ -321,14 +337,6 @@ protected:
   */
   virtual void
   parseMultigridSettings();
-
-  /*!
-    @brief Write output data to a_output
-    @param[inout] a_output Output data holder.
-    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
-  */
-  virtual void
-  writePlotData(EBAMRCellData& a_output, int& a_comp) override final;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -135,6 +135,12 @@ public:
   setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLevel);
 
   /*!
+    @brief Perform pre-regrid operations
+  */
+  void
+  preRegrid();
+
+  /*!
     @brief Regrid method for EBAMR base
     @param[in] a_lmin Coarsest grid level that changed. 
     @details This regrids EBLevelGrid and iterators
@@ -240,11 +246,11 @@ public:
   getEBLevelGrid(const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get neighbors for particular phase
+    @brief Get coarsened fine EBLevelGrid for particular phase
     @param[in] a_phase Phase
   */
-  const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>>&
-  getNeighbors(const phase::which_phase a_phase) const;
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGridCoFi(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get VoFIterators for particular phase
@@ -310,53 +316,32 @@ public:
   getGradientOp(const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get piecewise linear regrid utility
+    @brief Get ghost cell interpolator
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<AggEBPWLFillPatch>>&
-  getFillPatch(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBGhostCellInterpolator>>&
+  getGhostCellInterpolator(const phase::which_phase a_phase);
 
   /*!
     @brief Get piecewise linear ghost cell interpolation utility
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<EBFineInterp>>&
+  Vector<RefCountedPtr<EBCoarseToFineInterp>>&
   getFineInterp(const phase::which_phase a_phase);
 
   /*!
     @brief Get flux register utility
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<EBFluxRegister>>&
+  Vector<RefCountedPtr<EBReflux>>&
   getFluxRegister(const phase::which_phase a_phase);
 
   /*!
-    @brief Get level redistribution utility
-    @param[in] a_phase Phase
+    @brief Get the redistribution operators
+    @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBLevelRedist>>&
-  getLevelRedist(const phase::which_phase a_phase);
-
-  /*!
-    @brief Get coarse-to-fine redistribution utility
-    @param[in] a_phase Phase
-  */
-  Vector<RefCountedPtr<EBCoarToFineRedist>>&
-  getCoarToFineRedist(const phase::which_phase a_phase);
-
-  /*!
-    @brief Get coarse-to-coarse redistribution utility
-    @param[in] a_phase Phase
-  */
-  Vector<RefCountedPtr<EBCoarToCoarRedist>>&
-  getCoarToCoarRedist(const phase::which_phase a_phase);
-
-  /*!
-    @brief Get fine-to-coarse redistribution utility
-    @param[in] a_phase Phase
-  */
-  Vector<RefCountedPtr<EBFineToCoarRedist>>&
-  getFineToCoarRedist(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBRedistribution>>&
+  getRedistributionOp(const phase::which_phase a_phase);
 
   /*!
     @brief Get level-set function
