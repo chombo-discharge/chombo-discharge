@@ -429,6 +429,10 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="CD__StreamerInceptionStepper_8H.html#a90a70881e4736b29b2eaa4f23e9cab04">IntegrationAlgorithm</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a2941c536a92d1739e8b36416ee05e58e">m_inceptionAlgorithm</a></td></tr>
 <tr class="memdesc:a2941c536a92d1739e8b36416ee05e58e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integration algorithm for K-value. <br /></td></tr>
 <tr class="separator:a2941c536a92d1739e8b36416ee05e58e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa48ee24ee8a6632566e547e0c85c98e6"><td class="memItemLeft" align="right" valign="top"><a id="aa48ee24ee8a6632566e547e0c85c98e6"></a>
+<a class="el" href="CD__StreamerInceptionStepper_8H.html#a73685313521ddbddff8f615ccd7581ab">StepSizeMethod</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aa48ee24ee8a6632566e547e0c85c98e6">m_stepSizeMethod</a></td></tr>
+<tr class="memdesc:aa48ee24ee8a6632566e547e0c85c98e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step size selection method. <br /></td></tr>
+<tr class="separator:aa48ee24ee8a6632566e547e0c85c98e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a282dcf83dcf619936d2a2698b0e3dce2"><td class="memItemLeft" align="right" valign="top"><a id="a282dcf83dcf619936d2a2698b0e3dce2"></a>
 <a class="el" href="CD__StreamerInceptionStepper_8H.html#aae5ff942df8c99780044ca5a0b1ecdb7">TransportAlgorithm</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a282dcf83dcf619936d2a2698b0e3dce2">m_transportAlgorithm</a></td></tr>
 <tr class="memdesc:a282dcf83dcf619936d2a2698b0e3dce2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transport algorithm for advancing negative ions in the transient mode. <br /></td></tr>
@@ -528,14 +532,10 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a870a9148cd054c164aa0eef275c18e36">m_minDt</a></td></tr>
 <tr class="memdesc:a870a9148cd054c164aa0eef275c18e36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum permitted time step. <br /></td></tr>
 <tr class="separator:a870a9148cd054c164aa0eef275c18e36"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a921c23d8796ba93fbcd28d8c90de8960"><td class="memItemLeft" align="right" valign="top"><a id="a921c23d8796ba93fbcd28d8c90de8960"></a>
-Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a921c23d8796ba93fbcd28d8c90de8960">m_relativeInceptionStep</a></td></tr>
-<tr class="memdesc:a921c23d8796ba93fbcd28d8c90de8960"><td class="mdescLeft">&#160;</td><td class="mdescRight">Variable step size for K-integration algorithm (factor of dx) <br /></td></tr>
-<tr class="separator:a921c23d8796ba93fbcd28d8c90de8960"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a066fc3d0a965d6c0756e3920fb4a77ab"><td class="memItemLeft" align="right" valign="top"><a id="a066fc3d0a965d6c0756e3920fb4a77ab"></a>
-Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a066fc3d0a965d6c0756e3920fb4a77ab">m_fixedInceptionStep</a></td></tr>
-<tr class="memdesc:a066fc3d0a965d6c0756e3920fb4a77ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fixed step size (physical dimensions) <br /></td></tr>
-<tr class="separator:a066fc3d0a965d6c0756e3920fb4a77ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d9c4cce30d00ae3880b654f5736bdd7"><td class="memItemLeft" align="right" valign="top"><a id="a9d9c4cce30d00ae3880b654f5736bdd7"></a>
+Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a9d9c4cce30d00ae3880b654f5736bdd7">m_stepSizeFactor</a></td></tr>
+<tr class="memdesc:a9d9c4cce30d00ae3880b654f5736bdd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step size factor. <br /></td></tr>
+<tr class="separator:a9d9c4cce30d00ae3880b654f5736bdd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3486da060b5cefbf79acd20720d79298"><td class="memItemLeft" align="right" valign="top"><a id="a3486da060b5cefbf79acd20720d79298"></a>
 Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3486da060b5cefbf79acd20720d79298">m_inceptionK</a></td></tr>
 <tr class="memdesc:a3486da060b5cefbf79acd20720d79298"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inception criteria (read from input) <br /></td></tr>
@@ -544,10 +544,14 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a7c0e1237e5f590be7e338831a11c3f38">m_profile</a></td></tr>
 <tr class="memdesc:a7c0e1237e5f590be7e338831a11c3f38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Profile calculation or not. <br /></td></tr>
 <tr class="separator:a7c0e1237e5f590be7e338831a11c3f38"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ada3aaf0c1d19133c8ed3a68f04e729be"><td class="memItemLeft" align="right" valign="top"><a id="ada3aaf0c1d19133c8ed3a68f04e729be"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ada3aaf0c1d19133c8ed3a68f04e729be">m_useFixedInceptionStep</a></td></tr>
-<tr class="memdesc:ada3aaf0c1d19133c8ed3a68f04e729be"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, used fixed integration step for inception integration. <br /></td></tr>
-<tr class="separator:ada3aaf0c1d19133c8ed3a68f04e729be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9bf8232a0ff4325707bd9a70e562965"><td class="memItemLeft" align="right" valign="top"><a id="aa9bf8232a0ff4325707bd9a70e562965"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aa9bf8232a0ff4325707bd9a70e562965">m_debug</a></td></tr>
+<tr class="memdesc:aa9bf8232a0ff4325707bd9a70e562965"><td class="mdescLeft">&#160;</td><td class="mdescRight">Debug or not. <br /></td></tr>
+<tr class="separator:aa9bf8232a0ff4325707bd9a70e562965"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acbd2ece7c53efbb25e8e663aa9bc5e04"><td class="memItemLeft" align="right" valign="top"><a id="acbd2ece7c53efbb25e8e663aa9bc5e04"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#acbd2ece7c53efbb25e8e663aa9bc5e04">m_fullIntegration</a></td></tr>
+<tr class="memdesc:acbd2ece7c53efbb25e8e663aa9bc5e04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use full reconstruction of critical volume or not. <br /></td></tr>
+<tr class="separator:acbd2ece7c53efbb25e8e663aa9bc5e04"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5b1a6baf186af8d2478b4365ce5c5b5a"><td class="memItemLeft" align="right" valign="top"><a id="a5b1a6baf186af8d2478b4365ce5c5b5a"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a5b1a6baf186af8d2478b4365ce5c5b5a">m_ionTransport</a></td></tr>
 <tr class="memdesc:a5b1a6baf186af8d2478b4365ce5c5b5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ion transport on/off. <br /></td></tr>

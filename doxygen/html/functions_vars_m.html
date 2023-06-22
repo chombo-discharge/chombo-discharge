@@ -764,6 +764,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#a78074be1cbf25cd07ff6c441ed17556b">Physics::AdvectionDiffusion::AdvectionDiffusionStepper</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a02bb042402387ee9552da182eb494337">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
 , <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a2f14d4b1616e44cfcd420752008813aa">Physics::ItoKMC::ItoKMCPhysics</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aa9bf8232a0ff4325707bd9a70e562965">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_deeperLevelGrids
 : <a class="el" href="classEBHelmholtzOpFactory.html#a552c15960da771e9fddb904bde436e99">EBHelmholtzOpFactory</a>
@@ -1407,9 +1408,6 @@ $(function() {
 <li>m_firstDerivStencils
 : <a class="el" href="classCoarseInterpQuadCF.html#ac299779ab6aa7f53695303b594065d23">CoarseInterpQuadCF</a>
 </li>
-<li>m_fixedInceptionStep
-: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a066fc3d0a965d6c0756e3920fb4a77ab">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
-</li>
 <li>m_flipInside
 : <a class="el" href="classEBGeometryIF.html#afb799c8aa4b8ed4f447e76ca4f05dc7f">EBGeometryIF&lt; T &gt;</a>
 , <a class="el" href="classSignedDistanceBVH.html#a186f5f0c149b59bfa811247dadb9a24d">SignedDistanceBVH&lt; T, BV, K &gt;</a>
@@ -1503,6 +1501,9 @@ $(function() {
 </li>
 <li>m_forceIrregInterpolationNGP
 : <a class="el" href="classItoSolver.html#a44eff78633d5756c928ecfa7ade33e9b">ItoSolver</a>
+</li>
+<li>m_fullIntegration
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#acbd2ece7c53efbb25e8e663aa9bc5e04">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_function
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1NeutralSpeciesJSON.html#a5bc8473b5b897a8f63dc35cc779245af">Physics::CdrPlasma::NeutralSpeciesJSON</a>
@@ -3349,9 +3350,6 @@ $(function() {
 <li>m_regularGhostRegions
 : <a class="el" href="classEBGhostCellInterpolator.html#a1aa877059c00a3070bf2ea228733c22c">EBGhostCellInterpolator</a>
 </li>
-<li>m_relativeInceptionStep
-: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a921c23d8796ba93fbcd28d8c90de8960">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
-</li>
 <li>m_relaxationTime
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0608866c829b5d65e45d66132fa9e447">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
 </li>
@@ -3714,6 +3712,12 @@ $(function() {
 <li>m_step
 : <a class="el" href="classSurfaceODESolver.html#a75ca1c9e54fa882fb2cb415967f858a2">SurfaceODESolver&lt; N &gt;</a>
 </li>
+<li>m_stepSizeFactor
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a9d9c4cce30d00ae3880b654f5736bdd7">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_stepSizeMethod
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aa48ee24ee8a6632566e547e0c85c98e6">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>m_stopTime
 : <a class="el" href="classDriver.html#a67328b823fa5872c0ee193dde8c97371">Driver</a>
 </li>
@@ -3859,9 +3863,6 @@ $(function() {
 </li>
 <li>m_useFast
 : <a class="el" href="classSphereArray.html#ab513cac143c4c719c829036c8b04eb8c">SphereArray</a>
-</li>
-<li>m_useFixedInceptionStep
-: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ada3aaf0c1d19133c8ed3a68f04e729be">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_useFunction
 : <a class="el" href="classEBHelmholtzDirichletDomainBC.html#a7d94ebcdd3867bc2e3b78a632d07da75">EBHelmholtzDirichletDomainBC</a>
