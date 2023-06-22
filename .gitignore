@@ -5,6 +5,7 @@
 **/Make.defs.local
 *.log
 *.aux
+LB.txt
 
 
 **/doc/html/**

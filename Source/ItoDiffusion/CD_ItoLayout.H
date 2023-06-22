@@ -305,13 +305,6 @@ public:
   getDensities();
 
   /*!
-    @brief Get all scratch storage
-    @details This accumulates a pointer to scratch mesh data for each solver. 
-  */
-  virtual Vector<EBAMRCellData*>
-  getScratch();
-
-  /*!
     @brief Get all diffusion coefficients
     @details This accumulates a pointer to diffusion coefficient mesh data for each solver. 
   */

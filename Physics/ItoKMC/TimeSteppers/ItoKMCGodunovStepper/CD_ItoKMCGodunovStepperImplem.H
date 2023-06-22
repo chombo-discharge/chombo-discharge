@@ -520,7 +520,7 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
                                 a_lmin,
                                 a_oldFinestLevel,
                                 a_newFinestLevel,
-                                false);
+                                EBCoarseToFineInterp::Type::ConservativePWC);
 
   this->m_amr->interpToNewGrids(m_semiImplicitConductivityCDR,
                                 m_scratchSemiImplicitConductivityCDR,
@@ -528,7 +528,7 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
                                 a_lmin,
                                 a_oldFinestLevel,
                                 a_newFinestLevel,
-                                false);
+                                EBCoarseToFineInterp::Type::ConservativePWC);
 
   // Set up the field solver with standard coefficients or with
   // modified coefficients if we are reusing data from the last time step.
@@ -964,7 +964,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
       solver->depositParticles<PointParticle, &PointParticle::weight>(this->m_particleScratch1, *a_particles[idx]);
 
       // Copy to fluid realm and add to total conductivity.
-      this->m_fluidScratch1.copy(this->m_particleScratch1);
+      (this->m_amr)->copyData(this->m_fluidScratch1, this->m_particleScratch1);
       DataOps::incr(a_conductivityCell, this->m_fluidScratch1, 1.0 * std::abs(Z));
     }
   }
@@ -1061,7 +1061,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
     const int                        Z       = species->getChargeNumber();
 
     if (Z != 0) {
-      this->m_fluidScratch1.copy(solver->getPhi());
+      (this->m_amr)->copyData(this->m_fluidScratch1, solver->getPhi());
 
       DataOps::incr(rhoPhase, this->m_fluidScratch1, 1.0 * Z * Units::Qe);
     }

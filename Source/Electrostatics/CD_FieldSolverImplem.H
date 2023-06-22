@@ -20,9 +20,6 @@ Real
 FieldSolver::getDielectricPermittivity(const RealVect& a_pos) const
 {
   CH_TIME("FieldSolver::getDielectricPermittivity(RealVect a_pos)");
-  if (m_verbosity > 5) {
-    pout() << "FieldSolver::getDielectricPermittivity(RealVect a_pos)" << endl;
-  }
 
   const Vector<Dielectric>& dielectrics = m_computationalGeometry->getDielectrics();
 

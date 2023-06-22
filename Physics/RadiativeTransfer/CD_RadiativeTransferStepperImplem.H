@@ -44,6 +44,9 @@ template <typename T>
 RadiativeTransferStepper<T>::~RadiativeTransferStepper()
 {
   CH_TIME("RadiativeTransferStepper::~RadiativeTransferStepper");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::~RadiativeTransferStepper" << endl;
+  }
 }
 
 template <typename T>
@@ -51,6 +54,9 @@ void
 RadiativeTransferStepper<T>::setupSolvers()
 {
   CH_TIME("RadiativeTransferStepper::setupSolvers");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::setupSolvers" << endl;
+  }
 
   m_species = RefCountedPtr<RtSpecies>(new RadiativeTransferSpecies());
 
@@ -70,6 +76,9 @@ void
 RadiativeTransferStepper<T>::parseRuntimeOptions()
 {
   CH_TIME("RadiativeTransferStepper::parseRuntimeOptions");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::parseRuntimeOptions" << endl;
+  }
 
   ParmParse pp("RadiativeTransferStepper");
 
@@ -84,6 +93,9 @@ void
 RadiativeTransferStepper<T>::allocate()
 {
   CH_TIME("RadiativeTransferStepper::allocate");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::allocate" << endl;
+  }
 
   m_solver->allocate();
 }
@@ -93,6 +105,9 @@ void
 RadiativeTransferStepper<T>::initialData()
 {
   CH_TIME("RadiativeTransferStepper::initialData");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::initialData" << endl;
+  }
 
   m_solver->initialData();
   this->setGaussianSource();
@@ -107,6 +122,9 @@ void
 RadiativeTransferStepper<T>::postInitialize()
 {
   CH_TIME("RadiativeTransferStepper::postInitialize");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::postInitialize" << endl;
+  }
 }
 
 template <typename T>
@@ -114,6 +132,9 @@ void
 RadiativeTransferStepper<T>::forceDt(const Real a_dt)
 {
   CH_TIME("RadiativeTransferStepper::forceDt");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::forceDt" << endl;
+  }
 
   m_forceDt = a_dt;
 }
@@ -124,6 +145,9 @@ void
 RadiativeTransferStepper<T>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const
 {
   CH_TIME("RadiativeTransferStepper::writeCheckpointData");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::writeCheckpointData" << endl;
+  }
 
   m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
@@ -135,6 +159,9 @@ void
 RadiativeTransferStepper<T>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
 {
   CH_TIME("RadiativeTransferStepper::readCheckpointData");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::readCheckpointData" << endl;
+  }
 
   m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
@@ -145,6 +172,9 @@ void
 RadiativeTransferStepper<T>::postCheckpointSetup()
 {
   CH_TIME("RadiativeTransferStepper::postCheckpointSetup");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::postCheckpointSetup" << endl;
+  }
 
   this->setGaussianSource();
 }
@@ -154,20 +184,38 @@ int
 RadiativeTransferStepper<T>::getNumberOfPlotVariables() const
 {
   CH_TIME("RadiativeTransferStepper::getNumberOfPlotVariables");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::getNumberOfPlotVariables" << endl;
+  }
 
   return m_solver->getNumberOfPlotVariables();
 }
 
 template <typename T>
+Vector<std::string>
+RadiativeTransferStepper<T>::getPlotVariableNames() const
+{
+  CH_TIME("RadiativeTransferStepper::getPlotVariableNames");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::getPlotVariableNames" << endl;
+  }
+
+  return m_solver->getPlotVariableNames();
+}
+
+template <typename T>
 void
-RadiativeTransferStepper<T>::writePlotData(EBAMRCellData&       a_output,
-                                           Vector<std::string>& a_plotVariableNames,
-                                           int&                 a_icomp) const
+RadiativeTransferStepper<T>::writePlotData(LevelData<EBCellFAB>& a_output,
+                                           int&                  a_icomp,
+                                           const std::string     a_outputRealm,
+                                           const int             a_level) const
 {
   CH_TIME("RadiativeTransferStepper::writePlotData");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::writePlotData" << endl;
+  }
 
-  a_plotVariableNames.append(m_solver->getPlotVariableNames());
-  m_solver->writePlotData(a_output, a_icomp);
+  m_solver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
 }
 
 template <typename T>
@@ -175,6 +223,9 @@ Real
 RadiativeTransferStepper<T>::computeDt()
 {
   CH_TIME("RadiativeTransferStepper::computeDt");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::computeDt" << endl;
+  }
 
   Real dt = m_dt;
 
@@ -190,6 +241,9 @@ Real
 RadiativeTransferStepper<T>::advance(const Real a_dt)
 {
   CH_TIME("RadiativeTransferStepper::advance");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::advance" << endl;
+  }
 
   m_solver->advance(a_dt);
 
@@ -201,6 +255,9 @@ void
 RadiativeTransferStepper<T>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt)
 {
   CH_TIME("RadiativeTransferStepper::synchronizeSolverTimes");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::synchronizeSolverTimes" << endl;
+  }
 
   m_timeStep = a_step;
   m_time     = a_time;
@@ -214,6 +271,9 @@ void
 RadiativeTransferStepper<T>::printStepReport()
 {
   CH_TIME("RadiativeTransferStepper::printStepReport");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::printStepReport" << endl;
+  }
 }
 
 template <typename T>
@@ -221,6 +281,9 @@ void
 RadiativeTransferStepper<T>::registerRealms()
 {
   CH_TIME("RadiativeTransferStepper::registerRealms");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::registerRealms" << endl;
+  }
 
   m_amr->registerRealm(m_realm);
 }
@@ -230,6 +293,9 @@ void
 RadiativeTransferStepper<T>::registerOperators()
 {
   CH_TIME("RadiativeTransferStepper::registerOperators");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::registerOperators" << endl;
+  }
 
   m_solver->registerOperators();
 }
@@ -239,6 +305,9 @@ void
 RadiativeTransferStepper<T>::preRegrid(const int a_base, const int a_oldFinestLevel)
 {
   CH_TIME("RadiativeTransferStepper::preRegrid");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::preRegrid" << endl;
+  }
 
   m_solver->preRegrid(a_base, a_oldFinestLevel);
 }
@@ -248,6 +317,9 @@ void
 RadiativeTransferStepper<T>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
 {
   CH_TIME("RadiativeTransferStepper::regrid");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::regrid" << endl;
+  }
 
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 }
@@ -257,6 +329,9 @@ void
 RadiativeTransferStepper<T>::postRegrid()
 {
   CH_TIME("RadiativeTransferStepper::postRegrid");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::postRegrid" << endl;
+  }
 
   this->setGaussianSource();
 }
@@ -266,6 +341,9 @@ const EBAMRCellData&
 RadiativeTransferStepper<T>::getPhi() const
 {
   CH_TIME("RadiativeTransferStepper::getPhi");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::getPhi" << endl;
+  }
 
   return m_solver->getPhi();
 }
@@ -275,6 +353,9 @@ void
 RadiativeTransferStepper<T>::setGaussianSource()
 {
   CH_TIME("RadiativeTransferStepper::setGaussianSource");
+  if (m_verbosity > 5) {
+    pout() << "RadiativeTransferStepper::setGaussianSource" << endl;
+  }
 
   ParmParse pp("RadiativeTransferStepper");
 

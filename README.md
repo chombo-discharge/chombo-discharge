@@ -1,3 +1,6 @@
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.05335/status.svg)](https://doi.org/10.21105/joss.05335)
+[![DOI](https://zenodo.org/badge/355565674.svg)](https://zenodo.org/badge/latestdoi/355565674)
+
 chombo-discharge
 ----------------
 
@@ -5,7 +8,8 @@ This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for disc
 A modified version of ``Chombo`` is distributed together with this code.
 
 <p align="center">
-   <img src="./Docs/Sphinx/source/_static/figures/BranchingAir.gif" width="50%">
+   <img src="./Docs/Sphinx/source/_static/figures/BranchingAir.gif" width="36%">
+   <img src="./Exec/Examples/CdrPlasma/Sprite/sprite3d.png" width="55%">
 </p align="center">
 
 Installation

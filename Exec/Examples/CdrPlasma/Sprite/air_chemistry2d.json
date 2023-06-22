@@ -1,16 +1,8 @@
 {"gas":
  {
-     "law": "table",
-     "file": "ENMSIS_Atmosphere.dat",
-     "molar mass": 27,
-     "height": 0,
-     "temperature": 2,
-     "pressure": 3,
-     "density": 1,
-     "min height": 0,
-     "max height": 250000,
-     "res height": 1000,
-     "plot": true,
+     // Definition of the background gas. This is a 80%/20% mixture
+     // of molecular oxygen and nitrogen. Densities and temperatures
+     // are read from file. 
      "neutral species":
      [
 	 {
@@ -21,11 +13,24 @@
 	     "name": "N2",
 	     "molar fraction": 0.8
 	 }
-     ]
+     ],     
+     "law": "table",
+     "file": "ENMSIS_Atmosphere.dat",
+     "molar mass": 27,
+     "height": 0,
+     "temperature": 2,
+     "pressure": 3,
+     "density": 1,
+     "min height": 0,
+     "max height": 250000,
+     "res height": 1000,
+     "plot": true
  },
+
  "plasma species":
  [
      {
+	 // Thundercloud positive charge.
 	 "name": "TC+",
 	 "Z": 1,
 	 "mobile": false,
@@ -42,6 +47,7 @@
 	 }	 
      },
      {
+	 // Thundercloud positive charge.
 	 "name": "TC-",
 	 "Z": -1,
 	 "mobile": false,
@@ -56,7 +62,7 @@
 		 }
 	     ]
 	 }	 
-     },     
+     },
      {
 	 "name": "e",
 	 "Z": -1,
@@ -64,7 +70,6 @@
 	 "diffusive": true,
 	 "mobility": {
 	     "lookup" : "table E/N",
-	     "value": 0.02,
 	     "file": "bolsig_air.dat",
 	     "header": "E/N (Td)\tMobility *N (1/m/V/s)",
 	     "E/N": 0,
@@ -111,6 +116,7 @@
 	 }
      },
      {
+	 // Ionized molecular nitrogen
 	 "name": "N2+",
 	 "Z":  1,
 	 "mobile": false,
@@ -130,6 +136,7 @@
 	 }	 
      },
      {
+	 // Ionized molecular oxygen
 	 "name": "O2+",
 	 "Z":  1,
 	 "mobile": false,
@@ -149,11 +156,13 @@
 	 }	 
      },
      {"name": "O2-", "Z": -1, "mobile": false, "diffusive": false},
-     {"name": "O-", "Z": -1, "mobile": false, "diffusive": false}     
+     {"name": "O-", "Z": -1, "mobile": false, "diffusive": false},
+     {"name": "1PN2", "Z": 0, "mobile": false, "diffusive": false}
  ],
  "photon species":
  [
      {
+	 // Zheleznyak model for photons. 
 	 "name": "Y",
 	 "kappa": "stochastic A",
 	 "neutral": "O2",
@@ -164,9 +173,11 @@
      }
  ],
  "sigma": {
+     // Initial surface charge density - not relevant for this mode 
      "initial density": 0.0
  },
  "alpha": {
+     // Townsend ionization coefficient. 
      "lookup": "table E/N",
      "file" : "bolsig_air.dat",
      "header": "E/N (Td)\tTownsend ioniz. coef. alpha/N (m2)",
@@ -179,6 +190,7 @@
      "plot": true
  },
  "eta": {
+     // Townsend attachment coefficient.  
      "lookup": "table E/N",
      "file" : "bolsig_air.dat",
      "header": "E/N (Td)\tTownsend attach. coef. eta/N (m2)",
@@ -193,6 +205,7 @@
  "plasma reactions": 
  [
      {
+	 // Ionization of molecular oxygen
 	 "reaction": "e + O2 -> e + e + O2+",
 	 "lookup": "table E/N",
 	 "description": "O2 ionization 12.06 eV",
@@ -212,6 +225,7 @@
 	 }
      },
      {
+	 // Ionization of molecular nitrogen	 
 	 "reaction": "e + N2 -> e + e + N2+",
 	 "description": "N2 ionization 15.60 eV",	  
 	 "lookup": "table E/N",
@@ -231,6 +245,7 @@
 	 }
      },
      {
+	 // Dissociative attachment of oxygen
 	 "reaction": "e + O2 -> O-",
 	 "description": "O2 dissociative attachment",
 	 "lookup": "table E/N",
@@ -246,6 +261,7 @@
 	 "scale": 1.0
      },
      {
+	 // Production of photo-electrons
 	 "reaction": "e + N2 -> e + N2 + Y",
 	 "lookup": "table E/N",
 	 "file" : "bolsig_air.dat",
@@ -260,10 +276,26 @@
 	 "scale": 0.06
      },
      {
+	 // Removal of positive thundercloud charge. 
 	 "reaction": "TC+ -> ",
 	 "lookup": "constant",
 	 "rate" : 1E3
-     }     
+     },
+     {
+	 // Excitation of nitrogen to first positive system. 
+	 "reaction": "e + N2 -> e + 1PN2",
+	 "description": "1PN2 excitation 7.35eV",
+	 "lookup": "table E/N",
+	 "file" : "bolsig_air.dat",
+	 "header": "C14   N2    Excitation    7.35 eV",
+	 "E/N": 0,
+	 "rate": 1,	  
+	 "min E/N": 1,
+	 "max E/N": 2E6,
+	 "spacing": "exponential",     
+	 "points": 1000,	 
+	 "plot": true
+     }
  ],
  "photo reactions":
  [

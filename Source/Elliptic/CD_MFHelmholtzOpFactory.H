@@ -22,7 +22,7 @@
 #include <CD_EBAMRData.H>
 #include <CD_MFHelmholtzOp.H>
 #include <CD_MFCoarAve.H>
-#include <CD_MFFluxReg.H>
+#include <CD_MFReflux.H>
 #include <CD_MFMultigridInterpolator.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_MFBaseIVFAB.H>
@@ -32,9 +32,9 @@
 
 /*!
   @brief Factory class for making MFHelmholtzOp. 
-  @note  This factory is designed for coupling EBHelmholtzOps across EBIS levels
-  @note  This factory is designed without time-dependence in BCs. Time-dependent BCs are still doable by letting the boundary condition classes carry a reference to 
-         an externally updated time. If you need new coefficients you will have to set up multigrid again. 
+  @note This factory is designed for coupling EBHelmholtzOps across EBIS levels
+  @note This factory is designed without time-dependence in BCs. Time-dependent BCs are still doable by letting the boundary condition classes carry a reference to 
+  an externally updated time. If you need new coefficients you will have to set up multigrid again. 
 */
 class MFHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<MFCellFAB>>
 {
@@ -43,7 +43,7 @@ public:
   using MFIS             = RefCountedPtr<MultiFluidIndexSpace>;
   using AmrLevelGrids    = Vector<MFLevelGrid>;
   using AmrInterpolators = Vector<MFMultigridInterpolator>;
-  using AmrFluxRegisters = Vector<MFFluxReg>;
+  using AmrFluxRegisters = Vector<MFReflux>;
   using AmrCoarseners    = Vector<MFCoarAve>;
   using AmrResolutions   = Vector<Real>;
   using AmrRefRatios     = Vector<int>;

@@ -37,8 +37,11 @@ MFHelmholtzSaturationChargeJumpBCFactory::create(const Location::Cell a_dataLoca
                                                  const int            a_order,
                                                  const int            a_weight,
                                                  const int            a_radius,
-                                                 const int            a_ghostCF)
+                                                 const int            a_ghostCF,
+                                                 const IntVect        a_ghostPhi)
 {
+  CH_TIME("MFHelmholtzSaturationChargeJumpBCFactory::create");
+
   int order = a_order;
 
   // Drop order if we must
@@ -56,7 +59,8 @@ MFHelmholtzSaturationChargeJumpBCFactory::create(const Location::Cell a_dataLoca
                                                                                 order,
                                                                                 a_weight,
                                                                                 a_radius,
-                                                                                a_ghostCF));
+                                                                                a_ghostCF,
+                                                                                a_ghostPhi));
 }
 
 #include <CD_NamespaceFooter.H>

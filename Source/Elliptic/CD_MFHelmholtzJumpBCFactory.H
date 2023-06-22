@@ -47,6 +47,7 @@ public:
     @param[in] a_weight       Weighting factor for least squares
     @param[in] a_radius       Stencil radius
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
+    @param[in] a_ghostPhi     Number of ghost cells in phi
   */
   virtual RefCountedPtr<MFHelmholtzJumpBC>
   create(const Location::Cell a_dataLocation,
@@ -56,7 +57,8 @@ public:
          const int            a_order,
          const int            a_weight,
          const int            a_radius,
-         const int            a_ghostCF);
+         const int            a_ghostCF,
+         const IntVect        a_ghostPhi);
 
   /*!
     @brief Drop BC order if domain size is equal or below this.

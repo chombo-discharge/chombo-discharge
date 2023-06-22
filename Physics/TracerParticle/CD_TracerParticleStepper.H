@@ -164,21 +164,29 @@ namespace Physics {
 #endif
 
       /*!
-	@brief Write plot data to output holder. 
-	@param[inout] a_output            Output data holder.
-	@param[in]    a_plotVariableNames Plot variable names.
-	@param[inout] a_icomp             Starting component in a_output to begin at. 
+	@brief Get number of plot variables for this physics module
       */
-      virtual void
-      writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
+      int
+      getNumberOfPlotVariables() const override;
 
       /*!
-	@brief Get the number of plot variables for this time stepper. 
-	@details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. 
-	@return Returns number of plot variables that will be written during writePlotData
+	@brief Get plot variable names
       */
-      virtual int
-      getNumberOfPlotVariables() const override;
+      Vector<std::string>
+      getPlotVariableNames() const override;
+
+      /*!
+	@brief Write plot data to output holder. 
+	@param[inout] a_output Output data holder.
+	@param[inout] a_icomp  Starting component in a_output to begin at. 
+	@param[in]    a_outputRealm Realm where a_output belongs
+	@param[in]    a_level  Grid level
+      */
+      void
+      writePlotData(LevelData<EBCellFAB>& a_output,
+                    int&                  a_icomp,
+                    const std::string     a_realm,
+                    const int             a_level) const override;
 
       /*!
 	@brief Compute a time step to be used by Driver. 

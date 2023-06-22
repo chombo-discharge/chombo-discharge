@@ -12,6 +12,9 @@
 #ifndef CD_Units_H
 #define CD_Units_H
 
+// Chombo includes
+#include <REAL.H>
+
 // Our includes
 #include <CD_NamespaceHeader.H>
 

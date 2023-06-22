@@ -361,16 +361,6 @@ public:
   writePlotFile() const noexcept;
 
   /*!
-    @brief Write output data to a_output
-    @param[inout] a_output Output data holder.
-    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
-    @note This will write the plot data in this solver to a_output, starting on a_comp
-    @note This routine writes m_phi and m_rhs into a_ouput. 
-  */
-  virtual void
-  writePlotData(EBAMRCellData& a_output, int& a_comp) const noexcept;
-
-  /*!
     @brief Get number of variables to be plotted. 
   */
   virtual int
@@ -382,6 +372,21 @@ public:
   */
   virtual Vector<std::string>
   getPlotVariableNames() const noexcept;
+
+  /*!
+    @brief Write output data to a_output
+    @param[inout] a_output Output data holder.
+    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in]    a_outputRealm Realm where a_output belongs
+    @param[in]    a_level  Grid level
+    @note This will write the plot data in this solver to a_output, starting on a_comp
+    @note This routine writes m_phi and m_rhs into a_ouput. 
+  */
+  virtual void
+  writePlotData(LevelData<EBCellFAB>& a_output,
+                int&                  a_comp,
+                const std::string     a_outputRealm,
+                const int             a_level) const noexcept;
 
 protected:
   /*!

@@ -47,6 +47,11 @@ RoundedBoxIF::RoundedBoxIF(const RealVect a_loCorner,
   TransformIF* tif = new TransformIF(*bif);
   tif->translate(a_loCorner + 0.5 * xyz);
 
+  delete bif;
+  for (int i = 0; i < parts.size(); i++) {
+    delete parts[i];
+  }
+
   // Done;
   m_baseIF = RefCountedPtr<BaseIF>(tif);
 }

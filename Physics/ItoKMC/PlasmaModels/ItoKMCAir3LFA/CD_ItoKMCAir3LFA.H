@@ -67,6 +67,13 @@ namespace Physics {
       computeAlpha(const RealVect a_E) const override;
 
       /*!
+	@brief Compute Townsend attachment coefficient
+	@param[in] a_E Electric field. 
+      */
+      virtual Real
+      computeEta(const RealVect a_E) const override;
+
+      /*!
 	@brief Update reaction rates
 	@param[in] a_E       Electric field
 	@param[in] a_phi     Plasma species densities

@@ -97,13 +97,6 @@ public:
   parseRuntimeOptions();
 
   /*!
-    @brief Get output plot names
-    @return Returns a string of all variables that this solver can add to plot files. 
-  */
-  virtual Vector<std::string>
-  getPlotVariableNames() const;
-
-  /*!
     @brief Get the EB-particle intersection algorithm
   */
   virtual EBIntersection
@@ -268,6 +261,30 @@ public:
   */
   virtual void
   depositParticles(const WhichContainer a_container);
+
+  /*!
+    @brief Do an NGP deposit on a specific grid level. Used for IO.
+    @param[out] a_output Contains NGP deposition of particles. Ignores cut-cells.
+    @param[in] a_particles Particles
+    @param[in] a_level Grid level
+  */
+  template <class P, const Real& (P ::*particleScalarField)() const>
+  void
+  depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
+                      const ParticleContainer<P>& a_particles,
+                      const int                   a_level) const noexcept;
+
+  /*!
+    @brief Do an NGP deposit on a specific grid level. Used for IO.
+    @param[out] a_output Contains NGP deposition of particles. Ignores cut-cells.
+    @param[in] a_particles Particles
+    @param[in] a_level Grid level
+  */
+  template <class P, Real (P ::*particleScalarField)() const>
+  void
+  depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
+                      const ParticleContainer<P>& a_particles,
+                      const int                   a_level) const noexcept;
 
   /*!
     @brief Generic deposition function which deposits a particle field onto the mesh using a specified deposition method. 
@@ -455,6 +472,27 @@ public:
   getNumberOfPlotVariables() const;
 
   /*!
+    @brief Get output plot names
+    @return Returns a string of all variables that this solver can add to plot files. 
+  */
+  virtual Vector<std::string>
+  getPlotVariableNames() const;
+
+  /*!
+    @brief Write plot data
+    @param[inout] a_output Output data holder.
+    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in]    a_outputRealm Realm where a_output belongs
+    @param[in]    a_level  Grid level
+    @note This will write the plot data in this solver to a_output, starting on a_comp
+  */
+  virtual void
+  writePlotData(LevelData<EBCellFAB>& a_output,
+                int&                  a_comp,
+                const std::string     a_outputRealm,
+                const int             a_level) const noexcept;
+
+  /*!
     @brief Get number of particles in a specified particle container
     @param[in] a_whichContainer Which container to count particles in. 
     @param[in] a_localOnly      Only report local particles (i.e. not reduced over MPI ranks)
@@ -506,15 +544,6 @@ public:
   */
   virtual void
   setTime(const int a_step, const Real a_time, const Real a_dt);
-
-  /*!
-    @brief Write plot data
-    @param[inout] a_output Output data holder.
-    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
-    @note This will write the plot data in this solver to a_output, starting on a_comp
-  */
-  virtual void
-  writePlotData(EBAMRCellData& a_output, int& a_comp);
 
 #ifdef CH_USE_HDF5
   /*!
@@ -640,20 +669,6 @@ public:
   getDiffusionFunction() const;
 
   /*!
-    @brief Get scratch storage
-    @return Returns m_scratch
-  */
-  virtual EBAMRCellData&
-  getScratch();
-
-  /*!
-    @brief Get scratch storage
-    @return Returns m_scratch
-  */
-  virtual const EBAMRCellData&
-  getScratch() const;
-
-  /*!
     @brief Get mobility function
     @return m_mobilityFunction
   */
@@ -721,28 +736,11 @@ public:
   interpolateMobilities();
 
   /*!
-    @brief Interpolate mobilities -- this will switch between the two ways of computing the particle mobility.
-    @param[in] a_level Grid level
-    @param[in] a_dit   Grid index
-  */
-  virtual void
-  interpolateMobilities(const int a_level, const DataIndex& a_dit);
-
-  /*!
     @brief Update mobilities parametrically from the particle energy. 
     @details This calls the mobility function implemented by ItoSpecies. The particle mobility is set mu = f(p.energy()) where f is the mobility function in ItoSpecies
   */
   virtual void
   updateMobilities();
-
-  /*!
-    @brief Update mobilities parametrically from the particle energy.
-    @details This calls the mobility function implemented by ItoSpecies. The particle mobility is set mu = f(p.energy()) where f is the mobility function in ItoSpecies
-    @param[in] a_level Grid level
-    @param[in] a_dit   Grid index
-  */
-  virtual void
-  updateMobilities(const int a_level, const DataIndex a_dit);
 
   /*!
     @brief Interpolate the diffusion field to the particle positions. 
@@ -752,29 +750,11 @@ public:
   interpolateDiffusion();
 
   /*!
-    @brief Interpolate the diffusion field to the particle positions. 
-    @details This computes D_p = Df(X_p) where Df is the diffusion field on the mesh. 
-    @param[in] a_level Grid level
-    @param[in] a_dit   Grid index
-  */
-  virtual void
-  interpolateDiffusion(const int a_level, const DataIndex& a_dit);
-
-  /*!
     @brief Update mobilities parametrically from the particle energy. 
     @details This calls the diffusion function implemented by ItoSpecies. The particle diffusion is set D = f(p.energy()) where f is the diffusion function in ItoSpecies
   */
   virtual void
   updateDiffusion();
-
-  /*!
-    @brief Update mobilities parametrically from the particle energy. 
-    @details This calls the diffusion function implemented by ItoSpecies. The particle diffusion is set D = f(p.energy()) where f is the diffusion function in ItoSpecies
-    @param[in] a_level Grid level
-    @param[in] a_dit   Grid index    
-  */
-  virtual void
-  updateDiffusion(const int a_level, const DataIndex a_dit);
 
   /*!
     @brief Sort the input particle container by cell.
@@ -1249,11 +1229,6 @@ protected:
   EBAMRCellData m_diffusionFunction;
 
   /*!
-    @brief Scratch data
-  */
-  mutable EBAMRCellData m_scratch;
-
-  /*!
     @brief Scratch storage for holding the non-conservative deposition
   */
   mutable EBAMRIVData m_depositionNC;
@@ -1451,50 +1426,21 @@ protected:
   depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC) const;
 
   /*!
-    @brief Increment redistribution objects with mass to be redistributed
-    @param[in] a_massDifference mass to be redistributed. 
-  */
-  void
-  incrementRedist(const EBAMRIVData& a_massDifference) const;
-
-  /*!
-    @brief Do redistribution on all levels, no coarse-fine stuff
-    @param[inout] a_phi Data to be redistributed into. 
-  */
-  void
-  levelRedist(EBAMRCellData& a_phi) const;
-
-  /*!
-    @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
-    @param[in] a_massDifference mass to be redistributed. 
-  */
-  void
-  coarseFineIncrement(const EBAMRIVData& m_massDifference) const;
-
-  /*!
-    @brief Do coarse-fine mass redistribution
-    @param[inout] a_phi Data to be redistributed into. 
-  */
-  void
-  coarseFineRedistribution(EBAMRCellData& a_phi) const;
-
-  /*!
     @brief Superparticle merging with BVH trees
     @param[inout] a_particles        Particles to be merged/split
     @param[in]    a_particlesPerCell Target number of particles per cell
   */
-  void
+  virtual void
   makeSuperparticles(List<ItoParticle>& a_particles, const int a_particlesPerCell);
 
   /*!
-    @brief Write data to output. Convenience function which just copies data from one data holder to the output data holder. 
-    @param[inout] a_output            Output data holder.
-    @param[inout] a_icomp             Starting component where this solver begins writing the output. 
-    @param[in]    a_data              Data to write. 
-    @param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
+    @brief Interpolate mobilities -- this will switch between the two ways of computing the particle mobility.
+    @param[in] a_level             Grid level.
+    @param[in] a_dit               Grid index.
+    @param[in] a_velocityMagnitude Velocity magnitude.
   */
   virtual void
-  writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interpToCentroids) const;
+  interpolateMobilities(const int a_level, const DataIndex& a_dit, const EBCellFAB& a_velocityMagnitude) noexcept;
 
   /*!
     @brief Directly interpolate mobilities. Interpolates for all particles in the specified grid patch. 
@@ -1502,15 +1448,64 @@ protected:
     @param[in] a_dit   Grid index.
   */
   virtual void
-  interpolateMobilitiesDirect(const int a_level, const DataIndex& a_dit);
+  interpolateMobilitiesDirect(const int a_level, const DataIndex& a_dit) noexcept;
 
   /*!
     @brief Interpolate mobilities through the velocity. Interpolates for all particles in the specified grid patch. 
-    @param[in] a_level Grid level.
-    @param[in] a_dit   Grid index.
+    @param[in] a_level             Grid level.
+    @param[in] a_dit               Grid index.
+    @param[in] a_velocityMagnitude Velocity magnitude.
   */
   virtual void
-  interpolateMobilitiesVelocity(const int a_level, const DataIndex& a_dit);
+  interpolateMobilitiesVelocity(const int        a_level,
+                                const DataIndex& a_dit,
+                                const EBCellFAB& a_velocityMagnitude) noexcept;
+
+  /*!
+    @brief Update mobilities parametrically from the particle energy.
+    @details This calls the mobility function implemented by ItoSpecies. The particle mobility is set mu = f(p.energy()) where f is the mobility function in ItoSpecies
+    @param[in] a_level Grid level
+    @param[in] a_dit   Grid index
+  */
+  virtual void
+  updateMobilities(const int a_level, const DataIndex a_dit);
+
+  /*!
+    @brief Interpolate the diffusion field to the particle positions. 
+    @details This computes D_p = Df(X_p) where Df is the diffusion field on the mesh. 
+    @param[in] a_level Grid level
+    @param[in] a_dit   Grid index
+  */
+  virtual void
+  interpolateDiffusion(const int a_level, const DataIndex& a_dit);
+
+  /*!
+    @brief Update mobilities parametrically from the particle energy. 
+    @details This calls the diffusion function implemented by ItoSpecies. The particle diffusion is set D = f(p.energy()) where f is the diffusion function in ItoSpecies
+    @param[in] a_level Grid level
+    @param[in] a_dit   Grid index    
+  */
+  virtual void
+  updateDiffusion(const int a_level, const DataIndex a_dit);
+
+  /*!
+    @brief Write data to output. Convenience function. 
+    @param[inout] a_output Output data holder.
+    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in]    a_data   Data to write. 
+    @param[in]    a_outputRealm Realm where a_output belongs
+    @param[in]    a_level  Grid level
+    @param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
+    @param[in]    a_interpGhost If true, interpolate ghost cells
+  */
+  virtual void
+  writeData(LevelData<EBCellFAB>& a_output,
+            int&                  a_comp,
+            const EBAMRCellData&  a_data,
+            const std::string     a_outputRealm,
+            const int             a_level,
+            const bool            a_interpToCentroids,
+            const bool            a_interpGhost) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

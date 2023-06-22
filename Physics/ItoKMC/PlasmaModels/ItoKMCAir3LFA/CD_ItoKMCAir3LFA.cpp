@@ -101,11 +101,11 @@ ItoKMCAir3LFA::ItoKMCAir3LFA()
   auto y1 = std::make_shared<ItoKMCPhotoReaction>(0, std::list<size_t>{0, 1});
   m_photoReactions.emplace_back(y1);
 
-  // Run the rest of the define method.
-  this->define();
-
   // Read input data
   this->readTables();
+
+  // Run the rest of the define method.
+  this->define();
 }
 
 ItoKMCAir3LFA::~ItoKMCAir3LFA() { CH_TIME("ItoKMCAir3LFA::~ItoKMCAir3LFA"); }
@@ -212,6 +212,14 @@ ItoKMCAir3LFA::computeAlpha(const RealVect a_E) const
   CH_TIME("ItoKMCAir3LFA::computeAlpha");
 
   return m_tables.at("alpha").getEntry<1>(a_E.vectorLength());
+}
+
+Real
+ItoKMCAir3LFA::computeEta(const RealVect a_E) const
+{
+  CH_TIME("ItoKMCAir3LFA::computeEta");
+
+  return m_tables.at("eta").getEntry<1>(a_E.vectorLength());
 }
 
 Vector<Real>

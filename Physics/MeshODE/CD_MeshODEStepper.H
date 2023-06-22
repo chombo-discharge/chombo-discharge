@@ -146,16 +146,6 @@ namespace Physics {
       virtual void
       readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
 #endif
-
-      /*!
-	@brief Write plot data to output holder. 
-	@param[inout] a_output            Output data holder.
-	@param[in]    a_plotVariableNames Plot variable names.
-	@param[inout] a_icomp             Starting component in a_output to begin at. 
-      */
-      virtual void
-      writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
-
       /*!
 	@brief Get the number of plot variables for this time stepper. 
 	@details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. 
@@ -163,6 +153,25 @@ namespace Physics {
       */
       virtual int
       getNumberOfPlotVariables() const override;
+
+      /*!
+	@brief Get plot variable names
+      */
+      virtual Vector<std::string>
+      getPlotVariableNames() const override;
+
+      /*!
+	@brief Write plot data to output holder. 
+	@param[inout] a_output Output data holder.
+	@param[inout] a_icomp  Starting component in a_output to begin at. 
+	@πparam[in]   a_outputRealm Realm where a_output belongs
+	@param[in]    a_level  Grid level
+      */
+      virtual void
+      writePlotData(LevelData<EBCellFAB>& a_output,
+                    int&                  a_icomp,
+                    const std::string     a_outputRealm,
+                    const int             a_level) const override;
 
       /*!
 	@brief Compute a time step to be used by Driver. 

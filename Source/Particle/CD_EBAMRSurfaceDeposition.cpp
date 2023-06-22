@@ -208,6 +208,7 @@ EBAMRSurfaceDeposition::defineDataMotion() noexcept
 
   // TLDR: Define copiers for moving data between AMR levels and refinement/coarsenings of AMR levels.
 
+  m_validToValidCopiers.resize(1 + m_finestLevel);
   m_copierLevel.resize(1 + m_finestLevel);
   m_copierRefinedCoarToFineNoGhosts.resize(1 + m_finestLevel);
   m_copierCoarsenedFineToCoar.resize(1 + m_finestLevel);
@@ -221,6 +222,9 @@ EBAMRSurfaceDeposition::defineDataMotion() noexcept
     const DisjointBoxLayout& dbl    = eblg.getDBL();
 
     const bool doExchange = true;
+
+    // Valid to valid copier.
+    m_validToValidCopiers[lvl].define(dbl, dbl, domain);
 
     // Define Copier as going from valid -> valid+ghost.
     m_copierLevel[lvl].define(dbl, dbl, domain, m_radius * IntVect::Unit, doExchange);

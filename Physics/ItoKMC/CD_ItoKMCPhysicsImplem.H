@@ -93,8 +93,6 @@ ItoKMCPhysics::defineKMC() noexcept
 {
   CH_TIME("ItoKMCPhysics::defineKMC");
 
-  CH_assert(m_isDefined);
-
   m_kmcState.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
 
   m_kmcSolver.define(m_kmcReactions);

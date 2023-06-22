@@ -363,18 +363,6 @@ ItoLayout<T>::getDensities()
 
 template <class T>
 Vector<EBAMRCellData*>
-ItoLayout<T>::getScratch()
-{
-  Vector<EBAMRCellData*> ret(m_solvers.size(), nullptr);
-  for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
-    ret[iter.index()] = &(iter()->getScratch());
-  }
-
-  return ret;
-}
-
-template <class T>
-Vector<EBAMRCellData*>
 ItoLayout<T>::getDiffusionFunctions()
 {
   Vector<EBAMRCellData*> ret(m_solvers.size(), nullptr);

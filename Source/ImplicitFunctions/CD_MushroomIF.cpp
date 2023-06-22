@@ -41,6 +41,9 @@ MushroomIF::MushroomIF(const RealVect a_center,
 
   m_baseIF      = RefCountedPtr<BaseIF>(new SmoothIntersection(parts, a_curv));
   m_fluidInside = a_fluidInside;
+
+  delete parts[0];
+  delete parts[1];
 }
 
 MushroomIF::MushroomIF(const MushroomIF& a_inputIF)
