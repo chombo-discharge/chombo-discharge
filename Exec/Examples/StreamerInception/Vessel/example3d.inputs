@@ -38,7 +38,7 @@ Driver.checkpoint_interval             = -1               # Checkpoint interval
 Driver.regrid_interval                 = -1               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 0                # Number of initial regrids
+Driver.initial_regrids                 = 3                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
@@ -165,11 +165,12 @@ Vessel.live_shroom   = false          # Mushroom is live or not
 # ====================================================================================================
 StreamerInceptionStepper.verbosity     = -1                            # Chattiness.
 StreamerInceptionStepper.profile       = false
+StreamerInceptionStepper.full_integration          = false
 StreamerInceptionStepper.mode          = transient                     # Mode (stationary or transient)
-StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
+StreamerInceptionStepper.inception_alg = euler alpha 0.25                 # Integration algorithm for inception integral.
 StreamerInceptionStepper.output_file   = report.txt                    # Output file
 StreamerInceptionStepper.K_inception   = 10                            # User-specified inception value
-StreamerInceptionStepper.plt_vars      = K ions Uinc bg_rate detachment alpha eta poisson # Plot variables
+StreamerInceptionStepper.plt_vars      = K ions Uinc bg_rate detachment alpha eta # Plot variables
 
 # Static mode
 StreamerInceptionStepper.voltage_lo    = 10E3                          # Low voltage multiplier
@@ -177,7 +178,7 @@ StreamerInceptionStepper.voltage_hi    = 30E3                          # Highest
 StreamerInceptionStepper.voltage_steps = 10                            # Number of voltage steps
 
 # Dynamic mode
-StreamerInceptionStepper.ion_transport = true                          # Turn on/off ion transport
+StreamerInceptionStepper.ion_transport = false                          # Turn on/off ion transport
 StreamerInceptionStepper.transport_alg = heun                           # Advection algorithm. 
 StreamerInceptionStepper.cfl           = 0.8                           # CFL time step for dynamic mode
 StreamerInceptionStepper.min_dt        = 0.0                           # Minimum permitted time step
@@ -190,13 +191,13 @@ StreamerInceptionStepper.max_dt        = 250E-9                        # Maximum
 StreamerInceptionTagger.verbosity   = -1    # Tagger chattiness. 
 StreamerInceptionTagger.buffer      = 0     # Grown buffer around flagged cells
 StreamerInceptionTagger.max_voltage = 50E3 # Maximum applied voltage 
-StreamerInceptionTagger.ref_alpha   = 5.0   # Refinement curvature criterion. Lower => more mesh
+StreamerInceptionTagger.ref_alpha   = 2.0   # Refinement curvature criterion. Lower => more mesh
 StreamerInceptionTagger.plot        = false # Plot tagging field or not.
 
 # ====================================================================================================
 # Parameters for lightning impulse (used for dynamic runs)
 # ====================================================================================================
-lightning_impulse.peak       = 50E3
+lightning_impulse.peak       = 100E3
 lightning_impulse.start      = 1.E-9
 lightning_impulse.front_time = 1.2E-6
 lightning_impulse.tail_time  = 50E-6
