@@ -693,7 +693,7 @@ namespace Physics {
 	@brief output data file
       */
       std::string m_dataOutputFile;
-      
+
       /*!
 	@brief Output file
       */
@@ -933,7 +933,7 @@ namespace Physics {
       */
       virtual Real
       computeCriticalAreaTransient() const noexcept;
-      
+
       /*!
 	@brief Compute the ionization volume for each voltage
 	@note For the stationary method
@@ -960,7 +960,7 @@ namespace Physics {
       */
       void
       writeDataReportTransient(const Real& a_voltage) const noexcept;
-      
+
       /*!
 	@brief Print report to the terminal. 
 	@note For stationary runs

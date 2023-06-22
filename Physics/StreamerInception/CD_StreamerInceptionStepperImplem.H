@@ -2995,51 +2995,52 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeTransient() const noexce
   return ParallelOps::sum(Vcr);
 }
 
-template<typename P, typename F, typename C>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::computeCriticalAreaStationary() noexcept {
+StreamerInceptionStepper<P, F, C>::computeCriticalAreaStationary() noexcept
+{
   CH_TIME("StreamerInceptionStepper::computeCriticalAreaStationary");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::computeCriticalAreaStationary" << endl;
   }
 
   // Solve critical area of K values for each voltage
-  for (size_t i = 0; i < m_voltageSweeps.size(); ++i){
+  for (size_t i = 0; i < m_voltageSweeps.size(); ++i) {
     Real criticalAreaPlus = 0.0;
     Real criticalAreaMinu = 0.0;
 
-    for(int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-      const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
       const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
 
       const Real dx = m_amr->getDx()[lvl];
 
-      for(DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const EBISBox& ebisbox = ebisl[dit()];
-	const BaseFab<bool>& validCells = validCellsLD[dit()];
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+        const EBISBox&       ebisbox    = ebisl[dit()];
+        const BaseFab<bool>& validCells = validCellsLD[dit()];
 
-	const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
-	const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
+        const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
+        const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
 
-	auto irregularKernel = [&] (const VolIndex& vof) -> void{
-	  if(validCells(vof.gridIndex())){
-	    const Real boundaryArea = ebisbox.bndryArea(vof);
+        auto irregularKernel = [&](const VolIndex& vof) -> void {
+          if (validCells(vof.gridIndex())) {
+            const Real boundaryArea = ebisbox.bndryArea(vof);
 
-	    if(inceptionIntegralPlus(vof, i) >= m_inceptionK){
-	      criticalAreaPlus += boundaryArea * std::pow(dx, SpaceDim-1);
-	    }
-	    if(inceptionIntegralMinu(vof, i) >= m_inceptionK){
-	      criticalAreaMinu += boundaryArea * std::pow(dx, SpaceDim-1);
-	    }
-	  }
-	};
+            if (inceptionIntegralPlus(vof, i) >= m_inceptionK) {
+              criticalAreaPlus += boundaryArea * std::pow(dx, SpaceDim - 1);
+            }
+            if (inceptionIntegralMinu(vof, i) >= m_inceptionK) {
+              criticalAreaMinu += boundaryArea * std::pow(dx, SpaceDim - 1);
+            }
+          }
+        };
 
-	// Kernel regions.
-	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+        // Kernel regions.
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 
-	BoxLoops::loop(vofit, irregularKernel);
+        BoxLoops::loop(vofit, irregularKernel);
       }
     }
 
@@ -3050,33 +3051,34 @@ StreamerInceptionStepper<P, F, C>::computeCriticalAreaStationary() noexcept {
 
 template <typename P, typename F, typename C>
 Real
-StreamerInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcept{
+StreamerInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcept
+{
   CH_TIME("StreamerInceptionStepper::computeCriticalAreaTransient");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::computeCriticalAreaTransient" << endl;
   }
-  
+
   Real Acr = 0.0;
 
-  for(int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
     const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
 
-    const Real dx = m_amr->getDx()[lvl];
-    const Real area = std::pow(dx, SpaceDim-1);
+    const Real dx   = m_amr->getDx()[lvl];
+    const Real area = std::pow(dx, SpaceDim - 1);
 
-    for(DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const EBISBox& ebisbox = ebisl[dit()];
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      const EBISBox&       ebisbox    = ebisl[dit()];
       const BaseFab<bool>& validCells = validCellsLD[dit()];
 
       const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[dit()];
-      
-      auto irregularKernel = [&] (const VolIndex& vof) -> void{
-	if(validCells(vof.gridIndex()) && inceptionIntegral(vof, 0) >= m_inceptionK){
-	  Acr += ebisbox.bndryArea(vof) * area;
-	}
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        if (validCells(vof.gridIndex()) && inceptionIntegral(vof, 0) >= m_inceptionK) {
+          Acr += ebisbox.bndryArea(vof) * area;
+        }
       };
 
       // Kernel regions.
@@ -3085,7 +3087,7 @@ StreamerInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcept
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
-  
+
   return ParallelOps::sum(Acr);
 }
 
@@ -3483,96 +3485,97 @@ StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
 #endif
 }
 
-template<typename P, typename F, typename C>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P,F,C>::writeDataReportTransient(const Real& a_voltage) const noexcept
+StreamerInceptionStepper<P, F, C>::writeDataReportTransient(const Real& a_voltage) const noexcept
 {
   CH_TIME("StreamerInceptionStepper::writeDataReportTransient");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::writeDataReportTransient" << endl;
   }
 
   std::vector<RealVect> pos;
-  std::vector<Real> E;
-  std::vector<Real> dA;
-  std::vector<Real> dV;
-  std::vector<Real> ionDensityVector;
+  std::vector<Real>     E;
+  std::vector<Real>     dA;
+  std::vector<Real>     dV;
+  std::vector<Real>     ionDensityVector;
 
   const RealVect probLo = m_amr->getProbLo();
-  
-  for(int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
     const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
 
-    const Real dx = m_amr->getDx()[lvl];
-    const Real vol = std::pow(dx, SpaceDim);
-    const Real area = std::pow(dx, SpaceDim -1);
-    
-    for(DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const EBISBox& ebisbox = ebisl[dit()];
+    const Real dx   = m_amr->getDx()[lvl];
+    const Real vol  = std::pow(dx, SpaceDim);
+    const Real area = std::pow(dx, SpaceDim - 1);
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      const EBISBox&       ebisbox    = ebisl[dit()];
       const BaseFab<bool>& validCells = validCellsLD[dit()];
 
       const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[dit()];
-      
-      const EBCellFAB& electricField = (*m_electricFieldPlus[lvl])[dit()];
+
+      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
-      const EBCellFAB& ionDensity = (*m_ionSolver->getPhi()[lvl])[dit()];
+      const EBCellFAB& ionDensity    = (*m_ionSolver->getPhi()[lvl])[dit()];
       const FArrayBox& ionDensityReg = ionDensity.getFArrayBox();
-      
-      auto regularKernel = [&](const IntVect& iv) -> void{
-	if(validCells(iv, 0) && ebisbox.isRegular(iv)){
-	  pos.push_back(probLo + (0.5*RealVect::Unit + RealVect(iv))*dx);
-	  dA.push_back(0.0);
-	
-	  const RealVect EE = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv,1), electricFieldReg(iv, 2)));
-	  const Real currE = std::abs(a_voltage*EE.vectorLength());
-	  const Real alpha = m_alpha(currE);
-	  const Real eta = m_eta(currE);
-	
-	  E.push_back(currE);
-	  ionDensityVector.push_back(ionDensityReg(iv, 0));
 
-	  if(alpha >= eta){
-	    dV.push_back(vol);
-	  }
-	  else{
-	    dV.push_back(0.0);
-	  }
-	}
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
+          pos.push_back(probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx);
+          dA.push_back(0.0);
+
+          const RealVect EE = RealVect(
+            D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+          const Real currE = std::abs(a_voltage * EE.vectorLength());
+          const Real alpha = m_alpha(currE);
+          const Real eta   = m_eta(currE);
+
+          E.push_back(currE);
+          ionDensityVector.push_back(ionDensityReg(iv, 0));
+
+          if (alpha >= eta) {
+            dV.push_back(vol);
+          }
+          else {
+            dV.push_back(0.0);
+          }
+        }
       };
-      auto irregularKernel = [&](const VolIndex& vof) -> void{
-	if(validCells(vof.gridIndex())){
-	  pos.push_back(probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx));
-	
-	  const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof,1), electricField(vof, 2)));
-	  const Real currE = std::abs(a_voltage*EE.vectorLength());
-	  const Real alpha = m_alpha(currE);
-	  const Real eta = m_eta(currE);
-	
-	  E.push_back(currE);
-	  ionDensityVector.push_back(ionDensity(vof, 0));
-	  
-	  if(alpha >= eta){
-	    dV.push_back(ebisbox.volFrac(vof)*vol);
-	  }
-	  else{
-	    dV.push_back(0.0);
-	  }
-	  if(inceptionIntegral(vof, 0) >= m_inceptionK){
-	    dA.push_back(ebisbox.bndryArea(vof) * area);
-	  }
-	  else{
-	    dA.push_back(0.0);
-	  }
-	}
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        if (validCells(vof.gridIndex())) {
+          pos.push_back(probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx));
+
+          const RealVect EE    = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+          const Real     currE = std::abs(a_voltage * EE.vectorLength());
+          const Real     alpha = m_alpha(currE);
+          const Real     eta   = m_eta(currE);
+
+          E.push_back(currE);
+          ionDensityVector.push_back(ionDensity(vof, 0));
+
+          if (alpha >= eta) {
+            dV.push_back(ebisbox.volFrac(vof) * vol);
+          }
+          else {
+            dV.push_back(0.0);
+          }
+          if (inceptionIntegral(vof, 0) >= m_inceptionK) {
+            dA.push_back(ebisbox.bndryArea(vof) * area);
+          }
+          else {
+            dA.push_back(0.0);
+          }
+        }
       };
 
       // Kernel regions.
-      const Box cellBox = dbl[dit()];
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      const Box    cellBox = dbl[dit()];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
@@ -3589,7 +3592,7 @@ StreamerInceptionStepper<P,F,C>::writeDataReportTransient(const Real& a_voltage)
   output << std::left << std::setw(15) << setfill(' ') << "ionDensity";
   output << "\n";
 
-  for(size_t i = 0; i < pos.size(); ++i){
+  for (size_t i = 0; i < pos.size(); ++i) {
     output << std::left << std::setw(15) << pos[i][0];
     output << std::left << std::setw(15) << pos[i][1];
     output << std::left << std::setw(15) << pos[i][2];
