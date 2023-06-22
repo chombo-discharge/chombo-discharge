@@ -36,6 +36,16 @@ namespace Physics {
     };
 
     /*!
+      @brief Step size selection method
+    */
+    enum class StepSizeMethod
+    {
+      Fixed,
+      Dx,
+      Alpha
+    };
+
+    /*!
       @brief Algorithm for negative ion advancement
     */
     enum class TransportAlgorithm
@@ -380,6 +390,11 @@ namespace Physics {
       IntegrationAlgorithm m_inceptionAlgorithm;
 
       /*!
+	@brief Step size selection method
+      */
+      StepSizeMethod m_stepSizeMethod;
+
+      /*!
 	@brief Transport algorithm for advancing negative ions in the transient mode
       */
       TransportAlgorithm m_transportAlgorithm;
@@ -552,14 +567,9 @@ namespace Physics {
       Real m_minDt;
 
       /*!
-	@brief Variable step size for K-integration algorithm (factor of dx)
+	@brief Step size factor
       */
-      Real m_relativeInceptionStep;
-
-      /*!
-	@brief Fixed step size (physical dimensions)
-      */
-      Real m_fixedInceptionStep;
+      Real m_stepSizeFactor;
 
       /*!
 	@brief Inception criteria (read from input)
@@ -572,9 +582,14 @@ namespace Physics {
       bool m_profile;
 
       /*!
-	@brief If true, used fixed integration step for inception integration
+	@brief Debug or not
       */
-      bool m_useFixedInceptionStep;
+      bool m_debug;
+
+      /*!
+	@brief Use full reconstruction of critical volume or not
+      */
+      bool m_fullIntegration;
 
       /*!
 	@brief Ion transport on/off
