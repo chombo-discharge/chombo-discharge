@@ -1,49 +1,46 @@
 # ====================================================================================================
-# MechanicalShaft geometry class options
+# MechanicalShaft class options
 # ====================================================================================================
-MechanicalShaft.eps0                      = 1               # Background permittivity
-MechanicalShaft.turn_on_electrode         = true            # Turn on/off electrode
-MechanicalShaft.turn_on_dielectric        = true            # Turn on/off dielectric
+MechanicalShaft.eps0           = 1    # Background permittivity
+MechanicalShaft.use_electrode  = true # Turn on/off electrode
+MechanicalShaft.use_dielectric = true # Turn on/off dielectric
 
 # Electrode settings
 --------------------
-MechanicalShaft.electrode.live            = true            # Live electrode or not
-MechanicalShaft.electrode.endpoint1       = 0 0 0.5         # One endpoint
-MechanicalShaft.electrode.endpoint2       = 0 0 2           # Other endpoint
-MechanicalShaft.electrode.outer_radius    = 0.8             # Electrode outer radius
-MechanicalShaft.electrode.inner_radius    = 0.4             # Electrode inner radius	
-MechanicalShaft.electrode.outer_curvature = 0.1             # Outer curvature
-MechanicalShaft.electrode.inner_curvature = 0.1             # Inner curvature
+MechanicalShaft.electrode.orientation     = "+y"  # Electrode orientation
+MechanicalShaft.electrode.translate       = 0 0 0 # Electrode translation after rotation
+MechanicalShaft.electrode.live            = true  # Live electrode or not
+MechanicalShaft.electrode.length          = 1.0   # Electrode length 
+MechanicalShaft.electrode.outer.radius    = 0.9   # Electrode outer radius
+MechanicalShaft.electrode.inner.radius    = 0.6   # Electrode inner radius	
+MechanicalShaft.electrode.outer.curvature = 0.1   # Outer curvature
+MechanicalShaft.electrode.inner.curvature = 0.1   # Inner curvature
 
-# Mechshaft settings
---------------------
-MechanicalShaft.dielectric.shaft_shape    = polygon         # 'polygon', 'cylinder', or 'cyl_profile'
-MechanicalShaft.dielectric.permittivity   = 4.0             # Dielectric permittivity
 
-# Subsettings for polygonal cross section
------------------------------------------
-MechanicalShaft.dielectric.polygon.endpoint1  = 0 0 -4      # One endpoint
-MechanicalShaft.dielectric.polygon.endpoint2  = 0 0  4      # Other endpoint
-MechanicalShaft.dielectric.polygon.num_sides  = 6           # Number of sides for polygon shape. 
-MechanicalShaft.dielectric.polygon.radius     = 0.3         # Dielectric rod radius
-MechanicalShaft.dielectric.polygon.curvature  = 0.05        # Rounding radius
+# Main dielectric settings
+--------------------------
+MechanicalShaft.dielectric.shape        = circular_profiles # 'polygon', 'cylinder', or 'circular_profiles'
+MechanicalShaft.dielectric.permittivity = 4.0               # Dielectric permittivity
+MechanicalShaft.dielectric.orientation  = "+y"              # Dielectric orientation
+MechanicalShaft.dielectric.translate    = 0 0 0             # Dielectric translation after rotatino
 
 # Subsettings for 'cylinder'
 ----------------------------
-MechanicalShaft.dielectric.cylinder.endpoint1  = 0 0 -4     # Endpoint 1
-MechanicalShaft.dielectric.cylinder.endpoint2  = 0 0 4      # Endpoint 2
-MechanicalShaft.dielectric.cylinder.radius     = 0.3        # Cylinder radius
-MechanicalShaft.dielectric.cylinder.curvature  = 0.1        # Rounding radius
+MechanicalShaft.dielectric.cylinder.radius = 0.25 # Cylinder radius
 
-# Subsettings for 'cyl_profile'
--------------------------------
-MechanicalShaft.dielectric.cyl_profile.endpoint1       = 0 0 -4     # Endpoint 1
-MechanicalShaft.dielectric.cyl_profile.endpoint2       = 0 0  4     # Endpoint 2
-MechanicalShaft.dielectric.cyl_profile.cylinder_radius = 0.3        # Cylinder radius
-MechanicalShaft.dielectric.cyl_profile.torus_major     = 0.3        # Major torus radius
-MechanicalShaft.dielectric.cyl_profile.torus_minor     = 0.1        # Minor torus radius
-MechanicalShaft.dielectric.cyl_profile.torus_distance  = 0.2        # Distance between each torus
-MechanicalShaft.dielectric.cyl_profile.nleft           = 6          # Number of toroids to the left of center
-MechanicalShaft.dielectric.cyl_profile.nright          = 6          # Number of toroids to the right of center
-MechanicalShaft.dielectric.cyl_profile.shift           = 0          # Toroid shift from center
-MechanicalShaft.dielectric.cyl_profile.curvature       = 0.1        # Curvature
+# Subsettings for 'polygon'
+---------------------------
+MechanicalShaft.dielectric.polygon.num_sides  = 6   # Number of sides for polygon shape. 
+MechanicalShaft.dielectric.polygon.radius     = 0.5 # Dielectric rod radius
+MechanicalShaft.dielectric.polygon.curvature  = 0.1 # Rounding radius
+
+# Subsettings for 'circular_profiles'
+------------------------------------
+MechanicalShaft.dielectric.profile.circular.cylinder_radius      = 0.3  # Cylinder radius
+MechanicalShaft.dielectric.profile.circular.profile_major_radius = 0.3  # Profile major radius (torus)
+MechanicalShaft.dielectric.profile.circular.profile_minor_radius = 0.1  # Profile minor radius (torus)
+MechanicalShaft.dielectric.profile.circular.profile_translate    = 0.00 # Profile translation along axis
+MechanicalShaft.dielectric.profile.circular.profile_period       = 0.25 # Profile repetition period
+MechanicalShaft.dielectric.profile.circular.profile_repeat_lo    = 10   # Profile repetition
+MechanicalShaft.dielectric.profile.circular.profile_repeat_hi    = 10   # Profile repetition
+MechanicalShaft.dielectric.profile.circular.profile_smooth       = 0.05 # Profile smoothing

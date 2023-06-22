@@ -1,23 +1,23 @@
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-AmrMesh.lo_corner       = -5E-2 -5E-2 0    # Low corner of problem domain
-AmrMesh.hi_corner       =  5E-2  5E-2 10E-2 # High corner of problem domain
+AmrMesh.lo_corner       = -2 -4 -2    # Low corner of problem domain
+AmrMesh.hi_corner       =  2  0  2    # High corner of problem domain
 AmrMesh.verbosity       = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain = 32 32 32    # Number of cells on coarsest domain
-AmrMesh.max_amr_depth   = 3           # Maximum amr depth
+AmrMesh.max_amr_depth   = 1           # Maximum amr depth
 AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
 AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm  = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting     = morton      # 'none', 'shuffle', 'morton'
-AmrMesh.blocking_factor = 8           # Default blocking factor (16 in 3D)
+AmrMesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
 AmrMesh.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
-AmrMesh.num_ghost       = 3           # Number of ghost cells. Default is 3
-AmrMesh.lsf_ghost       = 3           # Number of ghost cells when writing level-set to grid
-AmrMesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
+AmrMesh.num_ghost       = 2           # Number of ghost cells. Default is 3
+AmrMesh.lsf_ghost       = 2           # Number of ghost cells when writing level-set to grid
+AmrMesh.eb_ghost        = 2           # Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
 AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
@@ -66,10 +66,10 @@ FieldSolverMultigrid.verbosity         = -1                # Class verbosity
 FieldSolverMultigrid.jump_bc           = natural           # Jump BC type ('natural' or 'saturation_charge')
 FieldSolverMultigrid.bc.x.lo      = neumann 0.0          # Bc type.
 FieldSolverMultigrid.bc.x.hi      = neumann 0.0          # Bc type.
-FieldSolverMultigrid.bc.y.lo      = neumann 0.0          # Bc type.
-FieldSolverMultigrid.bc.y.hi      = neumann 0.0          # Bc type.
-FieldSolverMultigrid.bc.z.lo      = dirichlet 0.0     # Bc type.
-FieldSolverMultigrid.bc.z.hi      = dirichlet 1.0     # Bc type.
+FieldSolverMultigrid.bc.y.lo      = dirichlet 0.0          # Bc type.
+FieldSolverMultigrid.bc.y.hi      = dirichlet 1.0          # Bc type.
+FieldSolverMultigrid.bc.z.lo      = neumann 0.0     # Bc type.
+FieldSolverMultigrid.bc.z.hi      = neumann 1.0     # Bc type.
 FieldSolverMultigrid.plt_vars     = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source = true              # Volume weighted space charge density or not (depends on algorithm)
@@ -113,56 +113,52 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # MECHANICAL_SHAFT CLASS OPTIONS
 # ====================================================================================================
 MechanicalShaft.eps0                      = 1               # Background permittivity
-MechanicalShaft.turn_on_electrode         = true            # Turn on/off electrode
-MechanicalShaft.turn_on_dielectric        = true           # Turn on/off dielectric
+MechanicalShaft.use_electrode         = true            # Turn on/off electrode
+MechanicalShaft.use_dielectric        = true           # Turn on/off dielectric
 
 # Electrode settings
 --------------------
-MechanicalShaft.electrode.live            = true            # Live electrode or not
-MechanicalShaft.electrode.endpoint1       = 0 0 8E-2       # One endpoint
-MechanicalShaft.electrode.endpoint2       = 0 0 2           # Other endpoint
-MechanicalShaft.electrode.outer_radius    = 3E-2            # Electrode outer radius
-MechanicalShaft.electrode.inner_radius    = 2E-2             # Electrode inner radius	
-MechanicalShaft.electrode.outer_curvature = 1E-3            # Outer curvature
-MechanicalShaft.electrode.inner_curvature = 1E-3            # Inner curvature
+MechanicalShaft.electrode.orientation     = "+y"  # Electrode orientation
+MechanicalShaft.electrode.translate       = 0.00 0 0.00 # Electrode translation after rotation
+MechanicalShaft.electrode.live            = true  # Live electrode or not
+MechanicalShaft.electrode.length          = 1.0   # Electrode length 
+MechanicalShaft.electrode.outer.radius    = 1.5   # Electrode outer radius
+MechanicalShaft.electrode.inner.radius    = 1.0   # Electrode inner radius	
+MechanicalShaft.electrode.outer.curvature = 0.1   # Outer curvature
+MechanicalShaft.electrode.inner.curvature = 0.1   # Inner curvature
 
-# Mechshaft settings
---------------------
-MechanicalShaft.dielectric.shaft_shape    = polygon         # 'polygon', 'cylinder', or 'cyl_profile'
-MechanicalShaft.dielectric.permittivity   = 4.0             # Dielectric permittivity
-
-# Subsettings for polygonal cross section
------------------------------------------
-MechanicalShaft.dielectric.polygon.endpoint1  = 0 0 -4      # One endpoint
-MechanicalShaft.dielectric.polygon.endpoint2  = 0 0  4      # Other endpoint
-MechanicalShaft.dielectric.polygon.num_sides  = 6           # Number of sides for polygon shape. 
-MechanicalShaft.dielectric.polygon.radius     = 1.5E-2      # Dielectric rod radius
-MechanicalShaft.dielectric.polygon.curvature  = 1E-3        # Rounding radius
+# Main dielectric settings
+--------------------------
+MechanicalShaft.dielectric.shape        = polygon # 'polygon', 'cylinder', or 'circular_profiles'
+MechanicalShaft.dielectric.permittivity = 4.0               # Dielectric permittivity
+MechanicalShaft.dielectric.orientation  = "+y"              # Dielectric orientation
+MechanicalShaft.dielectric.translate    = 0.00 0 0.00             # Dielectric translation after rotatino
 
 # Subsettings for 'cylinder'
 ----------------------------
-MechanicalShaft.dielectric.cylinder.endpoint1  = 0 0 -4     # Endpoint 1
-MechanicalShaft.dielectric.cylinder.endpoint2  = 0 0 4      # Endpoint 2
-MechanicalShaft.dielectric.cylinder.radius     = 1.5E-2     # Cylinder radius
-MechanicalShaft.dielectric.cylinder.curvature  = 0.1        # Rounding radius
+MechanicalShaft.dielectric.cylinder.radius = 0.5 # Cylinder radius
 
-# Subsettings for 'cyl_profile'
--------------------------------
-MechanicalShaft.dielectric.cyl_profile.endpoint1       = 0 0 -4     # Endpoint 1
-MechanicalShaft.dielectric.cyl_profile.endpoint2       = 0 0  4     # Endpoint 2
-MechanicalShaft.dielectric.cyl_profile.cylinder_radius = 0.3        # Cylinder radius
-MechanicalShaft.dielectric.cyl_profile.torus_major     = 0.3        # Major torus radius
-MechanicalShaft.dielectric.cyl_profile.torus_minor     = 0.1        # Minor torus radius
-MechanicalShaft.dielectric.cyl_profile.torus_distance  = 0.2        # Distance between each torus
-MechanicalShaft.dielectric.cyl_profile.nleft           = 6          # Number of toroids to the left of center
-MechanicalShaft.dielectric.cyl_profile.nright          = 6          # Number of toroids to the right of center
-MechanicalShaft.dielectric.cyl_profile.shift           = 0          # Toroid shift from center
-MechanicalShaft.dielectric.cyl_profile.curvature       = 0.1        # Curvature
+# Subsettings for 'polygon'
+---------------------------
+MechanicalShaft.dielectric.polygon.num_sides  = 6   # Number of sides for polygon shape. 
+MechanicalShaft.dielectric.polygon.radius     = 0.5 # Dielectric rod radius
+MechanicalShaft.dielectric.polygon.curvature  = 0.1 # Rounding radius
+
+# Subsettings for 'circular_profiles'
+------------------------------------
+MechanicalShaft.dielectric.profile.circular.cylinder_radius      = 0.5  # Cylinder radius
+MechanicalShaft.dielectric.profile.circular.profile_major_radius = 0.5  # Profile major radius (torus)
+MechanicalShaft.dielectric.profile.circular.profile_minor_radius = 0.1   # Profile minor radius (torus)
+MechanicalShaft.dielectric.profile.circular.profile_translate    = 0.0    # Profile translation along axis
+MechanicalShaft.dielectric.profile.circular.profile_period       = 0.5  # Profile repetition period
+MechanicalShaft.dielectric.profile.circular.profile_repeat_lo    = 10     # Profile repetition
+MechanicalShaft.dielectric.profile.circular.profile_repeat_hi    = 10     # Profile repetition
+MechanicalShaft.dielectric.profile.circular.profile_smooth       = 0.1   # Profile smoothing
 
 # ====================================================================================================
 # FIELD_STEPPER CLASS OPTIONS
 # ====================================================================================================
-FieldStepper.verbosity    = -1              # Verbosity
+FieldStepper.verbosity    = 20              # Verbosity
 FieldStepper.realm        = primal          # Primal Realm
 FieldStepper.load_balance = false           # Load balance or not.
 FieldStepper.box_sorting  = morton          # If you load balance you can redo the box sorting. 
