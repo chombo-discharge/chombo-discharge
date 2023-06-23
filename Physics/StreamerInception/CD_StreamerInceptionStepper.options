@@ -1,18 +1,19 @@
 # ====================================================================================================
 # StreamerInceptionStepper class options
 # ====================================================================================================
-StreamerInceptionStepper.verbosity     = -1                      # Chattiness.
-StreamerInceptionStepper.profile       = false                   # Turn on/off run-time profiling
-StreamerInceptionStepper.mode          = stationary              # Mode (stationary or transient)
-StreamerInceptionStepper.inception_alg = trapz dx 0.1            # Integration algorithm for inception integral.
-StreamerInceptionStepper.output_file   = report.txt              # Output file
-StreamerInceptionStepper.K_inception   = 12                      # User-specified inception value
-StreamerInceptionStepper.plt_vars      = K Uinc bg_rate emission # Plot variables
+StreamerInceptionStepper.verbosity        = -1                      ## Chattiness.
+StreamerInceptionStepper.profile          = false                   ## Turn on/off run-time profiling
+StreamerInceptionStepper.full_integration = false                   ## Use full reconstruction of K-region or not
+StreamerInceptionStepper.mode             = stationary              ## Mode (stationary or transient)
+StreamerInceptionStepper.inception_alg    = euler alpha 0.5         ## Integration algorithm and step size selection
+StreamerInceptionStepper.output_file      = report.txt              ## Output file
+StreamerInceptionStepper.K_inception      = 12                      ## User-specified inception value
+StreamerInceptionStepper.plt_vars         = K Uinc bg_rate emission ## Plot variables
 
 # Static mode
-StreamerInceptionStepper.voltage_lo    = 1.0                     # Low voltage multiplier
-StreamerInceptionStepper.voltage_hi    = 10.0                    # Highest voltage multiplier
-StreamerInceptionStepper.voltage_steps = 3                       # Number of voltage steps
+StreamerInceptionStepper.voltage_lo       = 1.0                     ## Low voltage multiplier
+StreamerInceptionStepper.voltage_hi       = 10.0                    ## Highest voltage multiplier
+StreamerInceptionStepper.voltage_steps    = 3                       ## Number of voltage steps
 
 # Dynamic mode
 StreamerInceptionStepper.ion_transport = true                    # Turn on/off ion transport

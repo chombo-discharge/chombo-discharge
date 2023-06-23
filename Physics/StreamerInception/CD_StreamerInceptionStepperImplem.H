@@ -45,6 +45,8 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   m_mode               = Mode::Stationary;
   m_transportAlgorithm = TransportAlgorithm::ImExCTU;
   m_profile            = false;
+  m_debug              = false;
+  m_fullIntegration    = false;
 
   this->parseOptions();
 
@@ -407,6 +409,7 @@ StreamerInceptionStepper<P, F, C>::parseInceptionAlgorithm() noexcept
   std::string str;
 
   // Get the inception algorithm
+  pp.get("full_integration", m_fullIntegration);
   pp.get("inception_alg", str, 0);
   if (str == "euler") {
     m_inceptionAlgorithm = IntegrationAlgorithm::Euler;
@@ -423,15 +426,22 @@ StreamerInceptionStepper<P, F, C>::parseInceptionAlgorithm() noexcept
   pp.get("inception_alg", str, 1);
   pp.get("inception_alg", stepSize, 2);
   if (str == "dx") {
-    m_useFixedInceptionStep = false;
-    m_relativeInceptionStep = stepSize;
+    m_stepSizeFactor = stepSize;
+
+    m_stepSizeMethod = StepSizeMethod::Fixed;
   }
   else if (str == "fixed") {
-    m_useFixedInceptionStep = true;
-    m_fixedInceptionStep    = stepSize;
+    m_stepSizeFactor = stepSize;
+
+    m_stepSizeMethod = StepSizeMethod::Dx;
+  }
+  else if (str == "alpha") {
+    m_stepSizeFactor = stepSize;
+
+    m_stepSizeMethod = StepSizeMethod::Alpha;
   }
   else {
-    MayDay::Error("Expected 'dx' or 'fixed' for 'StreamerInceptionStepper.inception_alg'");
+    MayDay::Error("Expected 'fixed', 'dx', or 'alpha' for 'StreamerInceptionStepper.inception_alg'");
   }
 }
 
@@ -1987,8 +1997,13 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
   m_tracerParticleSolver->remap();
   m_tracerParticleSolver->interpolateVelocities();
 
-  const size_t outcastsBefore  = amrParticles.getNumberOfOutcastParticlesGlobal();
-  const size_t particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
+  size_t outcastsBefore  = 0;
+  size_t particlesBefore = 0;
+
+  if (m_debug) {
+    outcastsBefore  = amrParticles.getNumberOfOutcastParticlesGlobal();
+    particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
+  }
 
   const Real sgn = (a_voltage > 0.0) - (a_voltage < 0.0);
 
@@ -1996,8 +2011,34 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
 
     // Euler integration.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Real dx   = m_amr->getDx()[lvl];
-      const Real step = m_useFixedInceptionStep ? m_fixedInceptionStep : (m_relativeInceptionStep * dx);
+      const Real dx = m_amr->getDx()[lvl];
+
+      Real spaceStep = std::numeric_limits<Real>::max();
+      Real alphaStep = std::numeric_limits<Real>::max();
+
+      switch (m_stepSizeMethod) {
+      case StepSizeMethod::Fixed: {
+        spaceStep = m_stepSizeFactor;
+
+        break;
+      }
+      case StepSizeMethod::Dx: {
+        spaceStep = m_stepSizeFactor * dx;
+
+        break;
+      }
+      case StepSizeMethod::Alpha: {
+        spaceStep = dx;
+        alphaStep = m_stepSizeFactor;
+
+        break;
+      }
+      default: {
+        MayDay::Error("StreamerInceptionStepper::inceptionIntegrateEuler - logic bust");
+
+        break;
+      }
+      }
 
       for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
         List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
@@ -2009,28 +2050,34 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
           const RealVect vel      = sgn * p.velocity();
           const Real     v        = vel.vectorLength();
           const Real     E        = std::abs(a_voltage * v);
-          const Real     dt       = step / v;
           const Real     alpha    = m_alpha(E);
           const Real     eta      = m_eta(E);
           const Real     alphaEff = alpha - eta;
 
-          // Update particle position
-          const RealVect newPos = p.position() + dt * vel;
+          // Stop integration if avalanche phase is over
+          const bool negativeAlpha   = alphaEff <= 0.0;
+          const bool haltIntegration = p.weight() > m_inceptionK && !m_fullIntegration;
 
-          // Stop integration for particles that move into regions alpha < 0.0,
-          // inside the EB or outside of the domain.
-          const bool negativeAlpha = alphaEff < 0.0;
-          const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
-          const bool insideEB      = this->particleInsideEB(newPos);
-
-          if (negativeAlpha || outsideDomain || insideEB) {
+          if (negativeAlpha || haltIntegration) {
             processedParticles.transfer(lit);
           }
           else {
-            p.position() = newPos;
-            p.weight() += step * alphaEff;
+            const Real     deltaX = std::min(spaceStep, alphaStep / alphaEff);
+            const Real     dt     = deltaX / v;
+            const RealVect newPos = p.position() + dt * vel;
 
-            ++lit;
+            const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
+            const bool insideEB      = this->particleInsideEB(newPos);
+
+            if (outsideDomain || insideEB) {
+              processedParticles.transfer(lit);
+            }
+            else {
+              p.position() = newPos;
+              p.weight()   = p.weight() + deltaX * alphaEff;
+
+              ++lit;
+            }
           }
         }
       }
@@ -2045,14 +2092,19 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
 
   this->rewindTracerParticles();
 
-  const size_t outcastsAfter  = amrParticles.getNumberOfOutcastParticlesGlobal();
-  const size_t particlesAfter = amrParticles.getNumberOfValidParticlesGlobal();
+  size_t outcastsAfter  = 0;
+  size_t particlesAfter = 0;
+
+  if (m_debug) {
+    outcastsAfter  = amrParticles.getNumberOfOutcastParticlesGlobal();
+    particlesAfter = amrParticles.getNumberOfValidParticlesGlobal();
+  }
 
   if (particlesBefore != particlesAfter) {
-    MayDay::Error("StreamerInceptionStepper::inceptionIntegrateEuler - lost/gained particles!");
+    MayDay::Warning("StreamerInceptionStepper::inceptionIntegrateEuler - lost/gained particles!");
   }
   if (outcastsBefore != outcastsAfter) {
-    MayDay::Error("StreamerInceptionStepper::inceptionIntegrateEuler - lost/gained outcast particles!");
+    MayDay::Warning("StreamerInceptionStepper::inceptionIntegrateEuler - lost/gained outcast particles!");
   }
 }
 
@@ -2097,8 +2149,34 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
 
     // Euler stage.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Real dx   = m_amr->getDx()[lvl];
-      const Real step = m_useFixedInceptionStep ? m_fixedInceptionStep : (m_relativeInceptionStep * dx);
+      const Real dx = m_amr->getDx()[lvl];
+
+      Real spaceStep = std::numeric_limits<Real>::max();
+      Real alphaStep = std::numeric_limits<Real>::max();
+
+      switch (m_stepSizeMethod) {
+      case StepSizeMethod::Fixed: {
+        spaceStep = m_stepSizeFactor;
+
+        break;
+      }
+      case StepSizeMethod::Dx: {
+        spaceStep = m_stepSizeFactor * dx;
+
+        break;
+      }
+      case StepSizeMethod::Alpha: {
+        spaceStep = dx;
+        alphaStep = m_stepSizeFactor;
+
+        break;
+      }
+      default: {
+        MayDay::Error("StreamerInceptionStepper::inceptionIntegrateEuler - logic bust");
+
+        break;
+      }
+      }
 
       for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
         List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
@@ -2107,34 +2185,42 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
 
-          const RealVect v        = p.velocity();
-          const Real     dt       = step / v.vectorLength();
-          const Real     E        = std::abs(a_voltage * v.vectorLength());
+          const RealVect vel      = p.velocity();
+          const Real     v        = vel.vectorLength();
+          const Real     E        = std::abs(a_voltage * v);
           const Real     alpha    = m_alpha(E);
           const Real     eta      = m_eta(E);
           const Real     alphaEff = alpha - eta;
 
-          // Storage alpha(p^k), v(p^k), and the step size.
-          p.template real<0>() = alphaEff;
-          p.template real<1>() = dt;
-          p.template vect<1>() = v;
+          // Stop integration if avalanche phase is over
+          const bool negativeAlpha   = (alphaEff <= 0.0);
+          const bool haltIntegration = p.weight() > m_inceptionK && !m_fullIntegration;
 
-          // Update position.
-          const RealVect newPos = p.position() + sgn * v * dt;
-
-          // Stop integration for particles that move into regions alpha < 0.0,
-          // inside the EB or outside of the domain.
-          const bool negativeAlpha = (alphaEff <= 0.0);
-          const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
-          const bool insideEB      = this->particleInsideEB(newPos);
-
-          if (negativeAlpha || outsideDomain || insideEB) {
+          if (negativeAlpha || haltIntegration) {
             processedParticles.transfer(lit);
           }
           else {
-            p.position() = newPos;
+            // Compute a time step that we will use for the integration.
+            const Real     deltaX = std::min(spaceStep, alphaStep / alphaEff);
+            const Real     dt     = deltaX / v;
+            const RealVect newPos = p.position() + sgn * vel * dt;
 
-            ++lit;
+            const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
+            const bool insideEB      = this->particleInsideEB(newPos);
+
+            if (outsideDomain || insideEB) {
+              processedParticles.transfer(lit);
+            }
+            else {
+              // Do an Euler step, storaging alpha(p^k), v(p^k), and the time step size.
+              p.template real<0>() = alphaEff;
+              p.template real<1>() = dt;
+              p.template vect<1>() = vel;
+
+              p.position() = newPos;
+
+              ++lit;
+            }
           }
         }
       }
@@ -2164,15 +2250,13 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
           const RealVect newPos = p.position() + 0.5 * sgn * dt * (vk1 - vk);
 
           // Compute new alpha.
-          const Real alpha1 = p.template real<0>();
-          const Real alpha  = m_alpha(E);
-          const Real eta    = m_eta(E);
-          const Real alpha2 = alpha - eta;
-          const Real d      = 0.5 * dt * (vk + vk1).vectorLength();
+          const Real alphak  = p.template real<0>();
+          const Real alphak1 = m_alpha(E) - m_eta(E);
+          const Real d       = 0.5 * dt * (vk + vk1).vectorLength();
 
           // Stop integration for particles that move into regions alpha < 0.0,
           // inside the EB or outside of the domain.
-          const bool negativeAlpha = (alpha1 + alpha2) <= 0.0;
+          const bool negativeAlpha = (alphak + alphak1) <= 0.0;
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
@@ -2181,7 +2265,7 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
           }
           else {
             p.position() = newPos;
-            p.weight() += 0.5 * d * (alpha1 + alpha2);
+            p.weight()   = p.weight() + 0.5 * d * (alphak + alphak1);
 
             ++lit;
           }

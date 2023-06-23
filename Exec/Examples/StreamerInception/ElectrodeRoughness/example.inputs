@@ -5,7 +5,7 @@ AmrMesh.lo_corner        = -1E-3 -1E-3 -1E-3 # Low corner of problem domain
 AmrMesh.hi_corner        =  1E-3  1E-3  1E-3 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 32 32 32    # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 2           # Maximum amr depth
+AmrMesh.max_amr_depth    = 3           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -17,12 +17,12 @@ AmrMesh.max_ebis_box     = 16          # Maximum allowed box size for EBIS gener
 AmrMesh.ref_rat          = 2 2 2 2 2 2 # Refinement ratios (mixed ratios are allowed). 
 AmrMesh.num_ghost        = 2           # Number of ghost cells. 
 AmrMesh.lsf_ghost        = 2           # Number of ghost cells when writing level-set to grid
-AmrMesh.eb_ghost         = 4           # Set number of of ghost cells for EB stuff
+AmrMesh.eb_ghost         = 2           # Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
 AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
-AmrMesh.centroid_sten    = lsq         # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
-AmrMesh.eb_sten          = lsq         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+AmrMesh.centroid_sten    = linear         # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+AmrMesh.eb_sten          = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius    = 1           # Redistribution radius for hyperbolic conservation laws
 
 
@@ -165,8 +165,9 @@ NoisePlane.clamp_dx          =  100E-6      # Noise clamp falloff
 # ====================================================================================================
 StreamerInceptionStepper.verbosity     = -1                            # Chattiness.
 StreamerInceptionStepper.profile       = false
+StreamerInceptionStepper.full_integration       = false
 StreamerInceptionStepper.mode          = stationary                    # Mode (stationary or transient)
-StreamerInceptionStepper.inception_alg = trapz dx 0.5                  # Integration algorithm for inception integral.
+StreamerInceptionStepper.inception_alg = euler alpha 0.25                  # Integration algorithm for inception integral.
 StreamerInceptionStepper.output_file   = report.txt                    # Output file
 StreamerInceptionStepper.K_inception   = 15                            # User-specified inception value
 StreamerInceptionStepper.plt_vars      = K Uinc poisson                # Plot variables
@@ -195,5 +196,3 @@ StreamerInceptionTagger.buffer      = 4     # Grown buffer around flagged cells
 StreamerInceptionTagger.max_voltage = 1.0   # Maximum applied voltage 
 StreamerInceptionTagger.ref_alpha   = 5.0   # Refinement curvature criterion. Lower => more mesh
 StreamerInceptionTagger.plot        = false # Plot tagging field or not. 
-
-

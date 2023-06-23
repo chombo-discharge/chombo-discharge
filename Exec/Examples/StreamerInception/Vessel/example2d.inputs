@@ -5,7 +5,7 @@ AmrMesh.lo_corner        = -0.2  0.0   # Low corner of problem domain
 AmrMesh.hi_corner        =  0.2  0.1   # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 32      # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 6           # Maximum amr depth
+AmrMesh.max_amr_depth    = 7           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -38,7 +38,7 @@ Driver.checkpoint_interval             = -1               # Checkpoint interval
 Driver.regrid_interval                 = -1               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 4                # Number of initial regrids
+Driver.initial_regrids                 = 5                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
@@ -55,9 +55,9 @@ Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 15.              # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = 2                # Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics              = 2                # Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.refine_angles                   = 45.              # Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes               = 0                # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics              = 0                # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
 # ====================================================================================================
@@ -161,18 +161,19 @@ Vessel.live_shroom   = false          # Mushroom is live or not
 # ====================================================================================================
 # StreamerInceptionStepper class options
 # ====================================================================================================
-StreamerInceptionStepper.verbosity     = -1                      # Chattiness.
-StreamerInceptionStepper.profile       = false                   # Turn on/off run-time profiling
-StreamerInceptionStepper.mode          = stationary              # Mode (stationary or transient)
-StreamerInceptionStepper.inception_alg = trapz dx 0.2            # Integration algorithm for inception integral.
-StreamerInceptionStepper.output_file   = report.txt              # Output file
-StreamerInceptionStepper.K_inception   = 12                      # User-specified inception value
-StreamerInceptionStepper.plt_vars      = K Uinc bg_rate emission # Plot variables
+StreamerInceptionStepper.verbosity        = -1                      ## Chattiness.
+StreamerInceptionStepper.profile          = false                   ## Turn on/off run-time profiling
+StreamerInceptionStepper.full_integration = false                   ## Turn on/off full integration
+StreamerInceptionStepper.mode             = stationary              ## Mode (stationary or transient)
+StreamerInceptionStepper.inception_alg    = trapz alpha 0.25        ## Integration algorithm for inception integral.
+StreamerInceptionStepper.output_file      = report.txt              ## Output file
+StreamerInceptionStepper.K_inception      = 12                      ## User-specified inception value
+StreamerInceptionStepper.plt_vars         = K Uinc bg_rate emission ## Plot variables
 
 # Static mode
-StreamerInceptionStepper.voltage_lo    = 20E3                     # Low voltage multiplier
-StreamerInceptionStepper.voltage_hi    = 80E3                     # Highest voltage multiplier
-StreamerInceptionStepper.voltage_steps = 19                       # Number of voltage steps
+StreamerInceptionStepper.voltage_lo       = 20E3                     # Low voltage multiplier
+StreamerInceptionStepper.voltage_hi       = 80E3                     # Highest voltage multiplier
+StreamerInceptionStepper.voltage_steps    = 19                       # Number of voltage steps
 
 # Dynamic mode
 StreamerInceptionStepper.ion_transport = true                    # Turn on/off ion transport
@@ -188,8 +189,8 @@ StreamerInceptionStepper.max_dt_growth = 0.05                    # Maximum relat
 # StreamerInceptionTagger class options
 # ====================================================================================================
 StreamerInceptionTagger.verbosity   = -1    # Tagger chattiness. 
-StreamerInceptionTagger.buffer      = 0     # Grown buffer around flagged cells
-StreamerInceptionTagger.max_voltage = 100E3 # Maximum applied voltage 
+StreamerInceptionTagger.buffer      = 8     # Grown buffer around flagged cells
+StreamerInceptionTagger.max_voltage = 80E3 # Maximum applied voltage 
 StreamerInceptionTagger.ref_alpha   = 1.0   # Refinement curvature criterion. Lower => more mesh
 StreamerInceptionTagger.plot        = false # Plot tagging field or not.
 
