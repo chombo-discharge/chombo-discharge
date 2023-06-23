@@ -68,6 +68,18 @@ namespace Physics {
     };
 
     /*!
+      @brief For specifying how the time step was restricted
+    */
+    enum class TimeStepRestriction
+    {
+      Unknown,
+      CDR,
+      VoltageCurve,
+      MinHardcap,
+      MaxHardcap
+    };
+
+    /*!
       @brief Class for streamer inception integral evaluations. 
       @details P is the tracer particle type
                F is the field solver type. 
@@ -401,6 +413,11 @@ namespace Physics {
 	@brief Transport algorithm for advancing negative ions in the transient mode
       */
       TransportAlgorithm m_transportAlgorithm;
+
+      /*!
+	@brief Time step restriction
+      */
+      TimeStepRestriction m_timeStepRestriction;
 
       /*!
 	@brief Tracer particle solver.

@@ -178,7 +178,7 @@ StreamerInceptionStepper.voltage_hi    = 30E3                     # Highest volt
 StreamerInceptionStepper.voltage_steps = 9                       # Number of voltage steps
 
 # Dynamic mode
-StreamerInceptionStepper.ion_transport = false                   # Turn on/off ion transport
+StreamerInceptionStepper.ion_transport = true                   # Turn on/off ion transport
 StreamerInceptionStepper.transport_alg = heun                    # Transport algorithm. 'euler', 'heun', or 'imex'
 StreamerInceptionStepper.cfl           = 0.8                     # CFL time step for dynamic mode
 StreamerInceptionStepper.first_dt      = 1.E-9                   # First time step to be used. 

@@ -39,14 +39,15 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   }
 
   // Default settings.
-  m_verbosity          = -1;
-  m_realm              = Realm::Primal;
-  m_phase              = phase::gas;
-  m_mode               = Mode::Stationary;
-  m_transportAlgorithm = TransportAlgorithm::ImExCTU;
-  m_profile            = false;
-  m_debug              = false;
-  m_fullIntegration    = false;
+  m_verbosity           = -1;
+  m_realm               = Realm::Primal;
+  m_phase               = phase::gas;
+  m_mode                = Mode::Stationary;
+  m_transportAlgorithm  = TransportAlgorithm::ImExCTU;
+  m_timeStepRestriction = TimeStepRestriction::Unknown;
+  m_profile             = false;
+  m_debug               = false;
+  m_fullIntegration     = false;
 
   this->parseOptions();
 
@@ -1077,32 +1078,41 @@ StreamerInceptionStepper<P, F, C>::computeDt()
   if (m_mode == Mode::Transient) {
 
     // Compute time step from ion solver.
-    Real ionDt = std::numeric_limits<Real>::max();
+    m_timeStepRestriction = TimeStepRestriction::Unknown;
 
-    switch (m_transportAlgorithm) {
-    case TransportAlgorithm::Euler: {
-      ionDt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
+    // Restrict by ion solver
+    if (m_ionTransport) {
+      Real ionDt = std::numeric_limits<Real>::infinity();
+      switch (m_transportAlgorithm) {
+      case TransportAlgorithm::Euler: {
+        ionDt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
 
-      break;
+        break;
+      }
+      case TransportAlgorithm::Heun: {
+        ionDt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
+
+        break;
+      }
+      case TransportAlgorithm::ImExCTU: {
+        ionDt = m_cfl * m_ionSolver->computeAdvectionDt();
+
+        break;
+      }
+      default: {
+        MayDay::Error("StreamerInceptionStepper::computDt -- logic bust");
+
+        break;
+      }
+      }
+
+      if (ionDt < dt) {
+        dt                    = ionDt;
+        m_timeStepRestriction = TimeStepRestriction::CDR;
+      }
     }
-    case TransportAlgorithm::Heun: {
-      ionDt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
 
-      break;
-    }
-    case TransportAlgorithm::ImExCTU: {
-      ionDt = m_cfl * m_ionSolver->computeAdvectionDt();
-
-      break;
-    }
-    default: {
-      MayDay::Error("StreamerInceptionStepper::computDt -- logic bust");
-
-      break;
-    }
-    }
-
-    // Compute time step that resolves the voltage curve.
+    // Restrict by voltage curve.
     Real curveDt = std::numeric_limits<Real>::max();
     if (m_timeStep == 0) {
       curveDt = m_firstDt;
@@ -1121,13 +1131,23 @@ StreamerInceptionStepper<P, F, C>::computeDt()
       curveDt = std::max(m_dt * (1.0 - m_maxDtGrowth), curveDt);
     }
 
-    dt = std::min(dt, ionDt);
-    dt = std::min(dt, curveDt);
+    if (curveDt < dt) {
+      dt                    = curveDt;
+      m_timeStepRestriction = TimeStepRestriction::VoltageCurve;
+    }
 
-    // Also restrict by hardcaps.
-    dt = std::min(dt, m_maxDt);
-    dt = std::max(dt, m_minDt);
+    // Restrict by hardcaps
+    if (dt > m_maxDt) {
+      dt                    = m_maxDt;
+      m_timeStepRestriction = TimeStepRestriction::MaxHardcap;
+    }
+
+    if (dt < m_minDt) {
+      dt                    = m_minDt;
+      m_timeStepRestriction = TimeStepRestriction::MinHardcap;
+    }
   }
+
   return dt;
 }
 
@@ -1148,8 +1168,8 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
 
     // Move the negative ions -- still want this for the time step.
     timer.startEvent("Ion advance");
-    this->computeIonVelocity(curVoltage);
     if (m_ionTransport) {
+      this->computeIonVelocity(curVoltage);
       this->computeIonDiffusion(curVoltage);
       this->advanceIons(a_dt);
     }
@@ -1334,10 +1354,46 @@ StreamerInceptionStepper<P, F, C>::printStepReport()
   }
 #endif
 
+  std::string timeStepMessage;
+  switch (m_timeStepRestriction) {
+  case TimeStepRestriction::Unknown: {
+    timeStepMessage = "Unknown";
+
+    break;
+  }
+  case TimeStepRestriction::CDR: {
+    timeStepMessage = "CFL";
+
+    break;
+  }
+  case TimeStepRestriction::VoltageCurve: {
+    timeStepMessage = "Voltage curve";
+
+    break;
+  }
+  case TimeStepRestriction::MinHardcap: {
+    timeStepMessage = "Min hardcap";
+
+    break;
+  }
+  case TimeStepRestriction::MaxHardcap: {
+    timeStepMessage = "Max hardcap";
+
+    break;
+  }
+  default: {
+    MayDay::Warning("StreamerInceptionStepper::printStepReport - logic bust");
+
+    break;
+  }
+  }
+
+  // clang-format off
   pout() << "                                ** Voltage                = " << m_voltageCurve(m_time) << endl;
   pout() << "                                ** Crit. volume           = " << m_criticalVolume.back().second << endl;
-  pout() << "                                ** Inception probability  = " << m_inceptionProbability.back().second
-         << endl;
+  pout() << "                                ** Inception probability  = " << m_inceptionProbability.back().second << endl;
+  pout() << "                                ** Time step restriction  = " << "'" << timeStepMessage << "'" << endl;
+  // clang-format on
 }
 
 template <typename P, typename F, typename C>
