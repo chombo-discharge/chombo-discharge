@@ -1,5 +1,7 @@
 /* chombo-discharge
  * Copyright © 2022 SINTEF Energy Research.
+ * Copyright © 2022 NTNU.       
+ * Copyright © 2022 Fanny Skirbekk.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
@@ -8,6 +10,7 @@
   @brief  TimeStepper class for evaluating the streamer inception criterion.
   @author Robert Marskar (SINTEF)
   @author Rasmus Hoholm (SINTEF)
+  @author Fanny Skirbekk (NTNU)
 */
 
 #ifndef CD_StreamerInceptionStepper_H
@@ -36,6 +39,16 @@ namespace Physics {
     };
 
     /*!
+      @brief Step size selection method
+    */
+    enum class StepSizeMethod
+    {
+      Fixed,
+      Dx,
+      Alpha
+    };
+
+    /*!
       @brief Algorithm for negative ion advancement
     */
     enum class TransportAlgorithm
@@ -52,6 +65,18 @@ namespace Physics {
     {
       Stationary,
       Transient
+    };
+
+    /*!
+      @brief For specifying how the time step was restricted
+    */
+    enum class TimeStepRestriction
+    {
+      Unknown,
+      CDR,
+      VoltageCurve,
+      MinHardcap,
+      MaxHardcap
     };
 
     /*!
@@ -380,9 +405,19 @@ namespace Physics {
       IntegrationAlgorithm m_inceptionAlgorithm;
 
       /*!
+	@brief Step size selection method
+      */
+      StepSizeMethod m_stepSizeMethod;
+
+      /*!
 	@brief Transport algorithm for advancing negative ions in the transient mode
       */
       TransportAlgorithm m_transportAlgorithm;
+
+      /*!
+	@brief Time step restriction
+      */
+      TimeStepRestriction m_timeStepRestriction;
 
       /*!
 	@brief Tracer particle solver.
@@ -495,9 +530,27 @@ namespace Physics {
 
       /*!
 	@brief Critical volumes of K values for each voltage
-	@note Stationary mode, positive polarity
+	@note Stationary mode, negative polarity
       */
       std::vector<Real> m_criticalVolumeMinu;
+
+      /*!
+	@brief Critical area of K values for each voltage
+	@note Stationary mode, positive polarity
+      */
+      std::vector<Real> m_criticalAreaPlus;
+
+      /*!
+	@brief Critical area of K values for each voltage
+	@note Stationary mode, negative polarity
+      */
+      std::vector<Real> m_criticalAreaMinu;
+
+      /*!
+	@brief Ionization volumes for each voltage
+	@note Stationary mode
+      */
+      std::vector<Real> m_ionizationVolume;
 
       /*!
 	@brief Rate of appearance of first electron (in critical volume)
@@ -537,9 +590,26 @@ namespace Physics {
       std::vector<std::pair<Real, Real>> m_criticalVolume;
 
       /*!
+	@brief Critical area at various time instances. 
+	@details First parameter is time, second parameter is the critical area. 
+      */
+      std::vector<std::pair<Real, Real>> m_criticalArea;
+
+      /*!
+	@brief Ionization volume at various time instances.
+	@details First parameter is time, second parameter is the ionization volume.
+      */
+      std::vector<std::pair<Real, Real>> m_ionizationVolumeTransient;
+
+      /*!
 	@brief CFL-step for negative ions.
       */
       Real m_cfl;
+
+      /*!
+	@brief First time step
+      */
+      Real m_firstDt;
 
       /*!
 	@brief Maximum permitted time step
@@ -552,14 +622,20 @@ namespace Physics {
       Real m_minDt;
 
       /*!
-	@brief Variable step size for K-integration algorithm (factor of dx)
+	@brief Permitted relative deviation in V(t) when computing voltage-curve based time steps.
       */
-      Real m_relativeInceptionStep;
+      Real m_epsVoltage;
+
+      /*!
+	@brief Maximum permitted time step growth 
+      */
+      Real m_maxDtGrowth;
 
       /*!
 	@brief Fixed step size (physical dimensions)
+	@brief Step size factor
       */
-      Real m_fixedInceptionStep;
+      Real m_stepSizeFactor;
 
       /*!
 	@brief Inception criteria (read from input)
@@ -572,9 +648,14 @@ namespace Physics {
       bool m_profile;
 
       /*!
-	@brief If true, used fixed integration step for inception integration
+	@brief Debug or not
       */
-      bool m_useFixedInceptionStep;
+      bool m_debug;
+
+      /*!
+	@brief Use full reconstruction of critical volume or not
+      */
+      bool m_fullIntegration;
 
       /*!
 	@brief Ion transport on/off
@@ -640,6 +721,11 @@ namespace Physics {
 	@brief Realm where the solver lives
       */
       std::string m_realm;
+
+      /*!
+	@brief output data file
+      */
+      std::string m_dataOutputFile;
 
       /*!
 	@brief Output file
@@ -868,10 +954,45 @@ namespace Physics {
       computeCriticalVolumeTransient() const noexcept;
 
       /*!
+	@brief Compute the critical area of the K values for each voltage
+	@note For the stationary method
+      */
+      virtual void
+      computeCriticalAreaStationary() noexcept;
+
+      /*!
+	@brief Compute the critical area of the K values for each voltage
+	@note For the transient method
+      */
+      virtual Real
+      computeCriticalAreaTransient() const noexcept;
+
+      /*!
+	@brief Compute the ionization volume for each voltage
+	@note For the stationary method
+      */
+      virtual void
+      computeIonizationVolumeStationary() noexcept;
+
+      /*!
+	@brief Compute the ionization volume for each voltage
+	@note For the transient method
+      */
+      virtual Real
+      computeIonizationVolumeTransient(const Real& a_voltage) const noexcept;
+
+      /*!
 	@brief Compute time to first critical electron.
       */
       virtual void
       computeRdotStationary() noexcept;
+
+      /*!
+	@brief Print data report
+	@note For transient runs
+      */
+      void
+      writeDataReportTransient(const Real& a_voltage) const noexcept;
 
       /*!
 	@brief Print report to the terminal. 
