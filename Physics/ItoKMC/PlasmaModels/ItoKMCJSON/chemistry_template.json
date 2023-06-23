@@ -1,0 +1,84 @@
+{
+    "gas": {
+	// Definition of the background gas. This must contain "background_species" and "gas_law".
+	//
+	"background species":
+	[
+	    // Definition of background species. This is an array of species with specified molar fractions. Species names
+	    // can not contain wildcards (@)	    		    
+	    {"id": "O2"},
+	    {"id"; "N2"}
+	],
+	// Specify which gas law we use. The user can define multiple gas laws and then specify which one to use.
+	"gas law": {
+	    "id": "ideal gas", // Specify which gas law we use.
+	    "plot": true,      // Turn on/off plotting.
+	    "ideal gas": {
+		// Definition for an ideal gas law. Temperature is always in Kevlin the pressure is in bar. The neutral density
+		// is derived using an ideal gas law.
+		"type": "ideal"
+		"temperature": 300,
+		"pressure": 1.0
+	    },
+	    "tabulated atmosphere": {
+		// Tabulated gas law. The user must supply a file containing the pressure, temperature and number density and
+		// specify the table resolution that will be used internally.
+		"type": "tabulated vs height",   // Specify that our gas law contains table-vs-height data
+		"file": "ENMSIS_Atmosphere.dat", // File name 
+		"axis": "y",                     // Associated Cartesian axis for the "height"
+		"temperature_column": 0,         // Column containing the temperature
+		"pressure column": 1,            // Column containing the pressure
+		"density column": 2,             // Column containing the number density
+		"min height": 0.0,               // Minium height kept when resampling the table
+		"max height": 250000,            // Maximum height kept when resampling the table
+		"res height", 500,               // Table resolution
+		"dump tables": true,             // Optional argument for dumping tables to disk (useful for debugging)
+		"T scale": 1.0,                  // Optional argument for user-specified temperature data scaling.
+		"P scale": 1.0,                  // Optional argument for user-specified pressure data scaling.
+		"Rho scale": 1.0                 // Optional argument for user-specified density data scaling.
+	    }
+	}
+    },
+    "plasma species":
+    [
+	// List of plasma species that are tracked. This is an array of species
+	// with various identifiers, some of which are always required (id, Z, type, mobile, diffusive) and
+	// others which are secondary requirements. 
+	{
+	    // Definition of a plasma species (electrons), which are tracked using an Ito method.
+	    "id": "e",        // string identifier for species
+	    "Z": -1,          // Charge number
+	    "type": "ito",    // Solver type. Either 'ito' or 'cdr'
+	    "mobile": true,   // Mobile or not
+	    "diffusive": true // Diffusive or not
+	    "mobility": {
+		// Specification of the mobile when the species is mobile. User can specify various forms of the mobility. E.g. constant, function-based, or
+		// tabulated vs E/N
+		"lookup" : "table E/N",                      // Specification of tabulated mobility lookup method                        
+		"file": "bolsig_air.dat",                    // File containg the mobility data
+		"header": "E/N (Td)\tMobility *N (1/m/V/s)", // Line immediately preceding the colum data
+		"E/N": 0,                                    // Column containing E/N
+		"mu*N": 1,                                   // Column containing mu*N
+		"min E/N": 10,                               // Minimum E/N kept when resampling table
+		"max E/N": 2E6,                              // Maximum E/N kept when resampling table
+		"points": 1000,                              // Number of grid points kept when resampling the table
+		"spacing": "exponential"                     // Grid point spacing when resampling the table
+	    },
+	    "diffusion": {
+		// Definition of the diffusion coefficient similiar to mobility coefficient above. 
+		"lookup": "table E/N",
+		"file": "bolsig_air.dat",
+		"header": "E/N (Td)\tDiffusion coefficient *N (1/m/s)",
+		"E/N": 0,
+		"D*N": 1,
+		"min E/N": 10,
+		"max E/N": 2E6,
+		"spacing": "exponential",
+		"points": 1000
+	    },
+	    "initial data": {
+
+	    }
+	}
+    ]
+}

@@ -21,6 +21,7 @@
 #include <nlohmann/json.hpp>
 
 // Our includes
+#include <CD_ItoKMCBackgroundSpecies.H>
 #include <CD_ItoKMCPhysics.H>
 
 namespace Physics {
@@ -222,6 +223,26 @@ namespace Physics {
       std::string m_jsonFile;
 
       /*!
+	@brief Map of background species
+      */
+      std::map<std::shared_ptr<ItoKMCBackgroundSpecies>> m_backgroundSpecies;
+
+      /*!
+	@brief Background gas pressure
+      */
+      FunctionX m_gasPressure;
+
+      /*!
+	@brief Background gas temperature
+      */
+      FunctionX m_gasTemperature;
+
+      /*!
+	@brief Background gas number density
+      */
+      FunctionX m_gasDensity;;            
+
+      /*!
 	@brief Check if a file exists
 	@param[in] a_filename File name
       */
@@ -229,10 +250,49 @@ namespace Physics {
       doesFileExist(const std::string a_filename) const noexcept;
 
       /*!
+	@brief Trim a string. This removes whitespace before/after
+	@param[in] a_string String to be trimmed
+      */
+      virtual std::string
+      trim(const std::string& a_string) const noexcept;
+
+      /*!
 	@brief Parse the JSON file
       */
       virtual void
       parseJSON() noexcept;
+
+      /*!
+	@brief Parse chattiness
+      */
+      virtual void
+      parseVerbose() noexcept;
+
+      /*!
+	@brief Throw a parser error
+	@param[in] a_error Error code.
+      */
+      virtual void
+      throwParserError(const std::string a_error) const noexcept;
+
+      /*!
+	@brief Throw a parser wearning
+	@param[in] a_error Warning
+      */
+      virtual void
+      throwParserWarning(const std::string a_warning) const noexcept;      
+
+      /*!
+	@brief Initialize gas law.
+      */
+      virtual void
+      initializeGasLaw() noexcept;
+
+      /*!
+	@brief Initialize gas law.
+      */
+      virtual void
+      initializeBackgroundSpecies() noexcept;
     };
   } // namespace ItoKMC
 } // namespace Physics
