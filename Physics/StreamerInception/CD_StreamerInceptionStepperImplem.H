@@ -1,5 +1,6 @@
 /* chombo-discharge
  * Copyright © 2022 SINTEF Energy Research.
+ * Copyright © 2022 NTNU.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
@@ -8,6 +9,7 @@
   @brief  Implementation of CD_StreamerInceptionStepper.H
   @author Robert Marskar (SINTEF)
   @author Rasmus Hoholm (SINTEF)
+  @author Fanny Skirbekk (NTNU)
 */
 
 #ifndef CD_StreamerInceptionStepperImplem_H
@@ -37,14 +39,15 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   }
 
   // Default settings.
-  m_verbosity          = -1;
-  m_realm              = Realm::Primal;
-  m_phase              = phase::gas;
-  m_mode               = Mode::Stationary;
-  m_transportAlgorithm = TransportAlgorithm::ImExCTU;
-  m_profile            = false;
-  m_debug              = false;
-  m_fullIntegration    = false;
+  m_verbosity           = -1;
+  m_realm               = Realm::Primal;
+  m_phase               = phase::gas;
+  m_mode                = Mode::Stationary;
+  m_transportAlgorithm  = TransportAlgorithm::ImExCTU;
+  m_timeStepRestriction = TimeStepRestriction::Unknown;
+  m_profile             = false;
+  m_debug               = false;
+  m_fullIntegration     = false;
 
   this->parseOptions();
 
@@ -459,10 +462,15 @@ StreamerInceptionStepper<P, F, C>::parseTransportAlgorithm() noexcept
   pp.get("transport_alg", str);
   pp.get("ion_transport", m_ionTransport);
   pp.get("cfl", m_cfl);
-  pp.get("max_dt", m_maxDt);
+  pp.get("first_dt", m_firstDt);
   pp.get("min_dt", m_minDt);
+  pp.get("max_dt", m_maxDt);
+  pp.get("max_dt_growth", m_maxDtGrowth);
+  pp.get("voltage_eps", m_epsVoltage);
 
-  m_minDt = std::max(m_minDt, 0.0);
+  CH_assert(m_minDt >= 0.0);
+  CH_assert(m_maxDt >= 0.0);
+  CH_assert(m_firstDt > 0.0);
 
   if (str == "euler") {
     m_transportAlgorithm == TransportAlgorithm::Euler;
@@ -1069,31 +1077,75 @@ StreamerInceptionStepper<P, F, C>::computeDt()
 
   if (m_mode == Mode::Transient) {
 
-    switch (m_transportAlgorithm) {
-    case TransportAlgorithm::Euler: {
-      dt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
+    // Compute time step from ion solver.
+    m_timeStepRestriction = TimeStepRestriction::Unknown;
 
-      break;
-    }
-    case TransportAlgorithm::Heun: {
-      dt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
+    // Restrict by ion solver
+    if (m_ionTransport) {
+      Real ionDt = std::numeric_limits<Real>::infinity();
+      switch (m_transportAlgorithm) {
+      case TransportAlgorithm::Euler: {
+        ionDt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
 
-      break;
-    }
-    case TransportAlgorithm::ImExCTU: {
-      dt = m_cfl * m_ionSolver->computeAdvectionDt();
+        break;
+      }
+      case TransportAlgorithm::Heun: {
+        ionDt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
 
-      break;
-    }
-    default: {
-      MayDay::Error("StreamerInceptionStepper::computDt -- logic bust");
+        break;
+      }
+      case TransportAlgorithm::ImExCTU: {
+        ionDt = m_cfl * m_ionSolver->computeAdvectionDt();
 
-      break;
-    }
+        break;
+      }
+      default: {
+        MayDay::Error("StreamerInceptionStepper::computDt -- logic bust");
+
+        break;
+      }
+      }
+
+      if (ionDt < dt) {
+        dt                    = ionDt;
+        m_timeStepRestriction = TimeStepRestriction::CDR;
+      }
     }
 
-    dt = std::min(dt, m_maxDt);
-    dt = std::max(dt, m_minDt);
+    // Restrict by voltage curve.
+    Real curveDt = std::numeric_limits<Real>::max();
+    if (m_timeStep == 0) {
+      curveDt = m_firstDt;
+    }
+    else {
+      const Real preU = m_voltageCurve(m_time - m_dt);
+      const Real curU = m_voltageCurve(m_time);
+      const Real dVdt = std::abs(curU - preU) / dt;
+
+      if (dVdt > std::numeric_limits<Real>::epsilon()) {
+        curveDt = m_epsVoltage * std::abs(curU) / dVdt;
+      }
+
+      // Do not grow too fast.
+      curveDt = std::min(m_dt * (1.0 + m_maxDtGrowth), curveDt);
+      curveDt = std::max(m_dt * (1.0 - m_maxDtGrowth), curveDt);
+    }
+
+    if (curveDt < dt) {
+      dt                    = curveDt;
+      m_timeStepRestriction = TimeStepRestriction::VoltageCurve;
+    }
+
+    // Restrict by hardcaps
+    if (dt > m_maxDt) {
+      dt                    = m_maxDt;
+      m_timeStepRestriction = TimeStepRestriction::MaxHardcap;
+    }
+
+    if (dt < m_minDt) {
+      dt                    = m_minDt;
+      m_timeStepRestriction = TimeStepRestriction::MinHardcap;
+    }
   }
 
   return dt;
@@ -1109,7 +1161,6 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
   }
 
   if (m_mode == Mode::Transient) {
-
     Timer timer("StreamerInceptionStepper::advance");
 
     const Real curTime    = m_time + a_dt;
@@ -1117,8 +1168,8 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
 
     // Move the negative ions -- still want this for the time step.
     timer.startEvent("Ion advance");
-    this->computeIonVelocity(curVoltage);
     if (m_ionTransport) {
+      this->computeIonVelocity(curVoltage);
       this->computeIonDiffusion(curVoltage);
       this->advanceIons(a_dt);
     }
@@ -1137,13 +1188,17 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
     this->computeInceptionIntegralTransient(curVoltage);
     timer.stopEvent("Compute integral");
 
-    // Compute the critical volume and the electron appearance rate.
+    // Compute the critical volume, critical area, the ionization volume and the electron appearance rate.
     timer.startEvent("Compute Vcr");
     const Real Vcr  = this->computeCriticalVolumeTransient();
+    const Real Acr  = this->computeCriticalAreaTransient();
+    const Real Vion = this->computeIonizationVolumeTransient(curVoltage);
     const Real Rdot = this->computeRdot(curVoltage);
     timer.stopEvent("Compute Vcr");
 
     m_criticalVolume.emplace_back(curTime, Vcr);
+    m_criticalArea.emplace_back(curTime, Acr);
+    m_ionizationVolumeTransient.emplace_back(curTime, Vion);
     m_Rdot.emplace_back(curTime, Rdot);
 
     // Compute the inception probability using the trapezoidal rule.
@@ -1173,7 +1228,9 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
     this->writeReportTransient();
     timer.stopEvent("Write report");
 
-    timer.eventReport(pout(), false);
+    if (m_profile) {
+      timer.eventReport(pout(), false);
+    }
   }
   else {
     MayDay::Error("StreamerInceptionStepper::advance -- must have 'StreamerInceptionStepper.mode = transient'");
@@ -1297,10 +1354,46 @@ StreamerInceptionStepper<P, F, C>::printStepReport()
   }
 #endif
 
+  std::string timeStepMessage;
+  switch (m_timeStepRestriction) {
+  case TimeStepRestriction::Unknown: {
+    timeStepMessage = "Unknown";
+
+    break;
+  }
+  case TimeStepRestriction::CDR: {
+    timeStepMessage = "CFL";
+
+    break;
+  }
+  case TimeStepRestriction::VoltageCurve: {
+    timeStepMessage = "Voltage curve";
+
+    break;
+  }
+  case TimeStepRestriction::MinHardcap: {
+    timeStepMessage = "Min hardcap";
+
+    break;
+  }
+  case TimeStepRestriction::MaxHardcap: {
+    timeStepMessage = "Max hardcap";
+
+    break;
+  }
+  default: {
+    MayDay::Warning("StreamerInceptionStepper::printStepReport - logic bust");
+
+    break;
+  }
+  }
+
+  // clang-format off
   pout() << "                                ** Voltage                = " << m_voltageCurve(m_time) << endl;
   pout() << "                                ** Crit. volume           = " << m_criticalVolume.back().second << endl;
-  pout() << "                                ** Inception probability  = " << m_inceptionProbability.back().second
-         << endl;
+  pout() << "                                ** Inception probability  = " << m_inceptionProbability.back().second << endl;
+  pout() << "                                ** Time step restriction  = " << "'" << timeStepMessage << "'" << endl;
+  // clang-format on
 }
 
 template <typename P, typename F, typename C>
@@ -1736,6 +1829,8 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
     this->computeInceptionIntegralStationary();
     this->computeInceptionVoltageVolume();
     this->computeCriticalVolumeStationary();
+    this->computeCriticalAreaStationary();
+    this->computeIonizationVolumeStationary();
     this->computeRdotStationary();
 
     // Compute background ionization and field emission on the mesh. Mostly for plotting.
@@ -1772,6 +1867,8 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
 
     m_Rdot.emplace_back(m_time, this->computeRdot(m_voltageCurve(m_time)));
     m_criticalVolume.emplace_back(m_time, this->computeCriticalVolumeTransient());
+    m_criticalArea.emplace_back(m_time, this->computeCriticalAreaTransient());
+    m_ionizationVolumeTransient.emplace_back(m_time, this->computeIonizationVolumeTransient(m_voltageCurve(m_time)));
     m_inceptionProbability.emplace_back(m_time, 0.0);
     m_maxK.emplace_back(m_time, maxK);
 
@@ -3040,6 +3137,240 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeTransient() const noexce
 
 template <typename P, typename F, typename C>
 void
+StreamerInceptionStepper<P, F, C>::computeCriticalAreaStationary() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::computeCriticalAreaStationary");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::computeCriticalAreaStationary" << endl;
+  }
+
+  // Solve critical area of K values for each voltage
+  for (size_t i = 0; i < m_voltageSweeps.size(); ++i) {
+    Real criticalAreaPlus = 0.0;
+    Real criticalAreaMinu = 0.0;
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+
+      const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
+
+      const Real dx = m_amr->getDx()[lvl];
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+        const EBISBox&       ebisbox    = ebisl[dit()];
+        const BaseFab<bool>& validCells = validCellsLD[dit()];
+
+        const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
+        const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
+
+        auto irregularKernel = [&](const VolIndex& vof) -> void {
+          if (validCells(vof.gridIndex())) {
+            const Real boundaryArea = ebisbox.bndryArea(vof);
+
+            if (inceptionIntegralPlus(vof, i) >= m_inceptionK) {
+              criticalAreaPlus += boundaryArea * std::pow(dx, SpaceDim - 1);
+            }
+            if (inceptionIntegralMinu(vof, i) >= m_inceptionK) {
+              criticalAreaMinu += boundaryArea * std::pow(dx, SpaceDim - 1);
+            }
+          }
+        };
+
+        // Kernel regions.
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+        BoxLoops::loop(vofit, irregularKernel);
+      }
+    }
+
+    m_criticalAreaPlus.push_back(ParallelOps::sum(criticalAreaPlus));
+    m_criticalAreaMinu.push_back(ParallelOps::sum(criticalAreaMinu));
+  }
+}
+
+template <typename P, typename F, typename C>
+Real
+StreamerInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::computeCriticalAreaTransient");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::computeCriticalAreaTransient" << endl;
+  }
+
+  Real Acr = 0.0;
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+
+    const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
+
+    const Real dx   = m_amr->getDx()[lvl];
+    const Real area = std::pow(dx, SpaceDim - 1);
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      const EBISBox&       ebisbox    = ebisl[dit()];
+      const BaseFab<bool>& validCells = validCellsLD[dit()];
+
+      const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[dit()];
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        if (validCells(vof.gridIndex()) && inceptionIntegral(vof, 0) >= m_inceptionK) {
+          Acr += ebisbox.bndryArea(vof) * area;
+        }
+      };
+
+      // Kernel regions.
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+
+  return ParallelOps::sum(Acr);
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::computeIonizationVolumeStationary");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::computeIonizationVolumeStationary" << endl;
+  }
+
+  // Solve ionization volume for each voltage
+  for (size_t i = 0; i < m_voltageSweeps.size(); ++i) {
+    Real ionizationVolume = 0.0;
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+
+      const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
+
+      const Real dx = m_amr->getDx()[lvl];
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+        const EBISBox&       ebisbox    = ebisl[dit()];
+        const BaseFab<bool>& validCells = validCellsLD[dit()];
+
+        const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
+        const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
+            const RealVect EE = RealVect(
+              D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+            const Real E = std::abs(m_voltageSweeps[i] * EE.vectorLength());
+
+            const Real alpha = m_alpha(E);
+            const Real eta   = m_eta(E);
+
+            if (alpha >= eta) {
+              ionizationVolume += std::pow(dx, SpaceDim);
+            }
+          }
+        };
+
+        auto irregularKernel = [&](const VolIndex& vof) -> void {
+          if (validCells(vof.gridIndex())) {
+            const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+            const Real     E  = std::abs(m_voltageSweeps[i] * EE.vectorLength());
+
+            const Real alpha = m_alpha(E);
+            const Real eta   = m_eta(E);
+
+            const Real kappa = ebisbox.volFrac(vof);
+
+            if (alpha >= eta) {
+              ionizationVolume += kappa * std::pow(dx, SpaceDim);
+            }
+          }
+        };
+
+        // Kernel regions.
+        const Box    cellBox = dbl[dit()];
+        VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop(vofit, irregularKernel);
+      }
+    }
+
+    m_ionizationVolume.push_back(ParallelOps::sum(ionizationVolume));
+  }
+}
+
+template <typename P, typename F, typename C>
+Real
+StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real& a_voltage) const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::computeIonizationVolumeTransient");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::computeIonizationVolumeTransient" << endl;
+  }
+
+  Real Vion = 0.0;
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+
+    const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
+
+    const Real dx  = m_amr->getDx()[lvl];
+    const Real vol = std::pow(dx, SpaceDim);
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      const EBISBox&       ebisbox    = ebisl[dit()];
+      const BaseFab<bool>& validCells = validCellsLD[dit()];
+
+      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
+      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
+          const RealVect EE = RealVect(
+            D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+          const Real E = std::abs(a_voltage * EE.vectorLength());
+
+          const Real alpha = m_alpha(E);
+          const Real eta   = m_eta(E);
+          if (alpha >= eta) {
+            Vion += vol;
+          }
+        }
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        if (validCells(vof.gridIndex())) {
+          const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+          const Real     E  = std::abs(a_voltage * EE.vectorLength());
+
+          const Real alpha = m_alpha(E);
+          const Real eta   = m_eta(E);
+          if (alpha >= eta) {
+            Vion = ebisbox.volFrac(vof) * vol;
+          }
+        }
+      };
+
+      // Kernel regions.
+      const Box    cellBox = dbl[dit()];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+
+  return ParallelOps::sum(Vion);
+}
+
+template <typename P, typename F, typename C>
+void
 StreamerInceptionStepper<P, F, C>::computeRdotStationary() noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeRdotStationary");
@@ -3210,6 +3541,9 @@ StreamerInceptionStepper<P, F, C>::writeReportStationary() const noexcept
     output << left << setw(15) << setfill(' ') << "Max K(-)";
     output << left << setw(20) << setfill(' ') << "Crit. vol(+)";
     output << left << setw(20) << setfill(' ') << "Crit. vol(-)";
+    output << left << setw(20) << setfill(' ') << "Crit. area(+)";
+    output << left << setw(20) << setfill(' ') << "Crit. area(-)";
+    output << left << setw(20) << setfill(' ') << "Ionization vol.";
     output << left << setw(20) << setfill(' ') << "Rdot (+)";
     output << left << setw(20) << setfill(' ') << "Rdot (-)" << "\n";
     output << "# ==================================================================================================================================" << "\n";        
@@ -3220,6 +3554,9 @@ StreamerInceptionStepper<P, F, C>::writeReportStationary() const noexcept
       output << left << setw(15) << setfill(' ') << m_maxKMinu[i];
       output << left << setw(20) << setfill(' ') << m_criticalVolumePlus[i];
       output << left << setw(20) << setfill(' ') << m_criticalVolumeMinu[i];
+      output << left << setw(20) << setfill(' ') << m_criticalAreaPlus[i];
+      output << left << setw(20) << setfill(' ') << m_criticalAreaMinu[i];
+      output << left << setw(20) << setfill(' ') << m_ionizationVolume[i];
       output << left << setw(20) << setfill(' ') << m_RdotPlus[i];
       output << left << setw(20) << setfill(' ') << m_RdotMinu[i];
       output << endl;
@@ -3249,6 +3586,8 @@ StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
     output << std::left << std::setw(15) << setfill(' ') << "V(t)";
     output << std::left << std::setw(15) << setfill(' ') << "max K(t)";
     output << std::left << std::setw(15) << setfill(' ') << "Vcr(t)";
+    output << std::left << std::setw(15) << setfill(' ') << "Acr(t)";
+    output << std::left << std::setw(15) << setfill(' ') << "Vion(t)";
     output << std::left << std::setw(15) << setfill(' ') << "Rdot(t)";
     output << std::left << std::setw(15) << setfill(' ') << "P(t)";
     output << std::left << std::setw(15) << setfill(' ') << "dP(t, t+dt)";
@@ -3271,6 +3610,8 @@ StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
       output << std::left << std::setw(15) << m_voltageCurve(time);
       output << std::left << std::setw(15) << m_maxK[i].second;
       output << std::left << std::setw(15) << m_criticalVolume[i].second;
+      output << std::left << std::setw(15) << m_criticalArea[i].second;
+      output << std::left << std::setw(15) << m_ionizationVolumeTransient[i].second;
       output << std::left << std::setw(15) << m_Rdot[i].second;
       output << std::left << std::setw(15) << m_inceptionProbability[i].second;
       output << std::left << std::setw(15) << dProb[i];
@@ -3282,6 +3623,127 @@ StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
 #ifdef CH_MPI
   }
 #endif
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::writeDataReportTransient(const Real& a_voltage) const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::writeDataReportTransient");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::writeDataReportTransient" << endl;
+  }
+
+  std::vector<RealVect> pos;
+  std::vector<Real>     E;
+  std::vector<Real>     dA;
+  std::vector<Real>     dV;
+  std::vector<Real>     ionDensityVector;
+
+  const RealVect probLo = m_amr->getProbLo();
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+
+    const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
+
+    const Real dx   = m_amr->getDx()[lvl];
+    const Real vol  = std::pow(dx, SpaceDim);
+    const Real area = std::pow(dx, SpaceDim - 1);
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      const EBISBox&       ebisbox    = ebisl[dit()];
+      const BaseFab<bool>& validCells = validCellsLD[dit()];
+
+      const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[dit()];
+
+      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
+      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+
+      const EBCellFAB& ionDensity    = (*m_ionSolver->getPhi()[lvl])[dit()];
+      const FArrayBox& ionDensityReg = ionDensity.getFArrayBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
+          pos.push_back(probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx);
+          dA.push_back(0.0);
+
+          const RealVect EE = RealVect(
+            D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+          const Real currE = std::abs(a_voltage * EE.vectorLength());
+          const Real alpha = m_alpha(currE);
+          const Real eta   = m_eta(currE);
+
+          E.push_back(currE);
+          ionDensityVector.push_back(ionDensityReg(iv, 0));
+
+          if (alpha >= eta) {
+            dV.push_back(vol);
+          }
+          else {
+            dV.push_back(0.0);
+          }
+        }
+      };
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        if (validCells(vof.gridIndex())) {
+          pos.push_back(probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx));
+
+          const RealVect EE    = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+          const Real     currE = std::abs(a_voltage * EE.vectorLength());
+          const Real     alpha = m_alpha(currE);
+          const Real     eta   = m_eta(currE);
+
+          E.push_back(currE);
+          ionDensityVector.push_back(ionDensity(vof, 0));
+
+          if (alpha >= eta) {
+            dV.push_back(ebisbox.volFrac(vof) * vol);
+          }
+          else {
+            dV.push_back(0.0);
+          }
+          if (inceptionIntegral(vof, 0) >= m_inceptionK) {
+            dA.push_back(ebisbox.bndryArea(vof) * area);
+          }
+          else {
+            dA.push_back(0.0);
+          }
+        }
+      };
+
+      // Kernel regions.
+      const Box    cellBox = dbl[dit()];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+  std::ofstream output{m_dataOutputFile, std::ofstream::out};
+
+  output << std::left << std::setw(15) << setfill(' ') << "x";
+  output << std::left << std::setw(15) << setfill(' ') << "y";
+  output << std::left << std::setw(15) << setfill(' ') << "z";
+  output << std::left << std::setw(15) << setfill(' ') << "E";
+  output << std::left << std::setw(15) << setfill(' ') << "dVcr";
+  output << std::left << std::setw(15) << setfill(' ') << "dAcr";
+  output << std::left << std::setw(15) << setfill(' ') << "ionDensity";
+  output << "\n";
+
+  for (size_t i = 0; i < pos.size(); ++i) {
+    output << std::left << std::setw(15) << pos[i][0];
+    output << std::left << std::setw(15) << pos[i][1];
+    output << std::left << std::setw(15) << pos[i][2];
+    output << std::left << std::setw(15) << E[i];
+    output << std::left << std::setw(15) << dV[i];
+    output << std::left << std::setw(15) << dA[i];
+    output << std::left << std::setw(15) << ionDensityVector[i];
+    output << "\n";
+  }
+
+  output.close();
 }
 
 template <typename P, typename F, typename C>

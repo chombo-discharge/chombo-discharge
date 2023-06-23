@@ -173,17 +173,19 @@ StreamerInceptionStepper.K_inception   = 10                            # User-sp
 StreamerInceptionStepper.plt_vars      = K ions Uinc bg_rate detachment alpha eta # Plot variables
 
 # Static mode
-StreamerInceptionStepper.voltage_lo    = 10E3                          # Low voltage multiplier
-StreamerInceptionStepper.voltage_hi    = 30E3                          # Highest voltage multiplier
-StreamerInceptionStepper.voltage_steps = 10                            # Number of voltage steps
+StreamerInceptionStepper.voltage_lo    = 10E3                     # Low voltage multiplier
+StreamerInceptionStepper.voltage_hi    = 30E3                     # Highest voltage multiplier
+StreamerInceptionStepper.voltage_steps = 9                       # Number of voltage steps
 
 # Dynamic mode
-StreamerInceptionStepper.ion_transport = false                          # Turn on/off ion transport
-StreamerInceptionStepper.transport_alg = heun                           # Advection algorithm. 
-StreamerInceptionStepper.cfl           = 0.8                           # CFL time step for dynamic mode
-StreamerInceptionStepper.min_dt        = 0.0                           # Minimum permitted time step
-StreamerInceptionStepper.max_dt        = 250E-9                        # Maximum permitted time step
-
+StreamerInceptionStepper.ion_transport = true                   # Turn on/off ion transport
+StreamerInceptionStepper.transport_alg = heun                    # Transport algorithm. 'euler', 'heun', or 'imex'
+StreamerInceptionStepper.cfl           = 0.8                     # CFL time step for dynamic mode
+StreamerInceptionStepper.first_dt      = 1.E-9                   # First time step to be used. 
+StreamerInceptionStepper.min_dt        = 1.E-9                   # Minimum permitted time step
+StreamerInceptionStepper.max_dt        = 1.E99                   # Maximum permitted time step
+StreamerInceptionStepper.voltage_eps   = 0.05                    # Permitted relative change in V(t) when computing dt
+StreamerInceptionStepper.max_dt_growth = 0.15                    # Maximum relative change in dt when computing dt
 
 # ====================================================================================================
 # StreamerInceptionTagger class options
@@ -197,7 +199,7 @@ StreamerInceptionTagger.plot        = false # Plot tagging field or not.
 # ====================================================================================================
 # Parameters for lightning impulse (used for dynamic runs)
 # ====================================================================================================
-lightning_impulse.peak       = 100E3
+lightning_impulse.peak       = 50E3
 lightning_impulse.start      = 1.E-9
 lightning_impulse.front_time = 1.2E-6
 lightning_impulse.tail_time  = 50E-6
