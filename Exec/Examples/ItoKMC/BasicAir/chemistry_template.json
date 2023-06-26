@@ -6,17 +6,31 @@
 	[
 	    // Definition of background species. This is an array of species with specified molar fractions. Species names
 	    // can not contain wildcards (@)	    		    
-	    {"id": "O2"},
-	    {"id"; "N2"}
+	    {
+		"id": "O2",
+		"plot": true,		
+		"molar fraction": {
+		    "type": "constant",
+		    "value": 0.2
+		}
+	    },
+	    {
+		"id": "N2",
+		"plot": true,
+		"molar fraction": {
+		    "type": "constant",
+		    "value": 0.8
+		}
+	    }
 	],
 	// Specify which gas law we use. The user can define multiple gas laws and then specify which one to use.
-	"gas law": {
-	    "id": "ideal gas", // Specify which gas law we use.
+	"law": {
+	    "id": "my_ideal_gas", // Specify which gas law we use.
 	    "plot": true,      // Turn on/off plotting.
-	    "ideal gas": {
+	    "my_ideal_gas": {
 		// Definition for an ideal gas law. Temperature is always in Kevlin the pressure is in bar. The neutral density
 		// is derived using an ideal gas law.
-		"type": "ideal"
+		"type": "ideal",
 		"temperature": 300,
 		"pressure": 1.0
 	    },
@@ -26,12 +40,12 @@
 		"type": "tabulated vs height",   // Specify that our gas law contains table-vs-height data
 		"file": "ENMSIS_Atmosphere.dat", // File name 
 		"axis": "y",                     // Associated Cartesian axis for the "height"
-		"temperature_column": 0,         // Column containing the temperature
+		"temperature column": 0,         // Column containing the temperature
 		"pressure column": 1,            // Column containing the pressure
 		"density column": 2,             // Column containing the number density
 		"min height": 0.0,               // Minium height kept when resampling the table
 		"max height": 250000,            // Maximum height kept when resampling the table
-		"res height", 500,               // Table resolution
+		"res height": 500,               // Table resolution
 		"dump tables": true,             // Optional argument for dumping tables to disk (useful for debugging)
 		"T scale": 1.0,                  // Optional argument for user-specified temperature data scaling.
 		"P scale": 1.0,                  // Optional argument for user-specified pressure data scaling.
@@ -50,9 +64,9 @@
 	    "Z": -1,          // Charge number
 	    "type": "ito",    // Solver type. Either 'ito' or 'cdr'
 	    "mobile": true,   // Mobile or not
-	    "diffusive": true // Diffusive or not
+	    "diffusive": true,// Diffusive or not
 	    "mobility": {
-		// Specification of the mobile when the species is mobile. User can specify various forms of the mobility. E.g. constant, function-based, or
+		// Specification of the mobilility coefficient when the species is mobile. User can specify various forms of the mobility. E.g. constant, function-based, or
 		// tabulated vs E/N
 		"lookup" : "table E/N",                      // Specification of tabulated mobility lookup method                        
 		"file": "bolsig_air.dat",                    // File containg the mobility data
@@ -62,7 +76,10 @@
 		"min E/N": 10,                               // Minimum E/N kept when resampling table
 		"max E/N": 2E6,                              // Maximum E/N kept when resampling table
 		"points": 1000,                              // Number of grid points kept when resampling the table
-		"spacing": "exponential"                     // Grid point spacing when resampling the table
+		"spacing": "exponential",                    // Grid point spacing when resampling the table
+		"E/N scale": 1.0,                            // Optional argument for scaling mobility coefficient
+		"mu scale": 1.0,                             // Optional argument for scaling the E/N column
+		"dump": true                                 // Optional argument for dumping table to disk (useful for debugging)
 	    },
 	    "diffusion": {
 		// Definition of the diffusion coefficient similiar to mobility coefficient above. 
@@ -80,5 +97,12 @@
 
 	    }
 	}
-    ]
+    ],
+    "do": {
+	"not": {
+	    "thee": {
+		"cat": true
+	    }
+	}
+    }
 }

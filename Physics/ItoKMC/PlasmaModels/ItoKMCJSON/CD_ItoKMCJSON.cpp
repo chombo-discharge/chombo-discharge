@@ -33,6 +33,11 @@ ItoKMCJSON::ItoKMCJSON() noexcept
   this->parsePPC();
   this->parseDebug();
   this->parseAlgorithm();
+  this->parseJSON();
+
+  // Initialize the gas law and background species
+  this->initializeGasLaw();
+  this->initializeBackgroundSpecies();
 }
 
 ItoKMCJSON::~ItoKMCJSON() noexcept { CH_TIME("ItoKMCJSON::~ItoKMCJSON"); }
@@ -124,7 +129,7 @@ ItoKMCJSON::parseVerbose() noexcept
 }
 
 void
-ItoKMCJSON::parseJSON() noexcept
+ItoKMCJSON::parseJSON()
 {
   CH_TIME("ItoKMCJSON::parseJSON");
   if (m_verbose) {
@@ -142,19 +147,24 @@ ItoKMCJSON::parseJSON() noexcept
 
     this->throwParserError(parseError.c_str());
   }
+  else {
+    // Parse the JSON file.
+    std::ifstream f(m_jsonFile);
 
-  // Parse the JSON file.
-  std::ifstream f(m_jsonFile);
+    constexpr auto callback        = nullptr;
+    constexpr auto allowExceptions = true;
+    constexpr auto ignoreComments  = true;
 
-  constexpr auto callback        = nullptr;
-  constexpr auto allowExceptions = true;
-  constexpr auto ignoreComments  = true;
+    m_json = nlohmann::json::parse(f, callback, allowExceptions, ignoreComments);
 
-  m_json = json::parse(f, callback, allowExceptions, ignoreComments);
+    if (m_verbose) {
+      pout() << m_className + "::parseJSON - done reading file!" << endl;
+    }
+  }
 }
 
 void
-ItoKMC::initializeGasLaw() noexcept
+ItoKMCJSON::initializeGasLaw() noexcept
 {
   CH_TIME("ItoKMCJSON::initializeGasLaw");
   if (m_verbose) {
@@ -163,26 +173,31 @@ ItoKMC::initializeGasLaw() noexcept
 
   const std::string baseError = m_className + "::initializeGasLaw";
 
-  if (!m_json.contains["gas"]) {
-    this->throwParserError(baseError + " but field 'gas' is missing");
-  }
-  if (!(m_json["gas"].contains("law"))) {
-    this->throwParserError(baseError + " but field 'gas/law' is missing");
+  // TLDR: This routine exists for populating m_gasPressure, m_gasTemperature, and m_gasDensity. If you want to add a new gas law, this
+  //       routine is where you would do it.
+
+  if (!(m_json["gas"]["law"].contains("id"))) {
+    this->throwParserError(baseError + " but field 'gas/law/id' is missing");
   }
 
-  const auto gasJSON = m_json["gas"];
-  const auto gasLaw  = trim(gasJSON["law"].get<std::string>());
+  const std::string curLaw = this->trim(m_json["gas"]["law"]["id"].get<std::string>());
 
-  if (gasLaw == "ideal") {
-    if (!(gasJSON.contains("temperature"))) {
+  if ((!m_json["gas"]["law"][curLaw].contains("type"))) {
+    this->throwParserError(baseError + " but specified gas law '" + curLaw + "' is missing the 'type' specifier");
+  }
+
+  const std::string type = this->trim(m_json["gas"]["law"][curLaw]["type"].get<std::string>());
+
+  if (type == "ideal") {
+    if (!(m_json["gas"]["law"][curLaw].contains("temperature"))) {
       this->throwParserError(baseError + " and got ideal gas law but field 'temperature' is missing");
     }
-    if (!(gasJSON.contains("pressure"))) {
+    if (!(m_json["gas"]["law"][curLaw].contains("pressure"))) {
       this->throwParserError(baseError + " and got ideal gas law but field 'pressure' is missing");
     }
 
-    const Real T0   = gasJSON["temperature"].get<Real>();
-    const Real P0   = gasJSON["temperature"].get<Real>();
+    const Real T0   = m_json["gas"]["law"][curLaw]["temperature"].get<Real>();
+    const Real P0   = m_json["gas"]["law"][curLaw]["pressure"].get<Real>();
     const Real P    = P0 * Units::atm2pascal;
     const Real Rho0 = (P * Units::Na) / (T0 * Units::R);
 
@@ -197,14 +212,14 @@ ItoKMC::initializeGasLaw() noexcept
     };
   }
   else {
-    const std::string parseError = baseError + " but gas law '" + gasLaw + "' is not supported";
+    const std::string parseError = baseError + " but gas law '" + type + "' is not supported";
 
     this->throwParserError(parseError);
   }
 }
 
 void
-ItoKMC::initializeBackgroundSpecies() noexcept
+ItoKMCJSON::initializeBackgroundSpecies() noexcept
 {
   CH_TIME("ItoKMCJSON::initializeBackgroundSpecies");
   if (m_verbose) {
@@ -213,18 +228,15 @@ ItoKMC::initializeBackgroundSpecies() noexcept
 
   const std::string baseError = m_className + "::initializeBackgroundSpecies";
 
-  if (!(m_json.contains["gas"])) {
-    this->throwParserError(baseError + " but field 'gas' is missing");
+  if (!(m_json["gas"].contains("background species"))) {
+    this->throwParserError(baseError + " but field 'gas/background species' is missing");
   }
-  if (!(m_json["gas"].contains("background_species"))) {
-    this->throwParserError(baseError + " but field 'gas/background_species' is missing");
-  }
+  else {
+    const auto backgroundSpecies = m_json["gas"]["background species"];
 
-  const auto gasJSON           = m_json["gas"];
-  const auto backgroundSpecies = gasJSON["background_species"];
-
-  for (const auto& species : backgroundSpecies) {
-    const auto speciesName = this->trim(species["id"].get<std::string>());
+    for (const auto& species : backgroundSpecies) {
+      const std::string speciesName = this->trim(species["id"].get<std::string>());
+    }
   }
 }
 

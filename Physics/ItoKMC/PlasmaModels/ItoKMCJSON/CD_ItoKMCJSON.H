@@ -9,8 +9,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_CdrPlasmaJSON_H
-#define CD_CdrPlasmaJSON_H
+#ifndef CD_ItoKMCJSON_H
+#define CD_ItoKMCJSON_H
 
 // Std includes
 #include <map>
@@ -23,6 +23,7 @@
 // Our includes
 #include <CD_ItoKMCBackgroundSpecies.H>
 #include <CD_ItoKMCPhysics.H>
+#include <CD_NamespaceHeader.H>
 
 namespace Physics {
   namespace ItoKMC {
@@ -100,21 +101,21 @@ namespace Physics {
 	@param[in] a_numParticles Number of particles per cell
       */
       virtual Real
-      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const noexcept override;
+      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const noexcept override{}
 
       /*!
 	@brief Compute Townsend ionization coefficient
 	@param[in] a_E Electric field. 
       */
       virtual Real
-      computeAlpha(const RealVect a_E) const override;
+      computeAlpha(const RealVect a_E) const override{}
 
       /*!
 	@brief Compute Townsend attachment coefficient
 	@param[in] a_E Electric field. 
       */
       virtual Real
-      computeEta(const RealVect a_E) const override;
+      computeEta(const RealVect a_E) const override{}
 
       /*!
 	@brief Update reaction rates
@@ -129,7 +130,7 @@ namespace Physics {
                           const Vector<Real>&     a_phi,
                           const Vector<RealVect>& a_gradPhi,
                           const Real              a_dx,
-                          const Real              a_kappa) const noexcept override;
+                          const Real              a_kappa) const noexcept override{}
 
       /*!
 	@brief Compute the Ito solver mobilities.
@@ -138,7 +139,7 @@ namespace Physics {
 	@param[in] a_E    Electric field
       */
       Vector<Real>
-      computeMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override;
+      computeMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override{}
 
       /*!
 	@brief Compute the Ito solver diffusion coefficients
@@ -218,6 +219,11 @@ namespace Physics {
       bool m_skipReactions;
 
       /*!
+	@brief Nohmanns implementation of JSON files
+      */
+      nlohmann::json m_json;
+
+      /*!
 	@brief Input JSON file name
       */
       std::string m_jsonFile;
@@ -225,7 +231,7 @@ namespace Physics {
       /*!
 	@brief Map of background species
       */
-      std::map<std::shared_ptr<ItoKMCBackgroundSpecies>> m_backgroundSpecies;
+      std::vector<std::shared_ptr<ItoKMCBackgroundSpecies>> m_backgroundSpecies;
 
       /*!
 	@brief Background gas pressure
@@ -260,7 +266,7 @@ namespace Physics {
 	@brief Parse the JSON file
       */
       virtual void
-      parseJSON() noexcept;
+      parseJSON() ;
 
       /*!
 	@brief Parse chattiness

@@ -31,9 +31,9 @@ namespace Physics {
     {
     public:
       /*!
-	@brief Alias for position-dependent number density
+	@brief Alias for position-dependent molar fraction
       */
-      using NumberDensity = std::function<Real(const RealVect a_pos)>;
+      using MolarFraction = std::function<Real(const RealVect a_pos)>;
 
       /*!
 	@brief Default constructor. Must subsequently call the define function. 
@@ -45,7 +45,7 @@ namespace Physics {
 	@param[in] a_name          Species name
 	@param[in] a_molarFraction Molar fraction
       */
-      ItoKMCBackgroundSpecies(const std::string& a_name, const NumberDensity& a_numberDensity) noexcept;
+      ItoKMCBackgroundSpecies(const std::string& a_name, const MolarFraction& a_molarFraction) noexcept;
 
       /*!
 	@brief Destructor
@@ -53,12 +53,12 @@ namespace Physics {
       virtual ~ItoKMCBackgroundSpecies() noexcept;
 
       /*!
-	@brief Full constructor. Calls the define function. 
-	@param[in] a_name          Species name.
-	@param[in] a_numberDensity Number density function.
+	@brief Define function. Puts object in usable state.
+	@param[in] a_name          Species name
+	@param[in] a_molarFraction Molar fraction
       */
       void
-      define(const std::string& a_name, const MolarFractionX& a_molarFraction) noexcept;
+      define(const std::string& a_name, const MolarFraction& a_molarFraction) noexcept;
 
       /*!
 	@brief Get (number) density at the physical coordinates.
@@ -88,7 +88,7 @@ namespace Physics {
       /*!
 	@brief Initial data function. 
       */
-      NumberDensity m_numberDensity;
+      MolarFraction m_numberDensity;
     };
   } // namespace ItoKMC
 } // namespace Physics
