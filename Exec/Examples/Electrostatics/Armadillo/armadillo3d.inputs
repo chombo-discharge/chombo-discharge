@@ -5,7 +5,7 @@ AmrMesh.lo_corner        = -100. -75 -100.   # Low corner of problem domain
 AmrMesh.hi_corner        =  100.  125 100.   # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 32 32 32    # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 3           # Maximum amr depth
+AmrMesh.max_amr_depth    = 2           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -16,8 +16,8 @@ AmrMesh.max_box_size     = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box     = 16          # Maximum allowed box size for EBIS generation. 
 AmrMesh.ref_rat          = 2 2 2 2 2 2 # Refinement ratios (mixed ratios are allowed). 
 AmrMesh.num_ghost        = 2           # Number of ghost cells. Default is 3
-AmrMesh.lsf_ghost        = 0           # Number of ghost cells when writing level-set to grid
-AmrMesh.eb_ghost         = 4           # Set number of of ghost cells for EB stuff
+AmrMesh.lsf_ghost        = 2           # Number of ghost cells when writing level-set to grid
+AmrMesh.eb_ghost         = 2           # Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
 AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
@@ -118,6 +118,7 @@ Tesselation.mesh_file   = armadillo.ply # Ply file
 Tesselation.partitioner = default       # Partitioner. Valid options are 'default', 'overlap', 'sah'
 Tesselation.use_bvh     = true          # Use bounding volume hierarchy for accelerating search
 Tesselation.z_coord     = 0.0           # z-coordinate for 2D slicing this object
+Tesselation.flip_inside =false
 
 # ====================================================================================================
 # FIELD_STEPPER CLASS OPTIONS
