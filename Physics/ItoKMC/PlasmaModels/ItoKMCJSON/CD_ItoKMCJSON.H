@@ -232,12 +232,12 @@ namespace Physics {
 	@brief Input JSON file name
       */
       std::string m_jsonFile;
-      
+
       /*!
 	@brief Map of string-int identifiers for background species
       */
       std::map<std::string, int> m_backgroundSpeciesMap;
-      
+
       /*!
 	@brief Map of int-string identifiers for background species
       */
@@ -247,7 +247,7 @@ namespace Physics {
 	@brief Map of background species. 
 	@details Built in initialization order but can look up arbitrary species name but using the maps. 
       */
-      std::vector<ItoKMCBackgroundSpecies> m_backgroundSpecies;      
+      std::vector<ItoKMCBackgroundSpecies> m_backgroundSpecies;
 
       /*!
 	@brief Plot background species or not
@@ -278,7 +278,8 @@ namespace Physics {
       /*!
 	@brief Background gas number density
       */
-      FunctionX m_gasDensity;;            
+      FunctionX m_gasDensity;
+      ;
 
       /*!
 	@brief Check if a file exists

@@ -144,7 +144,8 @@ LookupTable1D<N>::setRange(const Real a_min, const Real a_max, const int a_colRa
 
 template <int N>
 inline void
-LookupTable1D<N>::setMinRange(const Real a_min, const int a_colRange) {
+LookupTable1D<N>::setMinRange(const Real a_min, const int a_colRange)
+{
 
   // Do a backup of the data and reset data holder
   const std::vector<std::array<Real, N>> oldData = m_data;
@@ -162,7 +163,8 @@ LookupTable1D<N>::setMinRange(const Real a_min, const int a_colRange) {
 
 template <int N>
 inline void
-LookupTable1D<N>::setMaxRange(const Real a_max, const int a_colRange) {
+LookupTable1D<N>::setMaxRange(const Real a_max, const int a_colRange)
+{
   // Do a backup of the data and reset data holder.
   const std::vector<std::array<Real, N>> oldData = m_data;
   this->clear();
