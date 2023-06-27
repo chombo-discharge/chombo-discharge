@@ -74,8 +74,13 @@
 	"num points": 1000,
 	"spacing":"exponential",
 	"scale E/N": 1.0,
-	"scale alpha": 1.0
+	"scale alpha/N": 1.0
     },
+    "eta": {
+	// Definition of the alpha coefficient
+	"type": "constant",
+	"value": 0.5
+    },    
     "plasma species":
     [
 	// List of plasma species that are tracked. This is an array of species

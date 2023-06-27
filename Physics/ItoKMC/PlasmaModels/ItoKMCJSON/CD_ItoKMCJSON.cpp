@@ -41,8 +41,8 @@ ItoKMCJSON::ItoKMCJSON()
   this->initializeBackgroundSpecies();
 
   // Initialize Townsend coefficients
-  this->parseAlpha();
-  this->parseEta();
+  this->parseTownsendCoefficient("alpha");
+  this->parseTownsendCoefficient("eta");
 
   // Initialize the plasma species
   this->initializePlasmaSpecies();
@@ -511,58 +511,65 @@ ItoKMCJSON::initializePlasmaSpecies()
 }
 
 void
-ItoKMCJSON::parseAlpha()
+ItoKMCJSON::parseTownsendCoefficient(const std::string a_coeff)
 {
-  CH_TIME("ItoKMCJSON::parseAlpha");
+  CH_TIME("ItoKMCJSON::parseTownsendCoefficient");
   if (m_verbose) {
-    pout() << m_className + "::parseAlpha" << endl;
+    pout() << m_className + "::parseTownsendCoefficient" << endl;
   }
 
-  const std::string baseError = "ItoKMCJSON::parseAlpha";
+  const std::string baseError = "ItoKMCJSON::parseTownsendCoefficient";
 
-  if (!(m_json.contains("alpha"))) {
-    this->throwParserError(baseError + " but field 'alpha' (Townsend ionization coefficient) is missing");
+  FunctionEX func;
+
+  if (!(m_json.contains(a_coeff))) {
+    this->throwParserError(baseError + " but field '" + a_coeff + "' is missing");
   }
-  if (!(m_json["alpha"].contains("type"))) {
-    this->throwParserError(baseError + " but field 'alpha' does not contain 'type'");
+  if (!(m_json[a_coeff].contains("type"))) {
+    this->throwParserError(baseError + " but field '" + a_coeff + "' does not contain the required field 'type'");
   }
 
-  const std::string whichAlpha = m_json["alpha"]["type"].get<std::string>();
+  const std::string type = m_json[a_coeff]["type"].get<std::string>();
 
-  if (whichAlpha == "constant") {
-    if (!(m_json["alpha"].contains("value"))) {
+  if (type == "constant") {
+    if (!(m_json[a_coeff].contains("value"))) {
       this->throwParserError(baseError + " and got 'constant' but missing the 'value' field");
     }
 
-    const Real value = m_json["alpha"]["value"].get<Real>();
+    const Real value = m_json[a_coeff]["value"].get<Real>();
 
     if (value < 0.0) {
-      this->throwParserError(baseError + " and got 'constant' but can't have negative alpha");
+      this->throwParserError(baseError + " and got 'constant' but can't have negative coefficient");
     }
 
-    m_alpha = [value](const Real E, const RealVect x) -> Real {
+    func = [value](const Real E, const RealVect x) -> Real {
       return value;
     };
   }
-  else if (whichAlpha == "table vs E/N") {
+  else if (type == "table vs E/N") {
+    const std::string baseErrorTable = baseError + " and got table vs E/N";
+
+    const nlohmann::json& jsonTable = m_json[a_coeff];
+
+    if (!(jsonTable.contains("file"))) {
+      this->throwParserError(baseErrorTable + "but 'file' is not specified");
+    }
+
+    LookupTable1D<2> tabulatedAlpha = this->parseTableEByN(jsonTable, "alpha/N");
+
     this->throwParserError(baseError + "but 'table vs E/N' is not supported yet");
   }
   else {
-    this->throwParserError(baseError + "but alpha specification '" + whichAlpha + "' is not supported");
-  }
-}
-
-void
-ItoKMCJSON::parseEta()
-{
-  CH_TIME("ItoKMCJSON::parseEta");
-  if (m_verbose) {
-    pout() << m_className + "::parseEta" << endl;
+    this->throwParserError(baseError + "but type specification '" + type + "' is not supported");
   }
 
-  const std::string baseError = "ItoKMCJSON::parseEta";
-
-  this->throwParserWarning(baseError + " not implemented yet");
+  // Associate with correct internal functions.
+  if (a_coeff == "alpha") {
+    m_alpha = func;
+  }
+  else if (a_coeff == "eta") {
+    m_eta = func;
+  }
 }
 
 void
@@ -576,6 +583,29 @@ ItoKMCJSON::parseInitialData()
   const std::string baseError = "ItoKMCJSON::parseInitialData";
 
   this->throwParserWarning(baseError + " not implemented yet");
+}
+
+LookupTable1D<2>
+ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string& a_dataID) const
+{
+  CH_TIME("ItoKMCJSON::parseTableEByN");
+  if (m_verbose) {
+    pout() << m_className + "::parseTableEByN" << endl;
+  }
+
+  MayDay::Error("ItoKMCJSON::parseTableEbyN - logic bust, routine is not implemented");
+
+  const std::string preError  = "ItoKMCJSON::parseTableEByN";
+  const std::string postError = "for dataID " + a_dataID;
+
+  if (!(a_tableEntry.contains("file"))) {
+    this->throwParserError(preError + " but could not find the 'file' specifier " + postError);
+  }
+
+  const std::string fileName = a_tableEntry["file"].get<std::string>();
+
+  // Todo: Separate between simple and full read by including header
+  // Need file specification, alpha specification
 }
 
 Real
@@ -608,11 +638,7 @@ ItoKMCJSON::computeEta(const Real a_E, const RealVect a_pos) const noexcept
     pout() << m_className + "::computeEta" << endl;
   }
 
-#if 0
   return m_eta(a_E, a_pos);
-#else
-  return 0.0;
-#endif
 }
 
 Vector<Real>

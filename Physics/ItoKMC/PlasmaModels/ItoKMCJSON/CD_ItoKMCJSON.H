@@ -23,6 +23,7 @@
 // Our includes
 #include <CD_ItoKMCBackgroundSpecies.H>
 #include <CD_ItoKMCPhysics.H>
+#include <CD_LookupTable1D.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -267,7 +268,7 @@ namespace Physics {
       /*!
 	@brief Townsend attachment coefficient. Defined during parseEta
       */
-      FunctionEN m_eta;
+      FunctionEX m_eta;
 
       /*!
 	@brief Background gas pressure
@@ -283,7 +284,6 @@ namespace Physics {
 	@brief Background gas number density
       */
       FunctionX m_gasDensity;
-      ;
 
       /*!
 	@brief Check if a file exists
@@ -351,16 +351,11 @@ namespace Physics {
       initializeBackgroundSpecies();
 
       /*!
-	@brief Initialize Townsend ionization coefficient
+	@brief Parse one of the Townsend coefficients. 
+	@param[in] a_coeff Which coefficient. Must be "alpha" or "eta"
       */
       virtual void
-      parseAlpha();
-
-      /*!
-	@brief Initialize Townsend attachment coefficient
-      */
-      virtual void
-      parseEta();
+      parseTownsendCoefficient(const std::string a_str);
 
       /*!
 	@brief Initialize the plasma species
@@ -373,6 +368,14 @@ namespace Physics {
       */
       virtual void
       parseInitialData();
+
+      /*!
+	@brief Parse a table which is stored in E/N format
+	@param[in] a_tableEntry Table entry in JSON format. 
+	@param[in] a_dataID     Data identifier
+      */
+      virtual LookupTable1D<2>
+      parseTableEByN(const nlohmann::json& a_tableEntry, const std::string& a_dataID) const;
     };
   } // namespace ItoKMC
 } // namespace Physics
