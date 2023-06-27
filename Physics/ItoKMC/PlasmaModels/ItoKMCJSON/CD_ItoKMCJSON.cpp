@@ -590,25 +590,29 @@ ItoKMCJSON::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Rea
 }
 
 Real
-ItoKMCJSON::computeAlpha(const RealVect a_E) const noexcept
+ItoKMCJSON::computeAlpha(const Real a_E, const RealVect a_pos) const noexcept
 {
   CH_TIME("ItoKMCJSON::computeAlpha");
   if (m_verbose) {
     pout() << m_className + "::computeAlpha" << endl;
   }
 
-  return m_alpha(a_E.vectorLength(), RealVect::Zero);
+  return m_alpha(a_E, a_pos);
 }
 
 Real
-ItoKMCJSON::computeEta(const RealVect a_E) const noexcept
+ItoKMCJSON::computeEta(const Real a_E, const RealVect a_pos) const noexcept
 {
   CH_TIME("ItoKMCJSON::computeEta");
   if (m_verbose) {
     pout() << m_className + "::computeEta" << endl;
   }
 
+#if 0
+  return m_eta(a_E, a_pos);
+#else
   return 0.0;
+#endif
 }
 
 Vector<Real>

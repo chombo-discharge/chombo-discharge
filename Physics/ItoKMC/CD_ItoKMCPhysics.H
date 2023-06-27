@@ -97,19 +97,21 @@ namespace Physics {
 
       /*!
 	@brief Compute Townsend ionization coefficient
-	@param[in] a_E Electric field. 
+	@param[in] a_E Electric field magnitude
+	@param[in] a_x Physical coordinate
 	@return Should return the Townsend ionization coefficient. 
       */
       virtual Real
-      computeAlpha(const RealVect a_E) const = 0;
+      computeAlpha(const Real a_E, const RealVect a_x) const = 0;
 
       /*!
 	@brief Compute Townsend attachment coefficient
-	@param[in] a_E Electric field. 
+	@param[in] a_E Electric field magnitude
+	@param[in] a_x Physical coordinate
 	@return Should return the Townsend attachment coefficient. 
       */
       virtual Real
-      computeEta(const RealVect a_E) const = 0;
+      computeEta(const Real a_E, const RealVect a_x) const = 0;
 
       /*!
 	@brief Get all particle drift-diffusion species

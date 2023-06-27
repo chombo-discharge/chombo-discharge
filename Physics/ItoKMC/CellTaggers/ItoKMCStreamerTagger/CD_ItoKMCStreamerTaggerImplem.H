@@ -111,9 +111,10 @@ ItoKMCStreamerTagger<S>::computeTagFields(const RealVect a_pos,
 
   Vector<Real> tagFields(this->m_numTagFields);
 
-  tagFields[0] = a_E.vectorLength() / a_maxE;
-  tagFields[1] = this->m_physics->computeAlpha(a_E) * a_dx;
-  tagFields[1] -= this->m_physics->computeEta(a_E) * a_dx;
+  const Real E = a_E.vectorLength();
+  tagFields[0] = E/ a_maxE;
+  tagFields[1] = this->m_physics->computeAlpha(E, a_pos) * a_dx;
+  tagFields[1] -= this->m_physics->computeEta(E, a_pos) * a_dx;
 
   return tagFields;
 }

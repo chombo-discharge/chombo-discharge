@@ -61,17 +61,19 @@ namespace Physics {
 
       /*!
 	@brief Compute Townsend ionization coefficient
-	@param[in] a_E Electric field. 
+	@param[in] a_E   Electric field. 
+	@param[in] a_pos Physical coordinates
       */
       virtual Real
-      computeAlpha(const RealVect a_E) const override;
+      computeAlpha(const Real a_E, const RealVect a_pos) const override;
 
       /*!
 	@brief Compute Townsend attachment coefficient
-	@param[in] a_E Electric field. 
+	@param[in] a_E   Electric field. 
+	@param[in] a_pos Physical coordinates
       */
       virtual Real
-      computeEta(const RealVect a_E) const override;
+      computeEta(const Real a_E, const RealVect a_pos) const override;
 
       /*!
 	@brief Update reaction rates
