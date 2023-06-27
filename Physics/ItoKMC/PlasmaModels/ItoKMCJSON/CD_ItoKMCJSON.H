@@ -283,7 +283,7 @@ namespace Physics {
 	@brief Parse the JSON file
       */
       virtual void
-      parseJSON() ;
+      parseJSON();
 
       /*!
 	@brief Parse chattiness
@@ -306,6 +306,12 @@ namespace Physics {
       throwParserWarning(const std::string a_warning) const noexcept;
 
       /*!
+	@brief Check if a string contains the wildcard @ and return true if it does
+      */
+      virtual bool
+      containsWildcard(const std::string a_str) const noexcept;
+
+      /*!
 	@brief Check that molar fraction is one. Throws a warning if it isn't.
 	@param[in] a_position Physical coordinates
       */
@@ -319,10 +325,16 @@ namespace Physics {
       initializeGasLaw() noexcept;
 
       /*!
-	@brief Initialize gas law.
+	@brief Initialize the background species.
       */
       virtual void
       initializeBackgroundSpecies() noexcept;
+
+      /*!
+	@brief Initialize the plasma species
+      */
+      virtual void
+      initializePlasmaSpecies() noexcept;
     };
   } // namespace ItoKMC
 } // namespace Physics

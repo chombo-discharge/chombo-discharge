@@ -18,8 +18,18 @@
 		"id": "N2",
 		"plot": true,
 		"molar fraction": {
-		    "type": "constant",
-		    "value": 0.8
+		    "type": "table vs height",       // Specify table vs height
+		    "file": "N2_molar_fraction.dat", // File name containing molar fraction
+		    "axis": "y",                     // Axis which represents the "height"
+		    "height column": 0,              // Optional specification of column containing the height data (defaults to 0)
+		    "molar fraction column": 1,      // Optional specification of column containing the height data (defaults to 1)
+		    "height scale": 1.0,             // Optional scaling of height column
+		    "fraction scale": 1.0,           // Optional scaling of molar fraction column
+		    "min height": 0.0,               // Optional truncation of minimum height kept in internal table (occurs after scaling)
+		    "max height": 2.0,               // Optional truncation of maximum height kept in internal table (occurs after scaling)
+		    "num points": 100,               // Optional specification of number of data points kept in internal table (defaults to 1000)
+		    "spacing": "linear",             // Optional specification of table representation. Can be 'linear' or 'exponential' (defaults to linear)
+		    "dump": "debug_N2_fraction.dat"  // Optional debugging hook for dumping table to file (defaults to false)
 		}
 	    }
 	],
@@ -37,7 +47,7 @@
 	    "tabulated atmosphere": {
 		// Tabulated gas law. The user must supply a file containing the pressure, temperature and number density and
 		// specify the table resolution that will be used internally.
-		"type": "tabulated vs height",   // Specify that our gas law contains table-vs-height data
+		"type": "table vs height",   // Specify that our gas law contains table-vs-height data
 		"file": "ENMSIS_Atmosphere.dat", // File name 
 		"axis": "y",                     // Associated Cartesian axis for the "height"
 		"temperature column": 0,         // Column containing the temperature

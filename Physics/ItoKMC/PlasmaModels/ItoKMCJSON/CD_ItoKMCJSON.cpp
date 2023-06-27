@@ -38,6 +38,9 @@ ItoKMCJSON::ItoKMCJSON() noexcept
   // Initialize the gas law and background species
   this->initializeGasLaw();
   this->initializeBackgroundSpecies();
+
+  // Initialize the plasma species
+  this->initializePlasmaSpecies();
 }
 
 ItoKMCJSON::~ItoKMCJSON() noexcept { CH_TIME("ItoKMCJSON::~ItoKMCJSON"); }
@@ -113,6 +116,35 @@ ItoKMCJSON::throwParserWarning(const std::string a_warning) const noexcept
   pout() << a_warning << endl;
 
   MayDay::Warning(a_warning.c_str());
+}
+
+bool
+ItoKMCJSON::containsWildcard(const std::string a_str) const noexcept
+{
+  CH_TIME("ItoKMCJSON::containsWildcard");
+  if (m_verbose) {
+    pout() << m_className + "::containsWildcard" << endl;
+  }
+
+  return (a_str.find("@") != std::string::npos);
+}
+
+void
+ItoKMCJSON::checkMolarFraction(const RealVect a_position) const noexcept
+{
+  CH_TIME("ItoKMCJSON::checkMolarFraction");
+  if (m_verbose) {
+    pout() << m_className + "::checkMolarFraction" << endl;
+  }
+
+  Real sumFractions = 0.0;
+  for (const auto& species : m_backgroundSpecies) {
+    sumFractions += species.molarFraction(a_position);
+  }
+
+  if (std::abs(sumFractions - 1.0) > std::numeric_limits<Real>::epsilon()) {
+    MayDay::Warning("ItoKMCJSON::checkMolarFraction -- fractions do not sum to 1");
+  }
 }
 
 void
@@ -252,9 +284,13 @@ ItoKMCJSON::initializeBackgroundSpecies() noexcept
 
       std::function<Real(const RealVect x)> molarFraction;
 
+      if (this->containsWildcard(speciesName)) {
+        this->throwParserError(baseError + " but species '" + speciesName + "' should not contain wildcard @");
+      }
+
       if (molFracType == "constant") {
         if (!(species["molar fraction"].contains("value"))) {
-          this->throwParserError(baseError + " and got constant molar fractiont but field 'value' is missing");
+          this->throwParserError(baseError + " and got constant molar fraction but field 'value' is missing");
         }
 
         const Real m = species["molar fraction"]["value"].get<Real>();
@@ -262,6 +298,120 @@ ItoKMCJSON::initializeBackgroundSpecies() noexcept
         molarFraction = [m](const RealVect x) -> Real {
           return m;
         };
+      }
+      else if (molFracType == "table vs height") {
+        const std::string baseErrorID = baseError + "and got 'table vs height for species '" + speciesName + "'";
+
+        int heightColumn   = 0;
+        int fractionColumn = 1;
+        int axis           = -1;
+        int numPoints      = 1000;
+
+        TableSpacing spacing = TableSpacing::Uniform;
+
+        // Required arguments.
+        if (!(species["molar fraction"].contains("file"))) {
+          this->throwParserError(baseErrorID + " but 'file' is not specified");
+        }
+        if (!(species["molar fraction"].contains("axis"))) {
+          this->throwParserError(baseErrorID + " but 'axis' is not specified");
+        }
+
+        const std::string fileName  = this->trim(species["molar fraction"]["file"].get<std::string>());
+        const std::string whichAxis = this->trim(species["molar fraction"]["axis"].get<std::string>());
+
+        if (whichAxis == "x") {
+          axis = 0;
+        }
+        else if (whichAxis == "y") {
+          axis = 1;
+        }
+        else if (whichAxis == "z") {
+          axis = 2;
+        }
+        else {
+          this->throwParserError(baseErrorID + " but 'axis' is not 'x', 'y', or 'z'");
+        }
+
+        if (!(this->doesFileExist(fileName))) {
+          this->throwParserError(baseErrorID + "but file '" + fileName + "' does not exist");
+        }
+
+        // Optional arguments
+        if (species["molar fraction"].contains("height column")) {
+          heightColumn = species["molar fraction"]["height column"].get<int>();
+
+          if (heightColumn < 0) {
+            this->throwParserError(baseErrorID + " but can't have 'height column' < 0");
+          }
+        }
+        if (species["molar fraction"].contains("molar fraction column")) {
+          fractionColumn = species["molar fraction"]["molar fraction column"].get<int>();
+          if (fractionColumn < 0) {
+            this->throwParserError(baseErrorID + " but can't have 'molar fraction column' < 0");
+          }
+        }
+        if (species["molar fraction"].contains("num points")) {
+          numPoints = species["molar fraction"]["num points"].get<int>();
+
+          if (numPoints < 2) {
+            this->throwParserError(baseErrorID + " but can't have 'num points' < 2");
+          }
+        }
+
+        LookupTable1D<2> table = DataParser::simpleFileReadASCII(fileName, heightColumn, fractionColumn);
+
+        if (species["molar fraction"].contains("height scale")) {
+          const Real scaling = species["molar fraction"]["height scale"].get<Real>();
+          if (scaling <= 0.0) {
+            this->throwParserError(baseErrorID + " but can't have 'height scale' <= 0.0");
+          }
+
+          table.scale<0>(scaling);
+        }
+        if (species["molar fraction"].contains("fraction scale")) {
+          const Real scaling = species["molar fraction"]["fraction scale"].get<Real>();
+          if (scaling <= 0.0) {
+            this->throwParserError(baseErrorID + " but can't have 'fraction scale' <= 0.0");
+          }
+
+          table.scale<1>(scaling);
+        }
+        if (species["molar fraction"].contains("min height")) {
+          const Real minHeight = species["molar fraction"]["min height"].get<Real>();
+          table.setMinRange(minHeight, 0);
+        }
+        if (species["molar fraction"].contains("max height")) {
+          const Real maxHeight = species["molar fraction"]["max height"].get<Real>();
+          table.setMaxRange(maxHeight, 0);
+        }
+        if (species["molar fraction"].contains("spacing")) {
+          const std::string whichSpacing = species["molar fraction"]["spacing"].get<std::string>();
+
+          if (whichSpacing == "linear") {
+            spacing = TableSpacing::Uniform;
+          }
+          else if (whichSpacing == "exponential") {
+            spacing = TableSpacing::Exponential;
+          }
+          else {
+            this->throwParserError(baseErrorID + " but spacing '" + whichSpacing + "' is not supported");
+          }
+        }
+
+        table.setTableSpacing(spacing);
+        table.sort(0);
+        table.makeUniform(numPoints);
+
+        molarFraction = [table, axis](const RealVect a_position) -> Real {
+          return table.getEntry<1>(a_position[axis]);
+        };
+
+        if (species["molar fraction"].contains("dump")) {
+          const std::string dumpId = species["molar fraction"]["dump"].get<std::string>();
+
+          table.dumpTable(dumpId);
+        }
       }
       else {
         const std::string err = baseError + " but got unsupported molar fraction type '" + molFracType + "'";
@@ -283,20 +433,11 @@ ItoKMCJSON::initializeBackgroundSpecies() noexcept
 }
 
 void
-ItoKMCJSON::checkMolarFraction(const RealVect a_position) const noexcept
+ItoKMCJSON::initializePlasmaSpecies() noexcept
 {
-  CH_TIME("ItoKMCJSON::checkMolarFraction");
+  CH_TIME("ItoKMCJSON::initializePlasmaSpecies");
   if (m_verbose) {
-    pout() << m_className + "::checkMolarFraction" << endl;
-  }
-
-  Real sumFractions = 0.0;
-  for (const auto& species : m_backgroundSpecies) {
-    sumFractions += species.molarFraction(a_position);
-  }
-
-  if (std::abs(sumFractions - 1.0) > std::numeric_limits<Real>::epsilon()) {
-    MayDay::Warning("ItoKMCJSON::checkMolarFraction -- fractions do not sum to 1");
+    pout() << m_className + "::initializePlasmaSpecies" << endl;
   }
 }
 

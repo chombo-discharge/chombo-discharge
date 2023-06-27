@@ -120,6 +120,22 @@ public:
   setRange(const Real a_min, const Real a_max, const int a_whichColumn = 0);
 
   /*!
+    @brief Restrict table range to minimum value. Data outside these ranges are discarded. 
+    @param[in] a_min         Minimum x-value in the table. 
+    @param[in] a_whichColumn Ranges based on this column. 
+  */
+  inline void
+  setMinRange(const Real a_min, const int a_whichColumn = 0);
+
+  /*!
+    @brief Restrict table range to maximum value. Data outside this range are discarded. 
+    @param[in] a_max         Maximum x-value in the table. 
+    @param[in] a_whichColumn Ranges based on this column. 
+  */
+  inline void
+  setMaxRange(const Real a_max, const int a_whichColumn = 0);
+
+  /*!
     @brief Set the strategy when retrieving data that is out of range on the low side
     @details Set the input parameter a_strategy to Constant if you want to virtually pad the data with the last endpoint or Linear if you want linear interpolation.
     @param[in] a_strategy Range strategy. 
