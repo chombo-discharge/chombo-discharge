@@ -246,6 +246,7 @@ namespace Physics {
 	@param[in]    a_gradPhi       Plasma species density gradients. 
 	@param[in]    a_dt            Time step
 	@param[in]    a_E             Electric field
+	@param[in]    a_pos           Physical position
 	@param[in]    a_dx            Grid resolution
 	@param[in]    a_kappa         Cut-cell volume fraction. 
       */
@@ -256,6 +257,7 @@ namespace Physics {
                  const Vector<RealVect>& a_gradPhi,
                  const Real              a_dt,
                  const RealVect          a_E,
+                 const RealVect          a_pos,
                  const Real              a_dx,
                  const Real              a_kappa) const;
 
@@ -502,6 +504,7 @@ namespace Physics {
       /*!
 	@brief Update reaction rates
 	@param[in] a_E       Electric field
+	@param[in] a_pos     Physical position
 	@param[in] a_phi     Plasma species densities
 	@param[in] a_gradPhi Density gradients for plasma species. 
 	@param[in] a_dx      Grid resolution
@@ -510,6 +513,7 @@ namespace Physics {
       */
       virtual void
       updateReactionRates(const RealVect          a_E,
+                          const RealVect          a_pos,
                           const Vector<Real>&     a_phi,
                           const Vector<RealVect>& a_gradPhi,
                           const Real              a_dx,

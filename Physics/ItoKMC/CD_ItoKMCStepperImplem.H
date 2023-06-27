@@ -3801,7 +3801,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
       }
 
       // Do the physics advance.
-      m_physics->advanceKMC(particles, newPhotons, densities, densityGradients, a_dt, E, a_dx, 1.0);
+      m_physics->advanceKMC(particles, newPhotons, densities, densityGradients, a_dt, E, pos, a_dx, 1.0);
 
       // Repopulate the input data holders with the new number of particles/photons per cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {
@@ -3848,7 +3848,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
       }
 
       // Do the physics advance
-      m_physics->advanceKMC(particles, newPhotons, densities, densityGradients, a_dt, E, a_dx, kappa);
+      m_physics->advanceKMC(particles, newPhotons, densities, densityGradients, a_dt, E, pos, a_dx, kappa);
 
       // Repopulate the input data holders with the new number of particles/photons per cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {

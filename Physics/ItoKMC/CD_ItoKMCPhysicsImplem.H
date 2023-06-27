@@ -278,6 +278,7 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
                           const Vector<RealVect>& a_gradPhi,
                           const Real              a_dt,
                           const RealVect          a_E,
+                          const RealVect          a_pos,
                           const Real              a_dx,
                           const Real              a_kappa) const
 {
@@ -298,7 +299,7 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   }
 
   // Update the reaction rates and run the KMC solver.
-  this->updateReactionRates(a_E, a_phi, a_gradPhi, a_dx, a_kappa);
+  this->updateReactionRates(a_E, a_pos, a_phi, a_gradPhi, a_dx, a_kappa);
 
   // // Which algorithm?
   switch (m_algorithm) {
