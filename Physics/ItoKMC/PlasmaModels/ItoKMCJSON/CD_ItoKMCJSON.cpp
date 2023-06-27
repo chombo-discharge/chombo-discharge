@@ -235,8 +235,68 @@ ItoKMCJSON::initializeBackgroundSpecies() noexcept
     const auto backgroundSpecies = m_json["gas"]["background species"];
 
     for (const auto& species : backgroundSpecies) {
+      bool plotSpecies = false;
+
+      if (!(species.contains("id"))) {
+        this->throwParserError(baseError + " but species does not contain the 'id' field");
+      }
+      if (species.contains("plot")) {
+        plotSpecies = species["plot"].get<bool>();
+      }
+      if (!(species["molar fraction"].contains("type"))) {
+        this->throwParserError(baseError + " -- but species does not contain the 'molar fraction/type' field");
+      }
+
       const std::string speciesName = this->trim(species["id"].get<std::string>());
+      const std::string molFracType = this->trim(species["molar fraction"]["type"].get<std::string>());
+
+      std::function<Real(const RealVect x)> molarFraction;
+
+      if (molFracType == "constant") {
+        if (!(species["molar fraction"].contains("value"))) {
+          this->throwParserError(baseError + " and got constant molar fractiont but field 'value' is missing");
+        }
+
+        const Real m = species["molar fraction"]["value"].get<Real>();
+
+        molarFraction = [m](const RealVect x) -> Real {
+          return m;
+        };
+      }
+      else {
+        const std::string err = baseError + " but got unsupported molar fraction type '" + molFracType + "'";
+
+        MayDay::Error(err.c_str());
+      }
+
+      const int idx = m_backgroundSpecies.size();
+
+      m_backgroundSpecies.push_back(ItoKMCBackgroundSpecies(speciesName, molarFraction));
+      m_backgroundSpeciesPlot.push_back(plotSpecies);
+      m_backgroundSpeciesMap[speciesName] = idx;
+      m_backgroundSpeciesMapInverse[idx]  = speciesName;
     }
+  }
+
+  // Do a dummy test to see if molar fractions sum to one like they should. This may break if the user inputs function-based values.
+  this->checkMolarFraction(RealVect::Zero);
+}
+
+void
+ItoKMCJSON::checkMolarFraction(const RealVect a_position) const noexcept
+{
+  CH_TIME("ItoKMCJSON::checkMolarFraction");
+  if (m_verbose) {
+    pout() << m_className + "::checkMolarFraction" << endl;
+  }
+
+  Real sumFractions = 0.0;
+  for (const auto& species : m_backgroundSpecies) {
+    sumFractions += species.molarFraction(a_position);
+  }
+
+  if (std::abs(sumFractions - 1.0) > std::numeric_limits<Real>::epsilon()) {
+    MayDay::Warning("ItoKMCJSON::checkMolarFraction -- fractions do not sum to 1");
   }
 }
 

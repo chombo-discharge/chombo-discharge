@@ -61,11 +61,11 @@ namespace Physics {
       define(const std::string& a_name, const MolarFraction& a_molarFraction) noexcept;
 
       /*!
-	@brief Get (number) density at the physical coordinates.
+	@brief Get molar fraction at the physical coordinates.
 	@param[in] a_pos Physical position
       */
       Real
-      operator()(const RealVect a_pos) const noexcept;
+      molarFraction(const RealVect a_pos) const noexcept;
 
       /*!
 	@brief Get the species name
@@ -88,7 +88,7 @@ namespace Physics {
       /*!
 	@brief Initial data function. 
       */
-      MolarFraction m_numberDensity;
+      MolarFraction m_molarFraction;
     };
   } // namespace ItoKMC
 } // namespace Physics

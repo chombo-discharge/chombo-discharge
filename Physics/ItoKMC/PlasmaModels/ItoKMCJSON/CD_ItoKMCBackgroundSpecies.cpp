@@ -4,13 +4,10 @@
  */
 
 /*!
-  @file   CD_ItoKMCBackgroundSpecies.H
+  @file   CD_ItoKMCBackgroundSpeciesImplem.cpp
   @brief  Implementation of ItoKMCBackgroundSpecies.H
   @author Robert Marskar
 */
-
-#ifndef CD_ItoKMCBackgroundSpeciesImplem_H
-#define CD_ItoKMCBackgroundSpeciesImplem_H
 
 // Our includes
 #include <CD_ItoKMCBackgroundSpecies.H>
@@ -21,9 +18,9 @@ using namespace Physics::ItoKMC;
 ItoKMCBackgroundSpecies::ItoKMCBackgroundSpecies() noexcept { m_isDefined = false; }
 
 ItoKMCBackgroundSpecies::ItoKMCBackgroundSpecies(const std::string&   a_name,
-                                                 const MolarFraction& a_numberDensity) noexcept
+                                                 const MolarFraction& a_molarFraction) noexcept
 {
-  this->define(a_name, a_numberDensity);
+  this->define(a_name, a_molarFraction);
 }
 
 ItoKMCBackgroundSpecies::~ItoKMCBackgroundSpecies() noexcept {
@@ -31,19 +28,19 @@ ItoKMCBackgroundSpecies::~ItoKMCBackgroundSpecies() noexcept {
 }
 
 void
-ItoKMCBackgroundSpecies::define(const std::string& a_name, const MolarFraction& a_numberDensity) noexcept
+ItoKMCBackgroundSpecies::define(const std::string& a_name, const MolarFraction& a_molarFraction) noexcept
 {
   m_name          = a_name;
-  m_numberDensity = a_numberDensity;
+  m_molarFraction = a_molarFraction;
   m_isDefined     = true;
 }
 
 Real
-ItoKMCBackgroundSpecies::operator()(const RealVect a_pos) const noexcept
+ItoKMCBackgroundSpecies::molarFraction(const RealVect a_pos) const noexcept
 {
   CH_assert(m_isDefined);
 
-  return m_numberDensity(a_pos);
+  return m_molarFraction(a_pos);
 }
 
 std::string
@@ -55,5 +52,3 @@ ItoKMCBackgroundSpecies::getName() const noexcept
 }
 
 #include <CD_NamespaceFooter.H>
-
-#endif

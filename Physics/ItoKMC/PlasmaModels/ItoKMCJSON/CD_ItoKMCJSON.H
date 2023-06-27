@@ -227,11 +227,28 @@ namespace Physics {
 	@brief Input JSON file name
       */
       std::string m_jsonFile;
+      
+      /*!
+	@brief Map of string-int identifiers for background species
+      */
+      std::map<std::string, int> m_backgroundSpeciesMap;
+      
+      /*!
+	@brief Map of int-string identifiers for background species
+      */
+      std::map<int, std::string> m_backgroundSpeciesMapInverse;
 
       /*!
-	@brief Map of background species
+	@brief Map of background species. 
+	@details Built in initialization order but can look up arbitrary species name but using the maps. 
       */
-      std::vector<std::shared_ptr<ItoKMCBackgroundSpecies>> m_backgroundSpecies;
+      std::vector<ItoKMCBackgroundSpecies> m_backgroundSpecies;      
+
+      /*!
+	@brief Plot background species or not
+	@details Built in initialization order but can look up arbitrary species name but using the maps. 
+      */
+      std::vector<bool> m_backgroundSpeciesPlot;
 
       /*!
 	@brief Background gas pressure
@@ -286,7 +303,14 @@ namespace Physics {
 	@param[in] a_error Warning
       */
       virtual void
-      throwParserWarning(const std::string a_warning) const noexcept;      
+      throwParserWarning(const std::string a_warning) const noexcept;
+
+      /*!
+	@brief Check that molar fraction is one. Throws a warning if it isn't.
+	@param[in] a_position Physical coordinates
+      */
+      virtual void
+      checkMolarFraction(const RealVect a_position) const noexcept;
 
       /*!
 	@brief Initialize gas law.
