@@ -139,7 +139,7 @@ namespace Physics {
 	@param[in] a_E    Electric field
       */
       Vector<Real>
-      computeMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override{}
+      computeMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override;
 
       /*!
 	@brief Compute the Ito solver diffusion coefficients
@@ -148,8 +148,7 @@ namespace Physics {
 	@param[in] a_E         Electric field
       */
       Vector<Real>
-      computeDiffusionCoefficients(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override
-      {}
+      computeDiffusionCoefficients(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept;
 
       /*!
 	@brief Resolve secondary emission at the EB.
@@ -217,6 +216,11 @@ namespace Physics {
 	@brief A flag for skipping reactions completely. 
       */
       bool m_skipReactions;
+
+      /*!
+	@brief Total number of plasma species
+      */
+      int m_numPlasmaSpecies;
 
       /*!
 	@brief Nohmanns implementation of JSON files
@@ -335,6 +339,12 @@ namespace Physics {
       */
       virtual void
       initializePlasmaSpecies() noexcept;
+
+      /*!
+	@brief Parse initial data
+      */
+      virtual void
+      parseInitialData() noexcept;
     };
   } // namespace ItoKMC
 } // namespace Physics

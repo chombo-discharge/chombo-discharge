@@ -47,19 +47,19 @@ main(int argc, char* argv[])
     setPoutBaseName(basename);
   }
 
-  // auto geometry    = RefCountedPtr<ComputationalGeometry>(new DiskProfiledPlane());
-  // auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
-  // auto geocoarsen  = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
+  auto geometry    = RefCountedPtr<ComputationalGeometry>(new DiskProfiledPlane());
+  auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
+  auto geocoarsen  = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
   auto physics     = RefCountedPtr<ItoKMCPhysics>(new ItoKMCJSON());
-  // auto timestepper = RefCountedPtr<ItoKMCStepper<>>(new ItoKMCGodunovStepper<>(physics));
-  // auto tagger      = RefCountedPtr<CellTagger>(new ItoKMCStreamerTagger<ItoKMCStepper<>>(physics, timestepper, amr));
+  auto timestepper = RefCountedPtr<ItoKMCStepper<>>(new ItoKMCGodunovStepper<>(physics));
+  auto tagger      = RefCountedPtr<CellTagger>(new ItoKMCStreamerTagger<ItoKMCStepper<>>(physics, timestepper, amr));
 
-  // // Set potential
-  // timestepper->setVoltage(potential_curve);
+  // Set potential
+  timestepper->setVoltage(potential_curve);
 
-  // // Set up the Driver and run it
-  // RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(geometry, timestepper, amr, tagger, geocoarsen));
-  // engine->setupAndRun(input_file);
+  // Set up the Driver and run it
+  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(geometry, timestepper, amr, tagger, geocoarsen));
+  engine->setupAndRun(input_file);
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

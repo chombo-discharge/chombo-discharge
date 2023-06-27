@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_ItoKMCJSON.cpp
-  @brief  Implementation of CD_ItoKMCJson.cpp
+  @brief  Implementation of CD_ItoKMCJSON.H
   @author Robert Marskar
 */
 
@@ -15,6 +15,7 @@
 
 // Our includes
 #include <CD_ItoKMCJSON.H>
+#include <CD_ItoKMCCDRSpecies.H>
 #include <CD_Units.H>
 #include <CD_DataParser.H>
 #include <CD_ParticleManagement.H>
@@ -41,6 +42,13 @@ ItoKMCJSON::ItoKMCJSON() noexcept
 
   // Initialize the plasma species
   this->initializePlasmaSpecies();
+  this->parseInitialData();
+
+  // Define internals
+  this->define();
+
+  // Useful shortcut.
+  m_numPlasmaSpecies = this->getNumPlasmaSpecies();
 }
 
 ItoKMCJSON::~ItoKMCJSON() noexcept { CH_TIME("ItoKMCJSON::~ItoKMCJSON"); }
@@ -474,7 +482,63 @@ ItoKMCJSON::initializePlasmaSpecies() noexcept
     const std::string solver    = species["solver"].get<std::string>();
     const bool        mobile    = species["mobile"].get<bool>();
     const bool        diffusive = species["diffusive"].get<bool>();
+
+    if (solver == "ito") {
+      m_itoSpecies.push_back(RefCountedPtr<ItoSpecies>(new ItoSpecies(speciesID, Z, mobile, diffusive)));
+    }
+    else if (solver == "cdr") {
+      m_cdrSpecies.push_back(RefCountedPtr<CdrSpecies>(new ItoKMCCDRSpecies(speciesID, Z, mobile, diffusive)));
+    }
+    else {
+      this->throwParserError(baseErrorID + " but 'solver' field must be either 'cdr' or 'ito'");
+    }
+
+    if (m_verbose) {
+      pout() << "ItoKMCJSON::initializePlasmaSpecies, instantiating species:"
+             << "\n"
+             << "\tName             = " << speciesID << "\n"
+             << "\tZ                = " << Z << "\n"
+             << "\tMobile           = " << mobile << "\n"
+             << "\tDiffusive        = " << diffusive << "\n"
+             << "\tSolver type      = " << solver << "\n"
+             << "\n";
+    }
   }
+}
+
+void
+ItoKMCJSON::parseInitialData() noexcept
+{
+  CH_TIME("ItoKMCJSON::parseInitialData");
+  if (m_verbose) {
+    pout() << m_className + "::parseInitialData" << endl;
+  }
+}
+
+Vector<Real>
+ItoKMCJSON::computeMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept
+{
+  CH_TIME("ItoKMCJSON::computeMobilities");
+  if (m_verbose) {
+    pout() << m_className + "::computeMobilities" << endl;
+  }
+
+  Vector<Real> mobilityCoefficients(m_numPlasmaSpecies, 0.0);
+
+  return mobilityCoefficients;
+}
+
+Vector<Real>
+ItoKMCJSON::computeDiffusionCoefficients(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept
+{
+  CH_TIME("ItoKMCJSON::computeDiffusionCoefficients");
+  if (m_verbose) {
+    pout() << m_className + "::computeDiffusionCoefficients" << endl;
+  }
+
+  Vector<Real> diffusionCoefficients(m_numPlasmaSpecies, 0.0);
+
+  return diffusionCoefficients;
 }
 
 #include <CD_NamespaceFooter.H>
