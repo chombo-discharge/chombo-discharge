@@ -439,6 +439,42 @@ ItoKMCJSON::initializePlasmaSpecies() noexcept
   if (m_verbose) {
     pout() << m_className + "::initializePlasmaSpecies" << endl;
   }
+
+  const std::string baseError = "ItoKMCJSON::initializePlasmaSpecies";
+
+  if (!(m_json.contains("plasma species"))) {
+    this->throwParserError(baseError + " but did not find field 'plasma species'");
+  }
+
+  for (const auto& species : m_json["plasma species"]) {
+    if (!(species.contains("id"))) {
+      this->throwParserError(baseError + " but did not find field 'id' for one of the species");
+    }
+
+    const std::string speciesID   = species["id"].get<std::string>();
+    const std::string baseErrorID = baseError + " for species '" + speciesID + "'";
+
+    if (this->containsWildcard(speciesID)) {
+      this->throwParserError(baseErrorID + " but species name '" + speciesID + "' should not contain wildcard @");
+    }
+    if (!(species.contains("Z"))) {
+      this->throwParserError(baseErrorID + " but did not find 'Z' (must be integer)");
+    }
+    if (!(species.contains("solver"))) {
+      this->throwParserError(baseErrorID + " but did not field find 'solver' (must be 'ito' or 'cdr')");
+    }
+    if (!(species.contains("mobile"))) {
+      this->throwParserError(baseErrorID + " but did not find field 'mobile' (must be true/false)");
+    }
+    if (!(species.contains("diffusive"))) {
+      this->throwParserError(baseErrorID + " but did not find field 'diffusive' (must be true/false)");
+    }
+
+    const int         Z         = species["Z"].get<int>();
+    const std::string solver    = species["solver"].get<std::string>();
+    const bool        mobile    = species["mobile"].get<bool>();
+    const bool        diffusive = species["diffusive"].get<bool>();
+  }
 }
 
 #include <CD_NamespaceFooter.H>

@@ -72,7 +72,7 @@
 	    // Definition of a plasma species (electrons), which are tracked using an Ito method.
 	    "id": "e",        // string identifier for species
 	    "Z": -1,          // Charge number
-	    "type": "ito",    // Solver type. Either 'ito' or 'cdr'
+	    "solver": "ito",    // Solver type. Either 'ito' or 'cdr'
 	    "mobile": true,   // Mobile or not
 	    "diffusive": true,// Diffusive or not
 	    "mobility": {
