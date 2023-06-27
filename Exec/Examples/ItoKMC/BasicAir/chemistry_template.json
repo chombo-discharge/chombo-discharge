@@ -63,6 +63,19 @@
 	    }
 	}
     },
+    "alpha": {
+	// Definition of the alpha coefficient
+	"type": "table vs E/N",
+	"file": "air_bolsig.dat",
+	"E/N column": 0,
+	"alpha/N column": 1,
+	"min E/N": 1.0,
+	"max E/N": 1.0,
+	"num points": 1000,
+	"spacing":"exponential",
+	"scale E/N": 1.0,
+	"scale alpha": 1.0
+    },
     "plasma species":
     [
 	// List of plasma species that are tracked. This is an array of species

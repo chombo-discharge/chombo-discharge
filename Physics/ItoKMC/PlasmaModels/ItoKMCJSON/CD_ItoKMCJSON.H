@@ -81,7 +81,7 @@ namespace Physics {
       /*!
 	@brief Default constructor
       */
-      ItoKMCJSON() noexcept;
+      ItoKMCJSON();
 
       /*!
 	@brief Destructor
@@ -101,21 +101,21 @@ namespace Physics {
 	@param[in] a_numParticles Number of particles per cell
       */
       virtual Real
-      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const noexcept override{}
+      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const noexcept override;
 
       /*!
 	@brief Compute Townsend ionization coefficient
 	@param[in] a_E Electric field. 
       */
       virtual Real
-      computeAlpha(const RealVect a_E) const override{}
+      computeAlpha(const RealVect a_E) const noexcept override;
 
       /*!
 	@brief Compute Townsend attachment coefficient
 	@param[in] a_E Electric field. 
       */
       virtual Real
-      computeEta(const RealVect a_E) const override{}
+      computeEta(const RealVect a_E) const noexcept override;
 
       /*!
 	@brief Update reaction rates
@@ -130,7 +130,8 @@ namespace Physics {
                           const Vector<Real>&     a_phi,
                           const Vector<RealVect>& a_gradPhi,
                           const Real              a_dx,
-                          const Real              a_kappa) const noexcept override{}
+                          const Real              a_kappa) const noexcept override
+      {}
 
       /*!
 	@brief Compute the Ito solver mobilities.
@@ -148,7 +149,7 @@ namespace Physics {
 	@param[in] a_E         Electric field
       */
       Vector<Real>
-      computeDiffusionCoefficients(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept;
+      computeDiffusionCoefficients(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override;
 
       /*!
 	@brief Resolve secondary emission at the EB.
@@ -255,6 +256,16 @@ namespace Physics {
       std::vector<bool> m_backgroundSpeciesPlot;
 
       /*!
+	@brief Townsend ionization coefficient. Defined during parseAlpha
+      */
+      FunctionEX m_alpha;
+
+      /*!
+	@brief Townsend attachment coefficient. Defined during parseEta
+      */
+      FunctionEN m_eta;
+
+      /*!
 	@brief Background gas pressure
       */
       FunctionX m_gasPressure;
@@ -326,25 +337,37 @@ namespace Physics {
 	@brief Initialize gas law.
       */
       virtual void
-      initializeGasLaw() noexcept;
+      initializeGasLaw();
 
       /*!
 	@brief Initialize the background species.
       */
       virtual void
-      initializeBackgroundSpecies() noexcept;
+      initializeBackgroundSpecies();
+
+      /*!
+	@brief Initialize Townsend ionization coefficient
+      */
+      virtual void
+      parseAlpha();
+
+      /*!
+	@brief Initialize Townsend attachment coefficient
+      */
+      virtual void
+      parseEta();
 
       /*!
 	@brief Initialize the plasma species
       */
       virtual void
-      initializePlasmaSpecies() noexcept;
+      initializePlasmaSpecies();
 
       /*!
 	@brief Parse initial data
       */
       virtual void
-      parseInitialData() noexcept;
+      parseInitialData();
     };
   } // namespace ItoKMC
 } // namespace Physics

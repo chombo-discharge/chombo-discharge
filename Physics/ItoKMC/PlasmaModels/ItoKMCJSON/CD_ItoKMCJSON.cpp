@@ -23,7 +23,7 @@
 
 using namespace Physics::ItoKMC;
 
-ItoKMCJSON::ItoKMCJSON() noexcept
+ItoKMCJSON::ItoKMCJSON()
 {
   CH_TIME("ItoKMCJSON::ItoKMCJSON");
 
@@ -39,6 +39,10 @@ ItoKMCJSON::ItoKMCJSON() noexcept
   // Initialize the gas law and background species
   this->initializeGasLaw();
   this->initializeBackgroundSpecies();
+
+  // Initialize Townsend coefficients
+  this->parseAlpha();
+  this->parseEta();
 
   // Initialize the plasma species
   this->initializePlasmaSpecies();
@@ -204,7 +208,7 @@ ItoKMCJSON::parseJSON()
 }
 
 void
-ItoKMCJSON::initializeGasLaw() noexcept
+ItoKMCJSON::initializeGasLaw()
 {
   CH_TIME("ItoKMCJSON::initializeGasLaw");
   if (m_verbose) {
@@ -259,7 +263,7 @@ ItoKMCJSON::initializeGasLaw() noexcept
 }
 
 void
-ItoKMCJSON::initializeBackgroundSpecies() noexcept
+ItoKMCJSON::initializeBackgroundSpecies()
 {
   CH_TIME("ItoKMCJSON::initializeBackgroundSpecies");
   if (m_verbose) {
@@ -441,7 +445,7 @@ ItoKMCJSON::initializeBackgroundSpecies() noexcept
 }
 
 void
-ItoKMCJSON::initializePlasmaSpecies() noexcept
+ItoKMCJSON::initializePlasmaSpecies()
 {
   CH_TIME("ItoKMCJSON::initializePlasmaSpecies");
   if (m_verbose) {
@@ -507,12 +511,104 @@ ItoKMCJSON::initializePlasmaSpecies() noexcept
 }
 
 void
-ItoKMCJSON::parseInitialData() noexcept
+ItoKMCJSON::parseAlpha()
+{
+  CH_TIME("ItoKMCJSON::parseAlpha");
+  if (m_verbose) {
+    pout() << m_className + "::parseAlpha" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::parseAlpha";
+
+  if (!(m_json.contains("alpha"))) {
+    this->throwParserError(baseError + " but field 'alpha' (Townsend ionization coefficient) is missing");
+  }
+  if (!(m_json["alpha"].contains("type"))) {
+    this->throwParserError(baseError + " but field 'alpha' does not contain 'type'");
+  }
+
+  const std::string whichAlpha = m_json["alpha"]["type"].get<std::string>();
+
+  if (whichAlpha == "constant") {
+    if (!(m_json["alpha"].contains("value"))) {
+      this->throwParserError(baseError + " and got 'constant' but missing the 'value' field");
+    }
+
+    const Real value = m_json["alpha"]["value"].get<Real>();
+
+    if (value < 0.0) {
+      this->throwParserError(baseError + " and got 'constant' but can't have negative alpha");
+    }
+
+    m_alpha = [value](const Real E, const RealVect x) -> Real {
+      return value;
+    };
+  }
+  else if (whichAlpha == "table vs E/N") {
+    this->throwParserError(baseError + "but 'table vs E/N' is not supported yet");
+  }
+  else {
+    this->throwParserError(baseError + "but alpha specification '" + whichAlpha + "' is not supported");
+  }
+}
+
+void
+ItoKMCJSON::parseEta()
+{
+  CH_TIME("ItoKMCJSON::parseEta");
+  if (m_verbose) {
+    pout() << m_className + "::parseEta" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::parseEta";
+
+  this->throwParserWarning(baseError + " not implemented yet");
+}
+
+void
+ItoKMCJSON::parseInitialData()
 {
   CH_TIME("ItoKMCJSON::parseInitialData");
   if (m_verbose) {
     pout() << m_className + "::parseInitialData" << endl;
   }
+
+  const std::string baseError = "ItoKMCJSON::parseInitialData";
+
+  this->throwParserWarning(baseError + " not implemented yet");
+}
+
+Real
+ItoKMCJSON::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const noexcept
+{
+  CH_TIME("ItoKMCJSON::computeDt");
+  if (m_verbose) {
+    pout() << m_className + "::computeDt" << endl;
+  }
+
+  return std::numeric_limits<Real>::infinity();
+}
+
+Real
+ItoKMCJSON::computeAlpha(const RealVect a_E) const noexcept
+{
+  CH_TIME("ItoKMCJSON::computeAlpha");
+  if (m_verbose) {
+    pout() << m_className + "::computeAlpha" << endl;
+  }
+
+  return m_alpha(a_E.vectorLength(), RealVect::Zero);
+}
+
+Real
+ItoKMCJSON::computeEta(const RealVect a_E) const noexcept
+{
+  CH_TIME("ItoKMCJSON::computeEta");
+  if (m_verbose) {
+    pout() << m_className + "::computeEta" << endl;
+  }
+
+  return 0.0;
 }
 
 Vector<Real>
