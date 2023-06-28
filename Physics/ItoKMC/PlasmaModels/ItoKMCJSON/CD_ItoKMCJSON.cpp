@@ -36,8 +36,6 @@ ItoKMCJSON::ItoKMCJSON()
   this->parseAlgorithm();
   this->parseJSON();
 
-  MayDay::Warning("ItoKMCJSON - Consider changing species specifications!");
-
   // Initialize the gas law and background species
   this->initializeGasLaw();
   this->initializeBackgroundSpecies();
@@ -283,31 +281,33 @@ ItoKMCJSON::initializeBackgroundSpecies()
     for (const auto& species : backgroundSpecies) {
       bool plotSpecies = false;
 
-      if (!(species.contains("id"))) {
-        this->throwParserError(baseError + " but species does not contain the 'id' field");
-      }
-      if (species.contains("plot")) {
-        plotSpecies = species["plot"].get<bool>();
-      }
-      if (!(species["molar fraction"].contains("type"))) {
-        this->throwParserError(baseError + " -- but species does not contain the 'molar fraction/type' field");
-      }
-
-      const std::string speciesName = this->trim(species["id"].get<std::string>());
-      const std::string molFracType = this->trim(species["molar fraction"]["type"].get<std::string>());
-
-      std::function<Real(const RealVect x)> molarFraction;
+      const auto        obj         = species.get<nlohmann::json::object_t>();
+      const std::string speciesName = (*obj.begin()).first;
 
       if (this->containsWildcard(speciesName)) {
         this->throwParserError(baseError + " but species '" + speciesName + "' should not contain wildcard @");
       }
+      if (m_backgroundSpeciesMap.count(speciesName) != 0) {
+        this->throwParserError(baseError + " but species '" + speciesName + "' was already defined)");
+      }
+
+      if (species[speciesName].contains("plot")) {
+        plotSpecies = species[speciesName]["plot"].get<bool>();
+      }
+      if (!(species[speciesName]["molar fraction"].contains("type"))) {
+        this->throwParserError(baseError + " -- but species does not contain the 'molar fraction/type' field");
+      }
+
+      const std::string molFracType = this->trim(species[speciesName]["molar fraction"]["type"].get<std::string>());
+
+      std::function<Real(const RealVect x)> molarFraction;
 
       if (molFracType == "constant") {
-        if (!(species["molar fraction"].contains("value"))) {
+        if (!(species[speciesName]["molar fraction"].contains("value"))) {
           this->throwParserError(baseError + " and got constant molar fraction but field 'value' is missing");
         }
 
-        const Real m = species["molar fraction"]["value"].get<Real>();
+        const Real m = species[speciesName]["molar fraction"]["value"].get<Real>();
 
         molarFraction = [m](const RealVect x) -> Real {
           return m;
@@ -324,15 +324,15 @@ ItoKMCJSON::initializeBackgroundSpecies()
         TableSpacing spacing = TableSpacing::Uniform;
 
         // Required arguments.
-        if (!(species["molar fraction"].contains("file"))) {
+        if (!(species[speciesName]["molar fraction"].contains("file"))) {
           this->throwParserError(baseErrorID + " but 'file' is not specified");
         }
-        if (!(species["molar fraction"].contains("axis"))) {
+        if (!(species[speciesName]["molar fraction"].contains("axis"))) {
           this->throwParserError(baseErrorID + " but 'axis' is not specified");
         }
 
-        const std::string fileName  = this->trim(species["molar fraction"]["file"].get<std::string>());
-        const std::string whichAxis = this->trim(species["molar fraction"]["axis"].get<std::string>());
+        const std::string fileName  = this->trim(species[speciesName]["molar fraction"]["file"].get<std::string>());
+        const std::string whichAxis = this->trim(species[speciesName]["molar fraction"]["axis"].get<std::string>());
 
         if (whichAxis == "x") {
           axis = 0;
@@ -352,21 +352,21 @@ ItoKMCJSON::initializeBackgroundSpecies()
         }
 
         // Optional arguments
-        if (species["molar fraction"].contains("height column")) {
-          heightColumn = species["molar fraction"]["height column"].get<int>();
+        if (species[speciesName]["molar fraction"].contains("height column")) {
+          heightColumn = species[speciesName]["molar fraction"]["height column"].get<int>();
 
           if (heightColumn < 0) {
             this->throwParserError(baseErrorID + " but can't have 'height column' < 0");
           }
         }
-        if (species["molar fraction"].contains("molar fraction column")) {
-          fractionColumn = species["molar fraction"]["molar fraction column"].get<int>();
+        if (species[speciesName]["molar fraction"].contains("molar fraction column")) {
+          fractionColumn = species[speciesName]["molar fraction"]["molar fraction column"].get<int>();
           if (fractionColumn < 0) {
             this->throwParserError(baseErrorID + " but can't have 'molar fraction column' < 0");
           }
         }
-        if (species["molar fraction"].contains("num points")) {
-          numPoints = species["molar fraction"]["num points"].get<int>();
+        if (species[speciesName]["molar fraction"].contains("num points")) {
+          numPoints = species[speciesName]["molar fraction"]["num points"].get<int>();
 
           if (numPoints < 2) {
             this->throwParserError(baseErrorID + " but can't have 'num points' < 2");
@@ -375,32 +375,33 @@ ItoKMCJSON::initializeBackgroundSpecies()
 
         LookupTable1D<2> table = DataParser::simpleFileReadASCII(fileName, heightColumn, fractionColumn);
 
-        if (species["molar fraction"].contains("height scale")) {
-          const Real scaling = species["molar fraction"]["height scale"].get<Real>();
+        if (species[speciesName]["molar fraction"].contains("height scale")) {
+          const Real scaling = species[speciesName]["molar fraction"]["height scale"].get<Real>();
           if (scaling <= 0.0) {
             this->throwParserError(baseErrorID + " but can't have 'height scale' <= 0.0");
           }
 
           table.scale<0>(scaling);
         }
-        if (species["molar fraction"].contains("fraction scale")) {
-          const Real scaling = species["molar fraction"]["fraction scale"].get<Real>();
+        if (species[speciesName]["molar fraction"].contains("fraction scale")) {
+          const Real scaling = species[speciesName]["molar fraction"]["fraction scale"].get<Real>();
           if (scaling <= 0.0) {
             this->throwParserError(baseErrorID + " but can't have 'fraction scale' <= 0.0");
           }
 
           table.scale<1>(scaling);
         }
-        if (species["molar fraction"].contains("min height")) {
-          const Real minHeight = species["molar fraction"]["min height"].get<Real>();
+        if (species[speciesName]["molar fraction"].contains("min height")) {
+          const Real minHeight = species[speciesName]["molar fraction"]["min height"].get<Real>();
           table.setMinRange(minHeight, 0);
         }
-        if (species["molar fraction"].contains("max height")) {
-          const Real maxHeight = species["molar fraction"]["max height"].get<Real>();
+        if (species[speciesName]["molar fraction"].contains("max height")) {
+          const Real maxHeight = species[speciesName]["molar fraction"]["max height"].get<Real>();
           table.setMaxRange(maxHeight, 0);
         }
-        if (species["molar fraction"].contains("spacing")) {
-          const std::string whichSpacing = this->trim(species["molar fraction"]["spacing"].get<std::string>());
+        if (species[speciesName]["molar fraction"].contains("spacing")) {
+          const std::string whichSpacing = this->trim(
+            species[speciesName]["molar fraction"]["spacing"].get<std::string>());
 
           if (whichSpacing == "linear") {
             spacing = TableSpacing::Uniform;
@@ -421,8 +422,8 @@ ItoKMCJSON::initializeBackgroundSpecies()
           return table.getEntry<1>(a_position[axis]);
         };
 
-        if (species["molar fraction"].contains("dump")) {
-          const std::string dumpId = this->trim(species["molar fraction"]["dump"].get<std::string>());
+        if (species[speciesName]["molar fraction"].contains("dump")) {
+          const std::string dumpId = this->trim(species[speciesName]["molar fraction"]["dump"].get<std::string>());
 
           table.dumpTable(dumpId);
         }
@@ -461,39 +462,44 @@ ItoKMCJSON::initializePlasmaSpecies()
   }
 
   for (const auto& species : m_json["plasma species"]) {
-    if (!(species.contains("id"))) {
-      this->throwParserError(baseError + " but did not find field 'id' for one of the species");
-    }
-
-    const std::string speciesID   = species["id"].get<std::string>();
+    const auto        obj         = species.get<nlohmann::json::object_t>();
+    const std::string speciesID   = (*obj.begin()).first;
     const std::string baseErrorID = baseError + " for species '" + speciesID + "'";
 
     if (this->containsWildcard(speciesID)) {
       this->throwParserError(baseErrorID + " but species name '" + speciesID + "' should not contain wildcard @");
     }
-    if (!(species.contains("Z"))) {
+    if (m_plasmaSpeciesTypes.count(speciesID) != 0) {
+      this->throwParserError(baseErrorID + " but species '" + speciesID + "' was already defined)");
+    }
+
+    if (!(species[speciesID].contains("Z"))) {
       this->throwParserError(baseErrorID + " but did not find 'Z' (must be integer)");
     }
-    if (!(species.contains("solver"))) {
+    if (!(species[speciesID].contains("solver"))) {
       this->throwParserError(baseErrorID + " but did not field find 'solver' (must be 'ito' or 'cdr')");
     }
-    if (!(species.contains("mobile"))) {
+    if (!(species[speciesID].contains("mobile"))) {
       this->throwParserError(baseErrorID + " but did not find field 'mobile' (must be true/false)");
     }
-    if (!(species.contains("diffusive"))) {
+    if (!(species[speciesID].contains("diffusive"))) {
       this->throwParserError(baseErrorID + " but did not find field 'diffusive' (must be true/false)");
     }
 
-    const int         Z         = species["Z"].get<int>();
-    const std::string solver    = species["solver"].get<std::string>();
-    const bool        mobile    = species["mobile"].get<bool>();
-    const bool        diffusive = species["diffusive"].get<bool>();
+    const int         Z         = species[speciesID]["Z"].get<int>();
+    const std::string solver    = species[speciesID]["solver"].get<std::string>();
+    const bool        mobile    = species[speciesID]["mobile"].get<bool>();
+    const bool        diffusive = species[speciesID]["diffusive"].get<bool>();
 
     if (solver == "ito") {
       m_itoSpecies.push_back(RefCountedPtr<ItoSpecies>(new ItoSpecies(speciesID, Z, mobile, diffusive)));
+
+      m_plasmaSpeciesTypes[speciesID] = SpeciesType::Ito;
     }
     else if (solver == "cdr") {
       m_cdrSpecies.push_back(RefCountedPtr<CdrSpecies>(new ItoKMCCDRSpecies(speciesID, Z, mobile, diffusive)));
+
+      m_plasmaSpeciesTypes[speciesID] = SpeciesType::CDR;
     }
     else {
       this->throwParserError(baseErrorID + " but 'solver' field must be either 'cdr' or 'ito'");
@@ -590,14 +596,16 @@ ItoKMCJSON::initializeParticles()
   const std::string baseError = "ItoKMCJSON::initializeParticles";
 
   for (const auto& species : m_json["plasma species"]) {
-    if (species.contains("initial particles")) {
-      const std::string speciesID   = species["id"].get<std::string>();
-      const std::string baseErrorID = baseError + " and found 'initial particles' for species '" + speciesID + "'";
+    const auto        obj         = species.get<nlohmann::json::object_t>();
+    const std::string speciesID   = (*obj.begin()).first;
+    const std::string baseErrorID = baseError + " and found 'initial particles' for species '" + speciesID + "'";
+
+    if (species[speciesID].contains("initial particles")) {
 
       // Generate initial particles. Note that
       List<PointParticle> initialParticles;
 
-      for (const auto& initField : species["initial particles"]) {
+      for (const auto& initField : species[speciesID]["initial particles"]) {
         const auto obj = initField.get<nlohmann::json::object_t>();
 
         if (obj.size() != 1) {
@@ -622,12 +630,148 @@ ItoKMCJSON::initializeParticles()
           }
           weight = initField["single particle"]["weight"].get<unsigned long long>();
 
-          initialParticles.add(PointParticle(position, 1.0 * weight));
+          if (procID() == 0) {
+            initialParticles.add(PointParticle(position, 1.0 * weight));
+          }
+        }
+        else if (whichField == "uniform distribution") {
+          const nlohmann::json& jsonEntry = initField["uniform distribution"];
+
+          if (!(jsonEntry.contains("low corner"))) {
+            this->throwParserError(baseError + "but 'uniform distribution' does not contain 'low corner'");
+          }
+          if (!(jsonEntry.contains("high corner"))) {
+            this->throwParserError(baseError + "but 'uniform distribution' does not contain 'high corner'");
+          }
+          if (!(jsonEntry.contains("num particles"))) {
+            this->throwParserError(baseError + "but 'uniform distribution' does not contain 'num particles'");
+          }
+          if (!(jsonEntry.contains("weight"))) {
+            this->throwParserError(baseError + "but 'uniform distribution' does not contain 'weight'");
+          }
+
+          RealVect loCorner = RealVect::Zero;
+          RealVect hiCorner = RealVect::Zero;
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            loCorner[dir] = jsonEntry["low corner"][dir].get<Real>();
+            hiCorner[dir] = jsonEntry["high corner"][dir].get<Real>();
+
+            if (hiCorner[dir] < loCorner[dir]) {
+              this->throwParserError(baseError + "but 'uniform distribution' can't have 'high corner' < 'low corner'");
+            }
+          }
+
+          const unsigned long long numParticles   = jsonEntry["num particles"].get<unsigned long long>();
+          const unsigned long long particleWeight = jsonEntry["weight"].get<unsigned long long>();
+
+          if (numParticles > 0) {
+            List<PointParticle> particles;
+
+            ParticleManagement::drawBoxParticles(particles, numParticles, loCorner, hiCorner);
+
+            for (ListIterator<PointParticle> lit(particles); lit.ok(); ++lit) {
+              lit().weight() = 1.0 * particleWeight;
+            }
+
+            initialParticles.catenate(particles);
+          }
+        }
+        else if (whichField == "sphere distribution") {
+          const nlohmann::json& jsonEntry = initField["sphere distribution"];
+
+          if (!(jsonEntry.contains("center"))) {
+            this->throwParserError(baseError + "but 'sphere distribution' does not contain 'center'");
+          }
+          if (!(jsonEntry.contains("radius"))) {
+            this->throwParserError(baseError + "but 'sphere distribution' does not contain 'radius'");
+          }
+          if (!(jsonEntry.contains("num particles"))) {
+            this->throwParserError(baseError + "but 'sphere distribution' does not contain 'num particles'");
+          }
+          if (!(jsonEntry.contains("weight"))) {
+            this->throwParserError(baseError + "but 'sphere distribution' does not contain 'weight'");
+          }
+
+          RealVect center;
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            center[dir] = jsonEntry["center"][dir].get<Real>();
+          }
+
+          const Real               radius         = jsonEntry["radius"].get<Real>();
+          const unsigned long long numParticles   = jsonEntry["num particles"].get<unsigned long long>();
+          const unsigned long long particleWeight = jsonEntry["weight"].get<unsigned long long>();
+
+          if (radius < 0.0) {
+            this->throwParserError(baseError + "but 'sphere distribution' can't have 'radius' < 0");
+          }
+
+          if (numParticles > 0) {
+            List<PointParticle> particles;
+
+            ParticleManagement::drawSphereParticles(particles, numParticles, center, radius);
+
+            for (ListIterator<PointParticle> lit(particles); lit.ok(); ++lit) {
+              lit().weight() = 1.0 * particleWeight;
+            }
+
+            initialParticles.catenate(particles);
+          }
+        }
+        else if (whichField == "gaussian distribution") {
+          const nlohmann::json& jsonEntry = initField["gaussian distribution"];
+
+          if (!(jsonEntry.contains("center"))) {
+            this->throwParserError(baseError + "but 'gaussian distribution' does not contain 'center'");
+          }
+          if (!(jsonEntry.contains("radius"))) {
+            this->throwParserError(baseError + "but 'gaussian distribution' does not contain 'radius'");
+          }
+          if (!(jsonEntry.contains("num particles"))) {
+            this->throwParserError(baseError + "but 'gaussian distribution' does not contain 'num particles'");
+          }
+          if (!(jsonEntry.contains("weight"))) {
+            this->throwParserError(baseError + "but 'gaussian distribution' does not contain 'weight'");
+          }
+
+          RealVect center;
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            center[dir] = jsonEntry["center"][dir].get<Real>();
+          }
+
+          const Real               radius         = jsonEntry["radius"].get<Real>();
+          const unsigned long long numParticles   = jsonEntry["num particles"].get<unsigned long long>();
+          const unsigned long long particleWeight = jsonEntry["weight"].get<unsigned long long>();
+
+          if (radius < 0.0) {
+            this->throwParserError(baseError + "but 'gaussian distribution' can't have 'radius' < 0");
+          }
+
+          if (numParticles > 0) {
+            List<PointParticle> particles;
+
+            ParticleManagement::drawGaussianParticles(particles, numParticles, center, radius);
+
+            for (ListIterator<PointParticle> lit(particles); lit.ok(); ++lit) {
+              lit().weight() = 1.0 * particleWeight;
+            }
+
+            initialParticles.catenate(particles);
+          }
+        }
+        else if (whichField == "file") {
+          this->throwParserError(baseError + " but 'file' specification is not implemented yet");
         }
         else {
           this->throwParserError(baseError + " but specification '" + whichField + "' is not supported");
         }
+
+        MayDay::Warning("need file support for initial particles");
+
+        // Put the particles in the solver.
       }
+
+      MayDay::Warning("must put particles in solver particles -- how to index correctly into solvers?");
     }
   }
 }

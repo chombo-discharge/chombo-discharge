@@ -363,7 +363,7 @@ namespace Physics {
       ParticlePlacement m_particlePlacement;
 
       /*!
-	@brief Map for associating a plasma species with an Ito solver. 
+	@brief Map for associating a plasma species with an Ito solver or CDR solver.
       */
       std::map<int, std::pair<SpeciesType, int>> m_speciesMap;
 

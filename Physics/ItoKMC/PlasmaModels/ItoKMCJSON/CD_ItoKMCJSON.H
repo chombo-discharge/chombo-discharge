@@ -261,6 +261,11 @@ namespace Physics {
       std::vector<bool> m_backgroundSpeciesPlot;
 
       /*!
+	@brief Map for identifying a species name with a solver type
+      */
+      std::map<std::string, SpeciesType> m_plasmaSpeciesTypes;
+
+      /*!
 	@brief Townsend ionization coefficient. Defined during parseAlpha
       */
       FunctionEX m_alpha;
