@@ -36,6 +36,8 @@ ItoKMCJSON::ItoKMCJSON()
   this->parseAlgorithm();
   this->parseJSON();
 
+  MayDay::Warning("ItoKMCJSON - Consider changing species specifications!");
+
   // Initialize the gas law and background species
   this->initializeGasLaw();
   this->initializeBackgroundSpecies();
@@ -46,7 +48,7 @@ ItoKMCJSON::ItoKMCJSON()
 
   // Initialize the plasma species
   this->initializePlasmaSpecies();
-  this->parseInitialData();
+  this->initializeParticles();
 
   // Define internals
   this->define();
@@ -217,7 +219,7 @@ ItoKMCJSON::initializeGasLaw()
 
   const std::string baseError = m_className + "::initializeGasLaw";
 
-  // TLDR: This routine exists for populating m_gasPressure, m_gasTemperature, and m_gasDensity. If you want to add a new gas law, this
+  // TLDR: This routine exists for populating m_gasPressure, m_gasTemperature, and m_gasNumberDensity. If you want to add a new gas law, this
   //       routine is where you would do it.
 
   if (!(m_json["gas"]["law"].contains("id"))) {
@@ -251,7 +253,7 @@ ItoKMCJSON::initializeGasLaw()
     m_gasPressure = [P](const RealVect a_position) -> Real {
       return P;
     };
-    m_gasDensity = [Rho0](const RealVect a_position) -> Real {
+    m_gasNumberDensity = [Rho0](const RealVect a_position) -> Real {
       return Rho0;
     };
   }
@@ -398,7 +400,7 @@ ItoKMCJSON::initializeBackgroundSpecies()
           table.setMaxRange(maxHeight, 0);
         }
         if (species["molar fraction"].contains("spacing")) {
-          const std::string whichSpacing = species["molar fraction"]["spacing"].get<std::string>();
+          const std::string whichSpacing = this->trim(species["molar fraction"]["spacing"].get<std::string>());
 
           if (whichSpacing == "linear") {
             spacing = TableSpacing::Uniform;
@@ -420,7 +422,7 @@ ItoKMCJSON::initializeBackgroundSpecies()
         };
 
         if (species["molar fraction"].contains("dump")) {
-          const std::string dumpId = species["molar fraction"]["dump"].get<std::string>();
+          const std::string dumpId = this->trim(species["molar fraction"]["dump"].get<std::string>());
 
           table.dumpTable(dumpId);
         }
@@ -555,9 +557,14 @@ ItoKMCJSON::parseTownsendCoefficient(const std::string a_coeff)
       this->throwParserError(baseErrorTable + "but 'file' is not specified");
     }
 
-    LookupTable1D<2> tabulatedAlpha = this->parseTableEByN(jsonTable, "alpha/N");
+    LookupTable1D<2> tabulatedCoeff = this->parseTableEByN(jsonTable, a_coeff + "/N");
 
-    this->throwParserError(baseError + "but 'table vs E/N' is not supported yet");
+    func = [this, tabulatedCoeff](const Real E, const RealVect x) -> Real {
+      const Real N   = m_gasNumberDensity(x);
+      const Real Etd = E / (N * 1.E-21);
+
+      return tabulatedCoeff.getEntry<1>(Etd) * N;
+    };
   }
   else {
     this->throwParserError(baseError + "but type specification '" + type + "' is not supported");
@@ -573,16 +580,56 @@ ItoKMCJSON::parseTownsendCoefficient(const std::string a_coeff)
 }
 
 void
-ItoKMCJSON::parseInitialData()
+ItoKMCJSON::initializeParticles()
 {
-  CH_TIME("ItoKMCJSON::parseInitialData");
+  CH_TIME("ItoKMCJSON::initializeParticles");
   if (m_verbose) {
-    pout() << m_className + "::parseInitialData" << endl;
+    pout() << m_className + "::initializeParticles" << endl;
   }
 
-  const std::string baseError = "ItoKMCJSON::parseInitialData";
+  const std::string baseError = "ItoKMCJSON::initializeParticles";
 
-  this->throwParserWarning(baseError + " not implemented yet");
+  for (const auto& species : m_json["plasma species"]) {
+    if (species.contains("initial particles")) {
+      const std::string speciesID   = species["id"].get<std::string>();
+      const std::string baseErrorID = baseError + " and found 'initial particles' for species '" + speciesID + "'";
+
+      // Generate initial particles. Note that
+      List<PointParticle> initialParticles;
+
+      for (const auto& initField : species["initial particles"]) {
+        const auto obj = initField.get<nlohmann::json::object_t>();
+
+        if (obj.size() != 1) {
+          this->throwParserError(baseError + " - logic bust, too many entries!");
+        }
+
+        const std::string whichField = (*obj.begin()).first;
+
+        if (whichField == "single particle") {
+          unsigned long long weight   = 1ULL;
+          RealVect           position = RealVect::Zero;
+
+          if (!(initField["single particle"].contains("position"))) {
+            this->throwParserError(baseError + " but 'single particle' field does not contain 'position'");
+          }
+          if (!(initField["single particle"].contains("weight"))) {
+            this->throwParserError(baseError + " but 'single particle' field does not contain 'weight'");
+          }
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            position[dir] = initField["single particle"]["position"][dir].get<Real>();
+          }
+          weight = initField["single particle"]["weight"].get<unsigned long long>();
+
+          initialParticles.add(PointParticle(position, 1.0 * weight));
+        }
+        else {
+          this->throwParserError(baseError + " but specification '" + whichField + "' is not supported");
+        }
+      }
+    }
+  }
 }
 
 LookupTable1D<2>
@@ -593,19 +640,100 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
     pout() << m_className + "::parseTableEByN" << endl;
   }
 
-  MayDay::Error("ItoKMCJSON::parseTableEbyN - logic bust, routine is not implemented");
-
   const std::string preError  = "ItoKMCJSON::parseTableEByN";
-  const std::string postError = "for dataID " + a_dataID;
+  const std::string postError = "for dataID=" + a_dataID;
 
   if (!(a_tableEntry.contains("file"))) {
     this->throwParserError(preError + " but could not find the 'file' specifier " + postError);
   }
 
-  const std::string fileName = a_tableEntry["file"].get<std::string>();
+  const std::string fileName = this->trim(a_tableEntry["file"].get<std::string>());
+  if (!(this->doesFileExist(fileName))) {
+    this->throwParserError(preError + " but file '" + fileName + "' " + postError + " was not found");
+  }
 
-  // Todo: Separate between simple and full read by including header
-  // Need file specification, alpha specification
+  int columnEbyN  = 0;
+  int columnCoeff = 1;
+  int numPoints   = 1000;
+
+  TableSpacing spacing = TableSpacing::Exponential;
+
+  if (a_tableEntry.contains("EbyN column")) {
+    columnEbyN = a_tableEntry["EbyN column"].get<int>();
+  }
+  if (a_tableEntry.contains(a_dataID + " column")) {
+    columnCoeff = a_tableEntry[a_dataID + " column"].get<int>();
+  }
+  if (a_tableEntry.contains("num points")) {
+    numPoints = a_tableEntry["num points"];
+  }
+  if (a_tableEntry.contains("spacing")) {
+    const std::string whichSpacing = this->trim(a_tableEntry["spacing"].get<std::string>());
+
+    if (whichSpacing == "linear") {
+      spacing = TableSpacing::Uniform;
+    }
+    else if (whichSpacing == "exponential") {
+      spacing = TableSpacing::Exponential;
+    }
+    else {
+      this->throwParserError(preError + " but spacing '" + whichSpacing + "' is not supported");
+    }
+  }
+
+  LookupTable1D<2> tabulatedCoefficient;
+
+  if (a_tableEntry.contains("header")) {
+    const std::string header = this->trim(a_tableEntry["header"].get<std::string>());
+
+    tabulatedCoefficient = DataParser::fractionalFileReadASCII(fileName, header, "", columnEbyN, columnCoeff);
+  }
+  else {
+    tabulatedCoefficient = DataParser::simpleFileReadASCII(fileName, columnEbyN, columnCoeff);
+  }
+
+  // Scale table if asked
+  if (a_tableEntry.contains("scale E/N")) {
+    const Real scaling = a_tableEntry["scale E/N"].get<Real>();
+    if (scaling <= 0.0) {
+      this->throwParserWarning(preError + " but shouldn't have 'scale E/N' <= 0.0 for " + postError);
+    }
+
+    tabulatedCoefficient.scale<0>(scaling);
+  }
+  if (a_tableEntry.contains("scale " + a_dataID)) {
+    const Real scaling = a_tableEntry["scale " + a_dataID].get<Real>();
+    if (scaling <= 0.0) {
+      this->throwParserWarning(preError + " but shouldn't have 'scale E/N' <= 0.0 for " + postError);
+    }
+
+    tabulatedCoefficient.scale<1>(scaling);
+  }
+
+  // Set min/max range for internal table
+  if (a_tableEntry.contains("min E/N")) {
+    const Real minEbyN = a_tableEntry["min E/N"].get<Real>();
+
+    tabulatedCoefficient.setMinRange(minEbyN, 0);
+  }
+  if (a_tableEntry.contains("max E/N")) {
+    const Real maxEbyN = a_tableEntry["max E/N"].get<Real>();
+
+    tabulatedCoefficient.setMaxRange(maxEbyN, 0);
+  }
+
+  // Make the table uniform and meaningful
+  tabulatedCoefficient.setTableSpacing(spacing);
+  tabulatedCoefficient.sort(0);
+  tabulatedCoefficient.makeUniform(numPoints);
+
+  if (a_tableEntry.contains("dump")) {
+    const std::string dumpFile = this->trim(a_tableEntry["dump"].get<std::string>());
+
+    tabulatedCoefficient.dumpTable(dumpFile);
+  }
+
+  return tabulatedCoefficient;
 }
 
 Real

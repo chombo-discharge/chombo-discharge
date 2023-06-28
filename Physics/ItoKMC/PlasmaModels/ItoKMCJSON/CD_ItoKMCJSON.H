@@ -283,7 +283,7 @@ namespace Physics {
       /*!
 	@brief Background gas number density
       */
-      FunctionX m_gasDensity;
+      FunctionX m_gasNumberDensity;
 
       /*!
 	@brief Check if a file exists
@@ -364,10 +364,10 @@ namespace Physics {
       initializePlasmaSpecies();
 
       /*!
-	@brief Parse initial data
+	@brief Parse initial particles
       */
       virtual void
-      parseInitialData();
+      initializeParticles();
 
       /*!
 	@brief Parse a table which is stored in E/N format
