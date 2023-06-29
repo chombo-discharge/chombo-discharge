@@ -74,19 +74,6 @@ ItoKMCJSON::parseRuntimeOptions() noexcept
   this->parseAlgorithm();
 }
 
-bool
-ItoKMCJSON::doesFileExist(const std::string a_filename) const noexcept
-{
-  CH_TIME("ItoKMCJSON::doesFileExist");
-  if (m_verbose) {
-    pout() << m_className + "::doesFileExist" << endl;
-  }
-
-  std::ifstream istream(a_filename);
-
-  return istream.good();
-}
-
 std::string
 ItoKMCJSON::trim(const std::string& a_string) const noexcept
 {
@@ -137,6 +124,19 @@ ItoKMCJSON::throwParserWarning(const std::string a_warning) const noexcept
 }
 
 bool
+ItoKMCJSON::doesFileExist(const std::string a_filename) const noexcept
+{
+  CH_TIME("ItoKMCJSON::doesFileExist");
+  if (m_verbose) {
+    pout() << m_className + "::doesFileExist" << endl;
+  }
+
+  std::ifstream istream(a_filename);
+
+  return istream.good();
+}
+
+bool
 ItoKMCJSON::containsWildcard(const std::string a_str) const noexcept
 {
   CH_TIME("ItoKMCJSON::containsWildcard");
@@ -145,6 +145,68 @@ ItoKMCJSON::containsWildcard(const std::string a_str) const noexcept
   }
 
   return (a_str.find("@") != std::string::npos);
+}
+
+bool
+ItoKMCJSON::isBackgroundSpecies(const std::string& a_name) const noexcept
+{
+  CH_TIME("ItoKMCJSON::isBackgroundSpecies");
+  if (m_verbose) {
+    pout() << m_className + "::isBackgroundSpecies" << endl;
+  }
+
+  return m_backgroundSpeciesMap.count(a_name) != 0;
+}
+
+bool
+ItoKMCJSON::isPlasmaSpecies(const std::string& a_name) const noexcept
+{
+  CH_TIME("ItoKMCJSON::isPlasmaSpecies");
+  if (m_verbose) {
+    pout() << m_className + "::isPlasmaSpecies" << endl;
+  }
+
+  return m_plasmaSpeciesTypes.count(a_name) != 0;
+}
+
+bool
+ItoKMCJSON::isPhotonSpecies(const std::string& a_name) const noexcept
+{
+  CH_TIME("ItoKMCJSON::isPlasmaSpecies");
+  if (m_verbose) {
+    pout() << m_className + "::isPlasmaSpecies" << endl;
+  }
+
+  return m_photonIndexMap.count(a_name) != 0;
+}
+
+bool
+ItoKMCJSON::containsBracket(const std::string a_str) const noexcept
+{
+  CH_TIME("ItoKMCJSON::containsBracket");
+  if (m_verbose) {
+    pout() << m_className + "::containsBracket" << endl;
+  }
+
+  const std::list<char> bracketList{'(', ')', '[', ']', '{', '}'};
+
+  bool containsBracket = false;
+
+  for (const auto& b : bracketList) {
+    if (a_str.find(b) != std::string::npos) {
+      containsBracket = true;
+
+      break;
+    }
+  }
+
+  return containsBracket;
+}
+
+bool
+ItoKMCJSON::isBracketed(const std::string a_str) const noexcept
+{
+  return (a_str.front() == '(' && a_str.back() == ')');
 }
 
 void
@@ -294,6 +356,9 @@ ItoKMCJSON::initializeBackgroundSpecies()
 
       if (this->containsWildcard(speciesName)) {
         this->throwParserError(baseError + " but species '" + speciesName + "' should not contain wildcard @");
+      }
+      if (this->containsBracket(speciesName)) {
+        this->throwParserError(baseError + " but species '" + speciesName + "' should not contain brackets");
       }
       if (m_allSpecies.count(speciesName) != 0) {
         this->throwParserError(baseError + " but species '" + speciesName + "' was already defined elsewhere)");
@@ -478,6 +543,9 @@ ItoKMCJSON::initializePlasmaSpecies()
 
     if (this->containsWildcard(speciesID)) {
       this->throwParserError(baseErrorID + " but species name '" + speciesID + "' should not contain wildcard @");
+    }
+    if (this->containsBracket(speciesID)) {
+      this->throwParserError(baseError + " but species '" + speciesID + "' should not contain brackets");
     }
     if (m_allSpecies.count(speciesID) != 0) {
       this->throwParserError(baseErrorID + " but species '" + speciesID + "' was already defined elsewhere");
@@ -1053,6 +1121,9 @@ ItoKMCJSON::initializePhotonSpecies()
     if (this->containsWildcard(speciesID)) {
       this->throwParserError(baseErrorID + " but species name '" + speciesID + "' should not contain wildcard @");
     }
+    if (this->containsBracket(speciesID)) {
+      this->throwParserError(baseError + " but species '" + speciesID + "' should not contain brackets");
+    }
     if (m_allSpecies.count(speciesID) != 0) {
       this->throwParserError(baseErrorID + " but species '" + speciesID + "' was already defined elsewhere");
     }
@@ -1169,7 +1240,137 @@ ItoKMCJSON::initializePlasmaReactions()
 
     this->parseReactionString(reactants, products, reaction);
 
-    std::cout << baseErrorID << std::endl;
+    // Reactions may have contained a wildcard. Build a superset if it does.
+    const auto reactionSets = this->parseReactionWildcards(reactants, products, reactionJSON);
+
+    for (const auto& curReaction : reactionSets) {
+      const std::string              wildcard     = std::get<0>(curReaction);
+      const std::vector<std::string> curReactants = std::get<1>(curReaction);
+      const std::vector<std::string> curProducts  = std::get<2>(curReaction);
+
+      // This is the reaction index for the current index. The reaction we are currently
+      // dealing with is put in m_kmcReactions[reactionIdex].
+      const int reactionIndex = m_kmcReactions.size();
+
+      // Ignore species which are enclosed by brackets ()
+      std::vector<std::string> trimmedProducts;
+      for (const auto& p : curProducts) {
+        if (!(this->isBracketed(p))) {
+          trimmedProducts.emplace_back(p);
+        }
+      }
+
+      // Make sure the reaction makes sense
+      this->sanctifyPlasmaReaction(curReactants, trimmedProducts, reaction);
+    }
+  }
+}
+
+void
+ItoKMCJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
+                                   const std::vector<std::string>& a_products,
+                                   const std::string&              a_reaction) const noexcept
+{
+  CH_TIME("ItoKMCJSON::sanctifyPlasmaReaction()");
+  if (m_verbose) {
+    pout() << m_className + "::sanctifyPlasmaReaction()" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::sanctifyPlasmaReaction ";
+
+  // All reactants must be in the list of neutral species or in the list of plasma species
+  for (const auto& r : a_reactants) {
+    const bool isBackground = this->isBackgroundSpecies(r);
+    const bool isPlasma     = this->isPlasmaSpecies(r);
+    if (!isBackground && !isPlasma) {
+      this->throwParserError(baseError + " but reactant '" + r + "' for reaction '" + a_reaction +
+                             " should not appear on left hand side");
+    }
+  }
+
+  // All products should be in the list of plasma or photon species. It's ok if users include a neutral species -- we will ignore it (but tell the user about it).
+  for (const auto& p : a_products) {
+    const bool isBackground = this->isBackgroundSpecies(p);
+    const bool isPlasma     = this->isPlasmaSpecies(p);
+    const bool isPhoton     = this->isPhotonSpecies(p);
+
+    if (!isBackground && !isPlasma && !isPhoton) {
+      this->throwParserError(baseError + "but I do not know product species '" + p + "' for reaction '" + a_reaction +
+                             "'.");
+    }
+  }
+
+  // Check for charge conservation
+  int sumCharge = 0;
+  for (const auto& r : a_reactants) {
+    if (this->isPlasmaSpecies(r)) {
+      const SpeciesType& type = m_plasmaSpeciesTypes.at(r);
+
+      int Z = 0;
+
+      switch (type) {
+      case SpeciesType::Ito: {
+        const int idx = m_itoSpeciesMap.at(r);
+
+        Z = m_itoSpecies[idx]->getChargeNumber();
+
+        break;
+      }
+      case SpeciesType::CDR: {
+        const int idx = m_cdrSpeciesMap.at(r);
+
+        Z = m_cdrSpecies[idx]->getChargeNumber();
+
+        break;
+      }
+      default: {
+        const std::string err = baseError + " logic bust";
+
+        MayDay::Error(err.c_str());
+
+        break;
+      }
+      }
+
+      sumCharge -= Z;
+    }
+  }
+  for (const auto& p : a_products) {
+    if (this->isPlasmaSpecies(p)) {
+      const SpeciesType& type = m_plasmaSpeciesTypes.at(p);
+
+      int Z = 0;
+
+      switch (type) {
+      case SpeciesType::Ito: {
+        const int idx = m_itoSpeciesMap.at(p);
+
+        Z = m_itoSpecies[idx]->getChargeNumber();
+
+        break;
+      }
+      case SpeciesType::CDR: {
+        const int idx = m_cdrSpeciesMap.at(p);
+
+        Z = m_cdrSpecies[idx]->getChargeNumber();
+
+        break;
+      }
+      default: {
+        const std::string err = baseError + " logic bust";
+
+        MayDay::Error(err.c_str());
+
+        break;
+      }
+      }
+
+      sumCharge += Z;
+    }
+  }
+
+  if (sumCharge != 0) {
+    this->throwParserWarning(baseError + " but charge is not conserved for reaction '" + a_reaction + "'.");
   }
 }
 

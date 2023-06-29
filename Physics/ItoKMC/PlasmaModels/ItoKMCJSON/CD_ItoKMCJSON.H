@@ -326,13 +326,6 @@ namespace Physics {
       FunctionX m_gasNumberDensity;
 
       /*!
-	@brief Check if a file exists
-	@param[in] a_filename File name
-      */
-      virtual bool
-      doesFileExist(const std::string a_filename) const noexcept;
-
-      /*!
 	@brief Trim a string. This removes whitespace before/after
 	@param[in] a_string String to be trimmed
       */
@@ -366,10 +359,53 @@ namespace Physics {
       throwParserWarning(const std::string a_warning) const noexcept;
 
       /*!
+	@brief Check if a file exists
+	@param[in] a_filename File name
+      */
+      virtual bool
+      doesFileExist(const std::string a_filename) const noexcept;
+
+      /*!
+	@brief Return true if species is a background species
+	@param[in] a_name Species name
+      */
+      virtual bool
+      isBackgroundSpecies(const std::string& a_name) const noexcept;
+
+      /*!
+	@brief Return true if species is a plasma species
+	@param[in] a_name Species name
+      */
+      virtual bool
+      isPlasmaSpecies(const std::string& a_name) const noexcept;
+
+      /*!
+	@brief Return true if species is a photon species
+	@param[in] a_name Species name
+      */
+      virtual bool
+      isPhotonSpecies(const std::string& a_name) const noexcept;
+
+      /*!
 	@brief Check if a string contains the wildcard @ and return true if it does
+	@param[in] a_str Input string
       */
       virtual bool
       containsWildcard(const std::string a_str) const noexcept;
+
+      /*!
+	@brief Check if a string contains standard brackets
+	@param[in] a_str Input string
+      */
+      virtual bool
+      containsBracket(const std::string a_str) const noexcept;
+
+      /*!
+	@brief Check if a string contains starts with '(' and ends with ')'
+	@param[in] a_str Input string
+      */
+      virtual bool
+      isBracketed(const std::string a_str) const noexcept;
 
       /*!
 	@brief Check that molar fraction is one. Throws a warning if it isn't.
@@ -377,6 +413,17 @@ namespace Physics {
       */
       virtual void
       checkMolarFraction(const RealVect a_position) const noexcept;
+
+      /*!
+	@brief Check that a plasma reaction makes sense. I.e. that all species are properly defined and that it conserves charge.
+	@param[in] a_reactants Reactants
+	@param[in] a_products  Reaction products
+	@param[in] a_reaction  Reaction string
+      */
+      virtual void
+      sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
+                             const std::vector<std::string>& a_products,
+                             const std::string&              a_reaction) const noexcept;
 
       /*!
 	@brief Initialize gas law.
