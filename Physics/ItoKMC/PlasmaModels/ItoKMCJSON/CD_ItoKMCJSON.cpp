@@ -1374,6 +1374,43 @@ ItoKMCJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
   }
 }
 
+void
+ItoKMCJSON::parseReactionString(std::vector<std::string>& a_reactants,
+                                std::vector<std::string>& a_products,
+                                const std::string&        a_reaction) const noexcept
+{
+  CH_TIME("ItoKMCJSON::parseReactionString");
+  if (m_verbose) {
+    pout() << m_className + "::parseReactionString" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::parseReactionString";
+
+  // Parse the string into segments. We split on white-space.
+  std::stringstream        ss(a_reaction);
+  std::string              segment;
+  std::vector<std::string> segments;
+
+  while (std::getline(ss, segment, ' ')) {
+    segments.push_back(segment);
+  }
+
+  // Discard all whitespace and solitary + from input string
+  segments.erase(std::remove(segments.begin(), segments.end(), ""), segments.end());
+  segments.erase(std::remove(segments.begin(), segments.end(), "+"), segments.end());
+
+  // Find the element containing "->"
+  const auto& it = std::find(segments.begin(), segments.end(), "->");
+
+  // Make sure that -> is in the reaction string.
+  if (it == segments.end())
+    this->throwParserError(baseError + " -- Reaction '" + a_reaction + "' does not contain '->");
+
+  // Left of "->" are reactants and right of "->" are products
+  a_reactants = std::vector<std::string>(segments.begin(), it);
+  a_products  = std::vector<std::string>(it + 1, segments.end());
+}
+
 LookupTable1D<2>
 ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string& a_dataID) const
 {
@@ -1476,43 +1513,6 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
   }
 
   return tabulatedCoefficient;
-}
-
-void
-ItoKMCJSON::parseReactionString(std::vector<std::string>& a_reactants,
-                                std::vector<std::string>& a_products,
-                                const std::string&        a_reaction) const noexcept
-{
-  CH_TIME("ItoKMCJSON::parseReactionString");
-  if (m_verbose) {
-    pout() << m_className + "::parseReactionString" << endl;
-  }
-
-  const std::string baseError = "ItoKMCJSON::parseReactionString";
-
-  // Parse the string into segments. We split on white-space.
-  std::stringstream        ss(a_reaction);
-  std::string              segment;
-  std::vector<std::string> segments;
-
-  while (std::getline(ss, segment, ' ')) {
-    segments.push_back(segment);
-  }
-
-  // Discard all whitespace and solitary + from input string
-  segments.erase(std::remove(segments.begin(), segments.end(), ""), segments.end());
-  segments.erase(std::remove(segments.begin(), segments.end(), "+"), segments.end());
-
-  // Find the element containing "->"
-  const auto& it = std::find(segments.begin(), segments.end(), "->");
-
-  // Make sure that -> is in the reaction string.
-  if (it == segments.end())
-    this->throwParserError(baseError + " -- Reaction '" + a_reaction + "' does not contain '->");
-
-  // Left of "->" are reactants and right of "->" are products
-  a_reactants = std::vector<std::string>(segments.begin(), it);
-  a_products  = std::vector<std::string>(it + 1, segments.end());
 }
 
 std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
