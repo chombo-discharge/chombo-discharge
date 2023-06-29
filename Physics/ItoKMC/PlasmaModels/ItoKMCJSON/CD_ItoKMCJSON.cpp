@@ -16,6 +16,7 @@
 // Our includes
 #include <CD_ItoKMCJSON.H>
 #include <CD_ItoKMCCDRSpecies.H>
+#include <CD_ItoKMCPhotonSpecies.H>
 #include <CD_Units.H>
 #include <CD_DataParser.H>
 #include <CD_ParticleManagement.H>
@@ -49,6 +50,9 @@ ItoKMCJSON::ItoKMCJSON()
   this->initializeParticles();
   this->initializeMobilities();
   this->initializeDiffusionCoefficients();
+
+  // Initialize the photon species
+  this->initializePhotonSpecies();
 
   // Define internals. This includes the KMC solver instantiation.
   this->define();
@@ -523,13 +527,13 @@ ItoKMCJSON::initializePlasmaSpecies()
   // Initialize the solver map, which will assist us when we index into solvers later on.
   int species = 0;
   for (int i = 0; i < m_itoSpecies.size(); i++, species++) {
-    m_solverIndexMap[m_itoSpecies[i]->getName()] = species;
+    m_plasmaIndexMap[m_itoSpecies[i]->getName()] = species;
   }
   for (int i = 0; i < m_cdrSpecies.size(); i++, species++) {
-    m_solverIndexMap[m_cdrSpecies[i]->getName()] = species;
+    m_plasmaIndexMap[m_cdrSpecies[i]->getName()] = species;
   }
 
-  if (m_solverIndexMap.size() != m_numPlasmaSpecies) {
+  if (m_plasmaIndexMap.size() != m_numPlasmaSpecies) {
     this->throwParserError(baseError + " but something went wrong when setting up the solver map");
   }
 }
@@ -934,7 +938,7 @@ ItoKMCJSON::initializeMobilities()
     }
 
     // Put the mobility function into the appropriate solver.
-    const int idx = m_solverIndexMap[speciesID];
+    const int idx = m_plasmaIndexMap[speciesID];
 
     m_mobilityFunctions[idx] = mobilityFunction;
   }
@@ -1016,9 +1020,119 @@ ItoKMCJSON::initializeDiffusionCoefficients()
     }
 
     // Put the mobility function into the appropriate solver.
-    const int idx = m_solverIndexMap[speciesID];
+    const int idx = m_plasmaIndexMap[speciesID];
 
     m_diffusionCoefficients[idx] = diffusionCoefficient;
+  }
+}
+
+void
+ItoKMCJSON::initializePhotonSpecies()
+{
+  CH_TIME("ItoKMCJSON::initializePhotonSpecies");
+  if (m_verbose) {
+    pout() << m_className + "::initializePhotonSpecies" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::initializePhotonSpecies";
+
+  for (const auto& species : m_json["photon species"]) {
+    const auto        obj         = species.get<nlohmann::json::object_t>();
+    const std::string speciesID   = (*obj.begin()).first;
+    const std::string baseErrorID = baseError + " for species '" + speciesID + "'";
+
+    FunctionX kappaFunction = [](const RealVect a_pos) -> Real {
+      return 0.0;
+    };
+
+    if (this->containsWildcard(speciesID)) {
+      this->throwParserError(baseErrorID + " but species name '" + speciesID + "' should not contain wildcard @");
+    }
+    if (m_photonIndexMap.count(speciesID) != 0) {
+      this->throwParserError(baseErrorID + " but species '" + speciesID + "' was already defined)");
+    }
+
+    if (!(species[speciesID].contains("kappa"))) {
+      this->throwParserError(baseErrorID + " but 'kappa' is not specified");
+    }
+
+    const nlohmann::json& kappaJSON = species[speciesID]["kappa"];
+
+    const std::string type = this->trim(kappaJSON["type"].get<std::string>());
+    if (type == "constant") {
+      if (!(kappaJSON.contains("value"))) {
+        this->throwParserError(baseErrorID + " and got constant kappa but 'value' field is not specified");
+      }
+
+      const Real value = kappaJSON["value"].get<Real>();
+      if (value < 0.0) {
+        this->throwParserError(baseErrorID + " and got constant kappa but 'value' field can not be negative");
+      }
+
+      kappaFunction = [value](const RealVect a_pos) -> Real {
+        return value;
+      };
+    }
+    else if (type == "stochastic A") {
+      if (!(kappaJSON.contains("f1"))) {
+        this->throwParserError(baseErrorID + " and got 'stochastic A' but field 'f1' is not specified");
+      }
+      if (!(kappaJSON.contains("f2"))) {
+        this->throwParserError(baseErrorID + " and got 'stochastic A' but field 'f2' is not specified");
+      }
+      if (!(kappaJSON.contains("chi min"))) {
+        this->throwParserError(baseErrorID + " and got 'stochastic A' but field 'chi min' is not specified");
+      }
+      if (!(kappaJSON.contains("chi max"))) {
+        this->throwParserError(baseErrorID + " and got 'stochastic A' but field 'chi max' is not specified");
+      }
+      if (!(kappaJSON.contains("neutral"))) {
+        this->throwParserError(baseErrorID + " and got 'stochastic A' but field 'neutral' is not specified");
+      }
+
+      const Real        f1      = kappaJSON["f1"].get<Real>();
+      const Real        f2      = kappaJSON["f2"].get<Real>();
+      const Real        chiMin  = kappaJSON["chi min"].get<Real>();
+      const Real        chiMax  = kappaJSON["chi max"].get<Real>();
+      const std::string neutral = this->trim(kappaJSON["neutral"].get<std::string>());
+
+      if (f1 >= f2) {
+        this->throwParserError(baseErrorID + " and got 'stochastic A' but can't have f1 >= f2");
+      }
+      if (chiMin >= chiMax) {
+        this->throwParserError(baseErrorID + " and got 'stochastic A' but can't have 'chi min' >= 'chi max'");
+      }
+      if (m_backgroundSpeciesMap.count(neutral) != 1) {
+        this->throwParserError(baseErrorID + " and got 'stochastic A' but don't now species '" + neutral + "'");
+      }
+
+      std::uniform_real_distribution<Real> udist(f1, f2);
+
+      kappaFunction = [f1,
+                       f2,
+                       udist,
+                       x1              = chiMin,
+                       x2              = chiMax,
+                       &gasPressure    = this->m_gasPressure,
+                       &neutralSpecies = this->m_backgroundSpecies[m_backgroundSpeciesMap.at(neutral)]](
+                        const RealVect a_position) mutable -> Real {
+        const Real m = neutralSpecies.molarFraction(a_position);
+        const Real P = gasPressure(a_position);
+        const Real p = m * P;
+
+        const Real f  = Random::get(udist);
+        const Real a  = (f - f1) / (f2 - f1);
+        const Real K1 = x1 * p;
+        const Real K2 = x2 * p;
+
+        return K1 * std::pow(K2 / K1, a);
+      };
+    }
+    else {
+      this->throwParserError(baseErrorID + " but type specification '" + type + "' is not supported");
+    }
+
+    m_rtSpecies.push_back(RefCountedPtr<RtSpecies>(new ItoKMCPhotonSpecies(speciesID, kappaFunction)));
   }
 }
 

@@ -276,9 +276,14 @@ namespace Physics {
       std::map<std::string, int> m_cdrSpeciesMap;
 
       /*!
-	@brief Map for indexing a species name to a global index in the solver vectors
+	@brief Map for indexing a plasma species name to a global index in the solver vectors
       */
-      std::map<std::string, int> m_solverIndexMap;
+      std::map<std::string, int> m_plasmaIndexMap;
+
+      /*!
+	@brief Map for indexing a photon species name to a global index in the solver vectors
+      */
+      std::map<std::string, int> m_photonIndexMap;
 
       /*!
 	@brief Mobilities for the various species
@@ -410,6 +415,12 @@ namespace Physics {
       */
       virtual void
       initializeDiffusionCoefficients();
+
+      /*!
+	@brief Initialize the photon species
+      */
+      virtual void
+      initializePhotonSpecies();
 
       /*!
 	@brief Parse a table which is stored in E/N format

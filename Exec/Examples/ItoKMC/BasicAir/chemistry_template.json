@@ -212,5 +212,20 @@
 		}
 	    }
 	}
+    ],
+    "photon species":
+    [
+	{
+	    "uv photon" : {
+		"kappa": {
+		    "type": "stochastic A",
+		    "f1":   2.925E15,
+		    "f2":   3.059E15,
+		    "chi min": 2.625E-2,
+		    "chi max": 1.5,
+		    "neutral": "O2"
+		}
+	    }
+	}
     ]
 }
