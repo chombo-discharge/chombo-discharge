@@ -41,18 +41,17 @@ ItoKMCJSON::ItoKMCJSON()
   this->initializeBackgroundSpecies();
 
   // Initialize Townsend coefficients
-  this->parseTownsendCoefficient("alpha");
-  this->parseTownsendCoefficient("eta");
+  this->initializeTownsendCoefficient("alpha");
+  this->initializeTownsendCoefficient("eta");
 
   // Initialize the plasma species
   this->initializePlasmaSpecies();
   this->initializeParticles();
+  this->initializeMobilities();
+  this->initializeDiffusionCoefficients();
 
-  // Define internals
+  // Define internals. This includes the KMC solver instantiation.
   this->define();
-
-  // Useful shortcut.
-  m_numPlasmaSpecies = this->getNumPlasmaSpecies();
 }
 
 ItoKMCJSON::~ItoKMCJSON() noexcept { CH_TIME("ItoKMCJSON::~ItoKMCJSON"); }
@@ -518,17 +517,32 @@ ItoKMCJSON::initializePlasmaSpecies()
              << "\n";
     }
   }
+
+  m_numPlasmaSpecies = this->getNumPlasmaSpecies();
+
+  // Initialize the solver map, which will assist us when we index into solvers later on.
+  int species = 0;
+  for (int i = 0; i < m_itoSpecies.size(); i++, species++) {
+    m_solverIndexMap[m_itoSpecies[i]->getName()] = species;
+  }
+  for (int i = 0; i < m_cdrSpecies.size(); i++, species++) {
+    m_solverIndexMap[m_cdrSpecies[i]->getName()] = species;
+  }
+
+  if (m_solverIndexMap.size() != m_numPlasmaSpecies) {
+    this->throwParserError(baseError + " but something went wrong when setting up the solver map");
+  }
 }
 
 void
-ItoKMCJSON::parseTownsendCoefficient(const std::string a_coeff)
+ItoKMCJSON::initializeTownsendCoefficient(const std::string a_coeff)
 {
-  CH_TIME("ItoKMCJSON::parseTownsendCoefficient");
+  CH_TIME("ItoKMCJSON::initializeTownsendCoefficient");
   if (m_verbose) {
-    pout() << m_className + "::parseTownsendCoefficient" << endl;
+    pout() << m_className + "::initializeTownsendCoefficient" << endl;
   }
 
-  const std::string baseError = "ItoKMCJSON::parseTownsendCoefficient";
+  const std::string baseError = "ItoKMCJSON::initializeTownsendCoefficient";
 
   FunctionEX func;
 
@@ -844,6 +858,170 @@ ItoKMCJSON::initializeParticles()
   }
 }
 
+void
+ItoKMCJSON::initializeMobilities()
+{
+  CH_TIME("ItoKMCJSON::initializeMobilities");
+  if (m_verbose) {
+    pout() << m_className + "::initializeMobilities" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::initializeMobilities";
+
+  m_mobilityFunctions.resize(m_numPlasmaSpecies);
+
+  // Read in mobilities
+  for (const auto& species : m_json["plasma species"]) {
+
+    FunctionEX mobilityFunction = [](const Real E, const RealVect x) -> Real {
+      return 0.0;
+    };
+
+    // Get the species ID.
+    const auto        obj         = species.get<nlohmann::json::object_t>();
+    const std::string speciesID   = (*obj.begin()).first;
+    const std::string baseErrorID = baseError + " and found mobile species '" + speciesID + "'";
+
+    // Check if the species is mobile.
+    const bool isMobile = species[speciesID]["mobile"].get<bool>();
+    if (isMobile) {
+      if (!(species[speciesID].contains("mobility"))) {
+        this->throwParserError(baseErrorID + " but did not find the required field 'mobility'");
+      }
+
+      const nlohmann::json& mobilityJSON = species[speciesID]["mobility"];
+
+      if (!(mobilityJSON).contains("type")) {
+        this->throwParserError(baseErrorID + " but 'type' specifier was not found");
+      }
+
+      const std::string type = mobilityJSON["type"].get<std::string>();
+
+      if (type == "constant") {
+        if (!(mobilityJSON.contains("value"))) {
+          this->throwParserError(baseErrorID + " and got constant mobility but did not find the 'value' field");
+        }
+
+        const Real mu = mobilityJSON["value"].get<Real>();
+
+        if (mu < 0.0) {
+          this->throwParserError(baseErrorID + " and got constant mobility but mobility should not be negative");
+        }
+
+        mobilityFunction = [mu](const Real E, const RealVect x) -> Real {
+          return mu;
+        };
+      }
+      else if (type == "table vs E/N") {
+        const std::string baseErrorTable = baseErrorID + " and also got table vs E/N";
+
+        if (!(mobilityJSON.contains("file"))) {
+          this->throwParserError(baseErrorTable + ", but 'file' is not specified");
+        }
+
+        LookupTable1D<2> tabulatedCoeff = this->parseTableEByN(mobilityJSON, "mu*N");
+
+        mobilityFunction = [this, tabulatedCoeff](const Real E, const RealVect x) -> Real {
+          const Real N   = m_gasNumberDensity(x);
+          const Real Etd = E / (N * 1.E-21);
+
+          return tabulatedCoeff.getEntry<1>(Etd) / (std::numeric_limits<Real>::epsilon() + N);
+        };
+      }
+      else {
+        this->throwParserError(baseErrorID + " but mobility specifier '" + type + "' is not supported");
+      }
+    }
+
+    // Put the mobility function into the appropriate solver.
+    const int idx = m_solverIndexMap[speciesID];
+
+    m_mobilityFunctions[idx] = mobilityFunction;
+  }
+}
+
+void
+ItoKMCJSON::initializeDiffusionCoefficients()
+{
+  CH_TIME("ItoKMCJSON::initializeDiffusionCoefficients");
+  if (m_verbose) {
+    pout() << m_className + "::initializeDiffusionCoefficients" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::initializeDiffusionCoefficients";
+
+  m_diffusionCoefficients.resize(m_numPlasmaSpecies);
+
+  // Read in mobilities
+  for (const auto& species : m_json["plasma species"]) {
+
+    FunctionEX diffusionCoefficient = [](const Real E, const RealVect x) -> Real {
+      return 0.0;
+    };
+
+    // Get the species ID.
+    const auto        obj         = species.get<nlohmann::json::object_t>();
+    const std::string speciesID   = (*obj.begin()).first;
+    const std::string baseErrorID = baseError + " and found diffusive species '" + speciesID + "'";
+
+    // Check if the species is mobile.
+    const bool isDiffusive = species[speciesID]["diffusive"].get<bool>();
+    if (isDiffusive) {
+      if (!(species[speciesID].contains("diffusion"))) {
+        this->throwParserError(baseErrorID + " but did not find the required field 'diffusion'");
+      }
+
+      const nlohmann::json& diffusionJSON = species[speciesID]["diffusion"];
+
+      if (!(diffusionJSON).contains("type")) {
+        this->throwParserError(baseErrorID + " but 'type' specifier was not found");
+      }
+
+      const std::string type = diffusionJSON["type"].get<std::string>();
+
+      if (type == "constant") {
+        if (!(diffusionJSON.contains("value"))) {
+          this->throwParserError(baseErrorID + " and got constant diffusion but did not find the 'value' field");
+        }
+
+        const Real D = diffusionJSON["value"].get<Real>();
+
+        if (D < 0.0) {
+          this->throwParserError(baseErrorID + " and got constant diffusion but coefficient should not be negative");
+        }
+
+        diffusionCoefficient = [D](const Real E, const RealVect x) -> Real {
+          return D;
+        };
+      }
+      else if (type == "table vs E/N") {
+        const std::string baseErrorTable = baseErrorID + " and also got table vs E/N";
+
+        if (!(diffusionJSON.contains("file"))) {
+          this->throwParserError(baseErrorTable + ", but 'file' is not specified");
+        }
+
+        LookupTable1D<2> tabulatedCoeff = this->parseTableEByN(diffusionJSON, "D*N");
+
+        diffusionCoefficient = [this, tabulatedCoeff](const Real E, const RealVect x) -> Real {
+          const Real N   = m_gasNumberDensity(x);
+          const Real Etd = E / (N * 1.E-21);
+
+          return tabulatedCoeff.getEntry<1>(Etd) / (std::numeric_limits<Real>::epsilon() + N);
+        };
+      }
+      else {
+        this->throwParserError(baseErrorID + " but mobility specifier '" + type + "' is not supported");
+      }
+    }
+
+    // Put the mobility function into the appropriate solver.
+    const int idx = m_solverIndexMap[speciesID];
+
+    m_diffusionCoefficients[idx] = diffusionCoefficient;
+  }
+}
+
 LookupTable1D<2>
 ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string& a_dataID) const
 {
@@ -989,7 +1167,14 @@ ItoKMCJSON::computeMobilities(const Real a_time, const RealVect a_pos, const Rea
     pout() << m_className + "::computeMobilities" << endl;
   }
 
+  const Real E   = a_E.vectorLength();
+  const Real N   = m_gasNumberDensity(a_pos);
+  const Real Etd = E / (N * 1.E-21);
+
   Vector<Real> mobilityCoefficients(m_numPlasmaSpecies, 0.0);
+  for (int i = 0; i < m_numPlasmaSpecies; i++) {
+    mobilityCoefficients[i] = m_mobilityFunctions[i](E, a_pos);
+  }
 
   return mobilityCoefficients;
 }

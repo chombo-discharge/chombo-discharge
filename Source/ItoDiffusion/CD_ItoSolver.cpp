@@ -1269,10 +1269,10 @@ ItoSolver::getPlotVariableNames() const
     names.push_back(m_name + " diffusion_coefficient");
   }
   if (m_plotVelocity && m_isMobile) {
-    names.push_back("x-Velocity " + m_name);
-    names.push_back("y-Velocity " + m_name);
+    names.push_back("x-Velocity field " + m_name);
+    names.push_back("y-Velocity field " + m_name);
     if (SpaceDim == 3) {
-      names.push_back("z-Velocity " + m_name);
+      names.push_back("z-Velocity field " + m_name);
     }
   }
   if (m_plotParticles) {

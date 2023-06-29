@@ -112,22 +112,22 @@
 		"mobility" : {
 		    // Specification of the mobilility coefficient when the species is mobile. User can specify various forms of the mobility. E.g. constant, function-based, or
 		    // tabulated vs E/N
-		    "lookup" : "table E/N",                       // Specification of tabulated mobility lookup method
+		    "type" : "table vs E/N",                       // Specification of tabulated mobility lookup method
 		    "file" : "bolsig_air.dat",                    // File containg the mobility data
 		    "header" : "E/N (Td)\tMobility *N (1/m/V/s)", // Line immediately preceding the colum data
 		    "E/N" : 0,                                    // Column containing E/N
 		    "mu*N" : 1,                                   // Column containing mu*N
-		    "min E/N" : 10,                               // Minimum E/N kept when resampling table
+		    "min E/N" : 1,                               // Minimum E/N kept when resampling table
 		    "max E/N" : 2E6,                              // Maximum E/N kept when resampling table
 		    "points" : 1000,                              // Number of grid points kept when resampling the table
 		    "spacing" : "exponential",                    // Grid point spacing when resampling the table
 		    "E/N scale" : 1.0,                            // Optional argument for scaling mobility coefficient
-		    "mu scale" : 1.0,                             // Optional argument for scaling the E/N column
+		    "mu*N scale" : 1.0,                             // Optional argument for scaling the E/N column
 		    "dump" : "debug_mobility.dat" // Optional argument for dumping table to disk (useful for debugging)
 		},
 		"diffusion" : {
 		    // Definition of the diffusion coefficient similiar to mobility coefficient above.
-		    "lookup" : "table E/N",
+		    "type" : "table vs E/N",
 		    "file" : "bolsig_air.dat",
 		    "header" : "E/N (Td)\tDiffusion coefficient *N (1/m/s)",
 		    "E/N" : 0,
@@ -135,7 +135,8 @@
 		    "min E/N" : 10,
 		    "max E/N" : 2E6,
 		    "spacing" : "exponential",
-		    "points" : 1000
+		    "points" : 1000,
+		    "dump": "debug_diffusion.dat"
 		},
 		"initial particles" : [
 		    {
@@ -182,9 +183,34 @@
 		// Definition of another plasma species (M+), which are tracked using a CDR solver
 		"Z" : 1,            // Charge number
 		"solver" : "cdr",   // Solver type. Either 'ito' or 'cdr'
-		"mobile" : false,   // Mobile or not
-		"diffusive" : false// Diffusive or not,
+		"mobile" : true,   // Mobile or not
+		"diffusive" : true, // Diffusive or not
+		"mobility": {
+		    "type": "constant",
+		    "value": 0.0
+		},
+		"diffusion": {
+		    "type": "constant",
+		    "value": 0.0
+		}		
             }
+	},
+	{
+            "M-" : {
+		// Definition of another plasma species (M+), which are tracked using a CDR solver
+		"Z" : -1,            // Charge number
+		"solver" : "cdr",   // Solver type. Either 'ito' or 'cdr'
+		"mobile" : false,   // Mobile or not
+		"diffusive" : false, // Diffusive or not
+		"mobility": {
+		    "type": "constant",
+		    "value": 0.0
+		},
+		"diffusion": {
+		    "type": "constant",
+		    "value": 0.0
+		}
+	    }
 	}
     ]
 }

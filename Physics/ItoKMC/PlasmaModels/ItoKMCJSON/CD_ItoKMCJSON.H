@@ -276,6 +276,21 @@ namespace Physics {
       std::map<std::string, int> m_cdrSpeciesMap;
 
       /*!
+	@brief Map for indexing a species name to a global index in the solver vectors
+      */
+      std::map<std::string, int> m_solverIndexMap;
+
+      /*!
+	@brief Mobilities for the various species
+      */
+      std::vector<FunctionEX> m_mobilityFunctions;
+
+      /*!
+	@brief Diffusion coefficients for the various species
+      */
+      std::vector<FunctionEX> m_diffusionCoefficients;
+
+      /*!
 	@brief Townsend ionization coefficient. Defined during parseAlpha
       */
       FunctionEX m_alpha;
@@ -370,7 +385,7 @@ namespace Physics {
 	@param[in] a_coeff Which coefficient. Must be "alpha" or "eta"
       */
       virtual void
-      parseTownsendCoefficient(const std::string a_str);
+      initializeTownsendCoefficient(const std::string a_str);
 
       /*!
 	@brief Initialize the plasma species
@@ -383,6 +398,18 @@ namespace Physics {
       */
       virtual void
       initializeParticles();
+
+      /*!
+	@brief Initialize mobility functions
+      */
+      virtual void
+      initializeMobilities();
+
+      /*!
+	@brief Initialize diffusion coefficients
+      */
+      virtual void
+      initializeDiffusionCoefficients();
 
       /*!
 	@brief Parse a table which is stored in E/N format
