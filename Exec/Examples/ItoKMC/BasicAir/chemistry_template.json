@@ -224,26 +224,31 @@
     ],
     "photon species":
     [
+	// List of photon species that are tracked. This is an array of species
+	// with required identifiers (id, kappa)
 	{
-	    "id": "uv photon",
-	    "kappa": {
-		"type": "stochastic A",
-		"f1":   2.925E15,
-		"f2":   3.059E15,
-		"chi min": 2.625E-2,
-		"chi max": 1.5,
-		"neutral": "O2"
+	    "id": "uv photon",          // Photon species id. Must be unique
+	    "kappa": {                  // Specification of absorption coefficient. 
+		"type": "stochastic A", // Specify 'stochastic A' model. See e.g., Pasko sprite paper
+		"f1":   2.925E15,       // Lower frequency
+		"f2":   3.059E15,       // Upper frequency
+		"chi min": 2.625E-2,    // Minimum coefficient
+		"chi max": 1.5,         // Maximum coefficient
+		"neutral": "O2"         // Partial pressure of neutral that is involved. 
 	    }
 	}
     ],
     "plasma reactions":
     [
+	// List of plasma reactions. The left hand side can consist of plasma and background species, and the
+	// right-hand side can additionally consist of photon species.
 	{
-	    "description": "Impact ionization of O2",
-	    "reaction": "e + O2 -> e + e + M+",
-	    "plot": true,
-	    "type": "constant",
-	    "rate": 1.0
+	    "reaction": "e + @ -> e + e + M+", // Reaction. Must contain the '->' 
+	    "description": "R1",               // Optional description of the reaction. Used when plotting the rate
+	    "plot": true,                      // Optional. If true, the reaction rate will be plotted. 
+	    "type": "constant",                // Specification of reaction rate type
+	    "rate": 1.0,                       // Specification of the reaction rate
+	    "@": ["O2", "N2"]                  // Specification of wildcards. Required when the reaction string contains '@'
 	}
     ]
 }

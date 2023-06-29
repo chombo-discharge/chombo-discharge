@@ -238,6 +238,12 @@ namespace Physics {
       std::string m_jsonFile;
 
       /*!
+	@brief All species that have been defined.
+	@details Only used to make sure we're not doubly defining some species
+      */
+      std::set<std::string> m_allSpecies;
+
+      /*!
 	@brief Map of string-int identifiers for background species
       */
       std::map<std::string, int> m_backgroundSpeciesMap;
@@ -434,6 +440,29 @@ namespace Physics {
       */
       virtual LookupTable1D<2>
       parseTableEByN(const nlohmann::json& a_tableEntry, const std::string& a_dataID) const;
+
+      /*!
+	@brief Parses a reaction string into reactangs and products
+	@param[out] a_reactants Left-hand side of reaction
+	@param[out] a_products  Right-hand side of reaction
+	@param[in]  a_reaction  Reaction string. Must be in format "a + b + c -> e + f + g". 
+      */
+      virtual void
+      parseReactionString(std::vector<std::string>& a_reactants,
+                          std::vector<std::string>& a_products,
+                          const std::string&        a_reaction) const noexcept;
+
+      /*!
+	@brief Make a reaction set into a superset. This parses wildcards '@' in reaction string.
+	@param[in] a_reactants List of reactants. Can contain wildcard.
+	@param[in] a_products List of products. Can contain wildcard.
+	@param[in] a_reactionJSON  JSON reaction entry. 
+	@return Returns a list of reactants and products with wilcards replaced. The tuple entries are: <wildcard, reactants, products>
+      */
+      virtual std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
+      parseReactionWildcards(const std::vector<std::string>& a_reactants,
+                             const std::vector<std::string>& a_products,
+                             const nlohmann::json&           a_reactionJSON) const noexcept;
     };
   } // namespace ItoKMC
 } // namespace Physics

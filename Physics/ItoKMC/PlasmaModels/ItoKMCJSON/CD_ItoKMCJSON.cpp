@@ -295,8 +295,8 @@ ItoKMCJSON::initializeBackgroundSpecies()
       if (this->containsWildcard(speciesName)) {
         this->throwParserError(baseError + " but species '" + speciesName + "' should not contain wildcard @");
       }
-      if (m_backgroundSpeciesMap.count(speciesName) != 0) {
-        this->throwParserError(baseError + " but species '" + speciesName + "' was already defined)");
+      if (m_allSpecies.count(speciesName) != 0) {
+        this->throwParserError(baseError + " but species '" + speciesName + "' was already defined elsewhere)");
       }
 
       if (species.contains("plot")) {
@@ -447,6 +447,7 @@ ItoKMCJSON::initializeBackgroundSpecies()
       m_backgroundSpeciesPlot.push_back(plotSpecies);
       m_backgroundSpeciesMap[speciesName] = idx;
       m_backgroundSpeciesMapInverse[idx]  = speciesName;
+      m_allSpecies.emplace(speciesName);
     }
   }
 
@@ -478,8 +479,8 @@ ItoKMCJSON::initializePlasmaSpecies()
     if (this->containsWildcard(speciesID)) {
       this->throwParserError(baseErrorID + " but species name '" + speciesID + "' should not contain wildcard @");
     }
-    if (m_plasmaSpeciesTypes.count(speciesID) != 0) {
-      this->throwParserError(baseErrorID + " but species '" + speciesID + "' was already defined)");
+    if (m_allSpecies.count(speciesID) != 0) {
+      this->throwParserError(baseErrorID + " but species '" + speciesID + "' was already defined elsewhere");
     }
 
     if (!(species.contains("Z"))) {
@@ -515,6 +516,8 @@ ItoKMCJSON::initializePlasmaSpecies()
     else {
       this->throwParserError(baseErrorID + " but 'solver' field must be either 'cdr' or 'ito'");
     }
+
+    m_allSpecies.emplace(speciesID);
 
     if (m_verbose) {
       pout() << "ItoKMCJSON::initializePlasmaSpecies, instantiating species:"
@@ -1050,8 +1053,8 @@ ItoKMCJSON::initializePhotonSpecies()
     if (this->containsWildcard(speciesID)) {
       this->throwParserError(baseErrorID + " but species name '" + speciesID + "' should not contain wildcard @");
     }
-    if (m_photonIndexMap.count(speciesID) != 0) {
-      this->throwParserError(baseErrorID + " but species '" + speciesID + "' was already defined)");
+    if (m_allSpecies.count(speciesID) != 0) {
+      this->throwParserError(baseErrorID + " but species '" + speciesID + "' was already defined elsewhere");
     }
 
     if (!(species.contains("kappa"))) {
@@ -1144,6 +1147,29 @@ ItoKMCJSON::initializePlasmaReactions()
   CH_TIME("ItoKMCJSON::initializePlasmaReactions");
   if (m_verbose) {
     pout() << m_className + "::initializePlasmaReactions" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::initializePlasmaReactions";
+
+  for (const auto& reactionJSON : m_json["plasma reactions"]) {
+    if (!(reactionJSON.contains("reaction"))) {
+      this->throwParserError(baseError + " but one of the reactions is missing the field 'reaction'");
+    }
+    if (!(reactionJSON.contains("type"))) {
+      this->throwParserError(baseError + " but one of the reactions is missing the field 'type'");
+    }
+
+    const std::string reaction    = this->trim(reactionJSON["reaction"].get<std::string>());
+    const std::string baseErrorID = baseError + " for reaction '" + reaction + "'";
+
+    // Parse the reaction string to figure out the species involved in the reaction. This CAN involve the species wildcard, in which
+    // case we also build the reaction superset;
+    std::vector<std::string> reactants;
+    std::vector<std::string> products;
+
+    this->parseReactionString(reactants, products, reaction);
+
+    std::cout << baseErrorID << std::endl;
   }
 }
 
@@ -1249,6 +1275,107 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
   }
 
   return tabulatedCoefficient;
+}
+
+void
+ItoKMCJSON::parseReactionString(std::vector<std::string>& a_reactants,
+                                std::vector<std::string>& a_products,
+                                const std::string&        a_reaction) const noexcept
+{
+  CH_TIME("ItoKMCJSON::parseReactionString");
+  if (m_verbose) {
+    pout() << m_className + "::parseReactionString" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::parseReactionString";
+
+  // Parse the string into segments. We split on white-space.
+  std::stringstream        ss(a_reaction);
+  std::string              segment;
+  std::vector<std::string> segments;
+
+  while (std::getline(ss, segment, ' ')) {
+    segments.push_back(segment);
+  }
+
+  // Discard all whitespace and solitary + from input string
+  segments.erase(std::remove(segments.begin(), segments.end(), ""), segments.end());
+  segments.erase(std::remove(segments.begin(), segments.end(), "+"), segments.end());
+
+  // Find the element containing "->"
+  const auto& it = std::find(segments.begin(), segments.end(), "->");
+
+  // Make sure that -> is in the reaction string.
+  if (it == segments.end())
+    this->throwParserError(baseError + " -- Reaction '" + a_reaction + "' does not contain '->");
+
+  // Left of "->" are reactants and right of "->" are products
+  a_reactants = std::vector<std::string>(segments.begin(), it);
+  a_products  = std::vector<std::string>(it + 1, segments.end());
+}
+
+std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
+ItoKMCJSON::parseReactionWildcards(const std::vector<std::string>& a_reactants,
+                                   const std::vector<std::string>& a_products,
+                                   const nlohmann::json&           a_reactionJSON) const noexcept
+{
+  CH_TIME("ItoKMCJSON::parseReactionWildcards()");
+  if (m_verbose) {
+    pout() << m_className + "::parseReactionWildcards()" << endl;
+  }
+
+  // This is what we return. A horrific creature.
+  std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>> reactionSets;
+
+  // This is the reaction name.
+  const std::string reaction  = a_reactionJSON["reaction"].get<std::string>();
+  const std::string baseError = "ItoKMCJSON::parseReactionWildcards for reaction '" + reaction + "'";
+
+  // Check if reaction string had a wildcard '@'. If it did we replace the wildcard with the corresponding species. This means that we need to
+  // build additional reactions.
+  const bool containsWildcard = this->containsWildcard(reaction);
+
+  if (containsWildcard) {
+    if (!(a_reactionJSON.contains("@"))) {
+      this->throwParserError(baseError + "got reaction wildcard '@' but array '@:' was not specified");
+    }
+
+    // Get the wildcards array.
+    const std::vector<std::string> wildcards = a_reactionJSON["@"].get<std::vector<std::string>>();
+
+    // Go through the wildcards and replace appropriately.
+    for (const auto& w : wildcards) {
+      std::vector<std::string> curReactants;
+      std::vector<std::string> curProducts;
+
+      // Replace by wildcard in reactants.
+      for (const auto& r : a_reactants) {
+        if (this->containsWildcard(r)) {
+          curReactants.emplace_back(w);
+        }
+        else {
+          curReactants.emplace_back(r);
+        }
+      }
+
+      // Replace by wildcard in reactants.
+      for (const auto& p : a_products) {
+        if (this->containsWildcard(p)) {
+          curProducts.emplace_back(w);
+        }
+        else {
+          curProducts.emplace_back(p);
+        }
+      }
+
+      reactionSets.emplace_back(w, curReactants, curProducts);
+    }
+  }
+  else {
+    reactionSets.emplace_back("", a_reactants, a_products);
+  }
+
+  return reactionSets;
 }
 
 Real
