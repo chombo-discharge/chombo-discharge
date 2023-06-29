@@ -135,8 +135,7 @@ namespace Physics {
                           const Vector<Real>&     a_phi,
                           const Vector<RealVect>& a_gradPhi,
                           const Real              a_dx,
-                          const Real              a_kappa) const noexcept override
-      {}
+                          const Real              a_kappa) const noexcept override;
 
       /*!
 	@brief Compute the Ito solver mobilities.
@@ -421,6 +420,12 @@ namespace Physics {
       */
       virtual void
       initializePhotonSpecies();
+
+      /*!
+	@brief Initialize plasma reactions
+      */
+      virtual void
+      initializePlasmaReactions();
 
       /*!
 	@brief Parse a table which is stored in E/N format

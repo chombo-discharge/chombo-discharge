@@ -54,6 +54,9 @@ ItoKMCJSON::ItoKMCJSON()
   // Initialize the photon species
   this->initializePhotonSpecies();
 
+  // Initialize reactions
+  this->initializePlasmaReactions();
+
   // Define internals. This includes the KMC solver instantiation.
   this->define();
 }
@@ -1136,6 +1139,15 @@ ItoKMCJSON::initializePhotonSpecies()
   }
 }
 
+void
+ItoKMCJSON::initializePlasmaReactions()
+{
+  CH_TIME("ItoKMCJSON::initializePlasmaReactions");
+  if (m_verbose) {
+    pout() << m_className + "::initializePlasmaReactions" << endl;
+  }
+}
+
 LookupTable1D<2>
 ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string& a_dataID) const
 {
@@ -1281,9 +1293,7 @@ ItoKMCJSON::computeMobilities(const Real a_time, const RealVect a_pos, const Rea
     pout() << m_className + "::computeMobilities" << endl;
   }
 
-  const Real E   = a_E.vectorLength();
-  const Real N   = m_gasNumberDensity(a_pos);
-  const Real Etd = E / (N * 1.E-21);
+  const Real E = a_E.vectorLength();
 
   Vector<Real> mobilityCoefficients(m_numPlasmaSpecies, 0.0);
   for (int i = 0; i < m_numPlasmaSpecies; i++) {
@@ -1301,9 +1311,28 @@ ItoKMCJSON::computeDiffusionCoefficients(const Real a_time, const RealVect a_pos
     pout() << m_className + "::computeDiffusionCoefficients" << endl;
   }
 
+  const Real E = a_E.vectorLength();
+
   Vector<Real> diffusionCoefficients(m_numPlasmaSpecies, 0.0);
+  for (int i = 0; i < m_numPlasmaSpecies; i++) {
+    diffusionCoefficients[i] = m_diffusionCoefficients[i](E, a_pos);
+  }
 
   return diffusionCoefficients;
+}
+
+void
+ItoKMCJSON::updateReactionRates(const RealVect          a_E,
+                                const RealVect          a_pos,
+                                const Vector<Real>&     a_phi,
+                                const Vector<RealVect>& a_gradPhi,
+                                const Real              a_dx,
+                                const Real              a_kappa) const noexcept
+{
+  CH_TIME("ItoKMCJSON::updateReactionRates");
+  if (m_verbose) {
+    pout() << m_className + "::updateReactionRates" << endl;
+  }
 }
 
 #include <CD_NamespaceFooter.H>

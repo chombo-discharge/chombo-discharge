@@ -29,11 +29,11 @@
 			"spacing" : "linear",             // Optional specification of table representation. Can be 'linear' or 'exponential' (defaults to linear)
 			"dump" : "debug_N2_fraction.dat"  // Optional debugging hook for dumping table to file (defaults to false)
 		    },
-		    "plot" : false
+		    "plot" : false                        // Will not plot the molar fraction for this species
 		}
 	    }
 	],
-	// Specify which gas law we use. The user can define multiple gas laws and then specify which one to use.
+	// Specify which gas law we use. The user can define multiple gas laws and then later specify which one to use.
 	"law" : {
 	    "id" : "my_ideal_gas", // Specify which gas law we use.
 	    "plot" : true,         // Turn on/off plotting.
@@ -112,18 +112,18 @@
 		"mobility" : {
 		    // Specification of the mobilility coefficient when the species is mobile. User can specify various forms of the mobility. E.g. constant, function-based, or
 		    // tabulated vs E/N
-		    "type" : "table vs E/N",                       // Specification of tabulated mobility lookup method
+		    "type" : "table vs E/N",                      // Specification of tabulated mobility lookup method
 		    "file" : "bolsig_air.dat",                    // File containg the mobility data
 		    "header" : "E/N (Td)\tMobility *N (1/m/V/s)", // Line immediately preceding the colum data
 		    "E/N" : 0,                                    // Column containing E/N
 		    "mu*N" : 1,                                   // Column containing mu*N
-		    "min E/N" : 1,                               // Minimum E/N kept when resampling table
+		    "min E/N" : 1,                                // Minimum E/N kept when resampling table
 		    "max E/N" : 2E6,                              // Maximum E/N kept when resampling table
 		    "points" : 1000,                              // Number of grid points kept when resampling the table
 		    "spacing" : "exponential",                    // Grid point spacing when resampling the table
 		    "E/N scale" : 1.0,                            // Optional argument for scaling mobility coefficient
-		    "mu*N scale" : 1.0,                             // Optional argument for scaling the E/N column
-		    "dump" : "debug_mobility.dat" // Optional argument for dumping table to disk (useful for debugging)
+		    "mu*N scale" : 1.0,                           // Optional argument for scaling the E/N column
+		    "dump" : "debug_mobility.dat"                 // Optional argument for dumping table to disk (useful for debugging)
 		},
 		"diffusion" : {
 		    // Definition of the diffusion coefficient similiar to mobility coefficient above.
@@ -139,40 +139,54 @@
 		    "dump": "debug_diffusion.dat"
 		},
 		"initial particles" : [
+		    // Example of how to initialize particles using various methods (manual placement, distributions, reading
+		    // from disk. All these specification are incrementing (i.e., not overriding one another)
 		    {
-			"single particle" : {
-			    "position" : [ 0, 0, 0 ],
-			    "weight" : 1}
-		    },
-		    {
-			"uniform distribution" : {
-			    "low corner" : [ -0.04, 0, 0 ],
-			    "high corner" : [ 0.04, 0.04, 0 ],
-			    "num particles": 1000,
-			    "weight" : 1}
-		    },
-		    {
-			"sphere distribution" : {
-			    "center" : [ 0, 0, 0 ],
-			    "radius" : 1.0,
-			    "num particles": 0,
-			    "weight" : 1}
-		    },
-		    {
-			"gaussian distribution" : {
-			    "center" : [ 0, 0, 0 ],
-			    "radius" : 1.0,
-			    "num particles": 100,
-			    "weight" : 1
+			// Specification of single computational particles.
+			"single particle" : {         
+			    "position" : [ 0, 0, 0 ], // Position is at (0,00)
+			    "weight" : 1              // Physical particle with weight = 1
 			}
 		    },
 		    {
+			// Specification of initial particles sampled uniformly in space. This will distribute
+			// the particles over the MPI rank. 
+			"uniform distribution" : {
+			    "low corner" : [ -0.04, 0, 0 ],    // Lower-left physical corner of sampling region
+			    "high corner" : [ 0.04, 0.04, 0 ], // Upper-right physical corner of sampling region
+			    "num particles": 1000,             // Number of computational particles
+			    "weight" : 1                       // Particle weights
+			} 
+		    },
+		    {
+			// Specification of initial particles sampled uniformly inside of a sphere (circle in 2D). This 
+			// will distribute the particles over the MPI rank. 			
+			"sphere distribution" : {
+			    "center" : [ 0, 0, 0 ], // Sphere center
+			    "radius" : 1.0,         // Sphere radius
+			    "num particles": 0,     // Number computational particles
+			    "weight" : 1            // Particle weights
+			}
+		    },
+		    {
+			// Specification of initial particles sampled from a Gaussian distribution. This
+			// will distribute the particles over the MPI rank. 						
+			"gaussian distribution" : {
+			    "center" : [ 0, 0, 0 ], // Center of the gaussian distribution
+			    "radius" : 1.0,         // Gaussian radius
+			    "num particles": 100,   // Number of computational particles
+			    "weight" : 1            // Particle weights
+			}
+		    },
+		    {
+			// Specification of initial particles read from an input list. This
+			// will put all the particles on the master MPI rank. 
 			"list": {
 			    "file": "initial_particles.dat", // File containing the particles
-			    "x column": 0, // Optional specification of column containing x coordinate (defaults to 0)
-			    "y column": 1,  // Optional specification of column containing y coordinate (defaults to 1)
-			    "z column": 2, // Optional specification of column containing z coordinate (defaults to 2)
-			    "w column": 3 // Optional specification of column containing the particle weight (defaults to 3)
+			    "x column": 0,                   // Optional specification of column containing x coordinate (defaults to 0)
+			    "y column": 1,                   // Optional specification of column containing y coordinate (defaults to 1)
+			    "z column": 2,                   // Optional specification of column containing z coordinate (defaults to 2)
+			    "w column": 3                    // Optional specification of column containing the particle weight (defaults to 3)
 			}
 		    }
 		]
@@ -181,35 +195,35 @@
 	{
             "M+" : {
 		// Definition of another plasma species (M+), which are tracked using a CDR solver
-		"Z" : 1,            // Charge number
-		"solver" : "cdr",   // Solver type. Either 'ito' or 'cdr'
-		"mobile" : true,   // Mobile or not
-		"diffusive" : true, // Diffusive or not
-		"mobility": {
-		    "type": "constant",
-		    "value": 0.0
+		"Z" : 1,                // Charge number
+		"solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
+		"mobile" : true,        // Mobile or not
+		"diffusive" : true,     // Diffusive or not
+		"mobility": {           // Specification of the mobility
+		    "type": "constant", // Mobility is constant 
+		    "value": 2E-4       // Mobility value is 2E-4
 		},
-		"diffusion": {
-		    "type": "constant",
-		    "value": 0.0
+		"diffusion": {          // Specification of diffusion coefficient
+		    "type": "constant", // Diffusion coefficient is constant
+		    "value": 0.0        // Diffusion coefficient is 0.0
 		}		
             }
 	},
 	{
             "M-" : {
 		// Definition of another plasma species (M+), which are tracked using a CDR solver
-		"Z" : -1,            // Charge number
-		"solver" : "cdr",   // Solver type. Either 'ito' or 'cdr'
-		"mobile" : false,   // Mobile or not
-		"diffusive" : false, // Diffusive or not
-		"mobility": {
-		    "type": "constant",
-		    "value": 0.0
+		"Z" : -1,               // Charge number
+		"solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
+		"mobile" : true,        // Mobile or not
+		"diffusive" : true,     // Diffusive or not
+		"mobility": {           // Specification of the mobility
+		    "type": "constant", // Mobility is constant 
+		    "value": 2E-4       // Mobility value is 2E-4
 		},
-		"diffusion": {
-		    "type": "constant",
-		    "value": 0.0
-		}
+		"diffusion": {          // Specification of diffusion coefficient
+		    "type": "constant", // Diffusion coefficient is constant
+		    "value": 0.0        // Diffusion coefficient is 0.0
+		}				
 	    }
 	}
     ],
@@ -226,6 +240,16 @@
 		    "neutral": "O2"
 		}
 	    }
+	}
+    ],
+    "plasma reactions":
+    [
+	{
+	    "description": "Impact ionization of O2",
+	    "reaction": "e + O2 -> e + e + M+",
+	    "plot": true,
+	    "type": "constant",
+	    "rate": 1.0
 	}
     ]
 }
