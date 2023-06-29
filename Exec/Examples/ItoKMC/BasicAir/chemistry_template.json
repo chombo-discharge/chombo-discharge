@@ -5,32 +5,30 @@
 	    // Definition of background species. This is an array of species with specified molar fractions. Species names
 	    // can not contain wildcards (@)
 	    {
-		"O2" : {
-		    "molar fraction" : {
-			"type" : "constant", // Specification of how we compute the molar fraction
-			"value" : 0.2        // Specification what the molar fraction actually is
-		    },
-		    "plot" : true            // Specify that we plot the species' molar fraction
-		}
+		"id": "O2",              // Species ID
+		"molar fraction" : {     // Specification of how we compute the molar fraction
+		    "type" : "constant", // Constant molar fraction
+		    "value" : 0.2        // Molar fraction value
+		},
+		"plot" : true            // Specify that we plot the species' molar fraction
 	    },
 	    {
-		"N2" : {
-		    "molar fraction" : {
-			"type" : "table vs height",       // Specify table vs height
-			"file" : "N2_molar_fraction.dat", // File name containing molar fraction
-			"axis" : "y",                     // Axis which represents the "height"
-			"height column" : 0,              // Optional specification of column containing the height data (defaults to 0)
-			"molar fraction column" : 1,      // Optional specification of column containing the height data (defaults to 1)
-			"height scale" : 1.0,             // Optional scaling of height column
-			"fraction scale" : 1.0,           // Optional scaling of molar fraction column
-			"min height" : 0.0,               // Optional truncation of minimum height kept in internal table (occurs after scaling)
-			"max height" : 2.0,               // Optional truncation of maximum height kept in internal table (occurs after scaling)
-			"num points" : 100,               // Optional specification of number of data points kept in internal table (defaults to 1000)
-			"spacing" : "linear",             // Optional specification of table representation. Can be 'linear' or 'exponential' (defaults to linear)
-			"dump" : "debug_N2_fraction.dat"  // Optional debugging hook for dumping table to file (defaults to false)
-		    },
-		    "plot" : false                        // Will not plot the molar fraction for this species
-		}
+		"id" : "N2",                          // Species ID
+		"molar fraction" : {                  // Specification of how we compute the molar fraction
+		    "type" : "table vs height",       // Specify table vs height
+		    "file" : "N2_molar_fraction.dat", // File name containing molar fraction
+		    "axis" : "y",                     // Axis which represents the "height"
+		    "height column" : 0,              // Optional specification of column containing the height data (defaults to 0)
+		    "molar fraction column" : 1,      // Optional specification of column containing the height data (defaults to 1)
+		    "height scale" : 1.0,             // Optional scaling of height column
+		    "fraction scale" : 1.0,           // Optional scaling of molar fraction column
+		    "min height" : 0.0,               // Optional truncation of minimum height kept in internal table (occurs after scaling)
+		    "max height" : 2.0,               // Optional truncation of maximum height kept in internal table (occurs after scaling)
+		    "num points" : 100,               // Optional specification of number of data points kept in internal table (defaults to 1000)
+		    "spacing" : "linear",             // Optional specification of table representation. Can be 'linear' or 'exponential' (defaults to linear)
+		    "dump" : "debug_N2_fraction.dat"  // Optional debugging hook for dumping table to file (defaults to false)
+		},
+		"plot" : false                        // Will not plot the molar fraction for this species
 	    }
 	],
 	// Specify which gas law we use. The user can define multiple gas laws and then later specify which one to use.
@@ -104,141 +102,137 @@
 	// with various identifiers, some of which are always required (id, Z, type, mobile, diffusive) and
 	// others which are secondary requirements.
 	{
-            "e" : {
-		"Z" : -1,           // Charge number
-		"solver" : "ito",   // Solver type. Either 'ito' or 'cdr'
-		"mobile" : true,    // Mobile or not
-		"diffusive" : true, // Diffusive or not
-		"mobility" : {
-		    // Specification of the mobilility coefficient when the species is mobile. User can specify various forms of the mobility. E.g. constant, function-based, or
-		    // tabulated vs E/N
-		    "type" : "table vs E/N",                      // Specification of tabulated mobility lookup method
-		    "file" : "bolsig_air.dat",                    // File containg the mobility data
-		    "header" : "E/N (Td)\tMobility *N (1/m/V/s)", // Line immediately preceding the colum data
-		    "E/N" : 0,                                    // Column containing E/N
-		    "mu*N" : 1,                                   // Column containing mu*N
-		    "min E/N" : 1,                                // Minimum E/N kept when resampling table
-		    "max E/N" : 2E6,                              // Maximum E/N kept when resampling table
-		    "points" : 1000,                              // Number of grid points kept when resampling the table
-		    "spacing" : "exponential",                    // Grid point spacing when resampling the table
-		    "E/N scale" : 1.0,                            // Optional argument for scaling mobility coefficient
-		    "mu*N scale" : 1.0,                           // Optional argument for scaling the E/N column
-		    "dump" : "debug_mobility.dat"                 // Optional argument for dumping table to disk (useful for debugging)
-		},
-		"diffusion" : {
-		    // Definition of the diffusion coefficient similiar to mobility coefficient above.
-		    "type" : "table vs E/N",
-		    "file" : "bolsig_air.dat",
-		    "header" : "E/N (Td)\tDiffusion coefficient *N (1/m/s)",
-		    "E/N" : 0,
-		    "D*N" : 1,
-		    "min E/N" : 10,
-		    "max E/N" : 2E6,
-		    "spacing" : "exponential",
-		    "points" : 1000,
-		    "dump": "debug_diffusion.dat"
-		},
-		"initial particles" : [
-		    // Example of how to initialize particles using various methods (manual placement, distributions, reading
-		    // from disk. All these specification are incrementing (i.e., not overriding one another)
-		    {
-			// Specification of single computational particles.
-			"single particle" : {         
-			    "position" : [ 0, 0, 0 ], // Position is at (0,00)
-			    "weight" : 1              // Physical particle with weight = 1
-			}
-		    },
-		    {
-			// Specification of initial particles sampled uniformly in space. This will distribute
-			// the particles over the MPI rank. 
-			"uniform distribution" : {
-			    "low corner" : [ -0.04, 0, 0 ],    // Lower-left physical corner of sampling region
-			    "high corner" : [ 0.04, 0.04, 0 ], // Upper-right physical corner of sampling region
-			    "num particles": 1000,             // Number of computational particles
-			    "weight" : 1                       // Particle weights
-			} 
-		    },
-		    {
-			// Specification of initial particles sampled uniformly inside of a sphere (circle in 2D). This 
-			// will distribute the particles over the MPI rank. 			
-			"sphere distribution" : {
-			    "center" : [ 0, 0, 0 ], // Sphere center
-			    "radius" : 1.0,         // Sphere radius
-			    "num particles": 0,     // Number computational particles
-			    "weight" : 1            // Particle weights
-			}
-		    },
-		    {
-			// Specification of initial particles sampled from a Gaussian distribution. This
-			// will distribute the particles over the MPI rank. 						
-			"gaussian distribution" : {
-			    "center" : [ 0, 0, 0 ], // Center of the gaussian distribution
-			    "radius" : 1.0,         // Gaussian radius
-			    "num particles": 100,   // Number of computational particles
-			    "weight" : 1            // Particle weights
-			}
-		    },
-		    {
-			// Specification of initial particles read from an input list. This
-			// will put all the particles on the master MPI rank. 
-			"list": {
-			    "file": "initial_particles.dat", // File containing the particles
-			    "x column": 0,                   // Optional specification of column containing x coordinate (defaults to 0)
-			    "y column": 1,                   // Optional specification of column containing y coordinate (defaults to 1)
-			    "z column": 2,                   // Optional specification of column containing z coordinate (defaults to 2)
-			    "w column": 3                    // Optional specification of column containing the particle weight (defaults to 3)
-			}
+            "id": "e",          // Species ID
+	    "Z" : -1,           // Charge number
+	    "solver" : "ito",   // Solver type. Either 'ito' or 'cdr'
+	    "mobile" : true,    // Mobile or not
+	    "diffusive" : true, // Diffusive or not
+	    "mobility" : {
+		// Specification of the mobilility coefficient when the species is mobile. User can specify various forms of the mobility. E.g. constant, function-based, or
+		// tabulated vs E/N
+		"type" : "table vs E/N",                      // Specification of tabulated mobility lookup method
+		"file" : "bolsig_air.dat",                    // File containg the mobility data
+		"header" : "E/N (Td)\tMobility *N (1/m/V/s)", // Line immediately preceding the colum data
+		"E/N" : 0,                                    // Column containing E/N
+		"mu*N" : 1,                                   // Column containing mu*N
+		"min E/N" : 1,                                // Minimum E/N kept when resampling table
+		"max E/N" : 2E6,                              // Maximum E/N kept when resampling table
+		"points" : 1000,                              // Number of grid points kept when resampling the table
+		"spacing" : "exponential",                    // Grid point spacing when resampling the table
+		"E/N scale" : 1.0,                            // Optional argument for scaling mobility coefficient
+		"mu*N scale" : 1.0,                           // Optional argument for scaling the E/N column
+		"dump" : "debug_mobility.dat"                 // Optional argument for dumping table to disk (useful for debugging)
+	    },
+	    "diffusion" : {
+		// Definition of the diffusion coefficient similiar to mobility coefficient above.
+		"type" : "table vs E/N",
+		"file" : "bolsig_air.dat",
+		"header" : "E/N (Td)\tDiffusion coefficient *N (1/m/s)",
+		"E/N" : 0,
+		"D*N" : 1,
+		"min E/N" : 10,
+		"max E/N" : 2E6,
+		"spacing" : "exponential",
+		"points" : 1000,
+		"dump": "debug_diffusion.dat"
+	    },
+	    "initial particles" : [
+		// Example of how to initialize particles using various methods (manual placement, distributions, reading
+		// from disk. All these specification are incrementing (i.e., not overriding one another)
+		{
+		    // Specification of single computational particles.
+		    "single particle" : {         
+			"position" : [ 0, 0, 0 ], // Position is at (0,00)
+			"weight" : 1              // Physical particle with weight = 1
 		    }
-		]
-            }
+		},
+		{
+		    // Specification of initial particles sampled uniformly in space. This will distribute
+		    // the particles over the MPI rank. 
+		    "uniform distribution" : {
+			"low corner" : [ -0.04, 0, 0 ],    // Lower-left physical corner of sampling region
+			"high corner" : [ 0.04, 0.04, 0 ], // Upper-right physical corner of sampling region
+			"num particles": 1000,             // Number of computational particles
+			"weight" : 1                       // Particle weights
+		    } 
+		},
+		{
+		    // Specification of initial particles sampled uniformly inside of a sphere (circle in 2D). This 
+		    // will distribute the particles over the MPI rank. 			
+		    "sphere distribution" : {
+			"center" : [ 0, 0, 0 ], // Sphere center
+			"radius" : 1.0,         // Sphere radius
+			"num particles": 0,     // Number computational particles
+			"weight" : 1            // Particle weights
+		    }
+		},
+		{
+		    // Specification of initial particles sampled from a Gaussian distribution. This
+		    // will distribute the particles over the MPI rank. 						
+		    "gaussian distribution" : {
+			"center" : [ 0, 0, 0 ], // Center of the gaussian distribution
+			"radius" : 1.0,         // Gaussian radius
+			"num particles": 100,   // Number of computational particles
+			"weight" : 1            // Particle weights
+		    }
+		},
+		{
+		    // Specification of initial particles read from an input list. This
+		    // will put all the particles on the master MPI rank. 
+		    "list": {
+			"file": "initial_particles.dat", // File containing the particles
+			"x column": 0,                   // Optional specification of column containing x coordinate (defaults to 0)
+			"y column": 1,                   // Optional specification of column containing y coordinate (defaults to 1)
+			"z column": 2,                   // Optional specification of column containing z coordinate (defaults to 2)
+			"w column": 3                    // Optional specification of column containing the particle weight (defaults to 3)
+		    }
+		}
+	    ]
+        },
+	{
+	    // Definition of another plasma species (M+), which is tracked using a CDR solver	
+            "id": "M+",             // Species ID
+	    "Z" : 1,                // Charge number
+	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
+	    "mobile" : true,        // Mobile or not
+	    "diffusive" : true,     // Diffusive or not
+	    "mobility": {           // Specification of the mobility
+		"type": "constant", // Mobility is constant 
+		"value": 2E-4       // Mobility value is 2E-4
+	    },
+	    "diffusion": {          // Specification of diffusion coefficient
+		"type": "constant", // Diffusion coefficient is constant
+		"value": 0.0        // Diffusion coefficient is 0.0
+	    }		
 	},
 	{
-            "M+" : {
-		// Definition of another plasma species (M+), which are tracked using a CDR solver
-		"Z" : 1,                // Charge number
-		"solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
-		"mobile" : true,        // Mobile or not
-		"diffusive" : true,     // Diffusive or not
-		"mobility": {           // Specification of the mobility
-		    "type": "constant", // Mobility is constant 
-		    "value": 2E-4       // Mobility value is 2E-4
-		},
-		"diffusion": {          // Specification of diffusion coefficient
-		    "type": "constant", // Diffusion coefficient is constant
-		    "value": 0.0        // Diffusion coefficient is 0.0
-		}		
-            }
-	},
-	{
-            "M-" : {
-		// Definition of another plasma species (M+), which are tracked using a CDR solver
-		"Z" : -1,               // Charge number
-		"solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
-		"mobile" : true,        // Mobile or not
-		"diffusive" : true,     // Diffusive or not
-		"mobility": {           // Specification of the mobility
-		    "type": "constant", // Mobility is constant 
-		    "value": 2E-4       // Mobility value is 2E-4
-		},
-		"diffusion": {          // Specification of diffusion coefficient
-		    "type": "constant", // Diffusion coefficient is constant
-		    "value": 0.0        // Diffusion coefficient is 0.0
-		}				
-	    }
+	    // Definition of another plasma species (-+), which is tracked using a CDR solver
+	    "id": "M-",             // Species ID
+	    "Z" : -1,               // Charge number
+	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
+	    "mobile" : true,        // Mobile or not
+	    "diffusive" : true,     // Diffusive or not
+	    "mobility": {           // Specification of the mobility
+		"type": "constant", // Mobility is constant 
+		"value": 2E-4       // Mobility value is 2E-4
+	    },
+	    "diffusion": {          // Specification of diffusion coefficient
+		"type": "constant", // Diffusion coefficient is constant
+		"value": 0.0        // Diffusion coefficient is 0.0
+	    }				
 	}
     ],
     "photon species":
     [
 	{
-	    "uv photon" : {
-		"kappa": {
-		    "type": "stochastic A",
-		    "f1":   2.925E15,
-		    "f2":   3.059E15,
-		    "chi min": 2.625E-2,
-		    "chi max": 1.5,
-		    "neutral": "O2"
-		}
+	    "id": "uv photon",
+	    "kappa": {
+		"type": "stochastic A",
+		"f1":   2.925E15,
+		"f2":   3.059E15,
+		"chi min": 2.625E-2,
+		"chi max": 1.5,
+		"neutral": "O2"
 	    }
 	}
     ],

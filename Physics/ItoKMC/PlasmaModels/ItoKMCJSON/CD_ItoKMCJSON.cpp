@@ -287,8 +287,10 @@ ItoKMCJSON::initializeBackgroundSpecies()
     for (const auto& species : backgroundSpecies) {
       bool plotSpecies = false;
 
-      const auto        obj         = species.get<nlohmann::json::object_t>();
-      const std::string speciesName = (*obj.begin()).first;
+      if (!(species.contains("id"))) {
+        this->throwParserError(baseError + "but 'id' field is not specified");
+      }
+      const std::string speciesName = species["id"].get<std::string>();
 
       if (this->containsWildcard(speciesName)) {
         this->throwParserError(baseError + " but species '" + speciesName + "' should not contain wildcard @");
@@ -297,23 +299,23 @@ ItoKMCJSON::initializeBackgroundSpecies()
         this->throwParserError(baseError + " but species '" + speciesName + "' was already defined)");
       }
 
-      if (species[speciesName].contains("plot")) {
-        plotSpecies = species[speciesName]["plot"].get<bool>();
+      if (species.contains("plot")) {
+        plotSpecies = species["plot"].get<bool>();
       }
-      if (!(species[speciesName]["molar fraction"].contains("type"))) {
+      if (!(species["molar fraction"].contains("type"))) {
         this->throwParserError(baseError + " -- but species does not contain the 'molar fraction/type' field");
       }
 
-      const std::string molFracType = this->trim(species[speciesName]["molar fraction"]["type"].get<std::string>());
+      const std::string molFracType = this->trim(species["molar fraction"]["type"].get<std::string>());
 
       std::function<Real(const RealVect x)> molarFraction;
 
       if (molFracType == "constant") {
-        if (!(species[speciesName]["molar fraction"].contains("value"))) {
+        if (!(species["molar fraction"].contains("value"))) {
           this->throwParserError(baseError + " and got constant molar fraction but field 'value' is missing");
         }
 
-        const Real m = species[speciesName]["molar fraction"]["value"].get<Real>();
+        const Real m = species["molar fraction"]["value"].get<Real>();
 
         molarFraction = [m](const RealVect x) -> Real {
           return m;
@@ -330,15 +332,15 @@ ItoKMCJSON::initializeBackgroundSpecies()
         TableSpacing spacing = TableSpacing::Uniform;
 
         // Required arguments.
-        if (!(species[speciesName]["molar fraction"].contains("file"))) {
+        if (!(species["molar fraction"].contains("file"))) {
           this->throwParserError(baseErrorID + " but 'file' is not specified");
         }
-        if (!(species[speciesName]["molar fraction"].contains("axis"))) {
+        if (!(species["molar fraction"].contains("axis"))) {
           this->throwParserError(baseErrorID + " but 'axis' is not specified");
         }
 
-        const std::string fileName  = this->trim(species[speciesName]["molar fraction"]["file"].get<std::string>());
-        const std::string whichAxis = this->trim(species[speciesName]["molar fraction"]["axis"].get<std::string>());
+        const std::string fileName  = this->trim(species["molar fraction"]["file"].get<std::string>());
+        const std::string whichAxis = this->trim(species["molar fraction"]["axis"].get<std::string>());
 
         if (whichAxis == "x") {
           axis = 0;
@@ -358,21 +360,21 @@ ItoKMCJSON::initializeBackgroundSpecies()
         }
 
         // Optional arguments
-        if (species[speciesName]["molar fraction"].contains("height column")) {
-          heightColumn = species[speciesName]["molar fraction"]["height column"].get<int>();
+        if (species["molar fraction"].contains("height column")) {
+          heightColumn = species["molar fraction"]["height column"].get<int>();
 
           if (heightColumn < 0) {
             this->throwParserError(baseErrorID + " but can't have 'height column' < 0");
           }
         }
-        if (species[speciesName]["molar fraction"].contains("molar fraction column")) {
-          fractionColumn = species[speciesName]["molar fraction"]["molar fraction column"].get<int>();
+        if (species["molar fraction"].contains("molar fraction column")) {
+          fractionColumn = species["molar fraction"]["molar fraction column"].get<int>();
           if (fractionColumn < 0) {
             this->throwParserError(baseErrorID + " but can't have 'molar fraction column' < 0");
           }
         }
-        if (species[speciesName]["molar fraction"].contains("num points")) {
-          numPoints = species[speciesName]["molar fraction"]["num points"].get<int>();
+        if (species["molar fraction"].contains("num points")) {
+          numPoints = species["molar fraction"]["num points"].get<int>();
 
           if (numPoints < 2) {
             this->throwParserError(baseErrorID + " but can't have 'num points' < 2");
@@ -381,33 +383,32 @@ ItoKMCJSON::initializeBackgroundSpecies()
 
         LookupTable1D<2> table = DataParser::simpleFileReadASCII(fileName, heightColumn, fractionColumn);
 
-        if (species[speciesName]["molar fraction"].contains("height scale")) {
-          const Real scaling = species[speciesName]["molar fraction"]["height scale"].get<Real>();
+        if (species["molar fraction"].contains("height scale")) {
+          const Real scaling = species["molar fraction"]["height scale"].get<Real>();
           if (scaling <= 0.0) {
             this->throwParserError(baseErrorID + " but can't have 'height scale' <= 0.0");
           }
 
           table.scale<0>(scaling);
         }
-        if (species[speciesName]["molar fraction"].contains("fraction scale")) {
-          const Real scaling = species[speciesName]["molar fraction"]["fraction scale"].get<Real>();
+        if (species["molar fraction"].contains("fraction scale")) {
+          const Real scaling = species["molar fraction"]["fraction scale"].get<Real>();
           if (scaling <= 0.0) {
             this->throwParserError(baseErrorID + " but can't have 'fraction scale' <= 0.0");
           }
 
           table.scale<1>(scaling);
         }
-        if (species[speciesName]["molar fraction"].contains("min height")) {
-          const Real minHeight = species[speciesName]["molar fraction"]["min height"].get<Real>();
+        if (species["molar fraction"].contains("min height")) {
+          const Real minHeight = species["molar fraction"]["min height"].get<Real>();
           table.setMinRange(minHeight, 0);
         }
-        if (species[speciesName]["molar fraction"].contains("max height")) {
-          const Real maxHeight = species[speciesName]["molar fraction"]["max height"].get<Real>();
+        if (species["molar fraction"].contains("max height")) {
+          const Real maxHeight = species["molar fraction"]["max height"].get<Real>();
           table.setMaxRange(maxHeight, 0);
         }
-        if (species[speciesName]["molar fraction"].contains("spacing")) {
-          const std::string whichSpacing = this->trim(
-            species[speciesName]["molar fraction"]["spacing"].get<std::string>());
+        if (species["molar fraction"].contains("spacing")) {
+          const std::string whichSpacing = this->trim(species["molar fraction"]["spacing"].get<std::string>());
 
           if (whichSpacing == "linear") {
             spacing = TableSpacing::Uniform;
@@ -428,8 +429,8 @@ ItoKMCJSON::initializeBackgroundSpecies()
           return table.getEntry<1>(a_position[axis]);
         };
 
-        if (species[speciesName]["molar fraction"].contains("dump")) {
-          const std::string dumpId = this->trim(species[speciesName]["molar fraction"]["dump"].get<std::string>());
+        if (species["molar fraction"].contains("dump")) {
+          const std::string dumpId = this->trim(species["molar fraction"]["dump"].get<std::string>());
 
           table.dumpTable(dumpId);
         }
@@ -468,8 +469,10 @@ ItoKMCJSON::initializePlasmaSpecies()
   }
 
   for (const auto& species : m_json["plasma species"]) {
-    const auto        obj         = species.get<nlohmann::json::object_t>();
-    const std::string speciesID   = (*obj.begin()).first;
+    if (!(species.contains("id"))) {
+      this->throwParserError(baseError + " but one of the species does not contain the 'id' field");
+    }
+    const std::string speciesID   = species["id"].get<std::string>();
     const std::string baseErrorID = baseError + " for species '" + speciesID + "'";
 
     if (this->containsWildcard(speciesID)) {
@@ -479,23 +482,23 @@ ItoKMCJSON::initializePlasmaSpecies()
       this->throwParserError(baseErrorID + " but species '" + speciesID + "' was already defined)");
     }
 
-    if (!(species[speciesID].contains("Z"))) {
+    if (!(species.contains("Z"))) {
       this->throwParserError(baseErrorID + " but did not find 'Z' (must be integer)");
     }
-    if (!(species[speciesID].contains("solver"))) {
+    if (!(species.contains("solver"))) {
       this->throwParserError(baseErrorID + " but did not field find 'solver' (must be 'ito' or 'cdr')");
     }
-    if (!(species[speciesID].contains("mobile"))) {
+    if (!(species.contains("mobile"))) {
       this->throwParserError(baseErrorID + " but did not find field 'mobile' (must be true/false)");
     }
-    if (!(species[speciesID].contains("diffusive"))) {
+    if (!(species.contains("diffusive"))) {
       this->throwParserError(baseErrorID + " but did not find field 'diffusive' (must be true/false)");
     }
 
-    const int         Z         = species[speciesID]["Z"].get<int>();
-    const std::string solver    = species[speciesID]["solver"].get<std::string>();
-    const bool        mobile    = species[speciesID]["mobile"].get<bool>();
-    const bool        diffusive = species[speciesID]["diffusive"].get<bool>();
+    const int         Z         = species["Z"].get<int>();
+    const std::string solver    = species["solver"].get<std::string>();
+    const bool        mobile    = species["mobile"].get<bool>();
+    const bool        diffusive = species["diffusive"].get<bool>();
 
     if (solver == "ito") {
       m_plasmaSpeciesTypes[speciesID] = SpeciesType::Ito;
@@ -619,15 +622,14 @@ ItoKMCJSON::initializeParticles()
   const std::string baseError = "ItoKMCJSON::initializeParticles";
 
   for (const auto& species : m_json["plasma species"]) {
-    const auto        obj         = species.get<nlohmann::json::object_t>();
-    const std::string speciesID   = (*obj.begin()).first;
+    const std::string speciesID   = species["id"].get<std::string>();
     const std::string baseErrorID = baseError + " and found 'initial particles' for species '" + speciesID + "'";
 
     List<PointParticle> initialParticles;
 
-    if (species[speciesID].contains("initial particles")) {
+    if (species.contains("initial particles")) {
 
-      for (const auto& initField : species[speciesID]["initial particles"]) {
+      for (const auto& initField : species["initial particles"]) {
         const auto obj = initField.get<nlohmann::json::object_t>();
 
         if (obj.size() != 1) {
@@ -879,24 +881,21 @@ ItoKMCJSON::initializeMobilities()
 
   // Read in mobilities
   for (const auto& species : m_json["plasma species"]) {
-
     FunctionEX mobilityFunction = [](const Real E, const RealVect x) -> Real {
       return 0.0;
     };
 
-    // Get the species ID.
-    const auto        obj         = species.get<nlohmann::json::object_t>();
-    const std::string speciesID   = (*obj.begin()).first;
+    const std::string speciesID   = species["id"].get<std::string>();
     const std::string baseErrorID = baseError + " and found mobile species '" + speciesID + "'";
 
     // Check if the species is mobile.
-    const bool isMobile = species[speciesID]["mobile"].get<bool>();
+    const bool isMobile = species["mobile"].get<bool>();
     if (isMobile) {
-      if (!(species[speciesID].contains("mobility"))) {
+      if (!(species.contains("mobility"))) {
         this->throwParserError(baseErrorID + " but did not find the required field 'mobility'");
       }
 
-      const nlohmann::json& mobilityJSON = species[speciesID]["mobility"];
+      const nlohmann::json& mobilityJSON = species["mobility"];
 
       if (!(mobilityJSON).contains("type")) {
         this->throwParserError(baseErrorID + " but 'type' specifier was not found");
@@ -961,24 +960,21 @@ ItoKMCJSON::initializeDiffusionCoefficients()
 
   // Read in mobilities
   for (const auto& species : m_json["plasma species"]) {
-
     FunctionEX diffusionCoefficient = [](const Real E, const RealVect x) -> Real {
       return 0.0;
     };
 
-    // Get the species ID.
-    const auto        obj         = species.get<nlohmann::json::object_t>();
-    const std::string speciesID   = (*obj.begin()).first;
+    const std::string speciesID   = species["id"].get<std::string>();
     const std::string baseErrorID = baseError + " and found diffusive species '" + speciesID + "'";
 
     // Check if the species is mobile.
-    const bool isDiffusive = species[speciesID]["diffusive"].get<bool>();
+    const bool isDiffusive = species["diffusive"].get<bool>();
     if (isDiffusive) {
-      if (!(species[speciesID].contains("diffusion"))) {
+      if (!(species.contains("diffusion"))) {
         this->throwParserError(baseErrorID + " but did not find the required field 'diffusion'");
       }
 
-      const nlohmann::json& diffusionJSON = species[speciesID]["diffusion"];
+      const nlohmann::json& diffusionJSON = species["diffusion"];
 
       if (!(diffusionJSON).contains("type")) {
         this->throwParserError(baseErrorID + " but 'type' specifier was not found");
@@ -1040,8 +1036,11 @@ ItoKMCJSON::initializePhotonSpecies()
   const std::string baseError = "ItoKMCJSON::initializePhotonSpecies";
 
   for (const auto& species : m_json["photon species"]) {
-    const auto        obj         = species.get<nlohmann::json::object_t>();
-    const std::string speciesID   = (*obj.begin()).first;
+    if (!(species.contains("id"))) {
+      this->throwParserError(baseError + " but one of the photon species do not contain the 'id' field");
+    }
+
+    const std::string speciesID   = species["id"].get<std::string>();
     const std::string baseErrorID = baseError + " for species '" + speciesID + "'";
 
     FunctionX kappaFunction = [](const RealVect a_pos) -> Real {
@@ -1055,11 +1054,11 @@ ItoKMCJSON::initializePhotonSpecies()
       this->throwParserError(baseErrorID + " but species '" + speciesID + "' was already defined)");
     }
 
-    if (!(species[speciesID].contains("kappa"))) {
+    if (!(species.contains("kappa"))) {
       this->throwParserError(baseErrorID + " but 'kappa' is not specified");
     }
 
-    const nlohmann::json& kappaJSON = species[speciesID]["kappa"];
+    const nlohmann::json& kappaJSON = species["kappa"];
 
     const std::string type = this->trim(kappaJSON["type"].get<std::string>());
     if (type == "constant") {
