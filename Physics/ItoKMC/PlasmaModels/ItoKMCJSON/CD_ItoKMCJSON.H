@@ -500,6 +500,26 @@ namespace Physics {
                           const std::string&        a_reaction) const noexcept;
 
       /*!
+	@brief Turn reactants and products strings into indices
+	@param[out] a_backgroundReactants Background reactant indices
+	@param[out] a_plasmaReactants Plasma reactant indices
+	@param[out] a_photonReactants Photon reactant indices
+	@param[out] a_backgroundProducts Background product indices
+	@param[out] a_plasmaProducts Plasma product indices
+	@param[out] a_photonProducts Photon product indices
+	@param[in]  a_reactants Reactants 
+	@param[in]  a_products Products
+      */
+      virtual void
+      getReactionSpecies(std::list<int>&                 a_backgroundReactants,
+                         std::list<int>&                 a_plasmaReactants,
+                         std::list<int>&                 a_photonReactants,
+                         std::list<int>&                 a_backgroundProducts,
+                         std::list<int>&                 a_plasmaProducts,
+                         std::list<int>&                 a_photonProducts,
+                         const std::vector<std::string>& a_reactants,
+                         const std::vector<std::string>& a_products) const noexcept;
+      /*!
 	@brief Make a reaction set into a superset. This parses wildcards '@' in reaction string.
 	@param[in] a_reactants List of reactants. Can contain wildcard.
 	@param[in] a_products List of products. Can contain wildcard.

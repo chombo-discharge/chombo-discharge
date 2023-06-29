@@ -227,7 +227,7 @@
 	// List of photon species that are tracked. This is an array of species
 	// with required identifiers (id, kappa)
 	{
-	    "id": "uv photon",          // Photon species id. Must be unique
+	    "id": "Y",                  // Photon species id. Must be unique
 	    "kappa": {                  // Specification of absorption coefficient. 
 		"type": "stochastic A", // Specify 'stochastic A' model. See e.g., Pasko sprite paper
 		"f1":   2.925E15,       // Lower frequency
@@ -243,7 +243,7 @@
 	// List of plasma reactions. The left hand side can consist of plasma and background species, and the
 	// right-hand side can additionally consist of photon species.
 	{
-	    "reaction": "e + @ -> e + e + M+", // Reaction. Must contain the '->' 
+	    "reaction": "e + @ -> Y + e + e + M+", // Reaction. Must contain the '->' 
 	    "description": "R1",               // Optional description of the reaction. Used when plotting the rate
 	    "plot": true,                      // Optional. If true, the reaction rate will be plotted. 
 	    "type": "constant",                // Specification of reaction rate type

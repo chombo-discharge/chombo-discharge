@@ -172,9 +172,9 @@ ItoKMCJSON::isPlasmaSpecies(const std::string& a_name) const noexcept
 bool
 ItoKMCJSON::isPhotonSpecies(const std::string& a_name) const noexcept
 {
-  CH_TIME("ItoKMCJSON::isPlasmaSpecies");
+  CH_TIME("ItoKMCJSON::isPhotonSpecies");
   if (m_verbose) {
-    pout() << m_className + "::isPlasmaSpecies" << endl;
+    pout() << m_className + "::isPhotonSpecies" << endl;
   }
 
   return m_photonIndexMap.count(a_name) != 0;
@@ -1208,6 +1208,8 @@ ItoKMCJSON::initializePhotonSpecies()
       this->throwParserError(baseErrorID + " but type specification '" + type + "' is not supported");
     }
 
+    m_photonIndexMap[speciesID] = m_rtSpecies.size();
+
     m_rtSpecies.push_back(RefCountedPtr<RtSpecies>(new ItoKMCPhotonSpecies(speciesID, kappaFunction)));
   }
 }
@@ -1262,6 +1264,22 @@ ItoKMCJSON::initializePlasmaReactions()
 
       // Make sure the reaction makes sense
       this->sanctifyPlasmaReaction(curReactants, trimmedProducts, reaction);
+
+      std::list<int> backgroundReactants;
+      std::list<int> plasmaReactants;
+      std::list<int> photonReactants;
+      std::list<int> backgroundProducts;
+      std::list<int> plasmaProducts;
+      std::list<int> photonProducts;
+
+      this->getReactionSpecies(backgroundReactants,
+                               plasmaReactants,
+                               photonReactants,
+                               backgroundProducts,
+                               plasmaProducts,
+                               photonProducts,
+                               curReactants,
+                               trimmedProducts);
     }
   }
 }
@@ -1409,6 +1427,69 @@ ItoKMCJSON::parseReactionString(std::vector<std::string>& a_reactants,
   // Left of "->" are reactants and right of "->" are products
   a_reactants = std::vector<std::string>(segments.begin(), it);
   a_products  = std::vector<std::string>(it + 1, segments.end());
+}
+
+void
+ItoKMCJSON::getReactionSpecies(std::list<int>&                 a_backgroundReactants,
+                               std::list<int>&                 a_plasmaReactants,
+                               std::list<int>&                 a_photonReactants,
+                               std::list<int>&                 a_backgroundProducts,
+                               std::list<int>&                 a_plasmaProducts,
+                               std::list<int>&                 a_photonProducts,
+                               const std::vector<std::string>& a_reactants,
+                               const std::vector<std::string>& a_products) const noexcept
+{
+  CH_TIME("ItoKMCJSON::getReactionSpecies");
+  if (m_verbose) {
+    pout() << m_className + "::getReactionSpecies" << endl;
+  }
+
+  const std::string baseError = "ItoKMC::getReactionSpecies";
+
+  a_backgroundReactants.clear();
+  a_plasmaReactants.clear();
+  a_photonReactants.clear();
+  a_backgroundProducts.clear();
+  a_plasmaProducts.clear();
+  a_photonProducts.clear();
+
+  for (const auto& r : a_reactants) {
+    const bool isBackground = this->isBackgroundSpecies(r);
+    const bool isPlasma     = this->isPlasmaSpecies(r);
+    const bool isPhoton     = this->isPhotonSpecies(r);
+
+    if (isBackground && !isPlasma && !isPhoton) {
+      a_backgroundReactants.emplace_back(m_backgroundSpeciesMap.at(r));
+    }
+    else if (!isBackground && isPlasma && !isPhoton) {
+      a_plasmaReactants.emplace_back(m_plasmaIndexMap.at(r));
+    }
+    else if (!isBackground && !isPlasma && isPhoton) {
+      a_photonReactants.emplace_back(m_photonIndexMap.at(r));
+    }
+    else {
+      this->throwParserError(baseError + " -- logic bust 1");
+    }
+  }
+
+  for (const auto& r : a_products) {
+    const bool isBackground = this->isBackgroundSpecies(r);
+    const bool isPlasma     = this->isPlasmaSpecies(r);
+    const bool isPhoton     = this->isPhotonSpecies(r);
+
+    if (isBackground && !isPlasma && !isPhoton) {
+      a_backgroundProducts.emplace_back(m_backgroundSpeciesMap.at(r));
+    }
+    else if (!isBackground && isPlasma && !isPhoton) {
+      a_plasmaProducts.emplace_back(m_plasmaIndexMap.at(r));
+    }
+    else if (!isBackground && !isPlasma && isPhoton) {
+      a_photonProducts.emplace_back(m_photonIndexMap.at(r));
+    }
+    else {
+      this->throwParserError(baseError + " -- logic bust 2");
+    }
+  }
 }
 
 LookupTable1D<2>
