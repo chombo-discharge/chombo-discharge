@@ -145,9 +145,9 @@
 		    },
 		    {
 			"uniform distribution" : {
-			    "low corner" : [ 0, 0, 0 ],
-			    "high corner" : [ 0, 0, 0 ],
-			    "num particles": 0,
+			    "low corner" : [ -0.04, 0, 0 ],
+			    "high corner" : [ 0.04, 0.04, 0 ],
+			    "num particles": 1000,
 			    "weight" : 1}
 		    },
 		    {
@@ -164,7 +164,16 @@
 			    "num particles": 100,
 			    "weight" : 1
 			}
-		    }		    		    
+		    },
+		    {
+			"list": {
+			    "file": "initial_particles.dat", // File containing the particles
+			    "x column": 0, // Optional specification of column containing x coordinate (defaults to 0)
+			    "y column": 1,  // Optional specification of column containing y coordinate (defaults to 1)
+			    "z column": 2, // Optional specification of column containing z coordinate (defaults to 2)
+			    "w column": 3 // Optional specification of column containing the particle weight (defaults to 3)
+			}
+		    }
 		]
             }
 	},
@@ -174,7 +183,7 @@
 		"Z" : 1,            // Charge number
 		"solver" : "cdr",   // Solver type. Either 'ito' or 'cdr'
 		"mobile" : false,   // Mobile or not
-		"diffusive" : false // Diffusive or not
+		"diffusive" : false// Diffusive or not,
             }
 	}
     ]

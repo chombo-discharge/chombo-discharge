@@ -492,14 +492,16 @@ ItoKMCJSON::initializePlasmaSpecies()
     const bool        diffusive = species[speciesID]["diffusive"].get<bool>();
 
     if (solver == "ito") {
-      m_itoSpecies.push_back(RefCountedPtr<ItoSpecies>(new ItoSpecies(speciesID, Z, mobile, diffusive)));
-
       m_plasmaSpeciesTypes[speciesID] = SpeciesType::Ito;
+      m_itoSpeciesMap[speciesID]      = m_itoSpecies.size();
+
+      m_itoSpecies.push_back(RefCountedPtr<ItoSpecies>(new ItoSpecies(speciesID, Z, mobile, diffusive)));
     }
     else if (solver == "cdr") {
-      m_cdrSpecies.push_back(RefCountedPtr<CdrSpecies>(new ItoKMCCDRSpecies(speciesID, Z, mobile, diffusive)));
-
       m_plasmaSpeciesTypes[speciesID] = SpeciesType::CDR;
+      m_cdrSpeciesMap[speciesID]      = m_cdrSpecies.size();
+
+      m_cdrSpecies.push_back(RefCountedPtr<CdrSpecies>(new ItoKMCCDRSpecies(speciesID, Z, mobile, diffusive)));
     }
     else {
       this->throwParserError(baseErrorID + " but 'solver' field must be either 'cdr' or 'ito'");
@@ -600,10 +602,9 @@ ItoKMCJSON::initializeParticles()
     const std::string speciesID   = (*obj.begin()).first;
     const std::string baseErrorID = baseError + " and found 'initial particles' for species '" + speciesID + "'";
 
-    if (species[speciesID].contains("initial particles")) {
+    List<PointParticle> initialParticles;
 
-      // Generate initial particles. Note that
-      List<PointParticle> initialParticles;
+    if (species[speciesID].contains("initial particles")) {
 
       for (const auto& initField : species[speciesID]["initial particles"]) {
         const auto obj = initField.get<nlohmann::json::object_t>();
@@ -630,9 +631,13 @@ ItoKMCJSON::initializeParticles()
           }
           weight = initField["single particle"]["weight"].get<unsigned long long>();
 
+#ifdef CH_MPI
           if (procID() == 0) {
             initialParticles.add(PointParticle(position, 1.0 * weight));
           }
+#else
+          initialParticles.add(PointParticle(position, 1.0 * weight));
+#endif
         }
         else if (whichField == "uniform distribution") {
           const nlohmann::json& jsonEntry = initField["uniform distribution"];
@@ -759,19 +764,82 @@ ItoKMCJSON::initializeParticles()
             initialParticles.catenate(particles);
           }
         }
-        else if (whichField == "file") {
-          this->throwParserError(baseError + " but 'file' specification is not implemented yet");
+        else if (whichField == "list") {
+          const nlohmann::json& jsonEntry = initField["list"];
+
+          if (!(jsonEntry.contains("file"))) {
+            this->throwParserError(baseError + "but 'list' does not contain 'file'");
+          }
+
+          const std::string f = this->trim(jsonEntry["file"].get<std::string>());
+
+          unsigned int xcol = 0;
+          unsigned int ycol = 1;
+          unsigned int zcol = 2;
+          unsigned int wcol = 3;
+
+          if (jsonEntry.contains("x column")) {
+            xcol = jsonEntry["x column"].get<unsigned int>();
+          }
+          if (jsonEntry.contains("y column")) {
+            ycol = jsonEntry["y column"].get<unsigned int>();
+          }
+          if (jsonEntry.contains("z column")) {
+            zcol = jsonEntry["z column"].get<unsigned int>();
+          }
+          if (jsonEntry.contains("w column")) {
+            wcol = jsonEntry["w column"].get<unsigned int>();
+          }
+
+          List<PointParticle> particles = DataParser::readPointParticlesASCII(f, xcol, ycol, zcol, wcol);
+
+#ifdef CH_MPI
+          if (procID() == 0) {
+            initialParticles.catenate(particles);
+          }
+#else
+          initialParticles.catenate(particles);
+#endif
         }
         else {
           this->throwParserError(baseError + " but specification '" + whichField + "' is not supported");
         }
+      }
+    }
 
-        MayDay::Warning("need file support for initial particles");
+    // Put the particles in the solvers.
+    const SpeciesType& speciesType = m_plasmaSpeciesTypes.at(speciesID);
 
-        // Put the particles in the solver.
+    switch (speciesType) {
+    case SpeciesType::Ito: {
+      const int idx = m_itoSpeciesMap.at(speciesID);
+
+      List<ItoParticle>& solverParticles = m_itoSpecies[idx]->getInitialParticles();
+
+      solverParticles.clear();
+
+      for (ListIterator<PointParticle> lit(initialParticles); lit.ok(); ++lit) {
+        solverParticles.add(ItoParticle(lit().weight(), lit().position()));
       }
 
-      MayDay::Warning("must put particles in solver particles -- how to index correctly into solvers?");
+      break;
+    }
+    case SpeciesType::CDR: {
+      const int idx = m_cdrSpeciesMap.at(speciesID);
+
+      List<PointParticle>& solverParticles = m_cdrSpecies[idx]->getInitialParticles();
+
+      solverParticles.clear();
+
+      solverParticles.catenate(initialParticles);
+
+      break;
+    }
+    default: {
+      MayDay::Error("ItoKMCJSON::initializeParticles - logic bust");
+
+      break;
+    }
     }
   }
 }

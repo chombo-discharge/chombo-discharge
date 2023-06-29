@@ -266,6 +266,16 @@ namespace Physics {
       std::map<std::string, SpeciesType> m_plasmaSpeciesTypes;
 
       /*!
+	@brief Map for indexing from an ID to an Ito solver index
+      */
+      std::map<std::string, int> m_itoSpeciesMap;
+
+      /*!
+	@brief Map for indexing from an ID to an Ito solver index
+      */
+      std::map<std::string, int> m_cdrSpeciesMap;
+
+      /*!
 	@brief Townsend ionization coefficient. Defined during parseAlpha
       */
       FunctionEX m_alpha;

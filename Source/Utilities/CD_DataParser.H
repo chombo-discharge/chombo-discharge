@@ -12,7 +12,11 @@
 #ifndef CD_DataParser_H
 #define CD_DataParser_H
 
+// Chombo includes
+#include <List.H>
+
 // Our includes
+#include <CD_PointParticle.H>
 #include <CD_LookupTable1D.H>
 #include <CD_NamespaceHeader.H>
 
@@ -57,6 +61,26 @@ namespace DataParser {
                           const std::string       a_stopRead,
                           const int               a_xColumn     = 0,
                           const int               a_yColumn     = 1,
+                          const std::vector<char> a_ignoreChars = {'#', '/'});
+
+  /*!
+    @brief Simple file parser which will read particles (position/weight) from an ASCII file. 
+    @details Particles should be arranged as rows, e.g. in the form
+    x   y   z   w
+    0.0 0.0 0.0 1
+    @param[in] a_fileName    Input file name. Must be an ASCII file organized into rows and columns. 
+    @param[in] a_xColumn     Column containing the x-coordinate
+    @param[in] a_yColumn     Column containing the y-coordinate
+    @param[in] a_zColumn     Column containing the z-coordinate
+    @param[in] a_wColumn     Column containing the particle weight
+    @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
+  */
+  List<PointParticle>
+  readPointParticlesASCII(const std::string       a_fileName,
+                          const unsigned int      a_xColumn     = 0,
+                          const unsigned int      a_yColumn     = 1,
+                          const unsigned int      a_zColumn     = 2,
+                          const unsigned int      a_wColumn     = 3,
                           const std::vector<char> a_ignoreChars = {'#', '/'});
 
 } // namespace DataParser
