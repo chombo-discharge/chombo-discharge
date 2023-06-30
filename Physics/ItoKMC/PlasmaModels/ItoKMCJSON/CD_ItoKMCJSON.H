@@ -67,6 +67,15 @@ namespace Physics {
       using FunctionEX = std::function<Real(const Real E, const RealVect x)>;
 
       /*!
+	@brief Function for encapsulating a function f = f(E, V, x) where E is the electric field at physical coordinates x, and
+	V is a grid cell volume.
+	@param[in] E Electric field magnitude in SI units. 
+	@param[in] V Volume
+	@param[in] x Physical coordinates
+      */
+      using FunctionEVX = std::function<Real(const Real E, const Real V, const RealVect x)>;
+
+      /*!
 	@brief Function for encapsulating a function f = f(T) where T is the temperature of some species
 	@param[in] a_T Some temperature. 
       */
@@ -193,8 +202,7 @@ namespace Physics {
                           const Real                       a_dx,
                           const Real                       a_dt,
                           const bool                       a_isDielectric,
-                          const int                        a_matIndex) const noexcept override
-      {}
+                          const int                        a_matIndex) const noexcept override;
 
     protected:
       /*!
@@ -299,6 +307,26 @@ namespace Physics {
 	@brief Diffusion coefficients for the various species
       */
       std::vector<FunctionEX> m_diffusionCoefficients;
+
+      /*!
+	@brief Function-based plasma reaction rates. Same index as the actual reactions.
+      */
+      std::vector<FunctionEVX> m_kmcReactionRates;
+
+      /*!
+	@brief Whether or not a reaction uses a gradient correction for the rate (Soloviev et. al. paper)
+      */
+      std::vector<std::pair<bool, size_t>> m_kmcReactionGradientCorrections;
+
+      /*!
+	@brief Map of reactions that will be plotted.
+      */
+      std::map<int, bool> m_plasmaReactionPlot;
+
+      /*!
+	@brief Map of reactions that will be plotted.
+      */
+      std::map<int, std::pair<bool, int>> m_plasmaReactionSolovievCorrection;
 
       /*!
 	@brief Townsend ionization coefficient. Defined during parseAlpha
@@ -481,12 +509,16 @@ namespace Physics {
       initializePlasmaReactions();
 
       /*!
-	@brief Parse a table which is stored in E/N format
-	@param[in] a_tableEntry Table entry in JSON format. 
-	@param[in] a_dataID     Data identifier
+	@brief Initialize photo-reactions
       */
-      virtual LookupTable1D<2>
-      parseTableEByN(const nlohmann::json& a_tableEntry, const std::string& a_dataID) const;
+      virtual void
+      initializePhotoReactions();
+
+      /*!
+	@brief Initialize photo-reactions
+      */
+      virtual void
+      initializeSurfaceReactions();
 
       /*!
 	@brief Parses a reaction string into reactangs and products
@@ -511,14 +543,41 @@ namespace Physics {
 	@param[in]  a_products Products
       */
       virtual void
-      getReactionSpecies(std::list<int>&                 a_backgroundReactants,
-                         std::list<int>&                 a_plasmaReactants,
-                         std::list<int>&                 a_photonReactants,
-                         std::list<int>&                 a_backgroundProducts,
-                         std::list<int>&                 a_plasmaProducts,
-                         std::list<int>&                 a_photonProducts,
+      getReactionSpecies(std::list<size_t>&              a_backgroundReactants,
+                         std::list<size_t>&              a_plasmaReactants,
+                         std::list<size_t>&              a_photonReactants,
+                         std::list<size_t>&              a_backgroundProducts,
+                         std::list<size_t>&              a_plasmaProducts,
+                         std::list<size_t>&              a_photonProducts,
                          const std::vector<std::string>& a_reactants,
                          const std::vector<std::string>& a_products) const noexcept;
+
+      /*!
+	@brief Parse a plasma reaction rate and turn it into a function
+	@param[in] a_reactionJSON Reaction entry in JSON file
+	@param[in] a_backgroundReactants List of background species appearing on the left hand side of the reaction
+	@param[in] a_plasmaReactants List of plasma species appearing on the left-hand side of the reaction
+      */
+      virtual FunctionEVX
+      parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
+                              const std::list<size_t>& a_backgroundReactants,
+                              const std::list<size_t>& a_plasmaReactants) const;
+
+      /*!
+	@brief Parse whether or not a reaction uses a gradient correction for the rate. 
+	@param[in] a_reactionJSON Reaction entry in JSON file
+      */
+      virtual std::pair<bool, int>
+      parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reactionJSON) const;
+
+      /*!
+	@brief Parse a table which is stored in E/N format
+	@param[in] a_tableEntry Table entry in JSON format. 
+	@param[in] a_dataID     Data identifier
+      */
+      virtual LookupTable1D<2>
+      parseTableEByN(const nlohmann::json& a_tableEntry, const std::string& a_dataID) const;
+
       /*!
 	@brief Make a reaction set into a superset. This parses wildcards '@' in reaction string.
 	@param[in] a_reactants List of reactants. Can contain wildcard.

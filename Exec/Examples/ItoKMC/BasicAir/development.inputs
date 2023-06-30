@@ -48,7 +48,7 @@ Driver.initial_regrids                 = -1                # Number of initial r
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 0              # Maximum number of steps
+Driver.max_steps                       = 50               # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
@@ -264,7 +264,7 @@ ItoKMCGodunovStepper.algorithm                             = euler_maruyama # In
 # ====================================================================================================
 # ItoKMCJSON class options
 # ====================================================================================================
-ItoKMCJSON.verbose            = true                   ## Turn on/off verbosity
+ItoKMCJSON.verbose            = false                   ## Turn on/off verbosity
 ItoKMCJSON.debug              = true                   ## Turn on/off debugging
 ItoKMCJSON.chemistry_file     = chemistry_template.json ## Chemistry file
 

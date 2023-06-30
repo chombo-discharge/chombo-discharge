@@ -56,6 +56,8 @@ ItoKMCJSON::ItoKMCJSON()
 
   // Initialize reactions
   this->initializePlasmaReactions();
+  this->initializePhotoReactions();
+  this->initializeSurfaceReactions();
 
   // Define internals. This includes the KMC solver instantiation.
   this->define();
@@ -1265,12 +1267,13 @@ ItoKMCJSON::initializePlasmaReactions()
       // Make sure the reaction makes sense
       this->sanctifyPlasmaReaction(curReactants, trimmedProducts, reaction);
 
-      std::list<int> backgroundReactants;
-      std::list<int> plasmaReactants;
-      std::list<int> photonReactants;
-      std::list<int> backgroundProducts;
-      std::list<int> plasmaProducts;
-      std::list<int> photonProducts;
+      // Build the KMC reaction. Note that this does not involve the "background species", which are absorbed into the transition rates.
+      std::list<size_t> backgroundReactants;
+      std::list<size_t> plasmaReactants;
+      std::list<size_t> photonReactants;
+      std::list<size_t> backgroundProducts;
+      std::list<size_t> plasmaProducts;
+      std::list<size_t> photonProducts;
 
       this->getReactionSpecies(backgroundReactants,
                                plasmaReactants,
@@ -1280,8 +1283,41 @@ ItoKMCJSON::initializePlasmaReactions()
                                photonProducts,
                                curReactants,
                                trimmedProducts);
+
+      // Figure out how to compute the rate for this reaction. The plasma reactants are put in here because
+      // we must scale properly against the KMCDualStateReaction method (which operates using the microscopic rates).
+      const auto reactionRate = this->parsePlasmaReactionRate(reactionJSON, backgroundReactants, plasmaReactants);
+      // const auto reactionPlot = this->parsePlasmaReactionPlot(reactionJSON);
+      // const auto reactionDescription = this->parsePlasmaReactionDescription(reactionJSON);
+      const auto gradientCorrection = this->parsePlasmaReactionGradientCorrection(reactionJSON);
+
+      m_kmcReactions.emplace_back(std::make_shared<KMCReaction>(plasmaReactants, plasmaProducts, photonProducts));
+      m_kmcReactionRates.emplace_back(reactionRate);
+      m_kmcReactionGradientCorrections.emplace_back(gradientCorrection);
     }
   }
+}
+
+void
+ItoKMCJSON::initializePhotoReactions()
+{
+  CH_TIME("ItoKMCJSON::initializePhotoReactions");
+  if (m_verbose) {
+    pout() << m_className + "::initializePhotoReactions" << endl;
+  }
+
+  pout() << "ItoKMCJSON::initializePhotoReactions - not implemented" << endl;
+}
+
+void
+ItoKMCJSON::initializeSurfaceReactions()
+{
+  CH_TIME("ItoKMCJSON::initializeSurfaceReactions");
+  if (m_verbose) {
+    pout() << m_className + "::initializeSurfaceReactions" << endl;
+  }
+
+  pout() << "ItoKMCJSON::initializeSurfaceReactions - not implemented" << endl;
 }
 
 void
@@ -1430,12 +1466,12 @@ ItoKMCJSON::parseReactionString(std::vector<std::string>& a_reactants,
 }
 
 void
-ItoKMCJSON::getReactionSpecies(std::list<int>&                 a_backgroundReactants,
-                               std::list<int>&                 a_plasmaReactants,
-                               std::list<int>&                 a_photonReactants,
-                               std::list<int>&                 a_backgroundProducts,
-                               std::list<int>&                 a_plasmaProducts,
-                               std::list<int>&                 a_photonProducts,
+ItoKMCJSON::getReactionSpecies(std::list<size_t>&              a_backgroundReactants,
+                               std::list<size_t>&              a_plasmaReactants,
+                               std::list<size_t>&              a_photonReactants,
+                               std::list<size_t>&              a_backgroundProducts,
+                               std::list<size_t>&              a_plasmaProducts,
+                               std::list<size_t>&              a_photonProducts,
                                const std::vector<std::string>& a_reactants,
                                const std::vector<std::string>& a_products) const noexcept
 {
@@ -1490,6 +1526,121 @@ ItoKMCJSON::getReactionSpecies(std::list<int>&                 a_backgroundReact
       this->throwParserError(baseError + " -- logic bust 2");
     }
   }
+}
+
+std::function<Real(const Real E, const Real V, const RealVect x)>
+ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
+                                    const std::list<size_t>& a_backgroundReactants,
+                                    const std::list<size_t>& a_plasmaReactants) const
+{
+  CH_TIME("ItoKMCJSON::parsePlasmaReactionRate");
+  if (m_verbose) {
+    pout() << m_className + "::parsePlasmaReactionRate" << endl;
+  }
+
+  // TLDR: ItoKMCPhysics uses KMCDualStateReaction which computes propensities for reactions S + S -> null as a = 0.5 * c * X * (X-1), where c is the
+  //       "rate" in the KMC sense. This is correct since there are 0.5 * X * (X-1) distinct pairs of particles. But ItoKMCJSON expects that the input
+  //       rates corresponding to the rates in the reaction rate equation, so for S + S -> null we would have dn/dt = -2*k*n*n, or dX/dt = -(2k/dV) * X * X.
+  //       On the other hand, the deterministic limit of the tau-leaping equation becomes dX/dt = -2 * a = c*X*(X-1). For consistency we must therefore have
+  //       c = 2*k/dV. Likewise, we would have c = k/dV for the reaction S1 + S2 => null (S1 and S2 being different species). In this latter case we do not
+  //       need to account for the scaling.
+  //
+  //       This subtle scaling is important for consistency between the KMC algorithm and the reaction rate equation. Because KMCDualStateReaction operates
+  //       using the microscopic rates, we must add this scaling back in. Also note that this scaling does not matter if background species enter on the left
+  //       hand side because the rates are simply absorbed into the rate itself.
+
+  FunctionEVX kmcRate = [](const Real E, const Real V, const RealVect x) -> Real {
+    return 0.0;
+  };
+
+  // Count the number of times each reactant appears on the left hand side.
+  std::map<size_t, size_t> reactantNumbers;
+  for (const auto& r : a_plasmaReactants) {
+    if (reactantNumbers.count(r) != 0) {
+      reactantNumbers[r]++;
+    }
+    else {
+      reactantNumbers[r] = 1;
+    }
+  }
+
+  size_t volumeFactor     = 0;
+  Real   propensityFactor = 1.0;
+  for (const auto& rn : reactantNumbers) {
+    for (size_t i = 2; i <= rn.second; i++) {
+      propensityFactor *= i;
+    }
+
+    volumeFactor += rn.second;
+  }
+
+  if (procID() == 0) {
+    std::cout << propensityFactor << "\t" << volumeFactor << std::endl;
+  }
+
+  const std::string type      = this->trim(a_reactionJSON["type"].get<std::string>());
+  const std::string reaction  = this->trim(a_reactionJSON["reaction"].get<std::string>());
+  const std::string baseError = "ItoKMC::parsePlasmaReactionRate for reaction '" + reaction + "'";
+
+  if (type == "constant") {
+    if (!(a_reactionJSON.contains("rate"))) {
+      this->throwParserError(baseError + " and got constant rate but 'rate' is not specified");
+    }
+
+    const Real value = a_reactionJSON["rate"].get<Real>() * propensityFactor;
+
+    kmcRate = [value,
+               volumeFactor,
+               bgList         = a_backgroundReactants,
+               &bgSpecies     = this->m_backgroundSpecies,
+               &numberDensity = this->m_gasNumberDensity](const Real E, const Real V, const RealVect x) -> Real {
+      // Set equal to input rate, also corrected by the propensity factor if a species appears multiple times on the left hand side
+      Real k = value;
+
+      // Absorb background species directly into the constant.
+      const Real N = numberDensity(x);
+      for (const auto& idx : bgList) {
+        const Real n = bgSpecies[idx].molarFraction(x) * N;
+
+        k *= n;
+      }
+
+      // Correct by volume factor for higher order reactions.
+      if (volumeFactor > 0) {
+        k *= 1. / (std::pow(V, volumeFactor - 1));
+      }
+
+      return k;
+    };
+  }
+
+  return kmcRate;
+}
+
+std::pair<bool, int>
+ItoKMCJSON::parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reactionJSON) const
+{
+  CH_TIME("ItoKMCJSON::parsePlasmaReactionGradientCorrection");
+  if (m_verbose) {
+    pout() << m_className + "::parsePlasmaReactionGradientCorrection" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::parsePlasmaReactionGradientCorrection";
+
+  std::pair<bool, int> ret = std::make_pair(false, -1);
+
+  if (a_reactionJSON.contains("gradient correction")) {
+    const std::string species = this->trim(a_reactionJSON["gradient correction"].get<std::string>());
+
+    if (m_plasmaSpeciesTypes.count(species) == 0) {
+      this->throwParserError(baseError + " but species '" + species + " is not a plasma species");
+    }
+  }
+
+  // Need to test for mobility, diffusion, and build indices.
+  MayDay::Error(baseError.c_str());
+
+  return ret;
 }
 
 LookupTable1D<2>
@@ -1740,6 +1891,40 @@ ItoKMCJSON::updateReactionRates(const RealVect          a_E,
   CH_TIME("ItoKMCJSON::updateReactionRates");
   if (m_verbose) {
     pout() << m_className + "::updateReactionRates" << endl;
+  }
+
+  // Update basic reaction rates.
+  const Real E = a_E.vectorLength();
+  const Real V = std::pow(a_dx, SpaceDim);
+
+  for (int i = 0; i < m_kmcReactions.size(); i++) {
+    m_kmcReactions[i]->rate() = m_kmcReactionRates[i](E, V, a_pos);
+  }
+
+  // Add gradient correction for specified reactions.
+}
+
+void
+ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryParticles,
+                                Vector<Real>&                    a_secondaryCDRFluxes,
+                                Vector<List<Photon>>&            a_secondaryPhotons,
+                                const Vector<List<ItoParticle>>& a_primaryParticles,
+                                const Vector<Real>&              a_primaryCDRFluxes,
+                                const Vector<List<Photon>>&      a_primaryPhotons,
+                                const RealVect&                  a_E,
+                                const RealVect&                  a_cellCenter,
+                                const RealVect&                  a_cellCentroid,
+                                const RealVect&                  a_bndryCentroid,
+                                const RealVect&                  a_bndryNormal,
+                                const Real                       a_bndryArea,
+                                const Real                       a_dx,
+                                const Real                       a_dt,
+                                const bool                       a_isDielectric,
+                                const int                        a_matIndex) const noexcept
+{
+  CH_TIME("ItoKMCJSON::secondaryEmissionEB");
+  if (m_verbose) {
+    pout() << m_className + "::secondaryEmissionEB" << endl;
   }
 }
 

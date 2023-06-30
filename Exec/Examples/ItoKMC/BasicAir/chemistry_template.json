@@ -244,11 +244,12 @@
 	// right-hand side can additionally consist of photon species.
 	{
 	    "reaction": "e + @ -> Y + e + e + M+", // Reaction. Must contain the '->' 
-	    "description": "R1",               // Optional description of the reaction. Used when plotting the rate
-	    "plot": true,                      // Optional. If true, the reaction rate will be plotted. 
-	    "type": "constant",                // Specification of reaction rate type
-	    "rate": 1.0,                       // Specification of the reaction rate
-	    "@": ["O2", "N2"]                  // Specification of wildcards. Required when the reaction string contains '@'
+	    "description": "R1",                   // Optional description of the reaction. Used when plotting the rate
+	    "plot": true,                          // Optional. If true, the reaction rate will be plotted. 
+	    "type": "constant",                    // Specification of reaction rate type
+	    "rate": 0.0,                           // Specification of the reaction rate
+	    "@": ["O2", "N2"],                     // Specification of wildcards. Required when the reaction string contains '@'
+            "gradient correction": "e"             // Use gradient correction to rate
 	}
     ]
 }
