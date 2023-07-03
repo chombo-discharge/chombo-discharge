@@ -1742,6 +1742,80 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
       return tabulatedCoeff.getEntry<1>(Etd);
     };
   }
+  else if (type == "alpha*v") {
+    if (!(a_reactionJSON.contains("species"))) {
+      this->throwParserError(baseError + " and got 'alpha*v' but 'species' not not specified!");
+    }
+
+    const std::string species = a_reactionJSON["species"].get<std::string>();
+    const int         idx     = m_plasmaIndexMap.at(species);
+
+    auto kmcRate = [Vf     = volumeFactor,
+                    propF  = propensityFactor,
+                    L      = a_backgroundReactants,
+                    &S     = this->m_backgroundSpecies,
+                    &N     = this->m_gasNumberDensity,
+                    &mu    = m_mobilityFunctions[idx],
+                    &alpha = m_alpha](const Real E, const Real V, const RealVect x) -> Real {
+      Real k = alpha(E, x) * mu(E, x) * E;
+
+      for (const auto& idx : L) {
+        const Real n = S[idx].molarFraction(x) * N(x);
+
+        k *= n;
+      }
+
+      k *= propF;
+
+      if (Vf > 0) {
+        k *= 1. / std::pow(V, Vf - 1);
+      }
+
+      return k;
+    };
+
+    auto fluidRate = [&mu    = m_mobilityFunctions[idx],
+                      &alpha = m_alpha](const Real E, const Real V, const RealVect x) -> Real {
+      return alpha(E, x) * mu(E, x) * E;
+    };
+  }
+  else if (type == "eta*v") {
+    if (!(a_reactionJSON.contains("species"))) {
+      this->throwParserError(baseError + " and got 'eta*v' but 'species' not not specified!");
+    }
+
+    const std::string species = a_reactionJSON["species"].get<std::string>();
+    const int         idx     = m_plasmaIndexMap.at(species);
+
+    auto kmcRate = [Vf    = volumeFactor,
+                    propF = propensityFactor,
+                    L     = a_backgroundReactants,
+                    &S    = this->m_backgroundSpecies,
+                    &N    = this->m_gasNumberDensity,
+                    &mu   = m_mobilityFunctions[idx],
+                    &eta  = m_eta](const Real E, const Real V, const RealVect x) -> Real {
+      Real k = eta(E, x) * mu(E, x) * E;
+
+      for (const auto& idx : L) {
+        const Real n = S[idx].molarFraction(x) * N(x);
+
+        k *= n;
+      }
+
+      k *= propF;
+
+      if (Vf > 0) {
+        k *= 1. / std::pow(V, Vf - 1);
+      }
+
+      return k;
+    };
+
+    auto fluidRate = [&mu  = m_mobilityFunctions[idx],
+                      &eta = m_eta](const Real E, const Real V, const RealVect x) -> Real {
+      return eta(E, x) * mu(E, x) * E;
+    };
+  }
   else {
     this->throwParserError(baseError + " but 'type' specifier '" + type + "' is not supported");
   }

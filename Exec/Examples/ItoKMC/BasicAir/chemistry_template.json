@@ -261,10 +261,19 @@
 	// rate. The "plot" variable permits the user to plot the input rate as a function of E(x). Note that
 	// Because the rates KMC and RRE equations differ, an internal modification is made between the
 	// input rate in the reaction and the treament in the KMC algorithm (e.g., volume modifications due to
-	// biparticle reactions, or scaling for reactions involving the same species). 
+	// biparticle reactions, or scaling for reactions involving the same species).
+	{
+	    "reaction": "e + @ -> Y + e + (N2)", // Reaction. Must contain the '->'
+	    "@": ["N2"],                         // Specification of wildcards. Required when the reaction string contains '@'	    
+	    "description": "R0",                 // Optional description of the reaction. Used when plotting the rate
+	    "type": "constant",                  // Specification of reaction rate type
+	    "rate": 1.2345E-30,                  // Specification of the reaction rate
+            "gradient correction": "e",          // Use gradient correction to rate
+	    "plot": true                         // Optional. If true, the reaction rate will be plotted. 	    
+	},		
 	{
 	    // Tabulated reaction rate for e + N2 -> e + e + N2+
-	    "reaction": "e + N2 ->  e + e + N2+",            // Reaction. Must contain the '->'
+	    "reaction": "e + N2 -> e + e + N2+",            // Reaction. Must contain the '->'
 	    "description": "R1",                             // Optional description of the reaction. Used when plotting the rate
 	    "type": "table vs E/N",                          // Specification of reaction rate type
 	    "file" : "bolsig_air.dat",                       // File containing the data
@@ -283,7 +292,7 @@
 	},
 	{
 	    // Tabulated reaction rate for e + O2 -> e + e + O2+	    
-	    "reaction": "e + O2 ->  e + e + O2+",            // Reaction. Must contain the '->'
+	    "reaction": "e + O2 -> e + e + O2+",            // Reaction. Must contain the '->'
 	    "description": "R2",                             // Optional description of the reaction. Used when plotting the rate
 	    "type": "table vs E/N",                          // Specification of reaction rate type
 	    "file" : "bolsig_air.dat",                       // File containing the data
@@ -301,11 +310,18 @@
 	    "plot": true                                     // Optional. If true, the reaction rate will be plotted.
 	},
 	{
-	    "reaction": "e + @ -> Y + e + (N2)", // Reaction. Must contain the '->'
-	    "@": ["N2"],                         // Specification of wildcards. Required when the reaction string contains '@'	    
-	    "description": "R1",                 // Optional description of the reaction. Used when plotting the rate
-	    "type": "constant",                  // Specification of reaction rate type
-	    "rate": 1.2345E-30,                  // Specification of the reaction rate
+	    "reaction": "e -> e + e + (N+)", // Reaction. Must contain the '->'
+	    "description": "R3",                 // Optional description of the reaction. Used when plotting the rate
+	    "type": "alpha*v",                  // Specification of reaction rate type
+	    "species": "e",
+            "gradient correction": "e",          // Use gradient correction to rate
+	    "plot": true                         // Optional. If true, the reaction rate will be plotted. 	    
+	},
+	{
+	    "reaction": "e -> e + e + (N+)", // Reaction. Must contain the '->'
+	    "description": "R4",                 // Optional description of the reaction. Used when plotting the rate
+	    "type": "eta*v",                  // Specification of reaction rate type
+	    "species": "e",
             "gradient correction": "e",          // Use gradient correction to rate
 	    "plot": true                         // Optional. If true, the reaction rate will be plotted. 	    
 	}	
