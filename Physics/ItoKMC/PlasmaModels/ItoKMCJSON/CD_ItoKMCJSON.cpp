@@ -1669,11 +1669,11 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   const std::string baseError = "ItoKMC::parsePlasmaReactionRate for reaction '" + reaction + "'";
 
   if (type == "constant") {
-    if (!(a_reactionJSON.contains("rate"))) {
+    if (!(a_reactionJSON.contains("value"))) {
       this->throwParserError(baseError + " and got constant rate but 'rate' is not specified");
     }
 
-    const Real value = a_reactionJSON["rate"].get<Real>() * propensityFactor;
+    const Real value = a_reactionJSON["value"].get<Real>() * propensityFactor;
 
     kmcRate = [value,
                volumeFactor,

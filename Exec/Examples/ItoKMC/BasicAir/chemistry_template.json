@@ -267,7 +267,7 @@
 	    "@": ["N2"],                         // Specification of wildcards. Required when the reaction string contains '@'	    
 	    "description": "R0",                 // Optional description of the reaction. Used when plotting the rate
 	    "type": "constant",                  // Specification of reaction rate type
-	    "rate": 1.2345E-30,                  // Specification of the reaction rate
+	    "value": 1.2345E-30,                  // Specification of the reaction rate
             "gradient correction": "e",          // Use gradient correction to rate
 	    "plot": true                         // Optional. If true, the reaction rate will be plotted. 	    
 	},		
