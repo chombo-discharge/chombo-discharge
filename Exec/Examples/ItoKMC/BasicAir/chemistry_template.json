@@ -289,42 +289,42 @@
 	    "dump" : "debug_r1.dat",                         // Optional dump of internalized table to file. Useful for debugging.
             "gradient correction": "e",                      // Use gradient correction to rate
 	    "plot": true                                     // Optional. If true, the reaction rate will be plotted.
-	},
-	{
-	    // Tabulated reaction rate for e + O2 -> e + e + O2+	    
-	    "reaction": "e + O2 -> e + e + O2+",            // Reaction. Must contain the '->'
-	    "description": "R2",                             // Optional description of the reaction. Used when plotting the rate
-	    "type": "table vs E/N",                          // Specification of reaction rate type
-	    "file" : "bolsig_air.dat",                       // File containing the data
-	    "header" : "C42   O2    Ionization    12.06 eV", // Header line preceding data
-	    "E/N column" : 0,                                // Optional specification of column containing E/N (defaults to 0)
-	    "rate/N column" : 1,                             // Optional specification of column containing alpha/N (defaults to 1)
-	    "min E/N" : 1.0,                                 // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
-	    "max E/N" : 1000.0,                              // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
-	    "num points" : 1000,                             // Optional number of points kept when resamplnig the table (defaults to 1000)
-	    "spacing" : "exponential",                       // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
-	    "scale E/N" : 1.0,                               // Optional scaling of the column containing E/N
-	    "scale rate/N" : 1.0,                            // Optional scaling of the column containing rate/E
-	    "dump" : "debug_r2.dat",                         // Optional dump of internalized table to file. Useful for debugging.
-            "gradient correction": "e",                      // Use gradient correction to rate
-	    "plot": true                                     // Optional. If true, the reaction rate will be plotted.
-	},
-	{
-	    "reaction": "e -> e + e + (N+)", // Reaction. Must contain the '->'
-	    "description": "R3",                 // Optional description of the reaction. Used when plotting the rate
-	    "type": "alpha*v",                  // Specification of reaction rate type
-	    "species": "e",
-            "gradient correction": "e",          // Use gradient correction to rate
-	    "plot": true                         // Optional. If true, the reaction rate will be plotted. 	    
-	},
-	{
-	    "reaction": "e -> e + e + (N+)", // Reaction. Must contain the '->'
-	    "description": "R4",                 // Optional description of the reaction. Used when plotting the rate
-	    "type": "eta*v",                  // Specification of reaction rate type
-	    "species": "e",
-            "gradient correction": "e",          // Use gradient correction to rate
-	    "plot": true                         // Optional. If true, the reaction rate will be plotted. 	    
-	}	
+	}// ,
+	// {
+	//     // Tabulated reaction rate for e + O2 -> e + e + O2+	    
+	//     "reaction": "e + O2 -> e + e + O2+",            // Reaction. Must contain the '->'
+	//     "description": "R2",                             // Optional description of the reaction. Used when plotting the rate
+	//     "type": "table vs E/N",                          // Specification of reaction rate type
+	//     "file" : "bolsig_air.dat",                       // File containing the data
+	//     "header" : "C42   O2    Ionization    12.06 eV", // Header line preceding data
+	//     "E/N column" : 0,                                // Optional specification of column containing E/N (defaults to 0)
+	//     "rate/N column" : 1,                             // Optional specification of column containing alpha/N (defaults to 1)
+	//     "min E/N" : 1.0,                                 // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	//     "max E/N" : 1000.0,                              // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
+	//     "num points" : 1000,                             // Optional number of points kept when resamplnig the table (defaults to 1000)
+	//     "spacing" : "exponential",                       // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	//     "scale E/N" : 1.0,                               // Optional scaling of the column containing E/N
+	//     "scale rate/N" : 1.0,                            // Optional scaling of the column containing rate/E
+	//     "dump" : "debug_r2.dat",                         // Optional dump of internalized table to file. Useful for debugging.
+        //     "gradient correction": "e",                      // Use gradient correction to rate
+	//     "plot": true                                     // Optional. If true, the reaction rate will be plotted.
+	// },
+	// {
+	//     "reaction": "e -> e + e + (N+)", // Reaction. Must contain the '->'
+	//     "description": "R3",                 // Optional description of the reaction. Used when plotting the rate
+	//     "type": "alpha*v",                  // Specification of reaction rate type
+	//     "species": "e",
+        //     "gradient correction": "e",          // Use gradient correction to rate
+	//     "plot": true                         // Optional. If true, the reaction rate will be plotted. 	    
+	// },
+	// {
+	//     "reaction": "e -> e + e + (N+)", // Reaction. Must contain the '->'
+	//     "description": "R4",                 // Optional description of the reaction. Used when plotting the rate
+	//     "type": "eta*v",                  // Specification of reaction rate type
+	//     "species": "e",
+        //     "gradient correction": "e",          // Use gradient correction to rate
+	//     "plot": true                         // Optional. If true, the reaction rate will be plotted. 	    
+	// }	
 
     ]
 }

@@ -667,7 +667,7 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string a_coeff)
 
     func = [this, tabulatedCoeff](const Real E, const RealVect x) -> Real {
       const Real N   = m_gasNumberDensity(x);
-      const Real Etd = E / (N * 1.E-21);
+      const Real Etd = E / (N * Units::Td);
 
       return tabulatedCoeff.getEntry<1>(Etd) * N;
     };
@@ -1003,7 +1003,7 @@ ItoKMCJSON::initializeMobilities()
 
         mobilityFunction = [this, tabulatedCoeff](const Real E, const RealVect x) -> Real {
           const Real N   = m_gasNumberDensity(x);
-          const Real Etd = E / (N * 1.E-21);
+          const Real Etd = E / (N * Units::Td);
 
           return tabulatedCoeff.getEntry<1>(Etd) / (std::numeric_limits<Real>::epsilon() + N);
         };
@@ -1081,7 +1081,7 @@ ItoKMCJSON::initializeDiffusionCoefficients()
 
         diffusionCoefficient = [this, tabulatedCoeff](const Real E, const RealVect x) -> Real {
           const Real N   = m_gasNumberDensity(x);
-          const Real Etd = E / (N * 1.E-21);
+          const Real Etd = E / (N * Units::Td);
 
           return tabulatedCoeff.getEntry<1>(Etd) / (std::numeric_limits<Real>::epsilon() + N);
         };
@@ -1160,7 +1160,7 @@ ItoKMCJSON::initializeTemperatures()
 
         temperature = [this, eVToKelvin, tabulatedCoeff](const Real E, const RealVect x) -> Real {
           const Real N   = m_gasNumberDensity(x);
-          const Real Etd = E / (N * 1.E-21);
+          const Real Etd = E / (N * Units::Td);
 
           return eVToKelvin * tabulatedCoeff.getEntry<1>(Etd) / (std::numeric_limits<Real>::epsilon() + N);
         };
@@ -1635,10 +1635,6 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   //       using the microscopic rates, we must add this scaling back in. Also note that this scaling does not matter if background species enter on the left
   //       hand side because the rates are simply absorbed into the rate itself.
 
-  FunctionEVX kmcRate = [](const Real E, const Real V, const RealVect x) -> Real {
-    return 0.0;
-  };
-
   FunctionEX fluidRate = [](const Real E, const RealVect x) -> Real {
     return 0.0;
   };
@@ -1656,6 +1652,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
   size_t volumeFactor     = 0;
   Real   propensityFactor = 1.0;
+  Real   scaleFactor      = 1.0;
   for (const auto& rn : reactantNumbers) {
     for (size_t i = 2; i <= rn.second; i++) {
       propensityFactor *= i;
@@ -1668,39 +1665,57 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   const std::string reaction  = this->trim(a_reactionJSON["reaction"].get<std::string>());
   const std::string baseError = "ItoKMC::parsePlasmaReactionRate for reaction '" + reaction + "'";
 
+  if (a_reactionJSON.contains("scale")) {
+    scaleFactor = a_reactionJSON["scale"].get<Real>();
+  }
+
   if (type == "constant") {
     if (!(a_reactionJSON.contains("value"))) {
       this->throwParserError(baseError + " and got constant rate but 'rate' is not specified");
     }
 
-    const Real value = a_reactionJSON["value"].get<Real>() * propensityFactor;
+    const Real value = a_reactionJSON["value"].get<Real>(); // * propensityFactor;
+    if (value < 0.0) {
+      this->throwParserError(baseError + " and got constant rate but 'value' cannot be negative");
+    }
 
-    kmcRate = [value,
-               volumeFactor,
-               bgList         = a_backgroundReactants,
-               &bgSpecies     = this->m_backgroundSpecies,
-               &numberDensity = this->m_gasNumberDensity](const Real E, const Real V, const RealVect x) -> Real {
-      // Set equal to input rate, also corrected by the propensity factor if a species appears multiple times on the left hand side
-      Real k = value;
-
-      // Absorb background species directly into the constant.
-      const Real N = numberDensity(x);
-      for (const auto& idx : bgList) {
-        const Real n = bgSpecies[idx].molarFraction(x) * N;
-
-        k *= n;
-      }
-
-      // Correct by volume factor for higher order reactions.
-      if (volumeFactor > 0) {
-        k *= 1. / (std::pow(V, volumeFactor - 1));
-      }
-
-      return k;
+    fluidRate = [value, scaleFactor](const Real E, const RealVect x) -> Real {
+      return value * scaleFactor;
     };
+  }
+  else if (type == "alpha*v") {
+    if (!(a_reactionJSON.contains("species"))) {
+      this->throwParserError(baseError + " and got 'alpha*v' but 'species' not not specified!");
+    }
 
-    fluidRate = [value](const Real E, const RealVect x) -> Real {
-      return value;
+    const std::string species = a_reactionJSON["species"].get<std::string>();
+
+    if (!(this->isPlasmaSpecies(species))) {
+      this->throwParserError(baseError + "and got 'alpha*v' but species '" + species + "' is not a plasma species");
+    }
+
+    const int idx = m_plasmaIndexMap.at(species);
+
+    fluidRate = [&mu = m_mobilityFunctions[idx], &alpha = m_alpha, scaleFactor](const Real     E,
+                                                                                const RealVect x) -> Real {
+      return alpha(E, x) * mu(E, x) * E * scaleFactor;
+    };
+  }
+  else if (type == "eta*v") {
+    if (!(a_reactionJSON.contains("species"))) {
+      this->throwParserError(baseError + " and got 'eta*v' but 'species' not not specified!");
+    }
+
+    const std::string species = a_reactionJSON["species"].get<std::string>();
+
+    if (!(this->isPlasmaSpecies(species))) {
+      this->throwParserError(baseError + "and got 'eta*v' but species '" + species + "' is not a plasma species");
+    }
+
+    const int idx = m_plasmaIndexMap.at(species);
+
+    fluidRate = [&mu = m_mobilityFunctions[idx], &eta = m_eta, scaleFactor](const Real E, const RealVect x) -> Real {
+      return eta(E, x) * mu(E, x) * E * scaleFactor;
     };
   }
   else if (type == "table vs E/N") {
@@ -1713,112 +1728,170 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     LookupTable1D<2> tabulatedCoeff = this->parseTableEByN(a_reactionJSON, "rate/N");
 
-    kmcRate = [rate  = tabulatedCoeff,
-               Vf    = volumeFactor,
-               propF = propensityFactor,
-               L     = a_backgroundReactants,
-               &S    = this->m_backgroundSpecies,
-               &N    = this->m_gasNumberDensity](const Real E, const Real V, const RealVect x) -> Real {
-      Real k = rate.getEntry<1>(E / (N(x) * 1.E-21));
+    fluidRate = [&N = this->m_gasNumberDensity, tabulatedCoeff, scaleFactor](const Real E, const RealVect x) -> Real {
+      const Real Etd = E / (N(x) * Units::Td);
 
-      for (const auto& idx : L) {
-        const Real n = S[idx].molarFraction(x) * N(x);
-
-        k *= n;
-      }
-
-      // Correct by volume factor for higher order reactions.
-      k *= propF;
-      if (Vf > 0) {
-        k *= 1. / (std::pow(V, Vf - 1));
-      }
-
-      return k;
-    };
-
-    fluidRate = [&N = this->m_gasNumberDensity, tabulatedCoeff](const Real E, const RealVect x) -> Real {
-      const Real Etd = E / (N(x) * 1.E-21);
-
-      return tabulatedCoeff.getEntry<1>(Etd);
+      return tabulatedCoeff.getEntry<1>(Etd) * scaleFactor;
     };
   }
-  else if (type == "alpha*v") {
-    if (!(a_reactionJSON.contains("species"))) {
-      this->throwParserError(baseError + " and got 'alpha*v' but 'species' not not specified!");
+  else if (type == "functionT A") {
+    if (!(a_reactionJSON.contains("T"))) {
+      this->throwParserError(baseError + "and got 'functionT A' but field 'T' was not found");
+    }
+    if (!(a_reactionJSON.contains("c1"))) {
+      this->throwParserError(baseError + "and got 'functionT A' but field 'c2' was not found");
+    }
+    if (!(a_reactionJSON.contains("c2"))) {
+      this->throwParserError(baseError + "and got 'functionT A' but field 'c2' was not found");
     }
 
-    const std::string species = a_reactionJSON["species"].get<std::string>();
-    const int         idx     = m_plasmaIndexMap.at(species);
+    const std::string species = this->trim(a_reactionJSON["T"].get<std::string>());
+    const Real        c1      = a_reactionJSON["c1"].get<Real>();
+    const Real        c2      = a_reactionJSON["c2"].get<Real>();
 
-    auto kmcRate = [Vf     = volumeFactor,
-                    propF  = propensityFactor,
-                    L      = a_backgroundReactants,
-                    &S     = this->m_backgroundSpecies,
-                    &N     = this->m_gasNumberDensity,
-                    &mu    = m_mobilityFunctions[idx],
-                    &alpha = m_alpha](const Real E, const Real V, const RealVect x) -> Real {
-      Real k = alpha(E, x) * mu(E, x) * E;
+    const bool isBackground = this->isBackgroundSpecies(species);
+    const bool isPlasma     = this->isPlasmaSpecies(species);
 
-      for (const auto& idx : L) {
-        const Real n = S[idx].molarFraction(x) * N(x);
+    if (!isBackground || !isPlasma) {
+      this->throwParserError(baseError + " but species '" + species + "' is not a background or plasma species");
+    }
 
-        k *= n;
-      }
+    FunctionEX speciesTemperature;
+    if (isBackground) {
+      speciesTemperature = [&backgroundTemperature = this->m_gasTemperature](const Real E, const RealVect x) -> Real {
+        return backgroundTemperature(x);
+      };
+    }
+    else if (isPlasma) {
+      speciesTemperature = m_plasmaTemperatures[m_plasmaIndexMap.at(species)];
+    }
 
-      k *= propF;
-
-      if (Vf > 0) {
-        k *= 1. / std::pow(V, Vf - 1);
-      }
-
-      return k;
-    };
-
-    auto fluidRate = [&mu    = m_mobilityFunctions[idx],
-                      &alpha = m_alpha](const Real E, const Real V, const RealVect x) -> Real {
-      return alpha(E, x) * mu(E, x) * E;
+    fluidRate = [c1, c2, T = speciesTemperature, scaleFactor](const Real E, const RealVect x) -> Real {
+      return c1 * std::pow(T(E, x), c2) * scaleFactor;
     };
   }
-  else if (type == "eta*v") {
-    if (!(a_reactionJSON.contains("species"))) {
-      this->throwParserError(baseError + " and got 'eta*v' but 'species' not not specified!");
+  else if (type == "functionT1T2 A") {
+    if (!(a_reactionJSON.contains("T1"))) {
+      this->throwParserError(baseError + " and got 'functionT1T2 A' but field 'T1' was not found");
+    }
+    if (!(a_reactionJSON.contains("T2"))) {
+      this->throwParserError(baseError + " and got 'functionT1T2 A' but field 'T2' was not found");
+    }
+    if (!(a_reactionJSON.contains("c1"))) {
+      this->throwParserError(baseError + " and got 'functionT1T2 A' but field 'c1' was not found");
+    }
+    if (!(a_reactionJSON.contains("c2"))) {
+      this->throwParserError(baseError + " and got 'functionT1T2 A' but field 'c2' was not found");
     }
 
-    const std::string species = a_reactionJSON["species"].get<std::string>();
-    const int         idx     = m_plasmaIndexMap.at(species);
+    const std::string speciesT1 = this->trim(a_reactionJSON["T1"].get<std::string>());
+    const std::string speciesT2 = this->trim(a_reactionJSON["T2"].get<std::string>());
+    const std::string err       = " and got function 'functionT1T2 A' but unrecognized species '";
 
-    auto kmcRate = [Vf    = volumeFactor,
-                    propF = propensityFactor,
-                    L     = a_backgroundReactants,
-                    &S    = this->m_backgroundSpecies,
-                    &N    = this->m_gasNumberDensity,
-                    &mu   = m_mobilityFunctions[idx],
-                    &eta  = m_eta](const Real E, const Real V, const RealVect x) -> Real {
-      Real k = eta(E, x) * mu(E, x) * E;
+    const bool isPlasmaT1 = this->isPlasmaSpecies(speciesT1);
+    const bool isPlasmaT2 = this->isPlasmaSpecies(speciesT2);
 
-      for (const auto& idx : L) {
-        const Real n = S[idx].molarFraction(x) * N(x);
+    const bool isBackgroundT1 = this->isBackgroundSpecies(speciesT1);
+    const bool isBackgroundT2 = this->isBackgroundSpecies(speciesT2);
 
-        k *= n;
-      }
+    // Make sure that the specified species exist.
+    if (!isPlasmaT1 && !isBackgroundT1) {
+      this->throwParserError(baseError + err + speciesT1 + "'");
+    }
+    if (!isPlasmaT2 && !isBackgroundT2) {
+      this->throwParserError(baseError + err + speciesT2 + "'");
+    }
 
-      k *= propF;
+    FunctionEX speciesTemperature1;
+    FunctionEX speciesTemperature2;
 
-      if (Vf > 0) {
-        k *= 1. / std::pow(V, Vf - 1);
-      }
+    if (isBackgroundT1) {
+      speciesTemperature1 = [&backgroundTemperature = this->m_gasTemperature](const Real E, const RealVect x) -> Real {
+        return backgroundTemperature(x);
+      };
+    }
+    else {
+      speciesTemperature1 = m_plasmaTemperatures[m_plasmaIndexMap.at(speciesT1)];
+    }
+    if (isBackgroundT2) {
+      speciesTemperature2 = [&backgroundTemperature = this->m_gasTemperature](const Real E, const RealVect x) -> Real {
+        return backgroundTemperature(x);
+      };
+    }
+    else {
+      speciesTemperature2 = m_plasmaTemperatures[m_plasmaIndexMap.at(speciesT2)];
+    }
 
-      return k;
+    const Real c1 = a_reactionJSON["c1"].get<Real>();
+    const Real c2 = a_reactionJSON["c1"].get<Real>();
+
+    fluidRate = [c1, c2, T1 = speciesTemperature1, T2 = speciesTemperature2, scaleFactor](const Real     E,
+                                                                                          const RealVect x) -> Real {
+      return c1 * std::pow(T1(E, x) / T2(E, x), c2);
     };
+  }
+  else if (type == "function E/N exp A") {
+    const std::string err1 = baseError + " and got 'function E/N exp A' but field '";
+    const std::string err2 = "' is not specified";
 
-    auto fluidRate = [&mu  = m_mobilityFunctions[idx],
-                      &eta = m_eta](const Real E, const Real V, const RealVect x) -> Real {
-      return eta(E, x) * mu(E, x) * E;
+    if (!(a_reactionJSON.contains("c1"))) {
+      this->throwParserError(err1 + "c1" + err2);
+    }
+    if (!(a_reactionJSON.contains("c2"))) {
+      this->throwParserError(err1 + "c2" + err2);
+    }
+    if (!(a_reactionJSON.contains("c3"))) {
+      this->throwParserError(err1 + "c3" + err2);
+    }
+    if (!(a_reactionJSON.contains("c4"))) {
+      this->throwParserError(err1 + "c4" + err2);
+    }
+    if (!(a_reactionJSON.contains("c5"))) {
+      this->throwParserError(err1 + "c5" + err2);
+    }
+
+    // Get the constants
+    const Real c1 = a_reactionJSON["c1"].get<Real>();
+    const Real c2 = a_reactionJSON["c2"].get<Real>();
+    const Real c3 = a_reactionJSON["c3"].get<Real>();
+    const Real c4 = a_reactionJSON["c4"].get<Real>();
+    const Real c5 = a_reactionJSON["c5"].get<Real>();
+
+    fluidRate = [c1, c2, c3, c4, c5, &N = this->m_gasNumberDensity](const Real E, const RealVect x) -> Real {
+      const Real ETd = E / (N(x) * Units::Td);
+
+      return c1 * exp(-std::pow(c2 / (c3 + c4 * ETd), c5));
     };
   }
   else {
     this->throwParserError(baseError + " but 'type' specifier '" + type + "' is not supported");
   }
+
+  FunctionEVX kmcRate = [fluidRate,
+                         volumeFactor,
+                         propensityFactor,
+                         a_backgroundReactants,
+                         &S = this->m_backgroundSpecies,
+                         &N = this->m_gasNumberDensity](const Real E, const Real V, const RealVect x) -> Real {
+    Real k = fluidRate(E, x);
+
+    // Multiply by neutral densities
+    for (const auto& idx : a_backgroundReactants) {
+      const Real n = S[idx].molarFraction(x) * N(x);
+
+      k *= n;
+    }
+
+    // Multiply by propensity factor (because of ItoKMCDualStateReaction)
+    k *= propensityFactor;
+
+    // Multiply by volume factor (for higher-order reactions)
+    if (volumeFactor > 0) {
+      k *= 1. / std::pow(V, volumeFactor - 1);
+    }
+
+    return k;
+  };
 
   return std::make_pair(kmcRate, fluidRate);
 }
