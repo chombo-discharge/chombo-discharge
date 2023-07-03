@@ -135,6 +135,35 @@ namespace Physics {
       getRtSpecies() const;
 
       /*!
+	@brief Get number of plot variables
+      */
+      virtual Vector<std::string>
+      getPlotVariableNames() const noexcept;
+
+      /*!
+	@brief Get plot variables
+	@param[in] a_E       Electric field
+	@param[in] a_pos     Physical position
+	@param[in] a_phi     Plasma species densities
+	@param[in] a_gradPhi Density gradients for plasma species. 
+	@param[in] a_dx      Grid resolution
+	@param[in] a_kappa   Cut-cell volume fraction
+      */
+      virtual Vector<Real>
+      getPlotVariables(const RealVect          a_E,
+                       const RealVect          a_pos,
+                       const Vector<Real>&     a_phi,
+                       const Vector<RealVect>& a_gradPhi,
+                       const Real              a_dx,
+                       const Real              a_kappa) const noexcept;
+
+      /*!
+	@brief Get number of plot variables
+      */
+      virtual int
+      getNumberOfPlotVariables() const noexcept;
+
+      /*!
 	@brief Return number of Ito solvers.
       */
       inline int

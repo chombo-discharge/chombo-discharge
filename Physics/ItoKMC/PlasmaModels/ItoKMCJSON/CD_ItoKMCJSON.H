@@ -130,7 +130,13 @@ namespace Physics {
       computeEta(const Real a_E, const RealVect a_pos) const noexcept override;
 
       /*!
-	@brief Update reaction rates
+	@brief Get number of plot variables
+      */
+      virtual Vector<std::string>
+      getPlotVariableNames() const noexcept override;
+
+      /*!
+	@brief Get plot variables
 	@param[in] a_E       Electric field
 	@param[in] a_pos     Physical position
 	@param[in] a_phi     Plasma species densities
@@ -138,13 +144,19 @@ namespace Physics {
 	@param[in] a_dx      Grid resolution
 	@param[in] a_kappa   Cut-cell volume fraction
       */
-      virtual void
-      updateReactionRates(const RealVect          a_E,
-                          const RealVect          a_pos,
-                          const Vector<Real>&     a_phi,
-                          const Vector<RealVect>& a_gradPhi,
-                          const Real              a_dx,
-                          const Real              a_kappa) const noexcept override;
+      virtual Vector<Real>
+      getPlotVariables(const RealVect          a_E,
+                       const RealVect          a_pos,
+                       const Vector<Real>&     a_phi,
+                       const Vector<RealVect>& a_gradPhi,
+                       const Real              a_dx,
+                       const Real              a_kappa) const noexcept override;
+
+      /*!
+	@brief Get number of plot variables
+      */
+      virtual int
+      getNumberOfPlotVariables() const noexcept override;
 
       /*!
 	@brief Compute the Ito solver mobilities.
@@ -152,7 +164,7 @@ namespace Physics {
 	@param[in] a_pos  Position
 	@param[in] a_E    Electric field
       */
-      Vector<Real>
+      virtual Vector<Real>
       computeMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override;
 
       /*!
@@ -161,7 +173,7 @@ namespace Physics {
 	@param[in] a_pos       Position
 	@param[in] a_E         Electric field
       */
-      Vector<Real>
+      virtual Vector<Real>
       computeDiffusionCoefficients(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override;
 
       /*!
@@ -309,6 +321,11 @@ namespace Physics {
       std::vector<FunctionEX> m_diffusionCoefficients;
 
       /*!
+	@brief Plasma species temperatures
+      */
+      std::vector<FunctionEX> m_plasmaTemperatures;
+
+      /*!
 	@brief Function-based plasma reaction rates. Same index as the actual reactions.
       */
       std::vector<FunctionEVX> m_kmcReactionRates;
@@ -316,12 +333,12 @@ namespace Physics {
       /*!
 	@brief Whether or not a reaction uses a gradient correction for the rate (Soloviev et. al. paper)
       */
-      std::vector<std::pair<bool, size_t>> m_kmcReactionGradientCorrections;
+      std::vector<std::pair<bool, std::string>> m_kmcReactionGradientCorrections;
 
       /*!
 	@brief Map of reactions that will be plotted.
       */
-      std::map<int, bool> m_plasmaReactionPlot;
+      std::vector<std::pair<bool, std::string>> m_kmcReactionRatePlots;
 
       /*!
 	@brief Map of reactions that will be plotted.
@@ -497,6 +514,12 @@ namespace Physics {
       initializeDiffusionCoefficients();
 
       /*!
+	@brief Initialize the plasma species temperatures
+      */
+      virtual void
+      initializeTemperatures();
+
+      /*!
 	@brief Initialize the photon species
       */
       virtual void
@@ -564,10 +587,17 @@ namespace Physics {
                               const std::list<size_t>& a_plasmaReactants) const;
 
       /*!
+	@brief Parse whether or not a reaction rate should be plotted
+	@param[in] a_reactionJSON Reaction entry in JSON file
+      */
+      virtual std::pair<bool, std::string>
+      parsePlasmaReactionPlot(const nlohmann::json& a_reactionJSON) const;
+
+      /*!
 	@brief Parse whether or not a reaction uses a gradient correction for the rate. 
 	@param[in] a_reactionJSON Reaction entry in JSON file
       */
-      virtual std::pair<bool, int>
+      virtual std::pair<bool, std::string>
       parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reactionJSON) const;
 
       /*!
@@ -589,6 +619,23 @@ namespace Physics {
       parseReactionWildcards(const std::vector<std::string>& a_reactants,
                              const std::vector<std::string>& a_products,
                              const nlohmann::json&           a_reactionJSON) const noexcept;
+
+      /*!
+	@brief Update reaction rates
+	@param[in] a_E       Electric field
+	@param[in] a_pos     Physical position
+	@param[in] a_phi     Plasma species densities
+	@param[in] a_gradPhi Density gradients for plasma species. 
+	@param[in] a_dx      Grid resolution
+	@param[in] a_kappa   Cut-cell volume fraction
+      */
+      virtual void
+      updateReactionRates(const RealVect          a_E,
+                          const RealVect          a_pos,
+                          const Vector<Real>&     a_phi,
+                          const Vector<RealVect>& a_gradPhi,
+                          const Real              a_dx,
+                          const Real              a_kappa) const noexcept override;
     };
   } // namespace ItoKMC
 } // namespace Physics

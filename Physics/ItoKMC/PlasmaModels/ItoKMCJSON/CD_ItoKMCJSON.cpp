@@ -50,6 +50,7 @@ ItoKMCJSON::ItoKMCJSON()
   this->initializeParticles();
   this->initializeMobilities();
   this->initializeDiffusionCoefficients();
+  this->initializeTemperatures();
 
   // Initialize the photon species
   this->initializePhotonSpecies();
@@ -1031,7 +1032,6 @@ ItoKMCJSON::initializeDiffusionCoefficients()
 
   m_diffusionCoefficients.resize(m_numPlasmaSpecies);
 
-  // Read in mobilities
   for (const auto& species : m_json["plasma species"]) {
     FunctionEX diffusionCoefficient = [](const Real E, const RealVect x) -> Real {
       return 0.0;
@@ -1040,7 +1040,7 @@ ItoKMCJSON::initializeDiffusionCoefficients()
     const std::string speciesID   = species["id"].get<std::string>();
     const std::string baseErrorID = baseError + " and found diffusive species '" + speciesID + "'";
 
-    // Check if the species is mobile.
+    // Check if the species is diffusive
     const bool isDiffusive = species["diffusive"].get<bool>();
     if (isDiffusive) {
       if (!(species.contains("diffusion"))) {
@@ -1095,6 +1095,90 @@ ItoKMCJSON::initializeDiffusionCoefficients()
     const int idx = m_plasmaIndexMap[speciesID];
 
     m_diffusionCoefficients[idx] = diffusionCoefficient;
+  }
+}
+
+void
+ItoKMCJSON::initializeTemperatures()
+{
+  CH_TIME("ItoKMCJSON::initializeTemperatures");
+  if (m_verbose) {
+    pout() << m_className + "::initializeTemperatures" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::initializeTemperatures";
+
+  m_plasmaTemperatures.resize(m_numPlasmaSpecies);
+
+  for (const auto& species : m_json["plasma species"]) {
+    FunctionEX temperature = [](const Real E, const RealVect x) -> Real {
+      return 0.0;
+    };
+
+    const std::string speciesID   = species["id"].get<std::string>();
+    const std::string baseErrorID = baseError + " and found 'temperature' for species '" + speciesID + "'";
+
+    if (species.contains("temperature")) {
+      const nlohmann::json& temperatureJSON = species["temperature"];
+
+      if (!(temperatureJSON).contains("type")) {
+        this->throwParserError(baseErrorID + " but 'type' specifier was not found");
+      }
+
+      const std::string type = temperatureJSON["type"].get<std::string>();
+
+      if (type == "gas") {
+        temperature = [T = this->m_gasTemperature](const Real E, const RealVect x) -> Real {
+          return T(x);
+        };
+      }
+      else if (type == "constant") {
+        if (!(temperatureJSON.contains("T"))) {
+          this->throwParserError(baseErrorID + " and got constant temperature but did not find the 'T' field");
+        }
+
+        const Real T = temperatureJSON["T"].get<Real>();
+
+        if (T < 0.0) {
+          this->throwParserError(baseErrorID + " and got constant temperature but 'T' should not be negative");
+        }
+
+        temperature = [T](const Real E, const RealVect x) -> Real {
+          return T;
+        };
+      }
+      else if (type == "table vs E/N") {
+        const std::string baseErrorTable = baseErrorID + " and also got table vs E/N";
+
+        if (!(temperatureJSON.contains("file"))) {
+          this->throwParserError(baseErrorTable + ", but 'file' is not specified");
+        }
+
+        LookupTable1D<2> tabulatedCoeff = this->parseTableEByN(temperatureJSON, "D*N");
+
+        constexpr Real eVToKelvin = 2.0 * Units::Qe / (3.0 * Units::kb);
+
+        temperature = [this, eVToKelvin, tabulatedCoeff](const Real E, const RealVect x) -> Real {
+          const Real N   = m_gasNumberDensity(x);
+          const Real Etd = E / (N * 1.E-21);
+
+          return eVToKelvin * tabulatedCoeff.getEntry<1>(Etd) / (std::numeric_limits<Real>::epsilon() + N);
+        };
+      }
+      else {
+        this->throwParserError(baseErrorID + " but mobility specifier '" + type + "' is not supported");
+      }
+    }
+    else {
+      temperature = [T = this->m_gasTemperature](const Real E, const RealVect x) -> Real {
+        return T(x);
+      };
+    }
+
+    // Put the mobility function into the appropriate solver.
+    const int idx = m_plasmaIndexMap[speciesID];
+
+    m_plasmaTemperatures[idx] = temperature;
   }
 }
 
@@ -1286,13 +1370,13 @@ ItoKMCJSON::initializePlasmaReactions()
 
       // Figure out how to compute the rate for this reaction. The plasma reactants are put in here because
       // we must scale properly against the KMCDualStateReaction method (which operates using the microscopic rates).
-      const auto reactionRate = this->parsePlasmaReactionRate(reactionJSON, backgroundReactants, plasmaReactants);
-      // const auto reactionPlot = this->parsePlasmaReactionPlot(reactionJSON);
-      // const auto reactionDescription = this->parsePlasmaReactionDescription(reactionJSON);
+      const auto reactionRate       = this->parsePlasmaReactionRate(reactionJSON, backgroundReactants, plasmaReactants);
+      const auto reactionPlot       = this->parsePlasmaReactionPlot(reactionJSON);
       const auto gradientCorrection = this->parsePlasmaReactionGradientCorrection(reactionJSON);
 
       m_kmcReactions.emplace_back(std::make_shared<KMCReaction>(plasmaReactants, plasmaProducts, photonProducts));
       m_kmcReactionRates.emplace_back(reactionRate);
+      m_kmcReactionRatePlots.emplace_back(reactionPlot);
       m_kmcReactionGradientCorrections.emplace_back(gradientCorrection);
     }
   }
@@ -1617,7 +1701,29 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   return kmcRate;
 }
 
-std::pair<bool, int>
+std::pair<bool, std::string>
+ItoKMCJSON::parsePlasmaReactionPlot(const nlohmann::json& a_reactionJSON) const
+{
+  CH_TIME("ItoKMCJSON::parsePlasmaReactionPlot");
+  if (m_verbose) {
+    pout() << m_className + "::parsePlasmaReactionPlot" << endl;
+  }
+
+  bool        plot = false;
+  std::string id   = this->trim(a_reactionJSON["reaction"].get<std::string>());
+
+  if (a_reactionJSON.contains("plot")) {
+    plot = a_reactionJSON["plot"].get<bool>();
+  }
+
+  if (a_reactionJSON.contains("description")) {
+    id = this->trim(a_reactionJSON["description"].get<std::string>());
+  }
+
+  return std::make_pair(plot, id);
+}
+
+std::pair<bool, std::string>
 ItoKMCJSON::parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reactionJSON) const
 {
   CH_TIME("ItoKMCJSON::parsePlasmaReactionGradientCorrection");
@@ -1627,7 +1733,7 @@ ItoKMCJSON::parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reacti
 
   const std::string baseError = "ItoKMCJSON::parsePlasmaReactionGradientCorrection";
 
-  std::pair<bool, int> ret = std::make_pair(false, -1);
+  std::pair<bool, std::string> ret = std::make_pair(false, "invalid");
 
   if (a_reactionJSON.contains("gradient correction")) {
     const std::string species = this->trim(a_reactionJSON["gradient correction"].get<std::string>());
@@ -1635,10 +1741,45 @@ ItoKMCJSON::parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reacti
     if (m_plasmaSpeciesTypes.count(species) == 0) {
       this->throwParserError(baseError + " but species '" + species + " is not a plasma species");
     }
-  }
 
-  // Need to test for mobility, diffusion, and build indices.
-  MayDay::Error(baseError.c_str());
+    const SpeciesType type = m_plasmaSpeciesTypes.at(species);
+
+    bool isMobile;
+    bool isDiffusive;
+
+    switch (type) {
+    case SpeciesType::Ito: {
+      const int idx = m_itoSpeciesMap.at(species);
+
+      isMobile    = m_itoSpecies[idx]->isMobile();
+      isDiffusive = m_itoSpecies[idx]->isDiffusive();
+
+      break;
+    }
+    case SpeciesType::CDR: {
+      const int idx = m_cdrSpeciesMap.at(species);
+
+      isMobile    = m_cdrSpecies[idx]->isMobile();
+      isDiffusive = m_cdrSpecies[idx]->isDiffusive();
+
+      break;
+    }
+    default: {
+      const std::string err = baseError + " - logic bust";
+
+      this->throwParserError(err.c_str());
+
+      break;
+    }
+    };
+
+    if (isMobile && isDiffusive) {
+      ret = std::make_pair(true, species);
+    }
+    else {
+      this->throwParserError(baseError + " but species '" + species + "' is not mobile and diffusive!");
+    }
+  }
 
   return ret;
 }
@@ -1899,9 +2040,28 @@ ItoKMCJSON::updateReactionRates(const RealVect          a_E,
 
   for (int i = 0; i < m_kmcReactions.size(); i++) {
     m_kmcReactions[i]->rate() = m_kmcReactionRates[i](E, V, a_pos);
-  }
 
-  // Add gradient correction for specified reactions.
+    // Add gradient correction if the user has asked for it.
+    const std::pair<bool, std::string> gradientCorrection = m_kmcReactionGradientCorrections[i];
+
+    if (std::get<0>(gradientCorrection)) {
+      const int idx = m_plasmaIndexMap.at(std::get<1>(gradientCorrection));
+
+      const Real     n  = a_phi[idx];
+      const Real     mu = m_mobilityFunctions[idx](E, a_pos);
+      const Real     D  = m_diffusionCoefficients[idx](E, a_pos);
+      const RealVect g  = a_gradPhi[idx];
+
+      constexpr Real safety = std::numeric_limits<Real>::epsilon();
+
+      Real fcorr = 1.0 + a_E.dotProduct(D * g) / (safety + n * mu * E * E);
+
+      fcorr = std::max(fcorr, 0.0);
+      fcorr = std::min(fcorr, 1.0);
+
+      m_kmcReactions[i]->rate() *= fcorr;
+    }
+  }
 }
 
 void
@@ -1926,6 +2086,45 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
   if (m_verbose) {
     pout() << m_className + "::secondaryEmissionEB" << endl;
   }
+}
+
+Vector<std::string>
+ItoKMCJSON::getPlotVariableNames() const noexcept
+{
+  CH_TIME("ItoKMCJSON::getPlotVariableNames");
+  if (m_verbose) {
+    pout() << m_className + "::getPlotVariableNames" << endl;
+  }
+
+  return Vector<std::string>(1, "test_variable");
+}
+
+Vector<Real>
+ItoKMCJSON::getPlotVariables(const RealVect          a_E,
+                             const RealVect          a_pos,
+                             const Vector<Real>&     a_phi,
+                             const Vector<RealVect>& a_gradPhi,
+                             const Real              a_dx,
+                             const Real              a_kappa) const noexcept
+{
+
+  CH_TIME("ItoKMCJSON::getPlotVariables");
+  if (m_verbose) {
+    pout() << m_className + "::getPlotVariables" << endl;
+  }
+
+  return Vector<Real>(1.0);
+}
+
+int
+ItoKMCJSON::getNumberOfPlotVariables() const noexcept
+{
+  CH_TIME("ItoKMCJSON::getNumberOfPlotVariables");
+  if (m_verbose) {
+    pout() << m_className + "::getNumberOfPlotVariables" << endl;
+  }
+
+  return 1;
 }
 
 #include <CD_NamespaceFooter.H>
