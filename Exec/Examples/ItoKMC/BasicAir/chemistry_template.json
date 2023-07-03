@@ -136,6 +136,21 @@
 		"points" : 1000,
 		"dump": "debug_diffusion.dat"
 	    },
+	    "temperature": {
+		// Definition of the temperature, similar to the mobility coefficient above.
+		"type": "table vs E/N",
+		"file": "bolsig_air.dat",
+		"header" : "E/N (Td)\tMean energy (eV)",
+		"E/N" : 0,
+		"eV" : 1,
+		"min E/N" : 10,
+		"max E/N" : 2E6,
+		"E/N scale": 1.0,
+		"eV scale": 1.0,
+		"spacing" : "exponential",
+		"points" : 1000,
+		"dump": "debug_temperature.dat"		
+	    },
 	    "initial particles" : [
 		// Example of how to initialize particles using various methods (manual placement, distributions, reading
 		// from disk. All these specification are incrementing (i.e., not overriding one another)
