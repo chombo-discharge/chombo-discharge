@@ -331,6 +331,11 @@ namespace Physics {
       std::vector<FunctionEVX> m_kmcReactionRates;
 
       /*!
+	@brief Function-based plasma reaction rates. Same index as actual reactions. For plotting only.
+      */
+      std::vector<FunctionEX> m_fluidRates;
+
+      /*!
 	@brief Whether or not a reaction uses a gradient correction for the rate (Soloviev et. al. paper)
       */
       std::vector<std::pair<bool, std::string>> m_kmcReactionGradientCorrections;
@@ -581,7 +586,7 @@ namespace Physics {
 	@param[in] a_backgroundReactants List of background species appearing on the left hand side of the reaction
 	@param[in] a_plasmaReactants List of plasma species appearing on the left-hand side of the reaction
       */
-      virtual FunctionEVX
+      virtual std::pair<FunctionEVX, FunctionEX>
       parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
                               const std::list<size_t>& a_backgroundReactants,
                               const std::list<size_t>& a_plasmaReactants) const;

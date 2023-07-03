@@ -1370,12 +1370,13 @@ ItoKMCJSON::initializePlasmaReactions()
 
       // Figure out how to compute the rate for this reaction. The plasma reactants are put in here because
       // we must scale properly against the KMCDualStateReaction method (which operates using the microscopic rates).
-      const auto reactionRate       = this->parsePlasmaReactionRate(reactionJSON, backgroundReactants, plasmaReactants);
+      const auto reactionRates      = this->parsePlasmaReactionRate(reactionJSON, backgroundReactants, plasmaReactants);
       const auto reactionPlot       = this->parsePlasmaReactionPlot(reactionJSON);
       const auto gradientCorrection = this->parsePlasmaReactionGradientCorrection(reactionJSON);
 
       m_kmcReactions.emplace_back(std::make_shared<KMCReaction>(plasmaReactants, plasmaProducts, photonProducts));
-      m_kmcReactionRates.emplace_back(reactionRate);
+      m_kmcReactionRates.emplace_back(reactionRates.first);
+      m_fluidRates.emplace_back(reactionRates.second);
       m_kmcReactionRatePlots.emplace_back(reactionPlot);
       m_kmcReactionGradientCorrections.emplace_back(gradientCorrection);
     }
@@ -1612,7 +1613,8 @@ ItoKMCJSON::getReactionSpecies(std::list<size_t>&              a_backgroundReact
   }
 }
 
-std::function<Real(const Real E, const Real V, const RealVect x)>
+std::pair<std::function<Real(const Real E, const Real V, const RealVect x)>,
+          std::function<Real(const Real E, const RealVect x)>>
 ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
                                     const std::list<size_t>& a_backgroundReactants,
                                     const std::list<size_t>& a_plasmaReactants) const
@@ -1637,6 +1639,10 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     return 0.0;
   };
 
+  FunctionEX fluidRate = [](const Real E, const RealVect x) -> Real {
+    return 0.0;
+  };
+
   // Count the number of times each reactant appears on the left hand side.
   std::map<size_t, size_t> reactantNumbers;
   for (const auto& r : a_plasmaReactants) {
@@ -1656,10 +1662,6 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     }
 
     volumeFactor += rn.second;
-  }
-
-  if (procID() == 0) {
-    std::cout << propensityFactor << "\t" << volumeFactor << std::endl;
   }
 
   const std::string type      = this->trim(a_reactionJSON["type"].get<std::string>());
@@ -1696,9 +1698,55 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
       return k;
     };
+
+    fluidRate = [value](const Real E, const RealVect x) -> Real {
+      return value;
+    };
+  }
+  else if (type == "table vs E/N") {
+    const std::string baseErrorTable = baseError + " and got table vs E/N";
+
+    // Read in the table.
+    if (!(a_reactionJSON.contains("file"))) {
+      this->throwParserError(baseErrorTable + "but 'file' is not specified");
+    }
+
+    LookupTable1D<2> tabulatedCoeff = this->parseTableEByN(a_reactionJSON, "rate/N");
+
+    kmcRate = [rate  = tabulatedCoeff,
+               Vf    = volumeFactor,
+               propF = propensityFactor,
+               L     = a_backgroundReactants,
+               &S    = this->m_backgroundSpecies,
+               &N    = this->m_gasNumberDensity](const Real E, const Real V, const RealVect x) -> Real {
+      Real k = rate.getEntry<1>(E / (N(x) * 1.E-21));
+
+      for (const auto& idx : L) {
+        const Real n = S[idx].molarFraction(x) * N(x);
+
+        k *= n;
+      }
+
+      // Correct by volume factor for higher order reactions.
+      k *= propF;
+      if (Vf > 0) {
+        k *= 1. / (std::pow(V, Vf - 1));
+      }
+
+      return k;
+    };
+
+    fluidRate = [&N = this->m_gasNumberDensity, tabulatedCoeff](const Real E, const RealVect x) -> Real {
+      const Real Etd = E / (N(x) * 1.E-21);
+
+      return tabulatedCoeff.getEntry<1>(Etd);
+    };
+  }
+  else {
+    this->throwParserError(baseError + " but 'type' specifier '" + type + "' is not supported");
   }
 
-  return kmcRate;
+  return std::make_pair(kmcRate, fluidRate);
 }
 
 std::pair<bool, std::string>
@@ -2088,6 +2136,25 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
   }
 }
 
+int
+ItoKMCJSON::getNumberOfPlotVariables() const noexcept
+{
+  CH_TIME("ItoKMCJSON::getNumberOfPlotVariables");
+  if (m_verbose) {
+    pout() << m_className + "::getNumberOfPlotVariables" << endl;
+  }
+
+  int numPlots = 0;
+
+  for (int i = 0; i < m_kmcReactionRatePlots.size(); i++) {
+    if (std::get<0>(m_kmcReactionRatePlots[i])) {
+      numPlots++;
+    }
+  }
+
+  return numPlots;
+}
+
 Vector<std::string>
 ItoKMCJSON::getPlotVariableNames() const noexcept
 {
@@ -2096,7 +2163,15 @@ ItoKMCJSON::getPlotVariableNames() const noexcept
     pout() << m_className + "::getPlotVariableNames" << endl;
   }
 
-  return Vector<std::string>(1, "test_variable");
+  Vector<std::string> plotVariableNames;
+
+  for (int i = 0; i < m_kmcReactionRatePlots.size(); i++) {
+    if (std::get<0>(m_kmcReactionRatePlots[i])) {
+      plotVariableNames.push_back(std::get<1>(m_kmcReactionRatePlots[i]));
+    }
+  }
+
+  return plotVariableNames;
 }
 
 Vector<Real>
@@ -2113,18 +2188,18 @@ ItoKMCJSON::getPlotVariables(const RealVect          a_E,
     pout() << m_className + "::getPlotVariables" << endl;
   }
 
-  return Vector<Real>(1.0);
-}
+  Vector<Real> plotVars;
 
-int
-ItoKMCJSON::getNumberOfPlotVariables() const noexcept
-{
-  CH_TIME("ItoKMCJSON::getNumberOfPlotVariables");
-  if (m_verbose) {
-    pout() << m_className + "::getNumberOfPlotVariables" << endl;
+  // Update basic reaction rates.
+  const Real E = a_E.vectorLength();
+
+  for (int i = 0; i < m_kmcReactions.size(); i++) {
+    if (std::get<0>(m_kmcReactionRatePlots[i])) {
+      plotVars.push_back(m_fluidRates[i](E, a_pos));
+    }
   }
 
-  return 1;
+  return plotVars;
 }
 
 #include <CD_NamespaceFooter.H>

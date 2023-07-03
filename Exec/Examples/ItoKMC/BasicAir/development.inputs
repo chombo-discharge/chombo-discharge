@@ -44,7 +44,7 @@ Driver.checkpoint_interval             = 50               # Checkpoint interval
 Driver.regrid_interval                 = 5                # Regrid interval
 Driver.write_regrid_files              = true             # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = -1                # Number of initial regrids
+Driver.initial_regrids                 = 3                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
@@ -295,4 +295,3 @@ ItoKMCStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening
 ItoKMCStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha     = 0.1         # Set alpha coarsening. Higher => Less mesh
 ItoKMCStreamerTagger.max_coarsen_lvl   = 3            # Set max coarsening depth
-
