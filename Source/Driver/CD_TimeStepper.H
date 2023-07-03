@@ -182,7 +182,7 @@ public:
     Called by Driver in the IMMEDIATELY after writing the plot file. 
   */
   virtual void
-  postPlot();  
+  postPlot();
 
   /*!
     @brief Get computational loads to be checkpointed. 
