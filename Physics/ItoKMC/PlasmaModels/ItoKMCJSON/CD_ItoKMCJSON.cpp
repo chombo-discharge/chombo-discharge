@@ -1734,7 +1734,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
       return tabulatedCoeff.getEntry<1>(Etd) * scaleFactor;
     };
   }
-  else if (type == "functionT A") {
+  else if (type == "function T A") {
     if (!(a_reactionJSON.contains("T"))) {
       this->throwParserError(baseError + "and got 'functionT A' but field 'T' was not found");
     }
@@ -1770,7 +1770,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
       return c1 * std::pow(T(E, x), c2) * scaleFactor;
     };
   }
-  else if (type == "functionT1T2 A") {
+  else if (type == "function TT A") {
     if (!(a_reactionJSON.contains("T1"))) {
       this->throwParserError(baseError + " and got 'functionT1T2 A' but field 'T1' was not found");
     }

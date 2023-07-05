@@ -145,6 +145,95 @@ A JSON specification is e.g.
       }
    ]
 
+Function vs E/N
+^^^^^^^^^^^^^^^
+
+Some rates given as a function :math:`k = k\left(E/N\right)` are supported, which are outlined below.
+
+.. important::
+
+   In the below function-based rates, :math:`E/N` indicates the electric field in units of Townsend.
+
+**function E/N exp A**
+
+This specification is equivalent to a fluid rate
+
+.. math::
+
+   k = c_1\exp\left[-\left(\frac{c_2}{c_3 + c_4 E/N}\right)^{c_5}\right].
+
+The user must specify the constants :math:`c_i` in the JSON file.
+An example specification is
+
+.. code-block:: json
+		
+   "plasma reactions": [
+      {
+         "reaction": "A + B -> "       // Example reaction string. 
+	 "type": "function E/N exp A", // Function based rate.
+	 "c1": 1.0,                    // c1-coefficient
+	 "c2": 1.0,                    // c2-coefficient
+	 "c3": 1.0,                    // c3-coefficient
+	 "c4": 1.0,                    // c4-coefficient
+	 "c5": 1.0                     // c5-coefficient
+      }
+   ]
+
+
+Temperature-dependent
+^^^^^^^^^^^^^^^^^^^^^
+
+Some rates can be given as functions :math:`k = k(T)` where :math:`T` is some temperature.
+
+**function T A**
+
+This specification is equivalent to a fluid rate
+
+.. math::
+
+   k = c_1\left(T_i\right)^{c_2}.
+
+Mandatory input variables are :math:`c_1, c_2`, and the specification of the species corresponding to :math:`T_i`.
+This can correspond to one of the background species.
+An example specification is
+
+.. code-block:: json
+		
+   "plasma reactions": [
+      {
+         "reaction": "A + B -> " // Example reaction string. 
+	 "type": "function T A", // Function based rate.
+	 "c1": 1.0,              // c1-coefficient
+	 "c2": 1.0,              // c2-coefficient
+	 "T": "A"               // Which species temperature
+      }
+   ]
+
+**function TT A**
+
+This specification is equivalent to a fluid rate
+
+.. math::
+
+   k = c_1\left(\frac{T_1}{T_2}\right)^{c_2}.
+
+Mandatory input variables are :math:`c_1, c_2`, and the specification of the species corresponding to :math:`T_1` and :math:`T_2`.
+This can correspond to one of the background species.
+An example specification is
+
+.. code-block:: json
+		
+   "plasma reactions": [
+      {
+         "reaction": "A + B -> "  // Example reaction string. 
+	 "type": "function TT A", // Function based rate.
+	 "c1": 1.0,               // c1-coefficient
+	 "c2": 1.0,               // c2-coefficient
+	 "T1": "A",               // Which species temperature for T1
+	 "T2": "B"                // Which species temperature for T2	 
+      }
+   ]   
+
 Townsend rates
 ^^^^^^^^^^^^^^
 
@@ -206,7 +295,7 @@ A JSON specification that includes these
 	{
 	    "reaction": "e -> e + e + M+",       // Reaction string
 	    "type": "alpha*v",                   // Rate is alpha*v
-	    "species": "e"                       // Species for v,
+	    "species": "e",                      // Species for v,
 	    "plot": true,                        // Plot this reaction
 	    "description": "Townsend ionization" // Variable name in HDF5
 	}	
@@ -233,7 +322,27 @@ A JSON specification that includes this
 	{
 	    "reaction": "e -> e + e + M+", // Reaction string
 	    "type": "alpha*v",             // Rate is alpha*v
-	    "species": "e"                 // Species for v,
+	    "species": "e",                // Species for v,
 	    "gradient correction": "e"     // Specify gradient correction using species "e"
+	}	
+    ]
+
+Scaling
+_______
+
+Reactions can be scaled by including a ``scale`` field in the JSON entry.
+This will scale the reaction coefficient by the input factor.
+This is useful when scaling reactions from different units, or for completely off some input reactions.
+An example JSON specification is
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e -> e + e + M+", // Reaction string
+	    "type": "alpha*v",             // Rate is alpha*v
+	    "species": "e",                // Species for v,
+	    "scale": 0.0                   // Scaling factor
 	}	
     ]
