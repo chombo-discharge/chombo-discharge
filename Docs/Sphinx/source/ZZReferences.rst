@@ -1,7 +1,16 @@
-.. only:: html
+.. _Chap:References:
 
-   References
-   ----------
-   
+References
+**********
+
 .. bibliography:: references.bib
-   :style: plain
+
+.. _Chap:Publications:
+
+Publications
+************
+
+This is a list of known publications that use the ``chombo-discharge`` code.
+
+.. bibliography:: publications.bib
+   :all:

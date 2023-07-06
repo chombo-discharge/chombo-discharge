@@ -51,7 +51,10 @@ extensions = [
     'sphinxcontrib.bibtex']
 
 # Bib file
-bibtex_bibfiles = ['references.bib']
+bibtex_bibfiles = ['references.bib', 'publications.bib']
+
+# bibtex style
+bibtex_default_style = 'plain'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
