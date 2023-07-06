@@ -3,13 +3,43 @@
 Îto-KMC plasma model
 ********************
 
-.. warning::
-
-   Documentation is pending.
-
 Underlying model
 ================
 
+Plasma transport
+----------------
+
+The Îto-KMC model uses an Îto solver for some of the species, i.e. the particles drift and diffuse according to
+
+.. math::
+
+   d\mathbf{X} = \mathbf{V}dt + \sqrt{2D dt},
+
+where :math:`\mathbf{X}` is the particle position and :math:`\mathbf{V}` and :math:`D` is the particle drift velocity and diffusion coefficients, respectively.
+These are obtained by interpolating the macroscopic drift velocity and diffusion coefficients to the particle position.
+Further details regarding the Îto method are given in :ref:`Chap:ItoSolver`.
+
+Not all species in the Îto-KMC model need to be defined by particle solvers, as some species can be tracked by more conventional advection-diffusion-reaction solvers, see :ref:`Chap:CdrSolver` for discretization details.
+
+
+Photoionization
+---------------
+
+Photoionization in the Îto-KMC model is done using discrete photons.
+These are generated and advanced in every time step, and interact with the plasma through user-defined photo-reactions.
+The underlying solver is the discrete Monte Carlo photon transport solver, see :ref:`Chap:MonteCarloRTE`.
+
+Field interaction
+-----------------
+
+The Îto-KMC model uses an electrostatic approximation where the field is obtained by solving the Poisson equation for the potential.
+See :ref:`Chap:Electrostatics` for further details.
+
+Chemistry
+---------
+
+Kinetic Monte Carlo (KMC) is used within grid cells for resolving the plasma chemistry.
+The algorithmic concepts are given in :ref:`Chap:KineticMonteCarlo`.
 
 Algorithms
 ==========
@@ -23,11 +53,156 @@ Reactions
 Particle management
 -------------------
 
+0D chemistry
+------------
+
+The user input interface to the Îto-KMC model consists of a zero-dimensional plasma kinetics interface called ``ItoKMCPhysics``.
+This interface consists of the following main functionalities:
+
+#. User-defined species, and which solver types (Îto or CDR) to use when tracking them.
+#. User-defined initial particles, reaction kinetics, and photoionization processes. 
+
+The complete interface specification is given below.
+Because the interface is fairly extensive, ``chombo-discharge`` also supplies a JSON-based implementation called ``ItoKMCJSON`` (see :ref:`Chap:ItoKMCJSON`) for defining these things through file input.
+The difference between ``ItoKMCPhysics`` and its implementation ``ItoKMCJSON`` is that the JSON-based implementation class only supports a subset of potential features supported by ``ItoKMCPhysics``.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show/hide full 0D interface</a></summary>
+
+.. literalinclude:: ../../../../Physics/ItoKMC/CD_ItoKMCPhysics.H
+   :language: c++   
+
+.. raw:: html
+
+   </details><br>
+
+.. _Chap:ItoKMCJSON:
+
 JSON 0D chemistry interface
 ===========================
 
+The JSON-based chemistry interface (called ``ItoKMCJSON``) simplifies the definition of the plasma kinetics and initial conditions by permitting specifications through a JSON file.
+In addition, the JSON specification will permit the definition of background species that are not tracked as solvers (but that simply exist as a density function).
+The JSON interface thus provides a simple entry point for users that have no interest in defining the chemistry from scratch.
+
+Several mandatory fields are required when specifying the plasma kinetics, such as:
+
+* Gas pressure, temperature, and number density.
+* Background species (if any).
+* Townsend coefficients.
+* Plasma species and their initial conditions, which solver to use when tracking them.
+* Photon species and their absorption lengths.
+* Plasma reactions.
+* Photoionization reactions. 
+
+These specifications follow a pre-defined JSON format which is discussed in detail below.
+
+.. tip::
+
+   While JSON files do not formally support comments, the JSON submodule used by ``chombo-discharge`` allows them.
+
 Gas law
 -------
+
+The JSON gas law represents a loose definition of the gas pressure, temperature, and *number density*.
+Multiple gas laws can be defined in the JSON file, and the user can then select which one to use.
+This is defined within a JSON entry ``gas`` and a subentry ``law``.
+In the ``gas/law`` field one must specify an ``id`` field which indicates which gas law to use.
+One may also set an optional field ``plot`` to true/false if one wants to include the pressure, temperature, and density in the HDF5 output files.
+
+Each user-defined gas law exists as a separate entry in the ``gas/law`` field, and the minimum requirements for these are that they contain a ``type`` specifier.
+Currently, the supported types are
+
+* ``ideal`` (for constant ideal gas)
+* ``table vs height`` for tabulated density, temperature and pressure vs some height/axis.
+  
+The specification rules for these are different, and are discussed below.
+An example JSON specification is given below.
+Here, we have defined two gas law ``my_ideal_gas`` and ``tabulated_atmosphere`` and specified through the ``id`` parameter that we will use the ``my_ideal_gas`` specification.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Example gas law specification</a></summary>
+
+.. code-block:: json
+
+   {
+      "gas" : {
+         // Specify which gas law we use. The user can define multiple gas laws and then later specify which one to use.
+	 "law" : {
+	    "id" : "my_ideal_gas", // Specify which gas law we use.
+	    "plot" : true,         // Turn on/off plotting.
+	    "my_ideal_gas" : {
+		// Definition for an ideal gas law. Temperature is always in Kevlin the pressure is in bar. The neutral density
+		// is derived using an ideal gas law.
+		"type" : "ideal",
+		"temperature" : 300,
+		"pressure" : 1.0
+	    },
+	    "tabulated_atmosphere" : {
+		// Tabulated gas law. The user must supply a file containing the pressure, temperature and number density and
+		// specify the table resolution that will be used internally.
+		"type" : "table vs height",       // Specify that our gas law contains table-vs-height data
+		"file" : "ENMSIS_Atmosphere.dat", // File name
+		"axis" : "y",                     // Associated Cartesian axis for the "height"
+		"temperature column" : 0,         // Column containing the temperature
+		"pressure column" : 1,            // Column containing the pressure
+		"density column" : 2,             // Column containing the number density
+		"min height" : 0.0,               // Minium height kept when resampling the table
+		"max height" : 250000,            // Maximum height kept when resampling the table
+		"res height" : 500,               // Table resolution
+		"dump tables" : true,             // Optional argument for dumping tables to disk (useful for debugging)
+		"T scale" : 1.0,                  // Optional argument for user-specified temperature data scaling.
+		"P scale" : 1.0,                  // Optional argument for user-specified pressure data scaling.
+		"Rho scale" : 1.0                 // Optional argument for user-specified density data scaling.
+	    }
+	 }
+      }
+   }
+
+.. raw:: html
+
+   </details><br>   
+
+
+Ideal gas
+_________
+
+When specifying that the gas law ``type`` is ``ideal``, the user must further specify the temperature and pressure of the gas.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Example ideal gas specification</a></summary>
+
+.. code-block:: json
+
+   {
+      "gas" : {
+	 "law" : {
+	    "id" : "my_ideal_gas", // Specify which gas law we use.
+	    "my_ideal_gas" : {
+		"type" : "ideal",    // Ideal gas law type
+		"temperature" : 300, // Temperature must be in Kelvin
+		"pressure" : 1.0     // Pressure must be in bar
+	    },
+	 }
+      }
+   }
+
+
+.. raw:: html
+
+   </details><br>
+
+.. _Chap:ItoKMCJSON:
+
+Table vs height
+_______________
+
 
 Background species
 ------------------
@@ -77,6 +252,7 @@ The user must supply the following information:
    Internally, the rate is converted to a format that is consistent with the KMC algorithm.
 
 Plasma reactions should be entered in the JSON file using an array, .e.g.
+
 
 .. code-block:: json
 
@@ -251,18 +427,29 @@ To specify a Townsend rate constant, one can use the following:
 #. ``eta*v`` for setting the rate constant proportional to the Townsend attachment rate.
 
 One must also specify which species is associated with :math:`\left|\mathbf{v}\right|` by specifying a species flag.
-A complete JSON specification is
+.. A complete JSON specification is
+
+.. raw:: html
+
+   <details>
+   <summary><a>Example Townsend rate JSON specification</a></summary>
 
 .. code-block:: json
-		
-    "plasma reactions":
-    [
-	{
-	    "reaction": "e -> e + e + M+", // Reaction string
-	    "type": "alpha*v",             // Rate is alpha*v
-	    "species": "e"                 // Species for v
-	}	
-    ]
+
+   {
+      "plasma reactions":
+         [
+	    {
+	       "reaction": "e -> e + e + M+", // Reaction string
+	       "type": "alpha*v",             // Rate is alpha*v
+	       "species": "e"                 // Species for v
+	    }	
+         ]
+   }
+
+.. raw:: html
+
+   </details><br>   
 
 .. warning::
 
@@ -332,7 +519,7 @@ _______
 
 Reactions can be scaled by including a ``scale`` field in the JSON entry.
 This will scale the reaction coefficient by the input factor.
-This is useful when scaling reactions from different units, or for completely off some input reactions.
+This is useful when scaling reactions from different units, or for completely turning off some input reactions.
 An example JSON specification is
 
 .. code-block:: json
@@ -346,3 +533,10 @@ An example JSON specification is
 	    "scale": 0.0                   // Scaling factor
 	}	
     ]
+
+.. tip::
+
+   If one turns off a reaction by setting ``scale`` to zero, the KMC algorithm will still use the reaction but no reactants/products are consumed/produced.
+      
+Example programs
+================

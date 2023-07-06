@@ -2293,6 +2293,16 @@ ItoKMCJSON::getNumberOfPlotVariables() const noexcept
 
   int numPlots = 0;
 
+  if(m_plotGas) {
+    numPlots+= 3;
+  }
+
+  for (int i = 0; i < m_backgroundSpeciesPlot.size(); i++) {
+    if(m_backgroundSpeciesPlot[i]){
+      numPlots++;
+    }
+  }
+
   for (int i = 0; i < m_kmcReactionRatePlots.size(); i++) {
     if (std::get<0>(m_kmcReactionRatePlots[i])) {
       numPlots++;
@@ -2311,6 +2321,18 @@ ItoKMCJSON::getPlotVariableNames() const noexcept
   }
 
   Vector<std::string> plotVariableNames;
+
+  if(m_plotGas) {
+    plotVariableNames.push_back("gas pressure");
+    plotVariableNames.push_back("gas temperature");
+    plotVariableNames.push_back("gas number density");    
+  }
+
+  for (int i = 0; i < m_backgroundSpeciesPlot.size(); i++) {
+    if(m_backgroundSpeciesPlot[i]){
+      plotVariableNames.push_back(m_backgroundSpecies[i].getName() + " molar fraction");
+    }
+  }  
 
   for (int i = 0; i < m_kmcReactionRatePlots.size(); i++) {
     if (std::get<0>(m_kmcReactionRatePlots[i])) {
@@ -2339,6 +2361,18 @@ ItoKMCJSON::getPlotVariables(const RealVect          a_E,
 
   // Update basic reaction rates.
   const Real E = a_E.vectorLength();
+
+  if(m_plotGas) {
+    plotVars.push_back(m_gasPressure(a_pos));
+    plotVars.push_back(m_gasTemperature(a_pos));
+    plotVars.push_back(m_gasNumberDensity(a_pos));        
+  }
+
+  for (int i = 0; i < m_backgroundSpeciesPlot.size(); i++) {
+    if(m_backgroundSpeciesPlot[i]){
+      plotVars.push_back(m_backgroundSpecies[i].molarFraction(a_pos));
+    }
+  }    
 
   for (int i = 0; i < m_kmcReactions.size(); i++) {
     if (std::get<0>(m_kmcReactionRatePlots[i])) {
