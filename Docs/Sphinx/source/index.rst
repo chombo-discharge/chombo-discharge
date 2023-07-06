@@ -197,8 +197,10 @@ Contributing
    Contrib/Contributions
    Contrib/CodeStandard
 
-Bibliography
-************
+.. only:: html
+	  
+   Bibliography
+   ************
 
 .. toctree::
    :maxdepth: 3

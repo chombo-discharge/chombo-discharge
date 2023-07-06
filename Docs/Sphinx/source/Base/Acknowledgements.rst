@@ -22,12 +22,14 @@ Currently, if you use ``chombo-discharge`` you should cite the following method 
       year = {2023}
    }
 
-We maintain a list of publications (see :ref:`Chap:Publications`) that use ``chombo-discharge`` for scientific research.
-If you use the code for research, please let us know so we can update this list.
-   
-.. tip::
+.. only:: html
 
-   One can update the the bibliography file without involved us.
-   It is found in :file:`$DISCHARGE_HOME/Docs/Sphinx/source/publications.bib`, simply update it and contribute by creating a pull request on GitHub.
+   We maintain a list of publications (see :ref:`Chap:Publications`) that use ``chombo-discharge`` for scientific research.
+   If you use the code for research, please let us know so we can update this list.
+   
+   .. tip::
+
+      You can update the bibliography file yourself.
+      It is found in :file:`$DISCHARGE_HOME/Docs/Sphinx/source/publications.bib`, simply update it and contribute by creating a pull request on GitHub.
 
 

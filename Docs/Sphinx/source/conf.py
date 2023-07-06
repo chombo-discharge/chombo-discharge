@@ -55,6 +55,7 @@ bibtex_bibfiles = ['references.bib', 'publications.bib']
 
 # bibtex style
 bibtex_default_style = 'plain'
+bibtex_reference_style= 'author_year'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -300,7 +301,5 @@ numfig = True
 math_numfig = True
 numfig_secnum_depth = 2
 math_eqref_format = "Eq. {number}"
-
-
 
 print(commit_id)
