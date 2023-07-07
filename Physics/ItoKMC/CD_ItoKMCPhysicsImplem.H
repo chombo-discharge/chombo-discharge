@@ -54,6 +54,10 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
     m_particlePlacement = ParticlePlacement::Centroid;
   }
 #endif
+
+  MayDay::Warning("ItoKMCPhysics - fix photon pathways with ABSOLUTE efficiencies and sampling.");
+  MayDay::Warning("ItoKMCPhysics - in photoionizing reactions, absorption of fractional superphotons should be supported");
+  MayDay::Warning("ItoKMCPhysics - on photoabsorption on surfaces, fractional superphotons should be supported");  
 }
 
 inline ItoKMCPhysics::~ItoKMCPhysics() noexcept { CH_TIME("ItoKMCPhysics::~ItoKMCPhysics"); }

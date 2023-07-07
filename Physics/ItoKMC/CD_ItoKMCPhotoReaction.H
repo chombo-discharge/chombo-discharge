@@ -43,7 +43,7 @@ namespace Physics {
       */
       inline ItoKMCPhotoReaction(const size_t            a_source,
                                  const std::list<size_t> a_targets,
-                                 const Real              a_effiency = 1.0) noexcept;
+                                 const Real              a_efficiency = 1.0) noexcept;
 
       /*!
 	@brief Destructor. 

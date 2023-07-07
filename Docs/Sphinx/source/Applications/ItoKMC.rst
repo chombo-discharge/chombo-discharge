@@ -47,8 +47,9 @@ Algorithms
 Time stepping
 -------------
 
-Reactions
----------
+Reaction network
+----------------
+
 
 Particle management
 -------------------
@@ -60,11 +61,16 @@ The user input interface to the Îto-KMC model consists of a zero-dimensional pl
 This interface consists of the following main functionalities:
 
 #. User-defined species, and which solver types (Îto or CDR) to use when tracking them.
-#. User-defined initial particles, reaction kinetics, and photoionization processes. 
+#. User-defined initial particles, reaction kinetics, and photoionization processes.
 
-The complete interface specification is given below.
+.. _Chap:ItoKMCPhysics:
+
+ItoKMCPhysics
+_____________
+
+The complete C++ interface specification is given below.
 Because the interface is fairly extensive, ``chombo-discharge`` also supplies a JSON-based implementation called ``ItoKMCJSON`` (see :ref:`Chap:ItoKMCJSON`) for defining these things through file input.
-The difference between ``ItoKMCPhysics`` and its implementation ``ItoKMCJSON`` is that the JSON-based implementation class only supports a subset of potential features supported by ``ItoKMCPhysics``.
+The difference between ``ItoKMCPhysics`` and its implementation ``ItoKMCJSON`` is that the JSON-based implementation class only implements a subset of potential features supported by ``ItoKMCPhysics``.
 
 .. raw:: html
 
@@ -76,7 +82,147 @@ The difference between ``ItoKMCPhysics`` and its implementation ``ItoKMCJSON`` i
 
 .. raw:: html
 
-   </details><br>
+   </details><br>   
+
+Species definitions
+___________________
+
+Species are defined either as input species for CDR solvers (see :ref:`Chap:CdrSolver`) or Îto solvers (see :ref:`Chap:ItoSolver`).
+It is sufficient to populate the ``ItoKMCPhysics`` species vectors ``m_cdrSpecies`` and ``m_itoSpecies`` if one only wants to initialize the solvers.
+See :ref:`Chap:ItoKMCPhysics` for their C++ definition.
+In addition to actually populating the vectors, users will typically also include initial conditions for the species.
+The interfaces permit initial particles for the Îto solvers, while the CDR solvers permit particles *and* initial density functions.
+Additionally, one must define all species associated with radiative transfer solvers.
+
+.. _Chap:ItoKMCPlasmaReaction:
+
+Plasma reactions
+________________
+
+Plasma reactions in the Îto-KMC model are represented stoichiometrically as
+
+.. math::
+
+   A + B + \ldots \xrightarrow{c} C + D + \ldots
+
+where :math:`c` is the KMC rate coefficient, i.e. *not the rate coefficient from the reaction rate equation*.
+An arbitrary number of reactions is supported, but currently the reaction mechanisms are limited to:
+
+* The left-hand side must consist only of species that are tracked by a CDR or Îto solver.
+* The right-hand side can consist of species tracked by a CDR solver, an Îto solver, or a radiative transfer solver.
+
+These rules apply only to the internal C++ interface; implementations of this interface will typically also allow species defined as ''background species'', i.e. species that are not tracked by a solver.
+In that case, the interface implementation must absorb the background species contribution into the rate constant.
+
+In the KMC algorithm, one operates with chemical propensities rather than rate coefficients.
+For example, the chemical propensity :math:`a_1` for a reaction :math:`A + B \xrightarrow{c_1}\varnothing` is
+
+.. math::
+
+   a_1 = c_1X_AX_B,
+
+and from the macroscopic limit :math:`X_A \gg 1`, :math:`X_B \gg 1` one may in fact also derive that :math:`c_1 = k_1/\Delta V` where :math:`k_1` is the rate coefficient from the reaction rate equation, i.e. where :math:`\partial_t n_A = -k_1n_An_B`.
+Note that if the reaction was :math:`A + A\xrightarrow{c_2}\varnothing` then the propensity is
+
+.. math::
+
+   a_2 = \frac{1}{2}c_2X_A\left(X_A-1\right)
+
+since there are :math:`\frac{1}{2}X_A\left(X_A-1\right)` distinct pairs of particles of type :math:`A`.
+Likewise, the fluid rate coefficient would be :math:`k_2 = c_2\Delta V/2`.
+
+The distinction between KMC and fluid rates is an important one; the reaction representation used in the Îto-KMC model only operates with the KMC rates :math:`c_j`, and it is us to the user to ensure that these are consistent with the fluid limit.
+Internally, these reactions are implemented through the dual state KMC implementation, see :ref:`Chap:KMCDualState`.
+During the reaction advance the user only needs to update the :math:`c_j` coefficients (typically done via an interface implementation); the calculation of the propensity is automatic and follows the standard KMC rules (e.g., the KMC solver accounts for the number of distinct pairs of particles).
+This must be done in the routine ``updateReactionRates(...)``, see :ref:`Chap:ItoKMCPhysics` for the complete specification.
+
+Photo-reactions
+_______________
+
+Photo-reactions are also represented stoichiometrically as
+
+.. math::
+
+   \gamma \xrightarrow{\xi} A + B + \ldots,
+
+where :math:`\xi` is the photo-reaction efficiency, i.e. the probability that the photon :math:`\gamma` causes a reaction when it is absorbed on the mesh.
+Currently, photons can only be generated through *plasma reactions*, see :ref:`Chap:ItoKMCPlasmaReaction`, and we do not permit reactions between the photon and plasma species, i.e. reactions of the type :math:`\gamma + A\rightarrow\varnothing` are not permitted. 
+
+.. important::
+
+   We currently only support constant photoionization probabilities :math:`\xi`.
+
+``ItoKMCPhysics`` adds some flexibility when dealing with photo-reactions as it permits pre-evaluation of photoionization probabilities.
+That is, when generating photons through reactions of the type :math:`A + B \rightarrow \gamma`, one may scale the reaction by the photoionization probability :math:`\xi` so that only ionizing photons are generated and then write the photo-reaction as :math:`\gamma \xrightarrow{\xi=1} A + B + \ldots`.
+However, this process becomes more complicated when dealing with multiple photo-reaction pathways, e.g.,
+
+.. math::
+
+   \gamma &\xrightarrow{\xi_1} A + B, \\
+   \gamma &\xrightarrow{\xi_2} A + B, \\
+
+where :math:`\xi_1` and :math:`\xi_2` are the probabilities that the photon :math:`\gamma` triggers the reaction.
+If only a single physical photon is absorbed, then one must stochastically determine which pathway is triggered.
+There are two ways of doing this:
+
+#. Pre-scale the photon generation by :math:`\xi_1 + \xi_2`, and then determine the pathway through the relative probabilities :math:`\xi_1/\left(\xi_1+\xi_2\right)` and :math:`\xi_2/\left(\xi_1+\xi_2\right)`.
+#. Do not scale the photon generation reaction and determine the pathway through the absolute probabilities :math:`\xi_1` and :math:`\xi_2`.
+   This can imply a large computational cost since one will have to track all photons that are generated.
+
+The former method is normally the preferred way as it can lead to reductions in computational complexity and particle noise, but for flexibility ``ItoKMCPhysics`` supports both of these.
+The latter method can be of relevance if users wants precise descriptions of photons that trigger both photoionizing reactions and surface reactions (e.g., secondary electron emission).
+Pre-scaling by the photo-reaction efficiency is then difficult because the reactions
+
+.. math::
+
+   \gamma &\xrightarrow{\text{volume}}\varnothing \\
+   \gamma &\xrightarrow{\text{surface}}\varnothing,
+
+can not be pre-scaled.
+
+.. note::
+
+   Is this true? Or can we scale by :math:`\sum_j\xi_j + \sum_j\zeta_j` and then evaluate :math:`\xi_i/\sum_j \xi_j` when doing absorption on in the volume?
+
+   Should this be automated? How should the photon-products be scaled???
+   
+An alternative is to split the photon type :math:`\gamma` into volumetrically absorbed and surface absorbed photon species :math:`\gamma_v` and :math:`\gamma_s`.
+In this case one may pre-scale the photon-generating reactions by the photo-reaction probabilities :math:`\xi` (for volume absorption) and :math:`\zeta` (for surface absorption) as follows:
+
+.. math::
+
+   A + B &\xrightarrow{k\rightarrow k\xi}\gamma_v, \\ 
+   A + B &\xrightarrow{k\rightarrow k\zeta}\gamma_s.
+
+Volumetric and surface absorption is then treated independently
+
+.. math::
+
+   \gamma_v &\xrightarrow{\left(\xi=1\right)}, \ldots\\
+   \gamma_s &\xrightarrow{\left(\zeta=1\right)} \ldots.
+
+This type of pre-evaluation of the photo-reaction pathways is sensible in a statistical sense, but loses meaning if only a single photon is involved.
+
+.. important::
+   
+   The above sampling routines require some modification when dealing with super-photons.
+   For example, if the photon weight is :math:`w_\gamma = 1000` and :math:`\xi_1 = 0.01`, absorption of the super-photon on the mesh should on average trigger 10 reactions.
+   
+
+Surface reactions
+_________________
+
+Transport coefficients
+______________________
+
+Species mobilities and diffusion coefficients should be computed just as they are done in the fluid approximation.
+The ``ItoKMCPhysics`` interface requires implementations of two functions that define the coefficients as functions of :math:`\mu = \mu\left(t,\mathbf{x}, \mathbf{E}\right)`,
+and likewise for the diffusion coefficients.
+Note that these functions should return the *fluid coefficients*.
+
+.. important::
+
+   There is currently no support for computing :math:`\mu` as a function of the species densities (e.g., the electron density), but this only requires modest extensions of the Îto-KMC module.
 
 .. _Chap:ItoKMCJSON:
 
@@ -198,11 +344,9 @@ When specifying that the gas law ``type`` is ``ideal``, the user must further sp
 
    </details><br>
 
-.. _Chap:ItoKMCJSON:
 
 Table vs height
 _______________
-
 
 Background species
 ------------------
