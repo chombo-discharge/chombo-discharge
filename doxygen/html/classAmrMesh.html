@@ -633,9 +633,9 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve<
 <tr class="memitem:a8dd953629079c965c72a6a6b742f507a"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBReflux.html">EBReflux</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a8dd953629079c965c72a6a6b742f507a">getFluxRegister</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a8dd953629079c965c72a6a6b742f507a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flux register.  <a href="classAmrMesh.html#a8dd953629079c965c72a6a6b742f507a">More...</a><br /></td></tr>
 <tr class="separator:a8dd953629079c965c72a6a6b742f507a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35c78b954fe36e01edfa0d0260ba0b63"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBRedistribution.html">EBRedistribution</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a35c78b954fe36e01edfa0d0260ba0b63">getRedistributionOp</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:a35c78b954fe36e01edfa0d0260ba0b63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the redistribution operators.  <a href="classAmrMesh.html#a35c78b954fe36e01edfa0d0260ba0b63">More...</a><br /></td></tr>
-<tr class="separator:a35c78b954fe36e01edfa0d0260ba0b63"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9334b1e32789d5014a0285ecbff0a854"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a9334b1e32789d5014a0285ecbff0a854">getRedistributionOp</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:a9334b1e32789d5014a0285ecbff0a854"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the redistribution operators.  <a href="classAmrMesh.html#a9334b1e32789d5014a0285ecbff0a854">More...</a><br /></td></tr>
+<tr class="separator:a9334b1e32789d5014a0285ecbff0a854"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8a85437e92d6b8493258d04c05d30db"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classIrregAmrStencil.html">IrregAmrStencil</a>&lt; <a class="el" href="classCentroidInterpolationStencil.html">CentroidInterpolationStencil</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ab8a85437e92d6b8493258d04c05d30db">getCentroidInterpolationStencils</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:ab8a85437e92d6b8493258d04c05d30db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get interpolation stencils for going from cell center to cell centroid.  <a href="classAmrMesh.html#ab8a85437e92d6b8493258d04c05d30db">More...</a><br /></td></tr>
 <tr class="separator:ab8a85437e92d6b8493258d04c05d30db"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -4837,14 +4837,14 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="a35c78b954fe36e01edfa0d0260ba0b63"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a35c78b954fe36e01edfa0d0260ba0b63">&#9670;&nbsp;</a></span>getRedistributionOp()</h2>
+<a id="a9334b1e32789d5014a0285ecbff0a854"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9334b1e32789d5014a0285ecbff0a854">&#9670;&nbsp;</a></span>getRedistributionOp()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBRedistribution.html">EBRedistribution</a> &gt; &gt; &amp; AmrMesh::getRedistributionOp </td>
+          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &gt; &gt; &amp; AmrMesh::getRedistributionOp </td>
           <td>(</td>
           <td class="paramtype">const std::string&#160;</td>
           <td class="paramname"><em>a_realm</em>, </td>

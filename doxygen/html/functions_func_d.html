@@ -114,6 +114,7 @@ $(function() {
 , <a class="el" href="classEBCoarAve.html#a2f498c611d22502e1aec6910c38f5cb4">EBCoarAve</a>
 , <a class="el" href="classEBCoarseFineParticleMesh.html#a9e351ed56180a1bb49aaf58a4edc092e">EBCoarseFineParticleMesh</a>
 , <a class="el" href="classEBCoarseToFineInterp.html#a85834557cba5e137e459af35f35e25a0">EBCoarseToFineInterp</a>
+, <a class="el" href="classEBFluxRedistribution.html#aa30412043e2853160c7a4c015ad499fd">EBFluxRedistribution</a>
 , <a class="el" href="classEBGhostCellInterpolator.html#a612f7a5919ae1b8ed4dde073048f82ef">EBGhostCellInterpolator</a>
 , <a class="el" href="classEBGradient.html#a305b9c6e9ec0256f28dd17ec6f159822">EBGradient</a>
 , <a class="el" href="classEBHelmholtzDirichletEBBC.html#aa1fd5965352e99a245bdf687c979fe07">EBHelmholtzDirichletEBBC</a>
@@ -126,7 +127,6 @@ $(function() {
 , <a class="el" href="classEBMGProlong.html#a2399ac7ce1f858235045dc6e157c3bb5">EBMGProlong</a>
 , <a class="el" href="classEBMGRestrict.html#a7e91d46439750aef5ad5177785049df5">EBMGRestrict</a>
 , <a class="el" href="classEBParticleMesh.html#aad56ce575013118a307f3a2875c7cda5">EBParticleMesh</a>
-, <a class="el" href="classEBRedistribution.html#aeff8a4bb6af5df14de342da841a4924c">EBRedistribution</a>
 , <a class="el" href="classEBReflux.html#a15297578586adb374b8736527db48093">EBReflux</a>
 , <a class="el" href="classElectrode.html#a29a63a20e07ca6470d60800270824662">Electrode</a>
 , <a class="el" href="classIrregAmrStencil.html#a1fe18e32cc7fea9703f00574f2a32c8c">IrregAmrStencil&lt; IrregSten &gt;</a>
@@ -161,11 +161,11 @@ $(function() {
 <li>defineBuffers()
 : <a class="el" href="classEBAMRSurfaceDeposition.html#a19e526596ad7e42cff6f0ea74f9db532">EBAMRSurfaceDeposition</a>
 , <a class="el" href="classEBCoarAve.html#af31116766596f0839d21a1e791374bff">EBCoarAve</a>
+, <a class="el" href="classEBFluxRedistribution.html#a557bfa095e8b4b16bc57c6104152827a">EBFluxRedistribution</a>
 , <a class="el" href="classEBGhostCellInterpolator.html#a3d70444fbc659ca605b3ad3cd4985ec9">EBGhostCellInterpolator</a>
 , <a class="el" href="classEBGradient.html#ab3062394417d58d028ebe55931735436">EBGradient</a>
 , <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#ad523dd4d64565364f232ffb0253295c4">EBLeastSquaresMultigridInterpolator</a>
 , <a class="el" href="classEBMultigridInterpolator.html#a98d1600da6be0a36f2aea3587a1238dd">EBMultigridInterpolator</a>
-, <a class="el" href="classEBRedistribution.html#a23e6600b92694c604a300307ff943caa">EBRedistribution</a>
 , <a class="el" href="classEBReflux.html#a676a0159046c5d92e162293fa2ae800c">EBReflux</a>
 </li>
 <li>defineCellStencils()
@@ -254,7 +254,7 @@ $(function() {
 : <a class="el" href="classRealm.html#acf98254553c4cde4e7468eee204964ca">Realm</a>
 </li>
 <li>defineInterfaceCells()
-: <a class="el" href="classEBRedistribution.html#aecdaf7290dfe2a0479bc619292fd935c">EBRedistribution</a>
+: <a class="el" href="classEBFluxRedistribution.html#a27a4a5782a1d6408e078f91140c38441">EBFluxRedistribution</a>
 </li>
 <li>defineInterpolationStencils()
 : <a class="el" href="classCdrSolver.html#ab965dcd94518ca2b80b4348d2a67a63c">CdrSolver</a>
@@ -339,8 +339,8 @@ $(function() {
 </li>
 <li>defineStencils()
 : <a class="el" href="classCoarseInterpQuadCF.html#af19236675fcf8b8a92640c54bbf3582f">CoarseInterpQuadCF</a>
+, <a class="el" href="classEBFluxRedistribution.html#a7403d9ac8edccb12449df7b1078ac811">EBFluxRedistribution</a>
 , <a class="el" href="classEBHelmholtzOp.html#af1e883965165f53ff42eb0312c835788">EBHelmholtzOp</a>
-, <a class="el" href="classEBRedistribution.html#ad6132593bcf40cad6a4e4f9674b41754">EBRedistribution</a>
 , <a class="el" href="classEBReflux.html#a3d73e784ea643a893e1f4ab46f845db6">EBReflux</a>
 , <a class="el" href="classMFHelmholtzJumpBC.html#a9a69e50750b3b789a1e29ea52543ca98">MFHelmholtzJumpBC</a>
 </li>
@@ -350,7 +350,7 @@ $(function() {
 , <a class="el" href="classEBMultigridInterpolator.html#a1aa28379c1b2bc0a4ca6505b68e937a6">EBMultigridInterpolator</a>
 </li>
 <li>defineValidCells()
-: <a class="el" href="classEBRedistribution.html#abfca8e84e7dd3a820f48f826fbc48fd5">EBRedistribution</a>
+: <a class="el" href="classEBFluxRedistribution.html#a76921d5fec79c573a407072507d688b8">EBFluxRedistribution</a>
 , <a class="el" href="classRealm.html#a5f2289a6d36fe1f903b4a05dde660e04">Realm</a>
 </li>
 <li>defineVofIterator()
