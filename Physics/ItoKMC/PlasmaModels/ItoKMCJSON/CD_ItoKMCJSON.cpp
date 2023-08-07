@@ -1872,12 +1872,11 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   //         pq -> quenching pressure (in atm)
   //
   //
-  //       f = kr/(kr + kp + kq(N)) * nu * mu
+  //       f = kr/(kr + kp + kq(N)) * nu
   //          kr -> radiation rate
   //          kp -> predissociation rate
   //          kq -> quenching rate
   //          nu -> photoionization efficiency
-  //          mu -> excitation efficiency efficiency
   //
   // Note that we currently only support field-independent rates, but since all of this is lumped into a function f(E, x),  more complex expressions
   // that also account for possible field-dependencies are certain possible.
@@ -1890,13 +1889,23 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   bool pressureQuench = false;
   bool photoiQuench   = false;
 
-  if (a_reactionJSON.contains("quenching pressure")) {
+  if (a_reactionJSON.contains("quenching")) {
     pressureQuench = true;
 
-    const Real pq = a_reactionJSON["quenching pressure"].get<Real>();
+    const std::string derivedError = baseError + " and got 'quenching' but";
 
-    reactionScale = [pq, &P = this->m_gasPressure](const Real E, const RealVect x) -> Real {
-      return pq / (pq + P(x));
+    if (!(a_reactionJSON["quenching"].contains("pq"))) {
+      this->throwParserError(derivedError + " quenching pressure 'pq' is missing");
+    }
+    if (!(a_reactionJSON["quenching"].contains("photoi eff"))) {
+      this->throwParserError(derivedError + " photoionization efficiency 'photoi eff' is missing");
+    }
+
+    const Real pq        = a_reactionJSON["quenching"]["pq"].get<Real>();
+    const Real photoiEff = a_reactionJSON["quenching"]["photoi eff"].get<Real>();
+
+    reactionScale = [pq, photoiEff, &P = this->m_gasPressure](const Real E, const RealVect x) -> Real {
+      return (pq / (pq + P(x))) * photoiEff;
     };
   }
   if (a_reactionJSON.contains("photoionization")) {
@@ -1913,9 +1922,6 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     if (!(a_reactionJSON["photoionization"].contains("kq/N"))) {
       this->throwParserError(derivedError + " quenching factor 'kq/N' is missing");
     }
-    if (!(a_reactionJSON["photoionization"].contains("excite eff"))) {
-      this->throwParserError(derivedError + " excitation efficiency 'excite eff' is missing");
-    }
     if (!(a_reactionJSON["photoionization"].contains("photoi eff"))) {
       this->throwParserError(derivedError + " photoionization efficiency 'photoi eff' is missing");
     }
@@ -1923,14 +1929,12 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     const Real kr        = a_reactionJSON["photoionization"]["kr"].get<Real>();
     const Real kp        = a_reactionJSON["photoionization"]["kp"].get<Real>();
     const Real kqByN     = a_reactionJSON["photoionization"]["kq/N"].get<Real>();
-    const Real exciteEff = a_reactionJSON["photoionization"]["excite eff"].get<Real>();
     const Real photoiEff = a_reactionJSON["photoionization"]["photoi eff"].get<Real>();
 
-    reactionScale = [kr, kp, kqByN, exciteEff, photoiEff, &N = this->m_gasNumberDensity](const Real     E,
-                                                                                         const RealVect x) -> Real {
+    reactionScale = [kr, kp, kqByN, photoiEff, &N = this->m_gasNumberDensity](const Real E, const RealVect x) -> Real {
       const Real kq = kqByN * N(x);
 
-      return (kr / (kr + kp + kq)) * exciteEff * photoiEff;
+      return (kr / (kr + kp + kq)) * photoiEff;
     };
   }
 
@@ -1943,6 +1947,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     return unscaledFluidRate(E, x) * reactionScale(E, x) * scaleFactor;
   };
 
+  // This is the KMC rate -- note that it absorbs the background species.
   FunctionEVX kmcRate = [fluidRate,
                          volumeFactor,
                          propensityFactor,

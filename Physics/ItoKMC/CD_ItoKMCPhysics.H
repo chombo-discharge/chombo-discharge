@@ -434,7 +434,8 @@ namespace Physics {
       /*!
 	@brief Random number generators for photoionization pathways. 
 	@details The first index is the photon index, i.e. entry in m_photonSpecies. The second index in the
-	map is an RNG generator for selecting photo-reactions. 
+	map is an RNG generator for selecting photo-reactions, and a map which associates the returned
+	reaction from the RNG generator with an index in m_photoReactions.
       */
       std::map<int, std::pair<std::discrete_distribution<int>, std::map<int, int>>> m_photoPathways;
 

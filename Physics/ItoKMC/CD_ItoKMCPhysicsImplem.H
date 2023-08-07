@@ -111,6 +111,15 @@ ItoKMCPhysics::definePhotoPathways() noexcept
 {
   CH_TIME("ItoKMCPhysics::definePhotoPathways");
 
+  // Build a temporary list of pathways. I.e. restructure the list of reactions
+  //
+  // Y1 -> A
+  // Y1 -> B
+  // Y2 -> C
+  // Y2 -> D
+  //
+  // into separate lists for Y1, Y2, ....
+  //
   std::map<int, std::vector<std::pair<int, Real>>> pathways;
 
   for (int i = 0; i < m_photoReactions.size(); i++) {
@@ -122,17 +131,26 @@ ItoKMCPhysics::definePhotoPathways() noexcept
     pathways[src].emplace_back(std::make_pair(i, efficiency));
   }
 
-  // Define the reaction set.
+  // Go through the temporary pathways list and compute the relative efficiencies of one of the
+  // photons triggering a reaction. The relative efficiencies are given by
+  //
+  // p(i) = R(i)/sum_j R(j).
+  //
   for (const auto& p : pathways) {
     const int                               photoSpecies             = p.first;
     const std::vector<std::pair<int, Real>> reactionsAndEfficiencies = p.second;
 
     std::map<int, int> localToGlobalMap;
     std::list<double>  efficiencies;
+    double             sumEfficiencies = 0.0;
+
+    for (int i = 0; i < reactionsAndEfficiencies.size(); i++) {
+      sumEfficiencies += (double)reactionsAndEfficiencies[i].second;
+    }
 
     for (int i = 0; i < reactionsAndEfficiencies.size(); i++) {
       localToGlobalMap.emplace(i, reactionsAndEfficiencies[i].first);
-      efficiencies.emplace_back((double)reactionsAndEfficiencies[i].second);
+      efficiencies.emplace_back((double)reactionsAndEfficiencies[i].second / sumEfficiencies);
     }
 
     std::discrete_distribution<int> distribution(efficiencies.begin(), efficiencies.end());
