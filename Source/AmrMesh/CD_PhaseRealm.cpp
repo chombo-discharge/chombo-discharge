@@ -701,14 +701,14 @@ PhaseRealm::defineRedistOper(const int a_lmin, const int a_regsize)
 
       const bool redistributeOutside = true;
 
-      m_redistributionOp[lvl] = RefCountedPtr<EBRedistribution>(new EBRedistribution(eblgCoar,
-                                                                                     eblgCoarsened,
-                                                                                     eblg,
-                                                                                     eblgRefined,
-                                                                                     eblgFine,
-                                                                                     refToCoar,
-                                                                                     refToFine,
-                                                                                     redistributeOutside));
+      m_redistributionOp[lvl] = RefCountedPtr<EBFluxRedistribution>(new EBFluxRedistribution(eblgCoar,
+                                                                                             eblgCoarsened,
+                                                                                             eblg,
+                                                                                             eblgRefined,
+                                                                                             eblgFine,
+                                                                                             refToCoar,
+                                                                                             refToFine,
+                                                                                             redistributeOutside));
     }
   }
 }
@@ -980,7 +980,7 @@ PhaseRealm::getFluxRegister() const
   return m_ebReflux;
 }
 
-Vector<RefCountedPtr<EBRedistribution>>&
+Vector<RefCountedPtr<EBFluxRedistribution>>&
 PhaseRealm::getRedistributionOp() const
 {
   if (!this->queryOperator(s_eb_redist)) {

@@ -3186,7 +3186,7 @@ AmrMesh::getFluxRegister(const std::string a_realm, const phase::which_phase a_p
   return m_realms[a_realm]->getFluxRegister(a_phase);
 }
 
-Vector<RefCountedPtr<EBRedistribution>>&
+Vector<RefCountedPtr<EBFluxRedistribution>>&
 AmrMesh::getRedistributionOp(const std::string a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getRedistributionOp");

@@ -340,7 +340,7 @@ public:
     @brief Get the redistribution operators
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBRedistribution>>&
+  Vector<RefCountedPtr<EBFluxRedistribution>>&
   getRedistributionOp(const phase::which_phase a_phase);
 
   /*!
