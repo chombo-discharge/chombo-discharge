@@ -585,6 +585,8 @@ namespace Physics {
 	@param[in] a_reactionJSON Reaction entry in JSON file
 	@param[in] a_backgroundReactants List of background species appearing on the left hand side of the reaction
 	@param[in] a_plasmaReactants List of plasma species appearing on the left-hand side of the reaction
+	@return This should return a pair of KMC and fluid rates. The KMC rate will also be multiplied by background species on the 
+	left hand side of the reaction.
       */
       virtual std::pair<FunctionEVX, FunctionEX>
       parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,

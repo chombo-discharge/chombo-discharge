@@ -1635,7 +1635,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   //       using the microscopic rates, we must add this scaling back in. Also note that this scaling does not matter if background species enter on the left
   //       hand side because the rates are simply absorbed into the rate itself.
 
-  FunctionEX fluidRate = [](const Real E, const RealVect x) -> Real {
+  FunctionEX unscaledFluidRate = [](const Real E, const RealVect x) -> Real {
     return 0.0;
   };
 
@@ -1679,8 +1679,8 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
       this->throwParserError(baseError + " and got constant rate but 'value' cannot be negative");
     }
 
-    fluidRate = [value, scaleFactor](const Real E, const RealVect x) -> Real {
-      return value * scaleFactor;
+    unscaledFluidRate = [value](const Real E, const RealVect x) -> Real {
+      return value;
     };
   }
   else if (type == "alpha*v") {
@@ -1696,9 +1696,8 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     const int idx = m_plasmaIndexMap.at(species);
 
-    fluidRate = [&mu = m_mobilityFunctions[idx], &alpha = m_alpha, scaleFactor](const Real     E,
-                                                                                const RealVect x) -> Real {
-      return alpha(E, x) * mu(E, x) * E * scaleFactor;
+    unscaledFluidRate = [&mu = m_mobilityFunctions[idx], &alpha = m_alpha](const Real E, const RealVect x) -> Real {
+      return alpha(E, x) * mu(E, x) * E;
     };
   }
   else if (type == "eta*v") {
@@ -1714,8 +1713,8 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     const int idx = m_plasmaIndexMap.at(species);
 
-    fluidRate = [&mu = m_mobilityFunctions[idx], &eta = m_eta, scaleFactor](const Real E, const RealVect x) -> Real {
-      return eta(E, x) * mu(E, x) * E * scaleFactor;
+    unscaledFluidRate = [&mu = m_mobilityFunctions[idx], &eta = m_eta](const Real E, const RealVect x) -> Real {
+      return eta(E, x) * mu(E, x) * E;
     };
   }
   else if (type == "table vs E/N") {
@@ -1728,10 +1727,10 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     LookupTable1D<2> tabulatedCoeff = this->parseTableEByN(a_reactionJSON, "rate/N");
 
-    fluidRate = [&N = this->m_gasNumberDensity, tabulatedCoeff, scaleFactor](const Real E, const RealVect x) -> Real {
+    unscaledFluidRate = [&N = this->m_gasNumberDensity, tabulatedCoeff](const Real E, const RealVect x) -> Real {
       const Real Etd = E / (N(x) * Units::Td);
 
-      return tabulatedCoeff.getEntry<1>(Etd) * scaleFactor;
+      return tabulatedCoeff.getEntry<1>(Etd);
     };
   }
   else if (type == "function T A") {
@@ -1766,8 +1765,8 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
       speciesTemperature = m_plasmaTemperatures[m_plasmaIndexMap.at(species)];
     }
 
-    fluidRate = [c1, c2, T = speciesTemperature, scaleFactor](const Real E, const RealVect x) -> Real {
-      return c1 * std::pow(T(E, x), c2) * scaleFactor;
+    unscaledFluidRate = [c1, c2, T = speciesTemperature](const Real E, const RealVect x) -> Real {
+      return c1 * std::pow(T(E, x), c2);
     };
   }
   else if (type == "function TT A") {
@@ -1825,8 +1824,8 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     const Real c1 = a_reactionJSON["c1"].get<Real>();
     const Real c2 = a_reactionJSON["c1"].get<Real>();
 
-    fluidRate = [c1, c2, T1 = speciesTemperature1, T2 = speciesTemperature2, scaleFactor](const Real     E,
-                                                                                          const RealVect x) -> Real {
+    unscaledFluidRate = [c1, c2, T1 = speciesTemperature1, T2 = speciesTemperature2](const Real     E,
+                                                                                     const RealVect x) -> Real {
       return c1 * std::pow(T1(E, x) / T2(E, x), c2);
     };
   }
@@ -1857,7 +1856,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     const Real c4 = a_reactionJSON["c4"].get<Real>();
     const Real c5 = a_reactionJSON["c5"].get<Real>();
 
-    fluidRate = [c1, c2, c3, c4, c5, &N = this->m_gasNumberDensity](const Real E, const RealVect x) -> Real {
+    unscaledFluidRate = [c1, c2, c3, c4, c5, &N = this->m_gasNumberDensity](const Real E, const RealVect x) -> Real {
       const Real ETd = E / (N(x) * Units::Td);
 
       return c1 * exp(-std::pow(c2 / (c3 + c4 * ETd), c5));
@@ -1866,6 +1865,83 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   else {
     this->throwParserError(baseError + " but 'type' specifier '" + type + "' is not supported");
   }
+
+  // Scale the reaction if the user asks for it, which is useful when dealing with photoionizing reactions as it permits the user to only track
+  // photons that ionize. Currently, this is either pressure-based quenching or "photoionization-based" scaling. This is done by
+  //       f =  pq/(p(x) + pq)
+  //         pq -> quenching pressure (in atm)
+  //
+  //
+  //       f = kr/(kr + kp + kq(N)) * nu * mu
+  //          kr -> radiation rate
+  //          kp -> predissociation rate
+  //          kq -> quenching rate
+  //          nu -> photoionization efficiency
+  //          mu -> excitation efficiency efficiency
+  //
+  // Note that we currently only support field-independent rates, but since all of this is lumped into a function f(E, x),  more complex expressions
+  // that also account for possible field-dependencies are certain possible.
+
+  // Default rate that gets passed in below.
+  FunctionEX reactionScale = [](const Real E, const RealVect x) -> Real {
+    return 1.0;
+  };
+
+  bool pressureQuench = false;
+  bool photoiQuench   = false;
+
+  if (a_reactionJSON.contains("quenching pressure")) {
+    pressureQuench = true;
+
+    const Real pq = a_reactionJSON["quenching pressure"].get<Real>();
+
+    reactionScale = [pq, &P = this->m_gasPressure](const Real E, const RealVect x) -> Real {
+      return pq / (pq + P(x));
+    };
+  }
+  if (a_reactionJSON.contains("photoionization")) {
+    photoiQuench = true;
+
+    const std::string derivedError = baseError + " and got 'photoionization' but";
+
+    if (!(a_reactionJSON["photoionization"].contains("kr"))) {
+      this->throwParserError(derivedError + " radiative rate 'kr' is missing");
+    }
+    if (!(a_reactionJSON["photoionization"].contains("kp"))) {
+      this->throwParserError(derivedError + " predissociation rate 'kp' is missing");
+    }
+    if (!(a_reactionJSON["photoionization"].contains("kq/N"))) {
+      this->throwParserError(derivedError + " quenching factor 'kq/N' is missing");
+    }
+    if (!(a_reactionJSON["photoionization"].contains("excite eff"))) {
+      this->throwParserError(derivedError + " excitation efficiency 'excite eff' is missing");
+    }
+    if (!(a_reactionJSON["photoionization"].contains("photoi eff"))) {
+      this->throwParserError(derivedError + " photoionization efficiency 'photoi eff' is missing");
+    }
+
+    const Real kr        = a_reactionJSON["photoionization"]["kr"].get<Real>();
+    const Real kp        = a_reactionJSON["photoionization"]["kp"].get<Real>();
+    const Real kqByN     = a_reactionJSON["photoionization"]["kq/N"].get<Real>();
+    const Real exciteEff = a_reactionJSON["photoionization"]["excite eff"].get<Real>();
+    const Real photoiEff = a_reactionJSON["photoionization"]["photoi eff"].get<Real>();
+
+    reactionScale = [kr, kp, kqByN, exciteEff, photoiEff, &N = this->m_gasNumberDensity](const Real     E,
+                                                                                         const RealVect x) -> Real {
+      const Real kq = kqByN * N(x);
+
+      return (kr / (kr + kp + kq)) * exciteEff * photoiEff;
+    };
+  }
+
+  if (pressureQuench && photoiQuench) {
+    this->throwParserError(baseError + " but can't have both 'quenching pressure' and 'photoionization'");
+  }
+
+  // This is the conventional rate coefficient for the deterministic reaction rate equation.
+  FunctionEX fluidRate = [unscaledFluidRate, scaleFactor, reactionScale](const Real E, const RealVect x) -> Real {
+    return unscaledFluidRate(E, x) * reactionScale(E, x) * scaleFactor;
+  };
 
   FunctionEVX kmcRate = [fluidRate,
                          volumeFactor,
@@ -2293,12 +2369,12 @@ ItoKMCJSON::getNumberOfPlotVariables() const noexcept
 
   int numPlots = 0;
 
-  if(m_plotGas) {
-    numPlots+= 3;
+  if (m_plotGas) {
+    numPlots += 3;
   }
 
   for (int i = 0; i < m_backgroundSpeciesPlot.size(); i++) {
-    if(m_backgroundSpeciesPlot[i]){
+    if (m_backgroundSpeciesPlot[i]) {
       numPlots++;
     }
   }
@@ -2322,17 +2398,17 @@ ItoKMCJSON::getPlotVariableNames() const noexcept
 
   Vector<std::string> plotVariableNames;
 
-  if(m_plotGas) {
+  if (m_plotGas) {
     plotVariableNames.push_back("gas pressure");
     plotVariableNames.push_back("gas temperature");
-    plotVariableNames.push_back("gas number density");    
+    plotVariableNames.push_back("gas number density");
   }
 
   for (int i = 0; i < m_backgroundSpeciesPlot.size(); i++) {
-    if(m_backgroundSpeciesPlot[i]){
+    if (m_backgroundSpeciesPlot[i]) {
       plotVariableNames.push_back(m_backgroundSpecies[i].getName() + " molar fraction");
     }
-  }  
+  }
 
   for (int i = 0; i < m_kmcReactionRatePlots.size(); i++) {
     if (std::get<0>(m_kmcReactionRatePlots[i])) {
@@ -2362,17 +2438,17 @@ ItoKMCJSON::getPlotVariables(const RealVect          a_E,
   // Update basic reaction rates.
   const Real E = a_E.vectorLength();
 
-  if(m_plotGas) {
+  if (m_plotGas) {
     plotVars.push_back(m_gasPressure(a_pos));
     plotVars.push_back(m_gasTemperature(a_pos));
-    plotVars.push_back(m_gasNumberDensity(a_pos));        
+    plotVars.push_back(m_gasNumberDensity(a_pos));
   }
 
   for (int i = 0; i < m_backgroundSpeciesPlot.size(); i++) {
-    if(m_backgroundSpeciesPlot[i]){
+    if (m_backgroundSpeciesPlot[i]) {
       plotVars.push_back(m_backgroundSpecies[i].molarFraction(a_pos));
     }
-  }    
+  }
 
   for (int i = 0; i < m_kmcReactions.size(); i++) {
     if (std::get<0>(m_kmcReactionRatePlots[i])) {
