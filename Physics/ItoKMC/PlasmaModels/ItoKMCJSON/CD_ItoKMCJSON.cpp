@@ -1391,7 +1391,79 @@ ItoKMCJSON::initializePhotoReactions()
     pout() << m_className + "::initializePhotoReactions" << endl;
   }
 
-  pout() << "ItoKMCJSON::initializePhotoReactions - not implemented" << endl;
+  const std::string baseError = "ItoKMCJSON::initializePhotoReactions";
+
+  for (const auto& reactionJSON : m_json["photo reactions"]) {
+    if (!(reactionJSON.contains("reaction"))) {
+      this->throwParserError(baseError + " but one of the reactions is missing the field 'reaction'");
+    }
+    if (!(reactionJSON.contains("efficiency"))) {
+      this->throwParserError(baseError + " but one of the reactions is missing the field 'efficiency'");
+    }
+
+    const Real photoiEfficiency = reactionJSON["efficiency"].get<Real>();
+
+    const std::string reaction    = this->trim(reactionJSON["reaction"].get<std::string>());
+    const std::string baseErrorID = baseError + " for reaction '" + reaction + "'";
+
+    // Parse the reaction string to figure out the species involved in the reaction. This CAN involve the species wildcard, in which
+    // case we also build the reaction superset;
+    std::vector<std::string> reactants;
+    std::vector<std::string> products;
+
+    this->parseReactionString(reactants, products, reaction);
+
+    // Reactions may have contained a wildcard. Build a superset if it does.
+    const auto reactionSets = this->parseReactionWildcards(reactants, products, reactionJSON);
+
+    for (const auto& curReaction : reactionSets) {
+      const std::string              wildcard     = std::get<0>(curReaction);
+      const std::vector<std::string> curReactants = std::get<1>(curReaction);
+      const std::vector<std::string> curProducts  = std::get<2>(curReaction);
+
+      // This is the reaction index for the current index. The reaction we are currently
+      // dealing with is put in m_kmcReactions[reactionIdex].
+      const int reactionIndex = m_kmcReactions.size();
+
+      // Ignore species which are enclosed by brackets ()
+      std::vector<std::string> trimmedReactants;
+      std::vector<std::string> trimmedProducts;
+      for (const auto& r : curReactants) {
+        if (!(this->isBracketed(r))) {
+          trimmedReactants.emplace_back(r);
+        }
+      }
+      for (const auto& p : curProducts) {
+        if (!(this->isBracketed(p))) {
+          trimmedProducts.emplace_back(p);
+        }
+      }
+
+      // Make sure the reaction makes sense
+      this->sanctifyPhotoReaction(trimmedReactants, trimmedProducts, reaction);
+
+      // Get all species involved.
+      std::list<size_t> backgroundReactants;
+      std::list<size_t> plasmaReactants;
+      std::list<size_t> photonReactants;
+      std::list<size_t> backgroundProducts;
+      std::list<size_t> plasmaProducts;
+      std::list<size_t> photonProducts;
+
+      this->getReactionSpecies(backgroundReactants,
+                               plasmaReactants,
+                               photonReactants,
+                               backgroundProducts,
+                               plasmaProducts,
+                               photonProducts,
+                               trimmedReactants,
+                               trimmedProducts);
+
+      // Add the reaction
+      m_photoReactions.emplace_back(
+        std::make_shared<ItoKMCPhotoReaction>(photonReactants.front(), plasmaProducts, photoiEfficiency));
+    }
+  }
 }
 
 void
@@ -1474,6 +1546,94 @@ ItoKMCJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
       sumCharge -= Z;
     }
   }
+  for (const auto& p : a_products) {
+    if (this->isPlasmaSpecies(p)) {
+      const SpeciesType& type = m_plasmaSpeciesTypes.at(p);
+
+      int Z = 0;
+
+      switch (type) {
+      case SpeciesType::Ito: {
+        const int idx = m_itoSpeciesMap.at(p);
+
+        Z = m_itoSpecies[idx]->getChargeNumber();
+
+        break;
+      }
+      case SpeciesType::CDR: {
+        const int idx = m_cdrSpeciesMap.at(p);
+
+        Z = m_cdrSpecies[idx]->getChargeNumber();
+
+        break;
+      }
+      default: {
+        const std::string err = baseError + " logic bust";
+
+        MayDay::Error(err.c_str());
+
+        break;
+      }
+      }
+
+      sumCharge += Z;
+    }
+  }
+
+  if (sumCharge != 0) {
+    this->throwParserWarning(baseError + " but charge is not conserved for reaction '" + a_reaction + "'.");
+  }
+}
+
+void
+ItoKMCJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
+                                  const std::vector<std::string>& a_products,
+                                  const std::string&              a_reaction) const noexcept
+{
+  CH_TIME("ItoKMCJSON::sanctifyPhotoReaction()");
+  if (m_verbose) {
+    pout() << m_className + "::sanctifyPhotoReaction()" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::sanctifyPhotoReaction ";
+
+  // All reactants must be in the list of neutral species or in the list of plasma species
+  for (const auto& r : a_reactants) {
+    const bool isBackground = this->isBackgroundSpecies(r);
+    const bool isPlasma     = this->isPlasmaSpecies(r);
+    const bool isPhoton     = this->isPhotonSpecies(r);
+
+    if (!isBackground && !isPlasma && !isPhoton) {
+      this->throwParserError(baseError + " but reactant '" + r + "' for reaction '" + a_reaction +
+                             " is not a background/plasma/photon species");
+    }
+
+    if (isPlasma) {
+      this->throwParserError(baseError + " but reactant '" + r + "' for reaction '" + a_reaction +
+                             " should not appear on left hand side");
+    }
+  }
+
+  // All products should be in the list of plasma. It's ok if users include a neutral species -- we will ignore it (but tell the user about it).
+  for (const auto& p : a_products) {
+    const bool isBackground = this->isBackgroundSpecies(p);
+    const bool isPlasma     = this->isPlasmaSpecies(p);
+    const bool isPhoton     = this->isPhotonSpecies(p);
+
+    if (isPhoton) {
+      this->throwParserError(baseError + "but photon species '" + p + "' for reaction '" + a_reaction +
+                             "' is not allowed on the right-hand side.");
+    }
+
+    if (!isBackground && !isPlasma) {
+      this->throwParserError(baseError + "but I do not know product species '" + p + "' for reaction '" + a_reaction +
+                             "'.");
+    }
+  }
+
+  // Check for charge conservation
+  int sumCharge = 0;
+
   for (const auto& p : a_products) {
     if (this->isPlasmaSpecies(p)) {
       const SpeciesType& type = m_plasmaSpeciesTypes.at(p);

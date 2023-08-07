@@ -55,9 +55,6 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
   }
 #endif
 
-  MayDay::Warning("ItoKMCPhysics - fix photon pathways with ABSOLUTE efficiencies and sampling.");
-  MayDay::Warning(
-    "ItoKMCPhysics - in photoionizing reactions, absorption of fractional superphotons should be supported");
   MayDay::Warning("ItoKMCPhysics - on photoabsorption on surfaces, fractional superphotons should be supported");
 }
 

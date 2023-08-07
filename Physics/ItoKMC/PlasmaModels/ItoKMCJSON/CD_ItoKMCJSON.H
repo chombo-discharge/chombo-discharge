@@ -476,6 +476,17 @@ namespace Physics {
                              const std::string&              a_reaction) const noexcept;
 
       /*!
+	@brief Check that a photo-reaction makes sense. I.e. that all species are properly defined and that it conserves charge.
+	@param[in] a_reactants Reactants
+	@param[in] a_products  Reaction products
+	@param[in] a_reaction  Reaction string
+      */
+      virtual void
+      sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
+                            const std::vector<std::string>& a_products,
+                            const std::string&              a_reaction) const noexcept;
+
+      /*!
 	@brief Initialize gas law.
       */
       virtual void

@@ -330,11 +330,11 @@
     "photo reactions":
     [
 	{
-	    "reaction": "Y -> e + N2+",
+	    "reaction": "Y + (O2) -> e + O2+",
 	    "efficiency": 0.1
 	},
 	{
-	    "reaction": "Y -> (null)",
+	    "reaction": "Y + O2 -> (null)",
 	    "efficiency": 0.9
 	}	
     ]
