@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   CD_EBRedistribution.cpp
-  @brief  Implementation of CD_EBRedistribution.cpp
+  @file   CD_EBFluxRedistribution.cpp
+  @brief  Implementation of CD_EBFluxRedistribution.cpp
   @author Robert Marskar
 */
 
@@ -16,29 +16,29 @@
 #include <EBFastFR.cpp>
 
 // Our includes
-#include <CD_EBRedistribution.H>
+#include <CD_EBFluxRedistribution.H>
 #include <CD_VofUtils.H>
 #include <CD_BoxLoops.H>
 #include <CD_EBAddOp.H>
 #include <CD_NamespaceHeader.H>
 
-EBRedistribution::EBRedistribution() noexcept
+EBFluxRedistribution::EBFluxRedistribution() noexcept
 {
-  CH_TIME("EBRedistribution::EBRedistribution(weak)");
+  CH_TIME("EBFluxRedistribution::EBFluxRedistribution(weak)");
 
   m_isDefined = false;
 }
 
-EBRedistribution::EBRedistribution(const EBLevelGrid& a_eblgCoar,
-                                   const EBLevelGrid& a_eblgCoarsened,
-                                   const EBLevelGrid& a_eblg,
-                                   const EBLevelGrid& a_eblgRefined,
-                                   const EBLevelGrid& a_eblgFine,
-                                   const int          a_refToCoar,
-                                   const int          a_refToFine,
-                                   const bool         a_redistributeOutside) noexcept
+EBFluxRedistribution::EBFluxRedistribution(const EBLevelGrid& a_eblgCoar,
+                                           const EBLevelGrid& a_eblgCoarsened,
+                                           const EBLevelGrid& a_eblg,
+                                           const EBLevelGrid& a_eblgRefined,
+                                           const EBLevelGrid& a_eblgFine,
+                                           const int          a_refToCoar,
+                                           const int          a_refToFine,
+                                           const bool         a_redistributeOutside) noexcept
 {
-  CH_TIME("EBRedistribution::EBRedistribution(full)");
+  CH_TIME("EBFluxRedistribution::EBFluxRedistribution(full)");
 
   this->define(a_eblgCoar,
                a_eblgCoarsened,
@@ -50,19 +50,19 @@ EBRedistribution::EBRedistribution(const EBLevelGrid& a_eblgCoar,
                a_redistributeOutside);
 }
 
-EBRedistribution::~EBRedistribution() noexcept { CH_TIME("EBRedistribution::~EBRedistribution"); }
+EBFluxRedistribution::~EBFluxRedistribution() noexcept { CH_TIME("EBFluxRedistribution::~EBFluxRedistribution"); }
 
 void
-EBRedistribution::define(const EBLevelGrid& a_eblgCoar,
-                         const EBLevelGrid& a_eblgCoarsened,
-                         const EBLevelGrid& a_eblg,
-                         const EBLevelGrid& a_eblgRefined,
-                         const EBLevelGrid& a_eblgFine,
-                         const int          a_refToCoar,
-                         const int          a_refToFine,
-                         const bool         a_redistributeOutside) noexcept
+EBFluxRedistribution::define(const EBLevelGrid& a_eblgCoar,
+                             const EBLevelGrid& a_eblgCoarsened,
+                             const EBLevelGrid& a_eblg,
+                             const EBLevelGrid& a_eblgRefined,
+                             const EBLevelGrid& a_eblgFine,
+                             const int          a_refToCoar,
+                             const int          a_refToFine,
+                             const bool         a_redistributeOutside) noexcept
 {
-  CH_TIME("EBRedistribution::define");
+  CH_TIME("EBFluxRedistribution::define");
 
   CH_assert(a_eblg.isDefined());
 
@@ -119,9 +119,9 @@ EBRedistribution::define(const EBLevelGrid& a_eblgCoar,
 }
 
 void
-EBRedistribution::defineStencils() noexcept
+EBFluxRedistribution::defineStencils() noexcept
 {
-  CH_TIMERS("EBRedistribution::defineStencils");
+  CH_TIMERS("EBFluxRedistribution::defineStencils");
 
   // TLDR: This is a bit involved since we need to define stencils on the valid cut-cells on this level. If there's an EBCF interface we
   //       need to know about it because we don't want to:
@@ -284,9 +284,9 @@ EBRedistribution::defineStencils() noexcept
 }
 
 void
-EBRedistribution::defineValidCells(LevelData<BaseFab<bool>>& a_validCells) const noexcept
+EBFluxRedistribution::defineValidCells(LevelData<BaseFab<bool>>& a_validCells) const noexcept
 {
-  CH_TIME("EBRedistribution::defineValidCells");
+  CH_TIME("EBFluxRedistribution::defineValidCells");
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
 
@@ -335,9 +335,9 @@ EBRedistribution::defineValidCells(LevelData<BaseFab<bool>>& a_validCells) const
 }
 
 void
-EBRedistribution::defineInterfaceCells(LevelData<BaseFab<bool>>& a_interfaceCells) const noexcept
+EBFluxRedistribution::defineInterfaceCells(LevelData<BaseFab<bool>>& a_interfaceCells) const noexcept
 {
-  CH_TIME("EBRedistribution::defineInterfaceCells");
+  CH_TIME("EBFluxRedistribution::defineInterfaceCells");
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
   a_interfaceCells.define(dbl, 1, m_redistRadius * IntVect::Unit);
@@ -370,9 +370,9 @@ EBRedistribution::defineInterfaceCells(LevelData<BaseFab<bool>>& a_interfaceCell
 }
 
 void
-EBRedistribution::defineBuffers() noexcept
+EBFluxRedistribution::defineBuffers() noexcept
 {
-  CH_TIME("EBRedistribution::defineBuffers");
+  CH_TIME("EBFluxRedistribution::defineBuffers");
 
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
   const ProblemDomain&     domain = m_eblg.getDomain();
@@ -401,16 +401,16 @@ EBRedistribution::defineBuffers() noexcept
 }
 
 void
-EBRedistribution::redistributeAMR(LevelData<EBCellFAB>*             a_phiCoar,
-                                  LevelData<EBCellFAB>*             a_phi,
-                                  LevelData<EBCellFAB>*             a_phiFine,
-                                  const LevelData<BaseIVFAB<Real>>& a_deltaM,
-                                  const Real                        a_scaleCoar,
-                                  const Real                        a_scale,
-                                  const Real                        a_scaleFine,
-                                  const Interval&                   a_variables) const noexcept
+EBFluxRedistribution::redistributeAMR(LevelData<EBCellFAB>*             a_phiCoar,
+                                      LevelData<EBCellFAB>*             a_phi,
+                                      LevelData<EBCellFAB>*             a_phiFine,
+                                      const LevelData<BaseIVFAB<Real>>& a_deltaM,
+                                      const Real                        a_scaleCoar,
+                                      const Real                        a_scale,
+                                      const Real                        a_scaleFine,
+                                      const Interval&                   a_variables) const noexcept
 {
-  CH_TIME("EBRedistribution::redistributeAMR");
+  CH_TIME("EBFluxRedistribution::redistributeAMR");
 
   CH_assert(m_isDefined);
   CH_assert(a_phi != nullptr);
@@ -431,13 +431,13 @@ EBRedistribution::redistributeAMR(LevelData<EBCellFAB>*             a_phiCoar,
 }
 
 void
-EBRedistribution::redistributeCoar(LevelData<EBCellFAB>&             a_phiCoar,
-                                   const LevelData<BaseIVFAB<Real>>& a_deltaM,
-                                   const Real&                       a_scaleCoar,
-                                   const Interval&                   a_variables) const noexcept
+EBFluxRedistribution::redistributeCoar(LevelData<EBCellFAB>&             a_phiCoar,
+                                       const LevelData<BaseIVFAB<Real>>& a_deltaM,
+                                       const Real&                       a_scaleCoar,
+                                       const Interval&                   a_variables) const noexcept
 {
-  CH_TIMERS("EBRedistribution::redistributeCoar");
-  CH_TIMER("EBRedistribution::redistributeCoar::irreg_cells", t1);
+  CH_TIMERS("EBFluxRedistribution::redistributeCoar");
+  CH_TIMER("EBFluxRedistribution::redistributeCoar::irreg_cells", t1);
 
   CH_assert(m_isDefined);
   CH_assert(m_hasCoar);
@@ -485,13 +485,13 @@ EBRedistribution::redistributeCoar(LevelData<EBCellFAB>&             a_phiCoar,
   }
 }
 void
-EBRedistribution::redistributeLevel(LevelData<EBCellFAB>&             a_phi,
-                                    const LevelData<BaseIVFAB<Real>>& a_deltaM,
-                                    const Real&                       a_scale,
-                                    const Interval&                   a_variables) const noexcept
+EBFluxRedistribution::redistributeLevel(LevelData<EBCellFAB>&             a_phi,
+                                        const LevelData<BaseIVFAB<Real>>& a_deltaM,
+                                        const Real&                       a_scale,
+                                        const Interval&                   a_variables) const noexcept
 {
-  CH_TIMERS("EBRedistribution::redistributeLevel");
-  CH_TIMER("EBRedistribution::redistributeLevel::irreg_cells", t1);
+  CH_TIMERS("EBFluxRedistribution::redistributeLevel");
+  CH_TIMER("EBFluxRedistribution::redistributeLevel::irreg_cells", t1);
 
   CH_assert(m_isDefined);
   CH_assert(a_phi.isDefined());
@@ -539,13 +539,13 @@ EBRedistribution::redistributeLevel(LevelData<EBCellFAB>&             a_phi,
 }
 
 void
-EBRedistribution::redistributeFine(LevelData<EBCellFAB>&             a_phiFine,
-                                   const LevelData<BaseIVFAB<Real>>& a_deltaM,
-                                   const Real&                       a_scaleFine,
-                                   const Interval&                   a_variables) const noexcept
+EBFluxRedistribution::redistributeFine(LevelData<EBCellFAB>&             a_phiFine,
+                                       const LevelData<BaseIVFAB<Real>>& a_deltaM,
+                                       const Real&                       a_scaleFine,
+                                       const Interval&                   a_variables) const noexcept
 {
-  CH_TIMERS("EBRedistribution::redistributeFine");
-  CH_TIMER("EBRedistribution::redistributeFine::irreg_cells", t1);
+  CH_TIMERS("EBFluxRedistribution::redistributeFine");
+  CH_TIMER("EBFluxRedistribution::redistributeFine::irreg_cells", t1);
 
   CH_assert(m_isDefined);
   CH_assert(m_hasFine);

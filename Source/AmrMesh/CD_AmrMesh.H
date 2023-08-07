@@ -1815,7 +1815,7 @@ public:
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBRedistribution>>&
+  Vector<RefCountedPtr<EBFluxRedistribution>>&
   getRedistributionOp(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!

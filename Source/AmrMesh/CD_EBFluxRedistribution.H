@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_EBRedistribution.H
+  @file   CD_EBFluxRedistribution.H
   @brief  Declaration of a class which can perform redistribution in an EB-AMR context.
   @author Robert Marskar
 */
 
-#ifndef CD_EBRedistribution_H
-#define CD_EBRedistribution_H
+#ifndef CD_EBFluxRedistribution_H
+#define CD_EBFluxRedistribution_H
 
 // Chombo includes
 #include <EBLevelGrid.H>
@@ -39,18 +39,18 @@
   made here; the user will have to ensure proper scaling of his/her variables when calling the actual redistribution functions. 
   The scaling factors depend on what is actually being redistributed, and the user will need to work this out on paper. 
 */
-class EBRedistribution
+class EBFluxRedistribution
 {
 public:
   /*!
     @brief Weak constructor. Need to call define afterwards
   */
-  EBRedistribution() noexcept;
+  EBFluxRedistribution() noexcept;
 
   /*!
     @brief Copy constructor is not allowed.
   */
-  EBRedistribution(const EBRedistribution& a_other) = delete;
+  EBFluxRedistribution(const EBFluxRedistribution& a_other) = delete;
 
   /*!
     @brief Full constructor. Calls the define function and puts object in usable state. 
@@ -65,19 +65,19 @@ public:
     @param[in] a_refToFine            Refinement factor between this level and the fine level
     @param[in] a_redistributeOutside  Turn on/off redistribution outside domain. 
   */
-  EBRedistribution(const EBLevelGrid& a_eblgCoar,
-                   const EBLevelGrid& a_eblgCoarsened,
-                   const EBLevelGrid& a_eblg,
-                   const EBLevelGrid& a_eblgRefined,
-                   const EBLevelGrid& a_eblgFine,
-                   const int          a_refToCoar,
-                   const int          a_refToFine,
-                   const bool         a_redistributeOutside) noexcept;
+  EBFluxRedistribution(const EBLevelGrid& a_eblgCoar,
+                       const EBLevelGrid& a_eblgCoarsened,
+                       const EBLevelGrid& a_eblg,
+                       const EBLevelGrid& a_eblgRefined,
+                       const EBLevelGrid& a_eblgFine,
+                       const int          a_refToCoar,
+                       const int          a_refToFine,
+                       const bool         a_redistributeOutside) noexcept;
 
   /*!
     @brief Destructor (does nothing)
   */
-  virtual ~EBRedistribution() noexcept;
+  virtual ~EBFluxRedistribution() noexcept;
 
   /*!
     @brief Define fucntion. Puts object in usable state. 

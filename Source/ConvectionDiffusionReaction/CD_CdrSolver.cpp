@@ -451,7 +451,7 @@ CdrSolver::computeDivG(EBAMRCellData&     a_divG,
 
     if (m_whichRedistribution != Redistribution::None) {
 
-      Vector<RefCountedPtr<EBRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
+      Vector<RefCountedPtr<EBFluxRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
 
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
         const Real     scale     = 1.0;
@@ -484,7 +484,7 @@ CdrSolver::redistribute(EBAMRCellData& a_phi, const EBAMRIVData& a_delta) const 
   CH_assert(a_phi.getRealm() == m_realm);
   CH_assert(a_delta.getRealm() == m_realm);
 
-  Vector<RefCountedPtr<EBRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
+  Vector<RefCountedPtr<EBFluxRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const Real     scale     = 1.0;
