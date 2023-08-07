@@ -2046,6 +2046,9 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     return 1.0;
   };
 
+  MayDay::Warning(
+    "ItoKMCJSON::parsePlasmaReactionRate -- redo the quenching/photoionization scalings. Let photoi eff become 'efficiency' as separate input");
+
   bool pressureQuench = false;
   bool photoiQuench   = false;
 
