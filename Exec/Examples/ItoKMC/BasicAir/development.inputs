@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = 15E3
+ItoKMC.potential = 20E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
@@ -235,7 +235,7 @@ ItoKMCGodunovStepper.checkpoint_particles                  = true           # If
 ItoKMCGodunovStepper.verbosity                             = -1             # Verbosity
 ItoKMCGodunovStepper.abort_on_failure                      = true           # Abort on Poisson solver failure or not
 ItoKMCGodunovStepper.redistribute_cdr                      = true           # Turn on/off reactive redistribution
-ItoKMCGodunovStepper.profile                               = false          # Turn on/off run-time profiling
+ItoKMCGodunovStepper.profile                               = true           # Turn on/off run-time profiling
 ItoKMCGodunovStepper.plt_vars                              = none           # 'conductivity', 'current_density', 'particles_per_patch'
 ItoKMCGodunovStepper.dual_grid                             = true           # Turn on/off dual-grid functionality
 ItoKMCGodunovStepper.load_balance_fluid                    = false          # Turn on/off fluid realm load balancing. 
@@ -243,7 +243,7 @@ ItoKMCGodunovStepper.load_balance_particles                = true           # Tu
 ItoKMCGodunovStepper.load_indices                          = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoKMCGodunovStepper.load_per_cell                         = 1.0            # Default load per grid cell.
 ItoKMCGodunovStepper.box_sorting                           = morton         # Box sorting when load balancing
-ItoKMCGodunovStepper.particles_per_cell                    = 32             # Max computational particles per cell
+ItoKMCGodunovStepper.particles_per_cell                    = 16             # Max computational particles per cell
 ItoKMCGodunovStepper.merge_interval                        = 1              # Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                 = false          # Make superparticles during regrids
 ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0            # Advective time step CFL restriction
@@ -265,15 +265,15 @@ ItoKMCGodunovStepper.algorithm                             = euler_maruyama # In
 # ItoKMCJSON class options
 # ====================================================================================================
 ItoKMCJSON.verbose            = false                   ## Turn on/off verbosity
-ItoKMCJSON.debug              = true                   ## Turn on/off debugging
+ItoKMCJSON.debug              = true                    ## Turn on/off debugging
 ItoKMCJSON.chemistry_file     = chemistry_template.json ## Chemistry file
 
 # For controlling the time step
 ItoKMCJSON.dX                 = 2.0                     ## Maximum relative change Xnew/Xold during one time step.
 
 # Kinetic Monte Carlo solver settings. 
-ItoKMCJSON.max_new_particles  = 128                     ## Maximum number of computational particles to produce in reaction step
-ItoKMCJSON.max_new_photons    = 128                     ## Maximum number of computational photons to produce in reaction step	
+ItoKMCJSON.max_new_particles  = 64                      ## Maximum number of computational particles to produce in reaction step
+ItoKMCJSON.max_new_photons    = 64                      ## Maximum number of computational photons to produce in reaction step	
 ItoKMCJSON.Ncrit              = 5                       ## How many firings away from a Negative particle number?
 ItoKMCJSON.prop_eps           = 1.E99                   ## Maximum relative change in propensity function
 ItoKMCJSON.NSSA               = 10                      ## How many SSA steps to run when tau-leaping is inefficient

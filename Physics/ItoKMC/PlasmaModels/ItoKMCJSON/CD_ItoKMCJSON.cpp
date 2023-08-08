@@ -1393,15 +1393,18 @@ ItoKMCJSON::initializePhotoReactions()
 
   const std::string baseError = "ItoKMCJSON::initializePhotoReactions";
 
+  Real photoiEfficiency;
+
   for (const auto& reactionJSON : m_json["photoionization"]) {
     if (!(reactionJSON.contains("reaction"))) {
       this->throwParserError(baseError + " but one of the reactions is missing the field 'reaction'");
     }
     if (!(reactionJSON.contains("efficiency"))) {
-      this->throwParserError(baseError + " but one of the reactions is missing the field 'efficiency'");
+      photoiEfficiency = 1.0;
     }
-
-    const Real photoiEfficiency = reactionJSON["efficiency"].get<Real>();
+    else {
+      photoiEfficiency = reactionJSON["efficiency"].get<Real>();
+    }
 
     const std::string reaction    = this->trim(reactionJSON["reaction"].get<std::string>());
     const std::string baseErrorID = baseError + " for reaction '" + reaction + "'";
