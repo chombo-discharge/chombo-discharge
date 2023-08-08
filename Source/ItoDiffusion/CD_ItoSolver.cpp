@@ -2912,6 +2912,8 @@ ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
 
   MayDay::Warning(
     "ItoSolver::makeSuperParticles -- use dependency injection and inject a particle merger. Existing code should be a default particle merger");
+  MayDay::Warning(
+    "ItoSolver::makeSuperParticles -- need better abstractions for particle splitting in PartilceManagement");
 
   using PType        = NonCommParticle<2, 1>;
   using Node         = ParticleManagement::KDNode<PType>;
