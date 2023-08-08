@@ -510,6 +510,7 @@ ItoSolver::initialData()
   ParticleContainer<ItoParticle>& bulkParticles = m_particleContainers.at(WhichContainer::Bulk);
   bulkParticles.clearParticles();
   bulkParticles.addParticles(m_species->getInitialParticles());
+  bulkParticles.remap();
 
   constexpr Real tolerance = 0.0;
 
