@@ -270,9 +270,12 @@
 	    "value": 1.2345E-30,                 // Specification of the reaction rate
             "gradient correction": "e",          // Use gradient correction to rate
 	    "plot": true,                        // Optional. If true, the reaction rate will be plotted.
-	    "quenching": {
-		"pq": 4000.0,
-		"photoi eff": 1.0
+	    "quenching pressure": 4000.0,
+	    "efficiency": 0.1,
+	    "quenching rates": {
+		"kr" : 0.1,
+		"kp": 0.1,
+		"kq/N": 0.1
 	    }
 	},
 	{
@@ -331,7 +334,7 @@
 	// }	
 
     ],
-    "photo reactions":
+    "photoionization":
     [
 	{
 	    "reaction": "Y + (O2) -> e + O2+",
