@@ -29,7 +29,7 @@
 #include <CD_ParticleContainer.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBGradient.H>
-#include <CD_EBRedistribution.H>
+#include <CD_EBFluxRedistribution.H>
 #include <CD_EBAMRParticleMesh.H>
 #include <CD_EBAMRSurfaceDeposition.H>
 #include <CD_EBCoarseToFineInterp.H>
@@ -325,7 +325,7 @@ public:
     @brief Get the redistribution operators
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBRedistribution>>&
+  Vector<RefCountedPtr<EBFluxRedistribution>>&
   getRedistributionOp() const;
 
   /*!
@@ -505,7 +505,7 @@ protected:
   /*!
     @brief Redistribution utilities
   */
-  mutable Vector<RefCountedPtr<EBRedistribution>> m_redistributionOp;
+  mutable Vector<RefCountedPtr<EBFluxRedistribution>> m_redistributionOp;
 
   /*!
     @brief Gradient operator

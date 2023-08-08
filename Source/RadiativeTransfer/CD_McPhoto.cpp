@@ -984,7 +984,7 @@ McPhoto::depositPhotons(EBAMRCellData& a_phi, ParticleContainer<Photon>& a_photo
 
   // Redistribute
   if (m_blendConservation) {
-    Vector<RefCountedPtr<EBRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
+    Vector<RefCountedPtr<EBFluxRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Real     scale     = 1.0;
       const Interval variables = Interval(0, 0);
