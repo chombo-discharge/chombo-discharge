@@ -151,7 +151,7 @@ namespace ParticleManagement {
     @note This only adjusts the weight of the median particle. The particle class P should have a copy constructor for the other
     fields; note that these fields are simply copied over when the particle is split and are not adjusted. 
   */
-  template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
+  template <class P,  Real& (P::*weight)(), const RealVect& (P::*position)() const>
   typename KDNode<P>::Partitioner PartitionEqualWeight = [](KDNode<P>& a_node) -> void {
     CH_assert(!(a_node.isInteriorNode()));
 
@@ -301,22 +301,53 @@ namespace ParticleManagement {
 #endif
   };
 
-  /*!
-    @brief Stop function which returns true if weight in node < 2
-    @note The particle type is P and P::*weight is a pointer to a member function providing const-reference access to the particle weight.
-  */
-  template <class P, const Real& (P::*weight)() const>
-  typename KDNode<P>::StopFunction InsufficientWeightForSplitting =
-    [](const typename KDNode<P>::ParticleList& a_particles) {
-      constexpr Real splitThresh = 2.0 - std::numeric_limits<Real>::min();
+  template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
+  inline std::vector<std::shared_ptr<KDNode<P>>>
+  buildKDTreeEqualWeight(typename KDNode<P>::ParticleList& a_inputParticles, const int a_maxLeaves) noexcept {
+    CH_TIME("ParticleManagement::buildKDTreeEqualWeight");
 
-      Real W = 0.0;
-      for (const auto& p : a_particles) {
-        W += (p.*weight)();
+    Real W = 0.0;
+
+    for (auto& p : a_inputParticles) {
+      W += (p.*weight)();
+    }
+
+    std::vector<std::shared_ptr<KDNode<P>>> leaves1;
+    std::vector<std::shared_ptr<KDNode<P>>> leaves2;
+    
+    leaves1.emplace_back(std::make_shared<KDNode<P>>(a_inputParticles));
+    leaves1[0]->weight() = W;
+
+    bool keepGoing = true;
+
+    while (keepGoing && leaves1.size() < a_maxLeaves) {
+      keepGoing = false;
+
+      for (const auto& l : leaves1) {
+	if (l->weight() > 2.0 - std::numeric_limits<Real>::min()) {
+	  ParticleManagement::PartitionEqualWeight<P, weight, position>(*l);
+
+	  leaves2.emplace_back(l->getLeft());
+	  leaves2.emplace_back(l->getRight());
+
+	  keepGoing = true;
+	}
+	else {
+	  leaves2.emplace_back(l);
+	}
+
+	// Break out if we have sufficient leaf nodes.
+	if (leaves2.size() >= a_maxLeaves) {
+	  break;
+	}
       }
 
-      return (W < splitThresh) ? true : false;
-    };
+      leaves1 = leaves2;
+      leaves2.resize(0);
+    }
+
+    return leaves1;
+  }
 
   template <typename P, typename T, typename>
   inline void

@@ -29,6 +29,12 @@
 namespace ParticleManagement {
 
   /*!
+    @brief Simple abstraction for encapsulating a particle merging/splitting concept
+  */
+  template <class P>
+  using ParticleMerger = std::function<List<P>(List<P>& a_inputParticles)>;
+
+  /*!
     @brief Node in a particle-merging KD-tree. 
     @details This node type is used for partitioning particles into spatial subsets and merging/splitting them. 
     @details The template argument P is the particle type - the users decides how to merge/split/partition. 
@@ -47,11 +53,6 @@ namespace ParticleManagement {
       @brief Node partitioner for KD-tree construction.
     */
     using Partitioner = std::function<void(KDNode&)>;
-
-    /*!
-      @brief Stop function for KD-tree construction. 
-    */
-    using StopFunction = std::function<bool(const ParticleList&)>;
 
     /*!
       @brief Disallowed constructor
@@ -191,6 +192,24 @@ namespace ParticleManagement {
     inline void
     moveParticles(ParticleList& a_particles) noexcept;
   };
+
+  /*!
+    @brief Build a KD-tree following the "equal weight" principle when partitioning nodes.
+    @details If the number of leaves is a factor of two, leaves exist on the same level and the weight in each node will differ by
+    at most one physical particle. The template parameters are 
+
+       P            -> Particle type
+       P::*weight   -> Function pointer to particle weight
+       P::*position -> Function pointer to particle position.
+
+    A possible call signature is e.g. buildKDTreeEqualWeight<P, &P::weight, &P::position>.
+    @param[inout] a_inputParticles Input particles. These are destroyed on output.
+    @param[in] a_maxLeaves Maximum number of leaves in the tree.
+    @return Returns leaf nodes with particles. 
+  */
+  template <class P,  Real& (P::*weight)(), const RealVect& (P::*position)() const>  
+  static inline std::vector<std::shared_ptr<KDNode<P>>>
+  buildKDTreeEqualWeight(typename KDNode<P>::ParticleList& a_inputParticles, const int a_maxLeaves) noexcept;
 
   /*!
     @brief Remove physical particles from the input particles.

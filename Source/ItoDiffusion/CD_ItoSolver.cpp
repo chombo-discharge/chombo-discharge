@@ -2910,6 +2910,9 @@ ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
   CH_TIMER("ItoSolver::makeSuperParticles::build_kd", t2);
   CH_TIMER("ItoSolver::makeSuperParticles::merge_particles", t3);
 
+  MayDay::Warning(
+    "ItoSolver::makeSuperParticles -- use dependency injection and inject a particle merger. Existing code should be a default particle merger");
+
   using PType        = NonCommParticle<2, 1>;
   using Node         = ParticleManagement::KDNode<PType>;
   using ParticleList = ParticleManagement::KDNode<PType>::ParticleList;
@@ -2931,51 +2934,16 @@ ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
   }
   CH_STOP(t1);
 
-  // 2. Init the KD tree -- adding necessary capacity to avoid
-  //    potential reallocations throughout.
-  std::vector<std::shared_ptr<Node>> leaves1;
-  std::vector<std::shared_ptr<Node>> leaves2;
-
-  leaves1.emplace_back(std::make_shared<Node>(particles));
-  leaves1[0]->weight() = W;
-
-  // 3. Build the KD-tree; this uses a "width-first" construction which places most leaves
-  //    on the same level (differing by at most one).
-  CH_START(t2);
-  bool keepGoing = true;
-
-  while (keepGoing && leaves1.size() < a_ppc) {
-    keepGoing = false;
-
-    for (const auto& l : leaves1) {
-      if (l->weight() > 2.0 - std::numeric_limits<Real>::min()) {
-        ParticleManagement::PartitionEqualWeight<PType, &PType::template real<0>, &PType::template vect<0>>(*l);
-
-        leaves2.emplace_back(l->getLeft());
-        leaves2.emplace_back(l->getRight());
-
-        keepGoing = true;
-      }
-      else {
-        leaves2.emplace_back(l);
-      }
-
-      // Break out if we have sufficient leaf nodes.
-      if (leaves2.size() >= a_ppc) {
-        break;
-      }
-    }
-
-    leaves1 = leaves2;
-    leaves2.resize(0);
-  }
-  CH_STOP(t2);
+  // 2. Build KD-tree.
+  const std::vector<std::shared_ptr<Node>> leaves =
+    ParticleManagement::buildKDTreeEqualWeight<PType, &PType::template real<0>, &PType::template vect<0>>(particles,
+                                                                                                          a_ppc);
 
   // Merge leaves into new particles.
   CH_START(t3);
   a_particles.clear();
 
-  for (const auto& l : leaves1) {
+  for (const auto& l : leaves) {
     Real     w = 0.0;
     Real     e = 0.0;
     RealVect x = RealVect::Zero;
