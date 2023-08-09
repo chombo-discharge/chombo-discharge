@@ -1548,6 +1548,17 @@ A JSON specification that includes these
 
 Photoionization
 ---------------
+
+TODO.
+
+Secondary emission
+------------------
+
+.. warning::
+
+   Secondary emission on surfaces are not implemented (yet). Only purely absorbing BCs are currently supported.
       
 Example programs
 ================
+
+TODO.
