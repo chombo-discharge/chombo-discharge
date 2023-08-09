@@ -50,6 +50,8 @@ ItoSolver::ItoSolver()
   m_plotDeposition       = DepositionType::CIC;
   m_checkpointing        = WhichCheckpoint::Particles;
   m_mobilityInterp       = WhichMobilityInterpolation::Direct;
+
+  this->setDefaultParticleMerger();
 }
 
 ItoSolver::~ItoSolver() { CH_TIME("ItoSolver::~ItoSolver"); }
@@ -76,6 +78,24 @@ ItoSolver::setRealm(const std::string a_realm)
   CH_TIME("ItoSolver::setRealm");
 
   m_realm = a_realm;
+}
+
+void
+ItoSolver::setDefaultParticleMerger() noexcept
+{
+  CH_TIME("ItoSolver::setParticleMerger");
+
+  m_particleMerger = [this](List<ItoParticle>& a_particles, const int a_ppc) {
+    this->makeSuperparticlesEqualWeightKD(a_particles, a_ppc);
+  };
+}
+
+void
+ItoSolver::setParticleMerger(const ParticleMerger& a_particleMerger) noexcept
+{
+  CH_TIME("ItoSolver::setParticleMerger");
+
+  m_particleMerger = a_particleMerger;
 }
 
 const RefCountedPtr<ItoSpecies>&
@@ -153,9 +173,6 @@ ItoSolver::parseRNG()
   ParmParse pp(m_className.c_str());
 
   pp.get("normal_max", m_normalDistributionTruncation);
-
-  //Uniform integer distribution from [0, SpaceDim-1]
-  m_uniformDistribution0d = std::uniform_int_distribution<int>(0, SpaceDim - 1);
 }
 
 void
@@ -2818,7 +2835,7 @@ ItoSolver::organizeParticlesByPatch(const WhichContainer a_container)
 }
 
 void
-ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a_particlesPerPatch)
+ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a_particlesPerCell)
 {
   CH_TIME("ItoSolver::makeSuperparticles(WhichContainer, int)");
   if (m_verbosity > 5) {
@@ -2826,30 +2843,30 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a_part
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    this->makeSuperparticles(a_container, a_particlesPerPatch, lvl);
+    this->makeSuperparticles(a_container, a_particlesPerCell, lvl);
   }
 }
 
 void
-ItoSolver::makeSuperparticles(const WhichContainer a_container, const Vector<int> a_particlesPerPatch)
+ItoSolver::makeSuperparticles(const WhichContainer a_container, const Vector<int> a_particlesPerCell)
 {
   CH_TIME("ItoSolver::makeSuperparticles(WhichContainer, Vector<int>)");
   if (m_verbosity > 5) {
     pout() << m_name + "::makeSuperparticles(WhichContainer, Vector<int>)" << endl;
   }
 
-  if (a_particlesPerPatch.size() < 1) {
+  if (a_particlesPerCell.size() < 1) {
     MayDay::Error("ItoSolver::makeSuperParticles(Container, Vector<int>) -logic bust");
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     int ppc;
 
-    if (lvl < a_particlesPerPatch.size()) {
-      ppc = a_particlesPerPatch[lvl];
+    if (lvl < a_particlesPerCell.size()) {
+      ppc = a_particlesPerCell[lvl];
     }
     else {
-      ppc = a_particlesPerPatch.back();
+      ppc = a_particlesPerCell.back();
     }
 
     this->makeSuperparticles(a_container, ppc, lvl);
@@ -2857,7 +2874,7 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container, const Vector<int
 }
 
 void
-ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a_particlesPerPatch, const int a_level)
+ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a_particlesPerCell, const int a_level)
 {
   CH_TIME("ItoSolver::makeSuperparticles(WhichContainer, int, int)");
   if (m_verbosity > 5) {
@@ -2867,7 +2884,7 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a_part
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    this->makeSuperparticles(a_container, a_particlesPerPatch, a_level, dit());
+    this->makeSuperparticles(a_container, a_particlesPerCell, a_level, dit());
   }
 }
 
@@ -2891,7 +2908,7 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
     List<ItoParticle>& particles = cellParticles(iv, m_comp);
 
     if (particles.length() > 0) {
-      this->makeSuperparticles(particles, a_particlesPerCell);
+      m_particleMerger(particles, a_particlesPerCell);
     }
   };
 
@@ -2903,17 +2920,12 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
 }
 
 void
-ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
+ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles, const int a_ppc)
 {
   CH_TIMERS("ItoSolver::makeSuperparticles");
   CH_TIMER("ItoSolver::makeSuperParticles::populate_list", t1);
   CH_TIMER("ItoSolver::makeSuperParticles::build_kd", t2);
   CH_TIMER("ItoSolver::makeSuperParticles::merge_particles", t3);
-
-  // MayDay::Warning(
-  //   "ItoSolver::makeSuperParticles -- use dependency injection and inject a particle merger. Existing code should be a default particle merger");
-  // MayDay::Warning(
-  //   "ItoSolver::makeSuperParticles -- need better abstractions for particle splitting in PartilceManagement");
 
   using PType        = NonCommParticle<2, 1>;
   using Node         = KDNode<PType>;
@@ -2936,10 +2948,19 @@ ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
   }
   CH_STOP(t1);
 
+  // Particle reconciler for manipulated two particles arising from splitting of one particle.
+  auto particleReconcile = [](PType& p1, PType& p2, const PType& p0) -> void {
+    p1.template real<1>() = p0.template real<1>();
+    p2.template real<1>() = p0.template real<1>();
+  };
+
   // 2. Build KD-tree.
-  const std::vector<std::shared_ptr<Node>> leaves = ParticleManagement::
-    recursivePartitionAndSplitEqualWeightKD<PType, &PType::template real<0>, &PType::template vect<0>>(particles,
-                                                                                                       a_ppc);
+  const std::vector<std::shared_ptr<Node>> leaves =
+    ParticleManagement::recursivePartitionAndSplitEqualWeightKD<PType,
+                                                                &PType::template real<0>,
+                                                                &PType::template vect<0>>(particles,
+                                                                                          a_ppc,
+                                                                                          particleReconcile);
 
   // Merge leaves into new particles.
   CH_START(t3);
