@@ -28,9 +28,10 @@ namespace ParticleManagement {
 
   template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
   static inline void
-  partitionAndSplitEqualWeightKD(KDNode<P>& a_node) noexcept
+  partitionAndSplitEqualWeightKD(KDNode<P>& a_node, const BinaryParticleReconcile<P> a_particleReconcile) noexcept
   {
     CH_assert(!(a_node.isInteriorNode()));
+    CH_assert(this->weight() > 2.0 - std::numeric_limits<Real>::min());
 
     constexpr Real splitThresh = 2.0 - std::numeric_limits<Real>::min();
 
@@ -110,7 +111,30 @@ namespace ParticleManagement {
         dwr += (ddw / N) * Nr;
       }
 
-      if (dwl > 0.0) {
+      if (dwl > 0.0 && dwr > 0.0) {
+        // Splitting particle.
+
+        P il(p);
+        P ir(p);
+
+        CH_assert(dwl >= 1.0);
+        CH_assert(dwr >= 1.0);
+
+        wl += dwl;
+        wr += dwr;
+
+        (il.*weight)() = dwl;
+        (ir.*weight)() = dwr;
+
+        // User can reconcile other particle properties.
+        a_particleReconcile(il, ir, p);
+
+        pl.emplace_back(std::move(il));
+        pr.emplace_back(std::move(ir));
+      }
+      else if (dwl > 0.0 && dwr == 0.0) {
+        // Particle assigned to left node.
+
         P il(p);
 
         CH_assert(dwl >= 1.0);
@@ -119,8 +143,9 @@ namespace ParticleManagement {
         (il.*weight)() = dwl;
         pl.emplace_back(std::move(il));
       }
+      else if (dwl == 0.0 && dwr > 0.0) {
+        // Particle assigned to right node.
 
-      if (dwr > 0.0) {
         P ir(p);
 
         CH_assert(dwr >= 1.0);
@@ -128,6 +153,11 @@ namespace ParticleManagement {
         wr += dwr;
         (ir.*weight)() = dwr;
         pr.emplace_back(std::move(ir));
+      }
+      else {
+        // Should not happen.
+
+        MayDay::Abort("ParticleManagement::partitionAndSplitEqualWeightKD - logic bust");
       }
     }
     else {
@@ -181,7 +211,8 @@ namespace ParticleManagement {
   template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
   inline std::vector<std::shared_ptr<KDNode<P>>>
   recursivePartitionAndSplitEqualWeightKD(typename KDNode<P>::ParticleList& a_inputParticles,
-                                          const int                         a_maxLeaves) noexcept
+                                          const int                         a_maxLeaves,
+                                          const BinaryParticleReconcile<P>  a_particleReconcile) noexcept
   {
     CH_TIME("ParticleManagement::recursivePartitionAndSplitEqualWeightKD");
 
@@ -191,41 +222,41 @@ namespace ParticleManagement {
       W += (p.*weight)();
     }
 
-    std::vector<std::shared_ptr<KDNode<P>>> leaves1;
-    std::vector<std::shared_ptr<KDNode<P>>> leaves2;
+    std::vector<std::shared_ptr<KDNode<P>>> leaves;
 
-    leaves1.emplace_back(std::make_shared<KDNode<P>>(a_inputParticles));
-    leaves1[0]->weight() = W;
+    leaves.emplace_back(std::make_shared<KDNode<P>>(a_inputParticles));
+    leaves[0]->weight() = W;
 
     bool keepGoing = true;
 
-    while (keepGoing && leaves1.size() < a_maxLeaves) {
+    while (keepGoing && leaves.size() < a_maxLeaves) {
       keepGoing = false;
 
-      for (const auto& l : leaves1) {
-        if (l->weight() > 2.0 - std::numeric_limits<Real>::min()) {
-          ParticleManagement::partitionAndSplitEqualWeightKD<P, weight, position>(*l);
+      std::vector<std::shared_ptr<KDNode<P>>> newLeaves;
 
-          leaves2.emplace_back(l->getLeft());
-          leaves2.emplace_back(l->getRight());
+      for (const auto& l : leaves) {
+        if (l->weight() > 2.0 - std::numeric_limits<Real>::min()) {
+          ParticleManagement::partitionAndSplitEqualWeightKD<P, weight, position>(*l, a_particleReconcile);
+
+          newLeaves.emplace_back(l->getLeft());
+          newLeaves.emplace_back(l->getRight());
 
           keepGoing = true;
         }
         else {
-          leaves2.emplace_back(l);
+          newLeaves.emplace_back(l);
         }
 
         // Break out if we have sufficient leaf nodes.
-        if (leaves2.size() >= a_maxLeaves) {
+        if (newLeaves.size() >= a_maxLeaves) {
           break;
         }
       }
 
-      leaves1 = leaves2;
-      leaves2.resize(0);
+      leaves = newLeaves;
     }
 
-    return leaves1;
+    return leaves;
   }
 
   template <typename P, typename T, typename>

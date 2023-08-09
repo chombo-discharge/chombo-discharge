@@ -2910,10 +2910,10 @@ ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
   CH_TIMER("ItoSolver::makeSuperParticles::build_kd", t2);
   CH_TIMER("ItoSolver::makeSuperParticles::merge_particles", t3);
 
-  MayDay::Warning(
-    "ItoSolver::makeSuperParticles -- use dependency injection and inject a particle merger. Existing code should be a default particle merger");
-  MayDay::Warning(
-    "ItoSolver::makeSuperParticles -- need better abstractions for particle splitting in PartilceManagement");
+  // MayDay::Warning(
+  //   "ItoSolver::makeSuperParticles -- use dependency injection and inject a particle merger. Existing code should be a default particle merger");
+  // MayDay::Warning(
+  //   "ItoSolver::makeSuperParticles -- need better abstractions for particle splitting in PartilceManagement");
 
   using PType        = NonCommParticle<2, 1>;
   using Node         = KDNode<PType>;

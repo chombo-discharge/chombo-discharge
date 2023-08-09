@@ -30,13 +30,20 @@
 namespace ParticleManagement {
 
   /*!
-    @brief Concept for splitting a particle into more particles
+    @brief Declaration of a reconciliation function when splitting particles.
+    @details This is, for example, passed into the KD-tree equal-weight partioning structure, which may split a particle
+    such that the weight of the two nodes differ by at most one physical particle. By default, that method will call the
+    particle copy constructor, but this function permits the user to input a reconciliation function that manipulates other
+    class members in the split particles. 
   */
-  template<class P, size_t N>
-  using ParticleSplitter = std::function<std::array<P, N>(const P& p)>;
+  template <class P>
+  using BinaryParticleReconcile = std::function<void(P& p1, P& p2, const P& p0)>;
 
   /*!
     @brief Partition and split a KD-node with particles so that the weights are approximately the same. 
+
+    @param[inout] a_node Node to split. This MUST be a leaf node and it MUST be possible to split it. 
+    @param[in] a_particleReconcile Optional reconciliation function when splitting a particle into two new particles.
     @details This will partition particles on two sides of a plane parallel to one of the coordinate axis. The middle
     particle closest to this plane may be split, and the weights of the resulting particles are assigned such that the
     total weight of the two halves differ by at most one. The template parameters are 
@@ -46,13 +53,24 @@ namespace ParticleManagement {
        P::*position -> Function pointer to particle position.
 
     A possible call signature is e.g. recursivePartitionAndSplitEqualWeightKD<P, &P::weight, &P::position>.
+
+    The user can input a particle reconciliation function that manipulates the particle properties of the split particles. By default,
+    the split particles will use the copy constructor and thus inherit class members from p0, with the exception of the particle weights.
+    The reconcile function lets the user manipulate other particle properties, e.g. ones that are not properly captured by the particle copy
+    constructor, or that need some other form of reconciliation. 
   */
-  template <class P,  Real& (P::*weight)(), const RealVect& (P::*position)() const>
+  template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
   static inline void
-  partitionAndSplitEqualWeightKD(KDNode<P>& a_node) noexcept;
+  partitionAndSplitEqualWeightKD(
+    KDNode<P>&                       a_node,
+    const BinaryParticleReconcile<P> a_particleReconcile = [](P& p1, P& p2, const P& p0) -> void {
+    }) noexcept;
 
   /*!
     @brief Recursively build a KD-tree following the "equal weight" principle when partitioning nodes.
+    @param[inout] a_inputParticles Input particles. These are destroyed on output.
+    @param[in] a_maxLeaves Maximum number of leaves in the tree.
+    @return Returns leaf nodes containing the particles
     @details If the number of leaves is a factor of two, leaves exist on the same level and the weight in each node will differ by
     at most one physical particle. The template parameters are 
 
@@ -61,13 +79,20 @@ namespace ParticleManagement {
        P::*position -> Function pointer to particle position.
 
     A possible call signature is e.g. recursivePartitionAndSplitEqualWeightKD<P, &P::weight, &P::position>.
-    @param[inout] a_inputParticles Input particles. These are destroyed on output.
-    @param[in] a_maxLeaves Maximum number of leaves in the tree.
-    @return Returns leaf nodes with particles. 
+
+    The user can input a particle reconciliation function that manipulates the particle properties of the split particles. By default,
+    the split particles will use the copy constructor and thus inherit class members from p0, with the exception of the particle weights.
+    The reconcile function lets the user manipulate other particle properties, e.g. ones that are not properly captured by the particle copy
+    constructor, or that need some other form of reconciliation. 
+
   */
-  template <class P,  Real& (P::*weight)(), const RealVect& (P::*position)() const>  
+  template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
   static inline std::vector<std::shared_ptr<KDNode<P>>>
-  recursivePartitionAndSplitEqualWeightKD(typename KDNode<P>::ParticleList& a_inputParticles, const int a_maxLeaves) noexcept;
+  recursivePartitionAndSplitEqualWeightKD(
+    typename KDNode<P>::ParticleList& a_inputParticles,
+    const int                         a_maxLeaves,
+    const BinaryParticleReconcile<P>  a_particleReconcile = [](P& p1, P& p2, const P& p0) -> void {
+    }) noexcept;
 
   /*!
     @brief Remove physical particles from the input particles.
