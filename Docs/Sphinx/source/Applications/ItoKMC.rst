@@ -50,7 +50,6 @@ Time stepping
 Reaction network
 ----------------
 
-
 Particle management
 -------------------
 
@@ -351,17 +350,259 @@ _______________
 Background species
 ------------------
 
+Background species :math:`i` are defined as continuous background densities :math:`N_i` given by
+
+.. math::
+
+   N_i\left(\mathbf{x}\right) = \chi_i\left(\mathbf{x}\right)N\left(\mathbf{x}\right),
+
+where :math:`\chi_i\left(\mathbf{x}\right)` is the molar fraction of species :math:`i` (typically, but not necessarily, a constant).
+
+When specifying background species, the user must include an array of background species in the ``gas`` JSON field.
+For example,
+
+.. code-block:: json
+
+   {
+      "gas" : {
+	 "background species" : [
+	    {
+	       // First species goes here
+	    },
+	    {
+	       // Second species goes here
+	    }	    
+	 ]
+      }
+   }
+
+The order of appearance of the background species does not matter. 
+
 Name
 ____
+
+The species name is specified by including an ``id`` field, e.g.
+
+.. code-block:: json
+   :emphasize-lines: 5
+      
+   {
+      "gas" : {
+	 "background species" : [
+	    {
+	       "id": "O2"
+	    }
+	 ]
+      }
+   }
 
 Molar fraction
 ______________
 
+The molar fraction can be specified in various forms by including a field ``molar fraction``.
+This field also requires the user to specify the *type* of molar fraction.
+In principle, the molar fraction can have a positional dependency.
+
+.. warning::
+
+   There's no internal renormalization of the molar fractions input by the user.
+   Internal inconsitencies will occur if the user supplies inputs molar fractions that sum to a number different than one.
+
+   Various checks will be enabled if the user compiles in debug-mode (see :ref:`Chap:Installation`), but these checks are not guaranteed to catch all cases.
+
+Constant
+^^^^^^^^
+
+To specify a constant molar fraction, set the ``type`` specifier to constant and specify the value.
+An example JSON specification is
+
+.. code-block:: json
+   :emphasize-lines: 6-9
+      
+   {
+      "gas" : {
+	 "background species" : [
+	    {
+	       "id": "O2"             // Species name
+	       "molar fraction": {    // Molar fraction specification
+   	          "type": "constant", // Constant molar fraction
+	          "value": 0.2        // Molar fraction value
+	       }
+	    }
+	 ]
+      }
+   }
+
+Tabulated versus height
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The molar fraction can be set as a tabulated value versus one of the Cartesian coordinate axis by setting the ``type`` specifier to ``table vs height``.
+The input data should be tabulated in column form, e.g.
+
+.. code-block:: txt
+
+   # height       molar fraction
+   0              0.1
+   1              0.1 
+   2              0.1
+
+The file parser (see :ref:`LookupTable`) will ignore the header file if it starts with a hashtag (#).
+Various other inputs are then also required:
+
+* ``file`` File name containing the height vs. molar fraction data (required).
+* ``axis`` Cartesian axis to associate with the height coordinate (required).
+* ``height column`` Column in data file containing the height (optional, defaults to 0).
+* ``molar fraction column`` Column in data file containing the molar fraction (optional, defaults to 1).
+* ``height scale`` Scaling of height column (optional).
+* ``fraction scale`` Scaling (optional).
+* ``min height`` Truncate data to minimum height (optional, applied after scaling).
+* ``max height`` Truncate data to maximum height (optional, applied after scaling).
+* ``num points`` Number of points to keep in table representation (optional, defaults to 1000).
+* ``spacing`` Spacing table representation (optional, defaults to "linear".
+* ``dump`` Option for dumping tabulated data to file.
+
+An example JSON specification is
+
+.. code-block:: json
+   :emphasize-lines: 6-18
+      
+   {
+      "gas" : {
+	 "background species" : [
+	    {
+	       "id": "O2"                           // Species name
+	       "molar fraction": {                  // Molar fraction specification
+   	          "type": "table vs height",        // Constant molar fraction
+		  "file" : "O2_molar_fraction.dat", // File name containing molar fraction
+		  "dump" : "debug_O2_fraction.dat", // Optional debugging hook for dumping table to file
+		  "axis" : "y",                     // Axis which represents the "height"
+		  "height column" : 0,              // Optional specification of column containing the height data (defaults to 0)
+		  "molar fraction column" : 1,      // Optional specification of column containing the height data (defaults to 1)
+		  "height scale" : 1.0,             // Optional scaling of height column
+		  "fraction scale" : 1.0,           // Optional scaling of molar fraction column
+		  "min height" : 0.0,               // Optional truncation of minimum height kept in internal table (occurs after scaling)
+		  "max height" : 2.0,               // Optional truncation of maximum height kept in internal table (occurs after scaling)
+		  "num points" : 100,               // Optional specification of number of data points kept in internal table (defaults to 1000)
+		  "spacing" : "linear"              // Optional specification of table representation. Can be 'linear' or 'exponential' (defaults to linear)
+	       }
+	    }
+	 ]
+      }
+   }
+
 Plotting
 ________
 
+Background species densities can be included in HDF5 plots by including an optional field ``plot``.
+For example
+
+.. code-block:: json
+   :emphasize-lines: 10
+      
+   {
+      "gas" : {
+	 "background species" : [
+	    {
+	       "id": "O2"             // Species name
+	       "molar fraction": {    // Molar fraction specification
+   	          "type": "constant", // Constant molar fraction
+	          "value": 0.2        // Molar fraction value
+	       },
+	       "plot": true           // Plot number density in HDF5 or not
+	    }
+	 ]
+      }
+   }
+
 Townsend coefficients
 ---------------------
+
+Townsend ionization and attachment coefficients :math:`\alpha` and :math:`\eta` must be specified, and have two usages:
+
+#. Flagging cells for refinement (users can override this).
+#. Usage in plasma reactions.
+
+These are specified by including JSON entries ``alpha`` and ``eta``, e.g.
+
+.. code-block:: json
+	
+   {
+       "alpha": {
+          // alpha-coefficient specification goes here
+       },
+       "eta" : {
+          // eta-coefficient specification goes here
+       }
+   }
+
+There are various way of specifying these, as discussed below:
+
+Constant
+________
+
+To set a constant Townsend coefficient, set ``type`` to constant and then specify the value, e.g.
+
+.. code-block:: json
+   :emphasize-lines: 3-4
+      
+   {
+       "alpha": {
+          "type": "constant",
+	  "value": 1E5
+       }
+   }
+
+
+Tabulated vs :math:`E/N`
+________________________
+    
+To set the coefficient as functions :math:`f = f\left(E/N\right)`, set the ``type`` specifier to ``table vs E/N`` and specify the following fields:
+
+* ``file`` For specifying the file containing the input data, which must be organized as column data, e.g.
+
+  .. code-block:: txt
+
+     # E/N   alpha/N
+     0       1E5
+     100     1E5
+     200     1E5
+
+* ``header`` For specifying where in the file one starts reading data.
+  This is an optional argument intended for use with BOLSIG+ output data where the user specifies that the data is contained in the lines below the specified header.
+* ``E/N column`` For setting which column in the data file contains the values of :math:`E/N` (optional, defaults to 0).
+* ``alpha/N column`` For setting which column in the data file contains the values of :math:`\alpha/N`.
+  Note that this should be replaced by ``eta/N column`` when parsing the attachment coefficient.
+  This is an optional argument that defaults to 1.
+* ``scale E/N`` Optional scaling of the column containing the :math:`E/N` data.
+* ``scale alpha/N`` Optional scaling of the column containing the :math:`\alpha/N` data.
+* ``min E/N`` Optional truncation of the table representation of the data (applied after scaling).
+* ``max E/N`` Optional truncation of the table representation of the data (applied after scaling).
+* ``num points`` Number of data points in internal table representation (optional, defaults to 1000).
+* ``spacing`` Spacing in internal table representation. Can be ``linear`` or ``exponential``.
+  This is an optional argument that defaults to ``exponential``.
+* ``dump`` A string specifier for writing the table representation of :math:`E/N, \alpha/N` to file.
+
+An example JSON specification that uses a BOLSIG+ output file for parsing the data is
+
+.. code-block:: json
+   :emphasize-lines: 3-14
+      
+   {
+       "alpha": {
+          "type" : "table vs E/N",                                   // Specify that we read in alpha/N vs E/N
+  	  "file" : "bolsig_air.dat",                                 // File containing the data
+	  "dump" : "debug_alpha.dat",                                // Optional dump of internalized table to file. Useful for debugging.	
+	  "header" : "E/N (Td)\tTownsend ioniz. coef. alpha/N (m2)", // Optional argument. Contains line immediately preceding the data to be read.
+	  "E/N column" : 0,                                          // Optional specification of column containing E/N (defaults to 0)
+	  "alpha/N column" : 1,                                      // Optional specification of column containing alpha/N (defaults to 1)
+	  "min E/N" : 1.0,                                           // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	  "max E/N" : 1000.0,                                        // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
+	  "num points" : 1000,                                       // Optional number of points kept when resamplnig the table (defaults to 1000)
+	  "spacing" : "exponential",                                 // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	  "scale E/N" : 1.0,                                         // Optional scaling of the column containing E/N
+	  "scale alpha/N" : 1.0                                      // Optional scaling       
+       }
+   }		
 
 Plasma species
 --------------
@@ -395,8 +636,12 @@ The user must supply the following information:
    The JSON interface expects that the reaction rate :math:`k` is the same as in the reaction rate equation.
    Internally, the rate is converted to a format that is consistent with the KMC algorithm.
 
-Plasma reactions should be entered in the JSON file using an array, .e.g.
+Plasma reactions should be entered in the JSON file using an array (the order of reactions does not matter).
 
+.. raw:: html
+
+   <details>
+   <summary><a>Basic reaction example specifiers</a></summary>
 
 .. code-block:: json
 
@@ -409,7 +654,9 @@ Plasma reactions should be entered in the JSON file using an array, .e.g.
       } 
    ]
 
-The order of reactions does not matter.
+.. raw:: html
+
+   </details><br>      
 
 Reaction specifiers
 ___________________
@@ -426,7 +673,7 @@ For example:
       }
    ]
 
-which is equivalent to the reaction :math:`\text{e} + \text{N}_2 \xrightarrow{k} \text{e} + \text{e} + \text{N}_2^+`.
+which is equivalent to the reaction :math:`\text{e} + \text{N}_2 \rightarrow \text{e} + \text{e} + \text{N}_2^+`.
 Each species must be separated by whitespace and a addition operator.
 For example, the specification ``A + B + C`` will be interpreted as a reaction :math:`\text{A} + \text{B} + \text{C}` but the specification ``A+B + C`` will be interpreted as a reaction between one species ``A+B`` and another species ``C`` .
 
@@ -571,12 +818,13 @@ To specify a Townsend rate constant, one can use the following:
 #. ``eta*v`` for setting the rate constant proportional to the Townsend attachment rate.
 
 One must also specify which species is associated with :math:`\left|\mathbf{v}\right|` by specifying a species flag.
-.. A complete JSON specification is
+A complete JSON specification is
 
-.. raw:: html
+..
+   .. raw:: html
 
-   <details>
-   <summary><a>Example Townsend rate JSON specification</a></summary>
+      <details>
+      <summary><a>Example Townsend rate JSON specification</a></summary>
 
 .. code-block:: json
 
@@ -591,9 +839,10 @@ One must also specify which species is associated with :math:`\left|\mathbf{v}\r
          ]
    }
 
-.. raw:: html
+..
+   .. raw:: html
 
-   </details><br>   
+      </details><br>   
 
 .. warning::
 
@@ -603,6 +852,182 @@ One must also specify which species is associated with :math:`\left|\mathbf{v}\r
 
 Tabulated vs E/N
 ^^^^^^^^^^^^^^^^   
+
+Scaling
+_______
+
+Reactions can be scaled by including a ``scale`` field in the JSON entry.
+This will scale the reaction coefficient by the input factor, e.g. modify the rate constant as
+
+.. math::
+
+   k \rightarrow \nu k,
+   
+where :math:`\nu` is the scaling factor.
+This is useful when scaling reactions from different units, or for completely turning off some input reactions.
+An example JSON specification is
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e -> e + e + M+", // Reaction string
+	    "type": "alpha*v",             // Rate is alpha*v
+	    "species": "e",                // Species for v,
+	    "scale": 0.0                   // Scaling factor
+	}	
+    ]
+
+.. tip::
+
+   If one turns off a reaction by setting ``scale`` to zero, the KMC algorithm will still use the reaction but no reactants/products are consumed/produced.
+
+Efficiency
+__________
+
+Reactions efficiencies can be modified in the same way as one do with the ``scale`` field, e.g. modify the rate constant as
+
+.. math::
+
+   k \rightarrow \nu k,
+
+where :math:`\nu` is the reaction efficiency.
+An example JSON specification is
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e -> e + e + M+", // Reaction string
+	    "type": "alpha*v",             // Rate is alpha*v
+	    "species": "e",                // Species for v,
+	    "efficiency": 0.5              // Reaction efficiency.
+	}	
+    ]
+
+Quenching
+_________
+
+Reaction quenching can be achieved in the following forms:
+
+Pressure-based
+^^^^^^^^^^^^^^
+
+The reaction rate can modified by a factor :math:`p_q/\left[p_q + p\left(\mathbf{x}\right)\right]` where :math:`p_q` is a quenching pressure and :math:`p\left(\mathbf{x}\right)` is the gas pressure.
+This will modify the rate as
+
+.. math::
+
+   k \rightarrow k\frac{p_q}{p_q + p\left(\mathbf{x}\right)}.
+
+An example JSON specification is
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e + N2 -> e + N2 + Y", // Reaction string
+	    "type": "alpha*v",                  // Rate is alpha*v
+	    "species": "e",                     // Species for v,
+	    "quenching pressure": 4000.0        // Quenching pressure
+	}	
+    ]
+
+.. important::
+
+   The quenching pressure must be specified in units of Pascal.
+
+Rate-based
+^^^^^^^^^^
+
+The reaction rate can be modified by a factor :math:`k_r/\left[k_r + k_p + k_q\right]`.
+The intention behind this scaling is that reaction :math:`r` occurs only if it is not predissociated (by rate :math:`k_p`) or quenched (by rate :math:`k_q`).
+Such processes can occur, for example, in excited molecules.
+This will modifiy the rate constant as
+
+.. math::
+
+   k \rightarrow k\frac{k_r}{k_r + k_p + k_q},
+
+where the user will specifiy :math:`k_r`, :math:`k_p`, and :math:`k_q/N`.
+The JSON specification must contain ``quenching rates``, for example:
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e + N2 -> e + N2 + Y", // Reaction string
+	    "type": "alpha*v",                  // Rate is alpha*v
+	    "species": "e",                     // Species for v,
+	    "quenching rates": {                // Specify relevant rates
+	       "kr": 1E9,
+	       "kp": 1E9,
+	       "kq/N": 0.0 
+	    }
+	}	
+    ]
+
+
+
+
+Gradient correction
+___________________
+
+In LFA-based models it is frequently convenient to include energy-corrections to the ionization rate.
+In this case one modifies the rate as
+
+.. math::
+
+   k \rightarrow k\left(1 + \frac{\mathbf{E}\cdot \left(D\nabla n_i\right)}{n_i\mu_iE^2}\right).
+
+To include this correction one may include a specifier ``gradient correction`` in the JSON entry, in which case one must also enter the species :math:`n_i`.
+A JSON specification that includes this
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e -> e + e + M+", // Reaction string
+	    "type": "alpha*v",             // Rate is alpha*v
+	    "species": "e",                // Species for v,
+	    "gradient correction": "e"     // Specify gradient correction using species "e"
+	}	
+    ]
+
+Understanding reaction rates
+____________________________
+
+The JSON specification takes *fluid rates* as input to the KMC algorithm.
+Note that subsequent application of multiple scaling factors are multiplicative.
+For example, the specification
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e -> e + e + M+", // Reaction string
+	    "type": "alpha*v",             // Rate is alpha*v
+	    "species": "e",                // Species for v,
+	    "gradient correction": "e"     // Specify gradient correction using species "e"
+	    "quenching pressure": 4000,    // Quenching pressure
+	    "efficiency": 0.1              // Reaction efficiency
+	}	
+    ]
+
+is equivalent to the rate constant
+
+.. math::
+
+   k = \alpha\left|\mathbf{v}_e\right|\left(1 + \frac{\mathbf{E}\cdot \left(D_e\nabla n_e\right)}{n_e\mu_eE^2}\right)\frac{p_q}{p_q+p\left(\mathbf{x}\right)}\nu
+
+Internally, conversions between the *fluid rate* :math:`k` and the KMC rate :math:`c` are made.
+The conversion factors depend on the reaction order, and ensure consistency between the KMC and fluid formulations.
 
 Plotting rates
 ______________
@@ -632,55 +1057,8 @@ A JSON specification that includes these
 	}	
     ]
 
-
-Gradient correction
-___________________
-
-In LFA-based models it is frequently convenient to include energy-corrections to the ionization rate.
-In this case one modifies the rate as
-
-.. math::
-
-   k \rightarrow k\left(1 + \frac{\mathbf{E}\cdot \left(D\nabla n_i\right)}{n_i\mu_iE^2}\right).
-
-To include this correction one may include a specifier ``gradient correction`` in the JSON entry, in which case one must also enter the species :math:`n_i`.
-A JSON specification that includes this
-
-.. code-block:: json
-		
-    "plasma reactions":
-    [
-	{
-	    "reaction": "e -> e + e + M+", // Reaction string
-	    "type": "alpha*v",             // Rate is alpha*v
-	    "species": "e",                // Species for v,
-	    "gradient correction": "e"     // Specify gradient correction using species "e"
-	}	
-    ]
-
-Scaling
-_______
-
-Reactions can be scaled by including a ``scale`` field in the JSON entry.
-This will scale the reaction coefficient by the input factor.
-This is useful when scaling reactions from different units, or for completely turning off some input reactions.
-An example JSON specification is
-
-.. code-block:: json
-		
-    "plasma reactions":
-    [
-	{
-	    "reaction": "e -> e + e + M+", // Reaction string
-	    "type": "alpha*v",             // Rate is alpha*v
-	    "species": "e",                // Species for v,
-	    "scale": 0.0                   // Scaling factor
-	}	
-    ]
-
-.. tip::
-
-   If one turns off a reaction by setting ``scale`` to zero, the KMC algorithm will still use the reaction but no reactants/products are consumed/produced.
+Photoionization
+---------------
       
 Example programs
 ================

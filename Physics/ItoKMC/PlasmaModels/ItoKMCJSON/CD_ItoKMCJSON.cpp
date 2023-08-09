@@ -344,7 +344,7 @@ ItoKMCJSON::initializeBackgroundSpecies()
   const std::string baseError = m_className + "::initializeBackgroundSpecies";
 
   if (!(m_json["gas"].contains("background species"))) {
-    this->throwParserError(baseError + " but field 'gas/background species' is missing");
+    this->throwParserWarning(baseError + " but field 'gas/background species' is missing");
   }
   else {
     const auto backgroundSpecies = m_json["gas"]["background species"];
@@ -2432,6 +2432,10 @@ ItoKMCJSON::updateReactionRates(const RealVect          a_E,
   if (m_verbose) {
     pout() << m_className + "::updateReactionRates" << endl;
   }
+
+#ifndef NDEBUG
+  this->checkMolarFraction(a_pos);
+#endif
 
   // Update basic reaction rates.
   const Real E = a_E.vectorLength();
