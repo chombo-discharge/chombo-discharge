@@ -21,6 +21,7 @@
 #include <List.H>
 
 // Our includes
+#include <CD_KDNode.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -29,168 +30,69 @@
 namespace ParticleManagement {
 
   /*!
-    @brief Node in a particle-merging KD-tree. 
-    @details This node type is used for partitioning particles into spatial subsets and merging/splitting them. 
-    @details The template argument P is the particle type - the users decides how to merge/split/partition. 
+    @brief Declaration of a reconciliation function when splitting particles.
+    @details This is, for example, passed into the KD-tree equal-weight partioning structure, which may split a particle
+    such that the weight of the two nodes differ by at most one physical particle. By default, that method will call the
+    particle copy constructor, but this function permits the user to input a reconciliation function that manipulates other
+    class members in the split particles. 
   */
   template <class P>
-  class KDNode
-  {
-  public:
-    /*!
-      @brief List of particles. This is aliased because the KD-tree construction may require both random access
-      and something sortable. 
-    */
-    using ParticleList = std::vector<P>;
+  using BinaryParticleReconcile = std::function<void(P& p1, P& p2, const P& p0)>;
 
-    /*!
-      @brief Node partitioner for KD-tree construction.
-    */
-    using Partitioner = std::function<void(KDNode&)>;
+  /*!
+    @brief Partition and split a KD-node with particles so that the weights are approximately the same. 
 
-    /*!
-      @brief Stop function for KD-tree construction. 
-    */
-    using StopFunction = std::function<bool(const ParticleList&)>;
+    @param[inout] a_node Node to split. This MUST be a leaf node and it MUST be possible to split it. 
+    @param[in] a_particleReconcile Optional reconciliation function when splitting a particle into two new particles.
+    @details This will partition particles on two sides of a plane parallel to one of the coordinate axis. The middle
+    particle closest to this plane may be split, and the weights of the resulting particles are assigned such that the
+    total weight of the two halves differ by at most one. The template parameters are 
 
-    /*!
-      @brief Disallowed constructor
-    */
-    KDNode(const KDNode&) = delete;
+       P            -> Particle type
+       P::*weight   -> Function pointer to particle weight
+       P::*position -> Function pointer to particle position.
 
-    /*!
-      @brief Disallowed constructor
-    */
-    KDNode(const KDNode&&) = delete;
+    A possible call signature is e.g. recursivePartitionAndSplitEqualWeightKD<P, &P::weight, &P::position>.
 
-    /*!
-      @brief Disallowed assignment
-    */
-    KDNode&
-    operator=(const KDNode&) = delete;
+    The user can input a particle reconciliation function that manipulates the particle properties of the split particles. By default,
+    the split particles will use the copy constructor and thus inherit class members from p0, with the exception of the particle weights.
+    The reconcile function lets the user manipulate other particle properties, e.g. ones that are not properly captured by the particle copy
+    constructor, or that need some other form of reconciliation. 
+  */
+  template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
+  static inline void
+  partitionAndSplitEqualWeightKD(
+    KDNode<P>&                       a_node,
+    const BinaryParticleReconcile<P> a_particleReconcile = [](P& p1, P& p2, const P& p0) -> void {
+    }) noexcept;
 
-    /*!
-      @brief Disallowed assignment
-    */
-    KDNode&
-    operator=(const KDNode&&) = delete;
+  /*!
+    @brief Recursively build a KD-tree following the "equal weight" principle when partitioning nodes.
+    @param[inout] a_inputParticles Input particles. These are destroyed on output.
+    @param[in] a_maxLeaves Maximum number of leaves in the tree.
+    @return Returns leaf nodes containing the particles
+    @details If the number of leaves is a factor of two, leaves exist on the same level and the weight in each node will differ by
+    at most one physical particle. The template parameters are 
 
-    /*!
-      @brief Default constructor
-    */
-    KDNode();
+       P            -> Particle type
+       P::*weight   -> Function pointer to particle weight
+       P::*position -> Function pointer to particle position.
 
-    /*!
-      @brief Valid constructor. Takes list of particles.
-      @param[inout] a_particles List of particles to be partitioned later. 
-      @note The input particle list is transferred to m_particles. 
-    */
-    KDNode(ParticleList& a_particles);
+    A possible call signature is e.g. recursivePartitionAndSplitEqualWeightKD<P, &P::weight, &P::position>.
 
-    /*!
-      @brief Destructor. Does nothing.
-    */
-    virtual ~KDNode();
+    The user can input a particle reconciliation function that manipulates the particle properties of the split particles. By default,
+    the split particles will use the copy constructor and thus inherit class members from p0, with the exception of the particle weights.
+    The reconcile function lets the user manipulate other particle properties, e.g. ones that are not properly captured by the particle copy
+    constructor, or that need some other form of reconciliation. 
 
-    /*!
-      @brief Get the node weight
-    */
-    inline const Real&
-    weight() const noexcept;
-
-    /*!
-      @brief Get the node weight
-    */
-    inline Real&
-    weight() noexcept;
-
-    /*!
-      @brief Get particles in this node. 
-    */
-    inline const ParticleList&
-    getParticles() const noexcept;
-
-    /*!
-      @brief Get particles in this node. 
-    */
-    inline ParticleList&
-    getParticles() noexcept;
-
-    /*!
-      @brief Is leaf node or not.
-    */
-    inline bool
-    isLeafNode() const noexcept;
-
-    /*!
-      @brief Is leaf node or not.
-    */
-    inline bool
-    isInteriorNode() const noexcept;
-
-    /*!
-      @brief Gather particles further down in the subtree and return all particles (in the leaf nodes)
-    */
-    inline ParticleList
-    gatherParticles() const noexcept;
-
-    /*!
-      @brief Move the particles list further down in the subtree into this vector.
-      @note This clears the particles from the leaf nodes. Use gatherParticles if you do not
-      want to change the tree contents. 
-    */
-    inline ParticleList
-    moveParticles() noexcept;
-
-    /*!
-      @brief Get the left node.
-    */
-    inline std::shared_ptr<KDNode<P>>&
-    getLeft() noexcept;
-
-    /*!
-      @brief Get the right node.
-    */
-    inline std::shared_ptr<KDNode<P>>&
-    getRight() noexcept;
-
-  protected:
-    /*!
-      @brief Left KD-node
-    */
-    std::shared_ptr<KDNode> m_left;
-
-    /*!
-      @brief Right KD-node
-    */
-    std::shared_ptr<KDNode> m_right;
-
-    /*!
-      @brief Node weight
-    */
-    Real m_weight;
-
-    /*!
-      @brief List of particles
-    */
-    ParticleList m_particles;
-
-    /*!
-      @brief Gather particles further down in the subtree and return all particles (in the leaf nodes)
-      @param[inout] a_particles List of particles
-    */
-    inline void
-    gatherParticles(ParticleList& a_particles) const noexcept;
-
-    /*!
-      @brief Move particles further down in the subtree and return all particles (in the leaf nodes)
-      @param[inout] a_particles List of particles
-      @note This clears the particles from the leaf nodes. Use gatherParticles if you do not
-      want to change the tree contents. 
-    */
-    inline void
-    moveParticles(ParticleList& a_particles) noexcept;
-  };
+  */
+  template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
+  static inline std::vector<std::shared_ptr<KDNode<P>>>
+  recursivePartitionAndSplitEqualWeightKD(
+    typename KDNode<P>::ParticleList& a_inputParticles,
+    const int                         a_maxLeaves,
+    const BinaryParticleReconcile<P>  a_particleReconcile = [](P& p1, P& p2, const P& p0) -> void {
+    }) noexcept;
 
   /*!
     @brief Remove physical particles from the input particles.

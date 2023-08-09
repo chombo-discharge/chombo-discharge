@@ -790,6 +790,7 @@ ParticleContainer<P>::remap()
   CH_STOP(t1);
 
   for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
+    m_particles[lvl]->gatherOutcast();
     m_particles[lvl]->remapOutcast();
 
     CH_START(t2);
