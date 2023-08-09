@@ -1153,8 +1153,8 @@ ItoKMCJSON::initializeTemperatures()
         if (!(temperatureJSON.contains("file"))) {
           this->throwParserError(baseErrorTable + ", but 'file' is not specified");
         }
-
-        LookupTable1D<2> tabulatedCoeff = this->parseTableEByN(temperatureJSON, "D*N");
+	
+        LookupTable1D<2> tabulatedCoeff = this->parseTableEByN(temperatureJSON, "eV");
 
         constexpr Real eVToKelvin = 2.0 * Units::Qe / (3.0 * Units::kb);
 
@@ -1166,7 +1166,7 @@ ItoKMCJSON::initializeTemperatures()
         };
       }
       else {
-        this->throwParserError(baseErrorID + " but mobility specifier '" + type + "' is not supported");
+        this->throwParserError(baseErrorID + " but temperature specifier '" + type + "' is not supported");
       }
     }
     else {
@@ -2192,7 +2192,7 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
   }
 
   const std::string preError  = "ItoKMCJSON::parseTableEByN";
-  const std::string postError = "for dataID=" + a_dataID;
+  const std::string postError = "for dataID = " + a_dataID;
 
   if (!(a_tableEntry.contains("file"))) {
     this->throwParserError(preError + " but could not find the 'file' specifier " + postError);

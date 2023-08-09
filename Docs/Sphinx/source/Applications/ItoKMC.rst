@@ -607,18 +607,274 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
 Plasma species
 --------------
 
+Plasma species are species that are tracked using either a CDR or Îto solver.
+The user must specify the following information:
+
+* An ID/name for the species.
+* The species' charge number.
+* The solver type, i.e. whether or not it is tracked by a particle or fluid solver. 
+* Whether or not the species is mobile/diffusive.
+  If the species is mobile/diffusive, the mobility/diffusion coefficient must also be specified.
+* Optionally, the species temperature.
+  If not specified, the temperature will be set to the background gas temperature. 
+* Initial particles for the solvers. 
+
+
 Basic definition
 ________________
+
+Species are defined by an array of entries in a ``plasma species`` JSON field.
+Each species *must* specify the following fields
+
+* ``id`` (string) For setting the species name.
+* ``Z`` (integer) For setting the species' charge number.
+* ``solver`` (string) For specifying whether or not the species is tracked by a CDR or Îto solver.
+  Acceptable values are *cdr* and *ito*.
+* ``mobile`` (boolean) For specifying whether or not the species is mobile.
+* ``mobile`` (boolean) For specifying whether or not the species is diffusive.
+
+An example specification is
+
+.. code-block:: json
+
+    "plasma species" :
+    [
+	// List of plasma species that are tracked. This is an array of species
+	// with various identifiers, some of which are always required (id, Z, type, mobile, diffusive) and
+	// others which are secondary requirements.
+	{
+            "id": "e",          // Species ID
+	    "Z" : -1,           // Charge number
+	    "solver" : "ito",   // Solver type. Either 'ito' or 'cdr'
+	    "mobile" : true,    // Mobile or not
+	    "diffusive" : true  // Diffusive or not
+	},
+	{
+	    // Definition of O2+ plasma species.
+            "id": "O2+",            // Species ID
+	    "Z" : 1,                // Charge number
+	    "solver" : "cdr",       // CDR solver. 
+	    "mobile" : false,       // Not mobile.
+	    "diffusive" : false     // Not diffusive
+	}
+    ]
+
+Note that the order of appearance of the various species is irrelevant.
+However, if a species is specified as mobile/diffusive, the user *must* also specify the corresponding transport coefficients. 
+
+Mobility and diffusion coefficients
+___________________________________
+
+Mobility and diffusion coefficients are specified by including fields ``mobility`` and ``diffusion`` that further specifies how the transport coefficients are calculated.
+Note that the input to these fields should be *fluid transport coefficients*.
+These fields can be specified in various forms, as shown below.
+
+Constant
+^^^^^^^^
+
+To set a constant coefficient, set the ``type`` specifier to constant and then assign the value.
+For example,
+
+.. code-block:: json
+   :emphasize-lines: 12-19
+
+    "plasma species" :
+    [
+	{
+            "id": "e",             // Species ID
+	    "Z" : -1,              // Charge number
+	    "solver" : "ito",      // Solver type. Either 'ito' or 'cdr'
+	    "mobile" : true,       // Mobile or not
+	    "diffusive" : true     // Diffusive or not,
+	    "mobility": {
+	       "type": "constant", // Set constant mobility
+	       "value": 0.02
+	    },
+	    "diffusion": {
+	       "type": "constant", // Set constant diffusion coefficient
+	       "value": 2E-4
+	    }
+	}
+    ]
+
+Table vs :math:`E/N`
+^^^^^^^^^^^^^^^^^^^^
+
+To set the transport coefficients as functions :math:`f = f\left(E/N\right)`, set the ``type`` specifier to ``table vs E/N`` and specify the following fields:
+
+* ``file`` For specifying the file containing the input data, which must be organized as column data, e.g.
+
+  .. code-block:: txt
+
+     # E/N   mu/N
+     0       1E5
+     100     1E5
+     200     1E5
+
+* ``header`` For specifying where in the file one starts reading data.
+  This is an optional argument intended for use with BOLSIG+ output data where the user specifies that the data is contained in the lines below the specified header.
+* ``E/N`` For setting which column in the data file contains the values of :math:`E/N` (optional, defaults to 0).
+* ``mu*N`` For setting which column in the data file contains the values of :math:`\mu N` (or alternatively :math:`DN` for the diffusion coefficient).
+  This is an optional argument that defaults to 1.
+* ``E/N scale`` Optional scaling of the column containing the :math:`E/N` data.
+* ``mu*N scale`` Optional scaling of the column containing the :math:`\mu N` data (or alternatively :math:`DN` for the diffusion coefficient).
+* ``min E/N`` Optional truncation of the table representation of the data (applied after scaling).
+* ``max E/N`` Optional truncation of the table representation of the data (applied after scaling).
+* ``num points`` Number of data points in internal table representation (optional, defaults to 1000).
+* ``spacing`` Spacing in internal table representation. Can be ``linear`` or ``exponential``.
+  This is an optional argument that defaults to ``exponential``.
+* ``dump`` A string specifier for writing the table representation of :math:`E/N, \mu N` to file.
+
+An example JSON specification that uses a BOLSIG+ output file for parsing the data for the mobility is
+
+.. code-block:: json
+   :emphasize-lines: 9-22
+
+    "plasma species" :
+    [
+       {
+          "id": "e",                                       // Species ID
+          "Z" : -1,                                        // Charge number
+          "solver" : "ito",                                // Solver type. 
+          "mobile" : true,                                 // Mobile
+          "diffusive" : false,                             // Not diffusive
+          "mobility" : {
+	     "type" : "table vs E/N",                      // Specification of tabulated mobility lookup method
+	     "file" : "bolsig_air.dat",                    // File containg the mobility data
+	     "dump" : "debug_mobility.dat",                // Optional argument for dumping table to disk (useful for debugging)		
+	     "header" : "E/N (Td)\tMobility *N (1/m/V/s)", // Line immediately preceding the colum data
+	     "E/N" : 0,                                    // Column containing E/N
+	     "mu*N" : 1,                                   // Column containing mu*N
+	     "min E/N" : 1,                                // Minimum E/N kept when resampling table
+	     "max E/N" : 2E6,                              // Maximum E/N kept when resampling table
+	     "points" : 1000,                              // Number of grid points kept when resampling the table
+	     "spacing" : "exponential",                    // Grid point spacing when resampling the table
+	     "E/N scale" : 1.0,                            // Optional argument for scaling mobility coefficient
+	     "mu*N scale" : 1.0                            // Optional argument for scaling the E/N column
+	  }
+       }
+    ]
+
+.. tip::
+
+   The parser for the diffusion coefficient is analogous; simply replace ``mu*N`` by ``D*N``.
+    
+
+Temperature
+___________
+
+The species temperature is only parametrically attached to the species (i.e., not solved for), and can be specified by the user.
+Note that the temperature is mostly relevant for transport coefficients (e.g., reaction rates).
+The temperature can be specified through the ``temperature`` field for each species, and various forms of specifying this is available.
+
+.. important::
+   
+   If the specifies temperature is *not* specified by the user, it will be set equal to the background gas temperature.
+
+Background gas
+^^^^^^^^^^^^^^
+
+To set the temperature equal to the background gas temperature, set the ``type`` specifier field to ``gas``.
+For example:
+
+.. code-block:: json
+   :emphasize-lines: 7-9
+
+    "plasma species" :
+    [
+       {
+          "id": "O2+",      // Species ID
+          "Z" : 1,          // Charge number
+          "solver" : "ito", // Solver type. 
+	  "temperature": {  // Specify temperature
+	     "type": "gas"  // Temperature same as gas
+	  }
+       }
+    ]
+
+Constant
+^^^^^^^^
+
+To set a constant temperature, set the ``type`` specifier to ``constant`` and then specify the temperature.
+For example:
+
+.. code-block:: json
+   :emphasize-lines: 7-10
+
+    "plasma species" :
+    [
+       {
+          "id": "O2+",           // Species ID
+          "Z" : 1,               // Charge number
+          "solver" : "ito",      // Solver type. 
+	  "temperature": {       // Specify temperature
+	     "type": "constant", // Constant temperature
+	     "value": 300        // Temperature in Kelvin
+	  }
+       }
+    ]
+
+Table vs :math:`E/N`
+^^^^^^^^^^^^^^^^^^^^
+
+To set the species temperature as a function :math:`T = T\left(E/N\right)`, set the ``type`` specifier to ``table vs E/N`` and specify the following fields:
+
+* ``file`` For specifying the file containing the input data, which must be organized as column data *versus the mean energy*, e.g.
+
+  .. code-block:: txt
+
+     # E/N   energy (eV)
+     0       1
+     100     2
+     200     3
+
+* ``header`` For specifying where in the file one starts reading data.
+  This is an optional argument intended for use with BOLSIG+ output data where the user specifies that the data is contained in the lines below the specified header.
+* ``E/N`` For setting which column in the data file contains the values of :math:`E/N` (optional, defaults to 0).
+* ``eV`` For setting which column in the data file contains the energy vs :math:`E/N`.
+  This is an optional argument that defaults to 1.
+* ``E/N scale`` Optional scaling of the column containing the :math:`E/N` data.
+* ``eV scale`` Optional scaling of the column containing the energy (in eV).
+* ``min E/N`` Optional truncation of the table representation of the data (applied after scaling).
+* ``max E/N`` Optional truncation of the table representation of the data (applied after scaling).
+* ``num points`` Number of data points in internal table representation (optional, defaults to 1000).
+* ``spacing`` Spacing in internal table representation. Can be ``linear`` or ``exponential``.
+  This is an optional argument that defaults to ``exponential``.
+* ``dump`` A string specifier for writing the table representation of :math:`E/N, eV` to file.
+
+An example JSON specification that uses a BOLSIG+ output file for parsing the data for the mobility is
+
+.. code-block:: json
+   :emphasize-lines: 9-22
+
+    "plasma species" :
+    [
+       {
+          "id": "O2+",                                // Species ID
+          "Z" : 1,                                    // Charge number
+          "solver" : "ito",                           // Solver type. 
+          "mobile" : true,                            // Not mobile
+          "diffusive" : false,                        // Not diffusive
+	  "temperature": {                            // Specification of temperature
+	     "type": "table vs E/N",                  // Tabulated
+	     "file": "bolsig_air.dat",                // File name
+	     "dump": "debug_temperature.dat",         // Dump to file
+	     "header" : "E/N (Td)\tMean energy (eV)", // Header preceding data
+	     "E/N" : 0,                               // Column containing E/N
+	     "eV" : 1,                                // Column containing the energy
+	     "min E/N" : 10,                          // Truncation of table
+	     "max E/N" : 2E6,                         // Truncation of table
+	     "E/N scale": 1.0,                        // Scaling of input data
+	     "eV scale": 1.0,                         // Scaling of input data
+	     "spacing" : "exponential",               // Table spacing
+	     "points" : 1000                          // Number of points in table
+	  }
+       }
+    ]
 
 Initial particles
 _________________
 
-Mobility coefficients
-_____________________
-
-
-Diffusion coefficients
-______________________
 
 Plasma reactions
 ----------------
