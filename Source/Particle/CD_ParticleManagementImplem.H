@@ -31,7 +31,7 @@ namespace ParticleManagement {
   partitionAndSplitEqualWeightKD(KDNode<P>& a_node, const BinaryParticleReconcile<P> a_particleReconcile) noexcept
   {
     CH_assert(!(a_node.isInteriorNode()));
-    CH_assert(this->weight() > 2.0 - std::numeric_limits<Real>::min());
+    CH_assert(a_node.weight() > 2.0 - std::numeric_limits<Real>::min());
 
     constexpr Real splitThresh = 2.0 - std::numeric_limits<Real>::min();
 
