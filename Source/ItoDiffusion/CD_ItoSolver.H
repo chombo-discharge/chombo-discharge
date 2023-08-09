@@ -20,7 +20,6 @@
 #include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
 #include <CD_EBRepresentation.H>
-#include <CD_ParticleManagement.H>
 #include <CD_EBIntersection.H>
 #include <CD_NamespaceHeader.H>
 
@@ -1026,11 +1025,6 @@ protected:
     @brief Switch for deciding how to interpolate mobilities, i.e. interpolating either mu*E or just mu (to the particle position)
   */
   WhichMobilityInterpolation m_mobilityInterp;
-
-  /*!
-    @brief Particle merger
-  */
-  ParticleManagement::ParticleMerger<ItoParticle> m_particleMerger;
 
   /*!
     @brief Number of particles used when restarting a simulation -- this is relevant only when restarting from a "fluid" checkpoint file. 

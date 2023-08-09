@@ -2916,8 +2916,8 @@ ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
     "ItoSolver::makeSuperParticles -- need better abstractions for particle splitting in PartilceManagement");
 
   using PType        = NonCommParticle<2, 1>;
-  using Node         = ParticleManagement::KDNode<PType>;
-  using ParticleList = ParticleManagement::KDNode<PType>::ParticleList;
+  using Node         = KDNode<PType>;
+  using ParticleList = KDNode<PType>::ParticleList;
 
   // 1. Make the input list into a vector of particles with a smaller memory footprint.
   CH_START(t1);
@@ -2937,9 +2937,9 @@ ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
   CH_STOP(t1);
 
   // 2. Build KD-tree.
-  const std::vector<std::shared_ptr<Node>> leaves =
-    ParticleManagement::buildKDTreeEqualWeight<PType, &PType::template real<0>, &PType::template vect<0>>(particles,
-                                                                                                          a_ppc);
+  const std::vector<std::shared_ptr<Node>> leaves = ParticleManagement::
+    recursivePartitionAndSplitEqualWeightKD<PType, &PType::template real<0>, &PType::template vect<0>>(particles,
+                                                                                                       a_ppc);
 
   // Merge leaves into new particles.
   CH_START(t3);

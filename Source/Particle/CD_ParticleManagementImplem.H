@@ -26,133 +26,10 @@
 
 namespace ParticleManagement {
 
-  template <class P>
-  inline KDNode<P>::KDNode() : m_left(nullptr), m_right(nullptr), m_weight(0.0)
-  {}
-
-  template <class P>
-  inline KDNode<P>::KDNode(ParticleList& a_particles)
-    : m_left(nullptr), m_right(nullptr), m_weight(0.0), m_particles(std::move(a_particles))
-  {}
-
-  template <class P>
-  inline KDNode<P>::~KDNode()
-  {}
-
-  template <class P>
-  inline const typename KDNode<P>::ParticleList&
-  KDNode<P>::getParticles() const noexcept
+  template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
+  static inline void
+  partitionAndSplitEqualWeightKD(KDNode<P>& a_node) noexcept
   {
-    return m_particles;
-  }
-
-  template <class P>
-  inline typename KDNode<P>::ParticleList&
-  KDNode<P>::getParticles() noexcept
-  {
-    return m_particles;
-  }
-
-  template <class P>
-  inline const Real&
-  KDNode<P>::weight() const noexcept
-  {
-    return m_weight;
-  }
-
-  template <class P>
-  inline Real&
-  KDNode<P>::weight() noexcept
-  {
-    return m_weight;
-  }
-
-  template <class P>
-  inline bool
-  KDNode<P>::isLeafNode() const noexcept
-  {
-    return (m_left == nullptr) && (m_right == nullptr);
-  }
-
-  template <class P>
-  inline bool
-  KDNode<P>::isInteriorNode() const noexcept
-  {
-    return !(this->isLeafNode());
-  }
-
-  template <class P>
-  inline typename KDNode<P>::ParticleList
-  KDNode<P>::gatherParticles() const noexcept
-  {
-    ParticleList primitives;
-
-    this->gatherParticles(primitives);
-
-    return primitives;
-  }
-
-  template <class P>
-  inline void
-  KDNode<P>::gatherParticles(ParticleList& a_particles) const noexcept
-  {
-    if (this->isLeafNode()) {
-      a_particles.reserve(a_particles.size() + m_particles.size());
-      a_particles.insert(a_particles.end(), m_particles.begin(), m_particles.end());
-    }
-    else {
-      m_left->gatherParticles(a_particles);
-      m_right->gatherParticles(a_particles);
-    }
-  }
-
-  template <class P>
-  inline typename KDNode<P>::ParticleList
-  KDNode<P>::moveParticles() noexcept
-  {
-    ParticleList primitives;
-
-    this->moveParticles(primitives);
-
-    return primitives;
-  }
-
-  template <class P>
-  inline void
-  KDNode<P>::moveParticles(ParticleList& a_particles) noexcept
-  {
-    if (this->isLeafNode()) {
-      a_particles.reserve(a_particles.size() + m_particles.size());
-
-      std::move(m_particles.begin(), m_particles.end(), std::back_inserter(a_particles));
-    }
-    else {
-      m_left->moveParticles(a_particles);
-      m_right->moveParticles(a_particles);
-    }
-  }
-
-  template <class P>
-  inline std::shared_ptr<KDNode<P>>&
-  KDNode<P>::getLeft() noexcept
-  {
-    return m_left;
-  }
-
-  template <class P>
-  inline std::shared_ptr<KDNode<P>>&
-  KDNode<P>::getRight() noexcept
-  {
-    return m_right;
-  }
-
-  /*!
-    @brief Partitioning method for KDNode<P> which equilibriates the weight across the two halves when splitting a node
-    @note This only adjusts the weight of the median particle. The particle class P should have a copy constructor for the other
-    fields; note that these fields are simply copied over when the particle is split and are not adjusted. 
-  */
-  template <class P,  Real& (P::*weight)(), const RealVect& (P::*position)() const>
-  typename KDNode<P>::Partitioner PartitionEqualWeight = [](KDNode<P>& a_node) -> void {
     CH_assert(!(a_node.isInteriorNode()));
 
     constexpr Real splitThresh = 2.0 - std::numeric_limits<Real>::min();
@@ -299,12 +176,14 @@ namespace ParticleManagement {
     CH_assert(WL == wl);
     CH_assert(WR == wr);
 #endif
-  };
+  }
 
   template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
   inline std::vector<std::shared_ptr<KDNode<P>>>
-  buildKDTreeEqualWeight(typename KDNode<P>::ParticleList& a_inputParticles, const int a_maxLeaves) noexcept {
-    CH_TIME("ParticleManagement::buildKDTreeEqualWeight");
+  recursivePartitionAndSplitEqualWeightKD(typename KDNode<P>::ParticleList& a_inputParticles,
+                                          const int                         a_maxLeaves) noexcept
+  {
+    CH_TIME("ParticleManagement::recursivePartitionAndSplitEqualWeightKD");
 
     Real W = 0.0;
 
@@ -314,7 +193,7 @@ namespace ParticleManagement {
 
     std::vector<std::shared_ptr<KDNode<P>>> leaves1;
     std::vector<std::shared_ptr<KDNode<P>>> leaves2;
-    
+
     leaves1.emplace_back(std::make_shared<KDNode<P>>(a_inputParticles));
     leaves1[0]->weight() = W;
 
@@ -324,22 +203,22 @@ namespace ParticleManagement {
       keepGoing = false;
 
       for (const auto& l : leaves1) {
-	if (l->weight() > 2.0 - std::numeric_limits<Real>::min()) {
-	  ParticleManagement::PartitionEqualWeight<P, weight, position>(*l);
+        if (l->weight() > 2.0 - std::numeric_limits<Real>::min()) {
+          ParticleManagement::partitionAndSplitEqualWeightKD<P, weight, position>(*l);
 
-	  leaves2.emplace_back(l->getLeft());
-	  leaves2.emplace_back(l->getRight());
+          leaves2.emplace_back(l->getLeft());
+          leaves2.emplace_back(l->getRight());
 
-	  keepGoing = true;
-	}
-	else {
-	  leaves2.emplace_back(l);
-	}
+          keepGoing = true;
+        }
+        else {
+          leaves2.emplace_back(l);
+        }
 
-	// Break out if we have sufficient leaf nodes.
-	if (leaves2.size() >= a_maxLeaves) {
-	  break;
-	}
+        // Break out if we have sufficient leaf nodes.
+        if (leaves2.size() >= a_maxLeaves) {
+          break;
+        }
       }
 
       leaves1 = leaves2;
