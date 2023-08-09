@@ -875,6 +875,239 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
 Initial particles
 _________________
 
+Initial particles for species are added by including an ``initial particles`` field.
+The field consists of an array of JSON entries, where each array entry represents various ways of adding particles.
+
+.. important::
+
+   The ``initial particles`` field is *incrementing*, each new entry will add additional particles.
+
+For example, to add two particles with particle weights of 1, one may specify
+
+.. code-block:: json
+   :emphasize-lines: 9-22
+		     
+    "plasma species" :
+    [
+       {
+          "id": "e",                 // Species ID
+          "Z" : 1,                   // Charge number
+          "solver" : "ito",          // Solver type. 
+          "mobile" : false,          // Not mobile
+          "diffusive" : false,       // Not diffusive
+	  "initial particles": [     // Initial particles
+	     {
+	        "single particle": { // Single physical particle at (0,0,0)
+		   "position": [0, 0, 0],
+		   "weight": 1.0
+		}
+	     },
+	     {
+	        "single particle": { // Single physical particle at (0,1,0)
+		   "position": [0, 1, 0],
+		   "weight": 1.0
+		}
+	     }
+	  ]
+       }
+    ]
+
+The various supported ways of additional initial particles are discussed below.
+
+.. important::
+
+   If a solver is specified as a CDR solver, the initial particles are deposited as densities on the mesh using an NGP scheme.
+
+Single particle
+^^^^^^^^^^^^^^^
+
+Single particles are placed by including a ``single particle`` JSON entry.
+The user must specify
+
+* ``position`` The particle position.
+* ``weight`` The particle weight.
+  
+For example:
+
+.. code-block:: json
+   :emphasize-lines: 11-14
+		     
+    "plasma species" :
+    [
+       {
+          "id": "e",                 // Species ID
+          "Z" : 1,                   // Charge number
+          "solver" : "ito",          // Solver type. 
+          "mobile" : false,          // Not mobile
+          "diffusive" : false,       // Not diffusive
+	  "initial particles": [     // Initial particles
+	     {
+	        "single particle": { // Single physical particle at (0,0,0)
+		   "position": [0, 0, 0],
+		   "weight": 1.0
+		}
+	     }
+	  ]
+       }
+    ]
+
+Uniform distribution
+^^^^^^^^^^^^^^^^^^^^
+
+Particles can be randomly drawn from a uniform distribution (a rectangular box in 2D/3D) by including a ``uniform distribution``.
+The user must specify
+
+* ``low corner`` The lower left corner of the box.
+* ``high corner`` The lower left corner of the box.
+* ``num particles`` Number of computational particles that are drawn.
+* ``weight`` Particle weights.
+
+For example:
+
+.. code-block:: json
+   :emphasize-lines: 11-16
+		     
+    "plasma species" :
+    [
+       {
+          "id": "e",                                  // Species ID
+          "Z" : 1,                                    // Charge number
+          "solver" : "ito",                           // Solver type. 
+          "mobile" : false,                           // Not mobile
+          "diffusive" : false,                        // Not diffusive
+	  "initial particles": [                      // Initial particles
+	     {
+	        "uniform distribution" : {            // Particles inside a box
+		   "low corner" : [ -0.04, 0, 0 ],    // Lower-left physical corner of sampling region
+		   "high corner" : [ 0.04, 0.04, 0 ], // Upper-right physical corner of sampling region
+		   "num particles": 1000,             // Number of computational particles
+		   "weight" : 1                       // Particle weights
+		} 	     
+	     }
+	  ]
+       }
+    ]
+
+Sphere distribution
+^^^^^^^^^^^^^^^^^^^
+
+Particles can be randomly drawn inside a circle (sphere in 3D)  by including a ``sphere distribution``.
+The user must specify
+
+* ``center`` The sphere center.
+* ``radius`` The sphere radius.
+* ``num particles`` Number of computational particles that are drawn.
+* ``weight`` Particle weights.
+
+For example:
+
+.. code-block:: json
+   :emphasize-lines: 11-16
+		     
+    "plasma species" :
+    [
+       {
+          "id": "e",                            // Species ID
+          "Z" : 1,                              // Charge number
+          "solver" : "ito",                     // Solver type. 
+          "mobile" : false,                     // Not mobile
+          "diffusive" : false,                  // Not diffusive
+	  "initial particles": [                // Initial particles
+	     {
+	        "sphere distribution" : {       // Particles inside sphere
+		   "center" : [ 0, 7.5E-3, 0 ], // Sphere center
+		   "radius" : 1E-3,             // Sphere radius		
+		   "num particles": 1000,       // Number of computational particles
+		   "weight" : 1                 // Particle weights
+		} 	     
+	     }
+	  ]
+       }
+    ]
+
+Gaussian distribution
+^^^^^^^^^^^^^^^^^^^^^
+
+Particles can be randomly drawn from a Gaussian distribution by including a ``gaussian distribution``.
+The user must specify
+
+* ``center`` The sphere center.
+* ``radius`` The sphere radius.
+* ``num particles`` Number of computational particles that are drawn.
+* ``weight`` Particle weights.
+
+For example:
+
+.. code-block:: json
+   :emphasize-lines: 11-16
+		     
+    "plasma species" :
+    [
+       {
+          "id": "e",                            // Species ID
+          "Z" : 1,                              // Charge number
+          "solver" : "ito",                     // Solver type. 
+          "mobile" : false,                     // Not mobile
+          "diffusive" : false,                  // Not diffusive
+	  "initial particles": [                // Initial particles
+	     {
+	        "gaussian distribution" : {     // Particles drawn from a gaussian 
+		   "center" : [ 0, 7.5E-3, 0 ], // Center
+		   "radius" : 1E-3,             // Radius		
+		   "num particles": 1000,       // Number of computational particles
+		   "weight" : 1                 // Particle weights
+		} 	     
+	     }
+	  ]
+       }
+    ]
+
+List/file
+^^^^^^^^^
+
+Particles can be read from a file by including a ``list`` specifier.
+The particles must be organized as rows containing the coordinate positions and weights, e.g.
+
+.. code-block::
+
+   # x   y   z    w
+     0   0   0    1
+
+The user must specify
+
+* ``file`` File name.
+* ``x`` Column containing the :math:`x` coordinates (optional, defaults to 0).
+* ``y`` Column containing the :math:`y` coordinates (optional, defaults to 1).
+* ``z`` Column containing the :math:`z` coordinates (optional, defaults to 2).
+* ``w`` Column containing the particle weight (optional, defaults to 3).
+
+For example:
+
+.. code-block:: json
+   :emphasize-lines: 11-17
+		     
+    "plasma species" :
+    [
+       {
+          "id": "e",                            // Species ID
+          "Z" : 1,                              // Charge number
+          "solver" : "ito",                     // Solver type. 
+          "mobile" : false,                     // Not mobile
+          "diffusive" : false,                  // Not diffusive
+	  "initial particles": [                // Initial particles
+	     {
+	        "list": {
+	   	   "file": "initial_particles.dat", // File containing the particles
+		   "x column": 0,                   
+		   "y column": 1,                   
+		   "z column": 2,                   
+		   "w column": 3
+		}
+	     }    
+	  ]
+       }
+    ]
+
 
 Plasma reactions
 ----------------
