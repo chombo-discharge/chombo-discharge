@@ -33,6 +33,13 @@ class ItoSolver
 {
 public:
   /*!
+    @brief Concept for splitting/merging particles
+    @param[inout] a_particles Particles to be merged/split
+    @param[in] a_numTargetParticles Number of target particles
+  */
+  using ParticleMerger = std::function<void(List<ItoParticle>& a_particles, const int a_numTargetParticles)>;
+
+  /*!
     @brief Enum class for distinguishing various types of particle containers.
     @details This exists because the ItoSolver can partition particles into various containers, which is very useful when one wants to add particles from
     a source term, remove particles that fall inside the EB, or parse boundary conditions on the EB and domain faces. Here,
@@ -62,6 +69,19 @@ public:
     @brief Destructor (does nothing).
   */
   virtual ~ItoSolver();
+
+  /*!
+    @brief Set a default particle merger. This defaults to KD-tree merging following an "equal weight" principle.
+  */
+  virtual void
+  setDefaultParticleMerger() noexcept;
+
+  /*!
+    @brief Set the particle merger. This will get called when merging particles using makeSuperparticles.
+    @param[in] a_particleMerger Particle merger
+  */
+  virtual void
+  setParticleMerger(const ParticleMerger& a_particleMerger) noexcept;
 
   /*!
     @brief Get this solver's name 
@@ -804,7 +824,7 @@ public:
   */
   virtual void
   makeSuperparticles(const WhichContainer a_container,
-                     const int            a_particlesPerPatch,
+                     const int            a_particlesPerCell,
                      const int            a_level,
                      const DataIndex      a_dit);
 
@@ -1027,6 +1047,11 @@ protected:
   WhichMobilityInterpolation m_mobilityInterp;
 
   /*!
+    @brief Particle merger
+  */
+  ParticleMerger m_particleMerger;
+
+  /*!
     @brief Number of particles used when restarting a simulation -- this is relevant only when restarting from a "fluid" checkpoint file. 
   */
   int m_restartPPC;
@@ -1066,11 +1091,6 @@ protected:
     @details ItoSolver for parent class -- derived classes might be named something else.
   */
   std::string m_className;
-
-  /*!
-    @brief Uniform integer distribution between [0,SpaceDim-1]
-  */
-  mutable std::uniform_int_distribution<int> m_uniformDistribution0d;
 
   /*!
     @brief Truncation value for normal distribution. 
@@ -1405,7 +1425,7 @@ protected:
     the EB and put it back into the domain. 
     @param[inout] a_phi Quantity to be redistributed. 
   */
-  void
+  virtual void
   redistributeAMR(EBAMRCellData& a_phi) const;
 
   /*!
@@ -1413,7 +1433,7 @@ protected:
     @param[out] a_depositionNC     Non-conservative deposition
     @param[in]  a_depositionKappaC Conserved deposition
   */
-  void
+  virtual void
   depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC) const;
 
   /*!
@@ -1422,16 +1442,16 @@ protected:
     @param[out]   a_massDifference On output, contains mass loss in each cut-cell.
     @param[in]    a_depositionNC   The "non-conservative" deposited variable.
   */
-  void
+  virtual void
   depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC) const;
 
   /*!
-    @brief Superparticle merging with BVH trees
+    @brief Superparticle merging with KD/BVH trees
     @param[inout] a_particles        Particles to be merged/split
     @param[in]    a_particlesPerCell Target number of particles per cell
   */
   virtual void
-  makeSuperparticles(List<ItoParticle>& a_particles, const int a_particlesPerCell);
+  makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles, const int a_particlesPerCell);
 
   /*!
     @brief Interpolate mobilities -- this will switch between the two ways of computing the particle mobility.
