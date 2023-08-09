@@ -69,9 +69,8 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Classes</a> &#124;
-<a href="#func-members">Functions</a> &#124;
-<a href="#var-members">Variables</a>  </div>
+<a href="#typedef-members">Typedefs</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">ParticleManagement Namespace Reference</div>  </div>
 </div><!--header-->
@@ -80,14 +79,19 @@ $(function() {
 <p>Namespace for various particle management tools.  
 <a href="namespaceParticleManagement.html#details">More...</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
-Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleManagement_1_1KDNode.html">KDNode</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Node in a particle-merging KD-tree.  <a href="classParticleManagement_1_1KDNode.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:a355c356fabec1650406a887b59c2068f"><td class="memTemplParams" colspan="2">template&lt;class P &gt; </td></tr>
+<tr class="memitem:a355c356fabec1650406a887b59c2068f"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">BinaryParticleReconcile</a> = std::function&lt; void(P &amp;p1, P &amp;p2, const P &amp;p0)&gt;</td></tr>
+<tr class="memdesc:a355c356fabec1650406a887b59c2068f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Declaration of a reconciliation function when splitting particles.  <a href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">More...</a><br /></td></tr>
+<tr class="separator:a355c356fabec1650406a887b59c2068f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a682da4913c7f97a112bca7a51c83aada"><td class="memTemplParams" colspan="2">template&lt;class P , Real &amp;(P::*)() weight, const RealVect &amp;(P::*)() const position&gt; </td></tr>
+<tr class="memitem:a682da4913c7f97a112bca7a51c83aada"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; std::shared_ptr&lt; <a class="el" href="classKDNode.html">KDNode</a>&lt; P &gt; &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a682da4913c7f97a112bca7a51c83aada">recursivePartitionAndSplitEqualWeightKD</a> (typename <a class="el" href="classKDNode.html">KDNode</a>&lt; P &gt;::ParticleList &amp;a_inputParticles, const int a_maxLeaves, const <a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">BinaryParticleReconcile</a>&lt; P &gt; a_particleReconcile) noexcept</td></tr>
+<tr class="memdesc:a682da4913c7f97a112bca7a51c83aada"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recursively build a KD-tree following the "equal weight" principle when partitioning nodes.  <a href="namespaceParticleManagement.html#a682da4913c7f97a112bca7a51c83aada">More...</a><br /></td></tr>
+<tr class="separator:a682da4913c7f97a112bca7a51c83aada"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a21623f295aec259e5624cf60287f7fed"><td class="memTemplParams" colspan="2">template&lt;typename P , typename T , typename &gt; </td></tr>
 <tr class="memitem:a21623f295aec259e5624cf60287f7fed"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a21623f295aec259e5624cf60287f7fed">removePhysicalParticles</a> (List&lt; P &gt; &amp;a_particles, const T a_numPhysPartToRemove) noexcept</td></tr>
 <tr class="memdesc:a21623f295aec259e5624cf60287f7fed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove physical particles from the input particles.  <a href="namespaceParticleManagement.html#a21623f295aec259e5624cf60287f7fed">More...</a><br /></td></tr>
@@ -120,21 +124,30 @@ Functions</h2></td></tr>
 <tr class="memitem:a788d6de7f87c7d0126d8a8a8fadc4b8b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a788d6de7f87c7d0126d8a8a8fadc4b8b">drawGaussianParticles</a> (List&lt; P &gt; &amp;a_particles, const T a_numParticles, const RealVect a_center, const Real a_radius) noexcept</td></tr>
 <tr class="memdesc:a788d6de7f87c7d0126d8a8a8fadc4b8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw particles from a Gaussian distribution.  <a href="namespaceParticleManagement.html#a788d6de7f87c7d0126d8a8a8fadc4b8b">More...</a><br /></td></tr>
 <tr class="separator:a788d6de7f87c7d0126d8a8a8fadc4b8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a23ed9c2bfe7c1ee54b577d0ef735539f"><td class="memTemplParams" colspan="2">template&lt;class P , Real &amp;(P::*)() weight, const RealVect &amp;(P::*)() const position&gt; </td></tr>
-<tr class="memitem:a23ed9c2bfe7c1ee54b577d0ef735539f"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classParticleManagement_1_1KDNode.html">KDNode</a>&lt; P &gt;::Partitioner&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a23ed9c2bfe7c1ee54b577d0ef735539f">PartitionEqualWeight</a></td></tr>
-<tr class="memdesc:a23ed9c2bfe7c1ee54b577d0ef735539f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Partitioning method for <a class="el" href="classParticleManagement_1_1KDNode.html" title="Node in a particle-merging KD-tree.">KDNode</a>.  <a href="namespaceParticleManagement.html#a23ed9c2bfe7c1ee54b577d0ef735539f">More...</a><br /></td></tr>
-<tr class="separator:a23ed9c2bfe7c1ee54b577d0ef735539f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a26759b55c1001da7e58d4e961ed72185"><td class="memTemplParams" colspan="2">template&lt;class P , const Real &amp;(P::*)() const weight&gt; </td></tr>
-<tr class="memitem:a26759b55c1001da7e58d4e961ed72185"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classParticleManagement_1_1KDNode.html">KDNode</a>&lt; P &gt;::StopFunction&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a26759b55c1001da7e58d4e961ed72185">InsufficientWeightForSplitting</a></td></tr>
-<tr class="memdesc:a26759b55c1001da7e58d4e961ed72185"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop function which returns true if weight in node &lt; 2.  <a href="namespaceParticleManagement.html#a26759b55c1001da7e58d4e961ed72185">More...</a><br /></td></tr>
-<tr class="separator:a26759b55c1001da7e58d4e961ed72185"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Namespace for various particle management tools. </p>
-</div><h2 class="groupheader">Function Documentation</h2>
+</div><h2 class="groupheader">Typedef Documentation</h2>
+<a id="a355c356fabec1650406a887b59c2068f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a355c356fabec1650406a887b59c2068f">&#9670;&nbsp;</a></span>BinaryParticleReconcile</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class P &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">ParticleManagement::BinaryParticleReconcile</a> = typedef std::function&lt;void(P&amp; p1, P&amp; p2, const P&amp; p0)&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Declaration of a reconciliation function when splitting particles. </p>
+<p>This is, for example, passed into the KD-tree equal-weight partioning structure, which may split a particle such that the weight of the two nodes differ by at most one physical particle. By default, that method will call the particle copy constructor, but this function permits the user to input a reconciliation function that manipulates other class members in the split particles. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Function Documentation</h2>
 <a id="a03181d038c45abb4e5ba0d78be9d830c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a03181d038c45abb4e5ba0d78be9d830c">&#9670;&nbsp;</a></span>deleteParticles()</h2>
 
@@ -503,6 +516,64 @@ template&lt;typename T , typename &gt; </div>
 
 </div>
 </div>
+<a id="a682da4913c7f97a112bca7a51c83aada"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a682da4913c7f97a112bca7a51c83aada">&#9670;&nbsp;</a></span>recursivePartitionAndSplitEqualWeightKD()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class P , Real &amp;(P::*)() weight, const RealVect &amp;(P::*)() const position&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::shared_ptr&lt;<a class="el" href="classKDNode.html">KDNode</a>&lt;P&gt; &gt; &gt; ParticleManagement::recursivePartitionAndSplitEqualWeightKD </td>
+          <td>(</td>
+          <td class="paramtype">typename <a class="el" href="classKDNode.html">KDNode</a>&lt; P &gt;::ParticleList &amp;&#160;</td>
+          <td class="paramname"><em>a_inputParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_maxLeaves</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">BinaryParticleReconcile</a>&lt; P &gt;&#160;</td>
+          <td class="paramname"><em>a_particleReconcile</em> = <code>[](P&#160;&amp;p1,&#160;P&#160;&amp;p2,&#160;const&#160;P&#160;&amp;p0)&#160;-&gt;&#160;void&#160;{&#160;}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Recursively build a KD-tree following the "equal weight" principle when partitioning nodes. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_inputParticles</td><td>Input particles. These are destroyed on output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxLeaves</td><td>Maximum number of leaves in the tree. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns leaf nodes containing the particles</dd></dl>
+<p>If the number of leaves is a factor of two, leaves exist on the same level and the weight in each node will differ by at most one physical particle. The template parameters are</p>
+<p>P -&gt; Particle type P::*weight -&gt; Function pointer to particle weight P::*position -&gt; Function pointer to particle position.</p>
+<p>A possible call signature is e.g. recursivePartitionAndSplitEqualWeightKD&lt;P, &amp;P::weight, &amp;P::position&gt;.</p>
+<p>The user can input a particle reconciliation function that manipulates the particle properties of the split particles. By default, the split particles will use the copy constructor and thus inherit class members from p0, with the exception of the particle weights. The reconcile function lets the user manipulate other particle properties, e.g. ones that are not properly captured by the particle copy constructor, or that need some other form of reconciliation. </p>
+
+</div>
+</div>
 <a id="a21623f295aec259e5624cf60287f7fed"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a21623f295aec259e5624cf60287f7fed">&#9670;&nbsp;</a></span>removePhysicalParticles()</h2>
 
@@ -548,57 +619,6 @@ template&lt;typename P , typename T , typename &gt; </div>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>May fail if particle weights are not (close to) integers. </dd></dl>
-
-</div>
-</div>
-<h2 class="groupheader">Variable Documentation</h2>
-<a id="a26759b55c1001da7e58d4e961ed72185"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a26759b55c1001da7e58d4e961ed72185">&#9670;&nbsp;</a></span>InsufficientWeightForSplitting</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;class P , const Real &amp;(P::*)() const weight&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classParticleManagement_1_1KDNode.html">KDNode</a>&lt;P&gt;::StopFunction ParticleManagement::InsufficientWeightForSplitting</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">=</div>
-<div class="line">    [](<span class="keyword">const</span> <span class="keyword">typename</span> KDNode&lt;P&gt;::ParticleList&amp; a_particles) {</div>
-<div class="line">      constexpr Real splitThresh = 2.0 - <a class="code" href="namespaceParallelOps.html#ac16673e77130f572bc01154b59829fd2">std::numeric_limits&lt;Real&gt;::min</a>();</div>
-<div class="line"> </div>
-<div class="line">      Real W = 0.0;</div>
-<div class="line">      <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; p : a_particles) {</div>
-<div class="line">        W += (p.*weight)();</div>
-<div class="line">      }</div>
-<div class="line"> </div>
-<div class="line">      <span class="keywordflow">return</span> (W &lt; splitThresh) ? true : <span class="keyword">false</span>;</div>
-<div class="line">    }</div>
-<div class="ttc" id="anamespaceParallelOps_html_ac16673e77130f572bc01154b59829fd2"><div class="ttname"><a href="namespaceParallelOps.html#ac16673e77130f572bc01154b59829fd2">ParallelOps::min</a></div><div class="ttdeci">Real min(const Real &amp;a_input) noexcept</div><div class="ttdoc">Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)</div><div class="ttdef"><b>Definition:</b> CD_ParallelOpsImplem.H:58</div></div>
-</div><!-- fragment -->
-<p>Stop function which returns true if weight in node &lt; 2. </p>
-<dl class="section note"><dt>Note</dt><dd>The particle type is P and P::*weight is a pointer to a member function providing const-reference access to the particle weight. </dd></dl>
-
-</div>
-</div>
-<a id="a23ed9c2bfe7c1ee54b577d0ef735539f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a23ed9c2bfe7c1ee54b577d0ef735539f">&#9670;&nbsp;</a></span>PartitionEqualWeight</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;class P , Real &amp;(P::*)() weight, const RealVect &amp;(P::*)() const position&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classParticleManagement_1_1KDNode.html">KDNode</a>&lt;P&gt;::Partitioner ParticleManagement::PartitionEqualWeight</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Partitioning method for <a class="el" href="classParticleManagement_1_1KDNode.html" title="Node in a particle-merging KD-tree.">KDNode</a>. </p>
-<p>which equilibriates the weight across the two halves when splitting a node </p><dl class="section note"><dt>Note</dt><dd>This only adjusts the weight of the median particle. The particle class P should have a copy constructor for the other fields; note that these fields are simply copied over when the particle is split and are not adjusted. </dd></dl>
 
 </div>
 </div>

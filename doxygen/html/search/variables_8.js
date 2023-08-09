@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['qe_6994',['Qe',['../namespaceUnits.html#a6c222b26a27fc4985c5e26ec959f6460',1,'Units']]]
+  ['r_7000',['R',['../namespaceUnits.html#a1ceb2ad4285d02e1744cb3d24421a0e5',1,'Units']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['r_6995',['R',['../namespaceUnits.html#a1ceb2ad4285d02e1744cb3d24421a0e5',1,'Units']]]
+  ['s_5fthresh_7001',['s_thresh',['../classComputationalGeometry.html#afff931dbb71e4100838fd9d24c3a54b1',1,'ComputationalGeometry']]]
 ];

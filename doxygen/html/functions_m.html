@@ -2065,7 +2065,7 @@ $(function() {
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#af720727d0e56eafa7e9350c6088862e3">Physics::ItoKMC::ItoKMCPhysics</a>
 </li>
 <li>m_left
-: <a class="el" href="classParticleManagement_1_1KDNode.html#aa44b29904372896e6ddc1ce491bd2306">ParticleManagement::KDNode&lt; P &gt;</a>
+: <a class="el" href="classKDNode.html#acc1d5e533e7856f76d76bf44f271e0b5">KDNode&lt; P &gt;</a>
 </li>
 <li>m_length
 : <a class="el" href="classCylinderSdf.html#ae9cb3d86c5e5ddfe020a44d7be62a0c7">CylinderSdf</a>
@@ -2716,6 +2716,9 @@ $(function() {
 <li>m_particleItoPPC
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a4eebf477f5f4e9a71147b308669aa860">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
 </li>
+<li>m_particleMerger
+: <a class="el" href="classItoSolver.html#ac7bc2be51fdfa92d02244e5b06f67201">ItoSolver</a>
+</li>
 <li>m_particleMesh
 : <a class="el" href="classPhaseRealm.html#a85e62f95019cf966d379a660e2daaeda">PhaseRealm</a>
 </li>
@@ -2729,8 +2732,8 @@ $(function() {
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a89877ca686a749d6f8784a23c42e5b20">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
 </li>
 <li>m_particles
-: <a class="el" href="classParticleContainer.html#a2c197ca6b601406a4087eb3cbb3258a6">ParticleContainer&lt; P &gt;</a>
-, <a class="el" href="classParticleManagement_1_1KDNode.html#a5dd7ae028603fa97d4849b63703b57e7">ParticleManagement::KDNode&lt; P &gt;</a>
+: <a class="el" href="classKDNode.html#a8870f86cc846c35427d4604868ea8e83">KDNode&lt; P &gt;</a>
+, <a class="el" href="classParticleContainer.html#a2c197ca6b601406a4087eb3cbb3258a6">ParticleContainer&lt; P &gt;</a>
 , <a class="el" href="classTracerParticleSolver.html#a1c3ffb400ba2632d8a081c79db7efa16">TracerParticleSolver&lt; P &gt;</a>
 </li>
 <li>m_particleScratch1
@@ -3447,7 +3450,7 @@ $(function() {
 : <a class="el" href="classKMCDualStateReaction.html#a99f93b8a6a2a50191d297549fac02315">KMCDualStateReaction&lt; State, T &gt;</a>
 </li>
 <li>m_right
-: <a class="el" href="classParticleManagement_1_1KDNode.html#abef98e9ea70e3209bd7116f1cfb29942">ParticleManagement::KDNode&lt; P &gt;</a>
+: <a class="el" href="classKDNode.html#a6087fb6679ee26015e4d812735631425">KDNode&lt; P &gt;</a>
 </li>
 <li>m_rod
 : <a class="el" href="classVessel.html#a3d80a6f477e1adbf488c6ed3c88d5006">Vessel</a>
@@ -3861,9 +3864,6 @@ $(function() {
 <li>m_transportAlgorithm
 : <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a282dcf83dcf619936d2a2698b0e3dce2">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
-<li>m_uniformDistribution0d
-: <a class="el" href="classItoSolver.html#a1d1432b00602a2602938d0477a76b378">ItoSolver</a>
-</li>
 <li>m_upwindFactor
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a72ac379353f5e95cf3612296c75bd7c6">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
@@ -4067,6 +4067,7 @@ $(function() {
 , <a class="el" href="classEBHelmholtzRobinEBBCFactory.html#affa6a313e4f285bbf5cb30b95b8a8311">EBHelmholtzRobinEBBCFactory</a>
 , <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#adef6100e47359e06ba4eb451a14f0eed">EBLeastSquaresMultigridInterpolator</a>
 , <a class="el" href="classEBMultigridInterpolator.html#ab26c07e4cc5c5e164ac188469a8ffe40">EBMultigridInterpolator</a>
+, <a class="el" href="classKDNode.html#a8fd27119609eb47ce206f2def75fabd7">KDNode&lt; P &gt;</a>
 , <a class="el" href="classMFHelmholtzDirichletEBBC.html#a4ee90dbb8d15734f0e1c69834742bdf2">MFHelmholtzDirichletEBBC</a>
 , <a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#afb14de4034c0a21a2e1007fb73ef478c">MFHelmholtzDirichletEBBCFactory</a>
 , <a class="el" href="classMFHelmholtzElectrostaticEBBC.html#ab987b5c99081f21389e7f3f32095e6a6">MFHelmholtzElectrostaticEBBC</a>
@@ -4074,7 +4075,6 @@ $(function() {
 , <a class="el" href="classMFHelmholtzJumpBC.html#af2e0d1134b777e2923bc583b696c61ce">MFHelmholtzJumpBC</a>
 , <a class="el" href="classMFHelmholtzRobinEBBC.html#a95861ba91f8cd5600aaa02d38ed2c0e5">MFHelmholtzRobinEBBC</a>
 , <a class="el" href="classMFHelmholtzRobinEBBCFactory.html#aebfc52f246522cf523b028e40e307109">MFHelmholtzRobinEBBCFactory</a>
-, <a class="el" href="classParticleManagement_1_1KDNode.html#a51b4fffdd8342b5f2ca7a9211bd9a749">ParticleManagement::KDNode&lt; P &gt;</a>
 , <a class="el" href="classTracerParticle.html#ae478b04fdd638c43667437b6d53d967a">TracerParticle&lt; M, N &gt;</a>
 </li>
 <li>m_weighting
@@ -4151,10 +4151,13 @@ $(function() {
 </li>
 <li>makeSuperparticles()
 : <a class="el" href="classItoLayout.html#a1ce54d1788882b20dbeff5cd3a61b6b2">ItoLayout&lt; T &gt;</a>
-, <a class="el" href="classItoSolver.html#a05f1a0fcf4c8a6cb67745a9a3b21c0a9">ItoSolver</a>
+, <a class="el" href="classItoSolver.html#aa8859e84b563c9aa49927b39628571d3">ItoSolver</a>
 </li>
 <li>makeSuperParticles()
 : <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a5ca4b5d910f842b23cad9ebe90fe088d">Physics::BrownianWalker::BrownianWalkerStepper</a>
+</li>
+<li>makeSuperparticlesEqualWeightKD()
+: <a class="el" href="classItoSolver.html#a19632aa05427ba1e6cbb2e1f2f597b5f">ItoSolver</a>
 </li>
 <li>makeUniform()
 : <a class="el" href="classLookupTable1D.html#a598e96cdd3ddf4220937486e6d258ac4">LookupTable1D&lt; N &gt;</a>
@@ -4179,7 +4182,7 @@ $(function() {
 : <a class="el" href="classSignedDistanceDCEL.html#ac3ba4cb079ccd274977cf3ee9ff80e69">SignedDistanceDCEL&lt; T &gt;</a>
 </li>
 <li>MeshODESolver()
-: <a class="el" href="classMeshODESolver.html#a0a1ee066bf51807649f95986829c7cee">MeshODESolver&lt; N &gt;</a>
+: <a class="el" href="classMeshODESolver.html#a3082ff8876127d2bcfef15e9b624cb9f">MeshODESolver&lt; N &gt;</a>
 </li>
 <li>MeshODEStepper()
 : <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#af27c3d40ffa283e4c07727af3ce84834">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>
@@ -4188,7 +4191,7 @@ $(function() {
 : <a class="el" href="classMFBaseIVFAB.html#a1ea286eecb86a3eb7986420d9ab71b6c">MFBaseIVFAB</a>
 </li>
 <li>MFBaseIVFABFactory()
-: <a class="el" href="classMFBaseIVFABFactory.html#a5d873c6b90b2f2d915f7b8306c053bca">MFBaseIVFABFactory</a>
+: <a class="el" href="classMFBaseIVFABFactory.html#ad71b2810084fc969dce80bd8f90d1c6b">MFBaseIVFABFactory</a>
 </li>
 <li>MFCoarAve()
 : <a class="el" href="classMFCoarAve.html#a17b88ab11df6403b14ef0a79c2293869">MFCoarAve</a>
@@ -4200,7 +4203,7 @@ $(function() {
 : <a class="el" href="classMFHelmholtzDirichletEBBC.html#a18b95b3d890712dd1416340fef08f4ab">MFHelmholtzDirichletEBBC</a>
 </li>
 <li>MFHelmholtzDirichletEBBCFactory()
-: <a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#a240d4c17ccc61f9229c93036e3baf3f5">MFHelmholtzDirichletEBBCFactory</a>
+: <a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#ad20e599282940cc5e208c078ee918126">MFHelmholtzDirichletEBBCFactory</a>
 </li>
 <li>MFHelmholtzDomainBCFactory()
 : <a class="el" href="classMFHelmholtzDomainBCFactory.html#abb09d8122443521683cafaa65d01235d">MFHelmholtzDomainBCFactory</a>
@@ -4294,7 +4297,7 @@ $(function() {
 : <a class="el" href="classLoadBalancing.html#a8603836306419b19f1d3d8d30d27970a">LoadBalancing</a>
 </li>
 <li>moveParticles()
-: <a class="el" href="classParticleManagement_1_1KDNode.html#a29c82bf4474df7d8de1a61efea6a2e8b">ParticleManagement::KDNode&lt; P &gt;</a>
+: <a class="el" href="classKDNode.html#a064a8c46fd3e910e1261f269ede2be81">KDNode&lt; P &gt;</a>
 </li>
 <li>MultiFluidIndexSpace()
 : <a class="el" href="classMultiFluidIndexSpace.html#a1c7f783aac33f6a1cf5a2469aafb0851">MultiFluidIndexSpace</a>
