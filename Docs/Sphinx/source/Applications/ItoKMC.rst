@@ -135,7 +135,7 @@ Internally, these reactions are implemented through the dual state KMC implement
 During the reaction advance the user only needs to update the :math:`c_j` coefficients (typically done via an interface implementation); the calculation of the propensity is automatic and follows the standard KMC rules (e.g., the KMC solver accounts for the number of distinct pairs of particles).
 This must be done in the routine ``updateReactionRates(...)``, see :ref:`Chap:ItoKMCPhysics` for the complete specification.
 
-Photo-reactions
+Photoionization
 _______________
 
 Photo-reactions are also represented stoichiometrically as
@@ -145,7 +145,7 @@ Photo-reactions are also represented stoichiometrically as
    \gamma \xrightarrow{\xi} A + B + \ldots,
 
 where :math:`\xi` is the photo-reaction efficiency, i.e. the probability that the photon :math:`\gamma` causes a reaction when it is absorbed on the mesh.
-Currently, photons can only be generated through *plasma reactions*, see :ref:`Chap:ItoKMCPlasmaReaction`, and we do not permit reactions between the photon and plasma species, i.e. reactions of the type :math:`\gamma + A\rightarrow\varnothing` are not permitted. 
+Currently, photons can only be generated through *plasma reactions*, see :ref:`Chap:ItoKMCPlasmaReaction`, and we do not permit reactions between the photon and plasma species.
 
 .. important::
 
@@ -170,20 +170,6 @@ There are two ways of doing this:
 
 The former method is normally the preferred way as it can lead to reductions in computational complexity and particle noise, but for flexibility ``ItoKMCPhysics`` supports both of these.
 The latter method can be of relevance if users wants precise descriptions of photons that trigger both photoionizing reactions and surface reactions (e.g., secondary electron emission).
-Pre-scaling by the photo-reaction efficiency is then difficult because the reactions
-
-.. math::
-
-   \gamma &\xrightarrow{\text{volume}}\varnothing \\
-   \gamma &\xrightarrow{\text{surface}}\varnothing,
-
-can not be pre-scaled.
-
-.. note::
-
-   Is this true? Or can we scale by :math:`\sum_j\xi_j + \sum_j\zeta_j` and then evaluate :math:`\xi_i/\sum_j \xi_j` when doing absorption on in the volume?
-
-   Should this be automated? How should the photon-products be scaled???
    
 An alternative is to split the photon type :math:`\gamma` into volumetrically absorbed and surface absorbed photon species :math:`\gamma_v` and :math:`\gamma_s`.
 In this case one may pre-scale the photon-generating reactions by the photo-reaction probabilities :math:`\xi` (for volume absorption) and :math:`\zeta` (for surface absorption) as follows:
@@ -202,14 +188,12 @@ Volumetric and surface absorption is then treated independently
 
 This type of pre-evaluation of the photo-reaction pathways is sensible in a statistical sense, but loses meaning if only a single photon is involved.
 
-.. important::
-   
-   The above sampling routines require some modification when dealing with super-photons.
-   For example, if the photon weight is :math:`w_\gamma = 1000` and :math:`\xi_1 = 0.01`, absorption of the super-photon on the mesh should on average trigger 10 reactions.
-   
-
 Surface reactions
 _________________
+
+.. warning::
+
+   Surface reactions are supported by :ref:`Chap:ItoKMCPhysics` but not implemented in the JSON interface (yet).
 
 Transport coefficients
 ______________________
@@ -1549,7 +1533,73 @@ A JSON specification that includes these
 Photoionization
 ---------------
 
-TODO.
+Photoionization reactions are specified by including a ``photoionization`` array of JSON entries that specify each reaction.
+The left-hand side of the reaction must contain a photon species (plasma and background species can be present but will be ignored), and the right-hand side can consist of any species except other photon species.
+Each entry *must* contain a reaction string specifier and optionally also an efficiency (which defaults to 1).
+Assume that photons are generated through the reaction
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e + N2 -> e + N2 + Y", // Reaction string
+	    "type": "alpha*v",                  // Rate is alpha*v
+	    "species": "e",                     // Species for v,
+	    "quenching pressure": 4000.0        // Quenching
+	    "efficiency": 0.6                   // Excitation events per ionization event
+	    "scale": 0.1                        // Photoionization events per absorbed photon
+	}	
+    ]
+
+where we assume an excitation efficiency of :math:`0.6` and photoionization efficiency of :math:`0.1`.
+An example photoionization specification is then
+
+.. code-block:: json
+		
+    "photoionization":
+    [
+	{
+	    "reaction": "Y + O2 -> e + O2+"
+	}	
+    ]
+
+
+Note that the efficiency of this reaction is 1, i.e. the photoionization probabilities was pre-evaluated.
+As discussed in :ref:`Chap:ItoKMCPhysics`, we can perform late evaluation of the photoionization probability by specifically including a efficiency.
+In this case we modify the above into
+
+.. code-block:: json
+
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e + N2 -> e + N2 + Y", // Reaction string
+	    "type": "alpha*v",                  // Rate is alpha*v
+	    "species": "e",                     // Species for v,
+	    "quenching pressure": 4000.0        // Quenching
+	    "efficiency": 0.6                   // Excitation events per ionization event
+	}	
+    ],
+    "photoionization":
+    [
+	{
+	    "reaction": "Y + O2 -> e + O2+",
+	    "efficiency": 0.1
+	},
+	{
+	    "reaction": "Y + O2 -> (null)",
+	    "efficiency": 0.9
+	}		
+    ]
+
+where a null-absorption model has been added for the photon absorption.
+When multiple pathways are specified this way, and they have probabilities :math:`\xi_1, \xi_2, \ldots`, the reaction is stochastically determined from a discrete distribution with relative probabilities :math:`p_i = \xi_i/(\xi_1 + \xi_2+\ldots)`.
+
+.. important::
+
+   The null-reaction model is *not* automatically added when using late evaluation of the photoionization probability.
+
 
 Secondary emission
 ------------------
@@ -1561,4 +1611,7 @@ Secondary emission
 Example programs
 ================
 
-TODO.
+Example programs that use the Îto-KMC module are given in
+
+* :file:`$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirBasic` for a basic streamer discharge in atmospheric air.
+* :file:`$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirDBD` for a streamer discharge over a dielectric.
