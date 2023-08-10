@@ -1,17 +1,17 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = 20E3
+ItoKMC.potential = +40E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
 # AmrMesh class options
 # ====================================================================================================
-AmrMesh.lo_corner        =  -4E-2    0     # Low corner of problem domain
-AmrMesh.hi_corner        =  4E-2 4E-2  # High corner of problem domain
+AmrMesh.lo_corner        = -4E-2 -4E-2 -4E-2    # Low corner of problem domain
+AmrMesh.hi_corner        =  4E-2  4E-2  4E-2  # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 128 64     # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 7           # Maximum amr depth
+AmrMesh.coarsest_domain  = 64 64 64   # Number of cells on coarsest domain
+AmrMesh.max_amr_depth    = 8           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -47,13 +47,13 @@ Driver.write_restart_files             = false            # Write restart files 
 Driver.initial_regrids                 = 3                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
-Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 50               # Maximum number of steps
+Driver.stop_time                       = 5E-9             # Stop time
+Driver.max_steps                       = 1000             # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
 Driver.output_directory                = ./               # Output directory
-Driver.output_names                    = development           # Simulation output names
+Driver.output_names                    = simulation       # Simulation output names
 Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
 Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
@@ -61,8 +61,8 @@ Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 60.              # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = 2                # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_angles                   = 30.              # Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes               = 3                # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = 1                # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
@@ -123,12 +123,12 @@ ItoSolver.deposition_cf       = halo          # Coarse-fine deposition. interp, 
 # ====================================================================================================
 # CdrCTU solver settings. 
 # ====================================================================================================
-CdrCTU.bc.x.lo              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
-CdrCTU.bc.x.hi              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
-CdrCTU.bc.y.lo              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
-CdrCTU.bc.y.hi              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
-CdrCTU.bc.z.lo              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
-CdrCTU.bc.z.hi              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.bc.x.lo              = data                    # 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.bc.x.hi              = data                    # 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.bc.y.lo              = data                    # 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.bc.y.hi              = data                    # 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.bc.z.lo              = data                    # 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.bc.z.hi              = data                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.slope_limiter        = minmod                  # Slope limiter. 'none', 'minmod', 'mc', or 'superbee'
 CdrCTU.use_ctu              = true                    # If true, use CTU. Otherwise it's DTU.
 CdrCTU.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
@@ -204,23 +204,23 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 RodNeedleDisk.use_rod              = true       # Turn on/off rod
 RodNeedleDisk.use_needle           = true       # Turn on/off needle
-RodNeedleDisk.use_disk             = true       # Turn on/off disk
+RodNeedleDisk.use_disk             = false      # Turn on/off disk
 RodNeedleDisk.orientation          = "-y"       # Orientation
 RodNeedleDisk.translate            = 0 0 0      # Geometric translation
-RodNeedleDisk.rod_live             = false      # Rod/needle live or not
-RodNeedleDisk.disk_live            = true       # Disk live or not
+RodNeedleDisk.rod_live             = true       # Rod/needle live or not
+RodNeedleDisk.disk_live            = false      # Disk live or not
 
-RodNeedleDisk.rod_begin            = 0.25       # Start position for part of rod with small radius
-RodNeedleDisk.rod_midpoint         = 0.75       # Crossing point between small-radius portion with large-radius portion
-RodNeedleDisk.rod_end              = 1.75       # Stop position for rod
-RodNeedleDisk.rod_small_radius     = 0.1        # Radius for small-radius part of rod
-RodNeedleDisk.rod_big_radius       = 0.2        # Radius for large-radius part of rod
-RodNeedleDisk.rod_smooth           = 0.1        # Transition length between small/big radius parts
-RodNeedleDisk.rod_needle_smooth    = 0.00       # Transition length between needle and actual rod
+RodNeedleDisk.rod_begin            = 0.01       # Start position for part of rod with small radius
+RodNeedleDisk.rod_midpoint         = 0.021       # Crossing point between small-radius portion with large-radius portion
+RodNeedleDisk.rod_end              = 1.0        # Stop position for rod
+RodNeedleDisk.rod_small_radius     = 2.1E-3       # Radius for small-radius part of rod
+RodNeedleDisk.rod_big_radius       = 5.1E-3       # Radius for large-radius part of rod
+RodNeedleDisk.rod_smooth           = 5E-3       # Transition length between small/big radius parts
+RodNeedleDisk.rod_needle_smooth    = 1E-3      # Transition length between needle and actual rod
 
-RodNeedleDisk.needle_length        = 0.4        # Needle length (from some origin)
-RodNeedleDisk.needle_radius        = 0.025      # Needle radius
-RodNeedleDisk.needle_tip_radius    = 0.01       # Needle tip radius
+RodNeedleDisk.needle_length        = 100        # Needle length (from some origin)
+RodNeedleDisk.needle_radius        = 200E-6      # Needle radius
+RodNeedleDisk.needle_tip_radius    = 50E-6       # Needle tip radius
 RodNeedleDisk.needle_angle         = 30         # Full opening angle of needle tip (in degrees)
 
 RodNeedleDisk.disk_point           = -0.5       # Top position of disk
@@ -235,7 +235,7 @@ ItoKMCGodunovStepper.checkpoint_particles                  = true           # If
 ItoKMCGodunovStepper.verbosity                             = -1             # Verbosity
 ItoKMCGodunovStepper.abort_on_failure                      = true           # Abort on Poisson solver failure or not
 ItoKMCGodunovStepper.redistribute_cdr                      = true           # Turn on/off reactive redistribution
-ItoKMCGodunovStepper.profile                               = true           # Turn on/off run-time profiling
+ItoKMCGodunovStepper.profile                               = false          # Turn on/off run-time profiling
 ItoKMCGodunovStepper.plt_vars                              = none           # 'conductivity', 'current_density', 'particles_per_patch'
 ItoKMCGodunovStepper.dual_grid                             = true           # Turn on/off dual-grid functionality
 ItoKMCGodunovStepper.load_balance_fluid                    = false          # Turn on/off fluid realm load balancing. 
@@ -272,8 +272,8 @@ ItoKMCJSON.chemistry_file     = chemistry_template.json ## Chemistry file
 ItoKMCJSON.dX                 = 2.0                     ## Maximum relative change Xnew/Xold during one time step.
 
 # Kinetic Monte Carlo solver settings. 
-ItoKMCJSON.max_new_particles  = 64                      ## Maximum number of computational particles to produce in reaction step
-ItoKMCJSON.max_new_photons    = 64                      ## Maximum number of computational photons to produce in reaction step	
+ItoKMCJSON.max_new_particles  = 32                      ## Maximum number of computational particles to produce in reaction step
+ItoKMCJSON.max_new_photons    = 32                      ## Maximum number of computational photons to produce in reaction step	
 ItoKMCJSON.Ncrit              = 5                       ## How many firings away from a Negative particle number?
 ItoKMCJSON.prop_eps           = 1.E99                   ## Maximum relative change in propensity function
 ItoKMCJSON.NSSA               = 10                      ## How many SSA steps to run when tau-leaping is inefficient
@@ -293,5 +293,5 @@ ItoKMCStreamerTagger.buffer            = 4            # Grow tagged cells
 ItoKMCStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
 ItoKMCStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
 ItoKMCStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
-ItoKMCStreamerTagger.coarsen_alpha     = 0.1         # Set alpha coarsening. Higher => Less mesh
+ItoKMCStreamerTagger.coarsen_alpha     = 0.0          # Set alpha coarsening. Higher => Less mesh
 ItoKMCStreamerTagger.max_coarsen_lvl   = 4            # Set max coarsening depth

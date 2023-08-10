@@ -157,7 +157,7 @@
 		{
 		    // Specification of single computational particles.
 		    "single particle" : {         
-			"position" : [ 0, 0, 0 ], // Position is at (0,00)
+			"position" : [ 0, -1E-3, 0 ], // Position is at (0,00)
 			"weight" : 1              // Physical particle with weight = 1
 		    }
 		},
@@ -165,8 +165,8 @@
 		    // Specification of initial particles sampled uniformly in space. This will distribute
 		    // the particles over the MPI rank. 
 		    "uniform distribution" : {
-			"low corner" : [ -0.04, 0, 0 ],    // Lower-left physical corner of sampling region
-			"high corner" : [ 0.04, 0.04, 0 ], // Upper-right physical corner of sampling region
+			"low corner" : [ -0.04, -0.04, -0.04 ],    // Lower-left physical corner of sampling region
+			"high corner" : [ 0.04, 0.04, 0.04 ], // Upper-right physical corner of sampling region
 			"num particles": 1000,             // Number of computational particles
 			"weight" : 1                       // Particle weights
 		    } 
@@ -175,7 +175,7 @@
 		    // Specification of initial particles sampled uniformly inside of a sphere (circle in 2D). This 
 		    // will distribute the particles over the MPI rank. 			
 		    "sphere distribution" : {
-			"center" : [ 0, 7.5E-3, 0 ], // Sphere center
+			"center" : [ 0, 0, 0 ], // Sphere center
 			"radius" : 1E-3,         // Sphere radius
 			"num particles": 100,     // Number computational particles
 			"weight" : 1            // Particle weights
@@ -186,7 +186,7 @@
 		    // will distribute the particles over the MPI rank. 						
 		    "gaussian distribution" : {
 			"center" : [ 0, 0, 0 ], // Center of the gaussian distribution
-			"radius" : 1.0,         // Gaussian radius
+			"radius" : 2E-3,         // Gaussian radius
 			"num particles": 100,   // Number of computational particles
 			"weight" : 1            // Particle weights
 		    }
