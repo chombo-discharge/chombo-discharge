@@ -1,6 +1,6 @@
-## Exec/Examples/ItoKMC/AirBasic
+## Exec/Examples/ItoKMC/AirDBD
 
-This example runs a model of 2D and 3D streamer discharges in a high-voltage vessel geometry.
+This example runs a model of 2D and 3D streamer discharges over a dielectric surface.
 the input scripts and plasma chemistry are defined in
 
 * Plasma chemistry: air_chemistry.json
