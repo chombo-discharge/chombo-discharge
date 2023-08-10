@@ -1153,7 +1153,7 @@ ItoKMCJSON::initializeTemperatures()
         if (!(temperatureJSON.contains("file"))) {
           this->throwParserError(baseErrorTable + ", but 'file' is not specified");
         }
-	
+
         LookupTable1D<2> tabulatedCoeff = this->parseTableEByN(temperatureJSON, "eV");
 
         constexpr Real eVToKelvin = 2.0 * Units::Qe / (3.0 * Units::kb);
