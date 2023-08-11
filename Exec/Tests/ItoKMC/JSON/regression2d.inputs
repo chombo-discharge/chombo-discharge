@@ -44,7 +44,7 @@ Driver.checkpoint_interval             = 50               # Checkpoint interval
 Driver.regrid_interval                 = 5                # Regrid interval
 Driver.write_regrid_files              = true             # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 3                # Number of initial regrids
+Driver.initial_regrids                 = 0                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 5E-9             # Stop time
@@ -203,7 +203,7 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # RodNeedleDisk geometry class options
 # ====================================================================================================
 RodNeedleDisk.use_rod              = true       # Turn on/off rod
-RodNeedleDisk.use_needle           = true       # Turn on/off needle
+RodNeedleDisk.use_needle           = false      # Turn on/off needle
 RodNeedleDisk.use_disk             = false      # Turn on/off disk
 RodNeedleDisk.orientation          = "-y"       # Orientation
 RodNeedleDisk.translate            = 0 0 0      # Geometric translation
