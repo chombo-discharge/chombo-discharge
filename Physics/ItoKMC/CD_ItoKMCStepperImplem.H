@@ -3063,11 +3063,11 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<EBCellFAB*>& a_it
 
   const int numItoSpecies    = m_physics->getNumItoSpecies();
   const int numCdrSpecies    = m_physics->getNumCdrSpecies();
-  const int numPlasmaSpecies = m_physics->getNumCdrSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_electricField.nComp() == SpaceDim);
   CH_assert(a_itoDiffusionCoefficients.size() == numItoSpecies);
-  CH_assert(a_cdrDiffusionCoefficients.size() == numPlasmaSpecies);
+  CH_assert(a_cdrDiffusionCoefficients.size() == numCdrSpecies);
 
   // Geometric information that we need.
   const Real     dx      = m_amr->getDx()[a_level];
