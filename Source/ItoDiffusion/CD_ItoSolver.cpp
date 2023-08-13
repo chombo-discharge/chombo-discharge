@@ -544,6 +544,9 @@ ItoSolver::computeLoads(Vector<long int>& a_loads, const DisjointBoxLayout& a_db
     pout() << m_name + "::computeLoads" << endl;
   }
 
+  CH_assert(a_dbl.isClosed());
+  CH_assert(a_dbl.size() > 0);
+
   const ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
   a_loads.resize(a_dbl.size(), 0L);
