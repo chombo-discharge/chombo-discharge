@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = +3E3
+ItoKMC.potential = +6E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
@@ -90,7 +90,7 @@ FieldSolverMultigrid.gmg_min_iter      = 5                 # Minimum number of i
 FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2               # Solver hang
-FieldSolverMultigrid.gmg_min_cells     = 16                 # Bottom drop
+FieldSolverMultigrid.gmg_min_cells     = 4                 # Bottom drop
 FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2                 # Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight     = 1                 # Boundary condition weights (for least squares)
@@ -113,7 +113,7 @@ ItoSolver.redistribute        = false         # Turn on/off redistribution.
 ItoSolver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
 ItoSolver.checkpointing       = particles     # 'particles' or 'numbers'
 ItoSolver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
-ItoSolver.irr_ngp_deposition  = false          # Force irregular deposition in cut cells or not
+ItoSolver.irr_ngp_deposition  = false         # Force irregular deposition in cut cells or not
 ItoSolver.irr_ngp_interp      = true          # Force irregular interpolation in cut cells or not
 ItoSolver.mobility_interp     = direct        # How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
 ItoSolver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
@@ -202,8 +202,8 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 # RodNeedleDisk geometry class options
 # ====================================================================================================
-RodNeedleDisk.use_rod              = true       # Turn on/off rod
-RodNeedleDisk.use_needle           = false      # Turn on/off needle
+RodNeedleDisk.use_rod              = false       # Turn on/off rod
+RodNeedleDisk.use_needle           = true      # Turn on/off needle
 RodNeedleDisk.use_disk             = false      # Turn on/off disk
 RodNeedleDisk.orientation          = "-y"       # Orientation
 RodNeedleDisk.translate            = 0 0 0      # Geometric translation
@@ -219,8 +219,8 @@ RodNeedleDisk.rod_smooth           = 5E-4       # Transition length between smal
 RodNeedleDisk.rod_needle_smooth    = 1E-4      # Transition length between needle and actual rod
 
 RodNeedleDisk.needle_length        = 100        # Needle length (from some origin)
-RodNeedleDisk.needle_radius        = 200E-6      # Needle radius
-RodNeedleDisk.needle_tip_radius    = 50E-6       # Needle tip radius
+RodNeedleDisk.needle_radius        = 500E-6      # Needle radius
+RodNeedleDisk.needle_tip_radius    = 250E-6       # Needle tip radius
 RodNeedleDisk.needle_angle         = 30         # Full opening angle of needle tip (in degrees)
 
 RodNeedleDisk.disk_point           = -0.5       # Top position of disk
@@ -255,7 +255,7 @@ ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl  = 1.E99          # Ad
 ItoKMCGodunovStepper.fluid_advection_diffusion_cfl         = 0.5            # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.relax_dt_factor                       = 500.0          # Relaxation time step restriction. 
 ItoKMCGodunovStepper.min_dt                                = 25.E-12        # Minimum permitted time step
-ItoKMCGodunovStepper.max_dt                                = 1.E-10          # Maximum permitted time step
+ItoKMCGodunovStepper.max_dt                                = 1.E-12         # Maximum permitted time step
 ItoKMCGodunovStepper.extend_conductivity                   = true           # Permit particles to live outside the EB to avoid bad gradients near EB
 ItoKMCGodunovStepper.smooth_conductivity                   = false          # Use bilinear smoothing on the conductivity.
 ItoKMCGodunovStepper.eb_tolerance                          = 0.0            # EB intersection test tolerance
