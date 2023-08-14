@@ -2724,6 +2724,9 @@ ItoKMCStepper<I, C, R, F>::computeMobilities(Vector<EBAMRCellData*>& a_itoMobili
   for (int i = 0; i < numItoSpecies; i++) {
     m_amr->allocate(fluidScratchMobilities[i], m_fluidRealm, m_plasmaPhase, 1);
 
+    DataOps::setValue(fluidScratchMobilities[i], 0.0);
+    DataOps::setValue(*a_itoMobilities[i], 0.0);
+
     CH_assert(a_itoMobilities[i]->getRealm() == m_particleRealm);
   }
 

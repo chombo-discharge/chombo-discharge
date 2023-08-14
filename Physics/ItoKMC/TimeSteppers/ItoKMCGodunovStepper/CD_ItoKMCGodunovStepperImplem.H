@@ -38,6 +38,7 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
   this->m_extendConductivityEB     = false;
   this->m_smoothConductivity       = false;
   this->m_canRegridOnRestart       = true;
+  this->m_prevDt                   = 0.0;
 
   this->parseOptions();
 }
@@ -480,6 +481,12 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
   // Regrid solvers
   m_timer.startEvent("Regrid ItoSolver");
   (this->m_ito)->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  if (m_timeStep == 0) {
+    // Necessary because first time step is not semi-implicit, so it will use the densities from the
+    // Ito and CDr solvers. Howver,  ItoSolver does not re-deposit the particles during regrid, so we
+    // enforce it here.
+    (this->m_ito)->depositParticles();
+  }
   m_timer.stopEvent("Regrid ItoSolver");
 
   m_timer.startEvent("Regrid CdrSolver");
@@ -971,7 +978,6 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
 
   // Contribution from CDR solvers.
   DataOps::setValue(m_semiImplicitConductivityCDR, 0.0);
-
   for (auto solverIt = (this->m_cdr)->iterator(); solverIt.ok(); ++solverIt) {
     const RefCountedPtr<CdrSolver>&  solver  = solverIt();
     const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
