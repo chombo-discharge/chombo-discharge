@@ -94,11 +94,29 @@ ItoKMCPhysics::defineKMC() noexcept
   CH_TIME("ItoKMCPhysics::defineKMC");
 
   m_kmcState.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
-
   m_kmcSolver.define(m_kmcReactions);
 
   // Define solver parameters in case they've been changed since last time.
   m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
+
+  // Safety hook -- make sure no one defines reactions using an out-of-range species index.
+#ifndef NDEBUG
+  for (const auto& R : m_kmcReactions) {
+    const auto& lhsReactants = R->getReactants();
+    const auto& rhsReactants = R->getReactiveProducts();
+    const auto& rhsPhotons   = R->getNonReactiveProducts();
+
+    for (const auto& r : lhsReactants) {
+      CH_assert(r < m_itoSpecies.size() + m_cdrSpecies.size());
+    }
+    for (const auto& r : rhsReactants) {
+      CH_assert(r < m_itoSpecies.size() + m_cdrSpecies.size());
+    }
+    for (const auto& r : rhsPhotons) {
+      CH_assert(r < m_rtSpecies.size());
+    }
+  }
+#endif
 }
 
 inline void

@@ -95,6 +95,20 @@ public:
   getReactants() const noexcept;
 
   /*!
+    @brief Get the products from the reaction.
+    @return m_rhsReactives
+  */
+  inline std::list<size_t>
+  getReactiveProducts() const noexcept;
+
+  /*!
+    @brief Get the non-reactive products from the reaction.
+    @return m_rhsNonReactives
+  */
+  inline std::list<size_t>
+  getNonReactiveProducts() const noexcept;
+
+  /*!
     @brief Get the state change due to a change in the input reactant
     @param[in] a_reactant Reactive species
   */

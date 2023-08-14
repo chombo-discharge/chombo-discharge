@@ -248,6 +248,11 @@ namespace Physics {
       int m_numPlasmaSpecies;
 
       /*!
+	@brief Total number of photon species
+      */
+      int m_numPhotonSpecies;
+
+      /*!
 	@brief Nohmanns implementation of JSON files
       */
       nlohmann::json m_json;

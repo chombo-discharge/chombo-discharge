@@ -1298,6 +1298,8 @@ ItoKMCJSON::initializePhotonSpecies()
 
     m_rtSpecies.push_back(RefCountedPtr<RtSpecies>(new ItoKMCPhotonSpecies(speciesID, kappaFunction)));
   }
+
+  m_numPhotonSpecies = m_rtSpecies.size();
 }
 
 void
@@ -1336,10 +1338,6 @@ ItoKMCJSON::initializePlasmaReactions()
       const std::vector<std::string> curReactants = std::get<1>(curReaction);
       const std::vector<std::string> curProducts  = std::get<2>(curReaction);
 
-      // This is the reaction index for the current index. The reaction we are currently
-      // dealing with is put in m_kmcReactions[reactionIdex].
-      const int reactionIndex = m_kmcReactions.size();
-
       // Ignore species which are enclosed by brackets ()
       std::vector<std::string> trimmedProducts;
       for (const auto& p : curProducts) {
@@ -1367,6 +1365,16 @@ ItoKMCJSON::initializePlasmaReactions()
                                photonProducts,
                                curReactants,
                                trimmedProducts);
+
+      for (const auto& r : plasmaReactants) {
+        CH_assert(r < m_numPlasmaSpecies);
+      }
+      for (const auto& p : plasmaProducts) {
+        CH_assert(p < m_numPlasmaSpecies);
+      }
+      for (const auto& p : photonProducts) {
+        CH_assert(p < m_numPhotonSpecies);
+      }
 
       // Figure out how to compute the rate for this reaction. The plasma reactants are put in here because
       // we must scale properly against the KMCDualStateReaction method (which operates using the microscopic rates).
@@ -1423,10 +1431,6 @@ ItoKMCJSON::initializePhotoReactions()
       const std::string              wildcard     = std::get<0>(curReaction);
       const std::vector<std::string> curReactants = std::get<1>(curReaction);
       const std::vector<std::string> curProducts  = std::get<2>(curReaction);
-
-      // This is the reaction index for the current index. The reaction we are currently
-      // dealing with is put in m_kmcReactions[reactionIdex].
-      const int reactionIndex = m_kmcReactions.size();
 
       // Ignore species which are enclosed by brackets ()
       std::vector<std::string> trimmedReactants;

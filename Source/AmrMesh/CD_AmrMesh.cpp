@@ -2694,7 +2694,7 @@ AmrMesh::sanityCheck() const
     CH_assert(m_blockingFactor >= 4 && m_blockingFactor % m_refinementRatios[lvl] == 0);
   }
 
-  CH_assert(m_maxBoxSize >= 4 && m_maxBoxSize % m_blockingFactor == 0);
+  CH_assert(m_maxBoxSize >= 8 && m_maxBoxSize % m_blockingFactor == 0);
   CH_assert(m_fillRatioBR > 0. && m_fillRatioBR <= 1.0);
   CH_assert(m_bufferSizeBR > 0);
 
