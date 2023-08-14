@@ -119,8 +119,9 @@ EBAMRParticleMesh::defineEBParticleMesh()
   m_ebParticleMeshFiCo.resize(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
-    const EBISLayout&        ebisl = m_eblgs[lvl]->getEBISL();
+    const ProblemDomain&     domain = m_eblgs[lvl]->getDomain();
+    const DisjointBoxLayout& dbl    = m_eblgs[lvl]->getDBL();
+    const EBISLayout&        ebisl  = m_eblgs[lvl]->getEBISL();
 
     const bool hasCoar = lvl > 0;
 
@@ -133,13 +134,14 @@ EBAMRParticleMesh::defineEBParticleMesh()
 
       EBParticleMesh& particleMesh = (*m_ebParticleMesh[lvl])[dit()];
 
-      particleMesh.define(cellBox, ebisBox, m_dx[lvl] * RealVect::Unit, m_probLo);
+      particleMesh.define(domain, cellBox, ebisBox, m_dx[lvl] * RealVect::Unit, m_probLo);
     }
 
     // These are "special" particle-mesh interpolation objects for when we need to deposit coarse-level particles on a refined grid.
     if (hasCoar) {
       const EBLevelGrid& eblgFiCo = m_coarseFinePM[lvl]->getEblgFiCo();
 
+      const ProblemDomain&     domain    = eblgFiCo.getDomain();
       const DisjointBoxLayout& dblFiCo   = eblgFiCo.getDBL();
       const EBISLayout&        ebislFiCo = eblgFiCo.getEBISL();
 
@@ -151,7 +153,7 @@ EBAMRParticleMesh::defineEBParticleMesh()
 
         EBParticleMesh& particleMesh = (*m_ebParticleMeshFiCo[lvl])[dit()];
 
-        particleMesh.define(cellBox, ebisBox, m_dx[lvl] * RealVect::Unit, m_probLo);
+        particleMesh.define(domain, cellBox, ebisBox, m_dx[lvl] * RealVect::Unit, m_probLo);
       }
     }
     else {

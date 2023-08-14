@@ -94,6 +94,7 @@ ItoSolver::depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
   CH_assert(a_level >= 0);
   CH_assert(a_level <= m_amr->getFinestLevel());
 
+  const ProblemDomain&     domain = m_amr->getDomains()[a_level];
   const DisjointBoxLayout& dbl    = m_amr->getGrids(a_particles.getRealm())[a_level];
   const EBISLayout&        ebisl  = m_amr->getEBISLayout(a_particles.getRealm(), m_phase)[a_level];
   const Real               dx     = m_amr->getDx()[a_level];
@@ -105,7 +106,7 @@ ItoSolver::depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
     const Box      cellBox = dbl[dit()];
     const EBISBox& ebisbox = ebisl[dit()];
 
-    EBParticleMesh particleMesh(cellBox, ebisbox, dx * RealVect::Unit, probLo);
+    EBParticleMesh particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
     EBCellFAB&     output    = a_output[dit()];
     const List<P>& particles = a_particles[a_level][dit()].listItems();
@@ -128,6 +129,7 @@ ItoSolver::depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
   CH_assert(a_level >= 0);
   CH_assert(a_level <= m_amr->getFinestLevel());
 
+  const ProblemDomain&     domain = m_amr->getDomains()[a_level];
   const DisjointBoxLayout& dbl    = m_amr->getGrids(a_particles.getRealm())[a_level];
   const EBISLayout&        ebisl  = m_amr->getEBISLayout(a_particles.getRealm(), m_phase)[a_level];
   const Real               dx     = m_amr->getDx()[a_level];
@@ -139,7 +141,7 @@ ItoSolver::depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
     const Box      cellBox = dbl[dit()];
     const EBISBox& ebisbox = ebisl[dit()];
 
-    EBParticleMesh particleMesh(cellBox, ebisbox, dx * RealVect::Unit, probLo);
+    EBParticleMesh particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
     EBCellFAB&     output    = a_output[dit()];
     const List<P>& particles = a_particles[a_level][dit()].listItems();

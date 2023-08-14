@@ -348,15 +348,43 @@ EBParticleMesh::interpolate(List<P>&             a_particleList,
 
   const Interval variables(0, 0);
 
+  Box validBox = m_domain.domainBox();
+
+  switch (a_interpType) {
+  case DepositionType::NGP: {
+    validBox = m_domain.domainBox();
+
+    break;
+  }
+  case DepositionType::CIC: {
+    validBox = grow(validBox, -1);
+
+    break;
+  }
+  case DepositionType::TSC: {
+    validBox = grow(validBox, -2);
+
+    break;
+  }
+  case DepositionType::W4: {
+    validBox = grow(validBox, -3);
+
+    break;
+  }
+  default: {
+    MayDay::Error("EBParticleMesh::interpolate - logic bust");
+  }
+  }
+
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     P&              curParticle = lit();
     const RealVect& curPosition = curParticle.position();
 
-    // Note: We MUST initialize = 0 because the higher-order kernels do not reset the field. It doesn't matter if we do it here
-    //       or in the Fortran kernel.
     Real& curParticleField = (curParticle.*particleScalarField)();
+
     this->interpolateParticle(&curParticleField,
                               a_meshScalarField,
+                              validBox,
                               m_probLo,
                               m_dx,
                               curPosition,
@@ -382,16 +410,43 @@ EBParticleMesh::interpolate(List<P>&             a_particleList,
   // TLDR: This is a jack-of-all-trades interpolation function. The user will use this function to supply a pointer to the field that will be
   //       interpolated to. As per API, this function must be of the type 'RealVect& myParticleClass::myVectorVariable()'
 
+  Box validBox = m_domain.domainBox();
+
+  switch (a_interpType) {
+  case DepositionType::NGP: {
+    validBox = m_domain.domainBox();
+
+    break;
+  }
+  case DepositionType::CIC: {
+    validBox = grow(validBox, -1);
+
+    break;
+  }
+  case DepositionType::TSC: {
+    validBox = grow(validBox, -2);
+
+    break;
+  }
+  case DepositionType::W4: {
+    validBox = grow(validBox, -3);
+
+    break;
+  }
+  default: {
+    MayDay::Error("EBParticleMesh::interpolate - logic bust");
+  }
+  }
+
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     P&              curParticle = lit();
     const RealVect& curPosition = curParticle.position();
 
-    // Note: We MUST initialize = 0 because the higher-order kernels do not reset the field. It doesn't matter if we do it here
-    //       or in the Fortran kernel.
     RealVect& curParticleField = (curParticle.*particleVectorField)();
 
     this->interpolateParticle(curParticleField.dataPtr(),
                               a_meshVectorField,
+                              validBox,
                               m_probLo,
                               m_dx,
                               curPosition,
@@ -768,6 +823,7 @@ EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
 inline void
 EBParticleMesh::interpolateParticle(Real*                a_particleField,
                                     const EBCellFAB&     a_meshField,
+                                    const Box&           a_validBox,
                                     const RealVect&      a_probLo,
                                     const RealVect&      a_dx,
                                     const RealVect&      a_position,
@@ -808,7 +864,7 @@ EBParticleMesh::interpolateParticle(Real*                a_particleField,
   const FArrayBox& meshField = a_meshField.getFArrayBox();
 
   // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side.
-  if (m_ebisbox.isIrregular(particleIndex) && a_forceIrregNGP) {
+  if ((m_ebisbox.isIrregular(particleIndex) && a_forceIrregNGP) || !(a_validBox.contains(particleIndex))) {
     for (int comp = startComp; comp <= endComp; comp++) {
       a_particleField[comp] = meshField(particleIndex, comp);
     }
