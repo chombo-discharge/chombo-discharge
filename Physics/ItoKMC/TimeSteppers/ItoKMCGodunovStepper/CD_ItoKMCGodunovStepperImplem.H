@@ -437,6 +437,11 @@ ItoKMCGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFin
     pout() << "ItoKMCGodunovStepper::preRegrid" << endl;
   }
 
+  const int numItoSpecies    = (this->m_physics)->getNumItoSpecies();
+  const int numCdrSpecies    = (this->m_physics)->getNumCdrSpecies();
+  const int numPlasmaSpecies = (this->m_physics)->getNumPlasmaSpecies();
+  const int numPhotonSpecies = (this->m_physics)->getNumPhotonSpecies();
+
   ItoKMCStepper<I, C, R, F>::preRegrid(a_lmin, a_oldFinestLevel);
 
   for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
@@ -452,6 +457,14 @@ ItoKMCGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFin
 
   DataOps::copy(m_scratchSemiImplicitRhoCDR, m_semiImplicitRhoCDR);
   DataOps::copy(m_scratchSemiImplicitConductivityCDR, m_semiImplicitConductivityCDR);
+
+  // Release unecessary storage.
+  for (int i = 0; i < numCdrSpecies; i++) {
+    m_cdrDivD[i].clear();
+  }
+
+  m_semiImplicitRhoCDR.clear();
+  m_semiImplicitConductivityCDR.clear();
 }
 
 template <typename I, typename C, typename R, typename F>

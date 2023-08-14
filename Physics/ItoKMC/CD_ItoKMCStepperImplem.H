@@ -1501,6 +1501,11 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
     pout() << m_name + "::preRegrid" << endl;
   }
 
+  const int numItoSpecies    = m_physics->getNumItoSpecies();
+  const int numCdrSpecies    = m_physics->getNumCdrSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
+
   // If we are load balancing then we need to store the number of particles per cell on the old grids. This
   // will be used to estimate computational loads on the new grids.
   if (m_loadBalanceParticles) {
@@ -1519,6 +1524,67 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
     }
   }
 
+  // Release some unecessary storage.
+  m_fluidScratch1.clear();
+  m_fluidScratchD.clear();
+  m_fluidScratchEB.clear();
+
+  m_particleScratch1.clear();
+  m_particleScratchD.clear();
+  m_particleScratchEB.clear();
+
+  m_conductivityCell.clear();
+  m_conductivityFace.clear();
+  m_conductivityEB.clear();
+
+  m_electricFieldParticle.clear();
+  m_electricFieldFluid.clear();
+
+  m_electricFieldParticle.clear();
+  m_electricFieldFluid.clear();
+
+  for (int i = 0; i < numCdrSpecies; i++) {
+    m_cdrMobilities[i].clear();
+    m_cdrPhotoiProducts[i].clearParticles();
+  }
+
+  for (int i = 0; i < numItoSpecies; i++) {
+    m_fluidGradPhiIto[i].clear();
+    m_fluidPhiIto[i].clear();
+  }
+  for (int i = 0; i < numCdrSpecies; i++) {
+    m_fluidGradPhiCDR[i].clear();
+  }
+
+  for (int i = 0; i < numItoSpecies; i++) {
+    m_secondaryParticles[i].clearParticles();
+  }
+  for (int i = 0; i < numPhotonSpecies; i++) {
+    m_secondaryPhotons[i].clearParticles();
+  }
+
+  for (int i = 0; i < numCdrSpecies; i++) {
+    m_cdrFluxes[i].clear();
+    m_cdrFluxesExtrap[i].clear();
+  }
+
+  m_currentDensity.clear();
+  m_oldPPC.clear();
+  m_newPPC.clear();
+  m_fluidPPC.clear();
+
+  m_particleItoPPC.clear();
+  m_particleOldItoPPC.clear();
+
+  if (numCdrSpecies > 0) {
+    m_fluidCdrPPC.clear();
+    m_fluidOldCdrPPC.clear();
+  }
+
+  m_particleYPC.clear();
+  m_fluidYPC.clear();
+
+  // Put solvers in pre-regrid mode.
   m_ito->preRegrid(a_lmin, a_oldFinestLevel);
   m_cdr->preRegrid(a_lmin, a_oldFinestLevel);
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
