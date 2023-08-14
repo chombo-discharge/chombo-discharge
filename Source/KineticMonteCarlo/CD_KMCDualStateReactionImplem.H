@@ -225,6 +225,7 @@ KMCDualStateReaction<State, T>::sanityCheck(const State& a_state) const noexcept
   const auto& photonState   = a_state.getNonReactiveState();
 
   for (const auto& idx : m_lhsReactives) {
+    pout() << idx << "\t" << m_lhsReactives.size() << endl;
     CH_assert(reactiveState.size() > idx);
   }
 
