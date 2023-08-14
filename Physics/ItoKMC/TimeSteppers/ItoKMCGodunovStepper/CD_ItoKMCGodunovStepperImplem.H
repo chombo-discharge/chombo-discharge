@@ -481,7 +481,7 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
   // Regrid solvers
   m_timer.startEvent("Regrid ItoSolver");
   (this->m_ito)->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-  if (m_timeStep == 0) {
+  if (this->m_timeStep == 0) {
     // Necessary because first time step is not semi-implicit, so it will use the densities from the
     // Ito and CDr solvers. Howver,  ItoSolver does not re-deposit the particles during regrid, so we
     // enforce it here.

@@ -657,6 +657,7 @@ ItoKMCStepper<I, C, R, F>::initialData() noexcept
 
   // Solve Poisson equation and compute the E-field
   m_fieldSolver->setPermittivities();
+  this->computeSpaceChargeDensity();
   this->solvePoisson();
 
   // Fill solvers with velocities and diffusion coefficients
