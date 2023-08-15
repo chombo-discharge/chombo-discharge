@@ -219,8 +219,8 @@ RodNeedleDisk.rod_smooth           = 5E-4       # Transition length between smal
 RodNeedleDisk.rod_needle_smooth    = 1E-4      # Transition length between needle and actual rod
 
 RodNeedleDisk.needle_length        = 100        # Needle length (from some origin)
-RodNeedleDisk.needle_radius        = 500E-6      # Needle radius
-RodNeedleDisk.needle_tip_radius    = 250E-6       # Needle tip radius
+RodNeedleDisk.needle_radius        = 501E-6      # Needle radius
+RodNeedleDisk.needle_tip_radius    = 251E-6       # Needle tip radius
 RodNeedleDisk.needle_angle         = 30         # Full opening angle of needle tip (in degrees)
 
 RodNeedleDisk.disk_point           = -0.5       # Top position of disk
