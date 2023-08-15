@@ -89,12 +89,12 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBParticleMesh.html#a26bfd40f597b092f0ffdedad74a63c3d">EBParticleMesh</a> ()</td></tr>
 <tr class="memdesc:a26bfd40f597b092f0ffdedad74a63c3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Must subsequently call define. <br /></td></tr>
 <tr class="separator:a26bfd40f597b092f0ffdedad74a63c3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acc46033839467c822cd765b95735d5cb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBParticleMesh.html#acc46033839467c822cd765b95735d5cb">EBParticleMesh</a> (const Box &amp;a_region, const EBISBox &amp;a_ebisbox, const RealVect &amp;a_dx, const RealVect &amp;a_probLo)</td></tr>
-<tr class="memdesc:acc46033839467c822cd765b95735d5cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <a href="classEBParticleMesh.html#acc46033839467c822cd765b95735d5cb">More...</a><br /></td></tr>
-<tr class="separator:acc46033839467c822cd765b95735d5cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aad56ce575013118a307f3a2875c7cda5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBParticleMesh.html#aad56ce575013118a307f3a2875c7cda5">define</a> (const Box &amp;a_region, const EBISBox &amp;a_ebisbox, const RealVect &amp;a_dx, const RealVect &amp;a_probLo)</td></tr>
-<tr class="memdesc:aad56ce575013118a307f3a2875c7cda5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <a href="classEBParticleMesh.html#aad56ce575013118a307f3a2875c7cda5">More...</a><br /></td></tr>
-<tr class="separator:aad56ce575013118a307f3a2875c7cda5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae30416f8b2886a865845baec71abacc8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBParticleMesh.html#ae30416f8b2886a865845baec71abacc8">EBParticleMesh</a> (const ProblemDomain &amp;a_domain, const Box &amp;a_region, const EBISBox &amp;a_ebisbox, const RealVect &amp;a_dx, const RealVect &amp;a_probLo)</td></tr>
+<tr class="memdesc:ae30416f8b2886a865845baec71abacc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <a href="classEBParticleMesh.html#ae30416f8b2886a865845baec71abacc8">More...</a><br /></td></tr>
+<tr class="separator:ae30416f8b2886a865845baec71abacc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a282346f89cd5ffd896abb296fa5d51c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBParticleMesh.html#a282346f89cd5ffd896abb296fa5d51c7">define</a> (const ProblemDomain &amp;a_domain, const Box &amp;a_region, const EBISBox &amp;a_ebisbox, const RealVect &amp;a_dx, const RealVect &amp;a_probLo)</td></tr>
+<tr class="memdesc:a282346f89cd5ffd896abb296fa5d51c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <a href="classEBParticleMesh.html#a282346f89cd5ffd896abb296fa5d51c7">More...</a><br /></td></tr>
+<tr class="separator:a282346f89cd5ffd896abb296fa5d51c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a594e7bfdf37f0cfa2335d4c19df50553"><td class="memTemplParams" colspan="2">template&lt;class P , const Real &amp;(P::*)() const particleScalarField&gt; </td></tr>
 <tr class="memitem:a594e7bfdf37f0cfa2335d4c19df50553"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBParticleMesh.html#a594e7bfdf37f0cfa2335d4c19df50553">deposit</a> (const List&lt; P &gt; &amp;a_particleList, EBCellFAB &amp;a_rho, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const bool a_forceIrregNGP=false) const</td></tr>
 <tr class="memdesc:a594e7bfdf37f0cfa2335d4c19df50553"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit particle onto the mesh using a standard cloud width.  <a href="classEBParticleMesh.html#a594e7bfdf37f0cfa2335d4c19df50553">More...</a><br /></td></tr>
@@ -163,12 +163,16 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:aea545f06ef37b5ce2aebd66fe4518a86"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBParticleMesh.html#aea545f06ef37b5ce2aebd66fe4518a86">depositParticle4</a> (EBCellFAB &amp;a_rho, const RealVect &amp;a_probLo, const RealVect &amp;a_dx, const RealVect &amp;a_position, const Real *a_strength, const Interval a_components, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const bool a_forceIrregNGP) const</td></tr>
 <tr class="memdesc:aea545f06ef37b5ce2aebd66fe4518a86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wrapper function for depositing a single particle which has four times the usual cloud width.  <a href="classEBParticleMesh.html#aea545f06ef37b5ce2aebd66fe4518a86">More...</a><br /></td></tr>
 <tr class="separator:aea545f06ef37b5ce2aebd66fe4518a86"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7942930db24b6f898a24257b93502dd7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBParticleMesh.html#a7942930db24b6f898a24257b93502dd7">interpolateParticle</a> (Real *a_particleField, const EBCellFAB &amp;a_field, const RealVect &amp;a_probLo, const RealVect &amp;a_dx, const RealVect &amp;a_position, const Interval &amp;a_interval, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_interpType, const bool a_forceIrregNGP) const</td></tr>
-<tr class="memdesc:a7942930db24b6f898a24257b93502dd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wrapper function that interpolates a particle fields onto positions.  <a href="classEBParticleMesh.html#a7942930db24b6f898a24257b93502dd7">More...</a><br /></td></tr>
-<tr class="separator:a7942930db24b6f898a24257b93502dd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4802bf8e1f6c354c8aaabd04bd1441a5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBParticleMesh.html#a4802bf8e1f6c354c8aaabd04bd1441a5">interpolateParticle</a> (Real *a_particleField, const EBCellFAB &amp;a_field, const Box &amp;a_validBox, const RealVect &amp;a_probLo, const RealVect &amp;a_dx, const RealVect &amp;a_position, const Interval &amp;a_interval, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_interpType, const bool a_forceIrregNGP) const</td></tr>
+<tr class="memdesc:a4802bf8e1f6c354c8aaabd04bd1441a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wrapper function that interpolates a particle fields onto positions.  <a href="classEBParticleMesh.html#a4802bf8e1f6c354c8aaabd04bd1441a5">More...</a><br /></td></tr>
+<tr class="separator:a4802bf8e1f6c354c8aaabd04bd1441a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
+<tr class="memitem:abea064853973350076e6311a929fcb56"><td class="memItemLeft" align="right" valign="top"><a id="abea064853973350076e6311a929fcb56"></a>
+ProblemDomain&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBParticleMesh.html#abea064853973350076e6311a929fcb56">m_domain</a></td></tr>
+<tr class="memdesc:abea064853973350076e6311a929fcb56"><td class="mdescLeft">&#160;</td><td class="mdescRight">Problem domain. <br /></td></tr>
+<tr class="separator:abea064853973350076e6311a929fcb56"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0164ee589abc3fbba8d10f59faa2a481"><td class="memItemLeft" align="right" valign="top"><a id="a0164ee589abc3fbba8d10f59faa2a481"></a>
 Box&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBParticleMesh.html#a0164ee589abc3fbba8d10f59faa2a481">m_region</a></td></tr>
 <tr class="memdesc:a0164ee589abc3fbba8d10f59faa2a481"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-centered box, i.e. valid region. <br /></td></tr>
@@ -190,8 +194,8 @@ RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <div class="textblock"><p>A class for depositing and interpolating particles. Contains various useful routines for interpolation of different fields in the base particle class (e.g., mass, "mobility"). This class also contains functions for depositing particles with 2/4 times the usual particle width, which is included because we want to support deposition of particles over refinement boundaries. </p>
 <p>Currently, this class is cheap to construct and thus does not need to stored for each box during regrids. </p><dl class="section note"><dt>Note</dt><dd>If the user sets the object to force ngp deposition in cut-cells, the result is not kappa-weighted in any form, i.e. the cut-cell will contain the full deposited mass (without multiplying or dividing by kappa). Likewise, it will force NGP interpolation in cut-cells. </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="acc46033839467c822cd765b95735d5cb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acc46033839467c822cd765b95735d5cb">&#9670;&nbsp;</a></span>EBParticleMesh()</h2>
+<a id="ae30416f8b2886a865845baec71abacc8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae30416f8b2886a865845baec71abacc8">&#9670;&nbsp;</a></span>EBParticleMesh()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -199,6 +203,12 @@ RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
         <tr>
           <td class="memname">EBParticleMesh::EBParticleMesh </td>
           <td>(</td>
+          <td class="paramtype">const ProblemDomain &amp;&#160;</td>
+          <td class="paramname"><em>a_domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const Box &amp;&#160;</td>
           <td class="paramname"><em>a_region</em>, </td>
         </tr>
@@ -231,6 +241,7 @@ RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <p>Full constructor. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Computational domain </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_region</td><td>Cell-centered box </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisbox</td><td>EBIS box </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Resolution </td></tr>
@@ -242,8 +253,8 @@ RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="aad56ce575013118a307f3a2875c7cda5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aad56ce575013118a307f3a2875c7cda5">&#9670;&nbsp;</a></span>define()</h2>
+<a id="a282346f89cd5ffd896abb296fa5d51c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a282346f89cd5ffd896abb296fa5d51c7">&#9670;&nbsp;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -251,6 +262,12 @@ RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
         <tr>
           <td class="memname">void EBParticleMesh::define </td>
           <td>(</td>
+          <td class="paramtype">const ProblemDomain &amp;&#160;</td>
+          <td class="paramname"><em>a_domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const Box &amp;&#160;</td>
           <td class="paramname"><em>a_region</em>, </td>
         </tr>
@@ -283,11 +300,11 @@ RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <p>Define function. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Computational domain </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_region</td><td>Cell-centered box </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisbox</td><td>EBIS box </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Resolution </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of computational domain </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_forceIrregNGP</td><td>If true, forces NGP deposition and interpolation in cut-cells. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1323,8 +1340,8 @@ template&lt;class P , RealVect &amp;(P::*)() particleVectorField&gt; </div>
 
 </div>
 </div>
-<a id="a7942930db24b6f898a24257b93502dd7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7942930db24b6f898a24257b93502dd7">&#9670;&nbsp;</a></span>interpolateParticle()</h2>
+<a id="a4802bf8e1f6c354c8aaabd04bd1441a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4802bf8e1f6c354c8aaabd04bd1441a5">&#9670;&nbsp;</a></span>interpolateParticle()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1343,6 +1360,12 @@ template&lt;class P , RealVect &amp;(P::*)() particleVectorField&gt; </div>
           <td></td>
           <td class="paramtype">const EBCellFAB &amp;&#160;</td>
           <td class="paramname"><em>a_field</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_validBox</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1398,6 +1421,7 @@ template&lt;class P , RealVect &amp;(P::*)() particleVectorField&gt; </div>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_particleField</td><td>Field evaluations at the particle position. Must be of type Real[]. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_field</td><td>Field. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_validRegion</td><td>Region where particle can live without kernels reaching outside the domain. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of domain </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_position</td><td>Particle position </td></tr>

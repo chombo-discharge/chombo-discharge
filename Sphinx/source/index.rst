@@ -72,11 +72,11 @@ Introduction
 ************
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 5
    :caption: Introduction
    :hidden:
 
-   Base/Documentation
+   Base/Documetnation
    Base/Overview
    Base/Installation
    Base/Control
@@ -88,9 +88,9 @@ Design
 ******
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 5
    :caption: Design
-   :hidden:	     
+   :hidden:
 
    Source/DesignOverview
    Source/Driver

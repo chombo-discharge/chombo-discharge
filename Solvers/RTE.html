@@ -47,7 +47,6 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
@@ -247,7 +246,7 @@ The Euler discretization is</p>
 <div class="math notranslate nohighlight">
 \[\left(1+ \kappa \Delta t\right)\Psi^{k+1} - \Delta t \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi^{k+1}\right) = \Psi^{k} + \frac{\Delta t\eta^{k+1}}{c},\]</div>
 <p>Again, this is a Helmholtz equation for <cite>Psi^{k+1}</cite> which is solved using geometric multigrid.
-Expressions for the TGA scheme are found in <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id34" title="E. H. Twizell, A. B. Gumel, and M. A. Arigu. Second-order,L 0-stable methods for the heat equation with time-dependent boundary conditions. Advances in Computational Mathematics, 6(1):333–352, 1996. URL: http://link.springer.com/10.1007/BF02127712, doi:10.1007/BF02127712.">11</a>]</span>, but note that the TGA scheme requires a solution to two elliptic equations (thus it has approximately twice the cost).</p>
+Expressions for the TGA scheme are found in <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id34" title="E. H. Twizell, A. B. Gumel, and M. A. Arigu. Second-order,L 0-stable methods for the heat equation with time-dependent boundary conditions. Advances in Computational Mathematics, 6(1):333–352, 1996. URL: http://link.springer.com/10.1007/BF02127712, doi:10.1007/BF02127712.">Twizell <em>et al.</em>, 1996</a>]</span>, but note that the TGA scheme requires a solution to two elliptic equations (thus it has approximately twice the cost).</p>
 </section>
 </section>
 <section id="boundary-conditions">
@@ -312,7 +311,7 @@ However, the <code class="docutils literal notranslate"><span class="pre">Edding
 The Larsen boundary condition is an absorbing boundary condition, taking the form of a Robin boundary as follows:</p>
 <div class="math notranslate nohighlight">
 \[\kappa\partial_n\Psi + \frac{3\kappa^2}{2}\frac{1-3r_2}{1-2r_1}\Psi = g,\]</div>
-<p>where <span class="math notranslate nohighlight">\(r_1\)</span> and <span class="math notranslate nohighlight">\(r_2\)</span> are reflection coefficients and <span class="math notranslate nohighlight">\(g\)</span> is a surface source, see <span id="id2">[<a class="reference internal" href="../ZZReferences.html#id51" title="Edward W. Larsen, Guido Thömmes, Axel Klar, Seaid Mohammed, and Thomas Götz. Simplified PN Approximations to the Equations of Radiative Heat Transfer and Applications. Journal of Computational Physics, 183(2):652–675, dec 2002. URL: https://www.sciencedirect.com/science/article/pii/S0021999102972104, doi:10.1006/JCPH.2002.7210.">8</a>]</span> for details.
+<p>where <span class="math notranslate nohighlight">\(r_1\)</span> and <span class="math notranslate nohighlight">\(r_2\)</span> are reflection coefficients and <span class="math notranslate nohighlight">\(g\)</span> is a surface source, see <span id="id2">[<a class="reference internal" href="../ZZReferences.html#id51" title="Edward W. Larsen, Guido Thömmes, Axel Klar, Seaid Mohammed, and Thomas Götz. Simplified PN Approximations to the Equations of Radiative Heat Transfer and Applications. Journal of Computational Physics, 183(2):652–675, dec 2002. URL: https://www.sciencedirect.com/science/article/pii/S0021999102972104, doi:10.1006/JCPH.2002.7210.">Larsen <em>et al.</em>, 2002</a>]</span> for details.
 Note that when the user specifies the boundary condition value (e.g. by setting the BC function), he is setting the surface sourge <span class="math notranslate nohighlight">\(g\)</span>.
 In the majority of cases, however, we will have <span class="math notranslate nohighlight">\(r_1 = r_2 = g = 0\)</span> and the BC becomes</p>
 <div class="math notranslate nohighlight">

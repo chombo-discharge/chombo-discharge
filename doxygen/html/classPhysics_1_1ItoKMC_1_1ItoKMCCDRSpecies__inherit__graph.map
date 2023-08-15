@@ -1,0 +1,4 @@
+<map id="Physics::ItoKMC::ItoKMCCDRSpecies" name="Physics::ItoKMC::ItoKMCCDRSpecies">
+<area shape="rect" id="node1" title="Simple CdrSpecies class for usage with ItoKMC." alt="" coords="5,80,264,107"/>
+<area shape="rect" id="node2" href="$classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="87,5,182,32"/>
+</map>

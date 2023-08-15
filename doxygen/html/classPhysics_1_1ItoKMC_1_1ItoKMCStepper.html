@@ -188,6 +188,14 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a417bd617ec1b7226b1d77a2380228ba5">registerOperators</a> () noexcept override</td></tr>
 <tr class="memdesc:a417bd617ec1b7226b1d77a2380228ba5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register operators used for the simulation. <br /></td></tr>
 <tr class="separator:a417bd617ec1b7226b1d77a2380228ba5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad50decaac205b11f80c881e68f9d8a07"><td class="memItemLeft" align="right" valign="top"><a id="ad50decaac205b11f80c881e68f9d8a07"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad50decaac205b11f80c881e68f9d8a07">prePlot</a> () noexcept override</td></tr>
+<tr class="memdesc:ad50decaac205b11f80c881e68f9d8a07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform pre-plot operations. <br /></td></tr>
+<tr class="separator:ad50decaac205b11f80c881e68f9d8a07"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab942a70a98d80b387349cea0cc5f4bfd"><td class="memItemLeft" align="right" valign="top"><a id="ab942a70a98d80b387349cea0cc5f4bfd"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ab942a70a98d80b387349cea0cc5f4bfd">postPlot</a> () noexcept override</td></tr>
+<tr class="memdesc:ab942a70a98d80b387349cea0cc5f4bfd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform post-plot operations. <br /></td></tr>
+<tr class="separator:ab942a70a98d80b387349cea0cc5f4bfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a76e9d6200fb3089cc19c5973b0f53cb1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a76e9d6200fb3089cc19c5973b0f53cb1">preRegrid</a> (const int a_lmin, const int a_oldFinestLevel) noexcept override</td></tr>
 <tr class="memdesc:a76e9d6200fb3089cc19c5973b0f53cb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform pre-regrid operations - storing relevant data from the old grids.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a76e9d6200fb3089cc19c5973b0f53cb1">More...</a><br /></td></tr>
 <tr class="separator:a76e9d6200fb3089cc19c5973b0f53cb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -228,10 +236,6 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a2da29e7e5a5ac98dc2316f3439725289">setComputationalGeometry</a> (const RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> &gt; &amp;a_computationalGeometry)</td></tr>
 <tr class="memdesc:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the computational geometry.  <a href="classTimeStepper.html#a2da29e7e5a5ac98dc2316f3439725289">More...</a><br /></td></tr>
 <tr class="separator:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a20cc9ee90664ed9614bd5d18a7104d24 inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top"><a id="a20cc9ee90664ed9614bd5d18a7104d24"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a20cc9ee90664ed9614bd5d18a7104d24">prePlot</a> ()</td></tr>
-<tr class="memdesc:a20cc9ee90664ed9614bd5d18a7104d24 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">An option for calling special functions prior to plotting data. Called by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> in the IMMEDIATELY before writing the plot file. <br /></td></tr>
-<tr class="separator:a20cc9ee90664ed9614bd5d18a7104d24 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba1d6a5006558bc0e0029a89e88e9899 inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#aba1d6a5006558bc0e0029a89e88e9899">needToRegrid</a> ()</td></tr>
 <tr class="memdesc:aba1d6a5006558bc0e0029a89e88e9899 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fuction which can have <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> do regrids at arbitrary points in the simulation.  <a href="classTimeStepper.html#aba1d6a5006558bc0e0029a89e88e9899">More...</a><br /></td></tr>
 <tr class="separator:aba1d6a5006558bc0e0029a89e88e9899 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -548,6 +552,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a46f82bfc96e308afd984b7c91b5950f9">parsePlotVariables</a> () noexcept</td></tr>
 <tr class="memdesc:a46f82bfc96e308afd984b7c91b5950f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse plot variables. <br /></td></tr>
 <tr class="separator:a46f82bfc96e308afd984b7c91b5950f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d4712bdecdfd8aa5c7fc05d618fefa0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0d4712bdecdfd8aa5c7fc05d618fefa0">computePhysicsPlotVariables</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_physicsPlotVars) noexcept</td></tr>
+<tr class="memdesc:a0d4712bdecdfd8aa5c7fc05d618fefa0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute physics plot variables.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0d4712bdecdfd8aa5c7fc05d618fefa0">More...</a><br /></td></tr>
+<tr class="separator:a0d4712bdecdfd8aa5c7fc05d618fefa0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -757,6 +764,10 @@ Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class=
 <tr class="memitem:a643cd82cfa5a81f7f6cb51e08bbe0ded"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a643cd82cfa5a81f7f6cb51e08bbe0ded">m_currentDensity</a></td></tr>
 <tr class="memdesc:a643cd82cfa5a81f7f6cb51e08bbe0ded"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for current density.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a643cd82cfa5a81f7f6cb51e08bbe0ded">More...</a><br /></td></tr>
 <tr class="separator:a643cd82cfa5a81f7f6cb51e08bbe0ded"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3aa74c9372693aec084f1ce7a54840dc"><td class="memItemLeft" align="right" valign="top"><a id="a3aa74c9372693aec084f1ce7a54840dc"></a>
+<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a3aa74c9372693aec084f1ce7a54840dc">m_physicsPlotVariables</a></td></tr>
+<tr class="memdesc:a3aa74c9372693aec084f1ce7a54840dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for physics plot variables. <br /></td></tr>
+<tr class="separator:a3aa74c9372693aec084f1ce7a54840dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0fb0c6ee311d27df4ab7c5b0f53ff94b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0fb0c6ee311d27df4ab7c5b0f53ff94b">m_conductivityCell</a></td></tr>
 <tr class="memdesc:a0fb0c6ee311d27df4ab7c5b0f53ff94b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-centered conductivity.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0fb0c6ee311d27df4ab7c5b0f53ff94b">More...</a><br /></td></tr>
 <tr class="separator:a0fb0c6ee311d27df4ab7c5b0f53ff94b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2182,6 +2193,42 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>Input data must be defined on the fluid realms. Kernels are only called on the valid region. </dd></dl>
+
+</div>
+</div>
+<a id="a0d4712bdecdfd8aa5c7fc05d618fefa0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d4712bdecdfd8aa5c7fc05d618fefa0">&#9670;&nbsp;</a></span>computePhysicsPlotVariables()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I , typename C , typename R , typename F &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::computePhysicsPlotVariables </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_physicsPlotVars</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute physics plot variables. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_physicsPlotVars</td><td>Plot variables from physics implementation </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

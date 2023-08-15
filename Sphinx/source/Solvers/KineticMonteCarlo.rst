@@ -373,8 +373,8 @@ The relevant function signatures that specify the reactants, products, and the r
 
 .. _Chap:KMCDualState:
 
-Dual-state
-__________
+KMCDualState
+____________
 
 ``KMCDualState`` defines two state vectors :math:`\vec{X}` and :math:`\vec{Y}` where :math:`\vec{X}` are *reactant species* and :math:`\vec{Y}` are *non-reactant* species.
 The intention behind this class is that reactant species are allowed on either side of the reaction, while the non-reactant species only occur on the right-hand side of the reaction.

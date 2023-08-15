@@ -86,6 +86,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a17172a5a588035cbf4b8d123508dd744"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; 2 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceDataParser.html#a17172a5a588035cbf4b8d123508dd744">fractionalFileReadASCII</a> (const std::string a_fileName, const std::string a_startRead, const std::string a_stopRead, const int a_xColumn=0, const int a_yColumn=1, const std::vector&lt; char &gt; a_ignoreChars={'#', '/'})</td></tr>
 <tr class="memdesc:a17172a5a588035cbf4b8d123508dd744"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simple ASCII file parser which reads a file and puts the data into two columns (a lookup table)  <a href="namespaceDataParser.html#a17172a5a588035cbf4b8d123508dd744">More...</a><br /></td></tr>
 <tr class="separator:a17172a5a588035cbf4b8d123508dd744"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abbbc911b3e551c4c59ae57402b5ab85a"><td class="memItemLeft" align="right" valign="top">List&lt; <a class="el" href="classPointParticle.html">PointParticle</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceDataParser.html#abbbc911b3e551c4c59ae57402b5ab85a">readPointParticlesASCII</a> (const std::string a_fileName, const unsigned int a_xColumn=0, const unsigned int a_yColumn=1, const unsigned int a_zColumn=2, const unsigned int a_wColumn=3, const std::vector&lt; char &gt; a_ignoreChars={'#', '/'})</td></tr>
+<tr class="memdesc:abbbc911b3e551c4c59ae57402b5ab85a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simple file parser which will read particles (position/weight) from an ASCII file.  <a href="namespaceDataParser.html#abbbc911b3e551c4c59ae57402b5ab85a">More...</a><br /></td></tr>
+<tr class="separator:abbbc911b3e551c4c59ae57402b5ab85a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class for simple data parsing from IO files. </p>
@@ -148,6 +151,71 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_stopRead</td><td>Identifier where we stop parsing lines into the table </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_xColumn</td><td>Which column to use as the x-column. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_yColumn</td><td>Which column to use as the y-column. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ignoreChars</td><td>Characters indicating comments in the file. Lines starting with these characters are ignored. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="abbbc911b3e551c4c59ae57402b5ab85a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abbbc911b3e551c4c59ae57402b5ab85a">&#9670;&nbsp;</a></span>readPointParticlesASCII()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">List&lt; <a class="el" href="classPointParticle.html">PointParticle</a> &gt; DataParser::readPointParticlesASCII </td>
+          <td>(</td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_fileName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const unsigned int&#160;</td>
+          <td class="paramname"><em>a_xColumn</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const unsigned int&#160;</td>
+          <td class="paramname"><em>a_yColumn</em> = <code>1</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const unsigned int&#160;</td>
+          <td class="paramname"><em>a_zColumn</em> = <code>2</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const unsigned int&#160;</td>
+          <td class="paramname"><em>a_wColumn</em> = <code>3</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; char &gt;&#160;</td>
+          <td class="paramname"><em>a_ignoreChars</em> = <code>{'#',&#160;'/'}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Simple file parser which will read particles (position/weight) from an ASCII file. </p>
+<p>Particles should be arranged as rows, e.g. in the form x y z w 0.0 0.0 0.0 1 </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fileName</td><td>Input file name. Must be an ASCII file organized into rows and columns. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_xColumn</td><td>Column containing the x-coordinate </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_yColumn</td><td>Column containing the y-coordinate </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_zColumn</td><td>Column containing the z-coordinate </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_wColumn</td><td>Column containing the particle weight </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ignoreChars</td><td>Characters indicating comments in the file. Lines starting with these characters are ignored. </td></tr>
   </table>
   </dd>

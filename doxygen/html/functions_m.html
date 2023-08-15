@@ -110,12 +110,16 @@ $(function() {
 <li>m_allowCoarsening
 : <a class="el" href="classDriver.html#a04a71dc4e1b5f5a0ca359548cada7ce7">Driver</a>
 </li>
+<li>m_allSpecies
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a53006b3536208a4079368aead4a67ad2">Physics::ItoKMC::ItoKMCJSON</a>
+</li>
 <li>m_alpha
 : <a class="el" href="classEBHelmholtzOp.html#aaa4920c1fa6293e7848864defc4a2aaf">EBHelmholtzOp</a>
 , <a class="el" href="classEBHelmholtzOpFactory.html#af5da981f37e8e5e96cfdc0cb1f7b27d7">EBHelmholtzOpFactory</a>
 , <a class="el" href="classEddingtonSP1.html#ad1d8ea2095af97ec8fff8ac96d8e5ac3">EddingtonSP1</a>
 , <a class="el" href="classFieldSolverMultigrid.html#aaa7def33331572b1bad92dc0f0e74031">FieldSolverMultigrid</a>
 , <a class="el" href="classMFHelmholtzOpFactory.html#a47e39ca4a6b2b21d31d1595fccafecd3">MFHelmholtzOpFactory</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a172eb992e97819f4534d69bf3276441d">Physics::ItoKMC::ItoKMCJSON</a>
 , <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a22145387b738354c6235110dae0e7533">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_alphaConstant
@@ -221,6 +225,18 @@ $(function() {
 </li>
 <li>m_backgroundRate
 : <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a689c8ca2a0fc60b2dd4232ddf7f4270f">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_backgroundSpecies
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ae252cf5cd220eed444d5bf40fa211b23">Physics::ItoKMC::ItoKMCJSON</a>
+</li>
+<li>m_backgroundSpeciesMap
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a80a4ba4294c217d3674eb0dff52e3ba9">Physics::ItoKMC::ItoKMCJSON</a>
+</li>
+<li>m_backgroundSpeciesMapInverse
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a9433eb4fea50d50d7ac500c0c6c3bc20">Physics::ItoKMC::ItoKMCJSON</a>
+</li>
+<li>m_backgroundSpeciesPlot
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aa3c2f805093f53887b278bcb221dd1db">Physics::ItoKMC::ItoKMCJSON</a>
 </li>
 <li>m_baseif
 : <a class="el" href="classAmrMesh.html#a93c109ce8345145d8d5373abf9c6280b">AmrMesh</a>
@@ -420,6 +436,7 @@ $(function() {
 </li>
 <li>m_cdrSpeciesMap
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a25580a2f524014e60e356d53e449ae3f">Physics::CdrPlasma::CdrPlasmaJSON</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a58a0153c90c113f5dc6f4a27ef9409e4">Physics::ItoKMC::ItoKMCJSON</a>
 </li>
 <li>m_cdrTransportEnergyMap
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a38b971c03049c70d37abba61e611f175">Physics::CdrPlasma::CdrPlasmaJSON</a>
@@ -855,6 +872,9 @@ $(function() {
 <li>m_diffusionAlgorithm
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a598f337f38e9e8a9ef5721c9d4a18595">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
 </li>
+<li>m_diffusionCoefficients
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ac911588c0d6529a161ba457ca9a33acb">Physics::ItoKMC::ItoKMCJSON</a>
+</li>
 <li>m_diffusionConstants
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a65447932cccc936e01e50b6e3dba7779">Physics::CdrPlasma::CdrPlasmaJSON</a>
 </li>
@@ -909,6 +929,7 @@ $(function() {
 <li>m_domain
 : <a class="el" href="classDomainFluxIFFAB.html#a639dcd4cc1d6f5a462455fb3f84f8328">DomainFluxIFFAB</a>
 , <a class="el" href="classDomainFluxIFFABFactory.html#a5807e55bcc8b76f18283a267d44f744d">DomainFluxIFFABFactory</a>
+, <a class="el" href="classEBParticleMesh.html#abea064853973350076e6311a929fcb56">EBParticleMesh</a>
 , <a class="el" href="classIrregStencil.html#a79997461b373d06cac95872f0bc1fa2c">IrregStencil</a>
 </li>
 <li>m_domainBC
@@ -1299,7 +1320,8 @@ $(function() {
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html#ad28f94e1a07b39c66620c3834116ef56">Physics::CdrPlasma::CdrPlasmaImExSdcStepper</a>
 </li>
 <li>m_eta
-: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a45f3c1554d6c2d4cad19de52af65078b">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a23301777baa7e2e572cbad8080ee6b3e">Physics::ItoKMC::ItoKMCJSON</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a45f3c1554d6c2d4cad19de52af65078b">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_etaConstant
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#aab9f2698709cf12347b2b8cd095401d2">Physics::CdrPlasma::CdrPlasmaJSON</a>
@@ -1469,6 +1491,9 @@ $(function() {
 <li>m_fluidPPC
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a7376666830d566fcb7e38f17df2ef406">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
 </li>
+<li>m_fluidRates
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a94551b03c14b3563f33d62dc91cfcc32">Physics::ItoKMC::ItoKMCJSON</a>
+</li>
 <li>m_fluidRealm
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a82535c0bd3081204877a66036eb6ecaa">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
 </li>
@@ -1574,11 +1599,16 @@ $(function() {
 <li>m_gasDensity
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a326bb333cf090a39ca44053f7dc3208c">Physics::CdrPlasma::CdrPlasmaJSON</a>
 </li>
+<li>m_gasNumberDensity
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a6eaf6ac1636665a211fe313780e83571">Physics::ItoKMC::ItoKMCJSON</a>
+</li>
 <li>m_gasPressure
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a556b10a6b9068bff0d413f217b9f0347">Physics::CdrPlasma::CdrPlasmaJSON</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a491e20da61a9028d8b27b8614e6bb58f">Physics::ItoKMC::ItoKMCJSON</a>
 </li>
 <li>m_gasTemperature
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a57977562c6f4f982cc40ba4a72192d32">Physics::CdrPlasma::CdrPlasmaJSON</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a955384a8f47728322f76509374feb80e">Physics::ItoKMC::ItoKMCJSON</a>
 </li>
 <li>m_geoCoarsen
 : <a class="el" href="classDriver.html#a638972f4b2ad3599eac73250ecdf4435">Driver</a>
@@ -1962,6 +1992,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrSpeciesJSON.html#a148855e25cf41b0b9d48565e179c7302">Physics::CdrPlasma::CdrSpeciesJSON</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1NeutralSpeciesJSON.html#a69b9e6e3e0e1b843abf6cf78f875af7f">Physics::CdrPlasma::NeutralSpeciesJSON</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html#a1653dbeea8d5ec867e963c7e8d5f8f4a">Physics::CdrPlasma::RteSpeciesJSON</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#aed58daad919434e3d46e97affcd02dc8">Physics::ItoKMC::ItoKMCBackgroundSpecies</a>
 , <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aeb965c335c41dd5a92e8f76b73c1951f">Physics::ItoKMC::ItoKMCPhysics</a>
 , <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html#a6fb241cee5257fd32981d86a7c8f6839">Physics::ItoKMC::ItoKMCTagger&lt; S &gt;</a>
 , <a class="el" href="classRealm.html#a2c4942a63a8da78069ea38e680e85323">Realm</a>
@@ -2004,15 +2035,20 @@ $(function() {
 <li>m_itoSpecies
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a539eba97f3e484c832ba50232336fea7">Physics::ItoKMC::ItoKMCPhysics</a>
 </li>
+<li>m_itoSpeciesMap
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ae291c9c106d918aacecb1e330e8689b6">Physics::ItoKMC::ItoKMCJSON</a>
+</li>
 <li>m_ivs
 : <a class="el" href="classMFHelmholtzJumpBC.html#aaa5d12da508639b1d2ed06b7f3ae7045">MFHelmholtzJumpBC</a>
 , <a class="el" href="classMFInterfaceFAB.html#a82646e4c1c0583f76fd9e3eb5d78d9fc">MFInterfaceFAB&lt; T &gt;</a>
 </li>
 <li>m_json
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a319eaf39740c433a46b56440766a4819">Physics::CdrPlasma::CdrPlasmaJSON</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a9487dc0bbfb0e87073b59be5d43cbcaf">Physics::ItoKMC::ItoKMCJSON</a>
 </li>
 <li>m_jsonFile
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#ad84a3ddf3bcedd5dbbf984d0c71367b5">Physics::CdrPlasma::CdrPlasmaJSON</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ab7b8a8fc316314911bc2e57f4cd74c0b">Physics::ItoKMC::ItoKMCJSON</a>
 </li>
 <li>m_jump
 : <a class="el" href="classMFHelmholtzOp.html#ab8487ff4fd0e6100506d673a45d30cfc">MFHelmholtzOp</a>
@@ -2043,7 +2079,8 @@ $(function() {
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA_1_1PhotonZ.html#a4b1da3fe020ab61fda1d4df208edcfd9">Physics::ItoKMC::ItoKMCAir3LFA::PhotonZ</a>
 </li>
 <li>m_kappa
-: <a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferSpecies.html#abc2e32abe6f3cef7ea1e1464df75fdd6">Physics::RadiativeTransfer::RadiativeTransferSpecies</a>
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhotonSpecies.html#a607a3894ae8f6653e019fe2033cb7c4c">Physics::ItoKMC::ItoKMCPhotonSpecies</a>
+, <a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferSpecies.html#abc2e32abe6f3cef7ea1e1464df75fdd6">Physics::RadiativeTransfer::RadiativeTransferSpecies</a>
 , <a class="el" href="classRtSolver.html#a02749194fbf5eaf3610cf2aa13bfc546">RtSolver</a>
 </li>
 <li>m_kappaEB
@@ -2054,6 +2091,15 @@ $(function() {
 </li>
 <li>m_kappaSource
 : <a class="el" href="classFieldSolverMultigrid.html#adaad6fa4039b5db39f2c32542c3ba123">FieldSolverMultigrid</a>
+</li>
+<li>m_kmcReactionGradientCorrections
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ac22ee6ccc7932101438732834b212103">Physics::ItoKMC::ItoKMCJSON</a>
+</li>
+<li>m_kmcReactionRatePlots
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ad00634462b896b0aa228b8e38313607f">Physics::ItoKMC::ItoKMCJSON</a>
+</li>
+<li>m_kmcReactionRates
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a3816d0fb12c02ad6c71895250eae3e39">Physics::ItoKMC::ItoKMCJSON</a>
 </li>
 <li>m_kmcReactions
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a7648c33e761b813629351d15fc88b691">Physics::ItoKMC::ItoKMCPhysics</a>
@@ -2325,6 +2371,9 @@ $(function() {
 <li>m_mobilityFunction
 : <a class="el" href="classItoSolver.html#a842d9611dc970ba409a660600b75d922">ItoSolver</a>
 </li>
+<li>m_mobilityFunctions
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ad0f03a91c620d7c39a32cdc7f51b09cb">Physics::ItoKMC::ItoKMCJSON</a>
+</li>
 <li>m_mobilityFunctionsEN
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a887f18561595130f98487332e88b1d08">Physics::CdrPlasma::CdrPlasmaJSON</a>
 </li>
@@ -2350,6 +2399,7 @@ $(function() {
 </li>
 <li>m_molarFraction
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1NeutralSpeciesJSON.html#a66b577f66b162fe90f5bbad972ff7223">Physics::CdrPlasma::NeutralSpeciesJSON</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#a963df2eba67950ea20c5103e4025c0eb">Physics::ItoKMC::ItoKMCBackgroundSpecies</a>
 </li>
 <li>m_multByBco
 : <a class="el" href="classEBHelmholtzNeumannDomainBC.html#aaa846fe7ea2d1485976f0d9fa990a6b3">EBHelmholtzNeumannDomainBC</a>
@@ -2482,6 +2532,7 @@ $(function() {
 , <a class="el" href="classItoSpecies.html#a6a1c8d4933de50af2935f79f3479684f">ItoSpecies</a>
 , <a class="el" href="classMeshODESolver.html#a803fdb5ee685c4f3276f90d4e6352fcc">MeshODESolver&lt; N &gt;</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1NeutralSpeciesJSON.html#a8cac929d0dabcd7abab3c051d8849fe3">Physics::CdrPlasma::NeutralSpeciesJSON</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#ac103fae5bf164e37edde2063054e30ea">Physics::ItoKMC::ItoKMCBackgroundSpecies</a>
 , <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a19514500d8f27241b1aa2af12ba8c6c9">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
 , <a class="el" href="classRtSolver.html#a82a3cfbe7398e27f0638effd2d6b8bbf">RtSolver</a>
 , <a class="el" href="classRtSpecies.html#a76c8ad0f2cbefa0ea38f37db5f31063a">RtSpecies</a>
@@ -2606,8 +2657,12 @@ $(function() {
 : <a class="el" href="classMFHelmholtzJumpBC.html#a427ce0769dd4d98c8a7ed75ae66301c1">MFHelmholtzJumpBC</a>
 , <a class="el" href="classMFHelmholtzOp.html#a4a41db3cad08d71c811a131e75668e55">MFHelmholtzOp</a>
 </li>
+<li>m_numPhotonSpecies
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aa1a28643df582077d2ad34ff0fe64b6a">Physics::ItoKMC::ItoKMCJSON</a>
+</li>
 <li>m_numPlasmaSpecies
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#a8b5e638dc122fc189858d69dc801547f">Physics::ItoKMC::ItoKMCAir3LFA</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a9a9ac5466689ebbb0197ff4fc739f6d3">Physics::ItoKMC::ItoKMCJSON</a>
 </li>
 <li>m_numPlotGhost
 : <a class="el" href="classDriver.html#a1caaddba31ef709941afcc016cd31798">Driver</a>
@@ -2814,6 +2869,9 @@ $(function() {
 <li>m_photoIonizationFactor
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#a63479a4552bb55308b3f6e14c2d1545d">Physics::ItoKMC::ItoKMCAir3LFA</a>
 </li>
+<li>m_photonIndexMap
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a906f0ce925a7416d0c0c76f686a5addb">Physics::ItoKMC::ItoKMCJSON</a>
+</li>
 <li>m_photonProducts
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaReactionJSON.html#aeba3e50fa823ad92fb33b7518327395f">Physics::CdrPlasma::CdrPlasmaReactionJSON</a>
 </li>
@@ -2852,12 +2910,18 @@ $(function() {
 <li>m_physicsDt
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a24670ae30603a18f655d8184e11a54cc">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
 </li>
+<li>m_physicsPlotVariables
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a3aa74c9372693aec084f1ce7a54840dc">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
+</li>
 <li>m_physicsPlotVars
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a71601ac7fee7d410562b7a046a66399e">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
 <li>m_plane
 : <a class="el" href="classBoundedNoisePlane.html#a18fad53eeb59860bdecedd0824e478bd">BoundedNoisePlane</a>
 , <a class="el" href="classPerlinPlaneSdf.html#acd511557ee1b9e43a0b7650ddd125015">PerlinPlaneSdf</a>
+</li>
+<li>m_plasmaIndexMap
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#afe74e8eee917e01e19a79fb0c405a446">Physics::ItoKMC::ItoKMCJSON</a>
 </li>
 <li>m_plasmaPhase
 : <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a1ab465042a461ad75324a476229fe815">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>
@@ -2913,6 +2977,7 @@ $(function() {
 </li>
 <li>m_plasmaReactionSolovievCorrection
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#ac662aa3cc7679ee61e048d7b6c9f18f7">Physics::CdrPlasma::CdrPlasmaJSON</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#acf42372977e6014e24988b02c3d18c64">Physics::ItoKMC::ItoKMCJSON</a>
 </li>
 <li>m_plasmaReactionTablesEN
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a3418f2ec36a3033113e9d4c6b6027cac">Physics::CdrPlasma::CdrPlasmaJSON</a>
@@ -2920,11 +2985,18 @@ $(function() {
 <li>m_plasmaReactionTablesEnergy
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a72228ffdc1b3f5cff3ee85be8875bb02">Physics::CdrPlasma::CdrPlasmaJSON</a>
 </li>
+<li>m_plasmaSpeciesTypes
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#acbdb63744535dd7f37ae6bd431083163">Physics::ItoKMC::ItoKMCJSON</a>
+</li>
+<li>m_plasmaTemperatures
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ad2c0d89c611079db57e326ecf6bad0ce">Physics::ItoKMC::ItoKMCJSON</a>
+</li>
 <li>m_plot
 : <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#a304ba6582dde80507381eb51b598b175">Physics::StreamerInception::StreamerInceptionTagger</a>
 </li>
 <li>m_plotAlpha
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#ac93d994574cabda3ad7365177ace2143">Physics::CdrPlasma::CdrPlasmaJSON</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#af7cab0cc1eb26ce0901ba750e74185c4">Physics::ItoKMC::ItoKMCJSON</a>
 , <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ae8b702410adb1aa6e17ad7bd41ab8537">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_plotAverageEnergy
@@ -2977,6 +3049,7 @@ $(function() {
 </li>
 <li>m_plotEta
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a4e06df91abfa114d08ac5f419f25f2ff">Physics::CdrPlasma::CdrPlasmaJSON</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a27f1dfd43564d21f71cb95238a35073c">Physics::ItoKMC::ItoKMCJSON</a>
 , <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a797b760679d5fdf1fc2d7b880ce6b84b">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_plotFieldEmission
@@ -2984,6 +3057,7 @@ $(function() {
 </li>
 <li>m_plotGas
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#aaa947d775a1da8afbb3e74ee20465945">Physics::CdrPlasma::CdrPlasmaJSON</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a2d046992df897fc394801097208b4c5b">Physics::ItoKMC::ItoKMCJSON</a>
 </li>
 <li>m_plotInceptionIntegral
 : <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a2c363bbc1906324dce4f230414483868">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
@@ -3632,6 +3706,7 @@ $(function() {
 </li>
 <li>m_skipReactions
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a788d862fbf6ebb3515ce1fe9e2d6378b">Physics::CdrPlasma::CdrPlasmaJSON</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a764e2eefe7add0a19a57901dd401e385">Physics::ItoKMC::ItoKMCJSON</a>
 </li>
 <li>m_slowUnion
 : <a class="el" href="classSphereArray.html#a842277312eb3c38f918be3f53dc821e2">SphereArray</a>
@@ -3974,6 +4049,7 @@ $(function() {
 : <a class="el" href="classEBAMRSurfaceDeposition.html#a7edf5547ccf909ed2cb1c39423b256b0">EBAMRSurfaceDeposition</a>
 , <a class="el" href="classPhaseRealm.html#a789b712cd353e2ede8078bdd499ba818">PhaseRealm</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#aff35ae1e4298e4f97f4748510dd10b54">Physics::CdrPlasma::CdrPlasmaJSON</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aef0cf01192d1fe974f92afc616d6a3ac">Physics::ItoKMC::ItoKMCJSON</a>
 </li>
 <li>m_verbosity
 : <a class="el" href="classAmrMesh.html#a50336ab4f43dc66bf6f5ee8fde4a9acd">AmrMesh</a>
@@ -4151,7 +4227,7 @@ $(function() {
 </li>
 <li>makeSuperparticles()
 : <a class="el" href="classItoLayout.html#a1ce54d1788882b20dbeff5cd3a61b6b2">ItoLayout&lt; T &gt;</a>
-, <a class="el" href="classItoSolver.html#aa8859e84b563c9aa49927b39628571d3">ItoSolver</a>
+, <a class="el" href="classItoSolver.html#a90e0d074046485949984c3c074d1fe58">ItoSolver</a>
 </li>
 <li>makeSuperParticles()
 : <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a5ca4b5d910f842b23cad9ebe90fe088d">Physics::BrownianWalker::BrownianWalkerStepper</a>
@@ -4182,7 +4258,7 @@ $(function() {
 : <a class="el" href="classSignedDistanceDCEL.html#ac3ba4cb079ccd274977cf3ee9ff80e69">SignedDistanceDCEL&lt; T &gt;</a>
 </li>
 <li>MeshODESolver()
-: <a class="el" href="classMeshODESolver.html#a3082ff8876127d2bcfef15e9b624cb9f">MeshODESolver&lt; N &gt;</a>
+: <a class="el" href="classMeshODESolver.html#a0a1ee066bf51807649f95986829c7cee">MeshODESolver&lt; N &gt;</a>
 </li>
 <li>MeshODEStepper()
 : <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#af27c3d40ffa283e4c07727af3ce84834">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>
@@ -4191,7 +4267,7 @@ $(function() {
 : <a class="el" href="classMFBaseIVFAB.html#a1ea286eecb86a3eb7986420d9ab71b6c">MFBaseIVFAB</a>
 </li>
 <li>MFBaseIVFABFactory()
-: <a class="el" href="classMFBaseIVFABFactory.html#ad71b2810084fc969dce80bd8f90d1c6b">MFBaseIVFABFactory</a>
+: <a class="el" href="classMFBaseIVFABFactory.html#a5d873c6b90b2f2d915f7b8306c053bca">MFBaseIVFABFactory</a>
 </li>
 <li>MFCoarAve()
 : <a class="el" href="classMFCoarAve.html#a17b88ab11df6403b14ef0a79c2293869">MFCoarAve</a>
@@ -4203,10 +4279,10 @@ $(function() {
 : <a class="el" href="classMFHelmholtzDirichletEBBC.html#a18b95b3d890712dd1416340fef08f4ab">MFHelmholtzDirichletEBBC</a>
 </li>
 <li>MFHelmholtzDirichletEBBCFactory()
-: <a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#ad20e599282940cc5e208c078ee918126">MFHelmholtzDirichletEBBCFactory</a>
+: <a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#a240d4c17ccc61f9229c93036e3baf3f5">MFHelmholtzDirichletEBBCFactory</a>
 </li>
 <li>MFHelmholtzDomainBCFactory()
-: <a class="el" href="classMFHelmholtzDomainBCFactory.html#abb09d8122443521683cafaa65d01235d">MFHelmholtzDomainBCFactory</a>
+: <a class="el" href="classMFHelmholtzDomainBCFactory.html#a991237439f6f945a60d7f1a2c970ccb8">MFHelmholtzDomainBCFactory</a>
 </li>
 <li>MFHelmholtzEBBC()
 : <a class="el" href="classMFHelmholtzEBBC.html#af15c1cc5e32ebec39aac32ed717260f1">MFHelmholtzEBBC</a>
@@ -4218,10 +4294,10 @@ $(function() {
 : <a class="el" href="classMFHelmholtzElectrostaticDomainBCFactory.html#acf727f2a80c168e02f0ba842e2579da2">MFHelmholtzElectrostaticDomainBCFactory</a>
 </li>
 <li>MFHelmholtzElectrostaticEBBC()
-: <a class="el" href="classMFHelmholtzElectrostaticEBBC.html#af09b648479832646f5e8a0e325c711ad">MFHelmholtzElectrostaticEBBC</a>
+: <a class="el" href="classMFHelmholtzElectrostaticEBBC.html#a02b2dee4fd4fe20fdb452a8243c191d7">MFHelmholtzElectrostaticEBBC</a>
 </li>
 <li>MFHelmholtzElectrostaticEBBCFactory()
-: <a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#a9c805a8387909afa4f2d2250b7808993">MFHelmholtzElectrostaticEBBCFactory</a>
+: <a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#a3aa8ca207ff547801a59750e2393d4e1">MFHelmholtzElectrostaticEBBCFactory</a>
 </li>
 <li>MFHelmholtzJumpBC()
 : <a class="el" href="classMFHelmholtzJumpBC.html#a75a1cede969a2feac7f9b70d30510c12">MFHelmholtzJumpBC</a>
@@ -4236,13 +4312,13 @@ $(function() {
 : <a class="el" href="classMFHelmholtzNeumannEBBC.html#a919ffe862c85218d77847996c3fe94c7">MFHelmholtzNeumannEBBC</a>
 </li>
 <li>MFHelmholtzNeumannEBBCFactory()
-: <a class="el" href="classMFHelmholtzNeumannEBBCFactory.html#a0ad15ec0624424cf1ff91cf04370c0c4">MFHelmholtzNeumannEBBCFactory</a>
+: <a class="el" href="classMFHelmholtzNeumannEBBCFactory.html#a7a9080622a6cb87cd5e831a2576cd28f">MFHelmholtzNeumannEBBCFactory</a>
 </li>
 <li>MFHelmholtzOp()
-: <a class="el" href="classMFHelmholtzOp.html#a048e685667a853fd41ea38fe84754507">MFHelmholtzOp</a>
+: <a class="el" href="classMFHelmholtzOp.html#a196cef2dd89410c2c918cec348762d59">MFHelmholtzOp</a>
 </li>
 <li>MFHelmholtzOpFactory()
-: <a class="el" href="classMFHelmholtzOpFactory.html#a3c99674cf3c2592650a464038773f0f9">MFHelmholtzOpFactory</a>
+: <a class="el" href="classMFHelmholtzOpFactory.html#a59046d0f9a950da0a9107e8bddf6cc16">MFHelmholtzOpFactory</a>
 </li>
 <li>MFHelmholtzRobinDomainBCFactory()
 : <a class="el" href="classMFHelmholtzRobinDomainBCFactory.html#a35d5fdb7c2c2b87d337496723a800dfb">MFHelmholtzRobinDomainBCFactory</a>
@@ -4260,7 +4336,7 @@ $(function() {
 : <a class="el" href="classMFHelmholtzSaturationChargeJumpBCFactory.html#a2e7f97fb6aee42c916e0abbb00fea79e">MFHelmholtzSaturationChargeJumpBCFactory</a>
 </li>
 <li>MFInterfaceFAB()
-: <a class="el" href="classMFInterfaceFAB.html#a0c1665a8fb77aac838aab83eaf8e379e">MFInterfaceFAB&lt; T &gt;</a>
+: <a class="el" href="classMFInterfaceFAB.html#a9e9773180f04247c742b4fba03c82bf2">MFInterfaceFAB&lt; T &gt;</a>
 </li>
 <li>MFLevelGrid()
 : <a class="el" href="classMFLevelGrid.html#a922574db896fe47e94ba202590807c5e">MFLevelGrid</a>
@@ -4286,6 +4362,12 @@ $(function() {
 : <a class="el" href="classItoParticle.html#ac71370b741782ce8e4ecbeb3bf345f05">ItoParticle</a>
 , <a class="el" href="classItoSpecies.html#a60ffd4cb59f0fd5daf7e3fe7db381c1b">ItoSpecies</a>
 </li>
+<li>MolarFraction
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#ae6b85c38b93061f5f3f5d5280b4855c3">Physics::ItoKMC::ItoKMCBackgroundSpecies</a>
+</li>
+<li>molarFraction()
+: <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#a99902a6282a0f4be6233964f916abf81">Physics::ItoKMC::ItoKMCBackgroundSpecies</a>
+</li>
 <li>monotonizedCentral()
 : <a class="el" href="classCdrCTU.html#a75db786ac708eedb214e2bb4583aa1bf">CdrCTU</a>
 , <a class="el" href="classEBGhostCellInterpolator.html#ac225d1ed480fa58cbec028a3ec36b338">EBGhostCellInterpolator</a>
@@ -4308,7 +4390,7 @@ $(function() {
 , <a class="el" href="classFieldSolverMultigrid.html#aaf89c3ef8e19504afb28976473f2b797">FieldSolverMultigrid</a>
 </li>
 <li>MultiIndex()
-: <a class="el" href="classMultiIndex.html#abb80b4dfad04d5606c9d6b8c809da34c">MultiIndex</a>
+: <a class="el" href="classMultiIndex.html#a7be7d1bfd359b1423bfa0fb2e1e88f50">MultiIndex</a>
 </li>
 <li>multiply()
 : <a class="el" href="classDataOps.html#a72685cbfeebb9d46777890fbf5a0b3e6">DataOps</a>

@@ -47,7 +47,6 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
@@ -95,7 +94,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#state-and-reaction-examples">State and reaction examples</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#single-state">Single-state</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dual-state">Dual-state</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kmcdualstate">KMCDualState</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#verification">Verification</a><ul>
@@ -203,11 +202,11 @@ For example, for a third-order reaction <span class="math notranslate nohighligh
 <p>Various algorithms can be used for advancing the state <span class="math notranslate nohighlight">\(\vec{X}\)</span> for an arbitrary reaction network <span class="math notranslate nohighlight">\(\vec{R}\)</span>.</p>
 <ol class="arabic simple">
 <li><p>The <a class="reference internal" href="#chap-kmcssaadvance"><span class="std std-ref">Stochastic simulation algorithm</span></a> (SSA).
-The SSA is also known as the Gillespie algorithm <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id166" title="Daniel T. Gillespie. Exact stochastic simulation of coupled chemical reactions. Journal of Physical Chemistry, 81:2340-2361, 1977. doi:10.1021/j100540a008.">6</a>]</span>, and is an exact stochastic solution to the above problem.
+The SSA is also known as the Gillespie algorithm <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id166" title="Daniel T. Gillespie. Exact stochastic simulation of coupled chemical reactions. Journal of Physical Chemistry, 81:2340-2361, 1977. doi:10.1021/j100540a008.">Gillespie, 1977</a>]</span>, and is an exact stochastic solution to the above problem.
 However, it becomes inefficient as the number of reactions per unit time grows.</p></li>
 <li><p><a class="reference internal" href="#chap-kmctauadvance"><span class="std std-ref">Tau leaping</span></a>, which is an approximation to the SSA which uses Poisson sampling of the underlying reactions.</p></li>
 <li><p>Hybrid advance, see <a class="reference internal" href="#chap-kmchybridadvance"><span class="std std-ref">Hybrid algorithm</span></a>.
-The hybrid algorithm is taken from <span id="id2">Cao <em>et al.</em> [<a class="reference internal" href="../ZZReferences.html#id165" title="Yang Cao, Daniel T. Gillespie, and Linda R. Petzold. Efficient step size selection for the tau-leaping simulation method. Journal of Chemical Physics, 2006. doi:10.1063/1.2159468.">3</a>]</span>, and switches between tau leaping and the SSA in their respective limits.</p></li>
+The hybrid algorithm is taken from <span id="id2">Cao <em>et al.</em> [<a class="reference internal" href="../ZZReferences.html#id165" title="Yang Cao, Daniel T. Gillespie, and Linda R. Petzold. Efficient step size selection for the tau-leaping simulation method. Journal of Chemical Physics, 2006. doi:10.1063/1.2159468.">2006</a>]</span>, and switches between tau leaping and the SSA in their respective limits.</p></li>
 </ol>
 </section>
 <section id="stochastic-simulation-algorithm">
@@ -234,7 +233,7 @@ Note that tau leaping may fail to give a thermodynamically valid state, and shou
 </section>
 <section id="hybrid-algorithm">
 <span id="chap-kmchybridadvance"></span><h2>Hybrid algorithm<a class="headerlink" href="#hybrid-algorithm" title="Permalink to this heading"></a></h2>
-<p>The hybrid algorithm is taken from <span id="id3">Cao <em>et al.</em> [<a class="reference internal" href="../ZZReferences.html#id165" title="Yang Cao, Daniel T. Gillespie, and Linda R. Petzold. Efficient step size selection for the tau-leaping simulation method. Journal of Chemical Physics, 2006. doi:10.1063/1.2159468.">3</a>]</span>.
+<p>The hybrid algorithm is taken from <span id="id3">Cao <em>et al.</em> [<a class="reference internal" href="../ZZReferences.html#id165" title="Yang Cao, Daniel T. Gillespie, and Linda R. Petzold. Efficient step size selection for the tau-leaping simulation method. Journal of Chemical Physics, 2006. doi:10.1063/1.2159468.">2006</a>]</span>.
 Assume that we wish to integrate over some time <span class="math notranslate nohighlight">\(\Delta t\)</span>, which proceeds as follows:</p>
 <ol class="arabic">
 <li><p>Let <span class="math notranslate nohighlight">\(\tau = 0\)</span> be the simulated time within <span class="math notranslate nohighlight">\(\Delta t\)</span>.</p></li>
@@ -267,7 +266,7 @@ Let <span class="math notranslate nohighlight">\(\Delta\tau_{\textrm{nc}} \right
 </li>
 <li><p>If <span class="math notranslate nohighlight">\(\tau &lt; \Delta t\)</span>, return to step 2.</p></li>
 </ol>
-<p>The <span id="id4">Cao <em>et al.</em> [<a class="reference internal" href="../ZZReferences.html#id165" title="Yang Cao, Daniel T. Gillespie, and Linda R. Petzold. Efficient step size selection for the tau-leaping simulation method. Journal of Chemical Physics, 2006. doi:10.1063/1.2159468.">3</a>]</span> algorithm requires algorithmic specifications as follows:</p>
+<p>The <span id="id4">Cao <em>et al.</em> [<a class="reference internal" href="../ZZReferences.html#id165" title="Yang Cao, Daniel T. Gillespie, and Linda R. Petzold. Efficient step size selection for the tau-leaping simulation method. Journal of Chemical Physics, 2006. doi:10.1063/1.2159468.">2006</a>]</span> algorithm requires algorithmic specifications as follows:</p>
 <ul class="simple">
 <li><p>The factor <span class="math notranslate nohighlight">\(\epsilon\)</span> which determines the non-critical time step.</p></li>
 <li><p>The factor <span class="math notranslate nohighlight">\(N_{\textrm{crit}}\)</span> which determines which reactions are critical or not.</p></li>
@@ -348,7 +347,7 @@ In the absolute simplest case a state can be defined by maintaining a list of po
 </pre></div>
 </div>
 <p>More advanced examples can distinguish between different <em>modes</em> of populations, e.g. between species that can only appear on the left/right hand side of the reactions.
-See <a class="reference internal" href="#chap-kmcdualstate"><span class="std std-ref">Dual-state</span></a> for such an example.</p>
+See <a class="reference internal" href="#chap-kmcdualstate"><span class="std std-ref">KMCDualState</span></a> for such an example.</p>
 </section>
 <section id="defining-reactions">
 <h3>Defining reactions<a class="headerlink" href="#defining-reactions" title="Permalink to this heading"></a></h3>
@@ -463,8 +462,8 @@ The reaction is specified as a generic type of reaction</p>
 </pre></div>
 </div>
 </section>
-<section id="dual-state">
-<span id="chap-kmcdualstate"></span><h3>Dual-state<a class="headerlink" href="#dual-state" title="Permalink to this heading"></a></h3>
+<section id="kmcdualstate">
+<span id="chap-kmcdualstate"></span><h3>KMCDualState<a class="headerlink" href="#kmcdualstate" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">KMCDualState</span></code> defines two state vectors <span class="math notranslate nohighlight">\(\vec{X}\)</span> and <span class="math notranslate nohighlight">\(\vec{Y}\)</span> where <span class="math notranslate nohighlight">\(\vec{X}\)</span> are <em>reactant species</em> and <span class="math notranslate nohighlight">\(\vec{Y}\)</span> are <em>non-reactant</em> species.
 The intention behind this class is that reactant species are allowed on either side of the reaction, while the non-reactant species only occur on the right-hand side of the reaction.
 For example:</p>

@@ -1,0 +1,5 @@
+<map id="Physics/ItoKMC/PlasmaModels/ItoKMCJSON/CD_ItoKMCBackgroundSpecies.H" name="Physics/ItoKMC/PlasmaModels/ItoKMCJSON/CD_ItoKMCBackgroundSpecies.H">
+<area shape="rect" id="node1" title="Declaration of a background species class for usage with ItoKMCJSON." alt="" coords="5,5,264,61"/>
+<area shape="rect" id="node2" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="21,109,249,151"/>
+<area shape="rect" id="node3" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="14,199,255,240"/>
+</map>

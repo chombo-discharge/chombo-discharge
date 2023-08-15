@@ -47,7 +47,6 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
@@ -167,7 +166,7 @@
 <span id="chap-spatialdiscretization"></span><h1>Spatial discretization<a class="headerlink" href="#spatial-discretization" title="Permalink to this heading"></a></h1>
 <section id="cartesian-amr">
 <h2>Cartesian AMR<a class="headerlink" href="#cartesian-amr" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses patch-based structured adaptive mesh refinement (AMR) provided by <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id82" title="P Colella, D T Graves, T J Ligocki, G Miller, D Modiano, P O Schwartz, B Van Straalen, J Pilliod, D Trebotich, M Barad, B Keen, A Nonaka, and C Shen. EBChombo software package for cartesian grid, embedded boundary applications. Technical Report, Lawrence Berkeley National Laboratory, 2004.">5</a>]</span>.
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses patch-based structured adaptive mesh refinement (AMR) provided by <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id82" title="P Colella, D T Graves, T J Ligocki, G Miller, D Modiano, P O Schwartz, B Van Straalen, J Pilliod, D Trebotich, M Barad, B Keen, A Nonaka, and C Shen. EBChombo software package for cartesian grid, embedded boundary applications. Technical Report, Lawrence Berkeley National Laboratory, 2004.">Colella <em>et al.</em>, 2004</a>]</span>.
 In patch-based AMR the domain is subdivided into a collection of hierarchically nested grid levels, see <a class="reference internal" href="#fig-patchbasedamr"><span class="std std-numref">Fig. 2</span></a>.
 With Cartesian AMR each patch is a Cartesian block of grid cells.
 A <em>grid level</em> is composed of a union of grid patches sharing the same grid resolution, with the additional requirement that the patches on a grid level are <em>non-overlapping</em>.
@@ -329,8 +328,8 @@ The default behavior is to use a Morton space-filling curve for organizing the c
 <span id="chap-meshgeneration"></span><h2>Mesh generation<a class="headerlink" href="#mesh-generation" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports two algorithm for AMR grid generation:</p>
 <ol class="arabic simple">
-<li><p>The classical Berger-Rigoutsos algorithm <span id="id3">[<a class="reference internal" href="../ZZReferences.html#id38" title="Marsha Berger and Isidore Rigoutsos. An Algorithm for Point Clustering and Grid Generation. IEEE Transactions on Systems, Man and Cybernetics, 1991. doi:10.1109/21.120081.">1</a>]</span>.</p></li>
-<li><p>A <em>tiled</em> algorithm <span id="id4">[<a class="reference internal" href="../ZZReferences.html#id164" title="Brian T.N. Gunney and Robert W. Anderson. Advances in patch-based adaptive mesh refinement scalability. Journal of Parallel and Distributed Computing, 2016. doi:10.1016/j.jpdc.2015.11.005.">7</a>]</span>.</p></li>
+<li><p>The classical Berger-Rigoutsos algorithm <span id="id3">[<a class="reference internal" href="../ZZReferences.html#id38" title="Marsha Berger and Isidore Rigoutsos. An Algorithm for Point Clustering and Grid Generation. IEEE Transactions on Systems, Man and Cybernetics, 1991. doi:10.1109/21.120081.">Berger and Rigoutsos, 1991</a>]</span>.</p></li>
+<li><p>A <em>tiled</em> algorithm <span id="id4">[<a class="reference internal" href="../ZZReferences.html#id164" title="Brian T.N. Gunney and Robert W. Anderson. Advances in patch-based adaptive mesh refinement scalability. Journal of Parallel and Distributed Computing, 2016. doi:10.1016/j.jpdc.2015.11.005.">Gunney and Anderson, 2016</a>]</span>.</p></li>
 </ol>
 <p>Both algorithms work by taking a set of flagged cells on each grid level and generating new boxes that cover the flags.
 Only <em>properly nested</em> grids are generated, in which case two grid levels <span class="math notranslate nohighlight">\(l-1\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span> are separated by a non-zero number of grid cells on level <span class="math notranslate nohighlight">\(l\)</span>.
@@ -340,7 +339,7 @@ For example, ghost cells on level <span class="math notranslate nohighlight">\(l
 <section id="berger-rigoutsos-algorithm">
 <h3>Berger-Rigoutsos algorithm<a class="headerlink" href="#berger-rigoutsos-algorithm" title="Permalink to this heading"></a></h3>
 <p>The Berger-Rigoustous grid algorithm is implemented in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and is called by <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
-The classical Berger-Rigoustous algorithm is inherently serial in the sense that is collects the flagged cells onto each MPI rank and then generates the boxes, see <span id="id5">[<a class="reference internal" href="../ZZReferences.html#id38" title="Marsha Berger and Isidore Rigoutsos. An Algorithm for Point Clustering and Grid Generation. IEEE Transactions on Systems, Man and Cybernetics, 1991. doi:10.1109/21.120081.">1</a>]</span> for implementation details.
+The classical Berger-Rigoustous algorithm is inherently serial in the sense that is collects the flagged cells onto each MPI rank and then generates the boxes, see <span id="id5">[<a class="reference internal" href="../ZZReferences.html#id38" title="Marsha Berger and Isidore Rigoutsos. An Algorithm for Point Clustering and Grid Generation. IEEE Transactions on Systems, Man and Cybernetics, 1991. doi:10.1109/21.120081.">Berger and Rigoutsos, 1991</a>]</span> for implementation details.
 Typically, it is not used at large scale in 3D due to its memory consumption.</p>
 <figure class="align-center" id="id11">
 <span id="brmeshrefine"></span><a class="reference internal image-reference" href="../_images/BRMeshRefine.png"><img alt="../_images/BRMeshRefine.png" src="../_images/BRMeshRefine.png" style="width: 25%;" /></a>

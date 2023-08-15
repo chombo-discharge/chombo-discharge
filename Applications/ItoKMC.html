@@ -18,6 +18,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -46,7 +47,6 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
@@ -90,7 +90,71 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="CdrPlasmaModel.html">CDR plasma model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="StreamerInceptionModel.html">Streamer inception model</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Îto-KMC plasma model</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Îto-KMC plasma model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#underlying-model">Underlying model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#plasma-transport">Plasma transport</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#photoionization">Photoionization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#field-interaction">Field interaction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#chemistry">Chemistry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#algorithms">Algorithms</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#time-stepping">Time stepping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reaction-network">Reaction network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#particle-management">Particle management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#d-chemistry">0D chemistry</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#itokmcphysics">ItoKMCPhysics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#species-definitions">Species definitions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plasma-reactions">Plasma reactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Photoionization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#surface-reactions">Surface reactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transport-coefficients">Transport coefficients</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#json-0d-chemistry-interface">JSON 0D chemistry interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gas-law">Gas law</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ideal-gas">Ideal gas</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#table-vs-height">Table vs height</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#background-species">Background species</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#name">Name</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#molar-fraction">Molar fraction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plotting">Plotting</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#townsend-coefficients">Townsend coefficients</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Constant</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tabulated-vs-e-n">Tabulated vs <span class="math notranslate nohighlight">\(E/N\)</span></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#plasma-species">Plasma species</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#basic-definition">Basic definition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mobility-and-diffusion-coefficients">Mobility and diffusion coefficients</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#temperature">Temperature</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#initial-particles">Initial particles</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Plasma reactions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#reaction-specifiers">Reaction specifiers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rate-calculation">Rate calculation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scaling">Scaling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#efficiency">Efficiency</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#quenching">Quenching</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gradient-correction">Gradient correction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#understanding-reaction-rates">Understanding reaction rates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plotting-rates">Plotting rates</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Photoionization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#secondary-emission">Secondary emission</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#example-programs">Example programs</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
 <ul>
@@ -144,10 +208,1924 @@
              
   <section id="ito-kmc-plasma-model">
 <span id="chap-kmc"></span><h1>Îto-KMC plasma model<a class="headerlink" href="#ito-kmc-plasma-model" title="Permalink to this heading"></a></h1>
+<section id="underlying-model">
+<h2>Underlying model<a class="headerlink" href="#underlying-model" title="Permalink to this heading"></a></h2>
+<section id="plasma-transport">
+<h3>Plasma transport<a class="headerlink" href="#plasma-transport" title="Permalink to this heading"></a></h3>
+<p>The Îto-KMC model uses an Îto solver for some of the species, i.e. the particles drift and diffuse according to</p>
+<div class="math notranslate nohighlight">
+\[d\mathbf{X} = \mathbf{V}dt + \sqrt{2D dt},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{X}\)</span> is the particle position and <span class="math notranslate nohighlight">\(\mathbf{V}\)</span> and <span class="math notranslate nohighlight">\(D\)</span> is the particle drift velocity and diffusion coefficients, respectively.
+These are obtained by interpolating the macroscopic drift velocity and diffusion coefficients to the particle position.
+Further details regarding the Îto method are given in <a class="reference internal" href="../Solvers/Ito.html#chap-itosolver"><span class="std std-ref">ItoSolver</span></a>.</p>
+<p>Not all species in the Îto-KMC model need to be defined by particle solvers, as some species can be tracked by more conventional advection-diffusion-reaction solvers, see <a class="reference internal" href="../Solvers/CDR.html#chap-cdrsolver"><span class="std std-ref">CdrSolver</span></a> for discretization details.</p>
+</section>
+<section id="photoionization">
+<h3>Photoionization<a class="headerlink" href="#photoionization" title="Permalink to this heading"></a></h3>
+<p>Photoionization in the Îto-KMC model is done using discrete photons.
+These are generated and advanced in every time step, and interact with the plasma through user-defined photo-reactions.
+The underlying solver is the discrete Monte Carlo photon transport solver, see <a class="reference internal" href="../Solvers/RTE.html#chap-montecarlorte"><span class="std std-ref">Monte Carlo methods</span></a>.</p>
+</section>
+<section id="field-interaction">
+<h3>Field interaction<a class="headerlink" href="#field-interaction" title="Permalink to this heading"></a></h3>
+<p>The Îto-KMC model uses an electrostatic approximation where the field is obtained by solving the Poisson equation for the potential.
+See <a class="reference internal" href="../Solvers/Electrostatics.html#chap-electrostatics"><span class="std std-ref">Electrostatic solver</span></a> for further details.</p>
+</section>
+<section id="chemistry">
+<h3>Chemistry<a class="headerlink" href="#chemistry" title="Permalink to this heading"></a></h3>
+<p>Kinetic Monte Carlo (KMC) is used within grid cells for resolving the plasma chemistry.
+The algorithmic concepts are given in <a class="reference internal" href="../Solvers/KineticMonteCarlo.html#chap-kineticmontecarlo"><span class="std std-ref">Kinetic Monte Carlo</span></a>.</p>
+</section>
+</section>
+<section id="algorithms">
+<h2>Algorithms<a class="headerlink" href="#algorithms" title="Permalink to this heading"></a></h2>
+<section id="time-stepping">
+<h3>Time stepping<a class="headerlink" href="#time-stepping" title="Permalink to this heading"></a></h3>
+</section>
+<section id="reaction-network">
+<h3>Reaction network<a class="headerlink" href="#reaction-network" title="Permalink to this heading"></a></h3>
+</section>
+<section id="particle-management">
+<h3>Particle management<a class="headerlink" href="#particle-management" title="Permalink to this heading"></a></h3>
+</section>
+<section id="d-chemistry">
+<h3>0D chemistry<a class="headerlink" href="#d-chemistry" title="Permalink to this heading"></a></h3>
+<p>The user input interface to the Îto-KMC model consists of a zero-dimensional plasma kinetics interface called <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code>.
+This interface consists of the following main functionalities:</p>
+<ol class="arabic simple">
+<li><p>User-defined species, and which solver types (Îto or CDR) to use when tracking them.</p></li>
+<li><p>User-defined initial particles, reaction kinetics, and photoionization processes.</p></li>
+</ol>
+<section id="itokmcphysics">
+<span id="chap-itokmcphysics"></span><h4>ItoKMCPhysics<a class="headerlink" href="#itokmcphysics" title="Permalink to this heading"></a></h4>
+<p>The complete C++ interface specification is given below.
+Because the interface is fairly extensive, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also supplies a JSON-based implementation called <code class="docutils literal notranslate"><span class="pre">ItoKMCJSON</span></code> (see <a class="reference internal" href="#chap-itokmcjson"><span class="std std-ref">JSON 0D chemistry interface</span></a>) for defining these things through file input.
+The difference between <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code> and its implementation <code class="docutils literal notranslate"><span class="pre">ItoKMCJSON</span></code> is that the JSON-based implementation class only implements a subset of potential features supported by <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code>.</p>
+<details>
+<summary><a>Show/hide full 0D interface</a></summary><div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/* chombo-discharge</span>
+<span class="cm"> * Copyright © 2021 SINTEF Energy Research.</span>
+<span class="cm"> * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.</span>
+<span class="cm"> */</span><span class="w"></span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @file   CD_ItoKMCPhysics.H</span>
+<span class="cm">  @brief  Main file for describing Ito-based plasma physics</span>
+<span class="cm">  @author Robert Marskar</span>
+<span class="cm">*/</span><span class="w"></span>
+
+<span class="cp">#ifndef CD_ItoKMCPhysics_H</span>
+<span class="cp">#define CD_ItoKMCPhysics_H</span>
+
+<span class="c1">// Std includes</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;memory&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span><span class="cp"></span>
+
+<span class="c1">// Chombo includes</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;RealVect.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;RefCountedPtr.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;List.H&gt;</span><span class="cp"></span>
+
+<span class="c1">// Our includes</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_ItoSpecies.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_CdrSpecies.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_RtSpecies.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_Photon.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_ItoParticle.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_PointParticle.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_ItoKMCPhotoReaction.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_KMCDualState.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_KMCDualStateReaction.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_KMCSolver.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_NamespaceHeader.H&gt;</span><span class="cp"></span>
+
+<span class="k">namespace</span><span class="w"> </span><span class="nn">Physics</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">namespace</span><span class="w"> </span><span class="nn">ItoKMC</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="cm">/*!</span>
+<span class="cm">      @brief Numerical representation of the KMC state. Can be floating-point or integer type</span>
+<span class="cm">    */</span><span class="w"></span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">FPR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Real</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="cm">/*!</span>
+<span class="cm">      @brief KMC state used in the Kinetic Monte Carlo advancement</span>
+<span class="cm">    */</span><span class="w"></span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">KMCState</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KMCDualState</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="cm">/*!</span>
+<span class="cm">      @brief KMC reaction used in the Kinetic Monte Carlo advancement</span>
+<span class="cm">    */</span><span class="w"></span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">KMCReaction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KMCDualStateReaction</span><span class="o">&lt;</span><span class="n">KMCState</span><span class="p">,</span><span class="w"> </span><span class="n">FPR</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="cm">/*!</span>
+<span class="cm">      @brief KMC solverl type used in the Kinetic Monte carlo advancement</span>
+<span class="cm">    */</span><span class="w"></span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">KMCSolverType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KMCSolver</span><span class="o">&lt;</span><span class="n">KMCReaction</span><span class="p">,</span><span class="w"> </span><span class="n">KMCState</span><span class="p">,</span><span class="w"> </span><span class="n">FPR</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="cm">/*!</span>
+<span class="cm">      @brief Map to species type</span>
+<span class="cm">      @details This is just for distinguishing between species that are treated with an Ito or CDR formalism</span>
+<span class="cm">    */</span><span class="w"></span>
+<span class="w">    </span><span class="k">enum</span><span class="w"> </span><span class="nc">SpeciesType</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="n">Ito</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="n">CDR</span><span class="w"></span>
+<span class="w">    </span><span class="p">};</span><span class="w"></span>
+
+<span class="w">    </span><span class="cm">/*!</span>
+<span class="cm">      @brief Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers. </span>
+<span class="cm">      @details When using this class, the user should populate m_kmcReactions with the appropriate reactions AND implement routines</span>
+<span class="cm">      for computing the mobility/diffusion coefficeints. </span>
+<span class="cm">    */</span><span class="w"></span>
+<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">ItoKMCPhysics</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Constructor. Does nothing.</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="n">ItoKMCPhysics</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Destructor. Does nothing. </span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">ItoKMCPhysics</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Compute a time step to use. </span>
+<span class="cm">	@param[in] a_E            Electric field. </span>
+<span class="cm">	@param[in] a_pos          Position</span>
+<span class="cm">	@param[in] a_numParticles Number of reactive particles of each species</span>
+<span class="cm">	@return Default returns infinity but user can implement a physics based time step. </span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span><span class="w"></span>
+<span class="w">      </span><span class="nf">computeDt</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_numParticles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Compute Townsend ionization coefficient</span>
+<span class="cm">	@param[in] a_E Electric field magnitude</span>
+<span class="cm">	@param[in] a_x Physical coordinate</span>
+<span class="cm">	@return Should return the Townsend ionization coefficient. </span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span><span class="w"></span>
+<span class="w">      </span><span class="nf">computeAlpha</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Compute Townsend attachment coefficient</span>
+<span class="cm">	@param[in] a_E Electric field magnitude</span>
+<span class="cm">	@param[in] a_x Physical coordinate</span>
+<span class="cm">	@return Should return the Townsend attachment coefficient. </span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span><span class="w"></span>
+<span class="w">      </span><span class="nf">computeEta</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Get all particle drift-diffusion species</span>
+<span class="cm">	@return m_itoSpecies</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ItoSpecies</span><span class="o">&gt;&gt;&amp;</span><span class="w"></span>
+<span class="w">      </span><span class="n">getItoSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Get all fluid drift-diffusion species</span>
+<span class="cm">	@return m_cdrSpecies</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSpecies</span><span class="o">&gt;&gt;&amp;</span><span class="w"></span>
+<span class="w">      </span><span class="n">getCdrSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Get all photon species</span>
+<span class="cm">	@return m_rtSpecies</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">RtSpecies</span><span class="o">&gt;&gt;&amp;</span><span class="w"></span>
+<span class="w">      </span><span class="n">getRtSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Get number of plot variables</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="w"></span>
+<span class="w">      </span><span class="n">getPlotVariableNames</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Get plot variables</span>
+<span class="cm">	@param[in] a_E       Electric field</span>
+<span class="cm">	@param[in] a_pos     Physical position</span>
+<span class="cm">	@param[in] a_phi     Plasma species densities</span>
+<span class="cm">	@param[in] a_gradPhi Density gradients for plasma species. </span>
+<span class="cm">	@param[in] a_dx      Grid resolution</span>
+<span class="cm">	@param[in] a_kappa   Cut-cell volume fraction</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"></span>
+<span class="w">      </span><span class="n">getPlotVariables</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">          </span><span class="n">a_E</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">          </span><span class="n">a_pos</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_phi</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_gradPhi</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dx</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Get number of plot variables</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="kt">int</span><span class="w"></span>
+<span class="w">      </span><span class="nf">getNumberOfPlotVariables</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Return number of Ito solvers.</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">int</span><span class="w"></span>
+<span class="w">      </span><span class="nf">getNumItoSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Return number of CDR solvers.</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">int</span><span class="w"></span>
+<span class="w">      </span><span class="nf">getNumCdrSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Return total number of plasma species.</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">int</span><span class="w"></span>
+<span class="w">      </span><span class="nf">getNumPlasmaSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Return number of RTE solvers.</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">int</span><span class="w"></span>
+<span class="w">      </span><span class="nf">getNumPhotonSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Get the internal mapping between plasma species and Ito solvers</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">SpeciesType</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span><span class="w"></span>
+<span class="w">      </span><span class="n">getSpeciesMap</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Parse run-time options</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">parseRuntimeOptions</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Set initial surface charge. Default is 0, override if you want.</span>
+<span class="cm">	@param[in] a_time Simulation time</span>
+<span class="cm">	@param[in] a_pos  Physical coordinate</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span><span class="w"></span>
+<span class="w">      </span><span class="nf">initialSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Compute the Ito solver mobilities.</span>
+<span class="cm">	@param[in] a_time Time</span>
+<span class="cm">	@param[in] a_pos  Position</span>
+<span class="cm">	@param[in] a_E    Electric field</span>
+<span class="cm">	@return Must return a vector of non-negative mobility coefficients for the plasma species</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"></span>
+<span class="w">      </span><span class="n">computeMobilities</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_E</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Compute the Ito solver diffusion coefficients</span>
+<span class="cm">	@param[in] a_time Time</span>
+<span class="cm">	@param[in] a_pos  Position</span>
+<span class="cm">	@param[in] a_E    Electric field</span>
+<span class="cm">	@return Must return a vector of non-negative diffusion coefficients for the plasma species</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"></span>
+<span class="w">      </span><span class="n">computeDiffusionCoefficients</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_E</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Resolve secondary emission at the EB.</span>
+<span class="cm">	@details Routine is here to handle charge injection, secondary emission etc.</span>
+<span class="cm">	@param[out] a_secondaryParticles Outgoing plasma species particles.</span>
+<span class="cm">	@param[out] a_cdrFluxes          CDR fluxes for CDR species.</span>
+<span class="cm">	@param[out] a_secondaryPhotons   Photons injected through the EB.</span>
+<span class="cm">	@param[in]  a_primaryParticles   Particles that left the computational domain through the EB.</span>
+<span class="cm">	@param[in]  a_cdrFluxesExtrap    Extrapolated CDR fluxes.</span>
+<span class="cm">	@param[in]  a_primaryPhotons     Photons that left the computational domain through the EB.</span>
+<span class="cm">	@param[in]  a_newNumParticles    Total number of particles in the cut-cell AFTER the transport step.</span>
+<span class="cm">	@param[in]  a_oldNumParticles    Total number of particles in the cut-cell BEFORE the transport step.</span>
+<span class="cm">	@param[in]  a_electricField      Electric field.                  </span>
+<span class="cm">	@param[in]  a_physicalCellCenter Physical position of the cell center. </span>
+<span class="cm">	@param[in]  a_cellCentroid       Cell centroid relative to the cell center (not multiplied by dx).</span>
+<span class="cm">	@param[in]  a_bndryCentroid      EB face centroid relative to the cell center (not multiplied by dx).</span>
+<span class="cm">	@param[in]  a_bndryNormal        Cut-cell normal vector. </span>
+<span class="cm">	@param[in]  a_bndryArea          Cut-cell boundary area - not multiplied by dx (2D) or dx^2 (3D).</span>
+<span class="cm">	@param[in]  a_dx                 Grid resolution on this level. </span>
+<span class="cm">	@param[in]  a_dt                 Time step.</span>
+<span class="cm">	@param[in]  a_isDielectric       Dielectric or electrode. </span>
+<span class="cm">	@param[in]  a_matIndex           Material index (taken from computationalGeometry).</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">secondaryEmissionEB</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&gt;&amp;</span><span class="w">       </span><span class="n">a_secondaryParticles</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">                    </span><span class="n">a_cdrFluxes</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&gt;&amp;</span><span class="w">            </span><span class="n">a_secondaryPhotons</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_primaryParticles</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">              </span><span class="n">a_cdrFluxesExtrap</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&gt;&amp;</span><span class="w">      </span><span class="n">a_primaryPhotons</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                  </span><span class="n">a_E</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                  </span><span class="n">a_physicalCellCenter</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                  </span><span class="n">a_cellCentroid</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                  </span><span class="n">a_bndryCentroid</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                  </span><span class="n">a_bndryNormal</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                       </span><span class="n">a_bndryArea</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                       </span><span class="n">a_dx</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                       </span><span class="n">a_dt</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                       </span><span class="n">a_isDielectric</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_matIndex</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Advance particles. </span>
+<span class="cm">	@param[inout] a_numParticles  Number of physical particles</span>
+<span class="cm">	@param[out]   a_numNewPhotons Number of new physical photons to generate (of each type)</span>
+<span class="cm">	@param[in]    a_phi           Plasma species densities. </span>
+<span class="cm">	@param[in]    a_gradPhi       Plasma species density gradients. </span>
+<span class="cm">	@param[in]    a_dt            Time step</span>
+<span class="cm">	@param[in]    a_E             Electric field</span>
+<span class="cm">	@param[in]    a_pos           Physical position</span>
+<span class="cm">	@param[in]    a_dx            Grid resolution</span>
+<span class="cm">	@param[in]    a_kappa         Cut-cell volume fraction. </span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">advanceKMC</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_numParticles</span><span class="p">,</span><span class="w"></span>
+<span class="w">                 </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_numNewPhotons</span><span class="p">,</span><span class="w"></span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_phi</span><span class="p">,</span><span class="w"></span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_gradPhi</span><span class="p">,</span><span class="w"></span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dt</span><span class="p">,</span><span class="w"></span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">          </span><span class="n">a_E</span><span class="p">,</span><span class="w"></span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">          </span><span class="n">a_pos</span><span class="p">,</span><span class="w"></span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dx</span><span class="p">,</span><span class="w"></span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Reconcile the number of particles.</span>
+<span class="cm">	@details This will add/remove particles and potentially also adjust the particle weights.</span>
+<span class="cm">	@param[inout] a_particles Computational particles</span>
+<span class="cm">	@param[in]    a_newNumParticles New number of particles (i.e., after the KMC advance)</span>
+<span class="cm">	@param[in]    a_oldNumParticles Previous number of particles (i.e., before the KMC advance)</span>
+<span class="cm">	@param[in]    a_cellPos         Cell center position</span>
+<span class="cm">	@param[in]    a_centroidPos     Cell centroid position</span>
+<span class="cm">	@param[in]    a_loCorner        Low corner of minimum box enclosing the cut-cell</span>
+<span class="cm">	@param[in]    a_hiCorner        High corner of minimum box enclosing the cut-cell</span>
+<span class="cm">	@param[in]    a_bndryCentroid   Cut-cell boundary centroid</span>
+<span class="cm">	@param[in]    a_bndryNormal     Cut-cell normal (pointing into the domain)</span>
+<span class="cm">	@param[in]    a_dx              Grid resolution</span>
+<span class="cm">	@param[in]    a_kappa           Cut-cell volume fraction. </span>
+<span class="cm">	@note Public because this is called by ItoKMCStepper</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">reconcileParticles</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;*&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span><span class="w"></span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;&amp;</span><span class="w">          </span><span class="n">a_newNumParticles</span><span class="p">,</span><span class="w"></span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;&amp;</span><span class="w">          </span><span class="n">a_oldNumParticles</span><span class="p">,</span><span class="w"></span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">              </span><span class="n">a_cellPos</span><span class="p">,</span><span class="w"></span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">              </span><span class="n">a_centroidPos</span><span class="p">,</span><span class="w"></span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">              </span><span class="n">a_lo</span><span class="p">,</span><span class="w"></span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">              </span><span class="n">a_hi</span><span class="p">,</span><span class="w"></span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">              </span><span class="n">a_bndryCentroid</span><span class="p">,</span><span class="w"></span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">              </span><span class="n">a_bndryNormal</span><span class="p">,</span><span class="w"></span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                  </span><span class="n">a_dx</span><span class="p">,</span><span class="w"></span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                  </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Generate new photons. </span>
+<span class="cm">	@details This will add photons</span>
+<span class="cm">	@param[in] a_newPhotons      New photons</span>
+<span class="cm">	@param[in] a_numNewPhotons   Number of physical photons to be generated. </span>
+<span class="cm">	@param[in] a_cellPos         Cell center position</span>
+<span class="cm">	@param[in] a_centroidPos     Cell centroid position</span>
+<span class="cm">	@param[in] a_loCorner        Low corner of minimum box enclosing the cut-cell</span>
+<span class="cm">	@param[in] a_hiCorner        High corner of minimum box enclosing the cut-cell</span>
+<span class="cm">	@param[in] a_bndryCentroid   Cut-cell boundary centroid</span>
+<span class="cm">	@param[in] a_bndryNormal     Cut-cell normal (pointing into the domain)</span>
+<span class="cm">	@param[in] a_dx              Grid resolution</span>
+<span class="cm">	@param[in] a_kappa           Cut-cell volume fraction. </span>
+<span class="cm">	@note Public because this is called by ItoKMCStepper</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">reconcilePhotons</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;*&gt;&amp;</span><span class="w"> </span><span class="n">a_newPhotons</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_numNewPhotons</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">         </span><span class="n">a_cellPos</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">         </span><span class="n">a_centroidPos</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">         </span><span class="n">a_lo</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">         </span><span class="n">a_hi</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">         </span><span class="n">a_bndryCentroid</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">         </span><span class="n">a_bndryNormal</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_dx</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Reconcile photoionization reactions.</span>
+<span class="cm">	@param[inout] a_itoPrticles       Particle products placed in Ito solvers. </span>
+<span class="cm">	@param[inout] a_cdrParticles      Particle products placed in CDR solvers. </span>
+<span class="cm">	@param[in]    a_absorbedPhotons Photons absorbed on the mesh. </span>
+<span class="cm">	@details This runs through the photo-reactions and associates photo-ionization products. </span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">reconcilePhotoionization</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;*&gt;&amp;</span><span class="w">   </span><span class="n">a_itoParticles</span><span class="p">,</span><span class="w"></span>
+<span class="w">                               </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">PointParticle</span><span class="o">&gt;*&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrParticles</span><span class="p">,</span><span class="w"></span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;*&gt;&amp;</span><span class="w">  </span><span class="n">a_absorbedPhotons</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">protected</span><span class="o">:</span><span class="w"></span>
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Enum for switching between KMC algorithms</span>
+<span class="cm">	@details &#39;SSA&#39; is the Gillespie algorithm, &#39;Tau&#39; is tau-leaping and &#39;Hybrid&#39; is the Cao et. al. algorithm. </span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Algorithm</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">SSA</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="n">TauPlain</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="n">TauMidpoint</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="n">HybridPlain</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="n">HybridMidpoint</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="p">};</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Enum for switching between various particle placement algorithms</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ParticlePlacement</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">Random</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="n">Centroid</span><span class="w"></span>
+<span class="w">      </span><span class="p">};</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Algorithm to use for KMC advance</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="n">Algorithm</span><span class="w"> </span><span class="n">m_algorithm</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Particle placement algorithm</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="n">ParticlePlacement</span><span class="w"> </span><span class="n">m_particlePlacement</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Map for associating a plasma species with an Ito solver or CDR solver.</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">SpeciesType</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_speciesMap</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Class name. Used for options parsing</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">m_className</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Turn on/off debugging</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kt">bool</span><span class="w"> </span><span class="n">m_debug</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Is defined or not</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kt">bool</span><span class="w"> </span><span class="n">m_isDefined</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Kinetic Monte Carlo state</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">mutable</span><span class="w"> </span><span class="n">KMCState</span><span class="w"> </span><span class="n">m_kmcState</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Kinetic Monte Carlo solver. </span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">mutable</span><span class="w"> </span><span class="n">KMCSolverType</span><span class="w"> </span><span class="n">m_kmcSolver</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief List of reactions for the KMC solver</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">KMCReaction</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_kmcReactions</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief List of photoionization reactions</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">ItoKMCPhotoReaction</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_photoReactions</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Random number generators for photoionization pathways. </span>
+<span class="cm">	@details The first index is the photon index, i.e. entry in m_photonSpecies. The second index in the</span>
+<span class="cm">	map is an RNG generator for selecting photo-reactions, and a map which associates the returned</span>
+<span class="cm">	reaction from the RNG generator with an index in m_photoReactions.</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">discrete_distribution</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;&gt;&gt;</span><span class="w"> </span><span class="n">m_photoPathways</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief List of solver-tracked particle drift-diffusion species. </span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ItoSpecies</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_itoSpecies</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief List of solver-tracked fluid drift-diffusion species. </span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSpecies</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_cdrSpecies</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief List of solver-tracked photon species. </span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">RtSpecies</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_rtSpecies</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Maximum new number of particles generated by the chemistry advance</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">m_maxNewParticles</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Maximum new number of photons generated by the chemistry advance</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">m_maxNewPhotons</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Solver setting for the Cao et. al algorithm. </span>
+<span class="cm">	@details Determines critical reactions. A reaction is critical if it is m_Ncrit firings away from depleting a reactant. </span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">m_Ncrit</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Solver setting for the Cao et. al algorithm. </span>
+<span class="cm">	@details Maximum number of SSA steps to run when switching into SSA-based advancement for non-critical reactions. </span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">m_NSSA</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Solver setting for the Cao et. al. algorithm. </span>
+<span class="cm">	@details Equal to the maximum permitted change in the relative propensity for non-critical reactions</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="n">Real</span><span class="w"> </span><span class="n">m_SSAlim</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Solver setting for the Cao et. al. algorithm. </span>
+<span class="cm">	@details Equal to the maximum permitted change in the relative propensity for non-critical reactions</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="n">Real</span><span class="w"> </span><span class="n">m_eps</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Define method -- defines all the internal machinery</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">define</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Build internal representation of how we distinguish the Ito and CDR solvers</span>
+<span class="cm">	@note This should ALWAYS be called after initializing the species since ItoKMCStepper will rely on it. </span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">defineSpeciesMap</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Define the KMC solver and state</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">defineKMC</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Define pathways for photo-reactions</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">definePhotoPathways</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Parse the maximum number of particles generated per cell</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">parsePPC</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Parse the maximum number of particles generated per cell</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">parseDebug</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Parse reaction algorithm</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">parseAlgorithm</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Update reaction rates</span>
+<span class="cm">	@param[in] a_E       Electric field</span>
+<span class="cm">	@param[in] a_pos     Physical position</span>
+<span class="cm">	@param[in] a_phi     Plasma species densities</span>
+<span class="cm">	@param[in] a_gradPhi Density gradients for plasma species. </span>
+<span class="cm">	@param[in] a_dx      Grid resolution</span>
+<span class="cm">	@param[in] a_kappa   Cut-cell volume fraction</span>
+<span class="cm">	@note Must be implemented by the user.</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">updateReactionRates</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">          </span><span class="n">a_E</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">          </span><span class="n">a_pos</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_phi</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_gradPhi</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dx</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Remove particles from the input list.</span>
+<span class="cm">	@details This will remove weight from the input particles if we can. Otherwise we remove full particles. </span>
+<span class="cm">	@param[inout] a_particles   List of (super-)particles to remove from. </span>
+<span class="cm">	@param[in]    a_numToRemove Number of physical particles to remove from the input list</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">removeParticles</span><span class="p">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">a_numToRemove</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">};</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="c1">// namespace ItoKMC</span>
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace Physics</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_NamespaceFooter.H&gt;</span><span class="cp"></span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_ItoKMCPhysicsImplem.H&gt;</span><span class="cp"></span>
+
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</details><br></section>
+<section id="species-definitions">
+<h4>Species definitions<a class="headerlink" href="#species-definitions" title="Permalink to this heading"></a></h4>
+<p>Species are defined either as input species for CDR solvers (see <a class="reference internal" href="../Solvers/CDR.html#chap-cdrsolver"><span class="std std-ref">CdrSolver</span></a>) or Îto solvers (see <a class="reference internal" href="../Solvers/Ito.html#chap-itosolver"><span class="std std-ref">ItoSolver</span></a>).
+It is sufficient to populate the <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code> species vectors <code class="docutils literal notranslate"><span class="pre">m_cdrSpecies</span></code> and <code class="docutils literal notranslate"><span class="pre">m_itoSpecies</span></code> if one only wants to initialize the solvers.
+See <a class="reference internal" href="#chap-itokmcphysics"><span class="std std-ref">ItoKMCPhysics</span></a> for their C++ definition.
+In addition to actually populating the vectors, users will typically also include initial conditions for the species.
+The interfaces permit initial particles for the Îto solvers, while the CDR solvers permit particles <em>and</em> initial density functions.
+Additionally, one must define all species associated with radiative transfer solvers.</p>
+</section>
+<section id="plasma-reactions">
+<span id="chap-itokmcplasmareaction"></span><h4>Plasma reactions<a class="headerlink" href="#plasma-reactions" title="Permalink to this heading"></a></h4>
+<p>Plasma reactions in the Îto-KMC model are represented stoichiometrically as</p>
+<div class="math notranslate nohighlight">
+\[A + B + \ldots \xrightarrow{c} C + D + \ldots\]</div>
+<p>where <span class="math notranslate nohighlight">\(c\)</span> is the KMC rate coefficient, i.e. <em>not the rate coefficient from the reaction rate equation</em>.
+An arbitrary number of reactions is supported, but currently the reaction mechanisms are limited to:</p>
+<ul class="simple">
+<li><p>The left-hand side must consist only of species that are tracked by a CDR or Îto solver.</p></li>
+<li><p>The right-hand side can consist of species tracked by a CDR solver, an Îto solver, or a radiative transfer solver.</p></li>
+</ul>
+<p>These rules apply only to the internal C++ interface; implementations of this interface will typically also allow species defined as ‘’background species’’, i.e. species that are not tracked by a solver.
+In that case, the interface implementation must absorb the background species contribution into the rate constant.</p>
+<p>In the KMC algorithm, one operates with chemical propensities rather than rate coefficients.
+For example, the chemical propensity <span class="math notranslate nohighlight">\(a_1\)</span> for a reaction <span class="math notranslate nohighlight">\(A + B \xrightarrow{c_1}\varnothing\)</span> is</p>
+<div class="math notranslate nohighlight">
+\[a_1 = c_1X_AX_B,\]</div>
+<p>and from the macroscopic limit <span class="math notranslate nohighlight">\(X_A \gg 1\)</span>, <span class="math notranslate nohighlight">\(X_B \gg 1\)</span> one may in fact also derive that <span class="math notranslate nohighlight">\(c_1 = k_1/\Delta V\)</span> where <span class="math notranslate nohighlight">\(k_1\)</span> is the rate coefficient from the reaction rate equation, i.e. where <span class="math notranslate nohighlight">\(\partial_t n_A = -k_1n_An_B\)</span>.
+Note that if the reaction was <span class="math notranslate nohighlight">\(A + A\xrightarrow{c_2}\varnothing\)</span> then the propensity is</p>
+<div class="math notranslate nohighlight">
+\[a_2 = \frac{1}{2}c_2X_A\left(X_A-1\right)\]</div>
+<p>since there are <span class="math notranslate nohighlight">\(\frac{1}{2}X_A\left(X_A-1\right)\)</span> distinct pairs of particles of type <span class="math notranslate nohighlight">\(A\)</span>.
+Likewise, the fluid rate coefficient would be <span class="math notranslate nohighlight">\(k_2 = c_2\Delta V/2\)</span>.</p>
+<p>The distinction between KMC and fluid rates is an important one; the reaction representation used in the Îto-KMC model only operates with the KMC rates <span class="math notranslate nohighlight">\(c_j\)</span>, and it is us to the user to ensure that these are consistent with the fluid limit.
+Internally, these reactions are implemented through the dual state KMC implementation, see <a class="reference internal" href="../Solvers/KineticMonteCarlo.html#chap-kmcdualstate"><span class="std std-ref">KMCDualState</span></a>.
+During the reaction advance the user only needs to update the <span class="math notranslate nohighlight">\(c_j\)</span> coefficients (typically done via an interface implementation); the calculation of the propensity is automatic and follows the standard KMC rules (e.g., the KMC solver accounts for the number of distinct pairs of particles).
+This must be done in the routine <code class="docutils literal notranslate"><span class="pre">updateReactionRates(...)</span></code>, see <a class="reference internal" href="#chap-itokmcphysics"><span class="std std-ref">ItoKMCPhysics</span></a> for the complete specification.</p>
+</section>
+<section id="id1">
+<h4>Photoionization<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h4>
+<p>Photo-reactions are also represented stoichiometrically as</p>
+<div class="math notranslate nohighlight">
+\[\gamma \xrightarrow{\xi} A + B + \ldots,\]</div>
+<p>where <span class="math notranslate nohighlight">\(\xi\)</span> is the photo-reaction efficiency, i.e. the probability that the photon <span class="math notranslate nohighlight">\(\gamma\)</span> causes a reaction when it is absorbed on the mesh.
+Currently, photons can only be generated through <em>plasma reactions</em>, see <a class="reference internal" href="#chap-itokmcplasmareaction"><span class="std std-ref">Plasma reactions</span></a>, and we do not permit reactions between the photon and plasma species.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>We currently only support constant photoionization probabilities <span class="math notranslate nohighlight">\(\xi\)</span>.</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code> adds some flexibility when dealing with photo-reactions as it permits pre-evaluation of photoionization probabilities.
+That is, when generating photons through reactions of the type <span class="math notranslate nohighlight">\(A + B \rightarrow \gamma\)</span>, one may scale the reaction by the photoionization probability <span class="math notranslate nohighlight">\(\xi\)</span> so that only ionizing photons are generated and then write the photo-reaction as <span class="math notranslate nohighlight">\(\gamma \xrightarrow{\xi=1} A + B + \ldots\)</span>.
+However, this process becomes more complicated when dealing with multiple photo-reaction pathways, e.g.,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\gamma &amp;\xrightarrow{\xi_1} A + B, \\
+\gamma &amp;\xrightarrow{\xi_2} A + B, \\\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\xi_1\)</span> and <span class="math notranslate nohighlight">\(\xi_2\)</span> are the probabilities that the photon <span class="math notranslate nohighlight">\(\gamma\)</span> triggers the reaction.
+If only a single physical photon is absorbed, then one must stochastically determine which pathway is triggered.
+There are two ways of doing this:</p>
+<ol class="arabic simple">
+<li><p>Pre-scale the photon generation by <span class="math notranslate nohighlight">\(\xi_1 + \xi_2\)</span>, and then determine the pathway through the relative probabilities <span class="math notranslate nohighlight">\(\xi_1/\left(\xi_1+\xi_2\right)\)</span> and <span class="math notranslate nohighlight">\(\xi_2/\left(\xi_1+\xi_2\right)\)</span>.</p></li>
+<li><p>Do not scale the photon generation reaction and determine the pathway through the absolute probabilities <span class="math notranslate nohighlight">\(\xi_1\)</span> and <span class="math notranslate nohighlight">\(\xi_2\)</span>.
+This can imply a large computational cost since one will have to track all photons that are generated.</p></li>
+</ol>
+<p>The former method is normally the preferred way as it can lead to reductions in computational complexity and particle noise, but for flexibility <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code> supports both of these.
+The latter method can be of relevance if users wants precise descriptions of photons that trigger both photoionizing reactions and surface reactions (e.g., secondary electron emission).</p>
+<p>An alternative is to split the photon type <span class="math notranslate nohighlight">\(\gamma\)</span> into volumetrically absorbed and surface absorbed photon species <span class="math notranslate nohighlight">\(\gamma_v\)</span> and <span class="math notranslate nohighlight">\(\gamma_s\)</span>.
+In this case one may pre-scale the photon-generating reactions by the photo-reaction probabilities <span class="math notranslate nohighlight">\(\xi\)</span> (for volume absorption) and <span class="math notranslate nohighlight">\(\zeta\)</span> (for surface absorption) as follows:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}A + B &amp;\xrightarrow{k\rightarrow k\xi}\gamma_v, \\
+A + B &amp;\xrightarrow{k\rightarrow k\zeta}\gamma_s.\end{split}\]</div>
+<p>Volumetric and surface absorption is then treated independently</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\gamma_v &amp;\xrightarrow{\left(\xi=1\right)}, \ldots\\
+\gamma_s &amp;\xrightarrow{\left(\zeta=1\right)} \ldots.\end{split}\]</div>
+<p>This type of pre-evaluation of the photo-reaction pathways is sensible in a statistical sense, but loses meaning if only a single photon is involved.</p>
+</section>
+<section id="surface-reactions">
+<h4>Surface reactions<a class="headerlink" href="#surface-reactions" title="Permalink to this heading"></a></h4>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Documentation is pending.</p>
+<p>Surface reactions are supported by <a class="reference internal" href="#chap-itokmcphysics"><span class="std std-ref">ItoKMCPhysics</span></a> but not implemented in the JSON interface (yet).</p>
 </div>
+</section>
+<section id="transport-coefficients">
+<h4>Transport coefficients<a class="headerlink" href="#transport-coefficients" title="Permalink to this heading"></a></h4>
+<p>Species mobilities and diffusion coefficients should be computed just as they are done in the fluid approximation.
+The <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code> interface requires implementations of two functions that define the coefficients as functions of <span class="math notranslate nohighlight">\(\mu = \mu\left(t,\mathbf{x}, \mathbf{E}\right)\)</span>,
+and likewise for the diffusion coefficients.
+Note that these functions should return the <em>fluid coefficients</em>.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>There is currently no support for computing <span class="math notranslate nohighlight">\(\mu\)</span> as a function of the species densities (e.g., the electron density), but this only requires modest extensions of the Îto-KMC module.</p>
+</div>
+</section>
+</section>
+</section>
+<section id="json-0d-chemistry-interface">
+<span id="chap-itokmcjson"></span><h2>JSON 0D chemistry interface<a class="headerlink" href="#json-0d-chemistry-interface" title="Permalink to this heading"></a></h2>
+<p>The JSON-based chemistry interface (called <code class="docutils literal notranslate"><span class="pre">ItoKMCJSON</span></code>) simplifies the definition of the plasma kinetics and initial conditions by permitting specifications through a JSON file.
+In addition, the JSON specification will permit the definition of background species that are not tracked as solvers (but that simply exist as a density function).
+The JSON interface thus provides a simple entry point for users that have no interest in defining the chemistry from scratch.</p>
+<p>Several mandatory fields are required when specifying the plasma kinetics, such as:</p>
+<ul class="simple">
+<li><p>Gas pressure, temperature, and number density.</p></li>
+<li><p>Background species (if any).</p></li>
+<li><p>Townsend coefficients.</p></li>
+<li><p>Plasma species and their initial conditions, which solver to use when tracking them.</p></li>
+<li><p>Photon species and their absorption lengths.</p></li>
+<li><p>Plasma reactions.</p></li>
+<li><p>Photoionization reactions.</p></li>
+</ul>
+<p>These specifications follow a pre-defined JSON format which is discussed in detail below.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>While JSON files do not formally support comments, the JSON submodule used by <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> allows them.</p>
+</div>
+<section id="gas-law">
+<h3>Gas law<a class="headerlink" href="#gas-law" title="Permalink to this heading"></a></h3>
+<p>The JSON gas law represents a loose definition of the gas pressure, temperature, and <em>number density</em>.
+Multiple gas laws can be defined in the JSON file, and the user can then select which one to use.
+This is defined within a JSON entry <code class="docutils literal notranslate"><span class="pre">gas</span></code> and a subentry <code class="docutils literal notranslate"><span class="pre">law</span></code>.
+In the <code class="docutils literal notranslate"><span class="pre">gas/law</span></code> field one must specify an <code class="docutils literal notranslate"><span class="pre">id</span></code> field which indicates which gas law to use.
+One may also set an optional field <code class="docutils literal notranslate"><span class="pre">plot</span></code> to true/false if one wants to include the pressure, temperature, and density in the HDF5 output files.</p>
+<p>Each user-defined gas law exists as a separate entry in the <code class="docutils literal notranslate"><span class="pre">gas/law</span></code> field, and the minimum requirements for these are that they contain a <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier.
+Currently, the supported types are</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ideal</span></code> (for constant ideal gas)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">vs</span> <span class="pre">height</span></code> for tabulated density, temperature and pressure vs some height/axis.</p></li>
+</ul>
+<p>The specification rules for these are different, and are discussed below.
+An example JSON specification is given below.
+Here, we have defined two gas law <code class="docutils literal notranslate"><span class="pre">my_ideal_gas</span></code> and <code class="docutils literal notranslate"><span class="pre">tabulated_atmosphere</span></code> and specified through the <code class="docutils literal notranslate"><span class="pre">id</span></code> parameter that we will use the <code class="docutils literal notranslate"><span class="pre">my_ideal_gas</span></code> specification.</p>
+<details>
+<summary><a>Example gas law specification</a></summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+   &quot;gas&quot; : {
+      // Specify which gas law we use. The user can define multiple gas laws and then later specify which one to use.
+      &quot;law&quot; : {
+         &quot;id&quot; : &quot;my_ideal_gas&quot;, // Specify which gas law we use.
+         &quot;plot&quot; : true,         // Turn on/off plotting.
+         &quot;my_ideal_gas&quot; : {
+             // Definition for an ideal gas law. Temperature is always in Kevlin the pressure is in bar. The neutral density
+             // is derived using an ideal gas law.
+             &quot;type&quot; : &quot;ideal&quot;,
+             &quot;temperature&quot; : 300,
+             &quot;pressure&quot; : 1.0
+         },
+         &quot;tabulated_atmosphere&quot; : {
+             // Tabulated gas law. The user must supply a file containing the pressure, temperature and number density and
+             // specify the table resolution that will be used internally.
+             &quot;type&quot; : &quot;table vs height&quot;,       // Specify that our gas law contains table-vs-height data
+             &quot;file&quot; : &quot;ENMSIS_Atmosphere.dat&quot;, // File name
+             &quot;axis&quot; : &quot;y&quot;,                     // Associated Cartesian axis for the &quot;height&quot;
+             &quot;temperature column&quot; : 0,         // Column containing the temperature
+             &quot;pressure column&quot; : 1,            // Column containing the pressure
+             &quot;density column&quot; : 2,             // Column containing the number density
+             &quot;min height&quot; : 0.0,               // Minium height kept when resampling the table
+             &quot;max height&quot; : 250000,            // Maximum height kept when resampling the table
+             &quot;res height&quot; : 500,               // Table resolution
+             &quot;dump tables&quot; : true,             // Optional argument for dumping tables to disk (useful for debugging)
+             &quot;T scale&quot; : 1.0,                  // Optional argument for user-specified temperature data scaling.
+             &quot;P scale&quot; : 1.0,                  // Optional argument for user-specified pressure data scaling.
+             &quot;Rho scale&quot; : 1.0                 // Optional argument for user-specified density data scaling.
+         }
+      }
+   }
+}
+</pre></div>
+</div>
+</details><br><section id="ideal-gas">
+<h4>Ideal gas<a class="headerlink" href="#ideal-gas" title="Permalink to this heading"></a></h4>
+<p>When specifying that the gas law <code class="docutils literal notranslate"><span class="pre">type</span></code> is <code class="docutils literal notranslate"><span class="pre">ideal</span></code>, the user must further specify the temperature and pressure of the gas.</p>
+<details>
+<summary><a>Example ideal gas specification</a></summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+   &quot;gas&quot; : {
+      &quot;law&quot; : {
+         &quot;id&quot; : &quot;my_ideal_gas&quot;, // Specify which gas law we use.
+         &quot;my_ideal_gas&quot; : {
+             &quot;type&quot; : &quot;ideal&quot;,    // Ideal gas law type
+             &quot;temperature&quot; : 300, // Temperature must be in Kelvin
+             &quot;pressure&quot; : 1.0     // Pressure must be in bar
+         },
+      }
+   }
+}
+</pre></div>
+</div>
+</details><br></section>
+<section id="table-vs-height">
+<h4>Table vs height<a class="headerlink" href="#table-vs-height" title="Permalink to this heading"></a></h4>
+</section>
+</section>
+<section id="background-species">
+<h3>Background species<a class="headerlink" href="#background-species" title="Permalink to this heading"></a></h3>
+<p>Background species <span class="math notranslate nohighlight">\(i\)</span> are defined as continuous background densities <span class="math notranslate nohighlight">\(N_i\)</span> given by</p>
+<div class="math notranslate nohighlight">
+\[N_i\left(\mathbf{x}\right) = \chi_i\left(\mathbf{x}\right)N\left(\mathbf{x}\right),\]</div>
+<p>where <span class="math notranslate nohighlight">\(\chi_i\left(\mathbf{x}\right)\)</span> is the molar fraction of species <span class="math notranslate nohighlight">\(i\)</span> (typically, but not necessarily, a constant).</p>
+<p>When specifying background species, the user must include an array of background species in the <code class="docutils literal notranslate"><span class="pre">gas</span></code> JSON field.
+For example,</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+   &quot;gas&quot; : {
+      &quot;background species&quot; : [
+         {
+            // First species goes here
+         },
+         {
+            // Second species goes here
+         }
+      ]
+   }
+}
+</pre></div>
+</div>
+<p>The order of appearance of the background species does not matter.</p>
+<section id="name">
+<h4>Name<a class="headerlink" href="#name" title="Permalink to this heading"></a></h4>
+<p>The species name is specified by including an <code class="docutils literal notranslate"><span class="pre">id</span></code> field, e.g.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;gas&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;background species&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">         </span><span class="p">{</span><span class="w"></span>
+<span class="hll"><span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;O2&quot;</span><span class="w"></span>
+</span><span class="w">         </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">]</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="molar-fraction">
+<h4>Molar fraction<a class="headerlink" href="#molar-fraction" title="Permalink to this heading"></a></h4>
+<p>The molar fraction can be specified in various forms by including a field <code class="docutils literal notranslate"><span class="pre">molar</span> <span class="pre">fraction</span></code>.
+This field also requires the user to specify the <em>type</em> of molar fraction.
+In principle, the molar fraction can have a positional dependency.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>There’s no internal renormalization of the molar fractions input by the user.
+Internal inconsitencies will occur if the user supplies inputs molar fractions that sum to a number different than one.</p>
+<p>Various checks will be enabled if the user compiles in debug-mode (see <a class="reference internal" href="../Base/Installation.html#chap-installation"><span class="std std-ref">Installation</span></a>), but these checks are not guaranteed to catch all cases.</p>
+</div>
+<section id="constant">
+<h5>Constant<a class="headerlink" href="#constant" title="Permalink to this heading"></a></h5>
+<p>To specify a constant molar fraction, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to constant and specify the value.
+An example JSON specification is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+   &quot;gas&quot; : {
+      &quot;background species&quot; : [
+         {
+            &quot;id&quot;: &quot;O2&quot;             // Species name
+<span class="hll">            &quot;molar fraction&quot;: {    // Molar fraction specification
+</span><span class="hll">               &quot;type&quot;: &quot;constant&quot;, // Constant molar fraction
+</span><span class="hll">               &quot;value&quot;: 0.2        // Molar fraction value
+</span><span class="hll">            }
+</span>         }
+      ]
+   }
+}
+</pre></div>
+</div>
+</section>
+<section id="tabulated-versus-height">
+<h5>Tabulated versus height<a class="headerlink" href="#tabulated-versus-height" title="Permalink to this heading"></a></h5>
+<p>The molar fraction can be set as a tabulated value versus one of the Cartesian coordinate axis by setting the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">vs</span> <span class="pre">height</span></code>.
+The input data should be tabulated in column form, e.g.</p>
+<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span># height       molar fraction
+0              0.1
+1              0.1
+2              0.1
+</pre></div>
+</div>
+<p>The file parser (see <span class="xref std std-ref">LookupTable</span>) will ignore the header file if it starts with a hashtag (#).
+Various other inputs are then also required:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> File name containing the height vs. molar fraction data (required).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">axis</span></code> Cartesian axis to associate with the height coordinate (required).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">height</span> <span class="pre">column</span></code> Column in data file containing the height (optional, defaults to 0).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">molar</span> <span class="pre">fraction</span> <span class="pre">column</span></code> Column in data file containing the molar fraction (optional, defaults to 1).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">height</span> <span class="pre">scale</span></code> Scaling of height column (optional).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fraction</span> <span class="pre">scale</span></code> Scaling (optional).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">height</span></code> Truncate data to minimum height (optional, applied after scaling).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">height</span></code> Truncate data to maximum height (optional, applied after scaling).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">num</span> <span class="pre">points</span></code> Number of points to keep in table representation (optional, defaults to 1000).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spacing</span></code> Spacing table representation (optional, defaults to “linear”.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dump</span></code> Option for dumping tabulated data to file.</p></li>
+</ul>
+<p>An example JSON specification is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+   &quot;gas&quot; : {
+      &quot;background species&quot; : [
+         {
+            &quot;id&quot;: &quot;O2&quot;                           // Species name
+<span class="hll">            &quot;molar fraction&quot;: {                  // Molar fraction specification
+</span><span class="hll">               &quot;type&quot;: &quot;table vs height&quot;,        // Constant molar fraction
+</span><span class="hll">               &quot;file&quot; : &quot;O2_molar_fraction.dat&quot;, // File name containing molar fraction
+</span><span class="hll">               &quot;dump&quot; : &quot;debug_O2_fraction.dat&quot;, // Optional debugging hook for dumping table to file
+</span><span class="hll">               &quot;axis&quot; : &quot;y&quot;,                     // Axis which represents the &quot;height&quot;
+</span><span class="hll">               &quot;height column&quot; : 0,              // Optional specification of column containing the height data (defaults to 0)
+</span><span class="hll">               &quot;molar fraction column&quot; : 1,      // Optional specification of column containing the height data (defaults to 1)
+</span><span class="hll">               &quot;height scale&quot; : 1.0,             // Optional scaling of height column
+</span><span class="hll">               &quot;fraction scale&quot; : 1.0,           // Optional scaling of molar fraction column
+</span><span class="hll">               &quot;min height&quot; : 0.0,               // Optional truncation of minimum height kept in internal table (occurs after scaling)
+</span><span class="hll">               &quot;max height&quot; : 2.0,               // Optional truncation of maximum height kept in internal table (occurs after scaling)
+</span><span class="hll">               &quot;num points&quot; : 100,               // Optional specification of number of data points kept in internal table (defaults to 1000)
+</span><span class="hll">               &quot;spacing&quot; : &quot;linear&quot;              // Optional specification of table representation. Can be &#39;linear&#39; or &#39;exponential&#39; (defaults to linear)
+</span>            }
+         }
+      ]
+   }
+}
+</pre></div>
+</div>
+</section>
+</section>
+<section id="plotting">
+<h4>Plotting<a class="headerlink" href="#plotting" title="Permalink to this heading"></a></h4>
+<p>Background species densities can be included in HDF5 plots by including an optional field <code class="docutils literal notranslate"><span class="pre">plot</span></code>.
+For example</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+   &quot;gas&quot; : {
+      &quot;background species&quot; : [
+         {
+            &quot;id&quot;: &quot;O2&quot;             // Species name
+            &quot;molar fraction&quot;: {    // Molar fraction specification
+               &quot;type&quot;: &quot;constant&quot;, // Constant molar fraction
+               &quot;value&quot;: 0.2        // Molar fraction value
+            },
+<span class="hll">            &quot;plot&quot;: true           // Plot number density in HDF5 or not
+</span>         }
+      ]
+   }
+}
+</pre></div>
+</div>
+</section>
+</section>
+<section id="townsend-coefficients">
+<h3>Townsend coefficients<a class="headerlink" href="#townsend-coefficients" title="Permalink to this heading"></a></h3>
+<p>Townsend ionization and attachment coefficients <span class="math notranslate nohighlight">\(\alpha\)</span> and <span class="math notranslate nohighlight">\(\eta\)</span> must be specified, and have two usages:</p>
+<ol class="arabic simple">
+<li><p>Flagging cells for refinement (users can override this).</p></li>
+<li><p>Usage in plasma reactions.</p></li>
+</ol>
+<p>These are specified by including JSON entries <code class="docutils literal notranslate"><span class="pre">alpha</span></code> and <code class="docutils literal notranslate"><span class="pre">eta</span></code>, e.g.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+    &quot;alpha&quot;: {
+       // alpha-coefficient specification goes here
+    },
+    &quot;eta&quot; : {
+       // eta-coefficient specification goes here
+    }
+}
+</pre></div>
+</div>
+<p>There are various way of specifying these, as discussed below:</p>
+<section id="id2">
+<h4>Constant<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
+<p>To set a constant Townsend coefficient, set <code class="docutils literal notranslate"><span class="pre">type</span></code> to constant and then specify the value, e.g.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;alpha&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="hll"><span class="w">       </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">,</span><span class="w"></span>
+</span><span class="hll"><span class="w">       </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1E5</span><span class="w"></span>
+</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="tabulated-vs-e-n">
+<h4>Tabulated vs <span class="math notranslate nohighlight">\(E/N\)</span><a class="headerlink" href="#tabulated-vs-e-n" title="Permalink to this heading"></a></h4>
+<p>To set the coefficient as functions <span class="math notranslate nohighlight">\(f = f\left(E/N\right)\)</span>, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">vs</span> <span class="pre">E/N</span></code> and specify the following fields:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> For specifying the file containing the input data, which must be organized as column data, e.g.</p>
+<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span># E/N   alpha/N
+0       1E5
+100     1E5
+200     1E5
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">header</span></code> For specifying where in the file one starts reading data.
+This is an optional argument intended for use with BOLSIG+ output data where the user specifies that the data is contained in the lines below the specified header.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">E/N</span> <span class="pre">column</span></code> For setting which column in the data file contains the values of <span class="math notranslate nohighlight">\(E/N\)</span> (optional, defaults to 0).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">alpha/N</span> <span class="pre">column</span></code> For setting which column in the data file contains the values of <span class="math notranslate nohighlight">\(\alpha/N\)</span>.
+Note that this should be replaced by <code class="docutils literal notranslate"><span class="pre">eta/N</span> <span class="pre">column</span></code> when parsing the attachment coefficient.
+This is an optional argument that defaults to 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scale</span> <span class="pre">E/N</span></code> Optional scaling of the column containing the <span class="math notranslate nohighlight">\(E/N\)</span> data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scale</span> <span class="pre">alpha/N</span></code> Optional scaling of the column containing the <span class="math notranslate nohighlight">\(\alpha/N\)</span> data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">E/N</span></code> Optional truncation of the table representation of the data (applied after scaling).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">E/N</span></code> Optional truncation of the table representation of the data (applied after scaling).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">num</span> <span class="pre">points</span></code> Number of data points in internal table representation (optional, defaults to 1000).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spacing</span></code> Spacing in internal table representation. Can be <code class="docutils literal notranslate"><span class="pre">linear</span></code> or <code class="docutils literal notranslate"><span class="pre">exponential</span></code>.
+This is an optional argument that defaults to <code class="docutils literal notranslate"><span class="pre">exponential</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dump</span></code> A string specifier for writing the table representation of <span class="math notranslate nohighlight">\(E/N, \alpha/N\)</span> to file.</p></li>
+</ul>
+<p>An example JSON specification that uses a BOLSIG+ output file for parsing the data is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+    &quot;alpha&quot;: {
+<span class="hll">       &quot;type&quot; : &quot;table vs E/N&quot;,                                   // Specify that we read in alpha/N vs E/N
+</span><span class="hll">       &quot;file&quot; : &quot;bolsig_air.dat&quot;,                                 // File containing the data
+</span><span class="hll">       &quot;dump&quot; : &quot;debug_alpha.dat&quot;,                                // Optional dump of internalized table to file. Useful for debugging.
+</span><span class="hll">       &quot;header&quot; : &quot;E/N (Td)\tTownsend ioniz. coef. alpha/N (m2)&quot;, // Optional argument. Contains line immediately preceding the data to be read.
+</span><span class="hll">       &quot;E/N column&quot; : 0,                                          // Optional specification of column containing E/N (defaults to 0)
+</span><span class="hll">       &quot;alpha/N column&quot; : 1,                                      // Optional specification of column containing alpha/N (defaults to 1)
+</span><span class="hll">       &quot;min E/N&quot; : 1.0,                                           // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+</span><span class="hll">       &quot;max E/N&quot; : 1000.0,                                        // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
+</span><span class="hll">       &quot;num points&quot; : 1000,                                       // Optional number of points kept when resamplnig the table (defaults to 1000)
+</span><span class="hll">       &quot;spacing&quot; : &quot;exponential&quot;,                                 // Optional spcification of table representation. Defaults to &#39;exponential&#39; but can also be &#39;linear&#39;
+</span><span class="hll">       &quot;scale E/N&quot; : 1.0,                                         // Optional scaling of the column containing E/N
+</span><span class="hll">       &quot;scale alpha/N&quot; : 1.0                                      // Optional scaling
+</span>    }
+}
+</pre></div>
+</div>
+</section>
+</section>
+<section id="plasma-species">
+<h3>Plasma species<a class="headerlink" href="#plasma-species" title="Permalink to this heading"></a></h3>
+<p>Plasma species are species that are tracked using either a CDR or Îto solver.
+The user must specify the following information:</p>
+<ul class="simple">
+<li><p>An ID/name for the species.</p></li>
+<li><p>The species’ charge number.</p></li>
+<li><p>The solver type, i.e. whether or not it is tracked by a particle or fluid solver.</p></li>
+<li><p>Whether or not the species is mobile/diffusive.
+If the species is mobile/diffusive, the mobility/diffusion coefficient must also be specified.</p></li>
+<li><p>Optionally, the species temperature.
+If not specified, the temperature will be set to the background gas temperature.</p></li>
+<li><p>Initial particles for the solvers.</p></li>
+</ul>
+<section id="basic-definition">
+<h4>Basic definition<a class="headerlink" href="#basic-definition" title="Permalink to this heading"></a></h4>
+<p>Species are defined by an array of entries in a <code class="docutils literal notranslate"><span class="pre">plasma</span> <span class="pre">species</span></code> JSON field.
+Each species <em>must</em> specify the following fields</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">id</span></code> (string) For setting the species name.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Z</span></code> (integer) For setting the species’ charge number.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">solver</span></code> (string) For specifying whether or not the species is tracked by a CDR or Îto solver.
+Acceptable values are <em>cdr</em> and <em>ito</em>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mobile</span></code> (boolean) For specifying whether or not the species is mobile.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mobile</span></code> (boolean) For specifying whether or not the species is diffusive.</p></li>
+</ul>
+<p>An example specification is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma species&quot; :
+[
+    // List of plasma species that are tracked. This is an array of species
+    // with various identifiers, some of which are always required (id, Z, type, mobile, diffusive) and
+    // others which are secondary requirements.
+    {
+        &quot;id&quot;: &quot;e&quot;,          // Species ID
+        &quot;Z&quot; : -1,           // Charge number
+        &quot;solver&quot; : &quot;ito&quot;,   // Solver type. Either &#39;ito&#39; or &#39;cdr&#39;
+        &quot;mobile&quot; : true,    // Mobile or not
+        &quot;diffusive&quot; : true  // Diffusive or not
+    },
+    {
+        // Definition of O2+ plasma species.
+        &quot;id&quot;: &quot;O2+&quot;,            // Species ID
+        &quot;Z&quot; : 1,                // Charge number
+        &quot;solver&quot; : &quot;cdr&quot;,       // CDR solver.
+        &quot;mobile&quot; : false,       // Not mobile.
+        &quot;diffusive&quot; : false     // Not diffusive
+    }
+]
+</pre></div>
+</div>
+<p>Note that the order of appearance of the various species is irrelevant.
+However, if a species is specified as mobile/diffusive, the user <em>must</em> also specify the corresponding transport coefficients.</p>
+</section>
+<section id="mobility-and-diffusion-coefficients">
+<h4>Mobility and diffusion coefficients<a class="headerlink" href="#mobility-and-diffusion-coefficients" title="Permalink to this heading"></a></h4>
+<p>Mobility and diffusion coefficients are specified by including fields <code class="docutils literal notranslate"><span class="pre">mobility</span></code> and <code class="docutils literal notranslate"><span class="pre">diffusion</span></code> that further specifies how the transport coefficients are calculated.
+Note that the input to these fields should be <em>fluid transport coefficients</em>.
+These fields can be specified in various forms, as shown below.</p>
+<section id="id3">
+<h5>Constant<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h5>
+<p>To set a constant coefficient, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to constant and then assign the value.
+For example,</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span> &quot;plasma species&quot; :
+ [
+     {
+         &quot;id&quot;: &quot;e&quot;,             // Species ID
+         &quot;Z&quot; : -1,              // Charge number
+         &quot;solver&quot; : &quot;ito&quot;,      // Solver type. Either &#39;ito&#39; or &#39;cdr&#39;
+         &quot;mobile&quot; : true,       // Mobile or not
+         &quot;diffusive&quot; : true     // Diffusive or not,
+         &quot;mobility&quot;: {
+            &quot;type&quot;: &quot;constant&quot;, // Set constant mobility
+            &quot;value&quot;: 0.02
+<span class="hll">         },
+</span><span class="hll">         &quot;diffusion&quot;: {
+</span><span class="hll">            &quot;type&quot;: &quot;constant&quot;, // Set constant diffusion coefficient
+</span><span class="hll">            &quot;value&quot;: 2E-4
+</span><span class="hll">         }
+</span><span class="hll">     }
+</span><span class="hll"> ]
+</span></pre></div>
+</div>
+</section>
+<section id="table-vs-e-n">
+<h5>Table vs <span class="math notranslate nohighlight">\(E/N\)</span><a class="headerlink" href="#table-vs-e-n" title="Permalink to this heading"></a></h5>
+<p>To set the transport coefficients as functions <span class="math notranslate nohighlight">\(f = f\left(E/N\right)\)</span>, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">vs</span> <span class="pre">E/N</span></code> and specify the following fields:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> For specifying the file containing the input data, which must be organized as column data, e.g.</p>
+<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span># E/N   mu/N
+0       1E5
+100     1E5
+200     1E5
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">header</span></code> For specifying where in the file one starts reading data.
+This is an optional argument intended for use with BOLSIG+ output data where the user specifies that the data is contained in the lines below the specified header.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">E/N</span></code> For setting which column in the data file contains the values of <span class="math notranslate nohighlight">\(E/N\)</span> (optional, defaults to 0).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mu*N</span></code> For setting which column in the data file contains the values of <span class="math notranslate nohighlight">\(\mu N\)</span> (or alternatively <span class="math notranslate nohighlight">\(DN\)</span> for the diffusion coefficient).
+This is an optional argument that defaults to 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">E/N</span> <span class="pre">scale</span></code> Optional scaling of the column containing the <span class="math notranslate nohighlight">\(E/N\)</span> data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mu*N</span> <span class="pre">scale</span></code> Optional scaling of the column containing the <span class="math notranslate nohighlight">\(\mu N\)</span> data (or alternatively <span class="math notranslate nohighlight">\(DN\)</span> for the diffusion coefficient).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">E/N</span></code> Optional truncation of the table representation of the data (applied after scaling).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">E/N</span></code> Optional truncation of the table representation of the data (applied after scaling).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">num</span> <span class="pre">points</span></code> Number of data points in internal table representation (optional, defaults to 1000).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spacing</span></code> Spacing in internal table representation. Can be <code class="docutils literal notranslate"><span class="pre">linear</span></code> or <code class="docutils literal notranslate"><span class="pre">exponential</span></code>.
+This is an optional argument that defaults to <code class="docutils literal notranslate"><span class="pre">exponential</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dump</span></code> A string specifier for writing the table representation of <span class="math notranslate nohighlight">\(E/N, \mu N\)</span> to file.</p></li>
+</ul>
+<p>An example JSON specification that uses a BOLSIG+ output file for parsing the data for the mobility is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span> &quot;plasma species&quot; :
+ [
+    {
+       &quot;id&quot;: &quot;e&quot;,                                       // Species ID
+       &quot;Z&quot; : -1,                                        // Charge number
+       &quot;solver&quot; : &quot;ito&quot;,                                // Solver type.
+       &quot;mobile&quot; : true,                                 // Mobile
+       &quot;diffusive&quot; : false,                             // Not diffusive
+<span class="hll">       &quot;mobility&quot; : {
+</span><span class="hll">          &quot;type&quot; : &quot;table vs E/N&quot;,                      // Specification of tabulated mobility lookup method
+</span><span class="hll">          &quot;file&quot; : &quot;bolsig_air.dat&quot;,                    // File containg the mobility data
+</span><span class="hll">          &quot;dump&quot; : &quot;debug_mobility.dat&quot;,                // Optional argument for dumping table to disk (useful for debugging)
+</span><span class="hll">          &quot;header&quot; : &quot;E/N (Td)\tMobility *N (1/m/V/s)&quot;, // Line immediately preceding the colum data
+</span><span class="hll">          &quot;E/N&quot; : 0,                                    // Column containing E/N
+</span><span class="hll">          &quot;mu*N&quot; : 1,                                   // Column containing mu*N
+</span><span class="hll">          &quot;min E/N&quot; : 1,                                // Minimum E/N kept when resampling table
+</span><span class="hll">          &quot;max E/N&quot; : 2E6,                              // Maximum E/N kept when resampling table
+</span><span class="hll">          &quot;points&quot; : 1000,                              // Number of grid points kept when resampling the table
+</span><span class="hll">          &quot;spacing&quot; : &quot;exponential&quot;,                    // Grid point spacing when resampling the table
+</span><span class="hll">          &quot;E/N scale&quot; : 1.0,                            // Optional argument for scaling mobility coefficient
+</span><span class="hll">          &quot;mu*N scale&quot; : 1.0                            // Optional argument for scaling the E/N column
+</span><span class="hll">       }
+</span>    }
+ ]
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The parser for the diffusion coefficient is analogous; simply replace <code class="docutils literal notranslate"><span class="pre">mu*N</span></code> by <code class="docutils literal notranslate"><span class="pre">D*N</span></code>.</p>
+</div>
+</section>
+</section>
+<section id="temperature">
+<h4>Temperature<a class="headerlink" href="#temperature" title="Permalink to this heading"></a></h4>
+<p>The species temperature is only parametrically attached to the species (i.e., not solved for), and can be specified by the user.
+Note that the temperature is mostly relevant for transport coefficients (e.g., reaction rates).
+The temperature can be specified through the <code class="docutils literal notranslate"><span class="pre">temperature</span></code> field for each species, and various forms of specifying this is available.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>If the specifies temperature is <em>not</em> specified by the user, it will be set equal to the background gas temperature.</p>
+</div>
+<section id="background-gas">
+<h5>Background gas<a class="headerlink" href="#background-gas" title="Permalink to this heading"></a></h5>
+<p>To set the temperature equal to the background gas temperature, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier field to <code class="docutils literal notranslate"><span class="pre">gas</span></code>.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span> &quot;plasma species&quot; :
+ [
+    {
+       &quot;id&quot;: &quot;O2+&quot;,      // Species ID
+       &quot;Z&quot; : 1,          // Charge number
+       &quot;solver&quot; : &quot;ito&quot;, // Solver type.
+<span class="hll">       &quot;temperature&quot;: {  // Specify temperature
+</span><span class="hll">          &quot;type&quot;: &quot;gas&quot;  // Temperature same as gas
+</span><span class="hll">       }
+</span>    }
+ ]
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h5>Constant<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h5>
+<p>To set a constant temperature, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to <code class="docutils literal notranslate"><span class="pre">constant</span></code> and then specify the temperature.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span> &quot;plasma species&quot; :
+ [
+    {
+       &quot;id&quot;: &quot;O2+&quot;,           // Species ID
+       &quot;Z&quot; : 1,               // Charge number
+       &quot;solver&quot; : &quot;ito&quot;,      // Solver type.
+<span class="hll">       &quot;temperature&quot;: {       // Specify temperature
+</span><span class="hll">          &quot;type&quot;: &quot;constant&quot;, // Constant temperature
+</span><span class="hll">          &quot;value&quot;: 300        // Temperature in Kelvin
+</span><span class="hll">       }
+</span>    }
+ ]
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h5>Table vs <span class="math notranslate nohighlight">\(E/N\)</span><a class="headerlink" href="#id5" title="Permalink to this heading"></a></h5>
+<p>To set the species temperature as a function <span class="math notranslate nohighlight">\(T = T\left(E/N\right)\)</span>, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">vs</span> <span class="pre">E/N</span></code> and specify the following fields:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> For specifying the file containing the input data, which must be organized as column data <em>versus the mean energy</em>, e.g.</p>
+<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span># E/N   energy (eV)
+0       1
+100     2
+200     3
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">header</span></code> For specifying where in the file one starts reading data.
+This is an optional argument intended for use with BOLSIG+ output data where the user specifies that the data is contained in the lines below the specified header.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">E/N</span></code> For setting which column in the data file contains the values of <span class="math notranslate nohighlight">\(E/N\)</span> (optional, defaults to 0).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">eV</span></code> For setting which column in the data file contains the energy vs <span class="math notranslate nohighlight">\(E/N\)</span>.
+This is an optional argument that defaults to 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">E/N</span> <span class="pre">scale</span></code> Optional scaling of the column containing the <span class="math notranslate nohighlight">\(E/N\)</span> data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">eV</span> <span class="pre">scale</span></code> Optional scaling of the column containing the energy (in eV).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">E/N</span></code> Optional truncation of the table representation of the data (applied after scaling).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">E/N</span></code> Optional truncation of the table representation of the data (applied after scaling).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">num</span> <span class="pre">points</span></code> Number of data points in internal table representation (optional, defaults to 1000).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spacing</span></code> Spacing in internal table representation. Can be <code class="docutils literal notranslate"><span class="pre">linear</span></code> or <code class="docutils literal notranslate"><span class="pre">exponential</span></code>.
+This is an optional argument that defaults to <code class="docutils literal notranslate"><span class="pre">exponential</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dump</span></code> A string specifier for writing the table representation of <span class="math notranslate nohighlight">\(E/N, eV\)</span> to file.</p></li>
+</ul>
+<p>An example JSON specification that uses a BOLSIG+ output file for parsing the data for the mobility is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span> &quot;plasma species&quot; :
+ [
+    {
+       &quot;id&quot;: &quot;O2+&quot;,                                // Species ID
+       &quot;Z&quot; : 1,                                    // Charge number
+       &quot;solver&quot; : &quot;ito&quot;,                           // Solver type.
+       &quot;mobile&quot; : true,                            // Not mobile
+       &quot;diffusive&quot; : false,                        // Not diffusive
+<span class="hll">       &quot;temperature&quot;: {                            // Specification of temperature
+</span><span class="hll">          &quot;type&quot;: &quot;table vs E/N&quot;,                  // Tabulated
+</span><span class="hll">          &quot;file&quot;: &quot;bolsig_air.dat&quot;,                // File name
+</span><span class="hll">          &quot;dump&quot;: &quot;debug_temperature.dat&quot;,         // Dump to file
+</span><span class="hll">          &quot;header&quot; : &quot;E/N (Td)\tMean energy (eV)&quot;, // Header preceding data
+</span><span class="hll">          &quot;E/N&quot; : 0,                               // Column containing E/N
+</span><span class="hll">          &quot;eV&quot; : 1,                                // Column containing the energy
+</span><span class="hll">          &quot;min E/N&quot; : 10,                          // Truncation of table
+</span><span class="hll">          &quot;max E/N&quot; : 2E6,                         // Truncation of table
+</span><span class="hll">          &quot;E/N scale&quot;: 1.0,                        // Scaling of input data
+</span><span class="hll">          &quot;eV scale&quot;: 1.0,                         // Scaling of input data
+</span><span class="hll">          &quot;spacing&quot; : &quot;exponential&quot;,               // Table spacing
+</span><span class="hll">          &quot;points&quot; : 1000                          // Number of points in table
+</span><span class="hll">       }
+</span>    }
+ ]
+</pre></div>
+</div>
+</section>
+</section>
+<section id="initial-particles">
+<h4>Initial particles<a class="headerlink" href="#initial-particles" title="Permalink to this heading"></a></h4>
+<p>Initial particles for species are added by including an <code class="docutils literal notranslate"><span class="pre">initial</span> <span class="pre">particles</span></code> field.
+The field consists of an array of JSON entries, where each array entry represents various ways of adding particles.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">initial</span> <span class="pre">particles</span></code> field is <em>incrementing</em>, each new entry will add additional particles.</p>
+</div>
+<p>For example, to add two particles with particle weights of 1, one may specify</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span> &quot;plasma species&quot; :
+ [
+    {
+       &quot;id&quot;: &quot;e&quot;,                 // Species ID
+       &quot;Z&quot; : 1,                   // Charge number
+       &quot;solver&quot; : &quot;ito&quot;,          // Solver type.
+       &quot;mobile&quot; : false,          // Not mobile
+       &quot;diffusive&quot; : false,       // Not diffusive
+<span class="hll">       &quot;initial particles&quot;: [     // Initial particles
+</span><span class="hll">          {
+</span><span class="hll">             &quot;single particle&quot;: { // Single physical particle at (0,0,0)
+</span><span class="hll">                &quot;position&quot;: [0, 0, 0],
+</span><span class="hll">                &quot;weight&quot;: 1.0
+</span><span class="hll">             }
+</span><span class="hll">          },
+</span><span class="hll">          {
+</span><span class="hll">             &quot;single particle&quot;: { // Single physical particle at (0,1,0)
+</span><span class="hll">                &quot;position&quot;: [0, 1, 0],
+</span><span class="hll">                &quot;weight&quot;: 1.0
+</span><span class="hll">             }
+</span><span class="hll">          }
+</span><span class="hll">       ]
+</span>    }
+ ]
+</pre></div>
+</div>
+<p>The various supported ways of additional initial particles are discussed below.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>If a solver is specified as a CDR solver, the initial particles are deposited as densities on the mesh using an NGP scheme.</p>
+</div>
+<section id="single-particle">
+<h5>Single particle<a class="headerlink" href="#single-particle" title="Permalink to this heading"></a></h5>
+<p>Single particles are placed by including a <code class="docutils literal notranslate"><span class="pre">single</span> <span class="pre">particle</span></code> JSON entry.
+The user must specify</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">position</span></code> The particle position.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">weight</span></code> The particle weight.</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span> &quot;plasma species&quot; :
+ [
+    {
+       &quot;id&quot;: &quot;e&quot;,                 // Species ID
+       &quot;Z&quot; : 1,                   // Charge number
+       &quot;solver&quot; : &quot;ito&quot;,          // Solver type.
+       &quot;mobile&quot; : false,          // Not mobile
+       &quot;diffusive&quot; : false,       // Not diffusive
+       &quot;initial particles&quot;: [     // Initial particles
+          {
+<span class="hll">             &quot;single particle&quot;: { // Single physical particle at (0,0,0)
+</span><span class="hll">                &quot;position&quot;: [0, 0, 0],
+</span><span class="hll">                &quot;weight&quot;: 1.0
+</span><span class="hll">             }
+</span>          }
+       ]
+    }
+ ]
+</pre></div>
+</div>
+</section>
+<section id="uniform-distribution">
+<h5>Uniform distribution<a class="headerlink" href="#uniform-distribution" title="Permalink to this heading"></a></h5>
+<p>Particles can be randomly drawn from a uniform distribution (a rectangular box in 2D/3D) by including a <code class="docutils literal notranslate"><span class="pre">uniform</span> <span class="pre">distribution</span></code>.
+The user must specify</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">low</span> <span class="pre">corner</span></code> The lower left corner of the box.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">high</span> <span class="pre">corner</span></code> The lower left corner of the box.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">num</span> <span class="pre">particles</span></code> Number of computational particles that are drawn.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">weight</span></code> Particle weights.</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span> &quot;plasma species&quot; :
+ [
+    {
+       &quot;id&quot;: &quot;e&quot;,                                  // Species ID
+       &quot;Z&quot; : 1,                                    // Charge number
+       &quot;solver&quot; : &quot;ito&quot;,                           // Solver type.
+       &quot;mobile&quot; : false,                           // Not mobile
+       &quot;diffusive&quot; : false,                        // Not diffusive
+       &quot;initial particles&quot;: [                      // Initial particles
+          {
+<span class="hll">             &quot;uniform distribution&quot; : {            // Particles inside a box
+</span><span class="hll">                &quot;low corner&quot; : [ -0.04, 0, 0 ],    // Lower-left physical corner of sampling region
+</span><span class="hll">                &quot;high corner&quot; : [ 0.04, 0.04, 0 ], // Upper-right physical corner of sampling region
+</span><span class="hll">                &quot;num particles&quot;: 1000,             // Number of computational particles
+</span><span class="hll">                &quot;weight&quot; : 1                       // Particle weights
+</span><span class="hll">             }
+</span>          }
+       ]
+    }
+ ]
+</pre></div>
+</div>
+</section>
+<section id="sphere-distribution">
+<h5>Sphere distribution<a class="headerlink" href="#sphere-distribution" title="Permalink to this heading"></a></h5>
+<p>Particles can be randomly drawn inside a circle (sphere in 3D)  by including a <code class="docutils literal notranslate"><span class="pre">sphere</span> <span class="pre">distribution</span></code>.
+The user must specify</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">center</span></code> The sphere center.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">radius</span></code> The sphere radius.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">num</span> <span class="pre">particles</span></code> Number of computational particles that are drawn.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">weight</span></code> Particle weights.</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span> &quot;plasma species&quot; :
+ [
+    {
+       &quot;id&quot;: &quot;e&quot;,                            // Species ID
+       &quot;Z&quot; : 1,                              // Charge number
+       &quot;solver&quot; : &quot;ito&quot;,                     // Solver type.
+       &quot;mobile&quot; : false,                     // Not mobile
+       &quot;diffusive&quot; : false,                  // Not diffusive
+       &quot;initial particles&quot;: [                // Initial particles
+          {
+<span class="hll">             &quot;sphere distribution&quot; : {       // Particles inside sphere
+</span><span class="hll">                &quot;center&quot; : [ 0, 7.5E-3, 0 ], // Sphere center
+</span><span class="hll">                &quot;radius&quot; : 1E-3,             // Sphere radius
+</span><span class="hll">                &quot;num particles&quot;: 1000,       // Number of computational particles
+</span><span class="hll">                &quot;weight&quot; : 1                 // Particle weights
+</span><span class="hll">             }
+</span>          }
+       ]
+    }
+ ]
+</pre></div>
+</div>
+</section>
+<section id="gaussian-distribution">
+<h5>Gaussian distribution<a class="headerlink" href="#gaussian-distribution" title="Permalink to this heading"></a></h5>
+<p>Particles can be randomly drawn from a Gaussian distribution by including a <code class="docutils literal notranslate"><span class="pre">gaussian</span> <span class="pre">distribution</span></code>.
+The user must specify</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">center</span></code> The sphere center.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">radius</span></code> The sphere radius.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">num</span> <span class="pre">particles</span></code> Number of computational particles that are drawn.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">weight</span></code> Particle weights.</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span> &quot;plasma species&quot; :
+ [
+    {
+       &quot;id&quot;: &quot;e&quot;,                            // Species ID
+       &quot;Z&quot; : 1,                              // Charge number
+       &quot;solver&quot; : &quot;ito&quot;,                     // Solver type.
+       &quot;mobile&quot; : false,                     // Not mobile
+       &quot;diffusive&quot; : false,                  // Not diffusive
+       &quot;initial particles&quot;: [                // Initial particles
+          {
+<span class="hll">             &quot;gaussian distribution&quot; : {     // Particles drawn from a gaussian
+</span><span class="hll">                &quot;center&quot; : [ 0, 7.5E-3, 0 ], // Center
+</span><span class="hll">                &quot;radius&quot; : 1E-3,             // Radius
+</span><span class="hll">                &quot;num particles&quot;: 1000,       // Number of computational particles
+</span><span class="hll">                &quot;weight&quot; : 1                 // Particle weights
+</span><span class="hll">             }
+</span>          }
+       ]
+    }
+ ]
+</pre></div>
+</div>
+</section>
+<section id="list-file">
+<h5>List/file<a class="headerlink" href="#list-file" title="Permalink to this heading"></a></h5>
+<p>Particles can be read from a file by including a <code class="docutils literal notranslate"><span class="pre">list</span></code> specifier.
+The particles must be organized as rows containing the coordinate positions and weights, e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># x   y   z    w</span>
+  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>    <span class="mi">1</span>
+</pre></div>
+</div>
+<p>The user must specify</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> File name.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x</span></code> Column containing the <span class="math notranslate nohighlight">\(x\)</span> coordinates (optional, defaults to 0).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">y</span></code> Column containing the <span class="math notranslate nohighlight">\(y\)</span> coordinates (optional, defaults to 1).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">z</span></code> Column containing the <span class="math notranslate nohighlight">\(z\)</span> coordinates (optional, defaults to 2).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">w</span></code> Column containing the particle weight (optional, defaults to 3).</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span> &quot;plasma species&quot; :
+ [
+    {
+       &quot;id&quot;: &quot;e&quot;,                            // Species ID
+       &quot;Z&quot; : 1,                              // Charge number
+       &quot;solver&quot; : &quot;ito&quot;,                     // Solver type.
+       &quot;mobile&quot; : false,                     // Not mobile
+       &quot;diffusive&quot; : false,                  // Not diffusive
+       &quot;initial particles&quot;: [                // Initial particles
+          {
+<span class="hll">             &quot;list&quot;: {
+</span><span class="hll">                &quot;file&quot;: &quot;initial_particles.dat&quot;, // File containing the particles
+</span><span class="hll">                &quot;x column&quot;: 0,
+</span><span class="hll">                &quot;y column&quot;: 1,
+</span><span class="hll">                &quot;z column&quot;: 2,
+</span><span class="hll">                &quot;w column&quot;: 3
+</span><span class="hll">             }
+</span>          }
+       ]
+    }
+ ]
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="id6">
+<h3>Plasma reactions<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<p>Plasma reactions are always specified stoichiometrically in the form <span class="math notranslate nohighlight">\(S_A + S_B + \ldots \xrightarrow{k} S_C + S_D + \ldots\)</span>.
+The user must supply the following information:</p>
+<ul class="simple">
+<li><p>Species involved on the left-hand and right-hand side of the reaction.</p></li>
+<li><p>How to compute the reaction rate.</p></li>
+<li><p>Optionally specify gradient corrections to the reaction.</p></li>
+<li><p>Optionally specify whether or not the reaction rate will be written to file.</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The JSON interface expects that the reaction rate <span class="math notranslate nohighlight">\(k\)</span> is the same as in the reaction rate equation.
+Internally, the rate is converted to a format that is consistent with the KMC algorithm.</p>
+</div>
+<p>Plasma reactions should be entered in the JSON file using an array (the order of reactions does not matter).</p>
+<details>
+<summary><a>Basic reaction example specifiers</a></summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;: [
+   {
+   // First reaction goes here,
+   },
+   {
+   // Next reaction goes here,
+   }
+]
+</pre></div>
+</div>
+</details><br><section id="reaction-specifiers">
+<h4>Reaction specifiers<a class="headerlink" href="#reaction-specifiers" title="Permalink to this heading"></a></h4>
+<p>Each reaction must include an entry <code class="docutils literal notranslate"><span class="pre">reaction</span></code> in the list of reactions.
+This entry must consist of a single string with a left-hand and right-hand sides separated by <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code>.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">   </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;reaction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e + N2 -&gt; e + e + N2+&quot;</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+<p>which is equivalent to the reaction <span class="math notranslate nohighlight">\(\text{e} + \text{N}_2 \rightarrow \text{e} + \text{e} + \text{N}_2^+\)</span>.
+Each species must be separated by whitespace and a addition operator.
+For example, the specification <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">+</span> <span class="pre">B</span> <span class="pre">+</span> <span class="pre">C</span></code> will be interpreted as a reaction <span class="math notranslate nohighlight">\(\text{A} + \text{B} + \text{C}\)</span> but the specification <code class="docutils literal notranslate"><span class="pre">A+B</span> <span class="pre">+</span> <span class="pre">C</span></code> will be interpreted as a reaction between one species <code class="docutils literal notranslate"><span class="pre">A+B</span></code> and another species <code class="docutils literal notranslate"><span class="pre">C</span></code> .</p>
+<p>Internally, both the left- and right-hand sides are checked against background and plasma species.
+The program will perform a run-time exit if the species are not defined in these lists.
+Note that the right-hand side can additonal contain photon species.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Products not not defined as a species can be enclosed by parenthesis <code class="docutils literal notranslate"><span class="pre">(</span></code> and <code class="docutils literal notranslate"><span class="pre">)</span></code>.</p>
+</div>
+<p>The reaction string generally expects all species on each side of the reaction to be defined.
+It is, however, occasionally useful to include products which are <em>not</em> defined.
+For example, one may with to include the reaction <span class="math notranslate nohighlight">\(\text{e} + \text{O}_2^+ \rightarrow \text{O} +\text{O}\)</span> but not actually track the species <span class="math notranslate nohighlight">\(\text{O}\)</span>.
+The reaction string can then be defined as the string <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">+</span> <span class="pre">O2+</span> <span class="pre">-&gt;</span></code> but as it might be difficult for users to actually remember the full reaction, we may also enter it as <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">+</span> <span class="pre">O2+</span> <span class="pre">-&gt;</span> <span class="pre">(O)</span> <span class="pre">+</span> <span class="pre">(O)</span></code>.</p>
+</section>
+<section id="rate-calculation">
+<h4>Rate calculation<a class="headerlink" href="#rate-calculation" title="Permalink to this heading"></a></h4>
+<p>Reaction rates can be specified using multiple formats (constant, tabulated, function-based, etc).
+To specify how the rate is computed, one must specify the <code class="docutils literal notranslate"><span class="pre">type</span></code> keyword in the JSON entry.</p>
+<section id="id7">
+<h5>Constant<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h5>
+<p>To use a constant reaction rate, the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier must be set to constant and the reaction rate must be specified through the <code class="docutils literal notranslate"><span class="pre">value</span></code> keyword.
+A JSON specification is e.g.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;: [
+   {
+      &quot;reaction&quot;: &quot;e + N2 -&gt; e + e + N2+&quot; // Specify reaction
+      &quot;type&quot;: &quot;constant&quot;,                 // Reaction rate is constant
+      &quot;value&quot;: 1.E-30                     // Reaction rate
+   }
+]
+</pre></div>
+</div>
+</section>
+<section id="function-vs-e-n">
+<h5>Function vs E/N<a class="headerlink" href="#function-vs-e-n" title="Permalink to this heading"></a></h5>
+<p>Some rates given as a function <span class="math notranslate nohighlight">\(k = k\left(E/N\right)\)</span> are supported, which are outlined below.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>In the below function-based rates, <span class="math notranslate nohighlight">\(E/N\)</span> indicates the electric field in units of Townsend.</p>
+</div>
+<p><strong>function E/N exp A</strong></p>
+<p>This specification is equivalent to a fluid rate</p>
+<div class="math notranslate nohighlight">
+\[k = c_1\exp\left[-\left(\frac{c_2}{c_3 + c_4 E/N}\right)^{c_5}\right].\]</div>
+<p>The user must specify the constants <span class="math notranslate nohighlight">\(c_i\)</span> in the JSON file.
+An example specification is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;: [
+   {
+      &quot;reaction&quot;: &quot;A + B -&gt; &quot;       // Example reaction string.
+      &quot;type&quot;: &quot;function E/N exp A&quot;, // Function based rate.
+      &quot;c1&quot;: 1.0,                    // c1-coefficient
+      &quot;c2&quot;: 1.0,                    // c2-coefficient
+      &quot;c3&quot;: 1.0,                    // c3-coefficient
+      &quot;c4&quot;: 1.0,                    // c4-coefficient
+      &quot;c5&quot;: 1.0                     // c5-coefficient
+   }
+]
+</pre></div>
+</div>
+</section>
+<section id="temperature-dependent">
+<h5>Temperature-dependent<a class="headerlink" href="#temperature-dependent" title="Permalink to this heading"></a></h5>
+<p>Some rates can be given as functions <span class="math notranslate nohighlight">\(k = k(T)\)</span> where <span class="math notranslate nohighlight">\(T\)</span> is some temperature.</p>
+<p><strong>function T A</strong></p>
+<p>This specification is equivalent to a fluid rate</p>
+<div class="math notranslate nohighlight">
+\[k = c_1\left(T_i\right)^{c_2}.\]</div>
+<p>Mandatory input variables are <span class="math notranslate nohighlight">\(c_1, c_2\)</span>, and the specification of the species corresponding to <span class="math notranslate nohighlight">\(T_i\)</span>.
+This can correspond to one of the background species.
+An example specification is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;: [
+   {
+      &quot;reaction&quot;: &quot;A + B -&gt; &quot; // Example reaction string.
+      &quot;type&quot;: &quot;function T A&quot;, // Function based rate.
+      &quot;c1&quot;: 1.0,              // c1-coefficient
+      &quot;c2&quot;: 1.0,              // c2-coefficient
+      &quot;T&quot;: &quot;A&quot;               // Which species temperature
+   }
+]
+</pre></div>
+</div>
+<p><strong>function TT A</strong></p>
+<p>This specification is equivalent to a fluid rate</p>
+<div class="math notranslate nohighlight">
+\[k = c_1\left(\frac{T_1}{T_2}\right)^{c_2}.\]</div>
+<p>Mandatory input variables are <span class="math notranslate nohighlight">\(c_1, c_2\)</span>, and the specification of the species corresponding to <span class="math notranslate nohighlight">\(T_1\)</span> and <span class="math notranslate nohighlight">\(T_2\)</span>.
+This can correspond to one of the background species.
+An example specification is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;: [
+   {
+      &quot;reaction&quot;: &quot;A + B -&gt; &quot;  // Example reaction string.
+      &quot;type&quot;: &quot;function TT A&quot;, // Function based rate.
+      &quot;c1&quot;: 1.0,               // c1-coefficient
+      &quot;c2&quot;: 1.0,               // c2-coefficient
+      &quot;T1&quot;: &quot;A&quot;,               // Which species temperature for T1
+      &quot;T2&quot;: &quot;B&quot;                // Which species temperature for T2
+   }
+]
+</pre></div>
+</div>
+</section>
+<section id="townsend-rates">
+<h5>Townsend rates<a class="headerlink" href="#townsend-rates" title="Permalink to this heading"></a></h5>
+<p>Reaction rates can be specified to be proportional to <span class="math notranslate nohighlight">\(\alpha\left|\mathbf{v}_i\right|\)</span> where <span class="math notranslate nohighlight">\(\alpha\)</span> is the Townsend ionization coefficient and <span class="math notranslate nohighlight">\(\left|\mathbf{v}_i\right|\)</span> is the drift velocity for some species <span class="math notranslate nohighlight">\(i\)</span>.
+This type of reaction is normally encountered when using simplified chemistry, e.g.</p>
+<div class="math notranslate nohighlight">
+\[\partial_t n_i = \alpha\left|\mathbf{v}_s\right| n_i = \alpha\mu\left|E\right|n_i.\]</div>
+<p>which is representative of the reaction <span class="math notranslate nohighlight">\(S_i \rightarrow S_i + S_i\)</span>.
+To specify a Townsend rate constant, one can use the following:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">alpha*v</span></code> for setting the rate constant proportional to the Townsend ionization rate.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">eta*v</span></code> for setting the rate constant proportional to the Townsend attachment rate.</p></li>
+</ol>
+<p>One must also specify which species is associated with <span class="math notranslate nohighlight">\(\left|\mathbf{v}\right|\)</span> by specifying a species flag.
+A complete JSON specification is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+   &quot;plasma reactions&quot;:
+      [
+         {
+            &quot;reaction&quot;: &quot;e -&gt; e + e + M+&quot;, // Reaction string
+            &quot;type&quot;: &quot;alpha*v&quot;,             // Rate is alpha*v
+            &quot;species&quot;: &quot;e&quot;                 // Species for v
+         }
+      ]
+}
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When using the Townsend coefficients for computing the rates, one should normally <em>not</em> include any neutrals on the left hand side of the reaction.
+The reason for this is that the Townsend coefficients <span class="math notranslate nohighlight">\(\alpha\)</span> and <span class="math notranslate nohighlight">\(\eta\)</span> already incorporate the neutral density.
+By specifying e.g. a reaction string <span class="math notranslate nohighlight">\(\text{e} + \text{N}_2 \rightarrow \text{e} + \text{e} + \text{N}_2^+\)</span> together with the <code class="docutils literal notranslate"><span class="pre">alpha*v</span></code> or <code class="docutils literal notranslate"><span class="pre">eta*v</span></code> specifiers, one will end up multiplying in the neutral density twice, which will lead to an incorrect rate.</p>
+</div>
+</section>
+<section id="id8">
+<h5>Tabulated vs E/N<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h5>
+</section>
+</section>
+<section id="scaling">
+<h4>Scaling<a class="headerlink" href="#scaling" title="Permalink to this heading"></a></h4>
+<p>Reactions can be scaled by including a <code class="docutils literal notranslate"><span class="pre">scale</span></code> field in the JSON entry.
+This will scale the reaction coefficient by the input factor, e.g. modify the rate constant as</p>
+<div class="math notranslate nohighlight">
+\[k \rightarrow \nu k,\]</div>
+<p>where <span class="math notranslate nohighlight">\(\nu\)</span> is the scaling factor.
+This is useful when scaling reactions from different units, or for completely turning off some input reactions.
+An example JSON specification is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;:
+[
+    {
+        &quot;reaction&quot;: &quot;e -&gt; e + e + M+&quot;, // Reaction string
+        &quot;type&quot;: &quot;alpha*v&quot;,             // Rate is alpha*v
+        &quot;species&quot;: &quot;e&quot;,                // Species for v,
+        &quot;scale&quot;: 0.0                   // Scaling factor
+    }
+]
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>If one turns off a reaction by setting <code class="docutils literal notranslate"><span class="pre">scale</span></code> to zero, the KMC algorithm will still use the reaction but no reactants/products are consumed/produced.</p>
+</div>
+</section>
+<section id="efficiency">
+<h4>Efficiency<a class="headerlink" href="#efficiency" title="Permalink to this heading"></a></h4>
+<p>Reactions efficiencies can be modified in the same way as one do with the <code class="docutils literal notranslate"><span class="pre">scale</span></code> field, e.g. modify the rate constant as</p>
+<div class="math notranslate nohighlight">
+\[k \rightarrow \nu k,\]</div>
+<p>where <span class="math notranslate nohighlight">\(\nu\)</span> is the reaction efficiency.
+An example JSON specification is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;:
+[
+    {
+        &quot;reaction&quot;: &quot;e -&gt; e + e + M+&quot;, // Reaction string
+        &quot;type&quot;: &quot;alpha*v&quot;,             // Rate is alpha*v
+        &quot;species&quot;: &quot;e&quot;,                // Species for v,
+        &quot;efficiency&quot;: 0.5              // Reaction efficiency.
+    }
+]
+</pre></div>
+</div>
+</section>
+<section id="quenching">
+<h4>Quenching<a class="headerlink" href="#quenching" title="Permalink to this heading"></a></h4>
+<p>Reaction quenching can be achieved in the following forms:</p>
+<section id="pressure-based">
+<h5>Pressure-based<a class="headerlink" href="#pressure-based" title="Permalink to this heading"></a></h5>
+<p>The reaction rate can modified by a factor <span class="math notranslate nohighlight">\(p_q/\left[p_q + p\left(\mathbf{x}\right)\right]\)</span> where <span class="math notranslate nohighlight">\(p_q\)</span> is a quenching pressure and <span class="math notranslate nohighlight">\(p\left(\mathbf{x}\right)\)</span> is the gas pressure.
+This will modify the rate as</p>
+<div class="math notranslate nohighlight">
+\[k \rightarrow k\frac{p_q}{p_q + p\left(\mathbf{x}\right)}.\]</div>
+<p>An example JSON specification is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;:
+[
+    {
+        &quot;reaction&quot;: &quot;e + N2 -&gt; e + N2 + Y&quot;, // Reaction string
+        &quot;type&quot;: &quot;alpha*v&quot;,                  // Rate is alpha*v
+        &quot;species&quot;: &quot;e&quot;,                     // Species for v,
+        &quot;quenching pressure&quot;: 4000.0        // Quenching pressure
+    }
+]
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The quenching pressure must be specified in units of Pascal.</p>
+</div>
+</section>
+<section id="rate-based">
+<h5>Rate-based<a class="headerlink" href="#rate-based" title="Permalink to this heading"></a></h5>
+<p>The reaction rate can be modified by a factor <span class="math notranslate nohighlight">\(k_r/\left[k_r + k_p + k_q\right]\)</span>.
+The intention behind this scaling is that reaction <span class="math notranslate nohighlight">\(r\)</span> occurs only if it is not predissociated (by rate <span class="math notranslate nohighlight">\(k_p\)</span>) or quenched (by rate <span class="math notranslate nohighlight">\(k_q\)</span>).
+Such processes can occur, for example, in excited molecules.
+This will modifiy the rate constant as</p>
+<div class="math notranslate nohighlight">
+\[k \rightarrow k\frac{k_r}{k_r + k_p + k_q},\]</div>
+<p>where the user will specifiy <span class="math notranslate nohighlight">\(k_r\)</span>, <span class="math notranslate nohighlight">\(k_p\)</span>, and <span class="math notranslate nohighlight">\(k_q/N\)</span>.
+The JSON specification must contain <code class="docutils literal notranslate"><span class="pre">quenching</span> <span class="pre">rates</span></code>, for example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;:
+[
+    {
+        &quot;reaction&quot;: &quot;e + N2 -&gt; e + N2 + Y&quot;, // Reaction string
+        &quot;type&quot;: &quot;alpha*v&quot;,                  // Rate is alpha*v
+        &quot;species&quot;: &quot;e&quot;,                     // Species for v,
+        &quot;quenching rates&quot;: {                // Specify relevant rates
+           &quot;kr&quot;: 1E9,
+           &quot;kp&quot;: 1E9,
+           &quot;kq/N&quot;: 0.0
+        }
+    }
+]
+</pre></div>
+</div>
+</section>
+</section>
+<section id="gradient-correction">
+<h4>Gradient correction<a class="headerlink" href="#gradient-correction" title="Permalink to this heading"></a></h4>
+<p>In LFA-based models it is frequently convenient to include energy-corrections to the ionization rate.
+In this case one modifies the rate as</p>
+<div class="math notranslate nohighlight">
+\[k \rightarrow k\left(1 + \frac{\mathbf{E}\cdot \left(D\nabla n_i\right)}{n_i\mu_iE^2}\right).\]</div>
+<p>To include this correction one may include a specifier <code class="docutils literal notranslate"><span class="pre">gradient</span> <span class="pre">correction</span></code> in the JSON entry, in which case one must also enter the species <span class="math notranslate nohighlight">\(n_i\)</span>.
+A JSON specification that includes this</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;:
+[
+    {
+        &quot;reaction&quot;: &quot;e -&gt; e + e + M+&quot;, // Reaction string
+        &quot;type&quot;: &quot;alpha*v&quot;,             // Rate is alpha*v
+        &quot;species&quot;: &quot;e&quot;,                // Species for v,
+        &quot;gradient correction&quot;: &quot;e&quot;     // Specify gradient correction using species &quot;e&quot;
+    }
+]
+</pre></div>
+</div>
+</section>
+<section id="understanding-reaction-rates">
+<h4>Understanding reaction rates<a class="headerlink" href="#understanding-reaction-rates" title="Permalink to this heading"></a></h4>
+<p>The JSON specification takes <em>fluid rates</em> as input to the KMC algorithm.
+Note that subsequent application of multiple scaling factors are multiplicative.
+For example, the specification</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;:
+[
+    {
+        &quot;reaction&quot;: &quot;e -&gt; e + e + M+&quot;, // Reaction string
+        &quot;type&quot;: &quot;alpha*v&quot;,             // Rate is alpha*v
+        &quot;species&quot;: &quot;e&quot;,                // Species for v,
+        &quot;gradient correction&quot;: &quot;e&quot;     // Specify gradient correction using species &quot;e&quot;
+        &quot;quenching pressure&quot;: 4000,    // Quenching pressure
+        &quot;efficiency&quot;: 0.1              // Reaction efficiency
+    }
+]
+</pre></div>
+</div>
+<p>is equivalent to the rate constant</p>
+<div class="math notranslate nohighlight">
+\[k = \alpha\left|\mathbf{v}_e\right|\left(1 + \frac{\mathbf{E}\cdot \left(D_e\nabla n_e\right)}{n_e\mu_eE^2}\right)\frac{p_q}{p_q+p\left(\mathbf{x}\right)}\nu\]</div>
+<p>Internally, conversions between the <em>fluid rate</em> <span class="math notranslate nohighlight">\(k\)</span> and the KMC rate <span class="math notranslate nohighlight">\(c\)</span> are made.
+The conversion factors depend on the reaction order, and ensure consistency between the KMC and fluid formulations.</p>
+</section>
+<section id="plotting-rates">
+<h4>Plotting rates<a class="headerlink" href="#plotting-rates" title="Permalink to this heading"></a></h4>
+<p>Reaction rates can be plotted by including an optional <code class="docutils literal notranslate"><span class="pre">plot</span></code> specifier.
+If the specifier included, the reaction rates will be included in the HDF5 output.
+The user can also include a description string which will be used when plotting the reaction.</p>
+<p>The following two specifiers can be included:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">plot</span></code> (true/false) for plotting the reaction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">description</span></code> (string) for naming the reaction in the HDF5 output.</p></li>
+</ul>
+<p>If the plot description is left out, the reaction string will be used as a variable name in the plot file.
+A JSON specification that includes these</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;:
+[
+    {
+        &quot;reaction&quot;: &quot;e -&gt; e + e + M+&quot;,       // Reaction string
+        &quot;type&quot;: &quot;alpha*v&quot;,                   // Rate is alpha*v
+        &quot;species&quot;: &quot;e&quot;,                      // Species for v,
+        &quot;plot&quot;: true,                        // Plot this reaction
+        &quot;description&quot;: &quot;Townsend ionization&quot; // Variable name in HDF5
+    }
+]
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id9">
+<h3>Photoionization<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h3>
+<p>Photoionization reactions are specified by including a <code class="docutils literal notranslate"><span class="pre">photoionization</span></code> array of JSON entries that specify each reaction.
+The left-hand side of the reaction must contain a photon species (plasma and background species can be present but will be ignored), and the right-hand side can consist of any species except other photon species.
+Each entry <em>must</em> contain a reaction string specifier and optionally also an efficiency (which defaults to 1).
+Assume that photons are generated through the reaction</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;:
+[
+    {
+        &quot;reaction&quot;: &quot;e + N2 -&gt; e + N2 + Y&quot;, // Reaction string
+        &quot;type&quot;: &quot;alpha*v&quot;,                  // Rate is alpha*v
+        &quot;species&quot;: &quot;e&quot;,                     // Species for v,
+        &quot;quenching pressure&quot;: 4000.0        // Quenching
+        &quot;efficiency&quot;: 0.6                   // Excitation events per ionization event
+        &quot;scale&quot;: 0.1                        // Photoionization events per absorbed photon
+    }
+]
+</pre></div>
+</div>
+<p>where we assume an excitation efficiency of <span class="math notranslate nohighlight">\(0.6\)</span> and photoionization efficiency of <span class="math notranslate nohighlight">\(0.1\)</span>.
+An example photoionization specification is then</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;photoionization&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;reaction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Y + O2 -&gt; e + O2+&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Note that the efficiency of this reaction is 1, i.e. the photoionization probabilities was pre-evaluated.
+As discussed in <a class="reference internal" href="#chap-itokmcphysics"><span class="std std-ref">ItoKMCPhysics</span></a>, we can perform late evaluation of the photoionization probability by specifically including a efficiency.
+In this case we modify the above into</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;:
+[
+    {
+        &quot;reaction&quot;: &quot;e + N2 -&gt; e + N2 + Y&quot;, // Reaction string
+        &quot;type&quot;: &quot;alpha*v&quot;,                  // Rate is alpha*v
+        &quot;species&quot;: &quot;e&quot;,                     // Species for v,
+        &quot;quenching pressure&quot;: 4000.0        // Quenching
+        &quot;efficiency&quot;: 0.6                   // Excitation events per ionization event
+    }
+],
+&quot;photoionization&quot;:
+[
+    {
+        &quot;reaction&quot;: &quot;Y + O2 -&gt; e + O2+&quot;,
+        &quot;efficiency&quot;: 0.1
+    },
+    {
+        &quot;reaction&quot;: &quot;Y + O2 -&gt; (null)&quot;,
+        &quot;efficiency&quot;: 0.9
+    }
+]
+</pre></div>
+</div>
+<p>where a null-absorption model has been added for the photon absorption.
+When multiple pathways are specified this way, and they have probabilities <span class="math notranslate nohighlight">\(\xi_1, \xi_2, \ldots\)</span>, the reaction is stochastically determined from a discrete distribution with relative probabilities <span class="math notranslate nohighlight">\(p_i = \xi_i/(\xi_1 + \xi_2+\ldots)\)</span>.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The null-reaction model is <em>not</em> automatically added when using late evaluation of the photoionization probability.</p>
+</div>
+</section>
+<section id="secondary-emission">
+<h3>Secondary emission<a class="headerlink" href="#secondary-emission" title="Permalink to this heading"></a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Secondary emission on surfaces are not implemented (yet). Only purely absorbing BCs are currently supported.</p>
+</div>
+</section>
+</section>
+<section id="example-programs">
+<h2>Example programs<a class="headerlink" href="#example-programs" title="Permalink to this heading"></a></h2>
+<p>Example programs that use the Îto-KMC module are given in</p>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirBasic</span></code> for a basic streamer discharge in atmospheric air.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirDBD</span></code> for a streamer discharge over a dielectric.</p></li>
+</ul>
+</section>
 </section>
 
 

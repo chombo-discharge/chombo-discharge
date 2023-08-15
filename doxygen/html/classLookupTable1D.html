@@ -123,6 +123,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:abc947dd6530681a7cfc96c719d948777"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#abc947dd6530681a7cfc96c719d948777">setRange</a> (const Real a_min, const Real a_max, const int a_whichColumn=0)</td></tr>
 <tr class="memdesc:abc947dd6530681a7cfc96c719d948777"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restrict table range to maximum and minimum. Data outside these ranges are discarded.  <a href="classLookupTable1D.html#abc947dd6530681a7cfc96c719d948777">More...</a><br /></td></tr>
 <tr class="separator:abc947dd6530681a7cfc96c719d948777"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e2538bd69177b2daca9bad67b13a93b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a8e2538bd69177b2daca9bad67b13a93b">setMinRange</a> (const Real a_min, const int a_whichColumn=0)</td></tr>
+<tr class="memdesc:a8e2538bd69177b2daca9bad67b13a93b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restrict table range to minimum value. Data outside these ranges are discarded.  <a href="classLookupTable1D.html#a8e2538bd69177b2daca9bad67b13a93b">More...</a><br /></td></tr>
+<tr class="separator:a8e2538bd69177b2daca9bad67b13a93b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7572a596eaf527f334b3fc9a4fbe9a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#ad7572a596eaf527f334b3fc9a4fbe9a6">setMaxRange</a> (const Real a_max, const int a_whichColumn=0)</td></tr>
+<tr class="memdesc:ad7572a596eaf527f334b3fc9a4fbe9a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restrict table range to maximum value. Data outside this range are discarded.  <a href="classLookupTable1D.html#ad7572a596eaf527f334b3fc9a4fbe9a6">More...</a><br /></td></tr>
+<tr class="separator:ad7572a596eaf527f334b3fc9a4fbe9a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afd7a6ac332d5f5e0827a5312479fabfe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#afd7a6ac332d5f5e0827a5312479fabfe">setOutOfRangeStrategyLow</a> (const <a class="el" href="CD__LookupTable1D_8H.html#a68acea554b689ac41c0b13388ed03572">OutOfRangeStrategy</a> a_strategy)</td></tr>
 <tr class="memdesc:afd7a6ac332d5f5e0827a5312479fabfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the strategy when retrieving data that is out of range on the low side.  <a href="classLookupTable1D.html#afd7a6ac332d5f5e0827a5312479fabfe">More...</a><br /></td></tr>
 <tr class="separator:afd7a6ac332d5f5e0827a5312479fabfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -507,6 +513,100 @@ template&lt;int K&gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_scale</td><td>Factor to scale by </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_whichColumn</td><td>Column to scale </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad7572a596eaf527f334b3fc9a4fbe9a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7572a596eaf527f334b3fc9a4fbe9a6">&#9670;&nbsp;</a></span>setMaxRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;int N&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::setMaxRange </td>
+          <td>(</td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_max</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_whichColumn</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Restrict table range to maximum value. Data outside this range are discarded. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_max</td><td>Maximum x-value in the table. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_whichColumn</td><td>Ranges based on this column. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a8e2538bd69177b2daca9bad67b13a93b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e2538bd69177b2daca9bad67b13a93b">&#9670;&nbsp;</a></span>setMinRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;int N&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::setMinRange </td>
+          <td>(</td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_min</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_whichColumn</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Restrict table range to minimum value. Data outside these ranges are discarded. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_min</td><td>Minimum x-value in the table. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_whichColumn</td><td>Ranges based on this column. </td></tr>
   </table>
   </dd>
 </dl>
