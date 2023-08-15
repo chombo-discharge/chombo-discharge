@@ -94,11 +94,29 @@ ItoKMCPhysics::defineKMC() noexcept
   CH_TIME("ItoKMCPhysics::defineKMC");
 
   m_kmcState.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
-
   m_kmcSolver.define(m_kmcReactions);
 
   // Define solver parameters in case they've been changed since last time.
   m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
+
+  // Safety hook -- make sure no one defines reactions using an out-of-range species index.
+#ifndef NDEBUG
+  for (const auto& R : m_kmcReactions) {
+    const auto& lhsReactants = R->getReactants();
+    const auto& rhsReactants = R->getReactiveProducts();
+    const auto& rhsPhotons   = R->getNonReactiveProducts();
+
+    for (const auto& r : lhsReactants) {
+      CH_assert(r < m_itoSpecies.size() + m_cdrSpecies.size());
+    }
+    for (const auto& r : rhsReactants) {
+      CH_assert(r < m_itoSpecies.size() + m_cdrSpecies.size());
+    }
+    for (const auto& r : rhsPhotons) {
+      CH_assert(r < m_rtSpecies.size());
+    }
+  }
+#endif
 }
 
 inline void
@@ -106,6 +124,15 @@ ItoKMCPhysics::definePhotoPathways() noexcept
 {
   CH_TIME("ItoKMCPhysics::definePhotoPathways");
 
+  // Build a temporary list of pathways. I.e. restructure the list of reactions
+  //
+  // Y1 -> A
+  // Y1 -> B
+  // Y2 -> C
+  // Y2 -> D
+  //
+  // into separate lists for Y1, Y2, ....
+  //
   std::map<int, std::vector<std::pair<int, Real>>> pathways;
 
   for (int i = 0; i < m_photoReactions.size(); i++) {
@@ -117,17 +144,26 @@ ItoKMCPhysics::definePhotoPathways() noexcept
     pathways[src].emplace_back(std::make_pair(i, efficiency));
   }
 
-  // Define the reaction set.
+  // Go through the temporary pathways list and compute the relative efficiencies of one of the
+  // photons triggering a reaction. The relative efficiencies are given by
+  //
+  // p(i) = R(i)/sum_j R(j).
+  //
   for (const auto& p : pathways) {
     const int                               photoSpecies             = p.first;
     const std::vector<std::pair<int, Real>> reactionsAndEfficiencies = p.second;
 
     std::map<int, int> localToGlobalMap;
     std::list<double>  efficiencies;
+    double             sumEfficiencies = 0.0;
+
+    for (int i = 0; i < reactionsAndEfficiencies.size(); i++) {
+      sumEfficiencies += (double)reactionsAndEfficiencies[i].second;
+    }
 
     for (int i = 0; i < reactionsAndEfficiencies.size(); i++) {
       localToGlobalMap.emplace(i, reactionsAndEfficiencies[i].first);
-      efficiencies.emplace_back((double)reactionsAndEfficiencies[i].second);
+      efficiencies.emplace_back((double)reactionsAndEfficiencies[i].second / sumEfficiencies);
     }
 
     std::discrete_distribution<int> distribution(efficiencies.begin(), efficiencies.end());
@@ -278,6 +314,7 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
                           const Vector<RealVect>& a_gradPhi,
                           const Real              a_dt,
                           const RealVect          a_E,
+                          const RealVect          a_pos,
                           const Real              a_dx,
                           const Real              a_kappa) const
 {
@@ -298,7 +335,7 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   }
 
   // Update the reaction rates and run the KMC solver.
-  this->updateReactionRates(a_E, a_phi, a_gradPhi, a_dx, a_kappa);
+  this->updateReactionRates(a_E, a_pos, a_phi, a_gradPhi, a_dx, a_kappa);
 
   // // Which algorithm?
   switch (m_algorithm) {

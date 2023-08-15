@@ -128,13 +128,49 @@ template <int N>
 inline void
 LookupTable1D<N>::setRange(const Real a_min, const Real a_max, const int a_colRange)
 {
-
   // Do a backup of the data and reset data holder.
   const std::vector<std::array<Real, N>> oldData = m_data;
   this->clear();
 
   for (const auto& d : oldData) {
     if (d[a_colRange] >= a_min && d[a_colRange] <= a_max) {
+      m_data.emplace_back(d);
+    }
+  }
+
+  std::get<Sorted>(m_state)  = false;
+  std::get<Uniform>(m_state) = false;
+}
+
+template <int N>
+inline void
+LookupTable1D<N>::setMinRange(const Real a_min, const int a_colRange)
+{
+
+  // Do a backup of the data and reset data holder
+  const std::vector<std::array<Real, N>> oldData = m_data;
+  this->clear();
+
+  for (const auto& d : oldData) {
+    if (d[a_colRange] >= a_min) {
+      m_data.emplace_back(d);
+    }
+  }
+
+  std::get<Sorted>(m_state)  = false;
+  std::get<Uniform>(m_state) = false;
+}
+
+template <int N>
+inline void
+LookupTable1D<N>::setMaxRange(const Real a_max, const int a_colRange)
+{
+  // Do a backup of the data and reset data holder.
+  const std::vector<std::array<Real, N>> oldData = m_data;
+  this->clear();
+
+  for (const auto& d : oldData) {
+    if (d[a_colRange] <= a_max) {
       m_data.emplace_back(d);
     }
   }

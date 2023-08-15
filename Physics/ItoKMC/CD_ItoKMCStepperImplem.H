@@ -657,6 +657,7 @@ ItoKMCStepper<I, C, R, F>::initialData() noexcept
 
   // Solve Poisson equation and compute the E-field
   m_fieldSolver->setPermittivities();
+  this->computeSpaceChargeDensity();
   this->solvePoisson();
 
   // Fill solvers with velocities and diffusion coefficients
@@ -890,6 +891,9 @@ ItoKMCStepper<I, C, R, F>::getNumberOfPlotVariables() const noexcept
     numComp += 1;
   }
 
+  // Physics plot variables
+  numComp += m_physics->getNumberOfPlotVariables();
+
   return numComp;
 }
 
@@ -937,6 +941,9 @@ ItoKMCStepper<I, C, R, F>::getPlotVariableNames() const noexcept
   if (m_plotParticlesPerPatch) {
     plotVarNames.push_back("Particles per patch");
   }
+
+  // Physics plot variable names
+  plotVarNames.append(m_physics->getPlotVariableNames());
 
   return plotVarNames;
 }
@@ -988,6 +995,11 @@ ItoKMCStepper<I, C, R, F>::writePlotData(LevelData<EBCellFAB>& a_output,
   if (m_plotParticlesPerPatch) {
     this->writeNumberOfParticlesPerPatch(a_output, a_icomp, a_outputRealm, a_level);
   }
+
+  // Write physics plot variables
+  if (m_physics->getNumberOfPlotVariables() > 0) {
+    this->writeData(a_output, a_icomp, m_physicsPlotVariables, a_outputRealm, a_level, false, true);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1009,6 +1021,10 @@ ItoKMCStepper<I, C, R, F>::writeData(LevelData<EBCellFAB>& a_output,
   CH_TIMER("ItoKMCStepper::writeData::final_copy", t5);
   if (m_verbosity > 5) {
     pout() << m_name + "::writeData" << endl;
+  }
+
+  if (a_data[a_level].isNull()) {
+    pout() << "wtf" << endl;
   }
 
   // Number of components we are working with.
@@ -1448,12 +1464,47 @@ ItoKMCStepper<I, C, R, F>::registerOperators() noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
+ItoKMCStepper<I, C, R, F>::prePlot() noexcept
+{
+  CH_TIME("ItoKMCStepper::prePlot");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::prePlot" << endl;
+  }
+
+  const int numPhysicsPlotVars = m_physics->getNumberOfPlotVariables();
+
+  if (numPhysicsPlotVars > 0) {
+    m_amr->allocate(m_physicsPlotVariables, m_fluidRealm, m_plasmaPhase, numPhysicsPlotVars);
+  }
+
+  this->computePhysicsPlotVariables(m_physicsPlotVariables);
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::postPlot() noexcept
+{
+  CH_TIME("ItoKMCStepper::postPlot");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::postPlot" << endl;
+  }
+
+  m_physicsPlotVariables.clear();
+}
+
+template <typename I, typename C, typename R, typename F>
+void
 ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLevel) noexcept
 {
   CH_TIME("ItoKMCStepper::preRegrid");
   if (m_verbosity > 5) {
     pout() << m_name + "::preRegrid" << endl;
   }
+
+  const int numItoSpecies    = m_physics->getNumItoSpecies();
+  const int numCdrSpecies    = m_physics->getNumCdrSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
   // If we are load balancing then we need to store the number of particles per cell on the old grids. This
   // will be used to estimate computational loads on the new grids.
@@ -1473,6 +1524,67 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
     }
   }
 
+  // Release some unecessary storage.
+  m_fluidScratch1.clear();
+  m_fluidScratchD.clear();
+  m_fluidScratchEB.clear();
+
+  m_particleScratch1.clear();
+  m_particleScratchD.clear();
+  m_particleScratchEB.clear();
+
+  m_conductivityCell.clear();
+  m_conductivityFace.clear();
+  m_conductivityEB.clear();
+
+  m_electricFieldParticle.clear();
+  m_electricFieldFluid.clear();
+
+  m_electricFieldParticle.clear();
+  m_electricFieldFluid.clear();
+
+  for (int i = 0; i < numCdrSpecies; i++) {
+    m_cdrMobilities[i].clear();
+    m_cdrPhotoiProducts[i].clearParticles();
+  }
+
+  for (int i = 0; i < numItoSpecies; i++) {
+    m_fluidGradPhiIto[i].clear();
+    m_fluidPhiIto[i].clear();
+  }
+  for (int i = 0; i < numCdrSpecies; i++) {
+    m_fluidGradPhiCDR[i].clear();
+  }
+
+  for (int i = 0; i < numItoSpecies; i++) {
+    m_secondaryParticles[i].clearParticles();
+  }
+  for (int i = 0; i < numPhotonSpecies; i++) {
+    m_secondaryPhotons[i].clearParticles();
+  }
+
+  for (int i = 0; i < numCdrSpecies; i++) {
+    m_cdrFluxes[i].clear();
+    m_cdrFluxesExtrap[i].clear();
+  }
+
+  m_currentDensity.clear();
+  m_oldPPC.clear();
+  m_newPPC.clear();
+  m_fluidPPC.clear();
+
+  m_particleItoPPC.clear();
+  m_particleOldItoPPC.clear();
+
+  if (numCdrSpecies > 0) {
+    m_fluidCdrPPC.clear();
+    m_fluidOldCdrPPC.clear();
+  }
+
+  m_particleYPC.clear();
+  m_fluidYPC.clear();
+
+  // Put solvers in pre-regrid mode.
   m_ito->preRegrid(a_lmin, a_oldFinestLevel);
   m_cdr->preRegrid(a_lmin, a_oldFinestLevel);
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
@@ -2679,6 +2791,9 @@ ItoKMCStepper<I, C, R, F>::computeMobilities(Vector<EBAMRCellData*>& a_itoMobili
   for (int i = 0; i < numItoSpecies; i++) {
     m_amr->allocate(fluidScratchMobilities[i], m_fluidRealm, m_plasmaPhase, 1);
 
+    DataOps::setValue(fluidScratchMobilities[i], 0.0);
+    DataOps::setValue(*a_itoMobilities[i], 0.0);
+
     CH_assert(a_itoMobilities[i]->getRealm() == m_particleRealm);
   }
 
@@ -3018,11 +3133,11 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<EBCellFAB*>& a_it
 
   const int numItoSpecies    = m_physics->getNumItoSpecies();
   const int numCdrSpecies    = m_physics->getNumCdrSpecies();
-  const int numPlasmaSpecies = m_physics->getNumCdrSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_electricField.nComp() == SpaceDim);
   CH_assert(a_itoDiffusionCoefficients.size() == numItoSpecies);
-  CH_assert(a_cdrDiffusionCoefficients.size() == numPlasmaSpecies);
+  CH_assert(a_cdrDiffusionCoefficients.size() == numCdrSpecies);
 
   // Geometric information that we need.
   const Real     dx      = m_amr->getDx()[a_level];
@@ -3801,7 +3916,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
       }
 
       // Do the physics advance.
-      m_physics->advanceKMC(particles, newPhotons, densities, densityGradients, a_dt, E, a_dx, 1.0);
+      m_physics->advanceKMC(particles, newPhotons, densities, densityGradients, a_dt, E, pos, a_dx, 1.0);
 
       // Repopulate the input data holders with the new number of particles/photons per cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {
@@ -3848,7 +3963,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
       }
 
       // Do the physics advance
-      m_physics->advanceKMC(particles, newPhotons, densities, densityGradients, a_dt, E, a_dx, kappa);
+      m_physics->advanceKMC(particles, newPhotons, densities, densityGradients, a_dt, E, pos, a_dx, kappa);
 
       // Repopulate the input data holders with the new number of particles/photons per cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {
@@ -5542,6 +5657,163 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
     }
 
     computationParticles.clearParticles();
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::computePhysicsPlotVariables(EBAMRCellData& a_physicsPlotVars) noexcept
+{
+  CH_TIME("ItoKMCStepper::computePhysicsPlotVariables");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computePhysicsPlotVariables" << endl;
+  }
+
+  // Number of output variables from CdrPlasmaPhysics
+  const int numVars          = m_physics->getNumberOfPlotVariables();
+  const int numItoSpecies    = m_physics->getNumItoSpecies();
+  const int numCdrSpecies    = m_physics->getNumCdrSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
+
+  CH_assert(!(a_physicsPlotVars[0].isNull()));
+  CH_assert(a_physicsPlotVars[0]->nComp() == numVars);
+  CH_assert(a_physicsPlotVars.getRealm() == m_fluidRealm);
+
+  // Update gradients
+  this->computeDensityGradients();
+
+  const RealVect probLo = m_amr->getProbLo();
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_fluidRealm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[lvl];
+    const Real               dx    = m_amr->getDx()[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const Box&     cellBox = dbl[dit()];
+      const EBISBox& ebisBox = ebisl[dit()];
+
+      // Handle to electric field
+      const EBCellFAB& electricField    = (*m_electricFieldFluid[lvl])[dit()];
+      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+
+      // Handle to densities and density gradients for CDR and Ito species.
+      Vector<const EBCellFAB*> densitiesIto(numItoSpecies);
+      Vector<const EBCellFAB*> densityGradientsIto(numItoSpecies);
+      Vector<const FArrayBox*> densitiesItoReg(numItoSpecies);
+      Vector<const FArrayBox*> densityGradientsItoReg(numItoSpecies);
+
+      Vector<const EBCellFAB*> densitiesCDR(numCdrSpecies);
+      Vector<const EBCellFAB*> densityGradientsCDR(numCdrSpecies);
+      Vector<const FArrayBox*> densitiesCDRReg(numCdrSpecies);
+      Vector<const FArrayBox*> densityGradientsCDRReg(numCdrSpecies);
+
+      for (auto it = m_ito->iterator(); it.ok(); ++it) {
+        const RefCountedPtr<ItoSolver>& solver = it();
+
+        const int i = it.index();
+
+        densitiesIto[i]           = &(*(m_fluidPhiIto[i])[lvl])[dit()];
+        densitiesItoReg[i]        = &(densitiesIto[i]->getFArrayBox());
+        densityGradientsIto[i]    = &(*m_fluidGradPhiIto[i][lvl])[dit()];
+        densityGradientsItoReg[i] = &(densityGradientsIto[i]->getFArrayBox());
+      }
+
+      for (auto it = m_cdr->iterator(); it.ok(); ++it) {
+        const RefCountedPtr<CdrSolver>& solver = it();
+        const EBAMRCellData&            phi    = solver->getPhi();
+
+        const int i = it.index();
+
+        densitiesCDR[i]           = &(*phi[lvl])[dit()];
+        densitiesCDRReg[i]        = &(densitiesCDR[i]->getFArrayBox());
+        densityGradientsCDR[i]    = &(*m_fluidGradPhiCDR[i][lvl])[dit()];
+        densityGradientsCDRReg[i] = &(densityGradientsCDR[i]->getFArrayBox());
+      }
+
+      // Handle to valid grid cells.
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[lvl])[dit()];
+
+      // Handle to output variables
+      EBCellFAB& physicsPlotVars    = (*a_physicsPlotVars[lvl])[dit()];
+      FArrayBox& physicsPlotVarsReg = physicsPlotVars.getFArrayBox();
+
+      // Things that will be populated in the kernels.
+      Vector<Real>     densities(numPlasmaSpecies);
+      Vector<RealVect> densityGradients(numPlasmaSpecies);
+
+      // Regular cells
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (ebisBox.isRegular(iv) && validCells(iv, 0)) {
+          const RealVect pos = probLo + dx * (RealVect(iv) + 0.5 * RealVect::Unit);
+          const RealVect E   = RealVect(
+            D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+
+          // Populate gradients.
+          for (int i = 0; i < numItoSpecies; i++) {
+            densities[i]        = (*densitiesItoReg[i])(iv, 0);
+            densityGradients[i] = RealVect(D_DECL((*densityGradientsItoReg[i])(iv, 0),
+                                                  (*densityGradientsItoReg[i])(iv, 1),
+                                                  (*densityGradientsItoReg[i])(iv, 2)));
+          }
+
+          for (int i = 0; i < numCdrSpecies; i++) {
+            densities[numItoSpecies + i]        = (*densitiesCDRReg[i])(iv, 0);
+            densityGradients[numItoSpecies + i] = RealVect(D_DECL((*densityGradientsCDRReg[i])(iv, 0),
+                                                                  (*densityGradientsCDRReg[i])(iv, 1),
+                                                                  (*densityGradientsCDRReg[i])(iv, 2)));
+          }
+
+          // Do the physics advance.
+          const Vector<Real> plotVars = m_physics->getPlotVariables(E, pos, densities, densityGradients, dx, 1.0);
+
+          CH_assert(plotVars.size() == numVars);
+
+          for (int i = 0; i < numVars; i++) {
+            physicsPlotVarsReg(iv, i) = plotVars[i];
+          }
+        }
+      };
+
+      // Irregular cells
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        if (validCells(vof.gridIndex(), 0)) {
+          const RealVect pos = probLo + dx * (RealVect(vof.gridIndex()) + 0.5 * RealVect::Unit);
+          const RealVect E   = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+
+          // Populate gradients.
+          for (int i = 0; i < numItoSpecies; i++) {
+            densities[i]        = (*densitiesIto[i])(vof, 0);
+            densityGradients[i] = RealVect(D_DECL((*densityGradientsIto[i])(vof, 0),
+                                                  (*densityGradientsIto[i])(vof, 1),
+                                                  (*densityGradientsIto[i])(vof, 2)));
+          }
+
+          for (int i = 0; i < numCdrSpecies; i++) {
+            densities[numItoSpecies + i]        = (*densitiesCDR[i])(vof, 0);
+            densityGradients[numItoSpecies + i] = RealVect(D_DECL((*densityGradientsCDR[i])(vof, 0),
+                                                                  (*densityGradientsCDR[i])(vof, 1),
+                                                                  (*densityGradientsCDR[i])(vof, 2)));
+          }
+
+          // Do the physics advance.
+          const Vector<Real> plotVars = m_physics->getPlotVariables(E, pos, densities, densityGradients, dx, 1.0);
+
+          CH_assert(plotVars.size() == numVars);
+
+          for (int i = 0; i < numVars; i++) {
+            physicsPlotVars(vof, i) = plotVars[i];
+          }
+        }
+      };
+
+      // Run the kernels.
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[dit()];
+
+      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
   }
 }
 

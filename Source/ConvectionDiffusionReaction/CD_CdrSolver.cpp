@@ -1226,6 +1226,7 @@ CdrSolver::initialDataParticles()
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const RealVect           dx     = m_amr->getDx()[lvl] * RealVect::Unit;
       const RealVect           probLo = m_amr->getProbLo();
+      const ProblemDomain&     domain = m_amr->getDomains()[lvl];
       const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
       const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
@@ -1236,7 +1237,7 @@ CdrSolver::initialDataParticles()
 
         // Make the deposition object and put the particles on the grid.
         constexpr bool forceIrregNGP = true;
-        EBParticleMesh interp(cellBox, ebisbox, dx, probLo);
+        EBParticleMesh interp(domain, cellBox, ebisbox, dx, probLo);
 
         interp.deposit<PointParticle, &PointParticle::weight>(particles[lvl][dit()].listItems(),
                                                               (*m_phi[lvl])[dit()],

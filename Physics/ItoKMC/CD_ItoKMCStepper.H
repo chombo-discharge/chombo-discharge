@@ -240,6 +240,18 @@ namespace Physics {
       registerOperators() noexcept override;
 
       /*!
+	@brief Perform pre-plot operations
+      */
+      virtual void
+      prePlot() noexcept override;
+
+      /*!
+	@brief Perform post-plot operations
+      */
+      virtual void
+      postPlot() noexcept override;
+
+      /*!
 	@brief Perform pre-regrid operations - storing relevant data from the old grids. 
 	@param[in] a_lmin           The coarsest level that changes
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
@@ -620,6 +632,11 @@ namespace Physics {
 	@note Defined over the fluid realm with SpaceDim components. 
       */
       EBAMRCellData m_currentDensity;
+
+      /*!
+	@brief Storage for physics plot variables
+      */
+      EBAMRCellData m_physicsPlotVariables;
 
       /*!
 	@brief Cell-centered conductivity.
@@ -1719,6 +1736,13 @@ namespace Physics {
       */
       virtual void
       parsePlotVariables() noexcept;
+
+      /*!
+	@brief Compute physics plot variables
+	@param[out] a_physicsPlotVars Plot variables from physics implementation
+      */
+      virtual void
+      computePhysicsPlotVariables(EBAMRCellData& a_physicsPlotVars) noexcept;
     };
   } // namespace ItoKMC
 } // namespace Physics

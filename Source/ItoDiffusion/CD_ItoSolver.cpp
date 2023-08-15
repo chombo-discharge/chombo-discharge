@@ -527,6 +527,7 @@ ItoSolver::initialData()
   ParticleContainer<ItoParticle>& bulkParticles = m_particleContainers.at(WhichContainer::Bulk);
   bulkParticles.clearParticles();
   bulkParticles.addParticles(m_species->getInitialParticles());
+  bulkParticles.remap();
 
   constexpr Real tolerance = 0.0;
 
@@ -542,6 +543,9 @@ ItoSolver::computeLoads(Vector<long int>& a_loads, const DisjointBoxLayout& a_db
   if (m_verbosity > 5) {
     pout() << m_name + "::computeLoads" << endl;
   }
+
+  CH_assert(a_dbl.isClosed());
+  CH_assert(a_dbl.size() > 0);
 
   const ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
@@ -1286,10 +1290,10 @@ ItoSolver::getPlotVariableNames() const
     names.push_back(m_name + " diffusion_coefficient");
   }
   if (m_plotVelocity && m_isMobile) {
-    names.push_back("x-Velocity " + m_name);
-    names.push_back("y-Velocity " + m_name);
+    names.push_back("x-Velocity field " + m_name);
+    names.push_back("y-Velocity field " + m_name);
     if (SpaceDim == 3) {
-      names.push_back("z-Velocity " + m_name);
+      names.push_back("z-Velocity field " + m_name);
     }
   }
   if (m_plotParticles) {

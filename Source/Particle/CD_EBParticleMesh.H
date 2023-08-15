@@ -40,23 +40,32 @@ public:
 
   /*!
     @brief Full constructor
+    @param[in] a_domain        Computational domain
     @param[in] a_region        Cell-centered box
     @param[in] a_ebisbox       EBIS box 
     @param[in] a_dx            Resolution
     @param[in] a_probLo        Lower-left corner of computational domain
   */
-  EBParticleMesh(const Box& a_region, const EBISBox& a_ebisbox, const RealVect& a_dx, const RealVect& a_probLo);
+  EBParticleMesh(const ProblemDomain& a_domain,
+                 const Box&           a_region,
+                 const EBISBox&       a_ebisbox,
+                 const RealVect&      a_dx,
+                 const RealVect&      a_probLo);
 
   /*!
     @brief Define function
+    @param[in] a_domain        Computational domain
     @param[in] a_region        Cell-centered box
     @param[in] a_ebisbox       EBIS box 
     @param[in] a_dx            Resolution
     @param[in] a_probLo        Lower-left corner of computational domain
-    @param[in] a_forceIrregNGP If true, forces NGP deposition and interpolation in cut-cells. 
   */
   void
-  define(const Box& a_region, const EBISBox& a_ebisbox, const RealVect& a_dx, const RealVect& a_probLo);
+  define(const ProblemDomain& a_domain,
+         const Box&           a_region,
+         const EBISBox&       a_ebisbox,
+         const RealVect&      a_dx,
+         const RealVect&      a_probLo);
 
   /*!
     @brief Deposit particle onto the mesh using a standard cloud width. 
@@ -398,6 +407,7 @@ protected:
     as a Real[] and specifies the components to interpolate. 
     @param[out] a_particleField  Field evaluations at the particle position. Must be of type Real[]. 
     @param[in]  a_field          Field. 
+    @param[in]  a_validRegion    Region where particle can live without kernels reaching outside the domain.
     @param[in]  a_probLo         Lower-left corner of domain
     @param[in]  a_dx             Grid resolution
     @param[in]  a_position       Particle position
@@ -408,12 +418,18 @@ protected:
   inline void
   interpolateParticle(Real*                a_particleField,
                       const EBCellFAB&     a_field,
+                      const Box&           a_validBox,
                       const RealVect&      a_probLo,
                       const RealVect&      a_dx,
                       const RealVect&      a_position,
                       const Interval&      a_interval,
                       const DepositionType a_interpType,
                       const bool           a_forceIrregNGP) const;
+
+  /*!
+    @brief Problem domain
+  */
+  ProblemDomain m_domain;
 
   /*!
     @brief Cell-centered box, i.e. valid region. 

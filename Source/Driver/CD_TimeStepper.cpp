@@ -136,4 +136,8 @@ void
 TimeStepper::prePlot()
 {}
 
+void
+TimeStepper::postPlot()
+{}
+
 #include <CD_NamespaceFooter.H>

@@ -178,6 +178,13 @@ public:
   prePlot();
 
   /*!
+    @brief An option for calling special functions prior to plotting data. 
+    Called by Driver in the IMMEDIATELY after writing the plot file. 
+  */
+  virtual void
+  postPlot();
+
+  /*!
     @brief Get computational loads to be checkpointed. 
     @details This is used by Driver both for setting up load-balanced restarts AND for plotting the computational loads to a file. This routine is
     disjoint from loadBalanceBoxes because this routine is not part of a regrid. This means that we are not operating with temporarily load balanced

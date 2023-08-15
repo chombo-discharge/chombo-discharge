@@ -863,12 +863,6 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
             pout() << "Driver::run -- Writing plot file" << endl;
           }
 
-          // TimeStepper does pre-plot calculations.
-          m_timeStepper->prePlot();
-          if (!(m_cellTagger.isNull())) {
-            m_cellTagger->prePlot();
-          }
-
           // Write plot file.
           this->writePlotFile();
         }
@@ -1298,8 +1292,6 @@ Driver::setup(const std::string a_inputFile,
         if (m_writeLoads) {
           this->writeComputationalLoads();
         }
-
-        m_timeStepper->prePlot();
 
         this->writePlotFile();
       }
@@ -2166,6 +2158,12 @@ Driver::writePlotFile(const std::string a_filename)
     pout() << "Driver::writePlotFile(string)" << endl;
   }
 
+  // Time stepper does pre-plot operations
+  m_timeStepper->prePlot();
+  if (!(m_cellTagger.isNull())) {
+    m_cellTagger->prePlot();
+  }
+
   // Get total number of components for output
   int numOutputComp = m_timeStepper->getNumberOfPlotVariables();
   if (!m_cellTagger.isNull()) {
@@ -2253,6 +2251,9 @@ Driver::writePlotFile(const std::string a_filename)
 
     pout() << msg1 << a_filename.c_str() << msg2 << endl;
   }
+
+  // TimeStepper does post-plot operations.
+  m_timeStepper->postPlot();
 }
 
 void

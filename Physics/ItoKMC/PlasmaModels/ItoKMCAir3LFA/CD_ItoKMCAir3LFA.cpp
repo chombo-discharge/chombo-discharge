@@ -200,26 +200,26 @@ ItoKMCAir3LFA::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<
 {
   CH_TIME("ItoKMCAir3LFA::computeDt");
   const Real E     = a_E.vectorLength();
-  const Real alpha = this->computeAlpha(a_E);
+  const Real alpha = this->computeAlpha(E, a_pos);
   const Real mu    = m_tables.at("mobility").getEntry<1>(E);
 
   return log(m_deltaX) / (mu * E * alpha);
 }
 
 Real
-ItoKMCAir3LFA::computeAlpha(const RealVect a_E) const
+ItoKMCAir3LFA::computeAlpha(const Real a_E, RealVect a_pos) const
 {
   CH_TIME("ItoKMCAir3LFA::computeAlpha");
 
-  return m_tables.at("alpha").getEntry<1>(a_E.vectorLength());
+  return m_tables.at("alpha").getEntry<1>(a_E);
 }
 
 Real
-ItoKMCAir3LFA::computeEta(const RealVect a_E) const
+ItoKMCAir3LFA::computeEta(const Real a_E, const RealVect a_pos) const
 {
   CH_TIME("ItoKMCAir3LFA::computeEta");
 
-  return m_tables.at("eta").getEntry<1>(a_E.vectorLength());
+  return m_tables.at("eta").getEntry<1>(a_E);
 }
 
 Vector<Real>
@@ -302,6 +302,7 @@ ItoKMCAir3LFA::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryP
 
 void
 ItoKMCAir3LFA::updateReactionRates(const RealVect          a_E,
+                                   const RealVect          a_pos,
                                    const Vector<Real>&     a_phi,
                                    const Vector<RealVect>& a_gradPhi,
                                    const Real              a_dx,

@@ -97,19 +97,21 @@ namespace Physics {
 
       /*!
 	@brief Compute Townsend ionization coefficient
-	@param[in] a_E Electric field. 
+	@param[in] a_E Electric field magnitude
+	@param[in] a_x Physical coordinate
 	@return Should return the Townsend ionization coefficient. 
       */
       virtual Real
-      computeAlpha(const RealVect a_E) const = 0;
+      computeAlpha(const Real a_E, const RealVect a_x) const = 0;
 
       /*!
 	@brief Compute Townsend attachment coefficient
-	@param[in] a_E Electric field. 
+	@param[in] a_E Electric field magnitude
+	@param[in] a_x Physical coordinate
 	@return Should return the Townsend attachment coefficient. 
       */
       virtual Real
-      computeEta(const RealVect a_E) const = 0;
+      computeEta(const Real a_E, const RealVect a_x) const = 0;
 
       /*!
 	@brief Get all particle drift-diffusion species
@@ -131,6 +133,35 @@ namespace Physics {
       */
       const Vector<RefCountedPtr<RtSpecies>>&
       getRtSpecies() const;
+
+      /*!
+	@brief Get number of plot variables
+      */
+      virtual Vector<std::string>
+      getPlotVariableNames() const noexcept;
+
+      /*!
+	@brief Get plot variables
+	@param[in] a_E       Electric field
+	@param[in] a_pos     Physical position
+	@param[in] a_phi     Plasma species densities
+	@param[in] a_gradPhi Density gradients for plasma species. 
+	@param[in] a_dx      Grid resolution
+	@param[in] a_kappa   Cut-cell volume fraction
+      */
+      virtual Vector<Real>
+      getPlotVariables(const RealVect          a_E,
+                       const RealVect          a_pos,
+                       const Vector<Real>&     a_phi,
+                       const Vector<RealVect>& a_gradPhi,
+                       const Real              a_dx,
+                       const Real              a_kappa) const noexcept;
+
+      /*!
+	@brief Get number of plot variables
+      */
+      virtual int
+      getNumberOfPlotVariables() const noexcept;
 
       /*!
 	@brief Return number of Ito solvers.
@@ -244,6 +275,7 @@ namespace Physics {
 	@param[in]    a_gradPhi       Plasma species density gradients. 
 	@param[in]    a_dt            Time step
 	@param[in]    a_E             Electric field
+	@param[in]    a_pos           Physical position
 	@param[in]    a_dx            Grid resolution
 	@param[in]    a_kappa         Cut-cell volume fraction. 
       */
@@ -254,6 +286,7 @@ namespace Physics {
                  const Vector<RealVect>& a_gradPhi,
                  const Real              a_dt,
                  const RealVect          a_E,
+                 const RealVect          a_pos,
                  const Real              a_dx,
                  const Real              a_kappa) const;
 
@@ -359,7 +392,7 @@ namespace Physics {
       ParticlePlacement m_particlePlacement;
 
       /*!
-	@brief Map for associating a plasma species with an Ito solver. 
+	@brief Map for associating a plasma species with an Ito solver or CDR solver.
       */
       std::map<int, std::pair<SpeciesType, int>> m_speciesMap;
 
@@ -401,7 +434,8 @@ namespace Physics {
       /*!
 	@brief Random number generators for photoionization pathways. 
 	@details The first index is the photon index, i.e. entry in m_photonSpecies. The second index in the
-	map is an RNG generator for selecting photo-reactions. 
+	map is an RNG generator for selecting photo-reactions, and a map which associates the returned
+	reaction from the RNG generator with an index in m_photoReactions.
       */
       std::map<int, std::pair<std::discrete_distribution<int>, std::map<int, int>>> m_photoPathways;
 
@@ -500,6 +534,7 @@ namespace Physics {
       /*!
 	@brief Update reaction rates
 	@param[in] a_E       Electric field
+	@param[in] a_pos     Physical position
 	@param[in] a_phi     Plasma species densities
 	@param[in] a_gradPhi Density gradients for plasma species. 
 	@param[in] a_dx      Grid resolution
@@ -508,6 +543,7 @@ namespace Physics {
       */
       virtual void
       updateReactionRates(const RealVect          a_E,
+                          const RealVect          a_pos,
                           const Vector<Real>&     a_phi,
                           const Vector<RealVect>& a_gradPhi,
                           const Real              a_dx,

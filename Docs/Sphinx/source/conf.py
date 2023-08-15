@@ -51,7 +51,11 @@ extensions = [
     'sphinxcontrib.bibtex']
 
 # Bib file
-bibtex_bibfiles = ['references.bib']
+bibtex_bibfiles = ['references.bib', 'publications.bib']
+
+# bibtex style
+bibtex_default_style = 'plain'
+bibtex_reference_style= 'author_year'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -212,7 +216,7 @@ latex_elements = {
 'pointsize': '10pt',
 
 # Additional stuff for the LaTeX preamble.
-#'preamble': '',
+'preamble': '\setcounter{tocdepth}{5}',
 
 # Release name
 #'releasename': ''
@@ -297,7 +301,5 @@ numfig = True
 math_numfig = True
 numfig_secnum_depth = 2
 math_eqref_format = "Eq. {number}"
-
-
 
 print(commit_id)
