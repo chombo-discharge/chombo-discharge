@@ -204,7 +204,7 @@ protected:
   std::tuple<int, bool, bool> m_state;
 
   /*!
-    @brief A base resolution for the electric field tabulations (we assumed that the rates were mapped out linearly)
+    @brief Table resolution.
   */
   Real m_delta;
 

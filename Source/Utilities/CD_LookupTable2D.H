@@ -28,8 +28,9 @@
 
 /*!
   @brief Class for interpolation of data f = (x,y) data.
+  @details N is the number of dependent variables. 
 */
-template <int N>
+template <size_t N = 1>
 class LookupTable2D
 {
 public:
@@ -49,6 +50,16 @@ public:
     @brief Destructor (does nothing)
   */
   virtual ~LookupTable2D() noexcept;
+
+  /*!
+    @brief Add entry to table.
+    @param[in] a_x x-value for entry.
+    @param[in] a_y y-value for entry.
+    @param[in] a_z Dependent variables. Can be an entire array of list of values.
+  */
+  template <typename... Ts>
+  inline void
+  addEntry(const Real a_x, const Real a_y, const Ts&... a_z);
 
   /*!
     @brief Interpolation function. 
@@ -109,10 +120,20 @@ protected:
     @brief Spacing along second variable y
   */
   Real m_dy;
+
+  /*!
+    @brief Raw data.
+  */
+  std::vector<std::tuple<Real, Real, std::array<Real, N>>> m_rawData;
+
+  /*!
+    @brief Structured data. This is populated from m_rawData when calling makeUniform.
+  */
+  std::vector<std::vector<std::array<Real, N>>> m_structuredData;
 };
 
 #include <CD_NamespaceFooter.H>
 
-//#include <CD_LookupTable1DImplem.H>
+#include <CD_LookupTable2DImplem.H>
 
 #endif
