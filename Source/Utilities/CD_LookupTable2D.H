@@ -24,16 +24,16 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 #include <CD_LookupTable.H>
+#include <CD_LookupTable1D.H>
 
 /*!
-  @brief Class for interpolation of data f = (x,y) data
+  @brief Class for interpolation of data f = (x,y) data.
 */
-template <int Nx, int Ny>
+template <int N>
 class LookupTable2D
 {
 public:
-  static_assert(Nx > 1, "LookupTable2D<Nx,Ny> must have Nx > 1");
-  static_assert(Ny > 1, "LookupTable2D<Nx,Ny> must have Ny > 1");
+  static_assert(N >= 1, "LookupTable2D<N> must have N >= 1");
 
   /*!
     @brief Default constructor. Creates a table without any entires.
@@ -48,9 +48,71 @@ public:
   /*!
     @brief Destructor (does nothing)
   */
-  ~LookupTable2D() noexcept;
+  virtual ~LookupTable2D() noexcept;
+
+  /*!
+    @brief Interpolation function. 
+    @details Returns all dependent variables using bilinear interpolation. Out-of-range strategies are respected.
+    @param[in] a_x x-value
+    @param[in] a_y y-value
+  */
+  inline std::array<Real, N>
+  interpolate(const Real& a_x, const Real& a_y) const noexcept;
+
+  /*!
+    @brief Interpolation function for a specific variable. 
+    @details Returns specified dependent variables using bilinear interpolation. Out-of-range strategies are respected.
+    @param[in] a_x x-value
+    @param[in] a_y y-value
+  */
+  template <size_t K>
+  inline Real
+  interpolate(const Real& a_x, const Real& a_y) const noexcept;
 
 protected:
+  /*!
+    @brief Vector of one-dimensional tables. 
+  */
+  std::vector < LookupTable1D<N + 1>
+                  /*!
+    @brief Table spacing strategy along x
+  */
+                  TableSpacing m_tableSpacingX;
+
+  /*!
+    @brief Table spacing strategy along y
+  */
+  TableSpacing m_tableSpacingY;
+
+  /*!
+    @brief Out-of-range strategy along x
+  */
+  OutOfRangeStrategy m_strategyLoX;
+
+  /*!
+    @brief Out-of-range strategy along x
+  */
+  OutOfRangeStrategy m_strategyHiX;
+
+  /*!
+    @brief Out-of-range strategy along x
+  */
+  OutOfRangeStrategy m_strategyLoY;
+
+  /*!
+    @brief Out-of-range strategy along x
+  */
+  OutOfRangeStrategy m_strategyHiY;
+
+  /*!
+    @brief Spacing along first variable x
+  */
+  Real m_dx;
+
+  /*!
+    @brief Spacing along second variable y
+  */
+  Real m_dy;
 };
 
 #include <CD_NamespaceFooter.H>
