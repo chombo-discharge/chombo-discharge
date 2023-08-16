@@ -172,7 +172,7 @@ public:
     @param[in] a_x Interpolation point (independent variable)
   */
   inline std::array<Real, N>
-  getData(const Real a_x) const;
+  interpolate(const Real a_x) const;
 
   /*!
     @brief Get size of the table.

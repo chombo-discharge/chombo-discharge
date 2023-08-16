@@ -399,7 +399,7 @@ LookupTable1D<N>::interpolate(const Real a_x) const
 
 template <int N>
 inline std::array<Real, N>
-LookupTable1D<N>::getData(const Real a_x) const
+LookupTable1D<N>::interpolate(const Real a_x) const
 {
 
   std::array<Real, N> ret;
@@ -451,7 +451,8 @@ LookupTable1D<N>::getData(const Real a_x) const
         break;
       }
       default:
-        MayDay::Error("LookupTable1D<N>::getData -- logic bust when fetching out-of-range endpoint on the low side");
+        MayDay::Error(
+          "LookupTable1D<N>::interpolate -- logic bust when fetching out-of-range endpoint on the low side");
 
         break;
       }
