@@ -16,6 +16,7 @@
 #include <memory>
 #include <vector>
 #include <type_traits>
+#include <iostream>
 
 /*!
   @brief Strategy for obtaining data when requesting data that is out of range. 
@@ -40,12 +41,12 @@ enum StateStatus
 };
 
 /*!
-  @brief Enum for classifying how table is spaced. 
+  @brief Enum for classifying the coordinate system.
 */
-enum class TableSpacing
+enum class CoordinateSystem
 {
   Uniform,
-  Exponential
+  Logarithmic
 };
 
 #include <CD_LookupTable1D.H>
