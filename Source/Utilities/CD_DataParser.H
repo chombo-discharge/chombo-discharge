@@ -17,7 +17,7 @@
 
 // Our includes
 #include <CD_PointParticle.H>
-#include <CD_LookupTable1D.H>
+#include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
 
 /*!

@@ -23,7 +23,7 @@
 // Our includes
 #include <CD_ItoKMCBackgroundSpecies.H>
 #include <CD_ItoKMCPhysics.H>
-#include <CD_LookupTable1D.H>
+#include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {

@@ -31,7 +31,7 @@
 #include <CD_CdrPlasmaReactionJSON.H>
 #include <CD_CdrPlasmaPhotoReactionJSON.H>
 #include <CD_CdrPlasmaSurfaceReactionJSON.H>
-#include <CD_LookupTable1D.H>
+#include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
 
 using json = nlohmann::json;

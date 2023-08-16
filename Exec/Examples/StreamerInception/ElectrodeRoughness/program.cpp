@@ -2,7 +2,7 @@
 #include <CD_NoisePlane.H>
 #include <CD_StreamerInceptionStepper.H>
 #include <CD_StreamerInceptionTagger.H>
-#include <CD_LookupTable1D.H>
+#include <CD_LookupTable.H>
 #include <CD_DataParser.H>
 #include <ParmParse.H>
 
