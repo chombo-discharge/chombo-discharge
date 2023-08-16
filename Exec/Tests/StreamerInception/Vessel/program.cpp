@@ -69,14 +69,14 @@ main(int argc, char* argv[])
   RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
 
   // Define transport data
-  auto alpha = [&](const Real& E) -> Real {
+  auto alpha = [&](const Real& E, const RealVect& x) -> Real {
     return ionizationData.getEntry<1>(E);
   };
-  auto eta = [&](const Real& E) -> Real {
+  auto eta = [&](const Real& E, const RealVect& x) -> Real {
     return attachmentData.getEntry<1>(E);
   };
-  auto alphaEff = [&](const Real& E) -> Real {
-    return alpha(E) - eta(E);
+  auto alphaEff = [&](const Real& E, const RealVect& x) -> Real {
+    return alpha(E, x) - eta(E, x);
   };
   auto bgRate = [&](const Real& E, const RealVect& x) -> Real {
     return 1.E7;

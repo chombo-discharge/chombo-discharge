@@ -21,10 +21,10 @@
 
 using namespace Physics::StreamerInception;
 
-StreamerInceptionTagger::StreamerInceptionTagger(const RefCountedPtr<AmrMesh>&            a_amrMesh,
-                                                 const EBAMRCellData* const               a_electricField,
-                                                 const std::function<Real(const Real E)>& a_alphaEff,
-                                                 const phase::which_phase                 a_phase)
+StreamerInceptionTagger::StreamerInceptionTagger(const RefCountedPtr<AmrMesh>& a_amrMesh,
+                                                 const EBAMRCellData* const    a_electricField,
+                                                 const std::function<Real(const Real E, const RealVect x)>& a_alphaEff,
+                                                 const phase::which_phase                                   a_phase)
 {
   CH_TIME("StreamerInceptionTagger::StreamerInceptionTagger()");
 
@@ -181,6 +181,8 @@ StreamerInceptionTagger::computeTracerField() const noexcept
 
   CH_assert(m_electricField != nullptr);
 
+  const RealVect probLo = m_amr->getProbLo();
+
   // Compute alphaEff * dx on all grid levels.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -193,18 +195,22 @@ StreamerInceptionTagger::computeTracerField() const noexcept
       EBCellFAB& tracerField    = (*m_tracerField[lvl])[dit()];
       FArrayBox& tracerFieldReg = tracerField.getFArrayBox();
 
+      const EBISBox& ebisbox = electricField.getEBISBox();
+
       auto regularKernel = [&](const IntVect& iv) -> void {
+        const RealVect x  = probLo + dx * (0.5 * RealVect::Unit + RealVect(iv));
         const RealVect EE = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
         const Real     E  = EE.vectorLength();
 
-        tracerFieldReg(iv, 0) = m_alphaEff(m_maxVoltage * E) * dx;
+        tracerFieldReg(iv, 0) = m_alphaEff(m_maxVoltage * E, x) * dx;
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const RealVect x  = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
         const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
         const Real     E  = EE.vectorLength();
 
-        tracerField(vof, 0) = m_alphaEff(m_maxVoltage * E) * dx;
+        tracerField(vof, 0) = m_alphaEff(m_maxVoltage * E, x) * dx;
       };
 
       Box          cellBox = dbl[dit()];
