@@ -26,7 +26,7 @@
 #include <CD_LookupTable.H>
 
 /*!
-  @brief Class for looking up and interpolation (x,y) data. 
+  @brief Class for interpolation of f = f(x) data. 
 */
 template <int N>
 class LookupTable1D

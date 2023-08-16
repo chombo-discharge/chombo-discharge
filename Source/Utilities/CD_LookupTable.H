@@ -44,5 +44,6 @@ enum class TableSpacing
 };
 
 #include <CD_LookupTable1D.H>
+#include <CD_LookupTable2D.H>
 
 #endif
