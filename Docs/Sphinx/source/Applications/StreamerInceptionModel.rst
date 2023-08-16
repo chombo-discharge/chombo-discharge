@@ -604,7 +604,7 @@ For example,
 .. warning::
 
    The ``ctu`` option exists because the default advection solver for the streamer inception model is the corner transport upwind solver (see :ref:`Chap:CdrCTU`).
-   Ensure that ``CdrCTU.use_ctu = true`` if using `StreamerInceptionStepper.transport_alg = ctu`` algorithm and set ``CdrCTU.use_ctu = false`` otherwise.
+   Ensure that ``CdrCTU.use_ctu = true`` if using ``StreamerInceptionStepper.transport_alg = ctu`` algorithm and set ``CdrCTU.use_ctu = false`` otherwise.
 
   
 Caveats
