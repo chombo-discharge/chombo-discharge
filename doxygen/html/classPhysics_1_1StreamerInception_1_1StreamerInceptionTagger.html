@@ -121,9 +121,9 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#ade524bb7437d8386ce7dcbf81d90bb4b">StreamerInceptionTagger</a> (const <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html">StreamerInceptionTagger</a> &amp;&amp;)=delete</td></tr>
 <tr class="memdesc:ade524bb7437d8386ce7dcbf81d90bb4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed constructor. <br /></td></tr>
 <tr class="separator:ade524bb7437d8386ce7dcbf81d90bb4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a88a51abf50602ea8a6df4dc4b6be761d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#a88a51abf50602ea8a6df4dc4b6be761d">StreamerInceptionTagger</a> (const RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;a_amrMesh, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> *const a_electricField, const std::function&lt; Real(const Real E)&gt; &amp;a_alphaEff, const phase::which_phase a_phase=phase::gas)</td></tr>
-<tr class="memdesc:a88a51abf50602ea8a6df4dc4b6be761d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#a88a51abf50602ea8a6df4dc4b6be761d">More...</a><br /></td></tr>
-<tr class="separator:a88a51abf50602ea8a6df4dc4b6be761d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6861cebc86f9c7e6a0a731652c6f3d2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#ac6861cebc86f9c7e6a0a731652c6f3d2">StreamerInceptionTagger</a> (const RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;a_amrMesh, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> *const a_electricField, const std::function&lt; Real(const Real E, const RealVect x)&gt; &amp;a_alphaEff, const phase::which_phase a_phase=phase::gas)</td></tr>
+<tr class="memdesc:ac6861cebc86f9c7e6a0a731652c6f3d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#ac6861cebc86f9c7e6a0a731652c6f3d2">More...</a><br /></td></tr>
+<tr class="separator:ac6861cebc86f9c7e6a0a731652c6f3d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e649e7ce3f45b07a508d7858af7a9c0"><td class="memItemLeft" align="right" valign="top"><a id="a6e649e7ce3f45b07a508d7858af7a9c0"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#a6e649e7ce3f45b07a508d7858af7a9c0">~StreamerInceptionTagger</a> ()</td></tr>
 <tr class="memdesc:a6e649e7ce3f45b07a508d7858af7a9c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
@@ -218,10 +218,10 @@ const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> *&#160;</td><td
 <a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#a0c7aa86f36fb27024e0562063d0f4457">m_tracerField</a></td></tr>
 <tr class="memdesc:a0c7aa86f36fb27024e0562063d0f4457"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tracer field. Will be populated with |grad(E)|*dx/|E|. <br /></td></tr>
 <tr class="separator:a0c7aa86f36fb27024e0562063d0f4457"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3726d8d0221b4003ee08346d1e23f55f"><td class="memItemLeft" align="right" valign="top"><a id="a3726d8d0221b4003ee08346d1e23f55f"></a>
-std::function&lt; Real(const Real &amp;E)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#a3726d8d0221b4003ee08346d1e23f55f">m_alphaEff</a></td></tr>
-<tr class="memdesc:a3726d8d0221b4003ee08346d1e23f55f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ionization coefficient. <br /></td></tr>
-<tr class="separator:a3726d8d0221b4003ee08346d1e23f55f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afce64fce8013aa6ec7bf868aa5198dd0"><td class="memItemLeft" align="right" valign="top"><a id="afce64fce8013aa6ec7bf868aa5198dd0"></a>
+std::function&lt; Real(const Real &amp;E, const RealVect x)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#afce64fce8013aa6ec7bf868aa5198dd0">m_alphaEff</a></td></tr>
+<tr class="memdesc:afce64fce8013aa6ec7bf868aa5198dd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ionization coefficient. <br /></td></tr>
+<tr class="separator:afce64fce8013aa6ec7bf868aa5198dd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a0e495757eba4bba2756b25aaa0d68c"><td class="memItemLeft" align="right" valign="top"><a id="a0a0e495757eba4bba2756b25aaa0d68c"></a>
 phase::which_phase&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#a0a0e495757eba4bba2756b25aaa0d68c">m_phase</a></td></tr>
 <tr class="memdesc:a0a0e495757eba4bba2756b25aaa0d68c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase. <br /></td></tr>
@@ -268,8 +268,8 @@ std::vector&lt; std::pair&lt; <a class="el" href="classRealBox.html">RealBox</a>
 <div class="textblock"><p>Class for tagging cells in the StreamerInception module. </p>
 <p>This flags cells for refinement if alpha_eff * dx &gt; threshold. User must supply the effective ionization coefficient through the constructor. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a88a51abf50602ea8a6df4dc4b6be761d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a88a51abf50602ea8a6df4dc4b6be761d">&#9670;&nbsp;</a></span>StreamerInceptionTagger()</h2>
+<a id="ac6861cebc86f9c7e6a0a731652c6f3d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6861cebc86f9c7e6a0a731652c6f3d2">&#9670;&nbsp;</a></span>StreamerInceptionTagger()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -289,7 +289,7 @@ std::vector&lt; std::pair&lt; <a class="el" href="classRealBox.html">RealBox</a>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::function&lt; Real(const Real E)&gt; &amp;&#160;</td>
+          <td class="paramtype">const std::function&lt; Real(const Real E, const RealVect x)&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_alphaEff</em>, </td>
         </tr>
         <tr>

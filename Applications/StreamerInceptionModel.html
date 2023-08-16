@@ -131,6 +131,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#verbosity">verbosity</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mode">mode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#inception-alg">inception_alg</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#full-integration">full_integration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#output-file">output_file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#k-inception">K_inception</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#plt-vars">plt_vars</a></li>
@@ -207,8 +208,8 @@
 <p>The streamer inception model computes the inception voltage and probability of streamer inception for arbitrary geometries and voltage forms.</p>
 <p>For estimating the streamer inception, the module the electron avalanche integral</p>
 <div class="math notranslate nohighlight">
-\[K\left(\mathbf{x}\right) = \int_{\mathbf{x}}^{\text{until }\alpha_{\text{eff}} \leq 0} \alpha_{\text{eff}}(E)\text{d}l\]</div>
-<p>where <span class="math notranslate nohighlight">\(E = |\mathbf{E}|\)</span> and where <span class="math notranslate nohighlight">\(\alpha_{\text{eff}}(E) = \alpha(E) - \eta(E)\)</span> is the effective ionization coefficient.
+\[K\left(\mathbf{x}\right) = \int_{\mathbf{x}}^{\text{until }\alpha_{\text{eff}} \leq 0} \alpha_{\text{eff}}(E,\mathbf{x}^\prime)\text{d}l\]</div>
+<p>where <span class="math notranslate nohighlight">\(E = |\mathbf{E}|\)</span> and where <span class="math notranslate nohighlight">\(\alpha_{\text{eff}}(E,\mathbf{x}) = \alpha(E,\mathbf{x}) - \eta(E,\mathbf{x})\)</span> is the effective ionization coefficient.
 The integration runs along electric field lines.</p>
 <p>The streamer inception model solves for <span class="math notranslate nohighlight">\(K = K\left(\mathbf{x}\right)\)</span> for all <span class="math notranslate nohighlight">\(\mathbf{x}\)</span>, i.e., the inception integral is evaluated for all starting positions of the first electron.
 This differs from the conventional approach where the user will first extract electric field lines for post-processing.</p>
@@ -295,28 +296,29 @@ Note that, internally, we always ensure that <span class="math notranslate nohig
 <li><p>Voltage curve (for transient simulations).</p></li>
 </ol>
 <p>The input data to the streamer inception model is mostly done by passing in C++-functions to the class.
-These functions are mainly in the form</p>
+These functions are mainly in the forms</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="o">&gt;</span><span class="w"></span>
+<span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The user can specify analytic fields or use tabulated data, and pass these in through a C++ lambda function.
-For defining an analytic function:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">alphaCoeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+An example of defining an analytic input function is</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">alphaCoeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="o">/</span><span class="n">E</span><span class="p">.</span><span class="w"></span>
 <span class="p">};</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Tabulated data (see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable1d"><span class="std std-ref">Lookup tables</span></a>) can also be used.</p>
+<p>Tabulated data (see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable1d"><span class="std std-ref">Lookup tables</span></a>) can also be used as follows,</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">tableData</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">auto</span><span class="w"> </span><span class="n">alphaCoeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">tableData</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">auto</span><span class="w"> </span><span class="n">alphaCoeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">tableData</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">tableData</span><span class="p">.</span><span class="n">getEntry</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">E</span><span class="p">);</span><span class="w"></span>
 <span class="p">};</span><span class="w"></span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The <span class="math notranslate nohighlight">\(K\)</span> integral is only affect by the Townsend ionization and attachment coefficients.
+<p>The <span class="math notranslate nohighlight">\(K\)</span> integral is determined only by the Townsend ionization and attachment coefficients.
 The remaining transport data is used for calculating the inception probability (appearance of a first electron in the critical volume).</p>
 </div>
 <section id="inception-threshold">
@@ -330,14 +332,14 @@ The remaining transport data is used for calculating the inception probability (
 <section id="townsend-ionization-coefficient">
 <h3>Townsend ionization coefficient<a class="headerlink" href="#townsend-ionization-coefficient" title="Permalink to this heading"></a></h3>
 <p>To set the Townsend ionization coefficient, use the member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setAlpha</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_alpha</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setAlpha</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_alpha</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="townsend-attachment-coefficient">
 <h3>Townsend attachment coefficient<a class="headerlink" href="#townsend-attachment-coefficient" title="Permalink to this heading"></a></h3>
 <p>To set the Townsend attachment coefficient, use the member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setEta</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_eta</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setEta</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_eta</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -433,7 +435,7 @@ Once the particle integration halts, we rewind the particles back to their start
 <h4>Euler<a class="headerlink" href="#euler" title="Permalink to this heading"></a></h4>
 <p>For the Euler rule the particle weight for a particle <span class="math notranslate nohighlight">\(p\)</span> the update rule is</p>
 <div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}\mathbf{x}_p^{k+1} = \mathbf{x}_p^k - \mathbf{\hat{E}}\left(\mathbf{x}_p^k\right)\Delta x\\w_p^{k+1} = w_p^k + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^k\right)\right|\right)\Delta x,\end{aligned}\end{align} \]</div>
+\[ \begin{align}\begin{aligned}\mathbf{x}_p^{k+1} = \mathbf{x}_p^k - \mathbf{\hat{E}}\left(\mathbf{x}_p^k\right)\Delta x\\w_p^{k+1} = w_p^k + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^k\right)\right|,\mathbf{x}_p^k\right)\Delta x,\end{aligned}\end{align} \]</div>
 <p>where <span class="math notranslate nohighlight">\(\Delta x\)</span> is a user-specified integration length.</p>
 </section>
 <section id="trapezoidal">
@@ -443,7 +445,7 @@ Once the particle integration halts, we rewind the particles back to their start
 \[\mathbf{x}_p^\prime = \mathbf{x}_p^k - \mathbf{\hat{E}}\left(\mathbf{x}_p^k\right)\Delta x\]</div>
 <p>followed by</p>
 <div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}\mathbf{x}_p^{k+1} = \mathbf{x}_p^k + \frac{\Delta x}{2}\left[\mathbf{\hat{E}}\left(\mathbf{x}_p^k\right) + \mathbf{\hat{E}}\left(\mathbf{x}_p^\prime\right)\right].\\w_p^{k+1} = w_p^k + \frac{\Delta x}{2}\left[\alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^k\right)\right|\right) + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^\prime\right)\right|\right)\right]\end{aligned}\end{align} \]</div>
+\[ \begin{align}\begin{aligned}\mathbf{x}_p^{k+1} = \mathbf{x}_p^k + \frac{\Delta x}{2}\left[\mathbf{\hat{E}}\left(\mathbf{x}_p^k\right) + \mathbf{\hat{E}}\left(\mathbf{x}_p^\prime\right)\right].\\w_p^{k+1} = w_p^k + \frac{\Delta x}{2}\left[\alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^k\right)\right|,\mathbf{x}_p^k\right) + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^\prime\right)\right|,\mathbf{x}_p^\prime\right)\right]\end{aligned}\end{align} \]</div>
 </section>
 </section>
 <section id="critical-volume">
@@ -530,15 +532,38 @@ This should be specified in the form</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>StreamerInceptionStepper.inception_alg = &lt;algorithm&gt; &lt;mode&gt; &lt;value&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">&lt;algorithm&gt;</span></code> is either <code class="docutils literal notranslate"><span class="pre">trapz</span></code> (trapezoidal rule) or <code class="docutils literal notranslate"><span class="pre">euler</span></code> and mode is either <code class="docutils literal notranslate"><span class="pre">fixed</span></code> or <code class="docutils literal notranslate"><span class="pre">dx</span></code>.
-These differ in the sense that the integration step in the <code class="docutils literal notranslate"><span class="pre">value</span></code> field either corresponds to a fixed physical size or a number relative to the grid resolution.
-For example, the following will set an Euler integration with a fixed step size:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>StreamerInceptionStepper.inception_alg = euler fixed 100E-6
+<p>These indicate the following:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;algorithm&gt;</span></code> indicates the integration algorithm.
+Currently supported is <code class="docutils literal notranslate"><span class="pre">trapz</span></code> (trapezoidal rule) and <code class="docutils literal notranslate"><span class="pre">euler</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mode</span></code> indicates the integration step size selection.
+This can be the following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">fixed</span></code> for a spatially fixed step size.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dx</span></code> for step sizes relative to the grid resolution <span class="math notranslate nohighlight">\(\Delta x\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">alpha</span></code> For setting the step size relative to the avalanche length <span class="math notranslate nohighlight">\(1/\alpha\)</span>.and mode is either <code class="docutils literal notranslate"><span class="pre">fixed</span></code> or <code class="docutils literal notranslate"><span class="pre">dx</span></code>.</p></li>
+</ul>
+<p>Normally, <code class="docutils literal notranslate"><span class="pre">alpha</span></code> will yield the best integration results since the step size is adaptively selected, taking large steps where <span class="math notranslate nohighlight">\(\alpha\)</span> is small and smaller steps where <span class="math notranslate nohighlight">\(\alpha\)</span> is large.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">value</span></code> indicates a step size, and has a different interpretation for the various modes.
+* If using <code class="docutils literal notranslate"><span class="pre">fixed</span></code> integration, <code class="docutils literal notranslate"><span class="pre">value</span></code> indicates the physical length of the step size.
+* If using <code class="docutils literal notranslate"><span class="pre">dx</span></code> integration,  <code class="docutils literal notranslate"><span class="pre">value</span></code> indicates the step size relative to the grid cell resolution.
+* If using <code class="docutils literal notranslate"><span class="pre">alpha</span></code> integration, <code class="docutils literal notranslate"><span class="pre">value</span></code> indicates the step size relative to the avalanche length <span class="math notranslate nohighlight">\(1/\alpha\)</span>.</p></li>
+</ul>
+<p>For example, the following will set an Euler integration with an adaptive step size:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>StreamerInceptionStepper.inception_alg = euler alpha 0.5
 </pre></div>
 </div>
-<p>The subsequent code sets a trapezoidal rule using half the grid resolution as the particle step:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>StreamerInceptionStepper.inception_alg = trapezoidal dx 0.5
-</pre></div>
+</section>
+<section id="full-integration">
+<h3>full_integration<a class="headerlink" href="#full-integration" title="Permalink to this heading"></a></h3>
+<p>Normally, it will not necessary to integrate the particles beyond <span class="math notranslate nohighlight">\(w &gt; K_c\)</span> since this already implies inception.
+The flag <code class="docutils literal notranslate"><span class="pre">full_integration</span></code> can be used to turn on/off integration beyond <span class="math notranslate nohighlight">\(K_c\)</span>.
+If the flag is set to false, the particle integration routine will terminate once a particle weight reaches <span class="math notranslate nohighlight">\(K_c\)</span>.
+If the flag is set to true, the particle integration routine will proceed until the particles leave the domain or ionization volumes.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Setting <code class="docutils literal notranslate"><span class="pre">full_integration</span></code> to false can lead to large computational savings when the ionization volumes are large.</p>
 </div>
 </section>
 <section id="output-file">
@@ -620,7 +645,7 @@ StreamerInceptionStepper.max_dt        = 1E99
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">ctu</span></code> option exists because the default advection solver for the streamer inception model is the corner transport upwind solver (see <a class="reference internal" href="../Solvers/CDR.html#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a>).
-Ensure that <code class="docutils literal notranslate"><span class="pre">CdrCTU.use_ctu</span> <span class="pre">=</span> <span class="pre">true</span></code> if using <cite>StreamerInceptionStepper.transport_alg = ctu`</cite> algorithm and set <code class="docutils literal notranslate"><span class="pre">CdrCTU.use_ctu</span> <span class="pre">=</span> <span class="pre">false</span></code> otherwise.</p>
+Ensure that <code class="docutils literal notranslate"><span class="pre">CdrCTU.use_ctu</span> <span class="pre">=</span> <span class="pre">true</span></code> if using <code class="docutils literal notranslate"><span class="pre">StreamerInceptionStepper.transport_alg</span> <span class="pre">=</span> <span class="pre">ctu</span></code> algorithm and set <code class="docutils literal notranslate"><span class="pre">CdrCTU.use_ctu</span> <span class="pre">=</span> <span class="pre">false</span></code> otherwise.</p>
 </div>
 </section>
 <section id="caveats">
@@ -636,7 +661,7 @@ When running the model, ensure that the <a class="reference internal" href="../S
 <h2>Adaptive mesh refinement<a class="headerlink" href="#adaptive-mesh-refinement" title="Permalink to this heading"></a></h2>
 <p>The streamer inception model runs its own mesh refinement routine, which refines the mesh if</p>
 <div class="math notranslate nohighlight">
-\[\alpha_{\text{eff}}\left(\left|\mathbf{E}\right|\right)\Delta x &gt; \lambda,\]</div>
+\[\alpha_{\text{eff}}\left(\left|\mathbf{E}\right|, \mathbf{x}\right)\Delta x &gt; \lambda,\]</div>
 <p>where <span class="math notranslate nohighlight">\(\lambda\)</span> is a user-specified refinement criterion.</p>
 <p>This is implemented in a class</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">StreamerInceptionTagger</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">CellTagger</span><span class="w"></span>
@@ -660,11 +685,11 @@ StreamerInceptionTagger.ref_alpha   = 2.0
 <span id="chap-streamerinceptionsetup"></span><h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading"></a></h2>
 <p>To set up a new problem, using the Python setup tools in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/StreamerInception</span></code> is the simplest way.
 To see available setup options, run</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>./setup.py --help
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>python3 setup.py --help
 </pre></div>
 </div>
 <p>For example, to set up a new problem in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/MyApplications/MyStreamerInception</span></code> for a cylinder geometry, run</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>./setup.py -base_dir=MyApplications -app_name=MyStreamerInception -geometry=Cylinder
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>python3 setup.py -base_dir=MyApplications -app_name=MyStreamerInception -geometry=Cylinder
 </pre></div>
 </div>
 <p>This will set up a new problem in a cylinder geometry (defined in <code class="file docutils literal notranslate"><span class="pre">Geometries/Cylinder</span></code>).
