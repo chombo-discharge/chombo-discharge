@@ -164,7 +164,7 @@ public:
   */
   template <int K>
   inline Real
-  getEntry(const Real a_x) const;
+  interpolate(const Real a_x) const;
 
   /*!
     @brief Get data.

@@ -512,15 +512,15 @@ CdrPlasmaJSON::initializeNeutralSpecies()
 
     // Now create the temperature, pressure, and density functions.
     m_gasTemperature = [table = temperatureTable](const RealVect a_position) -> Real {
-      return table.getEntry<1>(a_position[SpaceDim - 1]);
+      return table.interpolate<1>(a_position[SpaceDim - 1]);
     };
 
     m_gasPressure = [table = pressureTable](const RealVect a_position) -> Real {
-      return table.getEntry<1>(a_position[SpaceDim - 1]);
+      return table.interpolate<1>(a_position[SpaceDim - 1]);
     };
 
     m_gasDensity = [table = densityTable](const RealVect a_position) -> Real {
-      return table.getEntry<1>(a_position[SpaceDim - 1]);
+      return table.interpolate<1>(a_position[SpaceDim - 1]);
     };
   }
   else {
@@ -952,7 +952,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
 
       // Add contribution from height profile.
       if (heightProfile.getNumEntries() > 0) {
-        retVal += heightProfile.getEntry<1>(a_position[SpaceDim - 1]);
+        retVal += heightProfile.interpolate<1>(a_position[SpaceDim - 1]);
       }
 
       return retVal;
@@ -4411,7 +4411,7 @@ CdrPlasmaJSON::computePlasmaSpeciesMobilities(const RealVect&          a_positio
         // Recall; the mobility tables are stored as (E/N, mu*N) so we need to extract mu from that.
         const LookupTable1D<2>& mobilityTable = m_mobilityTablesEN.at(i);
 
-        mu[i] = mobilityTable.getEntry<1>(Etd); // Get mu*N
+        mu[i] = mobilityTable.interpolate<1>(Etd); // Get mu*N
         mu[i] /= N;                             // Get mu
 
         break;
@@ -4419,7 +4419,7 @@ CdrPlasmaJSON::computePlasmaSpeciesMobilities(const RealVect&          a_positio
       case LookupMethod::TableEnergy: {
         const LookupTable1D<2>& mobilityTable = m_mobilityTablesEnergy.at(i);
 
-        mu[i] = mobilityTable.getEntry<1>(energies[i]);
+        mu[i] = mobilityTable.interpolate<1>(energies[i]);
         mu[i] /= N;
 
         break;
@@ -4486,7 +4486,7 @@ CdrPlasmaJSON::computePlasmaSpeciesDiffusion(const RealVect          a_pos,
         // Recall; the diffusion tables are stored as (E/N, D*N) so we need to extract D from that.
         const LookupTable1D<2>& diffusionTable = m_diffusionTablesEN.at(i);
 
-        Dco = diffusionTable.getEntry<1>(Etd); // Get D*N
+        Dco = diffusionTable.interpolate<1>(Etd); // Get D*N
         Dco /= N;                              // Get D
 
         break;
@@ -4495,7 +4495,7 @@ CdrPlasmaJSON::computePlasmaSpeciesDiffusion(const RealVect          a_pos,
         // Recall: The diffusion tables are stored as (eV, D*N) so we just get D from that.
         const LookupTable1D<2>& diffusionTable = m_diffusionTablesEnergy.at(i);
 
-        Dco = diffusionTable.getEntry<1>(energies[i]);
+        Dco = diffusionTable.interpolate<1>(energies[i]);
         Dco /= N;
 
         break;
@@ -4598,7 +4598,7 @@ CdrPlasmaJSON::computePlasmaSpeciesEnergies(const RealVect&          a_position,
           // Recall; the temperature tables are stored as (E/N, K) so we can fetch the temperature immediately.
           const LookupTable1D<2>& temperatureTable = m_temperatureTablesEN.at(i);
 
-          T = temperatureTable.getEntry<1>(Etd);
+          T = temperatureTable.interpolate<1>(Etd);
 
           break;
         }
@@ -4679,7 +4679,7 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
     const LookupTable1D<2>& reactionTable = m_plasmaReactionTablesEN.at(a_reactionIndex);
 
     // Get the reaction rate.
-    k = reactionTable.getEntry<1>(a_Etd);
+    k = reactionTable.interpolate<1>(a_Etd);
 
     // Multiply by neutral species densities.
     for (const auto& n : neutralReactants) {
@@ -4695,7 +4695,7 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
     const Real energy = a_cdrEnergies[speciesIndex];
 
     // Get the reaction rate.
-    k = reactionTable.getEntry<1>(energy);
+    k = reactionTable.interpolate<1>(energy);
 
     // Multiply by neutral species densities.
     for (const auto& n : neutralReactants) {
@@ -4802,7 +4802,7 @@ CdrPlasmaJSON::computeAlpha(const Real a_E, const RealVect a_position) const
 
   switch (m_alphaLookup) {
   case LookupMethod::TableEN: {
-    alpha = m_alphaTableEN.getEntry<1>(Etd); // Get alpha/N
+    alpha = m_alphaTableEN.interpolate<1>(Etd); // Get alpha/N
     alpha *= N;                              // Get alpha
 
     break;
@@ -4837,7 +4837,7 @@ CdrPlasmaJSON::computeEta(const Real a_E, const RealVect a_position) const
     break;
   }
   case LookupMethod::TableEN: {
-    eta = m_etaTableEN.getEntry<1>(Etd); // Get eta/N
+    eta = m_etaTableEN.interpolate<1>(Etd); // Get eta/N
     eta *= N;                            // Get eta
 
     break;

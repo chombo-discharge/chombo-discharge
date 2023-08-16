@@ -494,7 +494,7 @@ ItoKMCJSON::initializeBackgroundSpecies()
         table.makeUniform(numPoints);
 
         molarFraction = [table, axis](const RealVect a_position) -> Real {
-          return table.getEntry<1>(a_position[axis]);
+          return table.interpolate<1>(a_position[axis]);
         };
 
         if (species["molar fraction"].contains("dump")) {
@@ -669,7 +669,7 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string a_coeff)
       const Real N   = m_gasNumberDensity(x);
       const Real Etd = E / (N * Units::Td);
 
-      return tabulatedCoeff.getEntry<1>(Etd) * N;
+      return tabulatedCoeff.interpolate<1>(Etd) * N;
     };
   }
   else {
@@ -1005,7 +1005,7 @@ ItoKMCJSON::initializeMobilities()
           const Real N   = m_gasNumberDensity(x);
           const Real Etd = E / (N * Units::Td);
 
-          return tabulatedCoeff.getEntry<1>(Etd) / (std::numeric_limits<Real>::epsilon() + N);
+          return tabulatedCoeff.interpolate<1>(Etd) / (std::numeric_limits<Real>::epsilon() + N);
         };
       }
       else {
@@ -1083,7 +1083,7 @@ ItoKMCJSON::initializeDiffusionCoefficients()
           const Real N   = m_gasNumberDensity(x);
           const Real Etd = E / (N * Units::Td);
 
-          return tabulatedCoeff.getEntry<1>(Etd) / (std::numeric_limits<Real>::epsilon() + N);
+          return tabulatedCoeff.interpolate<1>(Etd) / (std::numeric_limits<Real>::epsilon() + N);
         };
       }
       else {
@@ -1162,7 +1162,7 @@ ItoKMCJSON::initializeTemperatures()
           const Real N   = m_gasNumberDensity(x);
           const Real Etd = E / (N * Units::Td);
 
-          return eVToKelvin * tabulatedCoeff.getEntry<1>(Etd) / (std::numeric_limits<Real>::epsilon() + N);
+          return eVToKelvin * tabulatedCoeff.interpolate<1>(Etd) / (std::numeric_limits<Real>::epsilon() + N);
         };
       }
       else {
@@ -1892,7 +1892,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     fluidRate = [&N = this->m_gasNumberDensity, tabulatedCoeff](const Real E, const RealVect x) -> Real {
       const Real Etd = E / (N(x) * Units::Td);
 
-      return tabulatedCoeff.getEntry<1>(Etd);
+      return tabulatedCoeff.interpolate<1>(Etd);
     };
   }
   else if (type == "function T A") {

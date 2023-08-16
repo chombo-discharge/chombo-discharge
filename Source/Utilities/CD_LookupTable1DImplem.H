@@ -277,7 +277,7 @@ LookupTable1D<N>::getIndexLo(const Real a_x) const
 template <int N>
 template <int K>
 inline Real
-LookupTable1D<N>::getEntry(const Real a_x) const
+LookupTable1D<N>::interpolate(const Real a_x) const
 {
 
   // TLDR: This is the main routine for fetching a column of data. This will switch between constant/linear interpolation outside of
@@ -291,11 +291,11 @@ LookupTable1D<N>::getEntry(const Real a_x) const
   else {
 
     if (!(std::get<Sorted>(m_state))) {
-      MayDay::Warning("LookupTable1D<N>::getEntry - table is not sorted");
+      MayDay::Warning("LookupTable1D<N>::interpolate - table is not sorted");
     }
 
     if (!(std::get<Uniform>(m_state))) {
-      MayDay::Warning("LookupTable1D<N>::getEntry - table is not uniform");
+      MayDay::Warning("LookupTable1D<N>::interpolate - table is not uniform");
     }
 
     // We have sorted our data from smallest to largest along some column -- this is that column.
@@ -336,7 +336,8 @@ LookupTable1D<N>::getEntry(const Real a_x) const
         break;
       }
       default:
-        MayDay::Error("LookupTable1D<N>::getEntry -- logic bust when fetching out-of-range endpoint on the low side");
+        MayDay::Error(
+          "LookupTable1D<N>::interpolate -- logic bust when fetching out-of-range endpoint on the low side");
 
         break;
       }
@@ -374,7 +375,8 @@ LookupTable1D<N>::getEntry(const Real a_x) const
         break;
       }
       default:
-        MayDay::Error("LookupTable1D<N>::getEntry -- logic bust when fetching out-of-range endpoint on the high side");
+        MayDay::Error(
+          "LookupTable1D<N>::interpolate -- logic bust when fetching out-of-range endpoint on the high side");
 
         break;
       }
@@ -407,11 +409,11 @@ LookupTable1D<N>::getData(const Real a_x) const
   }
   else {
     if (!(std::get<Sorted>(m_state))) {
-      MayDay::Error("LookupTable1D<N>::getEntry - table is not sorted");
+      MayDay::Error("LookupTable1D<N>::interpolate - table is not sorted");
     }
 
     if (!(std::get<Uniform>(m_state))) {
-      MayDay::Error("LookupTable1D<N>::getEntry - table is not uniform");
+      MayDay::Error("LookupTable1D<N>::interpolate - table is not uniform");
     }
 
     const int sortedColumn = std::get<Column>(m_state);
@@ -483,13 +485,14 @@ LookupTable1D<N>::getData(const Real a_x) const
         break;
       }
       default:
-        MayDay::Error("LookupTable1D<N>::getEntry -- logic bust when fetching out-of-range endpoint on the high side");
+        MayDay::Error(
+          "LookupTable1D<N>::interpolate -- logic bust when fetching out-of-range endpoint on the high side");
 
         break;
       }
     }
     else {
-      MayDay::Error("LookupTable1D<N>::getEntry (array version -- spacing is wrong");
+      MayDay::Error("LookupTable1D<N>::interpolate (array version -- spacing is wrong");
       const Real t = (a_x - m_data[idx][sortedColumn]) / m_delta;
 
       // Interpolate all variables.

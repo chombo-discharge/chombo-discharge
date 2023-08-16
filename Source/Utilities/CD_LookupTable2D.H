@@ -71,13 +71,9 @@ public:
 
 protected:
   /*!
-    @brief Vector of one-dimensional tables. 
-  */
-  std::vector < LookupTable1D<N + 1>
-                  /*!
     @brief Table spacing strategy along x
   */
-                  TableSpacing m_tableSpacingX;
+  TableSpacing m_tableSpacingX;
 
   /*!
     @brief Table spacing strategy along y

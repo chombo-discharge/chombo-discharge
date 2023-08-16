@@ -195,10 +195,10 @@ To retrieve data from one of the columns, one can fetch either a specific value 
 
    // For fetching column K
    template<int K>
-   Real getEntry(const Real a_x);
+   Real interpolate(const Real a_x);
 
    // For fetching the entire row
-   std::array<Real, N> getData(const Real a_x);
+   std::array<Real, N> interpolate(const Real a_x);
 
 In the above, the template parameter ``K`` is the column to retrieve and ``a_x`` is the value of the independent variable.
 
@@ -220,7 +220,7 @@ To retrieve an interpolated value for ``x=2.0`` in the third column we call
 
    LookupTable1D<3> myTable,
 
-   const Real val = myTable.getEntry<2>(2.0);
+   const Real val = myTable.interpolate<2>(2.0);
 
 which will return a value of 4.5 (linearly interpolated). 
 

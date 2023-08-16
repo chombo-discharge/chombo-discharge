@@ -55,10 +55,10 @@ main(int argc, char* argv[])
 
   // Define transport data
   auto alpha = [&](const Real& E) -> Real {
-    return ionizationData.getEntry<1>(E);
+    return ionizationData.interpolate<1>(E);
   };
   auto eta = [&](const Real& E) -> Real {
-    return attachmentData.getEntry<1>(E);
+    return attachmentData.interpolate<1>(E);
   };
   auto alphaEff = [&](const Real& E) -> Real {
     return alpha(E) - eta(E);

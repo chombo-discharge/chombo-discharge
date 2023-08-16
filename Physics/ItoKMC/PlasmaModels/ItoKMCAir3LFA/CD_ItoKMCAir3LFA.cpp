@@ -201,7 +201,7 @@ ItoKMCAir3LFA::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<
   CH_TIME("ItoKMCAir3LFA::computeDt");
   const Real E     = a_E.vectorLength();
   const Real alpha = this->computeAlpha(E, a_pos);
-  const Real mu    = m_tables.at("mobility").getEntry<1>(E);
+  const Real mu    = m_tables.at("mobility").interpolate<1>(E);
 
   return log(m_deltaX) / (mu * E * alpha);
 }
@@ -211,7 +211,7 @@ ItoKMCAir3LFA::computeAlpha(const Real a_E, RealVect a_pos) const
 {
   CH_TIME("ItoKMCAir3LFA::computeAlpha");
 
-  return m_tables.at("alpha").getEntry<1>(a_E);
+  return m_tables.at("alpha").interpolate<1>(a_E);
 }
 
 Real
@@ -219,7 +219,7 @@ ItoKMCAir3LFA::computeEta(const Real a_E, const RealVect a_pos) const
 {
   CH_TIME("ItoKMCAir3LFA::computeEta");
 
-  return m_tables.at("eta").getEntry<1>(a_E);
+  return m_tables.at("eta").interpolate<1>(a_E);
 }
 
 Vector<Real>
@@ -229,7 +229,7 @@ ItoKMCAir3LFA::computeMobilities(const Real a_time, const RealVect a_pos, const 
 
   Vector<Real> mobilities(3);
 
-  mobilities[0] = m_tables.at("mobility").getEntry<1>(a_E.vectorLength());
+  mobilities[0] = m_tables.at("mobility").interpolate<1>(a_E.vectorLength());
   mobilities[1] = m_ionMobility;
   mobilities[2] = m_ionMobility;
 
@@ -241,7 +241,7 @@ ItoKMCAir3LFA::computeDiffusionCoefficients(const Real a_time, const RealVect a_
 {
   Vector<Real> D(3);
 
-  D[0] = m_tables.at("diffco").getEntry<1>(a_E.vectorLength());
+  D[0] = m_tables.at("diffco").interpolate<1>(a_E.vectorLength());
   D[1] = m_ionDiffCo;
   D[2] = m_ionDiffCo;
 
@@ -313,15 +313,15 @@ ItoKMCAir3LFA::updateReactionRates(const RealVect          a_E,
   // Compute the reaction rates.
   const Real dV      = pow(a_dx, SpaceDim);
   const Real E       = a_E.vectorLength();
-  const Real Te      = m_tables.at("Te").getEntry<1>(E);
-  const Real mu      = m_tables.at("mobility").getEntry<1>(E);
-  const Real D       = m_tables.at("diffco").getEntry<1>(E);
+  const Real Te      = m_tables.at("Te").interpolate<1>(E);
+  const Real mu      = m_tables.at("mobility").interpolate<1>(E);
+  const Real D       = m_tables.at("diffco").interpolate<1>(E);
   const Real velo    = mu * E;
   const Real xfactor = (m_pq / (m_p + m_pq)) * excitationRates(E) * sergeyFactor(m_O2frac) * m_photoIonizationFactor;
   const Real bpn     = 2E-13 * sqrt(300 / m_T) / dV;
   const Real bpe     = 1.138E-11 * pow(Te, -0.7) / dV;
-  const Real alpha   = m_tables.at("alpha").getEntry<1>(E);
-  const Real eta     = m_tables.at("eta").getEntry<1>(E);
+  const Real alpha   = m_tables.at("alpha").interpolate<1>(E);
+  const Real eta     = m_tables.at("eta").interpolate<1>(E);
 
   // Soloviev correction factor.
   Real fcorr = 1.0 + a_E.dotProduct(D * a_gradPhi[0]) / (1.0 + a_phi[0] * mu * a_E.dotProduct(a_E));
