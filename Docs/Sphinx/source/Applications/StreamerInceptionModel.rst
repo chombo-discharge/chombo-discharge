@@ -12,9 +12,9 @@ For estimating the streamer inception, the module the electron avalanche integra
 
 .. math::
 
-   K\left(\mathbf{x}\right) = \int_{\mathbf{x}}^{\text{until }\alpha_{\text{eff}} \leq 0} \alpha_{\text{eff}}(E)\text{d}l
+   K\left(\mathbf{x}\right) = \int_{\mathbf{x}}^{\text{until }\alpha_{\text{eff}} \leq 0} \alpha_{\text{eff}}(E,\mathbf{x}^\prime)\text{d}l
 
-where :math:`E = |\mathbf{E}|` and where :math:`\alpha_{\text{eff}}(E) = \alpha(E) - \eta(E)` is the effective ionization coefficient.
+where :math:`E = |\mathbf{E}|` and where :math:`\alpha_{\text{eff}}(E,\mathbf{x}) = \alpha(E,\mathbf{x}) - \eta(E,\mathbf{x})` is the effective ionization coefficient.
 The integration runs along electric field lines.
 
 The streamer inception model solves for :math:`K = K\left(\mathbf{x}\right)` for all :math:`\mathbf{x}`, i.e., the inception integral is evaluated for all starting positions of the first electron.
@@ -139,34 +139,35 @@ The input to the streamer inception model are:
 #. Voltage curve (for transient simulations).
 
 The input data to the streamer inception model is mostly done by passing in C++-functions to the class.
-These functions are mainly in the form
+These functions are mainly in the forms
 
 .. code-block:: c++
 
    std::function<Real(const Real& E)>
+   std::function<Real(const Real& E, const RealVect& x)>
 
 The user can specify analytic fields or use tabulated data, and pass these in through a C++ lambda function.
-For defining an analytic function:
+An example of defining an analytic input function is
 
 .. code-block:: c++
 
-   auto alphaCoeff = [](const Real E) -> void {
+   auto alphaCoeff = [](const Real& E, const RealVect& x) -> void {
       return 1/E.
    };
 
-Tabulated data (see :ref:`Chap:LookupTable1D`) can also be used.
+Tabulated data (see :ref:`Chap:LookupTable1D`) can also be used as follows,
 
 .. code-block:: c++
 		
    LookupTable1D<2> tableData;
    
-   auto alphaCoeff = [tableData](const Real E) -> void {
+   auto alphaCoeff = [tableData](const Real& E, const RealVect& x) -> void {
       return tableData.getEntry<1>(E);
    };
 
 .. note::
 
-   The :math:`K` integral is only affect by the Townsend ionization and attachment coefficients.
+   The :math:`K` integral is determined only by the Townsend ionization and attachment coefficients.
    The remaining transport data is used for calculating the inception probability (appearance of a first electron in the critical volume). 
    
 
@@ -188,7 +189,7 @@ To set the Townsend ionization coefficient, use the member function
 
 .. code-block:: c++
 
-   StreamerInceptionStepper::setAlpha(const std::function<Real(const Real E)>& a_alpha) noexcept;
+   StreamerInceptionStepper::setAlpha(const std::function<Real(const RealVect& E, const RealVect& x)>& a_alpha) noexcept;
 
 
 Townsend attachment coefficient
@@ -198,8 +199,8 @@ To set the Townsend attachment coefficient, use the member function
 
 .. code-block:: c++
 
-   StreamerInceptionStepper::setEta(const std::function<Real(const Real& E)>& a_eta) noexcept;
-
+   StreamerInceptionStepper::setEta(const std::function<Real(const Real& E, const RealVect& x)>& a_eta) noexcept;
+   
 
 Negative ion mobility
 _____________________
@@ -209,6 +210,7 @@ To set the negative ion mobility, use the member function
 .. code-block:: c++
 
    StreamerInceptionStepper::setIonMobility(const std::function<Real(const Real& E)>& a_mobility) noexcept;
+   
 
 Negative ion diffusion coefficient
 __________________________________
@@ -330,7 +332,7 @@ For the Euler rule the particle weight for a particle :math:`p` the update rule 
 
    \mathbf{x}_p^{k+1} = \mathbf{x}_p^k - \mathbf{\hat{E}}\left(\mathbf{x}_p^k\right)\Delta x
    
-   w_p^{k+1} = w_p^k + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^k\right)\right|\right)\Delta x,
+   w_p^{k+1} = w_p^k + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^k\right)\right|,\mathbf{x}_p^k\right)\Delta x,
 
 where :math:`\Delta x` is a user-specified integration length.
 
@@ -350,7 +352,7 @@ followed by
 
       \mathbf{x}_p^{k+1} = \mathbf{x}_p^k + \frac{\Delta x}{2}\left[\mathbf{\hat{E}}\left(\mathbf{x}_p^k\right) + \mathbf{\hat{E}}\left(\mathbf{x}_p^\prime\right)\right].
 
-      w_p^{k+1} = w_p^k + \frac{\Delta x}{2}\left[\alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^k\right)\right|\right) + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^\prime\right)\right|\right)\right]
+      w_p^{k+1} = w_p^k + \frac{\Delta x}{2}\left[\alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^k\right)\right|,\mathbf{x}_p^k\right) + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^\prime\right)\right|,\mathbf{x}_p^\prime\right)\right]
 
 Critical volume
 _______________
@@ -472,19 +474,44 @@ This should be specified in the form
 
    StreamerInceptionStepper.inception_alg = <algorithm> <mode> <value>
 
-where ``<algorithm>`` is either ``trapz`` (trapezoidal rule) or ``euler`` and mode is either ``fixed`` or ``dx``.
-These differ in the sense that the integration step in the ``value`` field either corresponds to a fixed physical size or a number relative to the grid resolution.
-For example, the following will set an Euler integration with a fixed step size:
+These indicate the following:
+
+* ``<algorithm>`` indicates the integration algorithm.
+  Currently supported is ``trapz`` (trapezoidal rule) and ``euler``.
+
+* ``mode`` indicates the integration step size selection.
+  This can be the following:
+  
+  * ``fixed`` for a spatially fixed step size.
+  * ``dx`` for step sizes relative to the grid resolution :math:`\Delta x`.
+  * ``alpha`` For setting the step size relative to the avalanche length :math:`1/\alpha`.and mode is either ``fixed`` or ``dx``.
+
+  Normally, ``alpha`` will yield the best integration results since the step size is adaptively selected, taking large steps where :math:`\alpha` is small and smaller steps where :math:`\alpha` is large.
+
+* ``value`` indicates a step size, and has a different interpretation for the various modes.
+  * If using ``fixed`` integration, ``value`` indicates the physical length of the step size.
+  * If using ``dx`` integration,  ``value`` indicates the step size relative to the grid cell resolution.
+  * If using ``alpha`` integration, ``value`` indicates the step size relative to the avalanche length :math:`1/\alpha`.
+
+For example, the following will set an Euler integration with an adaptive step size:
 
 .. code-block:: text
 
-   StreamerInceptionStepper.inception_alg = euler fixed 100E-6
+   StreamerInceptionStepper.inception_alg = euler alpha 0.5
 
-The subsequent code sets a trapezoidal rule using half the grid resolution as the particle step:
+   
+full_integration
+________________
 
-.. code-block:: text
+Normally, it will not necessary to integrate the particles beyond :math:`w > K_c` since this already implies inception.
+The flag ``full_integration`` can be used to turn on/off integration beyond :math:`K_c`.
+If the flag is set to false, the particle integration routine will terminate once a particle weight reaches :math:`K_c`.
+If the flag is set to true, the particle integration routine will proceed until the particles leave the domain or ionization volumes. 
 
-   StreamerInceptionStepper.inception_alg = trapezoidal dx 0.5
+.. tip::
+
+   Setting ``full_integration`` to false can lead to large computational savings when the ionization volumes are large.
+
 
 output_file
 ___________
@@ -577,7 +604,7 @@ For example,
 .. warning::
 
    The ``ctu`` option exists because the default advection solver for the streamer inception model is the corner transport upwind solver (see :ref:`Chap:CdrCTU`).
-   Ensure that ``CdrCTU.use_ctu = true`` if using `StreamerInceptionStepper.transport_alg = ctu`` algorithm and set ``CdrCTU.use_ctu = false`` otherwise.
+   Ensure that ``CdrCTU.use_ctu = true`` if using ``StreamerInceptionStepper.transport_alg = ctu`` algorithm and set ``CdrCTU.use_ctu = false`` otherwise.
 
   
 Caveats
@@ -597,7 +624,7 @@ The streamer inception model runs its own mesh refinement routine, which refines
 
 .. math::
 
-   \alpha_{\text{eff}}\left(\left|\mathbf{E}\right|\right)\Delta x > \lambda,
+   \alpha_{\text{eff}}\left(\left|\mathbf{E}\right|, \mathbf{x}\right)\Delta x > \lambda,
 
 where :math:`\lambda` is a user-specified refinement criterion.
 
@@ -632,13 +659,13 @@ To see available setup options, run
 
 .. code-block:: text
 
-   ./setup.py --help
+   python3 setup.py --help
 
 For example, to set up a new problem in :file:`$DISCHARGE_HOME/MyApplications/MyStreamerInception` for a cylinder geometry, run
 
 .. code-block:: text
 
-   ./setup.py -base_dir=MyApplications -app_name=MyStreamerInception -geometry=Cylinder
+   python3 setup.py -base_dir=MyApplications -app_name=MyStreamerInception -geometry=Cylinder
 
 This will set up a new problem in a cylinder geometry (defined in :file:`Geometries/Cylinder`).
 The main file is named :file:`program.cpp`` and contains default implementations for the required input data (see :ref:`Chap:StreamerInceptionInputData`).

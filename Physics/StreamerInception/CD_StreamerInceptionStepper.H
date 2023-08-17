@@ -344,25 +344,25 @@ namespace Physics {
 	@param[in] a_alpha Townsend ionization coefficient. E is the field in SI units. 
       */
       virtual void
-      setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept;
+      setAlpha(const std::function<Real(const Real& E, const RealVect& x)>& a_alpha) noexcept;
 
       /*!
 	@brief Set the attachment coefficient.
 	@param[in] a_eta Townsend attachment coefficient. E is the field in SI units. 
       */
       virtual void
-      setEta(const std::function<Real(const Real& E)>& a_eta) noexcept;
+      setEta(const std::function<Real(const Real& E, const RealVect& x)>& a_eta) noexcept;
 
       /*!
 	@brief Get ionization coefficient
       */
-      virtual const std::function<Real(const Real& E)>&
+      virtual const std::function<Real(const Real& E, const RealVect& x)>&
       getAlpha() const noexcept;
 
       /*!
 	@brief Get attachment coefficient
       */
-      virtual const std::function<Real(const Real& E)>&
+      virtual const std::function<Real(const Real& E, const RealVect& x)>&
       getEta() const noexcept;
 
       /*!
@@ -760,12 +760,12 @@ namespace Physics {
       /*!
 	@brief Ionization coefficient. 
       */
-      std::function<Real(const Real& E)> m_alpha;
+      std::function<Real(const Real& E, const RealVect& x)> m_alpha;
 
       /*!
 	@brief Attachment coefficient.
       */
-      std::function<Real(const Real& E)> m_eta;
+      std::function<Real(const Real& E, const RealVect& x)> m_eta;
 
       /*!
 	@brief Detachment probability for negative ion.
@@ -872,32 +872,6 @@ namespace Physics {
       */
       virtual void
       computeFieldEmission(EBAMRCellData& a_emissionRate, const Real& a_voltage) const noexcept;
-
-      /*!
-	@brief Evaluate a function f = f(E) in a volume. 
-	@param[out] a_data    Mesh data
-	@param[in]  a_voltage Voltage multiplier
-	@param[in]  a_func    Function to evaluate
-	@note For plotting the emission rate in transient simulations. 
-      */
-      virtual void
-      evaluateFunction(EBAMRCellData&                           a_data,
-                       const Real&                              a_voltage,
-                       const std::function<Real(const Real E)>& a_func) const noexcept;
-
-      /*!
-	@brief Evaluate a function f = f(E) in a volume. 
-	@param[out] a_data    Mesh data
-	@param[in]  a_voltage Voltage multiplier
-	@param[in]  a_func    Function to evaluate
-	@param[in]  a_level   Grid level
-	@note For plotting the emission rate in transient simulations. 
-      */
-      virtual void
-      evaluateFunction(LevelData<EBCellFAB>&                    a_data,
-                       const Real&                              a_voltage,
-                       const std::function<Real(const Real E)>& a_func,
-                       const int                                a_level) const noexcept;
 
       /*!
 	@brief Evaluate a function f = f(E, x) in a volume. 

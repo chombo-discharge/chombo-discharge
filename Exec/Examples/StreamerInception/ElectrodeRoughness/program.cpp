@@ -54,8 +54,8 @@ main(int argc, char* argv[])
   auto eta = [&](const Real& E) -> Real {
     return attachmentData.interpolate<1>(E);
   };
-  auto alphaEff = [&](const Real& E) -> Real {
-    return alpha(E) - eta(E);
+  auto alphaEff = [&](const Real& E, const RealVect& x) -> Real {
+    return alpha(E, x) - eta(E, x);
   };
   auto bgRate = [&](const Real& E, const RealVect& x) -> Real {
     return 0.0;

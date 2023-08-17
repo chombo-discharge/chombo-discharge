@@ -49,10 +49,10 @@ namespace Physics {
 	@param[in] a_alphaEff      Ionization coefficient
 	@param[in] a_phase         Default phase. 
       */
-      StreamerInceptionTagger(const RefCountedPtr<AmrMesh>&            a_amrMesh,
-                              const EBAMRCellData* const               a_electricField,
-                              const std::function<Real(const Real E)>& a_alphaEff,
-                              const phase::which_phase                 a_phase = phase::gas);
+      StreamerInceptionTagger(const RefCountedPtr<AmrMesh>&                              a_amrMesh,
+                              const EBAMRCellData* const                                 a_electricField,
+                              const std::function<Real(const Real E, const RealVect x)>& a_alphaEff,
+                              const phase::which_phase                                   a_phase = phase::gas);
 
       /*!
 	@brief Destructor
@@ -114,7 +114,7 @@ namespace Physics {
       /*!
 	@brief Ionization coefficient
       */
-      std::function<Real(const Real& E)> m_alphaEff;
+      std::function<Real(const Real& E, const RealVect x)> m_alphaEff;
 
       /*!
 	@brief Phase

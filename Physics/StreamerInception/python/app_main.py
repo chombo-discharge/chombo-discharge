@@ -45,9 +45,9 @@ def write_template(args):
     mainf.write("\n")
     
     mainf.write("  // Define transport data\n")
-    mainf.write("  auto alpha         = [&](const Real& E) -> Real { return 0.0; };\n")
-    mainf.write("  auto eta           = [&](const Real& E) -> Real { return 0.0; };\n")
-    mainf.write("  auto alphaEff      = [&](const Real& E) -> Real { return alpha(E) - eta(E); };\n")
+    mainf.write("  auto alpha         = [&](const Real& E, const RealVect& x) -> Real { return 0.0; };\n")
+    mainf.write("  auto eta           = [&](const Real& E, const RealVect& x) -> Real { return 0.0; };\n")
+    mainf.write("  auto alphaEff      = [&](const Real& E, const RealVect& x) -> Real { return alpha(E,x) - eta(E,x); };\n")
     mainf.write("  auto bgRate        = [&](const Real& E, const RealVect& x) -> Real { return 0.0; };\n")
     mainf.write("  auto detachRate    = [&](const Real& E, const RealVect& x) -> Real { return 0.0; };\n")
     mainf.write("  auto fieldEmission = [&](const Real& E, const RealVect& x) -> Real { return 0.0; };\n")
