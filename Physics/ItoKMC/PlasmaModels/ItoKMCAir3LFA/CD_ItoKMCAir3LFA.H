@@ -229,7 +229,7 @@ namespace Physics {
       /*!
 	@brief Lookup tables holding mobilities, rate coefficients etc.
       */
-      std::map<std::string, LookupTable1D<2>> m_tables;
+      std::map<std::string, LookupTable1D<Real, 1>> m_tables;
 
       /*!
 	@brief Excitation rate for photoionization term

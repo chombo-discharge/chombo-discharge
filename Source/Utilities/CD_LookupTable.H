@@ -16,6 +16,7 @@
 #include <memory>
 #include <vector>
 #include <type_traits>
+#include <iostream>
 
 /*!
   @brief Strategy for obtaining data when requesting data that is out of range. 
@@ -26,23 +27,13 @@
 enum class OutOfRangeStrategy
 {
   Constant,
-  Linear
+  Interpolate
 };
 
 /*!
-  @brief For identifying columns in the LookupTable1D.
+  @brief Enum for classifying the coordinate system.
 */
-enum StateStatus
-{
-  Column  = 0,
-  Sorted  = 1,
-  Uniform = 2,
-};
-
-/*!
-  @brief Enum for classifying how table is spaced. 
-*/
-enum class TableSpacing
+enum class CoordinateSystem
 {
   Uniform,
   Exponential

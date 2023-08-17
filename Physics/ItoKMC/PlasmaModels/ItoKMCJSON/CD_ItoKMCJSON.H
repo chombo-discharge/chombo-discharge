@@ -628,7 +628,7 @@ namespace Physics {
 	@param[in] a_tableEntry Table entry in JSON format. 
 	@param[in] a_dataID     Data identifier
       */
-      virtual LookupTable1D<2>
+      virtual LookupTable1D<Real, 1>
       parseTableEByN(const nlohmann::json& a_tableEntry, const std::string& a_dataID) const;
 
       /*!

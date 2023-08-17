@@ -392,12 +392,15 @@ ItoKMCJSON::initializeBackgroundSpecies()
       else if (molFracType == "table vs height") {
         const std::string baseErrorID = baseError + "and got 'table vs height for species '" + speciesName + "'";
 
-        int heightColumn   = 0;
-        int fractionColumn = 1;
-        int axis           = -1;
-        int numPoints      = 1000;
+        int    heightColumn   = 0;
+        int    fractionColumn = 1;
+        int    axis           = -1;
+        size_t numPoints      = 1000;
 
-        TableSpacing spacing = TableSpacing::Uniform;
+        CoordinateSystem spacing = TableSpacing::Uniform;
+
+        Real minHeight = -std::numeric_limits<Real>::max();
+        Real maxHeight = +std::numeric_limits<Real>::max();
 
         // Required arguments.
         if (!(species["molar fraction"].contains("file"))) {
@@ -442,14 +445,14 @@ ItoKMCJSON::initializeBackgroundSpecies()
           }
         }
         if (species["molar fraction"].contains("num points")) {
-          numPoints = species["molar fraction"]["num points"].get<int>();
+          numPoints = species["molar fraction"]["num points"].get<size_t>();
 
           if (numPoints < 2) {
             this->throwParserError(baseErrorID + " but can't have 'num points' < 2");
           }
         }
 
-        LookupTable1D<2> table = DataParser::simpleFileReadASCII(fileName, heightColumn, fractionColumn);
+        LookupTable1D<Real, 1> table = DataParser::simpleFileReadASCII(fileName, heightColumn, fractionColumn);
 
         if (species["molar fraction"].contains("height scale")) {
           const Real scaling = species["molar fraction"]["height scale"].get<Real>();
@@ -467,28 +470,30 @@ ItoKMCJSON::initializeBackgroundSpecies()
 
           table.scale<1>(scaling);
         }
+
         if (species["molar fraction"].contains("min height")) {
-          const Real minHeight = species["molar fraction"]["min height"].get<Real>();
-          table.setMinRange(minHeight, 0);
+          minHeight = species["molar fraction"]["min height"].get<Real>();
         }
         if (species["molar fraction"].contains("max height")) {
-          const Real maxHeight = species["molar fraction"]["max height"].get<Real>();
-          table.setMaxRange(maxHeight, 0);
+          maxHeight = species["molar fraction"]["max height"].get<Real>();
         }
+
         if (species["molar fraction"].contains("spacing")) {
           const std::string whichSpacing = this->trim(species["molar fraction"]["spacing"].get<std::string>());
 
           if (whichSpacing == "linear") {
-            spacing = TableSpacing::Uniform;
+            coordSys = CoordinateSystem::Uniform;
           }
           else if (whichSpacing == "exponential") {
-            spacing = TableSpacing::Exponential;
+            coordSys = CoordinateSystem::Exponential;
           }
           else {
             this->throwParserError(baseErrorID + " but spacing '" + whichSpacing + "' is not supported");
           }
         }
 
+        table.truncate(minHeight, maxHeight, 0);
+        table.prepareTable(0, numPoints, coordSys);
         table.setTableSpacing(spacing);
         table.sort(0);
         table.makeUniform(numPoints);
@@ -663,7 +668,7 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string a_coeff)
       this->throwParserError(baseErrorTable + "but 'file' is not specified");
     }
 
-    LookupTable1D<2> tabulatedCoeff = this->parseTableEByN(jsonTable, a_coeff + "/N");
+    LookupTable1D<Real, 1> tabulatedCoeff = this->parseTableEByN(jsonTable, a_coeff + "/N");
 
     func = [this, tabulatedCoeff](const Real E, const RealVect x) -> Real {
       const Real N   = m_gasNumberDensity(x);
@@ -999,7 +1004,7 @@ ItoKMCJSON::initializeMobilities()
           this->throwParserError(baseErrorTable + ", but 'file' is not specified");
         }
 
-        LookupTable1D<2> tabulatedCoeff = this->parseTableEByN(mobilityJSON, "mu*N");
+        LookupTable1D<Real, 1> tabulatedCoeff = this->parseTableEByN(mobilityJSON, "mu*N");
 
         mobilityFunction = [this, tabulatedCoeff](const Real E, const RealVect x) -> Real {
           const Real N   = m_gasNumberDensity(x);
@@ -1077,7 +1082,7 @@ ItoKMCJSON::initializeDiffusionCoefficients()
           this->throwParserError(baseErrorTable + ", but 'file' is not specified");
         }
 
-        LookupTable1D<2> tabulatedCoeff = this->parseTableEByN(diffusionJSON, "D*N");
+        LookupTable1D<Real, 1> tabulatedCoeff = this->parseTableEByN(diffusionJSON, "D*N");
 
         diffusionCoefficient = [this, tabulatedCoeff](const Real E, const RealVect x) -> Real {
           const Real N   = m_gasNumberDensity(x);
@@ -1154,7 +1159,7 @@ ItoKMCJSON::initializeTemperatures()
           this->throwParserError(baseErrorTable + ", but 'file' is not specified");
         }
 
-        LookupTable1D<2> tabulatedCoeff = this->parseTableEByN(temperatureJSON, "eV");
+        LookupTable1D<Real, 1> tabulatedCoeff = this->parseTableEByN(temperatureJSON, "eV");
 
         constexpr Real eVToKelvin = 2.0 * Units::Qe / (3.0 * Units::kb);
 
@@ -1887,7 +1892,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
       this->throwParserError(baseErrorTable + "but 'file' is not specified");
     }
 
-    LookupTable1D<2> tabulatedCoeff = this->parseTableEByN(a_reactionJSON, "rate/N");
+    LookupTable1D<Real, 1> tabulatedCoeff = this->parseTableEByN(a_reactionJSON, "rate/N");
 
     fluidRate = [&N = this->m_gasNumberDensity, tabulatedCoeff](const Real E, const RealVect x) -> Real {
       const Real Etd = E / (N(x) * Units::Td);
@@ -2187,7 +2192,7 @@ ItoKMCJSON::parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reacti
   return ret;
 }
 
-LookupTable1D<2>
+LookupTable1D<Real, 1>
 ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string& a_dataID) const
 {
   CH_TIME("ItoKMCJSON::parseTableEByN");
@@ -2211,7 +2216,7 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
   int columnCoeff = 1;
   int numPoints   = 1000;
 
-  TableSpacing spacing = TableSpacing::Exponential;
+  CoordinateSystem spacing = CoordinateSystem::Exponential;
 
   if (a_tableEntry.contains("EbyN column")) {
     columnEbyN = a_tableEntry["EbyN column"].get<int>();
@@ -2226,17 +2231,17 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
     const std::string whichSpacing = this->trim(a_tableEntry["spacing"].get<std::string>());
 
     if (whichSpacing == "linear") {
-      spacing = TableSpacing::Uniform;
+      spacing = CoordinateSystem::Uniform;
     }
     else if (whichSpacing == "exponential") {
-      spacing = TableSpacing::Exponential;
+      spacing = CoordinateSystem::Exponential;
     }
     else {
       this->throwParserError(preError + " but spacing '" + whichSpacing + "' is not supported");
     }
   }
 
-  LookupTable1D<2> tabulatedCoefficient;
+  LookupTable1D<Real, 1> tabulatedCoefficient;
 
   if (a_tableEntry.contains("header")) {
     const std::string header = this->trim(a_tableEntry["header"].get<std::string>());
@@ -2266,26 +2271,24 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
   }
 
   // Set min/max range for internal table
+  Real minEbyN = -std::numeric_limits<Real>::max();
+  Real maxEbyN = +std::numeric_limits<Real>::max();
   if (a_tableEntry.contains("min E/N")) {
-    const Real minEbyN = a_tableEntry["min E/N"].get<Real>();
-
-    tabulatedCoefficient.setMinRange(minEbyN, 0);
+    minEbyN = a_tableEntry["min E/N"].get<Real>();
   }
   if (a_tableEntry.contains("max E/N")) {
-    const Real maxEbyN = a_tableEntry["max E/N"].get<Real>();
-
-    tabulatedCoefficient.setMaxRange(maxEbyN, 0);
+    maxEbyN = a_tableEntry["max E/N"].get<Real>();
   }
 
+  tabulatedCoefficient.truncate(minEbyN, maxEbyN, 0);
+
   // Make the table uniform and meaningful
-  tabulatedCoefficient.setTableSpacing(spacing);
-  tabulatedCoefficient.sort(0);
-  tabulatedCoefficient.makeUniform(numPoints);
+  tabulatedCoefficient.prepareTable(0, numPoints, spacing);
 
   if (a_tableEntry.contains("dump")) {
     const std::string dumpFile = this->trim(a_tableEntry["dump"].get<std::string>());
 
-    tabulatedCoefficient.dumpTable(dumpFile);
+    tabulatedCoefficient.writeStructuredData(dumpFile);
   }
 
   return tabulatedCoefficient;

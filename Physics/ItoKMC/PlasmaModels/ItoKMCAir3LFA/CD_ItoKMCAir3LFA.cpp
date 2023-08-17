@@ -188,10 +188,10 @@ ItoKMCAir3LFA::addTable(const std::string a_table_name, const std::string a_file
 {
   CH_TIME("ItoKMCAir3LFA::addTable");
 
-  LookupTable1D<2> table = DataParser::simpleFileReadASCII(a_file);
+  LookupTable1D<Real, 1> table = DataParser::simpleFileReadASCII(a_file);
 
-  table.sort();
-  table.makeUniform(1000);
+  table.prepareTable(0, 1000, CoordinateSystem::Uniform);
+
   m_tables.emplace(a_table_name, table);
 }
 
