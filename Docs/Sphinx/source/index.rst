@@ -182,6 +182,7 @@ Utilities
    :caption: Utilities
    :hidden:	     
 
+   Utilities/DataParser
    Utilities/LookupTable
    Utilities/RandomNumbers
    Utilities/LeastSquares
