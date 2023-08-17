@@ -48,10 +48,10 @@ main(int argc, char* argv[])
   attachmentData.prepareTable(0, 500, LookupTable::Spacing::Exponential);
 
   // Define transport data
-  auto alpha = [&](const Real& E) -> Real {
+  auto alpha = [&](const Real& E, const RealVect& x) -> Real {
     return ionizationData.interpolate<1>(E);
   };
-  auto eta = [&](const Real& E) -> Real {
+  auto eta = [&](const Real& E, const RealVect& x) -> Real {
     return attachmentData.interpolate<1>(E);
   };
   auto alphaEff = [&](const Real& E, const RealVect& x) -> Real {
