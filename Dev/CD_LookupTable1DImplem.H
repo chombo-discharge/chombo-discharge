@@ -15,6 +15,8 @@
 // Std includes
 #include <algorithm>
 #include <math.h>
+#include <iomanip>
+#include <fstream>
 
 // Our includes
 #include <CD_LookupTable1D.H>
@@ -30,7 +32,7 @@ inline void
 LookupTable1D<T, N, I>::reset() noexcept
 {
   m_isGood          = false;
-  m_grid            = std::make_tuple(CoordinateSystem::Uniform, -1.0, -1.0, -1.0);
+  m_grid            = std::make_tuple(CoordinateSystem::Uniform, 0, -1.0, -1.0, -1.0);
   m_rangeStrategyLo = OutOfRangeStrategy::Constant;
   m_rangeStrategyHi = OutOfRangeStrategy::Constant;
 
@@ -132,15 +134,16 @@ LookupTable1D<T, N, I>::prepareTable(const size_t&           a_independentVariab
 
     break;
   }
-  case CoordinateSystem::Logarithmic: {
+  case CoordinateSystem::Exponential: {
     if (xmin <= std::numeric_limits<T>::min()) {
       throw std::runtime_error(baseError + " - but can't have negativ values for logarithmic grid");
     }
+
     else {
-      delta = log(xmax / xmin) / (a_numPoints - 1);
+      delta = log10(xmax / xmin) / (a_numPoints - 1);
 
       for (int i = 0; i < a_numPoints; i++) {
-        coords[i] = xmin * exp(i * delta);
+        coords[i] = xmin * std::pow(10.0, i * delta);
       }
 
       break;
@@ -158,13 +161,7 @@ LookupTable1D<T, N, I>::prepareTable(const size_t&           a_independentVariab
   size_t curRow = 0;
 
   for (const auto& x : coords) {
-
-    while (true) {
-      if (curRow >= m_rawData.size()) {
-        std::cout << curRow << std::endl;
-        throw std::runtime_error(baseError + " - logic bust (array out of range)");
-      }
-
+    while (curRow < m_rawData.size() - 1) {
       const auto& row1 = m_rawData[curRow];
       const auto& row2 = m_rawData[curRow + 1];
 
@@ -177,20 +174,79 @@ LookupTable1D<T, N, I>::prepareTable(const size_t&           a_independentVariab
         std::array<T, N + 1> interpRow;
 
         for (size_t i = 0; i <= N; i++) {
-          //          interpRow[i] = row1[i] + t * (row2[i] - row1[i]);
+          interpRow[i] = row1[i] + t * (row2[i] - row1[i]);
         }
 
         m_structuredData.emplace_back(interpRow);
 
         break;
       }
-      else {
-        curRow++;
-      }
+
+      curRow++;
     }
   }
 
-  m_grid = std::make_tuple(a_coordSys, xmin, xmax, delta);
+  m_grid = std::make_tuple(a_coordSys, a_independentVariable, xmin, xmax, delta);
+}
+
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::writeRawData(const std::string& a_file) const noexcept
+{
+  this->writeToFile(a_file, m_rawData);
+}
+
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::writeStructuredData(const std::string& a_file) const noexcept
+{
+  this->writeToFile(a_file, m_structuredData);
+}
+
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::outputRawData(std::ostream& a_ostream) const noexcept
+{
+  this->outputData(a_ostream, m_rawData);
+}
+
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::outputStructuredData(std::ostream& a_ostream) const noexcept
+{
+  this->outputData(a_ostream, m_structuredData);
+}
+
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::outputData(std::ostream&                            a_ostream,
+                                   const std::vector<std::array<T, N + 1>>& a_data) const noexcept
+{
+  for (const auto& r : a_data) {
+    for (const auto& c : r) {
+      a_ostream << std::left << std::setw(14) << c;
+    }
+    a_ostream << "\n";
+  }
+}
+
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::writeToFile(const std::string&                       a_file,
+                                    const std::vector<std::array<T, N + 1>>& a_data) const noexcept
+{
+
+#ifdef CH_MPI
+  if (procID() == 0) {
+#endif
+    std::ofstream file;
+
+    file.open(a_file);
+    this->outputData(file, a_data);
+    file.close();
+#ifdef CH_MPI
+  }
+#endif
 }
 
 #endif

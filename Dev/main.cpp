@@ -11,8 +11,15 @@ main(int argc, char* argv[])
   table.addData(2.0,2.0);
   table.addData(3.0,3.0);
 
-  table.prepareTable(0,10,CoordinateSystem::Logarithmic);
+  table.prepareTable(0,10,CoordinateSystem::Exponential);
 
+  std::cout << "\n" << std::endl;
+  table.outputRawData();
+  std::cout << "\n";
+  table.outputStructuredData();  
+
+  table.writeRawData("raw.dat");
+  table.writeStructuredData("structured.dat");  
   //  table.dumpRawData();
 }
 

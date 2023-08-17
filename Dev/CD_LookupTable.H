@@ -46,7 +46,7 @@ enum StateStatus
 enum class CoordinateSystem
 {
   Uniform,
-  Logarithmic
+  Exponential
 };
 
 #include <CD_LookupTable1D.H>

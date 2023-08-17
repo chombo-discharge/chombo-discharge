@@ -98,16 +98,18 @@ public:
   prepareTable(const size_t& a_independentVariable, const size_t& a_numPoints, const CoordinateSystem& a_coordSys);
 
   /*!
-    @brief Interpolation function for specific independent variable.
-  */
-  inline std::array<T, N>
-  interpolate(const T x) const noexcept;
-
-  /*!
-    @brief Interpolate whole table.
+    @brief Interpolation function for specific dependent variable K
+    @param[in] a_x Independent variable x
   */
   template <size_t K>
   inline T
+  interpolate(const T a_x) const noexcept;
+
+  /*!
+    @brief Interpolate whole table.
+    @param[in] a_x Independent variable x
+  */
+  inline std::array<T, N + 1>
   interpolate(const T x) const noexcept;
 
   /*!
@@ -138,6 +140,34 @@ public:
   inline const std::vector<std::array<T, N + 1>>&
   getStructuredData() const noexcept;
 
+  /*!
+    @brief Dump raw table data to file
+    @param[in] a_file File name
+  */
+  inline void
+  writeRawData(const std::string& a_file) const noexcept;
+
+  /*!
+    @brief Dump structured table data to file
+    @param[in] a_file File name
+  */
+  inline void
+  writeStructuredData(const std::string& a_file) const noexcept;
+
+  /*!
+    @brief Dump raw table data to output stream.
+    @param[in] a_ostream Output stream
+  */
+  inline void
+  outputRawData(std::ostream& a_ostream = std::cout) const noexcept;
+
+  /*!
+    @brief Dump structured table data to file.
+    @param[in] a_ostream Output stream
+  */
+  inline void
+  outputStructuredData(std::ostream& a_ostream = std::cout) const noexcept;
+
 protected:
   /*!
     @brief Check if data can be interpolated
@@ -157,7 +187,7 @@ protected:
   /*!
     @brief Underlying 1D grid. This is populated when calling prepareTable.
   */
-  std::tuple<CoordinateSystem, T, T, T> m_grid;
+  std::tuple<CoordinateSystem, size_t, T, T, T> m_grid;
 
   /*!
     @brief Raw data
@@ -168,6 +198,22 @@ protected:
     @brief Structured data. This is populated when calling prepareTable.
   */
   std::vector<std::array<T, N + 1>> m_structuredData;
+
+  /*!
+    @brief Utility function for outputting data.
+    @param[in] a_ostream Output stream
+    @param[in] a_data Data to be sent to output stream
+  */
+  inline void
+  outputData(std::ostream& a_ostream, const std::vector<std::array<T, N + 1>>& a_data) const noexcept;
+
+  /*!
+    @brief Utility function for outputting data to a file
+    @param[in] a_file File name
+    @param[in] a_data Data to be sent to output stream
+  */
+  inline void
+  writeToFile(const std::string& a_file, const std::vector<std::array<T, N + 1>>& a_data) const noexcept;
 };
 
 #include <CD_LookupTable1DImplem.H>
