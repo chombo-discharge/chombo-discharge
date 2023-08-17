@@ -23,12 +23,13 @@
 
 /*!
   @brief Class for interpolation of f = f(x) data in one independent variable x.
+  @details N is the number of additional dependent variables. T must be a floating point type (e.g., float, double)
 */
 template <typename T, size_t N = 1, typename I = std::enable_if_t<std::is_floating_point<T>::value>>
 class LookupTable1D
 {
 public:
-  static_assert(N >= 1, "LookupTable1D<N> must have N > 1");
+  static_assert(N >= 1, "LookupTable1D<N> must have N >= 1");
 
   /*!
     @brief Default constructor. Creates a table without any entries. 
@@ -48,7 +49,7 @@ public:
 
   /*!
     @brief Add entry. 
-    @param[in] x Entry to add. For example addData(1,1,1,1). Number of arguments must be N+1
+    @param[in] x Entry to add. For example addData(1,1,1,1). Number of elements in x must be N+1
   */
   template <typename... Ts>
   inline void
@@ -63,6 +64,13 @@ public:
   */
   inline void
   swap(const size_t a_columnOne, const size_t a_columnTwo) noexcept;
+
+  /*!
+    @brief Utility function which scales one of the columns (either dependent or independent variable)
+  */
+  template <size_t K>
+  inline void
+  scale(const T& a_scale) noexcept;
 
   /*!
     @brief Utility function for truncating raw data along one of the variables (either dependent or independent).
@@ -103,14 +111,14 @@ public:
   */
   template <size_t K>
   inline T
-  interpolate(const T a_x) const noexcept;
+  interpolate(const T& a_x) const;
 
   /*!
     @brief Interpolate whole table.
     @param[in] a_x Independent variable x
   */
   inline std::array<T, N + 1>
-  interpolate(const T x) const noexcept;
+  interpolate(const T& x) const;
 
   /*!
     @brief Access function for raw data. 
@@ -214,6 +222,13 @@ protected:
   */
   inline void
   writeToFile(const std::string& a_file, const std::vector<std::array<T, N + 1>>& a_data) const noexcept;
+
+  /*!
+    @brief Get the lower index that brackets the input variable between two data points in the structured grid.
+    @param[in] a_x Independent variable.
+  */
+  inline size_t
+  getIndexLo(const T& a_x) const;
 };
 
 #include <CD_LookupTable1DImplem.H>

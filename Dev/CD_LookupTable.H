@@ -27,17 +27,7 @@
 enum class OutOfRangeStrategy
 {
   Constant,
-  Linear
-};
-
-/*!
-  @brief For identifying columns in the LookupTable1D.
-*/
-enum StateStatus
-{
-  Column  = 0,
-  Sorted  = 1,
-  Uniform = 2,
+  Interpolate
 };
 
 /*!

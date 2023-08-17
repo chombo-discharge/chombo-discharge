@@ -60,6 +60,40 @@ LookupTable1D<T, N, I>::swap(const size_t a_columnOne, const size_t a_columnTwo)
     r[a_columnOne] = r[a_columnTwo];
     r[a_columnTwo] = tmp;
   }
+
+  for (auto& r : m_structuredData) {
+    const auto tmp = r[a_columnOne];
+
+    r[a_columnOne] = r[a_columnTwo];
+    r[a_columnTwo] = tmp;
+  }
+
+  if (m_isGood) {
+    if (a_columnOne == std::get<4>(m_grid)) {
+      std::get<4>(m_grid) == a_columnOne;
+    }
+    else if (a_columnTwo == std::get<4>(m_grid)) {
+      std::get<4>(m_grid) == a_columnTwo;
+    }
+  }
+}
+
+template <typename T, size_t N, typename I>
+template <size_t K>
+inline void
+LookupTable1D<T, N, I>::scale(const T& a_scale) noexcept
+{
+  for (auto& r : m_rawData) {
+    r[K] *= a_scale;
+  }
+
+  for (auto& r : m_structuredData) {
+    r[K] *= a_scale;
+  }
+
+  if (m_isGood && K == std::get<2>(m_grid)) {
+    std::get<4>(m_grid) *= a_scale;
+  }
 }
 
 template <typename T, size_t N, typename I>
@@ -187,6 +221,8 @@ LookupTable1D<T, N, I>::prepareTable(const size_t&           a_independentVariab
   }
 
   m_grid = std::make_tuple(a_coordSys, a_independentVariable, xmin, xmax, delta);
+
+  m_isGood = true;
 }
 
 template <typename T, size_t N, typename I>
@@ -247,6 +283,134 @@ LookupTable1D<T, N, I>::writeToFile(const std::string&                       a_f
 #ifdef CH_MPI
   }
 #endif
+}
+
+template <typename T, size_t N, typename I>
+inline size_t
+LookupTable1D<T, N, I>::getIndexLo(const T& a_x) const
+{
+  const CoordinateSystem& coordSys            = std::get<0>(m_grid);
+  const size_t&           independentVariable = std::get<1>(m_grid);
+  const T&                x0                  = std::get<2>(m_grid);
+  const T&                delta               = std::get<4>(m_grid);
+
+  size_t idxLo;
+
+  switch (coordSys) {
+  case CoordinateSystem::Uniform: {
+    idxLo = std::floor((a_x - x0) / delta);
+
+    break;
+  }
+  case CoordinateSystem::Exponential: {
+    idxLo = std::floor(log10(a_x / x0) / delta);
+
+    break;
+  }
+  default: {
+    throw std::runtime_error("LookupTable1D<T,N,I>::getIndexLo - logic bust (unsupported coordinate system)");
+  }
+  }
+
+  return idxLo;
+}
+
+template <typename T, size_t N, typename I>
+inline std::array<T, N + 1>
+LookupTable1D<T, N, I>::interpolate(const T& a_x) const
+{
+  if (!m_isGood) {
+    throw std::runtime_error("LookupTable1D<T, N, I>::interpolate(array) but need to call 'prepareTable first'");
+  }
+
+  const size_t& indVar = std::get<1>(m_grid);
+  const T&      xmin   = std::get<2>(m_grid);
+  const T&      xmax   = std::get<3>(m_grid);
+
+  std::array<T, N + 1> ret;
+
+  if (a_x < xmin) {
+    switch (m_rangeStrategyLo) {
+    case OutOfRangeStrategy::Constant: {
+      ret = m_structuredData.front();
+
+      break;
+    }
+    case OutOfRangeStrategy::Interpolate: {
+      const T diffDx   = m_structuredData[1][indVar] - m_structuredData[0][indVar];
+      const T extrapDx = m_structuredData[0][indVar] - a_x;
+
+      ret = m_structuredData.front();
+
+      for (size_t i = 0; i < N + 1; i++) {
+        const T slope = (m_structuredData[1][i] - m_structuredData[0][i]) / diffDx;
+
+        ret[i] -= slope * extrapDx;
+      }
+
+      break;
+    }
+    default: {
+      throw std::runtime_error("LookupTable1D<T, N, I>::interpolate(array) unsupported range strategy at low end");
+
+      break;
+    }
+    }
+  }
+  else if (a_x > xmax) {
+    switch (m_rangeStrategyHi) {
+    case OutOfRangeStrategy::Constant: {
+      ret = m_structuredData.back();
+
+      break;
+    }
+    case OutOfRangeStrategy::Interpolate: {
+      const size_t& size = m_structuredData.size();
+
+      const T diffDx   = m_structuredData[size - 1][indVar] - m_structuredData[size - 2][indVar];
+      const T extrapDx = a_x - m_structuredData[size - 1][indVar];
+
+      ret = m_structuredData.back();
+
+      for (size_t i = 0; i < N + 1; i++) {
+        const T slope = (m_structuredData[size - 1][i] - m_structuredData[size - 2][i]) / diffDx;
+
+        ret[i] += slope * extrapDx;
+      }
+
+      break;
+    }
+    default: {
+      throw std::runtime_error("LookupTable1D<T, N, I>::interpolate(array) unsupported range strategy at low end");
+
+      break;
+    }
+    }
+  }
+  else {
+    const size_t idx = this->getIndexLo(a_x);
+
+    const T diffDx   = m_structuredData[idx + 1][indVar] - m_structuredData[idx][indVar];
+    const T interpDx = a_x - m_structuredData[idx][indVar];
+
+    ret = m_structuredData[idx];
+
+    for (size_t i = 0; i < N + 1; i++) {
+      const T slope = (m_structuredData[idx + 1][i] - m_structuredData[idx][i]) / diffDx;
+
+      ret[i] += slope * interpDx;
+    }
+  }
+
+  return ret;
+}
+
+template <typename T, size_t N, typename I>
+template <size_t K>
+inline T
+LookupTable1D<T, N, I>::interpolate(const T& a_x) const
+{
+  return std::get<K>(this->interpolate(a_x));
 }
 
 #endif

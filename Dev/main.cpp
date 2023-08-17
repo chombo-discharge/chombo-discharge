@@ -11,9 +11,10 @@ main(int argc, char* argv[])
   table.addData(2.0,2.0);
   table.addData(3.0,3.0);
 
-  table.prepareTable(0,10,CoordinateSystem::Exponential);
+  table.prepareTable(0,10,CoordinateSystem::Uniform);
 
-  std::cout << "\n" << std::endl;
+  table.scale<0>(2.0);
+
   table.outputRawData();
   std::cout << "\n";
   table.outputStructuredData();  
@@ -21,6 +22,11 @@ main(int argc, char* argv[])
   table.writeRawData("raw.dat");
   table.writeStructuredData("structured.dat");  
   //  table.dumpRawData();
+
+  table.setRangeStrategyLo(OutOfRangeStrategy::Constant);
+  table.setRangeStrategyHi(OutOfRangeStrategy::Interpolate);
+
+  std::cout << table.interpolate<1>(3.5) << std::endl;
 }
 
 
