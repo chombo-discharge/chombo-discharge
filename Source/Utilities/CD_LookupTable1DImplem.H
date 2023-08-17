@@ -17,6 +17,7 @@
 #include <math.h>
 #include <iomanip>
 #include <fstream>
+#include <limits>
 
 // Our includes
 #include <CD_LookupTable1D.H>
