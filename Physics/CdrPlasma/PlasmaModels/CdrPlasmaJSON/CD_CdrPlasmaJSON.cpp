@@ -1313,7 +1313,7 @@ CdrPlasmaJSON::parseAlpha()
     m_alphaTableEN = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
     // If the table is empty then it's an error.
-    if (m_alphaTableEN.getStructuredData().size() <= 1) {
+    if (m_alphaTableEN.getRawData().size() <= 1) {
       this->throwParserError(baseError + " and got 'table E/N' but table is empty. This is probably an error");
     }
 
@@ -1465,7 +1465,7 @@ CdrPlasmaJSON::parseEta()
     m_etaTableEN = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
     // If the table is empty then it's an error.
-    if (m_etaTableEN.getStructuredData().size() == 0) {
+    if (m_etaTableEN.getRawData().size() == 0) {
       this->throwParserError(baseError + " and got 'table E/N' but table is empty. This is probably an error");
     }
 
