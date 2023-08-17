@@ -25,7 +25,7 @@
   @brief Class for interpolation of f = f(x) data in one independent variable x.
   @details N is the number of additional dependent variables. T must be a floating point type (e.g., float, double)
 */
-template <typename T, size_t N = 1, typename I = std::enable_if_t<std::is_floating_point<T>::value>>
+template <typename T = Real, size_t N = 1, typename I = std::enable_if_t<std::is_floating_point<T>::value>>
 class LookupTable1D
 {
 public:
@@ -87,23 +87,23 @@ public:
     @param[in] a_strategy Out-of-range strategy on low end
   */
   inline void
-  setRangeStrategyLo(const OutOfRangeStrategy& a_strategy) noexcept;
+  setRangeStrategyLo(const LookupTable::OutOfRangeStrategy& a_strategy) noexcept;
 
   /*!
     @brief Set the out-of-range strategy on the high end
     @param[in] a_strategy Out-of-range strategy on the high end
   */
   inline void
-  setRangeStrategyHi(const OutOfRangeStrategy& a_strategy) noexcept;
+  setRangeStrategyHi(const LookupTable::OutOfRangeStrategy& a_strategy) noexcept;
 
   /*!
     @brief Turn the raw data into uniform data for fast lookup.
     @param[in] a_independentVariable The independent variable (i.e., column in the input data).
     @param[in] a_numPoints Number of points in the input table. 
-    @param[in] a_coordSys Coordinate system spacing. 
+    @param[in] a_spacing Table spacing
   */
   inline void
-  prepareTable(const size_t& a_independentVariable, const size_t& a_numPoints, const CoordinateSystem& a_coordSys);
+  prepareTable(const size_t& a_independentVariable, const size_t& a_numPoints, const LookupTable::Spacing& a_spacing);
 
   /*!
     @brief Interpolation function for specific dependent variable K
@@ -185,17 +185,17 @@ protected:
   /*!
     @brief Out-of-range strategy on low end
   */
-  OutOfRangeStrategy m_rangeStrategyLo;
+  LookupTable::OutOfRangeStrategy m_rangeStrategyLo;
 
   /*!
     @brief Out-of-range strategy on high end
   */
-  OutOfRangeStrategy m_rangeStrategyHi;
+  LookupTable::OutOfRangeStrategy m_rangeStrategyHi;
 
   /*!
     @brief Underlying 1D grid. This is populated when calling prepareTable.
   */
-  std::tuple<CoordinateSystem, size_t, T, T, T> m_grid;
+  std::tuple<LookupTable::Spacing, size_t, T, T, T> m_grid;
 
   /*!
     @brief Raw data

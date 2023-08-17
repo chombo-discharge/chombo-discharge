@@ -32,9 +32,9 @@ inline void
 LookupTable1D<T, N, I>::reset() noexcept
 {
   m_isGood          = false;
-  m_grid            = std::make_tuple(CoordinateSystem::Uniform, 0, -1.0, -1.0, -1.0);
-  m_rangeStrategyLo = OutOfRangeStrategy::Constant;
-  m_rangeStrategyHi = OutOfRangeStrategy::Constant;
+  m_grid            = std::make_tuple(LookupTable::Spacing::Uniform, 0, -1.0, -1.0, -1.0);
+  m_rangeStrategyLo = LookupTable::OutOfRangeStrategy::Constant;
+  m_rangeStrategyHi = LookupTable::OutOfRangeStrategy::Constant;
 
   m_rawData.clear();
   m_structuredData.clear();
@@ -108,28 +108,28 @@ LookupTable1D<T, N, I>::truncate(const T& a_min, const T& a_max, const size_t a_
     }
   }
 
-  m_rawData(std::move(truncatedData));
+  m_rawData = truncatedData;
 }
 
 template <typename T, size_t N, typename I>
 inline void
-LookupTable1D<T, N, I>::setRangeStrategyLo(const OutOfRangeStrategy& a_strategy) noexcept
+LookupTable1D<T, N, I>::setRangeStrategyLo(const LookupTable::OutOfRangeStrategy& a_strategy) noexcept
 {
   m_rangeStrategyLo = a_strategy;
 }
 
 template <typename T, size_t N, typename I>
 inline void
-LookupTable1D<T, N, I>::setRangeStrategyHi(const OutOfRangeStrategy& a_strategy) noexcept
+LookupTable1D<T, N, I>::setRangeStrategyHi(const LookupTable::OutOfRangeStrategy& a_strategy) noexcept
 {
   m_rangeStrategyHi = a_strategy;
 }
 
 template <typename T, size_t N, typename I>
 inline void
-LookupTable1D<T, N, I>::prepareTable(const size_t&           a_independentVariable,
-                                     const size_t&           a_numPoints,
-                                     const CoordinateSystem& a_coordSys)
+LookupTable1D<T, N, I>::prepareTable(const size_t&               a_independentVariable,
+                                     const size_t&               a_numPoints,
+                                     const LookupTable::Spacing& a_spacing)
 {
 
   const std::string baseError = "LookupTable1D<T,N,I>::prepareTable";
@@ -158,8 +158,8 @@ LookupTable1D<T, N, I>::prepareTable(const size_t&           a_independentVariab
 
   std::vector<T> coords(a_numPoints);
 
-  switch (a_coordSys) {
-  case CoordinateSystem::Uniform: {
+  switch (a_spacing) {
+  case LookupTable::Spacing::Uniform: {
     delta = (xmax - xmin) / (a_numPoints - 1);
 
     for (size_t i = 0; i < a_numPoints; i++) {
@@ -168,7 +168,7 @@ LookupTable1D<T, N, I>::prepareTable(const size_t&           a_independentVariab
 
     break;
   }
-  case CoordinateSystem::Exponential: {
+  case LookupTable::Spacing::Exponential: {
     if (xmin <= std::numeric_limits<T>::min()) {
       throw std::runtime_error(baseError + " - but can't have negativ values for logarithmic grid");
     }
@@ -184,7 +184,7 @@ LookupTable1D<T, N, I>::prepareTable(const size_t&           a_independentVariab
     }
   }
   default: {
-    throw std::runtime_error(baseError + " - logic bust (unsupported coordinate system)");
+    throw std::runtime_error(baseError + " - logic bust (unsupported table spacing system)");
 
     break;
   }
@@ -220,9 +220,37 @@ LookupTable1D<T, N, I>::prepareTable(const size_t&           a_independentVariab
     }
   }
 
-  m_grid = std::make_tuple(a_coordSys, a_independentVariable, xmin, xmax, delta);
+  m_grid = std::make_tuple(a_spacing, a_independentVariable, xmin, xmax, delta);
 
   m_isGood = true;
+}
+
+template <typename T, size_t N, typename I>
+inline std::vector<std::array<T, N + 1>>&
+LookupTable1D<T, N, I>::getRawData() noexcept
+{
+  return (m_rawData);
+}
+
+template <typename T, size_t N, typename I>
+inline std::vector<std::array<T, N + 1>>&
+LookupTable1D<T, N, I>::getStructuredData() noexcept
+{
+  return (m_structuredData);
+}
+
+template <typename T, size_t N, typename I>
+inline const std::vector<std::array<T, N + 1>>&
+LookupTable1D<T, N, I>::getRawData() const noexcept
+{
+  return (m_rawData);
+}
+
+template <typename T, size_t N, typename I>
+inline const std::vector<std::array<T, N + 1>>&
+LookupTable1D<T, N, I>::getStructuredData() const noexcept
+{
+  return (m_structuredData);
 }
 
 template <typename T, size_t N, typename I>
@@ -289,26 +317,26 @@ template <typename T, size_t N, typename I>
 inline size_t
 LookupTable1D<T, N, I>::getIndexLo(const T& a_x) const
 {
-  const CoordinateSystem& coordSys            = std::get<0>(m_grid);
-  const size_t&           independentVariable = std::get<1>(m_grid);
-  const T&                x0                  = std::get<2>(m_grid);
-  const T&                delta               = std::get<4>(m_grid);
+  const LookupTable::Spacing& spacing             = std::get<0>(m_grid);
+  const size_t&               independentVariable = std::get<1>(m_grid);
+  const T&                    x0                  = std::get<2>(m_grid);
+  const T&                    delta               = std::get<4>(m_grid);
 
   size_t idxLo;
 
-  switch (coordSys) {
-  case CoordinateSystem::Uniform: {
+  switch (spacing) {
+  case LookupTable::Spacing::Uniform: {
     idxLo = std::floor((a_x - x0) / delta);
 
     break;
   }
-  case CoordinateSystem::Exponential: {
+  case LookupTable::Spacing::Exponential: {
     idxLo = std::floor(log10(a_x / x0) / delta);
 
     break;
   }
   default: {
-    throw std::runtime_error("LookupTable1D<T,N,I>::getIndexLo - logic bust (unsupported coordinate system)");
+    throw std::runtime_error("LookupTable1D<T,N,I>::getIndexLo - logic bust (unsupported table spacing system)");
   }
   }
 
@@ -331,12 +359,12 @@ LookupTable1D<T, N, I>::interpolate(const T& a_x) const
 
   if (a_x < xmin) {
     switch (m_rangeStrategyLo) {
-    case OutOfRangeStrategy::Constant: {
+    case LookupTable::OutOfRangeStrategy::Constant: {
       ret = m_structuredData.front();
 
       break;
     }
-    case OutOfRangeStrategy::Interpolate: {
+    case LookupTable::OutOfRangeStrategy::Interpolate: {
       const T diffDx   = m_structuredData[1][indVar] - m_structuredData[0][indVar];
       const T extrapDx = m_structuredData[0][indVar] - a_x;
 
@@ -359,12 +387,12 @@ LookupTable1D<T, N, I>::interpolate(const T& a_x) const
   }
   else if (a_x > xmax) {
     switch (m_rangeStrategyHi) {
-    case OutOfRangeStrategy::Constant: {
+    case LookupTable::OutOfRangeStrategy::Constant: {
       ret = m_structuredData.back();
 
       break;
     }
-    case OutOfRangeStrategy::Interpolate: {
+    case LookupTable::OutOfRangeStrategy::Interpolate: {
       const size_t& size = m_structuredData.size();
 
       const T diffDx   = m_structuredData[size - 1][indVar] - m_structuredData[size - 2][indVar];

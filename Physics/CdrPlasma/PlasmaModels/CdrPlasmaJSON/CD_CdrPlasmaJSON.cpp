@@ -487,9 +487,9 @@ CdrPlasmaJSON::initializeNeutralSpecies()
       this->throwParserError(baseError + " and got tabulated gas law but file = '" + filename + "' was not found");
 
     // Let the data parser read the input.
-    LookupTable1D<2> temperatureTable = DataParser::simpleFileReadASCII(filename, height, T);
-    LookupTable1D<2> pressureTable    = DataParser::simpleFileReadASCII(filename, height, P);
-    LookupTable1D<2> densityTable     = DataParser::simpleFileReadASCII(filename, height, Rho);
+    LookupTable1D<Real, 1> temperatureTable = DataParser::simpleFileReadASCII(filename, height, T);
+    LookupTable1D<Real, 1> pressureTable    = DataParser::simpleFileReadASCII(filename, height, P);
+    LookupTable1D<Real, 1> densityTable     = DataParser::simpleFileReadASCII(filename, height, Rho);
 
     // Compute the number of points in the table
     const int numPoints = std::ceil((maxHeight - minHeight) / resHeight);
@@ -498,17 +498,13 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     densityTable.scale<1>(Units::Na / (M * g2kg));
 
     // Make the tables uniform
-    temperatureTable.setRange(minHeight, maxHeight, 0);
-    pressureTable.setRange(minHeight, maxHeight, 0);
-    densityTable.setRange(minHeight, maxHeight, 0);
+    temperatureTable.truncate(minHeight, maxHeight, 0);
+    pressureTable.truncate(minHeight, maxHeight, 0);
+    densityTable.truncate(minHeight, maxHeight, 0);
 
-    temperatureTable.sort(0);
-    pressureTable.sort(0);
-    densityTable.sort(0);
-
-    temperatureTable.makeUniform(numPoints);
-    pressureTable.makeUniform(numPoints);
-    densityTable.makeUniform(numPoints);
+    temperatureTable.prepareTable(0, numPoints, LookupTable::Spacing::Uniform);
+    pressureTable.prepareTable(0, numPoints, LookupTable::Spacing::Uniform);
+    densityTable.prepareTable(0, numPoints, LookupTable::Spacing::Uniform);
 
     // Now create the temperature, pressure, and density functions.
     m_gasTemperature = [table = temperatureTable](const RealVect a_position) -> Real {
@@ -771,7 +767,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
     std::vector<FunctionX> gauss4Functions;
 
     // Pointer to height profile table
-    LookupTable1D<2> heightProfile;
+    LookupTable1D<Real, 1> heightProfile;
 
     // Set the uniform density
     if (initData.contains("uniform")) {
@@ -924,15 +920,14 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
       heightProfile = DataParser::simpleFileReadASCII(filename, heightColumn, densityColumn);
 
       // Sort the table along the first column. This is the height above ground.
-      heightProfile.setRange(minHeight, maxHeight, 0);
+      heightProfile.truncate(minHeight, maxHeight, 0);
 
       // Scale the table by the desired factors.
       heightProfile.scale<0>(scaleX);
       heightProfile.scale<1>(scaleY);
 
       // Set range and make the table uniform so we can use fast lookup.
-      heightProfile.sort(0);
-      heightProfile.makeUniform(numPoints);
+      heightProfile.prepareTable(0, numPoints, LookupTable::Spacing::Uniform);
     }
 
     // Set the friggin function.
@@ -951,7 +946,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
       }
 
       // Add contribution from height profile.
-      if (heightProfile.getNumEntries() > 0) {
+      if (heightProfile.getStructuredData().size() > 0) {
         retVal += heightProfile.interpolate<1>(a_position[SpaceDim - 1]);
       }
 
@@ -1318,17 +1313,17 @@ CdrPlasmaJSON::parseAlpha()
     m_alphaTableEN = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
     // If the table is empty then it's an error.
-    if (m_alphaTableEN.getNumEntries() == 0) {
+    if (m_alphaTableEN.getStructuredData().size() <= 1) {
       this->throwParserError(baseError + " and got 'table E/N' but table is empty. This is probably an error");
     }
 
     // Figure out the table spacing
-    TableSpacing tableSpacing;
+    LookupTable::Spacing tableSpacing;
     if (spacing == "uniform") {
-      tableSpacing = TableSpacing::Uniform;
+      tableSpacing = LookupTable::Spacing::Uniform;
     }
     else if (spacing == "exponential") {
-      tableSpacing = TableSpacing::Exponential;
+      tableSpacing = LookupTable::Spacing::Exponential;
     }
     else {
       this->throwParserError(baseError + "and got 'table E/N' but 'spacing' field = '" + spacing +
@@ -1336,15 +1331,13 @@ CdrPlasmaJSON::parseAlpha()
     }
 
     // Format the table
-    m_alphaTableEN.setRange(minEN, maxEN, 0);
-    m_alphaTableEN.sort(0);
-    m_alphaTableEN.setTableSpacing(tableSpacing);
-    m_alphaTableEN.makeUniform(numPoints);
+    m_alphaTableEN.truncate(minEN, maxEN, 0);
+    m_alphaTableEN.prepareTable(0, numPoints, tableSpacing);
 
     // Check if we should dump the table to file so that users can debug.
     if (alpha.contains("dump")) {
       const std::string dumpFile = alpha["dump"].get<std::string>();
-      m_alphaTableEN.dumpTable(dumpFile);
+      m_alphaTableEN.writeStructuredData(dumpFile);
     }
 
     m_alphaLookup = LookupMethod::TableEN;
@@ -1472,17 +1465,17 @@ CdrPlasmaJSON::parseEta()
     m_etaTableEN = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
     // If the table is empty then it's an error.
-    if (m_etaTableEN.getNumEntries() == 0) {
+    if (m_etaTableEN.getStructuredData().size() == 0) {
       this->throwParserError(baseError + " and got 'table E/N' but table is empty. This is probably an error");
     }
 
     // Figure out the table spacing
-    TableSpacing tableSpacing;
+    LookupTable::Spacing tableSpacing;
     if (spacing == "uniform") {
-      tableSpacing = TableSpacing::Uniform;
+      tableSpacing = LookupTable::Spacing::Uniform;
     }
     else if (spacing == "exponential") {
-      tableSpacing = TableSpacing::Exponential;
+      tableSpacing = LookupTable::Spacing::Exponential;
     }
     else {
       this->throwParserError(baseError + "and got 'table E/N' but 'spacing' field = '" + spacing +
@@ -1490,15 +1483,13 @@ CdrPlasmaJSON::parseEta()
     }
 
     // Format the table
-    m_etaTableEN.setRange(minEN, maxEN, 0);
-    m_etaTableEN.sort(0);
-    m_etaTableEN.setTableSpacing(tableSpacing);
-    m_etaTableEN.makeUniform(numPoints);
+    m_etaTableEN.truncate(minEN, maxEN, 0);
+    m_etaTableEN.prepareTable(0, numPoints, tableSpacing);
 
     // Check if we should dump the table to file so that users can debug.
     if (eta.contains("dump")) {
       const std::string dumpFile = eta["dump"].get<std::string>();
-      m_etaTableEN.dumpTable(dumpFile);
+      m_etaTableEN.writeStructuredData(dumpFile);
     }
 
     m_etaLookup = LookupMethod::TableEN;
@@ -1634,22 +1625,22 @@ CdrPlasmaJSON::parseMobilities()
         // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
         // the user specified the correct E/N column then that data will be put in the first column. The data for mu*N will be in the
         // second column.
-        LookupTable1D<2> mobilityTable =
+        LookupTable1D<Real, 1> mobilityTable =
           DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
         // If the table is empty then it's an error.
-        if (mobilityTable.getNumEntries() == 0) {
+        if (mobilityTable.getRawData().size() == 0) {
           this->throwParserError(baseError + " and got tabulated mobility but mobility table '" + startRead +
                                  "' in file '" + filename + "'is empty");
         }
 
         // Figure out the table spacing
-        TableSpacing tableSpacing;
+        LookupTable::Spacing tableSpacing;
         if (spacing == "uniform") {
-          tableSpacing = TableSpacing::Uniform;
+          tableSpacing = LookupTable::Spacing::Uniform;
         }
         else if (spacing == "exponential") {
-          tableSpacing = TableSpacing::Exponential;
+          tableSpacing = LookupTable::Spacing::Exponential;
         }
         else {
           this->throwParserError(baseError + "and got 'table E/N' but 'spacing' field = '" + spacing +
@@ -1658,15 +1649,13 @@ CdrPlasmaJSON::parseMobilities()
 
         // Format the table appropriately.
         mobilityTable.scale<1>(scale);
-        mobilityTable.setRange(minEN, maxEN, 0);
-        mobilityTable.sort(0);
-        mobilityTable.setTableSpacing(tableSpacing);
-        mobilityTable.makeUniform(numPoints);
+        mobilityTable.truncate(minEN, maxEN, 0);
+	mobilityTable.prepareTable(0, numPoints, tableSpacing);
 
         // Check if we should dump the table to file so that users can debug.
         if (mobilityJSON.contains("dump")) {
           const std::string dumpFile = mobilityJSON["dump"].get<std::string>();
-          mobilityTable.dumpTable(dumpFile);
+          mobilityTable.writeStructuredData(dumpFile);
         }
 
         // Ok, put the table where it belongs.
@@ -1722,22 +1711,22 @@ CdrPlasmaJSON::parseMobilities()
         // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
         // the user specified the correct eV column then that data will be put in the first column. The data for mu*N will be in the
         // second column.
-        LookupTable1D<2> mobilityTable =
+        LookupTable1D<Real, 1> mobilityTable =
           DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
         // If the table is empty then it's an error.
-        if (mobilityTable.getNumEntries() == 0) {
+        if (mobilityTable.getRawData().size() == 0) {
           this->throwParserError(baseError + " and got 'table energy' but mobility table '" + startRead +
                                  "' in file '" + filename + "'is empty");
         }
 
         // Figure out the table spacing
-        TableSpacing tableSpacing;
+        LookupTable::Spacing tableSpacing;
         if (spacing == "uniform") {
-          tableSpacing = TableSpacing::Uniform;
+          tableSpacing = LookupTable::Spacing::Uniform;
         }
         else if (spacing == "exponential") {
-          tableSpacing = TableSpacing::Exponential;
+          tableSpacing = LookupTable::Spacing::Exponential;
         }
         else {
           this->throwParserError(baseError + "and got 'table energy' but 'spacing' field = '" + spacing +
@@ -1746,15 +1735,13 @@ CdrPlasmaJSON::parseMobilities()
 
         // Format the table appropriately.
         mobilityTable.scale<1>(scale);
-        mobilityTable.setRange(minEnergy, maxEnergy, 0);
-        mobilityTable.sort(0);
-        mobilityTable.setTableSpacing(tableSpacing);
-        mobilityTable.makeUniform(numPoints);
+        mobilityTable.truncate(minEnergy, maxEnergy, 0);
+	mobilityTable.prepareTable(0, numPoints, tableSpacing);
 
         // Check if we should dump the table to file so that users can debug.
         if (mobilityJSON.contains("dump")) {
           const std::string dumpFile = mobilityJSON["dump"].get<std::string>();
-          mobilityTable.dumpTable(dumpFile);
+          mobilityTable.writeStructuredData(dumpFile);
         }
 
         // Ok, put the table where it belongs.
@@ -1945,11 +1932,11 @@ CdrPlasmaJSON::parseDiffusion()
         // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
         // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
         // second column.
-        LookupTable1D<2> diffusionTable =
+        LookupTable1D<Real, 1> diffusionTable =
           DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
         // If the table is empty then it's an error.
-        if (diffusionTable.getNumEntries() == 0) {
+        if (diffusionTable.getRawData().size() == 0) {
           this->throwParserError(baseError + " and got tabulated diffusion but diffusion table '" + startRead +
                                  "' in file '" + filename + "'is empty");
         }
@@ -1961,12 +1948,12 @@ CdrPlasmaJSON::parseDiffusion()
         }
 
         // Figure out the table spacing
-        TableSpacing tableSpacing;
+        LookupTable::Spacing tableSpacing;
         if (spacing == "uniform") {
-          tableSpacing = TableSpacing::Uniform;
+          tableSpacing = LookupTable::Spacing::Uniform;
         }
         else if (spacing == "exponential") {
-          tableSpacing = TableSpacing::Exponential;
+          tableSpacing = LookupTable::Spacing::Exponential;
         }
         else {
           this->throwParserError(baseError + " and got tabulated diffusion but 'spacing' field = '" + spacing +
@@ -1975,15 +1962,13 @@ CdrPlasmaJSON::parseDiffusion()
 
         // Format the table
         diffusionTable.scale<1>(scale);
-        diffusionTable.setRange(minEN, maxEN, 0);
-        diffusionTable.sort(0);
-        diffusionTable.setTableSpacing(tableSpacing);
-        diffusionTable.makeUniform(numPoints);
+        diffusionTable.truncate(minEN, maxEN, 0);
+	diffusionTable.prepareTable(0, numPoints, tableSpacing);
 
         // Check if we should dump the table to file so that users can debug.
         if (diffusionJSON.contains("dump")) {
           const std::string dumpFile = diffusionJSON["dump"].get<std::string>();
-          diffusionTable.dumpTable(dumpFile);
+          diffusionTable.writeStructuredData(dumpFile);
         }
 
         m_diffusionLookup.emplace(std::make_pair(idx, LookupMethod::TableEN));
@@ -2035,11 +2020,11 @@ CdrPlasmaJSON::parseDiffusion()
         // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
         // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
         // second column.
-        LookupTable1D<2> diffusionTable =
+        LookupTable1D<Real, 1> diffusionTable =
           DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
         // If the table is empty then it's an error.
-        if (diffusionTable.getNumEntries() == 0) {
+        if (diffusionTable.getRawData().size() == 0) {
           this->throwParserError(baseError + " and got 'table energy' for diffusion but diffusion table '" + startRead +
                                  "' in file '" + filename + "'is empty");
         }
@@ -2051,12 +2036,12 @@ CdrPlasmaJSON::parseDiffusion()
         }
 
         // Figure out the table spacing
-        TableSpacing tableSpacing;
+        LookupTable::Spacing tableSpacing;
         if (spacing == "uniform") {
-          tableSpacing = TableSpacing::Uniform;
+          tableSpacing = LookupTable::Spacing::Uniform;
         }
         else if (spacing == "exponential") {
-          tableSpacing = TableSpacing::Exponential;
+          tableSpacing = LookupTable::Spacing::Exponential;
         }
         else {
           this->throwParserError(baseError + " and got 'table energy' for diffusion but 'spacing' field = '" + spacing +
@@ -2065,15 +2050,13 @@ CdrPlasmaJSON::parseDiffusion()
 
         // Format the table
         diffusionTable.scale<1>(scale);
-        diffusionTable.setRange(minEnergy, maxEnergy, 0);
-        diffusionTable.sort(0);
-        diffusionTable.setTableSpacing(tableSpacing);
-        diffusionTable.makeUniform(numPoints);
+        diffusionTable.truncate(minEnergy, maxEnergy, 0);
+	diffusionTable.prepareTable(0, numPoints, tableSpacing);
 
         // Check if we should dump the table to file so that users can debug.
         if (diffusionJSON.contains("dump")) {
           const std::string dumpFile = diffusionJSON["dump"].get<std::string>();
-          diffusionTable.dumpTable(dumpFile);
+          diffusionTable.writeStructuredData(dumpFile);
         }
 
         m_diffusionLookup.emplace(std::make_pair(idx, LookupMethod::TableEnergy));
@@ -2242,22 +2225,22 @@ CdrPlasmaJSON::parseTemperatures()
         // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
         // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
         // second column.
-        LookupTable1D<2> temperatureTable =
+        LookupTable1D<Real, 1> temperatureTable =
           DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
         // If the table is empty then it's an error.
-        if (temperatureTable.getNumEntries() == 0) {
+        if (temperatureTable.getRawData().size() == 0) {
           this->throwParserError(baseError + " but temperature table '" + startRead + "' in file '" + filename +
                                  "'is empty. This is probably an error");
         }
 
         // Figure out the table spacing
-        TableSpacing tableSpacing;
+        LookupTable::Spacing tableSpacing;
         if (spacing == "uniform") {
-          tableSpacing = TableSpacing::Uniform;
+          tableSpacing = LookupTable::Spacing::Uniform;
         }
         else if (spacing == "exponential") {
-          tableSpacing = TableSpacing::Exponential;
+          tableSpacing = LookupTable::Spacing::Exponential;
         }
         else {
           this->throwParserError(baseError + "and got tabulated mobility but 'spacing' field = '" + spacing +
@@ -2266,10 +2249,8 @@ CdrPlasmaJSON::parseTemperatures()
 
         // Format the table
         temperatureTable.scale<1>(scale);
-        temperatureTable.setRange(minEN, maxEN, 0);
-        temperatureTable.sort(0);
-        temperatureTable.setTableSpacing(tableSpacing);
-        temperatureTable.makeUniform(numPoints);
+        temperatureTable.truncate(minEN, maxEN, 0);
+	temperatureTable.prepareTable(0, numPoints, tableSpacing);
 
         // Conversion factor is eV to Kelvin.
         temperatureTable.scale<1>((2.0 * Units::Qe) / (3.0 * Units::kb));
@@ -2277,7 +2258,7 @@ CdrPlasmaJSON::parseTemperatures()
         // Check if we should dump the table to file so that users can debug.
         if (S.contains("dump")) {
           const std::string dumpFile = S["dump"].get<std::string>();
-          temperatureTable.dumpTable(dumpFile);
+          temperatureTable.writeStructuredData(dumpFile);
         }
 
         m_temperatureLookup.emplace(std::make_pair(idx, LookupMethod::TableEN));
@@ -2787,21 +2768,21 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
     // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
     // second column.
-    LookupTable1D<2> reactionTable =
+    LookupTable1D<Real, 1> reactionTable =
       DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
     // If the table is empty then it's an error.
-    if (reactionTable.getNumEntries() == 0) {
+    if (reactionTable.getRawData().size() == 0) {
       this->throwParserError(baseError + "and got 'table E/N' but table is empty. This is probably an error");
     }
 
     // Figure out the table spacing
-    TableSpacing tableSpacing;
+    LookupTable::Spacing tableSpacing;
     if (spacing == "uniform") {
-      tableSpacing = TableSpacing::Uniform;
+      tableSpacing = LookupTable::Spacing::Uniform;
     }
     else if (spacing == "exponential") {
-      tableSpacing = TableSpacing::Exponential;
+      tableSpacing = LookupTable::Spacing::Exponential;
     }
     else {
       this->throwParserError(baseError + "and got 'table E/N' but 'spacing' field = '" + spacing +
@@ -2809,15 +2790,13 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     }
 
     // Format the table.
-    reactionTable.setRange(minEN, maxEN, 0);
-    reactionTable.sort(0);
-    reactionTable.setTableSpacing(tableSpacing);
-    reactionTable.makeUniform(numPoints);
+    reactionTable.truncate(minEN, maxEN, 0);
+    reactionTable.prepareTable(0, numPoints, tableSpacing);
 
     // Check if we should dump the table to file so that users can debug.
     if (a_R.contains("dump")) {
       const std::string dumpFile = a_R["dump"].get<std::string>();
-      reactionTable.dumpTable(dumpFile);
+      reactionTable.writeStructuredData(dumpFile);
     }
 
     // Add the tabulated rate and identifier.
@@ -2867,21 +2846,21 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
     // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
     // second column.
-    LookupTable1D<2> reactionTable =
+    LookupTable1D<Real, 1> reactionTable =
       DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
     // If the table is empty then it's an error.
-    if (reactionTable.getNumEntries() == 0) {
+    if (reactionTable.getRawData().size() == 0) {
       this->throwParserError(baseError + "and got 'table energy' but table is empty. This is probably an error");
     }
 
     // Figure out the table spacing
-    TableSpacing tableSpacing;
+    LookupTable::Spacing tableSpacing;
     if (spacing == "uniform") {
-      tableSpacing = TableSpacing::Uniform;
+      tableSpacing = LookupTable::Spacing::Uniform;
     }
     else if (spacing == "exponential") {
-      tableSpacing = TableSpacing::Exponential;
+      tableSpacing = LookupTable::Spacing::Exponential;
     }
     else {
       this->throwParserError(baseError + "and got 'table energy' but 'spacing' field = '" + spacing +
@@ -2889,15 +2868,13 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     }
 
     // Format the table.
-    reactionTable.setRange(minEnergy, maxEnergy, 0);
-    reactionTable.sort(0);
-    reactionTable.setTableSpacing(tableSpacing);
-    reactionTable.makeUniform(numPoints);
+    reactionTable.truncate(minEnergy, maxEnergy, 0);
+    reactionTable.prepareTable(0, numPoints, tableSpacing);
 
     // Check if we should dump the table to file so that users can debug.
     if (a_R.contains("dump")) {
       const std::string dumpFile = a_R["dump"].get<std::string>();
-      reactionTable.dumpTable(dumpFile);
+      reactionTable.writeStructuredData(dumpFile);
     }
 
     // Now figure out the species whose energy determines the reaction rate. This MUST be a transport solver
@@ -4409,7 +4386,7 @@ CdrPlasmaJSON::computePlasmaSpeciesMobilities(const RealVect&          a_positio
       }
       case LookupMethod::TableEN: {
         // Recall; the mobility tables are stored as (E/N, mu*N) so we need to extract mu from that.
-        const LookupTable1D<2>& mobilityTable = m_mobilityTablesEN.at(i);
+        const LookupTable1D<Real,1>& mobilityTable = m_mobilityTablesEN.at(i);
 
         mu[i] = mobilityTable.interpolate<1>(Etd); // Get mu*N
         mu[i] /= N;                             // Get mu
@@ -4417,7 +4394,7 @@ CdrPlasmaJSON::computePlasmaSpeciesMobilities(const RealVect&          a_positio
         break;
       }
       case LookupMethod::TableEnergy: {
-        const LookupTable1D<2>& mobilityTable = m_mobilityTablesEnergy.at(i);
+        const LookupTable1D<Real, 1>& mobilityTable = m_mobilityTablesEnergy.at(i);
 
         mu[i] = mobilityTable.interpolate<1>(energies[i]);
         mu[i] /= N;
@@ -4484,7 +4461,7 @@ CdrPlasmaJSON::computePlasmaSpeciesDiffusion(const RealVect          a_pos,
       }
       case LookupMethod::TableEN: {
         // Recall; the diffusion tables are stored as (E/N, D*N) so we need to extract D from that.
-        const LookupTable1D<2>& diffusionTable = m_diffusionTablesEN.at(i);
+        const LookupTable1D<Real, 1>& diffusionTable = m_diffusionTablesEN.at(i);
 
         Dco = diffusionTable.interpolate<1>(Etd); // Get D*N
         Dco /= N;                              // Get D
@@ -4493,7 +4470,7 @@ CdrPlasmaJSON::computePlasmaSpeciesDiffusion(const RealVect          a_pos,
       }
       case LookupMethod::TableEnergy: {
         // Recall: The diffusion tables are stored as (eV, D*N) so we just get D from that.
-        const LookupTable1D<2>& diffusionTable = m_diffusionTablesEnergy.at(i);
+        const LookupTable1D<Real, 1>& diffusionTable = m_diffusionTablesEnergy.at(i);
 
         Dco = diffusionTable.interpolate<1>(energies[i]);
         Dco /= N;
@@ -4596,7 +4573,7 @@ CdrPlasmaJSON::computePlasmaSpeciesEnergies(const RealVect&          a_position,
         }
         case LookupMethod::TableEN: {
           // Recall; the temperature tables are stored as (E/N, K) so we can fetch the temperature immediately.
-          const LookupTable1D<2>& temperatureTable = m_temperatureTablesEN.at(i);
+          const LookupTable1D<Real, 1>& temperatureTable = m_temperatureTablesEN.at(i);
 
           T = temperatureTable.interpolate<1>(Etd);
 
@@ -4676,7 +4653,7 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
   }
   case LookupMethod::TableEN: {
     // Recall; the reaction tables are stored as (E/N, rate/N) so we need to extract mu from that.
-    const LookupTable1D<2>& reactionTable = m_plasmaReactionTablesEN.at(a_reactionIndex);
+    const LookupTable1D<Real, 1>& reactionTable = m_plasmaReactionTablesEN.at(a_reactionIndex);
 
     // Get the reaction rate.
     k = reactionTable.interpolate<1>(a_Etd);
@@ -4690,7 +4667,7 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
   }
   case LookupMethod::TableEnergy: {
     const int&              speciesIndex  = m_plasmaReactionTablesEnergy.at(a_reactionIndex).first;
-    const LookupTable1D<2>& reactionTable = m_plasmaReactionTablesEnergy.at(a_reactionIndex).second;
+    const LookupTable1D<Real, 1>& reactionTable = m_plasmaReactionTablesEnergy.at(a_reactionIndex).second;
 
     const Real energy = a_cdrEnergies[speciesIndex];
 

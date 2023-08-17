@@ -397,7 +397,7 @@ ItoKMCJSON::initializeBackgroundSpecies()
         int    axis           = -1;
         size_t numPoints      = 1000;
 
-        CoordinateSystem spacing = TableSpacing::Uniform;
+        LookupTable::Spacing spacing = LookupTable::Spacing::Uniform;
 
         Real minHeight = -std::numeric_limits<Real>::max();
         Real maxHeight = +std::numeric_limits<Real>::max();
@@ -482,10 +482,10 @@ ItoKMCJSON::initializeBackgroundSpecies()
           const std::string whichSpacing = this->trim(species["molar fraction"]["spacing"].get<std::string>());
 
           if (whichSpacing == "linear") {
-            coordSys = CoordinateSystem::Uniform;
+            spacing = LookupTable::Spacing::Uniform;
           }
           else if (whichSpacing == "exponential") {
-            coordSys = CoordinateSystem::Exponential;
+            spacing = LookupTable::Spacing::Exponential;
           }
           else {
             this->throwParserError(baseErrorID + " but spacing '" + whichSpacing + "' is not supported");
@@ -493,10 +493,7 @@ ItoKMCJSON::initializeBackgroundSpecies()
         }
 
         table.truncate(minHeight, maxHeight, 0);
-        table.prepareTable(0, numPoints, coordSys);
-        table.setTableSpacing(spacing);
-        table.sort(0);
-        table.makeUniform(numPoints);
+        table.prepareTable(0, numPoints, spacing);
 
         molarFraction = [table, axis](const RealVect a_position) -> Real {
           return table.interpolate<1>(a_position[axis]);
@@ -505,7 +502,7 @@ ItoKMCJSON::initializeBackgroundSpecies()
         if (species["molar fraction"].contains("dump")) {
           const std::string dumpId = this->trim(species["molar fraction"]["dump"].get<std::string>());
 
-          table.dumpTable(dumpId);
+          table.writeStructuredData(dumpId);
         }
       }
       else {
@@ -2216,7 +2213,7 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
   int columnCoeff = 1;
   int numPoints   = 1000;
 
-  CoordinateSystem spacing = CoordinateSystem::Exponential;
+  LookupTable::Spacing spacing = LookupTable::Spacing::Exponential;
 
   if (a_tableEntry.contains("EbyN column")) {
     columnEbyN = a_tableEntry["EbyN column"].get<int>();
@@ -2231,10 +2228,10 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
     const std::string whichSpacing = this->trim(a_tableEntry["spacing"].get<std::string>());
 
     if (whichSpacing == "linear") {
-      spacing = CoordinateSystem::Uniform;
+      spacing = LookupTable::Spacing::Uniform;
     }
     else if (whichSpacing == "exponential") {
-      spacing = CoordinateSystem::Exponential;
+      spacing = LookupTable::Spacing::Exponential;
     }
     else {
       this->throwParserError(preError + " but spacing '" + whichSpacing + "' is not supported");
@@ -2281,8 +2278,6 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
   }
 
   tabulatedCoefficient.truncate(minEbyN, maxEbyN, 0);
-
-  // Make the table uniform and meaningful
   tabulatedCoefficient.prepareTable(0, numPoints, spacing);
 
   if (a_tableEntry.contains("dump")) {
