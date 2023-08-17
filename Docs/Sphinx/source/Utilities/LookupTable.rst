@@ -18,7 +18,7 @@ The class is templated as
 
 .. code-block::
 
-   template <template T = Real, size_t N = 1>
+   template <typename T = Real, size_t N = 1>
    class LookupTable1D
 
 where the template parameter ``N`` indicates the number of dependent variables (``N=1`` yields a compile-time error).
