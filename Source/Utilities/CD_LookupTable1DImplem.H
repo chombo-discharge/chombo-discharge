@@ -4,647 +4,442 @@
  */
 
 /*!
-  @file   CD_LookupTable1DImplem.H
-  @brief  Implementation of CD_LookupTable1D.H
+  @file   CD_LookupTable1D.H
+  @brief  Declaration of a lookup table in one independent variable.
   @author Robert Marskar
 */
 
-#ifndef CD_LookupTable1DImplem_H
-#define CD_LookupTable1DImplem_H
+#ifndef CD_LookupTableImplem_H
+#define CD_LookupTableImplem_H
 
 // Std includes
-#include <iostream>
-#include <fstream>
 #include <algorithm>
 #include <math.h>
-
-// Chombo includes
-#include <SPMD.H>
-#include <MayDay.H>
+#include <iomanip>
+#include <fstream>
+#include <limits>
 
 // Our includes
 #include <CD_LookupTable1D.H>
-#include <CD_NamespaceHeader.H>
 
-template <int N>
-inline LookupTable1D<N>::LookupTable1D()
+template <typename T, size_t N, typename I>
+LookupTable1D<T, N, I>::LookupTable1D() noexcept
 {
+  this->reset();
+};
 
-  // Default settings
-  m_spacing = TableSpacing::Uniform;
-  m_state   = std::make_tuple(-1, false, false);
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::reset() noexcept
+{
+  m_isGood          = false;
+  m_grid            = std::make_tuple(LookupTable::Spacing::Uniform, 0, -1.0, -1.0, -1.0);
+  m_rangeStrategyLo = LookupTable::OutOfRangeStrategy::Constant;
+  m_rangeStrategyHi = LookupTable::OutOfRangeStrategy::Constant;
 
-  m_strategyLo = OutOfRangeStrategy::Constant;
-  m_strategyHi = OutOfRangeStrategy::Constant;
+  m_rawData.clear();
+  m_structuredData.clear();
 }
 
-template <int N>
-inline LookupTable1D<N>::~LookupTable1D()
-{}
-
-template <int N>
-inline LookupTable1D<N>::LookupTable1D(const LookupTable1D& a_table)
-{
-  m_data    = a_table.m_data;
-  m_state   = a_table.m_state;
-  m_delta   = a_table.m_delta;
-  m_spacing = a_table.m_spacing;
-
-  m_strategyLo = a_table.m_strategyLo;
-  m_strategyHi = a_table.m_strategyHi;
-}
-
-template <int N>
+template <typename T, size_t N, typename I>
 template <typename... Ts>
 inline void
-LookupTable1D<N>::addEntry(const Ts&... x)
+LookupTable1D<T, N, I>::addData(const Ts&... x)
 {
-  std::array<Real, sizeof...(Ts)> arr = {(Real)x...};
-  m_data.emplace_back(arr);
+  std::array<T, sizeof...(Ts)> arr = {(T)x...};
 
-  std::get<Sorted>(m_state)  = false;
-  std::get<Uniform>(m_state) = false;
+  m_rawData.emplace_back(arr);
 }
 
-template <int N>
+template <typename T, size_t N, typename I>
 inline void
-LookupTable1D<N>::sort(const int a_sortedColumn)
+LookupTable1D<T, N, I>::swap(const size_t a_columnOne, const size_t a_columnTwo) noexcept
 {
+  for (auto& r : m_rawData) {
+    const auto tmp = r[a_columnOne];
 
-  auto comparator = [idx = a_sortedColumn](const std::array<Real, N>& a, const std::array<Real, N>& b) -> bool {
-    return a[idx] < b[idx];
-  };
+    r[a_columnOne] = r[a_columnTwo];
+    r[a_columnTwo] = tmp;
+  }
 
-  std::sort(m_data.begin(), m_data.end(), comparator);
+  for (auto& r : m_structuredData) {
+    const auto tmp = r[a_columnOne];
 
-  std::get<Column>(m_state) = a_sortedColumn;
-  std::get<Sorted>(m_state) = true;
+    r[a_columnOne] = r[a_columnTwo];
+    r[a_columnTwo] = tmp;
+  }
+
+  if (m_isGood) {
+    if (a_columnOne == std::get<4>(m_grid)) {
+      std::get<4>(m_grid) == a_columnOne;
+    }
+    else if (a_columnTwo == std::get<4>(m_grid)) {
+      std::get<4>(m_grid) == a_columnTwo;
+    }
+  }
 }
 
-template <int N>
-template <int K>
+template <typename T, size_t N, typename I>
+template <size_t K>
 inline void
-LookupTable1D<N>::scale(const Real a_scale)
+LookupTable1D<T, N, I>::scale(const T& a_scale) noexcept
 {
-  for (auto& r : m_data) {
+  for (auto& r : m_rawData) {
     r[K] *= a_scale;
   }
 
-  if (K == std::get<Column>(m_state)) {
-    m_delta *= a_scale;
+  for (auto& r : m_structuredData) {
+    r[K] *= a_scale;
+  }
+
+  if (m_isGood && K == std::get<2>(m_grid)) {
+    std::get<4>(m_grid) *= a_scale;
   }
 }
 
-template <int N>
+template <typename T, size_t N, typename I>
 inline void
-LookupTable1D<N>::swap(const int a_column1, const int a_column2)
+LookupTable1D<T, N, I>::truncate(const T& a_min, const T& a_max, const size_t a_column) noexcept
 {
-  for (auto& r : m_data) {
-    const Real tmp = r[a_column1];
+  std::vector<std::array<T, N + 1>> truncatedData;
 
-    r[a_column1] = r[a_column2];
-    r[a_column2] = tmp;
-  }
-
-  if (std::get<Sorted>(m_state)) {
-
-    if (a_column1 == std::get<Column>(m_state)) {
-      std::get<Column>(m_state) = a_column1;
-    }
-    else if (a_column2 == std::get<Column>(m_state)) {
-      std::get<Column>(m_state) = a_column2;
-    }
-  }
-}
-
-template <int N>
-inline void
-LookupTable1D<N>::clear()
-{
-  m_data.resize(0);
-}
-
-template <int N>
-inline void
-LookupTable1D<N>::setRange(const Real a_min, const Real a_max, const int a_colRange)
-{
-  // Do a backup of the data and reset data holder.
-  const std::vector<std::array<Real, N>> oldData = m_data;
-  this->clear();
-
-  for (const auto& d : oldData) {
-    if (d[a_colRange] >= a_min && d[a_colRange] <= a_max) {
-      m_data.emplace_back(d);
+  for (const auto& xy : m_rawData) {
+    if (xy[a_column] >= a_min || xy[a_column] <= a_max) {
+      truncatedData.emplace_back(xy);
     }
   }
 
-  std::get<Sorted>(m_state)  = false;
-  std::get<Uniform>(m_state) = false;
+  m_rawData = truncatedData;
 }
 
-template <int N>
+template <typename T, size_t N, typename I>
 inline void
-LookupTable1D<N>::setMinRange(const Real a_min, const int a_colRange)
+LookupTable1D<T, N, I>::setRangeStrategyLo(const LookupTable::OutOfRangeStrategy& a_strategy) noexcept
+{
+  m_rangeStrategyLo = a_strategy;
+}
+
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::setRangeStrategyHi(const LookupTable::OutOfRangeStrategy& a_strategy) noexcept
+{
+  m_rangeStrategyHi = a_strategy;
+}
+
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::prepareTable(const size_t&               a_independentVariable,
+                                     const size_t&               a_numPoints,
+                                     const LookupTable::Spacing& a_spacing)
 {
 
-  // Do a backup of the data and reset data holder
-  const std::vector<std::array<Real, N>> oldData = m_data;
-  this->clear();
+  const std::string baseError = "LookupTable1D<T,N,I>::prepareTable";
 
-  for (const auto& d : oldData) {
-    if (d[a_colRange] >= a_min) {
-      m_data.emplace_back(d);
+  if (a_numPoints <= 1) {
+    throw std::runtime_error(baseError + " - must have 'a_numPoints > 1'");
+  }
+
+  // Sort the raw data along the specified column.
+  using Values                   = std::array<T, N + 1>;
+  std::vector<Values> sortedData = m_rawData;
+
+  std::sort(sortedData.begin(),
+            sortedData.end(),
+            [i = a_independentVariable](const Values& X1, const Values& X2) -> bool {
+              return X1[i] < X2[i];
+            });
+
+  // Set up the 1D grid
+  T xmin;
+  T xmax;
+  T delta;
+
+  xmin = sortedData.front()[a_independentVariable];
+  xmax = sortedData.back()[a_independentVariable];
+
+  std::vector<T> coords(a_numPoints);
+
+  switch (a_spacing) {
+  case LookupTable::Spacing::Uniform: {
+    delta = (xmax - xmin) / (a_numPoints - 1);
+
+    for (size_t i = 0; i < a_numPoints; i++) {
+      coords[i] = xmin + i * delta;
     }
-  }
-
-  std::get<Sorted>(m_state)  = false;
-  std::get<Uniform>(m_state) = false;
-}
-
-template <int N>
-inline void
-LookupTable1D<N>::setMaxRange(const Real a_max, const int a_colRange)
-{
-  // Do a backup of the data and reset data holder.
-  const std::vector<std::array<Real, N>> oldData = m_data;
-  this->clear();
-
-  for (const auto& d : oldData) {
-    if (d[a_colRange] <= a_max) {
-      m_data.emplace_back(d);
-    }
-  }
-
-  std::get<Sorted>(m_state)  = false;
-  std::get<Uniform>(m_state) = false;
-}
-
-template <int N>
-inline void
-LookupTable1D<N>::setOutOfRangeStrategyLow(const OutOfRangeStrategy a_strategy)
-{
-  m_strategyLo = a_strategy;
-}
-
-template <int N>
-inline void
-LookupTable1D<N>::setOutOfRangeStrategyHigh(const OutOfRangeStrategy a_strategy)
-{
-  m_strategyHi = a_strategy;
-}
-
-template <int N>
-inline void
-LookupTable1D<N>::setTableSpacing(const TableSpacing a_spacing)
-{
-
-  // If we change the table spacing, we are no longer in "uniform" mode.
-  if (a_spacing != m_spacing) {
-    std::get<Uniform>(m_state) = false;
-  }
-
-  m_spacing = a_spacing;
-}
-
-template <int N>
-inline void
-LookupTable1D<N>::dumpTable(std::ostream& a_outputStream) const
-{
-  for (const auto& r : m_data) {
-    for (const auto& c : r) {
-      a_outputStream << c << "\t";
-    }
-    a_outputStream << "\n";
-  }
-}
-
-template <int N>
-inline void
-LookupTable1D<N>::dumpTable(const std::string a_fileName) const
-{
-#ifdef CH_MPI
-  if (procID() == 0) {
-#endif
-    std::ofstream outputFile;
-
-    outputFile.open(a_fileName);
-
-    // Run through the data and write our stuff.
-    for (const auto& row : m_data) {
-      for (const auto& entry : row) {
-        outputFile << entry << "\t\t";
-      }
-      outputFile << "\n";
-    }
-
-    outputFile.close();
-#ifdef CH_MPI
-  }
-#endif
-}
-
-template <int N>
-inline int
-LookupTable1D<N>::getIndexLo(const Real a_x) const
-{
-  int index = 0;
-
-  // This is the column where sorted along.
-  const int sortedColumn = std::get<Column>(m_state);
-
-  // This is the lowest point in the table.
-  const Real x0 = m_data.front()[sortedColumn];
-
-  switch (m_spacing) {
-  case TableSpacing::Uniform: {
-    index = std::floor((a_x - x0) / m_delta);
 
     break;
   }
-  case TableSpacing::Exponential: {
-    index = std::floor(log(a_x / x0) / m_delta);
+  case LookupTable::Spacing::Exponential: {
+    if (xmin <= std::numeric_limits<T>::min()) {
+      throw std::runtime_error(baseError + " - but can't have negativ values for logarithmic grid");
+    }
+
+    else {
+      delta = log10(xmax / xmin) / (a_numPoints - 1);
+
+      for (int i = 0; i < a_numPoints; i++) {
+        coords[i] = xmin * std::pow(10.0, i * delta);
+      }
+
+      break;
+    }
+  }
+  default: {
+    throw std::runtime_error(baseError + " - logic bust (unsupported table spacing system)");
+
+    break;
+  }
+  }
+
+  m_structuredData.clear();
+
+  size_t curRow = 0;
+
+  for (const auto& x : coords) {
+    while (curRow < m_rawData.size() - 1) {
+      const auto& row1 = m_rawData[curRow];
+      const auto& row2 = m_rawData[curRow + 1];
+
+      const auto x1 = row1[a_independentVariable];
+      const auto x2 = row2[a_independentVariable];
+
+      if (x >= x1 && x <= x2) {
+        const auto t = (x - x1) / (x2 - x1);
+
+        std::array<T, N + 1> interpRow;
+
+        for (size_t i = 0; i <= N; i++) {
+          interpRow[i] = row1[i] + t * (row2[i] - row1[i]);
+        }
+
+        m_structuredData.emplace_back(interpRow);
+
+        break;
+      }
+
+      curRow++;
+    }
+  }
+
+  m_grid = std::make_tuple(a_spacing, a_independentVariable, xmin, xmax, delta);
+
+  m_isGood = true;
+}
+
+template <typename T, size_t N, typename I>
+inline std::vector<std::array<T, N + 1>>&
+LookupTable1D<T, N, I>::getRawData() noexcept
+{
+  return (m_rawData);
+}
+
+template <typename T, size_t N, typename I>
+inline std::vector<std::array<T, N + 1>>&
+LookupTable1D<T, N, I>::getStructuredData() noexcept
+{
+  return (m_structuredData);
+}
+
+template <typename T, size_t N, typename I>
+inline const std::vector<std::array<T, N + 1>>&
+LookupTable1D<T, N, I>::getRawData() const noexcept
+{
+  return (m_rawData);
+}
+
+template <typename T, size_t N, typename I>
+inline const std::vector<std::array<T, N + 1>>&
+LookupTable1D<T, N, I>::getStructuredData() const noexcept
+{
+  return (m_structuredData);
+}
+
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::writeRawData(const std::string& a_file) const noexcept
+{
+  this->writeToFile(a_file, m_rawData);
+}
+
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::writeStructuredData(const std::string& a_file) const noexcept
+{
+  this->writeToFile(a_file, m_structuredData);
+}
+
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::outputRawData(std::ostream& a_ostream) const noexcept
+{
+  this->outputData(a_ostream, m_rawData);
+}
+
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::outputStructuredData(std::ostream& a_ostream) const noexcept
+{
+  this->outputData(a_ostream, m_structuredData);
+}
+
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::outputData(std::ostream&                            a_ostream,
+                                   const std::vector<std::array<T, N + 1>>& a_data) const noexcept
+{
+  for (const auto& r : a_data) {
+    for (const auto& c : r) {
+      a_ostream << std::left << std::setw(14) << c;
+    }
+    a_ostream << "\n";
+  }
+}
+
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::writeToFile(const std::string&                       a_file,
+                                    const std::vector<std::array<T, N + 1>>& a_data) const noexcept
+{
+
+#ifdef CH_MPI
+  if (procID() == 0) {
+#endif
+    std::ofstream file;
+
+    file.open(a_file);
+    this->outputData(file, a_data);
+    file.close();
+#ifdef CH_MPI
+  }
+#endif
+}
+
+template <typename T, size_t N, typename I>
+inline size_t
+LookupTable1D<T, N, I>::getIndexLo(const T& a_x) const
+{
+  const LookupTable::Spacing& spacing             = std::get<0>(m_grid);
+  const size_t&               independentVariable = std::get<1>(m_grid);
+  const T&                    x0                  = std::get<2>(m_grid);
+  const T&                    delta               = std::get<4>(m_grid);
+
+  size_t idxLo;
+
+  switch (spacing) {
+  case LookupTable::Spacing::Uniform: {
+    idxLo = std::floor((a_x - x0) / delta);
+
+    break;
+  }
+  case LookupTable::Spacing::Exponential: {
+    idxLo = std::floor(log10(a_x / x0) / delta);
 
     break;
   }
   default: {
-    MayDay::Error("LookupTable1D<N>::getIndexLo - logic bust");
+    throw std::runtime_error("LookupTable1D<T,N,I>::getIndexLo - logic bust (unsupported table spacing system)");
   }
   }
 
-  return index;
+  return idxLo;
 }
 
-template <int N>
-template <int K>
-inline Real
-LookupTable1D<N>::getEntry(const Real a_x) const
+template <typename T, size_t N, typename I>
+inline std::array<T, N + 1>
+LookupTable1D<T, N, I>::interpolate(const T& a_x) const
 {
+  if (!m_isGood) {
+    throw std::runtime_error("LookupTable1D<T, N, I>::interpolate(array) but need to call 'prepareTable first'");
+  }
 
-  // TLDR: This is the main routine for fetching a column of data. This will switch between constant/linear interpolation outside of
-  //       the stored data range.
+  const size_t& indVar = std::get<1>(m_grid);
+  const T&      xmin   = std::get<2>(m_grid);
+  const T&      xmax   = std::get<3>(m_grid);
 
-  Real ret = 0.0;
+  std::array<T, N + 1> ret;
 
-  if (m_data.size() == 1) {
-    ret = m_data.front()[K];
+  if (a_x < xmin) {
+    switch (m_rangeStrategyLo) {
+    case LookupTable::OutOfRangeStrategy::Constant: {
+      ret = m_structuredData.front();
+
+      break;
+    }
+    case LookupTable::OutOfRangeStrategy::Interpolate: {
+      const T diffDx   = m_structuredData[1][indVar] - m_structuredData[0][indVar];
+      const T extrapDx = m_structuredData[0][indVar] - a_x;
+
+      ret = m_structuredData.front();
+
+      for (size_t i = 0; i < N + 1; i++) {
+        const T slope = (m_structuredData[1][i] - m_structuredData[0][i]) / diffDx;
+
+        ret[i] -= slope * extrapDx;
+      }
+
+      break;
+    }
+    default: {
+      throw std::runtime_error("LookupTable1D<T, N, I>::interpolate(array) unsupported range strategy at low end");
+
+      break;
+    }
+    }
+  }
+  else if (a_x > xmax) {
+    switch (m_rangeStrategyHi) {
+    case LookupTable::OutOfRangeStrategy::Constant: {
+      ret = m_structuredData.back();
+
+      break;
+    }
+    case LookupTable::OutOfRangeStrategy::Interpolate: {
+      const size_t& size = m_structuredData.size();
+
+      const T diffDx   = m_structuredData[size - 1][indVar] - m_structuredData[size - 2][indVar];
+      const T extrapDx = a_x - m_structuredData[size - 1][indVar];
+
+      ret = m_structuredData.back();
+
+      for (size_t i = 0; i < N + 1; i++) {
+        const T slope = (m_structuredData[size - 1][i] - m_structuredData[size - 2][i]) / diffDx;
+
+        ret[i] += slope * extrapDx;
+      }
+
+      break;
+    }
+    default: {
+      throw std::runtime_error("LookupTable1D<T, N, I>::interpolate(array) unsupported range strategy at low end");
+
+      break;
+    }
+    }
   }
   else {
+    const size_t idx = this->getIndexLo(a_x);
 
-    if (!(std::get<Sorted>(m_state))) {
-      MayDay::Warning("LookupTable1D<N>::getEntry - table is not sorted");
-    }
+    const T diffDx   = m_structuredData[idx + 1][indVar] - m_structuredData[idx][indVar];
+    const T interpDx = a_x - m_structuredData[idx][indVar];
 
-    if (!(std::get<Uniform>(m_state))) {
-      MayDay::Warning("LookupTable1D<N>::getEntry - table is not uniform");
-    }
+    ret = m_structuredData[idx];
 
-    // We have sorted our data from smallest to largest along some column -- this is that column.
-    const int sortedColumn = std::get<Column>(m_state);
+    for (size_t i = 0; i < N + 1; i++) {
+      const T slope = (m_structuredData[idx + 1][i] - m_structuredData[idx][i]) / diffDx;
 
-    // This is the LOWER index among the two indices we will interpolate between.
-    const int idx = this->getIndexLo(a_x);
-
-    // See how we should enforce fetching the data when retrieving data outside the stored data range.
-    if (idx < 0) { // Input point is outside the lower range
-
-      // Figure out how we should interpolate on the low side.
-      switch (m_strategyLo) {
-      case OutOfRangeStrategy::Constant: {
-        ret = m_data.front()[K];
-
-        break;
-      }
-      case OutOfRangeStrategy::Linear: {
-        const Real idxLo = 0;
-        const Real idxHi = 1;
-
-        const Real xLo = m_data[idxLo][sortedColumn];
-        const Real xHi = m_data[idxHi][sortedColumn];
-
-        // Figure out distance between the two points
-        const Real deltaX = xHi - xLo;
-
-        // Figure out the distance between the low index and our own input point.
-        const Real dist = xLo - a_x;
-
-        // Compute the slope.
-        const Real slope = (m_data[idxHi][K] - m_data[idxLo][K]) / deltaX;
-
-        // Do the interpolation.
-        ret = m_data.front()[K] - dist * slope;
-
-        break;
-      }
-      default:
-        MayDay::Error("LookupTable1D<N>::getEntry -- logic bust when fetching out-of-range endpoint on the low side");
-
-        break;
-      }
-    }
-    else if (idx >= m_data.size() - 1) { // Input point is outside the range on the high end.
-
-      // Figure out how to get the data outside the range.
-      switch (m_strategyHi) {
-      case OutOfRangeStrategy::Constant: {
-        ret = m_data.back()[K];
-
-        break;
-      }
-      case OutOfRangeStrategy::Linear: {
-        const int size = m_data.size();
-
-        const int idxLo = m_data.size() - 2;
-        const int idxHi = m_data.size() - 1;
-
-        const Real xLo = m_data[idxLo][sortedColumn];
-        const Real xHi = m_data[idxHi][sortedColumn];
-
-        // Compute the spacing between the two points
-        const Real deltaX = xHi - xLo;
-
-        // Compute the slope.
-        const Real slope = (m_data[size - 1][K] - m_data[size - 2][K]) / deltaX;
-
-        // Compute the distance to the endpoint.
-        const Real dist = a_x - xHi;
-
-        // Linearly interpolate.
-        ret = m_data.back()[K] + dist * slope;
-
-        break;
-      }
-      default:
-        MayDay::Error("LookupTable1D<N>::getEntry -- logic bust when fetching out-of-range endpoint on the high side");
-
-        break;
-      }
-    }
-    else {
-
-      // Compute spacing between the two points.
-      const Real d = (m_data[idx + 1][sortedColumn] - m_data[idx][sortedColumn]);
-
-      // Compute the slope between the two points.
-      const Real t = (a_x - m_data[idx][sortedColumn]) / d;
-
-      // Linearly interpolate.
-      ret = m_data[idx][K] + t * (m_data[idx + 1][K] - m_data[idx][K]);
+      ret[i] += slope * interpDx;
     }
   }
 
   return ret;
 }
 
-template <int N>
-inline std::array<Real, N>
-LookupTable1D<N>::getData(const Real a_x) const
+template <typename T, size_t N, typename I>
+template <size_t K>
+inline T
+LookupTable1D<T, N, I>::interpolate(const T& a_x) const
 {
-
-  std::array<Real, N> ret;
-
-  if (m_data.size() == 1) {
-    ret = m_data.front();
-  }
-  else {
-    if (!(std::get<Sorted>(m_state))) {
-      MayDay::Error("LookupTable1D<N>::getEntry - table is not sorted");
-    }
-
-    if (!(std::get<Uniform>(m_state))) {
-      MayDay::Error("LookupTable1D<N>::getEntry - table is not uniform");
-    }
-
-    const int sortedColumn = std::get<Column>(m_state);
-
-    // This is the LOWER index among the two indices we will interpolate between.
-    const int idx = this->getIndexLo(a_x);
-
-    // See how we should enforce fetching the data when retrieving data outside the stored data range.
-    if (idx < 0) { // On the low side.
-
-      // Figure out how we should interpolate on the low side.
-      switch (m_strategyLo) {
-      case OutOfRangeStrategy::Constant: {
-        ret = m_data.front();
-
-        break;
-      }
-      case OutOfRangeStrategy::Linear: {
-        ret = m_data.front();
-
-        // Distance from first point in the table to the interpolation point. This
-        // will be a positive number.
-        const Real dist = m_data.front()[sortedColumn] - a_x;
-
-        // Interpolate each dependent and independent variable.
-        for (int i = 0; i < N; i++) {
-
-          // This is the slope for variable i.
-          const Real slope = (m_data[1][i] - m_data[0][i]) / m_delta;
-
-          // Extrapolate beyond endpoint
-          ret[i] -= dist * slope;
-        }
-
-        break;
-      }
-      default:
-        MayDay::Error("LookupTable1D<N>::getData -- logic bust when fetching out-of-range endpoint on the low side");
-
-        break;
-      }
-    }
-    else if (idx >= m_data.size() - 1) {
-
-      // Figure out how to get the data outside the range.
-      switch (m_strategyHi) {
-      case OutOfRangeStrategy::Constant: {
-        ret = m_data.back();
-
-        break;
-      }
-      case OutOfRangeStrategy::Linear: {
-        const int size = m_data.size();
-
-        ret = m_data.back();
-
-        // This is the distance from the interpolation to the endpoint in the table. This will be a positive number.
-        const Real dist = a_x - m_data.back()[sortedColumn];
-
-        // Interpolate each dependent and independent variable.
-        for (int i = 0; i < N; i++) {
-
-          // This is the slope for variable i
-          const Real slope = (m_data[size - 1][i] - m_data[size - 2][i]) / m_delta;
-
-          ret[i] += dist * slope;
-        }
-
-        break;
-      }
-      default:
-        MayDay::Error("LookupTable1D<N>::getEntry -- logic bust when fetching out-of-range endpoint on the high side");
-
-        break;
-      }
-    }
-    else {
-      MayDay::Error("LookupTable1D<N>::getEntry (array version -- spacing is wrong");
-      const Real t = (a_x - m_data[idx][sortedColumn]) / m_delta;
-
-      // Interpolate all variables.
-      for (int i = 0; i < N; i++) {
-        ret[i] = m_data[idx][i] + t * (m_data[idx + 1][i] - m_data[idx][i]);
-      }
-    }
-  }
-
-  return ret;
+  return std::get<K>(this->interpolate(a_x));
 }
-
-template <int N>
-inline std::array<Real, N>
-LookupTable1D<N>::directLookup(const Real a_x) const
-{
-
-  std::array<Real, N> ret;
-  if (!(std::get<Sorted>(m_state))) {
-    std::cerr << "LookupTable1D<N>::directLookup -- logic bust. Data must be sorted along the input column!\n";
-  }
-  else {
-    const int column = std::get<Column>(m_state);
-
-    if (a_x <= m_data.front()[column]) {
-      ret = m_data.front();
-    }
-    else if (a_x >= m_data.back()[column]) {
-      ret = m_data.back();
-    }
-    else { // Do linear interpolation. We look through the rows and find two entries that bracket a_x. We then linearly interpolate between those entries.
-      for (int irow = 0; irow < m_data.size() - 1; irow++) {
-        const std::array<Real, N>& row1 = m_data[irow];
-        const std::array<Real, N>& row2 = m_data[irow + 1];
-
-        const Real x1 = row1[column];
-        const Real x2 = row2[column];
-
-        if (a_x >= x1 && a_x <= x2) {
-          const Real t = (a_x - x1) / (x2 - x1);
-
-          // Now interpolate data in each column.
-          for (int j = 0; j < N; j++) {
-            ret[j] = row1[j] + t * (row2[j] - row1[j]);
-          }
-        }
-      }
-    }
-  }
-
-  return ret;
-}
-
-template <int N>
-inline void
-LookupTable1D<N>::makeUniform(const int a_numRows)
-{
-
-  if (std::get<Sorted>(m_state)) {
-    const int sortedColumn = std::get<Column>(m_state);
-
-    if (a_numRows > 1) {
-
-      // Find minimum and maximum values for the independent variable
-      const Real xMin = m_data.front()[sortedColumn];
-      const Real xMax = m_data.back()[sortedColumn];
-
-      // Create a new vector of x-values
-      std::vector<Real> xValues(a_numRows, 0.0);
-
-      switch (m_spacing) {
-      case TableSpacing::Uniform: {
-        // Figure out the spacing
-        m_delta = (xMax - xMin) / (a_numRows - 1);
-
-        // Create uniformly spaced points
-        for (int i = 0; i < a_numRows; i++) {
-          xValues[i] = xMin + i * m_delta;
-        }
-
-        break;
-      }
-      case TableSpacing::Exponential: {
-        // Figure out the spacing
-        m_delta = log(xMax / xMin) / a_numRows;
-
-        // Create exponentially spaced points
-        for (int i = 0; i < a_numRows; i++) {
-          xValues[i] = xMin * exp(i * m_delta);
-        }
-
-        break;
-      }
-      default: {
-        MayDay::Error("LookupTable1D<N>::makeUniform - logic bust");
-      }
-      }
-
-      // Linearly interpolate the data.
-      std::array<Real, N>              interpRow;
-      std::vector<std::array<Real, N>> interpData;
-
-      int irow = 0;
-
-      const int column = std::get<Column>(m_state);
-
-      for (const auto& x : xValues) {
-        while (true) {
-          const std::array<Real, N>& row1 = m_data[irow];
-          const std::array<Real, N>& row2 = m_data[irow + 1];
-
-          const Real x1 = row1[column];
-          const Real x2 = row2[column];
-
-          if (x >= x1 && x <= x2) {
-            const Real t = (x - x1) / (x2 - x1);
-
-            for (int j = 0; j < N; j++) {
-              interpRow[j] = row1[j] + t * (row2[j] - row1[j]);
-            }
-
-            interpData.emplace_back(interpRow);
-
-            break;
-          }
-          else {
-            if (irow >= m_data.size() - 1) {
-              MayDay::Abort("LookupTable1D<N>::makeUniform - logic bust. Interpolated row is out-of-range");
-            }
-
-            irow++;
-          }
-        }
-      }
-
-      m_data = interpData;
-
-      std::get<Uniform>(m_state) = true;
-    }
-    else {
-      std::cerr << "LookupTable1D<N>::makeUniform -- must have at least two rows!\n";
-    }
-  }
-  else {
-    std::cerr << "LookupTable1D<N>::makeUniform -- must sort the column along one of the coordinates first!\n";
-  }
-}
-
-template <int N>
-inline int
-LookupTable1D<N>::getNumEntries() const
-{
-  return m_data.size();
-}
-
-#include <CD_NamespaceFooter.H>
 
 #endif

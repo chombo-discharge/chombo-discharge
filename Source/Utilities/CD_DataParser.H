@@ -17,7 +17,7 @@
 
 // Our includes
 #include <CD_PointParticle.H>
-#include <CD_LookupTable1D.H>
+#include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -36,7 +36,7 @@ namespace DataParser {
     @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
     @note xColumn = 0 is the FIRST column, xColumn=1 is the SECOND column and so on. 
   */
-  LookupTable1D<2>
+  LookupTable1D<Real, 1>
   simpleFileReadASCII(const std::string       a_fileName,
                       const int               a_xColumn     = 0,
                       const int               a_yColumn     = 1,
@@ -55,7 +55,7 @@ namespace DataParser {
     @param[in] a_yColumn     Which column to use as the y-column. 
     @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
   */
-  LookupTable1D<2>
+  LookupTable1D<Real, 1>
   fractionalFileReadASCII(const std::string       a_fileName,
                           const std::string       a_startRead,
                           const std::string       a_stopRead,

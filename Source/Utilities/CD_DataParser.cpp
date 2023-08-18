@@ -21,7 +21,7 @@
 #include <CD_DataParser.H>
 #include <CD_NamespaceHeader.H>
 
-LookupTable1D<2>
+LookupTable1D<Real, 1>
 DataParser::simpleFileReadASCII(const std::string       a_fileName,
                                 const int               a_xColumn,
                                 const int               a_yColumn,
@@ -30,7 +30,7 @@ DataParser::simpleFileReadASCII(const std::string       a_fileName,
   CH_TIME("DataParser::simpleFileReadASCII");
 
   // This is the return table. It will be populated as we read the file.
-  LookupTable1D<2> returnTable = LookupTable1D<2>();
+  LookupTable1D<Real, 1> returnTable;
 
   // Open an input file stream and start reading lines.
   std::ifstream inputFile(a_fileName);
@@ -68,7 +68,7 @@ DataParser::simpleFileReadASCII(const std::string       a_fileName,
         // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough data WILL be ignored.
         const int numColumnsOnThisLine = values.size();
         if (a_xColumn < numColumnsOnThisLine && a_yColumn < numColumnsOnThisLine) {
-          returnTable.addEntry(values[a_xColumn], values[a_yColumn]);
+          returnTable.addData(values[a_xColumn], values[a_yColumn]);
         }
       }
     }
@@ -77,7 +77,7 @@ DataParser::simpleFileReadASCII(const std::string       a_fileName,
   return returnTable;
 }
 
-LookupTable1D<2>
+LookupTable1D<Real, 1>
 DataParser::fractionalFileReadASCII(const std::string       a_fileName,
                                     const std::string       a_startRead,
                                     const std::string       a_stopRead,
@@ -88,7 +88,7 @@ DataParser::fractionalFileReadASCII(const std::string       a_fileName,
   CH_TIME("DataParser::fractionalFileReadASCII");
 
   // This is the return table. It will be populated as we read the file.
-  LookupTable1D<2> returnTable = LookupTable1D<2>();
+  LookupTable1D<Real, 1> returnTable;
 
   // Open an input file stream and start reading lines.
   bool          parseLine = false;
@@ -134,7 +134,7 @@ DataParser::fractionalFileReadASCII(const std::string       a_fileName,
         // data WILL be ignored.
         const int numColumnsOnThisLine = values.size();
         if (a_xColumn < numColumnsOnThisLine && a_yColumn < numColumnsOnThisLine) {
-          returnTable.addEntry(values[a_xColumn], values[a_yColumn]);
+          returnTable.addData(values[a_xColumn], values[a_yColumn]);
         }
       }
     }
