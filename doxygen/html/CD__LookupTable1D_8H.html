@@ -73,42 +73,38 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Classes</a> &#124;
-<a href="#enum-members">Enumerations</a>  </div>
+<a href="#nested-classes">Classes</a>  </div>
   <div class="headertitle">
 <div class="title">CD_LookupTable1D.H File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Declaration of a table for looking up coefficients etc.  
+<p>Declaration of a lookup table in one independent variable.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;iostream&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;array&gt;</code><br />
-<code>#include &lt;tuple&gt;</code><br />
-<code>#include &lt;REAL.H&gt;</code><br />
-<code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
-<code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
-<code>#include &lt;<a class="el" href="CD__LookupTable1DImplem_8H_source.html">CD_LookupTable1DImplem.H</a>&gt;</code><br />
+<code>#include &lt;type_traits&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__LookupTable_8H_source.html">CD_LookupTable.H</a>&gt;</code><br />
+<code>#include &lt;CD_LookupTable1DImplem.H&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for CD_LookupTable1D.H:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__LookupTable1D_8H__incl.png" border="0" usemap="#aSource_2Utilities_2CD__LookupTable1D_8H" alt=""/></div>
 <map name="aSource_2Utilities_2CD__LookupTable1D_8H" id="aSource_2Utilities_2CD__LookupTable1D_8H">
-<area shape="rect" title="Declaration of a table for looking up coefficients etc." alt="" coords="480,5,624,47"/>
+<area shape="rect" title="Declaration of a lookup table in one independent variable." alt="" coords="219,5,363,47"/>
 <area shape="rect" title=" " alt="" coords="5,169,85,196"/>
-<area shape="rect" title=" " alt="" coords="681,95,743,121"/>
-<area shape="rect" title=" " alt="" coords="768,95,824,121"/>
-<area shape="rect" title=" " alt="" coords="849,95,903,121"/>
-<area shape="rect" title=" " alt="" coords="928,95,997,121"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="110,169,295,196"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="320,169,499,196"/>
-<area shape="rect" href="CD__LookupTable1DImplem_8H.html" title="Implementation of CD_LookupTable1D.H." alt="" coords="447,95,657,121"/>
-<area shape="rect" title=" " alt="" coords="635,169,709,196"/>
-<area shape="rect" title=" " alt="" coords="733,169,819,196"/>
-<area shape="rect" title=" " alt="" coords="843,169,911,196"/>
-<area shape="rect" title=" " alt="" coords="936,169,1011,196"/>
-<area shape="rect" title=" " alt="" coords="523,169,611,196"/>
+<area shape="rect" title=" " alt="" coords="110,169,173,196"/>
+<area shape="rect" title=" " alt="" coords="383,95,439,121"/>
+<area shape="rect" title=" " alt="" coords="299,169,391,196"/>
+<area shape="rect" href="CD__LookupTable_8H.html" title="Declaration of a table for looking up coefficients etc." alt="" coords="165,95,307,121"/>
+<area shape="rect" href="CD__LookupTable1DImplem_8H_source.html" title=" " alt="" coords="463,95,673,121"/>
+<area shape="rect" title=" " alt="" coords="197,169,275,196"/>
+<area shape="rect" title=" " alt="" coords="696,169,781,196"/>
+<area shape="rect" title=" " alt="" coords="806,169,874,196"/>
+<area shape="rect" title=" " alt="" coords="416,169,491,196"/>
+<area shape="rect" title=" " alt="" coords="515,169,589,196"/>
+<area shape="rect" title=" " alt="" coords="613,169,672,196"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -116,16 +112,17 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__LookupTable1D_8H__dep__incl.png" border="0" usemap="#aSource_2Utilities_2CD__LookupTable1D_8Hdep" alt=""/></div>
 <map name="aSource_2Utilities_2CD__LookupTable1D_8Hdep" id="aSource_2Utilities_2CD__LookupTable1D_8Hdep">
-<area shape="rect" title="Declaration of a table for looking up coefficients etc." alt="" coords="595,5,739,47"/>
-<area shape="rect" href="CD__DataParser_8H.html" title="Declaration of various routines for simple parsing of input data." alt="" coords="235,102,379,143"/>
-<area shape="rect" href="CD__LookupTable1DImplem_8H.html" title="Implementation of CD_LookupTable1D.H." alt="" coords="940,102,1131,143"/>
-<area shape="rect" href="CD__CdrPlasmaJSON_8H.html" title="Declaration of a generic CdrPlasma model." alt="" coords="9,95,208,151"/>
-<area shape="rect" href="CD__ItoKMCAir3LFA_8H.html" title="Ito plasma three&#45;species model for air." alt="" coords="404,102,664,143"/>
-<area shape="rect" href="CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="688,102,916,143"/>
-<area shape="rect" href="CD__DataParser_8cpp.html" title="Implementation of CD_DataParser.H." alt="" coords="229,206,373,247"/>
-<area shape="rect" href="CD__CdrPlasmaJSON_8cpp.html" title="Implementation of CD_CdrPlasmaJSON.H." alt="" coords="5,199,204,255"/>
-<area shape="rect" href="CD__ItoKMCAir3LFA_8cpp.html" title="Implementation of CD_ItoKMCAir3LFA.H." alt="" coords="397,206,671,247"/>
-<area shape="rect" href="CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="695,206,936,247"/>
+<area shape="rect" title="Declaration of a lookup table in one independent variable." alt="" coords="445,5,589,47"/>
+<area shape="rect" href="CD__LookupTable_8H.html" title="Declaration of a table for looking up coefficients etc." alt="" coords="349,95,493,136"/>
+<area shape="rect" href="CD__LookupTable1DImplem_8H_source.html" title=" " alt="" coords="517,95,708,136"/>
+<area shape="rect" href="CD__DataParser_8H.html" title="Declaration of various routines for simple parsing of input data." alt="" coords="235,191,379,233"/>
+<area shape="rect" href="CD__CdrPlasmaJSON_8H.html" title="Declaration of a generic CdrPlasma model." alt="" coords="9,184,208,240"/>
+<area shape="rect" href="CD__ItoKMCAir3LFA_8H.html" title="Ito plasma three&#45;species model for air." alt="" coords="404,191,664,233"/>
+<area shape="rect" href="CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="695,191,923,233"/>
+<area shape="rect" href="CD__DataParser_8cpp.html" title="Implementation of CD_DataParser.H." alt="" coords="229,295,373,337"/>
+<area shape="rect" href="CD__CdrPlasmaJSON_8cpp.html" title="Implementation of CD_CdrPlasmaJSON.H." alt="" coords="5,288,204,344"/>
+<area shape="rect" href="CD__ItoKMCAir3LFA_8cpp.html" title="Implementation of CD_ItoKMCAir3LFA.H." alt="" coords="397,295,671,337"/>
+<area shape="rect" href="CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="695,295,936,337"/>
 </map>
 </div>
 </div>
@@ -133,31 +130,12 @@ This graph shows which files directly or indirectly include this file:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html">LookupTable1D&lt; N &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Class for looking up and interpolation (x,y) data.  <a href="classLookupTable1D.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html">LookupTable1D&lt; T, N, I &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Class for interpolation of f = f(x) data in one independent variable x.  <a href="classLookupTable1D.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
-Enumerations</h2></td></tr>
-<tr class="memitem:a68acea554b689ac41c0b13388ed03572"><td class="memItemLeft" align="right" valign="top"><a id="a68acea554b689ac41c0b13388ed03572"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CD__LookupTable1D_8H.html#a68acea554b689ac41c0b13388ed03572">OutOfRangeStrategy</a> { <b>Constant</b>
-, <b>Linear</b>
- }</td></tr>
-<tr class="memdesc:a68acea554b689ac41c0b13388ed03572"><td class="mdescLeft">&#160;</td><td class="mdescRight">Strategy for obtaining data when requesting data that is out of range. We can use either constant (i.e. virtually padding the data with the first/last entry) or with linear interpolation (i.e. virtually padding the data with a slope connecting the first two or last two entries in the table). <br /></td></tr>
-<tr class="separator:a68acea554b689ac41c0b13388ed03572"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a03ca319be3bdddb06bb83e7fc6e69580"><td class="memItemLeft" align="right" valign="top"><a id="a03ca319be3bdddb06bb83e7fc6e69580"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CD__LookupTable1D_8H.html#a03ca319be3bdddb06bb83e7fc6e69580">StateStatus</a> { <b>Column</b> = 0
-, <b>Sorted</b> = 1
-, <b>Uniform</b> = 2
- }</td></tr>
-<tr class="memdesc:a03ca319be3bdddb06bb83e7fc6e69580"><td class="mdescLeft">&#160;</td><td class="mdescRight">For identifying columns in the <a class="el" href="classLookupTable1D.html" title="Class for looking up and interpolation (x,y) data.">LookupTable1D</a>. <br /></td></tr>
-<tr class="separator:a03ca319be3bdddb06bb83e7fc6e69580"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acffc6eccff44c2e022a96233f052e5de"><td class="memItemLeft" align="right" valign="top"><a id="acffc6eccff44c2e022a96233f052e5de"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CD__LookupTable1D_8H.html#acffc6eccff44c2e022a96233f052e5de">TableSpacing</a> { <b>Uniform</b>
-, <b>Exponential</b>
- }</td></tr>
-<tr class="memdesc:acffc6eccff44c2e022a96233f052e5de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enum for classifying how table is spaced. <br /></td></tr>
-<tr class="separator:acffc6eccff44c2e022a96233f052e5de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Declaration of a table for looking up coefficients etc. </p>
+<div class="textblock"><p>Declaration of a lookup table in one independent variable. </p>
 <dl class="section author"><dt>Author</dt><dd>Robert Marskar </dd></dl>
 </div></div><!-- contents -->
 <!-- start footer part -->

@@ -1,27 +1,13 @@
 <map id="Source/Utilities/CD_LookupTable.H" name="Source/Utilities/CD_LookupTable.H">
-<area shape="rect" id="node1" title="Declaration of a table for looking up coefficients etc." alt="" coords="409,5,553,47"/>
-<area shape="rect" id="node2" href="$CD__DataParser_8H.html" title="Declaration of various routines for simple parsing of input data." alt="" coords="15,102,159,143"/>
-<area shape="rect" id="node5" href="$CD__LookupTableImplem_8H.html" title="Implementation of CD_LookupTable.H." alt="" coords="183,102,357,143"/>
-<area shape="rect" id="node6" href="$CD__CdrPlasmaJSON_8H.html" title="Declaration of a generic CdrPlasma model." alt="" coords="381,95,580,151"/>
-<area shape="rect" id="node7" href="$CD__ItoPlasmaPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="1107,102,1270,143"/>
-<area shape="rect" id="node11" href="$CD__ItoPlasmaAir3LFA_8H.html" title="Ito plasma three&#45;species model for air." alt="" coords="802,407,994,463"/>
-<area shape="rect" id="node14" href="$CD__ItoPlasmaAir3LEA_8H.html" title="Declaration of a three&#45;species air model with energy transport." alt="" coords="438,303,630,359"/>
-<area shape="rect" id="node3" href="$CD__DataParserImplem_8H_source.html" title=" " alt="" coords="5,206,169,247"/>
-<area shape="rect" id="node4" href="$CD__CdrPlasmaJSON_8cpp.html" title="Implementation of CD_CdrPlasmaJSON.H." alt="" coords="288,199,487,255"/>
-<area shape="rect" id="node8" href="$CD__ItoPlasmaPhysics_8cpp.html" title="Implementation of CD_ItoPlasmaPhysics.H." alt="" coords="910,206,1081,247"/>
-<area shape="rect" id="node9" href="$CD__ItoPlasmaPhysicsImplem_8H.html" title="Implementation of CD_ItoPlasmaPhysics.H." alt="" coords="1156,206,1363,247"/>
-<area shape="rect" id="node10" href="$CD__ItoPlasmaPhysicsLFA_8H.html" title="Interface file for LFA&#45;based ito plasma physics." alt="" coords="954,310,1133,351"/>
-<area shape="rect" id="node13" href="$CD__ItoPlasmaPhysicsLEA_8H.html" title="Interface file for LEA&#45;based ito plasma physics." alt="" coords="705,206,886,247"/>
-<area shape="rect" id="node16" href="$CD__ItoPlasmaStepper_8H.html" title="Abstract class for integrating the Ito plasma equations." alt="" coords="1387,206,1550,247"/>
-<area shape="rect" id="node18" href="$CD__ItoPlasmaTagger_8H.html" title="Parent tagger class for ItoPlasma." alt="" coords="1610,310,1773,351"/>
-<area shape="rect" id="node12" href="$CD__ItoPlasmaAir3LFA_8cpp.html" title="Implementation of CD_ItoPlasmaAir3LFA.H." alt="" coords="802,511,994,567"/>
-<area shape="rect" id="node15" href="$CD__ItoPlasmaAir3LEA_8cpp.html" title="Implementation of CD_ItoPlasmaAir3LEA.H." alt="" coords="437,407,631,463"/>
-<area shape="rect" id="node17" href="$CD__ItoPlasmaStepper_8cpp.html" title="Implementation of CD_ItoPlasmaStepper.H." alt="" coords="1157,310,1327,351"/>
-<area shape="rect" id="node24" href="$CD__ItoPlasmaGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="1351,303,1586,359"/>
-<area shape="rect" id="node19" href="$CD__ItoPlasmaFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="1601,414,1782,455"/>
-<area shape="rect" id="node23" href="$CD__ItoPlasmaTagger_8cpp.html" title="Implementation of CD_ItoPlasmaTagger.H." alt="" coords="1806,414,1969,455"/>
-<area shape="rect" id="node20" href="$CD__ItoPlasmaFieldTagger_8cpp.html" title="Implementation of CD_ItoPlasmaFieldTagger.H." alt="" coords="1474,518,1669,559"/>
-<area shape="rect" id="node21" href="$CD__ItoPlasmaStreamerTagger_8H.html" title="Implementation ItoPlasmaTagger which tags on alpha and curvature of field." alt="" coords="1693,511,1927,567"/>
-<area shape="rect" id="node22" href="$CD__ItoPlasmaStreamerTagger_8cpp.html" title="Implementation CD_ItoPlasmaStreamerTagger.H." alt="" coords="1687,615,1933,671"/>
-<area shape="rect" id="node25" href="$CD__ItoPlasmaGodunovStepper_8cpp.html" title="Implementation of CD_ItoPlasmaGodunovStepper.H." alt="" coords="1342,407,1577,463"/>
+<area shape="rect" id="node1" title="Declaration of a table for looking up coefficients etc." alt="" coords="609,5,753,47"/>
+<area shape="rect" id="node2" href="$CD__DataParser_8H.html" title="Declaration of various routines for simple parsing of input data." alt="" coords="249,102,393,143"/>
+<area shape="rect" id="node7" href="$CD__LookupTable1D_8H.html" title="Declaration of a lookup table in one independent variable." alt="" coords="969,102,1113,143"/>
+<area shape="rect" id="node9" href="$CD__CdrPlasmaJSON_8H.html" title="Declaration of a generic CdrPlasma model." alt="" coords="16,95,215,151"/>
+<area shape="rect" id="node10" href="$CD__ItoKMCAir3LFA_8H.html" title="Ito plasma three&#45;species model for air." alt="" coords="417,102,677,143"/>
+<area shape="rect" id="node11" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="701,102,929,143"/>
+<area shape="rect" id="node3" href="$CD__DataParser_8cpp.html" title="Implementation of CD_DataParser.H." alt="" coords="229,206,373,247"/>
+<area shape="rect" id="node4" href="$CD__CdrPlasmaJSON_8cpp.html" title="Implementation of CD_CdrPlasmaJSON.H." alt="" coords="5,199,204,255"/>
+<area shape="rect" id="node5" href="$CD__ItoKMCAir3LFA_8cpp.html" title="Implementation of CD_ItoKMCAir3LFA.H." alt="" coords="397,206,671,247"/>
+<area shape="rect" id="node6" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="695,206,936,247"/>
+<area shape="rect" id="node8" href="$CD__LookupTable1DImplem_8H_source.html" title=" " alt="" coords="960,206,1151,247"/>
 </map>

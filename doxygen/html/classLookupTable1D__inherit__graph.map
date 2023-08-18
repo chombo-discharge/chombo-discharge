@@ -1,4 +1,4 @@
-<map id="LookupTable1D&lt; N &gt;" name="LookupTable1D&lt; N &gt;">
-<area shape="rect" id="node1" title="Class for looking up and interpolation (x,y) data." alt="" coords="5,5,165,32"/>
-<area shape="rect" id="node2" href="$classLookupTable1D.html" title=" " alt="" coords="6,95,165,121"/>
+<map id="LookupTable1D&lt; T, N, I &gt;" name="LookupTable1D&lt; T, N, I &gt;">
+<area shape="rect" id="node1" title="Class for interpolation of f = f(x) data in one independent variable x." alt="" coords="9,5,197,32"/>
+<area shape="rect" id="node2" href="$classLookupTable1D.html" title=" " alt="" coords="5,95,200,121"/>
 </map>

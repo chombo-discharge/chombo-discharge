@@ -173,6 +173,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
@@ -905,7 +906,7 @@ Simply the field <code class="docutils literal notranslate"><span class="pre">un
 <li><p><code class="docutils literal notranslate"><span class="pre">height</span> <span class="pre">profile</span></code> For specifying a height profile along <span class="math notranslate nohighlight">\(y\)</span> in 2D, and <span class="math notranslate nohighlight">\(z\)</span> in 3D.
 To include it, prepare an ASCII files with at least two columns.
 The height (in meters) must be specified in one column and the density (in units of <span class="math notranslate nohighlight">\(m^{-3}\)</span>) in another.
-Internally, this data is stored in a lookup table (see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable1d"><span class="std std-ref">Lookup tables</span></a>).
+Internally, this data is stored in a lookup table (see <span class="xref std std-ref">Chap:LookupTable1D</span>).
 Required fields are</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> , for specifying the file.</p></li>
@@ -1112,7 +1113,7 @@ For example:</p>
 <p><strong>Tabulated mobility</strong></p>
 <p>Specifying <code class="docutils literal notranslate"><span class="pre">lookup</span></code> to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">E/N</span></code> lets the user set the mobility from a tabulated value of the reduced electric field.
 BOLSIG-like files can be parsed by specifying the header which contains the tabulated data, and the columns that identify the reduced electric field and mobilities.
-This data is then stored in a lookup table, see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable1d"><span class="std std-ref">Lookup tables</span></a>.</p>
+This data is then stored in a lookup table, see <span class="xref std std-ref">Chap:LookupTable1D</span>.</p>
 <p>For example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma species&quot;</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="p">[</span><span class="w"></span>
@@ -1148,7 +1149,7 @@ The data must be stored in rows and columns.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">dump</span></code>, an optional argument (useful for debugging) which will write the table to file.</p></li>
 </ul>
 <p>Note that the input file does <em>not</em> need regularly spaced or sorted data.
-For performance reasons, the tables are always resampled, see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable1d"><span class="std std-ref">Lookup tables</span></a>.</p>
+For performance reasons, the tables are always resampled, see <span class="xref std std-ref">Chap:LookupTable1D</span>.</p>
 </section>
 <section id="diffusion-coefficients">
 <h4>Diffusion coefficients<a class="headerlink" href="#diffusion-coefficients" title="Permalink to this heading"></a></h4>

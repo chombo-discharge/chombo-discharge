@@ -163,6 +163,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
@@ -308,7 +309,7 @@ An example of defining an analytic input function is</p>
 <span class="p">};</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Tabulated data (see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable1d"><span class="std std-ref">Lookup tables</span></a>) can also be used as follows,</p>
+<p>Tabulated data (see <span class="xref std std-ref">Chap:LookupTable1D</span>) can also be used as follows,</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">tableData</span><span class="p">;</span><span class="w"></span>
 
 <span class="k">auto</span><span class="w"> </span><span class="n">alphaCoeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">tableData</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">{</span><span class="w"></span>

@@ -102,10 +102,10 @@ Collaboration diagram for Physics::CdrPlasma::CdrPlasmaJSON:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON__coll__graph.png" border="0" usemap="#aPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON_coll__map" alt="Collaboration graph"/></div>
 <map name="aPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON_coll__map" id="aPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON_coll__map">
-<area shape="rect" title="Class which implements CdrPlasmaPhysics and parses plasma chemistry from a JSON input file." alt="" coords="27,213,176,255"/>
+<area shape="rect" title="Class which implements CdrPlasmaPhysics and parses plasma chemistry from a JSON input file." alt="" coords="65,213,215,255"/>
 <area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html" title="Abstract base class for specifying plasma kinetics. This is the base class used by CdrPlasmaStepper w..." alt="" coords="5,95,155,136"/>
-<area shape="rect" href="classLookupTable1D.html" title=" " alt="" coords="179,102,338,129"/>
-<area shape="rect" href="classLookupTable1D.html" title="Class for looking up and interpolation (x,y) data." alt="" coords="179,5,339,32"/>
+<area shape="rect" href="classLookupTable1D.html" title=" " alt="" coords="179,102,373,129"/>
+<area shape="rect" href="classLookupTable1D.html" title="Class for interpolation of f = f(x) data in one independent variable x." alt="" coords="182,5,370,32"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -594,14 +594,14 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a8a441b4a18129a7175c114431f00554a">FunctionEN</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a851536b5293720d62008a11ca05135c1">m_etaFunctionEN</a></td></tr>
 <tr class="memdesc:a851536b5293720d62008a11ca05135c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">For when we can put eta = eta(E,N) as an analytic function. <br /></td></tr>
 <tr class="separator:a851536b5293720d62008a11ca05135c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aea0da2886ce09599347936da00b27729"><td class="memItemLeft" align="right" valign="top"><a id="aea0da2886ce09599347936da00b27729"></a>
-<a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; 2 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#aea0da2886ce09599347936da00b27729">m_alphaTableEN</a></td></tr>
-<tr class="memdesc:aea0da2886ce09599347936da00b27729"><td class="mdescLeft">&#160;</td><td class="mdescRight">For when we can put alpha = table(E,N) <br /></td></tr>
-<tr class="separator:aea0da2886ce09599347936da00b27729"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a558cc5ec0707dc5bd2e12f1bbeb67bd0"><td class="memItemLeft" align="right" valign="top"><a id="a558cc5ec0707dc5bd2e12f1bbeb67bd0"></a>
-<a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; 2 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a558cc5ec0707dc5bd2e12f1bbeb67bd0">m_etaTableEN</a></td></tr>
-<tr class="memdesc:a558cc5ec0707dc5bd2e12f1bbeb67bd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">For when we can put eta = table(E,N) <br /></td></tr>
-<tr class="separator:a558cc5ec0707dc5bd2e12f1bbeb67bd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8681df0dc5a26e0948127f0160c106f2"><td class="memItemLeft" align="right" valign="top"><a id="a8681df0dc5a26e0948127f0160c106f2"></a>
+<a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; Real, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a8681df0dc5a26e0948127f0160c106f2">m_alphaTableEN</a></td></tr>
+<tr class="memdesc:a8681df0dc5a26e0948127f0160c106f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">For when we can put alpha = table(E,N) <br /></td></tr>
+<tr class="separator:a8681df0dc5a26e0948127f0160c106f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89fb8c70016a104a97d9cdf76a8e2f69"><td class="memItemLeft" align="right" valign="top"><a id="a89fb8c70016a104a97d9cdf76a8e2f69"></a>
+<a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; Real, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a89fb8c70016a104a97d9cdf76a8e2f69">m_etaTableEN</a></td></tr>
+<tr class="memdesc:a89fb8c70016a104a97d9cdf76a8e2f69"><td class="mdescLeft">&#160;</td><td class="mdescRight">For when we can put eta = table(E,N) <br /></td></tr>
+<tr class="separator:a89fb8c70016a104a97d9cdf76a8e2f69"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2260a354e87f85b292b59201ea8b8df6"><td class="memItemLeft" align="right" valign="top"><a id="a2260a354e87f85b292b59201ea8b8df6"></a>
 std::map&lt; int, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a65eac49748ad3f35790dfe288650b882">LookupMethod</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a2260a354e87f85b292b59201ea8b8df6">m_mobilityLookup</a></td></tr>
 <tr class="memdesc:a2260a354e87f85b292b59201ea8b8df6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mobility lookup method for each species. <br /></td></tr>
@@ -618,13 +618,13 @@ std::map&lt; int, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON
 std::map&lt; int, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a18b8f024c10f380a20c40d4a653fc2c8">FunctionEX</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a7c99c1afab08c9ae1116d4af462496de">m_mobilityFunctionsEX</a></td></tr>
 <tr class="memdesc:a7c99c1afab08c9ae1116d4af462496de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for function-based mobilities mu = mu(E,x) <br /></td></tr>
 <tr class="separator:a7c99c1afab08c9ae1116d4af462496de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2e3855b63929875e53d6f39e7c5aea9b"><td class="memItemLeft" align="right" valign="top"><a id="a2e3855b63929875e53d6f39e7c5aea9b"></a>
-std::map&lt; int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; 2 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a2e3855b63929875e53d6f39e7c5aea9b">m_mobilityTablesEN</a></td></tr>
-<tr class="memdesc:a2e3855b63929875e53d6f39e7c5aea9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for table-based mobilities. Stored as tables (E/N, mu*N) <br /></td></tr>
-<tr class="separator:a2e3855b63929875e53d6f39e7c5aea9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d86747dbbbca5c02baed88ade516f4c"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; 2 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a8d86747dbbbca5c02baed88ade516f4c">m_mobilityTablesEnergy</a></td></tr>
-<tr class="memdesc:a8d86747dbbbca5c02baed88ade516f4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for table-based mobilities as function of energy.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a8d86747dbbbca5c02baed88ade516f4c">More...</a><br /></td></tr>
-<tr class="separator:a8d86747dbbbca5c02baed88ade516f4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b3bdd000c84b32eb28daaa781230afe"><td class="memItemLeft" align="right" valign="top"><a id="a0b3bdd000c84b32eb28daaa781230afe"></a>
+std::map&lt; int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; Real, 1 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a0b3bdd000c84b32eb28daaa781230afe">m_mobilityTablesEN</a></td></tr>
+<tr class="memdesc:a0b3bdd000c84b32eb28daaa781230afe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for table-based mobilities. Stored as tables (E/N, mu*N) <br /></td></tr>
+<tr class="separator:a0b3bdd000c84b32eb28daaa781230afe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3c42bf966f07904eddb23c122d356f4"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; Real, 1 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#aa3c42bf966f07904eddb23c122d356f4">m_mobilityTablesEnergy</a></td></tr>
+<tr class="memdesc:aa3c42bf966f07904eddb23c122d356f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for table-based mobilities as function of energy.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#aa3c42bf966f07904eddb23c122d356f4">More...</a><br /></td></tr>
+<tr class="separator:aa3c42bf966f07904eddb23c122d356f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a06b9f604d0b7cc7cb3eacc4e09640ab7"><td class="memItemLeft" align="right" valign="top"><a id="a06b9f604d0b7cc7cb3eacc4e09640ab7"></a>
 std::map&lt; int, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a65eac49748ad3f35790dfe288650b882">LookupMethod</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a06b9f604d0b7cc7cb3eacc4e09640ab7">m_diffusionLookup</a></td></tr>
 <tr class="memdesc:a06b9f604d0b7cc7cb3eacc4e09640ab7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion lookup method. <br /></td></tr>
@@ -637,12 +637,12 @@ std::map&lt; int, Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><
 std::map&lt; int, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a8a441b4a18129a7175c114431f00554a">FunctionEN</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#ab4a8473c0501e26082f7ab40c48b93ee">m_diffusionFunctionsEN</a></td></tr>
 <tr class="memdesc:ab4a8473c0501e26082f7ab40c48b93ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for function-based diffusion coefficients. . <br /></td></tr>
 <tr class="separator:ab4a8473c0501e26082f7ab40c48b93ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a04111d7473aa9c83c41921be01eb4270"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; 2 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a04111d7473aa9c83c41921be01eb4270">m_diffusionTablesEN</a></td></tr>
-<tr class="memdesc:a04111d7473aa9c83c41921be01eb4270"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for table-based diffusion coefficients D = D(E,N).  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a04111d7473aa9c83c41921be01eb4270">More...</a><br /></td></tr>
-<tr class="separator:a04111d7473aa9c83c41921be01eb4270"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a14c439c5e2c074806a4df74af975c1ba"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; 2 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a14c439c5e2c074806a4df74af975c1ba">m_diffusionTablesEnergy</a></td></tr>
-<tr class="memdesc:a14c439c5e2c074806a4df74af975c1ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for table-based diffusion coefficients as function of energy.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a14c439c5e2c074806a4df74af975c1ba">More...</a><br /></td></tr>
-<tr class="separator:a14c439c5e2c074806a4df74af975c1ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2871299de28bff18b5f0410eb6cf4a8c"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; Real, 1 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a2871299de28bff18b5f0410eb6cf4a8c">m_diffusionTablesEN</a></td></tr>
+<tr class="memdesc:a2871299de28bff18b5f0410eb6cf4a8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for table-based diffusion coefficients D = D(E,N).  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a2871299de28bff18b5f0410eb6cf4a8c">More...</a><br /></td></tr>
+<tr class="separator:a2871299de28bff18b5f0410eb6cf4a8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa375bd93a61d845e2e547e64931a8340"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; Real, 1 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#aa375bd93a61d845e2e547e64931a8340">m_diffusionTablesEnergy</a></td></tr>
+<tr class="memdesc:aa375bd93a61d845e2e547e64931a8340"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for table-based diffusion coefficients as function of energy.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#aa375bd93a61d845e2e547e64931a8340">More...</a><br /></td></tr>
+<tr class="separator:aa375bd93a61d845e2e547e64931a8340"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a195efb8cefcdef11dd1a2a679201e4a6"><td class="memItemLeft" align="right" valign="top"><a id="a195efb8cefcdef11dd1a2a679201e4a6"></a>
 std::map&lt; int, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a65eac49748ad3f35790dfe288650b882">LookupMethod</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a195efb8cefcdef11dd1a2a679201e4a6">m_temperatureLookup</a></td></tr>
 <tr class="memdesc:a195efb8cefcdef11dd1a2a679201e4a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Temperature lookup method. <br /></td></tr>
@@ -651,10 +651,10 @@ std::map&lt; int, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON
 std::map&lt; int, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a38706e36fb5f8d91e1350cc1d7374a59">FunctionX</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#afbf2dc7fbe0cb0a0b6a97143c646af8a">m_temperatureConstants</a></td></tr>
 <tr class="memdesc:afbf2dc7fbe0cb0a0b6a97143c646af8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constant temperatures. <br /></td></tr>
 <tr class="separator:afbf2dc7fbe0cb0a0b6a97143c646af8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a81eaef977cbdc12e327f72c900b27efe"><td class="memItemLeft" align="right" valign="top"><a id="a81eaef977cbdc12e327f72c900b27efe"></a>
-std::map&lt; int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; 2 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a81eaef977cbdc12e327f72c900b27efe">m_temperatureTablesEN</a></td></tr>
-<tr class="memdesc:a81eaef977cbdc12e327f72c900b27efe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Temperatures as functions of E/N. <br /></td></tr>
-<tr class="separator:a81eaef977cbdc12e327f72c900b27efe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae59537ff5caaaeabdb8ae384daf81549"><td class="memItemLeft" align="right" valign="top"><a id="ae59537ff5caaaeabdb8ae384daf81549"></a>
+std::map&lt; int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; Real, 1 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#ae59537ff5caaaeabdb8ae384daf81549">m_temperatureTablesEN</a></td></tr>
+<tr class="memdesc:ae59537ff5caaaeabdb8ae384daf81549"><td class="mdescLeft">&#160;</td><td class="mdescRight">Temperatures as functions of E/N. <br /></td></tr>
+<tr class="separator:ae59537ff5caaaeabdb8ae384daf81549"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a19b839c6a0989c54a27183ab13b7c358"><td class="memItemLeft" align="right" valign="top"><a id="a19b839c6a0989c54a27183ab13b7c358"></a>
 std::map&lt; int, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a19b839c6a0989c54a27183ab13b7c358">m_plasmaReactionDescriptions</a></td></tr>
 <tr class="memdesc:a19b839c6a0989c54a27183ab13b7c358"><td class="mdescLeft">&#160;</td><td class="mdescRight">Description of plasma reactions. Only used for I/O. <br /></td></tr>
@@ -685,13 +685,13 @@ std::map&lt; int, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a
 std::map&lt; int, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a8a441b4a18129a7175c114431f00554a">FunctionEN</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a158a35e65b5d4f4806771f1483efed75">m_plasmaReactionFunctionsEN</a></td></tr>
 <tr class="memdesc:a158a35e65b5d4f4806771f1483efed75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function-based plasma reaction rates. <br /></td></tr>
 <tr class="separator:a158a35e65b5d4f4806771f1483efed75"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3418f2ec36a3033113e9d4c6b6027cac"><td class="memItemLeft" align="right" valign="top"><a id="a3418f2ec36a3033113e9d4c6b6027cac"></a>
-std::map&lt; int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; 2 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a3418f2ec36a3033113e9d4c6b6027cac">m_plasmaReactionTablesEN</a></td></tr>
-<tr class="memdesc:a3418f2ec36a3033113e9d4c6b6027cac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for table-based reaction coefficients, where k = k(E,N). <br /></td></tr>
-<tr class="separator:a3418f2ec36a3033113e9d4c6b6027cac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a72228ffdc1b3f5cff3ee85be8875bb02"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, std::pair&lt; int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; 2 &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a72228ffdc1b3f5cff3ee85be8875bb02">m_plasmaReactionTablesEnergy</a></td></tr>
-<tr class="memdesc:a72228ffdc1b3f5cff3ee85be8875bb02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for table-based reaction coefficients where k = k(energy).  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a72228ffdc1b3f5cff3ee85be8875bb02">More...</a><br /></td></tr>
-<tr class="separator:a72228ffdc1b3f5cff3ee85be8875bb02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac11797d7eb2d03ab7988468a03446b2a"><td class="memItemLeft" align="right" valign="top"><a id="ac11797d7eb2d03ab7988468a03446b2a"></a>
+std::map&lt; int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; Real, 1 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#ac11797d7eb2d03ab7988468a03446b2a">m_plasmaReactionTablesEN</a></td></tr>
+<tr class="memdesc:ac11797d7eb2d03ab7988468a03446b2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for table-based reaction coefficients, where k = k(E,N). <br /></td></tr>
+<tr class="separator:ac11797d7eb2d03ab7988468a03446b2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f15bdc0d6841584958e638b43813821"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, std::pair&lt; int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; Real, 1 &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a8f15bdc0d6841584958e638b43813821">m_plasmaReactionTablesEnergy</a></td></tr>
+<tr class="memdesc:a8f15bdc0d6841584958e638b43813821"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map for table-based reaction coefficients where k = k(energy).  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a8f15bdc0d6841584958e638b43813821">More...</a><br /></td></tr>
+<tr class="separator:a8f15bdc0d6841584958e638b43813821"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac80248d1cc33d3e00258c8303b0901e3"><td class="memItemLeft" align="right" valign="top"><a id="ac80248d1cc33d3e00258c8303b0901e3"></a>
 std::map&lt; int, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a18b8f024c10f380a20c40d4a653fc2c8">FunctionEX</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#ac80248d1cc33d3e00258c8303b0901e3">m_plasmaReactionEfficiencies</a></td></tr>
 <tr class="memdesc:ac80248d1cc33d3e00258c8303b0901e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scaled plasma reactions. These account for e.g. reaction efficiencies, collisional quenching, etc. <br /></td></tr>
@@ -4487,8 +4487,8 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 
 </div>
 </div>
-<a id="a04111d7473aa9c83c41921be01eb4270"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a04111d7473aa9c83c41921be01eb4270">&#9670;&nbsp;</a></span>m_diffusionTablesEN</h2>
+<a id="a2871299de28bff18b5f0410eb6cf4a8c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2871299de28bff18b5f0410eb6cf4a8c">&#9670;&nbsp;</a></span>m_diffusionTablesEN</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4497,7 +4497,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::map&lt;int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt;2&gt; &gt; Physics::CdrPlasma::CdrPlasmaJSON::m_diffusionTablesEN</td>
+          <td class="memname">std::map&lt;int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt;Real, 1&gt; &gt; Physics::CdrPlasma::CdrPlasmaJSON::m_diffusionTablesEN</td>
         </tr>
       </table>
   </td>
@@ -4512,8 +4512,8 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 
 </div>
 </div>
-<a id="a14c439c5e2c074806a4df74af975c1ba"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a14c439c5e2c074806a4df74af975c1ba">&#9670;&nbsp;</a></span>m_diffusionTablesEnergy</h2>
+<a id="aa375bd93a61d845e2e547e64931a8340"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa375bd93a61d845e2e547e64931a8340">&#9670;&nbsp;</a></span>m_diffusionTablesEnergy</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4522,7 +4522,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::map&lt;int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt;2&gt; &gt; Physics::CdrPlasma::CdrPlasmaJSON::m_diffusionTablesEnergy</td>
+          <td class="memname">std::map&lt;int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt;Real, 1&gt; &gt; Physics::CdrPlasma::CdrPlasmaJSON::m_diffusionTablesEnergy</td>
         </tr>
       </table>
   </td>
@@ -4587,8 +4587,8 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 
 </div>
 </div>
-<a id="a8d86747dbbbca5c02baed88ade516f4c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8d86747dbbbca5c02baed88ade516f4c">&#9670;&nbsp;</a></span>m_mobilityTablesEnergy</h2>
+<a id="aa3c42bf966f07904eddb23c122d356f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3c42bf966f07904eddb23c122d356f4">&#9670;&nbsp;</a></span>m_mobilityTablesEnergy</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4597,7 +4597,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::map&lt;int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt;2&gt; &gt; Physics::CdrPlasma::CdrPlasmaJSON::m_mobilityTablesEnergy</td>
+          <td class="memname">std::map&lt;int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt;Real, 1&gt; &gt; Physics::CdrPlasma::CdrPlasmaJSON::m_mobilityTablesEnergy</td>
         </tr>
       </table>
   </td>
@@ -4737,8 +4737,8 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 
 </div>
 </div>
-<a id="a72228ffdc1b3f5cff3ee85be8875bb02"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a72228ffdc1b3f5cff3ee85be8875bb02">&#9670;&nbsp;</a></span>m_plasmaReactionTablesEnergy</h2>
+<a id="a8f15bdc0d6841584958e638b43813821"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f15bdc0d6841584958e638b43813821">&#9670;&nbsp;</a></span>m_plasmaReactionTablesEnergy</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4747,7 +4747,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::map&lt;int, std::pair&lt;int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt;2&gt; &gt; &gt; Physics::CdrPlasma::CdrPlasmaJSON::m_plasmaReactionTablesEnergy</td>
+          <td class="memname">std::map&lt;int, std::pair&lt;int, <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt;Real, 1&gt; &gt; &gt; Physics::CdrPlasma::CdrPlasmaJSON::m_plasmaReactionTablesEnergy</td>
         </tr>
       </table>
   </td>

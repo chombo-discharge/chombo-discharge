@@ -342,9 +342,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:aacc5378d13a9d0e1d7e7e9adb7ea9f5e"><td class="memItemLeft" align="right" valign="top">virtual std::pair&lt; bool, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aacc5378d13a9d0e1d7e7e9adb7ea9f5e">parsePlasmaReactionGradientCorrection</a> (const nlohmann::json &amp;a_reactionJSON) const</td></tr>
 <tr class="memdesc:aacc5378d13a9d0e1d7e7e9adb7ea9f5e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse whether or not a reaction uses a gradient correction for the rate.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aacc5378d13a9d0e1d7e7e9adb7ea9f5e">More...</a><br /></td></tr>
 <tr class="separator:aacc5378d13a9d0e1d7e7e9adb7ea9f5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a341b7a10846bac712aead7e3f7ca9c19"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; 2 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a341b7a10846bac712aead7e3f7ca9c19">parseTableEByN</a> (const nlohmann::json &amp;a_tableEntry, const std::string &amp;a_dataID) const</td></tr>
-<tr class="memdesc:a341b7a10846bac712aead7e3f7ca9c19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a table which is stored in E/N format.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a341b7a10846bac712aead7e3f7ca9c19">More...</a><br /></td></tr>
-<tr class="separator:a341b7a10846bac712aead7e3f7ca9c19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4bd500f5b50a92554482ae5b38224d1b"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; Real, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a4bd500f5b50a92554482ae5b38224d1b">parseTableEByN</a> (const nlohmann::json &amp;a_tableEntry, const std::string &amp;a_dataID) const</td></tr>
+<tr class="memdesc:a4bd500f5b50a92554482ae5b38224d1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a table which is stored in E/N format.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a4bd500f5b50a92554482ae5b38224d1b">More...</a><br /></td></tr>
+<tr class="separator:a4bd500f5b50a92554482ae5b38224d1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a72a944c7c061f92e72b9c8aa9ab8ee6f"><td class="memItemLeft" align="right" valign="top">virtual std::list&lt; std::tuple&lt; std::string, std::vector&lt; std::string &gt;, std::vector&lt; std::string &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a72a944c7c061f92e72b9c8aa9ab8ee6f">parseReactionWildcards</a> (const std::vector&lt; std::string &gt; &amp;a_reactants, const std::vector&lt; std::string &gt; &amp;a_products, const nlohmann::json &amp;a_reactionJSON) const noexcept</td></tr>
 <tr class="memdesc:a72a944c7c061f92e72b9c8aa9ab8ee6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make a reaction set into a superset. This parses wildcards '@' in reaction string.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a72a944c7c061f92e72b9c8aa9ab8ee6f">More...</a><br /></td></tr>
 <tr class="separator:a72a944c7c061f92e72b9c8aa9ab8ee6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1724,8 +1724,8 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<a id="a341b7a10846bac712aead7e3f7ca9c19"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a341b7a10846bac712aead7e3f7ca9c19">&#9670;&nbsp;</a></span>parseTableEByN()</h2>
+<a id="a4bd500f5b50a92554482ae5b38224d1b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4bd500f5b50a92554482ae5b38224d1b">&#9670;&nbsp;</a></span>parseTableEByN()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1734,7 +1734,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; 2 &gt; ItoKMCJSON::parseTableEByN </td>
+          <td class="memname"><a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; Real, 1 &gt; ItoKMCJSON::parseTableEByN </td>
           <td>(</td>
           <td class="paramtype">const nlohmann::json &amp;&#160;</td>
           <td class="paramname"><em>a_tableEntry</em>, </td>

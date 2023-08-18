@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>chombo-discharge: LookupTable1D&lt; N &gt; Class Template Reference</title>
+<title>chombo-discharge: LookupTable1D&lt; T, N, I &gt; Class Template Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -74,144 +74,147 @@ $(function() {
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="classLookupTable1D-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">LookupTable1D&lt; N &gt; Class Template Reference</div>  </div>
+<div class="title">LookupTable1D&lt; T, N, I &gt; Class Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Class for looking up and interpolation (x,y) data.  
+<p>Class for interpolation of f = f(x) data in one independent variable x.  
  <a href="classLookupTable1D.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__LookupTable1D_8H_source.html">CD_LookupTable1D.H</a>&gt;</code></p>
 <div class="dynheader">
-Inheritance diagram for LookupTable1D&lt; N &gt;:</div>
+Inheritance diagram for LookupTable1D&lt; T, N, I &gt;:</div>
 <div class="dyncontent">
-<div class="center"><img src="classLookupTable1D__inherit__graph.png" border="0" usemap="#aLookupTable1D_3_01N_01_4_inherit__map" alt="Inheritance graph"/></div>
-<map name="aLookupTable1D_3_01N_01_4_inherit__map" id="aLookupTable1D_3_01N_01_4_inherit__map">
-<area shape="rect" title="Class for looking up and interpolation (x,y) data." alt="" coords="5,5,165,32"/>
-<area shape="rect" href="classLookupTable1D.html" title=" " alt="" coords="6,95,165,121"/>
+<div class="center"><img src="classLookupTable1D__inherit__graph.png" border="0" usemap="#aLookupTable1D_3_01T_00_01N_00_01I_01_4_inherit__map" alt="Inheritance graph"/></div>
+<map name="aLookupTable1D_3_01T_00_01N_00_01I_01_4_inherit__map" id="aLookupTable1D_3_01T_00_01N_00_01I_01_4_inherit__map">
+<area shape="rect" title="Class for interpolation of f = f(x) data in one independent variable x." alt="" coords="9,5,197,32"/>
+<area shape="rect" href="classLookupTable1D.html" title=" " alt="" coords="5,95,200,121"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a8504b4b1bbda5cbe0f75e22b2fd838fb"><td class="memItemLeft" align="right" valign="top"><a id="a8504b4b1bbda5cbe0f75e22b2fd838fb"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a8504b4b1bbda5cbe0f75e22b2fd838fb">LookupTable1D</a> ()</td></tr>
-<tr class="memdesc:a8504b4b1bbda5cbe0f75e22b2fd838fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Creates a table without any entries. <br /></td></tr>
-<tr class="separator:a8504b4b1bbda5cbe0f75e22b2fd838fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad7520199713b31b5a7aecee32dcc159a"><td class="memItemLeft" align="right" valign="top"><a id="ad7520199713b31b5a7aecee32dcc159a"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#ad7520199713b31b5a7aecee32dcc159a">LookupTable1D</a> (const <a class="el" href="classLookupTable1D.html">LookupTable1D</a> &amp;a_table)</td></tr>
-<tr class="memdesc:ad7520199713b31b5a7aecee32dcc159a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor. <br /></td></tr>
-<tr class="separator:ad7520199713b31b5a7aecee32dcc159a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a97c81d0742cac72c11327ae2fc260171"><td class="memItemLeft" align="right" valign="top"><a id="a97c81d0742cac72c11327ae2fc260171"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a97c81d0742cac72c11327ae2fc260171">~LookupTable1D</a> ()</td></tr>
-<tr class="memdesc:a97c81d0742cac72c11327ae2fc260171"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing). <br /></td></tr>
-<tr class="separator:a97c81d0742cac72c11327ae2fc260171"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4959cc9ecdfdb9102550d9583e0c554"><td class="memItemLeft" align="right" valign="top"><a id="af4959cc9ecdfdb9102550d9583e0c554"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#af4959cc9ecdfdb9102550d9583e0c554">clear</a> ()</td></tr>
-<tr class="memdesc:af4959cc9ecdfdb9102550d9583e0c554"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear all data. <br /></td></tr>
-<tr class="separator:af4959cc9ecdfdb9102550d9583e0c554"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a598e96cdd3ddf4220937486e6d258ac4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a598e96cdd3ddf4220937486e6d258ac4">makeUniform</a> (const int a_numRows)</td></tr>
-<tr class="memdesc:a598e96cdd3ddf4220937486e6d258ac4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make the table into a uniform table with the number of entries.  <a href="classLookupTable1D.html#a598e96cdd3ddf4220937486e6d258ac4">More...</a><br /></td></tr>
-<tr class="separator:a598e96cdd3ddf4220937486e6d258ac4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a18a755050b218de186c47fe61fd4686c"><td class="memTemplParams" colspan="2">template&lt;int K&gt; </td></tr>
-<tr class="memitem:a18a755050b218de186c47fe61fd4686c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a18a755050b218de186c47fe61fd4686c">scale</a> (const Real a_scale)</td></tr>
-<tr class="memdesc:a18a755050b218de186c47fe61fd4686c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data in column by a specified factor.  <a href="classLookupTable1D.html#a18a755050b218de186c47fe61fd4686c">More...</a><br /></td></tr>
-<tr class="separator:a18a755050b218de186c47fe61fd4686c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6b4a6cb99d724986f40ff4246ca56113"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a6b4a6cb99d724986f40ff4246ca56113">swap</a> (const int a_column1, const int a_column2)</td></tr>
-<tr class="memdesc:a6b4a6cb99d724986f40ff4246ca56113"><td class="mdescLeft">&#160;</td><td class="mdescRight">Swap two columns.  <a href="classLookupTable1D.html#a6b4a6cb99d724986f40ff4246ca56113">More...</a><br /></td></tr>
-<tr class="separator:a6b4a6cb99d724986f40ff4246ca56113"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abc947dd6530681a7cfc96c719d948777"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#abc947dd6530681a7cfc96c719d948777">setRange</a> (const Real a_min, const Real a_max, const int a_whichColumn=0)</td></tr>
-<tr class="memdesc:abc947dd6530681a7cfc96c719d948777"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restrict table range to maximum and minimum. Data outside these ranges are discarded.  <a href="classLookupTable1D.html#abc947dd6530681a7cfc96c719d948777">More...</a><br /></td></tr>
-<tr class="separator:abc947dd6530681a7cfc96c719d948777"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e2538bd69177b2daca9bad67b13a93b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a8e2538bd69177b2daca9bad67b13a93b">setMinRange</a> (const Real a_min, const int a_whichColumn=0)</td></tr>
-<tr class="memdesc:a8e2538bd69177b2daca9bad67b13a93b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restrict table range to minimum value. Data outside these ranges are discarded.  <a href="classLookupTable1D.html#a8e2538bd69177b2daca9bad67b13a93b">More...</a><br /></td></tr>
-<tr class="separator:a8e2538bd69177b2daca9bad67b13a93b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad7572a596eaf527f334b3fc9a4fbe9a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#ad7572a596eaf527f334b3fc9a4fbe9a6">setMaxRange</a> (const Real a_max, const int a_whichColumn=0)</td></tr>
-<tr class="memdesc:ad7572a596eaf527f334b3fc9a4fbe9a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restrict table range to maximum value. Data outside this range are discarded.  <a href="classLookupTable1D.html#ad7572a596eaf527f334b3fc9a4fbe9a6">More...</a><br /></td></tr>
-<tr class="separator:ad7572a596eaf527f334b3fc9a4fbe9a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afd7a6ac332d5f5e0827a5312479fabfe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#afd7a6ac332d5f5e0827a5312479fabfe">setOutOfRangeStrategyLow</a> (const <a class="el" href="CD__LookupTable1D_8H.html#a68acea554b689ac41c0b13388ed03572">OutOfRangeStrategy</a> a_strategy)</td></tr>
-<tr class="memdesc:afd7a6ac332d5f5e0827a5312479fabfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the strategy when retrieving data that is out of range on the low side.  <a href="classLookupTable1D.html#afd7a6ac332d5f5e0827a5312479fabfe">More...</a><br /></td></tr>
-<tr class="separator:afd7a6ac332d5f5e0827a5312479fabfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9da4b786778f4ae6eeeeb353f9e84eff"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a9da4b786778f4ae6eeeeb353f9e84eff">setOutOfRangeStrategyHigh</a> (const <a class="el" href="CD__LookupTable1D_8H.html#a68acea554b689ac41c0b13388ed03572">OutOfRangeStrategy</a> a_strategy)</td></tr>
-<tr class="memdesc:a9da4b786778f4ae6eeeeb353f9e84eff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the strategy when retrieving data that is out of range on the high side.  <a href="classLookupTable1D.html#a9da4b786778f4ae6eeeeb353f9e84eff">More...</a><br /></td></tr>
-<tr class="separator:a9da4b786778f4ae6eeeeb353f9e84eff"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9ee5f93bfb3a940485dfe1bb0a72cfcf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a9ee5f93bfb3a940485dfe1bb0a72cfcf">setTableSpacing</a> (const <a class="el" href="CD__LookupTable1D_8H.html#acffc6eccff44c2e022a96233f052e5de">TableSpacing</a> a_spacing)</td></tr>
-<tr class="memdesc:a9ee5f93bfb3a940485dfe1bb0a72cfcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the table spacing mode.  <a href="classLookupTable1D.html#a9ee5f93bfb3a940485dfe1bb0a72cfcf">More...</a><br /></td></tr>
-<tr class="separator:a9ee5f93bfb3a940485dfe1bb0a72cfcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a200b4cb16ae6f92c1063676025831cc6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a200b4cb16ae6f92c1063676025831cc6">sort</a> (const int a_whichColumn=0)</td></tr>
-<tr class="memdesc:a200b4cb16ae6f92c1063676025831cc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sort the table. Useful if the input data was not already sorted.  <a href="classLookupTable1D.html#a200b4cb16ae6f92c1063676025831cc6">More...</a><br /></td></tr>
-<tr class="separator:a200b4cb16ae6f92c1063676025831cc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae91a0ce9537b0b88c6755d7b27cad9cf"><td class="memTemplParams" colspan="2">template&lt;typename... Ts&gt; </td></tr>
-<tr class="memitem:ae91a0ce9537b0b88c6755d7b27cad9cf"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#ae91a0ce9537b0b88c6755d7b27cad9cf">addEntry</a> (const Ts &amp;... x)</td></tr>
-<tr class="memdesc:ae91a0ce9537b0b88c6755d7b27cad9cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add entry.  <a href="classLookupTable1D.html#ae91a0ce9537b0b88c6755d7b27cad9cf">More...</a><br /></td></tr>
-<tr class="separator:ae91a0ce9537b0b88c6755d7b27cad9cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ebd3386303c7fb896f874b8835b765f"><td class="memItemLeft" align="right" valign="top"><a id="a7ebd3386303c7fb896f874b8835b765f"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a7ebd3386303c7fb896f874b8835b765f">dumpTable</a> (std::ostream &amp;a_outputStream=std::cout) const</td></tr>
-<tr class="memdesc:a7ebd3386303c7fb896f874b8835b765f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump table to pout() <br /></td></tr>
-<tr class="separator:a7ebd3386303c7fb896f874b8835b765f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8537a32fe13b5400854ea79b54c3017e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a8537a32fe13b5400854ea79b54c3017e">dumpTable</a> (const std::string a_fileName) const</td></tr>
-<tr class="memdesc:a8537a32fe13b5400854ea79b54c3017e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump table to a file.  <a href="classLookupTable1D.html#a8537a32fe13b5400854ea79b54c3017e">More...</a><br /></td></tr>
-<tr class="separator:a8537a32fe13b5400854ea79b54c3017e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af754a0dd04b25802f91c81748fd51226"><td class="memTemplParams" colspan="2">template&lt;int K&gt; </td></tr>
-<tr class="memitem:af754a0dd04b25802f91c81748fd51226"><td class="memTemplItemLeft" align="right" valign="top">Real&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#af754a0dd04b25802f91c81748fd51226">getEntry</a> (const Real a_x) const</td></tr>
-<tr class="memdesc:af754a0dd04b25802f91c81748fd51226"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get entry.  <a href="classLookupTable1D.html#af754a0dd04b25802f91c81748fd51226">More...</a><br /></td></tr>
-<tr class="separator:af754a0dd04b25802f91c81748fd51226"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a961ad05554631c35b2888a6d47b89df7"><td class="memItemLeft" align="right" valign="top">std::array&lt; Real, N &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a961ad05554631c35b2888a6d47b89df7">getData</a> (const Real a_x) const</td></tr>
-<tr class="memdesc:a961ad05554631c35b2888a6d47b89df7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get data.  <a href="classLookupTable1D.html#a961ad05554631c35b2888a6d47b89df7">More...</a><br /></td></tr>
-<tr class="separator:a961ad05554631c35b2888a6d47b89df7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1c624112793c72890dd7ed022680f260"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a1c624112793c72890dd7ed022680f260">getNumEntries</a> () const</td></tr>
-<tr class="memdesc:a1c624112793c72890dd7ed022680f260"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get size of the table.  <a href="classLookupTable1D.html#a1c624112793c72890dd7ed022680f260">More...</a><br /></td></tr>
-<tr class="separator:a1c624112793c72890dd7ed022680f260"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7fa55ce87877184657600c94387328f"><td class="memItemLeft" align="right" valign="top"><a id="ab7fa55ce87877184657600c94387328f"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#ab7fa55ce87877184657600c94387328f">LookupTable1D</a> () noexcept</td></tr>
+<tr class="memdesc:ab7fa55ce87877184657600c94387328f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Creates a table without any entries. <br /></td></tr>
+<tr class="separator:ab7fa55ce87877184657600c94387328f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab75c573d29912726867fee5d20c3d241"><td class="memItemLeft" align="right" valign="top"><a id="ab75c573d29912726867fee5d20c3d241"></a>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#ab75c573d29912726867fee5d20c3d241">~LookupTable1D</a> () noexcept=default</td></tr>
+<tr class="memdesc:ab75c573d29912726867fee5d20c3d241"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing). <br /></td></tr>
+<tr class="separator:ab75c573d29912726867fee5d20c3d241"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac26cd87dc85f9c695981592f898e0ff2"><td class="memItemLeft" align="right" valign="top"><a id="ac26cd87dc85f9c695981592f898e0ff2"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#ac26cd87dc85f9c695981592f898e0ff2">reset</a> () noexcept</td></tr>
+<tr class="memdesc:ac26cd87dc85f9c695981592f898e0ff2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset everything. <br /></td></tr>
+<tr class="separator:ac26cd87dc85f9c695981592f898e0ff2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a966a475a87d9295bdb7fa6bb9d138ba9"><td class="memTemplParams" colspan="2">template&lt;typename... Ts&gt; </td></tr>
+<tr class="memitem:a966a475a87d9295bdb7fa6bb9d138ba9"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a966a475a87d9295bdb7fa6bb9d138ba9">addData</a> (const Ts &amp;... x)</td></tr>
+<tr class="memdesc:a966a475a87d9295bdb7fa6bb9d138ba9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add entry.  <a href="classLookupTable1D.html#a966a475a87d9295bdb7fa6bb9d138ba9">More...</a><br /></td></tr>
+<tr class="separator:a966a475a87d9295bdb7fa6bb9d138ba9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96a79f5a43b0f5bac9a1e9897bdaeefa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a96a79f5a43b0f5bac9a1e9897bdaeefa">swap</a> (const size_t a_columnOne, const size_t a_columnTwo) noexcept</td></tr>
+<tr class="memdesc:a96a79f5a43b0f5bac9a1e9897bdaeefa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function for swapping columns.  <a href="classLookupTable1D.html#a96a79f5a43b0f5bac9a1e9897bdaeefa">More...</a><br /></td></tr>
+<tr class="separator:a96a79f5a43b0f5bac9a1e9897bdaeefa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb4e4116d0df3be92a3278979d7e1764"><td class="memTemplParams" colspan="2"><a id="adb4e4116d0df3be92a3278979d7e1764"></a>
+template&lt;size_t K&gt; </td></tr>
+<tr class="memitem:adb4e4116d0df3be92a3278979d7e1764"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#adb4e4116d0df3be92a3278979d7e1764">scale</a> (const T &amp;a_scale) noexcept</td></tr>
+<tr class="memdesc:adb4e4116d0df3be92a3278979d7e1764"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function which scales one of the columns (either dependent or independent variable) <br /></td></tr>
+<tr class="separator:adb4e4116d0df3be92a3278979d7e1764"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3034b927935a5bb8d72b2b335048a76"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#aa3034b927935a5bb8d72b2b335048a76">truncate</a> (const T &amp;a_min, const T &amp;a_max, const size_t a_column) noexcept</td></tr>
+<tr class="memdesc:aa3034b927935a5bb8d72b2b335048a76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function for truncating raw data along one of the variables (either dependent or independent).  <a href="classLookupTable1D.html#aa3034b927935a5bb8d72b2b335048a76">More...</a><br /></td></tr>
+<tr class="separator:aa3034b927935a5bb8d72b2b335048a76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a619b7fae94c823793d453e5c52808cac"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a619b7fae94c823793d453e5c52808cac">setRangeStrategyLo</a> (const <a class="el" href="CD__LookupTable_8H.html#ae11b83e77d6f10fa01ec700a4252d0b7">LookupTable::OutOfRangeStrategy</a> &amp;a_strategy) noexcept</td></tr>
+<tr class="memdesc:a619b7fae94c823793d453e5c52808cac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the out-of-range strategy on the low end.  <a href="classLookupTable1D.html#a619b7fae94c823793d453e5c52808cac">More...</a><br /></td></tr>
+<tr class="separator:a619b7fae94c823793d453e5c52808cac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2945213a9ea8abf884af2f8c824d67e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#ab2945213a9ea8abf884af2f8c824d67e">setRangeStrategyHi</a> (const <a class="el" href="CD__LookupTable_8H.html#ae11b83e77d6f10fa01ec700a4252d0b7">LookupTable::OutOfRangeStrategy</a> &amp;a_strategy) noexcept</td></tr>
+<tr class="memdesc:ab2945213a9ea8abf884af2f8c824d67e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the out-of-range strategy on the high end.  <a href="classLookupTable1D.html#ab2945213a9ea8abf884af2f8c824d67e">More...</a><br /></td></tr>
+<tr class="separator:ab2945213a9ea8abf884af2f8c824d67e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5fd2ad1037051f01c5dca538d50f990"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#ad5fd2ad1037051f01c5dca538d50f990">prepareTable</a> (const size_t &amp;a_independentVariable, const size_t &amp;a_numPoints, const <a class="el" href="CD__LookupTable_8H.html#ae9f02c1664a9efc37ffc70297e92bfeb">LookupTable::Spacing</a> &amp;a_spacing)</td></tr>
+<tr class="memdesc:ad5fd2ad1037051f01c5dca538d50f990"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn the raw data into uniform data for fast lookup.  <a href="classLookupTable1D.html#ad5fd2ad1037051f01c5dca538d50f990">More...</a><br /></td></tr>
+<tr class="separator:ad5fd2ad1037051f01c5dca538d50f990"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a371cd575076ccc48cf8acb8c167f5d4c"><td class="memTemplParams" colspan="2">template&lt;size_t K&gt; </td></tr>
+<tr class="memitem:a371cd575076ccc48cf8acb8c167f5d4c"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a371cd575076ccc48cf8acb8c167f5d4c">interpolate</a> (const T &amp;a_x) const</td></tr>
+<tr class="memdesc:a371cd575076ccc48cf8acb8c167f5d4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolation function for specific dependent variable K.  <a href="classLookupTable1D.html#a371cd575076ccc48cf8acb8c167f5d4c">More...</a><br /></td></tr>
+<tr class="separator:a371cd575076ccc48cf8acb8c167f5d4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa39273f27e514f71b45739a16a27743b"><td class="memItemLeft" align="right" valign="top">std::array&lt; T, N+1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#aa39273f27e514f71b45739a16a27743b">interpolate</a> (const T &amp;x) const</td></tr>
+<tr class="memdesc:aa39273f27e514f71b45739a16a27743b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate whole table.  <a href="classLookupTable1D.html#aa39273f27e514f71b45739a16a27743b">More...</a><br /></td></tr>
+<tr class="separator:aa39273f27e514f71b45739a16a27743b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe51e0523a93fd76ff0848d57c029103"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::array&lt; T, N+1 &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#afe51e0523a93fd76ff0848d57c029103">getRawData</a> () noexcept</td></tr>
+<tr class="memdesc:afe51e0523a93fd76ff0848d57c029103"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access function for raw data.  <a href="classLookupTable1D.html#afe51e0523a93fd76ff0848d57c029103">More...</a><br /></td></tr>
+<tr class="separator:afe51e0523a93fd76ff0848d57c029103"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a334312701035e640be6632474dd5157c"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::array&lt; T, N+1 &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a334312701035e640be6632474dd5157c">getStructuredData</a> () noexcept</td></tr>
+<tr class="memdesc:a334312701035e640be6632474dd5157c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access function for structured data.  <a href="classLookupTable1D.html#a334312701035e640be6632474dd5157c">More...</a><br /></td></tr>
+<tr class="separator:a334312701035e640be6632474dd5157c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aabc0af01260a29ae6715a14bd1122d34"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; std::array&lt; T, N+1 &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#aabc0af01260a29ae6715a14bd1122d34">getRawData</a> () const noexcept</td></tr>
+<tr class="memdesc:aabc0af01260a29ae6715a14bd1122d34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access function for raw data.  <a href="classLookupTable1D.html#aabc0af01260a29ae6715a14bd1122d34">More...</a><br /></td></tr>
+<tr class="separator:aabc0af01260a29ae6715a14bd1122d34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25f4d42cbab8e6af94a471addfbb2f3c"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; std::array&lt; T, N+1 &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a25f4d42cbab8e6af94a471addfbb2f3c">getStructuredData</a> () const noexcept</td></tr>
+<tr class="memdesc:a25f4d42cbab8e6af94a471addfbb2f3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access function for structured data.  <a href="classLookupTable1D.html#a25f4d42cbab8e6af94a471addfbb2f3c">More...</a><br /></td></tr>
+<tr class="separator:a25f4d42cbab8e6af94a471addfbb2f3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abce574b4751cc1d51f4f5a6c3f288f9b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#abce574b4751cc1d51f4f5a6c3f288f9b">writeRawData</a> (const std::string &amp;a_file) const noexcept</td></tr>
+<tr class="memdesc:abce574b4751cc1d51f4f5a6c3f288f9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump raw table data to file.  <a href="classLookupTable1D.html#abce574b4751cc1d51f4f5a6c3f288f9b">More...</a><br /></td></tr>
+<tr class="separator:abce574b4751cc1d51f4f5a6c3f288f9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae11e146435e00adb8073590e883ef4e9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#ae11e146435e00adb8073590e883ef4e9">writeStructuredData</a> (const std::string &amp;a_file) const noexcept</td></tr>
+<tr class="memdesc:ae11e146435e00adb8073590e883ef4e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump structured table data to file.  <a href="classLookupTable1D.html#ae11e146435e00adb8073590e883ef4e9">More...</a><br /></td></tr>
+<tr class="separator:ae11e146435e00adb8073590e883ef4e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2dd3699b31cde553ec3388503ec4f17"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#ad2dd3699b31cde553ec3388503ec4f17">outputRawData</a> (std::ostream &amp;a_ostream=std::cout) const noexcept</td></tr>
+<tr class="memdesc:ad2dd3699b31cde553ec3388503ec4f17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump raw table data to output stream.  <a href="classLookupTable1D.html#ad2dd3699b31cde553ec3388503ec4f17">More...</a><br /></td></tr>
+<tr class="separator:ad2dd3699b31cde553ec3388503ec4f17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1d005672cfbc3a852e17a5126adc878"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#ac1d005672cfbc3a852e17a5126adc878">outputStructuredData</a> (std::ostream &amp;a_ostream=std::cout) const noexcept</td></tr>
+<tr class="memdesc:ac1d005672cfbc3a852e17a5126adc878"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump structured table data to file.  <a href="classLookupTable1D.html#ac1d005672cfbc3a852e17a5126adc878">More...</a><br /></td></tr>
+<tr class="separator:ac1d005672cfbc3a852e17a5126adc878"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a81667528ddb7acef81f6d3d11cc17b3a"><td class="memItemLeft" align="right" valign="top">std::array&lt; Real, N &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a81667528ddb7acef81f6d3d11cc17b3a">directLookup</a> (const Real a_x) const</td></tr>
-<tr class="memdesc:a81667528ddb7acef81f6d3d11cc17b3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Direct lookup, assumes non-uniform ordering.  <a href="classLookupTable1D.html#a81667528ddb7acef81f6d3d11cc17b3a">More...</a><br /></td></tr>
-<tr class="separator:a81667528ddb7acef81f6d3d11cc17b3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af1511794cbbbca0865ac195d6dbbbded"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#af1511794cbbbca0865ac195d6dbbbded">getIndexLo</a> (const Real a_x) const</td></tr>
-<tr class="memdesc:af1511794cbbbca0865ac195d6dbbbded"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the lower index during a lookup.  <a href="classLookupTable1D.html#af1511794cbbbca0865ac195d6dbbbded">More...</a><br /></td></tr>
-<tr class="separator:af1511794cbbbca0865ac195d6dbbbded"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d61ecb73c703d5a16faf43f7d408328"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a7d61ecb73c703d5a16faf43f7d408328">outputData</a> (std::ostream &amp;a_ostream, const std::vector&lt; std::array&lt; T, N+1 &gt;&gt; &amp;a_data) const noexcept</td></tr>
+<tr class="memdesc:a7d61ecb73c703d5a16faf43f7d408328"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function for outputting data.  <a href="classLookupTable1D.html#a7d61ecb73c703d5a16faf43f7d408328">More...</a><br /></td></tr>
+<tr class="separator:a7d61ecb73c703d5a16faf43f7d408328"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc64935733169f0a88e59226e9086fec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#acc64935733169f0a88e59226e9086fec">writeToFile</a> (const std::string &amp;a_file, const std::vector&lt; std::array&lt; T, N+1 &gt;&gt; &amp;a_data) const noexcept</td></tr>
+<tr class="memdesc:acc64935733169f0a88e59226e9086fec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function for outputting data to a file.  <a href="classLookupTable1D.html#acc64935733169f0a88e59226e9086fec">More...</a><br /></td></tr>
+<tr class="separator:acc64935733169f0a88e59226e9086fec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a905759bdbf1cf9b4b272f00b167d149e"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a905759bdbf1cf9b4b272f00b167d149e">getIndexLo</a> (const T &amp;a_x) const</td></tr>
+<tr class="memdesc:a905759bdbf1cf9b4b272f00b167d149e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the lower index that brackets the input variable between two data points in the structured grid.  <a href="classLookupTable1D.html#a905759bdbf1cf9b4b272f00b167d149e">More...</a><br /></td></tr>
+<tr class="separator:a905759bdbf1cf9b4b272f00b167d149e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:adbe5850d8851d897857655ec622385b0"><td class="memItemLeft" align="right" valign="top"><a id="adbe5850d8851d897857655ec622385b0"></a>
-<a class="el" href="CD__LookupTable1D_8H.html#a68acea554b689ac41c0b13388ed03572">OutOfRangeStrategy</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#adbe5850d8851d897857655ec622385b0">m_strategyLo</a></td></tr>
-<tr class="memdesc:adbe5850d8851d897857655ec622385b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">End point stategy on the low end of the data. <br /></td></tr>
-<tr class="separator:adbe5850d8851d897857655ec622385b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5efc986a0720ef1e27a9f8c9ec753fab"><td class="memItemLeft" align="right" valign="top"><a id="a5efc986a0720ef1e27a9f8c9ec753fab"></a>
-<a class="el" href="CD__LookupTable1D_8H.html#a68acea554b689ac41c0b13388ed03572">OutOfRangeStrategy</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a5efc986a0720ef1e27a9f8c9ec753fab">m_strategyHi</a></td></tr>
-<tr class="memdesc:a5efc986a0720ef1e27a9f8c9ec753fab"><td class="mdescLeft">&#160;</td><td class="mdescRight">End point stategy on the high end of the data. <br /></td></tr>
-<tr class="separator:a5efc986a0720ef1e27a9f8c9ec753fab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a04d37542f1244396868676ed4553771e"><td class="memItemLeft" align="right" valign="top"><a id="a04d37542f1244396868676ed4553771e"></a>
-<a class="el" href="CD__LookupTable1D_8H.html#acffc6eccff44c2e022a96233f052e5de">TableSpacing</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a04d37542f1244396868676ed4553771e">m_spacing</a></td></tr>
-<tr class="memdesc:a04d37542f1244396868676ed4553771e"><td class="mdescLeft">&#160;</td><td class="mdescRight">For setting the table spacing. <br /></td></tr>
-<tr class="separator:a04d37542f1244396868676ed4553771e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:accbacf974d4443618e14cf66006388c9"><td class="memItemLeft" align="right" valign="top"><a id="accbacf974d4443618e14cf66006388c9"></a>
-std::tuple&lt; int, bool, bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#accbacf974d4443618e14cf66006388c9">m_state</a></td></tr>
-<tr class="memdesc:accbacf974d4443618e14cf66006388c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Table state. First entry is the column along which we sort and make the table uniform. The second entry is whether or not the table is actually sorted, and the third entry is whether or not the table is uniform along the sorted column. <br /></td></tr>
-<tr class="separator:accbacf974d4443618e14cf66006388c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab12f3addfc72cf3527602eba52b84db2"><td class="memItemLeft" align="right" valign="top"><a id="ab12f3addfc72cf3527602eba52b84db2"></a>
-Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#ab12f3addfc72cf3527602eba52b84db2">m_delta</a></td></tr>
-<tr class="memdesc:ab12f3addfc72cf3527602eba52b84db2"><td class="mdescLeft">&#160;</td><td class="mdescRight">A base resolution for the electric field tabulations (we assumed that the rates were mapped out linearly) <br /></td></tr>
-<tr class="separator:ab12f3addfc72cf3527602eba52b84db2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a710712b8ed6154ff300014af1b7c0c5f"><td class="memItemLeft" align="right" valign="top"><a id="a710712b8ed6154ff300014af1b7c0c5f"></a>
-std::vector&lt; std::array&lt; Real, N &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a710712b8ed6154ff300014af1b7c0c5f">m_data</a></td></tr>
-<tr class="memdesc:a710712b8ed6154ff300014af1b7c0c5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data. <br /></td></tr>
-<tr class="separator:a710712b8ed6154ff300014af1b7c0c5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a755c1665ae5259b2566795fddc074d"><td class="memItemLeft" align="right" valign="top"><a id="a4a755c1665ae5259b2566795fddc074d"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a4a755c1665ae5259b2566795fddc074d">m_isGood</a></td></tr>
+<tr class="memdesc:a4a755c1665ae5259b2566795fddc074d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if data can be interpolated. <br /></td></tr>
+<tr class="separator:a4a755c1665ae5259b2566795fddc074d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a154bc78ef69a51b25e8d8526b2ac8daa"><td class="memItemLeft" align="right" valign="top"><a id="a154bc78ef69a51b25e8d8526b2ac8daa"></a>
+<a class="el" href="CD__LookupTable_8H.html#ae11b83e77d6f10fa01ec700a4252d0b7">LookupTable::OutOfRangeStrategy</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a154bc78ef69a51b25e8d8526b2ac8daa">m_rangeStrategyLo</a></td></tr>
+<tr class="memdesc:a154bc78ef69a51b25e8d8526b2ac8daa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Out-of-range strategy on low end. <br /></td></tr>
+<tr class="separator:a154bc78ef69a51b25e8d8526b2ac8daa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a286e566a54c199b951ad1f52686f9e"><td class="memItemLeft" align="right" valign="top"><a id="a9a286e566a54c199b951ad1f52686f9e"></a>
+<a class="el" href="CD__LookupTable_8H.html#ae11b83e77d6f10fa01ec700a4252d0b7">LookupTable::OutOfRangeStrategy</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a9a286e566a54c199b951ad1f52686f9e">m_rangeStrategyHi</a></td></tr>
+<tr class="memdesc:a9a286e566a54c199b951ad1f52686f9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Out-of-range strategy on high end. <br /></td></tr>
+<tr class="separator:a9a286e566a54c199b951ad1f52686f9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee0771480fe186ad9f8b8eab85883d9f"><td class="memItemLeft" align="right" valign="top"><a id="aee0771480fe186ad9f8b8eab85883d9f"></a>
+std::tuple&lt; <a class="el" href="CD__LookupTable_8H.html#ae9f02c1664a9efc37ffc70297e92bfeb">LookupTable::Spacing</a>, size_t, T, T, T &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#aee0771480fe186ad9f8b8eab85883d9f">m_grid</a></td></tr>
+<tr class="memdesc:aee0771480fe186ad9f8b8eab85883d9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Underlying 1D grid. This is populated when calling prepareTable. <br /></td></tr>
+<tr class="separator:aee0771480fe186ad9f8b8eab85883d9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b5434e2fd75edb3a4f1de226da93132"><td class="memItemLeft" align="right" valign="top"><a id="a2b5434e2fd75edb3a4f1de226da93132"></a>
+std::vector&lt; std::array&lt; T, N+1 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a2b5434e2fd75edb3a4f1de226da93132">m_rawData</a></td></tr>
+<tr class="memdesc:a2b5434e2fd75edb3a4f1de226da93132"><td class="mdescLeft">&#160;</td><td class="mdescRight">Raw data. <br /></td></tr>
+<tr class="separator:a2b5434e2fd75edb3a4f1de226da93132"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d1f6dccf5bc51a67837f7e048540870"><td class="memItemLeft" align="right" valign="top"><a id="a2d1f6dccf5bc51a67837f7e048540870"></a>
+std::vector&lt; std::array&lt; T, N+1 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a2d1f6dccf5bc51a67837f7e048540870">m_structuredData</a></td></tr>
+<tr class="memdesc:a2d1f6dccf5bc51a67837f7e048540870"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structured data. This is populated when calling prepareTable. <br /></td></tr>
+<tr class="separator:a2d1f6dccf5bc51a67837f7e048540870"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><h3>template&lt;int N&gt;<br />
-class LookupTable1D&lt; N &gt;</h3>
+<div class="textblock"><h3>template&lt;typename T = Real, size_t N = 1, typename I = std::enable_if_t&lt;std::is_floating_point&lt;T&gt;::value&gt;&gt;<br />
+class LookupTable1D&lt; T, N, I &gt;</h3>
 
-<p>Class for looking up and interpolation (x,y) data. </p>
+<p>Class for interpolation of f = f(x) data in one independent variable x. </p>
+<p>N is the number of additional dependent variables. T must be a floating point type (e.g., float, double) </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="ae91a0ce9537b0b88c6755d7b27cad9cf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae91a0ce9537b0b88c6755d7b27cad9cf">&#9670;&nbsp;</a></span>addEntry()</h2>
+<a id="a966a475a87d9295bdb7fa6bb9d138ba9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a966a475a87d9295bdb7fa6bb9d138ba9">&#9670;&nbsp;</a></span>addData()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;int N&gt; </div>
+template&lt;typename T , size_t N, typename I &gt; </div>
 <div class="memtemplate">
 template&lt;typename... Ts&gt; </div>
 <table class="mlabels">
@@ -219,7 +222,7 @@ template&lt;typename... Ts&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::addEntry </td>
+          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::addData </td>
           <td>(</td>
           <td class="paramtype">const Ts &amp;...&#160;</td>
           <td class="paramname"><em>x</em></td><td>)</td>
@@ -236,28 +239,28 @@ template&lt;typename... Ts&gt; </div>
 <p>Add entry. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>Entry to add. You can add an entire array through the variadic template. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>Entry to add. For example addData(1,1,1,1). Number of elements in x must be N+1 </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a81667528ddb7acef81f6d3d11cc17b3a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a81667528ddb7acef81f6d3d11cc17b3a">&#9670;&nbsp;</a></span>directLookup()</h2>
+<a id="a905759bdbf1cf9b4b272f00b167d149e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a905759bdbf1cf9b4b272f00b167d149e">&#9670;&nbsp;</a></span>getIndexLo()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;int N&gt; </div>
+template&lt;typename T , size_t N, typename I &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::array&lt; Real, N &gt; <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::directLookup </td>
+          <td class="memname">size_t <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::getIndexLo </td>
           <td>(</td>
-          <td class="paramtype">const Real&#160;</td>
+          <td class="paramtype">const T &amp;&#160;</td>
           <td class="paramname"><em>a_x</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -269,62 +272,141 @@ template&lt;int N&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Direct lookup, assumes non-uniform ordering. </p>
-<p>This is very slow, because it will look through the entire table. </p><dl class="section note"><dt>Note</dt><dd>The data MUST be sorted along the input column for this to work. </dd></dl>
-
-</div>
-</div>
-<a id="a8537a32fe13b5400854ea79b54c3017e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8537a32fe13b5400854ea79b54c3017e">&#9670;&nbsp;</a></span>dumpTable()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;int N&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::dumpTable </td>
-          <td>(</td>
-          <td class="paramtype">const std::string&#160;</td>
-          <td class="paramname"><em>a_fileName</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Dump table to a file. </p>
+<p>Get the lower index that brackets the input variable between two data points in the structured grid. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fileName</td><td>File name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_x</td><td>Independent variable. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a961ad05554631c35b2888a6d47b89df7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a961ad05554631c35b2888a6d47b89df7">&#9670;&nbsp;</a></span>getData()</h2>
+<a id="aabc0af01260a29ae6715a14bd1122d34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aabc0af01260a29ae6715a14bd1122d34">&#9670;&nbsp;</a></span>getRawData() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;int N&gt; </div>
+template&lt;typename T , size_t N, typename I &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::array&lt; Real, N &gt; <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::getData </td>
+          <td class="memname">const std::vector&lt; std::array&lt; T, N+1 &gt; &gt; &amp; <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::getRawData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Access function for raw data. </p>
+<dl class="section return"><dt>Returns</dt><dd>Returns m_rawData </dd></dl>
+
+</div>
+</div>
+<a id="afe51e0523a93fd76ff0848d57c029103"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe51e0523a93fd76ff0848d57c029103">&#9670;&nbsp;</a></span>getRawData() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , size_t N, typename I &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::array&lt; T, N+1 &gt; &gt; &amp; <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::getRawData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Access function for raw data. </p>
+<dl class="section return"><dt>Returns</dt><dd>Returns m_rawData </dd></dl>
+
+</div>
+</div>
+<a id="a25f4d42cbab8e6af94a471addfbb2f3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a25f4d42cbab8e6af94a471addfbb2f3c">&#9670;&nbsp;</a></span>getStructuredData() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , size_t N, typename I &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; std::array&lt; T, N+1 &gt; &gt; &amp; <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::getStructuredData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Access function for structured data. </p>
+<dl class="section return"><dt>Returns</dt><dd>Returns m_structuredData </dd></dl>
+
+</div>
+</div>
+<a id="a334312701035e640be6632474dd5157c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a334312701035e640be6632474dd5157c">&#9670;&nbsp;</a></span>getStructuredData() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , size_t N, typename I &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::array&lt; T, N+1 &gt; &gt; &amp; <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::getStructuredData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Access function for structured data. </p>
+<dl class="section return"><dt>Returns</dt><dd>Returns m_structuredData </dd></dl>
+
+</div>
+</div>
+<a id="a371cd575076ccc48cf8acb8c167f5d4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a371cd575076ccc48cf8acb8c167f5d4c">&#9670;&nbsp;</a></span>interpolate() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , size_t N, typename I &gt; </div>
+<div class="memtemplate">
+template&lt;size_t K&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">T <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::interpolate </td>
           <td>(</td>
-          <td class="paramtype">const Real&#160;</td>
+          <td class="paramtype">const T &amp;&#160;</td>
           <td class="paramname"><em>a_x</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -336,35 +418,32 @@ template&lt;int N&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Get data. </p>
-<dl class="section note"><dt>Note</dt><dd>When calling this, make sure the data is sorted AND uniform. For performance reasons this is not checked when calling this routine. </dd></dl>
+<p>Interpolation function for specific dependent variable K. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_x</td><td>Interpolation point (independent variable) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_x</td><td>Independent variable x </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="af754a0dd04b25802f91c81748fd51226"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af754a0dd04b25802f91c81748fd51226">&#9670;&nbsp;</a></span>getEntry()</h2>
+<a id="aa39273f27e514f71b45739a16a27743b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa39273f27e514f71b45739a16a27743b">&#9670;&nbsp;</a></span>interpolate() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;int N&gt; </div>
-<div class="memtemplate">
-template&lt;int K&gt; </div>
+template&lt;typename T , size_t N, typename I &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Real <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::getEntry </td>
+          <td class="memname">std::array&lt; T, N+1 &gt; <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::interpolate </td>
           <td>(</td>
-          <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_x</em></td><td>)</td>
+          <td class="paramtype">const T &amp;&#160;</td>
+          <td class="paramname"><em>x</em></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
@@ -375,172 +454,163 @@ template&lt;int K&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Get entry. </p>
-<dl class="section note"><dt>Note</dt><dd>When calling this, make sure the data is sorted AND uniform. For performance reasons this is not checked when calling this routine. </dd></dl>
+<p>Interpolate whole table. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_x</td><td>Interpolation point (independent variable) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_x</td><td>Independent variable x </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="af1511794cbbbca0865ac195d6dbbbded"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af1511794cbbbca0865ac195d6dbbbded">&#9670;&nbsp;</a></span>getIndexLo()</h2>
+<a id="a7d61ecb73c703d5a16faf43f7d408328"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d61ecb73c703d5a16faf43f7d408328">&#9670;&nbsp;</a></span>outputData()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;int N&gt; </div>
+template&lt;typename T , size_t N, typename I &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::getIndexLo </td>
+          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::outputData </td>
           <td>(</td>
-          <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_x</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get the lower index during a lookup. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_x</td><td>Interpolation point. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a1c624112793c72890dd7ed022680f260"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1c624112793c72890dd7ed022680f260">&#9670;&nbsp;</a></span>getNumEntries()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;int N&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">int <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::getNumEntries</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get size of the table. </p>
-<dl class="section return"><dt>Returns</dt><dd>m_data.size() </dd></dl>
-
-</div>
-</div>
-<a id="a598e96cdd3ddf4220937486e6d258ac4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a598e96cdd3ddf4220937486e6d258ac4">&#9670;&nbsp;</a></span>makeUniform()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;int N&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::makeUniform </td>
-          <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_numRows</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Make the table into a uniform table with the number of entries. </p>
-<p>This will make the data uniform with constant spacing along the specified column data. </p><dl class="section note"><dt>Note</dt><dd>The spacing that is used is based on the smallest and largest value in the specified column. </dd></dl>
-
-</div>
-</div>
-<a id="a18a755050b218de186c47fe61fd4686c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a18a755050b218de186c47fe61fd4686c">&#9670;&nbsp;</a></span>scale()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;int N&gt; </div>
-<div class="memtemplate">
-template&lt;int K&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::scale </td>
-          <td>(</td>
-          <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_scale</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Scale data in column by a specified factor. </p>
-<p>The template parameter is the column to be scaled. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_scale</td><td>Factor to scale by </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_whichColumn</td><td>Column to scale </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ad7572a596eaf527f334b3fc9a4fbe9a6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad7572a596eaf527f334b3fc9a4fbe9a6">&#9670;&nbsp;</a></span>setMaxRange()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;int N&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::setMaxRange </td>
-          <td>(</td>
-          <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_max</em>, </td>
+          <td class="paramtype">std::ostream &amp;&#160;</td>
+          <td class="paramname"><em>a_ostream</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_whichColumn</em> = <code>0</code>&#160;</td>
+          <td class="paramtype">const std::vector&lt; std::array&lt; T, N+1 &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Utility function for outputting data. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ostream</td><td>Output stream </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data to be sent to output stream </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad2dd3699b31cde553ec3388503ec4f17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2dd3699b31cde553ec3388503ec4f17">&#9670;&nbsp;</a></span>outputRawData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , size_t N, typename I &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::outputRawData </td>
+          <td>(</td>
+          <td class="paramtype">std::ostream &amp;&#160;</td>
+          <td class="paramname"><em>a_ostream</em> = <code>std::cout</code></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Dump raw table data to output stream. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ostream</td><td>Output stream </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac1d005672cfbc3a852e17a5126adc878"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1d005672cfbc3a852e17a5126adc878">&#9670;&nbsp;</a></span>outputStructuredData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , size_t N, typename I &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::outputStructuredData </td>
+          <td>(</td>
+          <td class="paramtype">std::ostream &amp;&#160;</td>
+          <td class="paramname"><em>a_ostream</em> = <code>std::cout</code></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Dump structured table data to file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ostream</td><td>Output stream </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad5fd2ad1037051f01c5dca538d50f990"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5fd2ad1037051f01c5dca538d50f990">&#9670;&nbsp;</a></span>prepareTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , size_t N, typename I &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::prepareTable </td>
+          <td>(</td>
+          <td class="paramtype">const size_t &amp;&#160;</td>
+          <td class="paramname"><em>a_independentVariable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const size_t &amp;&#160;</td>
+          <td class="paramname"><em>a_numPoints</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__LookupTable_8H.html#ae9f02c1664a9efc37ffc70297e92bfeb">LookupTable::Spacing</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_spacing</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -555,164 +625,165 @@ template&lt;int N&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Restrict table range to maximum value. Data outside this range are discarded. </p>
+<p>Turn the raw data into uniform data for fast lookup. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_max</td><td>Maximum x-value in the table. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_whichColumn</td><td>Ranges based on this column. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_independentVariable</td><td>The independent variable (i.e., column in the input data). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numPoints</td><td>Number of points in the input table. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_spacing</td><td>Table spacing </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a8e2538bd69177b2daca9bad67b13a93b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8e2538bd69177b2daca9bad67b13a93b">&#9670;&nbsp;</a></span>setMinRange()</h2>
+<a id="ab2945213a9ea8abf884af2f8c824d67e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2945213a9ea8abf884af2f8c824d67e">&#9670;&nbsp;</a></span>setRangeStrategyHi()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;int N&gt; </div>
+template&lt;typename T , size_t N, typename I &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::setMinRange </td>
+          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::setRangeStrategyHi </td>
           <td>(</td>
-          <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_min</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_whichColumn</em> = <code>0</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Restrict table range to minimum value. Data outside these ranges are discarded. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_min</td><td>Minimum x-value in the table. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_whichColumn</td><td>Ranges based on this column. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a9da4b786778f4ae6eeeeb353f9e84eff"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9da4b786778f4ae6eeeeb353f9e84eff">&#9670;&nbsp;</a></span>setOutOfRangeStrategyHigh()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;int N&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::setOutOfRangeStrategyHigh </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="CD__LookupTable1D_8H.html#a68acea554b689ac41c0b13388ed03572">OutOfRangeStrategy</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__LookupTable_8H.html#ae11b83e77d6f10fa01ec700a4252d0b7">LookupTable::OutOfRangeStrategy</a> &amp;&#160;</td>
           <td class="paramname"><em>a_strategy</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Set the strategy when retrieving data that is out of range on the high side. </p>
-<p>Set the input parameter a_strategy to Constant if you want to virtually pad the data with the last endpoint or Linear if you want linear interpolation. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Set the out-of-range strategy on the high end. </p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_strategy</td><td>Range strategy. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_strategy</td><td>Out-of-range strategy on the high end </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="afd7a6ac332d5f5e0827a5312479fabfe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afd7a6ac332d5f5e0827a5312479fabfe">&#9670;&nbsp;</a></span>setOutOfRangeStrategyLow()</h2>
+<a id="a619b7fae94c823793d453e5c52808cac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a619b7fae94c823793d453e5c52808cac">&#9670;&nbsp;</a></span>setRangeStrategyLo()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;int N&gt; </div>
+template&lt;typename T , size_t N, typename I &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::setOutOfRangeStrategyLow </td>
+          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::setRangeStrategyLo </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="CD__LookupTable1D_8H.html#a68acea554b689ac41c0b13388ed03572">OutOfRangeStrategy</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__LookupTable_8H.html#ae11b83e77d6f10fa01ec700a4252d0b7">LookupTable::OutOfRangeStrategy</a> &amp;&#160;</td>
           <td class="paramname"><em>a_strategy</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Set the strategy when retrieving data that is out of range on the low side. </p>
-<p>Set the input parameter a_strategy to Constant if you want to virtually pad the data with the last endpoint or Linear if you want linear interpolation. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Set the out-of-range strategy on the low end. </p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_strategy</td><td>Range strategy. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_strategy</td><td>Out-of-range strategy on low end </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="abc947dd6530681a7cfc96c719d948777"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abc947dd6530681a7cfc96c719d948777">&#9670;&nbsp;</a></span>setRange()</h2>
+<a id="a96a79f5a43b0f5bac9a1e9897bdaeefa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96a79f5a43b0f5bac9a1e9897bdaeefa">&#9670;&nbsp;</a></span>swap()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;int N&gt; </div>
+template&lt;typename T , size_t N, typename I &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::setRange </td>
+          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::swap </td>
           <td>(</td>
-          <td class="paramtype">const Real&#160;</td>
+          <td class="paramtype">const size_t&#160;</td>
+          <td class="paramname"><em>a_columnOne</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const size_t&#160;</td>
+          <td class="paramname"><em>a_columnTwo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Utility function for swapping columns. </p>
+<p>This is done on the raw data &ndash; if the user wants to swap columns in the resampled/structured data then he needs to call this function first and then resample the table through prepareTable </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_columnOne</td><td>Column to swap. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_columnTwo</td><td>Column to swap. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aa3034b927935a5bb8d72b2b335048a76"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3034b927935a5bb8d72b2b335048a76">&#9670;&nbsp;</a></span>truncate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , size_t N, typename I &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::truncate </td>
+          <td>(</td>
+          <td class="paramtype">const T &amp;&#160;</td>
           <td class="paramname"><em>a_min</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Real&#160;</td>
+          <td class="paramtype">const T &amp;&#160;</td>
           <td class="paramname"><em>a_max</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_whichColumn</em> = <code>0</code>&#160;</td>
+          <td class="paramtype">const size_t&#160;</td>
+          <td class="paramname"><em>a_column</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -722,137 +793,135 @@ template&lt;int N&gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Restrict table range to maximum and minimum. Data outside these ranges are discarded. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Utility function for truncating raw data along one of the variables (either dependent or independent). </p>
+<p>This will discard (from the raw data) all data that fall outside the input interval. This is done on the raw data &ndash; the user will need to call prepareTable if the result should propagate into the resampled/structured data. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_min</td><td>Minimum x-value in the table. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_max</td><td>Maximum x-value in the table. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_whichColumn</td><td>Ranges based on this column. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_min</td><td>Minimum value represented. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_max</td><td>Maximum value represented. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a9ee5f93bfb3a940485dfe1bb0a72cfcf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9ee5f93bfb3a940485dfe1bb0a72cfcf">&#9670;&nbsp;</a></span>setTableSpacing()</h2>
+<a id="abce574b4751cc1d51f4f5a6c3f288f9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abce574b4751cc1d51f4f5a6c3f288f9b">&#9670;&nbsp;</a></span>writeRawData()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;int N&gt; </div>
+template&lt;typename T , size_t N, typename I &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::setTableSpacing </td>
+          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::writeRawData </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="CD__LookupTable1D_8H.html#acffc6eccff44c2e022a96233f052e5de">TableSpacing</a>&#160;</td>
-          <td class="paramname"><em>a_spacing</em></td><td>)</td>
-          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_file</em></td><td>)</td>
+          <td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Set the table spacing mode. </p>
+<p>Dump raw table data to file. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_spacing</td><td>Spacing mode. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_file</td><td>File name </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a200b4cb16ae6f92c1063676025831cc6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a200b4cb16ae6f92c1063676025831cc6">&#9670;&nbsp;</a></span>sort()</h2>
+<a id="ae11e146435e00adb8073590e883ef4e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae11e146435e00adb8073590e883ef4e9">&#9670;&nbsp;</a></span>writeStructuredData()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;int N&gt; </div>
+template&lt;typename T , size_t N, typename I &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::sort </td>
+          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::writeStructuredData </td>
           <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_whichColumn</em> = <code>0</code></td><td>)</td>
-          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_file</em></td><td>)</td>
+          <td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Sort the table. Useful if the input data was not already sorted. </p>
+<p>Dump structured table data to file. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_whichColumn</td><td>Sort along this column.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_file</td><td>File name </td></tr>
   </table>
   </dd>
 </dl>
-<p>On output, the data in the table is sorted &ndash; smallest x goes first. </p>
 
 </div>
 </div>
-<a id="a6b4a6cb99d724986f40ff4246ca56113"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6b4a6cb99d724986f40ff4246ca56113">&#9670;&nbsp;</a></span>swap()</h2>
+<a id="acc64935733169f0a88e59226e9086fec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc64935733169f0a88e59226e9086fec">&#9670;&nbsp;</a></span>writeToFile()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;int N&gt; </div>
+template&lt;typename T , size_t N, typename I &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; N &gt;::swap </td>
+          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::writeToFile </td>
           <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_column1</em>, </td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_file</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_column2</em>&#160;</td>
+          <td class="paramtype">const std::vector&lt; std::array&lt; T, N+1 &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Swap two columns. </p>
+<p>Utility function for outputting data to a file. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_column1</td><td>First column </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_column2</td><td>Second column </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_file</td><td>File name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data to be sent to output stream </td></tr>
   </table>
   </dd>
 </dl>

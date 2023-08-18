@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Random numbers" href="RandomNumbers.html" />
-    <link rel="prev" title="Tracer particle model" href="../Applications/TracerParticleModel.html" /> 
+    <link rel="prev" title="Data parsing" href="DataParser.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -104,20 +104,22 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="DataParser.html">Data parsing</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Lookup tables</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#lookuptable1d">LookupTable1D</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#inserting-data">Inserting data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#restricting-ranges">Restricting ranges</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#independent-variable">Independent variable</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#swapping-columns">Swapping columns</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#regularize-table">Regularize table</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#setting-grid-point-spacing">Setting grid point spacing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#regularizing-table">Regularizing table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lookuptable1d">LookupTable1D</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#inserting-data">Inserting data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-modification">Data modification</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scaling">Scaling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#column-swapping">Column swapping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#range-truncation">Range truncation</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#retrieving-data">Retrieving data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#viewing-tables">Viewing tables</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#parsing-data">Parsing data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#regularize-table">Regularize table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-interpolation">Data interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#out-of-range-strategy">Out-of-range strategy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#viewing-tables">Viewing tables</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="RandomNumbers.html">Random numbers</a></li>
@@ -158,10 +160,10 @@
            <div itemprop="articleBody">
              
   <section id="lookup-tables">
-<span id="chap-lookuptable1d"></span><h1>Lookup tables<a class="headerlink" href="#lookup-tables" title="Permalink to this heading"></a></h1>
+<span id="chap-lookuptable"></span><h1>Lookup tables<a class="headerlink" href="#lookup-tables" title="Permalink to this heading"></a></h1>
 <section id="lookuptable1d">
 <h2>LookupTable1D<a class="headerlink" href="#lookuptable1d" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">LookupTable1D</span></code> is a class for looking up and interpolation data stored in a row-column format.
+<p><code class="docutils literal notranslate"><span class="pre">LookupTable1D</span></code> is a class for interpolating data stored in a row-column format.
 It is used in order to easily retrieve input data that can be stored in table formats.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -169,40 +171,41 @@ It is used in order to easily retrieve input data that can be stored in table fo
 It does not support higher-dimensional data interpolation.</p>
 </div>
 <p>The class is templated as</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span> <span class="o">&lt;</span><span class="nb">int</span> <span class="n">N</span><span class="o">&gt;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span> <span class="o">&lt;</span><span class="n">typename</span> <span class="n">T</span> <span class="o">=</span> <span class="n">Real</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">1</span><span class="o">&gt;</span>
 <span class="k">class</span> <span class="nc">LookupTable1D</span>
 </pre></div>
 </div>
-<p>where the template parameter <code class="docutils literal notranslate"><span class="pre">N</span></code> indicates the number of columns in the data holders.
-Internally, the data is stored as an <code class="docutils literal notranslate"><span class="pre">std::vector&lt;std::array&lt;Real,</span> <span class="pre">N&gt;</span> <span class="pre">&gt;</span></code> where the vector entries are rows and the <code class="docutils literal notranslate"><span class="pre">std::array&lt;Real,</span> <span class="pre">N&gt;</span></code> are data in each row.
-Thus, a table <code class="docutils literal notranslate"><span class="pre">LookupTable1D&lt;2&gt;</span></code> always has two columns.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">LookupTable1D</span></code> is used on regularly spaced data (for performance reasons).
-Although the user can fill irregularly spaced data into <code class="docutils literal notranslate"><span class="pre">LookupTable1D</span></code>, the class has routines for making that data regularly spaced and sorted along of its columns.
+<p>where the template parameter <code class="docutils literal notranslate"><span class="pre">N</span></code> indicates the number of dependent variables (<code class="docutils literal notranslate"><span class="pre">N=1</span></code> yields a compile-time error).
+Internally, the data is stored as an <code class="docutils literal notranslate"><span class="pre">std::vector&lt;std::array&lt;T,</span> <span class="pre">N</span> <span class="pre">+</span> <span class="pre">1&gt;</span> <span class="pre">&gt;</span></code> where the vector entries are rows and the <code class="docutils literal notranslate"><span class="pre">std::array&lt;T,</span> <span class="pre">N</span> <span class="pre">+</span> <span class="pre">1&gt;</span></code> are the column entries in that row.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The internal floating point representation defaults to <code class="docutils literal notranslate"><span class="pre">T</span></code> and the number of dependent variables to 1.</p>
+</div>
+<p>For performance reasons, the <code class="docutils literal notranslate"><span class="pre">LookupTable1D</span></code> class is used on regularly spaced data (either uniformly or logarithmically spaced).
+The user can still pass irregularly spaced data into <code class="docutils literal notranslate"><span class="pre">LookupTable1D</span></code>, and regularize the data later (i.e., interpolate it onto a regularly spaced 1D grid).
 Usage of <code class="docutils literal notranslate"><span class="pre">LookupTable1D</span></code> will therefore consist of the following:</p>
 <ol class="arabic simple">
 <li><p>Add data rows into the table.</p></li>
-<li><p>Swap columns if necessary.</p></li>
-<li><p>Restrict data ranges if necessary.</p></li>
-<li><p>Sort the table along of it’s columns, smallest to largest.</p></li>
+<li><p>Swap columns or scale data if necessary.</p></li>
+<li><p>Truncate data ranges if necessary.</p></li>
 <li><p>Regularize the table with a specified number of grid points.</p></li>
 <li><p><em>Retrieve data</em>.</p></li>
 </ol>
-<p>The steps for these processes are explained in detail below.</p>
-</section>
+<p>These steps are discussed below.</p>
 <section id="inserting-data">
-<h2>Inserting data<a class="headerlink" href="#inserting-data" title="Permalink to this heading"></a></h2>
-<p>To add data to the table, one will use the member function</p>
+<h3>Inserting data<a class="headerlink" href="#inserting-data" title="Permalink to this heading"></a></h3>
+<p>To add data to the table, use the member function</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span><span class="w"> </span><span class="n">Ts</span><span class="o">&gt;</span><span class="w"></span>
 <span class="kr">inline</span><span class="w"></span>
-<span class="kt">void</span><span class="w"> </span><span class="n">addEntry</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Ts</span><span class="o">&amp;</span><span class="p">...</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">addData</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Ts</span><span class="o">&amp;</span><span class="p">...</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
-<p>where the parameter pack must have <code class="docutils literal notranslate"><span class="pre">N</span></code> entries.
-For example, to add two rows of data to a table:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myTable</span><span class="p">;</span><span class="w"></span>
+<p>where the parameter pack must have <code class="docutils literal notranslate"><span class="pre">N+1</span></code> entries.
+For example, to add two rows of data to a table with two dependent variables:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myTable</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">myTable</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span><span class="w"> </span><span class="mf">6.0</span><span class="p">);</span><span class="w"></span>
-<span class="n">myTable</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">);</span><span class="w"></span>
+<span class="n">myTable</span><span class="p">.</span><span class="n">addData</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span><span class="w"> </span><span class="mf">6.0</span><span class="p">);</span><span class="w"></span>
+<span class="n">myTable</span><span class="p">.</span><span class="n">addData</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>This will insert two new rows at the end up the table.</p>
@@ -212,41 +215,23 @@ For example, to add two rows of data to a table:</p>
 Users will insert rows one by one; <code class="docutils literal notranslate"><span class="pre">LookupTable1D</span></code> has functions for sorting and regularizing the table.</p>
 </div>
 </section>
-<section id="restricting-ranges">
-<h2>Restricting ranges<a class="headerlink" href="#restricting-ranges" title="Permalink to this heading"></a></h2>
-<p>To restrict the data range, call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">setRange</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_min</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_max</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_independentVariable</span><span class="p">)</span><span class="w"></span>
+<section id="data-modification">
+<h3>Data modification<a class="headerlink" href="#data-modification" title="Permalink to this heading"></a></h3>
+<section id="scaling">
+<h4>Scaling<a class="headerlink" href="#scaling" title="Permalink to this heading"></a></h4>
+<p>To scale data in a particular column, use</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">scale</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_scale</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">a_min</span></code> and <code class="docutils literal notranslate"><span class="pre">a_max</span></code> are the permissible ranges for data in the input column (<code class="docutils literal notranslate"><span class="pre">a_independentVariable</span></code>).
-Data outside these ranges are discarded from the table.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">K</span></code> is the column to be scaled.</p>
 </section>
-<section id="independent-variable">
-<h2>Independent variable<a class="headerlink" href="#independent-variable" title="Permalink to this heading"></a></h2>
-<p>To select an independent variable, the user will select one of the columns and sort the data along that column.
-The C++ code for this is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"> </span><span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">sort</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_independentVariable</span><span class="p">);</span><span class="w"></span>
+<section id="column-swapping">
+<h4>Column swapping<a class="headerlink" href="#column-swapping" title="Permalink to this heading"></a></h4>
+<p>To swap columns, use</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">swap</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_columnOne</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_columnTwo</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
-<p>where the input integer indicates the column (i.e., independent variable) used for sorting.
-Note that the sorting <em>is always from smallest to largest value</em>.
-Thus, if one has two rows</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>1.0  5.0  6.0
-2.0  2.0  3.0
-</pre></div>
-</div>
-<p>and one calls <code class="docutils literal notranslate"><span class="pre">LookupTable1D&lt;N&gt;::sort(1)</span></code> the final table becomes</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>2.0  2.0  3.0
-1.0  5.0  6.0
-</pre></div>
-</div>
-<p>Note that the second column now becomes the independent variable.</p>
-</section>
-<section id="swapping-columns">
-<h2>Swapping columns<a class="headerlink" href="#swapping-columns" title="Permalink to this heading"></a></h2>
-<p>Columns can be swapped by calling <code class="docutils literal notranslate"><span class="pre">LookupTable1D&lt;N&gt;::swap(int,</span> <span class="pre">int)</span></code>, which will swap two of the columns.
-For example if the original data is</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>2.0  2.0  3.0
 1.0  5.0  6.0
 </pre></div>
@@ -256,25 +241,37 @@ For example if the original data is</p>
 1.0  6.0  5.0
 </pre></div>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
 <p>Note that swapping two columns destroys the sorting and one will need to set the independent variable again afterwards.</p>
+</div>
+</section>
+<section id="range-truncation">
+<h4>Range truncation<a class="headerlink" href="#range-truncation" title="Permalink to this heading"></a></h4>
+<p>To restrict the data range, call</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">truncate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">a_min</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">a_max</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_variable</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">a_min</span></code> and <code class="docutils literal notranslate"><span class="pre">a_max</span></code> are the permissible ranges for data in the input column (<code class="docutils literal notranslate"><span class="pre">a_variable</span></code>).
+Data outside these ranges is discarded from the table.</p>
+</section>
 </section>
 <section id="regularize-table">
-<h2>Regularize table<a class="headerlink" href="#regularize-table" title="Permalink to this heading"></a></h2>
-<p>To regularize the table the user must first determine if the grid points should be uniformly spaced or exponentially spaced in the independent variable.</p>
-<section id="setting-grid-point-spacing">
-<h3>Setting grid point spacing<a class="headerlink" href="#setting-grid-point-spacing" title="Permalink to this heading"></a></h3>
-<p>The user can set the spacing by calling</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setTableSpacing</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">TableSpacing</span><span class="w"> </span><span class="n">a_spacing</span><span class="p">);</span><span class="w"></span>
+<h3>Regularize table<a class="headerlink" href="#regularize-table" title="Permalink to this heading"></a></h3>
+<p>When regularizing the table, the potentially irregularly spaced raw data is interpolated onto a regular grid.
+The user must specify:</p>
+<ol class="arabic simple">
+<li><p>The independent variable.</p></li>
+<li><p>Number of grid points in regular grid.</p></li>
+<li><p>Grid point spacing.</p></li>
+</ol>
+<p>A <code class="docutils literal notranslate"><span class="pre">LookupTable1D</span></code> is regularized through</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="nf">prepareTable</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_independentVariable</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_numPoints</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">LookupTable</span><span class="o">::</span><span class="n">Spacing</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_spacing</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">TableSpacing::Uniform</span></code> and <code class="docutils literal notranslate"><span class="pre">TableSpacing::Exponential</span></code> are supported.
-For example, to use uniformly or exponentially spaced grid points:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myTable</span><span class="p">;</span><span class="w"></span>
-
-<span class="n">myTable</span><span class="p">.</span><span class="n">setTableSpacing</span><span class="p">(</span><span class="n">TableSpacing</span><span class="o">::</span><span class="n">Uniform</span><span class="p">);</span><span class="w">     </span><span class="c1">// For uniformly spaced points</span>
-<span class="n">myTable</span><span class="p">.</span><span class="n">setTableSpacing</span><span class="p">(</span><span class="n">TableSpacing</span><span class="o">::</span><span class="n">Exponential</span><span class="p">);</span><span class="w"> </span><span class="c1">// For exponentially spaced points</span>
-</pre></div>
-</div>
+<p>Here, <code class="docutils literal notranslate"><span class="pre">a_independentVariable</span></code> is the independent variable and <code class="docutils literal notranslate"><span class="pre">a_numPoints</span></code> is the number of grid points in the regularized table.
+Two different spacings are supported: <code class="docutils literal notranslate"><span class="pre">LookupTable::Spacing::Uniform</span></code> and <code class="docutils literal notranslate"><span class="pre">LookupTable::Spacing::Exponential</span></code>.</p>
 <p><strong>Uniform spacing</strong></p>
 <p>With uniform spacing, grid points in the table are spaced as</p>
 <div class="math notranslate nohighlight">
@@ -283,31 +280,21 @@ For example, to use uniformly or exponentially spaced grid points:</p>
 <p><strong>Exponential spacing</strong></p>
 <p>If grid points are exponentially spaced then</p>
 <div class="math notranslate nohighlight">
-\[x_i = x_{\textrm{min}}\left(\frac{x_{\textrm{max}}}{x_{\textrm{min}}}\right)^{\frac{i-1}{N}}, \quad i\in[0,N-1].\]</div>
-</section>
-<section id="regularizing-table">
-<h3>Regularizing table<a class="headerlink" href="#regularizing-table" title="Permalink to this heading"></a></h3>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">regularize</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_numRows</span><span class="p">)</span><span class="w"></span>
-</pre></div>
-</div>
-<p>which will make the table into a regularly spaced table with <code class="docutils literal notranslate"><span class="pre">a_numRows</span></code> rows.
-<code class="docutils literal notranslate"><span class="pre">LookupTable1D</span></code> will always use piecewise linear interpolation when regularizing the table.
-Specifying a number of rows that is smaller/larger than the original number of rows will downsample/upsample the table.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>When regularizing a table through <code class="docutils literal notranslate"><span class="pre">regularize</span></code>, the original data table is destroyed.</p>
+\[x_i = x_{\textrm{min}}\left(\frac{x_{\textrm{max}}}{x_{\textrm{min}}}\right)^{\frac{i}{N-1}}, \quad i\in[0,N-1].\]</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Note that one must have <span class="math notranslate nohighlight">\(x_{\textrm{min}} &gt; 0\)</span> when using exponentially spaced points.</p>
 </div>
 </section>
-</section>
-<section id="retrieving-data">
-<h2>Retrieving data<a class="headerlink" href="#retrieving-data" title="Permalink to this heading"></a></h2>
+<section id="data-interpolation">
+<h3>Data interpolation<a class="headerlink" href="#data-interpolation" title="Permalink to this heading"></a></h3>
 <p>To retrieve data from one of the columns, one can fetch either a specific value in a row, or the entire row.</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// For fetching column K</span>
-<span class="k">template</span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">K</span><span class="o">&gt;</span><span class="w"></span>
-<span class="n">Real</span><span class="w"> </span><span class="n">getEntry</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_x</span><span class="p">);</span><span class="w"></span>
+<span class="k">template</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="o">&gt;</span><span class="w"></span>
+<span class="n">T</span><span class="w"> </span><span class="n">interpolate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 
 <span class="c1">// For fetching the entire row</span>
-<span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"> </span><span class="n">getData</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_x</span><span class="p">);</span><span class="w"></span>
+<span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"> </span><span class="n">interpolate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>In the above, the template parameter <code class="docutils literal notranslate"><span class="pre">K</span></code> is the column to retrieve and <code class="docutils literal notranslate"><span class="pre">a_x</span></code> is the value of the independent variable.</p>
@@ -322,57 +309,45 @@ Specifying a number of rows that is smaller/larger than the original number of r
 </pre></div>
 </div>
 <p>To retrieve an interpolated value for <code class="docutils literal notranslate"><span class="pre">x=2.0</span></code> in the third column we call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myTable</span><span class="p">,</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myTable</span><span class="p">,</span><span class="w"></span>
 
-<span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myTable</span><span class="p">.</span><span class="n">getEntry</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">(</span><span class="mf">2.0</span><span class="p">);</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myTable</span><span class="p">.</span><span class="n">interpolate</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">(</span><span class="mf">2.0</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>which will return a value of 4.5 (linearly interpolated).</p>
 </section>
-<section id="viewing-tables">
-<h2>Viewing tables<a class="headerlink" href="#viewing-tables" title="Permalink to this heading"></a></h2>
-<p>For debugging purposes, <code class="docutils literal notranslate"><span class="pre">LookupTable1D</span></code> can write the internal data to an output stream or a file through the two member functions:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">dumpTable</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_outputStream</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
-
-<span class="kt">void</span><span class="w"> </span><span class="nf">dumpTable</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_fileName</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<section id="out-of-range-strategy">
+<h3>Out-of-range strategy<a class="headerlink" href="#out-of-range-strategy" title="Permalink to this heading"></a></h3>
+<p>Extrapolation outside the valid data range is determined by a user-specified strategy.
+When calling the <code class="docutils literal notranslate"><span class="pre">interpolate</span></code> function with an argument that exceeds the bounds of the raw or regular data, the range strategy is either:</p>
+<ul class="simple">
+<li><p>Return the value at the endpoint.</p></li>
+<li><p>Extrapolate from the endpoint.</p></li>
+</ul>
+<p>To set the range strategy one can use</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setRangeStrategyLo</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">LookupTable</span><span class="o">::</span><span class="n">OutOfRangeStrategy</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_strategy</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">setRangeStrategyHi</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">LookupTable</span><span class="o">::</span><span class="n">OutOfRangeStrategy</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_strategy</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
-<p>For example:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="mi">10</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myTable</span><span class="p">;</span><span class="w"></span>
-
-<span class="c1">// Dump table to terminal window</span>
-<span class="n">myTable</span><span class="p">.</span><span class="n">dumpTable</span><span class="p">();</span><span class="w"></span>
-
-<span class="c1">// Dump table to file.</span>
-<span class="n">myTable</span><span class="p">.</span><span class="n">dumpTable</span><span class="p">(</span><span class="s">&quot;myTable.dat&quot;</span><span class="p">);</span><span class="w"></span>
-</pre></div>
-</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">a_strategy</span></code> must be either of</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LookupTable::OutOfRangeStrategy::Constant</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LookupTable::OutOfRangeStrategy::Interpolate</span></code>.</p></li>
+</ul>
+<p>The default behavior is <code class="docutils literal notranslate"><span class="pre">LookupTable::OutOfRangeStrategy::Constant</span></code>.</p>
 </section>
-<section id="parsing-data">
-<h2>Parsing data<a class="headerlink" href="#parsing-data" title="Permalink to this heading"></a></h2>
-<p>Routines for reading column data into <code class="docutils literal notranslate"><span class="pre">LookupTable</span></code> are defined under the <code class="docutils literal notranslate"><span class="pre">DataParser</span></code> namespace.
-For example, for reading two columns into a lookup table:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Read all rows</span>
-<span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"></span>
-<span class="n">simpleFileReadASCII</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">       </span><span class="n">a_fileName</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">               </span><span class="n">a_xColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">               </span><span class="n">a_yColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_ignoreChars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="sc">&#39;#&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;/&#39;</span><span class="p">});</span><span class="w"></span>
+<section id="viewing-tables">
+<h3>Viewing tables<a class="headerlink" href="#viewing-tables" title="Permalink to this heading"></a></h3>
+<p>For debugging purposes, <code class="docutils literal notranslate"><span class="pre">LookupTable1D</span></code> can write the internal data to an output stream or a file through various member functions:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">writeRawData</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_file</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">writeStructuredData</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_file</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 
-<span class="c1">// Specify rows where to start and stop reading data</span>
-<span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"></span>
-<span class="n">fractionalFileReadASCII</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">       </span><span class="n">a_fileName</span><span class="p">,</span><span class="w"></span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">       </span><span class="n">a_startRead</span><span class="p">,</span><span class="w"></span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">       </span><span class="n">a_stopRead</span><span class="p">,</span><span class="w"></span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">               </span><span class="n">a_xColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">               </span><span class="n">a_yColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_ignoreChars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="sc">&#39;#&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;/&#39;</span><span class="p">});</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">outputRawData</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_ostream</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">outputStructuredData</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_ostream</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">DataParser</span></code> C++ API is found at <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/namespaceDataParser.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/namespaceDataParser.html</a>.</p>
-</div>
+<p>These functions will print the table (either raw or regularized) to an output stream or file.</p>
+</section>
 </section>
 </section>
 
@@ -380,7 +355,7 @@ For example, for reading two columns into a lookup table:</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../Applications/TracerParticleModel.html" class="btn btn-neutral float-left" title="Tracer particle model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="DataParser.html" class="btn btn-neutral float-left" title="Data parsing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="RandomNumbers.html" class="btn btn-neutral float-right" title="Random numbers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
