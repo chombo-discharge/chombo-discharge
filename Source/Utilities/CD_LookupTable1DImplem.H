@@ -26,7 +26,7 @@ template <typename T, size_t N, typename I>
 LookupTable1D<T, N, I>::LookupTable1D() noexcept
 {
   this->reset();
-};
+}
 
 template <typename T, size_t N, typename I>
 inline void
@@ -44,11 +44,18 @@ LookupTable1D<T, N, I>::reset() noexcept
 template <typename T, size_t N, typename I>
 template <typename... Ts>
 inline void
-LookupTable1D<T, N, I>::addData(const Ts&... x)
+LookupTable1D<T, N, I>::addData(const Ts&... x) noexcept
 {
   std::array<T, sizeof...(Ts)> arr = {(T)x...};
 
   m_rawData.emplace_back(arr);
+}
+
+template <typename T, size_t N, typename I>
+inline void
+LookupTable1D<T, N, I>::addData(const std::array<T, N + 1>& x) noexcept
+{
+  m_rawData.emplace_back(x);
 }
 
 template <typename T, size_t N, typename I>
@@ -71,10 +78,10 @@ LookupTable1D<T, N, I>::swap(const size_t a_columnOne, const size_t a_columnTwo)
 
   if (m_isGood) {
     if (a_columnOne == std::get<4>(m_grid)) {
-      std::get<4>(m_grid) == a_columnOne;
+      std::get<4>(m_grid) = a_columnOne;
     }
     else if (a_columnTwo == std::get<4>(m_grid)) {
-      std::get<4>(m_grid) == a_columnTwo;
+      std::get<4>(m_grid) = a_columnTwo;
     }
   }
 }
@@ -171,7 +178,7 @@ LookupTable1D<T, N, I>::prepareTable(const size_t&               a_independentVa
   }
   case LookupTable::Spacing::Exponential: {
     if (xmin <= std::numeric_limits<T>::min()) {
-      throw std::runtime_error(baseError + " - but can't have negativ values for logarithmic grid");
+      throw std::runtime_error(baseError + " - but must have all 'x > 0.0' for logarithmic grid");
     }
 
     else {
@@ -318,10 +325,9 @@ template <typename T, size_t N, typename I>
 inline size_t
 LookupTable1D<T, N, I>::getIndexLo(const T& a_x) const
 {
-  const LookupTable::Spacing& spacing             = std::get<0>(m_grid);
-  const size_t&               independentVariable = std::get<1>(m_grid);
-  const T&                    x0                  = std::get<2>(m_grid);
-  const T&                    delta               = std::get<4>(m_grid);
+  const LookupTable::Spacing& spacing = std::get<0>(m_grid);
+  const T&                    x0      = std::get<2>(m_grid);
+  const T&                    delta   = std::get<4>(m_grid);
 
   size_t idxLo;
 
@@ -440,6 +446,30 @@ inline T
 LookupTable1D<T, N, I>::interpolate(const T& a_x) const
 {
   return std::get<K>(this->interpolate(a_x));
+}
+
+template <typename T, size_t N, typename I>
+template <size_t M, typename... Ts>
+LookupTable1D<T, M, I>
+LookupTable1D<T, N, I>::slice(const Ts&... a_columns) const noexcept
+{
+  static_assert(M <= N, "LookupTable1D<T, N,I>::slice must have have 'M <= N'");
+
+  std::array<size_t, sizeof...(Ts)> arr = {(size_t)a_columns...};
+
+  LookupTable1D<T, M, I> ret;
+
+  for (const auto& r : m_rawData) {
+    std::array<T, M + 1> slicedData;
+
+    for (size_t i = 0; i < M + 1; i++) {
+      slicedData[i] = r[arr[i]];
+    }
+
+    ret.addData(slicedData);
+  }
+
+  return ret;
 }
 
 #endif

@@ -48,12 +48,28 @@ public:
   reset() noexcept;
 
   /*!
+    @brief Slice this table, keeping only the user-specified columns.
+    @details This returns a new table with a reduced number of columns.
+    @param[in] 
+  */
+  template <size_t M, typename... Ts>
+  LookupTable1D<T, M, I>
+  slice(const Ts&... a_columns) const noexcept;
+
+  /*!
     @brief Add entry. 
     @param[in] x Entry to add. For example addData(1,1,1,1). Number of elements in x must be N+1
   */
   template <typename... Ts>
   inline void
-  addData(const Ts&... x);
+  addData(const Ts&... x) noexcept;
+
+  /*!
+    @brief Add entry. 
+    @param[in] x Entry to add. 
+  */
+  inline void
+  addData(const std::array<T, N + 1>& x) noexcept;
 
   /*!
     @brief Utility function for swapping columns. 
