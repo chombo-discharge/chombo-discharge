@@ -216,7 +216,7 @@ latex_elements = {
 'pointsize': '10pt',
 
 # Additional stuff for the LaTeX preamble.
-'preamble': '\setcounter{tocdepth}{5}',
+'preamble': '\setcounter{secnumdepth}{3}\setcounter{tocdepth}{2}',
 
 # Release name
 #'releasename': ''
