@@ -106,10 +106,17 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#ac26cd87dc85f9c695981592f898e0ff2">reset</a> () noexcept</td></tr>
 <tr class="memdesc:ac26cd87dc85f9c695981592f898e0ff2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset everything. <br /></td></tr>
 <tr class="separator:ac26cd87dc85f9c695981592f898e0ff2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a966a475a87d9295bdb7fa6bb9d138ba9"><td class="memTemplParams" colspan="2">template&lt;typename... Ts&gt; </td></tr>
-<tr class="memitem:a966a475a87d9295bdb7fa6bb9d138ba9"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a966a475a87d9295bdb7fa6bb9d138ba9">addData</a> (const Ts &amp;... x)</td></tr>
-<tr class="memdesc:a966a475a87d9295bdb7fa6bb9d138ba9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add entry.  <a href="classLookupTable1D.html#a966a475a87d9295bdb7fa6bb9d138ba9">More...</a><br /></td></tr>
-<tr class="separator:a966a475a87d9295bdb7fa6bb9d138ba9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5183ca18ccfa8f914b7a427c0c285e2"><td class="memTemplParams" colspan="2">template&lt;size_t M, typename... Ts&gt; </td></tr>
+<tr class="memitem:ae5183ca18ccfa8f914b7a427c0c285e2"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, M, I &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#ae5183ca18ccfa8f914b7a427c0c285e2">slice</a> (const Ts &amp;... a_columns) const noexcept</td></tr>
+<tr class="memdesc:ae5183ca18ccfa8f914b7a427c0c285e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Slice this table, keeping only the user-specified columns.  <a href="classLookupTable1D.html#ae5183ca18ccfa8f914b7a427c0c285e2">More...</a><br /></td></tr>
+<tr class="separator:ae5183ca18ccfa8f914b7a427c0c285e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43e01ecb6aca129be36421736eac1ad1"><td class="memTemplParams" colspan="2">template&lt;typename... Ts&gt; </td></tr>
+<tr class="memitem:a43e01ecb6aca129be36421736eac1ad1"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a43e01ecb6aca129be36421736eac1ad1">addData</a> (const Ts &amp;... x) noexcept</td></tr>
+<tr class="memdesc:a43e01ecb6aca129be36421736eac1ad1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add entry.  <a href="classLookupTable1D.html#a43e01ecb6aca129be36421736eac1ad1">More...</a><br /></td></tr>
+<tr class="separator:a43e01ecb6aca129be36421736eac1ad1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acdd32bcc3cbd49e0fdd650014777443e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#acdd32bcc3cbd49e0fdd650014777443e">addData</a> (const std::array&lt; T, N+1 &gt; &amp;x) noexcept</td></tr>
+<tr class="memdesc:acdd32bcc3cbd49e0fdd650014777443e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add entry.  <a href="classLookupTable1D.html#acdd32bcc3cbd49e0fdd650014777443e">More...</a><br /></td></tr>
+<tr class="separator:acdd32bcc3cbd49e0fdd650014777443e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a96a79f5a43b0f5bac9a1e9897bdaeefa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a96a79f5a43b0f5bac9a1e9897bdaeefa">swap</a> (const size_t a_columnOne, const size_t a_columnTwo) noexcept</td></tr>
 <tr class="memdesc:a96a79f5a43b0f5bac9a1e9897bdaeefa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function for swapping columns.  <a href="classLookupTable1D.html#a96a79f5a43b0f5bac9a1e9897bdaeefa">More...</a><br /></td></tr>
 <tr class="separator:a96a79f5a43b0f5bac9a1e9897bdaeefa"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -208,8 +215,44 @@ class LookupTable1D&lt; T, N, I &gt;</h3>
 <p>Class for interpolation of f = f(x) data in one independent variable x. </p>
 <p>N is the number of additional dependent variables. T must be a floating point type (e.g., float, double) </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a966a475a87d9295bdb7fa6bb9d138ba9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a966a475a87d9295bdb7fa6bb9d138ba9">&#9670;&nbsp;</a></span>addData()</h2>
+<a id="acdd32bcc3cbd49e0fdd650014777443e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acdd32bcc3cbd49e0fdd650014777443e">&#9670;&nbsp;</a></span>addData() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , size_t N, typename I &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::addData </td>
+          <td>(</td>
+          <td class="paramtype">const std::array&lt; T, N+1 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>x</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add entry. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>Entry to add. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a43e01ecb6aca129be36421736eac1ad1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43e01ecb6aca129be36421736eac1ad1">&#9670;&nbsp;</a></span>addData() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -231,7 +274,7 @@ template&lt;typename... Ts&gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -703,6 +746,44 @@ template&lt;typename T , size_t N, typename I &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_strategy</td><td>Out-of-range strategy on low end </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ae5183ca18ccfa8f914b7a427c0c285e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5183ca18ccfa8f914b7a427c0c285e2">&#9670;&nbsp;</a></span>slice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , size_t N, typename I &gt; </div>
+<div class="memtemplate">
+template&lt;size_t M, typename... Ts&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, M, I &gt; <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, N, I &gt;::slice </td>
+          <td>(</td>
+          <td class="paramtype">const Ts &amp;...&#160;</td>
+          <td class="paramname"><em>a_columns</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Slice this table, keeping only the user-specified columns. </p>
+<p>This returns a new table with a reduced number of columns. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname"></td><td></td></tr>
   </table>
   </dd>
 </dl>
