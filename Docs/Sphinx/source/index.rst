@@ -72,7 +72,7 @@ Introduction
 ************
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 3
    :caption: Introduction
    :hidden:
 
@@ -88,7 +88,7 @@ Design
 ******
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 3
    :caption: Design
    :hidden:
 
