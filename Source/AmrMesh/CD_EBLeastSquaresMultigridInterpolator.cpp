@@ -11,6 +11,9 @@
 
 // Std includes
 #include <sstream>
+#include <thread>
+#include <chrono>
+#include <unistd.h>
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -26,6 +29,7 @@
 #include <CD_ParallelOps.H>
 #include <CD_LeastSquares.H>
 #include <CD_BoxLoops.H>
+#include <CD_Timer.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int EBLeastSquaresMultigridInterpolator::m_stenComp;
@@ -358,11 +362,22 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
   m_ghostIterFine.define(dblFine);
   CH_STOP(t1);
 
-  for (DataIterator dit(dblFine); dit.ok(); ++dit) {
-    const Box origFineBox    = dblFine[dit()];
-    const Box origCoarBox    = dblCoar[dit()];
-    const Box ghostedFineBox = grow(origFineBox, m_ghostVectorFine);
-    const Box grownCoarBox   = grow(origCoarBox, m_ghostVectorCoFi);
+  DataIterator dit = dblFine.dataIterator();
+
+  const int nbox = dit.size();
+
+  Timer timer("profiler");
+
+  timer.startEvent("omp_loop");
+
+#pragma omp parallel for schedule(static)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    //    usleep(1000);
+    const DataIndex din            = dit[mybox];
+    const Box       origFineBox    = dblFine[din];
+    const Box       origCoarBox    = dblCoar[din];
+    const Box       ghostedFineBox = grow(origFineBox, m_ghostVectorFine);
+    const Box       grownCoarBox   = grow(origCoarBox, m_ghostVectorCoFi);
 
     // Define the valid regions such that the interpolation does not include coarse grid cells that fall beneath the fine level,
     // and no fine cells outside the CF.
@@ -379,7 +394,7 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
     // Same for parts of the current (grown) patch that overlaps with neighboring boxes.
     CH_START(t3);
     NeighborIterator nit(dblFine);
-    for (nit.begin(dit()); nit.ok(); ++nit) {
+    for (nit.begin(din); nit.ok(); ++nit) {
 
       // = neighboring grid patch on the fine level. Use it's cells if they are also ghost cells in the current patch
       const Box neighborBoxFine = dblFine[nit()];
@@ -405,25 +420,25 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
 
     // Now go through each ghost cell and get an interpolation stencil to specified order.
     CH_START(t4);
-    const EBISBox& ebisboxFine = m_eblgFine.getEBISL()[dit()];
-    const EBISBox& ebisboxCoar = m_eblgCoFi.getEBISL()[dit()];
+    const EBISBox& ebisboxFine = m_eblgFine.getEBISL()[din];
+    const EBISBox& ebisboxCoar = m_eblgCoFi.getEBISL()[din];
 
     const EBGraph& fineGraph = ebisboxFine.getEBGraph();
 
-    m_fineStencils[dit()].define(m_ghostCells[dit()], fineGraph, m_numStenComp);
-    m_coarStencils[dit()].define(m_ghostCells[dit()], fineGraph, m_numStenComp);
-    m_ghostIterFine[dit()].define(m_ghostCells[dit()], fineGraph);
+    m_fineStencils[din].define(m_ghostCells[din], fineGraph, m_numStenComp);
+    m_coarStencils[din].define(m_ghostCells[din], fineGraph, m_numStenComp);
+    m_ghostIterFine[din].define(m_ghostCells[din], fineGraph);
     CH_STOP(t4);
 
     // Build stencils.
     CH_START(t5);
-    VoFIterator& vofit = m_ghostIterFine[dit()];
+    VoFIterator& vofit = m_ghostIterFine[din];
 
     auto kernel = [&](const VolIndex& ghostVofFine) -> void {
-      const VolIndex& ghostVofCoar = ebislFine.coarsen(ghostVofFine, m_refRat, dit());
+      const VolIndex& ghostVofCoar = ebislFine.coarsen(ghostVofFine, m_refRat, din);
 
-      VoFStencil& fineSten = m_fineStencils[dit()](ghostVofFine, comp);
-      VoFStencil& coarSten = m_coarStencils[dit()](ghostVofFine, comp);
+      VoFStencil& fineSten = m_fineStencils[din](ghostVofFine, comp);
+      VoFStencil& coarSten = m_coarStencils[din](ghostVofFine, comp);
 
       int  order        = m_order;
       bool foundStencil = false;
@@ -465,9 +480,14 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
       }
     };
 
-    BoxLoops::loop(vofit, kernel);
+    //    BoxLoops::loop(vofit, kernel);
     CH_STOP(t5);
   }
+
+  timer.stopEvent("omp_loop");
+  timer.eventReport(pout());
+
+  MayDay::Abort("stop here");
 
   // We now have all the stencils we need. Make them into an AggStencil for performance
   // optimization.

@@ -29,7 +29,7 @@ AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic con
 # DRIVER OPTIONS
 # ====================================================================================================
 Driver.verbosity                = 2                 # Engine verbosity
-Driver.geometry_generation      = chombo  # Grid generation method, 'chombo-discharge' or 'chombo'
+Driver.geometry_generation      = chombo-discharge  # Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level      = 0                 # Geometry scan level for chombo-discharge geometry generator
 Driver.plot_interval            = 10                # Plot interval
 Driver.checkpoint_interval      = 10                # Checkpoint interval
@@ -81,7 +81,7 @@ FieldSolverMultigrid.gmg_post_smooth   = 16        # Number of relaxations in up
 FieldSolverMultigrid.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
 FieldSolverMultigrid.gmg_min_iter      = 5         # Minimum number of iterations
 FieldSolverMultigrid.gmg_max_iter      = 32        # Maximum number of iterations
-FieldSolverMultigrid.gmg_exit_tol      = 1.E-10    # Residue tolerance
+FieldSolverMultigrid.gmg_exit_tol      = 1E-6    # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2       # Solver hang
 FieldSolverMultigrid.gmg_min_cells     = 4         # Bottom drop
 FieldSolverMultigrid.gmg_drop_order    = 0        # Drop stencil order to 1 if domain is coarser than this.
