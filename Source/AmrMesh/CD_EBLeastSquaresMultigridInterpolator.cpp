@@ -112,6 +112,9 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
     MayDay::Error("EBLeastSquaresMultigridInterpolator::coarseFineInterp -- number of ghost cells do not match!");
   }
 
+  const DataIterator dit  = a_phiFine.dataIterator();
+  const int          nbox = dit.size();
+
   LevelData<EBCellFAB> phiCoFi(m_eblgCoFi.getDBL(), 1, m_ghostVectorCoFi, EBCellFactory(m_eblgCoFi.getEBISL()));
 
   // Interpolate all variables near the EB. We will copy a_phiCoar to phiCoFi which holds the data on the coarse grid cells around each fine-grid
@@ -128,19 +131,22 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
 
     // Go through each grid patch and the to-be-interpolated ghost cells across the refinement boundary. We simply
     // apply the stencils here.
-    for (DataIterator dit = a_phiFine.dataIterator(); dit.ok(); ++dit) {
-      EBCellFAB&       dstFine = a_phiFine[dit()];
-      const EBCellFAB& srcFine = a_phiFine[dit()];
-      const EBCellFAB& srcCoar = phiCoFi[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBCellFAB&       dstFine = a_phiFine[din];
+      const EBCellFAB& srcFine = a_phiFine[din];
+      const EBCellFAB& srcCoar = phiCoFi[din];
 
       // Apply the coarse and fine stencils
       constexpr int numComp = 1;
       CH_START(t1);
-      m_aggCoarStencils[dit()]->apply(dstFine, srcCoar, m_comp, icomp, numComp, false);
+      m_aggCoarStencils[din]->apply(dstFine, srcCoar, m_comp, icomp, numComp, false);
       CH_STOP(t1);
 
       CH_START(t2);
-      m_aggFineStencils[dit()]->apply(dstFine, srcFine, icomp, icomp, numComp, true);
+      m_aggFineStencils[din]->apply(dstFine, srcFine, icomp, icomp, numComp, true);
       CH_STOP(t2);
     }
   }
@@ -159,9 +165,15 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_p
     MayDay::Error("EBLeastSquaresMultigridInterpolator::coarseFineInterp -- number of ghost cells do not match!");
   }
 
+  const DataIterator dit  = m_eblgFine.getDBL().dataIterator();
+  const int          nbox = dit.size();
+
   // TLDR: This routine does the coarse-fine interpolation with the coarse-grid data set to zero.
-  for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
-    this->coarseFineInterpH(a_phiFine[dit()], a_variables, dit());
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    this->coarseFineInterpH(a_phiFine[din], a_variables, din);
   }
 }
 
@@ -227,16 +239,22 @@ EBLeastSquaresMultigridInterpolator::defineGhostRegions() noexcept
   CH_TIME("EBLeastSquaresMultigridInterpolator::defineGhostRegions");
 
   const DisjointBoxLayout& dbl    = m_eblgFine.getDBL();
+  const DataIterator&      dit    = dbl.dataIterator();
   const ProblemDomain&     domain = m_eblgFine.getDomain();
   const EBISLayout&        ebisl  = m_eblgFine.getEBISL();
+  const int                nbox   = dit.size();
 
   // Define the "regular" ghost interpolation regions. This is just one cell wide since the operator stencil
   // has a width of 1 in regular cells.
   m_cfivs.define(dbl);
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box cellBox = dbl[dit()];
 
-    std::map<std::pair<int, Side::LoHiSide>, Box>& cfivsBoxes = m_cfivs[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box cellBox = dbl[din];
+
+    std::map<std::pair<int, Side::LoHiSide>, Box>& cfivsBoxes = m_cfivs[din];
 
     for (int dir = 0; dir < SpaceDim; dir++) {
       for (SideIterator sit; sit.ok(); ++sit) {
@@ -244,7 +262,7 @@ EBLeastSquaresMultigridInterpolator::defineGhostRegions() noexcept
         IntVectSet cfivs = IntVectSet(adjCellBox(cellBox, dir, sit(), 1));
 
         NeighborIterator nit(dbl); // Subtract the other boxes if they intersect this box.
-        for (nit.begin(dit()); nit.ok(); ++nit) {
+        for (nit.begin(din); nit.ok(); ++nit) {
           cfivs -= dbl[nit()];
         }
 
@@ -260,30 +278,34 @@ EBLeastSquaresMultigridInterpolator::defineGhostRegions() noexcept
   // require more ghost cells to be interpolated (defined by m_ghostCF). This routine computes those
   // cells, including all ghost cells that are within range m_ghostCF from the cut-cell.
   m_ghostCells.define(dbl);
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box      cellBox = dbl[dit()];
-    const EBISBox& ebisbox = ebisl[dit()];
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box      cellBox = dbl[din];
+    const EBISBox& ebisbox = ebisl[din];
 
     if (ebisbox.isAllRegular() || ebisbox.isAllCovered()) {
-      m_ghostCells[dit()] = IntVectSet();
+      m_ghostCells[din] = IntVectSet();
     }
     else {
       // 1. Define the width of the ghost layer region around current (irregular grid) patch
       Box grownBox = grow(cellBox, m_ghostCF);
       grownBox &= domain;
 
-      m_ghostCells[dit()] = IntVectSet(grownBox);
+      m_ghostCells[din] = IntVectSet(grownBox);
 
       NeighborIterator nit(dbl);
-      for (nit.begin(dit()); nit.ok(); ++nit) {
-        m_ghostCells[dit()] -= dbl[nit()];
+      for (nit.begin(din); nit.ok(); ++nit) {
+        m_ghostCells[din] -= dbl[nit()];
       }
-      m_ghostCells[dit()] -= cellBox;
+      m_ghostCells[din] -= cellBox;
 
       // 2. Only include ghost cells that are within range m_ghostCF of an irregular grid cell
       IntVectSet irreg = ebisbox.getIrregIVS(cellBox);
       irreg.grow(m_ghostCF);
-      m_ghostCells[dit()] &= irreg;
+      m_ghostCells[din] &= irreg;
     }
   }
 }
@@ -306,22 +328,25 @@ EBLeastSquaresMultigridInterpolator::defineCoarseInterp() noexcept
   CH_TIME("EBLeastSquaresMultigridInterpolator::defineCoarseInterp");
 
   const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL();
+  const DataIterator&      dit        = dblFine.dataIterator();
   const ProblemDomain&     domainCoar = m_eblgCoar.getDomain();
+  const int                nbox       = dit.size();
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     m_loCoarseInterpCF[dir].define(dblFine);
     m_hiCoarseInterpCF[dir].define(dblFine);
 
-    for (DataIterator dit(dblFine); dit.ok(); ++dit) {
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
       for (SideIterator sit; sit.ok(); ++sit) {
-        const Side::LoHiSide side = sit();
+        const Side::LoHiSide side      = sit();
+        const Box            interpBox = m_cfivs[din].at(std::make_pair(dir, side));
 
-        CoarseInterpQuadCF& interp = (side == Side::Lo) ? m_loCoarseInterpCF[dir][dit()]
-                                                        : m_hiCoarseInterpCF[dir][dit()];
+        CoarseInterpQuadCF& interp = (side == Side::Lo) ? m_loCoarseInterpCF[dir][din] : m_hiCoarseInterpCF[dir][din];
 
-        const Box interpBox = m_cfivs[dit()].at(std::make_pair(dir, side));
-
-        interp.define(dblFine, domainCoar, dit(), interpBox, m_refRat, dir);
+        interp.define(dblFine, domainCoar, din, interpBox, m_refRat, dir);
       }
     }
   }
@@ -349,8 +374,14 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
   const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
   const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
 
+  const DataIterator& ditFine = dblFine.dataIterator();
+  const DataIterator& ditCoar = dblCoar.dataIterator();
+
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
+
+  const int nboxFine = ditFine.size();
+  const int nboxCoar = ditCoar.size();
 
   CH_START(t1);
   m_fineStencils.define(dblFine);
@@ -358,9 +389,12 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
   m_ghostIterFine.define(dblFine);
   CH_STOP(t1);
 
-  for (DataIterator dit(dblFine); dit.ok(); ++dit) {
-    const Box origFineBox    = dblFine[dit()];
-    const Box origCoarBox    = dblCoar[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxFine; mybox++) {
+    const DataIndex& din = ditFine[mybox];
+
+    const Box origFineBox    = dblFine[din];
+    const Box origCoarBox    = dblCoar[din];
     const Box ghostedFineBox = grow(origFineBox, m_ghostVectorFine);
     const Box grownCoarBox   = grow(origCoarBox, m_ghostVectorCoFi);
 
@@ -379,7 +413,7 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
     // Same for parts of the current (grown) patch that overlaps with neighboring boxes.
     CH_START(t3);
     NeighborIterator nit(dblFine);
-    for (nit.begin(dit()); nit.ok(); ++nit) {
+    for (nit.begin(din); nit.ok(); ++nit) {
 
       // = neighboring grid patch on the fine level. Use it's cells if they are also ghost cells in the current patch
       const Box neighborBoxFine = dblFine[nit()];
@@ -405,25 +439,25 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
 
     // Now go through each ghost cell and get an interpolation stencil to specified order.
     CH_START(t4);
-    const EBISBox& ebisboxFine = m_eblgFine.getEBISL()[dit()];
-    const EBISBox& ebisboxCoar = m_eblgCoFi.getEBISL()[dit()];
+    const EBISBox& ebisboxFine = m_eblgFine.getEBISL()[din];
+    const EBISBox& ebisboxCoar = m_eblgCoFi.getEBISL()[din];
 
     const EBGraph& fineGraph = ebisboxFine.getEBGraph();
 
-    m_fineStencils[dit()].define(m_ghostCells[dit()], fineGraph, m_numStenComp);
-    m_coarStencils[dit()].define(m_ghostCells[dit()], fineGraph, m_numStenComp);
-    m_ghostIterFine[dit()].define(m_ghostCells[dit()], fineGraph);
+    m_fineStencils[din].define(m_ghostCells[din], fineGraph, m_numStenComp);
+    m_coarStencils[din].define(m_ghostCells[din], fineGraph, m_numStenComp);
+    m_ghostIterFine[din].define(m_ghostCells[din], fineGraph);
     CH_STOP(t4);
 
     // Build stencils.
     CH_START(t5);
-    VoFIterator& vofit = m_ghostIterFine[dit()];
+    VoFIterator& vofit = m_ghostIterFine[din];
 
     auto kernel = [&](const VolIndex& ghostVofFine) -> void {
-      const VolIndex& ghostVofCoar = ebislFine.coarsen(ghostVofFine, m_refRat, dit());
+      const VolIndex& ghostVofCoar = ebislFine.coarsen(ghostVofFine, m_refRat, din);
 
-      VoFStencil& fineSten = m_fineStencils[dit()](ghostVofFine, comp);
-      VoFStencil& coarSten = m_coarStencils[dit()](ghostVofFine, comp);
+      VoFStencil& fineSten = m_fineStencils[din](ghostVofFine, comp);
+      VoFStencil& coarSten = m_coarStencils[din](ghostVofFine, comp);
 
       int  order        = m_order;
       bool foundStencil = false;
@@ -628,25 +662,33 @@ EBLeastSquaresMultigridInterpolator::makeAggStencils() noexcept
 {
   CH_TIME("EBLeastSquaresMultigridInterpolator::makeAggStencils");
 
+  const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
+  const DisjointBoxLayout& dblCoFi = m_eblgCoFi.getDBL();
+
+  const DataIterator ditFine  = dblFine.dataIterator();
+  const int          nboxFine = ditFine.size();
+
   // Make some proxies.
-  LevelData<EBCellFAB> phiProxyFine(m_eblgFine.getDBL(), 1, m_ghostVectorFine, EBCellFactory(m_eblgFine.getEBISL()));
-  LevelData<EBCellFAB> phiProxyCoar(m_eblgCoFi.getDBL(), 1, m_ghostVectorCoFi, EBCellFactory(m_eblgCoFi.getEBISL()));
+  LevelData<EBCellFAB> phiProxyFine(dblFine, 1, m_ghostVectorFine, EBCellFactory(m_eblgFine.getEBISL()));
+  LevelData<EBCellFAB> phiProxyCoar(dblCoFi, 1, m_ghostVectorCoFi, EBCellFactory(m_eblgCoFi.getEBISL()));
 
   // Define the fine-grid stencils.
-  m_aggFineStencils.define(m_eblgFine.getDBL());
-  m_aggCoarStencils.define(m_eblgFine.getDBL());
+  m_aggFineStencils.define(dblFine);
+  m_aggCoarStencils.define(dblCoFi);
 
-  for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxFine; mybox++) {
+    const DataIndex& din = ditFine[mybox];
 
     Vector<RefCountedPtr<BaseIndex>>   dstBaseIndex;
     Vector<RefCountedPtr<BaseStencil>> dstBaseStencilFine;
     Vector<RefCountedPtr<BaseStencil>> dstBaseStencilCoar;
 
-    VoFIterator& vofit = m_ghostIterFine[dit()];
+    VoFIterator& vofit = m_ghostIterFine[din];
 
     auto kernel = [&](const VolIndex& vofFine) -> void {
-      const VoFStencil& stencilFine = m_fineStencils[dit()](vofFine, m_stenComp);
-      const VoFStencil& stencilCoar = m_coarStencils[dit()](vofFine, m_stenComp);
+      const VoFStencil& stencilFine = m_fineStencils[din](vofFine, m_stenComp);
+      const VoFStencil& stencilCoar = m_coarStencils[din](vofFine, m_stenComp);
 
       dstBaseIndex.push_back(RefCountedPtr<BaseIndex>(new VolIndex(vofFine)));
       dstBaseStencilFine.push_back(RefCountedPtr<BaseStencil>(new VoFStencil(stencilFine)));
@@ -655,11 +697,11 @@ EBLeastSquaresMultigridInterpolator::makeAggStencils() noexcept
 
     BoxLoops::loop(vofit, kernel);
 
-    m_aggFineStencils[dit()] = RefCountedPtr<AggStencil<EBCellFAB, EBCellFAB>>(
-      new AggStencil<EBCellFAB, EBCellFAB>(dstBaseIndex, dstBaseStencilFine, phiProxyFine[dit()], phiProxyFine[dit()]));
+    m_aggFineStencils[din] = RefCountedPtr<AggStencil<EBCellFAB, EBCellFAB>>(
+      new AggStencil<EBCellFAB, EBCellFAB>(dstBaseIndex, dstBaseStencilFine, phiProxyFine[din], phiProxyFine[din]));
 
-    m_aggCoarStencils[dit()] = RefCountedPtr<AggStencil<EBCellFAB, EBCellFAB>>(
-      new AggStencil<EBCellFAB, EBCellFAB>(dstBaseIndex, dstBaseStencilCoar, phiProxyCoar[dit()], phiProxyFine[dit()]));
+    m_aggCoarStencils[din] = RefCountedPtr<AggStencil<EBCellFAB, EBCellFAB>>(
+      new AggStencil<EBCellFAB, EBCellFAB>(dstBaseIndex, dstBaseStencilCoar, phiProxyCoar[din], phiProxyFine[din]));
   }
 }
 
@@ -691,24 +733,28 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<EBCellFAB
 
   const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL();
   const ProblemDomain&     domainCoar = m_eblgCoFi.getDomain();
+  const DataIterator&      ditFine    = dblFine.dataIterator();
+  const int                nboxFine   = ditFine.size();
 
   // We are interpolating the first layer of ghost cells to O(h^3). To do this, we must first do an interpolation on the
   // coarse grid, and then cubic interpolation on the fine grid.
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxFine; mybox++) {
+    const DataIndex& din = ditFine[mybox];
 
-  for (DataIterator dit(dblFine); dit.ok(); ++dit) {
-    const Box fineBox = dblFine[dit()];
+    const Box fineBox = dblFine[din];
 
-    FArrayBox&       finePhi = a_finePhi[dit()].getFArrayBox();
-    const FArrayBox& coarPhi = a_coarPhi[dit()].getFArrayBox();
+    FArrayBox&       finePhi = a_finePhi[din].getFArrayBox();
+    const FArrayBox& coarPhi = a_coarPhi[din].getFArrayBox();
 
     for (int dir = 0; dir < SpaceDim; dir++) {
       for (SideIterator sit; sit.ok(); ++sit) {
         const int iHiLo     = sign(sit());
-        const Box interpBox = m_cfivs[dit()].at(std::make_pair(dir, sit()));
+        const Box interpBox = m_cfivs[din].at(std::make_pair(dir, sit()));
 
         // Coarse-side interpolation stencil. This does interpolation orthogonal to direction 'dir'
-        const CoarseInterpQuadCF& coarseStencils = (sit() == Side::Lo) ? m_loCoarseInterpCF[dir][dit()]
-                                                                       : m_hiCoarseInterpCF[dir][dit()];
+        const CoarseInterpQuadCF& coarseStencils = (sit() == Side::Lo) ? m_loCoarseInterpCF[dir][din]
+                                                                       : m_hiCoarseInterpCF[dir][din];
 
         // Adds first derivative to the Taylor expansion.
         auto applyDerivs = [&](const IntVect& fineIV) -> void {
