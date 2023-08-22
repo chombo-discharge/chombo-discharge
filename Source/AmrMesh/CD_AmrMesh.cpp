@@ -353,16 +353,19 @@ AmrMesh::allocate(EBAMRIVData&             a_data,
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl    = m_realms[a_realm]->getGrids()[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
     const EBISLayout&        ebisl  = m_realms[a_realm]->getEBISLayout(a_phase)[lvl];
     const ProblemDomain&     domain = m_realms[a_realm]->getDomains()[lvl];
 
     LayoutData<IntVectSet> irregCells(dbl);
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      Box box = dbl.get(dit());
-      box.grow(ghost);
-      box &= domain;
 
-      irregCells[dit()] = ebisl[dit()].getIrregIVS(box);
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex din = dit[mybox];
+      const Box       box = grow(dbl[din], ghost) & domain;
+
+      irregCells[din] = ebisl[din].getIrregIVS(box);
     }
 
     a_data[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real>>>(
@@ -666,14 +669,17 @@ AmrMesh::reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const
     const DisjointBoxLayout& dbl    = m_realms[a_realm]->getGrids()[lvl];
     const EBISLayout&        ebisl  = m_realms[a_realm]->getEBISLayout(a_phase)[lvl];
     const ProblemDomain&     domain = m_realms[a_realm]->getDomains()[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
 
     LayoutData<IntVectSet> irregCells(dbl);
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      Box box = dbl.get(dit());
-      box.grow(ghost);
-      box &= domain;
 
-      irregCells[dit()] = ebisl[dit()].getIrregIVS(box);
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex din = dit[mybox];
+      const Box       box = grow(dbl[din], ghost) & domain;
+
+      irregCells[din] = ebisl[din].getIrregIVS(box);
     }
 
     a_data[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real>>>(
