@@ -92,26 +92,39 @@ EBReflux::defineRegionsCF() noexcept
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (SideIterator sit; sit.ok(); ++sit) {
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        coarMask[dit()].setVal(0.0);
+
+      const DataIterator& dit     = dbl.dataIterator();
+      const DataIterator& ditCoFi = dblCoFi.dataIterator();
+
+      const int nbox     = dit.size();
+      const int nboxCoFi = ditCoFi.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        coarMask[din].setVal(0.0);
       }
 
-      for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
-        coFiMask[dit()].setVal(0.0);
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nboxCoFi; mybox++) {
+        const DataIndex& din = ditCoFi[mybox];
 
-        const Box boxCoFi     = dblCoFi[dit()];
+        coFiMask[din].setVal(0.0);
+
+        const Box boxCoFi     = dblCoFi[din];
         const Box sideBoxCoFi = adjCellBox(boxCoFi, dir, sit(), 1);
 
         if (domain.contains(sideBoxCoFi)) {
           DenseIntVectSet cfivs = DenseIntVectSet(sideBoxCoFi, true);
 
           NeighborIterator nit(dblCoFi);
-          for (nit.begin(dit()); nit.ok(); ++nit) {
+          for (nit.begin(din); nit.ok(); ++nit) {
             cfivs -= dblCoFi[nit()];
           }
 
           for (DenseIntVectSetIterator ivsIt(cfivs); ivsIt.ok(); ++ivsIt) {
-            coFiMask[dit()](ivsIt(), 0) = 1.0;
+            coFiMask[din](ivsIt(), 0) = 1.0;
           }
         }
       }
@@ -121,12 +134,15 @@ EBReflux::defineRegionsCF() noexcept
       coFiMask.copyTo(interv, coarMask, interv, copier, LDaddOp<FArrayBox>());
 
       // Define regular cells
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const EBISBox&   ebisBox = ebisl[dit()];
-        const FArrayBox& mask    = coarMask[dit()];
-        DenseIntVectSet  cfivs(dbl[dit()], false);
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
 
-        for (BoxIterator bit(dbl[dit()]); bit.ok(); ++bit) {
+        const EBISBox&   ebisBox = ebisl[din];
+        const FArrayBox& mask    = coarMask[din];
+        DenseIntVectSet  cfivs(dbl[din], false);
+
+        for (BoxIterator bit(dbl[din]); bit.ok(); ++bit) {
           const IntVect iv = bit();
           if (mask(iv, 0) > 0.0 && ebisBox.isRegular(iv)) {
             cfivs |= iv;
@@ -134,14 +150,17 @@ EBReflux::defineRegionsCF() noexcept
         }
 
         cfivs.recalcMinBox();
-        m_regularCoarseFineRegions[dit()][std::make_pair(dir, sit())] = cfivs;
+        m_regularCoarseFineRegions[din][std::make_pair(dir, sit())] = cfivs;
       }
 
       // Define irregular cells.
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box        cellBox = dbl[dit()];
-        const FArrayBox& mask    = coarMask[dit()];
-        const EBISBox&   ebisBox = ebisl[dit()];
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box        cellBox = dbl[din];
+        const FArrayBox& mask    = coarMask[din];
+        const EBISBox&   ebisBox = ebisl[din];
         const EBGraph&   ebGraph = ebisBox.getEBGraph();
 
         IntVectSet irregCells;
@@ -155,7 +174,7 @@ EBReflux::defineRegionsCF() noexcept
         BoxLoops::loop(cellBox, findIrregCells);
 
         // Define appropriate iterators.
-        auto& irregularCoarseFineRegions = m_irregularCoarseFineRegions[dit()];
+        auto& irregularCoarseFineRegions = m_irregularCoarseFineRegions[din];
         irregularCoarseFineRegions[std::make_pair(dir, sit())].define(irregCells, ebGraph);
       }
     }
@@ -171,6 +190,9 @@ EBReflux::defineStencils() noexcept
   const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
   const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
 
+  const DataIterator ditCoar = dblCoar.dataIterator();
+  const DataIterator ditFine = dblFine.dataIterator();
+
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
 
@@ -181,12 +203,17 @@ EBReflux::defineStencils() noexcept
   m_fluxCoarseningStencils.define(dblCoar);
   m_fluxCoarseningRegions.define(dblCoar);
 
-  for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
-    const Box boxCoar = dblCoar[dit()];
-    const Box boxFine = dblFine[dit()];
+  const int nbox = ditCoar.size();
 
-    const EBISBox& ebisBoxCoar = ebislCoar[dit()];
-    const EBISBox& ebisBoxFine = ebislFine[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = ditCoar[mybox];
+
+    const Box boxCoar = dblCoar[din];
+    const Box boxFine = dblFine[din];
+
+    const EBISBox& ebisBoxCoar = ebislCoar[din];
+    const EBISBox& ebisBoxFine = ebislFine[din];
 
     const EBGraph& graphCoar = ebisBoxCoar.getEBGraph();
     const EBGraph& graphFine = ebisBoxFine.getEBGraph();
@@ -196,8 +223,8 @@ EBReflux::defineStencils() noexcept
         const Box        boxSide  = adjCellBox(boxCoar, dir, sit(), -1);
         const IntVectSet irregIVS = ebisBoxCoar.getIrregIVS(boxSide);
 
-        BaseIFFAB<FaceStencil>& faceStencils = m_fluxCoarseningStencils[dit()][std::make_pair(dir, sit())];
-        FaceIterator&           faceIterator = m_fluxCoarseningRegions[dit()][std::make_pair(dir, sit())];
+        BaseIFFAB<FaceStencil>& faceStencils = m_fluxCoarseningStencils[din][std::make_pair(dir, sit())];
+        FaceIterator&           faceIterator = m_fluxCoarseningRegions[din][std::make_pair(dir, sit())];
 
         faceStencils.define(irregIVS, graphCoar, dir, 1);
         faceIterator.define(irregIVS, graphCoar, dir, FaceStop::SurroundingWithBoundary);
@@ -212,7 +239,7 @@ EBReflux::defineStencils() noexcept
 
           if (areaCoar > 0.0) {
 
-            const Vector<FaceIndex>& fineFaces = ebislCoar.refine(coarFace, m_refRat, dit());
+            const Vector<FaceIndex>& fineFaces = ebislCoar.refine(coarFace, m_refRat, din);
             for (int iface = 0; iface < fineFaces.size(); iface++) {
               const FaceIndex& fineFace   = fineFaces[iface];
               const Real       fineWeight = ebisBoxFine.areaFrac(fineFace) * dxFactor / areaCoar;
@@ -296,6 +323,8 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
   const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
   const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
 
+  const DataIterator& ditCoar = dblCoar.dataIterator();
+
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
 
@@ -303,20 +332,25 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
   const Real dxFine         = dxCoar / m_refRat;
   const Real invFinePerCoar = 1.0 / std::pow(m_refRat, SpaceDim - 1);
 
-  for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
+  const int nbox = ditCoar.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = ditCoar[mybox];
+
+    const Box& coarCellBox = dblCoar[din];
+    const Box& fineCellBox = dblFine[din];
+
+    const EBISBox& coarEBISBox = ebislCoar[din];
+    const EBISBox& fineEBISBox = ebislFine[din];
+
+    const EBGraph& coarGraph = coarEBISBox.getEBGraph();
+    const EBGraph& fineGraph = fineEBISBox.getEBGraph();
+
     for (int dir = 0; dir < SpaceDim; dir++) {
-      const Box coarCellBox = dblCoar[dit()];
-      const Box fineCellBox = dblFine[dit()];
       const Box coarFaceBox = surroundingNodes(coarCellBox, dir);
 
-      const EBISBox& coarEBISBox = ebislCoar[dit()];
-      const EBISBox& fineEBISBox = ebislFine[dit()];
-
-      const EBGraph& coarGraph = coarEBISBox.getEBGraph();
-      const EBGraph& fineGraph = fineEBISBox.getEBGraph();
-
-      EBFaceFAB&       coarFlux = a_coarFluxes[dit()][dir];
-      const EBFaceFAB& fineFlux = a_fineFluxes[dit()][dir];
+      EBFaceFAB&       coarFlux = a_coarFluxes[din][dir];
+      const EBFaceFAB& fineFlux = a_fineFluxes[din][dir];
 
       FArrayBox&       coarFluxReg = coarFlux.getFArrayBox();
       const FArrayBox& fineFluxReg = fineFlux.getFArrayBox();
@@ -331,7 +365,7 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
       for (SideIterator sit; sit.ok(); ++sit) {
 
         // This is a BaseIFFAB<FaceStencil>
-        const auto& coarseningStencils = m_fluxCoarseningStencils[dit()].at(std::make_pair(dir, sit()));
+        const auto& coarseningStencils = m_fluxCoarseningStencils[din].at(std::make_pair(dir, sit()));
 
         // Kernel for regular cells.
         auto regularKernel = [&](const IntVect& iv) -> void {
@@ -370,8 +404,7 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
         CH_START(t1);
         const Box     sideBox = adjCellBox(coarCellBox, dir, sit(), -1);
         const Box     faceBox = surroundingNodes(sideBox, dir);
-        FaceIterator& faceIt  = m_fluxCoarseningRegions[dit][std::make_pair(dir, sit())];
-
+        FaceIterator& faceIt  = m_fluxCoarseningRegions[din][std::make_pair(dir, sit())];
         CH_STOP(t1);
 
         CH_START(t2);
@@ -406,18 +439,23 @@ EBReflux::refluxIntoCoarse(LevelData<EBCellFAB>&       a_Lphi,
   CH_assert(a_newFluxes.nComp() > a_newFluxVar);
 
   const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const DataIterator&      dit   = dbl.dataIterator();
   const EBISLayout&        ebisl = m_eblg.getEBISL();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box      cellBox = dbl[dit()];
-    const EBISBox& ebisBox = ebisl[dit()];
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    EBCellFAB& Lphi    = a_Lphi[dit()];
+    const Box      cellBox = dbl[din];
+    const EBISBox& ebisBox = ebisl[din];
+
+    EBCellFAB& Lphi    = a_Lphi[din];
     FArrayBox& LphiReg = Lphi.getFArrayBox();
 
     for (int dir = 0; dir < SpaceDim; dir++) {
-      const EBFaceFAB& oldFlux = a_oldFluxes[dit()][dir];
-      const EBFaceFAB& newFlux = a_newFluxes[dit()][dir];
+      const EBFaceFAB& oldFlux = a_oldFluxes[din][dir];
+      const EBFaceFAB& newFlux = a_newFluxes[din][dir];
 
       const FArrayBox& oldFluxReg = oldFlux.getFArrayBox();
       const FArrayBox& newFluxReg = newFlux.getFArrayBox();
@@ -443,8 +481,8 @@ EBReflux::refluxIntoCoarse(LevelData<EBCellFAB>&       a_Lphi,
           }
         };
 
-        const DenseIntVectSet& regularCFIVS   = m_regularCoarseFineRegions[dit()].at(std::make_pair(dir, sit()));
-        VoFIterator&           irregularCFIVS = m_irregularCoarseFineRegions[dit()].at(std::make_pair(dir, sit()));
+        const DenseIntVectSet& regularCFIVS   = m_regularCoarseFineRegions[din].at(std::make_pair(dir, sit()));
+        VoFIterator&           irregularCFIVS = m_irregularCoarseFineRegions[din].at(std::make_pair(dir, sit()));
 
         CH_START(t1);
         BoxLoops::loop(regularCFIVS, regularKernel);
