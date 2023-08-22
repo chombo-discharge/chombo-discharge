@@ -12,8 +12,7 @@ main(int argc, char* argv[])
 {
 
 #ifdef CH_MPI
-  int dummy;
-  MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &dummy);
+  MPI_Init(&argc, &argv);
 #endif
 
   // Build class options from input script and command line options

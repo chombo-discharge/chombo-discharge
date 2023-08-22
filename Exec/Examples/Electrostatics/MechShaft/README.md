@@ -1,12 +1,3 @@
-NB:This file should be reset to it's original format once OpenMP get's going.
-To run hybrid OpenMPI/OpenMP, make sure the MPI ranks are not bound by specifying
-
-mpiexec --bind-to none -n 12 -x OMP_NUM_THREADS=1 ./program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex example.inputs
-
-
-
-
-## Original content below
 ## Examples/Electrostatics/MechShaft
 
 This example solves the Poisson equation for the electric field around a simplified mechanical bushing.
