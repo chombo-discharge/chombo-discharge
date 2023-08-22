@@ -95,8 +95,16 @@ EBCoarAve::define(const EBLevelGrid& a_eblgFine,
   m_refRat   = a_refRat;
 
   m_irregSetsCoFi.define(m_eblgCoFi.getDBL());
-  for (DataIterator dit = m_eblgCoFi.getDBL().dataIterator(); dit.ok(); ++dit) {
-    m_irregSetsCoFi[dit()] = m_eblgCoFi.getEBISL()[dit()].getIrregIVS(m_eblgCoFi.getDBL().get(dit()));
+
+  const DisjointBoxLayout& dblCoFi = m_eblgCoFi.getDBL();
+  const DataIterator&      ditCoFi = dblCoFi.dataIterator();
+
+  const int nbox = ditCoFi.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = ditCoFi[mybox];
+
+    m_irregSetsCoFi[din] = m_eblgCoFi.getEBISL()[din].getIrregIVS(dblCoFi[din]);
   }
 
   this->defineCellStencils();
@@ -115,36 +123,41 @@ EBCoarAve::defineCellStencils() noexcept
   const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
   const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
 
+  const DataIterator& ditCoar = dblCoar.dataIterator();
+
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
 
   const Real dxCoar   = 1.0;
   const Real dxFine   = dxCoar / m_refRat;
   const Real dxFactor = std::pow(dxFine / dxCoar, SpaceDim);
+  const int  nbox     = ditCoar.size();
 
   m_irregCellsCoFi.define(dblCoar);
   m_cellConservativeStencils.define(dblCoar);
   m_cellArithmeticStencils.define(dblCoar);
   m_cellHarmonicStencils.define(dblCoar);
 
-  for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
-    const EBISBox& ebisBoxCoar = ebislCoar[dit()];
-    const EBISBox& ebisBoxFine = ebislFine[dit()];
-    const EBGraph& ebGraphCoar = ebisBoxCoar.getEBGraph();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din         = ditCoar[mybox];
+    const EBISBox&   ebisBoxCoar = ebislCoar[din];
+    const EBISBox&   ebisBoxFine = ebislFine[din];
+    const EBGraph&   ebGraphCoar = ebisBoxCoar.getEBGraph();
 
-    VoFIterator&           irregCells           = m_irregCellsCoFi[dit()];
-    BaseIVFAB<VoFStencil>& conservativeStencils = m_cellConservativeStencils[dit()];
-    BaseIVFAB<VoFStencil>& arithmeticStencils   = m_cellArithmeticStencils[dit()];
-    BaseIVFAB<VoFStencil>& harmonicStencils     = m_cellHarmonicStencils[dit()];
+    VoFIterator&           irregCells           = m_irregCellsCoFi[din];
+    BaseIVFAB<VoFStencil>& conservativeStencils = m_cellConservativeStencils[din];
+    BaseIVFAB<VoFStencil>& arithmeticStencils   = m_cellArithmeticStencils[din];
+    BaseIVFAB<VoFStencil>& harmonicStencils     = m_cellHarmonicStencils[din];
 
-    irregCells.define(m_irregSetsCoFi[dit()], ebGraphCoar);
-    conservativeStencils.define(m_irregSetsCoFi[dit()], ebGraphCoar, 1);
-    arithmeticStencils.define(m_irregSetsCoFi[dit()], ebGraphCoar, 1);
-    harmonicStencils.define(m_irregSetsCoFi[dit()], ebGraphCoar, 1);
+    irregCells.define(m_irregSetsCoFi[din], ebGraphCoar);
+    conservativeStencils.define(m_irregSetsCoFi[din], ebGraphCoar, 1);
+    arithmeticStencils.define(m_irregSetsCoFi[din], ebGraphCoar, 1);
+    harmonicStencils.define(m_irregSetsCoFi[din], ebGraphCoar, 1);
 
     auto buildStencils = [&](const VolIndex& coarVoF) -> void {
       const Real             kappaC      = ebisBoxCoar.volFrac(coarVoF);
-      const Vector<VolIndex> fineVoFs    = ebislCoar.refine(coarVoF, m_refRat, dit());
+      const Vector<VolIndex> fineVoFs    = ebislCoar.refine(coarVoF, m_refRat, din);
       const int              numFineVoFs = fineVoFs.size();
 
       VoFStencil& arithSten = arithmeticStencils(coarVoF, 0);
@@ -186,31 +199,37 @@ EBCoarAve::defineFaceStencils() noexcept
   const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
   const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
 
+  const DataIterator& ditCoar = dblCoar.dataIterator();
+
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
 
   const Real dxCoar   = 1.0;
   const Real dxFine   = dxCoar / m_refRat;
   const Real dxFactor = std::pow(dxFine / dxCoar, SpaceDim - 1);
+  const int  nbox     = ditCoar.size();
 
   m_irregFacesCoFi.define(dblCoar);
   m_faceArithmeticStencils.define(dblCoar);
   m_faceHarmonicStencils.define(dblCoar);
   m_faceConservativeStencils.define(dblCoar);
 
-  for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
-    const EBISBox& ebisBoxCoar = ebislCoar[dit()];
-    const EBISBox& ebisBoxFine = ebislFine[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = ditCoar[mybox];
+
+    const EBISBox& ebisBoxCoar = ebislCoar[din];
+    const EBISBox& ebisBoxFine = ebislFine[din];
     const EBGraph& ebGraphCoar = ebisBoxCoar.getEBGraph();
 
-    const IntVectSet irregIVS = ebisBoxCoar.getIrregIVS(dblCoar[dit()]);
+    const IntVectSet irregIVS = ebisBoxCoar.getIrregIVS(dblCoar[din]);
 
     for (int dir = 0; dir < SpaceDim; dir++) {
-      FaceIterator& faceIt = m_irregFacesCoFi[dit()][dir];
+      FaceIterator& faceIt = m_irregFacesCoFi[din][dir];
 
-      BaseIFFAB<FaceStencil>& arithmeticStencils   = m_faceArithmeticStencils[dit()][dir];
-      BaseIFFAB<FaceStencil>& harmonicStencils     = m_faceHarmonicStencils[dit()][dir];
-      BaseIFFAB<FaceStencil>& conservativeStencils = m_faceConservativeStencils[dit()][dir];
+      BaseIFFAB<FaceStencil>& arithmeticStencils   = m_faceArithmeticStencils[din][dir];
+      BaseIFFAB<FaceStencil>& harmonicStencils     = m_faceHarmonicStencils[din][dir];
+      BaseIFFAB<FaceStencil>& conservativeStencils = m_faceConservativeStencils[din][dir];
 
       faceIt.define(irregIVS, ebGraphCoar, dir, FaceStop::SurroundingWithBoundary);
 
@@ -219,9 +238,9 @@ EBCoarAve::defineFaceStencils() noexcept
       harmonicStencils.define(irregIVS, ebGraphCoar, dir, 1);
 
       auto buildStencils = [&](const FaceIndex& coarFace) -> void {
-        const Real               areaCoar     = ebisBoxCoar.areaFrac(coarFace);
-        const Vector<FaceIndex>& fineFaces    = ebislCoar.refine(coarFace, m_refRat, dit());
-        const int                numFineFaces = fineFaces.size();
+        const Real              areaCoar     = ebisBoxCoar.areaFrac(coarFace);
+        const Vector<FaceIndex> fineFaces    = ebislCoar.refine(coarFace, m_refRat, din);
+        const int               numFineFaces = fineFaces.size();
 
         FaceStencil& arithSten = arithmeticStencils(coarFace, 0);
         FaceStencil& harmSten  = harmonicStencils(coarFace, 0);
@@ -262,33 +281,39 @@ EBCoarAve::defineEBStencils() noexcept
   const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
   const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
 
+  const DataIterator& ditCoar = dblCoar.dataIterator();
+
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
 
   const Real dxCoar   = 1.0;
   const Real dxFine   = dxCoar / m_refRat;
   const Real dxFactor = std::pow(dxFine / dxCoar, SpaceDim - 1);
+  const int  nbox     = ditCoar.size();
 
   m_ebArithmeticStencils.define(dblCoar);
   m_ebHarmonicStencils.define(dblCoar);
   m_ebConservativeStencils.define(dblCoar);
 
-  for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
-    const EBISBox& ebisBoxCoar = ebislCoar[dit()];
-    const EBISBox& ebisBoxFine = ebislFine[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = ditCoar[mybox];
+
+    const EBISBox& ebisBoxCoar = ebislCoar[din];
+    const EBISBox& ebisBoxFine = ebislFine[din];
     const EBGraph& ebGraphCoar = ebisBoxCoar.getEBGraph();
 
-    BaseIVFAB<VoFStencil>& conservativeStencils = m_ebConservativeStencils[dit()];
-    BaseIVFAB<VoFStencil>& arithmeticStencils   = m_ebArithmeticStencils[dit()];
-    BaseIVFAB<VoFStencil>& harmonicStencils     = m_ebHarmonicStencils[dit()];
+    BaseIVFAB<VoFStencil>& conservativeStencils = m_ebConservativeStencils[din];
+    BaseIVFAB<VoFStencil>& arithmeticStencils   = m_ebArithmeticStencils[din];
+    BaseIVFAB<VoFStencil>& harmonicStencils     = m_ebHarmonicStencils[din];
 
-    conservativeStencils.define(m_irregSetsCoFi[dit()], ebGraphCoar, 1);
-    arithmeticStencils.define(m_irregSetsCoFi[dit()], ebGraphCoar, 1);
-    harmonicStencils.define(m_irregSetsCoFi[dit()], ebGraphCoar, 1);
+    conservativeStencils.define(m_irregSetsCoFi[din], ebGraphCoar, 1);
+    arithmeticStencils.define(m_irregSetsCoFi[din], ebGraphCoar, 1);
+    harmonicStencils.define(m_irregSetsCoFi[din], ebGraphCoar, 1);
 
     auto buildStencils = [&](const VolIndex& coarVoF) -> void {
       const Real             areaCoar    = ebisBoxCoar.bndryArea(coarVoF);
-      const Vector<VolIndex> refinedVoFs = ebislCoar.refine(coarVoF, m_refRat, dit());
+      const Vector<VolIndex> refinedVoFs = ebislCoar.refine(coarVoF, m_refRat, din);
 
       VoFStencil& arithSten = arithmeticStencils(coarVoF, 0);
       VoFStencil& harmSten  = harmonicStencils(coarVoF, 0);
@@ -325,7 +350,7 @@ EBCoarAve::defineEBStencils() noexcept
       }
     };
 
-    VoFIterator& irregCells = m_irregCellsCoFi[dit()];
+    VoFIterator& irregCells = m_irregCellsCoFi[din];
 
     BoxLoops::loop(irregCells, buildStencils);
   }
@@ -351,29 +376,38 @@ EBCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
   CH_assert(a_fineData.nComp() > a_variables.end());
   CH_assert(a_coarData.nComp() > a_variables.end());
 
-  LevelData<EBCellFAB> coFiData(m_eblgCoFi.getDBL(), 1, IntVect::Zero, EBCellFactory(m_eblgCoFi.getEBISL()));
+  const DisjointBoxLayout& dblCoFi = m_eblgCoFi.getDBL();
+  const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
+
+  const DataIterator& dit  = dblFine.dataIterator();
+  const int           nbox = dit.size();
+
+  LevelData<EBCellFAB> coFiData(dblCoFi, 1, IntVect::Zero, EBCellFactory(m_eblgCoFi.getEBISL()));
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
 
     CH_START(t1);
-    for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
-      EBCellFAB&       coarData = coFiData[dit()];
-      const EBCellFAB& fineData = a_fineData[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBCellFAB&       coarData = coFiData[din];
+      const EBCellFAB& fineData = a_fineData[din];
 
       // Switch between methods.
       switch (a_average) {
       case Average::Arithmetic: {
-        this->arithmeticAverage(coarData, fineData, dit(), 0, ivar);
+        this->arithmeticAverage(coarData, fineData, din, 0, ivar);
 
         break;
       }
       case Average::Harmonic: {
-        this->harmonicAverage(coarData, fineData, dit(), 0, ivar);
+        this->harmonicAverage(coarData, fineData, din, 0, ivar);
 
         break;
       }
       case Average::Conservative: {
-        this->conservativeAverage(coarData, fineData, dit(), 0, ivar);
+        this->conservativeAverage(coarData, fineData, din, 0, ivar);
 
         break;
       }
@@ -596,32 +630,42 @@ EBCoarAve::averageData(LevelData<EBFluxFAB>&       a_coarData,
   CH_assert(a_coarData.nComp() > a_variables.end());
   CH_assert(a_fineData.nComp() > a_variables.end());
 
-  LevelData<EBFluxFAB> coFiData(m_eblgCoFi.getDBL(), 1, IntVect::Zero, EBFluxFactory(m_eblgCoFi.getEBISL()));
+  const DisjointBoxLayout& dblCoFi = m_eblgCoFi.getDBL();
+  const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
+
+  const DataIterator& dit  = dblFine.dataIterator();
+  const int           nbox = dit.size();
+
+  LevelData<EBFluxFAB> coFiData(dblCoFi, 1, IntVect::Zero, EBFluxFactory(m_eblgCoFi.getEBISL()));
 
   CH_START(t1);
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
-    for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
-      EBFluxFAB&       coarData = coFiData[dit()];
-      const EBFluxFAB& fineData = a_fineData[dit()];
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBFluxFAB&       coarData = coFiData[din];
+      const EBFluxFAB& fineData = a_fineData[din];
 
       switch (a_average) {
       case Average::Arithmetic: {
         for (int dir = 0; dir < SpaceDim; dir++) {
-          this->arithmeticAverage(coarData[dir], fineData[dir], dit(), 0, ivar, dir);
+          this->arithmeticAverage(coarData[dir], fineData[dir], din, 0, ivar, dir);
         }
 
         break;
       }
       case Average::Harmonic: {
         for (int dir = 0; dir < SpaceDim; dir++) {
-          this->harmonicAverage(coarData[dir], fineData[dir], dit(), 0, ivar, dir);
+          this->harmonicAverage(coarData[dir], fineData[dir], din, 0, ivar, dir);
         }
 
         break;
       }
       case Average::Conservative: {
         for (int dir = 0; dir < SpaceDim; dir++) {
-          this->conservativeAverage(coarData[dir], fineData[dir], dit(), 0, ivar, dir);
+          this->conservativeAverage(coarData[dir], fineData[dir], din, 0, ivar, dir);
         }
 
         break;
@@ -887,30 +931,39 @@ EBCoarAve::averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
   CH_assert(a_coarData.nComp() > a_variables.end());
   CH_assert(a_fineData.nComp() > a_variables.end());
 
+  const DisjointBoxLayout& dblCoFi = m_eblgCoFi.getDBL();
+  const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
+
+  const DataIterator& dit  = dblFine.dataIterator();
+  const int           nbox = dit.size();
+
   LevelData<BaseIVFAB<Real>> coFiData;
   BaseIVFactory<Real>        factCoFi(m_eblgCoFi.getEBISL(), m_irregSetsCoFi);
-  coFiData.define(m_eblgCoFi.getDBL(), a_variables.size(), IntVect::Zero, factCoFi);
+  coFiData.define(dblCoFi, a_variables.size(), IntVect::Zero, factCoFi);
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
     CH_START(t1);
-    for (DataIterator dit = m_eblgFine.getDBL().dataIterator(); dit.ok(); ++dit) {
-      BaseIVFAB<Real>&       coarData = coFiData[dit()];
-      const BaseIVFAB<Real>& fineData = a_fineData[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      BaseIVFAB<Real>&       coarData = coFiData[din];
+      const BaseIVFAB<Real>& fineData = a_fineData[din];
 
       // Switch between averaging methods.
       switch (a_average) {
       case Average::Arithmetic: {
-        this->arithmeticAverage(coarData, fineData, dit(), 0, ivar);
+        this->arithmeticAverage(coarData, fineData, din, 0, ivar);
 
         break;
       }
       case Average::Harmonic: {
-        this->harmonicAverage(coarData, fineData, dit(), 0, ivar);
+        this->harmonicAverage(coarData, fineData, din, 0, ivar);
 
         break;
       }
       case Average::Conservative: {
-        this->conservativeAverage(coarData, fineData, dit(), 0, ivar);
+        this->conservativeAverage(coarData, fineData, din, 0, ivar);
 
         break;
       }
