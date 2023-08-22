@@ -129,6 +129,7 @@ EBFluxRedistribution::defineStencils() noexcept
   //       2) Redistribute from this level into regions covered by the finer grid. That mass should go on the fine level instead.
 
   const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const DataIterator&      dit   = dbl.dataIterator();
   const EBISLayout&        ebisl = m_eblg.getEBISL();
 
   const ProblemDomain& domain     = m_eblg.getDomain();
@@ -142,6 +143,8 @@ EBFluxRedistribution::defineStencils() noexcept
   const Real vol     = std::pow(dx, SpaceDim);
   const Real volCoar = std::pow(dxCoar, SpaceDim);
   const Real volFine = std::pow(dxFine, SpaceDim);
+
+  const int nbox = dit.size();
 
   // These are maps of the valid cells on this level, and cells that lie on the interface. The interfaceCells data is used to figure out
   // which cells we will redistribute to when we redistribute from a cut-cell and across the coarse-fine interface into a coarse-grid cell. The
@@ -157,22 +160,25 @@ EBFluxRedistribution::defineStencils() noexcept
   m_redistStencilsLevel.define(dbl);
   m_redistStencilsFine.define(dbl);
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box            box            = dbl[dit()];
-    const EBISBox&       ebisBox        = ebisl[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box            box            = dbl[din];
+    const EBISBox&       ebisBox        = ebisl[din];
     const EBGraph&       ebgraph        = ebisBox.getEBGraph();
     const IntVectSet     irregIVS       = ebisBox.getIrregIVS(box);
-    const BaseFab<bool>& validCells     = validCellsLD[dit()];
-    const BaseFab<bool>& interfaceCells = interfaceCellsLD[dit()];
+    const BaseFab<bool>& validCells     = validCellsLD[din];
+    const BaseFab<bool>& interfaceCells = interfaceCellsLD[din];
 
     EBISBox ebisBoxCoar;
     EBISBox ebisBoxFine;
 
     if (m_hasCoar) {
-      ebisBoxCoar = m_eblgCoarsened.getEBISL()[dit()];
+      ebisBoxCoar = m_eblgCoarsened.getEBISL()[din];
     }
     if (m_hasFine) {
-      ebisBoxFine = m_eblgRefined.getEBISL()[dit()];
+      ebisBoxFine = m_eblgRefined.getEBISL()[din];
     }
 
     IntVectSet redistCells;
@@ -183,10 +189,10 @@ EBFluxRedistribution::defineStencils() noexcept
       }
     }
 
-    VoFIterator&           vofit         = m_vofit[dit()];
-    BaseIVFAB<VoFStencil>& stencilsCoar  = m_redistStencilsCoar[dit()];
-    BaseIVFAB<VoFStencil>& stencilsLevel = m_redistStencilsLevel[dit()];
-    BaseIVFAB<VoFStencil>& stencilsFine  = m_redistStencilsFine[dit()];
+    VoFIterator&           vofit         = m_vofit[din];
+    BaseIVFAB<VoFStencil>& stencilsCoar  = m_redistStencilsCoar[din];
+    BaseIVFAB<VoFStencil>& stencilsLevel = m_redistStencilsLevel[din];
+    BaseIVFAB<VoFStencil>& stencilsFine  = m_redistStencilsFine[din];
 
     vofit.define(redistCells, ebgraph);
     stencilsCoar.define(redistCells, ebgraph, 1);
@@ -222,7 +228,7 @@ EBFluxRedistribution::defineStencils() noexcept
         if (!(validCells(curIV))) {
           CH_assert(m_hasFine);
 
-          const Vector<VolIndex>& refinedVoFs = ebisl.refine(curVoF, m_refToFine, dit());
+          const Vector<VolIndex>& refinedVoFs = ebisl.refine(curVoF, m_refToFine, din);
 
           fineVoFs.append(refinedVoFs);
 
@@ -236,7 +242,7 @@ EBFluxRedistribution::defineStencils() noexcept
         if (interfaceCells(curIV)) {
           CH_assert(m_hasCoar);
 
-          const VolIndex& coarsenedVoF = ebisl.coarsen(curVoF, m_refToCoar, dit());
+          const VolIndex& coarsenedVoF = ebisl.coarsen(curVoF, m_refToCoar, din);
 
           coarVoFs.push_back(coarsenedVoF);
 
@@ -288,11 +294,17 @@ EBFluxRedistribution::defineValidCells(LevelData<BaseFab<bool>>& a_validCells) c
 {
   CH_TIME("EBFluxRedistribution::defineValidCells");
 
-  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const DisjointBoxLayout& dbl  = m_eblg.getDBL();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
 
   a_validCells.define(dbl, 1, m_redistRadius * IntVect::Unit);
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    a_validCells[dit()].setVal(true);
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    a_validCells[din].setVal(true);
   }
 
   // If there's a finer level we need to figure out which cells on the fine level overlap with this level. Then we set those cells
@@ -301,15 +313,25 @@ EBFluxRedistribution::defineValidCells(LevelData<BaseFab<bool>>& a_validCells) c
     DisjointBoxLayout dblCoFi;
     coarsen(dblCoFi, m_eblgFine.getDBL(), m_refToFine);
 
+    const DataIterator& ditCoFi  = dblCoFi.dataIterator();
+    const int           nboxCoFi = ditCoFi.size();
+
     // Create some data = 0 on the coarse grid and = 1 on the fine grid.
     LevelData<FArrayBox> data(dbl, 1, m_redistRadius * IntVect::Unit);
     LevelData<FArrayBox> dataCoFi(dblCoFi, 1, m_redistRadius * IntVect::Unit);
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      data[dit()].setVal(0.0);
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      data[din].setVal(0.0);
     }
-    for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
-      dataCoFi[dit()].setVal(1.0);
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nboxCoFi; mybox++) {
+      const DataIndex& din = ditCoFi[mybox];
+
+      dataCoFi[din].setVal(1.0);
     }
 
     // Need a new Copier here.
@@ -317,11 +339,14 @@ EBFluxRedistribution::defineValidCells(LevelData<BaseFab<bool>>& a_validCells) c
     dataCoFi.copyTo(Interval(0, 0), data, Interval(0, 0), copier);
 
     // Go through the coarse grid and set cells to false wherever we find data > 0.0
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box cellBox = dbl[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      BaseFab<bool>&   validCells = a_validCells[dit()];
-      const FArrayBox& mask       = data[dit()];
+      const Box cellBox = dbl[din];
+
+      BaseFab<bool>&   validCells = a_validCells[din];
+      const FArrayBox& mask       = data[din];
 
       auto kernel = [&](const IntVect& iv) -> void {
         if (mask(iv) > 0.0) {
@@ -339,29 +364,38 @@ EBFluxRedistribution::defineInterfaceCells(LevelData<BaseFab<bool>>& a_interface
 {
   CH_TIME("EBFluxRedistribution::defineInterfaceCells");
 
-  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const DisjointBoxLayout& dbl  = m_eblg.getDBL();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+
   a_interfaceCells.define(dbl, 1, m_redistRadius * IntVect::Unit);
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    a_interfaceCells[dit()].setVal(false);
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    a_interfaceCells[din].setVal(false);
   }
 
   // If there's a coarse grid then some of the cells we would redistribute to overlap with the valid region
   // on the coarse grid.
   if (m_hasCoar) {
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box grownBox = grow(dbl[dit()], m_redistRadius);
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box grownBox = grow(dbl[din], m_redistRadius);
 
       DenseIntVectSet divs(grownBox, true);
 
       NeighborIterator nit(dbl);
-      for (nit.begin(dit()); nit.ok(); ++nit) {
+      for (nit.begin(din); nit.ok(); ++nit) {
         divs -= dbl[nit()];
       }
-      divs -= dbl[dit()];
+      divs -= dbl[din];
 
       // Flag the cells on the other side of the interface.
-      BaseFab<bool>& interfaceCells = a_interfaceCells[dit()];
+      BaseFab<bool>& interfaceCells = a_interfaceCells[din];
       for (DenseIntVectSetIterator ivsIt(divs); ivsIt.ok(); ++ivsIt) {
         interfaceCells(ivsIt()) = true;
       }
@@ -449,22 +483,28 @@ EBFluxRedistribution::redistributeCoar(LevelData<EBCellFAB>&             a_phiCo
   CH_assert(a_deltaM.nComp() > a_variables.end());
 
   const DisjointBoxLayout& dblCoar    = m_eblgCoarsened.getDBL();
+  const DataIterator&      ditCoar    = dblCoar.dataIterator();
   const EBISLayout&        ebislCoar  = m_eblgCoarsened.getEBISL();
   const ProblemDomain&     domainCoar = m_eblgCoarsened.getDomain();
+  const int                nbox       = ditCoar.size();
 
   LevelData<EBCellFAB> coarBuffer(dblCoar, 1, m_redistRadius * IntVect::Unit, EBCellFactory(ebislCoar));
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
-    for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
-      const BaseIVFAB<Real>&       deltaM   = a_deltaM[dit()];
-      const BaseIVFAB<VoFStencil>& stencils = m_redistStencilsCoar[dit()];
 
-      EBCellFAB& buffer = coarBuffer[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = ditCoar[mybox];
+
+      const BaseIVFAB<Real>&       deltaM   = a_deltaM[din];
+      const BaseIVFAB<VoFStencil>& stencils = m_redistStencilsCoar[din];
+
+      EBCellFAB& buffer = coarBuffer[din];
       buffer.setVal(0.0);
 
       // Apply stencil into buffer.
       CH_START(t1);
-      VoFIterator& vofit = m_vofit[dit()];
+      VoFIterator& vofit = m_vofit[din];
       for (vofit.reset(); vofit.ok(); ++vofit) {
         const VolIndex&   vof      = vofit();
         const VoFStencil& stencil  = stencils(vof, 0);
@@ -502,22 +542,28 @@ EBFluxRedistribution::redistributeLevel(LevelData<EBCellFAB>&             a_phi,
   CH_assert(a_deltaM.nComp() > a_variables.end());
 
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
+  const DataIterator&      dit    = dbl.dataIterator();
   const EBISLayout&        ebisl  = m_eblg.getEBISL();
   const ProblemDomain&     domain = m_eblg.getDomain();
+  const int                nbox   = dit.size();
 
   LevelData<EBCellFAB> levelBuffer(dbl, 1, m_redistRadius * IntVect::Unit, EBCellFactory(ebisl));
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const BaseIVFAB<Real>&       deltaM   = a_deltaM[dit()];
-      const BaseIVFAB<VoFStencil>& stencils = m_redistStencilsLevel[dit()];
 
-      EBCellFAB& buffer = levelBuffer[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const BaseIVFAB<Real>&       deltaM   = a_deltaM[din];
+      const BaseIVFAB<VoFStencil>& stencils = m_redistStencilsLevel[din];
+
+      EBCellFAB& buffer = levelBuffer[din];
       buffer.setVal(0.0);
 
       // Apply stencil into buffer.
       CH_START(t1);
-      VoFIterator& vofit = m_vofit[dit()];
+      VoFIterator& vofit = m_vofit[din];
       for (vofit.reset(); vofit.ok(); ++vofit) {
         const VolIndex&   vof      = vofit();
         const VoFStencil& stencil  = stencils(vof, 0);
@@ -557,21 +603,26 @@ EBFluxRedistribution::redistributeFine(LevelData<EBCellFAB>&             a_phiFi
   CH_assert(a_deltaM.nComp() > a_variables.end());
 
   const DisjointBoxLayout& dblFine   = m_eblgRefined.getDBL();
+  const DataIterator&      ditFine   = dblFine.dataIterator();
   const EBISLayout&        ebislFine = m_eblgRefined.getEBISL();
+  const int                nbox      = ditFine.size();
 
   LevelData<EBCellFAB> fineBuffer(dblFine, 1, m_refToFine * m_redistRadius * IntVect::Unit, EBCellFactory(ebislFine));
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
-    for (DataIterator dit(dblFine); dit.ok(); ++dit) {
-      const BaseIVFAB<Real>&       deltaM   = a_deltaM[dit()];
-      const BaseIVFAB<VoFStencil>& stencils = m_redistStencilsFine[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = ditFine[mybox];
 
-      EBCellFAB& buffer = fineBuffer[dit()];
+      const BaseIVFAB<Real>&       deltaM   = a_deltaM[din];
+      const BaseIVFAB<VoFStencil>& stencils = m_redistStencilsFine[din];
+
+      EBCellFAB& buffer = fineBuffer[din];
       buffer.setVal(0.0);
 
       // Apply stencil into buffer.
       CH_START(t1);
-      VoFIterator& vofit = m_vofit[dit()];
+      VoFIterator& vofit = m_vofit[din];
       for (vofit.reset(); vofit.ok(); ++vofit) {
         const VolIndex&   vof      = vofit();
         const VoFStencil& stencil  = stencils(vof, 0);
