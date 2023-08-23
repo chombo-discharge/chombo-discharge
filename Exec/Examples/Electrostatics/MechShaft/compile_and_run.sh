@@ -37,16 +37,21 @@ for PATTERN in 'AmrMesh::removeCoveredParticlesIF' \
 	       'AmrMesh::transferIrregularParticles' \
 	       'AmrMesh::intersectParticlesRaycastIF' \
 	       'AmrMesh::intersectParticlesBisectIF' \
+	       'AmrMesh::allocate(EBAMRIVData, string, phase::which_phase, int, int)' \
+	       'AmrMesh::reallocate(EBAMRIVData, phase::which_phase, int)' \
 	       'EBCoarAve::define' \
 	       'EBFluxRedistribution::define' \
 	       'EBGhostCellInterpolator::define' \
 	       'EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator' \
 	       'EBReflux::define'; do
 
-    echo $PATTERN
-    grep -n "${PATTERN}" time.table.serial | head -1
-    grep -n "${PATTERN}" time.table.omp | head -1
-    grep -n "${PATTERN}" time.table.mpi | head -1
-    grep -n "${PATTERN}" time.table.hybrid | head -1
-    echo ""    
+    if grep -q "${PATTERN}" time.table.serial
+    then
+	echo $PATTERN
+	grep -n "${PATTERN}" time.table.serial | head -1
+	grep -n "${PATTERN}" time.table.omp | head -1
+	grep -n "${PATTERN}" time.table.mpi | head -1
+	grep -n "${PATTERN}" time.table.hybrid | head -1
+	echo ""
+    fi
 done
