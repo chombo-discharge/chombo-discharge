@@ -125,9 +125,9 @@ void
 EBGradient::computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelData<EBCellFAB>& a_phi) const noexcept
 {
   CH_TIMERS("EBGradient::computeLevelGradient");
-  CH_TIMER("EBGradient::regular_cells", t1);
-  CH_TIMER("EBGradient::irregular_cells", t2);
-  CH_TIMER("EBGradient::set_covered_cells", t3);
+  CH_TIMER("EBGradient::computeLevelGradient::regular_cells", t1);
+  CH_TIMER("EBGradient::computeLevelGradient::irregular_cells", t2);
+  CH_TIMER("EBGradient::computeLevelGradient::set_covered_cells", t3);
 
   CH_assert(m_isDefined);
   CH_assert(a_gradient.nComp() == SpaceDim);
@@ -137,13 +137,18 @@ EBGradient::computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelDa
 
   // TLDR: This routine computes the level gradient, i.e. using finite difference stencils isolated to this level.
   const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const DataIterator&      dit   = dbl.dataIterator();
   const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const int                nbox  = dit.size();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    EBCellFAB&       grad    = a_gradient[dit()];
-    const EBCellFAB& phi     = a_phi[dit()];
-    const EBISBox&   ebisBox = ebisl[dit()];
-    const Box        cellBox = dbl[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    EBCellFAB&       grad    = a_gradient[din];
+    const EBCellFAB& phi     = a_phi[din];
+    const EBISBox&   ebisBox = ebisl[din];
+    const Box        cellBox = dbl[din];
 
     if (!ebisBox.isAllCovered()) {
 
@@ -166,7 +171,7 @@ EBGradient::computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelDa
         }
 
         // Apply stencil. Note that the stencil "variable" is the gradient component (i.e., direction)
-        auto& sten = m_levelStencils[dit()](vof, m_comp);
+        auto& sten = m_levelStencils[din](vof, m_comp);
         for (int i = 0; i < sten.size(); i++) {
           const VolIndex& ivof    = sten.vof(i);
           const Real&     iweight = sten.weight(i);
@@ -178,14 +183,14 @@ EBGradient::computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelDa
 
       // Now apply the kernels using our nifty BoxLoops.
       CH_START(t1);
-      BoxLoops::loop(dbl[dit()], regularKernel);
+      BoxLoops::loop(dbl[din], regularKernel);
       CH_STOP(t1);
 
       // Irregular cells done using AggStencil. Which is faster.
       CH_START(t2);
       for (int dir = 0; dir < SpaceDim; dir++) {
         EBCellFAB alias(Interval(dir, dir), grad);
-        m_aggLevelStencils[dir][dit()]->apply(alias, phi, 0, 0, 1, false);
+        m_aggLevelStencils[dir][din]->apply(alias, phi, 0, 0, 1, false);
       }
       CH_STOP(t2);
     }
@@ -193,7 +198,7 @@ EBGradient::computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelDa
     // Covered data is always bogus.
     CH_START(t3);
     for (int dir = 0; dir < SpaceDim; dir++) {
-      a_gradient[dit()].setCoveredCellVal(0.0, dir);
+      a_gradient[din].setCoveredCellVal(0.0, dir);
     }
     CH_STOP(t3);
   }
@@ -203,8 +208,8 @@ void
 EBGradient::computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient, const LevelData<EBCellFAB>& a_phi) const noexcept
 {
   CH_TIMERS("EBGradient::computeNormalDerivative");
-  CH_TIMER("EBGradient::regular_faces", t1);
-  CH_TIMER("EBGradient::irregular_faces", t2);
+  CH_TIMER("EBGradient::computeNormalDerivative::regular_faces", t1);
+  CH_TIMER("EBGradient::computeNormalDerivative::irregular_faces", t2);
 
   CH_assert(a_gradient.nComp() == SpaceDim);
   CH_assert(a_phi.nComp() == 1);
@@ -212,18 +217,23 @@ EBGradient::computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient, const Leve
   // TLDR: This routine computes the level gradient, i.e. using finite difference stencils isolated to this level. It only does this for interior
   // faces, and it only computes the component of the gradient that is normal to the face.
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
+  const DataIterator&      dit    = dbl.dataIterator();
   const EBISLayout&        ebisl  = m_eblg.getEBISL();
   const ProblemDomain&     domain = m_eblg.getDomain();
   const Real               idx    = 1. / m_dx; // Needed for the kernels.
+  const int                nbox   = dit.size();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box        cellBox = dbl[dit()];
-    const EBCellFAB& phi     = a_phi[dit()];
-    const EBISBox&   ebisBox = ebisl[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box        cellBox = dbl[din];
+    const EBCellFAB& phi     = a_phi[din];
+    const EBISBox&   ebisBox = ebisl[din];
     const EBGraph&   ebgraph = ebisBox.getEBGraph();
 
     for (int dir = 0; dir < SpaceDim; dir++) {
-      EBFaceFAB&           grad        = a_gradient[dit()][dir];
+      EBFaceFAB&           grad        = a_gradient[din][dir];
       BaseFab<Real>&       regGradient = grad.getSingleValuedFAB();
       const BaseFab<Real>& regPhi      = phi.getSingleValuedFAB();
 
@@ -271,7 +281,7 @@ EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
                                const LevelData<EBCellFAB>& a_phiFine) const noexcept
 {
   CH_TIMERS("EBGradient::computeAMRGradient");
-  CH_TIMER("EBGradient::ebcf_calculate", t1);
+  CH_TIMER("EBGradient::computeAMRGradient::ebcf_calculate", t1);
 
   CH_assert(m_isDefined);
   CH_assert(a_gradient.nComp() == SpaceDim);
@@ -290,17 +300,23 @@ EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
     const EBISLayout& ebisl     = m_eblg.getEBISL();
     const EBISLayout& ebislFiCo = m_eblgFiCo.getEBISL();
 
+    const DataIterator dit = dbl.dataIterator();
+
     LevelData<EBCellFAB> phiFiCo(dblFiCo, 1, m_ghostVector, EBCellFactory(ebislFiCo));
 
     a_phiFine.copyTo(phiFiCo, m_copier);
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&       gradient = a_gradient[dit()];
-      const EBCellFAB& phi      = a_phi[dit()];
-      const EBCellFAB& phiFine  = phiFiCo[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      const BaseIVFAB<VoFStencil>& stencilsCoar = m_ebcfStencilsCoar[dit()];
-      const BaseIVFAB<VoFStencil>& stencilsFine = m_ebcfStencilsFine[dit()];
+      EBCellFAB&       gradient = a_gradient[din];
+      const EBCellFAB& phi      = a_phi[din];
+      const EBCellFAB& phiFine  = phiFiCo[din];
+
+      const BaseIVFAB<VoFStencil>& stencilsCoar = m_ebcfStencilsCoar[din];
+      const BaseIVFAB<VoFStencil>& stencilsFine = m_ebcfStencilsFine[din];
 
       auto kernel = [&](const VolIndex& vof) -> void {
         const VoFStencil& stencilCoar = stencilsCoar(vof, m_comp);
@@ -328,7 +344,7 @@ EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
       };
 
       CH_START(t1);
-      BoxLoops::loop(m_ebcfIterator[dit()], kernel);
+      BoxLoops::loop(m_ebcfIterator[din], kernel);
       CH_STOP(t1);
     }
   }
@@ -338,14 +354,15 @@ void
 EBGradient::defineLevelStencils() noexcept
 {
   CH_TIMERS("EBGradient::defineLevelStencils");
-  CH_TIMER("EBGradient::define_dbl", t1);
-  CH_TIMER("EBGradient::define_patch", t2);
-  CH_TIMER("EBGradient::irreg_loop", t3);
+  CH_TIMER("EBGradient::defineLevelStencils::define_dbl", t1);
+  CH_TIMER("EBGradient::defineLevelStencils::define_patch", t2);
+  CH_TIMER("EBGradient::defineLevelStencils::irreg_loop", t3);
 
   // TLDR: This just defines finite-difference stencils on this level. We need explicit stencils at the domain boundary AND at
   //       the EB. There are other cases, too, but those are handled by defineStencilsEBCF.
 
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
+  const DataIterator&      dit    = dbl.dataIterator();
   const EBISLayout&        ebisl  = m_eblg.getEBISL();
   const ProblemDomain&     domain = m_eblg.getDomain();
 
@@ -354,10 +371,14 @@ EBGradient::defineLevelStencils() noexcept
   m_levelIterator.define(dbl);
   CH_STOP(t1);
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
     CH_START(t2);
-    const Box      cellBox = dbl[dit()];
-    const EBISBox& ebisbox = ebisl[dit()];
+    const Box      cellBox = dbl[din];
+    const EBISBox& ebisbox = ebisl[din];
     const EBGraph& ebgraph = ebisbox.getEBGraph();
 
     // Find cells where we need explicit stencils.
@@ -378,8 +399,8 @@ EBGradient::defineLevelStencils() noexcept
       }
     }
 
-    VoFIterator&           bndryIterator = m_levelIterator[dit()];
-    BaseIVFAB<VoFStencil>& bndryStencils = m_levelStencils[dit()];
+    VoFIterator&           bndryIterator = m_levelIterator[din];
+    BaseIVFAB<VoFStencil>& bndryStencils = m_levelStencils[din];
 
     bndryIterator.define(bndryIVS, ebgraph);
     bndryStencils.define(bndryIVS, ebgraph, m_nComp);
@@ -436,11 +457,18 @@ EBGradient::defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>
   LevelData<FArrayBox> coFiMaskCF(dblCoFi, m_nComp, IntVect::Unit);
   LevelData<FArrayBox> coFiMaskInvalid(dblCoFi, m_nComp, IntVect::Zero);
 
-  // Build the mask regions.
-  for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
-    FArrayBox& maskCF      = coFiMaskCF[dit()];
-    FArrayBox& maskInvalid = coFiMaskInvalid[dit()];
-    const Box  cellBox     = dblCoFi[dit()];
+  const DataIterator& ditCoFi  = dblCoFi.dataIterator();
+  const DataIterator& ditCoar  = dblCoar.dataIterator();
+  const int           nboxCoFi = ditCoFi.size();
+  const int           nboxCoar = ditCoar.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxCoFi; mybox++) {
+    const DataIndex& din = ditCoFi[mybox];
+
+    FArrayBox& maskCF      = coFiMaskCF[din];
+    FArrayBox& maskInvalid = coFiMaskInvalid[din];
+    const Box  cellBox     = dblCoFi[din];
     const Box  ghostedBox  = maskCF.box();
 
     // Set the "coarse-fine" mask. It is set to 1 in cells that are not valid cells. We do this by setting the FArrayBox data to one
@@ -451,7 +479,7 @@ EBGradient::defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>
     maskCF.setVal(zero, cellBox, m_comp, m_nComp);
 
     NeighborIterator nit(dblCoFi);
-    for (nit.begin(dit()); nit.ok(); ++nit) {
+    for (nit.begin(din); nit.ok(); ++nit) {
       const Box overlapBox = dblCoFi[nit()] & ghostedBox;
 
       if (!overlapBox.isEmpty()) {
@@ -469,9 +497,12 @@ EBGradient::defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>
   a_coarMaskCF.define(dblCoar, m_nComp, IntVect::Zero);      // Does not need ghost cells
   a_coarMaskInvalid.define(dblCoar, m_nComp, IntVect::Unit); // Needs one ghost cell.
 
-  for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
-    a_coarMaskCF[dit()].setVal(zero);
-    a_coarMaskInvalid[dit()].setVal(zero);
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxCoar; mybox++) {
+    const DataIndex& din = ditCoar[mybox];
+
+    a_coarMaskCF[din].setVal(zero);
+    a_coarMaskInvalid[din].setVal(zero);
   }
 
   // Ned to copy from the buffer masks to this mask.
@@ -551,6 +582,9 @@ EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF,
   const ProblemDomain& domain     = m_eblg.getDomain();
   const ProblemDomain& domainFine = m_eblgFine.getDomain();
 
+  const DataIterator& dit  = dbl.dataIterator();
+  const int           nbox = dit.size();
+
   // Define iterators and stencils for EBCF
   m_ebcfIterator.define(dbl);
   m_ebcfStencilsCoar.define(dbl);
@@ -563,20 +597,23 @@ EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF,
 
   int localHasEBCF = 0;
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box      cellBox = dbl[dit()];
-    const EBISBox& ebisBox = ebisl[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box      cellBox = dbl[din];
+    const EBISBox& ebisBox = ebisl[din];
     const EBGraph& ebgraph = ebisBox.getEBGraph();
 
     const bool isAllRegular = ebisBox.isAllRegular();
     const bool isAllCovered = ebisBox.isAllCovered();
     const bool isIrregular  = !isAllRegular && !isAllCovered;
 
-    const FArrayBox& coarseFineRegion = a_coarMaskCF[dit()];
-    const FArrayBox& invalidRegion    = a_coarMaskInvalid[dit()];
+    const FArrayBox& coarseFineRegion = a_coarMaskCF[din];
+    const FArrayBox& invalidRegion    = a_coarMaskInvalid[din];
 
     // Determine cells where we need to drop order.
-    IntVectSet& ebcfIVS = sets[dit()];
+    IntVectSet& ebcfIVS = sets[din];
     ebcfIVS.makeEmpty();
 
     if (isIrregular) {
@@ -600,9 +637,9 @@ EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF,
     }
 
     // Define the iterator.
-    m_ebcfIterator[dit()].define(ebcfIVS, ebgraph);
-    m_ebcfStencilsCoar[dit()].define(ebcfIVS, ebgraph, m_nComp);
-    m_ebcfStencilsFine[dit()].define(ebcfIVS, ebgraph, m_nComp);
+    m_ebcfIterator[din].define(ebcfIVS, ebgraph);
+    m_ebcfStencilsCoar[din].define(ebcfIVS, ebgraph, m_nComp);
+    m_ebcfStencilsFine[din].define(ebcfIVS, ebgraph, m_nComp);
   }
 
   // All ranks bware: An EBCF situation has gotten out of hand.
@@ -613,8 +650,8 @@ void
 EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) noexcept
 {
   CH_TIMERS("EBGradient::defineStencilsEBCF");
-  CH_TIMER("EBGradient::build_mask", t2);
-  CH_TIMER("EBGradient::compute_stencils", t3);
+  CH_TIMER("EBGradient::defineStencilsEBCF::build_mask", t2);
+  CH_TIMER("EBGradient::defineStencilsEBCF::compute_stencils", t3);
 
   CH_assert(m_hasFine);
   CH_assert(m_hasEBCF);
@@ -632,21 +669,27 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
 
   const ProblemDomain& domain = m_eblg.getDomain();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box cellBox      = dbl[dit()];
+  const DataIterator& dit  = dbl.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box cellBox      = dbl[din];
     const Box grownBox     = grow(cellBox, 1) & domain;
     const Box grownBoxFine = refine(grownBox, m_refRat);
 
-    const EBISBox& ebisBox     = ebisl[dit()];
-    const EBISBox& ebisBoxFine = ebislFine[dit()];
+    const EBISBox& ebisBox     = ebisl[din];
+    const EBISBox& ebisBoxFine = ebislFine[din];
 
-    const FArrayBox& coarMaskInvalid = a_coarMaskInvalid[dit()];
+    const FArrayBox& coarMaskInvalid = a_coarMaskInvalid[din];
 
-    VoFIterator&           ebcfIterator = m_ebcfIterator[dit()];
-    BaseIVFAB<VoFStencil>& coarStencils = m_ebcfStencilsCoar[dit()];
-    BaseIVFAB<VoFStencil>& fineStencils = m_ebcfStencilsFine[dit()];
+    VoFIterator&           ebcfIterator = m_ebcfIterator[din];
+    BaseIVFAB<VoFStencil>& coarStencils = m_ebcfStencilsCoar[din];
+    BaseIVFAB<VoFStencil>& fineStencils = m_ebcfStencilsFine[din];
 
-    const BaseIVFAB<VoFStencil>& levelStencils = m_levelStencils[dit()];
+    const BaseIVFAB<VoFStencil>& levelStencils = m_levelStencils[din];
 
     // Make the invalid region mask into a DenseIntVectSet because that's what LeastSquares wants.
     DenseIntVectSet validRegionCoar(grownBox, true);
@@ -681,7 +724,7 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
                                                     m_dataLocation,
                                                     ebisl,
                                                     ebislFine,
-                                                    dit(),
+                                                    din,
                                                     validRegionCoar,
                                                     validRegionFine,
                                                     m_dx,
@@ -1034,13 +1077,19 @@ EBGradient::makeAggStencils() noexcept
   LevelData<EBCellFAB> proxy(dbl, 1, m_ghostVector, EBCellFactory(ebisl));
   CH_STOP(t1);
 
+  const DataIterator& dit  = dbl.dataIterator();
+  const int           nbox = dit.size();
+
   for (int dir = 0; dir < SpaceDim; dir++) {
     CH_START(t2);
     m_aggLevelStencils[dir].define(dbl);
     CH_STOP(t2);
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const BaseIVFAB<VoFStencil>& rawStencils = m_levelStencils[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const BaseIVFAB<VoFStencil>& rawStencils = m_levelStencils[din];
 
       // Populate stencils
       CH_START(t3);
@@ -1062,12 +1111,12 @@ EBGradient::makeAggStencils() noexcept
         dstBaseStencil.push_back(RefCountedPtr<BaseStencil>(new VoFStencil(derivDirStencil)));
       };
 
-      BoxLoops::loop(m_levelIterator[dit()], kernel);
+      BoxLoops::loop(m_levelIterator[din], kernel);
       CH_STOP(t3);
 
       CH_START(t4);
-      m_aggLevelStencils[dir][dit()] = RefCountedPtr<AggStencil<EBCellFAB, EBCellFAB>>(
-        new AggStencil<EBCellFAB, EBCellFAB>(dstBaseIndex, dstBaseStencil, proxy[dit()], proxy[dit()]));
+      m_aggLevelStencils[dir][din] = RefCountedPtr<AggStencil<EBCellFAB, EBCellFAB>>(
+        new AggStencil<EBCellFAB, EBCellFAB>(dstBaseIndex, dstBaseStencil, proxy[din], proxy[din]));
       CH_STOP(t4);
     }
   }
