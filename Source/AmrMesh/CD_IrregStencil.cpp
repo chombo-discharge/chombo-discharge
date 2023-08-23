@@ -66,6 +66,9 @@ IrregStencil::define(const DisjointBoxLayout&        a_dbl,
   m_order       = a_order;
   m_stencilType = a_type;
 
+  MayDay::Warning("IrregStencil::define -- need to run our own version of EBArith::defineCFIVS!");
+  MayDay::Warning("IrregStencil::define -- and probably lots of other Chombo functions too!");
+  
   LayoutData<IntVectSet> cfivs;
   EBArith::defineCFIVS(cfivs, a_dbl, a_domain);
 

@@ -3,10 +3,10 @@ export CH_TIMER=1
 export OMP_NUM_THREADS=$NCORES
 export OMP_PLACES=cores
 export OMP_PROC_BIND=close
-export OMP_SCHEDULE="static,4"
+export OMP_SCHEDULE="dynamic, 4"
 
 COMPILE=false
-RUN=false
+RUN=true
 PROFILE_AMRMESH_COAR=true
 PROFILE_AMRMESH_FINE=true
 
