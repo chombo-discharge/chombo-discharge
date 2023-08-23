@@ -10,7 +10,7 @@
 */
 
 // Chombo includes
-#include <EBArith.H>
+#include <NeighborIterator.H>
 
 // Our includes
 #include <CD_IrregStencil.H>
@@ -66,18 +66,11 @@ IrregStencil::define(const DisjointBoxLayout&        a_dbl,
   m_order       = a_order;
   m_stencilType = a_type;
 
-  MayDay::Warning("IrregStencil::define -- need to run our own version of EBArith::defineCFIVS!");
-  MayDay::Warning("IrregStencil::define -- and probably lots of other Chombo functions too!");
-  
-  LayoutData<IntVectSet> cfivs;
-  EBArith::defineCFIVS(cfivs, a_dbl, a_domain);
-
   m_stencils.define(m_dbl);
   m_vofIter.define(m_dbl);
 
-  const DataIterator& dit = m_dbl.dataIterator();
-
-  const int nbox = dit.size();
+  const DataIterator& dit  = m_dbl.dataIterator();
+  const int           nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
@@ -88,6 +81,13 @@ IrregStencil::define(const DisjointBoxLayout&        a_dbl,
     const EBGraph&    ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
+    // Build the coarse-fine interface around this box
+    IntVectSet       cfivs = IntVectSet(grow(box, 1) & m_domain);
+    NeighborIterator nit(m_dbl);
+    for (nit.begin(din); nit.ok(); ++nit) {
+      cfivs -= m_dbl[nit()];
+    }
+
     m_stencils[din] = RefCountedPtr<BaseIVFAB<VoFStencil>>(new BaseIVFAB<VoFStencil>(ivs, ebgraph, m_defaultNumSten));
 
     VoFIterator& vofit = m_vofIter[din];
@@ -95,7 +95,7 @@ IrregStencil::define(const DisjointBoxLayout&        a_dbl,
 
     auto kernel = [&](const VolIndex& vof) -> void {
       VoFStencil& stencil = (*m_stencils[din])(vof, 0);
-      this->buildStencil(stencil, vof, m_dbl, m_domain, ebisbox, box, m_dx, cfivs[din]);
+      this->buildStencil(stencil, vof, m_dbl, m_domain, ebisbox, box, m_dx, cfivs);
 
 #if 0 // Safety test
       Real sum = 0.0;

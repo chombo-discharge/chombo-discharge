@@ -1,14 +1,14 @@
-export NCORES=8
+export NCORES=12
 export CH_TIMER=1
 export OMP_NUM_THREADS=$NCORES
 export OMP_PLACES=cores
 export OMP_PROC_BIND=close
 export OMP_SCHEDULE="dynamic, 4"
 
-COMPILE=false
+COMPILE=true
 RUN=true
 PROFILE_AMRMESH_COAR=true
-PROFILE_AMRMESH_FINE=true
+PROFILE_AMRMESH_FINE=false
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
 if $COMPILE
