@@ -286,9 +286,15 @@ Realm::defineHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
   constexpr int comp  = 0;
   constexpr int ncomp = 1;
 
+  const DataIterator& ditCoar  = a_gridsCoar.dataIterator();
+  const int           nboxCoar = ditCoar.size();
+
   // First, reset the mask.
-  for (DataIterator dit(a_gridsCoar); dit.ok(); ++dit) {
-    a_coarMask[dit()].setVal(false);
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxCoar; mybox++) {
+    const DataIndex& din = ditCoar[mybox];
+
+    a_coarMask[din].setVal(false);
   }
 
   // Ok, we need a particle halo.
@@ -300,9 +306,15 @@ Realm::defineHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
 
     IntVectSet halo;
 
+    const DataIterator& ditCoFi  = dblCoFi.dataIterator();
+    const int           nboxCoFi = ditCoFi.size();
+
     // Go through the cofi grid and set the halo to true
-    for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
-      const Box coFiBox = dblCoFi[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nboxCoFi; mybox++) {
+      const DataIndex& din = ditCoFi[mybox];
+
+      const Box coFiBox = dblCoFi[din];
 
       // Make IntVect set consisting of only ghost cells (a_buffer) for each box.
       Box grownBox = grow(coFiBox, a_buffer);
@@ -314,7 +326,7 @@ Realm::defineHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
 
       // Subtract non-ghosted neighboring boxes.
       NeighborIterator nit(dblCoFi); // Neighbor iterator
-      for (nit.begin(dit()); nit.ok(); ++nit) {
+      for (nit.begin(din); nit.ok(); ++nit) {
         const Box neighborBox = dblCoFi[nit()];
         myHalo -= neighborBox;
       }
@@ -330,21 +342,33 @@ Realm::defineHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
     LevelData<FArrayBox> coarMask(a_gridsCoar, ncomp, IntVect::Zero);
 
     // Reset masks
-    for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
-      coFiMask[dit()].setVal(0.0);
-    }
-    for (DataIterator dit(a_gridsCoar); dit.ok(); ++dit) {
-      coarMask[dit()].setVal(0.0);
-    }
+#pragma omp parallel
+    {
+#pragma omp for schedule(runtime)
+      for (int mybox = 0; mybox < nboxCoFi; mybox++) {
+        const DataIndex& din = ditCoFi[mybox];
 
-    // Run through the halo and set the halo cells to 1 on the coarsened fine grids. Since dblCoFi was a coarsening of the fine
-    // grid, the mask value in the valid region (i.e., not including ghosts) is always zero. There used to be a bug here because
-    // we only iterated through that region, but obviously the halo masks will always be zero in that case...
-    for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
-      const Box        region  = coFiMask[dit()].box();
-      const IntVectSet curHalo = halo & region;
-      for (IVSIterator ivsit(curHalo); ivsit.ok(); ++ivsit) {
-        coFiMask[dit()](ivsit(), comp) = 1.0;
+        coFiMask[din].setVal(0.0);
+      }
+#pragma omp for schedule(runtime)
+      for (int mybox = 0; mybox < nboxCoar; mybox++) {
+        const DataIndex& din = ditCoar[mybox];
+
+        coarMask[din].setVal(0.0);
+      }
+
+      // Run through the halo and set the halo cells to 1 on the coarsened fine grids. Since dblCoFi was a coarsening of the fine
+      // grid, the mask value in the valid region (i.e., not including ghosts) is always zero. There used to be a bug here because
+      // we only iterated through that region, but obviously the halo masks will always be zero in that case...
+#pragma omp for schedule(runtime)
+      for (int mybox = 0; mybox < nboxCoFi; mybox++) {
+        const DataIndex& din = ditCoFi[mybox];
+
+        const Box        region  = coFiMask[din].box();
+        const IntVectSet curHalo = halo & region;
+        for (IVSIterator ivsit(curHalo); ivsit.ok(); ++ivsit) {
+          coFiMask[din](ivsit(), comp) = 1.0;
+        }
       }
     }
 
@@ -355,11 +379,14 @@ Realm::defineHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
     coFiMask.copyTo(interv, coarMask, interv, copier, LDaddOp<FArrayBox>());
 
     // Run through the grids and make the boolean mask
-    for (DataIterator dit(a_gridsCoar); dit.ok(); ++dit) {
-      const Box box = a_gridsCoar[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nboxCoar; mybox++) {
+      const DataIndex& din = ditCoar[mybox];
 
-      BaseFab<bool>&   boolMask = a_coarMask[dit()];
-      const FArrayBox& realMask = coarMask[dit()];
+      const Box box = a_gridsCoar[din];
+
+      BaseFab<bool>&   boolMask = a_coarMask[din];
+      const FArrayBox& realMask = coarMask[din];
 
       auto kernel = [&](const IntVect& iv) -> void {
         if (realMask(iv, comp) > 0.0) {
@@ -387,36 +414,52 @@ Realm::defineValidCells()
   m_validCells.resize(1 + m_finestLevel);
 
   for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
-    const bool hasFine = lvl < m_finestLevel;
+    const DisjointBoxLayout& dblCoar  = m_grids[lvl];
+    const DataIterator&      ditCoar  = dblCoar.dataIterator();
+    const int                nboxCoar = ditCoar.size();
 
     m_validCells[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
-      new LevelData<BaseFab<bool>>(m_grids[lvl], numComp, numGhost * IntVect::Unit));
-    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
-      BaseFab<bool>& validCells = (*m_validCells[lvl])[dit()];
+      new LevelData<BaseFab<bool>>(dblCoar, numComp, numGhost * IntVect::Unit));
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nboxCoar; mybox++) {
+      const DataIndex& din = ditCoar[mybox];
+
+      BaseFab<bool>& validCells = (*m_validCells[lvl])[din];
+
       validCells.setVal(true);
     }
 
-    if (hasFine) {
+    if (lvl < m_finestLevel) {
       // If there is a finer level then we need to coarsen that level onto the current level and set all those cells to
       // false. I'm calling the current level the 'coarse level' and the finer level the 'fine level'.
 
-      const DisjointBoxLayout& dblFine = m_grids[lvl + 1];
-      const DisjointBoxLayout& dblCoar = m_grids[lvl];
-
       // Coarsened fine grids.
       DisjointBoxLayout dblCoFi;
-      coarsen(dblCoFi, dblFine, m_refinementRatios[lvl]);
+      coarsen(dblCoFi, m_grids[lvl + 1], m_refinementRatios[lvl]);
 
       // Create some data = 1 on the fine grid and = 0 on the coarse grid
       LevelData<FArrayBox> coFiData(dblCoFi, numComp, numGhost * IntVect::Unit);
       LevelData<FArrayBox> coarData(dblCoar, numComp, numGhost * IntVect::Unit);
 
-      for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
-        coFiData[dit()].setVal(1.0);
-      }
+      const DataIterator& ditCoFi  = dblCoFi.dataIterator();
+      const int           nboxCoFi = ditCoFi.size();
 
-      for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
-        coarData[dit()].setVal(0.0);
+#pragma omp parallel
+      {
+#pragma omp for schedule(runtime)
+        for (int mybox = 0; mybox < nboxCoFi; mybox++) {
+          const DataIndex& din = ditCoFi[mybox];
+
+          coFiData[din].setVal(1.0);
+        }
+
+#pragma omp for schedule(runtime)
+        for (int mybox = 0; mybox < nboxCoar; mybox++) {
+          const DataIndex& din = ditCoar[mybox];
+
+          coarData[din].setVal(0.0);
+        }
       }
 
       // Copy from fine to coarse.
@@ -424,11 +467,14 @@ Realm::defineValidCells()
       coFiData.copyTo(Interval(0, 0), coarData, Interval(0, 0), copier);
 
       // Go through the coarse grid -- wherever we find a value of 1 there is also a fine grid.
-      for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
-        const Box cellBox = dblCoar[dit()];
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nboxCoar; mybox++) {
+        const DataIndex& din = ditCoar[mybox];
 
-        BaseFab<bool>&   boolMask = (*m_validCells[lvl])[dit()];
-        const FArrayBox& fabMask  = coarData[dit()];
+        const Box cellBox = dblCoar[din];
+
+        BaseFab<bool>&   boolMask = (*m_validCells[lvl])[din];
+        const FArrayBox& fabMask  = coarData[din];
 
         auto kernel = [&](const IntVect& iv) -> void {
           if (fabMask(iv, curComp) > 0.0) {
