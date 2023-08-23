@@ -5,7 +5,8 @@ export OMP_PLACES=cores
 export OMP_PROC_BIND=close
 export OMP_SCHEDULE="guided"
 
-PROFILE_AMRMESH=true
+PROFILE_AMRMESH_FINE=true
+PROFILE_AMRMESH_COAR=true
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
 make -s -j$NCORES OPT=HIGH DEBUG=FALSE OPENMPCC=FALSE MPI=FALSE
@@ -30,7 +31,7 @@ mpiexec -n 1 --bind-to none ./program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPE
 cp time.table.0 time.table.hybrid
 
 # Kernel comparison for Source/AmrMesh folder
-if $PROFILE_AMRMESH
+if $PROFILE_AMRMESH_FINE
 then
     for PATTERN in 'AmrMesh::removeCoveredParticlesIF' \
 		       'AmrMesh::removeCoveredParticlesDiscrete' \
@@ -50,6 +51,10 @@ then
 		       'EBCoarAve::averageData(LD<EBCellFAB>)' \
 		       'EBCoarAve::averageData(LD<EBFluxFAB>)' \
 		       'EBCoarAve::averageData(LD<BaseIVFAB>)' \
+		       'EBCoarseToFineInterp::define' \
+		       'EBCoarseToFineInterp::defineWeights' \
+		       'EBCoarseToFineInterp::interpolate(LD<EBCellFAB>)' \
+		       'EBCoarseToFineInterp::interpolate(LD<BaseIVFAB<Real>>)' \
 		       'EBFluxRedistribution::defineStencils' \
 		       'EBFluxRedistribution::defineValidCells' \
 		       'EBFluxRedistribution::defineInterfaceCells' \
@@ -73,6 +78,10 @@ then
 		       'EBLeastSquaresMultigridInterpolator::defineStencilsEBCF' \
 		       'EBLeastSquaresMultigridInterpolator::makeAggStencils' \
 		       'EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp' \
+		       'EBMGProlong::define' \
+		       'EBMGProlong::prolongResidual' \
+		       'EBMGRestrict::define' \
+		       'EBMGRestrict::restrictResidual' \
 		       'EBReflux::defineStencils' \
 		       'EBReflux::coarsenFluxes' \
 		       'EBReflux::refluxIntoCoarse' \
@@ -81,6 +90,8 @@ then
 		       'IrregAmrStencil::apply(LD<EBCellFAB, int)' \
 		       'IrregAmrStencil::apply(LD<BaseIVFAB>, LD<EBCellFAB>, int)' \
 		       'IrregStencil::define' \
+		       'PhaseRealm::defineVofIterator' \
+		       'PhaseRealm::defineLevelSet' \
 		   ; do
 
 	if grep -q "${PATTERN}" time.table.serial

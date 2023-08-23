@@ -437,11 +437,18 @@ PhaseRealm::defineVofIterator(const int a_lmin)
 
     m_vofIter[lvl] = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(m_grids[lvl]));
 
-    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
-      VoFIterator& vofit = (*m_vofIter[lvl])[dit()];
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-      const Box&        cellBox = m_grids[lvl].get(dit());
-      const EBISBox&    ebisbox = m_ebisl[lvl][dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      VoFIterator& vofit = (*m_vofIter[lvl])[din];
+
+      const Box&        cellBox = m_grids[lvl].get(din);
+      const EBISBox&    ebisbox = m_ebisl[lvl][din];
       const EBGraph&    ebgraph = ebisbox.getEBGraph();
       const IntVectSet& irreg   = ebisbox.getIrregIVS(cellBox);
 
@@ -472,11 +479,18 @@ PhaseRealm::defineLevelSet(const int a_lmin, const int a_numGhost)
     for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
       const Real dx = m_dx[lvl];
 
-      m_levelset[lvl] = RefCountedPtr<LevelData<FArrayBox>>(
-        new LevelData<FArrayBox>(m_grids[lvl], ncomp, a_numGhost * IntVect::Unit));
+      const DisjointBoxLayout& dbl = m_grids[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
 
-      for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
-        FArrayBox& fab = (*m_levelset[lvl])[dit()];
+      m_levelset[lvl] = RefCountedPtr<LevelData<FArrayBox>>(
+        new LevelData<FArrayBox>(dbl, ncomp, a_numGhost * IntVect::Unit));
+
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        FArrayBox& fab = (*m_levelset[lvl])[din];
         const Box  bx  = fab.box();
 
         if (!m_baseif.isNull()) {

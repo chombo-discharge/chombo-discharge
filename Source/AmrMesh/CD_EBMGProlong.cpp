@@ -67,21 +67,27 @@ EBMGProlong::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar
   m_vofitFine.define(dblCoFi);
   m_prolongStencils.define(dblCoFi);
 
-  for (DataIterator dit(dblFine); dit.ok(); ++dit) {
-    const Box&       cellBox = dblFine[dit()];
-    const EBISBox&   ebisBox = ebislFine[dit()];
+  const DataIterator& dit  = dblFine.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box&       cellBox = dblFine[din];
+    const EBISBox&   ebisBox = ebislFine[din];
     const EBGraph&   ebgraph = ebisBox.getEBGraph();
     const IntVectSet irreg   = ebisBox.getIrregIVS(cellBox);
 
-    BaseIVFAB<VoFStencil>& prolongStencils = m_prolongStencils[dit()];
-    VoFIterator&           vofit           = m_vofitFine[dit()];
+    BaseIVFAB<VoFStencil>& prolongStencils = m_prolongStencils[din];
+    VoFIterator&           vofit           = m_vofitFine[din];
 
     vofit.define(irreg, ebgraph);
     prolongStencils.define(irreg, ebgraph, 1);
 
     for (vofit.reset(); vofit.ok(); ++vofit) {
       const VolIndex& fineVoF = vofit();
-      const VolIndex  coarVoF = ebislFine.coarsen(fineVoF, m_refRat, dit());
+      const VolIndex  coarVoF = ebislFine.coarsen(fineVoF, m_refRat, din);
 
       VoFStencil& prolongSten = prolongStencils(fineVoF, 0);
 
@@ -126,16 +132,22 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
     const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
     const EBISLayout&        ebislFine = m_eblgFine.getEBISL();
 
-    for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
-      EBCellFAB&       fineData = a_fineData[dit()];
-      const EBCellFAB& coarData = coFiData[dit()];
+    const DataIterator& dit  = dblCoFi.dataIterator();
+    const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBCellFAB&       fineData = a_fineData[din];
+      const EBCellFAB& coarData = coFiData[din];
 
       FArrayBox&       fineDataReg = fineData.getFArrayBox();
       const FArrayBox& coarDataReg = coarData.getFArrayBox();
 
-      const EBISBox& ebisBoxFine = ebislFine[dit()];
+      const EBISBox& ebisBoxFine = ebislFine[din];
 
-      const BaseIVFAB<VoFStencil>& prolongStencils = m_prolongStencils[dit()];
+      const BaseIVFAB<VoFStencil>& prolongStencils = m_prolongStencils[din];
 
       // Regular kernel.
       auto regularKernel = [&](const IntVect& ivCoar) -> void {
@@ -162,8 +174,8 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
       };
 
       // Run kernels
-      const Box    coarBox  = dblCoFi[dit()];
-      VoFIterator& fineVoFs = m_vofitFine[dit()];
+      const Box    coarBox  = dblCoFi[din];
+      VoFIterator& fineVoFs = m_vofitFine[din];
 
       CH_START(t1);
       BoxLoops::loop(coarBox, regularKernel);
