@@ -35,7 +35,7 @@ Exec/Examples/StreamerInception/ElectrodeRoughness/report.txt
 Exec/Tests/StreamerInception/Vessel/report.txt
 
 pout.*
-time.table.*
+time.table*
 
 myApplications/*
 MyApplications/*
