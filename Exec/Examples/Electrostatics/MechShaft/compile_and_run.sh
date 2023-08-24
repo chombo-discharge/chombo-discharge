@@ -1,9 +1,10 @@
-export NCORES=12
 export CH_TIMER=1
-export OMP_NUM_THREADS=$NCORES
+export NCORES=12
+export NRANKS=1
+export OMP_NUM_THREADS=12
 export OMP_PLACES=cores
-export OMP_PROC_BIND=close
-export OMP_SCHEDULE="dynamic, 4"
+export OMP_PROC_BIND=spread
+export OMP_SCHEDULE="static, 1"
 
 COMPILE=true
 RUN=true
@@ -13,8 +14,8 @@ PROFILE_AMRMESH_FINE=false
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
 if $COMPILE
 then
-    make -s -j$NCORES OPT=HIGH DEBUG=FALSE OPENMPCC=FALSE MPI=FALSE
-    make -s -j$NCORES OPT=HIGH DEBUG=FALSE OPENMPCC=TRUE MPI=FALSE
+    # make -s -j$NCORES OPT=HIGH DEBUG=FALSE OPENMPCC=FALSE MPI=FALSE
+    # make -s -j$NCORES OPT=HIGH DEBUG=FALSE OPENMPCC=TRUE MPI=FALSE
     make -s -j$NCORES OPT=HIGH DEBUG=FALSE OPENMPCC=FALSE MPI=TRUE
     make -s -j$NCORES OPT=HIGH DEBUG=FALSE OPENMPCC=TRUE MPI=TRUE
 fi
@@ -34,7 +35,7 @@ then
     cp time.table.0 time.table.mpi
 
     # # Run MPI+OpenMP version
-    mpiexec -n 1 --bind-to none ./program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex example.inputs FieldSolverMultigrid.gmg_exit_tol=1.2
+    mpiexec -n $NRANKS --bind-to socket ./program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex example.inputs FieldSolverMultigrid.gmg_exit_tol=1.2
     cp time.table.0 time.table.hybrid
 fi
 
