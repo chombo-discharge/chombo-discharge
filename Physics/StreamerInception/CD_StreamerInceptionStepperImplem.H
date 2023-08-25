@@ -633,6 +633,11 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
       ncomp += m_voltageSweeps.size();
     }
 
+    // When plotting both, add the effective ionization coefficient
+    if (m_plotAlpha && m_plotEta) {
+      ncomp += m_voltageSweeps.size();
+    }
+
     break;
   }
   case Mode::Transient: {
@@ -656,6 +661,9 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
       ncomp += 1;
     }
     if (m_plotEta) {
+      ncomp += 1;
+    }
+    if (m_plotAlpha && m_plotEta) {
       ncomp += 1;
     }
 
@@ -799,6 +807,15 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
     }
   }
 
+  //
+  if (m_plotAlpha && m_plotEta) {
+    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+      const std::string varName = prefix + "Alpha_eff/ V = " + std::to_string(m_voltageSweeps[i]);
+
+      plotVars.push_back(varName);
+    }
+  }
+
   return plotVars;
 }
 
@@ -843,6 +860,10 @@ StreamerInceptionStepper<P, F, C>::getTransientPlotVariableNames() const noexcep
 
   if (m_plotEta) {
     plotVars.push_back("Townsend eta coefficient");
+  }
+
+  if (m_plotAlpha && m_plotEta) {
+    plotVars.push_back("Effective Townsend coefficient");
   }
 
   return plotVars;
@@ -957,6 +978,25 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
       a_icomp++;
     }
   }
+
+  if (m_plotAlpha && m_plotEta) {
+    LevelData<EBCellFAB> alphaEff;
+    m_amr->allocate(alphaEff, m_realm, m_phase, a_level, 1);
+
+    auto alphaFunc = [alpha = this->m_alpha, eta = this->m_eta](const Real E, const RealVect x) -> Real {
+      return alpha(E, x) - eta(E, x);
+    };
+
+    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+      this->evaluateFunction(alphaEff, m_voltageSweeps[i], alphaFunc, a_level);
+
+      // Do a copy, but note that this does not include ghost cells across the CF interface since
+      // we are only computing for a single grid level.
+      m_amr->copyData(a_output, alphaEff, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
+
+      a_icomp++;
+    }
+  }
 }
 
 template <typename P, typename F, typename C>
@@ -1047,6 +1087,23 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
     // Do a copy, but note that this does not include ghost cells across the CF interface since
     // we are only computing for a single grid level.
     m_amr->copyData(a_output, eta, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
+
+    a_icomp++;
+  }
+
+  if (m_plotAlpha && m_plotEta) {
+    LevelData<EBCellFAB> alphaEff;
+    m_amr->allocate(alphaEff, m_realm, m_phase, a_level, 1);
+
+    auto alphaFunc = [alpha = this->m_alpha, eta = this->m_eta](const Real E, const RealVect x) -> Real {
+      return alpha(E, x) - eta(E, x);
+    };
+
+    this->evaluateFunction(alphaEff, m_voltageCurve(m_time), alphaFunc, a_level);
+
+    // Do a copy, but note that this does not include ghost cells across the CF interface since
+    // we are only computing for a single grid level.
+    m_amr->copyData(a_output, alphaEff, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
     a_icomp++;
   }
