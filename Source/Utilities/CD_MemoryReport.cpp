@@ -23,7 +23,7 @@ void
 MemoryReport::getMaxMinMemoryUsage()
 {
   CH_TIME("MemoryReport::getMaxMinMemoryUsage");
-
+#ifdef CH_USE_MEMORY_TRACKING
   Real maxPeak;
   Real minPeak;
   Real maxUnfreed;
@@ -34,6 +34,7 @@ MemoryReport::getMaxMinMemoryUsage()
   pout() << "MemoryReport::getMaxMinMemoryUsage:"
          << "\t Max peak = " << 1.0 * maxPeak << "\t Min peak = " << 1.0 * minPeak
          << "\t Max unfreed = " << 1.0 * maxUnfreed << "\t Min unfreed = " << 1.0 * minUnfreed << endl;
+#endif
 }
 
 void
@@ -44,17 +45,19 @@ MemoryReport::getMaxMinMemoryUsage(Real& a_maxPeak, Real& a_minPeak, Real& a_max
   constexpr int BytesPerMB = 1024 * 1024;
 
   // Gets usage in bytes.
-  long long curMemLL;
-  long long peakMemLL;
+  long long curMemLL  = 0LL;
+  long long peakMemLL = 0LL;
+#ifdef CH_USE_MEMORY_TRACKING
   overallMemoryUsage(curMemLL, peakMemLL);
+#endif
 
   const int unfreedMem = int(curMemLL);
   const int peakMem    = int(peakMemLL);
 
-  int maxPeakMem;
-  int minPeakMem;
-  int maxUnfreedMem;
-  int minUnfreedMem;
+  int maxPeakMem    = 0;
+  int minPeakMem    = 0;
+  int maxUnfreedMem = 0;
+  int minUnfreedMem = 0;
 
   // Find maximum/minimum usage.
 #ifdef CH_MPI
@@ -83,9 +86,11 @@ MemoryReport::getMemoryUsage(Vector<Real>& a_peak, Vector<Real>& a_unfreed)
 
   constexpr int BytesPerMB = 1024 * 1024;
 
-  long long curMemLL;
-  long long peakMemLL;
+  long long curMemLL  = 0LL;
+  long long peakMemLL = 0LL;
+#ifdef CH_USE_MEMORY_TRACKING
   overallMemoryUsage(curMemLL, peakMemLL);
+#endif
 
   const int unfreedMem = int(curMemLL);
   const int peakMem    = int(peakMemLL);
