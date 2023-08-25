@@ -113,45 +113,62 @@ EBAMRParticleMesh::defineCoarseFineMotion()
 void
 EBAMRParticleMesh::defineEBParticleMesh()
 {
-  CH_TIME("EBAMRParticleMesh::defineEBParticleMesh");
+  CH_TIMERS("EBAMRParticleMesh::defineEBParticleMesh");
+  CH_TIMER("EBAMRParticleMesh::defineEBParticleMesh::basic_defines", t1);
+  CH_TIMER("EBAMRParticleMesh::defineEBParticleMesh::define_level", t2);
+  CH_TIMER("EBAMRParticleMesh::defineEBParticleMesh::define_fico", t3);
 
   m_ebParticleMesh.resize(1 + m_finestLevel);
   m_ebParticleMeshFiCo.resize(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    CH_START(t1);
     const ProblemDomain&     domain = m_eblgs[lvl]->getDomain();
     const DisjointBoxLayout& dbl    = m_eblgs[lvl]->getDBL();
+    const DataIterator&      dit    = dbl.dataIterator();
     const EBISLayout&        ebisl  = m_eblgs[lvl]->getEBISL();
 
     const bool hasCoar = lvl > 0;
 
     m_ebParticleMesh[lvl] = RefCountedPtr<LayoutData<EBParticleMesh>>(new LayoutData<EBParticleMesh>(dbl));
+    CH_START(t1);
 
     // Define the "regular" particle-mesh interpolation objects. These are defined on the input grids.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box      cellBox = dbl[dit()];
-      const EBISBox& ebisBox = ebisl[dit()];
+    CH_START(t2);
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      EBParticleMesh& particleMesh = (*m_ebParticleMesh[lvl])[dit()];
+      const Box      cellBox = dbl[din];
+      const EBISBox& ebisBox = ebisl[din];
+
+      EBParticleMesh& particleMesh = (*m_ebParticleMesh[lvl])[din];
 
       particleMesh.define(domain, cellBox, ebisBox, m_dx[lvl] * RealVect::Unit, m_probLo);
     }
+    CH_STOP(t2);
 
     // These are "special" particle-mesh interpolation objects for when we need to deposit coarse-level particles on a refined grid.
+    CH_START(t3);
     if (hasCoar) {
-      const EBLevelGrid& eblgFiCo = m_coarseFinePM[lvl]->getEblgFiCo();
-
+      const EBLevelGrid&       eblgFiCo  = m_coarseFinePM[lvl]->getEblgFiCo();
       const ProblemDomain&     domain    = eblgFiCo.getDomain();
       const DisjointBoxLayout& dblFiCo   = eblgFiCo.getDBL();
+      const DataIterator&      ditFiCo   = dblFiCo.dataIterator();
       const EBISLayout&        ebislFiCo = eblgFiCo.getEBISL();
 
       m_ebParticleMeshFiCo[lvl] = RefCountedPtr<LayoutData<EBParticleMesh>>(new LayoutData<EBParticleMesh>(dblFiCo));
 
-      for (DataIterator dit(dblFiCo); dit.ok(); ++dit) {
-        const Box      cellBox = dblFiCo[dit()];
-        const EBISBox& ebisBox = ebislFiCo[dit()];
+      const int nboxFiCo = ditFiCo.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nboxFiCo; mybox++) {
+        const DataIndex& din = ditFiCo[mybox];
 
-        EBParticleMesh& particleMesh = (*m_ebParticleMeshFiCo[lvl])[dit()];
+        const Box      cellBox = dblFiCo[din];
+        const EBISBox& ebisBox = ebislFiCo[din];
+
+        EBParticleMesh& particleMesh = (*m_ebParticleMeshFiCo[lvl])[din];
 
         particleMesh.define(domain, cellBox, ebisBox, m_dx[lvl] * RealVect::Unit, m_probLo);
       }
@@ -159,6 +176,7 @@ EBAMRParticleMesh::defineEBParticleMesh()
     else {
       m_ebParticleMeshFiCo[lvl] = RefCountedPtr<LayoutData<EBParticleMesh>>(nullptr);
     }
+    CH_START(t3);
   }
 }
 
