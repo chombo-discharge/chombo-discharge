@@ -1,9 +1,11 @@
 # This is an example file for testing OpenMP functionality. It should be removed before a pull request.
 #
-# Specific examples that target folders are:
+# Specific examples that target folders whose files have been threaded are:
 #
 # Source/AmrMesh -> Exec/Examples/Electrostatics/MechShaft/compile_and_run.sh
 # Source/ConvectionDiffusionReaction -> Exec/Examples/AdvectionDiffusion/PipeFlow/compile_and_run.sh
+#
+# NOTE: ALL FOLDERS SHOULD BE THREADED BEFORE MERGING
 
 export CH_TIMER=1
 export DIM=2
