@@ -1,10 +1,10 @@
 export CH_TIMER=1
 export NCORES=8
-export NRANKS=1
-export OMP_NUM_THREADS=8
+export NPROCS=2
+export OMP_NUM_THREADS=4
 export OMP_PLACES=cores
-export OMP_PROC_BIND=close
-export OMP_SCHEDULE="static, 4"
+export OMP_PROC_BIND=true
+export OMP_SCHEDULE="dynamic, 4"
 
 COMPILE=true
 RUN=true
@@ -31,11 +31,11 @@ then
     cp time.table time.table.omp
 
     # # Run MPI version
-    mpiexec -n $NCORES ./program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex example.inputs FieldSolverMultigrid.gmg_exit_tol=1.2
+    mpiexec --report-bindings -n $NCORES --bind-to core ./program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex example.inputs FieldSolverMultigrid.gmg_exit_tol=1.2
     cp time.table.0 time.table.mpi
 
     # # Run MPI+OpenMP version
-    mpiexec -n $NRANKS --bind-to socket ./program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex example.inputs FieldSolverMultigrid.gmg_exit_tol=1.2
+    mpiexec --report-bindings --map-by slot:PE=$OMP_NUM_THREADS -n $NPROCS ./program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex example.inputs FieldSolverMultigrid.gmg_exit_tol=1.2
     cp time.table.0 time.table.hybrid
 fi
 

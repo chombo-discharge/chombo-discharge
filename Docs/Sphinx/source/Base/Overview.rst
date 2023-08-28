@@ -33,7 +33,7 @@ Key functionalities are provided in :numref:`Tab:KeyCapabilities`.
    * - Grids
      - **Fundamentally Cartesian**.
    * - Parallelized?
-     - **Yes**, using flat MPI.
+     - **Yes**, using OpenMP, MPI, or MPI+OpenMP.
    * - Load balancing?
      - **Yes**, with support for individual particle and fluid load balancing. 
    * - Complex geometries?

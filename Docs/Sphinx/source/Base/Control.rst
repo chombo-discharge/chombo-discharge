@@ -58,10 +58,13 @@ Recall also that default settings for the dimension (``DIM``), optimization leve
 Running applications
 --------------------
 
-Serial
-_________________
+How one runs ``chombo-discharge`` depends on the type of parallelism one compiled with.
+Below, we consider basic examples for serial and parallel execution.
 
-Next, if the application was compiled for serial execution one runs it with:
+Serial
+______
+
+If the application was compiled for serial execution one runs it with:
 
 .. code-block:: bash
 
@@ -69,16 +72,65 @@ Next, if the application was compiled for serial execution one runs it with:
 
 where <input_file> is your input file.
 
-Parallel
-________
+Parallel with OpenMP
+____________________
+
+When running with OpenMP one must specify the number of threads, and possibly also the binding of threads.
+``chombo-discharge`` is compiled with run-time thread scheduling (which defaults to static), which can be specified.
+For example
+
+.. code-block:: bash
+
+   export OMP_NUM_THREADS=8
+   export OMP_PLACES=cores
+   export OMP_PROC_BIND=true
+   export OMP_SCHEDULE="dynamic, 4"
+   ./<application_executable> <input_file>
+
+Parallel with MPI
+_________________
 
 If the executable was compiled with MPI, one executes with e.g. ``mpirun`` (or one of its aliases):
 
 .. code-block:: bash
 	     
-   mpirun -np 32 <application_executable> <input_file>
+   mpirun -np 8 <application_executable> <input_file>
 
 On clusters, this is a little bit different and usually requires passing the above command through a batch system.
+Normally, the MPI installation will map processes to cores.
+With OpenMP one can use ``--report-bindings`` to verify the mapping.
+
+Parallel with MPI/OpenMP
+________________________
+
+When running with both MPI and OpenMP the user must
+
+#. Bind each MPI rank to a specified resource (e.g., a node, socket, or list of CPUs)
+#. Bind OpenMP threads to resources available to each MPI rank.
+
+For example, the following is likely to fail:
+
+.. code-block:: bash
+
+   export OMP_NUM_THREADS=4
+   mpiexec -n 2 ./<application_executable> <input_file>
+
+Each MPI rank is quite likely to spawn threads on the same physical cores.
+With e.g. OpenMPI one can map each rank to a specified number of CPUs, and bind threads to those CPUs.
+For example, on a local workstation one might do
+
+.. code-block:: bash
+
+   export NPROCS=2		
+   export OMP_NUM_THREADS=4
+   export OMP_PLACES=cores
+   export OMP_PROC_BIND=true
+   mpiexec --map-by slot:PE=$OMP_NUM_THREADS -n $NRANKS ./<application_executable> <input_file>
+
+
+.. important::
+
+   More sophisticated architectures (e.g., clusters with NUMA nodes) require careful specification of MPI and thread placement (e.g. binding of MPI ranks to sockets).
 
 
 
