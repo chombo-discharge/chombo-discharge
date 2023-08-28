@@ -100,7 +100,7 @@ On clusters, this is a little bit different and usually requires passing the abo
 Normally, the MPI installation will map processes to cores.
 With OpenMP one can use ``--report-bindings`` to verify the mapping.
 
-Parallel with MPI/OpenMP
+Parallel with MPI+OpenMP
 ________________________
 
 When running with both MPI and OpenMP the user must

@@ -91,13 +91,18 @@ CdrCTU::computeAdvectionDt()
         const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
         const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
         const Real               dx    = m_amr->getDx()[lvl];
+        const DataIterator&      dit   = dbl.dataIterator();
 
-        for (DataIterator dit(dbl); dit.ok(); ++dit) {
-          const Box        cellBox = dbl[dit()];
-          const EBCellFAB& velo    = (*m_cellVelocity[lvl])[dit()];
-          const EBISBox&   ebisBox = ebisl[dit()];
+        const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime) reduction(min : minDt)
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex& din = dit[mybox];
 
-          VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+          const Box        cellBox = dbl[din];
+          const EBCellFAB& velo    = (*m_cellVelocity[lvl])[din];
+          const EBISBox&   ebisBox = ebisl[din];
+
+          VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
           // Regular grid data.
           const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
@@ -133,13 +138,10 @@ CdrCTU::computeAdvectionDt()
           BoxLoops::loop(vofit, irregularKernel);
         }
       }
-
-      // If we are using MPI then ranks need to know of each other's time steps.
-      minDt = ParallelOps::min(minDt);
     }
   }
 
-  return minDt;
+  return ParallelOps::min(minDt);
 }
 
 void
@@ -201,15 +203,20 @@ CdrCTU::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, 
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
     const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const ProblemDomain&     domain = m_amr->getDomains()[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBFluxFAB&       facePhi = (*a_facePhi[lvl])[dit()];
-      const EBCellFAB& cellPhi = (*phi[lvl])[dit()];
-      const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[dit()];
-      const EBFluxFAB& faceVel = (*m_faceVelocity[lvl])[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      const Box      cellBox = dbl[dit()];
-      const EBISBox& ebisbox = ebisl[dit()];
+      EBFluxFAB&       facePhi = (*a_facePhi[lvl])[din];
+      const EBCellFAB& cellPhi = (*phi[lvl])[din];
+      const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[din];
+      const EBFluxFAB& faceVel = (*m_faceVelocity[lvl])[din];
+
+      const Box      cellBox = dbl[din];
+      const EBISBox& ebisbox = ebisl[din];
 
       // Limit slopes and solve Riemann problem (which yields the upwind state at the face). Note that we need one ghost cell for
       // the slopes because in order to extrapolate to the left/right sides of a face, we need the centered slope on both
@@ -222,10 +229,10 @@ CdrCTU::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, 
 
       // Compute normal slopes.
       if (m_limiter != Limiter::None) {
-        this->computeNormalSlopes(normalSlopes, cellPhi, cellBox, domain, lvl, dit());
+        this->computeNormalSlopes(normalSlopes, cellPhi, cellBox, domain, lvl, din);
       }
 
-      this->upwind(facePhi, normalSlopes, cellPhi, cellVel, faceVel, domain, cellBox, lvl, dit(), a_dt);
+      this->upwind(facePhi, normalSlopes, cellPhi, cellVel, faceVel, domain, cellBox, lvl, din, a_dt);
     }
   }
 }

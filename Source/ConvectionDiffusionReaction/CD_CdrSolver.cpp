@@ -552,12 +552,17 @@ CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
   CH_assert(a_faceVelocity.nComp() == 1);
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const DataIterator& dit = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+    
     for (int dir = 0; dir < SpaceDim; dir++) {
-      EBFaceFAB&       flux = a_flux[dit()][dir];
-      const EBFaceFAB& phi  = a_facePhi[dit()][dir];
-      const EBFaceFAB& vel  = a_faceVelocity[dit()][dir];
+      EBFaceFAB&       flux = a_flux[din][dir];
+      const EBFaceFAB& phi  = a_facePhi[din][dir];
+      const EBFaceFAB& vel  = a_faceVelocity[din][dir];
 
       flux.setVal(0.0, m_comp);
       flux += phi;
@@ -613,16 +618,21 @@ CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EB
   const DisjointBoxLayout& dbl       = m_amr->getGrids(m_realm)[a_lvl];
   const EBISLayout&        ebisl     = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
   const ProblemDomain&     domain    = m_amr->getDomains()[a_lvl];
+  const DataIterator& dit = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const EBCellFAB& phi     = a_phi[dit()];
-    const Box&       cellBox = dbl[dit()];
-    const EBISBox&   ebisbox = ebisl[dit()];
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const EBCellFAB& phi     = a_phi[din];
+    const Box&       cellBox = dbl[din];
+    const EBISBox&   ebisbox = ebisl[din];
     const EBGraph&   ebgraph = ebisbox.getEBGraph();
 
     for (int dir = 0; dir < SpaceDim; dir++) {
-      EBFaceFAB&       flux = a_flux[dit()][dir];
-      const EBFaceFAB& dco  = (*m_faceCenteredDiffusionCoefficient[a_lvl])[dit()][dir];
+      EBFaceFAB&       flux = a_flux[din][dir];
+      const EBFaceFAB& dco  = (*m_faceCenteredDiffusionCoefficient[a_lvl])[din][dir];
 
       // Regular grid data.
       BaseFab<Real>&       regFlux = flux.getSingleValuedFAB();
@@ -689,20 +699,25 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
     const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const Real               dx     = m_amr->getDx()[lvl];
     const Real               idx    = 1. / dx;
+    const DataIterator&      dit    = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box&     cellBox = dbl[dit()];
-      const EBISBox& ebisbox = ebisl[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box&     cellBox = dbl[din];
+      const EBISBox& ebisbox = ebisl[din];
       const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-      const EBCellFAB&     phiCell    = (*a_cellStates[lvl])[dit()];
+      const EBCellFAB&     phiCell    = (*a_cellStates[lvl])[din];
       const BaseFab<Real>& regPhiCell = phiCell.getSingleValuedFAB();
 
       for (int dir = 0; dir < SpaceDim; dir++) {
-        EBFaceFAB&       fluxFace = (*a_flux[lvl])[dit()][dir];
-        const EBFaceFAB& phiFace  = (*a_faceStates[lvl])[dit()][dir];
-        const EBFaceFAB& velFace  = (*a_faceVelocities[lvl])[dit()][dir];
-        const EBFaceFAB& dcoFace  = (*a_faceDiffCo[lvl])[dit()][dir];
+        EBFaceFAB&       fluxFace = (*a_flux[lvl])[din][dir];
+        const EBFaceFAB& phiFace  = (*a_faceStates[lvl])[din][dir];
+        const EBFaceFAB& velFace  = (*a_faceVelocities[lvl])[din][dir];
+        const EBFaceFAB& dcoFace  = (*a_faceDiffCo[lvl])[din][dir];
 
         // Regular grid data.
         BaseFab<Real>&       regFluxFace = fluxFace.getSingleValuedFAB();
@@ -780,14 +795,19 @@ CdrSolver::resetDomainFlux(EBAMRFluxData& a_flux)
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
     const ProblemDomain&     domain = m_amr->getDomains()[lvl];
     const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box      cellBox = dbl[dit()];
-      const EBISBox& ebisbox = ebisl[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box      cellBox = dbl[din];
+      const EBISBox& ebisbox = ebisl[din];
       const EBGraph& ebgraph = ebisbox.getEBGraph();
 
       for (int dir = 0; dir < SpaceDim; dir++) {
-        EBFaceFAB&     flux    = (*a_flux[lvl])[dit()][dir];
+        EBFaceFAB&     flux    = (*a_flux[lvl])[din][dir];
         BaseFab<Real>& regFlux = flux.getSingleValuedFAB();
 
         for (SideIterator sit; sit.ok(); ++sit) {
@@ -851,14 +871,19 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
   const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_level];
   const ProblemDomain&     domain = m_amr->getDomains()[a_level];
   const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[a_level];
+  const DataIterator&      dit    = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const EBISBox& ebisbox = ebisl[dit()];
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const EBISBox& ebisbox = ebisl[din];
     const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const Box      cellBox = dbl[dit()];
+    const Box      cellBox = dbl[din];
 
     for (int dir = 0; dir < SpaceDim; dir++) {
-      EBFaceFAB& flux = a_flux[dit()][dir];
+      EBFaceFAB& flux = a_flux[din][dir];
 
       // Iterate over domain cells. I'm REALLY not sure about if this is performant...
       for (SideIterator sit; sit.ok(); ++sit) {
@@ -869,7 +894,7 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
         const CdrDomainBC::FluxFunction& bcFunction = m_domainBC.getBcFunction(domainSide);
 
         // Data-based BC holders -- needed if bcType is CdrDomainBC::BcType::DataBased.
-        const BaseIFFAB<Real>& dataBasedFlux = (*m_domainFlux[a_level])[dit()](dir, side);
+        const BaseIFFAB<Real>& dataBasedFlux = (*m_domainFlux[a_level])[din](dir, side);
 
         // Create a box which abuts the current domain side
         Box boundaryCellBox;
@@ -1003,14 +1028,18 @@ CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&             a_divG,
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_lvl];
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
   const Real               dx    = m_amr->getDx()[a_lvl];
+  const DataIterator&      dit   = dbl.dataIterator();
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const EBISBox& ebisbox = ebisl[dit()];
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    EBCellFAB&             divG   = a_divG[dit()];
-    const BaseIVFAB<Real>& ebflux = a_ebFlux[dit()];
+    EBCellFAB&             divG    = a_divG[din];
+    const BaseIVFAB<Real>& ebflux  = a_ebFlux[din];
+    const EBISBox&         ebisbox = ebisl[din];
 
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[din];
 
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real ebArea = ebisbox.bndryArea(vof);
@@ -1020,7 +1049,7 @@ CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&             a_divG,
 
       // Add face flux contributions to our sum(fluxes).
       for (int dir = 0; dir < SpaceDim; dir++) {
-        const EBFaceFAB& flux = a_centroidFlux[dit()][dir];
+        const EBFaceFAB& flux = a_centroidFlux[din][dir];
 
         for (SideIterator sit; sit.ok(); ++sit) {
           const Side::LoHiSide side = sit();
@@ -1062,19 +1091,23 @@ CdrSolver::conservativeDivergenceRegular(LevelData<EBCellFAB>&       a_divJ,
   // kappa*div(J) = sum(fluxes)/dx
 
   const DisjointBoxLayout dbl       = m_amr->getGrids(m_realm)[a_lvl];
+  const DataIterator&     dit       = dbl.dataIterator();
   const ProblemDomain     domain    = m_amr->getDomains()[a_lvl];
   const Real              dx        = m_amr->getDx()[a_lvl];
   const Real              inverseDx = 1. / dx;
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box      cellBox = dbl[dit()];
-    EBCellFAB&     divJ    = a_divJ[dit()];
+  const int nbox = dit.size();
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box      cellBox = dbl[din];
+    EBCellFAB&     divJ    = a_divJ[din];
     BaseFab<Real>& divJReg = divJ.getSingleValuedFAB();
 
     divJ.setVal(0.0);
 
     for (int dir = 0; dir < SpaceDim; dir++) {
-      const EBFaceFAB&     flux    = a_flux[dit()][dir];
+      const EBFaceFAB&     flux    = a_flux[din][dir];
       const BaseFab<Real>& fluxReg = flux.getSingleValuedFAB();
 
       // Regular kernel. We call this for a cell-centered box so the high flux is on iv + BASISV(dir) and the low flux
@@ -1088,7 +1121,7 @@ CdrSolver::conservativeDivergenceRegular(LevelData<EBCellFAB>&       a_divJ,
     }
 
     // Reset irregular grid cells. These will be computed in a different way.
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[din];
 
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       divJ(vof, m_comp) = 0.0;
@@ -1119,14 +1152,19 @@ CdrSolver::defineInterpolationStencils()
       const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
       const ProblemDomain&     domain = m_amr->getDomains()[lvl];
       const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const DataIterator&      dit    = dbl.dataIterator();
 
       m_interpStencils[dir][lvl] = RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil>>>(
         new LayoutData<BaseIFFAB<FaceStencil>>(dbl));
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        BaseIFFAB<FaceStencil>& sten     = (*m_interpStencils[dir][lvl])[dit()];
-        const Box               cellBox  = dbl[dit()];
-        const EBISBox&          ebisbox  = ebisl[dit()];
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        BaseIFFAB<FaceStencil>& sten     = (*m_interpStencils[dir][lvl])[din];
+        const Box               cellBox  = dbl[din];
+        const EBISBox&          ebisbox  = ebisl[din];
         const EBGraph&          ebgraph  = ebisbox.getEBGraph();
         const IntVectSet        irregIVS = ebisbox.getIrregIVS(cellBox);
 
@@ -1229,18 +1267,23 @@ CdrSolver::initialDataParticles()
       const ProblemDomain&     domain = m_amr->getDomains()[lvl];
       const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
       const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const DataIterator&      dit    = dbl.dataIterator();
 
       // 2. Deposit this levels particles. We use an NGP scheme to do this.
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box      cellBox = dbl[dit()];
-        const EBISBox& ebisbox = ebisl[dit()];
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box      cellBox = dbl[din];
+        const EBISBox& ebisbox = ebisl[din];
 
         // Make the deposition object and put the particles on the grid.
         constexpr bool forceIrregNGP = true;
         EBParticleMesh interp(domain, cellBox, ebisbox, dx, probLo);
 
-        interp.deposit<PointParticle, &PointParticle::weight>(particles[lvl][dit()].listItems(),
-                                                              (*m_phi[lvl])[dit()],
+        interp.deposit<PointParticle, &PointParticle::weight>(particles[lvl][din].listItems(),
+                                                              (*m_phi[lvl])[din],
                                                               DepositionType::NGP,
                                                               forceIrregNGP);
       }
@@ -1291,16 +1334,21 @@ CdrSolver::hybridDivergence(LevelData<EBCellFAB>&             a_hybridDivergence
 
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_lvl];
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
+  const DataIterator&      dit   = dbl.dataIterator();
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    EBCellFAB&             divH   = a_hybridDivergence[dit()]; // On input, this contains kappa*div(F)
-    BaseIVFAB<Real>&       deltaM = a_massDifference[dit()];
-    const BaseIVFAB<Real>& divNC =
-      a_nonConservativeDivergence[dit()]; // On input, this contains the non-conservative divergence.
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    const EBISBox& ebisbox = ebisl[dit()];
+    // On input, divH contains kappa*div(F) and divNC contains the non-conservative divergence
+    EBCellFAB&             divH   = a_hybridDivergence[din];
+    BaseIVFAB<Real>&       deltaM = a_massDifference[din];
+    const BaseIVFAB<Real>& divNC  = a_nonConservativeDivergence[din];
 
-    VoFIterator& vofit  = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
+    const EBISBox& ebisbox = ebisl[din];
+
+    VoFIterator& vofit  = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[din];
     auto         kernel = [&](const VolIndex& vof) -> void {
       const Real kappa = ebisbox.volFrac(vof);
       const Real dc    = divH(vof, m_comp);
@@ -1347,10 +1395,15 @@ CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const in
 
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_lvl];
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
+  const DataIterator&      dit   = dbl.dataIterator();
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const Box        cellBox  = dbl.get(dit());
-    const EBISBox&   ebisbox  = ebisl[dit()];
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box        cellBox  = dbl.get(din);
+    const EBISBox&   ebisbox  = ebisl[din];
     const EBGraph&   ebgraph  = ebisbox.getEBGraph();
     const IntVectSet irregIVS = ebisbox.getIrregIVS(cellBox);
 
@@ -1360,7 +1413,7 @@ CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const in
 
     if (isIrregular) {
       for (int dir = 0; dir < SpaceDim; dir++) {
-        EBFaceFAB& faceFlux = a_flux[dit()][dir];
+        EBFaceFAB& faceFlux = a_flux[din][dir];
 
         // Make a copy of faceFlux which we use as interpolant. EBFaceFAB
         // needs a cell box, so here you go.
@@ -1373,7 +1426,7 @@ CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const in
         FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingWithBoundary);
 
         auto kernel = [&](const FaceIndex& face) -> void {
-          const FaceStencil& sten = (*m_interpStencils[dir][a_lvl])[dit()](face, m_comp);
+          const FaceStencil& sten = (*m_interpStencils[dir][a_lvl])[din](face, m_comp);
 
           faceFlux(face, m_comp) = 0.;
 
@@ -1940,13 +1993,18 @@ CdrSolver::computeAdvectionDt()
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
       const Real               dx    = m_amr->getDx()[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box        cellBox = dbl[dit()];
-        const EBCellFAB& velo    = (*m_cellVelocity[lvl])[dit()];
-        const EBISBox&   ebisBox = ebisl[dit()];
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime) reduction(min : minDt)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
 
-        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+        const Box        cellBox = dbl[din];
+        const EBCellFAB& velo    = (*m_cellVelocity[lvl])[din];
+        const EBISBox&   ebisBox = ebisl[din];
+
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
         // Regular grid data.
         const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
@@ -1978,12 +2036,9 @@ CdrSolver::computeAdvectionDt()
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
-
-    // If we are using MPI then ranks need to know of each other's time steps.
-    minDt = ParallelOps::min(minDt);
   }
 
-  return minDt;
+  return ParallelOps::min(minDt);
 }
 
 Real
@@ -2011,12 +2066,17 @@ CdrSolver::computeDiffusionDt()
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
       const Real               dx    = m_amr->getDx()[lvl];
       const Real               dx2   = dx * dx;
+      const DataIterator&      dit   = dbl.dataIterator();
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box        cellBox    = dbl[dit()];
-        const EBISBox&   ebisbox    = ebisl[dit()];
-        const EBFluxFAB& diffCoFace = (*m_faceCenteredDiffusionCoefficient[lvl])[dit()];
-        VoFIterator&     vofit      = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime) reduction(min : minDt)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box        cellBox    = dbl[din];
+        const EBISBox&   ebisbox    = ebisl[din];
+        const EBFluxFAB& diffCoFace = (*m_faceCenteredDiffusionCoefficient[lvl])[din];
+        VoFIterator&     vofit      = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
         // Regular kernel. Strictly speaking, we should have a kernel which increments with the diffusion coefficients on each face since the finite volume
         // approximation to the Laplacian becomes (in 1D) Div*(D*Grad(phi)) = -D_(i-1/2)*(phi_i - phi_(i-1)) + D_(i+1/2)*(phi_(i+1)-phi_i). A good kernel
@@ -2061,11 +2121,9 @@ CdrSolver::computeDiffusionDt()
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
-
-    minDt = ParallelOps::min(minDt);
   }
 
-  return minDt;
+  return ParallelOps::min(minDt);
 }
 
 Real
@@ -2107,14 +2165,19 @@ CdrSolver::computeAdvectionDiffusionDt()
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
       const Real               dx    = m_amr->getDx()[lvl];
       const Real               dx2   = dx * dx;
+      const DataIterator&      dit   = dbl.dataIterator();
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const EBCellFAB& velo       = (*m_cellVelocity[lvl])[dit()];
-        const EBFluxFAB& diffCoFace = (*m_faceCenteredDiffusionCoefficient[lvl])[dit()];
-        const EBISBox&   ebisbox    = ebisl[dit()];
-        const Box        cellBox    = dbl[dit()];
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime) reduction(min : minDt)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
 
-        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+        const EBCellFAB& velo       = (*m_cellVelocity[lvl])[din];
+        const EBFluxFAB& diffCoFace = (*m_faceCenteredDiffusionCoefficient[lvl])[din];
+        const EBISBox&   ebisbox    = ebisl[din];
+        const Box        cellBox    = dbl[din];
+
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
         // Single-valued data.
         const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
@@ -2171,15 +2234,13 @@ CdrSolver::computeAdvectionDiffusionDt()
         };
 
         // Execute the kernels.
-        BoxLoops::loop(dbl[dit()], regularKernel);
+        BoxLoops::loop(dbl[din], regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
-
-    minDt = ParallelOps::min(minDt);
   }
 
-  return minDt;
+  return ParallelOps::min(minDt);
 }
 
 Real
@@ -2198,13 +2259,18 @@ CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance)
   if (a_max > 0.0) {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        const EBCellFAB& phi     = (*m_phi[lvl])[dit()];
-        const EBCellFAB& source  = (*m_source[lvl])[dit()];
-        const Box        cellBox = dbl[dit()];
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime) reduction(min : minDt)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
 
-        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+        const EBCellFAB& phi     = (*m_phi[lvl])[din];
+        const EBCellFAB& source  = (*m_source[lvl])[din];
+        const Box        cellBox = dbl[din];
+
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
         const BaseFab<Real>& phiReg = phi.getSingleValuedFAB();
         const BaseFab<Real>& srcReg = source.getSingleValuedFAB();
@@ -2230,15 +2296,13 @@ CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance)
         };
 
         // Execute kernels.
-        BoxLoops::loop(dbl[dit()], regularKernel);
+        BoxLoops::loop(dbl[din], regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
-
-    minDt = ParallelOps::min(minDt);
   }
 
-  return minDt;
+  return ParallelOps::min(minDt);
 }
 
 void
@@ -2270,16 +2334,21 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
 
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box&     cellBox = dbl[dit()];
-        const EBISBox& ebisBox = ebisl[dit()];
-        VoFIterator&   vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
 
-        EBCellFAB&       sumPhi    = (*a_weightedUpwindPhi[lvl])[dit()];
-        EBCellFAB&       sumWeight = (*scratch[lvl])[dit()];
-        const EBFluxFAB& facePhi   = (*m_faceStates[lvl])[dit()];
-        const EBFluxFAB& faceVel   = (*m_faceVelocity[lvl])[dit()];
+        const Box&     cellBox = dbl[din];
+        const EBISBox& ebisBox = ebisl[din];
+        VoFIterator&   vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+
+        EBCellFAB&       sumPhi    = (*a_weightedUpwindPhi[lvl])[din];
+        EBCellFAB&       sumWeight = (*scratch[lvl])[din];
+        const EBFluxFAB& facePhi   = (*m_faceStates[lvl])[din];
+        const EBFluxFAB& faceVel   = (*m_faceVelocity[lvl])[din];
 
         sumPhi.setVal(0.0);
         sumWeight.setVal(0.0);
@@ -2333,7 +2402,7 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
               const VolIndex&  vofLo    = faceLo.getVoF(Side::Lo);
               const Real       areaFrac = ebisBox.areaFrac(faceLo);
 
-              const FaceStencil& interpSten = (*m_interpStencils[dir][lvl])[dit()](faceLo, m_comp);
+              const FaceStencil& interpSten = (*m_interpStencils[dir][lvl])[din](faceLo, m_comp);
 
               Real phiLo = 0.0;
               Real velLo = 0.0;
@@ -2358,7 +2427,7 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
               const VolIndex&  vofHi    = faceHi.getVoF(Side::Hi);
               const Real       areaFrac = ebisBox.areaFrac(faceHi);
 
-              const FaceStencil& interpSten = (*m_interpStencils[dir][lvl])[dit()](faceHi, m_comp);
+              const FaceStencil& interpSten = (*m_interpStencils[dir][lvl])[din](faceHi, m_comp);
 
               Real phiHi = 0.0;
               Real velHi = 0.0;
@@ -2433,12 +2502,18 @@ CdrSolver::computeMass(const EBAMRCellData& a_phi, const bool a_kappaScale)
     const Real               dx    = m_amr->getDx()[lvl];
     const Real               dxVol = std::pow(dx, SpaceDim);
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box            cellbox    = dbl[dit()];
-      const EBISBox&       ebisbox    = ebisl[dit()];
-      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
+    const DataIterator& dit = dbl.dataIterator();
 
-      const EBCellFAB& phi    = (*a_phi[lvl])[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime) reduction(+ : mass)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box            cellbox    = dbl[din];
+      const EBISBox&       ebisbox    = ebisl[din];
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[din];
+
+      const EBCellFAB& phi    = (*a_phi[lvl])[din];
       const FArrayBox& phiReg = phi.getFArrayBox();
 
       // Kernel definitions.
@@ -2458,7 +2533,7 @@ CdrSolver::computeMass(const EBAMRCellData& a_phi, const bool a_kappaScale)
         }
       };
 
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       BoxLoops::loop(cellbox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
@@ -2620,7 +2695,7 @@ CdrSolver::extrapolateAdvectiveFluxToEB() noexcept
 {
   CH_TIME("CdrSolver::extrapolateAdvectiveFluxToEB()");
   if (m_verbosity > 5) {
-    pout() << "ExtrapolateAdvectiveFluxToEB()" << endl;
+    pout() << m_name + "::extrapolateAdvectiveFluxToEB()" << endl;
   }
 
   this->extrapolateAdvectiveFluxToEB(m_ebFlux);
@@ -2631,7 +2706,7 @@ CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
 {
   CH_TIME("CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData)");
   if (m_verbosity > 5) {
-    pout() << "ExtrapolateAdvectiveFluxToEB(EBAMRIVData)" << endl;
+    pout() << m_name + "::extrapolateadvectivefluxtoeb(EBAMRIVData)" << endl;
   }
 
   DataOps::setValue(a_ebFlux, 0.0);
@@ -2658,17 +2733,22 @@ CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
 
     // Project along normal vector.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-
       CH_assert(a_ebFlux[lvl]->nComp() == 1);
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box      cellBox = dbl[dit()];
-        const EBISBox& ebisBox = ebisl[dit()];
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
 
-        BaseIVFAB<Real>&       scalarFlux = (*a_ebFlux[lvl])[dit()];
-        const BaseIVFAB<Real>& vectorFlux = (*fluxEB[lvl])[dit()];
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box      cellBox = dbl[din];
+        const EBISBox& ebisBox = ebisl[din];
+
+        BaseIVFAB<Real>&       scalarFlux = (*a_ebFlux[lvl])[din];
+        const BaseIVFAB<Real>& vectorFlux = (*fluxEB[lvl])[din];
 
         auto irregularKernel = [&](const VolIndex& vof) {
           const RealVect& normal = ebisBox.normal(vof);
@@ -2678,7 +2758,7 @@ CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
           }
         };
 
-        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
         BoxLoops::loop(vofit, irregularKernel);
       }
@@ -2930,16 +3010,21 @@ CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const Real               dx    = m_amr->getDx()[lvl];
     const Real               vol   = pow(dx, SpaceDim);
+    const DataIterator&      dit   = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box&        cellBox  = dbl[dit()];
-      const EBISBox&    ebisbox  = ebisl[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box&        cellBox  = dbl[din];
+      const EBISBox&    ebisbox  = ebisl[din];
       const EBGraph&    ebgraph  = ebisbox.getEBGraph();
       const IntVectSet& irregIVS = ebisbox.getIrregIVS(cellBox);
 
       for (int dir = 0; dir < SpaceDim; dir++) {
-        EBFaceFAB&       facePhi = (*a_facePhi[lvl])[dit()][dir];
-        const EBCellFAB& cellPhi = (*a_cellPhi[lvl])[dit()];
+        EBFaceFAB&       facePhi = (*a_facePhi[lvl])[din][dir];
+        const EBCellFAB& cellPhi = (*a_cellPhi[lvl])[din];
 
         BaseFab<Real>&       faceReg = facePhi.getSingleValuedFAB();
         const BaseFab<Real>& cellReg = cellPhi.getSingleValuedFAB();
@@ -3056,15 +3141,20 @@ CdrSolver::fillGwn(EBAMRFluxData& a_noise, const Real a_sigma)
     const Real               dx    = m_amr->getDx()[lvl];
     const Real               vol   = pow(dx, SpaceDim);
     const Real               ivol  = sqrt(1. / vol);
+    const DataIterator&      dit   = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box&        cellBox = dbl[dit()];
-      const EBISBox&    ebisbox = ebisl[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box&        cellBox = dbl[din];
+      const EBISBox&    ebisbox = ebisl[din];
       const EBGraph&    ebgraph = ebisbox.getEBGraph();
       const IntVectSet& irreg   = ebisbox.getIrregIVS(cellBox);
 
       for (int dir = 0; dir < SpaceDim; dir++) {
-        EBFaceFAB&     noise    = (*a_noise[lvl])[dit()][dir];
+        EBFaceFAB&     noise    = (*a_noise[lvl])[din][dir];
         BaseFab<Real>& noiseReg = noise.getSingleValuedFAB();
 
         // Regular faces
