@@ -1,14 +1,3 @@
-# This is an example file for testing OpenMP functionality. It should be removed before a pull request.
-#
-# Specific examples that target folders whose files have been threaded are:
-#
-# Source/AmrMesh -> Exec/Examples/Electrostatics/MechShaft/compile_and_run.sh
-# Source/ConvectionDiffusionReaction -> Exec/Examples/AdvectionDiffusion/PipeFlow/compile_and_run.sh
-# Source/Driver -> Exec/Examples/CdrPlasma/DeterministicAir/compile_and_run.sh
-# Source/Electrostatics -> Exec/Examples/Electrostatics/ProfiledSurface
-#
-# NOTE: ALL FOLDERS SHOULD BE THREADED BEFORE MERGING
-
 export CH_TIMER=1
 export DIM=2
 export NCORES=8
@@ -21,7 +10,7 @@ export OMP_SCHEDULE="dynamic"
 COMPILE=true
 RUN=true
 PROFILE=true
-INPUT="example.inputs"
+INPUT="example2d.inputs Driver.max_steps=0 Driver.initial_regrids=1 Driver.write_memory=true Driver.write_loads=true FieldStepper.load_balance=true"
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
 if $COMPILE
@@ -42,11 +31,11 @@ then
     ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.OPENMPCC.ex $INPUT
     cp time.table time.table.omp
 
-    # # Run MPI version
+    # Run MPI version
     mpiexec --report-bindings -n $NCORES --bind-to core ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex $INPUT
     cp time.table.0 time.table.mpi
 
-    # # Run MPI+OpenMP version
+    # Run MPI+OpenMP version
     mpiexec --report-bindings --bind-to none --map-by slot:PE=$OMP_NUM_THREADS -n $NPROCS ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex $INPUT
     cp time.table.0 time.table.hybrid
 fi
@@ -54,7 +43,11 @@ fi
 # Kernel comparison for Source/AmrMesh
 if $PROFILE
 then
-    for PATTERN in 'CdrSolver::computeAdvectionFlux(LD<EBFluxFAB>' \
+    for PATTERN in 'FieldSolver::computeDisplacementField(MFAMRCellData, MFAMRCellData)' \
+		       'FieldSolver::setPermittivities()' \
+		       'FieldSolver::writeMultifluidData' \
+		       'FieldSolver::computeLoads(DisjointBoxLayout, int)' \
+		       'MFHelmholtzElectrostaticEBBC::defineSinglePhase()' \
 		   ; do
 
 	if grep -q "${PATTERN}" time.table.serial

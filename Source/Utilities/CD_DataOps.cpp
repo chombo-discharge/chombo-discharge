@@ -201,20 +201,25 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
   CH_assert(a_cellData.nComp() > a_faceInterval.end());
 
   const DisjointBoxLayout& dbl = a_cellData.disjointBoxLayout();
+  const DataIterator&      dit = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const EBCellFAB& cellData    = a_cellData[dit()];
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const EBCellFAB& cellData    = a_cellData[din];
     const FArrayBox& cellDataReg = cellData.getFArrayBox();
 
     const EBISBox& ebisbox = cellData.getEBISBox();
     const EBGraph& ebgraph = ebisbox.getEBGraph();
 
     for (int faceDir = 0; faceDir < SpaceDim; faceDir++) {
-      EBFaceFAB& faceData    = a_faceData[dit()][faceDir];
+      EBFaceFAB& faceData    = a_faceData[din][faceDir];
       FArrayBox& faceDataReg = faceData.getFArrayBox();
 
       // Build the computation box, including the ghost faces, but not domain faces.
-      Box cellBox = dbl[dit()];
+      Box cellBox = dbl[din];
       for (int tanDir = 0; tanDir < SpaceDim; tanDir++) {
         if (tanDir != faceDir) {
           cellBox.grow(tanDir, a_tanGhosts);

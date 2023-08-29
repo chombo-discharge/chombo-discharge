@@ -552,13 +552,13 @@ CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
   CH_assert(a_faceVelocity.nComp() == 1);
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
-  const DataIterator& dit = dbl.dataIterator();
+  const DataIterator&      dit = dbl.dataIterator();
 
   const int nbox = dit.size();
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
-    
+
     for (int dir = 0; dir < SpaceDim; dir++) {
       EBFaceFAB&       flux = a_flux[din][dir];
       const EBFaceFAB& phi  = a_facePhi[din][dir];
@@ -618,7 +618,7 @@ CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EB
   const DisjointBoxLayout& dbl       = m_amr->getGrids(m_realm)[a_lvl];
   const EBISLayout&        ebisl     = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
   const ProblemDomain&     domain    = m_amr->getDomains()[a_lvl];
-  const DataIterator& dit = dbl.dataIterator();
+  const DataIterator&      dit       = dbl.dataIterator();
 
   const int nbox = dit.size();
 #pragma omp parallel for schedule(runtime)
