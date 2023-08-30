@@ -76,6 +76,13 @@ namespace ParallelOps {
   max(const int& a_input) noexcept;
 
   /*!
+    @brief Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)
+    @param[in] a_input Data input. 
+  */
+  inline long long
+  max(const long long& a_input) noexcept;
+
+  /*!
     @brief Get the maximum value and the position corresponding to the maximum value of a_val
     @details This returns the value a_val and position a_pos such that they correspond to the 
     input variables for the processer which held the largest value a_val. 

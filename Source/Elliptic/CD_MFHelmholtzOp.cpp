@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Std includes
+#include <chrono>
+
 // Chombo includes
 #include <ParmParse.H>
 #include <CH_Timer.H>
@@ -548,51 +551,6 @@ MFHelmholtzOp::applyOp(LevelData<MFCellFAB>& a_Lphi, const LevelData<MFCellFAB>&
   constexpr bool homogeneousCFBC = true;
 
   this->applyOp(a_Lphi, a_phi, nullptr, a_homogeneousPhysBC, homogeneousCFBC);
-}
-
-void
-MFHelmholtzOp::computeOperatorLoads(LevelData<MFCellFAB>& a_phi, TimedDataIterator& a_timeDit)
-{
-  CH_TIME("MFHelmholtzOp::computeOperatorLoads");
-
-  // TLDR: This routine estimates the time spent in each grid patch for a typical relaxation step. This includes
-  //       coarse-fine interpolation, BC matching, and applying the operator.
-
-  LevelData<MFCellFAB> Lphi;
-  this->create(Lphi, a_phi);
-
-  for (a_timeDit.reset(); a_timeDit.ok(); ++a_timeDit) {
-
-    // Interpolation time with coarser
-    if (m_hasCoar) {
-      for (auto& op : m_helmOps) {
-        const int iphase = op.first;
-
-        RefCountedPtr<EBMultigridInterpolator>& phaseInterpolator = m_interpolator.getInterpolator(iphase);
-
-        EBCellFAB& phi = (EBCellFAB&)a_phi[a_timeDit()].getPhase(iphase);
-
-        phaseInterpolator->coarseFineInterpH(phi, Interval(m_comp, m_comp), a_timeDit());
-      }
-    }
-
-    // Matching time
-    if (m_multifluid) {
-      m_jumpBC->matchBC((*m_jump)[a_timeDit()], a_phi[a_timeDit()], true, a_timeDit());
-    }
-
-    // Apply operator application
-    for (auto& op : m_helmOps) {
-      const Box cellBox = Lphi.disjointBoxLayout()[a_timeDit()];
-
-      const int iphase = op.first;
-
-      EBCellFAB& Lph = Lphi[a_timeDit()].getPhase(iphase);
-      EBCellFAB& phi = a_phi[a_timeDit()].getPhase(iphase);
-
-      op.second->applyOp(Lph, phi, cellBox, a_timeDit(), true);
-    }
-  }
 }
 
 void

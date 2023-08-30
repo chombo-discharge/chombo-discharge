@@ -191,6 +191,25 @@ ParallelOps::max(const int& a_input) noexcept
 #endif
 }
 
+inline long long
+ParallelOps::max(const long long& a_input) noexcept
+{
+  CH_TIME("ParallelOps::max(long long)");
+
+#ifdef CH_MPI
+  long long ret = a_input;
+
+  const int result = MPI_Allreduce(MPI_IN_PLACE, &ret, 1, MPI_LONG_LONG, MPI_MAX, Chombo_MPI::comm);
+
+  if (result != MPI_SUCCESS) {
+    MayDay::Error("In file ParallelOps::max -- MPI communication error");
+  }
+  return ret;
+#else
+  return a_input;
+#endif
+}
+
 inline std::pair<Real, RealVect>
 ParallelOps::max(const Real& a_val, const RealVect& a_pos) noexcept
 {
