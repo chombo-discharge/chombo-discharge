@@ -12,9 +12,10 @@
 
 // Chombo includes
 #include <ParmParse.H>
-#include <EBLevelDataOps.H>
 #include <EBCellFactory.H>
 #include <EBLevelGrid.H>
+#include <EBFluxFactory.H>
+#include <EBCellFactory.H>
 #include <CH_Timer.H>
 
 // Our includes
@@ -538,10 +539,66 @@ EBHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBC
 {
   CH_TIME("EBHelmholtzOp::dotProduct");
 
-  ProblemDomain domain;
-  Real          volume;
+  const DisjointBoxLayout& dbl  = a_lhs.disjointBoxLayout();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
 
-  return EBLevelDataOps::kappaDotProduct(volume, a_lhs, a_rhs, EBLEVELDATAOPS_ALLVOFS, domain);
+  Real sumKappaXY = 0.0;
+  Real sumVolume  = 0.0;
+
+#pragma omp parallel for schedule(runtime) reduction(+ : sumKappaXY, sumVolume)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din     = dit[mybox];
+    const Box        cellBox = dbl[din];
+
+    const EBCellFAB& X = a_lhs[din];
+    const EBCellFAB& Y = a_rhs[din];
+
+    const FArrayBox& regX = X.getFArrayBox();
+    const FArrayBox& regY = Y.getFArrayBox();
+
+    const EBISBox& ebisbox = X.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+    auto regularKernel = [&](const IntVect& iv) -> void {
+      if (ebisbox.isRegular(iv)) {
+        sumKappaXY += regX(iv, 0) * regY(iv, 0);
+        sumVolume += 1.0;
+      }
+    };
+
+    auto irregularKernel = [&](const VolIndex& vof) -> void {
+      const Real kappa = ebisbox.volFrac(vof);
+
+      sumKappaXY += (kappa * X(vof, 0)) * (kappa * Y(vof, 0));
+      sumVolume += kappa;
+    };
+
+    const bool isCovered   = ebisbox.isAllCovered();
+    const bool isRegular   = ebisbox.isAllRegular();
+    const bool isIrregular = !isCovered && !isRegular;
+
+    if (isIrregular) {
+      VoFIterator vofit(ebisbox.getIrregIVS(cellBox), ebgraph);
+
+      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+    else if (isCovered) {
+      BoxLoops::loop(cellBox, regularKernel);
+    }
+  }
+
+  sumKappaXY = ParallelOps::sum(sumKappaXY);
+  sumVolume  = ParallelOps::sum(sumVolume);
+
+  Real dotProd = 0.0;
+
+  if (sumVolume > 0.0) {
+    dotProd = sumKappaXY / sumVolume;
+  }
+
+  return dotProd;
 }
 
 void
@@ -1371,8 +1428,14 @@ EBHelmholtzOp::diagonalScale(LevelData<EBCellFAB>& a_rhs, bool a_kappaWeighted)
   }
 
   // Scale by a-coefficient and alpha, too.
-  for (DataIterator dit(a_rhs.dataIterator()); dit.ok(); ++dit) {
-    a_rhs[dit()] *= (*m_Acoef)[dit()];
+  const DataIterator& dit  = a_rhs.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    a_rhs[din] *= (*m_Acoef)[din];
   }
 }
 
@@ -1381,8 +1444,14 @@ EBHelmholtzOp::divideByIdentityCoef(LevelData<EBCellFAB>& a_rhs)
 {
   CH_TIME("EBHelmholtzOp::divideByIdentityCoef(LD<EBCellFAB>)");
 
-  for (DataIterator dit(a_rhs.disjointBoxLayout()); dit.ok(); ++dit) {
-    a_rhs[dit()] /= (*m_Acoef)[dit()];
+  const DataIterator& dit  = a_rhs.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    a_rhs[din] /= (*m_Acoef)[din];
   }
 }
 
@@ -1514,7 +1583,9 @@ EBHelmholtzOp::relaxPointJacobi(LevelData<EBCellFAB>&       a_correction,
   LevelData<EBCellFAB> Lcorr;
   this->create(Lcorr, a_residual);
 
-  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const DisjointBoxLayout& dbl  = m_eblg.getDBL();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
 
   for (int iter = 0; iter < a_iterations; iter++) {
     if (m_doExchange) {
@@ -1523,8 +1594,11 @@ EBHelmholtzOp::relaxPointJacobi(LevelData<EBCellFAB>&       a_correction,
 
     this->homogeneousCFInterp(a_correction);
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      this->pointJacobiKernel(Lcorr[dit()], a_correction[dit()], a_residual[dit()], dbl[dit()], dit());
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      this->pointJacobiKernel(Lcorr[din], a_correction[din], a_residual[din], dbl[din], din);
     }
   }
 }
@@ -1568,6 +1642,7 @@ EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>&       a_correction,
   this->create(Lcorr, a_residual);
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const DataIterator&      dit = dbl.dataIterator();
 
   for (int iter = 0; iter < a_iterations; iter++) {
 
@@ -1579,8 +1654,12 @@ EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>&       a_correction,
 
       this->homogeneousCFInterp(a_correction);
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        this->gauSaiRedBlackKernel(Lcorr[dit()], a_correction[dit()], a_residual[dit()], dbl[dit()], dit(), redBlack);
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        this->gauSaiRedBlackKernel(Lcorr[din], a_correction[din], a_residual[din], dbl[din], din, redBlack);
       }
     }
   }
@@ -1661,6 +1740,7 @@ EBHelmholtzOp::relaxGSMultiColor(LevelData<EBCellFAB>&       a_correction,
   this->create(Lcorr, a_residual);
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const DataIterator&      dit = dbl.dataIterator();
 
   for (int iter = 0; iter < a_iterations; iter++) {
     for (int icolor = 0; icolor < m_colors.size(); icolor++) {
@@ -1670,13 +1750,12 @@ EBHelmholtzOp::relaxGSMultiColor(LevelData<EBCellFAB>&       a_correction,
 
       this->homogeneousCFInterp(a_correction);
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        this->gauSaiMultiColorKernel(Lcorr[dit()],
-                                     a_correction[dit()],
-                                     a_residual[dit()],
-                                     dbl[dit()],
-                                     dit(),
-                                     m_colors[icolor]);
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        this->gauSaiMultiColorKernel(Lcorr[din], a_correction[din], a_residual[din], dbl[din], din, m_colors[icolor]);
       }
     }
   }
@@ -1690,7 +1769,7 @@ EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB&       a_Lcorr,
                                       const DataIndex& a_dit,
                                       const IntVect&   a_color)
 {
-  CH_TIME("EBHelmholtzOp::gauSaiRedBlackkernel(EBCellFAB, EBCellFAB, EBCellFAB, Box, DataIndex, int)");
+  CH_TIME("EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB, EBCellFAB, EBCellFAB, Box, DataIndex, int)");
 
   // This is the kernel for computing phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| with a "multi-colored" pattern. As with red-black, we follow a pattern, but
   // the pattern in this case uses more "colors".
@@ -1751,24 +1830,31 @@ EBHelmholtzOp::computeDiagWeight()
 {
   CH_TIME("EBHelmholtzOp::computeDiagWeight()");
 
-  // Compute the diagonal term in the kappa-weighted operator. We put the result into m_alphaDiagWeight = kappa * A;
-  for (DataIterator dit(m_eblg.getDBL().dataIterator()); dit.ok(); ++dit) {
-    const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
+  // TLDR: Compute the diagonal term in the kappa-weighted operator. We put the result into m_alphaDiagWeight = kappa * A;
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const DataIterator&      dit   = dbl.dataIterator();
 
-    VoFIterator& vofit = m_vofIterStenc[dit()];
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din     = dit[mybox];
+    const EBISBox&   ebisbox = ebisl[din];
+
+    VoFIterator& vofit = m_vofIterStenc[din];
 
     auto alphaKernel = [&](const VolIndex& vof) -> void {
-      const Real volFrac = m_eblg.getEBISL()[dit()].volFrac(vof);
-      const Real Aco     = (*m_Acoef)[dit()](vof, m_comp);
+      const Real volFrac = m_eblg.getEBISL()[din].volFrac(vof);
+      const Real Aco     = (*m_Acoef)[din](vof, m_comp);
 
-      m_alphaDiagWeight[dit()](vof, m_comp) = volFrac * Aco;
+      m_alphaDiagWeight[din](vof, m_comp) = volFrac * Aco;
     };
 
     // Compute relaxation factor. Adjust the weight with domain boundary faces.
     auto betaKernel = [&](const VolIndex& vof) -> void {
       const IntVect iv = vof.gridIndex();
 
-      VoFStencil& curStencil = m_relaxStencils[dit()](vof, m_comp);
+      VoFStencil& curStencil = m_relaxStencils[din](vof, m_comp);
 
       Real betaWeight = EBArith::getDiagWeight(curStencil, vof);
       for (int dir = 0; dir < SpaceDim; dir++) {
@@ -1779,14 +1865,14 @@ EBHelmholtzOp::computeDiagWeight()
             Real              weightedAreaFrac = 0.0;
             Vector<FaceIndex> faces            = ebisbox.getFaces(vof, dir, sit());
             for (auto& f : faces.stdVector()) {
-              weightedAreaFrac += ebisbox.areaFrac(f) * (*m_Bcoef)[dit()][dir](f, m_comp) / (m_dx * m_dx);
+              weightedAreaFrac += ebisbox.areaFrac(f) * (*m_Bcoef)[din][dir](f, m_comp) / (m_dx * m_dx);
             }
             betaWeight += -weightedAreaFrac;
           }
         }
       }
 
-      m_betaDiagWeight[dit()](vof, m_comp) = betaWeight;
+      m_betaDiagWeight[din](vof, m_comp) = betaWeight;
     };
 
     BoxLoops::loop(vofit, alphaKernel);
@@ -1807,20 +1893,27 @@ EBHelmholtzOp::computeRelaxationCoefficient()
   ParmParse pp("EBHelmholtzOp");
   pp.query("sor_factor", sor_factor);
 
-  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit) {
-    const Box cellBox = m_eblg.getDBL()[dit()];
+  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box cellBox = m_eblg.getDBL()[din];
 
     // Add the diagonal term alpha * A
-    m_relCoef[dit()].setVal(0.0);
-    m_relCoef[dit()] += (*m_Acoef)[dit()];
-    m_relCoef[dit()] *= m_alpha;
+    m_relCoef[din].setVal(0.0);
+    m_relCoef[din] += (*m_Acoef)[din];
+    m_relCoef[din] *= m_alpha;
 
     // Add in the diagonal term for the variable-coefficient Laplacian
-    BaseFab<Real>& regRel = m_relCoef[dit()].getSingleValuedFAB();
+    BaseFab<Real>& regRel = m_relCoef[din].getSingleValuedFAB();
     for (int dir = 0; dir < SpaceDim; dir++) {
 
       // Regular kernel for adding -beta*(bcoef(loFace) + bcoef(hiFace))/dx^2 to the relaxation term.
-      BaseFab<Real>& regBcoDir = (*m_Bcoef)[dit()][dir].getSingleValuedFAB();
+      BaseFab<Real>& regBcoDir = (*m_Bcoef)[din][dir].getSingleValuedFAB();
 
       const Real factor        = m_beta / (m_dx * m_dx);
       auto       regularKernel = [&](const IntVect& iv) -> void {
@@ -1839,39 +1932,51 @@ EBHelmholtzOp::computeRelaxationCoefficient()
     // Do the same for the irregular cells
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       // m_alphaDiagWeight holds kappa * A
-      const Real alphaWeight = m_alpha * m_alphaDiagWeight[dit()](vof, m_comp);
+      const Real alphaWeight = m_alpha * m_alphaDiagWeight[din](vof, m_comp);
 
       // m_betaWeight holds the diagonal part of kappa*div(b*grad(phi)) in the cut-cells.
-      const Real betaWeight = m_beta * m_betaDiagWeight[dit()](vof, m_comp);
+      const Real betaWeight = m_beta * m_betaDiagWeight[din](vof, m_comp);
 
-      m_relCoef[dit()](vof, m_comp) = sor_factor / (alphaWeight + betaWeight);
+      m_relCoef[din](vof, m_comp) = sor_factor / (alphaWeight + betaWeight);
     };
 
-    BoxLoops::loop(m_vofIterStenc[dit()], irregularKernel);
+    BoxLoops::loop(m_vofIterStenc[din], irregularKernel);
   }
 }
 
 void
 EBHelmholtzOp::makeAggStencil()
 {
-  CH_TIME("EBHelmholtzOp::makeAggStencil()");
+  CH_TIMERS("EBHelmholtzOp::makeAggStencil()");
+  CH_TIMER("EBHelmholtzOp::makeAggStencil::define_proxies", t1);
+  CH_TIMER("EBHelmholtzOp::makeAggStencil::omp_loop", t2);
+
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const DataIterator&      dit   = dbl.dataIterator();
 
   // These are proxies for when we compute L(phi). The number of ghost cells is important because
   // VCAggStencil will use these proxies for computing offsets in the data.
-  LevelData<EBCellFAB> phiProxy(m_eblg.getDBL(), m_nComp, m_ghostPhi, EBCellFactory(m_eblg.getEBISL()));
-  LevelData<EBCellFAB> rhsProxy(m_eblg.getDBL(), m_nComp, m_ghostRhs, EBCellFactory(m_eblg.getEBISL()));
+  CH_START(t1);
+  LevelData<EBCellFAB> phiProxy(dbl, m_nComp, m_ghostPhi, EBCellFactory(ebisl));
+  LevelData<EBCellFAB> rhsProxy(dbl, m_nComp, m_ghostRhs, EBCellFactory(ebisl));
+  CH_STOP(t1);
 
-  m_aggRelaxStencil.define(m_eblg.getDBL());
+  m_aggRelaxStencil.define(dbl);
 
-  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit) {
+  const int nbox = dit.size();
+  CH_START(t2);
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
     Vector<RefCountedPtr<BaseIndex>>   dstBaseIndex;
     Vector<RefCountedPtr<BaseStencil>> dstBaseStencil;
 
-    VoFIterator& vofit = m_vofIterStenc[dit()];
+    VoFIterator& vofit = m_vofIterStenc[din];
 
     auto kernel = [&](const VolIndex& vof) -> void {
-      const VoFStencil opSten = m_relaxStencils[dit()](vof, m_comp);
+      const VoFStencil opSten = m_relaxStencils[din](vof, m_comp);
 
       dstBaseIndex.push_back(RefCountedPtr<BaseIndex>(new VolIndex(vof)));
       dstBaseStencil.push_back(RefCountedPtr<BaseStencil>(new VoFStencil(opSten)));
@@ -1879,14 +1984,15 @@ EBHelmholtzOp::makeAggStencil()
 
     BoxLoops::loop(vofit, kernel);
 
-    m_aggRelaxStencil[dit()] = RefCountedPtr<VCAggStencil>(new VCAggStencil(dstBaseIndex,
-                                                                            dstBaseStencil,
-                                                                            phiProxy[dit()],
-                                                                            rhsProxy[dit()],
-                                                                            m_relCoef[dit()],
-                                                                            m_alphaDiagWeight[dit()],
-                                                                            m_nComp));
+    m_aggRelaxStencil[din] = RefCountedPtr<VCAggStencil>(new VCAggStencil(dstBaseIndex,
+                                                                          dstBaseStencil,
+                                                                          phiProxy[din],
+                                                                          rhsProxy[din],
+                                                                          m_relCoef[din],
+                                                                          m_alphaDiagWeight[din],
+                                                                          m_nComp));
   }
+  CH_STOP(t2);
 }
 
 VoFStencil
@@ -2070,10 +2176,15 @@ EBHelmholtzOp::computeFlux(const LevelData<EBCellFAB>& a_phi)
   CH_TIME("EBHelmholtzOp::computeFlux(LD<EBCellFAB>)");
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const DataIterator&      dit = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
     for (int dir = 0; dir < SpaceDim; dir++) {
-      this->computeFlux((*m_flux)[dit()][dir], a_phi[dit()], dbl[dit()], dit(), dir);
+      this->computeFlux((*m_flux)[din][dir], a_phi[din], dbl[din], din, dir);
     }
   }
 }

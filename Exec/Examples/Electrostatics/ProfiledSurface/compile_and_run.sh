@@ -48,10 +48,19 @@ then
 		       'FieldSolver::writeMultifluidData' \
 		       'FieldSolver::computeLoads(DisjointBoxLayout, int)' \
 		       'MFHelmholtzElectrostaticEBBC::defineSinglePhase()' \
+		       'EBHelmholtzOp::dotProduct' \
 		       'EBHelmholtzOp::defineStencils()' \
 		       'EBHelmholtzOp::norm' \
 		       'EBHelmholtzOp::refluxFreeAMROperator' \
-		       'EBHelmholtzOp::applyOp(LD<EBCellFAB>)' \
+		       'EBHelmholtzOp::applyOp(LD<EBCellFAB>' \
+		       'EBHelmholtzOp::diagonalScale(LD<EBCellFAB>, bool)' \
+		       'EBHelmholtzOp::relaxPointJacobi(LD<EBCellFAB>, LD<EBCellFAB>, int)' \
+		       'EBHelmholtzOp::relaxGSRedBlack(LD<EBCellFAB>, LD<EBCellFAB>, int)' \
+		       'EBHelmholtzOp::relaxGSMultiColor(LD<EBCellFAB>, LD<EBCellFAB>, int)' \
+		       'EBHelmholtzOp::computeDiagWeight()' \
+		       'EBHelmholtzOp::computeRelaxationCoefficient()' \
+		       'EBHelmholtzOp::makeAggStencil()' \
+		       'EBHelmholtzOp::computeFlux(LD<EBCellFAB>)' \
 		   ; do
 
 	if grep -q "${PATTERN}" time.table.serial

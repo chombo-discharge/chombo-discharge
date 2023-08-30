@@ -411,12 +411,9 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
 {
   CH_TIME("MFHelmholtzOp::dotProduct)");
 
-  Real ret = 0.0;
-
   Real sumKappaXY = 0.0;
   Real sumVolume  = 0.0;
 
-  const ProblemDomain&     domain = m_mflg.getDomain();
   const DisjointBoxLayout& dbl    = a_lhs.disjointBoxLayout();
   const DataIterator&      dit    = dbl.dataIterator();
   const int                nbox   = dit.size();
@@ -470,11 +467,13 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
   sumKappaXY = ParallelOps::sum(sumKappaXY);
   sumVolume  = ParallelOps::sum(sumVolume);
 
+  Real dotProd = 0.0;
+  
   if (sumVolume > 0.0) {
-    ret = sumKappaXY / sumVolume;
+    dotProd = sumKappaXY / sumVolume;
   }
 
-  return ret;
+  return dotProd;
 }
 
 void
