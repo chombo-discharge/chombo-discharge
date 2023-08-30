@@ -362,6 +362,7 @@ Driver::getCellsAndBoxes(long long&                       a_numLocalCells,
   a_numLocalCells       = 0;
   a_numLocalCellsGhosts = 0;
   a_numLocalBoxes       = 0;
+
   a_numTotalCells       = 0;
   a_numTotalCellsGhosts = 0;
   a_numTotalBoxes       = 0;
@@ -400,16 +401,18 @@ Driver::getCellsAndBoxes(long long&                       a_numLocalCells,
     const long long boxesThisLevel       = ParallelOps::sum(numBoxes);
 
     // Total for this level
-    a_numTotalCells += cellsThisLevel;
-    a_numTotalCellsGhosts += cellsThisLevelGhosts;
-    a_numTotalBoxes += boxesThisLevel;
     a_numLocalCells += numCellsNoGhosts;
     a_numLocalCellsGhosts += numCellsWithGhosts;
     a_numLocalBoxes += numBoxes;
+
+    a_numTotalCells += cellsThisLevel;
+    a_numTotalCellsGhosts += cellsThisLevelGhosts;
+    a_numTotalBoxes += boxesThisLevel;
+
     a_numLocalLevelBoxes[lvl] = numBoxes;
-    a_numTotalLevelBoxes[lvl] = boxesThisLevel;
+    a_numTotalLevelBoxes[lvl] += boxesThisLevel;
     a_numLocalLevelCells[lvl] = numCellsNoGhosts;
-    a_numLocalLevelBoxes[lvl] = numBoxes;
+    a_numTotalLevelCells[lvl] += numCellsNoGhosts;
   }
 }
 
@@ -473,33 +476,40 @@ Driver::gridReport()
                            m_amr->getGrids(str));
   }
 
+  long long totalValidCells = totalLevelCells[finestLevel];
+
   validLevelCells = totalLevelCells;
+
   for (int lvl = 0; lvl < finestLevel; lvl++) {
     validLevelCells[lvl] -= totalLevelCells[lvl + 1] / std::pow(refRat[lvl], SpaceDim);
+
+    totalValidCells += validLevelCells[lvl];
   }
 
   // Begin writing a report.
-  pout() << "-----------------------------------------------------------------------" << endl
+  pout() << "=======================================================================" << endl
          << "Driver::Grid report - timestep = " << m_timeStep << endl
-         << "\t\t\t        Finest level           = " << finestLevel << endl
+         << "---------------------------------------------------------" << endl
+         << "\tFinest level............. = " << finestLevel << endl
 #if CH_SPACEDIM == 2
-         << "\t\t\t        Finest AMR domain      = " << finestBox.size()[0] << " x " << finestBox.size()[1] << endl
-         << "\t\t\t        Coarsest AMR domain    = " << coarsestBox.size()[0] << " x " << coarsestBox.size()[1] << endl
+         << "\tFinest AMR domain........ = " << finestBox.size()[0] << " x " << finestBox.size()[1] << endl
+         << "\tCoarsest AMR domain...... = " << coarsestBox.size()[0] << " x " << coarsestBox.size()[1] << endl
 #elif CH_SPACEDIM == 3
-         << "\t\t\t        Finest AMR domain      = " << finestBox.size()[0] << " x " << finestBox.size()[1] << " x "
+         << "\tFinest AMR domain........ = " << finestBox.size()[0] << " x " << finestBox.size()[1] << " x "
          << finestBox.size()[2] << endl
-         << "\t\t\t        Coarsest AMR domain    = " << coarsestBox.size()[0] << " x " << coarsestBox.size()[1]
-         << " x " << coarsestBox.size()[2] << endl
+         << "\tCoarsest AMR domain...... = " << coarsestBox.size()[0] << " x " << coarsestBox.size()[1] << " x "
+         << coarsestBox.size()[2] << endl
 #endif
-         << "\t\t\t        Refinement ratios      = " << ref_rat << endl
-         << "\t\t\t        Grid sparsity          = " << 1.0 * totalCells / uniformPoints << endl
-         << "\t\t\t        Finest dx              = " << dx[finestLevel] << endl
-         << "\t\t\t        Total number boxes     = " << DischargeIO::numberFmt(totalBoxes) << endl
-         << "\t\t\t        Number of valid cells  = " << DischargeIO::numberFmt(totalCells) << endl
-         << "\t\t\t        Including ghost cells  = " << DischargeIO::numberFmt(totalCellsGhosts) << endl
-         << "\t\t\t        Total # of boxes (lvl) = " << DischargeIO::numberFmt(totalLevelBoxes) << endl
-         << "\t\t\t        Total # of cells (lvl) = " << DischargeIO::numberFmt(totalLevelCells) << endl
-         << "\t\t\t        Valid # of cells (lvl) = " << DischargeIO::numberFmt(validLevelCells) << endl;
+         << "\tRefinement ratios........ = " << ref_rat << endl
+         << "\tGrid sparsity............ = " << 1.0 * totalCells / uniformPoints << endl
+         << "\tFinest dx................ = " << dx[finestLevel] << endl
+         << "\tTotal number boxes....... = " << DischargeIO::numberFmt(totalBoxes) << endl
+         << "\tNumber of cells.......... = " << DischargeIO::numberFmt(totalCells) << endl
+         << "\tIncluding ghost cells.... = " << DischargeIO::numberFmt(totalCellsGhosts) << endl
+         << "\tValid # of cells......... = " << DischargeIO::numberFmt(totalValidCells) << endl
+         << "\tTotal # of boxes (lvl)... = " << DischargeIO::numberFmt(totalLevelBoxes) << endl
+         << "\tTotal # of cells (lvl)... = " << DischargeIO::numberFmt(totalLevelCells) << endl
+         << "\tValid # of cells (lvl)... = " << DischargeIO::numberFmt(validLevelCells) << endl;
 
   // Do a local report for each Realm
   for (const auto& str : realms) {
@@ -516,12 +526,13 @@ Driver::gridReport()
                            finestLevel,
                            m_amr->getGrids(str));
 
-    pout() << "\t\t\t        Realm = " << str << endl
-           << "\t\t\t\t        Proc. # of valid cells = " << DischargeIO::numberFmt(localCells) << endl
-           << "\t\t\t\t        Including ghost cells  = " << DischargeIO::numberFmt(localCellsGhosts) << endl
-           << "\t\t\t\t        Proc. # of boxes       = " << DischargeIO::numberFmt(localBoxes) << endl
-           << "\t\t\t\t        Proc. # of boxes (lvl) = " << DischargeIO::numberFmt(localLevelBoxes) << endl
-           << "\t\t\t\t        Proc. # of cells (lvl) = " << DischargeIO::numberFmt(localLevelCells) << endl;
+    pout() << "\t**************" << endl
+           << "\tRealm = " << str << endl
+           << "\t...Proc. # of valid cells... = " << DischargeIO::numberFmt(localCells) << endl
+           << "\t...Including ghost cells.... = " << DischargeIO::numberFmt(localCellsGhosts) << endl
+           << "\t...Proc. # of boxes......... = " << DischargeIO::numberFmt(localBoxes) << endl
+           << "\t...Proc. # of boxes (lvl)... = " << DischargeIO::numberFmt(localLevelBoxes) << endl
+           << "\t...Proc. # of cells (lvl)... = " << DischargeIO::numberFmt(localLevelCells) << endl;
   }
 
   // Write a memory report if Chombo was to compiled to use memory tracking.
@@ -533,8 +544,8 @@ Driver::gridReport()
 
   overallMemoryUsage(localUnfreedMemory, localPeakMemory);
 
-  pout() << "\t\t\t        Unfreed memory        = " << std::ceil(localUnfreedMemory / BytesPerMB) << " (MB)" << endl
-         << "\t\t\t        Peak memory usage     = " << std::ceil(localPeakMemory / BytesPerMB) << " (MB)" << endl;
+  pout() << "\tUnfreed memory        = " << std::ceil(localUnfreedMemory / BytesPerMB) << " (MB)" << endl
+         << "\tPeak memory usage     = " << std::ceil(localPeakMemory / BytesPerMB) << " (MB)" << endl;
 #ifdef CH_MPI
 
   // If this is an MPI run we want to include the maximum consum memory in the report as well. We compute the
@@ -544,13 +555,13 @@ Driver::gridReport()
   const long long maxUnfreedMemory = ParallelOps::max(localUnfreedMemory);
   const long long maxPeakMemory    = ParallelOps::max(localPeakMemory);
 
-  pout() << "\t\t\t        Min unfreed memory    = " << std::ceil(minUnfreedMemory / BytesPerMB) << " (MB)" << endl
-         << "\t\t\t        Min peak memory       = " << std::ceil(minPeakMemory / BytesPerMB) << " (MB)" << endl
-         << "\t\t\t        Max unfreed memory    = " << std::ceil(maxUnfreedMemory / BytesPerMB) << " (MB)" << endl
-         << "\t\t\t        Max peak memory       = " << std::ceil(maxPeakMemory / BytesPerMB) << " (MB)" << endl;
+  pout() << "\tMin unfreed memory    = " << std::ceil(minUnfreedMemory / BytesPerMB) << " (MB)" << endl
+         << "\tMin peak memory       = " << std::ceil(minPeakMemory / BytesPerMB) << " (MB)" << endl
+         << "\tMax unfreed memory    = " << std::ceil(maxUnfreedMemory / BytesPerMB) << " (MB)" << endl
+         << "\tMax peak memory       = " << std::ceil(maxPeakMemory / BytesPerMB) << " (MB)" << endl;
 #endif
-  pout() << "-----------------------------------------------------------------------" << endl;
 #endif
+  pout() << "=======================================================================" << endl;
 
   pout() << endl;
 }

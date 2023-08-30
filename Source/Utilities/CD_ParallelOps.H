@@ -12,6 +12,9 @@
 #ifndef CD_ParallelOps_H
 #define CD_ParallelOps_H
 
+// Chombo includes
+#include <RealVect.H>
+
 // Our includes
 #include <CD_NamespaceHeader.H>
 
