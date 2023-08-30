@@ -11,13 +11,11 @@
 
 // Chombo includes
 #include <BRMeshRefine.H>
-#include <EBEllipticLoadBalance.H>
-#include <EBLevelDataOps.H>
-#include <MFLevelDataOps.H>
-#include <EBArith.H>
 #include <ParmParse.H>
 #include <BaseIFFactory.H>
 #include <BaseIVFactory.H>
+#include <EBCellFactory.H>
+#include <EBFluxFactory.H>
 
 // Our includes
 #include <CD_AmrMesh.H>

@@ -15,7 +15,6 @@
 // Chombo includes
 #include <CH_Timer.H>
 #include <EBCellFactory.H>
-#include <EBLevelDataOps.H>
 #include <NeighborIterator.H>
 #include <EBAlias.H>
 #include <ParmParse.H>

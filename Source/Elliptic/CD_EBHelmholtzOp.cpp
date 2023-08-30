@@ -262,23 +262,26 @@ EBHelmholtzOp::defineStencils()
 {
   CH_TIME("EBHelmholtzOp::defineStencils()");
 
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+
   // Basic defines.
-  EBCellFactory cellFact(m_eblg.getEBISL());
-  EBFluxFactory fluxFact(m_eblg.getEBISL());
+  EBCellFactory cellFact(ebisl);
+  EBFluxFactory fluxFact(ebisl);
 
-  m_relCoef.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, cellFact);
+  m_relCoef.define(dbl, m_nComp, IntVect::Zero, cellFact);
 
-  m_vofIterIrreg.define(m_eblg.getDBL());
-  m_vofIterMulti.define(m_eblg.getDBL());
-  m_vofIterStenc.define(m_eblg.getDBL());
-  m_alphaDiagWeight.define(m_eblg.getDBL());
-  m_betaDiagWeight.define(m_eblg.getDBL());
-  m_relaxStencils.define(m_eblg.getDBL());
+  m_vofIterIrreg.define(dbl);
+  m_vofIterMulti.define(dbl);
+  m_vofIterStenc.define(dbl);
+  m_alphaDiagWeight.define(dbl);
+  m_betaDiagWeight.define(dbl);
+  m_relaxStencils.define(dbl);
 
   for (int dir = 0; dir < SpaceDim; dir++) {
-    m_vofIterDomLo[dir].define(m_eblg.getDBL());
-    m_vofIterDomHi[dir].define(m_eblg.getDBL());
-    m_centroidFluxStencil[dir].define(m_eblg.getDBL());
+    m_vofIterDomLo[dir].define(dbl);
+    m_vofIterDomHi[dir].define(dbl);
+    m_centroidFluxStencil[dir].define(dbl);
   }
 
   // Get the "colors" for multi-colored relaxation.
@@ -298,9 +301,15 @@ EBHelmholtzOp::defineStencils()
   const LayoutData<BaseIVFAB<VoFStencil>>& ebFluxStencil = m_ebBc->getGradPhiStencils();
 
   // Define everything
-  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit) {
-    const Box      cellBox = m_eblg.getDBL()[dit()];
-    const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
+  const DataIterator& dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box      cellBox = dbl[din];
+    const EBISBox& ebisbox = ebisl[din];
     const EBGraph& ebgraph = ebisbox.getEBGraph();
 
     const IntVectSet irregIVS = ebisbox.getIrregIVS(cellBox);
@@ -337,22 +346,22 @@ EBHelmholtzOp::defineStencils()
 
     // Define iterators. These iterators run over the irregular cells, multi-valued cells only, and cells where we have explicit
     // stencils for kappa*L(phi). The domain iterators are iterators for cut-cells that neighbor a domain edge (face)
-    m_vofIterIrreg[dit()].define(irregIVS, ebgraph);
-    m_vofIterMulti[dit()].define(multiIVS, ebgraph);
-    m_vofIterStenc[dit()].define(stencIVS, ebgraph);
+    m_vofIterIrreg[din].define(irregIVS, ebgraph);
+    m_vofIterMulti[din].define(multiIVS, ebgraph);
+    m_vofIterStenc[din].define(stencIVS, ebgraph);
 
     for (int dir = 0; dir < SpaceDim; dir++) {
       const IntVectSet loIrreg = irregIVS & m_sideBox.at(std::make_pair(dir, Side::Lo));
       const IntVectSet hiIrreg = irregIVS & m_sideBox.at(std::make_pair(dir, Side::Hi));
 
-      m_vofIterDomLo[dir][dit()].define(loIrreg, ebgraph);
-      m_vofIterDomHi[dir][dit()].define(hiIrreg, ebgraph);
+      m_vofIterDomLo[dir][din].define(loIrreg, ebgraph);
+      m_vofIterDomHi[dir][din].define(hiIrreg, ebgraph);
     }
 
     // Define data holders.
-    m_relaxStencils[dit()].define(stencIVS, ebgraph, m_nComp);
-    m_alphaDiagWeight[dit()].define(stencIVS, ebgraph, m_nComp);
-    m_betaDiagWeight[dit()].define(stencIVS, ebgraph, m_nComp);
+    m_relaxStencils[din].define(stencIVS, ebgraph, m_nComp);
+    m_alphaDiagWeight[din].define(stencIVS, ebgraph, m_nComp);
+    m_betaDiagWeight[din].define(stencIVS, ebgraph, m_nComp);
 
     // The below code may seem intimidating at first. What happens is that we explicitly store stencils for all cells that is either a cut-cell
     // or shares a face with a cut-cell. Now, we have to compute stencils explicitly for this subset of cells, and we need representations both
@@ -392,18 +401,18 @@ EBHelmholtzOp::defineStencils()
     // Referring to the sketch above, we iterate through cells A, B, D, E and compute the face centroid fluxes for all these cells. This includes
     // e.g. the face connecting E and F. However, since F only has regular faces we don't store the stencil explicitly for that cell.
     //
-    BaseIVFAB<VoFStencil>& opStencil  = m_relaxStencils[dit()];
-    VoFIterator&           vofitStenc = m_vofIterStenc[dit()];
-    VoFIterator&           vofitIrreg = m_vofIterIrreg[dit()];
+    BaseIVFAB<VoFStencil>& opStencil  = m_relaxStencils[din];
+    VoFIterator&           vofitStenc = m_vofIterStenc[din];
+    VoFIterator&           vofitIrreg = m_vofIterIrreg[din];
 
     BoxLoops::loop(vofitStenc, [&](const VolIndex& vof) -> void {
       opStencil(vof, m_comp).clear();
     });
 
     for (int dir = 0; dir < SpaceDim; dir++) {
-      m_centroidFluxStencil[dir][dit()].define(stencIVS, ebgraph, dir, m_nComp);
+      m_centroidFluxStencil[dir][din].define(stencIVS, ebgraph, dir, m_nComp);
 
-      BaseIFFAB<VoFStencil>& fluxStencils = m_centroidFluxStencil[dir][dit()];
+      BaseIFFAB<VoFStencil>& fluxStencils = m_centroidFluxStencil[dir][din];
 
       // 1.
       FaceIterator faceIt(stencIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary);
@@ -414,7 +423,7 @@ EBHelmholtzOp::defineStencils()
           const VolIndex vofHi = face.getVoF(Side::Hi);
 
           // 2.
-          const VoFStencil fluxSten = this->getFaceCentroidFluxStencil(face, dit());
+          const VoFStencil fluxSten = this->getFaceCentroidFluxStencil(face, din);
 
           // 3.
           fluxStencils(face, m_comp) = fluxSten;
@@ -442,9 +451,9 @@ EBHelmholtzOp::defineStencils()
 
     // 5. Add contributions to the operator from the EB faces.
     BoxLoops::loop(vofitIrreg, [&](const VolIndex& vof) -> void {
-      VoFStencil ebSten = ebFluxStencil[dit()](vof, m_comp);
+      VoFStencil ebSten = ebFluxStencil[din](vof, m_comp);
 
-      ebSten *= (*m_BcoefIrreg)[dit()](vof, m_comp);
+      ebSten *= (*m_BcoefIrreg)[din](vof, m_comp);
 
       opStencil(vof, m_comp) += ebSten;
     });
@@ -573,11 +582,17 @@ EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int a_order)
   // TLDR: This computes the Linf norm.
   Real maxNorm = 0.0;
 
-  for (DataIterator dit = a_rhs.dataIterator(); dit.ok(); ++dit) {
-    const EBCellFAB& rhs     = a_rhs[dit()];
+  const DataIterator& dit = a_rhs.dataIterator();
+
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime) reduction(max : maxNorm)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const EBCellFAB& rhs     = a_rhs[din];
     const FArrayBox& regRhs  = rhs.getFArrayBox();
     const EBISBox&   ebisbox = rhs.getEBISBox();
-    const Box        box     = a_rhs.disjointBoxLayout()[dit()];
+    const Box        box     = a_rhs.disjointBoxLayout()[din];
 
     auto regularKernel = [&](const IntVect& iv) -> void {
       if (ebisbox.isRegular(iv)) {
@@ -595,7 +610,7 @@ EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int a_order)
     CH_STOP(t1);
 
     CH_START(t2);
-    BoxLoops::loop(m_vofIterIrreg[dit()], irregularKernel);
+    BoxLoops::loop(m_vofIterIrreg[din], irregularKernel);
     CH_STOP(t2);
   }
 
@@ -771,29 +786,41 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
     fineOp->deallocateFlux();
   }
 
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+
+  const DataIterator& dit  = dbl.dataIterator();
+  const int           nbox = dit.size();
+
   // Fill the domain fluxes.
-  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit) {
-    this->fillDomainFlux((*m_flux)[dit()], a_phi[dit()], m_eblg.getDBL()[dit()], dit());
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    this->fillDomainFlux((*m_flux)[din], a_phi[din], dbl[din], din);
   }
 
   // The above calls replaced the fluxes on this level by (conservative) averages of the fluxes on
   // the finer level. We can proceed as usual now, ignoring the fine level.
   const Real inverseDx = 1.0 / m_dx;
-  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit) {
-    const Box      cellBox = m_eblg.getDBL()[dit()];
-    const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    EBCellFAB& Lphi    = a_Lphi[dit()];
+    const Box      cellBox = dbl[din];
+    const EBISBox& ebisbox = ebisl[din];
+
+    EBCellFAB& Lphi    = a_Lphi[din];
     FArrayBox& LphiReg = Lphi.getFArrayBox();
 
-    const EBCellFAB& phi  = a_phi[dit()];
-    const EBCellFAB& Aco  = (*m_Acoef)[dit()];
-    const EBFluxFAB& Bco  = (*m_Bcoef)[dit()];
-    const EBFluxFAB& flux = (*m_flux)[dit()];
+    const EBCellFAB& phi  = a_phi[din];
+    const EBCellFAB& Aco  = (*m_Acoef)[din];
+    const EBFluxFAB& Bco  = (*m_Bcoef)[din];
+    const EBFluxFAB& flux = (*m_flux)[din];
 
-    const BaseIVFAB<Real>&       BcoIrreg      = (*m_BcoefIrreg)[dit()];
-    const BaseIVFAB<VoFStencil>& ebFluxStencil = m_ebBc->getGradPhiStencils()[dit()];
-    const BaseIVFAB<Real>&       alphaDiag     = m_alphaDiagWeight[dit()];
+    const BaseIVFAB<Real>&       BcoIrreg      = (*m_BcoefIrreg)[din];
+    const BaseIVFAB<VoFStencil>& ebFluxStencil = m_ebBc->getGradPhiStencils()[din];
+    const BaseIVFAB<Real>&       alphaDiag     = m_alphaDiagWeight[din];
 
     // Add alpha-term.
     Lphi.setVal(0.0);
@@ -845,7 +872,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
               curFlux = faceFlux(face, m_comp);
             }
             else {
-              curFlux = m_domainBc->getFaceFlux(vof, phi, Bco[dir], dir, sit(), dit(), a_homogeneousPhysBC);
+              curFlux = m_domainBc->getFaceFlux(vof, phi, Bco[dir], dir, sit(), din, a_homogeneousPhysBC);
               curFlux *= m_beta;
             }
 
@@ -864,10 +891,10 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
         Lphi(vof, m_comp) += m_beta * BcoIrreg(vof, m_comp) * weight * phi(ivof, m_comp);
       }
     };
-    BoxLoops::loop(m_vofIterIrreg[dit()], irregularKernel);
+    BoxLoops::loop(m_vofIterIrreg[din], irregularKernel);
 
     // Finally, add in the inhomogeneous EB flux.
-    m_ebBc->applyEBFlux(m_vofIterIrreg[dit()], Lphi, phi, BcoIrreg, dit(), m_beta, a_homogeneousPhysBC);
+    m_ebBc->applyEBFlux(m_vofIterIrreg[din], Lphi, phi, BcoIrreg, din, m_beta, a_homogeneousPhysBC);
   }
 
   this->deallocateFlux();
@@ -1037,8 +1064,14 @@ EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
 
   // Apply operator in each kernel.
   const DisjointBoxLayout& dbl = a_Lphi.disjointBoxLayout();
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    this->applyOp(a_Lphi[dit()], phi[dit()], dbl[dit()], dit(), a_homogeneousPhysBC);
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    this->applyOp(a_Lphi[din], phi[din], dbl[din], din, a_homogeneousPhysBC);
   }
 }
 

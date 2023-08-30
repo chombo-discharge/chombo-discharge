@@ -6,6 +6,7 @@
 # Source/ConvectionDiffusionReaction -> Exec/Examples/AdvectionDiffusion/PipeFlow/compile_and_run.sh
 # Source/Driver -> Exec/Examples/CdrPlasma/DeterministicAir/compile_and_run.sh
 # Source/Electrostatics -> Exec/Examples/Electrostatics/ProfiledSurface
+# Source/Elliptic -> Exec/Examples/Electrostatics/ProfiledSurface
 #
 # NOTE: ALL FOLDERS SHOULD BE THREADED BEFORE MERGING
 

@@ -9,7 +9,7 @@ export OMP_SCHEDULE="dynamic"
 
 COMPILE=true
 RUN=true
-PROFILE=false
+PROFILE=true
 INPUT="example2d.inputs Driver.max_steps=0 Driver.initial_regrids=1 Driver.write_memory=true Driver.write_loads=true FieldStepper.load_balance=true"
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
@@ -48,6 +48,10 @@ then
 		       'FieldSolver::writeMultifluidData' \
 		       'FieldSolver::computeLoads(DisjointBoxLayout, int)' \
 		       'MFHelmholtzElectrostaticEBBC::defineSinglePhase()' \
+		       'EBHelmholtzOp::defineStencils()' \
+		       'EBHelmholtzOp::norm' \
+		       'EBHelmholtzOp::refluxFreeAMROperator' \
+		       'EBHelmholtzOp::applyOp(LD<EBCellFAB>)' \
 		   ; do
 
 	if grep -q "${PATTERN}" time.table.serial

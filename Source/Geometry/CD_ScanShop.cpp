@@ -14,8 +14,6 @@
 
 // Chombo includes
 #include <BRMeshRefine.H>
-#include <LoadBalance.H>
-#include <EBLevelDataOps.H>
 #include <ParmParse.H>
 
 // Our includes
