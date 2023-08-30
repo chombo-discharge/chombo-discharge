@@ -61,6 +61,38 @@ then
 		       'EBHelmholtzOp::computeRelaxationCoefficient()' \
 		       'EBHelmholtzOp::makeAggStencil()' \
 		       'EBHelmholtzOp::computeFlux(LD<EBCellFAB>)' \
+		       'DataOps::setValue(LD<MFCellFAB>, Real)' \
+		       'DataOps::averageCellToFace(LD<EBFluxFAB, LD<EBCellFAB>, ....' \
+		       'DataOps::axby' \
+		       'DataOps::incr(LD<EBCellFAB)' \
+		       'DataOps::getMaxMin(Real, Real, LD<EBFluxFAB>, int>)' \
+		       'DataOps::kappaScale(LD<EBCellFAB>)' \
+		       'DataOps::kappaScale(LD<MFCellFAB>)' \
+		       'DataOps::scale(LD<MFCellFAB>)' \
+		       'DataOps::scale(LD<EBCellFAB>)' \
+		       'DataOps::setCoveredValue(LD<EBFluxFAB>, int, Real)' \
+		       'DataOps::setValue(LD<MFCellFAB>, Real)' \
+		       'DataOps::incr(LD<MFCellFAB)' \
+		       'MFHelmholtzOp::applyOp' \
+		       'MFHelmholtzOp::relaxPointJacobi' \
+		       'MFHelmholtzOp::interpolateCF' \
+		       'MFHelmholtzOp::relaxGSRedBlack' \
+		       'MFHelmholtzOp::relaxGSMultiColor' \
+		       'MFHelmholtzJumpBC::defineStencils()' \
+		       'MFHelmholtzJumpBC::buildAverageStencils()' \
+		       'MFHelmholtzJumpBC::defineIterators()' \
+		       'MFHelmholtzJumpBC::resetBC()' \
+		       'MFHelmholtzJumpBC::matchBC(LD<MFCellFAB>, LD<BaseIVFAB<Real>, bool)' \
+		       'EBHelmholtzDirichletEBBC::define()' \
+		       'MFHelmholtzEBBC::defineMultiPhase()' \
+		       'EBHelmholtzOpFactory::defineMultigridLevels()' \
+		       'MFHelmholtzDirichletEBBC::defineSinglePhase()' \
+		       'MFHelmholtzRobinEBBC::define()' \
+		       'EBHelmholtzNeumannEBBC::define()' \
+		       'MFHelmholtzOpFactory::defineJump()' \
+		       'MFHelmholtzOpFactory::setJump(EBAMRIVData, Real)' \
+		       'EBHelmholtzRobinEBBC::define()' \
+		       'MFHelmholtzOp::relax' \
 		   ; do
 
 	if grep -q "${PATTERN}" time.table.serial

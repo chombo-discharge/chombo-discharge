@@ -831,16 +831,16 @@ FieldSolverMultigrid::computeLoads(const DisjointBoxLayout& a_dbl, const int a_l
 
   // Reset time
   TimedDataIterator dit = a_dbl.timedDataIterator();
-  dit.clearTime();
   dit.enableTime();
+  dit.clearTime();
 
   for (int k = 0; k < numApply; k++) {
     oper->computeOperatorLoads(*dummy[a_level], dit);
   }
 
   // Merge times
-  dit.disableTime();
   dit.mergeTime();
+  dit.disableTime();
 
   // Now do the load balancing. When we do this, the boxes do not follow AmrMesh sorting. I.e., the
   // vector indices correspond to the indices in DisjointBoxLayout::getBoxArray().

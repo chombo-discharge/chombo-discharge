@@ -240,7 +240,7 @@ public:
     @param[in]    a_scale Scale factor.
   */
   static void
-  incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale);
+  incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale) noexcept;
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
@@ -249,7 +249,7 @@ public:
     @param[in]    a_scale Scale factor.
   */
   static void
-  incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Real a_scale);
+  incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Real a_scale) noexcept;
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
@@ -865,7 +865,7 @@ public:
     @param[in]    a_scale Scaling factor
   */
   static void
-  scale(MFAMRCellData& a_lhs, const Real& a_scale);
+  scale(MFAMRCellData& a_lhs, const Real& a_scale) noexcept;
 
   /*!
     @brief Scale data by factor
@@ -873,7 +873,7 @@ public:
     @param[in]    a_scale Scaling factor
   */
   static void
-  scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale);
+  scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale) noexcept;
 
   /*!
     @brief Scale data by factor
@@ -1244,7 +1244,7 @@ public:
     @param[in]  a_value Value to set
   */
   static void
-  setValue(MFAMRCellData& a_lhs, const Real& a_value);
+  setValue(MFAMRCellData& a_lhs, const Real& a_value) noexcept;
 
   /*!
     @brief Set value in data
@@ -1252,7 +1252,7 @@ public:
     @param[in]  a_value Value to set
   */
   static void
-  setValue(LevelData<MFCellFAB>& a_lhs, const Real& a_value);
+  setValue(LevelData<MFCellFAB>& a_lhs, const Real& a_value) noexcept;
 
   /*!
     @brief Set value in data

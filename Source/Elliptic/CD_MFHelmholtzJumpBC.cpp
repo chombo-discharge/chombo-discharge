@@ -138,6 +138,9 @@ MFHelmholtzJumpBC::defineStencils()
   // MFHelmholtzJumpBC internals should never be called unless it's a multiphase problem.
   if (m_multiPhase) {
     const DisjointBoxLayout& dbl = m_mflg.getGrids();
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
 
     m_gradPhiStencils.define(dbl);
     m_gradPhiWeights.define(dbl);
@@ -147,16 +150,19 @@ MFHelmholtzJumpBC::defineStencils()
     m_avgVoFs.define(dbl);
     m_denom.define(dbl);
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box box = dbl[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      m_gradPhiStencils[dit()].define(m_mflg, dit());
-      m_gradPhiWeights[dit()].define(m_mflg, dit());
-      m_boundaryPhi[dit()].define(m_mflg, dit());
-      m_avgStencils[dit()].define(m_mflg, dit());
-      m_avgWeights[dit()].define(m_mflg, dit());
-      m_denom[dit()].define(m_mflg, dit());
-      m_avgVoFs[dit()].define(m_mflg, dit());
+      const Box box = dbl[din];
+
+      m_gradPhiStencils[din].define(m_mflg, din);
+      m_gradPhiWeights[din].define(m_mflg, din);
+      m_boundaryPhi[din].define(m_mflg, din);
+      m_avgStencils[din].define(m_mflg, din);
+      m_avgWeights[din].define(m_mflg, din);
+      m_denom[din].define(m_mflg, din);
+      m_avgVoFs[din].define(m_mflg, din);
     }
 
     // Build stencils and weights for each phase.
@@ -164,15 +170,18 @@ MFHelmholtzJumpBC::defineStencils()
       const EBLevelGrid& eblg  = m_mflg.getEBLevelGrid(iphase);
       const EBISLayout&  ebisl = eblg.getEBISL();
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box         box     = dbl[dit()];
-        const EBISBox&    ebisbox = ebisl[dit()];
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box         box     = dbl[din];
+        const EBISBox&    ebisbox = ebisl[din];
         const EBGraph&    ebgraph = ebisbox.getEBGraph();
-        const IntVectSet& ivs     = m_ivs[dit()];
+        const IntVectSet& ivs     = m_ivs[din];
 
         // Build stencils like we always do
-        BaseIVFAB<VoFStencil>& gradStencils = m_gradPhiStencils[dit()].getIVFAB(iphase);
-        BaseIVFAB<Real>&       bndryWeights = m_gradPhiWeights[dit()].getIVFAB(iphase);
+        BaseIVFAB<VoFStencil>& gradStencils = m_gradPhiStencils[din].getIVFAB(iphase);
+        BaseIVFAB<Real>&       bndryWeights = m_gradPhiWeights[din].getIVFAB(iphase);
 
         // Iteration space for kernel
         VoFIterator vofit(ivs, ebgraph);
@@ -192,7 +201,7 @@ MFHelmholtzJumpBC::defineStencils()
 
             // Check if stencil reaches too far across CF
             if (foundStencil) {
-              foundStencil = this->isStencilValidCF(pairSten.second, dit());
+              foundStencil = this->isStencilValidCF(pairSten.second, din);
             }
           }
 
@@ -205,7 +214,7 @@ MFHelmholtzJumpBC::defineStencils()
 
             // Check if stencil reaches too far across CF
             if (foundStencil) {
-              foundStencil = this->isStencilValidCF(pairSten.second, dit());
+              foundStencil = this->isStencilValidCF(pairSten.second, din);
             }
           }
 
@@ -244,25 +253,31 @@ MFHelmholtzJumpBC::buildAverageStencils()
   CH_assert(m_multiPhase);
 
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
 
   // Compute the average stencils and weights.
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
     const EBLevelGrid& eblg  = m_mflg.getEBLevelGrid(iphase);
     const EBISLayout&  ebisl = eblg.getEBISL();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box         box     = dbl[dit()];
-      const EBISBox&    ebisbox = ebisl[dit()];
-      const IntVectSet& ivs     = m_ivs[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      const BaseIVFAB<VoFStencil>& gradStencils = m_gradPhiStencils[dit()].getIVFAB(iphase);
-      const BaseIVFAB<Real>&       bndryWeights = m_gradPhiWeights[dit()].getIVFAB(iphase);
+      const Box         box     = dbl[din];
+      const EBISBox&    ebisbox = ebisl[din];
+      const IntVectSet& ivs     = m_ivs[din];
+
+      const BaseIVFAB<VoFStencil>& gradStencils = m_gradPhiStencils[din].getIVFAB(iphase);
+      const BaseIVFAB<Real>&       bndryWeights = m_gradPhiWeights[din].getIVFAB(iphase);
 
       // Build the average stencils. Only matters if the cell is a multi-valued cell.
-      BaseIVFAB<VoFStencil>&       avgStencils = m_avgStencils[dit()].getIVFAB(iphase);
-      BaseIVFAB<Real>&             avgWeights  = m_avgWeights[dit()].getIVFAB(iphase);
-      BaseIVFAB<Vector<VolIndex>>& avgVoFs     = m_avgVoFs[dit()].getIVFAB(iphase);
-      const BaseIVFAB<Real>&       Bcoef       = (*m_Bcoef)[dit()].getIVFAB(iphase);
+      BaseIVFAB<VoFStencil>&       avgStencils = m_avgStencils[din].getIVFAB(iphase);
+      BaseIVFAB<Real>&             avgWeights  = m_avgWeights[din].getIVFAB(iphase);
+      BaseIVFAB<Vector<VolIndex>>& avgVoFs     = m_avgVoFs[din].getIVFAB(iphase);
+      const BaseIVFAB<Real>&       Bcoef       = (*m_Bcoef)[din].getIVFAB(iphase);
 
       for (IVSIterator ivsIt(ivs); ivsIt.ok(); ++ivsIt) {
         const IntVect iv = ivsIt();
@@ -300,23 +315,26 @@ MFHelmholtzJumpBC::buildAverageStencils()
   }
 
   // For efficiency reasons, store 1/(bp*wp + bq*wq). Scale the average stencils by this value as well since we apply it anyways.
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
     constexpr int vofComp     = 0;
     constexpr int firstPhase  = 0;
     constexpr int secondPhase = 1;
 
-    for (IVSIterator ivsIt(m_ivs[dit()]); ivsIt.ok(); ++ivsIt) {
+    for (IVSIterator ivsIt(m_ivs[din]); ivsIt.ok(); ++ivsIt) {
       const IntVect  iv = ivsIt();
       const VolIndex vof0(iv, vofComp);
 
-      VoFStencil& derivStenPhase0 = m_avgStencils[dit()].getIVFAB(firstPhase)(vof0, vofComp);
-      VoFStencil& derivStenPhase1 = m_avgStencils[dit()].getIVFAB(secondPhase)(vof0, vofComp);
+      VoFStencil& derivStenPhase0 = m_avgStencils[din].getIVFAB(firstPhase)(vof0, vofComp);
+      VoFStencil& derivStenPhase1 = m_avgStencils[din].getIVFAB(secondPhase)(vof0, vofComp);
 
-      const Real& weightPhase0 = m_avgWeights[dit()].getIVFAB(firstPhase)(vof0, vofComp);
-      const Real& weightPhase1 = m_avgWeights[dit()].getIVFAB(secondPhase)(vof0, vofComp);
+      const Real& weightPhase0 = m_avgWeights[din].getIVFAB(firstPhase)(vof0, vofComp);
+      const Real& weightPhase1 = m_avgWeights[din].getIVFAB(secondPhase)(vof0, vofComp);
 
-      Real& denomPhase0 = m_denom[dit()].getIVFAB(firstPhase)(vof0, vofComp);
-      Real& denomPhase1 = m_denom[dit()].getIVFAB(secondPhase)(vof0, vofComp);
+      Real& denomPhase0 = m_denom[din].getIVFAB(firstPhase)(vof0, vofComp);
+      Real& denomPhase1 = m_denom[din].getIVFAB(secondPhase)(vof0, vofComp);
 
       const Real denom = 1. / (weightPhase0 + weightPhase1);
 
@@ -339,29 +357,32 @@ MFHelmholtzJumpBC::buildAverageStencils()
     // Some dummy data for the stencils.
     LevelData<EBCellFAB> phiProxy(dbl, 1, m_ghostPhi, EBCellFactory(ebisl));
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox& ebisbox = ebisl[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBISBox& ebisbox = ebisl[din];
       const EBGraph& ebgraph = ebisbox.getEBGraph();
 
       Vector<RefCountedPtr<BaseIndex>>   dstBaseIndex;
       Vector<RefCountedPtr<BaseStencil>> dstBaseStencil;
 
       auto kernel = [&](const VolIndex& vof) -> void {
-        const VoFStencil& stencil = (m_avgStencils[dit()].getIVFAB(iphase))(VolIndex(vof.gridIndex(), 0), 0);
+        const VoFStencil& stencil = (m_avgStencils[din].getIVFAB(iphase))(VolIndex(vof.gridIndex(), 0), 0);
 
         dstBaseIndex.push_back(RefCountedPtr<BaseIndex>(new VolIndex(vof)));
         dstBaseStencil.push_back(RefCountedPtr<BaseStencil>(new VoFStencil(stencil)));
       };
 
-      VoFIterator vofit(m_ivs[dit()], ebgraph);
+      VoFIterator vofit(m_ivs[din], ebgraph);
 
       BoxLoops::loop(vofit, kernel);
 
-      aggStencils[dit()] = RefCountedPtr<AggStencil<EBCellFAB, BaseIVFAB<Real>>>(
+      aggStencils[din] = RefCountedPtr<AggStencil<EBCellFAB, BaseIVFAB<Real>>>(
         new AggStencil<EBCellFAB, BaseIVFAB<Real>>(dstBaseIndex,
                                                    dstBaseStencil,
-                                                   phiProxy[dit()],
-                                                   m_boundaryPhi[dit()].getIVFAB(iphase)));
+                                                   phiProxy[din],
+                                                   m_boundaryPhi[din].getIVFAB(iphase)));
     }
   }
 }
@@ -376,6 +397,9 @@ MFHelmholtzJumpBC::defineIterators()
   //       problem because the boundary conditions classes will still need the iterators.
 
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
 
   m_ivs.define(dbl);
 
@@ -392,22 +416,25 @@ MFHelmholtzJumpBC::defineIterators()
     const EBLevelGrid& eblg  = m_mflg.getEBLevelGrid(iphase);
     const EBISLayout&  ebisl = eblg.getEBISL();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box        box      = dbl[dit()];
-      const EBISBox&   ebisbox  = ebisl[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box        box      = dbl[din];
+      const EBISBox&   ebisbox  = ebisl[din];
       const EBGraph&   ebgraph  = ebisbox.getEBGraph();
       const IntVectSet allIrreg = ebisbox.getIrregIVS(box);
 
-      m_ivs[dit()] = m_mflg.interfaceRegion(dbl[dit()], dit());
+      m_ivs[din] = m_mflg.interfaceRegion(dbl[din], din);
 
       IntVectSet singlePhaseCells = allIrreg;
       IntVectSet multiPhaseCells  = IntVectSet();
 
-      singlePhaseCells -= m_ivs[dit()];
-      multiPhaseCells |= m_ivs[dit()];
+      singlePhaseCells -= m_ivs[din];
+      multiPhaseCells |= m_ivs[din];
 
-      VoFIterator& singlePhaseVofIt = singlePhaseVofs[dit()];
-      VoFIterator& multiPhaseVofIt  = multiPhaseVofs[dit()];
+      VoFIterator& singlePhaseVofIt = singlePhaseVofs[din];
+      VoFIterator& multiPhaseVofIt  = multiPhaseVofs[din];
 
       singlePhaseVofIt.define(singlePhaseCells, ebgraph);
       multiPhaseVofIt.define(multiPhaseCells, ebgraph);
@@ -460,9 +487,15 @@ MFHelmholtzJumpBC::resetBC() const
 {
   CH_TIME("MFHelmholtzJumpBC::resetBC()");
 
-  for (DataIterator dit = m_boundaryPhi.dataIterator(); dit.ok(); ++dit) {
+  const DataIterator& dit = m_boundaryPhi.dataIterator();
+
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
     for (int iphase = 0; iphase < m_numPhases; iphase++) {
-      BaseIVFAB<Real>& bndryPhi = m_boundaryPhi[dit()].getIVFAB(iphase);
+      BaseIVFAB<Real>& bndryPhi = m_boundaryPhi[din].getIVFAB(iphase);
       bndryPhi.setVal(0.0);
     }
   }
@@ -476,8 +509,14 @@ MFHelmholtzJumpBC::matchBC(LevelData<BaseIVFAB<Real>>& a_jump,
   CH_TIME("MFHelmholtzJumpBC::matchBC(LD<MFCellFAB>, LD<BaseIVFAB<Real>, bool)");
 
   if (m_multiPhase) {
-    for (DataIterator dit = a_phi.dataIterator(); dit.ok(); ++dit) {
-      this->matchBC(a_jump[dit()], a_phi[dit()], a_homogeneousPhysBC, dit());
+    const DataIterator& dit = a_phi.dataIterator();
+
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      this->matchBC(a_jump[din], a_phi[din], a_homogeneousPhysBC, din);
     }
   }
 }

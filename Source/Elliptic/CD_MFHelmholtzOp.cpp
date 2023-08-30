@@ -17,6 +17,7 @@
 #include <CD_Timer.H>
 #include <CD_MFHelmholtzOp.H>
 #include <CD_MultifluidAlias.H>
+#include <CD_DataOps.H>
 #include <CD_ParallelOps.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
@@ -330,9 +331,7 @@ MFHelmholtzOp::incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_r
 {
   CH_TIME("MFHelmholtzOp::incr");
 
-  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit) {
-    a_lhs[dit()].plus(a_rhs[dit()], a_scale);
-  }
+  DataOps::incr(a_lhs, a_rhs, a_scale);
 }
 
 void
@@ -340,9 +339,7 @@ MFHelmholtzOp::scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale)
 {
   CH_TIME("MFHelmholtzOp::scale");
 
-  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit) {
-    a_lhs[dit()] *= a_scale;
-  }
+  DataOps::scale(a_lhs, a_scale);
 }
 
 void
@@ -350,9 +347,7 @@ MFHelmholtzOp::setToZero(LevelData<MFCellFAB>& a_lhs)
 {
   CH_TIME("MFHelmholtzOp::setToZero)");
 
-  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit) {
-    a_lhs[dit()].setVal(0.0);
-  }
+  DataOps::setValue(a_lhs, 0.0);
 }
 
 void
@@ -414,9 +409,9 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
   Real sumKappaXY = 0.0;
   Real sumVolume  = 0.0;
 
-  const DisjointBoxLayout& dbl    = a_lhs.disjointBoxLayout();
-  const DataIterator&      dit    = dbl.dataIterator();
-  const int                nbox   = dit.size();
+  const DisjointBoxLayout& dbl  = a_lhs.disjointBoxLayout();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime) reduction(+ : sumKappaXY, sumVolume)
   for (int mybox = 0; mybox < nbox; mybox++) {
@@ -468,7 +463,7 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
   sumVolume  = ParallelOps::sum(sumVolume);
 
   Real dotProd = 0.0;
-  
+
   if (sumVolume > 0.0) {
     dotProd = sumKappaXY / sumVolume;
   }
@@ -617,17 +612,24 @@ MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
 
   // Now apply the operator on each patch.
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box cellBox = dbl[dit()];
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box cellBox = dbl[din];
 
     for (auto& op : m_helmOps) {
       const int iphase = op.first;
 
       // Doing the nasty, but applyOp will only monkey with ghost cells in a_phi.
-      EBCellFAB& Lph = (EBCellFAB&)a_Lphi[dit()].getPhase(iphase);
-      EBCellFAB& phi = (EBCellFAB&)a_phi[dit()].getPhase(iphase);
+      EBCellFAB& Lph = (EBCellFAB&)a_Lphi[din].getPhase(iphase);
+      EBCellFAB& phi = (EBCellFAB&)a_phi[din].getPhase(iphase);
 
-      op.second->applyOp(Lph, phi, cellBox, dit(), a_homogeneousPhysBC);
+      op.second->applyOp(Lph, phi, cellBox, din, a_homogeneousPhysBC);
     }
   }
 }
@@ -645,15 +647,21 @@ MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi,
   if (m_hasCoar) {
     if (a_homogeneousCF) {
       // The homogeneous version will be called on every relaxation so we use a format which avoid having to alias data (which can be expensive).
-      for (DataIterator dit = a_phi.dataIterator(); dit.ok(); ++dit) {
+      const DataIterator& dit  = a_phi.dataIterator();
+      const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
         for (auto& op : m_helmOps) {
           const int iphase = op.first;
 
           RefCountedPtr<EBMultigridInterpolator>& phaseInterpolator = m_interpolator.getInterpolator(iphase);
 
-          EBCellFAB& phi = (EBCellFAB&)a_phi[dit()].getPhase(iphase);
+          EBCellFAB& phi = (EBCellFAB&)a_phi[din].getPhase(iphase);
 
-          phaseInterpolator->coarseFineInterpH(phi, Interval(m_comp, m_comp), dit());
+          phaseInterpolator->coarseFineInterpH(phi, Interval(m_comp, m_comp), din);
         }
       }
     }
@@ -776,6 +784,9 @@ MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>&       a_correction,
   this->create(Lcorr, a_correction);
 
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
 
   constexpr bool homogeneousCFBC   = true;
   constexpr bool homogeneousPhysBC = true;
@@ -788,17 +799,20 @@ MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>&       a_correction,
     this->updateJumpBC(a_correction, homogeneousPhysBC);
 
     // Do relaxation on each patch.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box cellBox = dbl[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box cellBox = dbl[din];
 
       for (auto& op : m_helmOps) {
         const int iphase = op.first;
 
-        EBCellFAB&       Lph = Lcorr[dit()].getPhase(iphase);
-        EBCellFAB&       phi = a_correction[dit()].getPhase(iphase);
-        const EBCellFAB& res = a_residual[dit()].getPhase(iphase);
+        EBCellFAB&       Lph = Lcorr[din].getPhase(iphase);
+        EBCellFAB&       phi = a_correction[din].getPhase(iphase);
+        const EBCellFAB& res = a_residual[din].getPhase(iphase);
 
-        op.second->pointJacobiKernel(Lph, phi, res, cellBox, dit());
+        op.second->pointJacobiKernel(Lph, phi, res, cellBox, din);
       }
     }
   }
@@ -820,6 +834,9 @@ MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>&       a_correction,
   this->create(Lcorr, a_correction);
 
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
 
   constexpr bool homogeneousCFBC   = true;
   constexpr bool homogeneousPhysBC = true;
@@ -833,17 +850,19 @@ MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>&       a_correction,
       this->updateJumpBC(a_correction, homogeneousPhysBC);
 
       // Do relaxation on each patch.
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box cellBox = dbl[dit()];
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din     = dit[mybox];
+        const Box        cellBox = dbl[din];
 
         for (auto& op : m_helmOps) {
           const int iphase = op.first;
 
-          EBCellFAB&       Lph = Lcorr[dit()].getPhase(iphase);
-          EBCellFAB&       phi = a_correction[dit()].getPhase(iphase);
-          const EBCellFAB& res = a_residual[dit()].getPhase(iphase);
+          EBCellFAB&       Lph = Lcorr[din].getPhase(iphase);
+          EBCellFAB&       phi = a_correction[din].getPhase(iphase);
+          const EBCellFAB& res = a_residual[din].getPhase(iphase);
 
-          op.second->gauSaiRedBlackKernel(Lph, phi, res, cellBox, dit(), redBlack);
+          op.second->gauSaiRedBlackKernel(Lph, phi, res, cellBox, din, redBlack);
         }
       }
     }
@@ -867,6 +886,9 @@ MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>&       a_correction,
   this->create(Lcorr, a_correction);
 
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
 
   constexpr bool homogeneousCFBC   = true;
   constexpr bool homogeneousPhysBC = true;
@@ -881,17 +903,20 @@ MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>&       a_correction,
       this->updateJumpBC(a_correction, homogeneousPhysBC);
 
       // Do relaxation on each patch
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box cellBox = dbl[dit()];
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box cellBox = dbl[din];
 
         for (auto& op : m_helmOps) {
           const int iphase = op.first;
 
-          EBCellFAB&       Lph = Lcorr[dit()].getPhase(iphase);
-          EBCellFAB&       phi = a_correction[dit()].getPhase(iphase);
-          const EBCellFAB& res = a_residual[dit()].getPhase(iphase);
+          EBCellFAB&       Lph = Lcorr[din].getPhase(iphase);
+          EBCellFAB&       phi = a_correction[din].getPhase(iphase);
+          const EBCellFAB& res = a_residual[din].getPhase(iphase);
 
-          op.second->gauSaiMultiColorKernel(Lph, phi, res, cellBox, dit(), m_colors[icolor]);
+          op.second->gauSaiMultiColorKernel(Lph, phi, res, cellBox, din, m_colors[icolor]);
         }
       }
     }

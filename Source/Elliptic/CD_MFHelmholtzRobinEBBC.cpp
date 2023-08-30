@@ -111,6 +111,9 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
 
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
   const ProblemDomain&     domain = m_eblg.getDomain();
+  const DataIterator&      dit    = dbl.dataIterator();
+
+  const int nbox = dit.size();
 
   // Drop order if we must
   for (int dir = 0; dir < SpaceDim; dir++) {
@@ -119,7 +122,10 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
     }
   }
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
     const Box      box     = dbl[dit()];
     const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
 

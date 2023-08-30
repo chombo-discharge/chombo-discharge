@@ -196,14 +196,21 @@ EBHelmholtzOpFactory::defineMultigridLevels()
           constexpr int nghost = 1;
 
           LayoutData<IntVectSet> irregSets(gridsCoar);
-          for (DataIterator dit(gridsCoar); dit.ok(); ++dit) {
-            Box bx = gridsCoar[dit()];
+
+          const DataIterator& dit = gridsCoar.dataIterator();
+
+          const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+          for (int mybox = 0; mybox < nbox; mybox++) {
+            const DataIndex& din = dit[mybox];
+
+            Box bx = gridsCoar[din];
             bx.grow(nghost);
             bx &= domainCoar;
 
-            const EBISBox& ebisbox = ebislCoar[dit()];
+            const EBISBox& ebisbox = ebislCoar[din];
 
-            irregSets[dit()] = ebisbox.getIrregIVS(bx);
+            irregSets[din] = ebisbox.getIrregIVS(bx);
           }
 
           // Factories for generating A and B-coefficients on the multigrid levels.
