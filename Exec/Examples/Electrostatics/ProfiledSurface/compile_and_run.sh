@@ -5,12 +5,13 @@ export NPROCS=1
 export OMP_NUM_THREADS=12
 export OMP_PLACES=cores
 export OMP_PROC_BIND=true
-export OMP_SCHEDULE="static, 4"
+export OMP_SCHEDULE="dynamic"
 
 COMPILE=true
 RUN=true
 PROFILE=true
-INPUT="example2d.inputs Driver.max_steps=0 Driver.initial_regrids=1 Driver.write_memory=true Driver.write_loads=true FieldStepper.load_balance=true"
+INPUT="example2d.inputs Driver.max_steps=0"
+# Driver.initial_regrids=1 Driver.write_memory=true Driver.write_loads=true FieldStepper.load_balance=true"
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
 if $COMPILE
@@ -93,6 +94,9 @@ then
 		       'MFHelmholtzOpFactory::setJump(EBAMRIVData, Real)' \
 		       'EBHelmholtzRobinEBBC::define()' \
 		       'MFHelmholtzOp::relax' \
+		       'AMRMultiGrid::solveNo-InitResid' \
+		       'FieldSolverMultigrid::setupSolver()' \
+		       'AMRMultiGrid::computeAMRResidual' \
 		   ; do
 
 	if grep -q "${PATTERN}" time.table.serial
