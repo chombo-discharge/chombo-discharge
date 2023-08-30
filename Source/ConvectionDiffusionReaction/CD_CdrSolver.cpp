@@ -13,7 +13,6 @@
 #include <ParmParse.H>
 #include <EBAMRIO.H>
 #include <EBArith.H>
-#include <EBLevelDataOps.H>
 
 // Our includes
 #include <CD_CdrSolver.H>
@@ -2951,34 +2950,22 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
     DataOps::scale(scratchFluxOne, 2.0);                                   // scratchFluxOne = 2*D*phis
     DataOps::squareRoot(scratchFluxOne);                                   // scratchFluxOne = sqrt(2*D*phis)
 
-#if 0 // Debug, check if we have negative face values
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      for (int dir = 0; dir <SpaceDim; dir++){
-	Real max, min;
-	EBLevelDataOps::getMaxMin(max, min, *scratchFluxOne[lvl], 0, dir);
-	if(min < 0.0 || max < 0.0){
-	  MayDay::Abort("CdrSolver::gwnDiffusionSource - negative face value");
-	}
-      }
+#ifndef NDEBUG
+    Real max;
+    Real min;
+
+    DataOps::getMaxMin(max, min, scratchFluxOne, 0);
+
+    if (min < 0.0 || max < 0.0) {
+      MayDay::Abort("CdrSolver::gwnDiffusionSource - negative face value");
     }
 #endif
 
-    this->fillGwn(scratchFluxTwo, 1.0); // Gaussian White Noise = W/sqrt(dV)
-    DataOps::multiply(scratchFluxOne,
-                      scratchFluxTwo); // Now scratchFluxOne holds the fluctuating cell-centered flux Z*sqrt(2*D*phi).
-    this->computeDivG(a_noiseSource,
-                      scratchFluxOne,
-                      m_ebZero,
-                      false); // Compute the finite volume approximation and make it into a source term.
-
-#if 0 // Debug, check if we have NaNs/Infs
-    m_amr->conservativeAverage(a_noiseSource, m_realm, m_phase);
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      if(EBLevelDataOps::checkNANINF(*a_noiseSource[lvl])){
-	MayDay::Abort("CdrSolver::gwnDiffusionSource - something is wrong");
-      }
-    }
-#endif
+    // Let scratchFluxOne holds the fluctuating cell-centered flux Z*sqrt(2*D*phi) and then compute the finite volume approximation of the
+    // divergence
+    this->fillGwn(scratchFluxTwo, 1.0);
+    DataOps::multiply(scratchFluxOne, scratchFluxTwo);
+    this->computeDivG(a_noiseSource, scratchFluxOne, m_ebZero, false);
   }
   else {
     DataOps::setValue(a_noiseSource, 0.0);
@@ -3108,7 +3095,7 @@ CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a
     }
 
     // Covered faces are bogus.
-    EBLevelDataOps::setCoveredVal(*a_facePhi[lvl], 0.0);
+    DataOps::setCoveredValue(*a_facePhi[lvl], 0.0);
   }
 
   // No random flux on domain faces.

@@ -22,6 +22,7 @@
 #include <CD_LeastSquares.H>
 #include <CD_BoxLoops.H>
 #include <CD_EBReflux.H>
+#include <CD_DataOps.H>
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
@@ -548,7 +549,7 @@ EBHelmholtzOp::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_r
 {
   CH_TIME("EBHelmholtzOp::incr");
 
-  EBLevelDataOps::incr(a_lhs, a_rhs, a_scale);
+  DataOps::incr(a_lhs, a_rhs, a_scale);
 }
 
 void
@@ -560,7 +561,7 @@ EBHelmholtzOp::axby(LevelData<EBCellFAB>&       a_lhs,
 {
   CH_TIME("EBHelmholtzOp::axby");
 
-  EBLevelDataOps::axby(a_lhs, a_x, a_y, a_a, a_b);
+  DataOps::axby(a_lhs, a_x, a_y, a_a, a_b);
 }
 
 void
@@ -568,7 +569,7 @@ EBHelmholtzOp::scale(LevelData<EBCellFAB>& a_lhs, const Real& a_scale)
 {
   CH_TIME("EBHelmholtzOp::scale");
 
-  EBLevelDataOps::scale(a_lhs, a_scale);
+  DataOps::scale(a_lhs, a_scale);
 }
 
 Real
@@ -630,7 +631,7 @@ EBHelmholtzOp::setToZero(LevelData<EBCellFAB>& a_lhs)
 {
   CH_TIME("EBHelmholtzOp::setToZero(LD<EBCellFAB>)");
 
-  EBLevelDataOps::setToZero(a_lhs);
+  DataOps::setValue(a_lhs, 0.0);
 }
 
 void
@@ -1366,7 +1367,7 @@ EBHelmholtzOp::diagonalScale(LevelData<EBCellFAB>& a_rhs, bool a_kappaWeighted)
 
   // Scale by volume fraction if asked.
   if (a_kappaWeighted) {
-    EBLevelDataOps::kappaWeight(a_rhs);
+    DataOps::kappaScale(a_rhs);
   }
 
   // Scale by a-coefficient and alpha, too.

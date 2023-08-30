@@ -12,12 +12,13 @@
 // Chombo includes
 #include <ParmParse.H>
 #include <CH_Timer.H>
-#include <EBLevelDataOps.H>
 
 // Our includes
 #include <CD_Timer.H>
 #include <CD_MFHelmholtzOp.H>
 #include <CD_MultifluidAlias.H>
+#include <CD_ParallelOps.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int MFHelmholtzOp::m_comp;
@@ -412,41 +413,65 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
 
   Real ret = 0.0;
 
-  Real accum = 0.0;
-  Real volum = 0.0;
-  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit) {
-    const MFCellFAB& lhs = a_lhs[dit()];
+  Real sumKappaXY = 0.0;
+  Real sumVolume  = 0.0;
 
-    Real phaseVolume;
+  const ProblemDomain&     domain = m_mflg.getDomain();
+  const DisjointBoxLayout& dbl    = a_lhs.disjointBoxLayout();
+  const DataIterator&      dit    = dbl.dataIterator();
+  const int                nbox   = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(+ : sumKappaXY, sumVolume)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din     = dit[mybox];
+    const Box        cellBox = dbl[din];
+    const MFCellFAB& lhs     = a_lhs[din];
+
     for (int i = 0; i < lhs.numPhases(); i++) {
-      const EBCellFAB& data1   = a_lhs[dit()].getPhase(i);
-      const EBCellFAB& data2   = a_rhs[dit()].getPhase(i);
-      const EBISBox&   ebisbox = data1.getEBISBox();
+      const EBCellFAB& X = a_lhs[din].getPhase(i);
+      const EBCellFAB& Y = a_rhs[din].getPhase(i);
 
-      if (!ebisbox.isAllCovered()) {
-        const Box box = a_lhs.disjointBoxLayout()[dit()];
+      const FArrayBox& regX = X.getFArrayBox();
+      const FArrayBox& regY = Y.getFArrayBox();
 
-        accum += EBLevelDataOps::sumKappaDotProduct(phaseVolume,
-                                                    data1,
-                                                    data2,
-                                                    box,
-                                                    EBLEVELDATAOPS_ALLVOFS,
-                                                    m_mflg.getDomain());
-        volum += phaseVolume;
+      const EBISBox& ebisbox = X.getEBISBox();
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (ebisbox.isRegular(iv)) {
+          sumKappaXY += regX(iv, 0) * regY(iv, 0);
+          sumVolume += 1.0;
+        }
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const Real kappa = ebisbox.volFrac(vof);
+
+        sumKappaXY += (kappa * X(vof, 0)) * (kappa * Y(vof, 0));
+        sumVolume += kappa;
+      };
+
+      const bool isCovered   = ebisbox.isAllCovered();
+      const bool isRegular   = ebisbox.isAllRegular();
+      const bool isIrregular = !isCovered && !isRegular;
+
+      if (isIrregular) {
+        VoFIterator vofit(ebisbox.getIrregIVS(cellBox), ebgraph);
+
+        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop(vofit, irregularKernel);
+      }
+      else if (isCovered) {
+        BoxLoops::loop(cellBox, regularKernel);
       }
     }
   }
 
-#ifdef CH_MPI
-  Real recv;
-  MPI_Allreduce(&accum, &recv, 1, MPI_CH_REAL, MPI_SUM, Chombo_MPI::comm);
-  accum = recv;
-  MPI_Allreduce(&volum, &recv, 1, MPI_CH_REAL, MPI_SUM, Chombo_MPI::comm);
-  volum = recv;
-#endif
+  sumKappaXY = ParallelOps::sum(sumKappaXY);
+  sumVolume  = ParallelOps::sum(sumVolume);
 
-  if (volum > 0.0) {
-    ret = accum / volum;
+  if (sumVolume > 0.0) {
+    ret = sumKappaXY / sumVolume;
   }
 
   return ret;
