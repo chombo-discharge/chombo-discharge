@@ -44,7 +44,9 @@ fi
 # Kernel comparison for Source/AmrMesh
 if $PROFILE
 then
-    for PATTERN in 'FieldSolver::computeDisplacementField(MFAMRCellData, MFAMRCellData)' \
+    for PATTERN in 'ScanShop::buildCoarseLevel(int, int)' \
+		       'ScanShop::buildFinerLevels(int, int)' \
+		       'ScanShop::defineLevel' \
 		   ; do
 
 	if grep -q "${PATTERN}" time.table.serial

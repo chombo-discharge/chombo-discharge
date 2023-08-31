@@ -23,7 +23,7 @@ export OMP_SCHEDULE="dynamic"
 COMPILE=true
 RUN=true
 PROFILE=true
-INPUT="example.inputs"
+INPUT="regression.inputs"
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
 if $COMPILE
