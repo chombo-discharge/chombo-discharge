@@ -1463,6 +1463,7 @@ ItoSolver::writeData(LevelData<EBCellFAB>& a_output,
 
   CH_START(t2);
   m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
+  scratch.exchange();
   CH_START(t2);
 
   // Interpolate ghost cells
@@ -1484,7 +1485,16 @@ ItoSolver::writeData(LevelData<EBCellFAB>& a_output,
   const Interval srcInterv(0, numComp - 1);
   const Interval dstInterv(a_comp, a_comp + numComp - 1);
 
-  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  m_amr->copyData(a_output,
+                  scratch,
+                  a_level,
+                  a_outputRealm,
+                  m_realm,
+                  dstInterv,
+                  srcInterv,
+                  CopyStrategy::ValidGhost,
+                  CopyStrategy::ValidGhost);
+
   CH_STOP(t5);
 
   a_comp += numComp;
