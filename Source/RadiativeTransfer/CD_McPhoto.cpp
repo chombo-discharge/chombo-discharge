@@ -1890,4 +1890,26 @@ McPhoto::getSourcePhotons()
   return m_sourcePhotons;
 }
 
+int
+McPhoto::getMaxPhotonsPerCell() const noexcept
+{
+  CH_TIME("McPhoto::getMaxPhotonsPerCell");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getMaxPhotonsPerCell" << endl;
+  }
+
+  return (int)m_maxPhotonsGeneratedPerCell;
+}
+
+int
+McPhoto::getNumSamplingPackets() const noexcept
+{
+  CH_TIME("McPhoto::getNumSamplingPackets");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getNumSamplingPackets" << endl;
+  }
+
+  return m_numSamplingPackets;
+}
+
 #include <CD_NamespaceFooter.H>

@@ -134,6 +134,31 @@ public:
                           ParticleContainer<Photon>& a_photons,
                           const Real                 a_dt);
 
+
+  /*!
+    @brief Compute the number of physical photons in each grid cell.
+    @param[out] a_numPhysPhotonsTotal Total number of physical photons to be generated in each grid cell.
+    @param[out] a_numPhysPhotonsPacket Number of physical photons to be generated in each packet. Must have a components = m_numSamplingPackets
+    @param[in] a_source Source term -- the interpretation of this depends on the user-specified interpretation of the source term.
+    @param[in] a_dt Time step
+  */
+  virtual void
+  computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
+                            EBAMRCellData&       a_numPhysPhotonsPerPacket,
+                            const EBAMRCellData& a_source,
+                            const Real           a_dt) const noexcept;
+
+  /*!
+    @brief Generate computational photons.
+    @param[inout] a_photons Computational photons
+    @param[in] a_numPhysicalPhotons Number of physical photons to add to a_photons
+    @param[in] a_maxPhotonsPerCell Maximum number of photons generated per cell.
+  */
+  virtual void
+  generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
+                               const EBAMRCellData&       a_numPhysicalPhotons,
+                               const size_t               a_maxPhotonsPerCell) const noexcept;  
+
   /*!
     @brief Remap computational particles. This remaps m_photons
   */
@@ -392,6 +417,18 @@ public:
   virtual ParticleContainer<Photon>&
   getSourcePhotons();
 
+  /*!
+    @brief Get maximum number of photons generated per cell
+  */
+  virtual int
+  getMaxPhotonsPerCell() const noexcept;
+
+  /*!
+    @brief Get maximum number of photons generated per cell
+  */
+  virtual int
+  getNumSamplingPackets() const noexcept;
+
 protected:
   /*!
     @brief Enum for interpreting how photons are generated when using fluid codes
@@ -564,25 +601,6 @@ protected:
   */
   ParticleContainer<Photon> m_sourcePhotons;
 
-  /*!
-    @brief Compute the number of physical photons in each grid cell.
-    @param[out] a_numPhysPhotons Number of physical photons to be generated in each grid cell.
-    @param[in] a_source Source term -- the interpretation of this depends on the user-specified interpretation of the source term.
-    @param[in] a_dt Time step
-  */
-  virtual void
-  computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
-                            EBAMRCellData&       a_numPhysPhotonsPerPacket,
-                            const EBAMRCellData& a_source,
-                            const Real           a_dt) const noexcept;
-
-  /*!
-    @brief Generate computational photons
-  */
-  virtual void
-  generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
-                               const EBAMRCellData&       a_numPhysicalPhotons,
-                               const size_t               a_maxPhotonsPerCell) const noexcept;
 
   /*!
     @brief Draw photons in a cell and volume
