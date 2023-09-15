@@ -50,21 +50,33 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
     pout() << m_name + "::advance" << endl;
   }
 
+  EBAMRCellData numPhysPhotons;
+  m_amr->allocate(numPhysPhotons, m_realm, m_phase, 1);
+
   // Note: This routine does an on-the-fly generation of photons based on the contents in a_source. This routine is primarily
   //       written for fluid methods since all input/output parameters happen on the mesh. Most particle solvers will use a different
   //       approach and will probably fill m_sourcePhotons through a kinetic interface and use advancePhotonsInstantaneous or advancePhotonsTransient.
   //
   //       If you find yourself calling this routine with a pure particle method, you're may be doing something you shouldn't....
 
-  // If we're doing an instantaneous solver, do a safety cleanout first of m_photons first (past photons have been absorbed on the mesh)
+  // Recall: m_photons are 'traveling' photons, m_sourcePhotons are photons to be transferred into m_photons before transport over dt,
+  //         and m_ebPhotons and m_domainPhotons are photons that strike the EB or domain boundaries.
+  //
+  //         If we're doing an instantaneous solver, do a safety cleanout of m_photons first (past photons have been absorbed on the mesh).
   if (m_instantaneous) {
     this->clear(m_photons);
   }
 
-  // Generate new photons and add them to m_sourcePhotons.
+  this->clear(m_bulkPhotons);
   this->clear(m_sourcePhotons);
-  this->generatePhotons(m_sourcePhotons, a_source, a_dt);
-  m_photons.addParticles(m_sourcePhotons);
+  this->clear(m_ebPhotons);
+  this->clear(m_domainPhotons);
+
+  // Compute number of physical photons to be generated.
+  this->computeNumPhysicalPhotons(numPhysPhotons, a_source, a_dt);
+
+  // Generate computational photons in each cell from the number of physical photons.
+  this->generateComputationalPhotons(m_photons, numPhysPhotons, m_maxPhotonsGeneratedPerCell);
 
   // Advance photons either instantaneously or transiently.
   if (m_instantaneous) {
@@ -72,10 +84,13 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
   }
   else {
     this->advancePhotonsTransient(m_bulkPhotons, m_ebPhotons, m_domainPhotons, m_photons, a_dt);
+
     this->remap(m_photons);
   }
 
-  // Deposit photons on the mesh.
+  this->clear(m_sourcePhotons);
+
+  // Deposit the photons on the mesh.
   this->depositPhotons(a_phi, m_bulkPhotons, m_deposition);
 
   return true;
@@ -806,102 +821,55 @@ McPhoto::randomExponential(const Real a_mean)
 }
 
 void
-McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellData& a_source, const Real a_dt)
+McPhoto::computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotons,
+                                   const EBAMRCellData& a_source,
+                                   const Real           a_dt) const noexcept
 {
-  CH_TIME("McPhoto::generatePhotons");
+  CH_TIME("McPhoto::computeNumPhysicalPhotons");
   if (m_verbosity > 5) {
-    pout() << m_name + "::generatePhotons" << endl;
+    pout() << m_name + "::computeNumPhysicalPhotons" << endl;
   }
 
+  CH_assert(a_numPhysPhotons[0]->nComp() == 1);
   CH_assert(a_source[0]->nComp() == 1);
+  CH_assert(a_dt >= 0.0);
+
+  DataOps::setValue(a_numPhysPhotons, 0.0);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
-    const RealVect           probLo = m_amr->getProbLo();
-    const Real               dx     = m_amr->getDx()[lvl];
-    const Real               vol    = pow(dx, SpaceDim);
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real               dx    = m_amr->getDx()[lvl];
+    const Real               vol   = pow(dx, SpaceDim);
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box      cellBox = dbl.get(dit());
-      const EBISBox& ebisbox = (*a_source[lvl])[dit()].getEBISBox();
-
-      const EBCellFAB&     source     = (*a_source[lvl])[dit()];
-      const FArrayBox&     srcFAB     = source.getFArrayBox();
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      const Box            cellBox    = dbl[dit()];
+      const EBISBox&       ebisbox    = ebisl[dit()];
       const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
 
-      List<Photon>& photons = a_photons[lvl][dit()].listItems();
-      photons.clear();
+      const EBCellFAB& source    = (*a_source[lvl])[dit()];
+      const FArrayBox& sourceReg = source.getFArrayBox();
 
-      // Regular cells. Note that we make superphotons if we have to. Also, only draw photons in valid cells,
-      // grids that are covered by finer grids don't draw photons.
+      EBCellFAB& numPhysPhotons    = (*a_numPhysPhotons[lvl])[dit()];
+      FArrayBox& numPhysPhotonsReg = numPhysPhotons.getFArrayBox();
+
       auto regularKernel = [&](const IntVect& iv) -> void {
-        if (ebisbox.isRegular(iv) && validCells(iv, 0)) {
+        if (ebisbox.isRegular(iv) && validCells(iv)) {
 
-          const size_t numPhysPhotons = this->drawPhotons(srcFAB(iv, 0), vol, a_dt);
-
-          if (numPhysPhotons > 0) {
-            const std::vector<size_t> photonWeights =
-              ParticleManagement::partitionParticleWeights(numPhysPhotons, m_maxPhotonsGeneratedPerCell);
-
-            const RealVect lo = probLo + RealVect(iv) * dx;
-            const RealVect hi = lo + RealVect::Unit * dx;
-
-            for (size_t i = 0; i < photonWeights.size(); i++) {
-
-              // Determine starting position within cell, propagation direction, absorption
-              // length, and weight.
-              const RealVect pos    = Random::randomPosition(lo, hi);
-              const RealVect v      = Units::c * Random::getDirection();
-              const Real     weight = (Real)photonWeights[i];
-              const Real     kappa  = m_rtSpecies->getAbsorptionCoefficient(pos);
-
-              photons.add(Photon(pos, v, kappa, weight));
-            }
-          }
+          numPhysPhotonsReg(iv, 0) = Real(this->drawPhotons(sourceReg(iv, 0), vol, a_dt));
         }
       };
 
-      // Irregular kernel. Same as the above really.
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         const IntVect iv = vof.gridIndex();
 
-        if (validCells(iv, 0)) {
+        if (ebisbox.isIrregular(iv) && validCells(iv)) {
+          const Real kappa = vol * ebisbox.volFrac(vof);
 
-          const size_t numPhysPhotons = this->drawPhotons(source(vof, 0), vol, a_dt);
-
-          if (numPhysPhotons > 0) {
-            const std::vector<size_t> photonWeights =
-              ParticleManagement::partitionParticleWeights(numPhysPhotons, m_maxPhotonsGeneratedPerCell);
-
-            // These are needed when drawing photon starting positions within cut-cells -- we compute the
-            // minimum bounding box when we draw the position within the valid region of the cut-cell.
-            const Real     volFrac       = ebisbox.volFrac(vof);
-            const RealVect cellPos       = probLo + Location::position(Location::Cell::Center, vof, ebisbox, dx);
-            const RealVect bndryCentroid = ebisbox.bndryCentroid(vof);
-            const RealVect bndryNormal   = ebisbox.normal(vof);
-
-            RealVect lo = -0.5 * RealVect::Unit;
-            RealVect hi = 0.5 * RealVect::Unit;
-            if (volFrac < 1.0) {
-              DataOps::computeMinValidBox(lo, hi, bndryNormal, bndryCentroid);
-            }
-
-            for (size_t i = 0; i < photonWeights.size(); i++) {
-
-              // Determine starting position within cell, propagation direction, absorption
-              // length, and weight.
-              const RealVect pos    = Random::randomPosition(cellPos, lo, hi, bndryCentroid, bndryNormal, dx, volFrac);
-              const RealVect v      = Units::c * Random::getDirection();
-              const Real     kappa  = m_rtSpecies->getAbsorptionCoefficient(pos);
-              const Real     weight = (Real)photonWeights[i];
-
-              photons.add(Photon(pos, v, m_rtSpecies->getAbsorptionCoefficient(pos), weight));
-            }
-          }
+          numPhysPhotons(vof, 0) = Real(this->drawPhotons(source(vof, 0), kappa * vol, a_dt));
         }
       };
 
-      // Run the kernels.
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 
       BoxLoops::loop(cellBox, regularKernel);
@@ -911,7 +879,7 @@ McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellDa
 }
 
 size_t
-McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt)
+McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt) const noexcept
 {
   CH_TIME("McPhoto::drawPhotons");
   if (m_verbosity > 5) {
@@ -953,6 +921,112 @@ McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt)
   }
 
   return numPhysicalPhotons;
+}
+
+void
+McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
+                                      const EBAMRCellData&       a_numPhysPhotons,
+                                      const size_t               a_maxPhotonsPerCell) const noexcept
+{
+  CH_TIME("McPhoto::generateComputationalPhotons");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::generateComputationalPhotons" << endl;
+  }
+
+  CH_assert(a_numPhysPhotons[0]->nComp() == 1);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const RealVect           probLo = m_amr->getProbLo();
+    const Real               dx     = m_amr->getDx()[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const Box      cellBox = dbl[dit()];
+      const EBISBox& ebisbox = ebisl[dit()];
+
+      const EBCellFAB&     numPhysPhotons    = (*a_numPhysPhotons[lvl])[dit()];
+      const FArrayBox&     numPhysPhotonsReg = numPhysPhotons.getFArrayBox();
+      const BaseFab<bool>& validCells        = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
+
+      List<Photon>& photons = a_photons[lvl][dit()].listItems();
+
+      // Regular cells. Note that we make superphotons if we have to. Also, only draw photons in valid cells,
+      // grids that are covered by finer grids don't draw photons.
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (ebisbox.isRegular(iv) && validCells(iv, 0)) {
+
+          const size_t num = numPhysPhotonsReg(iv, 0);
+
+          if (num > 0) {
+            const std::vector<size_t> photonWeights = ParticleManagement::partitionParticleWeights(num,
+                                                                                                   a_maxPhotonsPerCell);
+
+            const RealVect lo = probLo + RealVect(iv) * dx;
+            const RealVect hi = lo + RealVect::Unit * dx;
+
+            for (size_t i = 0; i < photonWeights.size(); i++) {
+
+              // Determine starting position within cell, propagation direction, absorption
+              // length, and weight.
+              const RealVect pos    = Random::randomPosition(lo, hi);
+              const RealVect v      = Units::c * Random::getDirection();
+              const Real     weight = (Real)photonWeights[i];
+              const Real     kappa  = m_rtSpecies->getAbsorptionCoefficient(pos);
+
+              photons.add(Photon(pos, v, kappa, weight));
+            }
+          }
+        }
+      };
+
+      // Irregular kernel. Same as the above really.
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const IntVect iv = vof.gridIndex();
+
+        if (validCells(iv, 0)) {
+
+          const size_t num = numPhysPhotons(vof, 0);
+
+          if (num > 0) {
+            const std::vector<size_t> photonWeights = ParticleManagement::partitionParticleWeights(num,
+                                                                                                   a_maxPhotonsPerCell);
+
+            // These are needed when drawing photon starting positions within cut-cells -- we compute the
+            // minimum bounding box when we draw the position within the valid region of the cut-cell.
+            const Real     volFrac       = ebisbox.volFrac(vof);
+            const RealVect cellPos       = probLo + Location::position(Location::Cell::Center, vof, ebisbox, dx);
+            const RealVect bndryCentroid = ebisbox.bndryCentroid(vof);
+            const RealVect bndryNormal   = ebisbox.normal(vof);
+
+            RealVect lo = -0.5 * RealVect::Unit;
+            RealVect hi = 0.5 * RealVect::Unit;
+            if (volFrac < 1.0) {
+              DataOps::computeMinValidBox(lo, hi, bndryNormal, bndryCentroid);
+            }
+
+            for (size_t i = 0; i < photonWeights.size(); i++) {
+
+              // Determine starting position within cell, propagation direction, absorption
+              // length, and weight.
+              const RealVect pos    = Random::randomPosition(cellPos, lo, hi, bndryCentroid, bndryNormal, dx, volFrac);
+              const RealVect v      = Units::c * Random::getDirection();
+              const Real     kappa  = m_rtSpecies->getAbsorptionCoefficient(pos);
+              const Real     weight = (Real)photonWeights[i];
+
+              photons.add(Photon(pos, v, m_rtSpecies->getAbsorptionCoefficient(pos), weight));
+            }
+          }
+        }
+      };
+
+      // Run the kernels.
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
 }
 
 void
@@ -1221,12 +1295,6 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
       List<Photon>& domPhotons  = a_domainPhotons[lvl][dit()].listItems();
       List<Photon>& allPhotons  = a_photons[lvl][dit()].listItems();
 
-      // These must be cleared -- I assume that users will already have used any information
-      // from a past time step already.
-      bulkPhotons.clear();
-      ebPhotons.clear();
-      domPhotons.clear();
-
       // Iterate over the Photons that will be moved.
       for (ListIterator<Photon> lit(allPhotons); lit.ok(); ++lit) {
         Photon& p = lit();
@@ -1305,10 +1373,12 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
           else {
             if (sEB < sDom) {
               p.position() = oldPos + sEB * path;
+
               ebPhotons.add(p);
             }
             else {
               p.position() = oldPos + std::max((Real)0.0, sDom - SAFETY) * path;
+
               domPhotons.add(p);
             }
           }
@@ -1392,11 +1462,6 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
       List<Photon>& ebPhotons   = a_ebPhotons[lvl][dit()].listItems();
       List<Photon>& domPhotons  = a_domainPhotons[lvl][dit()].listItems();
       List<Photon>& allPhotons  = a_photons[lvl][dit()].listItems();
-
-      // These must be cleared -- I assume that information from past time steps has already been processed.
-      bulkPhotons.clear();
-      ebPhotons.clear();
-      domPhotons.clear();
 
       // Iterate over the photons that will be moved.
       for (ListIterator<Photon> lit(allPhotons); lit.ok(); ++lit) {
@@ -1482,17 +1547,18 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
           p.position() = newPos;
         }
         else { // Determine scenarios -- if the photon was absorbed the smallest s-parameter takes precedence.
-          const Real s = Min(sBulk, Min(sEB, sDomain));
+          const Real s = std::min(sBulk, std::min(sEB, sDomain));
+
           p.position() = oldPos + s * path;
 
           // Now check where it was actually absorbed
-          if (absorbedBulk && sBulk < Min(sEB, sDomain)) {
+          if (absorbedBulk && sBulk < std::min(sEB, sDomain)) {
             bulkPhotons.transfer(lit);
           }
-          else if (absorbedEB && sEB < Min(sBulk, sDomain)) {
+          else if (absorbedEB && sEB < std::min(sBulk, sDomain)) {
             ebPhotons.transfer(lit);
           }
-          else if (absorbedDomain && sDomain < Min(sBulk, sEB)) {
+          else if (absorbedDomain && sDomain < std::min(sBulk, sEB)) {
             domPhotons.transfer(lit);
           }
           else {
