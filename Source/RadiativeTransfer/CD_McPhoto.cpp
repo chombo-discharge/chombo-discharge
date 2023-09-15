@@ -100,7 +100,9 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
 
       // Absorb the bulk photons on the mesh.
       this->depositPhotons(phi, m_bulkPhotons, m_deposition);
-      this->clear(m_bulkPhotons);
+      if(m_numSamplingPackets > 1) {
+	this->clear(m_bulkPhotons);
+      }
 
       DataOps::incr(a_phi, phi, 1.0);
     }
