@@ -65,7 +65,7 @@ Driver.refine_dielectrics              = -1            # Refine dielectric surfa
 # ====================================================================================================
 McPhoto.verbosity          = -1            # Solver verbosity
 McPhoto.instantaneous      = true          # Instantaneous transport or not
-McPhoto.max_photons        = 64            # Maximum no. generated in a cell (< = 0 yields physical Photons)
+McPhoto.max_photons_per_cell        = 64            # Maximum no. generated in a cell (< = 0 yields physical Photons)
 McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
 McPhoto.transparent_eb     = false         # Turn on/off transparent boundaries. Only for instantaneous=true
 McPhoto.random_kappa       = true          # Randomize absorption length (taken from Photon implementation)

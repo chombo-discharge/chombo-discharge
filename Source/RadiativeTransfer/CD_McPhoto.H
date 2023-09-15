@@ -488,9 +488,14 @@ protected:
   bool m_plotDomainPhotons;
 
   /*!
-    @brief Number of Photons per pseudoPhoton
+    @brief Number of computational photons generated per cell
   */
   size_t m_maxPhotonsGeneratedPerCell;
+
+  /*!
+    @brief 
+  */
+  int m_numSamplingPackets;
 
   /*!
     @brief RNG seed

@@ -179,15 +179,16 @@ McPhoto::parsePseudoPhotons()
 
   ParmParse pp(m_className.c_str());
 
-  Real maxPhotons;
-  pp.get("max_photons", maxPhotons);
+  int maxPhotons;
 
-  // = -1 => no restriction
-  if (maxPhotons <= 0.0) {
+  //  pp.get("num_sampling_packets", m_numSamplingPackets);
+  pp.get("max_photons_per_cell", maxPhotons);
+
+  if (maxPhotons <= 0) {
     m_maxPhotonsGeneratedPerCell = std::numeric_limits<size_t>::max();
   }
   else {
-    m_maxPhotonsGeneratedPerCell = round(maxPhotons);
+    m_maxPhotonsGeneratedPerCell = (size_t) maxPhotons;
   }
 }
 
