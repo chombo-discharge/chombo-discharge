@@ -376,8 +376,9 @@ ___________________
 * ``McPhoto.verbosity`` for controlling the solver verbosity.
 * ``McPhoto.instantaneous`` for setting the transport mode.
 * ``McPhoto.max_photons_per_cell`` for restricting the number of photons generated per cell when having the solver generate the computational photons. This is only relevant when calling the ``advance`` method.
-* ``McPhoto.num_sampling_packets`` for using sub-sampling when generating and transport photons in instantenous mode.
+* ``McPhoto.num_sampling_packets`` for using sub-sampling when generating and transport photons in instantaneous mode through the ``advance`` function.
   This permits the ``McPhoto.max_photons_per_cell`` to partition the photon transport into packets where a fewer number of photons are generated during each step. Note that this will deposit the photons on the mesh for each packet, and the absorbed photons are only available as a density (i.e., the computational photons that were absorbed are lost).
+  This can reduce memory for certain types of applications when using many computational photons.
 * ``McPhoto.blend_conservation`` is a dead option marked for future removal (it blends a non-conservative divergence when depositing in cut-cells).
 * ``McPhoto.transparent_eb`` for turning on/off transparent boundaries. Mostly used for debugging.
 * ``McPhoto.plt_vars`` for setting plot variables. 
