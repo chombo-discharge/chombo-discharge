@@ -3,13 +3,31 @@
 Radiative transfer
 ==================
 
-Radiative transfer is supported in the diffusion (i.e. Eddington or Helmholtz) approximation and with Monte Carlo sampling of discrete photons.
-The solvers share a common interface (a parent class), but note that the radiative transfer equation is inherently deterministic while Monte Carlo photon transport is inherently stochastic. 
-The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach solves solves for fully transient or ''stationary'' transport.
-
-.. note::
+.. tip::
 
    The source code for the radiative transfer solvers reside in :file:`Source/RadiativeTransfer`
+
+.. _Chap:RtSolver:   
+
+RtSolver
+--------
+
+Radiative transfer solvers are supported in the form of
+
+* Diffusion solvers, i.e. first order Eddington solvers, which takes the form of a Helmholtz equation.
+* Using Monte Carlo sampling of discrete photons.
+  
+The solvers share a parent class ``RtSolver``, and code that uses only the ``RtSolver`` interface will should be able to switch between the two implementations.
+Note, however, that the radiative transfer equation is inherently deterministic while Monte Carlo photon transport is inherently stochastic. 
+The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach solves solves for fully transient or ''stationary'' transport.
+
+.. tip::
+   
+   The source code for the solver is located in :file:`$DISCHARGE_HOME/Source/RadiativeTransfer` and it is a fairly lightweight abstract class.
+   As with other solvers, ``RtSolver`` can use a specified :ref:`Chap:Realm`.
+
+To use the ``RtSolver`` interface the user must cast from one of the inherited classes (see :ref:`Chap:DiffusionRTE` or :ref:`Chap:MonteCarloRTE`).
+Since most of the ``RtSolver`` is an interface which is implemented by other radiative transfer solvers, documentation of boundary conditions, kernels and so on are found in the implementation classes.
 
 .. _Chap:RtSpecies:
 
@@ -17,7 +35,7 @@ RtSpecies
 ---------
 
 The class ``RtSpecies`` is an abstract base class for parsing necessary information into radiative transfer solvers.
-When creating a radiative transfer solver one will need to pass in a pointer to ``RtSpecies`` such that the solvers can look up the required infromation.
+When creating a radiative transfer solver one will need to pass in a reference to an ``RtSpecies`` instantiation such that the solvers can look up the required infromation.
 Currently, ``RtSpecies`` is a lightweight class where the user needs to implement the function
 
 .. code-block:: c++
@@ -27,18 +45,6 @@ Currently, ``RtSpecies`` is a lightweight class where the user needs to implemen
 The absorption coefficient is used in the diffusion (see :ref:`Chap:DiffusionRTE`) and Monte Carlo (see :ref:`Chap:MonteCarloRTE`) solvers. 
 
 One can also assign a name to the species through the member variable ``RtSpecies::m_name``.
-
-.. _Chap:RtSolver:
-
-RtSolver
---------
-
-``RtSolver`` is the base class for encapsulating a radiative transfer solver.
-The source code for the solver is located in :file:`$DISCHARGE_HOME/Source/RadiativeTransfer` and it is a fairly lightweight abstract class.
-As with other solvers, ``RtSolver`` can use a specified :ref:`Chap:Realm`.
-
-To use the ``RtSolver`` interface the user must cast from one of the inherited classes (see :ref:`Chap:DiffusionRTE` or :ref:`Chap:MonteCarloRTE`).
-Since most of the ``RtSolver`` is an interface which is implemented by other radiative transfer solvers, documentation of boundary conditions, kernels and so on are found in the implementation classes.
 
 .. _Chap:DiffusionRTE:
 
@@ -63,7 +69,7 @@ In the diffusion approximation, the radiative transport equation is
    \partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},
 
 where :math:`\kappa` is the absorption coefficient (i.e., inverse absorption length).
-Note that in the context below, :math:`\kappa` is *not* the volume fraction of a grid cell. 
+Note that in the context below, :math:`\kappa` is *not* the volume fraction of a grid cell but the absorption coefficient.
 This is called the Eddington approximation, and the radiative flux is :math:`F = -\frac{c}{3\kappa}\nabla \Psi`.
 
 In the stationary case this yields a Helmholtz equation
@@ -91,16 +97,14 @@ See :ref:`Chap:LinearSolvers` for discretization details.
 Transient kernel
 ^^^^^^^^^^^^^^^^
 
-For solving :eq:`TransientDiffusionRTE`, ``EddingtonSP1`` implements both the backward Euler method and the Twizell-Gumel-Arigu (TGA) scheme.
-Explicit discretizations are not available. 
+For solving :eq:`TransientDiffusionRTE`, ``EddingtonSP1`` implements the backward Euler method, while explicit discretizations are not currently available. 
 The Euler discretization is
 
 .. math::
 
    \left(1+ \kappa \Delta t\right)\Psi^{k+1} - \Delta t \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi^{k+1}\right) = \Psi^{k} + \frac{\Delta t\eta^{k+1}}{c},
 
-Again, this is a Helmholtz equation for `\Psi^{k+1}` which is solved using geometric multigrid. 
-Expressions for the TGA scheme are found in :cite:`Twizell1996`, but note that the TGA scheme requires a solution to two elliptic equations (thus it has approximately twice the cost). 
+Again, this is a Helmholtz equation for :math:`\Psi^{k+1}` which is solved using geometric multigrid.
 
 .. _Chap:EddingtonSP1BC:
    
@@ -188,54 +192,22 @@ ____________________
 
 The ``EddingtonSP1`` implementation has a number of configurable options for running the solver, and these are given below:
 
-.. code-block:: text
-	     
-   # ====================================================================================================
-   # EddingtonSP1 class options
-   # ====================================================================================================
-   EddingtonSP1.stationary          = true         # Stationary solver
-   EddingtonSP1.reflectivity        = 0.           # Reflectivity
-   EddingtonSP1.use_tga             = false        # Use TGA for integration
-   EddingtonSP1.kappa_scale         = true         # Kappa scale source or not (depends on algorithm)
-   EddingtonSP1.plt_vars            = phi src      # Plot variables. Available are 'phi' and 'src'
-   
-   EddingtonSP1.ebbc                = larsen 0.0   # Bc on embedded boundaries
-   EddingtonSP1.bc.x.lo             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
-   EddingtonSP1.bc.x.hi             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
-   EddingtonSP1.bc.y.lo             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
-   EddingtonSP1.bc.y.hi             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
-   EddingtonSP1.bc.z.lo             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
-   EddingtonSP1.bc.z.hi             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
-   EddingtonSP1.bc.z.hi             = larsen 0.0   # Boundary on domain. 'neumann' or 'larsen'
-   
-   EddingtonSP1.gmg_verbosity       = -1           # GMG verbosity
-   EddingtonSP1.gmg_pre_smooth      = 8            # Number of relaxations in downsweep
-   EddingtonSP1.gmg_post_smooth     = 8            # Number of relaxations in upsweep
-   EddingtonSP1.gmg_bott_smooth     = 8            # NUmber of relaxations before dropping to bottom solver
-   EddingtonSP1.gmg_min_iter        = 5            # Minimum number of iterations
-   EddingtonSP1.gmg_max_iter        = 32           # Maximum number of iterations
-   EddingtonSP1.gmg_exit_tol        = 1.E-6        # Residue tolerance
-   EddingtonSP1.gmg_exit_hang       = 0.2          # Solver hang
-   EddingtonSP1.gmg_min_cells       = 16           # Bottom drop
-   EddingtonSP1.gmg_bottom_solver   = bicgstab     # Bottom solver type. Valid options are 'simple <number>' and 'bicgstab'
-   EddingtonSP1.gmg_cycle           = vcycle       # Cycle type. Only 'vcycle' supported for now
-   EddingtonSP1.gmg_ebbc_weight     = 2            # EBBC weight (only for Dirichlet)
-   EddingtonSP1.gmg_ebbc_order      = 2            # EBBC order (only for Dirichlet)
-   EddingtonSP1.gmg_smoother        = red_black    # Relaxation type. 'jacobi', 'red_black', or 'multi_color'
+.. literalinclude:: ../../../../Source/RadiativeTransfer/CD_EddingtonSP1.options
 
 Basic options
 ^^^^^^^^^^^^^
 
 Basic input options to ``EddingtonSP1`` are as follows:
 
+* ``EddingtonSP1.verbosity`` for controlling solver verbosity.
 * ``EddingtonSP1.stationary`` for setting whether or not the solver is stationary.
 * ``EddingtonSP1.reflectivity`` for controlling the reflectivity in the Larsen boundary conditions.
-* ``EddingtonSP1.use_tga`` for switching between backward Euler and TGA time discretizations.
   Only relevant if ``EddingtonSP1.stationary = false``.
 * ``EddingtonSP1.kappa_scale`` Switch for multiplying the source with with the volume fraction or not.
-  Note that the multigrid Helmholtz solvers require a diagonal weighting of the operator.
+  Note that the multigrid Helmholtz solvers require a diagonal weighting of the operator, including the right-hand side.
   If ``EddingtonSP1.kappa_scale = false`` then the solver will assume that this weighting of the source term has already been made.
-* ``EddingtonSP1.plt_vars`` For setting which solver plot variables are included in plot files. 
+* ``EddingtonSP1.plt_vars`` For setting which solver plot variables are included in plot files.
+* ``EddingtonSP1.use_regrid_slopes`` For setting turning on/off slopes when regridding the solution.
 
 Setting boundary conditions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -245,8 +217,8 @@ Boundary conditions are parsed through the flags
 * ``EddingtonSP1.ebbc`` Which sets the boundary conditions on the EBs.
 * ``EddingtonSP1.bc.dim.side`` Which sets the boundary conditions on the domain sides, see :ref:`Chap:EddingtonSP1BC` for details. 
 
-Tuning multigrid performance
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Multigrid settings
+^^^^^^^^^^^^^^^^^^
 
 All parameters that begin with the form ``EddingtonSP1.gmg_`` indicate a tuning parameter for geometric multigrid.
 
@@ -282,7 +254,7 @@ All parameters that begin with the form ``EddingtonSP1.gmg_`` indicate a tuning 
   Note that this is also the stencil radius.
   See :ref:`Chap:LinearSolvers` for details. 
 * ``EddingtonSP1.gmg_ebbc_weight``.
-  Sets the least squares stencil weighting factor for least squares gradient reconstruction on EBs when using Dirichlet boundary conditions. 
+  Sets the least squares stencil weighting factor for least squares gradient reconstruction on EBs when using Robin or Dirichlet boundary conditions.
   See :ref:`Chap:LeastSquares` for details.   
 * ``EddingtonSP1.gmg_smoother``.
   Sets the multigrid smoother.
@@ -298,95 +270,170 @@ The following parameters for ``EddingtonSP1`` are run-time configurable:
 
 .. _Chap:MonteCarloRTE:
 
-Monte Carlo methods
--------------------
+Monte Carlo sampling
+--------------------
 
-All types of moment-closed radiative transfer equations contain nonphysical artifacts (which may or may not be acceptable).
-For example, in the diffusion approximation the radiative flux is :math:`F = -\frac{c}{3\kappa}\nabla \Psi`, implying that photons can leak around boundaries.
-I.e. the diffusion approximation does not correctly describe shadows.
-It is possible to go beyond the diffusion approximation by also solving for higher-order moments like the radiative flux.
-While such methods can describe shadows, they do, contain other nonphysical features.
+``McPhoto`` defines a class which can solve radiative transfer problems using discrete photons that travel "instantenously" or transiently.
+The class derives from ``RtSolver`` and can thus be used by problems that only require the ``RtSolver`` interface.
+``McPhoto`` can provide a rather complex interaction with boundaries, such as computing the intersection between a photon path and a geometry, and thus it can capture e.g. shadows.
 
-Both ''stationary'' and transient Monte Carlo methods are offered as an alternative to the diffusion approximation. 
+The Monte Carlo sampling is a particle-based radiative transfer solver, and particle-mesh operations (see :ref:`Chap:ParticleMesh`) are required in order to deposit the photons on a mesh when computing densities.
 
-photon particle
+.. tip::
+
+   The ``McPhoto`` class is defined in :file:`$DISCHARGE_HOME/Source/RadiativeTransfer/CD_McPhoto.H`.
+   See the `McPhoto C++ API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classMcPhoto.html>`_ for further details.
+
+The solver has multiple data holders for systemizing photons, which is especially useful during transport kernels where some of the photons might strike a boundary:
+
+* In-flight photons
+* Bulk-absorbed photons, i.e. photons absorbed on the mesh.
+* EB-absorbed photons, i.e. photons that struck the EB during a transport step.
+* Domain-absorbed photons, i.e. photons that struck the domain edge/face during a transport step.
+* Source photons, for letting the user pass in externally generated photons into the solver.
+
+Photon particle
 _______________
 
-The Îto particle is a computational particle class in `chombo-discharge` which can be used together with the particle tools in `Chombo`.
-The following data fields are implemented in the particle:
+The ``Photon`` particle is a simple encapsulation of a computational particle and is used by ``McPhoto``.
+It derives from ``GenericParticle<2,1>`` and stores (in addition to the particle position):
 
-.. code-block:: c++
+* The particle weight.
+* The particle mean absorption coefficient.
+* The particle velocity/direction.
+
+.. tip::
+
+   The ``Photon`` class is defined in :file:`$DISCHARGE_HOME/Source/RadiativeTransfer/CD_Photon.H`
+
+When defining the ``McPhoto`` class, the particle's absorption coefficient is computed from the implementation of the absorption function method in :ref:`Chap:RtSpecies`.
+
+Generating photons
+__________________
+
+There are several ways users can generate computational photons that are to be transported by the solver.
+
+#. Fetch the *source photons* by calling ``McPhoto::getSourcePhotons()`` and fill the returned data holder.
+   The photons can then be added to the ``McPhoto`` instantiation and one of the transport kernels can be called.
+
+#. If the source term :math:`\eta` has been filled, the user can call ``McPhoto::advance`` to have the solver generate the computational photons and than transport them.
+
+   .. important::
+
+      The ``advance`` function is *only* meant to be used together with a mesh-based source term that the user has filled prior to calling the method.
+
+      When using the ``advance``, the number of photons that are generated are limit to a user-specified number (see :ref:`Chap:McPhotoOptions` for further details).
+
+Transport modes
+_______________
+
+``McPhoto`` can be run as a fully transient (in which photons are tracked in time) or as an instantaneous solver (where photons are absorbed immediately on the mesh).
+These two differ in the way the transport problem over a time step :math:`\Delta t` is approach, but both methods include intersection tests with geometries and domain edges/faces, 
+
+Instantaneous transport
+^^^^^^^^^^^^^^^^^^^^^^^
+
+When using instantaneous transport, any photon generated in a time step is immediately absorbed on the boundary through the following steps:
+
+#. Optionally, have the solver generate photons to be transport (or add them externally).
+#. Draw a propagation distance :math:`r` by drawing random numbers from an exponential distribution :math:`p(r) = \kappa \exp\left(-\kappa r\right)`.
+   Here, :math:`\kappa` is computed by calling the underlying :ref:`Chap:RtSpecies` absorption function.
+   The absorbed position of the photon is set to :math:`\mathbf{x} = \mathbf{x}_0 + r\mathbf{n}`.
+
+   .. warning::
+
+      In instantaneous mode photons might travel infinitely long, i.e. there is no guarantee that :math:`c\Delta t \leq r`.
+#. Deposit the photons on the mesh.
+
+Transient transport
+^^^^^^^^^^^^^^^^^^^
+
+The transient Monte Carlo method is almost identical to the stationary method, except that it does not deposit all generated photons on the mesh but tracks them through time.
+For each photon, do the following:
+
+#. Compute an absorption length :math:`r` by sampling the absorption function at the current photon position.
    
-   RealVect m_position;
-   RealVect m_velocity;
-   Real m_mass;
-   Real m_kappa;
+#. Each photon is advanced over the time step :math:`\Delta t` such that the position is
 
-To obtain the fields, the user will call
+   .. math::
 
-.. code-block:: c++
+      \mathbf{x} = \mathbf{x}_0 + \mathbf{c}\Delta t.
 
-   RealVect& position();
-   RealVect& velocity();
-   Real& mass();
-   Real& diffusion();
-
-
-All functions also have ``const`` versions.
-Note that the field ``m_mass`` is the same as the *weight* of the computational particle.
-The following functions are used to set the various properties:
-
-.. code-block:: c++
-
-   setPosition(const RealVect a_pos);
-   setVelocity(const RealVect a_vel);
-   setMass(const Real a_mass);
-   setDiffusion(const Real a_diffusion;
-
-Interaction with boundaries
-___________________________
-
-
-Stationary Monte Carlo
-______________________
-
-The stationary Monte Carlo method proceeds as follows.
-
-1. For each cell in the mesh, draw a discrete number of photons :math:`\mathcal{P}\left(\eta \Delta V\Delta t\right)` where :math:`\mathcal{P}` is a Poisson distribution. The user may also choose to use pseudophotons rather than physical photons by modifying photon weights. Each photon is generated in the cell centroid :math:`\mathbf{x}_0` and given a random propagation direction :math:`\mathbf{n}`.
-
-2. Draw a propagation distance :math:`r` by drawing random numbers from an exponential distribution :math:`p(r) = \kappa \exp\left(-\kappa r\right)`. The absorbed position of the photon is :math:`\mathbf{x} = \mathbf{x}_0 + r\mathbf{n}`.
-
-3. Check if the path from :math:`\mathbf{x}_0` to :math:`\mathbf{x}` intersects an internal or domain boundary. If it does, absorb the photon on the boundary. If not, move the photon to :math:`\mathbf{x}` or reflect it off symmetry boundaries. 
-
-4. Rebin the absorbed photons onto the AMR grid. This involves parallel communication. 
-
-5. Compute the resulting photoionization profile. The user may choose between several different deposition schemes (like e.g. cloud-in-cell).
-      
-The Monte Carlo methods use computational particles for advancing the photons in exactly the same way a Particle-In-Cell method would use them for advancing electrons. Although a computational photon would normally live on the finest grid level that overlaps its position, this is not practical for all particle deposition kernels. For example, for cloud-in-cell deposition schemes it is useful to have the restrict the interpolation kernels to the grid level where the particle lives. In Chombo-speak, we therefore use a buffer region that extends some cells from a refinement boundary where the photons are not allowed to live. Instead, photons in that buffer region are transferred to a coarser level, and their deposition clouds are first interpolated to the fine level before deposition on the fine level happens. Selecting a deposition scheme and adjusting the buffer region is done through an input script associated with the solver. 
+#. Check if :math:`\left|\mathbf{x}-\mathbf{x}_0\right| < r` and if it is, absorb the photon on the mesh.
    
-Transient Monte Carlo
-_____________________
+Other transport kernels
+^^^^^^^^^^^^^^^^^^^^^^^
 
-The transient Monte Carlo method is almost identical to the stationary method, except that it does not deposit all generated photons on the mesh but tracks them through time. The transient method is implemented as follows:
+In addition to the above two methods, the solver interface permits users to add e.g. source photons externally and add them to the solvers' transport kernel. 
 
-1. For each cell in the mesh, draw a discrete number of photons :math:`\mathcal{P}\left(\eta \Delta V\Delta t\right)` as above, and append these to the already existing photons. Each photon is given a uniformly distributed random creation time within :math:`\Delta t`. 
-   
-2. Each photon is advanced over the time step :math:`\Delta t` by a sequence of :math:`N` substeps (:math:`N` may be different for each photon).
+.. _Chap:McPhotoOptions:
 
-   a. We compute :math:`N` such that we sample :math:`N\Delta \tau = \Delta t` with :math:`c\kappa\Delta\tau < 1`.
+Solver configuration
+___________________
 
-   b. A photon at position :math:`\mathbf{x}_0` is moved a distance :math:`\Delta \mathbf{x} = c\mathbf{n}\Delta\tau`. For each step we compute the absorption probability :math:`p = \kappa\left|\Delta\mathbf{x}\right|` where :math:`p\in[0,1]` is a uniform random number. If the photon is absorbed on this interval, draw a new uniform random number :math:`r \in [0,1]` and absorb the photon at the position :math:`\mathbf{x}_0 + r\Delta\mathbf{x}`. If the photon is not absorbed, it is moved to position :math:`\mathbf{x}_0 + r\Delta\mathbf{x}`.
+.. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.options
 
-3. Check if the path from :math:`\mathbf{x}_0` to :math:`\mathbf{x}` intersects an internal or domain boundary. If it does, absorb the photon on the boundary. If not, move the photon to :math:`\mathbf{x}`.
+* ``McPhoto.verbosity`` for controlling the solver verbosity.
+* ``McPhoto.instantaneous`` for setting the transport mode.
+* ``McPhoto.max_photons_per_cell`` for restricting the number of photons generated per cell when having the solver generate the computational photons. This is only relevant when calling the ``advance`` method.
+* ``McPhoto.num_sampling_packets`` for using sub-sampling when generating and transport photons in instantaneous mode through the ``advance`` function.
+  This permits the ``McPhoto.max_photons_per_cell`` to partition the photon transport into packets where a fewer number of photons are generated during each step. Note that this will deposit the photons on the mesh for each packet, and the absorbed photons are only available as a density (i.e., the computational photons that were absorbed are lost).
+  This can reduce memory for certain types of applications when using many computational photons.
+* ``McPhoto.blend_conservation`` is a dead option marked for future removal (it blends a non-conservative divergence when depositing in cut-cells).
+* ``McPhoto.transparent_eb`` for turning on/off transparent boundaries. Mostly used for debugging.
+* ``McPhoto.plt_vars`` for setting plot variables. 
+* ``McPhoto.intersection_alg`` sets the intersection algorithm when computing collisions with EBs.
+  Ray-casting and bisection methods are supported.
+* ``McPhoto.bisect_step`` sets bisection step (physical length) when calculation intersection tests using the bisection algorithm (i.e., this parameter is irrelevant if ``McPhoto.intersection_alg = raycast``).
+* ``McPhoto.deposition`` for setting the deposition method.
+  Currently, NGP and CIC methods are supported (see :ref:`Chap:ParticleMesh`).
+* ``McPhoto.deposition_cf`` for setting the deposition strategy near coarse-fine boundaries.
+  Currently, *interp* and *halo* are supported, see :ref:`Chap:ParticleMesh`.
+* ``McPhoto_bc_<coord>_<low/high>`` sets the boundary condition on domain edges/faces.
+* ``McPhoto.photon_generation`` for setting the photon generation method (details are given below).
+* ``McPhoto.source_type`` for setting the photon generation method (details are given below).
 
-4. Rebin the absorbed photons onto the AMR grid. This involves parallel communication. 
+Clarifications
+^^^^^^^^^^^^^^
 
-5. Compute the resulting photoionization profile. The user may choose between several different deposition schemes (like e.g. cloud-in-cell).
+When computational photons are generated through the solver, users might have filled the source term differently depending on the application.
+For example, users might have filled the source term with the number of photons generated per unit volume and time, or the *physical* number of photons to be generated. 
+The two input options ``McPhoto.photon_generation`` and ``McPhoto.source_type`` contain the necessary specifications for ensuring that the user-filled source term can be translated properly for ensuring that the correct number of physical photons are generated.
+Firstly, ``McPhoto.source_type`` contains the specification of what the source term contains, e.g.
 
-Limitations
------------
+* ``number`` if the source term contains the physical number of photons.
+* ``volume`` if the source terms contains the physical number of photons generated per unit volume.
+* ``volume_rate`` if the source terms contains the physical number of photons generated per unit volume and time.
+* ``rate`` if the source terms contains the physical number of photons generated per unit time.
+
+When ``McPhoto`` calculates the number of physical photons in a cell, it will automatically determine from ``McPhoto.source_type``, :math:`\Delta V` and :math:`\Delta t` how many physical photons are to be generated in each grid cell.
+
+``McPhoto.photon_generation`` permits the user to turn on/off Poisson sampling when determining how many photons will be generated.
+If this is set to *stochastic*, the solver will first compute the number of physical photons :math:`\overline{N}_\gamma^{\text{phys}}` following the procedure above, and then run a Poisson sampling such that the final number of physical photons is
+
+.. math::
+
+   N_{\gamma}^{\text{phys}} = P\left(\overline{N}_{\gamma}^{\text{phys}}\right).
+
+Otherwise, if ``McPhoto.photon_generation`` is set to *deterministic* then the solver will generate
+
+.. math::
+
+   N_{\gamma}^{\text{phys}} = \overline{N}_{\gamma}^{\text{phys}}
+
+photons.
+Again, these elements are important because users might choose to run such stochastic samplings outside of ``McPhoto``.
+
+.. important::
+
+   All of the above procedures are done *per-cell*.
+  
 
 Example application
 -------------------
 
-An example application of usage of the ``RtSolver`` is found in :ref:`Chap:RadiativeTransferModel`. 
+Example applications that use ``RtSolver`` are found in:
+
+* :ref:`Chap:RadiativeTransferModel`.
+* :ref:`Chap:CdrPlasmaModel`.
+* :ref:`Chap:ItoKMC`.    

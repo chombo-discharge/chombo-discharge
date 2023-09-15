@@ -156,15 +156,18 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aef6d651972be5b22b0dfc778a834b9d8">isInstantaneous</a> ()</td></tr>
 <tr class="memdesc:aef6d651972be5b22b0dfc778a834b9d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Instantaneous solver or not. <br /></td></tr>
 <tr class="separator:aef6d651972be5b22b0dfc778a834b9d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a58144e783e153a45c51607123d7105c9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a58144e783e153a45c51607123d7105c9">generatePhotons</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_photons, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_source, const Real a_dt)</td></tr>
-<tr class="memdesc:a58144e783e153a45c51607123d7105c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate computational photon sfrom a source term.  <a href="classMcPhoto.html#a58144e783e153a45c51607123d7105c9">More...</a><br /></td></tr>
-<tr class="separator:a58144e783e153a45c51607123d7105c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac417c104ce1b2ded82dba7d55910237b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ac417c104ce1b2ded82dba7d55910237b">advancePhotonsInstantaneous</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_bulkPhotons, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_ebPhotons, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_domainPhotons, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_photons)</td></tr>
 <tr class="memdesc:ac417c104ce1b2ded82dba7d55910237b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move photons and absorb them on various objects.  <a href="classMcPhoto.html#ac417c104ce1b2ded82dba7d55910237b">More...</a><br /></td></tr>
 <tr class="separator:ac417c104ce1b2ded82dba7d55910237b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a801909315b9d81eaaec819a6ebd25fdd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a801909315b9d81eaaec819a6ebd25fdd">advancePhotonsTransient</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_bulkPhotons, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_ebPhotons, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_domainPhotons, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_photons, const Real a_dt)</td></tr>
 <tr class="memdesc:a801909315b9d81eaaec819a6ebd25fdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move photons and absorb them on various objects.  <a href="classMcPhoto.html#a801909315b9d81eaaec819a6ebd25fdd">More...</a><br /></td></tr>
 <tr class="separator:a801909315b9d81eaaec819a6ebd25fdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2996c54ec6cc903a1bb7919feb8d0147"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a2996c54ec6cc903a1bb7919feb8d0147">computeNumPhysicalPhotons</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_numPhysPhotonsTotal, <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_numPhysPhotonsPerPacket, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_source, const Real a_dt) const noexcept</td></tr>
+<tr class="memdesc:a2996c54ec6cc903a1bb7919feb8d0147"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the number of physical photons in each grid cell.  <a href="classMcPhoto.html#a2996c54ec6cc903a1bb7919feb8d0147">More...</a><br /></td></tr>
+<tr class="separator:a2996c54ec6cc903a1bb7919feb8d0147"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aedfb09455408860523c0513e62363ef5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aedfb09455408860523c0513e62363ef5">generateComputationalPhotons</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_photons, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_numPhysicalPhotons, const size_t a_maxPhotonsPerCell) const noexcept</td></tr>
+<tr class="memdesc:aedfb09455408860523c0513e62363ef5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate computational photons.  <a href="classMcPhoto.html#aedfb09455408860523c0513e62363ef5">More...</a><br /></td></tr>
+<tr class="separator:aedfb09455408860523c0513e62363ef5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83b71abb5f05186cdf9e1ca7392c5378"><td class="memItemLeft" align="right" valign="top"><a id="a83b71abb5f05186cdf9e1ca7392c5378"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a83b71abb5f05186cdf9e1ca7392c5378">remap</a> ()</td></tr>
 <tr class="memdesc:a83b71abb5f05186cdf9e1ca7392c5378"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remap computational particles. This remaps m_photons. <br /></td></tr>
@@ -268,6 +271,14 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a92c8a2364df70e13445d4f05d26a7955"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a92c8a2364df70e13445d4f05d26a7955">getSourcePhotons</a> ()</td></tr>
 <tr class="memdesc:a92c8a2364df70e13445d4f05d26a7955"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get source photons.  <a href="classMcPhoto.html#a92c8a2364df70e13445d4f05d26a7955">More...</a><br /></td></tr>
 <tr class="separator:a92c8a2364df70e13445d4f05d26a7955"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6b49636701b47b7387f4efae225e8ac"><td class="memItemLeft" align="right" valign="top"><a id="ad6b49636701b47b7387f4efae225e8ac"></a>
+virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ad6b49636701b47b7387f4efae225e8ac">getMaxPhotonsPerCell</a> () const noexcept</td></tr>
+<tr class="memdesc:ad6b49636701b47b7387f4efae225e8ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum number of photons generated per cell. <br /></td></tr>
+<tr class="separator:ad6b49636701b47b7387f4efae225e8ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb531c420343d9d5cfc88be405332062"><td class="memItemLeft" align="right" valign="top"><a id="adb531c420343d9d5cfc88be405332062"></a>
+virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#adb531c420343d9d5cfc88be405332062">getNumSamplingPackets</a> () const noexcept</td></tr>
+<tr class="memdesc:adb531c420343d9d5cfc88be405332062"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum number of photons generated per cell. <br /></td></tr>
+<tr class="separator:adb531c420343d9d5cfc88be405332062"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classRtSolver"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classRtSolver')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classRtSolver.html">RtSolver</a></td></tr>
 <tr class="memitem:a159dfdd246795e94f9f18be45b7590e9 inherit pub_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top"><a id="a159dfdd246795e94f9f18be45b7590e9"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a159dfdd246795e94f9f18be45b7590e9">RtSolver</a> ()</td></tr>
@@ -380,9 +391,9 @@ Protected Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a2214e190ebd62bbec704fcdddb9e1d8d"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a2214e190ebd62bbec704fcdddb9e1d8d">drawPhotons</a> (const Real a_source, const Real a_volume, const Real a_dt)</td></tr>
-<tr class="memdesc:a2214e190ebd62bbec704fcdddb9e1d8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw photons in a cell and volume.  <a href="classMcPhoto.html#a2214e190ebd62bbec704fcdddb9e1d8d">More...</a><br /></td></tr>
-<tr class="separator:a2214e190ebd62bbec704fcdddb9e1d8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22ac8d5d0ff805aa90bb48465742137e"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a22ac8d5d0ff805aa90bb48465742137e">drawPhotons</a> (const Real a_source, const Real a_volume, const Real a_dt) const noexcept</td></tr>
+<tr class="memdesc:a22ac8d5d0ff805aa90bb48465742137e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw photons in a cell and volume.  <a href="classMcPhoto.html#a22ac8d5d0ff805aa90bb48465742137e">More...</a><br /></td></tr>
+<tr class="separator:a22ac8d5d0ff805aa90bb48465742137e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9202da5518777b2e7de354acd0b7625e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a9202da5518777b2e7de354acd0b7625e">domainBcMap</a> (const int a_dir, const Side::LoHiSide a_side)</td></tr>
 <tr class="memdesc:a9202da5518777b2e7de354acd0b7625e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mapping function for domain boundary conditions.  <a href="classMcPhoto.html#a9202da5518777b2e7de354acd0b7625e">More...</a><br /></td></tr>
 <tr class="separator:a9202da5518777b2e7de354acd0b7625e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -494,8 +505,11 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="separator:a0485251e0fbaf03bfa4b552f87cac10f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64fee208dfd98b7136e189092a8ed803"><td class="memItemLeft" align="right" valign="top"><a id="a64fee208dfd98b7136e189092a8ed803"></a>
 size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a64fee208dfd98b7136e189092a8ed803">m_maxPhotonsGeneratedPerCell</a></td></tr>
-<tr class="memdesc:a64fee208dfd98b7136e189092a8ed803"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of Photons per pseudoPhoton. <br /></td></tr>
+<tr class="memdesc:a64fee208dfd98b7136e189092a8ed803"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of computational photons generated per cell. <br /></td></tr>
 <tr class="separator:a64fee208dfd98b7136e189092a8ed803"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abaf73acbdce5500f0250d29bc0375895"><td class="memItemLeft" align="right" valign="top"><a id="abaf73acbdce5500f0250d29bc0375895"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_numSamplingPackets</b></td></tr>
+<tr class="separator:abaf73acbdce5500f0250d29bc0375895"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad5cbdbb16e6ee4444c4ebccb96c12286"><td class="memItemLeft" align="right" valign="top"><a id="ad5cbdbb16e6ee4444c4ebccb96c12286"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ad5cbdbb16e6ee4444c4ebccb96c12286">m_seed</a></td></tr>
 <tr class="memdesc:ad5cbdbb16e6ee4444c4ebccb96c12286"><td class="mdescLeft">&#160;</td><td class="mdescRight">RNG seed. <br /></td></tr>
@@ -1168,6 +1182,65 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
+<a id="a2996c54ec6cc903a1bb7919feb8d0147"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2996c54ec6cc903a1bb7919feb8d0147">&#9670;&nbsp;</a></span>computeNumPhysicalPhotons()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void McPhoto::computeNumPhysicalPhotons </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_numPhysPhotonsTotal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_numPhysPhotonsPerPacket</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_dt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the number of physical photons in each grid cell. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_numPhysPhotonsTotal</td><td>Total number of physical photons to be generated in each grid cell. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_numPhysPhotonsPacket</td><td>Number of physical photons to be generated in each packet. Must have a components = m_numSamplingPackets </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_source</td><td>Source term &ndash; the interpretation of this depends on the user-specified interpretation of the source term. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a16b2b61e407b18a331ceaad31414f2b1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a16b2b61e407b18a331ceaad31414f2b1">&#9670;&nbsp;</a></span>countOutcast()</h2>
 
@@ -1569,8 +1642,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a2214e190ebd62bbec704fcdddb9e1d8d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2214e190ebd62bbec704fcdddb9e1d8d">&#9670;&nbsp;</a></span>drawPhotons()</h2>
+<a id="a22ac8d5d0ff805aa90bb48465742137e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22ac8d5d0ff805aa90bb48465742137e">&#9670;&nbsp;</a></span>drawPhotons()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1599,12 +1672,12 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -1622,8 +1695,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a58144e783e153a45c51607123d7105c9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a58144e783e153a45c51607123d7105c9">&#9670;&nbsp;</a></span>generatePhotons()</h2>
+<a id="aedfb09455408860523c0513e62363ef5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aedfb09455408860523c0513e62363ef5">&#9670;&nbsp;</a></span>generateComputationalPhotons()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1632,7 +1705,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void McPhoto::generatePhotons </td>
+          <td class="memname">void McPhoto::generateComputationalPhotons </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_photons</em>, </td>
@@ -1641,37 +1714,36 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_source</em>, </td>
+          <td class="paramname"><em>a_numPhysicalPhotons</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_dt</em>&#160;</td>
+          <td class="paramtype">const size_t&#160;</td>
+          <td class="paramname"><em>a_maxPhotonsPerCell</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Generate computational photon sfrom a source term. </p>
+<p>Generate computational photons. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_photons</td><td>Computational photons. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_source</td><td>Source term, i.e. number of photons produced per unit time. The photons will be generated based on what the user specifies in the input parameters for this class. I.e., whether or not a_source will generate stochastic or deterministic photons, and scaled based on what a_source actually contains (number of photons, number/volume, number/second, number/(volume*second)). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step</td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_photons</td><td>Computational photons </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numPhysicalPhotons</td><td>Number of physical photons to add to a_photons </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxPhotonsPerCell</td><td>Maximum number of photons generated per cell. </td></tr>
   </table>
   </dd>
 </dl>
-<p>This will generate photons and put them in a_particles </p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo:</a></b></dt><dd>Implementation could use a lambda to avoid the double definition. </dd></dl>
 
 </div>
 </div>
