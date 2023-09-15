@@ -181,7 +181,7 @@ McPhoto::parsePseudoPhotons()
 
   int maxPhotons;
 
-  //  pp.get("num_sampling_packets", m_numSamplingPackets);
+  pp.get("num_sampling_packets", m_numSamplingPackets);
   pp.get("max_photons_per_cell", maxPhotons);
 
   if (maxPhotons <= 0) {
