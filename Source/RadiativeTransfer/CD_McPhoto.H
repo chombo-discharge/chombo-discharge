@@ -134,7 +134,6 @@ public:
                           ParticleContainer<Photon>& a_photons,
                           const Real                 a_dt);
 
-
   /*!
     @brief Compute the number of physical photons in each grid cell.
     @param[out] a_numPhysPhotonsTotal Total number of physical photons to be generated in each grid cell.
@@ -157,7 +156,7 @@ public:
   virtual void
   generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
                                const EBAMRCellData&       a_numPhysicalPhotons,
-                               const size_t               a_maxPhotonsPerCell) const noexcept;  
+                               const size_t               a_maxPhotonsPerCell) const noexcept;
 
   /*!
     @brief Remap computational particles. This remaps m_photons
@@ -600,7 +599,6 @@ protected:
     @brief This is a particle container that can be used to add Photons directly. 
   */
   ParticleContainer<Photon> m_sourcePhotons;
-
 
   /*!
     @brief Draw photons in a cell and volume
