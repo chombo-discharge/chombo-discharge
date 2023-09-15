@@ -103,19 +103,6 @@ public:
   isInstantaneous();
 
   /*!
-    @brief Generate computational photon sfrom a source term 
-    @param[out] a_photons Computational photons. 
-    @param[in]  a_source  Source term, i.e. number of photons produced per unit time. The photons will be generated
-    based on what the user specifies in the input parameters for this class. I.e., whether or not a_source will generate stochastic or deterministic photons, and
-    scaled based on what a_source actually contains (number of photons, number/volume, number/second, number/(volume*second)). 
-    @param[in] a_dt Time step
-    @details This will generate photons and put them in a_particles
-    @todo Implementation could use a lambda to avoid the double definition. 
-  */
-  virtual void
-  generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellData& a_source, const Real a_dt);
-
-  /*!
     @brief Move photons and absorb them on various objects
     @param[out]   a_bulkPhotons   Photons absorbed on the mesh
     @param[out]   a_ebPhotons     Photons absorbed on the EB
@@ -146,6 +133,30 @@ public:
                           ParticleContainer<Photon>& a_domainPhotons,
                           ParticleContainer<Photon>& a_photons,
                           const Real                 a_dt);
+
+  /*!
+    @brief Compute the number of physical photons in each grid cell.
+    @param[out] a_numPhysPhotonsTotal Total number of physical photons to be generated in each grid cell.
+    @param[out] a_numPhysPhotonsPacket Number of physical photons to be generated in each packet. Must have a components = m_numSamplingPackets
+    @param[in] a_source Source term -- the interpretation of this depends on the user-specified interpretation of the source term.
+    @param[in] a_dt Time step
+  */
+  virtual void
+  computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
+                            EBAMRCellData&       a_numPhysPhotonsPerPacket,
+                            const EBAMRCellData& a_source,
+                            const Real           a_dt) const noexcept;
+
+  /*!
+    @brief Generate computational photons.
+    @param[inout] a_photons Computational photons
+    @param[in] a_numPhysicalPhotons Number of physical photons to add to a_photons
+    @param[in] a_maxPhotonsPerCell Maximum number of photons generated per cell.
+  */
+  virtual void
+  generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
+                               const EBAMRCellData&       a_numPhysicalPhotons,
+                               const size_t               a_maxPhotonsPerCell) const noexcept;
 
   /*!
     @brief Remap computational particles. This remaps m_photons
@@ -405,6 +416,18 @@ public:
   virtual ParticleContainer<Photon>&
   getSourcePhotons();
 
+  /*!
+    @brief Get maximum number of photons generated per cell
+  */
+  virtual int
+  getMaxPhotonsPerCell() const noexcept;
+
+  /*!
+    @brief Get maximum number of photons generated per cell
+  */
+  virtual int
+  getNumSamplingPackets() const noexcept;
+
 protected:
   /*!
     @brief Enum for interpreting how photons are generated when using fluid codes
@@ -488,9 +511,14 @@ protected:
   bool m_plotDomainPhotons;
 
   /*!
-    @brief Number of Photons per pseudoPhoton
+    @brief Number of computational photons generated per cell
   */
   size_t m_maxPhotonsGeneratedPerCell;
+
+  /*!
+    @brief 
+  */
+  int m_numSamplingPackets;
 
   /*!
     @brief RNG seed
@@ -580,7 +608,7 @@ protected:
     @details The return result of this function depends on the input parameters to this class. 
   */
   size_t
-  drawPhotons(const Real a_source, const Real a_volume, const Real a_dt);
+  drawPhotons(const Real a_source, const Real a_volume, const Real a_dt) const noexcept;
 
   /*!
     @brief Mapping function for domain boundary conditions
