@@ -50,14 +50,25 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
     pout() << m_name + "::advance" << endl;
   }
 
-  EBAMRCellData numPhysPhotons;
-  m_amr->allocate(numPhysPhotons, m_realm, m_phase, 1);
-
   // Note: This routine does an on-the-fly generation of photons based on the contents in a_source. This routine is primarily
   //       written for fluid methods since all input/output parameters happen on the mesh. Most particle solvers will use a different
   //       approach and will probably fill m_sourcePhotons through a kinetic interface and use advancePhotonsInstantaneous or advancePhotonsTransient.
   //
   //       If you find yourself calling this routine with a pure particle method, you're may be doing something you shouldn't....
+  //
+  //       This routine is a bit convoluted because it permits sub-sampling of the photons generated in the grid cells. That is, instead of generating
+  //       all photons at once and moving them, we divide them into packets and advance the packets independently of one another. This results in additional
+  //       MPI calls, but can reduce memory when many photons are generated per cell.
+
+  DataOps::setValue(a_phi, 0.0);
+
+  EBAMRCellData phi;
+  EBAMRCellData numPhysPhotonsTotal;
+  EBAMRCellData numPhysPhotonsPacket;
+
+  m_amr->allocate(phi, m_realm, m_phase, 1);
+  m_amr->allocate(numPhysPhotonsTotal, m_realm, m_phase, 1);
+  m_amr->allocate(numPhysPhotonsPacket, m_realm, m_phase, m_numSamplingPackets);
 
   // Recall: m_photons are 'traveling' photons, m_sourcePhotons are photons to be transferred into m_photons before transport over dt,
   //         and m_ebPhotons and m_domainPhotons are photons that strike the EB or domain boundaries.
@@ -72,26 +83,37 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
   this->clear(m_ebPhotons);
   this->clear(m_domainPhotons);
 
-  // Compute number of physical photons to be generated.
-  this->computeNumPhysicalPhotons(numPhysPhotons, a_source, a_dt);
+  this->computeNumPhysicalPhotons(numPhysPhotonsTotal, numPhysPhotonsPacket, a_source, a_dt);
 
-  // Generate computational photons in each cell from the number of physical photons.
-  this->generateComputationalPhotons(m_photons, numPhysPhotons, m_maxPhotonsGeneratedPerCell);
-
-  // Advance photons either instantaneously or transiently.
+  // Advance photons either instantaneously or transiently. For transient advances
   if (m_instantaneous) {
-    this->advancePhotonsInstantaneous(m_bulkPhotons, m_ebPhotons, m_domainPhotons, m_photons);
+    const size_t maxPhotonsPerPacket = m_maxPhotonsGeneratedPerCell / m_numSamplingPackets;
+    const size_t remainder           = m_maxPhotonsGeneratedPerCell % m_numSamplingPackets;
+
+    for (int i = 0; i < m_numSamplingPackets; i++) {
+      const size_t maxPhotonsPerCell = (i == 0) ? maxPhotonsPerPacket + remainder : maxPhotonsPerPacket;
+
+      const EBAMRCellData& numPhysPhotons = m_amr->slice(numPhysPhotonsPacket, Interval(i, i));
+
+      this->generateComputationalPhotons(m_photons, numPhysPhotons, maxPhotonsPerCell);
+      this->advancePhotonsInstantaneous(m_bulkPhotons, m_ebPhotons, m_domainPhotons, m_photons);
+
+      // Absorb the bulk photons on the mesh.
+      this->depositPhotons(phi, m_bulkPhotons, m_deposition);
+      this->clear(m_bulkPhotons);
+
+      DataOps::incr(a_phi, phi, 1.0);
+    }
   }
   else {
+    this->generateComputationalPhotons(m_photons, numPhysPhotonsTotal, m_maxPhotonsGeneratedPerCell);
     this->advancePhotonsTransient(m_bulkPhotons, m_ebPhotons, m_domainPhotons, m_photons, a_dt);
-
     this->remap(m_photons);
+    this->depositPhotons(a_phi, m_bulkPhotons, m_deposition);
   }
 
-  this->clear(m_sourcePhotons);
-
-  // Deposit the photons on the mesh.
-  this->depositPhotons(a_phi, m_bulkPhotons, m_deposition);
+  m_amr->conservativeAverage(a_phi, m_realm, m_phase);
+  m_amr->interpGhost(a_phi, m_realm, m_phase);
 
   return true;
 }
@@ -203,7 +225,11 @@ McPhoto::parsePseudoPhotons()
     m_maxPhotonsGeneratedPerCell = std::numeric_limits<size_t>::max();
   }
   else {
-    m_maxPhotonsGeneratedPerCell = (size_t) maxPhotons;
+    m_maxPhotonsGeneratedPerCell = (size_t)maxPhotons;
+  }
+
+  if (m_numSamplingPackets <= 0) {
+    m_numSamplingPackets = 1;
   }
 }
 
@@ -821,7 +847,8 @@ McPhoto::randomExponential(const Real a_mean)
 }
 
 void
-McPhoto::computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotons,
+McPhoto::computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
+                                   EBAMRCellData&       a_numPhysPhotonsPacket,
                                    const EBAMRCellData& a_source,
                                    const Real           a_dt) const noexcept
 {
@@ -830,11 +857,12 @@ McPhoto::computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotons,
     pout() << m_name + "::computeNumPhysicalPhotons" << endl;
   }
 
-  CH_assert(a_numPhysPhotons[0]->nComp() == 1);
+  CH_assert(a_numPhysPhotonsTotal[0]->nComp() == 1);
+  CH_assert(a_numPhysPhotonsPacket[0]->nComp() == m_numSamplingPackets);
   CH_assert(a_source[0]->nComp() == 1);
   CH_assert(a_dt >= 0.0);
 
-  DataOps::setValue(a_numPhysPhotons, 0.0);
+  DataOps::setValue(a_numPhysPhotonsTotal, 0.0);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
@@ -850,13 +878,25 @@ McPhoto::computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotons,
       const EBCellFAB& source    = (*a_source[lvl])[dit()];
       const FArrayBox& sourceReg = source.getFArrayBox();
 
-      EBCellFAB& numPhysPhotons    = (*a_numPhysPhotons[lvl])[dit()];
-      FArrayBox& numPhysPhotonsReg = numPhysPhotons.getFArrayBox();
+      EBCellFAB& numPhysPhotonsTotal    = (*a_numPhysPhotonsTotal[lvl])[dit()];
+      FArrayBox& numPhysPhotonsTotalReg = numPhysPhotonsTotal.getFArrayBox();
+
+      EBCellFAB& numPhysPhotonsPacket    = (*a_numPhysPhotonsPacket[lvl])[dit()];
+      FArrayBox& numPhysPhotonsPacketReg = numPhysPhotonsPacket.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (ebisbox.isRegular(iv) && validCells(iv)) {
 
-          numPhysPhotonsReg(iv, 0) = Real(this->drawPhotons(sourceReg(iv, 0), vol, a_dt));
+          const size_t numPhysPhotons = this->drawPhotons(sourceReg(iv, 0), vol, a_dt);
+          const size_t packetSize     = numPhysPhotons / m_numSamplingPackets;
+          const size_t remainder      = numPhysPhotons % m_numSamplingPackets;
+
+          numPhysPhotonsTotalReg(iv, 0) = Real(numPhysPhotons);
+
+          for (int i = 0; i < m_numSamplingPackets; i++) {
+            numPhysPhotonsPacketReg(iv, i) = Real(packetSize);
+          }
+          numPhysPhotonsPacketReg(iv, 0) += Real(remainder);
         }
       };
 
@@ -866,7 +906,16 @@ McPhoto::computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotons,
         if (ebisbox.isIrregular(iv) && validCells(iv)) {
           const Real kappa = vol * ebisbox.volFrac(vof);
 
-          numPhysPhotons(vof, 0) = Real(this->drawPhotons(source(vof, 0), kappa * vol, a_dt));
+          const size_t numPhysPhotons = this->drawPhotons(source(vof, 0), vol, a_dt);
+          const size_t packetSize     = numPhysPhotons / m_numSamplingPackets;
+          const size_t remainder      = numPhysPhotons % m_numSamplingPackets;
+
+          numPhysPhotonsTotal(vof, 0) = Real(numPhysPhotons);
+
+          for (int i = 0; i < m_numSamplingPackets; i++) {
+            numPhysPhotonsPacket(vof, i) = Real(packetSize);
+          }
+          numPhysPhotonsPacket(vof, 0) += Real(remainder);
         }
       };
 
@@ -1251,7 +1300,13 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
                                      ParticleContainer<Photon>& a_domainPhotons,
                                      ParticleContainer<Photon>& a_photons)
 {
-  CH_TIME("McPhoto::advancePhotonsInstantaneous");
+  CH_TIMERS("McPhoto::advancePhotonsInstantaneous");
+  CH_TIMER("McPhoto::advancePhotonsInstantaneous::init_tests", t1);
+  CH_TIMER("McPhoto::advancePhotonsInstantaneous::no_intersect", t2);
+  CH_TIMER("McPhoto::advancePhotonsInstantaneous::domain_intersect", t3);
+  CH_TIMER("McPhoto::advancePhotonsInstantaneous::eb_intersect", t4);
+  CH_TIMER("McPhoto::advancePhotonsInstantaneous::transport", t5);
+  CH_TIMER("McPhoto::advancePhotonsInstantaneous::remap", t6);
   if (m_verbosity > 5) {
     pout() << m_name + "::advancePhotonsInstantaneous" << endl;
   }
@@ -1300,6 +1355,7 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
         Photon& p = lit();
 
         // Draw a new random absorption position
+        CH_START(t1);
         const RealVect oldPos    = p.position();
         const RealVect direction = p.velocity() / (p.velocity().vectorLength());
         const RealVect newPos    = oldPos + direction * this->randomExponential(p.kappa());
@@ -1318,14 +1374,16 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
             checkDom = true;
           }
         }
+        CH_STOP(t1);
 
-        if (!checkEB && !checkDom || m_transparentEB) {
-
-          // No intersection test necessary, photons is guaranteed to end up on the mesh.
+        if ((!checkEB && !checkDom) || m_transparentEB) {
+          CH_START(t2);
           p.position() = newPos;
           bulkPhotons.add(p);
+          CH_START(t2);
         }
         else {
+          CH_START(t3);
           // Must do an intersection test (with either EB or domain). These tests work such that we parametrize the photon path as
           //
           // x(s) = x0 + s*(x1-x0), s = [0,1]
@@ -1342,9 +1400,13 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
 
           // Do intersection tests. These return true/false if the path crossed an object. If it returned true, the s-parameter
           // will have been defined as well.
+          CH_START(t3);
           if (checkDom) {
             contactDomain = ParticleOps::domainIntersection(oldPos, newPos, probLo, probHi, sDom);
           }
+          CH_STOP(t3);
+
+          CH_START(t4);
           if (checkEB) {
             switch (m_intersectionEB) {
             case IntersectionEB::Raycast: {
@@ -1364,8 +1426,10 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
             }
             }
           }
+          CH_STOP(t4);
 
-          // Move the Photon to the data holder where it belongs.
+          // Move the photon to the appropriate data holder
+          CH_START(t5);
           if (!contactEB && !contactDomain) {
             p.position() = newPos;
             bulkPhotons.add(p);
@@ -1382,6 +1446,7 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
               domPhotons.add(p);
             }
           }
+          CH_STOP(t5);
         }
       }
 
@@ -1391,9 +1456,11 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
   }
 
   // Need to remap because photons may/will have moved off the processor.
+  CH_START(t6);
   a_bulkPhotons.remap();
   a_ebPhotons.remap();
   a_domainPhotons.remap();
+  CH_STOP(t6);
 
 #if MC_PHOTO_DEBUG // Debug hook
   const int bulkPhotons = this->countPhotons(a_bulkPhotons.getParticles());

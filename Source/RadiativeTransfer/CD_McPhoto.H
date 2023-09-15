@@ -102,8 +102,6 @@ public:
   virtual bool
   isInstantaneous();
 
-
-
   /*!
     @brief Move photons and absorb them on various objects
     @param[out]   a_bulkPhotons   Photons absorbed on the mesh
@@ -573,13 +571,18 @@ protected:
     @param[in] a_dt Time step
   */
   virtual void
-  computeNumPhysicalPhotons(EBAMRCellData& a_numPhysPhotons, const EBAMRCellData& a_source, const Real a_dt) const noexcept;
+  computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
+                            EBAMRCellData&       a_numPhysPhotonsPerPacket,
+                            const EBAMRCellData& a_source,
+                            const Real           a_dt) const noexcept;
 
   /*!
     @brief Generate computational photons
   */
   virtual void
-  generateComputationalPhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellData& a_numPhysicalPhotons, const size_t a_maxPhotonsPerCell) const noexcept;
+  generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
+                               const EBAMRCellData&       a_numPhysicalPhotons,
+                               const size_t               a_maxPhotonsPerCell) const noexcept;
 
   /*!
     @brief Draw photons in a cell and volume
