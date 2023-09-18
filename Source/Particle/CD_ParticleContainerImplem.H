@@ -85,6 +85,7 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
 
   // Do the define stuff.
   this->setupGrownGrids(base, m_finestLevel);
+  this->setupBoxTiles(base, m_finestLevel);
   this->setupParticleData(base, m_finestLevel);
 
   m_isDefined         = true;
@@ -120,6 +121,35 @@ ParticleContainer<P>::setupGrownGrids(const int a_base, const int a_finestLevel)
     }
 
     m_grownGrids[lvl] = BoxLayout(boxes, dbl.procIDs());
+  }
+}
+
+template <class P>
+void
+ParticleContainer<P>::setupBoxTiles(const int a_base, const int a_finestLevel)
+{
+  CH_TIME("ParticleContainer<P>::setupBoxTiles");
+
+  m_allBoxTiles.resize(1 + a_finestLevel);
+
+  for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl    = m_grids[lvl];
+    const ProblemDomain&     domain = m_domains[lvl];
+
+    const IntVect probLo = domain.domainBox().smallEnd();
+
+    m_allBoxTiles[lvl].clear();
+
+    for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
+      const Box box = dbl[lit()];
+
+      const IntVect tag = box.smallEnd();
+      const IntVect iv  = IntVect(D_DECL((tag[0] - probLo[0]) / m_blockingFactor,
+                                        (tag[1] - probLo[1]) / m_blockingFactor,
+                                        (tag[2] - probLo[2]) / m_blockingFactor));
+
+      m_allBoxTiles[lvl].emplace(TileI<int, SpaceDim>(D_DECL(iv[0], iv[1], iv[2])));
+    }
   }
 }
 
@@ -773,35 +803,114 @@ ParticleContainer<P>::evictInvalidParticles(List<P>&         a_evictedParticles,
 }
 
 template <class P>
+IntVect
+ParticleContainer<P>::getParticleCellIndex(const RealVect& a_position, const RealVect a_dx) const noexcept
+{
+  const RealVect x = a_position - m_probLo;
+
+  return IntVect(
+    D_DECL((int)std::floor(x[0] / a_dx[0]), (int)std::floor(x[1] / a_dx[1]), (int)std::floor(x[2] / a_dx[2])));
+}
+
+template <class P>
 void
 ParticleContainer<P>::remap()
 {
   CH_TIMERS("ParticleContainer<P>::remap");
   CH_TIMER("ParticleContainer<P>::remap::catenate_to_finest", t1);
-  CH_TIMER("ParticleContainer<P>::remap::catenate_to_coarser", t2);
+  CH_TIMER("ParticleContainer<P>::remap::level_transfer", t2);
+  CH_TIMER("ParticleContainer<P>::remap::local_remap", t3);
+  CH_TIMER("ParticleContainer<P>::remap::remap_outcast", t4);
+  CH_TIMER("ParticleContainer<P>::remap::remap_outcast", t5);
 
-  CH_START(t1);
-  List<P>& outcastFinest = m_particles[m_finestLevel]->outcast();
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
-      outcastFinest.catenate((*m_particles[lvl])[dit()].listItems());
+  ParmParse pp("ParticleContainer");
+
+  bool useNewRemap = false;
+  pp.query("use_new_remap", useNewRemap);
+
+  if (!useNewRemap) {
+
+    CH_START(t1);
+    List<P>& outcastFinest = m_particles[m_finestLevel]->outcast();
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
+        outcastFinest.catenate((*m_particles[lvl])[dit()].listItems());
+      }
+    }
+    CH_STOP(t1);
+
+    for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
+      m_particles[lvl]->gatherOutcast();
+      m_particles[lvl]->remapOutcast();
+
+      CH_START(t2);
+      if (lvl > 0) {
+
+        List<P>& outcast     = m_particles[lvl]->outcast();
+        List<P>& outcastCoar = m_particles[lvl - 1]->outcast();
+
+        outcastCoar.catenate(outcast);
+      }
+      CH_STOP(t2);
     }
   }
-  CH_STOP(t1);
+  else {
+    CH_START(t1);
+    Vector<List<P>*> levelOutcasts(1 + m_finestLevel);
+    levelOutcasts[m_finestLevel] = &(m_particles[m_finestLevel]->outcast());
 
-  for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
-    m_particles[lvl]->gatherOutcast();
-    m_particles[lvl]->remapOutcast();
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      levelOutcasts[lvl] = &(m_particles[lvl]->outcast());
 
-    CH_START(t2);
-    if (lvl > 0) {
-
-      List<P>& outcast     = m_particles[lvl]->outcast();
-      List<P>& outcastCoar = m_particles[lvl - 1]->outcast();
-
-      outcastCoar.catenate(outcast);
+      for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
+        levelOutcasts[m_finestLevel]->catenate((*m_particles[lvl])[dit()].listItems());
+      }
     }
-    CH_STOP(t2);
+    CH_STOP(t1);
+
+    // Figure out which level the particle lives on.
+    CH_START(t2);
+    for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
+
+      for (ListIterator<P> lit(*levelOutcasts[lvl]); lit.ok();) {
+        const IntVect              pi = this->getParticleCellIndex(lit().position(), m_dx[lvl]);
+        const IntVect              pt = pi / m_blockingFactor;
+        const TileI<int, SpaceDim> ti = TileI<int, SpaceDim>(D_DECL(pt[0], pt[1], pt[2]));
+
+        if (m_allBoxTiles[lvl].count(ti) > 0) {
+          ++lit;
+        }
+        else {
+          if (lvl > 0) {
+            levelOutcasts[lvl - 1]->transfer(lit);
+          }
+          else {
+            levelOutcasts[lvl]->remove(lit);
+          }
+        }
+      }
+    }
+
+    // Local remapping
+    // CH_START(t3);
+    // for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    //   for (ListIterator<P> lit(*levelOutcasts[lvl]); lit.ok();) {
+    //   }
+    // }
+    // CH_STOP(t3);
+
+    // Remap outcasts
+    CH_START(t4);
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      m_particles[lvl]->remapOutcast();
+    }
+    CH_START(t4);
+
+    CH_START(t5);
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      levelOutcasts[lvl]->clear();
+    }
+    CH_START(t5);
   }
 }
 
@@ -900,6 +1009,7 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   }
 
   this->setupGrownGrids(a_lmin, m_finestLevel);
+  this->setupBoxTiles(a_lmin, m_finestLevel);
   this->setupParticleData(a_lmin, m_finestLevel);
 
   const int oldFinestLevel = m_cacheParticles.size() - 1;

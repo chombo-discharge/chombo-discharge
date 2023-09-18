@@ -12,6 +12,10 @@
 #ifndef CD_ParticleContainer_H
 #define CD_ParticleContainer_H
 
+// Std includes
+#include <utility>
+#include <set>
+
 // Chombo includes
 #include <Particle.H>
 #include <ParticleData.H>
@@ -23,6 +27,7 @@
 #include <BaseEBCellFAB.H>
 
 // Our includes
+#include <CD_Tile.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -79,7 +84,7 @@ public:
   /*!
     @brief Destructor ( does nothing)
   */
-  ~ParticleContainer();
+  virtual ~ParticleContainer();
 
   /*!
     @brief Define the container. This will do a clear-out of all particles. 
@@ -568,11 +573,6 @@ protected:
   Vector<DisjointBoxLayout> m_grids;
 
   /*!
-    @brief Old AMR grids. Used during regrids
-  */
-  Vector<DisjointBoxLayout> m_oldGrids;
-
-  /*!
     @brief Problem domains
   */
   Vector<ProblemDomain> m_domains;
@@ -596,6 +596,11 @@ protected:
     @brief Refinement ratios. Entry at index 'l' is the refinement between level 'l' and level 'l+1'
   */
   Vector<int> m_refRat;
+
+  /*!
+    @brief List of valid boxes/tiles
+  */
+  Vector<std::set<TileI<int, SpaceDim>>> m_allBoxTiles;
 
   /*!
     @brief The actual particles that this ParticleContainer represents
@@ -635,6 +640,14 @@ protected:
   AMRCellParticles<P> m_cellSortedParticles;
 
   /*!
+    @brief Get particle index
+    @param[in] a_position Physical particle position
+    @pπaram[in] a_dx Grid resolution
+  */
+  inline IntVect
+  getParticleCellIndex(const RealVect& a_position, const RealVect a_dx) const noexcept;
+
+  /*!
     @brief Set up grown grids
     @param[in] a_base        Base level
     @param[in] a_finestLevel Finest AMR level
@@ -649,6 +662,14 @@ protected:
   */
   void
   setupParticleData(const int a_base, const int a_finestLevel);
+
+  /*!
+    @brief Setup function for the boxes/tiles on each level
+    @param[in] a_base        Base level
+    @param[in] a_finestLevel Finest AMR level
+  */
+  void
+  setupBoxTiles(const int a_base, const int a_finestLevel);
 };
 
 #include <CD_NamespaceFooter.H>
