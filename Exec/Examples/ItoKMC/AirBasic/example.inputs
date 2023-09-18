@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = +30E3
+ItoKMC.potential = +40E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
@@ -90,12 +90,12 @@ FieldSolverMultigrid.gmg_min_iter      = 5                 # Minimum number of i
 FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2               # Solver hang
-FieldSolverMultigrid.gmg_min_cells     = 16                 # Bottom drop
+FieldSolverMultigrid.gmg_min_cells     = 4                 # Bottom drop
 FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2                 # Boundary condition order for multigrid
-FieldSolverMultigrid.gmg_bc_weight     = 1                 # Boundary condition weights (for least squares)
+FieldSolverMultigrid.gmg_bc_weight     = 2                 # Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order    = 2                 # Boundary condition order for jump conditions
-FieldSolverMultigrid.gmg_jump_weight   = 1                 # Boundary condition weight for jump conditions (for least squares)
+FieldSolverMultigrid.gmg_jump_weight   = 2                 # Boundary condition weight for jump conditions (for least squares)
 FieldSolverMultigrid.gmg_bottom_solver = bicgstab          # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverMultigrid.gmg_cycle         = vcycle            # Cycle type. Only 'vcycle' supported for now. 
 FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
@@ -220,8 +220,8 @@ RodNeedleDisk.rod_smooth           = 5E-3       # Transition length between smal
 RodNeedleDisk.rod_needle_smooth    = 1E-3      # Transition length between needle and actual rod
 
 RodNeedleDisk.needle_length        = 100        # Needle length (from some origin)
-RodNeedleDisk.needle_radius        = 200E-6      # Needle radius
-RodNeedleDisk.needle_tip_radius    = 50E-6       # Needle tip radius
+RodNeedleDisk.needle_radius        = 200E-6     # Needle radius
+RodNeedleDisk.needle_tip_radius    = 100E-6     # Needle tip radius
 RodNeedleDisk.needle_angle         = 30         # Full opening angle of needle tip (in degrees)
 
 RodNeedleDisk.disk_point           = -0.5       # Top position of disk
