@@ -33,7 +33,7 @@ jobs:
     needs: Formatting
     name: Linux-GNU
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
     strategy:
       matrix:
         ver: [10,12]
@@ -96,7 +96,7 @@ jobs:
     needs: Formatting
     name: Linux-Intel
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
     strategy:
       matrix:
         dim: [2, 3]

@@ -1,31 +1,27 @@
 # ====================================================================================================
 # McPhoto class options
 # ====================================================================================================
-McPhoto.verbosity          = -1            # Solver verbosity
-McPhoto.instantaneous      = true          # Instantaneous transport or not
-McPhoto.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical photons)
-McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
-McPhoto.transparent_eb     = false         # Turn on/off transparent boundaries. Only for instantaneous=true
-McPhoto.random_kappa       = true          # Randomize absorption length (taken from Photon implementation)
-McPhoto.plt_vars           = phi src phot  # Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot', 'src_phot'
-McPhoto.intersection_alg   = bisection     # EB intersection algorithm. Supported are: 'raycast' 'bisection'
-McPhoto.bisect_step        = 1.E-4         # Bisection step length for intersection tests
-McPhoto.seed               = 0             # Seed for RNG
-McPhoto.bc_x_low           = outflow       # Boundary condition. 'outflow', 'symmetry', or 'wall'
-McPhoto.bc_x_high          = outflow       # Boundary condition
-McPhoto.bc_y_low           = outflow       # Boundary condition
-McPhoto.bc_y_high          = outflow       # Boundary condition
-McPhoto.bc_z_low           = outflow       # Boundary condition
-McPhoto.bc_z_high          = outflow       # Boundary condition
-McPhoto.photon_generation  = deterministic # Volumetric source term. 'deterministic' or 'stochastic'
-McPhoto.source_type        = number        # 'number'      = Source term contains the number of photons produced
-                                           # 'volume'      = Source terms contains the number of photons produced per unit volume
-                                           # 'volume_rate' = Source terms contains the volumetric rate
-                                           # 'rate'        = Source terms contains the rate
-McPhoto.deposition         = cic           # 'ngp'  = nearest grid point
-McPhoto.deposition_cf      = halo          # Coarse-fine deposition. Must be interp or halo
-                                           # 'num'  = # of photons per cell
-                                           # 'cic'  = cloud-in-cell
-                                           # 'tsc'  = triangle-shaped-cloud
-                                           # 'w4'   = 3rd order interpolation
+McPhoto.verbosity            = -1            ## Solver verbosity
+McPhoto.instantaneous        = true          ## Instantaneous transport or not
+McPhoto.max_photons_per_cell = 32            ## Maximum no. generated in a cell (<= 0 yields physical photons)
+McPhoto.num_sampling_packets = 1             ## Number of sub-sampling packets for max_photons_per_cell. Only for instantaneous=true
+McPhoto.blend_conservation   = false         ## Switch for blending with the nonconservative divergence
+McPhoto.transparent_eb       = false         ## Turn on/off transparent boundaries. Only for instantaneous=true
+McPhoto.plt_vars             = phi src phot  ## Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot', 'src_phot'
+McPhoto.intersection_alg     = bisection     ## EB intersection algorithm. Supported are: 'raycast' 'bisection'
+McPhoto.bisect_step          = 1.E-4         ## Bisection step length for intersection tests
+McPhoto.bc_x_low             = outflow       ## Boundary condition. 'outflow', 'symmetry', or 'wall'
+McPhoto.bc_x_high            = outflow       ## Boundary condition
+McPhoto.bc_y_low             = outflow       ## Boundary condition
+McPhoto.bc_y_high            = outflow       ## Boundary condition
+McPhoto.bc_z_low             = outflow       ## Boundary condition
+McPhoto.bc_z_high            = outflow       ## Boundary condition
+McPhoto.photon_generation    = deterministic ## Volumetric source term. 'deterministic' or 'stochastic'
+McPhoto.source_type          = number        ## 'number'      -> Source term contains the number of photons produced
+                                             ## 'volume'      -> Source terms contains the number of photons produced per unit volume
+                                             ## 'volume_rate' -> Source terms contains the volumetric rate
+                                             ## 'rate'        -> Source terms contains the rate
+McPhoto.deposition           = cic           ## 'ngp'  -> nearest grid point, 'cic' -> cloud-in-cell
+McPhoto.deposition_cf        = halo          ## Coarse-fine deposition. Must be 'interp' or 'halo'
+
 

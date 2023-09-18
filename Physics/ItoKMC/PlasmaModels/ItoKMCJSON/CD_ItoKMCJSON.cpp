@@ -2705,6 +2705,10 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
   if (m_verbose) {
     pout() << m_className + "::secondaryEmissionEB" << endl;
   }
+
+  for (int i = 0; i < a_primaryCDRFluxes.size(); i++) {
+    a_secondaryCDRFluxes[i] = std::max(a_primaryCDRFluxes[i], 0.0);
+  }
 }
 
 int

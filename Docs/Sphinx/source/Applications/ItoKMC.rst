@@ -1,4 +1,4 @@
-.. _Chap:KMC:
+.. _Chap:ItoKMC:
 
 Îto-KMC plasma model
 ********************
