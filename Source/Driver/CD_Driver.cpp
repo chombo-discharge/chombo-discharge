@@ -2439,10 +2439,16 @@ Driver::writeCheckpointFile()
   Timer timer("Driver::writeCheckpointFile");
   if (m_verbosity >= 3) {
     pout() << "Driver::writeCheckpointFile - writing checkpoint file..." << endl;
+  }
+  if (m_profile) {
     timer.startEvent("Write data");
   }
 
   for (int lvl = 0; lvl <= finestCheckLevel; lvl++) {
+    if (m_verbosity >= 4) {
+      pout() << "Driver::writeCheckpointFile -- writing level = " << lvl << endl;
+    }
+
     handleOut.setGroupToLevel(lvl);
 
     // Write amr grids
