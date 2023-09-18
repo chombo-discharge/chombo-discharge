@@ -288,9 +288,15 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aa883bfab3b6d74896938f26a0a738fef">initializeBackgroundSpecies</a> ()</td></tr>
 <tr class="memdesc:aa883bfab3b6d74896938f26a0a738fef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the background species. <br /></td></tr>
 <tr class="separator:aa883bfab3b6d74896938f26a0a738fef"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad6a4f28c3e1049dcd573c1f14dc775e0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ad6a4f28c3e1049dcd573c1f14dc775e0">initializeTownsendCoefficient</a> (const std::string a_str)</td></tr>
-<tr class="memdesc:ad6a4f28c3e1049dcd573c1f14dc775e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse one of the Townsend coefficients.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ad6a4f28c3e1049dcd573c1f14dc775e0">More...</a><br /></td></tr>
-<tr class="separator:ad6a4f28c3e1049dcd573c1f14dc775e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d996661de876bc15607675e98815d51"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a6d996661de876bc15607675e98815d51">initializeTownsendCoefficient</a> (const std::string a_coeff)</td></tr>
+<tr class="memdesc:a6d996661de876bc15607675e98815d51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse one of the Townsend coefficients.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a6d996661de876bc15607675e98815d51">More...</a><br /></td></tr>
+<tr class="separator:a6d996661de876bc15607675e98815d51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e91d8027a8996db0c1ab9a605b382fb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a6e91d8027a8996db0c1ab9a605b382fb">initializeAutomaticTownsend</a> (const std::string a_coeff)</td></tr>
+<tr class="memdesc:a6e91d8027a8996db0c1ab9a605b382fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize automatic Townsend coefficient (ionizatino or attachment) from the reaction rates.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a6e91d8027a8996db0c1ab9a605b382fb">More...</a><br /></td></tr>
+<tr class="separator:a6e91d8027a8996db0c1ab9a605b382fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55bcfa42fca72b3c925a25027df591cd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a55bcfa42fca72b3c925a25027df591cd">previewFunctionEX</a> (const nlohmann::json &amp;a_json, const <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a932c4ebf26fb8de278e69e8a2ca28237">FunctionEX</a> &amp;a_function) const</td></tr>
+<tr class="memdesc:a55bcfa42fca72b3c925a25027df591cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simple function for previewing a rate/coefficient defined as a function f = f(E,x)  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a55bcfa42fca72b3c925a25027df591cd">More...</a><br /></td></tr>
+<tr class="separator:a55bcfa42fca72b3c925a25027df591cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7782265a2bf0b4e6f8055c538c0291b6"><td class="memItemLeft" align="right" valign="top"><a id="a7782265a2bf0b4e6f8055c538c0291b6"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a7782265a2bf0b4e6f8055c538c0291b6">initializePlasmaSpecies</a> ()</td></tr>
 <tr class="memdesc:a7782265a2bf0b4e6f8055c538c0291b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the plasma species. <br /></td></tr>
@@ -405,6 +411,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a764e2eefe7add0a19a57901dd401e385">m_skipReactions</a></td></tr>
 <tr class="memdesc:a764e2eefe7add0a19a57901dd401e385"><td class="mdescLeft">&#160;</td><td class="mdescRight">A flag for skipping reactions completely. <br /></td></tr>
 <tr class="separator:a764e2eefe7add0a19a57901dd401e385"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a740d36b81b15e0535cf0414f7f450f8e"><td class="memItemLeft" align="right" valign="top"><a id="a740d36b81b15e0535cf0414f7f450f8e"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a740d36b81b15e0535cf0414f7f450f8e">m_previewRates</a></td></tr>
+<tr class="memdesc:a740d36b81b15e0535cf0414f7f450f8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Preview rates or not. <br /></td></tr>
+<tr class="separator:a740d36b81b15e0535cf0414f7f450f8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9a9ac5466689ebbb0197ff4fc739f6d3"><td class="memItemLeft" align="right" valign="top"><a id="a9a9ac5466689ebbb0197ff4fc739f6d3"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a9a9ac5466689ebbb0197ff4fc739f6d3">m_numPlasmaSpecies</a></td></tr>
 <tr class="memdesc:a9a9ac5466689ebbb0197ff4fc739f6d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total number of plasma species. <br /></td></tr>
@@ -474,10 +484,25 @@ std::vector&lt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a9
 std::vector&lt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#abffff5a74a58606efee0538556e57bf2">FunctionEVX</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a3816d0fb12c02ad6c71895250eae3e39">m_kmcReactionRates</a></td></tr>
 <tr class="memdesc:a3816d0fb12c02ad6c71895250eae3e39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function-based plasma reaction rates. Same index as the actual reactions. <br /></td></tr>
 <tr class="separator:a3816d0fb12c02ad6c71895250eae3e39"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a94551b03c14b3563f33d62dc91cfcc32"><td class="memItemLeft" align="right" valign="top"><a id="a94551b03c14b3563f33d62dc91cfcc32"></a>
-std::vector&lt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a932c4ebf26fb8de278e69e8a2ca28237">FunctionEX</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a94551b03c14b3563f33d62dc91cfcc32">m_fluidRates</a></td></tr>
-<tr class="memdesc:a94551b03c14b3563f33d62dc91cfcc32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function-based plasma reaction rates. Same index as actual reactions. For plotting only. <br /></td></tr>
+<tr class="memitem:a94551b03c14b3563f33d62dc91cfcc32"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a932c4ebf26fb8de278e69e8a2ca28237">FunctionEX</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a94551b03c14b3563f33d62dc91cfcc32">m_fluidRates</a></td></tr>
+<tr class="memdesc:a94551b03c14b3563f33d62dc91cfcc32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function-based plasma reaction rates as if they appeared in the reaction rate equation. Same index as actual reactions.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a94551b03c14b3563f33d62dc91cfcc32">More...</a><br /></td></tr>
 <tr class="separator:a94551b03c14b3563f33d62dc91cfcc32"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa92c281d113177cd653817206194e927"><td class="memItemLeft" align="right" valign="top"><a id="aa92c281d113177cd653817206194e927"></a>
+std::vector&lt; std::list&lt; size_t &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aa92c281d113177cd653817206194e927">m_plasmaReactionBackgroundReactants</a></td></tr>
+<tr class="memdesc:aa92c281d113177cd653817206194e927"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of background species involved in a reaction. <br /></td></tr>
+<tr class="separator:aa92c281d113177cd653817206194e927"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb9c7c6e8beaa3612c4d106333ff46ff"><td class="memItemLeft" align="right" valign="top"><a id="adb9c7c6e8beaa3612c4d106333ff46ff"></a>
+std::vector&lt; std::list&lt; size_t &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#adb9c7c6e8beaa3612c4d106333ff46ff">m_plasmaReactionPlasmaReactants</a></td></tr>
+<tr class="memdesc:adb9c7c6e8beaa3612c4d106333ff46ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of plasma species on the left-hand side of a reaction. <br /></td></tr>
+<tr class="separator:adb9c7c6e8beaa3612c4d106333ff46ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21a64f102398425c67b47edd90a9d77a"><td class="memItemLeft" align="right" valign="top"><a id="a21a64f102398425c67b47edd90a9d77a"></a>
+std::vector&lt; std::list&lt; size_t &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a21a64f102398425c67b47edd90a9d77a">m_plasmaReactionPlasmaProducts</a></td></tr>
+<tr class="memdesc:a21a64f102398425c67b47edd90a9d77a"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of plasma species on the right-hand side of a reaction. <br /></td></tr>
+<tr class="separator:a21a64f102398425c67b47edd90a9d77a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14fc132ea66be6afa9b4e9c74ed52f5b"><td class="memItemLeft" align="right" valign="top"><a id="a14fc132ea66be6afa9b4e9c74ed52f5b"></a>
+std::vector&lt; std::list&lt; size_t &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a14fc132ea66be6afa9b4e9c74ed52f5b">m_plasmaReactionPhotonProducts</a></td></tr>
+<tr class="memdesc:a14fc132ea66be6afa9b4e9c74ed52f5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of photon species on the right-hand side of a reaction. <br /></td></tr>
+<tr class="separator:a14fc132ea66be6afa9b4e9c74ed52f5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac22ee6ccc7932101438732834b212103"><td class="memItemLeft" align="right" valign="top"><a id="ac22ee6ccc7932101438732834b212103"></a>
 std::vector&lt; std::pair&lt; bool, std::string &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ac22ee6ccc7932101438732834b212103">m_kmcReactionGradientCorrections</a></td></tr>
 <tr class="memdesc:ac22ee6ccc7932101438732834b212103"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether or not a reaction uses a gradient correction for the rate (Soloviev et. al. paper) <br /></td></tr>
@@ -490,6 +515,14 @@ std::vector&lt; std::pair&lt; bool, std::string &gt; &gt;&#160;</td><td class="m
 std::map&lt; int, std::pair&lt; bool, int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#acf42372977e6014e24988b02c3d18c64">m_plasmaReactionSolovievCorrection</a></td></tr>
 <tr class="memdesc:acf42372977e6014e24988b02c3d18c64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map of reactions that will be plotted. <br /></td></tr>
 <tr class="separator:acf42372977e6014e24988b02c3d18c64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52a598f03600197b63c5ee722c857f8e"><td class="memItemLeft" align="right" valign="top"><a id="a52a598f03600197b63c5ee722c857f8e"></a>
+std::pair&lt; bool, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a52a598f03600197b63c5ee722c857f8e">m_autoAlpha</a></td></tr>
+<tr class="memdesc:a52a598f03600197b63c5ee722c857f8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag if the user wants to compute the alpha coefficient from the reactions. <br /></td></tr>
+<tr class="separator:a52a598f03600197b63c5ee722c857f8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae53424f62d77e3e7c80414ad6a82a32e"><td class="memItemLeft" align="right" valign="top"><a id="ae53424f62d77e3e7c80414ad6a82a32e"></a>
+std::pair&lt; bool, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ae53424f62d77e3e7c80414ad6a82a32e">m_autoEta</a></td></tr>
+<tr class="memdesc:ae53424f62d77e3e7c80414ad6a82a32e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag if the user wants to compute the alpha coefficient from the reactions. <br /></td></tr>
+<tr class="separator:ae53424f62d77e3e7c80414ad6a82a32e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a172eb992e97819f4534d69bf3276441d"><td class="memItemLeft" align="right" valign="top"><a id="a172eb992e97819f4534d69bf3276441d"></a>
 <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a932c4ebf26fb8de278e69e8a2ca28237">FunctionEX</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a172eb992e97819f4534d69bf3276441d">m_alpha</a></td></tr>
 <tr class="memdesc:a172eb992e97819f4534d69bf3276441d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Townsend ionization coefficient. Defined during parseAlpha. <br /></td></tr>
@@ -1328,8 +1361,42 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<a id="ad6a4f28c3e1049dcd573c1f14dc775e0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad6a4f28c3e1049dcd573c1f14dc775e0">&#9670;&nbsp;</a></span>initializeTownsendCoefficient()</h2>
+<a id="a6e91d8027a8996db0c1ab9a605b382fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e91d8027a8996db0c1ab9a605b382fb">&#9670;&nbsp;</a></span>initializeAutomaticTownsend()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCJSON::initializeAutomaticTownsend </td>
+          <td>(</td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_coeff</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Initialize automatic Townsend coefficient (ionizatino or attachment) from the reaction rates. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coeff</td><td>Which coefficient. Must be "alpha" or "eta" </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a6d996661de876bc15607675e98815d51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d996661de876bc15607675e98815d51">&#9670;&nbsp;</a></span>initializeTownsendCoefficient()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1341,7 +1408,7 @@ Additional Inherited Members</h2></td></tr>
           <td class="memname">void ItoKMCJSON::initializeTownsendCoefficient </td>
           <td>(</td>
           <td class="paramtype">const std::string&#160;</td>
-          <td class="paramname"><em>a_str</em></td><td>)</td>
+          <td class="paramname"><em>a_coeff</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -1615,7 +1682,7 @@ Additional Inherited Members</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>This should return a pair of KMC and fluid rates. The KMC rate will also be multiplied by background species on the left hand side of the reaction. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>This should return a tuple of KMC and fluid rates. The KMC rate will also be multiplied by background species on the left hand side of the reaction. </dd></dl>
 
 </div>
 </div>
@@ -1763,6 +1830,51 @@ Additional Inherited Members</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_tableEntry</td><td>Table entry in JSON format. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dataID</td><td>Data identifier </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a55bcfa42fca72b3c925a25027df591cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55bcfa42fca72b3c925a25027df591cd">&#9670;&nbsp;</a></span>previewFunctionEX()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCJSON::previewFunctionEX </td>
+          <td>(</td>
+          <td class="paramtype">const nlohmann::json &amp;&#160;</td>
+          <td class="paramname"><em>a_json</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a932c4ebf26fb8de278e69e8a2ca28237">FunctionEX</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_function</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Simple function for previewing a rate/coefficient defined as a function f = f(E,x) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_json</td><td>JSON entry containing the previewing information. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_function</td><td>Function to be previewed. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2271,6 +2383,31 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Plot background species or not. </p>
 <p>Built in initialization order but can look up arbitrary species name but using the maps. </p>
+
+</div>
+</div>
+<a id="a94551b03c14b3563f33d62dc91cfcc32"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a94551b03c14b3563f33d62dc91cfcc32">&#9670;&nbsp;</a></span>m_fluidRates</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a932c4ebf26fb8de278e69e8a2ca28237">FunctionEX</a>&gt; Physics::ItoKMC::ItoKMCJSON::m_fluidRates</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Function-based plasma reaction rates as if they appeared in the reaction rate equation. Same index as actual reactions. </p>
+<p>If S = k * n_1 * n_2 * n_3 where n_1, n_2, n_3 is any species, then this contains 'k'. </p>
 
 </div>
 </div>

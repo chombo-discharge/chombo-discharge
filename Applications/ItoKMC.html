@@ -126,6 +126,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#townsend-coefficients">Townsend coefficients</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#automatic">Automatic</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">Constant</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tabulated-vs-e-n">Tabulated vs <span class="math notranslate nohighlight">\(E/N\)</span></a></li>
 </ul>
@@ -150,6 +151,11 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#id9">Photoionization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#secondary-emission">Secondary emission</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#warnings-and-caveats">Warnings and caveats</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#higher-order-reactions">Higher-order reactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10">Townsend coefficients</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#example-programs">Example programs</a></li>
@@ -1173,7 +1179,7 @@ For example</p>
 <p>Townsend ionization and attachment coefficients <span class="math notranslate nohighlight">\(\alpha\)</span> and <span class="math notranslate nohighlight">\(\eta\)</span> must be specified, and have two usages:</p>
 <ol class="arabic simple">
 <li><p>Flagging cells for refinement (users can override this).</p></li>
-<li><p>Usage in plasma reactions.</p></li>
+<li><p>Potential usage in plasma reactions (which requires particular care, see <a class="reference internal" href="#chap-itokmcwarnings"><span class="std std-ref">Warnings and caveats</span></a>.</p></li>
 </ol>
 <p>These are specified by including JSON entries <code class="docutils literal notranslate"><span class="pre">alpha</span></code> and <code class="docutils literal notranslate"><span class="pre">eta</span></code>, e.g.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
@@ -1187,6 +1193,25 @@ For example</p>
 </pre></div>
 </div>
 <p>There are various way of specifying these, as discussed below:</p>
+<section id="automatic">
+<h4>Automatic<a class="headerlink" href="#automatic" title="Permalink to this heading"></a></h4>
+<p>In auto-mode the Townsend coefficients for the electrons is automatically derived from the user-specified list of reactions.
+E.g., the Townsend ionization coefficient is computed as</p>
+<div class="math notranslate nohighlight">
+\[\alpha = \frac{\sum k}{\mu E},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\sum k\)</span> is the sum of all ionizing reactions, also incorporating the neutral density.
+The advantage of this approach is that one may choose to discard some of the reactions from e.g. BOLSIG+ output but without recomputing the Townsend coefficients.</p>
+<p>To automatically set Townsend coefficients, set <code class="docutils literal notranslate"><span class="pre">type</span></code> to auto and specify the species that is involved, e.g.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;alpha&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;auto&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;species&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e&quot;</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The advantage of using auto-mode for the coefficients is that one automatically ensures consistency between the user-specified list of reactions and the</p>
+</section>
 <section id="id2">
 <h4>Constant<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
 <p>To set a constant Townsend coefficient, set <code class="docutils literal notranslate"><span class="pre">type</span></code> to constant and then specify the value, e.g.</p>
@@ -2117,6 +2142,28 @@ When multiple pathways are specified this way, and they have probabilities <span
 <p class="admonition-title">Warning</p>
 <p>Secondary emission on surfaces are not implemented (yet). Only purely absorbing BCs are currently supported.</p>
 </div>
+</section>
+<section id="warnings-and-caveats">
+<span id="chap-itokmcwarnings"></span><h3>Warnings and caveats<a class="headerlink" href="#warnings-and-caveats" title="Permalink to this heading"></a></h3>
+<section id="higher-order-reactions">
+<h4>Higher-order reactions<a class="headerlink" href="#higher-order-reactions" title="Permalink to this heading"></a></h4>
+<p>Usually, many rate coefficients depend on the output of other software (e.g., BOLSIG+) and the scaling of rate coefficients is not immediately obvious.
+This is particularly the case for three-body reactions with BOLSIG+ that may require scaling before running the Boltzmann solver (by scaling the input cross sections), or after running the Boltzmann solver, in which case the rate coefficients themselves might require scaling. In any case the user should investigate the cross-section file that BOLSIG+ uses, and figure out the required scaling.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>For two-body reactions, e.g. <span class="math notranslate nohighlight">\(A + B\rightarrow \varnothing\)</span> the rate coefficient must be specified in units of <span class="math notranslate nohighlight">\(\textrm{m}^3\textrm{s}^{-1}\)</span>, while for three-body reactions <span class="math notranslate nohighlight">\(A + B + C\rightarrow\varnothing\)</span> the rate coefficient must have units of <span class="math notranslate nohighlight">\(\textrm{m}^6\textrm{s}^{-1}\)</span>.</p>
+<p>For three-body reactions the units given by BOLSIG+ in the output file may or may not be incorrect (depending on whether or not the user scaled the cross sections).</p>
+</div>
+</section>
+<section id="id10">
+<h4>Townsend coefficients<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h4>
+<p>Townsend coefficients are not fundamentally required for specifying the reactions, but as with the higher-order reactions some of the output rates for three-body reactions might be inconsistently represented in the BOLSIG+ output files.
+For example, some care might be required when using the Townsend attachment coefficient for air when the reaction <span class="math notranslate nohighlight">\(\textrm{e} + \textrm{O}_2 + \textrm{O}_2\rightarrow \textrm{O}_2^- + \textrm{O}_2\)</span> is included because the rate constant might require proper scaling after running the Boltzmann solver, but this scaling is invisible to the BOLSIG+’s calculation of the attachment coefficient <span class="math notranslate nohighlight">\(\eta/N\)</span>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The JSON interface <em>does not guard</em> against inconsitencies in the user-provided chemistry, and provision of inconsistent <span class="math notranslate nohighlight">\(\eta/N\)</span> and attachment reaction rates are quite possible.</p>
+</div>
+</section>
 </section>
 </section>
 <section id="example-programs">

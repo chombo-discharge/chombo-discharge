@@ -143,6 +143,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#specifying-reaction-rates">Specifying reaction rates</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#modifying-reactions">Modifying reactions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#plotting-reactions">Plotting reactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#warnings-and-caveats">Warnings and caveats</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#photo-reactions">Photo-reactions</a><ul>
@@ -1717,6 +1718,33 @@ For example, if we know the rate <span class="math notranslate nohighlight">\(k\
 <p class="admonition-title">Note</p>
 <p>This functionality should be used with care because each reaction increases the I/O load.</p>
 </div>
+</section>
+<section id="warnings-and-caveats">
+<h4>Warnings and caveats<a class="headerlink" href="#warnings-and-caveats" title="Permalink to this heading"></a></h4>
+<p>Note that the JSON interface <em>always</em> computes reactions as if they were specified by the deterministic reaction rate equation</p>
+<div class="math notranslate nohighlight">
+\[\partial_t n_i = \sum_r k_r n_j n_k n_l\ldots,\]</div>
+<p>where the fluid source term for any reaction <span class="math notranslate nohighlight">\(r\)</span> is <span class="math notranslate nohighlight">\(S_r = k_r n_j n_k n_l\ldots\)</span>.
+Caution should always be exercised when defining a reaction set.</p>
+<section id="higher-order-reactions">
+<h5>Higher-order reactions<a class="headerlink" href="#higher-order-reactions" title="Permalink to this heading"></a></h5>
+<p>Usually, many rate coefficients depend on the output of other software (e.g., BOLSIG+) and the scaling of rate coefficients is not immediately obvious.
+This is particularly the case for three-body reactions with BOLSIG+ that may require scaling before running the Boltzmann solver (by scaling the input cross sections), or after running the Boltzmann solver, in which case the rate coefficients themselves might require scaling. In any case the user should investigate the cross-section file that BOLSIG+ uses, and figure out the required scaling.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>For two-body reactions, e.g. <span class="math notranslate nohighlight">\(A + B\rightarrow \varnothing\)</span> the rate coefficient must be specified in units of <span class="math notranslate nohighlight">\(\textrm{m}^3\textrm{s}^{-1}\)</span>, while for three-body reactions <span class="math notranslate nohighlight">\(A + B + C\rightarrow\varnothing\)</span> the rate coefficient must have units of <span class="math notranslate nohighlight">\(\textrm{m}^6\textrm{s}^{-1}\)</span>.</p>
+<p>For three-body reactions the units given by BOLSIG+ in the output file may or may not be incorrect (depending on whether or not the user scaled the cross sections).</p>
+</div>
+</section>
+<section id="townsend-coefficients">
+<h5>Townsend coefficients<a class="headerlink" href="#townsend-coefficients" title="Permalink to this heading"></a></h5>
+<p>Townsend coefficients are not fundamentally required for specifying the reactions, but as with the higher-order reactions some of the output rates for three-body reactions might be inconsistently represented in the BOLSIG+ output files.
+For example, some care might be required when using the Townsend attachment coefficient for air when the reaction <span class="math notranslate nohighlight">\(\textrm{e} + \textrm{O}_2 + \textrm{O}_2\rightarrow \textrm{O}_2^- + \textrm{O}_2\)</span> is included because the rate constant might require proper scaling after running the Boltzmann solver, but this scaling is invisible to the BOLSIG+’s calculation of the attachment coefficient <span class="math notranslate nohighlight">\(\eta/N\)</span>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The JSON interface <em>does not guard</em> against inconsistencies in the user-provided chemistry, and provision of inconsistent <span class="math notranslate nohighlight">\(\eta/N\)</span> and attachment reaction rates are quite possible.</p>
+</div>
+</section>
 </section>
 </section>
 <section id="photo-reactions">
