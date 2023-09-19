@@ -904,8 +904,6 @@ McPhoto::computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
         const IntVect iv = vof.gridIndex();
 
         if (ebisbox.isIrregular(iv) && validCells(iv)) {
-          const Real kappa = vol * ebisbox.volFrac(vof);
-
           const size_t numPhysPhotons = this->drawPhotons(source(vof, 0), vol, a_dt);
           const size_t packetSize     = numPhysPhotons / m_numSamplingPackets;
           const size_t remainder      = numPhysPhotons % m_numSamplingPackets;
@@ -1023,7 +1021,7 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
               const Real     weight = (Real)photonWeights[i];
               const Real     kappa  = m_rtSpecies->getAbsorptionCoefficient(pos);
 
-              photons.add(Photon(pos, v/v.vectorLength(), kappa, weight));
+              photons.add(Photon(pos, v / v.vectorLength(), kappa, weight));
             }
           }
         }
@@ -1060,7 +1058,6 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
               // length, and weight.
               const RealVect pos    = Random::randomPosition(cellPos, lo, hi, bndryCentroid, bndryNormal, dx, volFrac);
               const RealVect v      = Units::c * Random::getDirection();
-              const Real     kappa  = m_rtSpecies->getAbsorptionCoefficient(pos);
               const Real     weight = (Real)photonWeights[i];
 
               photons.add(Photon(pos, v, m_rtSpecies->getAbsorptionCoefficient(pos), weight));
@@ -1875,18 +1872,20 @@ McPhoto::computeLoads(const LevelData<EBCellFAB>& a_sourceTerm,
     const Real dx = m_amr->getDx()[a_level];
     const Real dV = std::pow(dx, SpaceDim);
 
+    const long long maxCompPhotons = (long long)m_maxPhotonsGeneratedPerCell;
+
     for (DataIterator dit(a_dbl); dit.ok(); ++dit) {
-      const EBCellFAB& src    = a_sourceTerm[dit()];
-      const FArrayBox& srcReg = src.getFArrayBox();
+      const EBCellFAB&     src        = a_sourceTerm[dit()];
+      const FArrayBox&     srcReg     = src.getFArrayBox();
+      const EBISBox&       ebisBox    = src.getEBISBox();
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[a_level])[dit()];
 
       auto regularKernel = [&](const IntVect& iv) -> void {
-        const size_t numPhysPhotons = this->drawPhotons(srcReg(iv, 0), dV, m_dt);
+        if (ebisBox.isRegular(iv) && validCells(iv)) {
 
-        if (numPhysPhotons > m_maxPhotonsGeneratedPerCell) {
-          loads[dit().intCode()] += (long long)m_maxPhotonsGeneratedPerCell;
-        }
-        else {
-          loads[dit().intCode()] += (long long)numPhysPhotons;
+          const long long numPhysPhotons = (long long)this->drawPhotons(srcReg(iv, 0), dV, m_dt);
+
+          loads[dit().intCode()] += std::min(numPhysPhotons, maxCompPhotons);
         }
       };
 
