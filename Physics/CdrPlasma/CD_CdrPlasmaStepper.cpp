@@ -3066,7 +3066,7 @@ CdrPlasmaStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   const int numRTESolvers = m_physics->getNumRtSpecies();
 
   if (numRTESolvers > 0) {
-    m_amr->allocate(m_rtePreRegridSources, m_fluidRealm, phase::gas, numRTESolvers);
+    m_amr->allocate(m_rtePreRegridSources, m_particleRealm, phase::gas, numRTESolvers);
 
     for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
       const RefCountedPtr<RtSolver>& solver = solverIt();

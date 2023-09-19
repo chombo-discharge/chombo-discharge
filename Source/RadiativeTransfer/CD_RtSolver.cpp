@@ -456,4 +456,23 @@ RtSolver::parseVerbosity() noexcept
   pp.get("verbosity", m_verbosity);
 }
 
+Vector<long long>
+RtSolver::computeLoads(const LevelData<EBCellFAB>& a_sourceTerm,
+                       const DisjointBoxLayout&    a_dbl,
+                       const int                   a_level) const noexcept
+{
+  CH_TIME("RtSolver::computeLoads");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeLoads" << endl;
+  }
+
+  Vector<long long> loads(a_dbl.size(), 0LL);
+
+  for (DataIterator dit(a_dbl); dit.ok(); ++dit) {
+    loads[dit().intCode()] = a_dbl[dit()].numPts();
+  }
+
+  return loads;
+}
+
 #include <CD_NamespaceFooter.H>
