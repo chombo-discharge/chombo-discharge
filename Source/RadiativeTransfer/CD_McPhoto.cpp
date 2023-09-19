@@ -1914,4 +1914,17 @@ McPhoto::getNumSamplingPackets() const noexcept
   return m_numSamplingPackets;
 }
 
+Vector<long long>
+McPhoto::computeLoads(const LevelData<EBCellFAB>& a_sourceTerm,
+                      const DisjointBoxLayout&    a_dbl,
+                      const int                   a_level) const noexcept
+{
+  CH_TIME("McPhoto::computeLoads");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeLoads" << endl;
+  }
+  
+  return RtSolver::computeLoads(a_sourceTerm, a_dbl, a_level);
+}
+
 #include <CD_NamespaceFooter.H>

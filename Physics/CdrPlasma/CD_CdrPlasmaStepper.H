@@ -471,6 +471,11 @@ namespace Physics {
       int m_upwindFactor;
 
       /*!
+	@brief Load per cell
+      */
+      int m_loadPerCell;
+
+      /*!
 	@brief Parse dual-grid functionality
       */
       virtual void

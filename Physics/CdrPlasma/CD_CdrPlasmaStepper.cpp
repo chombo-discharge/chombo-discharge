@@ -202,11 +202,32 @@ CdrPlasmaStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
     a_procs[lvl] = grids.procIDs();
     a_boxes[lvl] = grids.boxArray();
 
-#if 1 // Do something stupid for now, just to trigger the appropriate errors.
-    for (int i = 0; i < a_procs[lvl].size(); i++) {
-      a_procs[lvl][i] = 0;
+    // Accumulate loads from each solver.
+    Vector<long long> loads(a_boxes[lvl].size(), 0LL);
+
+    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+      const RefCountedPtr<RtSolver>& solver = solverIt();
+      const int                      idx    = solverIt.index();
+
+      const EBAMRCellData rteSource = m_amr->slice(rteSourcesNewGrids, Interval(idx, idx));
+
+      Vector<long long> curLoads = solver->computeLoads(*rteSource[lvl], a_grids[lvl], lvl);
+
+      CH_assert(curLoads.size() == loads.size());
+
+      for (int i = 0; i < curLoads.size(); i++) {
+        loads[i] += curLoads[i];
+      }
     }
-#endif
+
+    // Add the constant load per cell.
+    for (DataIterator dit(grids); dit.ok(); ++dit) {
+      loads[dit().intCode()] += (long long)grids[dit()].numPts() * m_loadPerCell;
+    }
+
+    ParallelOps::vectorSum(loads);
+
+    LoadBalancing::makeBalance(a_procs[lvl], loads, a_boxes[lvl]);
   }
 }
 
@@ -217,6 +238,8 @@ CdrPlasmaStepper::getCheckpointLoads(const std::string a_realm, const int a_leve
   if (m_verbosity > 5) {
     pout() << "CdrPlasmaStepper::getCheckpointLoads()" << endl;
   }
+
+  pout() << "CdrPlasmaStepper::getCheckpointLoads -- not implemented" << endl;
 
   return TimeStepper::getCheckpointLoads(a_realm, a_level);
 }
@@ -3986,10 +4009,12 @@ CdrPlasmaStepper::parseLoadBalance()
   }
 
   m_loadBalance = false;
+  m_loadPerCell = 1;
 
   ParmParse pp(m_className.c_str());
 
   pp.query("load_balance", m_loadBalance);
+  pp.query("load_per_cell", m_loadPerCell);
 }
 
 void

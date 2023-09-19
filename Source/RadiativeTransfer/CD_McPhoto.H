@@ -428,6 +428,20 @@ public:
   virtual int
   getNumSamplingPackets() const noexcept;
 
+  /*!
+    @brief Get computational loads for a level
+    @param[in] a_sourceTerm Source term interpolated to the nwe grids
+    @param[in] a_dbl Grids on input level
+    @param[in] a_level Input level
+    @return Loads for each box on a grid level. 
+    @note The return vector should have the same order as the boxes in a_dbl. E.g. ret[0] must be the load for a_dbl.boxArray()[0];
+    @details The default implementation returns the number of cells in the grid patch as a proxy for the load. 
+  */
+  virtual Vector<long long>
+  computeLoads(const LevelData<EBCellFAB>& a_sourceTerm,
+               const DisjointBoxLayout&    a_dbl,
+               const int                   a_level) const noexcept override;
+
 protected:
   /*!
     @brief Enum for interpreting how photons are generated when using fluid codes
