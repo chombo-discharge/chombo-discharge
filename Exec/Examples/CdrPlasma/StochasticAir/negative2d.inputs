@@ -222,6 +222,8 @@ CdrPlasmaGodunovStepper.source_comp      = interp        # Interpolated 'interp'
 CdrPlasmaGodunovStepper.floor_cdr        = true          # Floor CDR solvers to avoid negative densities
 CdrPlasmaGodunovStepper.debug            = false         # Turn on debugging messages. Also monitors mass if it was injected into the system. 
 CdrPlasmaGodunovStepper.profile          = false         # Turn on/off performance profiling.
+CdrPlasmaGodunovStepper.dual_grid         = false         # Turn on/off separate load balancing for radiative transfer
+CdrPlasmaGodunovStepper.load_balance      = false         # Turn on/off radiative transfer load balancing
 
 # ====================================================================================================
 # CdrPlasmaJSON class options
