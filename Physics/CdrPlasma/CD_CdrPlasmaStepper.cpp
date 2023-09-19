@@ -37,7 +37,7 @@ CdrPlasmaStepper::CdrPlasmaStepper()
   m_solverVerbosity = -1;
   m_phase           = phase::gas;
   m_fluidRealm      = Realm::Primal;
-  m_particleRealm   = Realm::Primal;
+  m_particleRealm   = "ParticleRealm";
 }
 
 CdrPlasmaStepper::CdrPlasmaStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics) : CdrPlasmaStepper()
@@ -67,7 +67,7 @@ CdrPlasmaStepper::registerRealms()
   CH_assert(!m_amr.isNull());
 
   m_amr->registerRealm(m_fluidRealm);
-  m_amr->registerRealm(m_particleRealm);  
+  m_amr->registerRealm(m_particleRealm);
 }
 
 void
@@ -111,6 +111,62 @@ CdrPlasmaStepper::stationaryRTE()
   }
 
   return m_rte->isStationary();
+}
+
+bool
+CdrPlasmaStepper::loadBalanceThisRealm(const std::string a_realm) const
+{
+  CH_TIME("CdrPlasmaStepper::loadBalanceThisRealm");
+  if (m_verbosity > 5) {
+    pout() << "CdrPlasmaStepper::loadBalanceThisRealm" << endl;
+  }
+
+  if (m_particleRealm == m_fluidRealm) {
+    return false;
+  }
+  else {
+    if (a_realm == m_fluidRealm) {
+      return false;
+    }
+    else if (a_realm == m_particleRealm) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void
+CdrPlasmaStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
+                                   Vector<Vector<Box>>&             a_boxes,
+                                   const std::string                a_realm,
+                                   const Vector<DisjointBoxLayout>& a_grids,
+                                   const int                        a_lmin,
+                                   const int                        a_finestLevel)
+{
+  CH_TIME("CdrPlasmaStepper::loadBalanceBoxes");
+  if (m_verbosity > 5) {
+    pout() << "CdrPlasmaStepper::loadBalanceBoxes" << endl;
+  }
+
+  CH_assert(m_particleRealm != m_fluidRealm);
+  CH_assert(a_realm == m_particleRealm);
+
+  a_procs.resize(1 + a_finestLevel);
+  a_boxes.resize(1 + a_finestLevel);
+
+  for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++) {
+    const DisjointBoxLayout& grids = a_grids[lvl];
+
+    a_procs[lvl] = grids.procIDs();
+    a_boxes[lvl] = grids.boxArray();
+
+#if 1 // Do something stupid for now, just to trigger the appropriate errors.
+    for (int i = 0; i < a_procs[lvl].size(); i++) {
+      a_procs[lvl][i] = 0;
+    }
+#endif
+  }
 }
 
 void
@@ -239,7 +295,6 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
   DataOps::setValue(a_conductivityFace, std::numeric_limits<Real>::max());
   DataOps::setValue(a_conductivityEB, std::numeric_limits<Real>::max());
 
-#if 1
   // Average the cell-centered conductivity to faces. Note that this includes one "ghost face", which we need
   // because the multigrid solver will interpolate face-centered conductivities to face centroids.
   const Average  average  = Average::Arithmetic;
@@ -253,9 +308,6 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
                              interv,
                              interv,
                              average);
-#else
-  DataOps::averageCellToFace(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
-#endif
 
 #if 1
   // Now compute the conductivity on the EB.
@@ -527,21 +579,29 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cdrSour
   if (m_verbosity > 5) {
     pout() << "CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData>x5, EBAMRCellData, Real, Real)" << endl;
   }
-
-  // TLDR: This is the general version for computing the CDR and RTE source terms. This will call the level version.
-
-  CH_assert(a_E[0]->nComp() == SpaceDim);
-  CH_assert(a_dt >= 0.0);
-
   // Number of CDR and RTE solvers.
   const int numCdrSpecies = m_physics->getNumCdrSpecies();
   const int numRteSpecies = m_physics->getNumRtSpecies();
 
+  // TLDR: This is the general version for computing the CDR and RTE source terms. It places everything on the fluid realm and
+  // then calls the level version.
+
+  CH_assert(a_E[0]->nComp() == SpaceDim);
+  CH_assert(a_dt >= 0.0);
+  CH_assert(a_E.getRealm() == m_fluidRealm);
   CH_assert(a_cdrSources.size() == numCdrSpecies);
   CH_assert(a_rteSources.size() == numRteSpecies);
   CH_assert(a_cdrDensities.size() == numCdrSpecies);
   CH_assert(a_cdrGradients.size() == numCdrSpecies);
   CH_assert(a_rteDensities.size() == numRteSpecies);
+
+  for (int i = 0; i < numRteSpecies; i++) {
+    CH_assert(a_cdrSources[i]->getRealm() == m_fluidRealm);
+    CH_assert(a_rteSources[i]->getRealm() == m_particleRealm);
+    CH_assert(a_cdrDensities[i]->getRealm() == m_fluidRealm);
+    CH_assert(a_cdrGradients[i]->getRealm() == m_fluidRealm);
+    CH_assert(a_rteDensities[i]->getRealm() == m_particleRealm);
+  }
 
   // This is a special option in case we use upwinding. In that case we need to allocate
   // storage for holding the upwind-weighted data for each cdr solver.
@@ -635,20 +695,46 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
   // TLDR: This is the level version of advanceReactionNetwork. It's purpose is to compute the source terms for the CDR and RTE equations. It will expose
   //       all the input parameters on a per-patch basis and then call the patch version.
 
-  CH_assert(a_E.nComp() == SpaceDim);
-  CH_assert(a_dt >= 0.0);
-
   constexpr int comp = 0;
 
   // Number of species involved.
   const int numRteSpecies = m_physics->getNumRtSpecies();
   const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
+  CH_assert(a_E.nComp() == SpaceDim);
+  CH_assert(a_dt >= 0.0);
   CH_assert(a_cdrSources.size() == numCdrSpecies);
   CH_assert(a_rteSources.size() == numRteSpecies);
   CH_assert(a_cdrDensities.size() == numCdrSpecies);
   CH_assert(a_cdrGradients.size() == numCdrSpecies);
   CH_assert(a_rteDensities.size() == numRteSpecies);
+
+  // Allocate data for RTE things on the fluid realm.
+  Vector<LevelData<EBCellFAB>*> fluidRealmRTEDensities(numRteSpecies, nullptr);
+  Vector<LevelData<EBCellFAB>*> fluidRealmRTESources(numRteSpecies, nullptr);
+  for (int i = 0; i < numRteSpecies; i++) {
+    if (m_particleRealm != m_fluidRealm) {
+      fluidRealmRTEDensities[i] = new LevelData<EBCellFAB>();
+      fluidRealmRTESources[i]   = new LevelData<EBCellFAB>();
+
+      m_amr->allocate(*fluidRealmRTEDensities[i], m_fluidRealm, phase::gas, a_lvl, 1);
+      m_amr->allocate(*fluidRealmRTESources[i], m_fluidRealm, phase::gas, a_lvl, 1);
+
+      m_amr->copyData(*fluidRealmRTEDensities[i],
+                      *a_rteDensities[i],
+                      a_lvl,
+                      m_fluidRealm,
+                      m_particleRealm,
+                      Interval(0, 0),
+                      Interval(0, 0),
+                      CopyStrategy::Valid,
+                      CopyStrategy::Valid);
+    }
+    else {
+      fluidRealmRTEDensities[i] = a_rteDensities[i];
+      fluidRealmRTESources[i]   = a_rteSources[i];
+    }
+  }
 
   // Stencils for putting cell-centered data on cell centroids.
   const IrregAmrStencil<CentroidInterpolationStencil>& interpStencils =
@@ -706,8 +792,8 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
     for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
 
-      rteSources[idx]   = &(*a_rteSources[idx])[dit()];
-      rteDensities[idx] = &(*a_rteDensities[idx])[dit()];
+      rteSources[idx]   = &(*fluidRealmRTESources[idx])[dit()];
+      rteDensities[idx] = &(*fluidRealmRTEDensities[idx])[dit()];
 
       rteSourcesFAB[idx]   = &(rteSources[idx]->getFArrayBox());
       rteDensitiesFAB[idx] = &(rteDensities[idx]->getFArrayBox());
@@ -754,6 +840,24 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
 
       rteSources[idx]->setCoveredCellVal(0.0, comp);
     };
+  }
+
+  // Copy RTE result back to the solver's data holders.
+  for (int i = 0; i < numRteSpecies; i++) {
+    m_amr->copyData(*a_rteSources[i],
+                    *fluidRealmRTESources[i],
+                    a_lvl,
+                    m_particleRealm,
+                    m_fluidRealm,
+                    Interval(0, 0),
+                    Interval(0, 0),
+                    CopyStrategy::Valid,
+                    CopyStrategy::Valid);
+
+    if (m_particleRealm != m_fluidRealm) {
+      delete fluidRealmRTESources[i];
+      delete fluidRealmRTEDensities[i];
+    }
   }
 }
 
@@ -4233,9 +4337,7 @@ CdrPlasmaStepper::computeDielectricCurrent()
     // Grid kernel.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const Real& bndryFrac = ebisBox.bndryArea(vof);
-      const Real& flux =
-        patchCurrent(vof,
-                     comp); // Recall -- this holds the normal component of the current density on the EB surface.
+      const Real& flux      = patchCurrent(vof, comp);
 
       current += flux * bndryFrac;
     };
@@ -4703,6 +4805,7 @@ CdrPlasmaStepper::prePlot()
   if (m_verbosity > 3) {
     pout() << "CdrPlasmaStepper::prePlot" << endl;
   }
+
   this->computePhysicsPlotVars(m_physicsPlotVars);
 }
 
@@ -4720,6 +4823,7 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
   if (numVars > 0) {
 
     const int numCdrSpecies = m_physics->getNumCdrSpecies();
+    const int numRteSpecies = m_physics->getNumRtSpecies();
 
     // Compute the electric field
     EBAMRCellData E;
@@ -4754,6 +4858,13 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
       m_amr->computeGradient(*cdrGradients[idx], scratch, m_fluidRealm, m_cdr->getPhase());
       m_amr->arithmeticAverage(*cdrGradients[idx], m_fluidRealm, m_cdr->getPhase());
       m_amr->interpGhost(*cdrGradients[idx], m_fluidRealm, m_cdr->getPhase());
+    }
+
+    // RTE densities must be put on the fluid realm which is where we run the calculations.
+    Vector<EBAMRCellData> fluidDensitiesRTE(numRteSpecies);
+    for (int i = 0; i < numRteSpecies; i++) {
+      m_amr->allocate(fluidDensitiesRTE[i], m_fluidRealm, phase::gas, 1);
+      m_amr->copyData(fluidDensitiesRTE[i], *rteDensities[i]);
     }
 
     // This is stuff that is on a per-cell basis. We visit each cell and populate these fields and then pass them to our
@@ -4805,7 +4916,7 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
           }
 
           for (int i = 0; i < rteDensities.size(); i++) {
-            localRteDensities[i] = (*(*rteDensities[i])[lvl])[dit()].getSingleValuedFAB()(iv, 0);
+            localRteDensities[i] = (*(fluidDensitiesRTE[i])[lvl])[dit()].getSingleValuedFAB()(iv, 0);
           }
 
           // Get plot variables from plasma physics.
@@ -4840,7 +4951,7 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
           }
 
           for (int i = 0; i < rteDensities.size(); i++) {
-            localRteDensities[i] = (*(*rteDensities[i])[lvl])[dit()](vof, 0);
+            localRteDensities[i] = (*(fluidDensitiesRTE[i])[lvl])[dit()](vof, 0);
           }
 
           // Get plot variables from plasma physics.
