@@ -1290,8 +1290,12 @@ McPhoto::depositPhotonsNGP(LevelData<EBCellFAB>&            a_output,
     EBCellFAB&          output  = a_output[dit()];
     const List<Photon>& photons = a_photons[a_level][dit()].listItems();
 
+    output.setVal(0.0);
+
     particleMesh.deposit<Photon, &Photon::weight>(photons, output, DepositionType::NGP, true);
   }
+
+  a_output.exchange();
 }
 
 void
@@ -1862,7 +1866,7 @@ McPhoto::computeLoads(Vector<long long>& a_loads, const DisjointBoxLayout& a_dbl
     pout() << m_name + "::computeLoads" << endl;
   }
 
-  a_loads.resize(a_dbl.size(), 1LL);
+  a_loads.resize(a_dbl.size(), 0LL);
 
   for (DataIterator dit(a_dbl); dit.ok(); ++dit) {
     a_loads[dit().intCode()] += m_photons[a_level][dit()].listItems().length();
