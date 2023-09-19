@@ -251,9 +251,34 @@ CdrPlasmaStepper::getCheckpointLoads(const std::string a_realm, const int a_leve
     pout() << "CdrPlasmaStepper::getCheckpointLoads()" << endl;
   }
 
-  pout() << "CdrPlasmaStepper::getCheckpointLoads -- not implemented" << endl;
+  const int numRtSolvers = m_physics->getNumRtSpecies();
 
-  return TimeStepper::getCheckpointLoads(a_realm, a_level);
+  Vector<long int> loads;
+
+  if ((a_realm == m_particleRealm) && m_loadBalance && (m_particleRealm != m_fluidRealm) && numRtSolvers > 0) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(a_realm)[a_level];
+
+    loads.resize(dbl.size(), 0LL);
+
+    // Add solver loads
+    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+      const RefCountedPtr<RtSolver>& solver = solverIt();
+
+      Vector<long long> solverLoads;
+      solver->computeLoads(solverLoads, dbl, a_level);
+
+      ParallelOps::vectorSum(solverLoads);
+
+      for (int i = 0; i < loads.size(); i++) {
+        loads[i] += (long int)solverLoads[i];
+      }
+    }
+  }
+  else {
+    loads = TimeStepper::getCheckpointLoads(a_realm, a_level);
+  }
+
+  return loads;
 }
 
 void

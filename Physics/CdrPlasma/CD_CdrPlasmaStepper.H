@@ -328,11 +328,10 @@ namespace Physics {
         Physics
       };
 
-
       /*!
 	@brief Set the potential
       */
-      std::function<Real(const Real a_time)> m_voltage;      
+      std::function<Real(const Real a_time)> m_voltage;
 
       /*!
 	@brief Realm where the fluid and field solvers live
@@ -1483,7 +1482,6 @@ namespace Physics {
       virtual void
       solverDump();
 
-
       /*!
 	@brief Solve the radiative transfer problem. 
 	@details This will call the other version with states taken from the solvers. 
@@ -1491,8 +1489,6 @@ namespace Physics {
       */
       virtual void
       solveRadiativeTransfer(const Real a_dt);
-
-
 
       /*!
 	@brief Compute the ohmic current on electrodes.

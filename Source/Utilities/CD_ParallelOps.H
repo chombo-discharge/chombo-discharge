@@ -168,7 +168,7 @@ namespace ParallelOps {
     @param[inout] a_data On 
   */
   inline void
-  vectorSum(Vector<long long int>& a_data) noexcept;  
+  vectorSum(Vector<long long int>& a_data) noexcept;
 } // namespace ParallelOps
 
 #include <CD_NamespaceFooter.H>

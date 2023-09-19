@@ -845,8 +845,8 @@ McPhoto::domainBcMap(const int a_dir, const Side::LoHiSide a_side)
 Real
 McPhoto::randomExponential(const Real a_mean)
 {
-   std::exponential_distribution<Real> dist(a_mean);
-   return Random::get(dist);
+  std::exponential_distribution<Real> dist(a_mean);
+  return Random::get(dist);
 }
 
 void
