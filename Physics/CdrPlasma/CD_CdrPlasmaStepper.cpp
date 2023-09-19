@@ -37,7 +37,6 @@ CdrPlasmaStepper::CdrPlasmaStepper()
   m_solverVerbosity = -1;
   m_phase           = phase::gas;
   m_fluidRealm      = Realm::Primal;
-  m_particleRealm   = "ParticleRealm";
 }
 
 CdrPlasmaStepper::CdrPlasmaStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics) : CdrPlasmaStepper()
@@ -121,19 +120,13 @@ CdrPlasmaStepper::loadBalanceThisRealm(const std::string a_realm) const
     pout() << "CdrPlasmaStepper::loadBalanceThisRealm" << endl;
   }
 
-  if (m_particleRealm == m_fluidRealm) {
-    return false;
-  }
-  else {
-    if (a_realm == m_fluidRealm) {
-      return false;
-    }
-    else if (a_realm == m_particleRealm) {
-      return true;
-    }
+  bool loadBalance = false;
+
+  if (m_loadBalance && a_realm == m_particleRealm && m_particleRealm != m_fluidRealm) {
+    loadBalance = true;
   }
 
-  return false;
+  return loadBalance;
 }
 
 void
@@ -3883,6 +3876,45 @@ CdrPlasmaStepper::setVoltage(std::function<Real(const Real a_time)> a_voltage)
   }
 
   m_voltage = a_voltage;
+}
+
+void
+CdrPlasmaStepper::parseDualGrid()
+{
+  CH_TIME("CdrPlasmaStepper::parseDualGrid");
+  if (m_verbosity > 5) {
+    pout() << "CdrPlasmaStepper::parseDualGrid" << endl;
+  }
+
+  m_particleRealm = Realm::Primal;
+
+  bool dualGrid = false;
+
+  ParmParse pp(m_className.c_str());
+
+  pp.query("dual_grid", dualGrid);
+
+  if (dualGrid) {
+    m_particleRealm = "ParticleRealm";
+  }
+  else {
+    m_particleRealm = Realm::Primal;
+  }
+}
+
+void
+CdrPlasmaStepper::parseLoadBalance()
+{
+  CH_TIME("CdrPlasmaStepper::parseLoadBalance");
+  if (m_verbosity > 5) {
+    pout() << "CdrPlasmaStepper::parseLoadBalance" << endl;
+  }
+
+  m_loadBalance = false;
+
+  ParmParse pp(m_className.c_str());
+
+  pp.query("load_balance", m_loadBalance);
 }
 
 void

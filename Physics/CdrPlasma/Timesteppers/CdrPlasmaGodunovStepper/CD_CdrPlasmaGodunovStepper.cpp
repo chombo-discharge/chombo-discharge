@@ -39,6 +39,8 @@ CdrPlasmaGodunovStepper::CdrPlasmaGodunovStepper(RefCountedPtr<CdrPlasmaPhysics>
   m_physics      = a_physics;
   m_extrapAdvect = true;
   m_regridSlopes = true;
+
+  this->parseOptions();
 }
 
 CdrPlasmaGodunovStepper::~CdrPlasmaGodunovStepper()
@@ -58,6 +60,8 @@ CdrPlasmaGodunovStepper::parseOptions()
   }
 
   // Parse various options.
+  this->parseDualGrid();
+  this->parseLoadBalance();  
   this->parseVerbosity();
   this->parseSolverVerbosity();
   this->parseFastPoisson();
@@ -85,6 +89,7 @@ CdrPlasmaGodunovStepper::parseRuntimeOptions()
     pout() << "CdrPlasmaGodunovStepper::parseRuntimeOptions()" << endl;
   }
 
+  this->parseLoadBalance();    
   this->parseVerbosity();
   this->parseSolverVerbosity();
   this->parseFastPoisson();

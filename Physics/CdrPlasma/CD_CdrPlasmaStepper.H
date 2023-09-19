@@ -339,9 +339,9 @@ namespace Physics {
       phase::which_phase m_phase;
 
       /*!
-	@brief Dual grid or not
+	@brief Load balance particle realm or not
       */
-      bool m_dualGrid;
+      bool m_loadBalance;
 
       /*!
 	@brief Which source term computation
@@ -447,6 +447,18 @@ namespace Physics {
 	@brief Upwind factor
       */
       int m_upwindFactor;
+
+      /*!
+	@brief Parse dual-grid functionality
+      */
+      virtual void
+      parseDualGrid();
+
+      /*!
+	@brief Parse load-balancing functionality
+      */
+      virtual void
+      parseLoadBalance();
 
       /*!
 	@brief Parse class verbosity
