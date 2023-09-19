@@ -76,6 +76,10 @@ CdrPlasmaStepper::postRegrid()
   if (m_verbosity > 5) {
     pout() << "CdrPlasmaStepper::postRegrid()" << endl;
   }
+
+  if (m_physics->getNumRtSpecies() > 0) {
+    m_amr->deallocate(m_rtePreRegridSources);
+  }
 }
 
 void
@@ -3059,7 +3063,23 @@ CdrPlasmaStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
     pout() << "CdrPlasmaStepper::preRegrid(int, int)" << endl;
   }
 
-  // Solvers do pre-regridding shit.
+  const int numRTESolvers = m_physics->getNumRtSpecies();
+
+  if (numRTESolvers > 0) {
+    m_amr->allocate(m_rtePreRegridSources, m_fluidRealm, phase::gas, numRTESolvers);
+
+    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+      const RefCountedPtr<RtSolver>& solver = solverIt();
+      const int                      idx    = solverIt.index();
+
+      EBAMRCellData        fluidRealmSource    = m_amr->slice(m_rtePreRegridSources, Interval(idx, idx));
+      const EBAMRCellData& particleRealmSource = solver->getSource();
+
+      m_amr->copyData(fluidRealmSource, particleRealmSource);
+    }
+  }
+
+  // Solvers do pre-regridding.
   m_cdr->preRegrid(a_lmin, a_oldFinestLevel);
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_rte->preRegrid(a_lmin, a_oldFinestLevel);

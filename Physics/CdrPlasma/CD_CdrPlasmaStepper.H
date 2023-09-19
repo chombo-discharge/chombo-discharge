@@ -389,6 +389,12 @@ namespace Physics {
       EBAMRCellData m_physicsPlotVars;
 
       /*!
+	@brief Storage for RTE source terms. 
+	@details Allocated and stored in the regrid step.
+      */
+      EBAMRCellData m_rtePreRegridSources;
+
+      /*!
 	@brief Minimum allowed time step
       */
       Real m_minDt;
