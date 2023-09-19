@@ -1923,8 +1923,38 @@ McPhoto::computeLoads(const LevelData<EBCellFAB>& a_sourceTerm,
   if (m_verbosity > 5) {
     pout() << m_name + "::computeLoads" << endl;
   }
-  
-  return RtSolver::computeLoads(a_sourceTerm, a_dbl, a_level);
+
+  Vector<long long> loads(a_dbl.size(), 1LL);
+
+  if (m_dt <= std::numeric_limits<Real>::min()) {
+    loads = RtSolver::computeLoads(a_sourceTerm, a_dbl, a_level);
+  }
+  else {
+
+    // Compute the number of computational photons in each grid cell.
+    const Real dx = m_amr->getDx()[a_level];
+    const Real dV = std::pow(dx, SpaceDim);
+
+    for (DataIterator dit(a_dbl); dit.ok(); ++dit) {
+      const EBCellFAB& src    = a_sourceTerm[dit()];
+      const FArrayBox& srcReg = src.getFArrayBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        const size_t numPhysPhotons = this->drawPhotons(srcReg(iv, 0), dV, m_dt);
+
+        if (numPhysPhotons > m_maxPhotonsGeneratedPerCell) {
+          loads[dit().intCode()] += (long long)m_maxPhotonsGeneratedPerCell;
+        }
+        else {
+          loads[dit().intCode()] += (long long)numPhysPhotons;
+        }
+      };
+
+      BoxLoops::loop(a_dbl[dit()], regularKernel);
+    }
+  }
+
+  return loads;
 }
 
 #include <CD_NamespaceFooter.H>

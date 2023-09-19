@@ -8,6 +8,7 @@ for PATTERN in 'ParticleData::remapOutcast' \
 		   'ParticleData::remapOutcast::barrier' \
 		   'ParticleData::remapOutcast::mpi_scatter' \
 		   'ParticleData::remapOutcast::catenate' \
+		   'McPhoto::depositPhotons'\
 	       ; do
 
     for i in `find . -name "time.table.*"`; do	
