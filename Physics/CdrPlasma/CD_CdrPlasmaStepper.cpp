@@ -77,8 +77,10 @@ CdrPlasmaStepper::postRegrid()
     pout() << "CdrPlasmaStepper::postRegrid()" << endl;
   }
 
-  if (m_physics->getNumRtSpecies() > 0) {
-    m_amr->deallocate(m_rteSourcesOldGrids);
+  const int numRtSolvers = m_physics->getNumRtSpecies();
+
+  if ((m_particleRealm != m_fluidRealm) && m_loadBalance && numRtSolvers > 0) {
+    m_particleRealmLoads.clear();
   }
 }
 
@@ -128,7 +130,7 @@ CdrPlasmaStepper::loadBalanceThisRealm(const std::string a_realm) const
 
   const int numRteSpecies = m_physics->getNumRtSpecies();
 
-  if (m_loadBalance && a_realm == m_particleRealm && m_particleRealm != m_fluidRealm && numRteSpecies > 0) {
+  if (m_loadBalance && a_realm == m_particleRealm && (m_particleRealm != m_fluidRealm) && numRteSpecies > 0) {
     loadBalance = true;
   }
 
@@ -149,86 +151,96 @@ CdrPlasmaStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
   }
 
   const int numRtSpecies   = m_physics->getNumRtSpecies();
-  const int oldFinestLevel = m_rteSourcesOldGrids.size() - 1;
+  const int oldFinestLevel = m_particleRealmLoads.size() - 1;
 
   CH_assert(m_particleRealm != m_fluidRealm);
   CH_assert(a_realm == m_particleRealm);
   CH_assert(m_loadBalance);
   CH_assert(numRtSpecies > 0);
 
+  // Decompose the DisjointBoxLayout
   a_procs.resize(1 + a_finestLevel);
   a_boxes.resize(1 + a_finestLevel);
 
-  // If we load balance we'll need to interpolate the source terms for the RTE solvers to the new grid.
-  Vector<RefCountedPtr<EBCoarseToFineInterp>> interpOps(1 + a_finestLevel);
+  for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++) {
+    a_procs[lvl] = a_grids[lvl].procIDs();
+    a_boxes[lvl] = a_grids[lvl].boxArray();
+  }
+
+  // Allocate some storage on the new grids so we can interpolate the loads to those grids.
+  EBAMRCellData newGridLoads;
+  m_amr->allocate(newGridLoads, m_particleRealm, phase::gas, 1);
+
+  // Define an interpolator so we can interpolate to the new grids
+  Vector<RefCountedPtr<EBCoarseToFineInterp>> interpOp(1 + a_finestLevel);
   for (int lvl = 1; lvl <= a_finestLevel; lvl++) {
     const EBLevelGrid& eblgFine = *m_amr->getEBLevelGrid(m_particleRealm, phase::gas)[lvl];
     const EBLevelGrid& eblgCoFi = *m_amr->getEBLevelGridCoFi(m_particleRealm, phase::gas)[lvl - 1];
     const EBLevelGrid& eblgCoar = *m_amr->getEBLevelGrid(m_particleRealm, phase::gas)[lvl - 1];
     const int          refRat   = m_amr->getRefinementRatios()[lvl - 1];
 
-    interpOps[lvl] = RefCountedPtr<EBCoarseToFineInterp>(
-      new EBCoarseToFineInterp(eblgFine, eblgCoFi, eblgCoar, refRat));
+    interpOp[lvl] = RefCountedPtr<EBCoarseToFineInterp>(new EBCoarseToFineInterp(eblgFine, eblgCoFi, eblgCoar, refRat));
   }
 
-  // Interpolate m_rteSourcesOldGrids to the new grids
-  EBAMRCellData rteSourcesNewGrids;
-  m_amr->allocate(rteSourcesNewGrids, m_particleRealm, phase::gas, numRtSpecies);
-
+  // These levels have not changed but ownership MIGHT have changed.
   for (int lvl = 0; lvl <= std::max(0, a_lmin - 1); lvl++) {
-    m_rteSourcesOldGrids[lvl]->copyTo(*rteSourcesNewGrids[lvl]);
+    m_particleRealmLoads[lvl]->copyTo(*newGridLoads[lvl]);
   }
 
+  // These levels have changed.
   for (int lvl = std::max(1, a_lmin); lvl <= a_finestLevel; lvl++) {
-    const RefCountedPtr<EBCoarseToFineInterp>& interpolator = interpOps[lvl];
+    RefCountedPtr<EBCoarseToFineInterp>& interpolator = interpOp[lvl];
 
-    for (int ivar = 0; ivar < numRtSpecies; ivar++) {
-      interpolator->interpolate(*rteSourcesNewGrids[lvl],
-                                *rteSourcesNewGrids[lvl - 1],
-                                Interval(ivar, ivar),
-                                EBCoarseToFineInterp::Type::ConservativePWC);
-    }
+    interpolator->interpolate(*newGridLoads[lvl],
+                              *newGridLoads[lvl - 1],
+                              Interval(0, 0),
+                              EBCoarseToFineInterp::Type::ConservativePWC);
 
     // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
     // to pollute the solution with interpolation there since we already have valid data.
     if (lvl <= std::min(oldFinestLevel, a_finestLevel)) {
-      m_rteSourcesOldGrids[lvl]->copyTo(*rteSourcesNewGrids[lvl]);
+      m_particleRealmLoads[lvl]->copyTo(*newGridLoads[lvl]);
     }
   }
 
-  for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++) {
-    const DisjointBoxLayout& grids = a_grids[lvl];
+  // Compute the loads on each patch.
+  Vector<Vector<long int>> loads(1 + a_finestLevel, 0L);
+  for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl = a_grids[lvl];
 
-    a_procs[lvl] = grids.procIDs();
-    a_boxes[lvl] = grids.boxArray();
+    Vector<long int>& levelLoads = loads[lvl];
 
-    // Accumulate loads from each solver.
-    Vector<long long> loads(a_boxes[lvl].size(), 0LL);
+    levelLoads.resize(dbl.size());
 
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const RefCountedPtr<RtSolver>& solver = solverIt();
-      const int                      idx    = solverIt.index();
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const Box            cellBox     = dbl[dit()];
+      const EBCellFAB&     gridLoad    = (*newGridLoads[lvl])[dit()];
+      const EBISBox&       ebisbox     = gridLoad.getEBISBox();
+      const BaseFab<bool>& validCells  = (*m_amr->getValidCells(m_particleRealm)[lvl])[dit()];
+      const FArrayBox&     gridLoadReg = gridLoad.getFArrayBox();
 
-      const EBAMRCellData rteSource = m_amr->slice(rteSourcesNewGrids, Interval(idx, idx));
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
+          levelLoads[dit().intCode()] += (long int)gridLoadReg(iv, 0);
+        }
+      };
 
-      Vector<long long> curLoads = solver->computeLoads(*rteSource[lvl], a_grids[lvl], lvl);
-
-      CH_assert(curLoads.size() == loads.size());
-
-      for (int i = 0; i < curLoads.size(); i++) {
-        loads[i] += curLoads[i];
-      }
+      BoxLoops::loop(cellBox, regularKernel);
     }
 
-    // Add the constant load per cell.
-    for (DataIterator dit(grids); dit.ok(); ++dit) {
-      loads[dit().intCode()] += (long long)grids[dit()].numPts() * m_loadPerCell;
+    ParallelOps::vectorSum(levelLoads);
+
+    // Add the "constant" load from the other PPC stuff
+    for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
+      const Box cellBox = dbl[lit()];
+
+      levelLoads[lit().intCode()] += (long int)m_loadPerCell * cellBox.numPts();
     }
-
-    ParallelOps::vectorSum(loads);
-
-    LoadBalancing::makeBalance(a_procs[lvl], loads, a_boxes[lvl]);
   }
+
+  // 5. Finally do the actual load balancing.
+  LoadBalancing::sort(a_boxes, loads, BoxSorting::Morton);
+  LoadBalancing::balanceLevelByLevel(a_procs, loads, a_boxes);
 }
 
 Vector<long int>
@@ -3141,19 +3153,39 @@ CdrPlasmaStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
     pout() << "CdrPlasmaStepper::preRegrid(int, int)" << endl;
   }
 
-  const int numRTESolvers = m_physics->getNumRtSpecies();
+  const int numRtSolvers = m_physics->getNumRtSpecies();
 
-  if (numRTESolvers > 0) {
-    m_amr->allocate(m_rteSourcesOldGrids, m_particleRealm, phase::gas, numRTESolvers);
+  // Compute the loads on the particle realm.
+  if ((m_particleRealm != m_fluidRealm) && m_loadBalance && numRtSolvers > 0) {
+    EBAMRCellData scratch;
 
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const RefCountedPtr<RtSolver>& solver = solverIt();
-      const int                      idx    = solverIt.index();
+    m_amr->allocate(scratch, m_particleRealm, phase::gas, 1);
+    m_amr->allocate(m_particleRealmLoads, m_particleRealm, phase::gas, 1);
 
-      EBAMRCellData        fluidRealmSource    = m_amr->slice(m_rteSourcesOldGrids, Interval(idx, idx));
-      const EBAMRCellData& particleRealmSource = solver->getSource();
+    DataOps::setValue(scratch, 0.0);
+    DataOps::setValue(m_particleRealmLoads, 0.0);
 
-      m_amr->copyData(fluidRealmSource, particleRealmSource);
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+
+      LevelData<EBCellFAB>& levelScratch = *scratch[lvl];
+      LevelData<EBCellFAB>& levelLoads   = *m_particleRealmLoads[lvl];
+
+      // Add solver loads
+      for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+        const RefCountedPtr<RtSolver>& solver = solverIt();
+
+        Vector<long long> solverLoads;
+        solver->computeLoads(solverLoads, dbl, lvl);
+
+        ParallelOps::vectorSum(solverLoads);
+
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+          levelScratch[dit()].setVal(1.0 * solverLoads[dit().intCode()]);
+        }
+
+        DataOps::incr(levelLoads, levelScratch, 1.0);
+      }
     }
   }
 

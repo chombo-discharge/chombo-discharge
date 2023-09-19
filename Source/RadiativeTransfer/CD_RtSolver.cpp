@@ -205,8 +205,6 @@ RtSolver::setSource(const EBAMRCellData& a_source)
     pout() << m_name + "::setSource(ebamrcell)" << endl;
   }
 
-  const int finestLevel = m_amr->getFinestLevel();
-
   m_amr->copyData(m_source, a_source);
 
   m_amr->conservativeAverage(m_source, m_realm, m_phase);
@@ -456,23 +454,19 @@ RtSolver::parseVerbosity() noexcept
   pp.get("verbosity", m_verbosity);
 }
 
-Vector<long long>
-RtSolver::computeLoads(const LevelData<EBCellFAB>& a_sourceTerm,
-                       const DisjointBoxLayout&    a_dbl,
-                       const int                   a_level) const noexcept
+void
+RtSolver::computeLoads(Vector<long long>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level) const noexcept
 {
   CH_TIME("RtSolver::computeLoads");
   if (m_verbosity > 5) {
     pout() << m_name + "::computeLoads" << endl;
   }
 
-  Vector<long long> loads(a_dbl.size(), 0LL);
+  a_loads.resize(a_dbl.size(), 0LL);
 
   for (DataIterator dit(a_dbl); dit.ok(); ++dit) {
-    loads[dit().intCode()] = a_dbl[dit()].numPts();
+    a_loads[dit().intCode()] = a_dbl[dit()].numPts();
   }
-
-  return loads;
 }
 
 #include <CD_NamespaceFooter.H>

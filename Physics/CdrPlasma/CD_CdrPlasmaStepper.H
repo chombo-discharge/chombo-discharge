@@ -408,7 +408,7 @@ namespace Physics {
 	@brief Storage for RTE source terms. 
 	@details Allocated and stored in the regrid step.
       */
-      EBAMRCellData m_rteSourcesOldGrids;
+      EBAMRCellData m_particleRealmLoads;
 
       /*!
 	@brief Minimum allowed time step

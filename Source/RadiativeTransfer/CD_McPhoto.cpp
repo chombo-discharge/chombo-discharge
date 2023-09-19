@@ -88,21 +88,24 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
     const size_t maxPhotonsPerPacket = m_maxPhotonsGeneratedPerCell / m_numSamplingPackets;
     const size_t remainder           = m_maxPhotonsGeneratedPerCell % m_numSamplingPackets;
 
+    ParticleContainer<Photon> scratchPhotons;
+    m_amr->allocate(scratchPhotons, m_realm);
+
     for (int i = 0; i < m_numSamplingPackets; i++) {
       const size_t maxPhotonsPerCell = (i == 0) ? maxPhotonsPerPacket + remainder : maxPhotonsPerPacket;
 
       const EBAMRCellData& numPhysPhotons = m_amr->slice(numPhysPhotonsPacket, Interval(i, i));
 
       this->generateComputationalPhotons(m_photons, numPhysPhotons, maxPhotonsPerCell);
-      this->advancePhotonsInstantaneous(m_bulkPhotons, m_ebPhotons, m_domainPhotons, m_photons);
+      this->advancePhotonsInstantaneous(scratchPhotons, m_ebPhotons, m_domainPhotons, m_photons);
 
       // Absorb the bulk photons on the mesh.
-      this->depositPhotons(phi, m_bulkPhotons, m_deposition);
-      if (m_numSamplingPackets > 1) {
-        this->clear(m_bulkPhotons);
-      }
-
+      this->depositPhotons(phi, scratchPhotons, m_deposition);
       DataOps::incr(a_phi, phi, 1.0);
+
+      // Store the photons that were absorbed.
+      m_bulkPhotons.transferParticles(scratchPhotons);
+      scratchPhotons.clearParticles();
     }
   }
   else {
@@ -1851,49 +1854,20 @@ McPhoto::getNumSamplingPackets() const noexcept
   return m_numSamplingPackets;
 }
 
-Vector<long long>
-McPhoto::computeLoads(const LevelData<EBCellFAB>& a_sourceTerm,
-                      const DisjointBoxLayout&    a_dbl,
-                      const int                   a_level) const noexcept
+void
+McPhoto::computeLoads(Vector<long long>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level) const noexcept
 {
   CH_TIME("McPhoto::computeLoads");
   if (m_verbosity > 5) {
     pout() << m_name + "::computeLoads" << endl;
   }
 
-  Vector<long long> loads(a_dbl.size(), 1LL);
+  a_loads.resize(a_dbl.size(), 1LL);
 
-  if (m_dt <= std::numeric_limits<Real>::min()) {
-    loads = RtSolver::computeLoads(a_sourceTerm, a_dbl, a_level);
+  for (DataIterator dit(a_dbl); dit.ok(); ++dit) {
+    a_loads[dit().intCode()] += m_photons[a_level][dit()].listItems().length();
+    a_loads[dit().intCode()] += m_bulkPhotons[a_level][dit()].listItems().length();
   }
-  else {
-
-    // Compute the number of computational photons in each grid cell.
-    const Real dx = m_amr->getDx()[a_level];
-    const Real dV = std::pow(dx, SpaceDim);
-
-    const long long maxCompPhotons = (long long)m_maxPhotonsGeneratedPerCell;
-
-    for (DataIterator dit(a_dbl); dit.ok(); ++dit) {
-      const EBCellFAB&     src        = a_sourceTerm[dit()];
-      const FArrayBox&     srcReg     = src.getFArrayBox();
-      const EBISBox&       ebisBox    = src.getEBISBox();
-      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[a_level])[dit()];
-
-      auto regularKernel = [&](const IntVect& iv) -> void {
-        if (ebisBox.isRegular(iv) && validCells(iv)) {
-
-          const long long numPhysPhotons = (long long)this->drawPhotons(srcReg(iv, 0), dV, m_dt);
-
-          loads[dit().intCode()] += std::min(numPhysPhotons, maxCompPhotons);
-        }
-      };
-
-      BoxLoops::loop(a_dbl[dit()], regularKernel);
-    }
-  }
-
-  return loads;
 }
 
 #include <CD_NamespaceFooter.H>
