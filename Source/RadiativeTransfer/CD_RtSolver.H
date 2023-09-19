@@ -121,7 +121,9 @@ public:
     @details The default implementation returns the number of cells in the grid patch as a proxy for the load. 
   */
   virtual Vector<long long>
-  computeLoads(const LevelData<EBCellFAB>& a_sourceTerm, const DisjointBoxLayout& a_dbl, const int a_level) const noexcept;  
+  computeLoads(const LevelData<EBCellFAB>& a_sourceTerm,
+               const DisjointBoxLayout&    a_dbl,
+               const int                   a_level) const noexcept;
 
   /*!
     @brief Set the amr object

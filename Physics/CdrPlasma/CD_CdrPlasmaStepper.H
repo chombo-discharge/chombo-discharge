@@ -214,6 +214,23 @@ namespace Physics {
                        const int                        a_finestLevel) override final;
 
       /*!
+	@brief Get computational loads to be checkpointed. 
+	@details This is used by Driver both for setting up load-balanced restarts AND for plotting the computational loads to a file. This routine is
+	disjoint from loadBalanceBoxes because this routine is not part of a regrid. This means that we are not operating with temporarily load balanced
+	grids where the but the final ones. 
+	@note The default implementation uses the box volume as a proxy for the load. You should overwrite this if you load balance your application, and also
+	make sure that the loads returned from this routine are consistent with what you put in loadBalanceBoxes. 
+
+	Also note that the return vector has the same ordering as the DisjointBoxLayout's boxes on the input grid level. See the implementation for further details. 
+	@param[in] a_realm Realm
+	@param[in] a_level Grid level
+	@return Returns computational loads for each box on grid level a_level. 
+    
+      */
+      virtual Vector<long int>
+      getCheckpointLoads(const std::string a_realm, const int a_level) const override final;
+
+      /*!
 	@brief Pre-regrid function -- this is the one called by Driver. 
 	@param[in] a_lmin           The coarsest level that changes
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
@@ -274,13 +291,12 @@ namespace Physics {
       virtual void
       setRadiativeTransferSolvers(RefCountedPtr<RtLayout<RtSolver>>& a_rte);
 
-
       /*!
 	@brief Set voltage curve.
 	@param[in] a_voltage Voltage curve
       */
       virtual void
-      setVoltage(std::function<Real(const Real a_time)> a_voltage);      
+      setVoltage(std::function<Real(const Real a_time)> a_voltage);
 
     protected:
       /*!
@@ -392,7 +408,7 @@ namespace Physics {
 	@brief Storage for RTE source terms. 
 	@details Allocated and stored in the regrid step.
       */
-      EBAMRCellData m_rtePreRegridSources;
+      EBAMRCellData m_rteSourcesOldGrids;
 
       /*!
 	@brief Minimum allowed time step

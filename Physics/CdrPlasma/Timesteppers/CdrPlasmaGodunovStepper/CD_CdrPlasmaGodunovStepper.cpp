@@ -61,7 +61,7 @@ CdrPlasmaGodunovStepper::parseOptions()
 
   // Parse various options.
   this->parseDualGrid();
-  this->parseLoadBalance();  
+  this->parseLoadBalance();
   this->parseVerbosity();
   this->parseSolverVerbosity();
   this->parseFastPoisson();
@@ -89,7 +89,7 @@ CdrPlasmaGodunovStepper::parseRuntimeOptions()
     pout() << "CdrPlasmaGodunovStepper::parseRuntimeOptions()" << endl;
   }
 
-  this->parseLoadBalance();    
+  this->parseLoadBalance();
   this->parseVerbosity();
   this->parseSolverVerbosity();
   this->parseFastPoisson();

@@ -78,7 +78,7 @@ CdrPlasmaStepper::postRegrid()
   }
 
   if (m_physics->getNumRtSpecies() > 0) {
-    m_amr->deallocate(m_rtePreRegridSources);
+    m_amr->deallocate(m_rteSourcesOldGrids);
   }
 }
 
@@ -126,7 +126,9 @@ CdrPlasmaStepper::loadBalanceThisRealm(const std::string a_realm) const
 
   bool loadBalance = false;
 
-  if (m_loadBalance && a_realm == m_particleRealm && m_particleRealm != m_fluidRealm) {
+  const int numRteSpecies = m_physics->getNumRtSpecies();
+
+  if (m_loadBalance && a_realm == m_particleRealm && m_particleRealm != m_fluidRealm && numRteSpecies > 0) {
     loadBalance = true;
   }
 
@@ -146,11 +148,53 @@ CdrPlasmaStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
     pout() << "CdrPlasmaStepper::loadBalanceBoxes" << endl;
   }
 
+  const int numRtSpecies   = m_physics->getNumRtSpecies();
+  const int oldFinestLevel = m_rteSourcesOldGrids.size() - 1;
+
   CH_assert(m_particleRealm != m_fluidRealm);
   CH_assert(a_realm == m_particleRealm);
+  CH_assert(m_loadBalance);
+  CH_assert(numRtSpecies > 0);
 
   a_procs.resize(1 + a_finestLevel);
   a_boxes.resize(1 + a_finestLevel);
+
+  // If we load balance we'll need to interpolate the source terms for the RTE solvers to the new grid.
+  Vector<RefCountedPtr<EBCoarseToFineInterp>> interpOps(1 + a_finestLevel);
+  for (int lvl = 1; lvl <= a_finestLevel; lvl++) {
+    const EBLevelGrid& eblgFine = *m_amr->getEBLevelGrid(m_particleRealm, phase::gas)[lvl];
+    const EBLevelGrid& eblgCoFi = *m_amr->getEBLevelGridCoFi(m_particleRealm, phase::gas)[lvl - 1];
+    const EBLevelGrid& eblgCoar = *m_amr->getEBLevelGrid(m_particleRealm, phase::gas)[lvl - 1];
+    const int          refRat   = m_amr->getRefinementRatios()[lvl - 1];
+
+    interpOps[lvl] = RefCountedPtr<EBCoarseToFineInterp>(
+      new EBCoarseToFineInterp(eblgFine, eblgCoFi, eblgCoar, refRat));
+  }
+
+  // Interpolate m_rteSourcesOldGrids to the new grids
+  EBAMRCellData rteSourcesNewGrids;
+  m_amr->allocate(rteSourcesNewGrids, m_particleRealm, phase::gas, numRtSpecies);
+
+  for (int lvl = 0; lvl <= std::max(0, a_lmin - 1); lvl++) {
+    m_rteSourcesOldGrids[lvl]->copyTo(*rteSourcesNewGrids[lvl]);
+  }
+
+  for (int lvl = std::max(1, a_lmin); lvl <= a_finestLevel; lvl++) {
+    const RefCountedPtr<EBCoarseToFineInterp>& interpolator = interpOps[lvl];
+
+    for (int ivar = 0; ivar < numRtSpecies; ivar++) {
+      interpolator->interpolate(*rteSourcesNewGrids[lvl],
+                                *rteSourcesNewGrids[lvl - 1],
+                                Interval(ivar, ivar),
+                                EBCoarseToFineInterp::Type::ConservativePWC);
+    }
+
+    // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
+    // to pollute the solution with interpolation there since we already have valid data.
+    if (lvl <= std::min(oldFinestLevel, a_finestLevel)) {
+      m_rteSourcesOldGrids[lvl]->copyTo(*rteSourcesNewGrids[lvl]);
+    }
+  }
 
   for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++) {
     const DisjointBoxLayout& grids = a_grids[lvl];
@@ -164,6 +208,17 @@ CdrPlasmaStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
     }
 #endif
   }
+}
+
+Vector<long int>
+CdrPlasmaStepper::getCheckpointLoads(const std::string a_realm, const int a_level) const
+{
+  CH_TIME("CdrPlasmaStepper::getCheckpointLoads()");
+  if (m_verbosity > 5) {
+    pout() << "CdrPlasmaStepper::getCheckpointLoads()" << endl;
+  }
+
+  return TimeStepper::getCheckpointLoads(a_realm, a_level);
 }
 
 void
@@ -3066,13 +3121,13 @@ CdrPlasmaStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   const int numRTESolvers = m_physics->getNumRtSpecies();
 
   if (numRTESolvers > 0) {
-    m_amr->allocate(m_rtePreRegridSources, m_particleRealm, phase::gas, numRTESolvers);
+    m_amr->allocate(m_rteSourcesOldGrids, m_particleRealm, phase::gas, numRTESolvers);
 
     for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
       const RefCountedPtr<RtSolver>& solver = solverIt();
       const int                      idx    = solverIt.index();
 
-      EBAMRCellData        fluidRealmSource    = m_amr->slice(m_rtePreRegridSources, Interval(idx, idx));
+      EBAMRCellData        fluidRealmSource    = m_amr->slice(m_rteSourcesOldGrids, Interval(idx, idx));
       const EBAMRCellData& particleRealmSource = solver->getSource();
 
       m_amr->copyData(fluidRealmSource, particleRealmSource);
