@@ -382,8 +382,8 @@ CdrPlasmaGodunovStepper::preRegrid(const int a_lbase, const int a_finestLevel)
   // When we regrid we must compute the field on the new grid using the semi-implicit update. However, we only have
   // the conductivities and space charge on the old grids, so we must store them and interpolate them to the new grids.
   if (m_fieldCoupling == FieldCoupling::SemiImplicit) {
-    m_amr->allocate(m_scratchConductivity, m_realm, phase::gas, 1);
-    m_amr->allocate(m_scratchSemiImplicitRho, m_realm, phase::gas, 1);
+    m_amr->allocate(m_scratchConductivity, m_fluidRealm, phase::gas, 1);
+    m_amr->allocate(m_scratchSemiImplicitRho, m_fluidRealm, phase::gas, 1);
 
     DataOps::copy(m_scratchConductivity, m_conductivityFactorCell);
     DataOps::copy(m_scratchSemiImplicitRho, m_semiImplicitRho);
@@ -439,11 +439,11 @@ CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
                             interpType);
 
     // Coarsen the conductivity and space charge from the last step and update ghost cells.
-    m_amr->arithmeticAverage(m_conductivityFactorCell, m_realm, m_phase);
-    m_amr->interpGhostPwl(m_conductivityFactorCell, m_realm, m_phase);
+    m_amr->arithmeticAverage(m_conductivityFactorCell, m_fluidRealm, m_phase);
+    m_amr->interpGhostPwl(m_conductivityFactorCell, m_fluidRealm, m_phase);
 
-    m_amr->arithmeticAverage(m_semiImplicitRho, m_realm, m_phase);
-    m_amr->interpGhostPwl(m_semiImplicitRho, m_realm, m_phase);
+    m_amr->arithmeticAverage(m_semiImplicitRho, m_fluidRealm, m_phase);
+    m_amr->interpGhostPwl(m_semiImplicitRho, m_fluidRealm, m_phase);
 
     // Set up the semi-implicit Poisson equation and solve it.
     m_fieldSolver->setupSolver();
@@ -461,7 +461,7 @@ CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
 #ifdef CH_USE_HDF5
       pout() << "CdrPlasmaGodunovStepper::regrid - I'm adding a debug file in 'semi_implicit_debug.hdf5'" << endl;
       EBAMRCellData data;
-      m_amr->allocate(data, m_realm, m_phase, 2);
+      m_amr->allocate(data, m_fluidRealm, m_phase, 2);
 
       m_amr->copyData(data, m_conductivityFactorCell, Interval(0, 0), Interval(0, 0));
       m_amr->copyData(data, m_semiImplicitRho, Interval(1, 1), Interval(0, 0));
@@ -520,11 +520,11 @@ CdrPlasmaGodunovStepper::postCheckpointSetup()
     // to set up the field solver with those quantities rather than the regular space charge.
     m_fieldSolver->setupSolver();
 
-    m_amr->arithmeticAverage(m_conductivityFactorCell, m_realm, m_phase);
-    m_amr->interpGhostPwl(m_conductivityFactorCell, m_realm, m_phase);
+    m_amr->arithmeticAverage(m_conductivityFactorCell, m_fluidRealm, m_phase);
+    m_amr->interpGhostPwl(m_conductivityFactorCell, m_fluidRealm, m_phase);
 
-    m_amr->arithmeticAverage(m_semiImplicitRho, m_realm, m_phase);
-    m_amr->interpGhostPwl(m_semiImplicitRho, m_realm, m_phase);
+    m_amr->arithmeticAverage(m_semiImplicitRho, m_fluidRealm, m_phase);
+    m_amr->interpGhostPwl(m_semiImplicitRho, m_fluidRealm, m_phase);
 
     this->computeFaceConductivity(m_conductivityFactorFace, m_conductivityFactorEB, m_conductivityFactorCell);
     this->setupSemiImplicitPoisson(m_conductivityFactorFace, m_conductivityFactorEB, 1.0);
@@ -579,10 +579,10 @@ CdrPlasmaGodunovStepper::solveSemiImplicitPoisson()
   DataOps::setValue(rho, 0.0);
   DataOps::copy(rhoPhase, m_semiImplicitRho);
 
-  m_amr->arithmeticAverage(rho, m_realm);
-  m_amr->interpGhostPwl(rho, m_realm);
+  m_amr->arithmeticAverage(rho, m_fluidRealm);
+  m_amr->interpGhostPwl(rho, m_fluidRealm);
 
-  m_amr->interpToCentroids(rhoPhase, m_realm, m_phase);
+  m_amr->interpToCentroids(rhoPhase, m_fluidRealm, m_phase);
 
   const bool converged = m_fieldSolver->solve(m_fieldSolver->getPotential(), rho, m_sigma->getPhi(), false);
 
@@ -602,10 +602,10 @@ CdrPlasmaGodunovStepper::allocateInternals()
   CdrPlasmaStepper::allocateInternals();
 
   // Set up storage for semi-implicit field solves.
-  m_amr->allocate(m_semiImplicitRho, m_realm, m_phase, nComp);
-  m_amr->allocate(m_conductivityFactorCell, m_realm, m_phase, nComp);
-  m_amr->allocate(m_conductivityFactorFace, m_realm, m_phase, nComp);
-  m_amr->allocate(m_conductivityFactorEB, m_realm, m_phase, nComp);
+  m_amr->allocate(m_semiImplicitRho, m_fluidRealm, m_phase, nComp);
+  m_amr->allocate(m_conductivityFactorCell, m_fluidRealm, m_phase, nComp);
+  m_amr->allocate(m_conductivityFactorFace, m_fluidRealm, m_phase, nComp);
+  m_amr->allocate(m_conductivityFactorEB, m_fluidRealm, m_phase, nComp);
 
   // Initialize values.
   DataOps::setValue(m_semiImplicitRho, 0.0);
@@ -631,7 +631,7 @@ CdrPlasmaGodunovStepper::allocateScratch()
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(new CdrStorage(m_amr, m_realm, m_cdr->getPhase()));
+    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(new CdrStorage(m_amr, m_fluidRealm, m_cdr->getPhase()));
     m_cdrScratch[idx]->allocateStorage();
   }
 
@@ -640,16 +640,16 @@ CdrPlasmaGodunovStepper::allocateScratch()
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    m_rteScratch[idx] = RefCountedPtr<RtStorage>(new RtStorage(m_amr, m_realm, m_rte->getPhase()));
+    m_rteScratch[idx] = RefCountedPtr<RtStorage>(new RtStorage(m_amr, m_fluidRealm, m_rte->getPhase()));
     m_rteScratch[idx]->allocateStorage();
   }
 
   // Allocate storage for field solver.
-  m_fieldScratch = RefCountedPtr<FieldStorage>(new FieldStorage(m_amr, m_realm, m_cdr->getPhase()));
+  m_fieldScratch = RefCountedPtr<FieldStorage>(new FieldStorage(m_amr, m_fluidRealm, m_cdr->getPhase()));
   m_fieldScratch->allocateStorage();
 
   // Allocate storage for surface charge solver.
-  m_sigmaScratch = RefCountedPtr<SigmaStorage>(new SigmaStorage(m_amr, m_realm, m_cdr->getPhase()));
+  m_sigmaScratch = RefCountedPtr<SigmaStorage>(new SigmaStorage(m_amr, m_fluidRealm, m_cdr->getPhase()));
   m_sigmaScratch->allocateStorage();
 }
 
@@ -773,14 +773,14 @@ CdrPlasmaGodunovStepper::computeCdrGradients()
     // Update the ghost cells so we can compute the gradient.
     m_amr->copyData(scratch, solver->getPhi());
 
-    m_amr->arithmeticAverage(scratch, m_realm, m_phase);
-    m_amr->interpGhostPwl(scratch, m_realm, m_phase);
+    m_amr->arithmeticAverage(scratch, m_fluidRealm, m_phase);
+    m_amr->interpGhostPwl(scratch, m_fluidRealm, m_phase);
 
     // Compute the gradient, coarsen it, and update the ghost cells.
-    m_amr->computeGradient(grad, scratch, m_realm, phase::gas);
+    m_amr->computeGradient(grad, scratch, m_fluidRealm, phase::gas);
 
-    m_amr->arithmeticAverage(grad, m_realm, m_cdr->getPhase());
-    m_amr->interpGhost(grad, m_realm, m_cdr->getPhase());
+    m_amr->arithmeticAverage(grad, m_fluidRealm, m_cdr->getPhase());
+    m_amr->interpGhost(grad, m_fluidRealm, m_cdr->getPhase());
   }
 }
 
@@ -833,7 +833,7 @@ CdrPlasmaGodunovStepper::extrapolateCdrToEB()
 
   // Scratch storage for holding a gradient at the EB
   EBAMRIVData gradientEB;
-  m_amr->allocate(gradientEB, m_realm, m_cdr->getPhase(), SpaceDim);
+  m_amr->allocate(gradientEB, m_fluidRealm, m_cdr->getPhase(), SpaceDim);
 
   // Run through the solvers and fetch the various data used for the extrapolation.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -966,7 +966,7 @@ CdrPlasmaGodunovStepper::extrapolateCdrToDomain()
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux.
   EBAMRIFData grad;
-  m_amr->allocate(grad, m_realm, m_cdr->getPhase(), SpaceDim);
+  m_amr->allocate(grad, m_fluidRealm, m_cdr->getPhase(), SpaceDim);
 
   // Run through the CDR solvers and populate the vectors.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -1221,8 +1221,8 @@ CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt)
       }
 
       // Coarsen the solution and update ghost cells.
-      m_amr->arithmeticAverage(phi, m_realm, m_cdr->getPhase());
-      m_amr->interpGhost(phi, m_realm, m_cdr->getPhase());
+      m_amr->arithmeticAverage(phi, m_fluidRealm, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_fluidRealm, m_cdr->getPhase());
     }
 
     // Do the diffusion advance. This can be explicit or implicit.
@@ -1263,8 +1263,8 @@ CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt)
     }
 
     // Coarsen the solution and update ghost cells.
-    m_amr->arithmeticAverage(phi, m_realm, m_cdr->getPhase());
-    m_amr->interpGhost(phi, m_realm, m_cdr->getPhase());
+    m_amr->arithmeticAverage(phi, m_fluidRealm, m_cdr->getPhase());
+    m_amr->interpGhost(phi, m_fluidRealm, m_cdr->getPhase());
   }
   m_timer->stopEvent("Transport advance");
 
@@ -1290,8 +1290,8 @@ CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt)
   DataOps::scale(m_conductivityFactorCell, a_dt / Units::eps0);
   DataOps::floor(m_conductivityFactorCell, 0.0);
 
-  m_amr->arithmeticAverage(m_conductivityFactorCell, m_realm, m_phase);
-  m_amr->interpGhostPwl(m_conductivityFactorCell, m_realm, m_phase);
+  m_amr->arithmeticAverage(m_conductivityFactorCell, m_fluidRealm, m_phase);
+  m_amr->interpGhostPwl(m_conductivityFactorCell, m_fluidRealm, m_phase);
 
   // Average conductivity to faces and set up the semi-implicit poisson equation.
   this->computeFaceConductivity(m_conductivityFactorFace, m_conductivityFactorEB, m_conductivityFactorCell);
@@ -1691,11 +1691,11 @@ CdrPlasmaGodunovStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lv
 
   CdrPlasmaStepper::readCheckpointData(a_handle, a_lvl);
 
-  read(a_handle, *m_semiImplicitRho[a_lvl], "semiImplicitRho", m_amr->getGrids(m_realm)[a_lvl], interv, false);
+  read(a_handle, *m_semiImplicitRho[a_lvl], "semiImplicitRho", m_amr->getGrids(m_fluidRealm)[a_lvl], interv, false);
   read(a_handle,
        *m_conductivityFactorCell[a_lvl],
        "conductivityFactor",
-       m_amr->getGrids(m_realm)[a_lvl],
+       m_amr->getGrids(m_fluidRealm)[a_lvl],
        interv,
        false);
 }

@@ -52,7 +52,7 @@ namespace Physics {
       /*!
 	@brief Destructor
       */
-      ~CdrPlasmaStepper();
+      virtual ~CdrPlasmaStepper();
 
       /*!
 	@brief Instantiate solvers
@@ -1275,10 +1275,14 @@ namespace Physics {
       };
 
       /*!
-	@brief Realm where the time stepper is registered. 
-	@details This will always be the primal realm because CdrPlasma has no dual-grid functionality.
+	@brief Realm where the fluid and field solvers live
       */
-      std::string m_realm;
+      std::string m_fluidRealm;
+
+      /*!
+	@brief If using dual-grid, RTE solvers live here.
+      */
+      std::string m_particleRealm;
 
       /*!
 	@brief Time stepper class name
