@@ -1067,6 +1067,7 @@ Driver::parseRuntimeOptions()
   pp.get("write_restart_files", m_writeRestartFiles);
   pp.get("num_plot_ghost", m_numPlotGhost);
   pp.get("allow_coarsening", m_allowCoarsening);
+  pp.get("max_plot_depth", m_maxPlotLevel);
   pp.get("max_steps", m_maxSteps);
   pp.get("stop_time", m_stopTime);
 
