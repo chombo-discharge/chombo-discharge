@@ -451,6 +451,12 @@ namespace Physics {
       Real m_dtCFL;
 
       /*!
+	@brief Load per cell. 
+	@details Used only when running with load-balanced RTE solvers.
+      */
+      Real m_loadPerCell;
+
+      /*!
 	@brief Time code for step restriction
       */
       TimeCode m_timeCode;
@@ -474,11 +480,6 @@ namespace Physics {
 	@brief Upwind factor
       */
       int m_upwindFactor;
-
-      /*!
-	@brief Load per cell
-      */
-      int m_loadPerCell;
 
       /*!
 	@brief Parse dual-grid functionality
@@ -803,6 +804,8 @@ namespace Physics {
 	@param[in]  a_time         Time
 	@param[in]  a_dt           Time step.
 	@param[in]  a_dx           Grid resolution.
+	@πaram[in]  a_level        Grid level
+	@πaram[in]  a_din          Grid index on level
 	@param[in]  a_cellBox      Cell-centered computational region. 
       */
       virtual void
@@ -815,6 +818,8 @@ namespace Physics {
                                          const Real&               a_time,
                                          const Real&               a_dt,
                                          const Real&               a_dx,
+                                         const int                 a_level,
+                                         const DataIndex&          a_din,
                                          const Box&                a_cellBox);
 
       /*!

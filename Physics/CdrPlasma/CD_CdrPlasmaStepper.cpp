@@ -927,6 +927,8 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
                                              a_time,
                                              a_dt,
                                              dx,
+                                             a_lvl,
+                                             dit(),
                                              cellBox);
 
     // The regular cell loop will also do the irregular cells, so we redo the irregular cells here.
@@ -989,6 +991,8 @@ CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<FArrayBox*>&       a
                                                      const Real&               a_time,
                                                      const Real&               a_dt,
                                                      const Real&               a_dx,
+                                                     const int                 a_level,
+                                                     const DataIndex&          a_din,
                                                      const Box&                a_cellBox)
 {
   CH_TIME("CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<FArrayBox*>x5, FArrayBox, Realx3, Box)");
@@ -1017,6 +1021,10 @@ CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<FArrayBox*>&       a
   CH_assert(a_cdrGradients.size() == numCdrSpecies);
   CH_assert(a_rteDensities.size() == numRteSpecies);
 
+  // Geometric information and valid cells
+  const EBISBox&       ebisbox    = m_amr->getEBISLayout(m_fluidRealm, phase::gas)[a_level][a_din];
+  const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[a_level])[a_din];
+
   // Lower-left corner -- physical coordinates.
   const RealVect probLo = m_amr->getProbLo();
 
@@ -1037,53 +1045,55 @@ CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<FArrayBox*>&       a
   // Regular kernel. We reconstructor the various cell-centered quantities and put them in the data structure required
   // by CdrPlasmaPhysics.
   auto regularKernel = [&](const IntVect& iv) -> void {
-    // Create the position and electric field.
-    const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
-    const RealVect E   = RealVect(D_DECL(a_E(iv, 0), a_E(iv, 1), a_E(iv, 2)));
+    if (ebisbox.isRegular(iv) && validCells(iv)) {
+      // Create the position and electric field.
+      const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
+      const RealVect E   = RealVect(D_DECL(a_E(iv, 0), a_E(iv, 1), a_E(iv, 2)));
 
-    // Get the cell-centered CDR density and gradient.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int  idx = solverIt.index();
-      const Real phi = (*a_cdrDensities[idx])(iv, comp);
+      // Get the cell-centered CDR density and gradient.
+      for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+        const int  idx = solverIt.index();
+        const Real phi = (*a_cdrDensities[idx])(iv, comp);
 
-      cdrDensities[idx] = std::max(zero, phi);
-      cdrGradients[idx] = RealVect(
-        D_DECL((*a_cdrGradients[idx])(iv, 0), (*a_cdrGradients[idx])(iv, 1), (*a_cdrGradients[idx])(iv, 2)));
-    }
+        cdrDensities[idx] = std::max(zero, phi);
+        cdrGradients[idx] = RealVect(
+          D_DECL((*a_cdrGradients[idx])(iv, 0), (*a_cdrGradients[idx])(iv, 1), (*a_cdrGradients[idx])(iv, 2)));
+      }
 
-    // Get the cell-centered radiative transfer densities.
-    for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const int  idx = solverIt.index();
-      const Real phi = (*a_rteDensities[idx])(iv, comp);
+      // Get the cell-centered radiative transfer densities.
+      for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+        const int  idx = solverIt.index();
+        const Real phi = (*a_rteDensities[idx])(iv, comp);
 
-      rteDensities[idx] = std::max(zero, phi);
-    }
+        rteDensities[idx] = std::max(zero, phi);
+      }
 
-    // Physics now solves for the source terms.
-    m_physics->advanceReactionNetwork(cdrSources,
-                                      rteSources,
-                                      cdrDensities,
-                                      cdrGradients,
-                                      rteDensities,
-                                      E,
-                                      pos,
-                                      a_dx,
-                                      a_dt,
-                                      a_time,
-                                      kappa);
+      // Physics now solves for the source terms.
+      m_physics->advanceReactionNetwork(cdrSources,
+                                        rteSources,
+                                        cdrDensities,
+                                        cdrGradients,
+                                        rteDensities,
+                                        E,
+                                        pos,
+                                        a_dx,
+                                        a_dt,
+                                        a_time,
+                                        kappa);
 
-    // Put CDR source terms into temporary data holders.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
+      // Put CDR source terms into temporary data holders.
+      for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
 
-      cdrSrc(iv, idx) = cdrSources[idx];
-    }
+        cdrSrc(iv, idx) = cdrSources[idx];
+      }
 
-    // Put RTE source terms into temporary dataholders.
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
+      // Put RTE source terms into temporary dataholders.
+      for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
 
-      rteSrc(iv, idx) = rteSources[idx];
+        rteSrc(iv, idx) = rteSources[idx];
+      }
     }
   };
 
@@ -1251,7 +1261,8 @@ CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&         
   CH_assert(a_rteDensities.size() == numRteSpecies);
 
   // EB box.
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_phase)[a_lvl][a_dit];
+  const EBISBox&       ebisbox    = m_amr->getEBISLayout(m_fluidRealm, m_phase)[a_lvl][a_dit];
+  const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[a_lvl])[a_dit];
 
   // Lower-left corner in physical coordinates
   const RealVect probLo = m_amr->getProbLo();
@@ -1265,88 +1276,91 @@ CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&         
 
   // Irregular grid kernel.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
-    const Real        kappa   = ebisbox.volFrac(vof);
-    const VoFStencil& stencil = a_interpStencils(vof, comp);
-    const RealVect    pos     = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
-    const RealVect    normal  = ebisbox.normal(vof);
+    const IntVect iv = vof.gridIndex();
+    if (validCells(iv)) {
+      const Real        kappa   = ebisbox.volFrac(vof);
+      const VoFStencil& stencil = a_interpStencils(vof, comp);
+      const RealVect    pos     = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
+      const RealVect    normal  = ebisbox.normal(vof);
 
-    // I assume that the electric field is on the cell center (which is what FieldSolverMultigrid currently does), but we do want the field on the centroid.
-    RealVect E = RealVect::Zero;
-    for (int i = 0; i < stencil.size(); i++) {
-
-      // Do all components.
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        E[dir] += stencil.weight(i) * a_E(stencil.vof(i), dir);
-      }
-    }
-
-    // Compute RTE densities on the centroids. Again, I sort of assume that the solver being used
-    // is a cell-centered solver so we interpolate the isotropic term to the centroid.
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      rteDensities[idx] = 0.0;
-
-      for (int i = 0; i < stencil.size(); i++) {
-        rteDensities[idx] += stencil.weight(i) * (*a_rteDensities[idx])(stencil.vof(i), comp);
-      }
-
-      rteDensities[idx] = std::max(zero, rteDensities[idx]);
-    }
-
-    // Compute plasma species densities on the cell centroid.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      cdrDensities[idx] = 0.0;
-
-      for (int i = 0; i < stencil.size(); i++) {
-        cdrDensities[idx] += stencil.weight(i) * (*a_cdrDensities[idx])(stencil.vof(i), comp);
-      }
-
-      cdrDensities[idx] = std::max(cdrDensities[idx], zero);
-    }
-
-    // Compute plasma species gradients on the cell centroid.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      cdrGradients[idx] = RealVect::Zero;
-
+      // I assume that the electric field is on the cell center (which is what FieldSolverMultigrid currently does), but we do want the field on the centroid.
+      RealVect E = RealVect::Zero;
       for (int i = 0; i < stencil.size(); i++) {
 
         // Do all components.
         for (int dir = 0; dir < SpaceDim; dir++) {
-          cdrGradients[idx][dir] += stencil.weight(i) * (*a_cdrGradients[idx])(stencil.vof(i), dir);
+          E[dir] += stencil.weight(i) * a_E(stencil.vof(i), dir);
         }
       }
-    }
 
-    // Call the plasma-kinetics framework and have it fill the source terms over a time step a_dt.
-    m_physics->advanceReactionNetwork(cdrSources,
-                                      rteSources,
-                                      cdrDensities,
-                                      cdrGradients,
-                                      rteDensities,
-                                      E,
-                                      pos,
-                                      a_dx,
-                                      a_dt,
-                                      a_time,
-                                      kappa);
+      // Compute RTE densities on the centroids. Again, I sort of assume that the solver being used
+      // is a cell-centered solver so we interpolate the isotropic term to the centroid.
+      for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
 
-    // Iterate through the CDR solvers and set the source terms.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
+        rteDensities[idx] = 0.0;
 
-      (*a_cdrSources[idx])(vof, comp) = cdrSources[idx];
-    }
+        for (int i = 0; i < stencil.size(); i++) {
+          rteDensities[idx] += stencil.weight(i) * (*a_rteDensities[idx])(stencil.vof(i), comp);
+        }
 
-    // Iterate through the RTE solvers and set the source terms.
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
+        rteDensities[idx] = std::max(zero, rteDensities[idx]);
+      }
 
-      (*a_rteSources[idx])(vof, comp) = rteSources[idx];
+      // Compute plasma species densities on the cell centroid.
+      for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
+
+        cdrDensities[idx] = 0.0;
+
+        for (int i = 0; i < stencil.size(); i++) {
+          cdrDensities[idx] += stencil.weight(i) * (*a_cdrDensities[idx])(stencil.vof(i), comp);
+        }
+
+        cdrDensities[idx] = std::max(cdrDensities[idx], zero);
+      }
+
+      // Compute plasma species gradients on the cell centroid.
+      for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
+
+        cdrGradients[idx] = RealVect::Zero;
+
+        for (int i = 0; i < stencil.size(); i++) {
+
+          // Do all components.
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            cdrGradients[idx][dir] += stencil.weight(i) * (*a_cdrGradients[idx])(stencil.vof(i), dir);
+          }
+        }
+      }
+
+      // Call the plasma-kinetics framework and have it fill the source terms over a time step a_dt.
+      m_physics->advanceReactionNetwork(cdrSources,
+                                        rteSources,
+                                        cdrDensities,
+                                        cdrGradients,
+                                        rteDensities,
+                                        E,
+                                        pos,
+                                        a_dx,
+                                        a_dt,
+                                        a_time,
+                                        kappa);
+
+      // Iterate through the CDR solvers and set the source terms.
+      for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
+
+        (*a_cdrSources[idx])(vof, comp) = cdrSources[idx];
+      }
+
+      // Iterate through the RTE solvers and set the source terms.
+      for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
+
+        (*a_rteSources[idx])(vof, comp) = rteSources[idx];
+      }
     }
   };
 
@@ -1396,7 +1410,8 @@ CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&          
   CH_assert(a_rteDensities.size() == numRteSpecies);
 
   // EB box.
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_phase)[a_lvl][a_dit];
+  const EBISBox&       ebisbox    = m_amr->getEBISLayout(m_fluidRealm, m_phase)[a_lvl][a_dit];
+  const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[a_lvl])[a_dit];
 
   // Lower-left corner in physical coordinates.
   const RealVect probLo = m_amr->getProbLo();
@@ -1410,68 +1425,71 @@ CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&          
 
   // Definition of the irregular kernel.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
-    const Real        kappa   = ebisbox.volFrac(vof);
-    const VoFStencil& stencil = a_interpStencils(vof, comp);
-    const RealVect    pos     = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
+    const IntVect iv = vof.gridIndex();
+    if (validCells(iv)) {
+      const Real        kappa   = ebisbox.volFrac(vof);
+      const VoFStencil& stencil = a_interpStencils(vof, comp);
+      const RealVect    pos     = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
 
-    // Input E is on cell center but we need centroid.
-    RealVect E = RealVect::Zero;
-    for (int i = 0; i < stencil.size(); i++) {
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        E[dir] += a_E(stencil.vof(i), dir) * stencil.weight(i);
-      }
-    }
-
-    // On input the CDR densities are on the centroid so just make sure they are positive.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      cdrDensities[idx] = std::max(zero, (*a_cdrDensities[idx])(vof, comp));
-    }
-
-    // On input we assume that the CDR gradients are on the cell center so we interpolate to centroid.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      cdrGradients[idx] = RealVect::Zero;
+      // Input E is on cell center but we need centroid.
+      RealVect E = RealVect::Zero;
       for (int i = 0; i < stencil.size(); i++) {
         for (int dir = 0; dir < SpaceDim; dir++) {
-          cdrGradients[idx][dir] += (*a_cdrGradients[idx])(stencil.vof(i), dir) * stencil.weight(i);
+          E[dir] += a_E(stencil.vof(i), dir) * stencil.weight(i);
         }
       }
-    }
 
-    // On input the RTE densities are on the centroid, so just make sure it's positive.
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx     = solverIt.index();
-      rteDensities[idx] = std::max(zero, (*a_rteDensities[idx])(vof, comp));
-    }
+      // On input the CDR densities are on the centroid so just make sure they are positive.
+      for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
 
-    // Compute source terms
-    m_physics->advanceReactionNetwork(cdrSources,
-                                      rteSources,
-                                      cdrDensities,
-                                      cdrGradients,
-                                      rteDensities,
-                                      E,
-                                      pos,
-                                      a_dx,
-                                      a_dt,
-                                      a_time,
-                                      kappa);
+        cdrDensities[idx] = std::max(zero, (*a_cdrDensities[idx])(vof, comp));
+      }
 
-    // Put the CDR source term where it belongs.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
+      // On input we assume that the CDR gradients are on the cell center so we interpolate to centroid.
+      for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
 
-      (*a_cdrSources[idx])(vof, comp) = cdrSources[idx];
-    }
+        cdrGradients[idx] = RealVect::Zero;
+        for (int i = 0; i < stencil.size(); i++) {
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            cdrGradients[idx][dir] += (*a_cdrGradients[idx])(stencil.vof(i), dir) * stencil.weight(i);
+          }
+        }
+      }
 
-    // Put the RTE source term where it belongs.
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
+      // On input the RTE densities are on the centroid, so just make sure it's positive.
+      for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx     = solverIt.index();
+        rteDensities[idx] = std::max(zero, (*a_rteDensities[idx])(vof, comp));
+      }
 
-      (*a_rteSources[idx])(vof, comp) = rteSources[idx];
+      // Compute source terms
+      m_physics->advanceReactionNetwork(cdrSources,
+                                        rteSources,
+                                        cdrDensities,
+                                        cdrGradients,
+                                        rteDensities,
+                                        E,
+                                        pos,
+                                        a_dx,
+                                        a_dt,
+                                        a_time,
+                                        kappa);
+
+      // Put the CDR source term where it belongs.
+      for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
+
+        (*a_cdrSources[idx])(vof, comp) = cdrSources[idx];
+      }
+
+      // Put the RTE source term where it belongs.
+      for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
+
+        (*a_rteSources[idx])(vof, comp) = rteSources[idx];
+      }
     }
   };
 
@@ -1517,7 +1535,8 @@ CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&         
   CH_assert(a_rteDensities.size() == numRteSpecies);
 
   // EB box.
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_phase)[a_lvl][a_dit];
+  const EBISBox&       ebisbox    = m_amr->getEBISLayout(m_fluidRealm, m_phase)[a_lvl][a_dit];
+  const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[a_lvl])[a_dit];
 
   // Lower-left corner in physical coordinates.
   const RealVect probLo = m_amr->getProbLo();
@@ -1531,107 +1550,111 @@ CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&         
 
   // This is the kernel that we run.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
-    const Real        kappa   = ebisbox.volFrac(vof);
-    const VoFStencil& stencil = a_interpStencils(vof, comp);
-    const RealVect    pos     = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
+    const IntVect iv = vof.gridIndex();
 
-    // The input electric field is on the cell center but we need it on the centroid.
-    RealVect E = RealVect::Zero;
-    for (int i = 0; i < stencil.size(); i++) {
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        E[dir] += stencil.weight(i) * a_E(stencil.vof(i), dir);
-      }
-    }
+    if (validCells(iv)) {
+      const Real        kappa   = ebisbox.volFrac(vof);
+      const VoFStencil& stencil = a_interpStencils(vof, comp);
+      const RealVect    pos     = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
 
-    // Project the electric field on the EB normal (recall, it points inwards into the plasma)
-    const Real EdotN = E.dotProduct(ebisbox.normal(vof));
-
-    // Compute the CDR densities that go into the reaction kernel. Note that since we upwind, we check if the
-    // flow is into or away from the boundary. If the flow is away from the boundary we don't really have an upwind
-    // side so we set the density to zero in that case. This is not really captured by CdrSolver::weightedUpwind because
-    // the fallback option is to use the cell-centered value (that is the correct design, when we don't have reactive plasmas). We fix
-    // that here.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      // Get the charge number.
-      const RefCountedPtr<CdrSpecies> species = solverIt.getSpecies();
-      const int                       Z       = species->getChargeNumber();
-
-      // Check if the EB is an "inflow" face. If it is, we will turn off this species in the reaction network.
-      bool inflow = false;
-      if (solverIt()->isMobile() && Real(Z) * EdotN > 0.0) {
-        inflow = true;
-      }
-
-      // If it's not an inflow face, interpolate the data to the cell centroid. Otherwise, set the
-      // species density to zero.
-      if (!inflow) {
-        cdrDensities[idx] = zero;
-
-        for (int i = 0; i < stencil.size(); i++) {
-          cdrDensities[idx] += stencil.weight(i) * (*a_cdrDensities[idx])(stencil.vof(i), comp);
-        }
-
-        // Enforce positivity in reaction kernel (interpolation stencils might have negative weights).
-        cdrDensities[idx] = std::max(zero, cdrDensities[idx]);
-      }
-      else {
-        cdrDensities[idx] = zero;
-      }
-    }
-
-    // Interpolate cell-centered gradients to centroid.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      cdrGradients[idx] = RealVect::Zero;
+      // The input electric field is on the cell center but we need it on the centroid.
+      RealVect E = RealVect::Zero;
       for (int i = 0; i < stencil.size(); i++) {
         for (int dir = 0; dir < SpaceDim; dir++) {
-          cdrGradients[idx][dir] += stencil.weight(i) * (*a_cdrGradients[idx])(stencil.vof(i), dir);
+          E[dir] += stencil.weight(i) * a_E(stencil.vof(i), dir);
         }
       }
-    }
 
-    // Interpolate the RTE densities to the centroid.
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
+      // Project the electric field on the EB normal (recall, it points inwards into the plasma)
+      const Real EdotN = E.dotProduct(ebisbox.normal(vof));
 
-      // Apply the stencil but always leave a positive number of photons (interpolators might not always have non-negative weights).
-      rteDensities[idx] = 0.0;
+      // Compute the CDR densities that go into the reaction kernel. Note that since we upwind, we check if the
+      // flow is into or away from the boundary. If the flow is away from the boundary we don't really have an upwind
+      // side so we set the density to zero in that case. This is not really captured by CdrSolver::weightedUpwind because
+      // the fallback option is to use the cell-centered value (that is the correct design, when we don't have reactive plasmas). We fix
+      // that here.
+      for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
 
-      for (int i = 0; i < stencil.size(); i++) {
-        rteDensities[idx] += stencil.weight(i) * (*a_rteDensities[idx])(stencil.vof(i), comp);
+        // Get the charge number.
+        const RefCountedPtr<CdrSpecies> species = solverIt.getSpecies();
+        const int                       Z       = species->getChargeNumber();
+
+        // Check if the EB is an "inflow" face. If it is, we will turn off this species in the reaction network.
+        bool inflow = false;
+        if (solverIt()->isMobile() && Real(Z) * EdotN > 0.0) {
+          inflow = true;
+        }
+
+        // If it's not an inflow face, interpolate the data to the cell centroid. Otherwise, set the
+        // species density to zero.
+        if (!inflow) {
+          cdrDensities[idx] = zero;
+
+          for (int i = 0; i < stencil.size(); i++) {
+            cdrDensities[idx] += stencil.weight(i) * (*a_cdrDensities[idx])(stencil.vof(i), comp);
+          }
+
+          // Enforce positivity in reaction kernel (interpolation stencils might have negative weights).
+          cdrDensities[idx] = std::max(zero, cdrDensities[idx]);
+        }
+        else {
+          cdrDensities[idx] = zero;
+        }
       }
 
-      rteDensities[idx] = std::max(zero, rteDensities[idx]);
-    }
+      // Interpolate cell-centered gradients to centroid.
+      for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
 
-    // Call the plasma-kinetics framework and have it fill the source terms over a time step a_dt.
-    m_physics->advanceReactionNetwork(cdrSources,
-                                      rteSources,
-                                      cdrDensities,
-                                      cdrGradients,
-                                      rteDensities,
-                                      E,
-                                      pos,
-                                      a_dx,
-                                      a_dt,
-                                      a_time,
-                                      kappa);
+        cdrGradients[idx] = RealVect::Zero;
+        for (int i = 0; i < stencil.size(); i++) {
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            cdrGradients[idx][dir] += stencil.weight(i) * (*a_cdrGradients[idx])(stencil.vof(i), dir);
+          }
+        }
+      }
 
-    // Iterate through the CDR solvers and set the source terms.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
+      // Interpolate the RTE densities to the centroid.
+      for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
 
-      (*a_cdrSources[idx])(vof, comp) = cdrSources[idx];
-    }
+        // Apply the stencil but always leave a positive number of photons (interpolators might not always have non-negative weights).
+        rteDensities[idx] = 0.0;
 
-    // Iterate through the RTE solvers and set the source terms.
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
+        for (int i = 0; i < stencil.size(); i++) {
+          rteDensities[idx] += stencil.weight(i) * (*a_rteDensities[idx])(stencil.vof(i), comp);
+        }
 
-      (*a_rteSources[idx])(vof, comp) = rteSources[idx];
+        rteDensities[idx] = std::max(zero, rteDensities[idx]);
+      }
+
+      // Call the plasma-kinetics framework and have it fill the source terms over a time step a_dt.
+      m_physics->advanceReactionNetwork(cdrSources,
+                                        rteSources,
+                                        cdrDensities,
+                                        cdrGradients,
+                                        rteDensities,
+                                        E,
+                                        pos,
+                                        a_dx,
+                                        a_dt,
+                                        a_time,
+                                        kappa);
+
+      // Iterate through the CDR solvers and set the source terms.
+      for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
+
+        (*a_cdrSources[idx])(vof, comp) = cdrSources[idx];
+      }
+
+      // Iterate through the RTE solvers and set the source terms.
+      for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
+
+        (*a_rteSources[idx])(vof, comp) = rteSources[idx];
+      }
     }
   };
 
@@ -4074,17 +4097,13 @@ CdrPlasmaStepper::parseLoadBalance()
   std::string str = "morton";
 
   m_loadBalance = false;
-  m_loadPerCell = 1;
-
-  Real loadPerCell = 1.0;
+  m_loadPerCell = 0.0;
 
   ParmParse pp(m_className.c_str());
 
   pp.get("load_balance", m_loadBalance);
-  pp.get("load_per_cell", loadPerCell);
+  pp.get("load_per_cell", m_loadPerCell);
   pp.get("box_sorting", str);
-
-  m_loadPerCell = round(loadPerCell);
 
   if (str == "none") {
     m_boxSort = BoxSorting::None;
