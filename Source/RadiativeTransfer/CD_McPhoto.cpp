@@ -1304,10 +1304,17 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
                                      ParticleContainer<Photon>& a_domainPhotons,
                                      ParticleContainer<Photon>& a_photons)
 {
-  CH_TIME("McPhoto::advancePhotonsInstantaneous");
+  CH_TIMERS("McPhoto::advancePhotonsInstantaneous");
+  CH_TIMER("McPhoto::advancePhotonsInstantaneous::amr_loop", t1);
+  CH_TIMER("McPhoto::advancePhotonsInstantaneous::remap_bulk", t2);
+  CH_TIMER("McPhoto::advancePhotonsInstantaneous::mpi_waitall", t0);
   if (m_verbosity > 5) {
     pout() << m_name + "::advancePhotonsInstantaneous" << endl;
   }
+
+  CH_START(t0);
+  MPI_Barrier(Chombo_MPI::comm);
+  CH_STOP(t0);
 
   // TLDR: This routine iterates over the levels and boxes and does the following
   //
@@ -1321,7 +1328,7 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
   //       }
   //
   //       Remap a_bulkPhotons, a_ebPhotons, a_domainPhotons
-
+  CH_START(t1);
   // Low and high corners
   const RealVect probLo = m_amr->getProbLo();
   const RealVect probHi = m_amr->getProbHi();
@@ -1438,11 +1445,36 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
       allPhotons.clear();
     }
   }
+  CH_STOP(t1);
 
   // Need to remap because photons may/will have moved off the processor.
+  CH_START(t0);
+  MPI_Barrier(Chombo_MPI::comm);
+  CH_STOP(t0);
+
+  CH_START(t2);
   a_bulkPhotons.remap();
+  CH_STOP(t2);
+
+  CH_START(t0);
+  MPI_Barrier(Chombo_MPI::comm);
+  CH_STOP(t0);
+
+  CH_START(t2);
   a_ebPhotons.remap();
+  CH_STOP(t2);
+
+  CH_START(t0);
+  MPI_Barrier(Chombo_MPI::comm);
+  CH_STOP(t0);
+
+  CH_START(t2);
   a_domainPhotons.remap();
+  CH_STOP(t2);
+
+  CH_START(t0);
+  MPI_Barrier(Chombo_MPI::comm);
+  CH_STOP(t0);
 }
 
 void
@@ -1869,7 +1901,6 @@ McPhoto::computeLoads(Vector<long long>& a_loads, const DisjointBoxLayout& a_dbl
   a_loads.resize(a_dbl.size(), 0LL);
 
   for (DataIterator dit(a_dbl); dit.ok(); ++dit) {
-    a_loads[dit().intCode()] += m_photons[a_level][dit()].listItems().length();
     a_loads[dit().intCode()] += m_bulkPhotons[a_level][dit()].listItems().length();
   }
 }

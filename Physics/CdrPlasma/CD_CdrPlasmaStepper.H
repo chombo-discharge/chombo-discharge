@@ -25,6 +25,7 @@
 #include <CD_FieldSolver.H>
 #include <CD_SurfaceODESolver.H>
 #include <CD_TimeStepper.H>
+#include <CD_BoxSorting.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -352,6 +353,11 @@ namespace Physics {
 	@brief Plasma phase
       */
       phase::which_phase m_phase;
+
+      /*!
+	@brief Box-sorting for when users decide to load balance the RTE solvers
+      */
+      BoxSorting m_boxSort;
 
       /*!
 	@brief Load balance particle realm or not

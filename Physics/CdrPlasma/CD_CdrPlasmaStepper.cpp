@@ -37,6 +37,7 @@ CdrPlasmaStepper::CdrPlasmaStepper()
   m_solverVerbosity = -1;
   m_phase           = phase::gas;
   m_fluidRealm      = Realm::Primal;
+  m_boxSort         = BoxSorting::Morton;
 }
 
 CdrPlasmaStepper::CdrPlasmaStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics) : CdrPlasmaStepper()
@@ -239,7 +240,7 @@ CdrPlasmaStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
   }
 
   // 5. Finally do the actual load balancing.
-  LoadBalancing::sort(a_boxes, loads, BoxSorting::Morton);
+  LoadBalancing::sort(a_boxes, loads, m_boxSort);
   LoadBalancing::balanceLevelByLevel(a_procs, loads, a_boxes);
 }
 
@@ -272,6 +273,11 @@ CdrPlasmaStepper::getCheckpointLoads(const std::string a_realm, const int a_leve
       for (int i = 0; i < loads.size(); i++) {
         loads[i] += (long int)solverLoads[i];
       }
+    }
+
+    // Add constant load per cell
+    for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
+      loads[lit().intCode()] += (long int)dbl[lit()].numPts() * m_loadPerCell;
     }
   }
   else {
@@ -4065,6 +4071,8 @@ CdrPlasmaStepper::parseLoadBalance()
     pout() << "CdrPlasmaStepper::parseLoadBalance" << endl;
   }
 
+  std::string str = "morton";
+
   m_loadBalance = false;
   m_loadPerCell = 1;
 
@@ -4072,6 +4080,23 @@ CdrPlasmaStepper::parseLoadBalance()
 
   pp.query("load_balance", m_loadBalance);
   pp.query("load_per_cell", m_loadPerCell);
+  pp.query("box_sorting", str);
+
+  if (str == "none") {
+    m_boxSort = BoxSorting::None;
+  }
+  else if (str == "std") {
+    m_boxSort = BoxSorting::Std;
+  }
+  else if (str == "shuffle") {
+    m_boxSort = BoxSorting::Shuffle;
+  }
+  else if (str == "morton") {
+    m_boxSort = BoxSorting::Morton;
+  }
+  else {
+    MayDay::Abort("CdrPlasmaStepper::parseLoadBalance - unknown box sorting method requested");
+  }
 }
 
 void
