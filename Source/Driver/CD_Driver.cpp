@@ -2714,10 +2714,6 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
     for (const auto& c : checkpointedLoads) {
       if (curRealm == c.first) {
         foundCheckedLoads = true;
-
-        if (procID() == 0) {
-          std::cout << "found checked loads for = " << curRealm << std::endl;
-        }
       }
     }
 
