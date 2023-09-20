@@ -4076,11 +4076,15 @@ CdrPlasmaStepper::parseLoadBalance()
   m_loadBalance = false;
   m_loadPerCell = 1;
 
+  Real loadPerCell = 1.0;
+
   ParmParse pp(m_className.c_str());
 
-  pp.query("load_balance", m_loadBalance);
-  pp.query("load_per_cell", m_loadPerCell);
-  pp.query("box_sorting", str);
+  pp.get("load_balance", m_loadBalance);
+  pp.get("load_per_cell", loadPerCell);
+  pp.get("box_sorting", str);
+
+  m_loadPerCell = round(loadPerCell);
 
   if (str == "none") {
     m_boxSort = BoxSorting::None;
