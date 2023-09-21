@@ -160,6 +160,15 @@ namespace ParallelOps {
   */
   inline void
   vectorSum(Vector<long int>& a_data) noexcept;
+
+  /*!
+    @brief Perform a summation of all the MPI ranks's input data. 
+    @details This performs a rank-wise summation. If rank 1 has data (1,2,3) and rank 2 has data (3,4,5), the output data
+    on both ranks is (4,6,8).
+    @param[inout] a_data On 
+  */
+  inline void
+  vectorSum(Vector<long long int>& a_data) noexcept;
 } // namespace ParallelOps
 
 #include <CD_NamespaceFooter.H>

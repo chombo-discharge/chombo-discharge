@@ -100,6 +100,9 @@ Driver::getNumberOfPlotVariables() const
   if (m_plotLevelset) {
     numPlotVars = numPlotVars + 2;
   }
+  if (m_plotLoads) {
+    numPlotVars += m_amr->getRealms().size();
+  }
 
   return numPlotVars;
 }
@@ -133,6 +136,15 @@ Driver::getPlotVariableNames() const
   if (m_plotLevelset) {
     plotVarNames.push_back("levelset_gas");
     plotVarNames.push_back("levelset_solid");
+  }
+  if (m_plotLoads) {
+    const std::string base = "_load";
+
+    for (const auto& str : m_amr->getRealms()) {
+      const std::string id = str + base;
+
+      plotVarNames.push_back(id);
+    }
   }
 
   return plotVarNames;
@@ -1076,6 +1088,7 @@ Driver::parsePlotVariables()
   m_plotTags     = false;
   m_plotRanks    = false;
   m_plotLevelset = false;
+  m_plotLoads    = false;
 
   // Check input script to see which variables to include in plot files.
   ParmParse pp("Driver");
@@ -1085,12 +1098,18 @@ Driver::parsePlotVariables()
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++) {
-    if (str[i] == "tags")
+    if (str[i] == "tags") {
       m_plotTags = true;
-    else if (str[i] == "mpi_rank")
+    }
+    else if (str[i] == "mpi_rank") {
       m_plotRanks = true;
-    else if (str[i] == "levelset")
+    }
+    else if (str[i] == "levelset") {
       m_plotLevelset = true;
+    }
+    else if (str[i] == "loads") {
+      m_plotLoads = true;
+    }
   }
 }
 
@@ -2277,6 +2296,9 @@ Driver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_l
   if (m_plotLevelset) {
     this->writeLevelset(a_output, a_comp, a_level);
   }
+  if (m_plotLoads) {
+    this->writeLoads(a_output, a_comp, a_level);
+  }
 }
 
 void
@@ -2392,6 +2414,39 @@ Driver::writeLevelset(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_l
   }
 
   a_comp = a_comp + 2;
+}
+
+void
+Driver::writeLoads(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
+{
+  CH_TIME("Driver::writeLoads");
+  if (m_verbosity > 3) {
+    pout() << "Driver::writeLoads" << endl;
+  }
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
+  for (const auto& r : m_amr->getRealms()) {
+    CH_assert(a_output.nComp() > a_comp);
+
+    LevelData<EBCellFAB> scratch;
+    m_amr->allocate(scratch, r, phase::gas, a_level, 1);
+
+    const Vector<long int> loads = m_timeStepper->getCheckpointLoads(r, a_level);
+
+    const DisjointBoxLayout& dbl = m_amr->getGrids(r)[a_level];
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      scratch[dit()].setVal(loads[dit().intCode()]);
+    }
+
+    const Interval srcInterv(0, 0);
+    const Interval dstInterv(a_comp, a_comp);
+
+    m_amr->copyData(a_output, scratch, a_level, m_realm, r, dstInterv, srcInterv);
+
+    a_comp++;
+  }
 }
 
 void

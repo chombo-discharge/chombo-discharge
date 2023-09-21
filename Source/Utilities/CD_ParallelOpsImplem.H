@@ -434,6 +434,20 @@ ParallelOps::vectorSum(Vector<long int>& a_data) noexcept
 #endif
 }
 
+inline void
+ParallelOps::vectorSum(Vector<long long int>& a_data) noexcept
+{
+  CH_TIME("ParallelOps::vectorSum(long int)");
+
+#ifdef CH_MPI
+  const Vector<long long int> tmp = a_data;
+  const int result = MPI_Allreduce(&(tmp[0]), &(a_data[0]), a_data.size(), MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+  if (result != MPI_SUCCESS) {
+    MayDay::Error("In file ParallelOps::vectorSum -- MPI communication error");
+  }
+#endif
+}
+
 inline Real
 ParallelOps::average(const Real& a_val) noexcept
 {

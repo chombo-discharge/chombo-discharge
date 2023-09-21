@@ -112,6 +112,18 @@ public:
   setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry);
 
   /*!
+    @brief Get computational loads for a specific grid level
+    @param[out] a_loads Grid loads for this level. 
+    @param[in] a_dbl Grids on input level
+    @param[in] a_level Input level
+    @return Loads for each box on a grid level. 
+    @note The return vector should have the same order as the boxes in a_dbl. E.g. ret[0] must be the load for a_dbl.boxArray()[0];
+    @details The default implementation returns the number of cells in the grid patch as a proxy for the load. 
+  */
+  virtual void
+  computeLoads(Vector<long long>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level) const noexcept;
+
+  /*!
     @brief Set the amr object
     @param[in] a_amr AmrMesh object.
   */

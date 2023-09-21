@@ -25,6 +25,7 @@
 #include <CD_FieldSolver.H>
 #include <CD_SurfaceODESolver.H>
 #include <CD_TimeStepper.H>
+#include <CD_BoxSorting.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -52,7 +53,7 @@ namespace Physics {
       /*!
 	@brief Destructor
       */
-      ~CdrPlasmaStepper();
+      virtual ~CdrPlasmaStepper();
 
       /*!
 	@brief Instantiate solvers
@@ -187,20 +188,56 @@ namespace Physics {
       printStepReport() override;
 
       /*!
+	@brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids. 
+	@param[in] a_realm Realm name
+      */
+      virtual bool
+      loadBalanceThisRealm(const std::string a_realm) const override final;
+
+      /*!
+	@brief Load balance grid boxes for a specified realm. 
+	@param[out] a_procs       MPI ranks owning the various grid boxes. 
+	@param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
+	@param[in]  a_realm       Realm identifier
+	@param[in]  a_grids       Original grids
+	@param[in]  a_lmin        Coarsest grid level that changed
+	@param[in]  a_finestLevel New finest grid level
+	@details This is only called by Driver if TimeStepper::loadBalanceThisRealm(a_realm) returned true. The default implementation
+	uses volume-based loads for the grid patches. If the user wants to load balance boxes on a realm, this routine must be overwritten and
+	he should compute loads for the various patches in a_grids and call LoadBalancing::makeBalance(Vector<int>, Vector<T>, Vector<Box>).
+      */
+      virtual void
+      loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
+                       Vector<Vector<Box>>&             a_boxes,
+                       const std::string                a_realm,
+                       const Vector<DisjointBoxLayout>& a_grids,
+                       const int                        a_lmin,
+                       const int                        a_finestLevel) override final;
+
+      /*!
+	@brief Get computational loads to be checkpointed. 
+	@details This is used by Driver both for setting up load-balanced restarts AND for plotting the computational loads to a file. This routine is
+	disjoint from loadBalanceBoxes because this routine is not part of a regrid. This means that we are not operating with temporarily load balanced
+	grids where the but the final ones. 
+	@note The default implementation uses the box volume as a proxy for the load. You should overwrite this if you load balance your application, and also
+	make sure that the loads returned from this routine are consistent with what you put in loadBalanceBoxes. 
+
+	Also note that the return vector has the same ordering as the DisjointBoxLayout's boxes on the input grid level. See the implementation for further details. 
+	@param[in] a_realm Realm
+	@param[in] a_level Grid level
+	@return Returns computational loads for each box on grid level a_level. 
+    
+      */
+      virtual Vector<long int>
+      getCheckpointLoads(const std::string a_realm, const int a_level) const override final;
+
+      /*!
 	@brief Pre-regrid function -- this is the one called by Driver. 
 	@param[in] a_lmin           The coarsest level that changes
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
       */
       virtual void
       preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
-
-      /*!
-	@brief Do a preRegrid operation for internal storage (if needed). 
-	@param[in] a_lmin           The coarsest level that changes
-	@param[in] a_oldFinestLevel The finest level before the regrid. 
-      */
-      virtual void
-      preRegridInternals(const int a_lmin, const int a_oldFinestLevel);
 
       /*!
 	@brief Regrid method.
@@ -219,6 +256,307 @@ namespace Physics {
       postRegrid() override;
 
       /*!
+	@brief Compute the cell-centered electric field on a specific phase using whatever is available in m_fieldSolver
+	@details This will use the potential from m_fieldSolver.
+	@param[out] a_electricFieldCell Cell-centered electric field
+	@param[in]  a_phase             Phase
+      */
+      virtual void
+      computeElectricField(EBAMRCellData& a_electricFieldCell, const phase::which_phase a_phase) const;
+
+      /*!
+	@brief Return time
+	@return m_time.
+      */
+      virtual Real
+      getTime() const;
+
+      /*!
+	@brief Set the CDR layout. 
+	@param[in] a_cdr CDR solvers.
+      */
+      virtual void
+      setCdrSolvers(RefCountedPtr<CdrLayout<CdrSolver>>& a_cdr);
+
+      /*!
+	@brief Set the field solver
+	@param[in] a_fieldSolver Field solver
+      */
+      virtual void
+      setFieldSolver(RefCountedPtr<FieldSolver>& a_fieldSolver);
+
+      /*!
+	@brief Set the RTE solvers
+	@param[in] a_rte RTE solvers
+      */
+      virtual void
+      setRadiativeTransferSolvers(RefCountedPtr<RtLayout<RtSolver>>& a_rte);
+
+      /*!
+	@brief Set voltage curve.
+	@param[in] a_voltage Voltage curve
+      */
+      virtual void
+      setVoltage(std::function<Real(const Real a_time)> a_voltage);
+
+    protected:
+      /*!
+	@brief Enum for switching between source term computations. 'Interpolated' interpolates the cell-centered data
+	to cell centroids. InterpolatedStable is the same as Interpolated but with a stability fix near inflow EBs.
+	CellAverage assumes centroid-centered data, and Upwind uses the upwind formulation in Villa et. al. 
+      */
+      enum class SourceTermComputation
+      {
+        Interpolated,
+        InterpolatedStable,
+        CellAverage,
+        Upwind
+      };
+
+      /*!
+	@brief An enum for encapsulating how time steps were restricted. 
+      */
+      enum class TimeCode
+      {
+        Advection,
+        Diffusion,
+        AdvectionDiffusion,
+        Source,
+        RelaxationTime,
+        Restricted,
+        Hardcap,
+        Error,
+        Physics
+      };
+
+      /*!
+	@brief Set the potential
+      */
+      std::function<Real(const Real a_time)> m_voltage;
+
+      /*!
+	@brief Realm where the fluid and field solvers live
+      */
+      std::string m_fluidRealm;
+
+      /*!
+	@brief If using dual-grid, RTE solvers live here.
+      */
+      std::string m_particleRealm;
+
+      /*!
+	@brief Time stepper class name
+      */
+      std::string m_className;
+
+      /*!
+	@brief Plasma phase
+      */
+      phase::which_phase m_phase;
+
+      /*!
+	@brief Box-sorting for when users decide to load balance the RTE solvers
+      */
+      BoxSorting m_boxSort;
+
+      /*!
+	@brief Load balance particle realm or not
+      */
+      bool m_loadBalance;
+
+      /*!
+	@brief Which source term computation
+      */
+      SourceTermComputation m_whichSourceTermComputation;
+
+      /*!
+	@brief Index space
+      */
+      RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
+
+      /*!
+	@brief Plasma kinetics
+      */
+      RefCountedPtr<CdrPlasmaPhysics> m_physics;
+
+      /*!
+	@brief CDR solvers
+      */
+      RefCountedPtr<CdrLayout<CdrSolver>> m_cdr;
+
+      /*!
+	@brief Radiative transfer solvers
+      */
+      RefCountedPtr<RtLayout<RtSolver>> m_rte;
+
+      /*!
+	@brief Poisson solver
+      */
+      RefCountedPtr<FieldSolver> m_fieldSolver;
+
+      /*!
+	@brief Surface charge solver
+      */
+      RefCountedPtr<SurfaceODESolver<1>> m_sigma;
+
+      /*!
+	@brief Storage for the current
+      */
+      EBAMRCellData m_currentDensity;
+
+      /*!
+	@brief Storage for physics-observables
+      */
+      EBAMRCellData m_physicsPlotVars;
+
+      /*!
+	@brief Storage for RTE source terms. 
+	@details Allocated and stored in the regrid step.
+      */
+      EBAMRCellData m_particleRealmLoads;
+
+      /*!
+	@brief Minimum allowed time step
+      */
+      Real m_minDt;
+
+      /*!
+	@brief Maximum allowed time step
+      */
+      Real m_maxDt;
+
+      /*!
+	@brief CFL number.
+      */
+      Real m_cfl;
+
+      /*!
+	@brief Fudge factor for relaxation time
+      */
+      Real m_relaxTime;
+
+      /*!
+	@brief TIme
+      */
+      Real m_time;
+
+      /*!
+	@brief Previous time step size
+      */
+      Real m_dt;
+
+      /*!
+	@brief Computed CFL time step
+      */
+      Real m_dtCFL;
+
+      /*!
+	@brief Load per cell. 
+	@details Used only when running with load-balanced RTE solvers.
+      */
+      Real m_loadPerCell;
+
+      /*!
+	@brief Time code for step restriction
+      */
+      TimeCode m_timeCode;
+
+      /*!
+	@brief Verbosity for solvers
+      */
+      int m_solverVerbosity;
+
+      /*!
+	@brief Fast RTE solver
+      */
+      int m_fastRTE;
+
+      /*!
+	@brief Fast RTE solver
+      */
+      int m_fastPoisson;
+
+      /*!
+	@brief Upwind factor
+      */
+      int m_upwindFactor;
+
+      /*!
+	@brief Parse dual-grid functionality
+      */
+      virtual void
+      parseDualGrid();
+
+      /*!
+	@brief Parse load-balancing functionality
+      */
+      virtual void
+      parseLoadBalance();
+
+      /*!
+	@brief Parse class verbosity
+      */
+      virtual void
+      parseVerbosity();
+
+      /*!
+	@brief Parse solver verbosities. 
+      */
+      virtual void
+      parseSolverVerbosity();
+
+      /*!
+	@brief Parse the CFL number. 
+      */
+      virtual void
+      parseCFL();
+
+      /*!
+	@brief Parse the relaxation time restriction. 
+      */
+      virtual void
+      parseRelaxationTime();
+
+      /*!
+	@brief Parse the minimum allowed time step
+      */
+      virtual void
+      parseMinDt();
+
+      /*!
+	@brief Parse the maximum allowed time step
+      */
+      virtual void
+      parseMaxDt();
+
+      /*!
+	@brief Parse the "fast poisson" method, i.e. how often we solve the Poisson equation. 
+      */
+      virtual void
+      parseFastPoisson();
+
+      /*!
+	@brief Parse the "fast rte" method, i.e. how often we solve the Poisson equation. 
+      */
+      virtual void
+      parseFastRadiativeTransfer();
+
+      /*!
+	@brief Parse how we compute the source terms. 
+	@details This is for modifications near the EB.
+      */
+      virtual void
+      parseSourceComputation();
+
+      /*!
+	@brief Do a preRegrid operation for internal storage (if needed). 
+	@param[in] a_lmin           The coarsest level that changes
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+      */
+      virtual void
+      preRegridInternals(const int a_lmin, const int a_oldFinestLevel);
+
+      /*!
 	@brief Compute the current density
 	@param[out] a_J Current density
       */
@@ -232,15 +570,6 @@ namespace Physics {
       */
       virtual void
       computeElectricField(MFAMRCellData& a_electricFieldCell, const MFAMRCellData& a_potential) const;
-
-      /*!
-	@brief Compute the cell-centered electric field on a specific phase using whatever is available in m_fieldSolver
-	@details This will use the potential from m_fieldSolver.
-	@param[out] a_electricFieldCell Cell-centered electric field
-	@param[in]  a_phase             Phase
-      */
-      virtual void
-      computeElectricField(EBAMRCellData& a_electricFieldCell, const phase::which_phase a_phase) const;
 
       /*!
 	@brief Compute the cell-centered electric field on a specific phase
@@ -282,13 +611,6 @@ namespace Physics {
       */
       virtual void
       computeMaxElectricField(Real& a_maxElectricField, const phase::which_phase a_phase);
-
-      /*!
-	@brief Return time
-	@return m_time.
-      */
-      virtual Real
-      getTime() const;
 
       /*!
 	@brief Check if RTE solvers are stationary
@@ -482,6 +804,8 @@ namespace Physics {
 	@param[in]  a_time         Time
 	@param[in]  a_dt           Time step.
 	@param[in]  a_dx           Grid resolution.
+	@πaram[in]  a_level        Grid level
+	@πaram[in]  a_din          Grid index on level
 	@param[in]  a_cellBox      Cell-centered computational region. 
       */
       virtual void
@@ -494,6 +818,8 @@ namespace Physics {
                                          const Real&               a_time,
                                          const Real&               a_dt,
                                          const Real&               a_dx,
+                                         const int                 a_level,
+                                         const DataIndex&          a_din,
                                          const Box&                a_cellBox);
 
       /*!
@@ -1168,40 +1494,12 @@ namespace Physics {
       solverDump();
 
       /*!
-	@brief Set voltage curve.
-	@param[in] a_voltage Voltage curve
-      */
-      virtual void
-      setVoltage(std::function<Real(const Real a_time)> a_voltage);
-
-      /*!
 	@brief Solve the radiative transfer problem. 
 	@details This will call the other version with states taken from the solvers. 
 	@param[in] a_dt Time step.
       */
       virtual void
       solveRadiativeTransfer(const Real a_dt);
-
-      /*!
-	@brief Set the CDR layout. 
-	@param[in] a_cdr CDR solvers.
-      */
-      virtual void
-      setCdrSolvers(RefCountedPtr<CdrLayout<CdrSolver>>& a_cdr);
-
-      /*!
-	@brief Set the field solver
-	@param[in] a_fieldSolver Field solver
-      */
-      virtual void
-      setFieldSolver(RefCountedPtr<FieldSolver>& a_fieldSolver);
-
-      /*!
-	@brief Set the RTE solvers
-	@param[in] a_rte RTE solvers
-      */
-      virtual void
-      setRadiativeTransferSolvers(RefCountedPtr<RtLayout<RtSolver>>& a_rte);
 
       /*!
 	@brief Compute the ohmic current on electrodes.
@@ -1243,217 +1541,6 @@ namespace Physics {
       */
       virtual Real
       getDt();
-
-    protected:
-      /*!
-	@brief Enum for switching between source term computations. 'Interpolated' interpolates the cell-centered data
-	to cell centroids. InterpolatedStable is the same as Interpolated but with a stability fix near inflow EBs.
-	CellAverage assumes centroid-centered data, and Upwind uses the upwind formulation in Villa et. al. 
-      */
-      enum class SourceTermComputation
-      {
-        Interpolated,
-        InterpolatedStable,
-        CellAverage,
-        Upwind
-      };
-
-      /*!
-	@brief An enum for encapsulating how time steps were restricted. 
-      */
-      enum class TimeCode
-      {
-        Advection,
-        Diffusion,
-        AdvectionDiffusion,
-        Source,
-        RelaxationTime,
-        Restricted,
-        Hardcap,
-        Error,
-        Physics
-      };
-
-      /*!
-	@brief Realm where the time stepper is registered. 
-	@details This will always be the primal realm because CdrPlasma has no dual-grid functionality.
-      */
-      std::string m_realm;
-
-      /*!
-	@brief Time stepper class name
-      */
-      std::string m_className;
-
-      /*!
-	@brief Plasma phase
-      */
-      phase::which_phase m_phase;
-
-      /*!
-	@brief Which source term computation
-      */
-      SourceTermComputation m_whichSourceTermComputation;
-
-      /*!
-	@brief Index space
-      */
-      RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
-
-      /*!
-	@brief Plasma kinetics
-      */
-      RefCountedPtr<CdrPlasmaPhysics> m_physics;
-
-      /*!
-	@brief CDR solvers
-      */
-      RefCountedPtr<CdrLayout<CdrSolver>> m_cdr;
-
-      /*!
-	@brief Radiative transfer solvers
-      */
-      RefCountedPtr<RtLayout<RtSolver>> m_rte;
-
-      /*!
-	@brief Poisson solver
-      */
-      RefCountedPtr<FieldSolver> m_fieldSolver;
-
-      /*!
-	@brief Surface charge solver
-      */
-      RefCountedPtr<SurfaceODESolver<1>> m_sigma;
-
-      /*!
-	@brief Storage for the current
-      */
-      EBAMRCellData m_currentDensity;
-
-      /*!
-	@brief Storage for physics-observables
-      */
-      EBAMRCellData m_physicsPlotVars;
-
-      /*!
-	@brief Set the potential
-      */
-      std::function<Real(const Real a_time)> m_voltage;
-
-      /*!
-	@brief Minimum allowed time step
-      */
-      Real m_minDt;
-
-      /*!
-	@brief Maximum allowed time step
-      */
-      Real m_maxDt;
-
-      /*!
-	@brief CFL number.
-      */
-      Real m_cfl;
-
-      /*!
-	@brief Fudge factor for relaxation time
-      */
-      Real m_relaxTime;
-
-      /*!
-	@brief TIme
-      */
-      Real m_time;
-
-      /*!
-	@brief Previous time step size
-      */
-      Real m_dt;
-
-      /*!
-	@brief Computed CFL time step
-      */
-      Real m_dtCFL;
-
-      /*!
-	@brief Time code for step restriction
-      */
-      TimeCode m_timeCode;
-
-      /*!
-	@brief Verbosity for solvers
-      */
-      int m_solverVerbosity;
-
-      /*!
-	@brief Fast RTE solver
-      */
-      int m_fastRTE;
-
-      /*!
-	@brief Fast RTE solver
-      */
-      int m_fastPoisson;
-
-      /*!
-	@brief Upwind factor
-      */
-      int m_upwindFactor;
-
-      /*!
-	@brief Parse class verbosity
-      */
-      virtual void
-      parseVerbosity();
-
-      /*!
-	@brief Parse solver verbosities. 
-      */
-      virtual void
-      parseSolverVerbosity();
-
-      /*!
-	@brief Parse the CFL number. 
-      */
-      virtual void
-      parseCFL();
-
-      /*!
-	@brief Parse the relaxation time restriction. 
-      */
-      virtual void
-      parseRelaxationTime();
-
-      /*!
-	@brief Parse the minimum allowed time step
-      */
-      virtual void
-      parseMinDt();
-
-      /*!
-	@brief Parse the maximum allowed time step
-      */
-      virtual void
-      parseMaxDt();
-
-      /*!
-	@brief Parse the "fast poisson" method, i.e. how often we solve the Poisson equation. 
-      */
-      virtual void
-      parseFastPoisson();
-
-      /*!
-	@brief Parse the "fast rte" method, i.e. how often we solve the Poisson equation. 
-      */
-      virtual void
-      parseFastRadiativeTransfer();
-
-      /*!
-	@brief Parse how we compute the source terms. 
-	@details This is for modifications near the EB.
-      */
-      virtual void
-      parseSourceComputation();
 
       /*!
 	@brief Compute and put the current density in output data holder

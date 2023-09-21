@@ -171,7 +171,7 @@ Various class options are available for adjusting the behavior of the ``Driver``
 * ``Driver.max_chk_depth``.  Maximum checkpoint file depth.
   Values :math:`< 0` means all levels. 
 * ``Driver.num_plot_ghost``. Number of ghost cells in plot files. 
-* ``Driver.plt_vars``. Plot variables for ``Driver``. Valid options are *tags*, *mpi_rank*, *levelset*. 
+* ``Driver.plt_vars``. Plot variables for ``Driver``. Valid options are *tags*, *mpi_rank*, *levelset*, *loads*.
 * ``Driver.restart``. Restart step (less or equal to 0 implies fresh simulation)
 * ``Driver.allow_coarsening``. Allows removal of grid levels if cell tags dont run deep enough.
 * ``Driver.grow_geo_tags``. How much to grow cut-cell refinement tags. 
