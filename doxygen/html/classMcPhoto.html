@@ -279,6 +279,9 @@ virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#adb531c420343d9d5cfc88be405332062">getNumSamplingPackets</a> () const noexcept</td></tr>
 <tr class="memdesc:adb531c420343d9d5cfc88be405332062"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum number of photons generated per cell. <br /></td></tr>
 <tr class="separator:adb531c420343d9d5cfc88be405332062"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2fe39d06c9b0c7e64323f4abbf8ca189"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a2fe39d06c9b0c7e64323f4abbf8ca189">computeLoads</a> (Vector&lt; long long &gt; &amp;a_loads, const DisjointBoxLayout &amp;a_dbl, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a2fe39d06c9b0c7e64323f4abbf8ca189"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get computational loads for a specific grid level. This computes the number of photons in the bulk data holder.  <a href="classMcPhoto.html#a2fe39d06c9b0c7e64323f4abbf8ca189">More...</a><br /></td></tr>
+<tr class="separator:a2fe39d06c9b0c7e64323f4abbf8ca189"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classRtSolver"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classRtSolver')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classRtSolver.html">RtSolver</a></td></tr>
 <tr class="memitem:a159dfdd246795e94f9f18be45b7590e9 inherit pub_methods_classRtSolver"><td class="memItemLeft" align="right" valign="top"><a id="a159dfdd246795e94f9f18be45b7590e9"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a159dfdd246795e94f9f18be45b7590e9">RtSolver</a> ()</td></tr>
@@ -1179,6 +1182,63 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <dl class="section note"><dt>Note</dt><dd>Issues an error &ndash; currently don't know how to compute the mesh flux from computational photons.... </dd></dl>
 
 <p>Implements <a class="el" href="classRtSolver.html#a686bc53955acb79c2157d56193f5d00c">RtSolver</a>.</p>
+
+</div>
+</div>
+<a id="a2fe39d06c9b0c7e64323f4abbf8ca189"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2fe39d06c9b0c7e64323f4abbf8ca189">&#9670;&nbsp;</a></span>computeLoads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void McPhoto::computeLoads </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; long long &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_loads</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DisjointBoxLayout &amp;&#160;</td>
+          <td class="paramname"><em>a_dbl</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get computational loads for a specific grid level. This computes the number of photons in the bulk data holder. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_loads</td><td>Grid loads for this level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dbl</td><td>Grids on input level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Input level </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Loads for each box on a grid level. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The return vector should have the same order as the boxes in a_dbl. E.g. ret[0] must be the load for a_dbl.boxArray()[0];</dd></dl>
+<p>The default implementation returns the number of cells in the grid patch as a proxy for the load. </p>
+
+<p>Reimplemented from <a class="el" href="classRtSolver.html#a243e895c4e3e528849a0555ea28b284a">RtSolver</a>.</p>
 
 </div>
 </div>

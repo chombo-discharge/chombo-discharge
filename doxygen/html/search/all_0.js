@@ -33,7 +33,7 @@ var searchData=
   ['advancereactionnetworkirreginterp_30',['advanceReactionNetworkIrregInterp',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#acb682621ae68e3be969708908d241acc',1,'Physics::CdrPlasma::CdrPlasmaStepper']]],
   ['advancereactionnetworkirregkappa_31',['advanceReactionNetworkIrregKappa',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a6016efca252e0968c7c39993b1af904f',1,'Physics::CdrPlasma::CdrPlasmaStepper']]],
   ['advancereactionnetworkirregupwind_32',['advanceReactionNetworkIrregUpwind',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#afbf5396d1aac9af7491d2e2b28736465',1,'Physics::CdrPlasma::CdrPlasmaStepper']]],
-  ['advancereactionnetworkregularcells_33',['advanceReactionNetworkRegularCells',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a2aa06f633d4a7db69cf7ceecfbacb735',1,'Physics::CdrPlasma::CdrPlasmaStepper']]],
+  ['advancereactionnetworkregularcells_33',['advanceReactionNetworkRegularCells',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a90b590eb532444046dd71138e4050c5e',1,'Physics::CdrPlasma::CdrPlasmaStepper']]],
   ['advancerk2_34',['advanceRK2',['../classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a768decf0c75e014c10956b87c26e917f',1,'Physics::MeshODE::MeshODEStepper']]],
   ['advancerk4_35',['advanceRK4',['../classPhysics_1_1MeshODE_1_1MeshODEStepper.html#aa7b7c146361d083e26d3d3a6054a5584',1,'Physics::MeshODE::MeshODEStepper']]],
   ['advancessa_36',['advanceSSA',['../classKMCSolver.html#ab5887e59779dbd63cff39d34b9715c36',1,'KMCSolver::advanceSSA(State &amp;a_state, const Real a_dt) const noexcept'],['../classKMCSolver.html#a3d545a4df72ac4cacfafe6af242d5cca',1,'KMCSolver::advanceSSA(State &amp;a_state, const ReactionList &amp;a_reactions, const Real a_dt) const noexcept']]],

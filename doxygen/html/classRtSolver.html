@@ -150,6 +150,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:aaf26205b8fe427419686946e4b4e6460"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#aaf26205b8fe427419686946e4b4e6460">setComputationalGeometry</a> (const RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> &gt; a_computationalGeometry)</td></tr>
 <tr class="memdesc:aaf26205b8fe427419686946e4b4e6460"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set computational geometry.  <a href="classRtSolver.html#aaf26205b8fe427419686946e4b4e6460">More...</a><br /></td></tr>
 <tr class="separator:aaf26205b8fe427419686946e4b4e6460"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a243e895c4e3e528849a0555ea28b284a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a243e895c4e3e528849a0555ea28b284a">computeLoads</a> (Vector&lt; long long &gt; &amp;a_loads, const DisjointBoxLayout &amp;a_dbl, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a243e895c4e3e528849a0555ea28b284a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get computational loads for a specific grid level.  <a href="classRtSolver.html#a243e895c4e3e528849a0555ea28b284a">More...</a><br /></td></tr>
+<tr class="separator:a243e895c4e3e528849a0555ea28b284a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01b8a6ecb69b68033a00a2e2197c137a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a01b8a6ecb69b68033a00a2e2197c137a">setAmr</a> (const RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;a_amr)</td></tr>
 <tr class="memdesc:a01b8a6ecb69b68033a00a2e2197c137a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the amr object.  <a href="classRtSolver.html#a01b8a6ecb69b68033a00a2e2197c137a">More...</a><br /></td></tr>
 <tr class="separator:a01b8a6ecb69b68033a00a2e2197c137a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -709,6 +712,63 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <p>For diffusive models, the flux will be something like grad(a_phi). For higher-order models, the flux will be contained in a_phi (somehow). </p>
 
 <p>Implemented in <a class="el" href="classMcPhoto.html#a16166b0bf3e5d6b2435b53faa6a69a32">McPhoto</a>, and <a class="el" href="classEddingtonSP1.html#a35d252832e553dff62434ada8b4e3f61">EddingtonSP1</a>.</p>
+
+</div>
+</div>
+<a id="a243e895c4e3e528849a0555ea28b284a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a243e895c4e3e528849a0555ea28b284a">&#9670;&nbsp;</a></span>computeLoads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void RtSolver::computeLoads </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; long long &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_loads</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DisjointBoxLayout &amp;&#160;</td>
+          <td class="paramname"><em>a_dbl</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get computational loads for a specific grid level. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_loads</td><td>Grid loads for this level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dbl</td><td>Grids on input level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Input level </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Loads for each box on a grid level. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The return vector should have the same order as the boxes in a_dbl. E.g. ret[0] must be the load for a_dbl.boxArray()[0];</dd></dl>
+<p>The default implementation returns the number of cells in the grid patch as a proxy for the load. </p>
+
+<p>Reimplemented in <a class="el" href="classMcPhoto.html#a2fe39d06c9b0c7e64323f4abbf8ca189">McPhoto</a>.</p>
 
 </div>
 </div>

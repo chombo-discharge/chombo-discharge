@@ -1,5 +1,5 @@
 <map id="Physics::CdrPlasma::CdrPlasmaStepper" name="Physics::CdrPlasma::CdrPlasmaStepper">
-<area shape="rect" id="node1" title="Abstract class for evolving the minimal plasma model in time." alt="" coords="37,199,188,240"/>
+<area shape="rect" id="node1" title="Abstract class for evolving the minimal plasma model in time." alt="" coords="37,213,188,255"/>
 <area shape="rect" id="node2" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,95,111,121"/>
 <area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="135,95,331,121"/>
 <area shape="rect" id="node4" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="163,5,302,32"/>

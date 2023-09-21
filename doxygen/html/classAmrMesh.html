@@ -110,10 +110,6 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a2354431a853db080b55495a7b20f4512"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a2354431a853db080b55495a7b20f4512">copyData</a> (<a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_dst, const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_src, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_toRegion=CopyStrategy::Valid, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_fromRegion=CopyStrategy::Valid) const noexcept</td></tr>
 <tr class="memdesc:a2354431a853db080b55495a7b20f4512"><td class="mdescLeft">&#160;</td><td class="mdescRight">Method for copying from a source container to a destination container. User supplies information about from/to regions.  <a href="classAmrMesh.html#a2354431a853db080b55495a7b20f4512">More...</a><br /></td></tr>
 <tr class="separator:a2354431a853db080b55495a7b20f4512"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a74ab0580b7ff28128fc5c1051badd862"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a74ab0580b7ff28128fc5c1051badd862"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a74ab0580b7ff28128fc5c1051badd862">copyData</a> (LevelData&lt; T &gt; &amp;a_dst, const LevelData&lt; T &gt; &amp;a_src, const int a_level, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_toRegion=CopyStrategy::Valid, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_fromRegion=CopyStrategy::Valid) const noexcept</td></tr>
-<tr class="memdesc:a74ab0580b7ff28128fc5c1051badd862"><td class="mdescLeft">&#160;</td><td class="mdescRight">Method for copying from a source container to a destination container. User supplies information about from/to regions.  <a href="classAmrMesh.html#a74ab0580b7ff28128fc5c1051badd862">More...</a><br /></td></tr>
-<tr class="separator:a74ab0580b7ff28128fc5c1051badd862"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66c261aa8445bbe634131faf865dee15"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a66c261aa8445bbe634131faf865dee15"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a66c261aa8445bbe634131faf865dee15">copyData</a> (<a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_dst, const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_src, const Interval &amp;a_dstComps, const Interval &amp;a_srcComps, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_toRegion=CopyStrategy::Valid, const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;a_fromRegion=CopyStrategy::Valid) const noexcept</td></tr>
 <tr class="memdesc:a66c261aa8445bbe634131faf865dee15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Method for copying from a source container to a destination container. User supplies information.  <a href="classAmrMesh.html#a66c261aa8445bbe634131faf865dee15">More...</a><br /></td></tr>
@@ -3311,7 +3307,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a2354431a853db080b55495a7b20f4512"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2354431a853db080b55495a7b20f4512">&#9670;&nbsp;</a></span>copyData() <span class="overload">[1/5]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a2354431a853db080b55495a7b20f4512">&#9670;&nbsp;</a></span>copyData() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3375,7 +3371,7 @@ This routine will not work if copying between grids before/after regrids. </dd><
 </div>
 </div>
 <a id="a66c261aa8445bbe634131faf865dee15"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a66c261aa8445bbe634131faf865dee15">&#9670;&nbsp;</a></span>copyData() <span class="overload">[2/5]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a66c261aa8445bbe634131faf865dee15">&#9670;&nbsp;</a></span>copyData() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3452,79 +3448,8 @@ This routine will not work if copying between grids before/after regrids. </dd><
 
 </div>
 </div>
-<a id="a74ab0580b7ff28128fc5c1051badd862"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a74ab0580b7ff28128fc5c1051badd862">&#9670;&nbsp;</a></span>copyData() <span class="overload">[3/5]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void AmrMesh::copyData </td>
-          <td>(</td>
-          <td class="paramtype">LevelData&lt; T &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_dst</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const LevelData&lt; T &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_src</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_level</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_toRegion</em> = <code>CopyStrategy::Valid</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="CD__CopyStrategy_8H.html#a5bce9d77ba68a01d7c2644c2d8fd83b6">CopyStrategy</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_fromRegion</em> = <code>CopyStrategy::Valid</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Method for copying from a source container to a destination container. User supplies information about from/to regions. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_dst</td><td>Destination data </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_src</td><td>Source data </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fromRegion</td><td>Region we copy from </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_toRegion</td><td>Region we copy into </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section note"><dt>Note</dt><dd>If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS </dd>
-<dd>
-This routine will not work if copying between grids before/after regrids. </dd></dl>
-
-</div>
-</div>
 <a id="a6e2fbca514264f27a0106a49df839ae5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6e2fbca514264f27a0106a49df839ae5">&#9670;&nbsp;</a></span>copyData() <span class="overload">[4/5]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e2fbca514264f27a0106a49df839ae5">&#9670;&nbsp;</a></span>copyData() <span class="overload">[3/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3609,7 +3534,7 @@ This routine will not work if copying between grids before/after regrids. </dd><
 </div>
 </div>
 <a id="a7f0ceb890b1dde44995215e93f514180"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7f0ceb890b1dde44995215e93f514180">&#9670;&nbsp;</a></span>copyData() <span class="overload">[5/5]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f0ceb890b1dde44995215e93f514180">&#9670;&nbsp;</a></span>copyData() <span class="overload">[4/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">

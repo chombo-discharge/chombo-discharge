@@ -260,6 +260,9 @@ Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><
 <tr class="memitem:a74e914907956cbae6bda7726a4d05952"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a74e914907956cbae6bda7726a4d05952">writeLevelset</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const int a_level) const noexcept</td></tr>
 <tr class="memdesc:a74e914907956cbae6bda7726a4d05952"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write level sets.  <a href="classDriver.html#a74e914907956cbae6bda7726a4d05952">More...</a><br /></td></tr>
 <tr class="separator:a74e914907956cbae6bda7726a4d05952"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25dd1773104c4f0b5471daa0a30529f2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a25dd1773104c4f0b5471daa0a30529f2">writeLoads</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a25dd1773104c4f0b5471daa0a30529f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write computational loads to output.  <a href="classDriver.html#a25dd1773104c4f0b5471daa0a30529f2">More...</a><br /></td></tr>
+<tr class="separator:a25dd1773104c4f0b5471daa0a30529f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0539d9687fe6840da428beebc72ce384"><td class="memItemLeft" align="right" valign="top"><a id="a0539d9687fe6840da428beebc72ce384"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a0539d9687fe6840da428beebc72ce384">getFinestTagLevel</a> (const <a class="el" href="CD__EBAMRTags_8H.html#a23ff4c2bc0ca3002cc8c0cde60fe9181">EBAMRTags</a> &amp;a_cellTags) const</td></tr>
 <tr class="memdesc:a0539d9687fe6840da428beebc72ce384"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the finest tag level. <br /></td></tr>
@@ -484,6 +487,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a5ee5c20e2c31e856440dcf9273a9bc19">m_plotRanks</a></td></tr>
 <tr class="memdesc:a5ee5c20e2c31e856440dcf9273a9bc19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plot MPI ranks. <br /></td></tr>
 <tr class="separator:a5ee5c20e2c31e856440dcf9273a9bc19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab31bd4ca51fa5a929edaeadded0422f9"><td class="memItemLeft" align="right" valign="top"><a id="ab31bd4ca51fa5a929edaeadded0422f9"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#ab31bd4ca51fa5a929edaeadded0422f9">m_plotLoads</a></td></tr>
+<tr class="memdesc:ab31bd4ca51fa5a929edaeadded0422f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plot patch loads. <br /></td></tr>
+<tr class="separator:ab31bd4ca51fa5a929edaeadded0422f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a20c2f1a521cf7cf3e3df50555ace0d"><td class="memItemLeft" align="right" valign="top"><a id="a1a20c2f1a521cf7cf3e3df50555ace0d"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a1a20c2f1a521cf7cf3e3df50555ace0d">m_plotLevelset</a></td></tr>
 <tr class="memdesc:a1a20c2f1a521cf7cf3e3df50555ace0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plot level sets. <br /></td></tr>
@@ -1385,6 +1392,59 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
   </dd>
 </dl>
 <p>This adds data to a_output where the cell-centered data is the level-set value. </p><dl class="section note"><dt>Note</dt><dd>This writes directly to a_output. </dd></dl>
+
+</div>
+</div>
+<a id="a25dd1773104c4f0b5471daa0a30529f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a25dd1773104c4f0b5471daa0a30529f2">&#9670;&nbsp;</a></span>writeLoads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Driver::writeLoads </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>a_comp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write computational loads to output. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_comp</td><td>Starting component </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>AMR level</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This adds data to a_output where the data in each grid patch is the MPI rank. </p>
 
 </div>
 </div>
