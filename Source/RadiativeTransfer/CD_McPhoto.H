@@ -25,6 +25,7 @@
 #include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
 #include <CD_Photon.H>
+#include <CD_PointParticle.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -159,6 +160,23 @@ public:
                                const size_t               a_maxPhotonsPerCell) const noexcept;
 
   /*!
+    @brief Dirty-sampling method for photons. 
+    @details This is a "dirty" routine in the sense that it does not respect the EB and deposits using an NGP scheme
+    (such that we don't have to communicate between sampling buckets). This is not something that we recommend using,
+    unless you have a geometry-less domain and NGP deposition is acceptable. If those are good for you, feel free to 
+    use this routine. 
+    @param[inout] a_photons Computational photons. Will be populated and depleted inside the routine.
+    @param[inout] a_phi Mesh-based density. Will be incremented by the generated photons.
+    @param[in] a_numPhysicalPhotons Number of physical photons to add to a_photons
+    @param[in] a_maxPhotonsPerCell Maximum number of photons generated per cell.
+  */
+  virtual void
+  dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
+                     EBAMRCellData&                    a_phi,
+                     const EBAMRCellData&              a_numPhysicalPhotons,
+                     const size_t                      a_maxPhotonsPerCell) const noexcept;
+
+  /*!
     @brief Remap computational particles. This remaps m_photons
   */
   virtual void
@@ -184,8 +202,9 @@ public:
     @param[inout] a_photons    Computational photons to be deposited
     @param[in]    a_deposition Deposition method
   */
-  virtual void
-  depositPhotons(EBAMRCellData& a_phi, ParticleContainer<Photon>& a_particles, const DepositionType& a_deposition);
+  template <class P, const Real& (P::*particleScalarField)() const>
+  void
+  depositPhotons(EBAMRCellData& a_phi, ParticleContainer<P>& a_particles, const DepositionType& a_deposition);
 
   /*!
     @brief Sort container by cell
@@ -523,6 +542,11 @@ protected:
   bool m_plotDomainPhotons;
 
   /*!
+    @brief Dirty sampling or not
+  */
+  bool m_dirtySampling;
+
+  /*!
     @brief Number of computational photons generated per cell
   */
   size_t m_maxPhotonsGeneratedPerCell;
@@ -635,7 +659,7 @@ protected:
     @param[in] a_mean Mean value in exponential distribution. 
   */
   Real
-  randomExponential(const Real a_mean);
+  randomExponential(const Real a_mean) const noexcept;
 
   /*!
     @brief This computes the "conservative" deposition, multiplied by kappa
@@ -644,9 +668,10 @@ protected:
     @param[in] a_deposition Deposition method
     @param[in] a_coarseFineDeposition Coarse-fine deposition strategy.
   */
+  template <class P, const Real& (P::*particleScalarField)() const>
   void
   depositKappaConservative(EBAMRCellData&             a_phi,
-                           ParticleContainer<Photon>& a_particles,
+                           ParticleContainer<P>&      a_particles,
                            const DepositionType       a_deposition,
                            const CoarseFineDeposition a_coarseFineDeposition);
 
@@ -672,6 +697,15 @@ protected:
   */
   void
   parseTransparentBoundaries();
+
+  /*!
+    @brief Parse dirty sampling for photons.
+    @details This is a hidden option -- I really don't want it to be part of the regular user interface
+    because the code is not general (only works for instantaneous, non-EB cases where photons aren't even absorbed on the
+    domain boundaries)
+  */
+  void
+  parseDirtySampling();
 
   /*!
     @brief Parse the divergence computation, i.e. if we blend with non-conservative divergence or not
@@ -734,5 +768,7 @@ protected:
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_McPhotoImplem.H>
 
 #endif
