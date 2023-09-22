@@ -202,7 +202,7 @@ public:
     @param[inout] a_photons    Computational photons to be deposited
     @param[in]    a_deposition Deposition method
   */
-  template <class P, const Real& (P::*particleScalarField)() const>
+  template <class P = Photon, const Real& (P::*particleScalarField)() const = &P::weight>
   void
   depositPhotons(EBAMRCellData& a_phi, ParticleContainer<P>& a_particles, const DepositionType& a_deposition);
 
