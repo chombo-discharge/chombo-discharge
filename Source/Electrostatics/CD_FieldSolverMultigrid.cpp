@@ -259,6 +259,36 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
     this->setupSolver();
   }
 
+#if 1/// Code to be deleted at the end. 
+  if (m_numFilterSrc > 0) {
+    MFAMRCellData& rho = (MFAMRCellData&) (a_rho);
+    CH_START(t3);
+    for (int i = 0; i < m_numFilterSrc; i++) {
+      const Real alpha  = 0.5;
+      const int  stride = 1;
+
+      m_amr->conservativeAverage(rho, m_realm);
+      m_amr->interpGhost(rho, m_realm);            
+
+      // Filter both phases.
+      const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+      const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+
+      if (!ebisGas.isNull()) {
+        EBAMRCellData tmp = m_amr->alias(phase::gas, rho);
+
+        DataOps::filterSmooth(tmp, alpha, stride);
+      }
+      if (!ebisSol.isNull()) {
+        EBAMRCellData tmp = m_amr->alias(phase::solid, rho);
+
+        DataOps::filterSmooth(tmp, alpha, stride);
+      }
+    }
+    CH_STOP(t3);
+  }
+#endif  
+
   // Define temporaries; the incoming data might need to be scaled but we don't want to
   // alter it directly.
   CH_START(t1);
@@ -290,9 +320,10 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   m_amr->arithmeticAverage(kappaRhoByEps0, m_realm);
   m_amr->interpGhost(kappaRhoByEps0, m_realm);
 
+#if 0/// This the code to be enabled at the end. 
   if (m_numFilterSrc > 0) {
     CH_START(t3);
-    for (int i = 0; i < m_numFilterPhi; i++) {
+    for (int i = 0; i < m_numFilterSrc; i++) {
       const Real alpha  = 0.5;
       const int  stride = 1;
 
@@ -301,21 +332,22 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
       const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
       if (!ebisGas.isNull()) {
-        EBAMRCellData phi = m_amr->alias(phase::gas, kappaRhoByEps0);
+        EBAMRCellData tmp = m_amr->alias(phase::gas, kappaRhoByEps0);
 
-        DataOps::filterSmooth(phi, alpha, stride);
+        DataOps::filterSmooth(tmp, alpha, stride);
       }
       if (!ebisSol.isNull()) {
-        EBAMRCellData phi = m_amr->alias(phase::solid, kappaRhoByEps0);
+        EBAMRCellData tmp = m_amr->alias(phase::solid, kappaRhoByEps0);
 
-        DataOps::filterSmooth(phi, alpha, stride);
+        DataOps::filterSmooth(tmp, alpha, stride);
       }
 
       m_amr->conservativeAverage(kappaRhoByEps0, m_realm);
       m_amr->interpGhost(kappaRhoByEps0, m_realm);      
     }
     CH_STOP(t3);
-  }  
+  }
+#endif
 
   // Do the scaled surface charge
   DataOps::copy(sigmaByEps0, a_sigma);

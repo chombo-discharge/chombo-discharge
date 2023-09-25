@@ -596,7 +596,7 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
     auto doThisCell = [&](const IntVect& iv) -> bool {
       bool ret = ebisbox.isRegular(iv);
 
-      const Box grownBox = grow(Box(iv, iv), a_stride);
+      const Box grownBox = grow(Box(iv, iv), a_stride) & domain;
 
       for (BoxIterator bit(grownBox); bit.ok(); ++bit) {
         if (!(ebisbox.isRegular(bit()))) {
@@ -632,7 +632,7 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
       }
 
       auto regularKernel = [&](const IntVect& iv) -> void {
-        if (doThisCell(iv)) {
+			     if (true){//doThisCell(iv)) {
           data(iv, icomp) = A * phi(iv);
           data(iv, icomp) += B * (phi(iv + x) + phi(iv - x) + phi(iv + y) + phi(iv - y));
           data(iv, icomp) += C * (phi(iv + x + y) + phi(iv + x - y) + phi(iv - x + y) + phi(iv - x - y));
