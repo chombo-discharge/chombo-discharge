@@ -83,7 +83,8 @@ FieldSolverMultigrid::parseFiltering()
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("filter", m_numFilterSmooth);
+  pp.get("filter_potential", m_numFilterPhi);
+  pp.get("filter_rho", m_numFilterSrc);  
 }
 
 void
@@ -289,6 +290,33 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   m_amr->arithmeticAverage(kappaRhoByEps0, m_realm);
   m_amr->interpGhost(kappaRhoByEps0, m_realm);
 
+  if (m_numFilterSrc > 0) {
+    CH_START(t3);
+    for (int i = 0; i < m_numFilterPhi; i++) {
+      const Real alpha  = 0.5;
+      const int  stride = 1;
+
+      // Filter both phases.
+      const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+      const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+
+      if (!ebisGas.isNull()) {
+        EBAMRCellData phi = m_amr->alias(phase::gas, kappaRhoByEps0);
+
+        DataOps::filterSmooth(phi, alpha, stride);
+      }
+      if (!ebisSol.isNull()) {
+        EBAMRCellData phi = m_amr->alias(phase::solid, kappaRhoByEps0);
+
+        DataOps::filterSmooth(phi, alpha, stride);
+      }
+
+      m_amr->conservativeAverage(kappaRhoByEps0, m_realm);
+      m_amr->interpGhost(kappaRhoByEps0, m_realm);      
+    }
+    CH_STOP(t3);
+  }  
+
   // Do the scaled surface charge
   DataOps::copy(sigmaByEps0, a_sigma);
   DataOps::scale(sigmaByEps0, 1. / (Units::eps0));
@@ -338,12 +366,12 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 
   m_multigridSolver->revert(phi, rhs, finestLevel, 0);
 
-  if (m_numFilterSmooth > 0) {
+  if (m_numFilterPhi > 0) {
     CH_START(t3);
-    for (int i = 0; i < m_numFilterSmooth; i++) {
+    for (int i = 0; i < m_numFilterPhi; i++) {
 
       m_amr->conservativeAverage(a_phi, m_realm);
-      m_amr->interpGhostMG(a_phi, m_realm);
+      m_amr->interpGhostPwl(a_phi, m_realm);
 
       const Real alpha  = 0.5;
       const int  stride = 1;
@@ -368,7 +396,7 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 
   // Coarsen/update ghosts before computing the field.
   m_amr->conservativeAverage(a_phi, m_realm);
-  m_amr->interpGhostMG(a_phi, m_realm);
+  m_amr->interpGhostPwl(a_phi, m_realm);
 
   this->computeElectricField(m_electricField, a_phi);
 

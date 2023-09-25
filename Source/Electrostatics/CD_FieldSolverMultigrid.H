@@ -255,9 +255,14 @@ protected:
   bool m_isSolverSetup;
 
   /*!
-    @brief Filter smoothing.
+    @brief Filter smoothing for source term.
   */
-  int m_numFilterSmooth;
+  int m_numFilterSrc;  
+
+  /*!
+    @brief Filter smoothing for potential
+  */
+  int m_numFilterPhi;
 
   /*!
     @brief Verbosity for geometric multigrid
