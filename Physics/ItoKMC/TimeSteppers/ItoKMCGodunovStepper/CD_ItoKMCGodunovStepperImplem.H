@@ -21,6 +21,7 @@
 #include <CD_ParallelOps.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
+#include <CD_Photon.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::ItoKMC;
@@ -225,7 +226,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   // Done only so we can plot the absorbed photons (advanceReactionNetwork absorbs them)
   m_timer.startEvent("Deposit photons");
   for (auto solverIt = (this->m_rte)->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->depositPhotons(solverIt()->getPhi(), solverIt()->getBulkPhotons(), DepositionType::NGP);
+    RefCountedPtr<McPhoto> solver = solverIt();
+
+    EBAMRCellData&             phi     = solver->getPhi();
+    ParticleContainer<Photon>& photons = solver->getBulkPhotons();
+
+    solver->depositPhotons<Photon, &Photon::weight>(phi, photons, DepositionType::NGP);
   }
   m_timer.stopEvent("Deposit photons");
 
