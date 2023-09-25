@@ -1195,12 +1195,12 @@ ParticleContainer<P>::transferMaskParticles(const int a_level, const LevelData<B
         MayDay::Warning("ParticleContainer<P>::copyMaskParticles -- logic bust. Particle has fallen off grid");
       }
       else {
-	if (mask(iv)) {
-	  maskParticles.transfer(lit);
-	}
-	else {
-	  ++lit;
-	}
+        if (mask(iv)) {
+          maskParticles.transfer(lit);
+        }
+        else {
+          ++lit;
+        }
       }
     }
   }
