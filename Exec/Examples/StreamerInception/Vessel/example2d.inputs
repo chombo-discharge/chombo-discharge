@@ -84,7 +84,8 @@ FieldSolverMultigrid.bc.y.hi           = neumann   0.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
-FieldSolverMultigrid.filter            = 0                 # Number of filterings after Poisson solve
+FieldSolverMultigrid.filter_rho        = 0                 # Number of filterings of space charge before Poisson solve
+FieldSolverMultigrid.filter_potential  = 0                 # Number of filterings of potential after Poisson solve
 
 FieldSolverMultigrid.gmg_verbosity     = -1                # GMG verbosity
 FieldSolverMultigrid.gmg_pre_smooth    = 12                # Number of relaxations in downsweep

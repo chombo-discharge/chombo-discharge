@@ -204,9 +204,12 @@ public:
     @param[inout] a_data   Data to be filtered.
     @param[in]    a_alpha  Filter factor
     @param[in]    a_stride Cell stride s
+    @param[in]    a_zeroEB Set value in covered cells to zero or not
+    @note This routine will fill ghost cells outside the domain boundary, but ignore the corner ghost cells at the domain corners. This routine may
+    be dangerous to use with EBs as the data inside the EB is either kept as-is or replaced by zero.
   */
   static void
-  filterSmooth(EBAMRCellData& a_data, const Real a_alpha, const int a_stride) noexcept;
+  filterSmooth(EBAMRCellData& a_data, const Real a_alpha, const int a_stride, const bool a_zeroEB) noexcept;
 
   /*!
     @brief Apply a convolved filter phi = alpha * phi_i + 0.5*(1-alpha) * [phi_(i+s) + phi_(i-s)] in each direction. 
@@ -214,9 +217,12 @@ public:
     @param[inout] a_data   Data to be filtered.
     @param[in]    a_alpha  Filter factor
     @param[in]    a_stride Cell stride s
+    @param[in]    a_zeroEB Set value in covered cells to zero or not
+    @note This routine will fill ghost cells outside the domain boundary, but ignore the corner ghost cells at the domain corners. This routine may
+    be dangerous to use with EBs as the data inside the EB is either kept as-is or replaced by zero.
   */
   static void
-  filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const int a_stride) noexcept;
+  filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const int a_stride, const bool a_zeroEB) noexcept;
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
