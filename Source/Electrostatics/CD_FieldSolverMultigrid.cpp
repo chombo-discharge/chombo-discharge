@@ -243,13 +243,13 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
     this->setupSolver();
   }
 
-#if 1/// Code to be deleted at the end.
-  int m_numFilterSrc = 0;
+#if 1 /// Code to be deleted at the end.
+  int       m_numFilterSrc = 0;
   ParmParse pp(m_className.c_str());
   pp.get("filter_rho", m_numFilterSrc);
 
-  if(m_numFilterSrc > 0) {
-    MFAMRCellData& rho = (MFAMRCellData&) (a_rho);
+  if (m_numFilterSrc > 0) {
+    MFAMRCellData& rho = (MFAMRCellData&)(a_rho);
     CH_START(t3);
 
     for (int i = 0; i < m_numFilterSrc; i++) {
@@ -257,7 +257,7 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
       const int  stride = 1;
 
       m_amr->conservativeAverage(rho, m_realm);
-      m_amr->interpGhost(rho, m_realm);            
+      m_amr->interpGhost(rho, m_realm);
 
       // Filter both phases.
       const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
@@ -281,7 +281,7 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
       const int  stride = 1;
 
       m_amr->conservativeAverage(rho, m_realm);
-      m_amr->interpGhost(rho, m_realm);            
+      m_amr->interpGhost(rho, m_realm);
 
       // Filter both phases.
       const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
@@ -300,10 +300,10 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
     }
 
     m_amr->conservativeAverage(rho, m_realm);
-    m_amr->interpGhost(rho, m_realm);                
+    m_amr->interpGhost(rho, m_realm);
     CH_STOP(t3);
   }
-#endif  
+#endif
 
   // Define temporaries; the incoming data might need to be scaled but we don't want to
   // alter it directly.

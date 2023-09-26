@@ -699,8 +699,8 @@ CdrPlasmaImExSdcStepper::computeFD0()
         solver->computeDivD(FD_0, phi_0, false, false, false); // Domain fluxes always come in through advection terms.
 
         // Shouldn't be necesary
-        m_amr->conservativeAverage(FD_0, m_fluidRealm, m_cdr->getPhase());
-        m_amr->interpGhost(FD_0, m_fluidRealm, m_cdr->getPhase());
+        m_amr->conservativeAverage(FD_0, m_realm, m_cdr->getPhase());
+        m_amr->interpGhost(FD_0, m_realm, m_cdr->getPhase());
       }
       else {
         DataOps::setValue(FD_0, 0.0);
@@ -873,8 +873,8 @@ CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const int a
       DataOps::incr(phi_m1, src, m_dtm[a_m]); // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
 
       // This shouldn't be necessary
-      m_amr->conservativeAverage(phi_m1, m_fluidRealm, m_cdr->getPhase());
-      m_amr->interpGhost(phi_m1, m_fluidRealm, m_cdr->getPhase());
+      m_amr->conservativeAverage(phi_m1, m_realm, m_cdr->getPhase());
+      m_amr->interpGhost(phi_m1, m_realm, m_cdr->getPhase());
 
       if (a_lagged_terms) { // Back up the old slope first, we will need it for the lagged term
         DataOps::copy(scratch, FAR_m);
@@ -886,8 +886,8 @@ CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const int a
       DataOps::scale(FAR_m, 1. / m_dtm[a_m]); // :
 
       // Shouldn't be necessary
-      m_amr->conservativeAverage(FAR_m, m_fluidRealm, m_cdr->getPhase());
-      m_amr->interpGhost(FAR_m, m_fluidRealm, m_cdr->getPhase());
+      m_amr->conservativeAverage(FAR_m, m_realm, m_cdr->getPhase());
+      m_amr->interpGhost(FAR_m, m_realm, m_cdr->getPhase());
     }
 
     // Now add in the lagged advection-reaction and quadrature terms. This is a bit weird, but we did overwrite
@@ -968,8 +968,8 @@ CdrPlasmaImExSdcStepper::integrateAdvection(const Real a_dt, const int a_m, cons
       DataOps::copy(phi_m1, phi_m);
       DataOps::incr(phi_m1, scratch, -m_dtm[a_m]);
       DataOps::floor(phi_m1, 0.0);
-      m_amr->conservativeAverage(phi_m1, m_fluidRealm, m_cdr->getPhase());
-      m_amr->interpGhost(phi_m1, m_fluidRealm, m_cdr->getPhase());
+      m_amr->conservativeAverage(phi_m1, m_realm, m_cdr->getPhase());
+      m_amr->interpGhost(phi_m1, m_realm, m_cdr->getPhase());
     }
     else {
       DataOps::copy(phi_m1, phi_m);
@@ -1020,8 +1020,8 @@ CdrPlasmaImExSdcStepper::integrateDiffusion(const Real a_dt, const int a_m, cons
         const EBAMRCellData& FD_m1k = storage->getFD()[a_m + 1]; // FD_(m+1)^k. Lagged term.
         DataOps::incr(init_soln, FD_m1k, -m_dtm[a_m]);
       }
-      m_amr->conservativeAverage(init_soln, m_fluidRealm, m_cdr->getPhase());
-      m_amr->interpGhost(init_soln, m_fluidRealm, m_cdr->getPhase());
+      m_amr->conservativeAverage(init_soln, m_realm, m_cdr->getPhase());
+      m_amr->interpGhost(init_soln, m_realm, m_cdr->getPhase());
       DataOps::copy(phi_m1, phi_m);
 
       // Solve
@@ -1031,8 +1031,8 @@ CdrPlasmaImExSdcStepper::integrateDiffusion(const Real a_dt, const int a_m, cons
       else {
         solver->advanceEuler(phi_m1, init_soln, source, m_dtm[a_m]); // No source.
       }
-      m_amr->conservativeAverage(phi_m1, m_fluidRealm, m_cdr->getPhase());
-      m_amr->interpGhost(phi_m1, m_fluidRealm, m_cdr->getPhase());
+      m_amr->conservativeAverage(phi_m1, m_realm, m_cdr->getPhase());
+      m_amr->interpGhost(phi_m1, m_realm, m_cdr->getPhase());
       DataOps::floor(phi_m1, 0.0);
 
       // Update the operator slope
@@ -1042,8 +1042,8 @@ CdrPlasmaImExSdcStepper::integrateDiffusion(const Real a_dt, const int a_m, cons
       DataOps::incr(FD_m1k, init_soln, -1.0);
       DataOps::scale(FD_m1k, 1. / m_dtm[a_m]);
 
-      m_amr->conservativeAverage(FD_m1k, m_fluidRealm, m_cdr->getPhase());
-      m_amr->interpGhost(FD_m1k, m_fluidRealm, m_cdr->getPhase());
+      m_amr->conservativeAverage(FD_m1k, m_realm, m_cdr->getPhase());
+      m_amr->interpGhost(FD_m1k, m_realm, m_cdr->getPhase());
     }
     else {
       EBAMRCellData& FD_m1k = storage->getFD()[a_m + 1];
@@ -1108,8 +1108,8 @@ CdrPlasmaImExSdcStepper::reconcileIntegrands()
       }
 
       // Shouldn't be necessary
-      m_amr->conservativeAverage(F_m, m_fluidRealm, m_cdr->getPhase());
-      m_amr->interpGhost(F_m, m_fluidRealm, m_cdr->getPhase());
+      m_amr->conservativeAverage(F_m, m_realm, m_cdr->getPhase());
+      m_amr->interpGhost(F_m, m_realm, m_cdr->getPhase());
     }
   }
 
@@ -1412,7 +1412,7 @@ CdrPlasmaImExSdcStepper::allocateCdrStorage()
 
   for (CdrIterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it) {
     const int idx     = solver_it.index();
-    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(new CdrStorage(m_amr, m_fluidRealm, m_cdr->getPhase(), ncomp));
+    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(new CdrStorage(m_amr, m_realm, m_cdr->getPhase(), ncomp));
     m_cdrScratch[idx]->allocateStorage(m_p);
   }
 }
@@ -1421,7 +1421,7 @@ void
 CdrPlasmaImExSdcStepper::allocateFieldStorage()
 {
   const int ncomp = 1;
-  m_fieldScratch  = RefCountedPtr<FieldStorage>(new FieldStorage(m_amr, m_fluidRealm, m_cdr->getPhase(), ncomp));
+  m_fieldScratch  = RefCountedPtr<FieldStorage>(new FieldStorage(m_amr, m_realm, m_cdr->getPhase(), ncomp));
   m_fieldScratch->allocateStorage(m_p);
 }
 
@@ -1434,7 +1434,7 @@ CdrPlasmaImExSdcStepper::allocateRtStorage()
 
   for (RtIterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it) {
     const int idx     = solver_it.index();
-    m_rteScratch[idx] = RefCountedPtr<RtStorage>(new RtStorage(m_amr, m_fluidRealm, m_rte->getPhase(), ncomp));
+    m_rteScratch[idx] = RefCountedPtr<RtStorage>(new RtStorage(m_amr, m_realm, m_rte->getPhase(), ncomp));
     m_rteScratch[idx]->allocateStorage(m_p);
   }
 }
@@ -1443,7 +1443,7 @@ void
 CdrPlasmaImExSdcStepper::allocateSigmaStorage()
 {
   const int ncomp = 1;
-  m_sigmaScratch  = RefCountedPtr<SigmaStorage>(new SigmaStorage(m_amr, m_fluidRealm, m_cdr->getPhase(), ncomp));
+  m_sigmaScratch  = RefCountedPtr<SigmaStorage>(new SigmaStorage(m_amr, m_realm, m_cdr->getPhase(), ncomp));
   m_sigmaScratch->allocateStorage(m_p);
 }
 
@@ -1522,9 +1522,9 @@ CdrPlasmaImExSdcStepper::computeCdrGradients(const Vector<EBAMRCellData*>& a_phi
     const int                  idx     = solver_it.index();
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaImExSdcStepper::getCdrStorage(solver_it);
     EBAMRCellData&             grad    = storage->getGradient();
-    m_amr->computeGradient(grad, *a_phis[idx], m_fluidRealm, m_cdr->getPhase());
-    //    m_amr->conservativeAverage(grad, m_fluidRealm, m_cdr->getPhase());
-    m_amr->interpGhost(grad, m_fluidRealm, m_cdr->getPhase());
+    m_amr->computeGradient(grad, *a_phis[idx], m_realm, m_cdr->getPhase());
+    //    m_amr->conservativeAverage(grad, m_realm, m_cdr->getPhase());
+    m_amr->interpGhost(grad, m_realm, m_cdr->getPhase());
   }
 }
 
@@ -1587,7 +1587,7 @@ CdrPlasmaImExSdcStepper::computeCdrEbStates()
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux.
   EBAMRIVData eb_gradient;
-  m_amr->allocate(eb_gradient, m_fluidRealm, m_cdr->getPhase(), SpaceDim);
+  m_amr->allocate(eb_gradient, m_realm, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++) {
     CdrPlasmaImExSdcStepper::extrapolateToEb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
     CdrPlasmaImExSdcStepper::projectFlux(*eb_gradients[i], eb_gradient);
@@ -1624,7 +1624,7 @@ CdrPlasmaImExSdcStepper::computeCdrEbStates(const Vector<EBAMRCellData*>& a_phis
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux.
   EBAMRIVData eb_gradient;
-  m_amr->allocate(eb_gradient, m_fluidRealm, m_cdr->getPhase(), SpaceDim);
+  m_amr->allocate(eb_gradient, m_realm, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < a_phis.size(); i++) {
     CdrPlasmaImExSdcStepper::extrapolateToEb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
     CdrPlasmaImExSdcStepper::projectFlux(*eb_gradients[i], eb_gradient);
@@ -1659,7 +1659,7 @@ CdrPlasmaImExSdcStepper::computeCdrDomainStates()
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux.
   EBAMRIFData grad;
-  m_amr->allocate(grad, m_fluidRealm, m_cdr->getPhase(), SpaceDim);
+  m_amr->allocate(grad, m_realm, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++) {
     CdrPlasmaImExSdcStepper::extrapolateToDomainFaces(grad, m_cdr->getPhase(), *cdr_gradients[i]);
     CdrPlasmaImExSdcStepper::projectDomain(*domain_gradients[i], grad);
@@ -1692,7 +1692,7 @@ CdrPlasmaImExSdcStepper::computeCdrDomainStates(const Vector<EBAMRCellData*>& a_
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux.
   EBAMRIFData grad;
-  m_amr->allocate(grad, m_fluidRealm, m_cdr->getPhase(), SpaceDim);
+  m_amr->allocate(grad, m_realm, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < a_phis.size(); i++) {
     this->extrapolateToDomainFaces(grad, m_cdr->getPhase(), *cdr_gradients[i]);
     this->projectDomain(*domain_gradients[i], grad);
