@@ -582,6 +582,24 @@ CdrPlasmaGodunovStepper::solveSemiImplicitPoisson()
   m_amr->arithmeticAverage(rho, m_realm);
   m_amr->interpGhostPwl(rho, m_realm);
 
+#if 1 /// Code to be deleted at the end.
+  int       m_numFilterSrc = 0;
+  ParmParse pp(m_className.c_str());
+  pp.get("filter_rho", m_numFilterSrc);
+
+  if (m_numFilterSrc > 0) {
+    for (int i = 0; i < m_numFilterSrc; i++) {
+      const Real alpha  = 0.5;
+      const int  stride = 1;
+
+      DataOps::filterSmooth(rhoPhase, alpha, stride, true);
+
+      m_amr->arithmeticAverage(rho, m_realm);
+      m_amr->interpGhostPwl(rho, m_realm);
+    }
+  }
+#endif
+
   m_amr->interpToCentroids(rhoPhase, m_realm, m_phase);
 
   const bool converged = m_fieldSolver->solve(m_fieldSolver->getPotential(), rho, m_sigma->getPhi(), false);

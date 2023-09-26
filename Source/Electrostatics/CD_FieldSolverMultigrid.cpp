@@ -220,7 +220,6 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   CH_TIMERS("FieldSolverMultigrid::solve");
   CH_TIMER("FieldSolverMultigrid::solve::alloc_temps", t1);
   CH_TIMER("FieldSolverMultigrid::solve::set_temps", t2);
-  CH_TIMER("FieldSolverMultigrid::solve::smooth_phi", t3);
   if (m_verbosity > 5) {
     pout() << "FieldSolverMultigrid::solve(MFAMRCellData, MFAMRCellData, EBAMRIVData, bool)" << endl;
   }
@@ -242,68 +241,6 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   if (!m_isSolverSetup) {
     this->setupSolver();
   }
-
-#if 1 /// Code to be deleted at the end.
-  int       m_numFilterSrc = 0;
-  ParmParse pp(m_className.c_str());
-  pp.get("filter_rho", m_numFilterSrc);
-
-  if (m_numFilterSrc > 0) {
-    MFAMRCellData& rho = (MFAMRCellData&)(a_rho);
-    CH_START(t3);
-
-    for (int i = 0; i < m_numFilterSrc; i++) {
-      const Real alpha  = 0.5;
-      const int  stride = 1;
-
-      m_amr->conservativeAverage(rho, m_realm);
-      m_amr->interpGhost(rho, m_realm);
-
-      // Filter both phases.
-      const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
-      const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
-
-      if (!ebisGas.isNull()) {
-        EBAMRCellData tmp = m_amr->alias(phase::gas, rho);
-
-        DataOps::filterSmooth(tmp, alpha, stride, true);
-      }
-      if (!ebisSol.isNull()) {
-        EBAMRCellData tmp = m_amr->alias(phase::solid, rho);
-
-        DataOps::filterSmooth(tmp, alpha, stride, true);
-      }
-    }
-
-    // Do a compensation step
-    {
-      const Real alpha  = 0.5;
-      const int  stride = 1;
-
-      m_amr->conservativeAverage(rho, m_realm);
-      m_amr->interpGhost(rho, m_realm);
-
-      // Filter both phases.
-      const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
-      const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
-
-      if (!ebisGas.isNull()) {
-        EBAMRCellData tmp = m_amr->alias(phase::gas, rho);
-
-        DataOps::filterSmooth(tmp, alpha, stride, true);
-      }
-      if (!ebisSol.isNull()) {
-        EBAMRCellData tmp = m_amr->alias(phase::solid, rho);
-
-        DataOps::filterSmooth(tmp, alpha, stride, true);
-      }
-    }
-
-    m_amr->conservativeAverage(rho, m_realm);
-    m_amr->interpGhost(rho, m_realm);
-    CH_STOP(t3);
-  }
-#endif
 
   // Define temporaries; the incoming data might need to be scaled but we don't want to
   // alter it directly.
