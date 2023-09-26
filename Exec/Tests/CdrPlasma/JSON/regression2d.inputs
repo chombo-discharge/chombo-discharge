@@ -78,7 +78,8 @@ FieldSolverMultigrid.bc.y.hi           = neumann   0.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
-FieldSolverMultigrid.filter            = 0                 # Number of filterings after Poisson solve
+FieldSolverMultigrid.filter_rho        = 0                 # Number of filterings of space charge before Poisson solve
+FieldSolverMultigrid.filter_potential  = 0                 # Number of filterings of potential after Poisson solve
 
 FieldSolverMultigrid.gmg_verbosity     = -1                # GMG verbosity
 FieldSolverMultigrid.gmg_pre_smooth    = 12                # Number of relaxations in downsweep
@@ -228,6 +229,8 @@ CdrPlasmaGodunovStepper.min_dt           = 0.            # Minimum permitted tim
 CdrPlasmaGodunovStepper.max_dt           = 1.E-11        # Maximum permitted time step
 CdrPlasmaGodunovStepper.cfl              = 0.8           # CFL number
 CdrPlasmaGodunovStepper.use_regrid_slopes = true          # Use slopes when regridding (or not)
+CdrPlasmaGodunovStepper.filter_rho        = 0             # Number of filterings of space charge
+CdrPlasmaGodunovStepper.filter_compensate = false         # Use compensation step after filter or not
 CdrPlasmaGodunovStepper.field_coupling   = semi_implicit # Field coupling. 'explicit' or 'semi_implicit'
 CdrPlasmaGodunovStepper.advection        = muscl         # Advection algorithm. 'euler', 'rk2', or 'muscl'
 CdrPlasmaGodunovStepper.diffusion        = explicit      # Diffusion. 'explicit', 'implicit', or 'auto'. 
@@ -241,10 +244,6 @@ CdrPlasmaGodunovStepper.source_comp      = interp2       # Interpolated 'interp'
 CdrPlasmaGodunovStepper.floor_cdr        = true          # Floor CDR solvers to avoid negative densities
 CdrPlasmaGodunovStepper.debug            = false         # Turn on debugging messages. Also monitors mass if it was injected into the system. 
 CdrPlasmaGodunovStepper.profile          = false         # Turn on/off performance profiling.
-CdrPlasmaGodunovStepper.dual_grid         = false         # Turn on/off separate load balancing for radiative transfer
-CdrPlasmaGodunovStepper.load_balance      = false         # Turn on/off radiative transfer load balancing
-CdrPlasmaGodunovStepper.load_per_cell     = 1.0           # Constant load-per-cell when running dual grid
-CdrPlasmaGodunovStepper.box_sorting       = morton        # Box sorting with dual grid. "none", "std", "shuffle", or "morton"
 
 
 # ====================================================================================================
