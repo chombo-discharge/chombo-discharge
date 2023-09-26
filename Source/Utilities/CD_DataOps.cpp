@@ -551,17 +551,20 @@ DataOps::dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellF
 }
 
 void
-DataOps::filterSmooth(EBAMRCellData& a_data, const Real a_alpha, const int a_stride) noexcept
+DataOps::filterSmooth(EBAMRCellData& a_data, const Real a_alpha, const int a_stride, const bool a_zeroEB) noexcept
 {
   CH_TIME("DataOps::filterSmooth(EBAMRCellData)");
 
   for (int lvl = 0; lvl < a_data.size(); lvl++) {
-    DataOps::filterSmooth(*a_data[lvl], a_alpha, a_stride);
+    DataOps::filterSmooth(*a_data[lvl], a_alpha, a_stride, a_zeroEB);
   }
 }
 
 void
-DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const int a_stride) noexcept
+DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
+                      const Real            a_alpha,
+                      const int             a_stride,
+                      const bool            a_zeroEB) noexcept
 {
   CH_TIME("DataOps::filterSmooth(LevelData<EBCellFAB>)");
 
@@ -582,29 +585,41 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
   const DisjointBoxLayout& dbl = a_data.disjointBoxLayout();
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    FArrayBox& data = a_data[dit()].getFArrayBox();
+    EBCellFAB& data    = a_data[dit()];
+    FArrayBox& dataReg = data.getFArrayBox();
 
     const Box            cellBox = dbl[dit()];
+    const Box            dataBox = dataReg.box();
     const EBISBox&       ebisbox = a_data[dit()].getEBISBox();
+    const EBGraph&       ebgraph = ebisbox.getEBGraph();
     const ProblemDomain& domain  = ebisbox.getDomain();
 
     // Make a copy of the input data.
-    FArrayBox phi;
-    phi.define(data.box(), 1);
+    EBCellFAB clone;
 
-    // Kernel for checking if we should indeed smooth the cell.
+    clone.define(ebisbox, dataBox, 1);
+    FArrayBox& cloneReg = clone.getFArrayBox();
+
+    // Get all cells within range a_stride of an irregular cell.
+    IntVectSet ivs = ebisbox.getIrregIVS(cellBox);
+    ivs.grow(a_stride);
+    ivs &= cellBox;
+
+    VoFIterator vofit(ivs, ebgraph);
+
+    // Kernel for checking if we should smooth the cell using a regular kernel.
     auto doThisCell = [&](const IntVect& iv) -> bool {
       bool ret = ebisbox.isRegular(iv);
 
-      const Box grownBox = grow(Box(iv, iv), a_stride) & domain;
+      const Box stencilBox = grow(Box(iv, iv), a_stride) & domain;
 
-      for (BoxIterator bit(grownBox); bit.ok(); ++bit) {
+      for (BoxIterator bit(stencilBox); bit.ok(); ++bit) {
         if (!(ebisbox.isRegular(bit()))) {
           ret = false;
         }
       }
-
-      return ret;
+      return true;
+      //      return ret;
     };
 
 #if CH_SPACEDIM == 2
@@ -617,32 +632,40 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
 
     for (int icomp = 0; icomp < nComp; icomp++) {
 
-      // Copy current compnent into transient storage and then fill ghost cells outside of the domain.
-      phi.copy(data, icomp, 0);
+      // Do a copy.
+      clone.copy(dataBox, Interval(0, 0), dataBox, data, Interval(icomp, icomp));
+
+      // Fill ghost cells.
       for (int dir = 0; dir < SpaceDim; dir++) {
         for (SideIterator sit; sit.ok(); ++sit) {
           const Box insideBox = adjCellBox(domain.domainBox(), dir, sit(), -1) & cellBox;
 
           for (BoxIterator bit(insideBox); bit.ok(); ++bit) {
             for (int s = 1; s <= a_stride; s++) {
-              phi(bit() + sign(sit()) * BASISV(dir), icomp) = data(bit(), icomp);
+              cloneReg(bit() + s * sign(sit()) * BASISV(dir)) = dataReg(bit(), icomp);
             }
           }
         }
       }
 
+      if (a_zeroEB) {
+        clone.setCoveredCellVal(0.0, 0, true);
+      }
+
       auto regularKernel = [&](const IntVect& iv) -> void {
-			     if (true){//doThisCell(iv)) {
-          data(iv, icomp) = A * phi(iv);
-          data(iv, icomp) += B * (phi(iv + x) + phi(iv - x) + phi(iv + y) + phi(iv - y));
-          data(iv, icomp) += C * (phi(iv + x + y) + phi(iv + x - y) + phi(iv - x + y) + phi(iv - x - y));
+        if (doThisCell(iv)) {
+          dataReg(iv, icomp) = A * cloneReg(iv);
+          dataReg(iv, icomp) += B * (cloneReg(iv + x) + cloneReg(iv - x) + cloneReg(iv + y) + cloneReg(iv - y));
+          dataReg(iv, icomp) += C * (cloneReg(iv + x + y) + cloneReg(iv + x - y) + cloneReg(iv - x + y) +
+                                     cloneReg(iv - x - y));
         }
         else {
-          data(iv, icomp) = phi(iv);
+          dataReg(iv, icomp) = cloneReg(iv);
         }
       };
 
       BoxLoops::loop(cellBox, regularKernel);
+      //      BoxLoops::loop(vofit, irregularKernel);
     }
 #elif CH_SPACEDIM == 3
 
@@ -656,24 +679,24 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
     const IntVect z = a_stride * BASISV(2);
 
     for (int icomp = 0; icomp < nComp; icomp++) {
-
-      // Copy current compnent into transient storage.
-      phi.copy(data, icomp, 0);
-
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (doThisCell(iv)) {
-          data(iv, icomp) = A * phi(iv);
-          data(iv, icomp) += B * (phi(iv + x) + phi(iv - x) + phi(iv + y) + phi(iv - y) + phi(iv + z) + phi(iv - z));
-          data(iv, icomp) += C * (phi(iv + x + y) + phi(iv + x - y) + phi(iv - x + y) + phi(iv - x - y));
-          data(iv, icomp) += C * (phi(iv + x + z) + phi(iv + x - z) + phi(iv - x + z) + phi(iv - x - z));
-          data(iv, icomp) += C * (phi(iv + y + z) + phi(iv + y - z) + phi(iv - y + z) + phi(iv - y - z));
-          data(iv, icomp) += D *
-                             (phi(iv + x + y + z) + phi(iv + x + y - z) + phi(iv + x - y + z) + phi(iv + x - y - z));
-          data(iv, icomp) += D *
-                             (phi(iv - x + y + z) + phi(iv - x + y - z) + phi(iv - x - y + z) + phi(iv - x - y - z));
+          dataReg(iv, icomp) = A * cloneReg(iv);
+          dataReg(iv, icomp) += B * (cloneReg(iv + x) + cloneReg(iv - x) + cloneReg(iv + y) + cloneReg(iv - y) +
+                                     cloneReg(iv + z) + cloneReg(iv - z));
+          dataReg(iv, icomp) += C * (cloneReg(iv + x + y) + cloneReg(iv + x - y) + cloneReg(iv - x + y) +
+                                     cloneReg(iv - x - y));
+          dataReg(iv, icomp) += C * (cloneReg(iv + x + z) + cloneReg(iv + x - z) + cloneReg(iv - x + z) +
+                                     cloneReg(iv - x - z));
+          dataReg(iv, icomp) += C * (cloneReg(iv + y + z) + cloneReg(iv + y - z) + cloneReg(iv - y + z) +
+                                     cloneReg(iv - y - z));
+          dataReg(iv, icomp) += D * (cloneReg(iv + x + y + z) + cloneReg(iv + x + y - z) + cloneReg(iv + x - y + z) +
+                                     cloneReg(iv + x - y - z));
+          dataReg(iv, icomp) += D * (cloneReg(iv - x + y + z) + cloneReg(iv - x + y - z) + cloneReg(iv - x - y + z) +
+                                     cloneReg(iv - x - y - z));
         }
         else {
-          data(iv, icomp) = phi(iv);
+          dataReg(iv, icomp) = cloneReg(iv);
         }
       };
 
