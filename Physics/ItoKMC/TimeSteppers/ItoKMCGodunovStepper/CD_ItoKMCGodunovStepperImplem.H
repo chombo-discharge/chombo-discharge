@@ -1020,7 +1020,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
     const Real alpha  = 0.5;
     const int  stride = 1;
 
-    DataOps::filterSmooth(a_conductivityCell, alpha, stride);
+    DataOps::filterSmooth(a_conductivityCell, alpha, stride, true);
 
     (this->m_amr)->arithmeticAverage(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
     (this->m_amr)->interpGhostPwl(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
