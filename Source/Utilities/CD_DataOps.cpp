@@ -600,28 +600,6 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
     clone.define(ebisbox, dataBox, 1);
     FArrayBox& cloneReg = clone.getFArrayBox();
 
-    // Get all cells within range a_stride of an irregular cell.
-    IntVectSet ivs = ebisbox.getIrregIVS(cellBox);
-    ivs.grow(a_stride);
-    ivs &= cellBox;
-
-    VoFIterator vofit(ivs, ebgraph);
-
-    // Kernel for checking if we should smooth the cell using a regular kernel.
-    auto doThisCell = [&](const IntVect& iv) -> bool {
-      bool ret = ebisbox.isRegular(iv);
-
-      const Box stencilBox = grow(Box(iv, iv), a_stride) & domain;
-
-      for (BoxIterator bit(stencilBox); bit.ok(); ++bit) {
-        if (!(ebisbox.isRegular(bit()))) {
-          ret = false;
-        }
-      }
-      return true;
-      //      return ret;
-    };
-
 #if CH_SPACEDIM == 2
     const Real A = std::pow(a_alpha, 2.0) * std::pow((1.0 - a_alpha) / 2.0, 0.0);
     const Real B = std::pow(a_alpha, 1.0) * std::pow((1.0 - a_alpha) / 2.0, 1.0);
@@ -653,19 +631,13 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
       }
 
       auto regularKernel = [&](const IntVect& iv) -> void {
-        if (doThisCell(iv)) {
-          dataReg(iv, icomp) = A * cloneReg(iv);
-          dataReg(iv, icomp) += B * (cloneReg(iv + x) + cloneReg(iv - x) + cloneReg(iv + y) + cloneReg(iv - y));
-          dataReg(iv, icomp) += C * (cloneReg(iv + x + y) + cloneReg(iv + x - y) + cloneReg(iv - x + y) +
-                                     cloneReg(iv - x - y));
-        }
-        else {
-          dataReg(iv, icomp) = cloneReg(iv);
-        }
+        dataReg(iv, icomp) = A * cloneReg(iv);
+        dataReg(iv, icomp) += B * (cloneReg(iv + x) + cloneReg(iv - x) + cloneReg(iv + y) + cloneReg(iv - y));
+        dataReg(iv, icomp) += C * (cloneReg(iv + x + y) + cloneReg(iv + x - y) + cloneReg(iv - x + y) +
+                                   cloneReg(iv - x - y));
       };
 
       BoxLoops::loop(cellBox, regularKernel);
-      //      BoxLoops::loop(vofit, irregularKernel);
     }
 #elif CH_SPACEDIM == 3
 
@@ -680,24 +652,19 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
 
     for (int icomp = 0; icomp < nComp; icomp++) {
       auto regularKernel = [&](const IntVect& iv) -> void {
-        if (doThisCell(iv)) {
-          dataReg(iv, icomp) = A * cloneReg(iv);
-          dataReg(iv, icomp) += B * (cloneReg(iv + x) + cloneReg(iv - x) + cloneReg(iv + y) + cloneReg(iv - y) +
-                                     cloneReg(iv + z) + cloneReg(iv - z));
-          dataReg(iv, icomp) += C * (cloneReg(iv + x + y) + cloneReg(iv + x - y) + cloneReg(iv - x + y) +
-                                     cloneReg(iv - x - y));
-          dataReg(iv, icomp) += C * (cloneReg(iv + x + z) + cloneReg(iv + x - z) + cloneReg(iv - x + z) +
-                                     cloneReg(iv - x - z));
-          dataReg(iv, icomp) += C * (cloneReg(iv + y + z) + cloneReg(iv + y - z) + cloneReg(iv - y + z) +
-                                     cloneReg(iv - y - z));
-          dataReg(iv, icomp) += D * (cloneReg(iv + x + y + z) + cloneReg(iv + x + y - z) + cloneReg(iv + x - y + z) +
-                                     cloneReg(iv + x - y - z));
-          dataReg(iv, icomp) += D * (cloneReg(iv - x + y + z) + cloneReg(iv - x + y - z) + cloneReg(iv - x - y + z) +
-                                     cloneReg(iv - x - y - z));
-        }
-        else {
-          dataReg(iv, icomp) = cloneReg(iv);
-        }
+        dataReg(iv, icomp) = A * cloneReg(iv);
+        dataReg(iv, icomp) += B * (cloneReg(iv + x) + cloneReg(iv - x) + cloneReg(iv + y) + cloneReg(iv - y) +
+                                   cloneReg(iv + z) + cloneReg(iv - z));
+        dataReg(iv, icomp) += C * (cloneReg(iv + x + y) + cloneReg(iv + x - y) + cloneReg(iv - x + y) +
+                                   cloneReg(iv - x - y));
+        dataReg(iv, icomp) += C * (cloneReg(iv + x + z) + cloneReg(iv + x - z) + cloneReg(iv - x + z) +
+                                   cloneReg(iv - x - z));
+        dataReg(iv, icomp) += C * (cloneReg(iv + y + z) + cloneReg(iv + y - z) + cloneReg(iv - y + z) +
+                                   cloneReg(iv - y - z));
+        dataReg(iv, icomp) += D * (cloneReg(iv + x + y + z) + cloneReg(iv + x + y - z) + cloneReg(iv + x - y + z) +
+                                   cloneReg(iv + x - y - z));
+        dataReg(iv, icomp) += D * (cloneReg(iv - x + y + z) + cloneReg(iv - x + y - z) + cloneReg(iv - x - y + z) +
+                                   cloneReg(iv - x - y - z));
       };
 
       BoxLoops::loop(cellBox, regularKernel);
