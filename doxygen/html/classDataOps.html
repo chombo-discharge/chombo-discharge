@@ -127,12 +127,12 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a12a46d6c23aeeb3c5122acb6a87b92ae"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a12a46d6c23aeeb3c5122acb6a87b92ae">dotProduct</a> (EBCellFAB &amp;a_result, const EBCellFAB &amp;a_data1, const EBCellFAB &amp;a_data2, const Box &amp;a_box)</td></tr>
 <tr class="memdesc:a12a46d6c23aeeb3c5122acb6a87b92ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compote the cell-wise dot product between two data holders.  <a href="classDataOps.html#a12a46d6c23aeeb3c5122acb6a87b92ae">More...</a><br /></td></tr>
 <tr class="separator:a12a46d6c23aeeb3c5122acb6a87b92ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af65e8967b0bbe248934bdba3dda691a2"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#af65e8967b0bbe248934bdba3dda691a2">filterSmooth</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const Real a_alpha, const int a_stride) noexcept</td></tr>
-<tr class="memdesc:af65e8967b0bbe248934bdba3dda691a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply a convolved filter phi = alpha * phi_i + 0.5*(1-alpha) * [phi_(i+s) + phi_(i-s)] in each direction.  <a href="classDataOps.html#af65e8967b0bbe248934bdba3dda691a2">More...</a><br /></td></tr>
-<tr class="separator:af65e8967b0bbe248934bdba3dda691a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a16821da02d3ab69aa44ac6550a09ed19"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a16821da02d3ab69aa44ac6550a09ed19">filterSmooth</a> (LevelData&lt; EBCellFAB &gt; &amp;a_data, const Real a_alpha, const int a_stride) noexcept</td></tr>
-<tr class="memdesc:a16821da02d3ab69aa44ac6550a09ed19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply a convolved filter phi = alpha * phi_i + 0.5*(1-alpha) * [phi_(i+s) + phi_(i-s)] in each direction.  <a href="classDataOps.html#a16821da02d3ab69aa44ac6550a09ed19">More...</a><br /></td></tr>
-<tr class="separator:a16821da02d3ab69aa44ac6550a09ed19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a505cd90f96964992607c08e02c845170"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a505cd90f96964992607c08e02c845170">filterSmooth</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const Real a_alpha, const int a_stride, const bool a_zeroEB) noexcept</td></tr>
+<tr class="memdesc:a505cd90f96964992607c08e02c845170"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply a convolved filter phi = alpha * phi_i + 0.5*(1-alpha) * [phi_(i+s) + phi_(i-s)] in each direction.  <a href="classDataOps.html#a505cd90f96964992607c08e02c845170">More...</a><br /></td></tr>
+<tr class="separator:a505cd90f96964992607c08e02c845170"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0cf66aa022399705b36d49cad9b4de9"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ac0cf66aa022399705b36d49cad9b4de9">filterSmooth</a> (LevelData&lt; EBCellFAB &gt; &amp;a_data, const Real a_alpha, const int a_stride, const bool a_zeroEB) noexcept</td></tr>
+<tr class="memdesc:ac0cf66aa022399705b36d49cad9b4de9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply a convolved filter phi = alpha * phi_i + 0.5*(1-alpha) * [phi_(i+s) + phi_(i-s)] in each direction.  <a href="classDataOps.html#ac0cf66aa022399705b36d49cad9b4de9">More...</a><br /></td></tr>
+<tr class="separator:ac0cf66aa022399705b36d49cad9b4de9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a77d3d9b487c6182b3941fcab221e727f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">incr</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_lhs, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_rhs, const Real a_scale)</td></tr>
 <tr class="memdesc:a77d3d9b487c6182b3941fcab221e727f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.  <a href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">More...</a><br /></td></tr>
 <tr class="separator:a77d3d9b487c6182b3941fcab221e727f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1930,8 +1930,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="af65e8967b0bbe248934bdba3dda691a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af65e8967b0bbe248934bdba3dda691a2">&#9670;&nbsp;</a></span>filterSmooth() <span class="overload">[1/2]</span></h2>
+<a id="a505cd90f96964992607c08e02c845170"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a505cd90f96964992607c08e02c845170">&#9670;&nbsp;</a></span>filterSmooth() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1955,7 +1955,13 @@ template&lt;typename T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_stride</em>&#160;</td>
+          <td class="paramname"><em>a_stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_zeroEB</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1976,14 +1982,16 @@ template&lt;typename T &gt; </div>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be filtered. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_alpha</td><td>Filter factor </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_stride</td><td>Cell stride s </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_zeroEB</td><td>Set value in covered cells to zero or not </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section note"><dt>Note</dt><dd>This routine will fill ghost cells outside the domain boundary, but ignore the corner ghost cells at the domain corners. This routine may be dangerous to use with EBs as the data inside the EB is either kept as-is or replaced by zero. </dd></dl>
 
 </div>
 </div>
-<a id="a16821da02d3ab69aa44ac6550a09ed19"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a16821da02d3ab69aa44ac6550a09ed19">&#9670;&nbsp;</a></span>filterSmooth() <span class="overload">[2/2]</span></h2>
+<a id="ac0cf66aa022399705b36d49cad9b4de9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0cf66aa022399705b36d49cad9b4de9">&#9670;&nbsp;</a></span>filterSmooth() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2007,7 +2015,13 @@ template&lt;typename T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_stride</em>&#160;</td>
+          <td class="paramname"><em>a_stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_zeroEB</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2028,9 +2042,11 @@ template&lt;typename T &gt; </div>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be filtered. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_alpha</td><td>Filter factor </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_stride</td><td>Cell stride s </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_zeroEB</td><td>Set value in covered cells to zero or not </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section note"><dt>Note</dt><dd>This routine will fill ghost cells outside the domain boundary, but ignore the corner ghost cells at the domain corners. This routine may be dangerous to use with EBs as the data inside the EB is either kept as-is or replaced by zero. </dd></dl>
 
 </div>
 </div>
