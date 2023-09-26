@@ -2,7 +2,7 @@
 
 DIM            = 2
 DEBUG          = TRUE
-OPT            = TRUE
+OPT            = FALSE
 PRECISION      = DOUBLE
 PROFILE        = FALSE
 CXX            = icpc
