@@ -1,52 +1,52 @@
 <map id="Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H" name="Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H">
-<area shape="rect" id="node1" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="1228,5,1476,61"/>
-<area shape="rect" id="node2" title=" " alt="" coords="3945,333,4049,360"/>
-<area shape="rect" id="node3" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="1099,109,1315,136"/>
-<area shape="rect" id="node7" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2059,483,2245,509"/>
-<area shape="rect" id="node8" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="3179,483,3357,509"/>
-<area shape="rect" id="node29" href="$CD__DataOps_8H.html" title="Agglomeration of useful data operations." alt="" coords="3549,333,3667,360"/>
-<area shape="rect" id="node37" href="$CD__ParallelOps_8H.html" title="Agglomeration of basic MPI reductions." alt="" coords="4074,333,4209,360"/>
-<area shape="rect" id="node40" href="$CD__Units_8H.html" title="Declaration of various useful units." alt="" coords="1859,333,1955,360"/>
-<area shape="rect" id="node42" href="$CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="853,333,952,360"/>
-<area shape="rect" id="node4" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="2051,184,2210,211"/>
-<area shape="rect" id="node11" href="$CD__PointParticle_8H.html" title="Declaration of a computational point particle." alt="" coords="1123,333,1266,360"/>
-<area shape="rect" id="node5" title=" " alt="" coords="1513,483,1599,509"/>
-<area shape="rect" id="node6" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="2189,408,2333,435"/>
-<area shape="rect" id="node9" href="$CD__ItoKMCPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="2295,259,2454,285"/>
-<area shape="rect" id="node18" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="2811,333,2933,360"/>
-<area shape="rect" id="node19" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="2763,408,2882,435"/>
-<area shape="rect" id="node20" href="$CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="1851,408,1979,435"/>
-<area shape="rect" id="node21" href="$CD__RtLayout_8H.html" title="Declaration of a class that holds a set of RtSolvers." alt="" coords="3793,408,3913,435"/>
-<area shape="rect" id="node22" href="$CD__McPhoto_8H.html" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="3938,408,4057,435"/>
-<area shape="rect" id="node23" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="1592,408,1725,435"/>
-<area shape="rect" id="node24" href="$CD__CdrCTU_8H.html" title="Declaration of a class which implements CdrMultigrid using MUSCL for advection." alt="" coords="2003,408,2114,435"/>
-<area shape="rect" id="node25" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="1541,333,1733,360"/>
-<area shape="rect" id="node26" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="2509,408,2688,435"/>
-<area shape="rect" id="node27" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="3661,259,3870,285"/>
-<area shape="rect" id="node10" title=" " alt="" coords="4551,483,4681,509"/>
-<area shape="rect" id="node12" title=" " alt="" coords="719,483,777,509"/>
-<area shape="rect" id="node13" title=" " alt="" coords="826,483,902,509"/>
-<area shape="rect" id="node14" title=" " alt="" coords="528,483,589,509"/>
-<area shape="rect" id="node15" title=" " alt="" coords="626,483,689,509"/>
-<area shape="rect" id="node16" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="691,408,851,435"/>
-<area shape="rect" id="node17" href="$CD__PointParticleImplem_8H.html" title="Implementation of CD_PointParticle.H." alt="" coords="1222,408,1415,435"/>
-<area shape="rect" id="node28" title=" " alt="" coords="4827,483,4885,509"/>
-<area shape="rect" id="node30" href="$CD__Average_8H.html" title="Declaration of averaging methods." alt="" coords="3059,408,3173,435"/>
-<area shape="rect" id="node31" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="4437,408,4577,435"/>
-<area shape="rect" id="node34" href="$CD__Decorations_8H_source.html" title=" " alt="" coords="3198,408,3338,435"/>
-<area shape="rect" id="node35" href="$CD__MFInterfaceFAB_8H.html" title="Declaration of a class that allocates irregular data holders over the interface between two phases." alt="" coords="3362,408,3526,435"/>
-<area shape="rect" id="node36" href="$CD__DataOpsImplem_8H.html" title="Implementation of CD_DataOps.H." alt="" coords="3551,408,3719,435"/>
-<area shape="rect" id="node32" title=" " alt="" coords="4298,483,4401,509"/>
-<area shape="rect" id="node33" title=" " alt="" coords="4425,483,4527,509"/>
-<area shape="rect" id="node38" href="$CD__ParallelOpsImplem_8H.html" title="Implementation of CD_ParallelOps.H." alt="" coords="4653,408,4838,435"/>
-<area shape="rect" id="node39" title=" " alt="" coords="4708,483,4783,509"/>
-<area shape="rect" id="node41" title=" " alt="" coords="1077,408,1147,435"/>
-<area shape="rect" id="node43" title=" " alt="" coords="373,408,440,435"/>
-<area shape="rect" id="node44" title=" " alt="" coords="464,408,515,435"/>
-<area shape="rect" id="node45" title=" " alt="" coords="294,408,349,435"/>
-<area shape="rect" id="node46" href="$CD__TimerImplem_8H.html" title="Implementation of CD_Timer.H." alt="" coords="119,408,270,435"/>
-<area shape="rect" id="node47" title=" " alt="" coords="5,483,80,509"/>
-<area shape="rect" id="node48" title=" " alt="" coords="104,483,184,509"/>
-<area shape="rect" id="node49" title=" " alt="" coords="209,483,282,509"/>
-<area shape="rect" id="node50" title=" " alt="" coords="307,483,381,509"/>
+<area shape="rect" id="node1" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="1073,5,1321,61"/>
+<area shape="rect" id="node2" title=" " alt="" coords="567,333,671,360"/>
+<area shape="rect" id="node3" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="1428,109,1644,136"/>
+<area shape="rect" id="node7" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="3002,483,3187,509"/>
+<area shape="rect" id="node8" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="2133,483,2312,509"/>
+<area shape="rect" id="node10" href="$CD__Photon_8H.html" title="Declaration of a photon class for particle methods." alt="" coords="4268,333,4375,360"/>
+<area shape="rect" id="node30" href="$CD__DataOps_8H.html" title="Agglomeration of useful data operations." alt="" coords="1618,333,1737,360"/>
+<area shape="rect" id="node37" href="$CD__ParallelOps_8H.html" title="Agglomeration of basic MPI reductions." alt="" coords="695,333,830,360"/>
+<area shape="rect" id="node40" href="$CD__Units_8H.html" title="Declaration of various useful units." alt="" coords="1099,333,1195,360"/>
+<area shape="rect" id="node42" href="$CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="855,333,953,360"/>
+<area shape="rect" id="node4" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="3117,184,3275,211"/>
+<area shape="rect" id="node17" href="$CD__PointParticle_8H.html" title="Declaration of a computational point particle." alt="" coords="4485,333,4627,360"/>
+<area shape="rect" id="node5" title=" " alt="" coords="4750,483,4837,509"/>
+<area shape="rect" id="node6" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="3276,408,3420,435"/>
+<area shape="rect" id="node9" href="$CD__ItoKMCPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="3983,259,4142,285"/>
+<area shape="rect" id="node19" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="2588,333,2711,360"/>
+<area shape="rect" id="node20" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="2482,408,2601,435"/>
+<area shape="rect" id="node21" href="$CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="2929,408,3057,435"/>
+<area shape="rect" id="node22" href="$CD__RtLayout_8H.html" title="Declaration of a class that holds a set of RtSolvers." alt="" coords="3132,408,3252,435"/>
+<area shape="rect" id="node23" href="$CD__McPhoto_8H.html" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="3841,259,3959,285"/>
+<area shape="rect" id="node24" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="3732,408,3865,435"/>
+<area shape="rect" id="node25" href="$CD__CdrCTU_8H.html" title="Declaration of a class which implements CdrMultigrid using MUSCL for advection." alt="" coords="3445,408,3555,435"/>
+<area shape="rect" id="node26" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="3555,333,3747,360"/>
+<area shape="rect" id="node27" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="2676,408,2855,435"/>
+<area shape="rect" id="node28" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="1042,259,1251,285"/>
+<area shape="rect" id="node11" title=" " alt="" coords="4897,483,4956,509"/>
+<area shape="rect" id="node12" title=" " alt="" coords="5006,483,5082,509"/>
+<area shape="rect" id="node13" title=" " alt="" coords="5165,483,5227,509"/>
+<area shape="rect" id="node14" title=" " alt="" coords="4626,483,4689,509"/>
+<area shape="rect" id="node15" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="4847,408,5007,435"/>
+<area shape="rect" id="node16" href="$CD__PhotonImplem_8H.html" title="Implementation of CD_Photon.H." alt="" coords="4041,408,4199,435"/>
+<area shape="rect" id="node18" href="$CD__PointParticleImplem_8H.html" title="Implementation of CD_PointParticle.H." alt="" coords="4325,408,4518,435"/>
+<area shape="rect" id="node29" title=" " alt="" coords="745,483,804,509"/>
+<area shape="rect" id="node31" href="$CD__Average_8H.html" title="Declaration of averaging methods." alt="" coords="1785,408,1900,435"/>
+<area shape="rect" id="node32" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="1429,408,1569,435"/>
+<area shape="rect" id="node34" href="$CD__Decorations_8H_source.html" title=" " alt="" coords="1925,408,2065,435"/>
+<area shape="rect" id="node35" href="$CD__MFInterfaceFAB_8H.html" title="Declaration of a class that allocates irregular data holders over the interface between two phases." alt="" coords="2141,408,2305,435"/>
+<area shape="rect" id="node36" href="$CD__DataOpsImplem_8H.html" title="Implementation of CD_DataOps.H." alt="" coords="1593,408,1761,435"/>
+<area shape="rect" id="node33" title=" " alt="" coords="1447,483,1550,509"/>
+<area shape="rect" id="node38" href="$CD__ParallelOpsImplem_8H.html" title="Implementation of CD_ParallelOps.H." alt="" coords="373,408,558,435"/>
+<area shape="rect" id="node39" title=" " alt="" coords="428,483,503,509"/>
+<area shape="rect" id="node41" title=" " alt="" coords="1081,408,1151,435"/>
+<area shape="rect" id="node43" title=" " alt="" coords="889,408,956,435"/>
+<area shape="rect" id="node44" title=" " alt="" coords="735,408,785,435"/>
+<area shape="rect" id="node45" title=" " alt="" coords="810,408,865,435"/>
+<area shape="rect" id="node46" href="$CD__TimerImplem_8H.html" title="Implementation of CD_Timer.H." alt="" coords="146,408,297,435"/>
+<area shape="rect" id="node47" title=" " alt="" coords="307,483,381,509"/>
+<area shape="rect" id="node48" title=" " alt="" coords="5,483,85,509"/>
+<area shape="rect" id="node49" title=" " alt="" coords="110,483,183,509"/>
+<area shape="rect" id="node50" title=" " alt="" coords="208,483,283,509"/>
 </map>

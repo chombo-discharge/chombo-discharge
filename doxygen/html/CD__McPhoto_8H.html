@@ -89,63 +89,65 @@ $(function() {
 <code>#include &lt;<a class="el" href="CD__EBParticleMesh_8H_source.html">CD_EBParticleMesh.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__ParticleContainer_8H_source.html">CD_ParticleContainer.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__Photon_8H_source.html">CD_Photon.H</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__PointParticle_8H_source.html">CD_PointParticle.H</a>&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__McPhotoImplem_8H_source.html">CD_McPhotoImplem.H</a>&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for CD_McPhoto.H:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__McPhoto_8H__incl.png" border="0" usemap="#aSource_2RadiativeTransfer_2CD__McPhoto_8H" alt=""/></div>
 <map name="aSource_2RadiativeTransfer_2CD__McPhoto_8H" id="aSource_2RadiativeTransfer_2CD__McPhoto_8H">
-<area shape="rect" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="353,5,537,47"/>
+<area shape="rect" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="2515,5,2699,47"/>
 <area shape="rect" title=" " alt="" coords="5,95,77,121"/>
-<area shape="rect" title=" " alt="" coords="153,401,237,427"/>
-<area shape="rect" title=" " alt="" coords="312,401,427,427"/>
-<area shape="rect" title=" " alt="" coords="1425,401,1511,427"/>
-<area shape="rect" href="CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="3731,95,3847,121"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="3083,483,3269,509"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="3849,483,4028,509"/>
-<area shape="rect" href="CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="547,319,719,345"/>
-<area shape="rect" href="CD__EBParticleMesh_8H.html" title="Declaration of a class for handling particle&#45;mesh interpolation and deposition." alt="" coords="2447,319,2609,345"/>
-<area shape="rect" href="CD__Photon_8H.html" title="Declaration of a photon class for particle methods." alt="" coords="5593,319,5700,345"/>
-<area shape="rect" title=" " alt="" coords="5283,483,5370,509"/>
-<area shape="rect" href="CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="4505,319,4727,345"/>
-<area shape="rect" href="CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="3377,169,3501,196"/>
-<area shape="rect" href="CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="5277,401,5403,427"/>
-<area shape="rect" href="CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="3041,319,3159,345"/>
-<area shape="rect" title=" " alt="" coords="4858,483,4937,509"/>
-<area shape="rect" title=" " alt="" coords="5001,483,5132,509"/>
-<area shape="rect" title=" " alt="" coords="5176,483,5237,509"/>
-<area shape="rect" title=" " alt="" coords="5395,483,5488,509"/>
-<area shape="rect" title=" " alt="" coords="1479,483,1620,509"/>
-<area shape="rect" href="CD__Dielectric_8H.html" title="Dielectric class." alt="" coords="4835,401,4959,427"/>
-<area shape="rect" href="CD__Electrode_8H.html" title="Declaration of an electrode class." alt="" coords="4229,401,4352,427"/>
-<area shape="rect" href="CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="4376,401,4579,427"/>
-<area shape="rect" href="CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="4983,401,5099,427"/>
-<area shape="rect" title=" " alt="" coords="1245,401,1400,427"/>
-<area shape="rect" href="CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="1942,319,2082,345"/>
-<area shape="rect" href="CD__DomainFluxIFFAB_8H.html" title="Declaration of a BaseIFFAB wrapper that holds domain fluxes." alt="" coords="1689,401,1866,427"/>
-<area shape="rect" href="CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="3264,401,3397,427"/>
-<area shape="rect" href="CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="2459,244,2621,271"/>
-<area shape="rect" href="CD__LoadBalancing_8H.html" title="Declaration of a static class for various load balancing operations." alt="" coords="3832,319,3989,345"/>
-<area shape="rect" href="CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="3637,319,3781,345"/>
-<area shape="rect" href="CD__EBReflux_8H.html" title="Declaration of a class which can reflux over the coarse&#45;fine interface." alt="" coords="3421,401,3541,427"/>
-<area shape="rect" href="CD__DomainFluxIFFABFactory_8H.html" title="Declaration of factory class for DomainFluxIFFAB." alt="" coords="1594,319,1817,345"/>
-<area shape="rect" href="CD__NonConservativeDivergenceStencil_8H.html" title="Implementation of IrregStencil that can perform the nonconservative divergence averaging." alt="" coords="3565,393,3800,435"/>
-<area shape="rect" title=" " alt="" coords="2245,401,2347,427"/>
-<area shape="rect" title=" " alt="" coords="2145,401,2221,427"/>
-<area shape="rect" title=" " alt="" coords="553,401,714,427"/>
-<area shape="rect" title=" " alt="" coords="738,401,817,427"/>
-<area shape="rect" title=" " alt="" coords="841,401,975,427"/>
-<area shape="rect" href="CD__ParticleContainerImplem_8H.html" title="Implementation of CD_ParticleContainer.H." alt="" coords="999,401,1222,427"/>
-<area shape="rect" title=" " alt="" coords="2659,401,2749,427"/>
-<area shape="rect" href="CD__DepositionType_8H.html" title="Declaration of deposition types." alt="" coords="2824,401,2987,427"/>
-<area shape="rect" href="CD__EBParticleMeshImplem_8H.html" title="Implementatoin of CD_EBParticleMesh.H." alt="" coords="2422,401,2634,427"/>
-<area shape="rect" title=" " alt="" coords="5765,483,5824,509"/>
-<area shape="rect" title=" " alt="" coords="5849,483,5925,509"/>
-<area shape="rect" title=" " alt="" coords="5949,483,6011,509"/>
-<area shape="rect" title=" " alt="" coords="5678,483,5741,509"/>
-<area shape="rect" href="CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="5631,401,5791,427"/>
-<area shape="rect" href="CD__PhotonImplem_8H.html" title="Implementation of CD_Photon.H." alt="" coords="4653,401,4811,427"/>
+<area shape="rect" title=" " alt="" coords="203,319,287,345"/>
+<area shape="rect" title=" " alt="" coords="312,319,427,345"/>
+<area shape="rect" title=" " alt="" coords="471,393,558,420"/>
+<area shape="rect" href="CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="2549,95,2665,121"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2682,393,2867,420"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="3657,393,3836,420"/>
+<area shape="rect" href="CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="906,244,1078,271"/>
+<area shape="rect" href="CD__EBParticleMesh_8H.html" title="Declaration of a class for handling particle&#45;mesh interpolation and deposition." alt="" coords="4075,244,4237,271"/>
+<area shape="rect" href="CD__Photon_8H.html" title="Declaration of a photon class for particle methods." alt="" coords="5121,244,5228,271"/>
+<area shape="rect" href="CD__PointParticle_8H.html" title="Declaration of a computational point particle." alt="" coords="5482,244,5625,271"/>
+<area shape="rect" href="CD__McPhotoImplem_8H.html" title="Implementation of CD_McPhoto.H." alt="" coords="3951,169,4119,196"/>
+<area shape="rect" title=" " alt="" coords="1619,393,1706,420"/>
+<area shape="rect" href="CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="1895,244,2116,271"/>
+<area shape="rect" href="CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="2545,169,2669,196"/>
+<area shape="rect" href="CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="2813,319,2939,345"/>
+<area shape="rect" href="CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="3596,244,3713,271"/>
+<area shape="rect" title=" " alt="" coords="1517,393,1595,420"/>
+<area shape="rect" title=" " alt="" coords="2277,393,2408,420"/>
+<area shape="rect" title=" " alt="" coords="2001,393,2063,420"/>
+<area shape="rect" title=" " alt="" coords="2892,393,2985,420"/>
+<area shape="rect" title=" " alt="" coords="1229,319,1371,345"/>
+<area shape="rect" href="CD__Dielectric_8H.html" title="Dielectric class." alt="" coords="1547,319,1671,345"/>
+<area shape="rect" href="CD__Electrode_8H.html" title="Declaration of an electrode class." alt="" coords="1943,319,2065,345"/>
+<area shape="rect" href="CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="2484,319,2687,345"/>
+<area shape="rect" href="CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="2191,319,2307,345"/>
+<area shape="rect" title=" " alt="" coords="1051,319,1205,345"/>
+<area shape="rect" href="CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="2963,319,3103,345"/>
+<area shape="rect" href="CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="3229,319,3363,345"/>
+<area shape="rect" href="CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="3077,244,3240,271"/>
+<area shape="rect" href="CD__LoadBalancing_8H.html" title="Declaration of a static class for various load balancing operations." alt="" coords="2703,244,2860,271"/>
+<area shape="rect" href="CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="2535,244,2679,271"/>
+<area shape="rect" href="CD__EBReflux_8H.html" title="Declaration of a class which can reflux over the coarse&#45;fine interface." alt="" coords="3437,319,3557,345"/>
+<area shape="rect" title=" " alt="" coords="3270,393,3373,420"/>
+<area shape="rect" title=" " alt="" coords="711,319,873,345"/>
+<area shape="rect" title=" " alt="" coords="897,319,975,345"/>
+<area shape="rect" title=" " alt="" coords="553,319,687,345"/>
+<area shape="rect" href="CD__ParticleContainerImplem_8H.html" title="Implementation of CD_ParticleContainer.H." alt="" coords="1695,319,1918,345"/>
+<area shape="rect" title=" " alt="" coords="3835,319,3925,345"/>
+<area shape="rect" title=" " alt="" coords="4474,319,4550,345"/>
+<area shape="rect" href="CD__DepositionType_8H.html" title="Declaration of deposition types." alt="" coords="4287,319,4449,345"/>
+<area shape="rect" href="CD__EBParticleMeshImplem_8H.html" title="Implementatoin of CD_EBParticleMesh.H." alt="" coords="4050,319,4262,345"/>
+<area shape="rect" title=" " alt="" coords="5953,393,6012,420"/>
+<area shape="rect" title=" " alt="" coords="5574,393,5650,420"/>
+<area shape="rect" title=" " alt="" coords="5749,393,5811,420"/>
+<area shape="rect" title=" " alt="" coords="5850,393,5913,420"/>
+<area shape="rect" href="CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="5532,319,5692,345"/>
+<area shape="rect" href="CD__PhotonImplem_8H.html" title="Implementation of CD_Photon.H." alt="" coords="4929,319,5087,345"/>
+<area shape="rect" href="CD__PointParticleImplem_8H.html" title="Implementation of CD_PointParticle.H." alt="" coords="5263,319,5457,345"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -153,18 +155,19 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__McPhoto_8H__dep__incl.png" border="0" usemap="#aSource_2RadiativeTransfer_2CD__McPhoto_8Hdep" alt=""/></div>
 <map name="aSource_2RadiativeTransfer_2CD__McPhoto_8Hdep" id="aSource_2RadiativeTransfer_2CD__McPhoto_8Hdep">
-<area shape="rect" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="129,5,313,47"/>
+<area shape="rect" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="213,5,397,47"/>
 <area shape="rect" href="CD__McPhoto_8cpp.html" title="Implementation of CD_McPhoto.H." alt="" coords="5,95,189,136"/>
-<area shape="rect" href="CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="214,102,477,129"/>
-<area shape="rect" href="CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="83,191,333,233"/>
-<area shape="rect" href="CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="357,199,611,225"/>
-<area shape="rect" href="CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="645,184,861,240"/>
-<area shape="rect" href="CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="107,295,338,337"/>
-<area shape="rect" href="CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="363,295,605,337"/>
-<area shape="rect" href="CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="107,399,338,441"/>
-<area shape="rect" href="CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="362,392,563,448"/>
-<area shape="rect" href="CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="341,496,584,552"/>
-<area shape="rect" href="CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="629,288,877,344"/>
+<area shape="rect" href="CD__McPhotoImplem_8H.html" title="Implementation of CD_McPhoto.H." alt="" coords="213,95,397,136"/>
+<area shape="rect" href="CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="422,102,685,129"/>
+<area shape="rect" href="CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="291,191,541,233"/>
+<area shape="rect" href="CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="565,199,819,225"/>
+<area shape="rect" href="CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="853,184,1069,240"/>
+<area shape="rect" href="CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="315,295,546,337"/>
+<area shape="rect" href="CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="571,295,813,337"/>
+<area shape="rect" href="CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="315,399,546,441"/>
+<area shape="rect" href="CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="570,392,771,448"/>
+<area shape="rect" href="CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="549,496,792,552"/>
+<area shape="rect" href="CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="837,288,1085,344"/>
 </map>
 </div>
 </div>

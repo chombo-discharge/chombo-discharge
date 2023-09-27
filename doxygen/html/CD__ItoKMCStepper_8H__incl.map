@@ -1,52 +1,52 @@
 <map id="Physics/ItoKMC/CD_ItoKMCStepper.H" name="Physics/ItoKMC/CD_ItoKMCStepper.H">
-<area shape="rect" id="node1" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="3316,5,3579,32"/>
-<area shape="rect" id="node2" title=" " alt="" coords="4123,304,4209,331"/>
-<area shape="rect" id="node3" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="2719,155,2863,181"/>
-<area shape="rect" id="node8" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2375,453,2560,480"/>
-<area shape="rect" id="node9" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="3395,453,3574,480"/>
-<area shape="rect" id="node11" href="$CD__ItoKMCPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="1544,155,1703,181"/>
-<area shape="rect" id="node24" href="$CD__PointParticle_8H.html" title="Declaration of a computational point particle." alt="" coords="703,304,845,331"/>
-<area shape="rect" id="node33" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="3205,80,3327,107"/>
-<area shape="rect" id="node34" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="2315,155,2433,181"/>
-<area shape="rect" id="node36" href="$CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="3567,80,3695,107"/>
-<area shape="rect" id="node40" href="$CD__RtLayout_8H.html" title="Declaration of a class that holds a set of RtSolvers." alt="" coords="3719,80,3839,107"/>
-<area shape="rect" id="node43" href="$CD__McPhoto_8H.html" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="4381,80,4500,107"/>
-<area shape="rect" id="node46" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="3090,155,3223,181"/>
-<area shape="rect" id="node47" href="$CD__CdrCTU_8H.html" title="Declaration of a class which implements CdrMultigrid using MUSCL for advection." alt="" coords="4224,379,4335,405"/>
-<area shape="rect" id="node48" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="3351,80,3543,107"/>
-<area shape="rect" id="node49" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="2887,155,3066,181"/>
-<area shape="rect" id="node50" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="4833,80,5043,107"/>
-<area shape="rect" id="node4" title=" " alt="" coords="2610,229,2709,256"/>
-<area shape="rect" id="node5" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="2839,304,3061,331"/>
-<area shape="rect" id="node7" href="$CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="2839,379,3042,405"/>
-<area shape="rect" id="node10" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="2885,229,3009,256"/>
-<area shape="rect" id="node6" title=" " alt="" coords="1149,453,1242,480"/>
-<area shape="rect" id="node12" title=" " alt="" coords="383,453,461,480"/>
-<area shape="rect" id="node13" title=" " alt="" coords="775,453,837,480"/>
-<area shape="rect" id="node14" title=" " alt="" coords="947,229,1076,256"/>
-<area shape="rect" id="node15" title=" " alt="" coords="1887,304,1946,331"/>
-<area shape="rect" id="node16" href="$CD__ItoSpecies_8H.html" title="Declaration of an ItoSpecies class that passes in names and initial data to ItoSolvers." alt="" coords="1779,229,1908,256"/>
-<area shape="rect" id="node17" href="$CD__ItoParticle_8H.html" title="Declaration of a particle class for Ito diffusion." alt="" coords="356,304,483,331"/>
-<area shape="rect" id="node23" href="$CD__CdrSpecies_8H.html" title="Declaration of a class that passes information into CdrSolver (e.g., initial conditions)." alt="" coords="1984,229,2119,256"/>
-<area shape="rect" id="node26" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="3813,229,3940,256"/>
-<area shape="rect" id="node27" href="$CD__Photon_8H.html" title="Declaration of a photon class for particle methods." alt="" coords="546,304,653,331"/>
-<area shape="rect" id="node28" href="$CD__ItoKMCPhotoReaction_8H.html" title="Declaration of a class for holding photoionization reaction types in ito_plasma physics." alt="" coords="2461,379,2663,405"/>
-<area shape="rect" id="node29" href="$CD__KMCDualState_8H.html" title="Declaration of a simple state vector for running Kinetic Monte Carlo for plasma problems." alt="" coords="1419,379,1575,405"/>
-<area shape="rect" id="node30" href="$CD__KMCDualStateReaction_8H.html" title="Declaration of a simple plasma reaction type for Kinetic Monte Carlo." alt="" coords="1373,304,1586,331"/>
-<area shape="rect" id="node31" href="$CD__KMCSolver_8H.html" title="Class for running Kinetic Monte Carlo functionality." alt="" coords="688,379,820,405"/>
-<area shape="rect" id="node32" href="$CD__ItoKMCPhysicsImplem_8H.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="2021,304,2229,331"/>
-<area shape="rect" id="node18" title=" " alt="" coords="126,453,185,480"/>
-<area shape="rect" id="node19" title=" " alt="" coords="255,453,331,480"/>
-<area shape="rect" id="node20" title=" " alt="" coords="513,453,574,480"/>
-<area shape="rect" id="node21" title=" " alt="" coords="5,453,68,480"/>
-<area shape="rect" id="node22" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="301,379,461,405"/>
-<area shape="rect" id="node25" href="$CD__PointParticleImplem_8H.html" title="Implementation of CD_PointParticle.H." alt="" coords="1099,379,1292,405"/>
-<area shape="rect" id="node35" href="$CD__ItoLayoutImplem_8H.html" title="Implementation of CD_ItoLayout.H." alt="" coords="3186,229,3359,256"/>
-<area shape="rect" id="node37" href="$CD__CdrSolver_8H.html" title="Declaration of an abstract class for solving scalar convection&#45;diffusion&#45;reaction problems." alt="" coords="3536,155,3660,181"/>
-<area shape="rect" id="node39" href="$CD__CdrLayoutImplem_8H.html" title="Implementation of CD_CdrLayout.H." alt="" coords="4510,304,4689,331"/>
-<area shape="rect" id="node38" title=" " alt="" coords="4218,229,4290,256"/>
-<area shape="rect" id="node41" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="3815,155,3931,181"/>
-<area shape="rect" id="node42" href="$CD__RtLayoutImplem_8H.html" title="Implementation of CD_RtLayout.H." alt="" coords="3623,379,3794,405"/>
-<area shape="rect" id="node44" title=" " alt="" coords="4617,155,4701,181"/>
-<area shape="rect" id="node45" title=" " alt="" coords="4726,155,4841,181"/>
+<area shape="rect" id="node1" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="3334,5,3597,32"/>
+<area shape="rect" id="node2" title=" " alt="" coords="3868,304,3954,331"/>
+<area shape="rect" id="node3" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="2663,155,2807,181"/>
+<area shape="rect" id="node8" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2522,453,2708,480"/>
+<area shape="rect" id="node9" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="3543,453,3722,480"/>
+<area shape="rect" id="node11" href="$CD__ItoKMCPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="1628,155,1786,181"/>
+<area shape="rect" id="node24" href="$CD__PointParticle_8H.html" title="Declaration of a computational point particle." alt="" coords="701,304,844,331"/>
+<area shape="rect" id="node33" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="4354,80,4476,107"/>
+<area shape="rect" id="node34" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="2520,155,2638,181"/>
+<area shape="rect" id="node36" href="$CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="5032,80,5160,107"/>
+<area shape="rect" id="node40" href="$CD__RtLayout_8H.html" title="Declaration of a class that holds a set of RtSolvers." alt="" coords="4511,80,4631,107"/>
+<area shape="rect" id="node43" href="$CD__McPhoto_8H.html" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="3406,80,3525,107"/>
+<area shape="rect" id="node46" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="3034,155,3167,181"/>
+<area shape="rect" id="node47" href="$CD__CdrCTU_8H.html" title="Declaration of a class which implements CdrMultigrid using MUSCL for advection." alt="" coords="4850,379,4961,405"/>
+<area shape="rect" id="node48" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="3175,80,3367,107"/>
+<area shape="rect" id="node49" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="2831,155,3010,181"/>
+<area shape="rect" id="node50" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="4661,80,4870,107"/>
+<area shape="rect" id="node4" title=" " alt="" coords="2663,229,2762,256"/>
+<area shape="rect" id="node5" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="2943,304,3164,331"/>
+<area shape="rect" id="node7" href="$CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="2911,379,3114,405"/>
+<area shape="rect" id="node10" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="2938,229,3062,256"/>
+<area shape="rect" id="node6" title=" " alt="" coords="1246,453,1339,480"/>
+<area shape="rect" id="node12" title=" " alt="" coords="411,453,488,480"/>
+<area shape="rect" id="node13" title=" " alt="" coords="921,453,984,480"/>
+<area shape="rect" id="node14" title=" " alt="" coords="920,229,1049,256"/>
+<area shape="rect" id="node15" title=" " alt="" coords="1994,304,2052,331"/>
+<area shape="rect" id="node16" href="$CD__ItoSpecies_8H.html" title="Declaration of an ItoSpecies class that passes in names and initial data to ItoSolvers." alt="" coords="1892,229,2021,256"/>
+<area shape="rect" id="node17" href="$CD__ItoParticle_8H.html" title="Declaration of a particle class for Ito diffusion." alt="" coords="418,304,545,331"/>
+<area shape="rect" id="node23" href="$CD__CdrSpecies_8H.html" title="Declaration of a class that passes information into CdrSolver (e.g., initial conditions)." alt="" coords="2097,229,2232,256"/>
+<area shape="rect" id="node26" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="3493,229,3620,256"/>
+<area shape="rect" id="node27" href="$CD__Photon_8H.html" title="Declaration of a photon class for particle methods." alt="" coords="570,304,676,331"/>
+<area shape="rect" id="node28" href="$CD__ItoKMCPhotoReaction_8H.html" title="Declaration of a class for holding photoionization reaction types in ito_plasma physics." alt="" coords="2634,379,2836,405"/>
+<area shape="rect" id="node29" href="$CD__KMCDualState_8H.html" title="Declaration of a simple state vector for running Kinetic Monte Carlo for plasma problems." alt="" coords="1541,379,1697,405"/>
+<area shape="rect" id="node30" href="$CD__KMCDualStateReaction_8H.html" title="Declaration of a simple plasma reaction type for Kinetic Monte Carlo." alt="" coords="1554,304,1767,331"/>
+<area shape="rect" id="node31" href="$CD__KMCSolver_8H.html" title="Class for running Kinetic Monte Carlo functionality." alt="" coords="810,379,942,405"/>
+<area shape="rect" id="node32" href="$CD__ItoKMCPhysicsImplem_8H.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="2178,304,2386,331"/>
+<area shape="rect" id="node18" title=" " alt="" coords="78,453,136,480"/>
+<area shape="rect" id="node19" title=" " alt="" coords="300,453,376,480"/>
+<area shape="rect" id="node20" title=" " alt="" coords="624,453,686,480"/>
+<area shape="rect" id="node21" title=" " alt="" coords="518,453,581,480"/>
+<area shape="rect" id="node22" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="474,379,634,405"/>
+<area shape="rect" id="node25" href="$CD__PointParticleImplem_8H.html" title="Implementation of CD_PointParticle.H." alt="" coords="1221,379,1414,405"/>
+<area shape="rect" id="node35" href="$CD__ItoLayoutImplem_8H.html" title="Implementation of CD_ItoLayout.H." alt="" coords="4450,229,4623,256"/>
+<area shape="rect" id="node37" href="$CD__CdrSolver_8H.html" title="Declaration of an abstract class for solving scalar convection&#45;diffusion&#45;reaction problems." alt="" coords="3948,155,4072,181"/>
+<area shape="rect" id="node39" href="$CD__CdrLayoutImplem_8H.html" title="Implementation of CD_CdrLayout.H." alt="" coords="5026,304,5204,331"/>
+<area shape="rect" id="node38" title=" " alt="" coords="4151,229,4223,256"/>
+<area shape="rect" id="node41" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="3592,155,3708,181"/>
+<area shape="rect" id="node42" href="$CD__RtLayoutImplem_8H.html" title="Implementation of CD_RtLayout.H." alt="" coords="4452,379,4623,405"/>
+<area shape="rect" id="node44" title=" " alt="" coords="3432,155,3516,181"/>
+<area shape="rect" id="node45" title=" " alt="" coords="3292,155,3407,181"/>
 </map>

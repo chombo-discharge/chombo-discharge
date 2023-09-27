@@ -168,6 +168,9 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:aedfb09455408860523c0513e62363ef5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aedfb09455408860523c0513e62363ef5">generateComputationalPhotons</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_photons, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_numPhysicalPhotons, const size_t a_maxPhotonsPerCell) const noexcept</td></tr>
 <tr class="memdesc:aedfb09455408860523c0513e62363ef5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate computational photons.  <a href="classMcPhoto.html#aedfb09455408860523c0513e62363ef5">More...</a><br /></td></tr>
 <tr class="separator:aedfb09455408860523c0513e62363ef5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53e8ff8f986e801623a1c11094251738"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a53e8ff8f986e801623a1c11094251738">dirtySamplePhotons</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPointParticle.html">PointParticle</a> &gt; &amp;a_photons, <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_numPhysicalPhotons, const size_t a_maxPhotonsPerCell) const noexcept</td></tr>
+<tr class="memdesc:a53e8ff8f986e801623a1c11094251738"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dirty-sampling method for photons.  <a href="classMcPhoto.html#a53e8ff8f986e801623a1c11094251738">More...</a><br /></td></tr>
+<tr class="separator:a53e8ff8f986e801623a1c11094251738"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83b71abb5f05186cdf9e1ca7392c5378"><td class="memItemLeft" align="right" valign="top"><a id="a83b71abb5f05186cdf9e1ca7392c5378"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a83b71abb5f05186cdf9e1ca7392c5378">remap</a> ()</td></tr>
 <tr class="memdesc:a83b71abb5f05186cdf9e1ca7392c5378"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remap computational particles. This remaps m_photons. <br /></td></tr>
@@ -178,9 +181,10 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:ab43303c3391364188cf423c8b9e1d4ae"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ab43303c3391364188cf423c8b9e1d4ae">depositPhotons</a> ()</td></tr>
 <tr class="memdesc:ab43303c3391364188cf423c8b9e1d4ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit photons on the mesh.  <a href="classMcPhoto.html#ab43303c3391364188cf423c8b9e1d4ae">More...</a><br /></td></tr>
 <tr class="separator:ab43303c3391364188cf423c8b9e1d4ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a083a58856a29011750bb7051b313ba66"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a083a58856a29011750bb7051b313ba66">depositPhotons</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> &amp;a_deposition)</td></tr>
-<tr class="memdesc:a083a58856a29011750bb7051b313ba66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit photons.  <a href="classMcPhoto.html#a083a58856a29011750bb7051b313ba66">More...</a><br /></td></tr>
-<tr class="separator:a083a58856a29011750bb7051b313ba66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5d2c90f8f4d3fa2efa3750ba82092b5"><td class="memTemplParams" colspan="2">template&lt;class P , const Real &amp;(P::*)() const particleScalarField&gt; </td></tr>
+<tr class="memitem:af5d2c90f8f4d3fa2efa3750ba82092b5"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#af5d2c90f8f4d3fa2efa3750ba82092b5">depositPhotons</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> &amp;a_deposition)</td></tr>
+<tr class="memdesc:af5d2c90f8f4d3fa2efa3750ba82092b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit photons.  <a href="classMcPhoto.html#af5d2c90f8f4d3fa2efa3750ba82092b5">More...</a><br /></td></tr>
+<tr class="separator:af5d2c90f8f4d3fa2efa3750ba82092b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada8ed4f1b1f0f9e242d4caa01f45655d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ada8ed4f1b1f0f9e242d4caa01f45655d">sortPhotonsByCell</a> (const <a class="el" href="classMcPhoto.html#a3e74abc2e95a4dd5ff480a4cad3288f6">WhichContainer</a> &amp;a_which)</td></tr>
 <tr class="memdesc:ada8ed4f1b1f0f9e242d4caa01f45655d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sort container by cell.  <a href="classMcPhoto.html#ada8ed4f1b1f0f9e242d4caa01f45655d">More...</a><br /></td></tr>
 <tr class="separator:ada8ed4f1b1f0f9e242d4caa01f45655d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -400,12 +404,13 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a9202da5518777b2e7de354acd0b7625e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a9202da5518777b2e7de354acd0b7625e">domainBcMap</a> (const int a_dir, const Side::LoHiSide a_side)</td></tr>
 <tr class="memdesc:a9202da5518777b2e7de354acd0b7625e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mapping function for domain boundary conditions.  <a href="classMcPhoto.html#a9202da5518777b2e7de354acd0b7625e">More...</a><br /></td></tr>
 <tr class="separator:a9202da5518777b2e7de354acd0b7625e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af3dc0ad693b7f2b442d25a53616ffe68"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#af3dc0ad693b7f2b442d25a53616ffe68">randomExponential</a> (const Real a_mean)</td></tr>
-<tr class="memdesc:af3dc0ad693b7f2b442d25a53616ffe68"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRandom.html" title="Class for encapsulating random number generation.">Random</a> exponential trial.  <a href="classMcPhoto.html#af3dc0ad693b7f2b442d25a53616ffe68">More...</a><br /></td></tr>
-<tr class="separator:af3dc0ad693b7f2b442d25a53616ffe68"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3b11419ab84372dff96030488597c9be"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a3b11419ab84372dff96030488597c9be">depositKappaConservative</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition)</td></tr>
-<tr class="memdesc:a3b11419ab84372dff96030488597c9be"><td class="mdescLeft">&#160;</td><td class="mdescRight">This computes the "conservative" deposition, multiplied by kappa.  <a href="classMcPhoto.html#a3b11419ab84372dff96030488597c9be">More...</a><br /></td></tr>
-<tr class="separator:a3b11419ab84372dff96030488597c9be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acff014808ab36fe23e2f689404d40aa8"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#acff014808ab36fe23e2f689404d40aa8">randomExponential</a> (const Real a_mean) const noexcept</td></tr>
+<tr class="memdesc:acff014808ab36fe23e2f689404d40aa8"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRandom.html" title="Class for encapsulating random number generation.">Random</a> exponential trial.  <a href="classMcPhoto.html#acff014808ab36fe23e2f689404d40aa8">More...</a><br /></td></tr>
+<tr class="separator:acff014808ab36fe23e2f689404d40aa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0fb0110871d8e806cdf488f4070ddd0f"><td class="memTemplParams" colspan="2">template&lt;class P , const Real &amp;(P::*)() const particleScalarField&gt; </td></tr>
+<tr class="memitem:a0fb0110871d8e806cdf488f4070ddd0f"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a0fb0110871d8e806cdf488f4070ddd0f">depositKappaConservative</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition)</td></tr>
+<tr class="memdesc:a0fb0110871d8e806cdf488f4070ddd0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">This computes the "conservative" deposition, multiplied by kappa.  <a href="classMcPhoto.html#a0fb0110871d8e806cdf488f4070ddd0f">More...</a><br /></td></tr>
+<tr class="separator:a0fb0110871d8e806cdf488f4070ddd0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a627125a2fb3c05f36a0f7d04120390ed"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a627125a2fb3c05f36a0f7d04120390ed">depositNonConservative</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_depositionNC, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_depositionKappaC)</td></tr>
 <tr class="memdesc:a627125a2fb3c05f36a0f7d04120390ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make the "non-conservative" kappa deposition.  <a href="classMcPhoto.html#a627125a2fb3c05f36a0f7d04120390ed">More...</a><br /></td></tr>
 <tr class="separator:a627125a2fb3c05f36a0f7d04120390ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -416,6 +421,9 @@ Protected Member Functions</h2></td></tr>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a65acbf58522501756e8e944ca006ff45">parseTransparentBoundaries</a> ()</td></tr>
 <tr class="memdesc:a65acbf58522501756e8e944ca006ff45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn on/off transparent boundaries. <br /></td></tr>
 <tr class="separator:a65acbf58522501756e8e944ca006ff45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a677e07138dd6fe69bf15711844e4aa00"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a677e07138dd6fe69bf15711844e4aa00">parseDirtySampling</a> ()</td></tr>
+<tr class="memdesc:a677e07138dd6fe69bf15711844e4aa00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse dirty sampling for photons.  <a href="classMcPhoto.html#a677e07138dd6fe69bf15711844e4aa00">More...</a><br /></td></tr>
+<tr class="separator:a677e07138dd6fe69bf15711844e4aa00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aabe821e56c23eb4620e576b2c042f805"><td class="memItemLeft" align="right" valign="top"><a id="aabe821e56c23eb4620e576b2c042f805"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aabe821e56c23eb4620e576b2c042f805">parseDivergenceComputation</a> ()</td></tr>
 <tr class="memdesc:aabe821e56c23eb4620e576b2c042f805"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the divergence computation, i.e. if we blend with non-conservative divergence or not. <br /></td></tr>
@@ -506,6 +514,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a0485251e0fbaf03bfa4b552f87cac10f">m_plotDomainPhotons</a></td></tr>
 <tr class="memdesc:a0485251e0fbaf03bfa4b552f87cac10f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if m_ebPhotons should be plotted. <br /></td></tr>
 <tr class="separator:a0485251e0fbaf03bfa4b552f87cac10f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a652da038b5ef7617df473cb44dd7a334"><td class="memItemLeft" align="right" valign="top"><a id="a652da038b5ef7617df473cb44dd7a334"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a652da038b5ef7617df473cb44dd7a334">m_dirtySampling</a></td></tr>
+<tr class="memdesc:a652da038b5ef7617df473cb44dd7a334"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dirty sampling or not. <br /></td></tr>
+<tr class="separator:a652da038b5ef7617df473cb44dd7a334"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64fee208dfd98b7136e189092a8ed803"><td class="memItemLeft" align="right" valign="top"><a id="a64fee208dfd98b7136e189092a8ed803"></a>
 size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a64fee208dfd98b7136e189092a8ed803">m_maxPhotonsGeneratedPerCell</a></td></tr>
 <tr class="memdesc:a64fee208dfd98b7136e189092a8ed803"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of computational photons generated per cell. <br /></td></tr>
@@ -1421,11 +1433,13 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a3b11419ab84372dff96030488597c9be"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3b11419ab84372dff96030488597c9be">&#9670;&nbsp;</a></span>depositKappaConservative()</h2>
+<a id="a0fb0110871d8e806cdf488f4070ddd0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0fb0110871d8e806cdf488f4070ddd0f">&#9670;&nbsp;</a></span>depositKappaConservative()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;class P , const Real &amp;(P::*)() const particleScalarField&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -1439,7 +1453,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
@@ -1553,14 +1567,13 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a083a58856a29011750bb7051b313ba66"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a083a58856a29011750bb7051b313ba66">&#9670;&nbsp;</a></span>depositPhotons() <span class="overload">[2/2]</span></h2>
+<a id="af5d2c90f8f4d3fa2efa3750ba82092b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5d2c90f8f4d3fa2efa3750ba82092b5">&#9670;&nbsp;</a></span>depositPhotons() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
+<div class="memtemplate">
+template&lt;class P , const Real &amp;(P::*)() const particleScalarField&gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">void McPhoto::depositPhotons </td>
@@ -1571,7 +1584,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
@@ -1586,11 +1599,6 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td></td><td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Deposit photons. </p>
@@ -1651,6 +1659,65 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
     <tr><td class="paramdir">[out]</td><td class="paramname">a_output</td><td>Contains NGP deposition of photons. Ignores cut-cells. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_photons</td><td>photons </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a53e8ff8f986e801623a1c11094251738"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53e8ff8f986e801623a1c11094251738">&#9670;&nbsp;</a></span>dirtySamplePhotons()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void McPhoto::dirtySamplePhotons </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPointParticle.html">PointParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_photons</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_phi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_numPhysicalPhotons</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const size_t&#160;</td>
+          <td class="paramname"><em>a_maxPhotonsPerCell</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Dirty-sampling method for photons. </p>
+<p>This is a "dirty" routine in the sense that it does not respect the EB and deposits using an NGP scheme (such that we don't have to communicate between sampling buckets). This is not something that we recommend using, unless you have a geometry-less domain and NGP deposition is acceptable. If those are good for you, feel free to use this routine. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_photons</td><td>Computational photons. Will be populated and depleted inside the routine. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Mesh-based density. Will be incremented by the generated photons. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numPhysicalPhotons</td><td>Number of physical photons to add to a_photons </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxPhotonsPerCell</td><td>Maximum number of photons generated per cell. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2021,6 +2088,34 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
+<a id="a677e07138dd6fe69bf15711844e4aa00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a677e07138dd6fe69bf15711844e4aa00">&#9670;&nbsp;</a></span>parseDirtySampling()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void McPhoto::parseDirtySampling </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Parse dirty sampling for photons. </p>
+<p>This is a hidden option &ndash; I really don't want it to be part of the regular user interface because the code is not general (only works for instantaneous, non-EB cases where photons aren't even absorbed on the domain boundaries) </p>
+
+</div>
+</div>
 <a id="a1ca87608627761f39fb02ec898ce2af5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1ca87608627761f39fb02ec898ce2af5">&#9670;&nbsp;</a></span>preRegrid()</h2>
 
@@ -2068,8 +2163,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="af3dc0ad693b7f2b442d25a53616ffe68"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af3dc0ad693b7f2b442d25a53616ffe68">&#9670;&nbsp;</a></span>randomExponential()</h2>
+<a id="acff014808ab36fe23e2f689404d40aa8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acff014808ab36fe23e2f689404d40aa8">&#9670;&nbsp;</a></span>randomExponential()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2082,12 +2177,12 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td>(</td>
           <td class="paramtype">const Real&#160;</td>
           <td class="paramname"><em>a_mean</em></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -2352,6 +2447,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>Source/RadiativeTransfer/<a class="el" href="CD__McPhoto_8H_source.html">CD_McPhoto.H</a></li>
 <li>Source/RadiativeTransfer/<a class="el" href="CD__McPhoto_8cpp.html">CD_McPhoto.cpp</a></li>
+<li>Source/RadiativeTransfer/<a class="el" href="CD__McPhotoImplem_8H_source.html">CD_McPhotoImplem.H</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
