@@ -393,6 +393,11 @@ ___________________
 * ``McPhoto.photon_generation`` for setting the photon generation method (details are given below).
 * ``McPhoto.source_type`` for setting the photon generation method (details are given below).
 
+.. tip::
+
+   The ``McPhoto`` class includes a hidden input parameter ``McPhoto.dirty_sampling = true/false`` which enables a cheaper sampling method for discrete photons when calling the ``advance`` method.
+   The caveat is that the method does not incorporate boundary intersect, only works for instantaneous propagation, forces NGP deposition of photons, and avoids filling the data holders that are necessary for load balancing.
+
 Clarifications
 ^^^^^^^^^^^^^^
 

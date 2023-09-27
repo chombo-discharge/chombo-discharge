@@ -3692,7 +3692,6 @@ CdrPlasmaStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int
     // If we're doing a stationary RTE, we should update the elliptic equations. The RTE solvers should
     // have regridded the source term in that case.
     if (this->stationaryRTE()) {
-      MayDay::Abort("crap");
       constexpr Real dummyDt = 0.0;
 
       this->solveRadiativeTransfer(dummyDt);
