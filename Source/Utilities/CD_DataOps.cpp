@@ -600,20 +600,17 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
     clone.define(ebisbox, dataBox, 1);
     FArrayBox& cloneReg = clone.getFArrayBox();
 
-#if CH_SPACEDIM == 2
-    const Real A = std::pow(a_alpha, 2.0) * std::pow((1.0 - a_alpha) / 2.0, 0.0);
-    const Real B = std::pow(a_alpha, 1.0) * std::pow((1.0 - a_alpha) / 2.0, 1.0);
-    const Real C = std::pow(a_alpha, 0.0) * std::pow((1.0 - a_alpha) / 2.0, 2.0);
-
-    const IntVect x = a_stride * BASISV(0);
-    const IntVect y = a_stride * BASISV(1);
-
     for (int icomp = 0; icomp < nComp; icomp++) {
 
       // Do a copy.
-      clone.copy(dataBox, Interval(0, 0), dataBox, data, Interval(icomp, icomp));
+      const Box validBox = dataBox & domain;
+      clone.setVal(0.0);
+      clone.copy(validBox, Interval(0, 0), validBox, data, Interval(icomp, icomp));
+      if (a_zeroEB) {
+        clone.setCoveredCellVal(0.0, 0, true);
+      }
 
-      // Fill ghost cells.
+      // Fill ghost cells by extending the data on the inside of the domain. This ignores corner cells.
       for (int dir = 0; dir < SpaceDim; dir++) {
         for (SideIterator sit; sit.ok(); ++sit) {
           const Box insideBox = adjCellBox(domain.domainBox(), dir, sit(), -1) & cellBox;
@@ -626,9 +623,13 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
         }
       }
 
-      if (a_zeroEB) {
-        clone.setCoveredCellVal(0.0, 0, true);
-      }
+#if CH_SPACEDIM == 2
+      const Real A = std::pow(a_alpha, 2.0) * std::pow((1.0 - a_alpha) / 2.0, 0.0);
+      const Real B = std::pow(a_alpha, 1.0) * std::pow((1.0 - a_alpha) / 2.0, 1.0);
+      const Real C = std::pow(a_alpha, 0.0) * std::pow((1.0 - a_alpha) / 2.0, 2.0);
+
+      const IntVect x = a_stride * BASISV(0);
+      const IntVect y = a_stride * BASISV(1);
 
       auto regularKernel = [&](const IntVect& iv) -> void {
         dataReg(iv, icomp) = A * cloneReg(iv);
@@ -636,21 +637,16 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
         dataReg(iv, icomp) += C * (cloneReg(iv + x + y) + cloneReg(iv + x - y) + cloneReg(iv - x + y) +
                                    cloneReg(iv - x - y));
       };
-
-      BoxLoops::loop(cellBox, regularKernel);
-    }
 #elif CH_SPACEDIM == 3
+      const Real A = std::pow(a_alpha, 3.0) * std::pow((1.0 - a_alpha) / 2.0, 0.0);
+      const Real B = std::pow(a_alpha, 2.0) * std::pow((1.0 - a_alpha) / 2.0, 1.0);
+      const Real C = std::pow(a_alpha, 1.0) * std::pow((1.0 - a_alpha) / 2.0, 2.0);
+      const Real D = std::pow(a_alpha, 0.0) * std::pow((1.0 - a_alpha) / 2.0, 3.0);
 
-    const Real A = std::pow(a_alpha, 3.0) * std::pow((1.0 - a_alpha) / 2.0, 0.0);
-    const Real B = std::pow(a_alpha, 2.0) * std::pow((1.0 - a_alpha) / 2.0, 1.0);
-    const Real C = std::pow(a_alpha, 1.0) * std::pow((1.0 - a_alpha) / 2.0, 2.0);
-    const Real D = std::pow(a_alpha, 0.0) * std::pow((1.0 - a_alpha) / 2.0, 3.0);
+      const IntVect x = a_stride * BASISV(0);
+      const IntVect y = a_stride * BASISV(1);
+      const IntVect z = a_stride * BASISV(2);
 
-    const IntVect x = a_stride * BASISV(0);
-    const IntVect y = a_stride * BASISV(1);
-    const IntVect z = a_stride * BASISV(2);
-
-    for (int icomp = 0; icomp < nComp; icomp++) {
       auto regularKernel = [&](const IntVect& iv) -> void {
         dataReg(iv, icomp) = A * cloneReg(iv);
         dataReg(iv, icomp) += B * (cloneReg(iv + x) + cloneReg(iv - x) + cloneReg(iv + y) + cloneReg(iv - y) +
@@ -666,12 +662,12 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
         dataReg(iv, icomp) += D * (cloneReg(iv - x + y + z) + cloneReg(iv - x + y - z) + cloneReg(iv - x - y + z) +
                                    cloneReg(iv - x - y - z));
       };
+#else
+      MayDay::Error("DataOps::filterSmooth -- dimensionality logic bust");
+#endif
 
       BoxLoops::loop(cellBox, regularKernel);
     }
-#else
-    MayDay::Error("DataOps::filterSmooth -- dimensionality logic bust");
-#endif
   }
 }
 
