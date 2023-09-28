@@ -396,7 +396,7 @@ ___________________
 .. tip::
 
    The ``McPhoto`` class includes a hidden input parameter ``McPhoto.dirty_sampling = true/false`` which enables a cheaper sampling method for discrete photons when calling the ``advance`` method.
-   The caveat is that the method does not incorporate boundary intersect, only works for instantaneous propagation, forces NGP deposition of photons, and avoids filling the data holders that are necessary for load balancing.
+   The caveat is that the method does not incorporate boundary intersect, only works for instantaneous propagation, and avoids filling the data holders that are necessary for load balancing.
 
 Clarifications
 ^^^^^^^^^^^^^^

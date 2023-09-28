@@ -1227,25 +1227,31 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
 
   a_photons.remap();
 
-  // Deposit with an NGP method
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const ProblemDomain&     domain = m_amr->getDomains()[lvl];
-    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const Real               dx     = m_amr->getDx()[lvl];
-    const RealVect           probLo = m_amr->getProbLo();
+  // Deposit photons on the mesh. I'm putting in a custom deposition method in case the user wants NGP deposition, which will be
+  // faster than the one supplied through AmrMesh.
+  if (m_deposition == DepositionType::NGP) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const ProblemDomain&     domain = m_amr->getDomains()[lvl];
+      const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real               dx     = m_amr->getDx()[lvl];
+      const RealVect           probLo = m_amr->getProbLo();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box      cellBox = dbl[dit()];
-      const EBISBox& ebisbox = ebisl[dit()];
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        const Box      cellBox = dbl[dit()];
+        const EBISBox& ebisbox = ebisl[dit()];
 
-      EBParticleMesh particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
+        EBParticleMesh particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
-      EBCellFAB&                 output  = (*a_phi[lvl])[dit()];
-      const List<PointParticle>& photons = a_photons[lvl][dit()].listItems();
+        EBCellFAB&                 output  = (*a_phi[lvl])[dit()];
+        const List<PointParticle>& photons = a_photons[lvl][dit()].listItems();
 
-      particleMesh.deposit<PointParticle, &PointParticle::weight>(photons, output, DepositionType::NGP, true);
+        particleMesh.deposit<PointParticle, &PointParticle::weight>(photons, output, DepositionType::NGP, true);
+      }
     }
+  }
+  else {
+    this->depositPhotons<PointParticle, &PointParticle::weight>(a_phi, a_photons, m_deposition);
   }
 
   a_photons.clearParticles();
@@ -1263,7 +1269,7 @@ McPhoto::depositPhotons()
 }
 
 void
-McPhoto::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC)
+McPhoto::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC) const noexcept
 {
   CH_TIME("McPhoto::depositNonConservative");
   if (m_verbosity > 5) {
@@ -1281,7 +1287,9 @@ McPhoto::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData
 }
 
 void
-McPhoto::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC)
+McPhoto::depositHybrid(EBAMRCellData&     a_depositionH,
+                       EBAMRIVData&       a_massDifference,
+                       const EBAMRIVData& a_depositionNC) const noexcept
 {
   CH_TIME("McPhoto::depositHybrid");
   if (m_verbosity > 5) {

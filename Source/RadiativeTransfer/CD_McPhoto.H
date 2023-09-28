@@ -161,9 +161,9 @@ public:
 
   /*!
     @brief Dirty-sampling method for photons. 
-    @details This is a "dirty" routine in the sense that it does not respect the EB and deposits using an NGP scheme
-    (such that we don't have to communicate between sampling buckets). This is not something that we recommend using,
-    unless you have a geometry-less domain and NGP deposition is acceptable. If those are good for you, feel free to 
+    @details This is a "dirty" routine in the sense that it does not respect the EB and avoids filling m_bulkParticles.
+    If you also use an NGP scheme this avoids communication between sampling buckets. But this is not something that we recommend using,
+    unless you have a geometry-less domain. If those are good for you, feel free to 
     use this routine. 
     @param[inout] a_photons Computational photons. Will be populated and depleted inside the routine.
     @param[inout] a_phi Mesh-based density. Will be incremented by the generated photons.
@@ -204,7 +204,9 @@ public:
   */
   template <class P, const Real& (P::*particleScalarField)() const>
   void
-  depositPhotons(EBAMRCellData& a_phi, ParticleContainer<P>& a_particles, const DepositionType& a_deposition);
+  depositPhotons(EBAMRCellData&        a_phi,
+                 ParticleContainer<P>& a_particles,
+                 const DepositionType& a_deposition) const noexcept;
 
   /*!
     @brief Sort container by cell
@@ -604,12 +606,12 @@ protected:
   /*!
     @brief Scratch storage for holding the non-conservative deposition
   */
-  EBAMRIVData m_depositionNC;
+  mutable EBAMRIVData m_depositionNC;
 
   /*!
     @brief Scratch storage for holding the mass difference when using hybrid deposition
   */
-  EBAMRIVData m_massDiff;
+  mutable EBAMRIVData m_massDiff;
 
   /*!
     @brief All particles
@@ -673,7 +675,7 @@ protected:
   depositKappaConservative(EBAMRCellData&             a_phi,
                            ParticleContainer<P>&      a_particles,
                            const DepositionType       a_deposition,
-                           const CoarseFineDeposition a_coarseFineDeposition);
+                           const CoarseFineDeposition a_coarseFineDeposition) const noexcept;
 
   /*!
     @brief Make the "non-conservative" kappa deposition
@@ -681,7 +683,7 @@ protected:
     @param[in]  a_depositionKappaC Conservative deposition
   */
   void
-  depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC);
+  depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC) const noexcept;
 
   /*!
     @brief Make the hybrid deposition. Also compute the mass difference
@@ -690,7 +692,9 @@ protected:
     @param[in]    a_depositioNC    Non-conservative deposition
   */
   void
-  depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC);
+  depositHybrid(EBAMRCellData&     a_depositionH,
+                EBAMRIVData&       a_massDifference,
+                const EBAMRIVData& a_depositionNC) const noexcept;
 
   /*!
     @brief Turn on/off transparent boundaries
