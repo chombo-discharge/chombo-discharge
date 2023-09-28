@@ -161,9 +161,9 @@ public:
 
   /*!
     @brief Dirty-sampling method for photons. 
-    @details This is a "dirty" routine in the sense that it does not respect the EB and deposits using an NGP scheme
-    (such that we don't have to communicate between sampling buckets). This is not something that we recommend using,
-    unless you have a geometry-less domain and NGP deposition is acceptable. If those are good for you, feel free to 
+    @details This is a "dirty" routine in the sense that it does not respect the EB and avoids filling m_bulkParticles.
+    If you also use an NGP scheme this avoids communication between sampling buckets. But this is not something that we recommend using,
+    unless you have a geometry-less domain. If those are good for you, feel free to 
     use this routine. 
     @param[inout] a_photons Computational photons. Will be populated and depleted inside the routine.
     @param[inout] a_phi Mesh-based density. Will be incremented by the generated photons.
