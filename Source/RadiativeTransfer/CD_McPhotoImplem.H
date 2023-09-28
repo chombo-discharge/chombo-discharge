@@ -18,7 +18,9 @@
 
 template <class P, const Real& (P::*particleScalarField)() const>
 void
-McPhoto::depositPhotons(EBAMRCellData& a_phi, ParticleContainer<P>& a_photons, const DepositionType& a_deposition)
+McPhoto::depositPhotons(EBAMRCellData&        a_phi,
+                        ParticleContainer<P>& a_photons,
+                        const DepositionType& a_deposition) const noexcept
 {
   CH_TIME("McPhoto::depositPhotons(ParticleContainer)");
   if (m_verbosity > 5) {
@@ -65,7 +67,7 @@ void
 McPhoto::depositKappaConservative(EBAMRCellData&             a_phi,
                                   ParticleContainer<P>&      a_particles,
                                   const DepositionType       a_deposition,
-                                  const CoarseFineDeposition a_coarseFineDeposition)
+                                  const CoarseFineDeposition a_coarseFineDeposition) const noexcept
 {
   CH_TIME("McPhoto::depositKappaConservative");
   if (m_verbosity > 5) {

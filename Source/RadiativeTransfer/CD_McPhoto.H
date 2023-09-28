@@ -204,7 +204,9 @@ public:
   */
   template <class P, const Real& (P::*particleScalarField)() const>
   void
-  depositPhotons(EBAMRCellData& a_phi, ParticleContainer<P>& a_particles, const DepositionType& a_deposition);
+  depositPhotons(EBAMRCellData&        a_phi,
+                 ParticleContainer<P>& a_particles,
+                 const DepositionType& a_deposition) const noexcept;
 
   /*!
     @brief Sort container by cell
@@ -604,12 +606,12 @@ protected:
   /*!
     @brief Scratch storage for holding the non-conservative deposition
   */
-  EBAMRIVData m_depositionNC;
+  mutable EBAMRIVData m_depositionNC;
 
   /*!
     @brief Scratch storage for holding the mass difference when using hybrid deposition
   */
-  EBAMRIVData m_massDiff;
+  mutable EBAMRIVData m_massDiff;
 
   /*!
     @brief All particles
@@ -673,7 +675,7 @@ protected:
   depositKappaConservative(EBAMRCellData&             a_phi,
                            ParticleContainer<P>&      a_particles,
                            const DepositionType       a_deposition,
-                           const CoarseFineDeposition a_coarseFineDeposition);
+                           const CoarseFineDeposition a_coarseFineDeposition) const noexcept;
 
   /*!
     @brief Make the "non-conservative" kappa deposition
@@ -681,7 +683,7 @@ protected:
     @param[in]  a_depositionKappaC Conservative deposition
   */
   void
-  depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC);
+  depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC) const noexcept;
 
   /*!
     @brief Make the hybrid deposition. Also compute the mass difference
@@ -690,7 +692,9 @@ protected:
     @param[in]    a_depositioNC    Non-conservative deposition
   */
   void
-  depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC);
+  depositHybrid(EBAMRCellData&     a_depositionH,
+                EBAMRIVData&       a_massDifference,
+                const EBAMRIVData& a_depositionNC) const noexcept;
 
   /*!
     @brief Turn on/off transparent boundaries
