@@ -17,10 +17,12 @@ def write_template(args):
 
     options_files = [args.discharge_home + "/Source/AmrMesh/CD_AmrMesh.options", \
                      args.discharge_home + "/Source/Driver/CD_Driver.options", \
+                     args.discharge_home + "/Source/ConvectionDiffusionReaction/CD_" + args.cdr_solver + ".options",\
                      args.discharge_home + "/Source/Electrostatics/CD_" + args.field_solver + ".options",\
-                     args.discharge_home + "/Source/ItoDiffusion/CD_ItoSolver.options",\
+                     args.discharge_home + "/Source/ItoDiffusion/CD_" + args.ito_solver + ".options",\
+                     args.discharge_home + "/Source/SurfaceODESolver/CD_SurfaceODESolver.options",\
                      args.discharge_home + "/Source/RadiativeTransfer/CD_McPhoto.options",\
-                     args.discharge_home + "/Source/Geometry/CD_GeoCoarsener.options", \
+                     args.discharge_home + "/Source/Geometry/CD_GeoCoarsener.options",\
                      args.discharge_home + "/Geometries/" + args.geometry + "/CD_" + args.geometry + ".options", \
                      args.discharge_home + "/Physics/ItoKMC/TimeSteppers/" + args.time_stepper + "/CD_" + args.time_stepper + ".options", \
                      args.discharge_home + "/Physics/ItoKMC/PlasmaModels/" + args.physics + "/CD_" + args.physics + ".options"]
