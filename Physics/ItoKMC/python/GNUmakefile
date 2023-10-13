@@ -11,8 +11,8 @@ $(ebaseobject): dependencies
 # Build dependencies if they do not exis. 
 dependencies: 
 	$(MAKE) --directory=$(DISCHARGE_HOME) discharge-lib
-	$(MAKE) --directory=$(DISCHARGE_HOME) itoplasma
+	$(MAKE) --directory=$(DISCHARGE_HOME) ito-kmc
 
 # Make advection-diffusion headers and library visible. 
-XTRACPPFLAGS += $(ITOPLASMA_INCLUDE) -I$(DISCHARGE_HOME)/Submodules/json/include
-XTRALIBFLAGS += $(addprefix -l, $(ITOPLASMA_LIB))$(config)
+XTRACPPFLAGS += $(ITOKMC_INCLUDE) -I$(DISCHARGE_HOME)/Submodules/json/include
+XTRALIBFLAGS += $(addprefix -l, $(ITOKMC_LIB))$(config)
