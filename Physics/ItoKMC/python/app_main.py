@@ -4,9 +4,9 @@ import sys
 def write_template(args):
     # Make sure that every class can be found where they should
     geofile = args.discharge_home + "/Geometries" + "/" + args.geometry + "/CD_" + args.geometry + ".H"
-    tsfile  = args.discharge_home + "/Physics/ItoPlasma/TimeSteppers" + "/" + args.time_stepper + "/CD_" + args.time_stepper + ".H"
-    kinfile = args.discharge_home + "/Physics/ItoPlasma/PlasmaModels" + "/" + args.physics + "/CD_" + args.physics + ".H"
-    tagfile = args.discharge_home + "/Physics/ItoPlasma/CellTaggers" +  "/" + args.cell_tagger + "/CD_" + args.cell_tagger + ".H"
+    tsfile  = args.discharge_home + "/Physics/ItoKMC/TimeSteppers" + "/" + args.time_stepper + "/CD_" + args.time_stepper + ".H"
+    kinfile = args.discharge_home + "/Physics/ItoKMC/PlasmaModels" + "/" + args.physics + "/CD_" + args.physics + ".H"
+    tagfile = args.discharge_home + "/Physics/ItoKMC/CellTaggers" +  "/" + args.cell_tagger + "/CD_" + args.cell_tagger + ".H"
     if not os.path.exists(geofile):
         print('Could not find ' + geofile)
     if not os.path.exists(tsfile):
@@ -49,7 +49,7 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("using namespace ChomboDischarge;\n")
-    mainf.write("using namespace Physics::ItoPlasma;\n\n")
+    mainf.write("using namespace Physics::ItoKMC;\n\n")
     mainf.write("int main(int argc, char* argv[]){\n")
 
     mainf.write("\n")
@@ -74,42 +74,20 @@ def write_template(args):
     mainf.write("  }\n")
 
     mainf.write("\n")
-    mainf.write("  // Set geometry and AMR \n")
-    mainf.write("  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new " + args.geometry + "());\n")
-    mainf.write("  RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());\n")
-    mainf.write("  RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());\n")
-
-    mainf.write("\n")
-    mainf.write("  // Set up physics \n")
-    mainf.write("  RefCountedPtr<ItoPlasmaPhysics> physics      = RefCountedPtr<ItoPlasmaPhysics> (new " + args.physics + "());\n")
-    mainf.write("  RefCountedPtr<ItoPlasmaStepper> timestepper  = RefCountedPtr<ItoPlasmaStepper> (new " + args.time_stepper + "(physics));\n")
+    mainf.write("  auto compgeom    = RefCountedPtr<ComputationalGeometry> (new " + args.geometry + "());\n")
+    mainf.write("  auto amr         = RefCountedPtr<AmrMesh> (new AmrMesh());\n")
+    mainf.write("  auto geocoarsen  = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());\n")
+    mainf.write("  auto physics     = RefCountedPtr<ItoKMCPhysics> (new " + args.physics + "());\n")
+    mainf.write("  auto timestepper = RefCountedPtr<ItoKMCStepper<>> (new " + args.time_stepper + "<>(physics));\n")
     if args.cell_tagger != "none":
-        mainf.write("  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new " + args.cell_tagger + "(physics, timestepper, amr, compgeom));\n")
+        mainf.write("  auto tagger      = RefCountedPtr<CellTagger> (new " + args.cell_tagger + "<ItoKMCStepper<>>(physics, timestepper, amr));\n")
     else:
-        mainf.write("  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);\n")
+        mainf.write("  auto tagger      = RefCountedPtr<CellTagger> (nullptr);\n")
 
-    mainf.write("\n")
-
-    mainf.write("  // Create solver factories\n")
-    mainf.write("  auto poi_fact = new FieldSolverFactory<" + args.field_solver + ">();\n")
-    mainf.write("  auto ito_fact = new ItoFactory<ItoSolver, " + args.ito_solver + ">();\n")
-    mainf.write("  auto rte_fact = new RtFactory<McPhoto, McPhoto>();\n")
-    mainf.write("\n")
-    
-    mainf.write("  // Instantiate solvers\n")
-    mainf.write("  auto poi = poi_fact->newSolver();\n");
-    mainf.write("  auto cdr = ito_fact->newLayout(physics->getItoSpecies());\n");
-    mainf.write("  auto rte = rte_fact->newLayout(physics->getRtSpecies());\n");
-    mainf.write("\n")
-
-    mainf.write("  // Send solvers to TimeStepper \n")
-    mainf.write("  timestepper->setFieldSolver(poi);\n");
-    mainf.write("  timestepper->setIto(cdr);\n");
-    mainf.write("  timestepper->setRadiativeTransferSolvers(rte);\n");
     mainf.write("\n")
 
     mainf.write("  // Set potential \n")
-    mainf.write("timestepper->setVoltage(potential_curve);\n")
+    mainf.write("  timestepper->setVoltage(potential_curve);\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")

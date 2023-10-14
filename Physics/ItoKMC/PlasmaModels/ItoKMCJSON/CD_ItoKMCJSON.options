@@ -3,6 +3,7 @@
 # ====================================================================================================
 ItoKMCJSON.verbose            = false           ## Turn on/off verbosity
 ItoKMCJSON.debug              = false           ## Turn on/off debugging
+ItoKMCJSON.chemistry_file     = chemistry.json  ## Chemistry file. Must be supplied by the user. 
 
 # For controlling the time step
 ItoKMCJSON.dX                 = 2.0             ## Maximum relative change Xnew/Xold during one time step.

@@ -15,9 +15,10 @@ parser.add_argument('-base_dir',       type=str,  default=os.environ.get('DISCHA
 parser.add_argument('-geometry',       type=str,  default="RegularGeometry",                                                  help="Geometry class (default: %(default)s)")
 parser.add_argument('-field_solver',   type=str,  default="FieldSolverMultigrid",                                             help="Poisson solver implementation (default: %(default)s)")
 parser.add_argument('-ito_solver',     type=str,  default="ItoSolver",                                                        help="Ito solver implementation (default: %(default)s)")
-parser.add_argument('-physics',        type=str,  default="ItoPlasmaJSON",                                                    help="Plasma model (default: %(default)s)")
-parser.add_argument('-time_stepper',   type=str,  default="ItoPlasmaGodunovStepper",                                          help="Time stepping method (default: %(default)s)")
-parser.add_argument('-cell_tagger',    type=str,  default="ItoPlasmaStreamerTagger",                                          help="Cell tagging method (default: %(default)s)")
+parser.add_argument('-cdr_solver',     type=str,  default="CdrCTU",                                                           help="Ito solver implementation (default: %(default)s)")
+parser.add_argument('-physics',        type=str,  default="ItoKMCJSON",                                                       help="Plasma model (default: %(default)s)")
+parser.add_argument('-time_stepper',   type=str,  default="ItoKMCGodunovStepper",                                             help="Time stepping method (default: %(default)s)")
+parser.add_argument('-cell_tagger',    type=str,  default="ItoKMCStreamerTagger",                                             help="Cell tagging method (default: %(default)s)")
 parser.add_argument('-app_name',       type=str,                                                                              help="Mini app name. An error message is issued if the name already exists")
 
 args = parser.parse_args()
