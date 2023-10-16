@@ -1495,6 +1495,44 @@ ItoKMCJSON::initializePhotonSpecies()
         return K1 * std::pow(K2 / K1, a);
       };
     }
+    else if (type == "stochastic B") {
+      if (!(kappaJSON.contains("chi min"))) {
+        this->throwParserError(baseErrorID + " and got 'stochastic B' but field 'chi min' is not specified");
+      }
+      if (!(kappaJSON.contains("chi max"))) {
+        this->throwParserError(baseErrorID + " and got 'stochastic B' but field 'chi max' is not specified");
+      }
+      if (!(kappaJSON.contains("neutral"))) {
+        this->throwParserError(baseErrorID + " and got 'stochastic B' but field 'neutral' is not specified");
+      }
+
+      const Real        chiMin  = kappaJSON["chi min"].get<Real>();
+      const Real        chiMax  = kappaJSON["chi max"].get<Real>();
+      const std::string neutral = this->trim(kappaJSON["neutral"].get<std::string>());
+
+      if (chiMin >= chiMax) {
+        this->throwParserError(baseErrorID + " and got 'stochastic B' but can't have 'chi min' >= 'chi max'");
+      }
+      if (m_backgroundSpeciesMap.count(neutral) != 1) {
+        this->throwParserError(baseErrorID + " and got 'stochastic B' but don't now species '" + neutral + "'");
+      }
+
+      kappaFunction = [x1              = chiMin,
+                       x2              = chiMax,
+                       &gasPressure    = this->m_gasPressure,
+                       &neutralSpecies = this->m_backgroundSpecies[m_backgroundSpeciesMap.at(neutral)]](
+                        const RealVect a_position) mutable -> Real {
+        const Real m = neutralSpecies.molarFraction(a_position);
+        const Real P = gasPressure(a_position);
+        const Real p = m * P;
+
+        const Real u  = Random::getUniformReal01();
+        const Real K1 = x1 * p;
+        const Real K2 = x2 * p;
+
+        return K1 * std::pow(K2 / K1, u);
+      };
+    }
     else {
       this->throwParserError(baseErrorID + " but type specification '" + type + "' is not supported");
     }
