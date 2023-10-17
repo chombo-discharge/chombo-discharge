@@ -1023,10 +1023,6 @@ ItoKMCStepper<I, C, R, F>::writeData(LevelData<EBCellFAB>& a_output,
     pout() << m_name + "::writeData" << endl;
   }
 
-  if (a_data[a_level].isNull()) {
-    pout() << "wtf" << endl;
-  }
-
   // Number of components we are working with.
   const int numComp = a_data[a_level]->nComp();
 
@@ -1059,7 +1055,15 @@ ItoKMCStepper<I, C, R, F>::writeData(LevelData<EBCellFAB>& a_output,
   DataOps::setCoveredValue(scratch, 0.0);
 
   CH_START(t5);
-  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, a_data.getRealm(), dstInterv, srcInterv);
+  m_amr->copyData(a_output,
+                  scratch,
+                  a_level,
+                  a_outputRealm,
+                  a_data.getRealm(),
+                  dstInterv,
+                  srcInterv,
+                  CopyStrategy::ValidGhost,
+                  CopyStrategy::ValidGhost);
   CH_STOP(t5);
 
   a_comp += numComp;
@@ -5142,6 +5146,8 @@ ItoKMCStepper<I, C, R, F>::advancePhotons(const Real a_dt) noexcept
     ParticleContainer<Photon>& domainPhotons = solver->getDomainPhotons();
     ParticleContainer<Photon>& sourcePhotons = solver->getSourcePhotons();
 
+    solver->clear(bulkPhotons);
+
     if (solver->isInstantaneous()) {
       solver->clear(photons);
 
@@ -5815,6 +5821,8 @@ ItoKMCStepper<I, C, R, F>::computePhysicsPlotVariables(EBAMRCellData& a_physicsP
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
+
+  m_amr->average(a_physicsPlotVars, m_fluidRealm, m_plasmaPhase, Average::Arithmetic, Interval(0, numVars - 1));
 }
 
 #include <CD_NamespaceFooter.H>
