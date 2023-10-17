@@ -138,7 +138,12 @@
 <li class="toctree-l4"><a class="reference internal" href="#initial-particles">Initial particles</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id6">Plasma reactions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#photon-species">Photon species</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id6">Basic definition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#absorption-coefficient">Absorption coefficient</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">Plasma reactions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#reaction-specifiers">Reaction specifiers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#rate-calculation">Rate calculation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#scaling">Scaling</a></li>
@@ -149,11 +154,11 @@
 <li class="toctree-l4"><a class="reference internal" href="#plotting-rates">Plotting rates</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id9">Photoionization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">Photoionization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#secondary-emission">Secondary emission</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#warnings-and-caveats">Warnings and caveats</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#higher-order-reactions">Higher-order reactions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id10">Townsend coefficients</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id12">Townsend coefficients</a></li>
 </ul>
 </li>
 </ul>
@@ -1730,8 +1735,124 @@ The particles must be organized as rows containing the coordinate positions and 
 </section>
 </section>
 </section>
+<section id="photon-species">
+<h3>Photon species<a class="headerlink" href="#photon-species" title="Permalink to this heading"></a></h3>
+<p>Photon species are species that are tracked using a radiative transfer solver.
+These are defined by an array of entries in a <code class="docutils literal notranslate"><span class="pre">photon</span> <span class="pre">species</span></code> JSON entry, and must define the following information:</p>
+<ul class="simple">
+<li><p>An ID/name for the species.</p></li>
+<li><p>The absorption coefficient for the photon type.</p></li>
+</ul>
 <section id="id6">
-<h3>Plasma reactions<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<h4>Basic definition<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h4>
+<p>A basic definition of a single photon species is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;photon species&quot;:
+ [
+     {
+         &quot;id&quot;: &quot;Y&quot;,              // Photon species id. Must be unique
+         &quot;kappa&quot;: {              // Specification of absorption coefficient.
+             &quot;type&quot;: &quot;constant&quot;, // Specify constant absorption coefficient
+             &quot;value&quot;: 1E4        // Value of the absorption coefficeint
+         }
+     }
+ ]
+</pre></div>
+</div>
+<p>Multiple photon species are added by appending with more entries, e.g.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;photon species&quot;:
+ [
+     {
+         &quot;id&quot;: &quot;Y1&quot;,             // Photon species id. Must be unique
+         &quot;kappa&quot;: {              // Specification of absorption coefficient.
+             &quot;type&quot;: &quot;constant&quot;, // Specify constant absorption coefficient
+             &quot;value&quot;: 1E4        // Value of the absorption coefficeint
+         }
+     },
+     {
+         &quot;id&quot;: &quot;Y2&quot;,             // Photon species id. Must be unique
+         &quot;kappa&quot;: {              // Specification of absorption coefficient.
+             &quot;type&quot;: &quot;constant&quot;, // Specify constant absorption coefficient
+             &quot;value&quot;: 1E4        // Value of the absorption coefficeint
+         }
+     }
+ ]
+</pre></div>
+</div>
+</section>
+<section id="absorption-coefficient">
+<h4>Absorption coefficient<a class="headerlink" href="#absorption-coefficient" title="Permalink to this heading"></a></h4>
+<section id="id7">
+<h5>Constant<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h5>
+<p>In order to set a constant absorption coefficient, set <code class="docutils literal notranslate"><span class="pre">type</span></code> to constant and then specify the <code class="docutils literal notranslate"><span class="pre">value</span></code> field.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;photon species&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">     </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Y&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;kappa&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">             </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">             </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1E4</span><span class="w"></span>
+<span class="w">         </span><span class="p">}</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="w"> </span><span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="stochastic-a">
+<h5>stochastic A<a class="headerlink" href="#stochastic-a" title="Permalink to this heading"></a></h5>
+<p>The <code class="docutils literal notranslate"><span class="pre">stochastic</span> <span class="pre">A</span></code> specifier computes a random absorption length from the expression</p>
+<div class="math notranslate nohighlight">
+\[\kappa = \left(\chi_{\textrm{min}}p_i\right)\left(\frac{\chi_{\textrm{max}}}{\chi_{\textrm{min}}}\right)^{\frac{f-f_1}{f_2 - f_1}},\]</div>
+<p>where <span class="math notranslate nohighlight">\(p_i\)</span> is the partial pressure of some species <span class="math notranslate nohighlight">\(i\)</span>, and <span class="math notranslate nohighlight">\(p_i\chi_{\textrm{min}}\)</span> and <span class="math notranslate nohighlight">\(p_i\chi_{\textrm{max}}\)</span> are minimum and maximum absorption lengths on the frequency interval <span class="math notranslate nohighlight">\(f\in[f_1,f_2]\)</span>.
+The user must specify <span class="math notranslate nohighlight">\(\chi_{\textrm{min}}\)</span>, <span class="math notranslate nohighlight">\(\chi_{\textrm{max}}\)</span>, <span class="math notranslate nohighlight">\(f_1\)</span>, <span class="math notranslate nohighlight">\(f_2\)</span>, and the background species used when computing <span class="math notranslate nohighlight">\(p_i\)</span>.
+This is done through fields <code class="docutils literal notranslate"><span class="pre">f1</span></code>, <code class="docutils literal notranslate"><span class="pre">f_2</span></code>, <code class="docutils literal notranslate"><span class="pre">chi</span> <span class="pre">min</span></code>, <code class="docutils literal notranslate"><span class="pre">chi</span> <span class="pre">max</span></code>, and <code class="docutils literal notranslate"><span class="pre">neutral</span></code>.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;photon species&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Y&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;kappa&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;stochastic A&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;f1&quot;</span><span class="p">:</span><span class="w">   </span><span class="mf">2.925E15</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;f2&quot;</span><span class="p">:</span><span class="w">   </span><span class="mf">3.059E15</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;chi min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2.625E-2</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;chi max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.5</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;neutral&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;O2&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="stochastic-b">
+<h5>stochastic B<a class="headerlink" href="#stochastic-b" title="Permalink to this heading"></a></h5>
+<p>The <code class="docutils literal notranslate"><span class="pre">stochastic</span> <span class="pre">B</span></code> specifier computes a random absorption length from the expression</p>
+<div class="math notranslate nohighlight">
+\[\kappa = \left(\chi_{\textrm{min}}p_i\right)\left(\frac{\chi_{\textrm{max}}}{\chi_{\textrm{min}}}\right)^u,\]</div>
+<p>where <span class="math notranslate nohighlight">\(p_i\)</span> is the partial pressure of some species <span class="math notranslate nohighlight">\(i\)</span>, and <span class="math notranslate nohighlight">\(p_i\chi_{\textrm{min}}\)</span> and <span class="math notranslate nohighlight">\(p_i\chi_{\textrm{max}}\)</span> are minimum and maximum absorption lengths, and <span class="math notranslate nohighlight">\(u\)</span> is a random number between 0 and 1.
+Note that that this is just a simpler way of using the <code class="docutils literal notranslate"><span class="pre">stochastic</span> <span class="pre">A</span></code> specifier above.
+The user must specify <span class="math notranslate nohighlight">\(\chi_{\textrm{min}}\)</span>, <span class="math notranslate nohighlight">\(\chi_{\textrm{max}}\)</span>, and the background species used when computing <span class="math notranslate nohighlight">\(p_i\)</span>.
+This is done through fields <code class="docutils literal notranslate"><span class="pre">chi</span> <span class="pre">min</span></code>, <code class="docutils literal notranslate"><span class="pre">chi</span> <span class="pre">max</span></code>, and <code class="docutils literal notranslate"><span class="pre">neutral</span></code>.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;photon species&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Y&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;kappa&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;stochastic B&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;chi min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2.625E-2</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;chi max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.5</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;neutral&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;O2&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="id8">
+<h3>Plasma reactions<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h3>
 <p>Plasma reactions are always specified stoichiometrically in the form <span class="math notranslate nohighlight">\(S_A + S_B + \ldots \xrightarrow{k} S_C + S_D + \ldots\)</span>.
 The user must supply the following information:</p>
 <ul class="simple">
@@ -1788,8 +1909,8 @@ The reaction string can then be defined as the string <code class="docutils lite
 <h4>Rate calculation<a class="headerlink" href="#rate-calculation" title="Permalink to this heading"></a></h4>
 <p>Reaction rates can be specified using multiple formats (constant, tabulated, function-based, etc).
 To specify how the rate is computed, one must specify the <code class="docutils literal notranslate"><span class="pre">type</span></code> keyword in the JSON entry.</p>
-<section id="id7">
-<h5>Constant<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h5>
+<section id="id9">
+<h5>Constant<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h5>
 <p>To use a constant reaction rate, the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier must be set to constant and the reaction rate must be specified through the <code class="docutils literal notranslate"><span class="pre">value</span></code> keyword.
 A JSON specification is e.g.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;: [
@@ -1903,8 +2024,8 @@ The reason for this is that the Townsend coefficients <span class="math notransl
 By specifying e.g. a reaction string <span class="math notranslate nohighlight">\(\text{e} + \text{N}_2 \rightarrow \text{e} + \text{e} + \text{N}_2^+\)</span> together with the <code class="docutils literal notranslate"><span class="pre">alpha*v</span></code> or <code class="docutils literal notranslate"><span class="pre">eta*v</span></code> specifiers, one will end up multiplying in the neutral density twice, which will lead to an incorrect rate.</p>
 </div>
 </section>
-<section id="id8">
-<h5>Tabulated vs E/N<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h5>
+<section id="id10">
+<h5>Tabulated vs E/N<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h5>
 </section>
 </section>
 <section id="scaling">
@@ -2074,8 +2195,8 @@ A JSON specification that includes these</p>
 </div>
 </section>
 </section>
-<section id="id9">
-<h3>Photoionization<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h3>
+<section id="id11">
+<h3>Photoionization<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h3>
 <p>Photoionization reactions are specified by including a <code class="docutils literal notranslate"><span class="pre">photoionization</span></code> array of JSON entries that specify each reaction.
 The left-hand side of the reaction must contain a photon species (plasma and background species can be present but will be ignored), and the right-hand side can consist of any species except other photon species.
 Each entry <em>must</em> contain a reaction string specifier and optionally also an efficiency (which defaults to 1).
@@ -2155,8 +2276,8 @@ This is particularly the case for three-body reactions with BOLSIG+ that may req
 <p>For three-body reactions the units given by BOLSIG+ in the output file may or may not be incorrect (depending on whether or not the user scaled the cross sections).</p>
 </div>
 </section>
-<section id="id10">
-<h4>Townsend coefficients<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h4>
+<section id="id12">
+<h4>Townsend coefficients<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h4>
 <p>Townsend coefficients are not fundamentally required for specifying the reactions, but as with the higher-order reactions some of the output rates for three-body reactions might be inconsistently represented in the BOLSIG+ output files.
 For example, some care might be required when using the Townsend attachment coefficient for air when the reaction <span class="math notranslate nohighlight">\(\textrm{e} + \textrm{O}_2 + \textrm{O}_2\rightarrow \textrm{O}_2^- + \textrm{O}_2\)</span> is included because the rate constant might require proper scaling after running the Boltzmann solver, but this scaling is invisible to the BOLSIG+’s calculation of the attachment coefficient <span class="math notranslate nohighlight">\(\eta/N\)</span>.</p>
 <div class="admonition warning">
