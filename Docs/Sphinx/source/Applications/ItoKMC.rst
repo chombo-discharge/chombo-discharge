@@ -1119,6 +1119,139 @@ For example:
        }
     ]
 
+Photon species
+--------------
+
+Photon species are species that are tracked using a radiative transfer solver.
+These are defined by an array of entries in a ``photon species`` JSON entry, and must define the following information:
+
+* An ID/name for the species.
+* The absorption coefficient for the photon type.
+
+Basic definition
+________________
+
+A basic definition of a single photon species is
+
+.. code-block:: json
+
+   "photon species":
+    [
+	{
+	    "id": "Y",              // Photon species id. Must be unique
+	    "kappa": {              // Specification of absorption coefficient. 
+		"type": "constant", // Specify constant absorption coefficient
+		"value": 1E4        // Value of the absorption coefficeint
+	    }
+	}
+    ]
+
+Multiple photon species are added by appending with more entries, e.g.
+
+.. code-block:: json
+
+   "photon species":
+    [
+	{
+	    "id": "Y1",             // Photon species id. Must be unique
+	    "kappa": {              // Specification of absorption coefficient. 
+		"type": "constant", // Specify constant absorption coefficient
+		"value": 1E4        // Value of the absorption coefficeint
+	    }
+	},
+	{
+	    "id": "Y2",             // Photon species id. Must be unique
+	    "kappa": {              // Specification of absorption coefficient. 
+		"type": "constant", // Specify constant absorption coefficient
+		"value": 1E4        // Value of the absorption coefficeint
+	    }
+	}	
+    ]
+
+
+Absorption coefficient
+______________________
+
+Constant
+^^^^^^^^
+
+In order to set a constant absorption coefficient, set ``type`` to constant and then specify the ``value`` field.
+For example:
+
+.. code-block:: json
+
+   "photon species":
+    [
+	{
+	    "id": "Y",
+	    "kappa": { 
+		"type": "constant",
+		"value": 1E4       
+	    }
+	}
+    ]
+
+stochastic A
+^^^^^^^^^^^^
+
+The ``stochastic A`` specifier computes a random absorption length from the expression
+
+.. math::
+
+   \kappa = \left(\chi_{\textrm{min}}p_i\right)\left(\frac{\chi_{\textrm{max}}}{\chi_{\textrm{min}}}\right)^{\frac{f-f_1}{f_2 - f_1}},
+
+where :math:`p_i` is the partial pressure of some species :math:`i`, and :math:`p_i\chi_{\textrm{min}}` and :math:`p_i\chi_{\textrm{max}}` are minimum and maximum absorption lengths on the frequency interval :math:`f\in[f_1,f_2]`.
+The user must specify :math:`\chi_{\textrm{min}}`, :math:`\chi_{\textrm{max}}`, :math:`f_1`, :math:`f_2`, and the background species used when computing :math:`p_i`.
+This is done through fields ``f1``, ``f_2``, ``chi min``, ``chi max``, and ``neutral``.
+For example:
+
+.. code-block:: json
+
+    "photon species":
+    [
+	{
+	    "id": "Y",                  
+	    "kappa": {                  
+		"type": "stochastic A", 
+		"f1":   2.925E15,       
+		"f2":   3.059E15,       
+		"chi min": 2.625E-2,    
+		"chi max": 1.5,         
+		"neutral": "O2"         
+	    }
+	}
+    ]		
+
+stochastic B
+^^^^^^^^^^^^
+
+The ``stochastic B`` specifier computes a random absorption length from the expression
+
+.. math::
+
+   \kappa = \left(\chi_{\textrm{min}}p_i\right)\left(\frac{\chi_{\textrm{max}}}{\chi_{\textrm{min}}}\right)^u,
+
+where :math:`p_i` is the partial pressure of some species :math:`i`, and :math:`p_i\chi_{\textrm{min}}` and :math:`p_i\chi_{\textrm{max}}` are minimum and maximum absorption lengths, and :math:`u` is a random number between 0 and 1.
+Note that that this is just a simpler way of using the ``stochastic A`` specifier above. 
+The user must specify :math:`\chi_{\textrm{min}}`, :math:`\chi_{\textrm{max}}`, and the background species used when computing :math:`p_i`.
+This is done through fields ``chi min``, ``chi max``, and ``neutral``.
+For example:
+
+.. code-block:: json
+
+    "photon species":
+    [
+	{
+	    "id": "Y",                  
+	    "kappa": {                  
+		"type": "stochastic B", 
+		"chi min": 2.625E-2,    
+		"chi max": 1.5,         
+		"neutral": "O2"         
+	    }
+	}
+    ]		
+
 
 Plasma reactions
 ----------------
@@ -1393,19 +1526,68 @@ Reactions efficiencies can be modified in the same way as one do with the ``scal
    k \rightarrow \nu k,
 
 where :math:`\nu` is the reaction efficiency.
-An example JSON specification is
+Specifications of the efficiency can be achieved in the forms discussed below.
+
+Constant efficiency
+^^^^^^^^^^^^^^^^^^^
+
+An example JSON specification for a constant efficiency is:
 
 .. code-block:: json
 		
     "plasma reactions":
     [
 	{
-	    "reaction": "e -> e + e + M+", // Reaction string
-	    "type": "alpha*v",             // Rate is alpha*v
-	    "species": "e",                // Species for v,
-	    "efficiency": 0.5              // Reaction efficiency.
+	    "reaction": "e -> e + e + M+", 
+	    "efficiency": 0.5              
 	}	
     ]
+
+Efficiency vs E/N
+^^^^^^^^^^^^^^^^^
+
+An example JSON specification for an efficiency computed versus :math:`E/N` is
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e -> e + e + M+", 
+	    "efficiency vs E/N": "efficiencies.dat"
+	}	
+    ]
+
+where the file ``efficiencies.dat`` must contain two-column data containing values of :math:`E/N` along the first column and efficiencies along the second column.
+An example file is e.g.
+
+.. code-block:: text
+
+   0    0
+   100  0.1
+   200  0.3
+   500  0.8
+   1000 1.0
+   
+This data is then internally convered to a uniformly spaced lookup table (see :ref:`LookupTable`).
+
+Efficiency vs E
+^^^^^^^^^^^^^^^^^
+
+An example JSON specification for an efficiency computed versus :math:`E` is
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e -> e + e + M+", 
+	    "efficiency vs E": "efficiencies.dat"
+	}	
+    ]
+
+where the file ``efficiencies.dat`` must contain two-column data containing values of :math:`E` along the first column and efficiencies along the second column.
+This method follows the same as ``efficiency vs E/N`` where the data in the input file is put in a lookup table.
 
 Quenching
 _________
