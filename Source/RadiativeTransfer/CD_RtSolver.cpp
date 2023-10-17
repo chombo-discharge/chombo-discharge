@@ -383,7 +383,15 @@ RtSolver::writeData(LevelData<EBCellFAB>& a_output,
   DataOps::setCoveredValue(scratch, 0.0);
 
   CH_START(t6);
-  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  m_amr->copyData(a_output,
+                  scratch,
+                  a_level,
+                  a_outputRealm,
+                  m_realm,
+                  dstInterv,
+                  srcInterv,
+                  CopyStrategy::ValidGhost,
+                  CopyStrategy::ValidGhost);
   CH_STOP(t6);
 
   a_comp += numComp;

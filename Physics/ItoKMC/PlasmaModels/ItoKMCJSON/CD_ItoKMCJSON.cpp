@@ -2297,6 +2297,34 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
       return fluidRate(E, x) * efficiency;
     };
   }
+  if (a_reactionJSON.contains("efficiency vs E/N")) {
+    const std::string file = a_reactionJSON["efficiency vs E/N"].get<std::string>();
+
+    LookupTable1D<Real, 1> tabulatedEfficiency = DataParser::simpleFileReadASCII(file);
+
+    tabulatedEfficiency.prepareTable(0, 500, LookupTable::Spacing::Uniform);
+
+    fluidRate = [fluidRate, tabulatedEfficiency, &N = this->m_gasNumberDensity](const Real E, const RealVect x) {
+      const Real ETd = E / (N(x) * Units::Td);
+
+      const Real eff = tabulatedEfficiency.interpolate<1>(ETd);
+
+      return eff * fluidRate(E, x);
+    };
+  }
+  if (a_reactionJSON.contains("efficiency vs E")) {
+    const std::string file = a_reactionJSON["efficiency vs E"].get<std::string>();
+
+    LookupTable1D<Real, 1> tabulatedEfficiency = DataParser::simpleFileReadASCII(file);
+
+    tabulatedEfficiency.prepareTable(0, 500, LookupTable::Spacing::Uniform);
+
+    fluidRate = [fluidRate, tabulatedEfficiency](const Real E, const RealVect x) {
+      const Real eff = tabulatedEfficiency.interpolate<1>(E);
+
+      return eff * fluidRate(E, x);
+    };
+  }
   if (a_reactionJSON.contains("quenching pressure")) {
     const Real pq = a_reactionJSON["quenching pressure"].get<Real>();
 

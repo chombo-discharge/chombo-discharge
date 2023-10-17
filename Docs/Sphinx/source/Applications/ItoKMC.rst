@@ -1526,19 +1526,68 @@ Reactions efficiencies can be modified in the same way as one do with the ``scal
    k \rightarrow \nu k,
 
 where :math:`\nu` is the reaction efficiency.
-An example JSON specification is
+Specifications of the efficiency can be achieved in the forms discussed below.
+
+Constant efficiency
+^^^^^^^^^^^^^^^^^^^
+
+An example JSON specification for a constant efficiency is:
 
 .. code-block:: json
 		
     "plasma reactions":
     [
 	{
-	    "reaction": "e -> e + e + M+", // Reaction string
-	    "type": "alpha*v",             // Rate is alpha*v
-	    "species": "e",                // Species for v,
-	    "efficiency": 0.5              // Reaction efficiency.
+	    "reaction": "e -> e + e + M+", 
+	    "efficiency": 0.5              
 	}	
     ]
+
+Efficiency vs E/N
+^^^^^^^^^^^^^^^^^
+
+An example JSON specification for an efficiency computed versus :math:`E/N` is
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e -> e + e + M+", 
+	    "efficiency vs E/N": "efficiencies.dat"
+	}	
+    ]
+
+where the file ``efficiencies.dat`` must contain two-column data containing values of :math:`E/N` along the first column and efficiencies along the second column.
+An example file is e.g.
+
+.. code-block:: text
+
+   0    0
+   100  0.1
+   200  0.3
+   500  0.8
+   1000 1.0
+   
+This data is then internally convered to a uniformly spaced lookup table (see :ref:`LookupTable`).
+
+Efficiency vs E
+^^^^^^^^^^^^^^^^^
+
+An example JSON specification for an efficiency computed versus :math:`E` is
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e -> e + e + M+", 
+	    "efficiency vs E": "efficiencies.dat"
+	}	
+    ]
+
+where the file ``efficiencies.dat`` must contain two-column data containing values of :math:`E` along the first column and efficiencies along the second column.
+This method follows the same as ``efficiency vs E/N`` where the data in the input file is put in a lookup table.
 
 Quenching
 _________
