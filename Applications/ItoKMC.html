@@ -2059,18 +2059,58 @@ An example JSON specification is</p>
 <div class="math notranslate nohighlight">
 \[k \rightarrow \nu k,\]</div>
 <p>where <span class="math notranslate nohighlight">\(\nu\)</span> is the reaction efficiency.
-An example JSON specification is</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;:
-[
-    {
-        &quot;reaction&quot;: &quot;e -&gt; e + e + M+&quot;, // Reaction string
-        &quot;type&quot;: &quot;alpha*v&quot;,             // Rate is alpha*v
-        &quot;species&quot;: &quot;e&quot;,                // Species for v,
-        &quot;efficiency&quot;: 0.5              // Reaction efficiency.
-    }
-]
+Specifications of the efficiency can be achieved in the forms discussed below.</p>
+<section id="constant-efficiency">
+<h5>Constant efficiency<a class="headerlink" href="#constant-efficiency" title="Permalink to this heading"></a></h5>
+<p>An example JSON specification for a constant efficiency is:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;reaction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e -&gt; e + e + M+&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;efficiency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
+</section>
+<section id="efficiency-vs-e-n">
+<h5>Efficiency vs E/N<a class="headerlink" href="#efficiency-vs-e-n" title="Permalink to this heading"></a></h5>
+<p>An example JSON specification for an efficiency computed versus <span class="math notranslate nohighlight">\(E/N\)</span> is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;reaction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e -&gt; e + e + M+&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;efficiency vs E/N&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;efficiencies.dat&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+<p>where the file <code class="docutils literal notranslate"><span class="pre">efficiencies.dat</span></code> must contain two-column data containing values of <span class="math notranslate nohighlight">\(E/N\)</span> along the first column and efficiencies along the second column.
+An example file is e.g.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>0    0
+100  0.1
+200  0.3
+500  0.8
+1000 1.0
+</pre></div>
+</div>
+<p>This data is then internally convered to a uniformly spaced lookup table (see <span class="xref std std-ref">LookupTable</span>).</p>
+</section>
+<section id="efficiency-vs-e">
+<h5>Efficiency vs E<a class="headerlink" href="#efficiency-vs-e" title="Permalink to this heading"></a></h5>
+<p>An example JSON specification for an efficiency computed versus <span class="math notranslate nohighlight">\(E\)</span> is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;reaction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e -&gt; e + e + M+&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;efficiency vs E&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;efficiencies.dat&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+<p>where the file <code class="docutils literal notranslate"><span class="pre">efficiencies.dat</span></code> must contain two-column data containing values of <span class="math notranslate nohighlight">\(E\)</span> along the first column and efficiencies along the second column.
+This method follows the same as <code class="docutils literal notranslate"><span class="pre">efficiency</span> <span class="pre">vs</span> <span class="pre">E/N</span></code> where the data in the input file is put in a lookup table.</p>
+</section>
 </section>
 <section id="quenching">
 <h4>Quenching<a class="headerlink" href="#quenching" title="Permalink to this heading"></a></h4>
