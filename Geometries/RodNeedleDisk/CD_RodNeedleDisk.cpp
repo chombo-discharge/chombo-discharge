@@ -103,8 +103,9 @@ RodNeedleDisk::defineRodNeedle() noexcept
   // Create the needle implicit function.
   if (useNeedle) {
     // a_angle is entire opening angle, dividing by two to get half of the opening angle
-    const Real bodyRadius = needleRadius - needleTipRadius;
-    const Real tipLength  = bodyRadius / std::tan((0.5 * needleAngle) * Units::pi / 180.0);
+    const Real bodyRadius       = needleRadius - needleTipRadius;
+    const Real tipLength        = bodyRadius / std::tan((0.5 * needleAngle) * Units::pi / 180.0);
+    const Real transitionRadius = 0.25 * needleTipRadius;
 
     // The center of the needle tip is set to origo in order for the rotation to work more easily
     const Vec3 bodyBackPosition(0.0, 0.0, 0.0);
@@ -117,7 +118,7 @@ RodNeedleDisk::defineRodNeedle() noexcept
 
     cylinder = std::make_shared<EBGeometry::CylinderSDF<Real>>(bodyBackPosition, bodyFrontPosition, bodyRadius);
     cone     = std::make_shared<EBGeometry::InfiniteConeSDF<Real>>(needleTipCenter, needleAngle);
-    needle   = EBGeometry::Intersection<Real>(cylinder, cone);
+    needle   = EBGeometry::SmoothIntersection<Real>(cylinder, cone, transitionRadius);
     needle   = EBGeometry::Offset<Real>(needle, needleTipRadius);
 
     implicitFunctions.emplace_back(needle);
