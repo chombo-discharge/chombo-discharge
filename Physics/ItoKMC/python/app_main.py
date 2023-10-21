@@ -74,6 +74,9 @@ def write_template(args):
     mainf.write("  }\n")
 
     mainf.write("\n")
+    mainf.write("  // Initialize RNG\n")
+    mainf.write("  Random::seed();\n");
+    mainf.write("\n")
     mainf.write("  auto compgeom    = RefCountedPtr<ComputationalGeometry> (new " + args.geometry + "());\n")
     mainf.write("  auto amr         = RefCountedPtr<AmrMesh> (new AmrMesh());\n")
     mainf.write("  auto geocoarsen  = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());\n")
