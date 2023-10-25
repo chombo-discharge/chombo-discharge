@@ -613,7 +613,22 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
 	  "scale E/N" : 1.0,                                         // Optional scaling of the column containing E/N
 	  "scale alpha/N" : 1.0                                      // Optional scaling       
        }
-   }		
+   }
+
+Plotting
+________
+
+To include the Townsend coefficients as mesh variables in HDF5 files, include the ``plot`` specifier, e.g.
+
+.. code-block:: json
+   
+   {
+      "alpha": {
+         "type": "auto",
+	 "species": "e",
+	 "plot": true
+      }
+   }
 
 Plasma species
 --------------

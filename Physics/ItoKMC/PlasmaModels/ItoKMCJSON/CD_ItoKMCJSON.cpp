@@ -710,13 +710,21 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string a_coeff)
     this->throwParserError(baseError + " but type specification '" + type + "' is not supported");
   }
 
+  // Check if we should plot the coefficient
+  bool plotCoeff = false;
+  if (m_json[a_coeff].contains("plot")) {
+    plotCoeff = m_json[a_coeff]["plot"].get<bool>();
+  }
+
   // Associate with correct internal functions. This should be safe to do even if we are using 'auto' mode for the
   // coefficients because proper warnings will be given later on.
   if (a_coeff == "alpha") {
-    m_alpha = func;
+    m_alpha     = func;
+    m_plotAlpha = plotCoeff;
   }
   else if (a_coeff == "eta") {
-    m_eta = func;
+    m_eta     = func;
+    m_plotEta = plotCoeff;
   }
   else {
     this->throwParserError(baseError + " but input argument 'a_coeff' was not 'alpha' or 'eta'");
@@ -2803,6 +2811,14 @@ ItoKMCJSON::getNumberOfPlotVariables() const noexcept
     }
   }
 
+  if (m_plotAlpha) {
+    numPlots++;
+  }
+
+  if (m_plotEta) {
+    numPlots++;
+  }
+
   return numPlots;
 }
 
@@ -2832,6 +2848,13 @@ ItoKMCJSON::getPlotVariableNames() const noexcept
     if (std::get<0>(m_kmcReactionRatePlots[i])) {
       plotVariableNames.push_back(std::get<1>(m_kmcReactionRatePlots[i]));
     }
+  }
+
+  if (m_plotAlpha) {
+    plotVariableNames.push_back("Townsend ionization coefficient");
+  }
+  if (m_plotEta) {
+    plotVariableNames.push_back("Townsend attachment coefficient");
   }
 
   return plotVariableNames;
@@ -2872,6 +2895,13 @@ ItoKMCJSON::getPlotVariables(const RealVect          a_E,
     if (std::get<0>(m_kmcReactionRatePlots[i])) {
       plotVars.push_back(m_fluidRates[i](E, a_pos));
     }
+  }
+
+  if (m_plotAlpha) {
+    plotVars.push_back(m_alpha(E, a_pos));
+  }
+  if (m_plotEta) {
+    plotVars.push_back(m_eta(E, a_pos));
   }
 
   return plotVars;
