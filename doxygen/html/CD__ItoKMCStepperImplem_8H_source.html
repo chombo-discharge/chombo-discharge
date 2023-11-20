@@ -5895,11 +5895,12 @@ $(function() {
 <div class="line"><a name="l05823"></a><span class="lineno"> 5823</span>&#160;  }</div>
 <div class="line"><a name="l05824"></a><span class="lineno"> 5824</span>&#160; </div>
 <div class="line"><a name="l05825"></a><span class="lineno"> 5825</span>&#160;  m_amr-&gt;average(a_physicsPlotVars, m_fluidRealm, m_plasmaPhase, Average::Arithmetic, Interval(0, numVars - 1));</div>
-<div class="line"><a name="l05826"></a><span class="lineno"> 5826</span>&#160;}</div>
-<div class="line"><a name="l05827"></a><span class="lineno"> 5827</span>&#160; </div>
-<div class="line"><a name="l05828"></a><span class="lineno"> 5828</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l05829"></a><span class="lineno"> 5829</span>&#160; </div>
-<div class="line"><a name="l05830"></a><span class="lineno"> 5830</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l05826"></a><span class="lineno"> 5826</span>&#160;  m_amr-&gt;interpGhost(a_physicsPlotVars, m_fluidRealm, m_plasmaPhase);</div>
+<div class="line"><a name="l05827"></a><span class="lineno"> 5827</span>&#160;}</div>
+<div class="line"><a name="l05828"></a><span class="lineno"> 5828</span>&#160; </div>
+<div class="line"><a name="l05829"></a><span class="lineno"> 5829</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l05830"></a><span class="lineno"> 5830</span>&#160; </div>
+<div class="line"><a name="l05831"></a><span class="lineno"> 5831</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__Average_8H_html_ad98181732ac62b1b3b276f48772349c4"><div class="ttname"><a href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a></div><div class="ttdeci">Average</div><div class="ttdoc">Various averaging methods.</div><div class="ttdef"><b>Definition:</b> CD_Average.H:24</div></div>
 <div class="ttc" id="aCD__DataOps_8H_html"><div class="ttname"><a href="CD__DataOps_8H.html">CD_DataOps.H</a></div><div class="ttdoc">Agglomeration of useful data operations.</div></div>
 <div class="ttc" id="aCD__EBCoarseToFineInterp_8H_html"><div class="ttname"><a href="CD__EBCoarseToFineInterp_8H.html">CD_EBCoarseToFineInterp.H</a></div><div class="ttdoc">Declaration of an aggregated class for regrid operations.</div></div>
