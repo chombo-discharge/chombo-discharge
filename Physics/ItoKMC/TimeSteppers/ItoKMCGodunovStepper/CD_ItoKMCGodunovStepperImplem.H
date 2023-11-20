@@ -573,11 +573,17 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
     this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::All);
     this->computeSemiImplicitRho();
   }
-  
+
   const bool converged = this->solvePoisson();
-  
+
   if (!converged) {
-    MayDay::Warning("ItoKMCGodunovStepper::regrid - Poisson solve did not converge after regrid!!!");
+    const std::string errMsg = "ItoKMCGodunovStepper::regrid - Poisson solve did not converge after regrid";
+
+    pout() << errMsg << endl;
+
+    if (this->m_abortOnFailure) {
+      MayDay::Error(errMsg.c_str());
+    }
   }
   m_timer.stopEvent("Solve Poisson");
 
@@ -1279,9 +1285,16 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   m_timer.startEvent("Solve Poisson");
   const bool converged = this->solvePoisson();
   if (!converged) {
-    MayDay::Warning("ItoKMCGodunovStepper::advanceEulerMaruyama - Poisson solver did not converge");
+    const std::string errMsg =
+      "ItoKMCGodunovStepper::advanceEulerMaruyama - Poisson solve did not converge after regrid";
+
+    pout() << errMsg << endl;
+
+    if (this->m_abortOnFailure) {
+      MayDay::Error(errMsg.c_str());
+    }
   }
-  m_timer.stopEvent("Solve Poisson");  
+  m_timer.stopEvent("Solve Poisson");
 
   // Recompute velocities with the new electric field. This interpolates the velocities to the current particle positions, i.e.
   // we compute V^(k+1)(X^k) = mu^k * E^(k+1)(X^k)
