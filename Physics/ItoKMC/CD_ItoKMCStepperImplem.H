@@ -5823,6 +5823,7 @@ ItoKMCStepper<I, C, R, F>::computePhysicsPlotVariables(EBAMRCellData& a_physicsP
   }
 
   m_amr->average(a_physicsPlotVars, m_fluidRealm, m_plasmaPhase, Average::Arithmetic, Interval(0, numVars - 1));
+  m_amr->interpGhost(a_physicsPlotVars, m_fluidRealm, m_plasmaPhase);
 }
 
 #include <CD_NamespaceFooter.H>
