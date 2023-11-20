@@ -573,7 +573,9 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
     this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::All);
     this->computeSemiImplicitRho();
   }
+  
   const bool converged = this->solvePoisson();
+  
   if (!converged) {
     MayDay::Warning("ItoKMCGodunovStepper::regrid - Poisson solve did not converge after regrid!!!");
   }
@@ -1272,11 +1274,14 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   this->computeSemiImplicitRho();
   m_timer.stopEvent("Deposit point particles");
 
-  // Solve the stinking equation.
+  // Solve the semi-implicit Poisson equation.
   this->barrier();
   m_timer.startEvent("Solve Poisson");
-  this->solvePoisson();
-  m_timer.stopEvent("Solve Poisson");
+  const bool converged = this->solvePoisson();
+  if (!converged) {
+    MayDay::Warning("ItoKMCGodunovStepper::advanceEulerMaruyama - Poisson solver did not converge");
+  }
+  m_timer.stopEvent("Solve Poisson");  
 
   // Recompute velocities with the new electric field. This interpolates the velocities to the current particle positions, i.e.
   // we compute V^(k+1)(X^k) = mu^k * E^(k+1)(X^k)
