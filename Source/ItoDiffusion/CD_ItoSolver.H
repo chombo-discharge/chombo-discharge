@@ -829,6 +829,14 @@ public:
                      const DataIndex      a_dit);
 
   /*!
+    @brief Superparticle merging with KD/BVH trees
+    @param[inout] a_particles        Particles to be merged/split
+    @param[in]    a_particlesPerCell Target number of particles per cell
+  */
+  virtual void
+  makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles, const int a_particlesPerCell);
+
+  /*!
     @brief Remap the bulk particle container.
   */
   virtual void
@@ -1444,14 +1452,6 @@ protected:
   */
   virtual void
   depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC) const;
-
-  /*!
-    @brief Superparticle merging with KD/BVH trees
-    @param[inout] a_particles        Particles to be merged/split
-    @param[in]    a_particlesPerCell Target number of particles per cell
-  */
-  virtual void
-  makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles, const int a_particlesPerCell);
 
   /*!
     @brief Interpolate mobilities -- this will switch between the two ways of computing the particle mobility.

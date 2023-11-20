@@ -381,14 +381,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->advanceReactionNetwork(a_dt);
   m_timer.stopEvent("Reaction network");
 
-  // Build superparticles.
-  if ((this->m_timeStep + 1) % this->m_mergeInterval == 0 && this->m_mergeInterval > 0) {
-    this->barrier();
-    m_timer.startEvent("Super-particle management");
-    (this->m_ito)->makeSuperparticles(ItoSolver::WhichContainer::Bulk, (this->m_particlesPerCell));
-    m_timer.stopEvent("Super-particle management");
-  }
-
   // Sort particles per patch.
   this->barrier();
   m_timer.startEvent("Sort by patch");
