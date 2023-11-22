@@ -4071,6 +4071,9 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   const RealVect probLo  = m_amr->getProbLo();
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level][a_dit];
 
+  // Number of computational particles to make on this level
+  const int ppc = (a_level < m_particlesPerCell.size()) ? m_particlesPerCell[a_level] : m_particlesPerCell.back();
+
   // List of valid grid cells
   const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_particleRealm)[a_level])[a_dit];
 
@@ -4193,6 +4196,15 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
+
+      // Merge the particles together.
+      if ((this->m_timeStep + 1) % this->m_mergeInterval == 0 && this->m_mergeInterval > 0) {
+        for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+          const int idx = solverIt.index();
+
+          solverIt()->makeSuperparticlesEqualWeightKD(*itoParticles[idx], ppc);
+        }
+      }
     }
   };
 
@@ -4266,6 +4278,15 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
+
+      // Merge the particles together.
+      if ((this->m_timeStep + 1) % this->m_mergeInterval == 0 && this->m_mergeInterval > 0) {
+        for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+          const int idx = solverIt.index();
+
+          solverIt()->makeSuperparticlesEqualWeightKD(*itoParticles[idx], ppc);
+        }
+      }
     }
   };
 
