@@ -378,6 +378,9 @@ virtual <a class="el" href="CD__EBIntersection_8H.html#ad8aa543cfc22c9b4f2a6a6da
 <tr class="memitem:aa8859e84b563c9aa49927b39628571d3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aa8859e84b563c9aa49927b39628571d3">makeSuperparticles</a> (const <a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">WhichContainer</a> a_container, const int a_particlesPerCell, const int a_level, const DataIndex a_dit)</td></tr>
 <tr class="memdesc:aa8859e84b563c9aa49927b39628571d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make superparticles for a particle container &ndash; this is used for a specified grid level and patch.  <a href="classItoSolver.html#aa8859e84b563c9aa49927b39628571d3">More...</a><br /></td></tr>
 <tr class="separator:aa8859e84b563c9aa49927b39628571d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19632aa05427ba1e6cbb2e1f2f597b5f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a19632aa05427ba1e6cbb2e1f2f597b5f">makeSuperparticlesEqualWeightKD</a> (List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const int a_particlesPerCell)</td></tr>
+<tr class="memdesc:a19632aa05427ba1e6cbb2e1f2f597b5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Superparticle merging with KD/BVH trees.  <a href="classItoSolver.html#a19632aa05427ba1e6cbb2e1f2f597b5f">More...</a><br /></td></tr>
+<tr class="separator:a19632aa05427ba1e6cbb2e1f2f597b5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a802e12734bd28664a925cf946f485350"><td class="memItemLeft" align="right" valign="top"><a id="a802e12734bd28664a925cf946f485350"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a802e12734bd28664a925cf946f485350">remap</a> ()</td></tr>
 <tr class="memdesc:a802e12734bd28664a925cf946f485350"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remap the bulk particle container. <br /></td></tr>
@@ -519,9 +522,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:aac2b82ed36f44539366b43564e352846"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aac2b82ed36f44539366b43564e352846">depositHybrid</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_depositionH, <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_massDifference, const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_depositionNC) const</td></tr>
 <tr class="memdesc:aac2b82ed36f44539366b43564e352846"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make the "hybrid" deposition phiH = kappa*phiC + (1-kappa)*phiNC. On input, a_depositionH should contain phiC.  <a href="classItoSolver.html#aac2b82ed36f44539366b43564e352846">More...</a><br /></td></tr>
 <tr class="separator:aac2b82ed36f44539366b43564e352846"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a19632aa05427ba1e6cbb2e1f2f597b5f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a19632aa05427ba1e6cbb2e1f2f597b5f">makeSuperparticlesEqualWeightKD</a> (List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const int a_particlesPerCell)</td></tr>
-<tr class="memdesc:a19632aa05427ba1e6cbb2e1f2f597b5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Superparticle merging with KD/BVH trees.  <a href="classItoSolver.html#a19632aa05427ba1e6cbb2e1f2f597b5f">More...</a><br /></td></tr>
-<tr class="separator:a19632aa05427ba1e6cbb2e1f2f597b5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad2e2869b2f9907251a682b7d25198207"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad2e2869b2f9907251a682b7d25198207">interpolateMobilities</a> (const int a_level, const DataIndex &amp;a_dit, const EBCellFAB &amp;a_velocityMagnitude) noexcept</td></tr>
 <tr class="memdesc:ad2e2869b2f9907251a682b7d25198207"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate mobilities &ndash; this will switch between the two ways of computing the particle mobility.  <a href="classItoSolver.html#ad2e2869b2f9907251a682b7d25198207">More...</a><br /></td></tr>
 <tr class="separator:ad2e2869b2f9907251a682b7d25198207"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -3837,7 +3837,7 @@ template&lt;class P , Real(P ::*)() const particleScalarField&gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
