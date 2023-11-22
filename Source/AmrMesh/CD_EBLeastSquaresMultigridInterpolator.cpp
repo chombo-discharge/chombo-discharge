@@ -293,11 +293,7 @@ EBLeastSquaresMultigridInterpolator::defineBuffers() noexcept
 {
   CH_TIME("EBLeastSquaresMultigridInterpolator::defineBuffers()");
 
-  m_copier.ghostDefine(m_eblgCoar.getDBL(),
-                       m_eblgCoFi.getDBL(),
-                       m_eblgCoar.getDomain(),
-                       m_ghostVectorFine,
-                       m_ghostVectorCoFi);
+  m_copier.define(m_eblgCoar.getDBL(), m_eblgCoFi.getDBL(), m_ghostVectorCoFi);
 }
 
 void

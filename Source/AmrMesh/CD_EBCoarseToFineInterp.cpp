@@ -161,11 +161,7 @@ EBCoarseToFineInterp::interpolate(LevelData<EBCellFAB>&             a_fineData,
   // Define the copier that we need if we don't already have it.
   Copier& cellCopier = m_cellCopiers[a_coarData.ghostVect()];
   if (!(cellCopier.isDefined())) {
-    cellCopier.ghostDefine(a_coarData.disjointBoxLayout(),
-                           m_eblgCoFi.getDBL(),
-                           m_eblgCoar.getDomain(),
-                           a_coarData.ghostVect(),
-                           IntVect::Unit);
+    cellCopier.define(a_coarData.disjointBoxLayout(), m_eblgCoFi.getDBL(), m_coFiData.ghostVect());
   }
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
