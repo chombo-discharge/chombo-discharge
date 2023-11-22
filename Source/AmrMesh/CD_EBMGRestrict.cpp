@@ -69,7 +69,7 @@ EBMGRestrict::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoa
   m_restrictStencils.define(dblCoFi);
 
   // Note: MUST have the same number of ghost cells as the buffer being defined in the restriction function.
-  m_copier.ghostDefine(dblCoFi, m_eblgCoar.getDBL(), m_eblgCoar.getDomain(), IntVect::Zero);
+  m_copier.define(dblCoFi, m_eblgCoar.getDBL(), IntVect::Zero);
 
   for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
     const Box&       cellBox = dblCoFi[dit()];

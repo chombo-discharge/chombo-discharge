@@ -1185,8 +1185,7 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
   CH_TIMER("FieldSolver::writeMultifluidData::interp_ghost", t3);
   CH_TIMER("FieldSolver::writeMultifluidData::centroid_interp", t4);
   CH_TIMER("FieldSolver::writeMultifluidData::set_data", t5);
-  CH_TIMER("FieldSolver::writeMultifluidData::define_copier", t6);
-  CH_TIMER("FieldSolver::writeMultifluidData::copy_to_output", t7);
+  CH_TIMER("FieldSolver::writeMultifluidData::copy_to_output", t6);
   if (m_verbosity > 5) {
     pout() << "FieldSolver::writeMultifluidData" << endl;
   }
@@ -1378,19 +1377,9 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
   const Interval srcInterv(0, numComp - 1);
   const Interval dstInterv(a_comp, numComp - 1 + a_comp);
 
-  // Now do the copy - make sure we include our newly interpolated ghost cells.
   CH_START(t6);
-  Copier copier;
-  copier.ghostDefine(scratchGas.disjointBoxLayout(),
-                     a_output.disjointBoxLayout(),
-                     m_amr->getDomains()[a_level],
-                     scratchGas.ghostVect(),
-                     a_output.ghostVect());
-  CH_STOP(t6);
-
-  CH_START(t7);
   m_amr->copyData(a_output, scratchGas, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
-  CH_STOP(t7);
+  CH_STOP(t6);
 
   a_comp += numComp;
 }
