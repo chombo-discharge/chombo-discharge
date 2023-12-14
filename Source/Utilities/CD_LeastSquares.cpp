@@ -156,12 +156,25 @@ LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
                                             a_radius,
                                             VofUtils::Connectivity::MonotonePath,
                                             a_addStartingVof);
-
       break;
     }
     case Neighborhood::Radius: {
       allVofs =
         VofUtils::getVofsInRadius(a_vof, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, a_addStartingVof);
+      break;
+    }
+    case Neighborhood::SemiCircle: {
+      constexpr Real deltaThresh = 0.5;
+
+      allVofs = VofUtils::getVofsInSemiCircle(a_vof,
+                                              a_ebisbox,
+                                              normal,
+                                              a_radius,
+                                              deltaThresh,
+                                              VofUtils::Connectivity::MonotonePath,
+                                              Location::Cell::Boundary,
+                                              a_cellPositions,
+                                              a_addStartingVof);
       break;
     }
     default: {
@@ -173,12 +186,13 @@ LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
     // Now build the stencil.
     if (allVofs.size() > numUnknowns) {
 
-      const Vector<RealVect> displacements =
+      Vector<RealVect> displacements =
         LeastSquares::getDisplacements(Location::Cell::Boundary, a_cellPositions, a_vof, allVofs, a_ebisbox, a_dx);
 
       // This routine eliminates a_vof from the system of equations!
       IntVectSet knownTerms;
       knownTerms |= IntVect::Zero;
+
       bndrySten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order, knownTerms);
     }
   }
