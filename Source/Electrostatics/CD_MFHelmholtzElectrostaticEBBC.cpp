@@ -130,7 +130,7 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
         if (foundStencil) {
           foundStencil = this->isStencilValidCF(pairSten.second, dit());
         }
-      }      
+      }
 
       // Last ditch effort: Try a full radius
       order = m_order;
