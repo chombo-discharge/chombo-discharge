@@ -183,7 +183,7 @@ MFHelmholtzJumpBC::defineStencils()
           bool                        foundStencil = false;
           std::pair<Real, VoFStencil> pairSten;
 
-          // Try quadrants first.
+          // Try semi-circle first.
           order = m_order;
           while (!foundStencil && order > 0) {
             foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
@@ -199,7 +199,23 @@ MFHelmholtzJumpBC::defineStencils()
             }
           }
 
-          // If we couldn't find in a quadrant, try a larger neighborhood
+          // Try quadrant if that didn't work. 
+          order = m_order;
+          while (!foundStencil && order > 0) {
+            foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
+                                                                    vof,
+                                                                    ebisbox,
+                                                                    VofUtils::Neighborhood::Quadrant,
+                                                                    order);
+            order--;
+
+            // Check if stencil reaches too far across CF
+            if (foundStencil) {
+              foundStencil = this->isStencilValidCF(pairSten.second, dit());
+            }
+          }	  
+
+          // Last ditch effort: Try a full radius
           order = m_order;
           while (!foundStencil && order > 0) {
             foundStencil =

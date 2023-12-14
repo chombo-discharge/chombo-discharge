@@ -115,7 +115,24 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
         }
       }
 
-      // If we couldn't find in a semi-circle, try a larger neighborhood
+      // Try quadrant if that didn't work.
+      order = m_order;
+      while (!foundStencil && order > 0) {
+        foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
+                                                                vof,
+                                                                VofUtils::Neighborhood::Quadrant,
+                                                                dit(),
+                                                                order,
+                                                                m_weight);
+        order--;
+
+        // Check if stencil reaches too far across CF
+        if (foundStencil) {
+          foundStencil = this->isStencilValidCF(pairSten.second, dit());
+        }
+      }      
+
+      // Last ditch effort: Try a full radius
       order = m_order;
       while (!foundStencil && order > 0) {
         foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
