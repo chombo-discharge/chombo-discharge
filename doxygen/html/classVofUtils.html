@@ -94,6 +94,7 @@ Public Types</h2></td></tr>
 <tr class="separator:a4c1b8b107f99c67dd45645e40a1ba5e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20afa13a2365fadd02bb69ae65ee9eb9"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classVofUtils.html#a20afa13a2365fadd02bb69ae65ee9eb9">Neighborhood</a> { <b>Quadrant</b>
 , <b>Radius</b>
+, <b>SemiCircle</b>
  }</td></tr>
 <tr class="memdesc:a20afa13a2365fadd02bb69ae65ee9eb9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Neighborhood type.  <a href="classVofUtils.html#a20afa13a2365fadd02bb69ae65ee9eb9">More...</a><br /></td></tr>
 <tr class="separator:a20afa13a2365fadd02bb69ae65ee9eb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -116,6 +117,9 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a59e5e601931496a9e7b6f20a4c3b464e"><td class="memItemLeft" align="right" valign="top">static Vector&lt; VolIndex &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classVofUtils.html#a59e5e601931496a9e7b6f20a4c3b464e">getVofsInQuadrant</a> (const VolIndex &amp;a_startVof, const EBISBox &amp;a_ebisbox, const RealVect &amp;a_normal, const int a_radius, const <a class="el" href="classVofUtils.html#a4c1b8b107f99c67dd45645e40a1ba5e4">Connectivity</a> a_connectivity, const bool a_addStartVof)</td></tr>
 <tr class="memdesc:a59e5e601931496a9e7b6f20a4c3b464e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch vofs in a quadrant, using a specified radius and with a specified connectivitiy between them.  <a href="classVofUtils.html#a59e5e601931496a9e7b6f20a4c3b464e">More...</a><br /></td></tr>
 <tr class="separator:a59e5e601931496a9e7b6f20a4c3b464e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab182598b6a9055d376ea3380c98bc71c"><td class="memItemLeft" align="right" valign="top">static Vector&lt; VolIndex &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classVofUtils.html#ab182598b6a9055d376ea3380c98bc71c">getVofsInSemiCircle</a> (const VolIndex &amp;a_startVof, const EBISBox &amp;a_ebisbox, const RealVect &amp;a_normal, const int a_radius, const Real a_deltaThresh, const <a class="el" href="classVofUtils.html#a4c1b8b107f99c67dd45645e40a1ba5e4">Connectivity</a> a_connectivity, const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_vofLocation, const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_cellLocation, const bool a_addStartVof)</td></tr>
+<tr class="memdesc:ab182598b6a9055d376ea3380c98bc71c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all vofs lying in a semi-circle (sphere in 3D) from the indicated position in the starting vof.  <a href="classVofUtils.html#ab182598b6a9055d376ea3380c98bc71c">More...</a><br /></td></tr>
+<tr class="separator:ab182598b6a9055d376ea3380c98bc71c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af290b7de4448f7147b1954e51d81a7d2"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classVofUtils.html#af290b7de4448f7147b1954e51d81a7d2">excludeCells</a> (Vector&lt; VolIndex &gt; &amp;a_vofs, const Box &amp;a_excludeBox)</td></tr>
 <tr class="memdesc:af290b7de4448f7147b1954e51d81a7d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies a_vofs so it doesn't include cells in a_excludeIVS.  <a href="classVofUtils.html#af290b7de4448f7147b1954e51d81a7d2">More...</a><br /></td></tr>
 <tr class="separator:af290b7de4448f7147b1954e51d81a7d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -223,6 +227,7 @@ Static Protected Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">Quadrant.</td><td>Only fetch vofs in a specified quadrant. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">Radius.</td><td>Fetch all vofs in a specified radius. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">SemiCircle.</td><td>Fetch all vofs in a half-circle with specified radius. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1070,6 +1075,101 @@ Static Protected Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ab182598b6a9055d376ea3380c98bc71c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab182598b6a9055d376ea3380c98bc71c">&#9670;&nbsp;</a></span>getVofsInSemiCircle()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; VolIndex &gt; VofUtils::getVofsInSemiCircle </td>
+          <td>(</td>
+          <td class="paramtype">const VolIndex &amp;&#160;</td>
+          <td class="paramname"><em>a_startVof</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBISBox &amp;&#160;</td>
+          <td class="paramname"><em>a_ebisbox</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_normal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_radius</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_deltaThresh</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classVofUtils.html#a4c1b8b107f99c67dd45645e40a1ba5e4">Connectivity</a>&#160;</td>
+          <td class="paramname"><em>a_connectivity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a>&#160;</td>
+          <td class="paramname"><em>a_vofLocation</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a>&#160;</td>
+          <td class="paramname"><em>a_cellLocation</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_addStartVof</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get all vofs lying in a semi-circle (sphere in 3D) from the indicated position in the starting vof. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_startVof</td><td>Starting Vof. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisbox</td><td>EBISBox. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_normal</td><td>Normal vector </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_radius</td><td>Radius. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_deltaThresh</td><td>Threshold for the normal distance betw </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_connectivity</td><td>Connectivity specification (e.g. monotone path or simplyconnected) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_vofLocation</td><td>Point inside the current vof </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellLocation</td><td>Other cell locations to test with. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_addStartVof</td><td>If false, a_startVof will not be included in the list. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>This routine will fetch vofs within a_radius and discard the ones that fall on the ''wrong'' side of the semi-circle (sphere in 3D). Here, the wrong side is defined as all points (x-x0)*n &lt; a_deltaThresh </dd></dl>
 
 </div>
 </div>
