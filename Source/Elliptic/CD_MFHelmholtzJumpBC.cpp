@@ -186,8 +186,11 @@ MFHelmholtzJumpBC::defineStencils()
           // Try quadrants first.
           order = m_order;
           while (!foundStencil && order > 0) {
-            foundStencil =
-              this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Quadrant, order);
+            foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
+                                                                    vof,
+                                                                    ebisbox,
+                                                                    VofUtils::Neighborhood::SemiCircle,
+                                                                    order);
             order--;
 
             // Check if stencil reaches too far across CF
