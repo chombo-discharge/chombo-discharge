@@ -78,6 +78,43 @@ VofUtils::getVofsInQuadrant(const VolIndex&    a_startVof,
 }
 
 Vector<VolIndex>
+VofUtils::getVofsInSemiCircle(const VolIndex&      a_startVof,
+                              const EBISBox&       a_ebisbox,
+                              const RealVect&      a_normal,
+                              const int            a_radius,
+                              const Real           a_deltaThresh,
+                              const Connectivity   a_connectivity,
+                              const Location::Cell a_vofLocation,
+                              const Location::Cell a_cellLocation,
+                              const bool           a_addStartVof)
+{
+  Vector<VolIndex> vofs;
+
+  if (a_normal != RealVect::Zero) {
+    const RealVect x0 = Location::position(a_vofLocation, a_startVof, a_ebisbox, 1.0);
+
+    const Vector<VolIndex> vofsInRadius =
+      VofUtils::getVofsInRadius(a_startVof, a_ebisbox, a_radius, a_connectivity, false);
+
+    for (int i = 0; i < vofsInRadius.size(); i++) {
+      const VolIndex& curVoF = vofsInRadius[i];
+
+      const RealVect delta = Location::position(a_cellLocation, curVoF, a_ebisbox, 1.0) - x0;
+
+      if (delta.dotProduct(a_normal) > a_deltaThresh) {
+        vofs.push_back(curVoF);
+      }
+    }
+
+    if (a_addStartVof) {
+      vofs.push_back(a_startVof);
+    }
+  }
+
+  return vofs;
+}
+
+Vector<VolIndex>
 VofUtils::getVofsInMonotonePath(const VolIndex& a_startVoF,
                                 const EBISBox&  a_ebisbox,
                                 const int       a_radius,
