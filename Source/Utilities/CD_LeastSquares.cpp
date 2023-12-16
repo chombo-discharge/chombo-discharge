@@ -164,7 +164,7 @@ LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
       break;
     }
     case Neighborhood::SemiCircle: {
-      constexpr Real deltaThresh = 0.5;
+      constexpr Real deltaThresh = 1.E-4;
 
       allVofs = VofUtils::getVofsInSemiCircle(a_vof,
                                               a_ebisbox,
