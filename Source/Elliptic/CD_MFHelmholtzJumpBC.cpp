@@ -200,30 +200,30 @@ MFHelmholtzJumpBC::defineStencils()
           }
 
           // Try quadrant if that didn't work.
-          // order = m_order;
-          // while (!foundStencil && order > 0) {
-          //   foundStencil =
-          //     this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Quadrant, order);
-          //   order--;
+          order = m_order;
+          while (!foundStencil && order > 0) {
+            foundStencil =
+              this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Quadrant, order);
+            order--;
 
-          //   // Check if stencil reaches too far across CF
-          //   if (foundStencil) {
-          //     foundStencil = this->isStencilValidCF(pairSten.second, dit());
-          //   }
-          // }
+            // Check if stencil reaches too far across CF
+            if (foundStencil) {
+              foundStencil = this->isStencilValidCF(pairSten.second, dit());
+            }
+          }
 
-          // // Last ditch effort: Try a full radius
-          // order = m_order;
-          // while (!foundStencil && order > 0) {
-          //   foundStencil =
-          //     this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Radius, order);
-          //   order--;
+          // Last ditch effort: Try a full radius
+          order = m_order;
+          while (!foundStencil && order > 0) {
+            foundStencil =
+              this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Radius, order);
+            order--;
 
-          //   // Check if stencil reaches too far across CF
-          //   if (foundStencil) {
-          //     foundStencil = this->isStencilValidCF(pairSten.second, dit());
-          //   }
-          // }
+            // Check if stencil reaches too far across CF
+            if (foundStencil) {
+              foundStencil = this->isStencilValidCF(pairSten.second, dit());
+            }
+          }
 
           if (foundStencil) {
             bndryWeights(vof, m_comp) = pairSten.first;
