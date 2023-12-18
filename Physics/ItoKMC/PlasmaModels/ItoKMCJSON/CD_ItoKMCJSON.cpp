@@ -1739,6 +1739,8 @@ ItoKMCJSON::initializeSurfaceReactions(const std::string a_surface)
     pout() << m_className + "::initializeSurfaceReactions" << endl;
   }
 
+  MayDay::Warning("ItoKMCJSON::initializeSurfaceReactions -- should we support multiple ejected species?");
+
   const std::string baseError = "ItoKMCJSON::initializePhotoReactions";
 
   std::string reactionSpecifier;
@@ -1778,7 +1780,11 @@ ItoKMCJSON::initializeSurfaceReactions(const std::string a_surface)
       efficiencies.push_back(reactionJSON["efficiency"].get<Real>());
     }
     else {
-      this->throwParserError(baseError + " but reaction contains both 'efficiencies' and 'efficiency'");
+      this->throwParserError(baseErrorID + " but reaction contains both 'efficiencies' and 'efficiency'");
+    }
+
+    if (efficiencies.size() != reactionSets.size()) {
+      this->throwParserError(baseErrorID + " but efficiencies array does not match number of wildcards");
     }
 
     for (int i = 0; i < reactionSets.size(); i++) {
@@ -1803,6 +1809,9 @@ ItoKMCJSON::initializeSurfaceReactions(const std::string a_surface)
       }
 
       // Do not permit more than one species on the right-hand side.
+      if (trimmedReactants.size() != 1) {
+        this->throwParserError(baseErrorID + " - only one species allowed on the left-hand side (can't be wildcard)");
+      }
       if (trimmedProducts.size() != 1) {
         this->throwParserError(baseErrorID + " - only one species allowed on the right-hand side (can be wildcard)");
       }
