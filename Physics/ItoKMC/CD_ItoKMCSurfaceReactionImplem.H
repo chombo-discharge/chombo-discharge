@@ -35,6 +35,8 @@ ItoKMCSurfaceReaction::define(const size_t            a_reactant,
   m_reactant     = a_reactant;
   m_products     = a_products;
   m_efficiencies = a_efficiencies;
+
+  m_distribution = std::discrete_distribution<int>(std::begin(m_efficiencies), std::end(m_efficiencies));
 }
 
 inline const size_t&
@@ -53,6 +55,12 @@ inline const std::list<Real>&
 ItoKMCSurfaceReaction::getEfficiencies() const noexcept
 {
   return m_efficiencies;
+}
+
+inline const std::discrete_distribution<int>&
+ItoKMCSurfaceReaction::getDistribution() const noexcept
+{
+  return m_distribution;
 }
 
 #include <CD_NamespaceFooter.H>

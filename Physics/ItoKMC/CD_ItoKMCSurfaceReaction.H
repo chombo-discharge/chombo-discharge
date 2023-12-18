@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_ItoKMCSurfaceReaction.H
-  @brief  Declaration of a class that encapsulates secondary emission at EBs and domain edges/faces
+  @brief  Declaration of a class that encapsulates a set secondary emission at EBs and domain edges/faces
   @author Robert Marskar
 */
 
@@ -14,6 +14,7 @@
 
 // Std includes
 #include <list>
+#include <random>
 
 // Chombo includes
 #include <REAL.H>
@@ -25,7 +26,7 @@ namespace Physics {
   namespace ItoKMC {
 
     /*!
-      @brief Reaction class for describing photoionization in ItoKMCPhysics. 
+      @brief Reaction class for describing secondary emission in ItoKMCPhysics. 
       @details This class encapsulates reaction A -> B, A -> C, A -> D, ... with various efficienes. 
     */
     class ItoKMCSurfaceReaction
@@ -80,6 +81,12 @@ namespace Physics {
       inline const std::list<Real>&
       getEfficiencies() const noexcept;
 
+      /*!
+	@brief Get the discrete distribution that determines the reaction pathway
+      */
+      inline const std::discrete_distribution<int>&
+      getDistribution() const noexcept;
+
     protected:
       /*!
 	@brief Source reactant index.
@@ -95,6 +102,11 @@ namespace Physics {
 	@brief Reaction efficiencies. Note
       */
       std::list<Real> m_efficiencies;
+
+      /*!
+	@brief Discrete distribution with the input efficiencies
+      */
+      std::discrete_distribution<int> m_distribution;
     };
   } // namespace ItoKMC
 } // namespace Physics

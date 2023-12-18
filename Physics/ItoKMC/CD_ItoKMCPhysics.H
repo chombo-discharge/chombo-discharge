@@ -29,7 +29,7 @@
 #include <CD_ItoParticle.H>
 #include <CD_PointParticle.H>
 #include <CD_ItoKMCPhotoReaction.H>
-#include <CD_ItoKMCSurfaceReaction.H>
+#include <CD_ItoKMCSurfaceReactionSet.H>
 #include <CD_KMCDualState.H>
 #include <CD_KMCDualStateReaction.H>
 #include <CD_KMCSolver.H>
@@ -441,9 +441,9 @@ namespace Physics {
       std::map<int, std::pair<std::discrete_distribution<int>, std::map<int, int>>> m_photoPathways;
 
       /*!
-	@brief Map of secondary emission reactions on dielectric surfaces. 
+	@brief Surface reactions.
       */
-      std::map<size_t, std::shared_ptr<const ItoKMCSurfaceReaction>> m_dielectricSurfaceReactions;
+      ItoKMCSurfaceReactionSet m_surfaceReactions;
 
       /*!
 	@brief List of solver-tracked particle drift-diffusion species. 

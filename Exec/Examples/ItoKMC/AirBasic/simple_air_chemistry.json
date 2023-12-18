@@ -392,5 +392,16 @@
 	{
 	    "reaction": "Y + (O2) -> e + O2+"
 	}
+    ],
+    "dielectric reactions":
+    [
+	{
+	    "reaction": "Y -> e",
+	    "efficiency": 0.1
+	},
+	{
+	    "reaction": "Y -> (null)",
+	    "efficiency": 0.9
+	}
     ]
 }

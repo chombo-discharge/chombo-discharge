@@ -61,7 +61,8 @@ ItoKMCJSON::ItoKMCJSON()
   this->initializeTownsendCoefficient("eta");
   this->initializePlasmaReactions();
   this->initializePhotoReactions();
-  this->initializeSurfaceReactions();
+  this->initializeSurfaceReactions("dielectric");
+  this->initializeSurfaceReactions("electrode");
 
   // Initialize automatic Townsend coefficients. Triggers only if
   // user asked for it.
@@ -1731,14 +1732,47 @@ ItoKMCJSON::initializePhotoReactions()
 }
 
 void
-ItoKMCJSON::initializeSurfaceReactions()
+ItoKMCJSON::initializeSurfaceReactions(const std::string a_surface)
 {
   CH_TIME("ItoKMCJSON::initializeSurfaceReactions");
   if (m_verbose) {
     pout() << m_className + "::initializeSurfaceReactions" << endl;
   }
 
-  pout() << "ItoKMCJSON::initializeSurfaceReactions - not implemented" << endl;
+  const std::string baseError = "ItoKMCJSON::initializePhotoReactions";
+
+  std::string reactionSpecifier;
+  if (a_surface == "dielectric") {
+    reactionSpecifier = "dielectric reactions";
+  }
+  else if (a_surface == "electrode") {
+    reactionSpecifier = "electrode reactions";
+  }
+  else {
+    MayDay::Abort("ItoKMCJSON::initializeSurfaceReactions -- logic bust");
+  }
+
+  for (const auto& reactionJSON : m_json[reactionSpecifier]) {
+
+    Real reactionEfficiency = 1.0;
+
+    if (!(reactionJSON.contains("reaction"))) {
+      this->throwParserError(baseError + " but one of the reactions is missing the field 'reaction'");
+    }
+    if (!(reactionJSON.contains("efficiency"))) {
+      reactionEfficiency = 1.0;
+    }
+    else {
+      reactionEfficiency = reactionJSON["efficiency"].get<Real>();
+    }
+
+    const std::string reaction    = this->trim(reactionJSON["reaction"].get<std::string>());
+    const std::string baseErrorID = baseError + " for reaction '" + reaction + "'";
+
+    if (procID() == 0) {
+      std::cout << reaction << std::endl;
+    }
+  }
 }
 
 void

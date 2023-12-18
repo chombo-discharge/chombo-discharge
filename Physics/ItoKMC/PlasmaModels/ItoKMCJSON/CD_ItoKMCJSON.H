@@ -610,10 +610,11 @@ namespace Physics {
       initializePhotoReactions();
 
       /*!
-	@brief Initialize photo-reactions
+	@brief Initialize surface reactions
+	@param[in] a_surface Surface type
       */
       virtual void
-      initializeSurfaceReactions();
+      initializeSurfaceReactions(const std::string a_surface);
 
       /*!
 	@brief Parses a reaction string into reactangs and products
