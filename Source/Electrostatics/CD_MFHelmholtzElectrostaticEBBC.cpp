@@ -116,38 +116,38 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
       }
 
       // Try quadrant if that didn't work.
-      order = m_order;
-      while (!foundStencil && order > 0) {
-        foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
-                                                                vof,
-                                                                VofUtils::Neighborhood::Quadrant,
-                                                                dit(),
-                                                                order,
-                                                                m_weight);
-        order--;
+      // order = m_order;
+      // while (!foundStencil && order > 0) {
+      //   foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
+      //                                                           vof,
+      //                                                           VofUtils::Neighborhood::Quadrant,
+      //                                                           dit(),
+      //                                                           order,
+      //                                                           m_weight);
+      //   order--;
 
-        // Check if stencil reaches too far across CF
-        if (foundStencil) {
-          foundStencil = this->isStencilValidCF(pairSten.second, dit());
-        }
-      }
+      //   // Check if stencil reaches too far across CF
+      //   if (foundStencil) {
+      //     foundStencil = this->isStencilValidCF(pairSten.second, dit());
+      //   }
+      // }
 
       // Last ditch effort: Try a full radius
-      order = m_order;
-      while (!foundStencil && order > 0) {
-        foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
-                                                                vof,
-                                                                VofUtils::Neighborhood::Radius,
-                                                                dit(),
-                                                                order,
-                                                                m_weight);
-        order--;
+      // order = m_order;
+      // while (!foundStencil && order > 0) {
+      //   foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
+      //                                                           vof,
+      //                                                           VofUtils::Neighborhood::Radius,
+      //                                                           dit(),
+      //                                                           order,
+      //                                                           m_weight);
+      //   order--;
 
-        // Check if stencil reaches too far across CF
-        if (foundStencil) {
-          foundStencil = this->isStencilValidCF(pairSten.second, dit());
-        }
-      }
+      //   // Check if stencil reaches too far across CF
+      //   if (foundStencil) {
+      //     foundStencil = this->isStencilValidCF(pairSten.second, dit());
+      //   }
+      // }
 
       if (foundStencil) {
         weights(vof, m_comp)  = pairSten.first;
