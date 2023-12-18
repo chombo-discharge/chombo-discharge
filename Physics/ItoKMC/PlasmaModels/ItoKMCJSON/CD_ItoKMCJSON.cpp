@@ -62,7 +62,7 @@ ItoKMCJSON::ItoKMCJSON()
   this->initializePlasmaReactions();
   this->initializePhotoReactions();
   this->initializeSurfaceReactions("dielectric");
-  this->initializeSurfaceReactions("electrode");
+  this->initializeSurfaceReactions("electrode");  
 
   // Initialize automatic Townsend coefficients. Triggers only if
   // user asked for it.
@@ -1753,24 +1753,59 @@ ItoKMCJSON::initializeSurfaceReactions(const std::string a_surface)
   }
 
   for (const auto& reactionJSON : m_json[reactionSpecifier]) {
-
-    Real reactionEfficiency = 1.0;
-
     if (!(reactionJSON.contains("reaction"))) {
       this->throwParserError(baseError + " but one of the reactions is missing the field 'reaction'");
     }
-    if (!(reactionJSON.contains("efficiency"))) {
-      reactionEfficiency = 1.0;
-    }
-    else {
-      reactionEfficiency = reactionJSON["efficiency"].get<Real>();
+    if (!(reactionJSON.contains("efficiencies")) && !(reactionJSON.contains("efficiency"))) {
+      this->throwParserError(baseError + " but one of the reactions is missing the field 'efficiencies/efficiency'");
     }
 
     const std::string reaction    = this->trim(reactionJSON["reaction"].get<std::string>());
     const std::string baseErrorID = baseError + " for reaction '" + reaction + "'";
 
-    if (procID() == 0) {
-      std::cout << reaction << std::endl;
+    std::vector<std::string> reactants;
+    std::vector<std::string> products;
+    std::vector<Real>        efficiencies;
+
+    this->parseReactionString(reactants, products, reaction);
+
+    const auto reactionSets = this->parseReactionWildcards(reactants, products, reactionJSON);
+
+    if (reactionJSON.contains("efficiencies") && !(reactionJSON.contains("efficiency"))) {
+      efficiencies = reactionJSON["efficiencies"].get<std::vector<Real>>();
+    }
+    else if (!(reactionJSON.contains("efficiencies")) && reactionJSON.contains("efficiency")) {
+      efficiencies.push_back(reactionJSON["efficiency"].get<Real>());
+    }
+    else {
+      this->throwParserError(baseError + " but reaction contains both 'efficiencies' and 'efficiency'");
+    }
+
+    for (int i = 0; i < reactionSets.size(); i++) {
+      const auto curReaction = reactionSets[i];
+
+      const std::string              wildcard     = std::get<0>(curReaction);
+      const std::vector<std::string> curReactants = std::get<1>(curReaction);
+      const std::vector<std::string> curProducts  = std::get<2>(curReaction);
+
+      // Ignore species which are enclosed by brackets (), except if (null) is included
+      std::vector<std::string> trimmedReactants;
+      std::vector<std::string> trimmedProducts;
+      for (const auto& r : curReactants) {
+        if (!(this->isBracketed(r))) {
+          trimmedReactants.emplace_back(r);
+        }
+      }
+      for (const auto& p : curProducts) {
+        if (!(this->isBracketed(p)) || p == "(null)") {
+          trimmedProducts.emplace_back(p);
+        }
+      }
+
+      // Do not permit more than one species on the right-hand side.
+      if (trimmedProducts.size() != 1) {
+        this->throwParserError(baseErrorID + " - only one species allowed on the right-hand side (can be wildcard)");
+      }
     }
   }
 }
@@ -2611,7 +2646,7 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
   return tabulatedCoefficient;
 }
 
-std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
+std::vector<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
 ItoKMCJSON::parseReactionWildcards(const std::vector<std::string>& a_reactants,
                                    const std::vector<std::string>& a_products,
                                    const nlohmann::json&           a_reactionJSON) const noexcept
@@ -2622,7 +2657,7 @@ ItoKMCJSON::parseReactionWildcards(const std::vector<std::string>& a_reactants,
   }
 
   // This is what we return. A horrific creature.
-  std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>> reactionSets;
+  std::vector<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>> reactionSets;
 
   // This is the reaction name.
   const std::string reaction  = a_reactionJSON["reaction"].get<std::string>();

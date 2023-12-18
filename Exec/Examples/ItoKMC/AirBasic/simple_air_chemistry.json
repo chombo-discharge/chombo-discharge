@@ -396,12 +396,9 @@
     "dielectric reactions":
     [
 	{
-	    "reaction": "Y -> e",
-	    "efficiency": 0.1
-	},
-	{
-	    "reaction": "Y -> (null)",
-	    "efficiency": 0.9
+	    "reaction": "Y -> @",
+	    "@": ["e", "(null)"],
+	    "efficiencies": [0.1, 0.9]
 	}
     ]
 }

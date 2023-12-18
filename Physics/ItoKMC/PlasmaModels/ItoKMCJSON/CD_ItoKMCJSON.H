@@ -690,7 +690,7 @@ namespace Physics {
 	@param[in] a_reactionJSON  JSON reaction entry. 
 	@return Returns a list of reactants and products with wilcards replaced. The tuple entries are: <wildcard, reactants, products>
       */
-      virtual std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
+      virtual std::vector<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
       parseReactionWildcards(const std::vector<std::string>& a_reactants,
                              const std::vector<std::string>& a_products,
                              const nlohmann::json&           a_reactionJSON) const noexcept;
