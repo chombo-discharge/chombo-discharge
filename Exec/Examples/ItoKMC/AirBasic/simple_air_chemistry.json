@@ -396,7 +396,7 @@
     "dielectric reactions":
     [
 	{
-	    "reaction": "Y -> e + @",
+	    "reaction": "Y -> @",
 	    "@": ["e", "(null)"],
 	    "efficiencies": [0.1, 0.9]
 	}

@@ -62,7 +62,7 @@ ItoKMCJSON::ItoKMCJSON()
   this->initializePlasmaReactions();
   this->initializePhotoReactions();
   this->initializeSurfaceReactions("dielectric");
-  this->initializeSurfaceReactions("electrode");  
+  this->initializeSurfaceReactions("electrode");
 
   // Initialize automatic Townsend coefficients. Triggers only if
   // user asked for it.
@@ -1812,11 +1812,6 @@ ItoKMCJSON::initializeSurfaceReactions(const std::string a_surface)
       if (trimmedReactants.size() != 1) {
         this->throwParserError(baseErrorID + " - only one species allowed on the left-hand side (can't be wildcard)");
       }
-#if 0
-      if (trimmedProducts.size() != 1) {
-        this->throwParserError(baseErrorID + " - only one species allowed on the right-hand side (can be wildcard)");
-      }
-#endif
 
       // Left-hand side must be a particle species (Ito or photon)
       const std::string r        = trimmedReactants.front();
@@ -1864,18 +1859,34 @@ ItoKMCJSON::initializeSurfaceReactions(const std::string a_surface)
       // Create the reaction and append it to the set.
       ItoKMCSurfaceReaction reaction(reactantIndex, productIndices, efficiencies[i]);
 
-      // if (isPlasma && a_surface == "dielectric") {
-      //   surfaceReaction = &(m_surfaceReactions.getDielectricPlasmaReactions()[reactionIndex]);
-      // }
-      // else if (isPlasma && a_surface == "electrode") {
-      //   surfaceReaction = &(m_surfaceReactions.getElectrodePlasmaReactions()[reactionIndex]);
-      // }
-      // else if (isPhoton && a_surface == "dielectric") {
-      //   surfaceReaction = &(m_surfaceReactions.getDielectricPhotonReactions()[reactionIndex]);
-      // }
-      // else if (isPhoton && a_surface == "electrode") {
-      //   surfaceReaction = &(m_surfaceReactions.getElectrodePhotonReactions()[reactionIndex]);
-      // }
+      ItoKMCSurfaceReactions reactions;
+
+      reactions.add(reaction);
+
+      if (isPlasma && a_surface == "dielectric") {
+        m_surfaceReactions.add(reactantIndex,
+                               reaction,
+                               ItoKMCSurfaceReactionSet::Surface::Dielectric,
+                               ItoKMCSurfaceReactionSet::Species::Plasma);
+      }
+      else if (isPlasma && a_surface == "electrode") {
+        m_surfaceReactions.add(reactantIndex,
+                               reaction,
+                               ItoKMCSurfaceReactionSet::Surface::Electrode,
+                               ItoKMCSurfaceReactionSet::Species::Plasma);
+      }
+      else if (isPhoton && a_surface == "dielectric") {
+        m_surfaceReactions.add(reactantIndex,
+                               reaction,
+                               ItoKMCSurfaceReactionSet::Surface::Dielectric,
+                               ItoKMCSurfaceReactionSet::Species::Photon);
+      }
+      else if (isPhoton && a_surface == "electrode") {
+        m_surfaceReactions.add(reactantIndex,
+                               reaction,
+                               ItoKMCSurfaceReactionSet::Surface::Electrode,
+                               ItoKMCSurfaceReactionSet::Species::Photon);
+      }
     }
   }
 }
