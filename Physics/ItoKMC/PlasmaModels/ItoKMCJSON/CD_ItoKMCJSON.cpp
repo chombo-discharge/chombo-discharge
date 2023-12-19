@@ -1842,7 +1842,7 @@ ItoKMCJSON::initializeSurfaceReactions(const std::string a_surface)
       }
 
       // Turn product strings into indices
-      std::list<size_t> productIndices2;
+      std::list<size_t> productIndices;
       for (const auto& p : trimmedProducts) {
         if (p != "(null)") {
           if (this->isPhotonSpecies(p)) {
