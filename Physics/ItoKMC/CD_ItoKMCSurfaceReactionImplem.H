@@ -20,9 +20,9 @@ using namespace Physics::ItoKMC;
 
 inline ItoKMCSurfaceReaction::ItoKMCSurfaceReaction(const size_t            a_reactant,
                                                     const std::list<size_t> a_products,
-                                                    const std::list<Real>   a_efficiencies) noexcept
+                                                    const Real              a_efficiency) noexcept
 {
-  this->define(a_reactant, a_products, a_efficiencies);
+  this->define(a_reactant, a_products, a_efficiency);
 }
 
 inline ItoKMCSurfaceReaction::~ItoKMCSurfaceReaction() noexcept {}
@@ -30,17 +30,21 @@ inline ItoKMCSurfaceReaction::~ItoKMCSurfaceReaction() noexcept {}
 inline void
 ItoKMCSurfaceReaction::define(const size_t            a_reactant,
                               const std::list<size_t> a_products,
-                              const std::list<Real>   a_efficiencies) noexcept
+                              const Real              a_efficiency) noexcept
 {
-  m_reactant     = a_reactant;
-  m_products     = a_products;
-  m_efficiencies = a_efficiencies;
-
-  m_distribution = std::discrete_distribution<int>(std::begin(m_efficiencies), std::end(m_efficiencies));
+  m_reactant   = a_reactant;
+  m_products   = a_products;
+  m_efficiency = a_efficiency;
 }
 
 inline const size_t&
 ItoKMCSurfaceReaction::getReactant() const noexcept
+{
+  return m_reactant;
+}
+
+inline size_t&
+ItoKMCSurfaceReaction::getReactant() noexcept
 {
   return m_reactant;
 }
@@ -51,20 +55,24 @@ ItoKMCSurfaceReaction::getProducts() const noexcept
   return m_products;
 }
 
-inline const std::list<Real>&
-ItoKMCSurfaceReaction::getEfficiencies() const noexcept
+inline std::list<size_t>&
+ItoKMCSurfaceReaction::getProducts() noexcept
 {
-  return m_efficiencies;
+  return m_products;
 }
 
-inline const std::discrete_distribution<int>&
-ItoKMCSurfaceReaction::getDistribution() const noexcept
+inline const Real&
+ItoKMCSurfaceReaction::getEfficiency() const noexcept
 {
-  return m_distribution;
+  return m_efficiency;
+}
+
+inline Real&
+ItoKMCSurfaceReaction::getEfficiency() noexcept
+{
+  return m_efficiency;
 }
 
 #include <CD_NamespaceFooter.H>
-
-#include <CD_ItoKMCSurfaceReactionImplem.H>
 
 #endif

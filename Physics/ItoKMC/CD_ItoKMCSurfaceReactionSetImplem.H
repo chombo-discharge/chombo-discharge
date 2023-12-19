@@ -21,27 +21,28 @@ using namespace Physics::ItoKMC;
 inline ItoKMCSurfaceReactionSet::~ItoKMCSurfaceReactionSet() noexcept {}
 
 inline void
-ItoKMCSurfaceReactionSet::addSurfaceReaction(const ItoKMCSurfaceReaction&            a_reaction,
+ItoKMCSurfaceReactionSet::addSurfaceReaction(const size_t                            a_speciesIndex,
+                                             const ItoKMCSurfaceReaction&            a_reaction,
                                              const ItoKMCSurfaceReactionSet::Surface a_surface,
-                                             const ItoKMCSurfaceReactionSet::Species a_species) noexcept
+                                             const ItoKMCSurfaceReactionSet::Species a_speciesType) noexcept
 {
   if (a_surface == Surface::Dielectric) {
-    if (a_species == Species::Plasma) {
-      m_dielectricPlasmaReactions.push_back(a_reaction);
+    if (a_speciesType == Species::Plasma) {
+      m_dielectricPlasmaReactions.emplace(a_speciesIndex, a_reaction);
     }
-    else if (a_species == Species::Photon) {
-      m_dielectricPhotonReactions.push_back(a_reaction);
+    else if (a_speciesType == Species::Photon) {
+      m_dielectricPhotonReactions.emplace(a_speciesIndex, a_reaction);
     }
     else {
       MayDay::Error("ItoKMCSurfaceReaction::addSurfaceReaction - logic bust 1");
     }
   }
   else if (a_surface == Surface::Electrode) {
-    if (a_species == Species::Plasma) {
-      m_electrodePlasmaReactions.push_back(a_reaction);
+    if (a_speciesType == Species::Plasma) {
+      m_electrodePlasmaReactions.emplace(a_speciesIndex, a_reaction);
     }
-    else if (a_species == Species::Photon) {
-      m_electrodePhotonReactions.push_back(a_reaction);
+    else if (a_speciesType == Species::Photon) {
+      m_electrodePhotonReactions.emplace(a_speciesIndex, a_reaction);
     }
     else {
       MayDay::Error("ItoKMCSurfaceReaction::addSurfaceReaction - logic bust 2");
@@ -52,25 +53,25 @@ ItoKMCSurfaceReactionSet::addSurfaceReaction(const ItoKMCSurfaceReaction&       
   }
 }
 
-inline const std::vector<ItoKMCSurfaceReaction>&
+inline const std::map<size_t, ItoKMCSurfaceReaction>&
 ItoKMCSurfaceReactionSet::getDielectricPlasmaReactions() const noexcept
 {
   return m_dielectricPlasmaReactions;
 }
 
-inline const std::vector<ItoKMCSurfaceReaction>&
+inline const std::map<size_t, ItoKMCSurfaceReaction>&
 ItoKMCSurfaceReactionSet::getDielectricPhotonReactions() const noexcept
 {
   return m_dielectricPhotonReactions;
 }
 
-inline const std::vector<ItoKMCSurfaceReaction>&
+inline const std::map<size_t, ItoKMCSurfaceReaction>&
 ItoKMCSurfaceReactionSet::getElectrodePlasmaReactions() const noexcept
 {
   return m_electrodePlasmaReactions;
 }
 
-inline const std::vector<ItoKMCSurfaceReaction>&
+inline const std::map<size_t, ItoKMCSurfaceReaction>&
 ItoKMCSurfaceReactionSet::getElectrodePhotonReactions() const noexcept
 {
   return m_electrodePhotonReactions;

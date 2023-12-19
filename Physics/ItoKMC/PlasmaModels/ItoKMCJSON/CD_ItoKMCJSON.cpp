@@ -1812,9 +1812,70 @@ ItoKMCJSON::initializeSurfaceReactions(const std::string a_surface)
       if (trimmedReactants.size() != 1) {
         this->throwParserError(baseErrorID + " - only one species allowed on the left-hand side (can't be wildcard)");
       }
+#if 0
       if (trimmedProducts.size() != 1) {
         this->throwParserError(baseErrorID + " - only one species allowed on the right-hand side (can be wildcard)");
       }
+#endif
+
+      // Left-hand side must be a particle species (Ito or photon)
+      const std::string r        = trimmedReactants.front();
+      const bool        isPlasma = this->isPlasmaSpecies(r);
+      const bool        isPhoton = this->isPhotonSpecies(r);
+
+      size_t reactantIndex;
+
+      if (isPhoton) {
+        reactantIndex = m_photonIndexMap.at(r);
+      }
+      else if (isPlasma) {
+        const SpeciesType speciesType = m_plasmaSpeciesTypes.at(r);
+
+        if (speciesType != SpeciesType::Ito) {
+          this->throwParserError(baseErrorID + " but reactant is not a particle (Ito or photon) species");
+        }
+
+        reactantIndex = m_itoSpeciesMap.at(r);
+      }
+      else {
+        this->throwParserError(baseErrorID + " but reactant is not a particle (Ito or photon) species");
+      }
+
+      // Turn product strings into indices
+      std::list<size_t> productIndices;
+      for (const auto& p : trimmedProducts) {
+        if (p != "(null)") {
+          if (this->isPhotonSpecies(p)) {
+            this->throwParserError(baseErrorID + " but product must be an Ito species");
+          }
+          else if (this->isPlasmaSpecies(p)) {
+            if (m_plasmaSpeciesTypes.at(p) != SpeciesType::Ito) {
+              this->throwParserError(baseErrorID + " but product must be an Ito species");
+            }
+          }
+          else {
+            this->throwParserError(baseErrorID + " but product must be an Ito species");
+          }
+
+          productIndices.emplace_back((size_t)m_itoSpeciesMap.at(p));
+        }
+      }
+
+      // Create the reaction and append it to the set.
+      ItoKMCSurfaceReaction reaction(reactantIndex, productIndices, efficiencies[i]);
+
+      // if (isPlasma && a_surface == "dielectric") {
+      //   surfaceReaction = &(m_surfaceReactions.getDielectricPlasmaReactions()[reactionIndex]);
+      // }
+      // else if (isPlasma && a_surface == "electrode") {
+      //   surfaceReaction = &(m_surfaceReactions.getElectrodePlasmaReactions()[reactionIndex]);
+      // }
+      // else if (isPhoton && a_surface == "dielectric") {
+      //   surfaceReaction = &(m_surfaceReactions.getDielectricPhotonReactions()[reactionIndex]);
+      // }
+      // else if (isPhoton && a_surface == "electrode") {
+      //   surfaceReaction = &(m_surfaceReactions.getElectrodePhotonReactions()[reactionIndex]);
+      // }
     }
   }
 }
@@ -2858,8 +2919,18 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
     pout() << m_className + "::secondaryEmissionEB" << endl;
   }
 
+  // Outflow for all CDR fluxes. 
   for (int i = 0; i < a_primaryCDRFluxes.size(); i++) {
     a_secondaryCDRFluxes[i] = std::max(a_primaryCDRFluxes[i], 0.0);
+  }
+
+  // Go through all primary particles.
+  for (int i = 0; i < m_itoSpecies.size(); i++) {
+    const List<ItoParticle>& primaryParticles = a_primaryParticles[i];
+
+    for (ListIterator<ItoParticle> lit(primaryParticles); lit.ok(); ++lit) {
+
+    }
   }
 }
 

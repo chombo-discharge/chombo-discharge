@@ -54,59 +54,61 @@ namespace Physics {
 
       /*!
 	@brief Add a reaction
-	@param[in] a_reaction Reaction to add
-	@param[in] a_surface  Specification of surface type
-	@param[in] a_species  Specification of species type
+	@πaram[in] a_speciesIndex Species index
+	@param[in] a_reaction     Reaction to add
+	@param[in] a_surface      Specification of surface type
+	@param[in] a_species      Specification of species type
       */
       inline void
-      addSurfaceReaction(const ItoKMCSurfaceReaction&            a_reaction,
+      addSurfaceReaction(const size_t                            a_speciesIndex,
+			 const ItoKMCSurfaceReaction&            a_reaction,
                          const ItoKMCSurfaceReactionSet::Surface a_surface,
-                         const ItoKMCSurfaceReactionSet::Species a_species) noexcept;
+                         const ItoKMCSurfaceReactionSet::Species a_speciesType) noexcept;
 
       /*!
 	@brief Get the dielectric surface reactions where outgoing species is a plasma species
       */
-      const std::vector<ItoKMCSurfaceReaction>&
+      const std::map<size_t, ItoKMCSurfaceReaction>&
       getDielectricPlasmaReactions() const noexcept;
 
       /*!
 	@brief Get the dielectric surface reactions where outgoing species is a photon species
       */
-      const std::vector<ItoKMCSurfaceReaction>&
+      const std::map<size_t, ItoKMCSurfaceReaction>&
       getDielectricPhotonReactions() const noexcept;
 
       /*!
 	@brief Get the electrode surface reactions where outgoing species is a plasma species
       */
-      const std::vector<ItoKMCSurfaceReaction>&
+      const std::map<size_t, ItoKMCSurfaceReaction>&
       getElectrodePlasmaReactions() const noexcept;
 
       /*!
 	@brief Get the electrode surface reactions where outgoing species is a plasma species
       */
-      const std::vector<ItoKMCSurfaceReaction>&
+      const std::map<size_t, ItoKMCSurfaceReaction>&
       getElectrodePhotonReactions() const noexcept;
 
     protected:
       /*!
 	@brief Dielectric reaction set where outgoing species is a plasma species
       */
-      std::vector<ItoKMCSurfaceReaction> m_dielectricPlasmaReactions;
+      std::map<size_t, ItoKMCSurfaceReaction> m_dielectricPlasmaReactions;
 
       /*!
 	@brief Dielectric reaction set where outgoing species is a photon species
       */
-      std::vector<ItoKMCSurfaceReaction> m_dielectricPhotonReactions;
+      std::map<size_t, ItoKMCSurfaceReaction> m_dielectricPhotonReactions;
 
       /*!
 	@brief Electrode reaction set where outgoing species is a plasma species
       */
-      std::vector<ItoKMCSurfaceReaction> m_electrodePlasmaReactions;
+      std::map<size_t, ItoKMCSurfaceReaction> m_electrodePlasmaReactions;
 
       /*!
 	@brief Electrode reaction set where outgoing species is a photon species
       */
-      std::vector<ItoKMCSurfaceReaction> m_electrodePhotonReactions;
+      std::map<size_t, ItoKMCSurfaceReaction> m_electrodePhotonReactions;
     };
   } // namespace ItoKMC
 } // namespace Physics
