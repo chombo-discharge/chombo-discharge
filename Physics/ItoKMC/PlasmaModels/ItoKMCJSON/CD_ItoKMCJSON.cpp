@@ -2931,6 +2931,8 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
   const bool isCathode = a_E.dotProduct(a_bndryNormal) <= 0.0;
   const bool isAnode   = !isCathode;
 
+  const RealVect releasePosition = a_cellCenter + a_dx * a_cellCentroid;
+
   // Outflow for all CDR fluxes.
   for (int i = 0; i < a_primaryCDRFluxes.size(); i++) {
     a_secondaryCDRFluxes[i] = std::max(a_primaryCDRFluxes[i], 0.0);
@@ -2965,8 +2967,7 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
           const int Z = m_itoSpecies[p]->getChargeNumber();
 
           if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
-	    std::cout << "releasing particle" << std::endl;
-            a_secondaryParticles[p].add(lit());
+            a_secondaryParticles[p].add(ItoParticle(lit().weight(), releasePosition));
           }
         }
       }
@@ -2992,7 +2993,7 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
           const int Z = m_itoSpecies[p]->getChargeNumber();
 
           if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
-            a_secondaryParticles[p].add(ItoParticle(lit().weight(), lit().position()));
+            a_secondaryParticles[p].add(ItoParticle(lit().weight(), releasePosition));
           }
         }
       }
