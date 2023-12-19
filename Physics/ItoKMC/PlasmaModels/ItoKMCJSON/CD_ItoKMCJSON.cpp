@@ -1739,8 +1739,6 @@ ItoKMCJSON::initializeSurfaceReactions(const std::string a_surface)
     pout() << m_className + "::initializeSurfaceReactions" << endl;
   }
 
-  MayDay::Warning("ItoKMCJSON::initializeSurfaceReactions -- should we support multiple ejected species?");
-
   const std::string baseError = "ItoKMCJSON::initializePhotoReactions";
 
   std::string reactionSpecifier;
@@ -2967,6 +2965,7 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
           const int Z = m_itoSpecies[p]->getChargeNumber();
 
           if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
+	    std::cout << "releasing particle" << std::endl;
             a_secondaryParticles[p].add(lit());
           }
         }

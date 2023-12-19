@@ -167,7 +167,7 @@
 		    "uniform distribution" : {
 			"low corner" : [ -0.04, 0, 0 ],    // Lower-left physical corner of sampling region
 			"high corner" : [ 0.04, 0.04, 0 ], // Upper-right physical corner of sampling region
-			"num particles": 1000,             // Number of computational particles
+			"num particles": 0,             // Number of computational particles
 			"weight" : 1                       // Particle weights
 		    } 
 		},
@@ -175,9 +175,9 @@
 		    // Specification of initial particles sampled uniformly inside of a sphere (circle in 2D). This 
 		    // will distribute the particles over the MPI rank. 			
 		    "sphere distribution" : {
-			"center" : [ 0, 7.5E-3, 0 ], // Sphere center
-			"radius" : 1E-3,         // Sphere radius
-			"num particles": 100,     // Number computational particles
+			"center" : [ 0, 7.2E-3, 0 ], // Sphere center
+			"radius" : 100E-6,         // Sphere radius
+			"num particles": 1000,     // Number computational particles
 			"weight" : 1            // Particle weights
 		    }
 		},
@@ -187,7 +187,7 @@
 		    "gaussian distribution" : {
 			"center" : [ 0, 0, 0 ], // Center of the gaussian distribution
 			"radius" : 1.0,         // Gaussian radius
-			"num particles": 100,   // Number of computational particles
+			"num particles": 0,   // Number of computational particles
 			"weight" : 1            // Particle weights
 		    }
 		},
@@ -208,8 +208,8 @@
 	    // Definition of O2+ plasma species.
             "id": "O2+",            // Species ID
 	    "Z" : 1,                // Charge number
-	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
-	    "mobile" : false,       // Mobile or not
+	    "solver" : "ito",       // Solver type. Either 'ito' or 'cdr'
+	    "mobile" : true,       // Mobile or not
 	    "diffusive" : false,    // Diffusive or not
 	    "mobility": {           // Specification of the mobility
 		"type": "constant", // Mobility is constant 
@@ -240,8 +240,8 @@
 	    // Definition of N2+ plasma species.
 	    "id": "N2+",            // Species ID
 	    "Z" : 1,                // Charge number
-	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
-	    "mobile" : false,       // Mobile or not
+	    "solver" : "ito",       // Solver type. Either 'ito' or 'cdr'
+	    "mobile" : true,       // Mobile or not
 	    "diffusive" : false,    // Diffusive or not
 	    "mobility": {           // Specification of the mobility
 		"type": "constant", // Mobility is constant 
@@ -370,7 +370,17 @@
 	{
 	    "reaction": "Y -> @",
 	    "@": ["e", "(null)"],
-	    "efficiencies": [0.1, 0.9]
-	}	
-    ]    
+	    "efficiencies": [1.0, 0.0]
+	},
+	{
+	    "reaction": "N2+ -> @",
+	    "@": ["e", "(null)"],
+	    "efficiencies": [100.0,1.0]
+	},
+	{
+	    "reaction": "O2+ -> @",
+	    "@": ["e", "(null)"],
+	    "efficiencies": [100.0,1.0]	    
+	}		
+    ]        
 }

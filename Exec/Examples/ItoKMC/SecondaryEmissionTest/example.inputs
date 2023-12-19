@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = 20E3
+ItoKMC.potential = 6E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
@@ -47,7 +47,7 @@ Driver.write_restart_files             = false            # Write restart files 
 Driver.initial_regrids                 = 3                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
-Driver.stop_time                       = 5E-9             # Stop time
+Driver.stop_time                       = 500E-9             # Stop time
 Driver.max_steps                       = 500              # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
@@ -216,7 +216,7 @@ DiskProfiledPlane.wheel_smooth          = 1E-3                    # Smoothing di
 DiskProfiledPlane.wheel_extra_thickness = 0.0                     # Extra wheel thickness
 
 DiskProfiledPlane.box_dimensions        = 7.2000123E-2 0.020012 1 # Box dimensions
-DiskProfiledPlane.box_translate         = 0 5.0123E-3 0           # Box translation
+DiskProfiledPlane.box_translate         = 0 7.2123E-3 0           # Box translation
 DiskProfiledPlane.box_permittivity      = 4.0                     # Dielectric box permittivity
 DiskProfiledPlane.box_curvature         = 300E-6                  # Corner curvatures
 
@@ -275,7 +275,7 @@ ItoKMCJSON.dX                 = 2.0                     ## Maximum relative chan
 
 # Kinetic Monte Carlo solver settings. 
 ItoKMCJSON.max_new_particles  = 32                      ## Maximum number of computational particles to produce in reaction step
-ItoKMCJSON.max_new_photons    = 32                      ## Maximum number of computational photons to produce in reaction step	
+ItoKMCJSON.max_new_photons    = 128                      ## Maximum number of computational photons to produce in reaction step	
 ItoKMCJSON.Ncrit              = 5                       ## How many firings away from a Negative particle number?
 ItoKMCJSON.prop_eps           = 1.E99                   ## Maximum relative change in propensity function
 ItoKMCJSON.NSSA               = 10                      ## How many SSA steps to run when tau-leaping is inefficient
