@@ -2993,7 +2993,6 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
           const int Z = m_itoSpecies[p]->getChargeNumber();
 
           if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
-            std::cout << "releasing particle" << std::endl;
             a_secondaryParticles[p].add(ItoParticle(lit().weight(), lit().position()));
           }
         }
