@@ -393,12 +393,12 @@
 	    "reaction": "Y + (O2) -> e + O2+"
 	}
     ],
-    "dielectric reactions":
+    "electrode reactions":
     [
 	{
 	    "reaction": "Y -> @",
 	    "@": ["e", "(null)"],
 	    "efficiencies": [0.1, 0.9]
-	}
+	}	
     ]
 }

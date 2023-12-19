@@ -65,19 +65,19 @@ namespace Physics {
       /*!
 	@brief Get the plasma products for each reaction
       */
-      inline const std::list<Products>&
+      inline const std::vector<Products>&
       getProducts() const noexcept;
 
       /*!
 	@brief Get the reaction efficiency
       */
-      inline const std::list<Real>&
+      inline const std::vector<Real>&
       getEfficiencies() const noexcept;
 
       /*!
 	@brief Get the discrete distribution for the reaction efficiencies
       */
-      inline const std::discrete_distribution<size_t>&
+      inline std::discrete_distribution<size_t>&
       getDistribution() const noexcept;
 
     protected:
@@ -95,17 +95,17 @@ namespace Physics {
       /*!
 	@brief Plasma product indices
       */
-      std::list<Products> m_products;
+      std::vector<Products> m_products;
 
       /*!
 	@brief Reaction efficiencies
       */
-      std::list<Real> m_efficiencies;
+      std::vector<Real> m_efficiencies;
 
       /*!
 	@brief Discrete distribution -- useful when drawing a reaction.
       */
-      std::discrete_distribution<size_t> m_distribution;
+      mutable std::discrete_distribution<size_t> m_distribution;
     };
   } // namespace ItoKMC
 } // namespace Physics

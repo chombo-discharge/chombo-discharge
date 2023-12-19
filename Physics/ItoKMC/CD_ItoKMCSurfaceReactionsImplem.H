@@ -61,19 +61,19 @@ ItoKMCSurfaceReactions::getReactant() const noexcept
   return m_reactant;
 }
 
-inline const std::list<ItoKMCSurfaceReactions::Products>&
+inline const std::vector<ItoKMCSurfaceReactions::Products>&
 ItoKMCSurfaceReactions::getProducts() const noexcept
 {
   return m_products;
 }
 
-inline const std::list<Real>&
+inline const std::vector<Real>&
 ItoKMCSurfaceReactions::getEfficiencies() const noexcept
 {
   return m_efficiencies;
 }
 
-inline const std::discrete_distribution<size_t>&
+inline std::discrete_distribution<size_t>&
 ItoKMCSurfaceReactions::getDistribution() const noexcept
 {
   return m_distribution;

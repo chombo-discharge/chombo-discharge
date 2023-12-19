@@ -2930,17 +2930,74 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
     pout() << m_className + "::secondaryEmissionEB" << endl;
   }
 
-  // Outflow for all CDR fluxes. 
+  const bool isCathode = a_E.dotProduct(a_bndryNormal) <= 0.0;
+  const bool isAnode   = !isCathode;
+
+  // Outflow for all CDR fluxes.
   for (int i = 0; i < a_primaryCDRFluxes.size(); i++) {
     a_secondaryCDRFluxes[i] = std::max(a_primaryCDRFluxes[i], 0.0);
   }
 
   // Go through all primary particles.
+  const std::map<size_t, ItoKMCSurfaceReactions>& plasmaReactions =
+    a_isDielectric ? m_surfaceReactions.getDielectricPlasmaReactions()
+                   : m_surfaceReactions.getElectrodePlasmaReactions();
+
+  const std::map<size_t, ItoKMCSurfaceReactions>& photonReactions =
+    a_isDielectric ? m_surfaceReactions.getDielectricPhotonReactions()
+                   : m_surfaceReactions.getElectrodePhotonReactions();
+
+  // Plasma reactions
   for (int i = 0; i < m_itoSpecies.size(); i++) {
     const List<ItoParticle>& primaryParticles = a_primaryParticles[i];
 
-    for (ListIterator<ItoParticle> lit(primaryParticles); lit.ok(); ++lit) {
+    // Do secondary emission for each intersected particle if there's a corresponding surface reaction.
+    if (plasmaReactions.count(i) > 0) {
 
+      // These are the products and distribution for this reaction.
+      const auto& reactions      = plasmaReactions.at(i);
+      const auto& plasmaProducts = reactions.getProducts();
+      auto&       distribution   = reactions.getDistribution();
+
+      // Go through all the primary particles and construct secondary particles.
+      for (ListIterator<ItoParticle> lit(a_primaryParticles[i]); lit.ok(); ++lit) {
+        const size_t reaction = Random::getDiscrete(distribution);
+
+        for (const auto& p : plasmaProducts[reaction]) {
+          const int Z = m_itoSpecies[p]->getChargeNumber();
+
+          if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
+            a_secondaryParticles[p].add(lit());
+          }
+        }
+      }
+    }
+  }
+
+  // Photon reactions
+  for (int i = 0; i < m_rtSpecies.size(); i++) {
+    const List<Photon>& primaryPhotons = a_primaryPhotons[i];
+
+    // Do secondary emission for each intersected particle if there's a corresponding surface reaction.
+    if (photonReactions.count(i) > 0) {
+
+      // These are the products and distribution for this reaction.
+      const auto& reactions      = photonReactions.at(i);
+      const auto& plasmaProducts = reactions.getProducts();
+      auto&       distribution   = reactions.getDistribution();
+
+      for (ListIterator<Photon> lit(a_primaryPhotons[i]); lit.ok(); ++lit) {
+        const size_t reaction = Random::getDiscrete(distribution);
+
+        for (const auto& p : plasmaProducts[reaction]) {
+          const int Z = m_itoSpecies[p]->getChargeNumber();
+
+          if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
+            std::cout << "releasing particle" << std::endl;
+            a_secondaryParticles[p].add(ItoParticle(lit().weight(), lit().position()));
+          }
+        }
+      }
     }
   }
 }
