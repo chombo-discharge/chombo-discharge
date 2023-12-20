@@ -1830,9 +1830,57 @@ When multiple pathways are specified this way, and they have probabilities :math
 Secondary emission
 ------------------
 
-.. warning::
+Secondary emission is supported for particles, including photons, but not for fluid species.
+Specification of secondary emission is done separately on dielectrics and electrodes by specifying JSON entries ``electrode reactions`` and ``dielectric reactions``.
+The internal specification for these are identical, so all examples below use ``dielectric reactions``.
+Secondary emission reactions are specified similarly to photoionization reactions.
+However, the left-hand side must consist of a single species (photon or particle), while the right-hand side can consist of multiple species.
+Wildcards ``@`` are supported, as is the ``(null)`` species which enables null-reactions, as further discussed below.
+An example JSON specification that enables secondary electron emission due to photons and ion impact is
 
-   Secondary emission on surfaces are not implemented (yet). Only purely absorbing BCs are currently supported.
+.. code-block:: json
+
+   "dielectric reactions":
+   [
+      {
+         "reaction": "Y -> e",
+	 "efficiency": 0.1
+      },
+      {
+         "reaction": "Y -> (null)",
+	 "efficiency": 0.9
+      }
+   ]
+
+The ``reaction`` field specifies which reaction is triggered: The left hand side is the primary (outgoing) species and the left hand side must contain the secondary emissions.
+The left-hand side can consist of either photons (e.g., ``Y``) or particle (e.g., ``O2+``) species.
+The efficiency field specifies the efficiency of the reaction.
+When multiple reactions are specified, we randomly sample the reaction according to a discrete distribution with probabilities
+
+.. math::
+
+   p(i) = \frac{\nu_i}{\sum_i \nu_i},
+
+where :math:`\nu_i` are the efficiencies.
+Note that the efficiencies do not need to sum to one, and if only a single reaction is specified the efficiency specifier has not real effect.
+The above reactions include the null reaction in order to ensure that the correct secondary emission probability is reached, where the ``(null)`` specifier implies that no secondary emission takes place.
+In the above example the probability of secondary electron emission is 0.1, while the probability of a null-reaction (outgoing particle is absorbed without any associated emission) is 0.9.
+The above example can be compressed by using a wildcard and an ``efficiencies`` array as follows:
+
+.. code-block:: json
+
+   "dielectric reactions":
+   [
+      {
+         "reaction": "Y -> @",
+	 "@": ["e", "(null)"],
+	 "efficiencies": [1,9]
+      }
+   ]
+
+where for the sake of demonstration the efficiencies are set to 1 and 9 (rather than 0.1 and 0.9).
+This has no effect on the probabilities :math:`p(i)` given above. 
+
 
 .. _Chap:ItoKMCWarnings:
 		
