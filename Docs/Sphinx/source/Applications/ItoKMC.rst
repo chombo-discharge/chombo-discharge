@@ -1831,8 +1831,8 @@ Secondary emission
 ------------------
 
 Secondary emission is supported for particles, including photons, but not for fluid species.
-Specification of secondary emission is done separately on dielectrics and electrodes by specifying JSON entries ``electrode reactions`` and ``dielectric reactions``.
-The internal specification for these are identical, so all examples below use ``dielectric reactions``.
+Specification of secondary emission is done separately on dielectrics and electrodes by specifying JSON entries ``electrode emission`` and ``dielectric emission``.
+The internal specification for these are identical, so all examples below use ``dielectric emission``.
 Secondary emission reactions are specified similarly to photoionization reactions.
 However, the left-hand side must consist of a single species (photon or particle), while the right-hand side can consist of multiple species.
 Wildcards ``@`` are supported, as is the ``(null)`` species which enables null-reactions, as further discussed below.
@@ -1840,7 +1840,7 @@ An example JSON specification that enables secondary electron emission due to ph
 
 .. code-block:: json
 
-   "dielectric reactions":
+   "dielectric emission":
    [
       {
          "reaction": "Y -> e",
@@ -1869,7 +1869,7 @@ The above example can be compressed by using a wildcard and an ``efficiencies`` 
 
 .. code-block:: json
 
-   "dielectric reactions":
+   "dielectric emission":
    [
       {
          "reaction": "Y -> @",

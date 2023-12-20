@@ -375,7 +375,7 @@
 	    "reaction": "Y + (O2) -> e + O2+"
 	}
     ],
-    "dielectric reactions":
+    "dielectric emission":
     [
 	{
 	    "reaction": "Y -> @",

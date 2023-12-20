@@ -1743,10 +1743,10 @@ ItoKMCJSON::initializeSurfaceReactions(const std::string a_surface)
 
   std::string reactionSpecifier;
   if (a_surface == "dielectric") {
-    reactionSpecifier = "dielectric reactions";
+    reactionSpecifier = "dielectric emission";
   }
   else if (a_surface == "electrode") {
-    reactionSpecifier = "electrode reactions";
+    reactionSpecifier = "electrode emission";
   }
   else {
     MayDay::Abort("ItoKMCJSON::initializeSurfaceReactions -- logic bust");
