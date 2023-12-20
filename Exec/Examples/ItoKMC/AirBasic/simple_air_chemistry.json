@@ -69,41 +69,6 @@
 	"type": "auto",
 	"species": "e"
     },    
-    "alpha_direct": {
-	// Definition of direct definition the alpha coefficient. This can be done by specifying the 'type' field
-	// as 'constant' or 'table alpha/N vs E/N'. If you use 'constant', then only the 'value' field is required
-	// for complete Tabulated coefficients are bit more involved, and are fully specified below. Note that
-	// if do not specify the "header" field, then the full file is read in (ignoring any # comments). If you
-	// read from e.g. BOLSIG+ outputs, then you will probably need to include the header to ensure you obtain
-	// data from the correct place in the file.
-	"type" : "table vs E/N",                                   // Specify that we read in alpha/N vs E/N
-	"file" : "bolsig_air.dat",                                 // File containing the data
-	//"dump" : "debug_alpha.dat",                              // Optional dump of internalized table to file. Useful for debugging.	
-	"header" : "E/N (Td)\tTownsend ioniz. coef. alpha/N (m2)", // Optional argument. Contains line immediately preceding the data to be read.
-	"E/N column" : 0,                                          // Optional specification of column containing E/N (defaults to 0)
-	"alpha/N column" : 1,                                      // Optional specification of column containing alpha/N (defaults to 1)
-	"min E/N" : 1.0,                                           // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
-	"max E/N" : 1000.0,                                        // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
-	"num points" : 1000,                                       // Optional number of points kept when resamplnig the table (defaults to 1000)
-	"spacing" : "exponential",                                 // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
-	"scale E/N" : 1.0,                                         // Optional scaling of the column containing E/N
-	"scale alpha/N" : 1.0                                      // Optional scaling
-    },
-    "eta_direct" : {
-	// Direct definition of the Townsend attachment coefficient. Follows the same terminology as the Townsend ionization coefficient.
-	"type" : "table vs E/N",                                  // Specify that we read in alpha/N vs E/N
-	"file" : "bolsig_air.dat",                                // File containing the data
-	//"dump" : "debug_eta.dat",                               // Optional dump of internalized table to file. Useful for debugging.	
-	"header" : "E/N (Td)\tTownsend attach. coef. eta/N (m2)", // Optional argument. Contains the line immediately preceding the data to be read.
-	"E/N column" : 0,                                         // Optional specification of column containing E/N (defaults to 0)
-	"eta/N column" : 1,                                       // Optional specification of column containing eta/N (defaults to 1)
-	"min E/N" : 1.0,                                          // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
-	"max E/N" : 1000.0,                                       // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
-	"num points" : 1000,                                      // Optional number of points kept when resamplnig the table (defaults to 1000)
-	"spacing" : "exponential",                                // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
-	"scale E/N" : 1.0,                                        // Optional scaling of the column containing E/N
-	"scale eta/N" : 1.0                                       // Optional scaling
-    },
     "plasma species" :
     [
 	// List of plasma species that are tracked. This is an array of species
