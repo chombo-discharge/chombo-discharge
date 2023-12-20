@@ -4737,7 +4737,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(Vector<ParticleContainer<ItoP
                                          cdrFluxesExtrap,
                                          primaryPhotons,
                                          E,
-                                         physPos,
+                                         cellCenter,
                                          cellCentroid,
                                          bndryCentroid,
                                          bndryNormal,
@@ -4747,10 +4747,17 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(Vector<ParticleContainer<ItoP
                                          isDielectric,
                                          matIndex);
 
-          // Secondary particles and photons are filled directly because the containers are cell-sorted, but the CDR fluxes are not. Put them
-          // in the correct place now.
+          // Fill output data holders.
+          for (int i = 0; i < numItoSpecies; i++) {
+            (*secondaryParticlesFAB[i])(iv, 0) = secondaryParticles[i];
+          }
+
           for (int i = 0; i < numCdrSpecies; i++) {
             (*cdrFluxesFAB[i])(vof, 0) = cdrFluxes[i];
+          }
+
+          for (int i = 0; i < numPhotonSpecies; i++) {
+            (*secondaryPhotonsFAB[i])(iv, 0) = secondaryPhotons[i];
           }
         }
       };
