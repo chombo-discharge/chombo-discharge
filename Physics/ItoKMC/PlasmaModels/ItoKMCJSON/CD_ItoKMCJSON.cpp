@@ -61,8 +61,8 @@ ItoKMCJSON::ItoKMCJSON()
   this->initializeTownsendCoefficient("eta");
   this->initializePlasmaReactions();
   this->initializePhotoReactions();
-  this->initializeSurfaceReactions("dielectric");
-  this->initializeSurfaceReactions("electrode");
+  this->initializeSurfaceEmission("dielectric");
+  this->initializeSurfaceEmission("electrode");
 
   // Initialize automatic Townsend coefficients. Triggers only if
   // user asked for it.
@@ -1732,11 +1732,11 @@ ItoKMCJSON::initializePhotoReactions()
 }
 
 void
-ItoKMCJSON::initializeSurfaceReactions(const std::string a_surface)
+ItoKMCJSON::initializeSurfaceEmission(const std::string a_surface)
 {
-  CH_TIME("ItoKMCJSON::initializeSurfaceReactions");
+  CH_TIME("ItoKMCJSON::initializeSurfaceEmission");
   if (m_verbose) {
-    pout() << m_className + "::initializeSurfaceReactions" << endl;
+    pout() << m_className + "::initializeSurfaceEmission" << endl;
   }
 
   const std::string baseError = "ItoKMCJSON::initializePhotoReactions";
@@ -1749,7 +1749,7 @@ ItoKMCJSON::initializeSurfaceReactions(const std::string a_surface)
     reactionSpecifier = "electrode emission";
   }
   else {
-    MayDay::Abort("ItoKMCJSON::initializeSurfaceReactions -- logic bust");
+    MayDay::Abort("ItoKMCJSON::initializeSurfaceEmission -- logic bust");
   }
 
   for (const auto& reactionJSON : m_json[reactionSpecifier]) {

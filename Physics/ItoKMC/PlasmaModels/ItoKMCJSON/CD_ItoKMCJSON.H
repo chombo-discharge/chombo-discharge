@@ -614,7 +614,7 @@ namespace Physics {
 	@param[in] a_surface Surface type
       */
       virtual void
-      initializeSurfaceReactions(const std::string a_surface);
+      initializeSurfaceEmission(const std::string a_surface);
 
       /*!
 	@brief Parses a reaction string into reactangs and products
