@@ -2976,7 +2976,6 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
 
   // Photon reactions
   for (int i = 0; i < m_rtSpecies.size(); i++) {
-    const List<Photon>& primaryPhotons = a_primaryPhotons[i];
 
     // Do secondary emission for each intersected particle if there's a corresponding surface reaction.
     if (photonReactions.count(i) > 0) {

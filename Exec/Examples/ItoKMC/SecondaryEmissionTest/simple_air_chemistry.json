@@ -62,6 +62,16 @@
 	}
     },
     "alpha": {
+	"type": "auto",
+	"species": "e",
+	"plot": true
+    },
+    "eta": {
+	"type": "auto",
+	"species": "e",
+	"plot": true
+    },        
+    "alpha_direct": {
 	// Definition of the alpha coefficient. This can be done by specifying the 'type' field
 	// as 'constant' or 'table alpha/N vs E/N'. If you use 'constant', then only the 'value' field is required
 	// for complete Tabulated coefficients are bit more involved, and are fully specified below. Note that
@@ -81,7 +91,7 @@
 	"scale E/N" : 1.0,                                         // Optional scaling of the column containing E/N
 	"scale alpha/N" : 1.0                                      // Optional scaling
     },
-    "eta" : {
+    "eta_direct" : {
 	// Definition of the Townsend attachment coefficient. Follows the same terminology as the Townsend ionization coefficient.
 	"type" : "table vs E/N",                                  // Specify that we read in alpha/N vs E/N
 	"file" : "bolsig_air.dat",                                // File containing the data
@@ -370,17 +380,17 @@
 	{
 	    "reaction": "Y -> @",
 	    "@": ["e", "(null)"],
-	    "efficiencies": [1.0, 0.0]
+	    "efficiencies": [0.1, 0.9]
 	},
 	{
 	    "reaction": "N2+ -> @",
 	    "@": ["e", "(null)"],
-	    "efficiencies": [100.0,1.0]
+	    "efficiencies": [0.1,0.9]
 	},
 	{
 	    "reaction": "O2+ -> @",
 	    "@": ["e", "(null)"],
-	    "efficiencies": [100.0,1.0]	    
+	    "efficiencies": [0.1,0.9]	    
 	}		
     ]        
 }
