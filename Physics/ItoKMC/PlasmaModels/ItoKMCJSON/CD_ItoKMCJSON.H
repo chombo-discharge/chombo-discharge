@@ -711,14 +711,6 @@ namespace Physics {
                           const Vector<RealVect>& a_gradPhi,
                           const Real              a_dx,
                           const Real              a_kappa) const noexcept override;
-
-      /*!
-	@brief Sample a multinomial distribution with N samples 
-	@param[in] a_N Number of samples
-	@param[in] a_distribution Discrete distribution
-      */
-      std::vector<size_t>
-      multinomial(const size_t N, const std::discrete_distribution<size_t>& a_distribution) const noexcept;
     };
   } // namespace ItoKMC
 } // namespace Physics

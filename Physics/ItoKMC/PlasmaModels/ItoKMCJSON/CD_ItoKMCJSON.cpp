@@ -2947,64 +2947,52 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
     a_isDielectric ? m_surfaceReactions.getDielectricPhotonReactions()
                    : m_surfaceReactions.getElectrodePhotonReactions();
 
-  // Do secondary emission for each intersected particle if there's a corresponding surface reaction.
+  // Plasma reactions
   for (int i = 0; i < m_itoSpecies.size(); i++) {
+    const List<ItoParticle>& primaryParticles = a_primaryParticles[i];
+
+    // Do secondary emission for each intersected particle if there's a corresponding surface reaction.
     if (plasmaReactions.count(i) > 0) {
 
       // These are the products and distribution for this reaction.
       const auto& reactions      = plasmaReactions.at(i);
       const auto& plasmaProducts = reactions.getProducts();
-      const auto& distribution   = reactions.getDistribution();
+      auto&       distribution   = reactions.getDistribution();
 
-      // Figure out the number of particles to sample and then run a multinomial sampling
-      size_t N = 0;
+      // Go through all the primary particles and construct secondary particles.
       for (ListIterator<ItoParticle> lit(a_primaryParticles[i]); lit.ok(); ++lit) {
-        N += (size_t)lit().weight();
-      }
+        const size_t reaction = Random::getDiscrete(distribution);
 
-      const std::vector<size_t> X = this->multinomial(N, distribution);
+        for (const auto& p : plasmaProducts[reaction]) {
+          const int Z = m_itoSpecies[p]->getChargeNumber();
 
-      // Release the particles.
-      for (int i = 0; i < X.size(); i++) {
-        if (X[i] > 0) {
-          for (const auto& p : plasmaProducts[i]) {
-            const int Z = m_itoSpecies[p]->getChargeNumber();
-
-            if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
-              a_secondaryParticles[p].add(ItoParticle(1.0 * X[i], releasePosition));
-            }
+          if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
+            a_secondaryParticles[p].add(ItoParticle(lit().weight(), releasePosition));
           }
         }
       }
     }
   }
 
-  // Do secondary emission for each intersected photon if there's a corresponding surface reaction.
+  // Photon reactions
   for (int i = 0; i < m_rtSpecies.size(); i++) {
+
+    // Do secondary emission for each intersected particle if there's a corresponding surface reaction.
     if (photonReactions.count(i) > 0) {
 
       // These are the products and distribution for this reaction.
       const auto& reactions      = photonReactions.at(i);
       const auto& plasmaProducts = reactions.getProducts();
-      const auto& distribution   = reactions.getDistribution();
+      auto&       distribution   = reactions.getDistribution();
 
-      // Figure out the number of particles to sample and then run a multinomial sampling
-      size_t N = 0;
       for (ListIterator<Photon> lit(a_primaryPhotons[i]); lit.ok(); ++lit) {
-        N += (size_t)lit().weight();
-      }
+        const size_t reaction = Random::getDiscrete(distribution);
 
-      const std::vector<size_t> X = this->multinomial(N, distribution);
+        for (const auto& p : plasmaProducts[reaction]) {
+          const int Z = m_itoSpecies[p]->getChargeNumber();
 
-      // Release the particles.
-      for (int i = 0; i < X.size(); i++) {
-        if (X[i] > 0) {
-          for (const auto& p : plasmaProducts[i]) {
-            const int Z = m_itoSpecies[p]->getChargeNumber();
-
-            if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
-              a_secondaryParticles[p].add(ItoParticle(1.0 * X[i], releasePosition));
-            }
+          if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
+            a_secondaryParticles[p].add(ItoParticle(lit().weight(), releasePosition));
           }
         }
       }
@@ -3132,26 +3120,6 @@ ItoKMCJSON::getPlotVariables(const RealVect          a_E,
   }
 
   return plotVars;
-}
-
-std::vector<size_t>
-ItoKMCJSON::multinomial(const size_t N, const std::discrete_distribution<size_t>& a_distribution) const noexcept
-{
-  CH_TIME("ItoKMCJSON::multinomial");
-  if (m_verbose) {
-    pout() << m_className + "::multinomial" << endl;
-  }
-
-  std::vector<size_t> X(a_distribution.probabilities().size(), 0);
-
-  auto& dist = (std::discrete_distribution<size_t>&)a_distribution;
-  for (size_t i = 0; i < N; i++) {
-    const size_t j = Random::getDiscrete(dist);
-
-    X[j]++;
-  }
-
-  return X;
 }
 
 #include <CD_NamespaceFooter.H>
