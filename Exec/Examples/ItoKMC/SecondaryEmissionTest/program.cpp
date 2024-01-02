@@ -10,7 +10,7 @@
 #include <CD_McPhoto.H>
 #include <CD_ItoKMCJSON.H>
 #include <CD_CdrCTU.H>
-#include <CD_DiskProfiledPlane.H>
+#include <CD_Aerosol.H>
 #include <CD_ItoKMCGodunovStepper.H>
 #include <CD_ItoKMCStreamerTagger.H>
 
@@ -47,7 +47,7 @@ main(int argc, char* argv[])
     setPoutBaseName(basename);
   }
 
-  auto geometry    = RefCountedPtr<ComputationalGeometry>(new DiskProfiledPlane());
+  auto geometry    = RefCountedPtr<ComputationalGeometry>(new Aerosol());
   auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
   auto geocoarsen  = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
   auto physics     = RefCountedPtr<ItoKMCPhysics>(new ItoKMCJSON());
