@@ -293,7 +293,7 @@ ItoKMCStreamerTagger.tag_box1_hi       = 0.0 0.0 0.0  # these two corners
 ItoKMCStreamerTagger.buffer            = 4            # Grow tagged cells
 
 ItoKMCStreamerTagger.refine_curvature  = 2.0        # Curvature refinement
-ItoKMCStreamerTagger.coarsen_curvature = 2.0        # Curvature coarsening	
+ItoKMCStreamerTagger.coarsen_curvature = 0.1        # Curvature coarsening	
 ItoKMCStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha     = 0.1         # Set alpha coarsening. Higher => Less mesh
 ItoKMCStreamerTagger.max_coarsen_lvl   = 4            # Set max coarsening depth
