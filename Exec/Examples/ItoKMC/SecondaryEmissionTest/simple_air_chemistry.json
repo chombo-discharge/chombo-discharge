@@ -185,9 +185,9 @@
 		    // Specification of initial particles sampled uniformly inside of a sphere (circle in 2D). This 
 		    // will distribute the particles over the MPI rank. 			
 		    "sphere distribution" : {
-			"center" : [ 0, 7.2E-3, 0 ], // Sphere center
-			"radius" : 100E-6,         // Sphere radius
-			"num particles": 1000,     // Number computational particles
+			"center" : [ 0, 7.5E-3, 0 ], // Sphere center
+			"radius" : 500E-6,         // Sphere radius
+			"num particles": 10000,     // Number computational particles
 			"weight" : 1            // Particle weights
 		    }
 		},

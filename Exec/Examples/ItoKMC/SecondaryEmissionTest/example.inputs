@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = 5.5E3
+ItoKMC.potential = 6.0E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
@@ -91,7 +91,7 @@ FieldSolverMultigrid.gmg_min_iter      = 5                 # Minimum number of i
 FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2               # Solver hang
-FieldSolverMultigrid.gmg_min_cells     = 16                  # Bottom drop
+FieldSolverMultigrid.gmg_min_cells     = 4                  # Bottom drop
 FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2                 # Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight     = 1                 # Boundary condition weights (for least squares)
@@ -216,7 +216,7 @@ DiskProfiledPlane.wheel_smooth          = 1E-3                    # Smoothing di
 DiskProfiledPlane.wheel_extra_thickness = 0.0                     # Extra wheel thickness
 
 DiskProfiledPlane.box_dimensions        = 7.2000123E-2 0.020012 1 # Box dimensions
-DiskProfiledPlane.box_translate         = 0 7.4123E-3 0           # Box translation
+DiskProfiledPlane.box_translate         = 0 7.6123E-3 0           # Box translation
 DiskProfiledPlane.box_permittivity      = 4.0                     # Dielectric box permittivity
 DiskProfiledPlane.box_curvature         = 300E-6                  # Corner curvatures
 
@@ -277,10 +277,10 @@ ItoKMCJSON.dX                 = 2.0                     ## Maximum relative chan
 ItoKMCJSON.max_new_particles  = 32                      ## Maximum number of computational particles to produce in reaction step
 ItoKMCJSON.max_new_photons    = 32                      ## Maximum number of computational photons to produce in reaction step	
 ItoKMCJSON.Ncrit              = 5                       ## How many firings away from a Negative particle number?
-ItoKMCJSON.prop_eps           = 10.0                   ## Maximum relative change in propensity function
+ItoKMCJSON.prop_eps           = 1.E99                   ## Maximum relative change in propensity function
 ItoKMCJSON.NSSA               = 10                      ## How many SSA steps to run when tau-leaping is inefficient
 ItoKMCJSON.SSAlim             = 1.0                     ## When to enter SSA instead of tau-leaping
-ItoKMCJSON.algorithm          = hybrid_midpoint         ## 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
+ItoKMCJSON.algorithm          = tau_plain         ## 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
 
 # ====================================================================================================
 # ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS
