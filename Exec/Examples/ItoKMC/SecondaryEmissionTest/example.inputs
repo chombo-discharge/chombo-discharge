@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = 7E3
+ItoKMC.potential = 5.5E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
@@ -216,7 +216,7 @@ DiskProfiledPlane.wheel_smooth          = 1E-3                    # Smoothing di
 DiskProfiledPlane.wheel_extra_thickness = 0.0                     # Extra wheel thickness
 
 DiskProfiledPlane.box_dimensions        = 7.2000123E-2 0.020012 1 # Box dimensions
-DiskProfiledPlane.box_translate         = 0 7.2123E-3 0           # Box translation
+DiskProfiledPlane.box_translate         = 0 7.4123E-3 0           # Box translation
 DiskProfiledPlane.box_permittivity      = 4.0                     # Dielectric box permittivity
 DiskProfiledPlane.box_curvature         = 300E-6                  # Corner curvatures
 
@@ -239,9 +239,9 @@ ItoKMCGodunovStepper.abort_on_failure                      = true           # Ab
 ItoKMCGodunovStepper.redistribute_cdr                      = true           # Turn on/off reactive redistribution
 ItoKMCGodunovStepper.profile                               = true           # Turn on/off run-time profiling
 ItoKMCGodunovStepper.plt_vars                              = current_density           # 'conductivity', 'current_density', 'particles_per_patch'
-ItoKMCGodunovStepper.dual_grid                             = true           # Turn on/off dual-grid functionality
+ItoKMCGodunovStepper.dual_grid                             = false           # Turn on/off dual-grid functionality
 ItoKMCGodunovStepper.load_balance_fluid                    = false          # Turn on/off fluid realm load balancing. 
-ItoKMCGodunovStepper.load_balance_particles                = true           # Turn on/off particle load balancing
+ItoKMCGodunovStepper.load_balance_particles                = false           # Turn on/off particle load balancing
 ItoKMCGodunovStepper.load_indices                          = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoKMCGodunovStepper.load_per_cell                         = 1.0            # Default load per grid cell.
 ItoKMCGodunovStepper.box_sorting                           = morton         # Box sorting when load balancing
@@ -292,8 +292,8 @@ ItoKMCStreamerTagger.tag_box1_lo       = 0.0 0.0 0.0  # Only allow tags that fal
 ItoKMCStreamerTagger.tag_box1_hi       = 0.0 0.0 0.0  # these two corners
 ItoKMCStreamerTagger.buffer            = 4            # Grow tagged cells
 
-ItoKMCStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
-ItoKMCStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
+ItoKMCStreamerTagger.refine_curvature  = 2.0        # Curvature refinement
+ItoKMCStreamerTagger.coarsen_curvature = 2.0        # Curvature coarsening	
 ItoKMCStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha     = 0.1         # Set alpha coarsening. Higher => Less mesh
 ItoKMCStreamerTagger.max_coarsen_lvl   = 4            # Set max coarsening depth
