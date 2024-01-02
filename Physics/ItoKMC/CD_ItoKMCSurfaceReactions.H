@@ -81,12 +81,11 @@ namespace Physics {
       getDistribution() const noexcept;
 
     protected:
-
       /*!
 	@brief Is defined or not
       */
       bool m_isDefined;
-      
+
       /*!
 	@brief Reactant index.
       */

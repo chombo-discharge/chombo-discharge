@@ -4886,10 +4886,10 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
     // Add the secondary particles into the solvers and remove the primary particles.
     ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
     particles.transferParticles(*a_secondaryParticles[idx]);
-    
+
     a_primaryParticles[idx]->clearParticles();
 
-    if(a_secondaryParticles[idx]->getNumberOfValidParticlesGlobal() > 0) {
+    if (a_secondaryParticles[idx]->getNumberOfValidParticlesGlobal() > 0) {
       MayDay::Abort("logic bust");
     }
   }

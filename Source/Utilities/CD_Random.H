@@ -121,7 +121,7 @@ public:
   */
   template <typename T>
   inline static size_t
-  getDiscrete(T& a_distribution);  
+  getDiscrete(T& a_distribution);
 
   /*!
     @brief Seed the RNG

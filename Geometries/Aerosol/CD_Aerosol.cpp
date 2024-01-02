@@ -29,13 +29,14 @@ Aerosol::Aerosol()
   Real     eps, eps0, noise_persistence, noise_amplitude;
   RealVect noise_frequency;
   int      noise_octaves, num_spheres;
-  bool     noise_reseed;
+  bool     noise_reseed, invert;
 
   Vector<Real> v(SpaceDim);
 
   // Get a bunch of parameters from the input script
   ParmParse pp("Aerosol");
 
+  pp.get("invert", invert);
   pp.get("eps0", eps0);
   pp.get("permittivity", eps);
   pp.get("num_spheres", num_spheres);
@@ -46,7 +47,8 @@ Aerosol::Aerosol()
   pp.getarr("noise_frequency", v, 0, SpaceDim);
   noise_frequency = RealVect(D_DECL(v[0], v[1], v[2]));
 
-  setGasPermittivity(eps0);
+  this->setGasPermittivity(eps0);
+
   m_dielectrics.resize(0);
   m_electrodes.resize(0);
 
@@ -69,14 +71,13 @@ Aerosol::Aerosol()
     // Get the perlin sphere.
     RefCountedPtr<BaseIF> sph = RefCountedPtr<BaseIF>(new PerlinSphereSdf(radius,
                                                                           center,
-                                                                          false,
+                                                                          invert,
                                                                           noise_amplitude,
                                                                           noise_frequency,
                                                                           noise_persistence,
                                                                           noise_octaves,
                                                                           noise_reseed));
 
-    // Add dielectric sphere
     m_dielectrics.push_back(Dielectric(sph, eps));
   }
 }
