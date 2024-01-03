@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = 200E3
+ItoKMC.potential = 300E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
@@ -59,7 +59,7 @@ Driver.max_chk_depth                   = -1               # Restrict chechkpoint
 Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
 Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
-Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
+Driver.allow_coarsening                = false             # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
 Driver.refine_angles                   = 10.              # Refine cells if angle between elements exceed this value.
 Driver.refine_electrodes               = 2                # Refine electrode surfaces. -1 => equal to refine_geometry
@@ -236,7 +236,7 @@ ItoKMCGodunovStepper.load_balance_particles                = false           # T
 ItoKMCGodunovStepper.load_indices                          = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoKMCGodunovStepper.load_per_cell                         = 1.0            # Default load per grid cell.
 ItoKMCGodunovStepper.box_sorting                           = morton         # Box sorting when load balancing
-ItoKMCGodunovStepper.particles_per_cell                    = 32             # Max computational particles per cell
+ItoKMCGodunovStepper.particles_per_cell                    = 16             # Max computational particles per cell
 ItoKMCGodunovStepper.merge_interval                        = 1              # Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                 = false          # Make superparticles during regrids
 ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0            # Advective time step CFL restriction
