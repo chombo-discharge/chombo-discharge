@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = 150E3
+ItoKMC.potential = 200E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
@@ -10,8 +10,8 @@ ItoKMC.basename  = pout
 AmrMesh.lo_corner        =  -2E-2 -2E-2 -2E-2     # Low corner of problem domain
 AmrMesh.hi_corner        =  2E-2 2E-2  2E-2 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 128 128 128    # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 7           # Maximum amr depth
+AmrMesh.coarsest_domain  = 64 64 64    # Number of cells on coarsest domain
+AmrMesh.max_amr_depth    = 8           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -63,7 +63,7 @@ Driver.allow_coarsening                = true             # Allows removal of gr
 Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
 Driver.refine_angles                   = 10.              # Refine cells if angle between elements exceed this value.
 Driver.refine_electrodes               = 2                # Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics              = 1                # Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics              = 8                # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
 # ====================================================================================================
@@ -84,14 +84,14 @@ FieldSolverMultigrid.filter_rho        = 0                 # Number of filtering
 FieldSolverMultigrid.filter_potential  = 0                 # Number of filterings of potential after Poisson solve
 
 FieldSolverMultigrid.gmg_verbosity     = 10                # GMG verbosity
-FieldSolverMultigrid.gmg_pre_smooth    = 12                # Number of relaxations in downsweep
-FieldSolverMultigrid.gmg_post_smooth   = 12                # Number of relaxations in upsweep
-FieldSolverMultigrid.gmg_bott_smooth   = 12                # Number of at bottom level (before dropping to bottom solver)
+FieldSolverMultigrid.gmg_pre_smooth    = 24                # Number of relaxations in downsweep
+FieldSolverMultigrid.gmg_post_smooth   = 24                # Number of relaxations in upsweep
+FieldSolverMultigrid.gmg_bott_smooth   = 24                # Number of at bottom level (before dropping to bottom solver)
 FieldSolverMultigrid.gmg_min_iter      = 5                 # Minimum number of iterations
 FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2               # Solver hang
-FieldSolverMultigrid.gmg_min_cells     = 4                 # Bottom drop
+FieldSolverMultigrid.gmg_min_cells     = 8                 # Bottom drop
 FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2                 # Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight     = 1                 # Boundary condition weights (for least squares)
@@ -209,16 +209,16 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # radius and center. 
 # ====================================================================================================
 Aerosol.num_spheres       = 1              # Number of spheres
-Aerosol.invert            = false          # Invert so that instead of particles we have holes
+Aerosol.invert            = true          # Invert so that instead of particles we have holes
 Aerosol.permittivity      = 5.0            # Dielectric permittivity
 Aerosol.eps0              = 1              # Permittivity
-Aerosol.noise_amplitude   = 100E-6         # Noise amplitude
+Aerosol.noise_amplitude   = 1E-6         # Noise amplitude
 Aerosol.noise_frequency   = 1E3 1E3 1E3    # Noise frequency
 Aerosol.noise_persistence = 0.5            # Noise persistence
 Aerosol.noise_octaves     = 3              # Noise octaves
 Aerosol.noise_reseed      = false           # Reseed noise
 
-Aerosol.sphere1.radius    = 250E-6           # Sphere radius
+Aerosol.sphere1.radius    = 50E-6           # Sphere radius
 Aerosol.sphere1.center    = 0.0 0.0 0.0    # Sphere position
 
 # ==================================================================================================== 
@@ -228,7 +228,7 @@ ItoKMCGodunovStepper.checkpoint_particles                  = true           # If
 ItoKMCGodunovStepper.verbosity                             = -1             # Verbosity
 ItoKMCGodunovStepper.abort_on_failure                      = true           # Abort on Poisson solver failure or not
 ItoKMCGodunovStepper.redistribute_cdr                      = true           # Turn on/off reactive redistribution
-ItoKMCGodunovStepper.profile                               = false           # Turn on/off run-time profiling
+ItoKMCGodunovStepper.profile                               = false          # Turn on/off run-time profiling
 ItoKMCGodunovStepper.plt_vars                              = current_density           # 'conductivity', 'current_density', 'particles_per_patch'
 ItoKMCGodunovStepper.dual_grid                             = false           # Turn on/off dual-grid functionality
 ItoKMCGodunovStepper.load_balance_fluid                    = false          # Turn on/off fluid realm load balancing. 
@@ -236,19 +236,19 @@ ItoKMCGodunovStepper.load_balance_particles                = false           # T
 ItoKMCGodunovStepper.load_indices                          = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoKMCGodunovStepper.load_per_cell                         = 1.0            # Default load per grid cell.
 ItoKMCGodunovStepper.box_sorting                           = morton         # Box sorting when load balancing
-ItoKMCGodunovStepper.particles_per_cell                    = 16             # Max computational particles per cell
+ItoKMCGodunovStepper.particles_per_cell                    = 32             # Max computational particles per cell
 ItoKMCGodunovStepper.merge_interval                        = 1              # Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                 = false          # Make superparticles during regrids
 ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0            # Advective time step CFL restriction
-ItoKMCGodunovStepper.max_particle_advection_cfl            = 5.0            # Advective time step CFL restriction
+ItoKMCGodunovStepper.max_particle_advection_cfl            = 10.0            # Advective time step CFL restriction
 ItoKMCGodunovStepper.min_particle_diffusion_cfl            = 0.0            # Diffusive time step CFL restriction
 ItoKMCGodunovStepper.max_particle_diffusion_cfl            = 1.E99          # Diffusive time step CFL restriction
 ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl  = 0.0            # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl  = 1.E99          # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.fluid_advection_diffusion_cfl         = 0.5            # Advection-diffusion time step CFL restriction
-ItoKMCGodunovStepper.relax_dt_factor                       = 100.0          # Relaxation time step restriction. 
-ItoKMCGodunovStepper.min_dt                                = 10.E-12        # Minimum permitted time step
-ItoKMCGodunovStepper.max_dt                                = 200.E-12          # Maximum permitted time step
+ItoKMCGodunovStepper.relax_dt_factor                       = 500.0          # Relaxation time step restriction. 
+ItoKMCGodunovStepper.min_dt                                = 20.E-12        # Minimum permitted time step
+ItoKMCGodunovStepper.max_dt                                = 1.E-9          # Maximum permitted time step
 ItoKMCGodunovStepper.extend_conductivity                   = true           # Permit particles to live outside the EB to avoid bad gradients near EB
 ItoKMCGodunovStepper.smooth_conductivity                   = false          # Use bilinear smoothing on the conductivity.
 ItoKMCGodunovStepper.eb_tolerance                          = 0.0            # EB intersection test tolerance
@@ -283,8 +283,8 @@ ItoKMCStreamerTagger.tag_box1_lo       = 0.0 0.0 0.0  # Only allow tags that fal
 ItoKMCStreamerTagger.tag_box1_hi       = 0.0 0.0 0.0  # these two corners
 ItoKMCStreamerTagger.buffer            = 4            # Grow tagged cells
 
-ItoKMCStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
+ItoKMCStreamerTagger.refine_curvature  = 1.E99         # Curvature refinement
 ItoKMCStreamerTagger.coarsen_curvature = 1.E99       # Curvature coarsening	
 ItoKMCStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha     = 0.1         # Set alpha coarsening. Higher => Less mesh
-ItoKMCStreamerTagger.max_coarsen_lvl   = 4            # Set max coarsening depth
+ItoKMCStreamerTagger.max_coarsen_lvl   = 5            # Set max coarsening depth

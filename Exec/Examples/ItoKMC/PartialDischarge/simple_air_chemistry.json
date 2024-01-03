@@ -162,54 +162,11 @@
 		"points" : 1000
 	    },
 	    "initial particles" : [
-		// Example of how to initialize particles using various methods (manual placement, distributions, reading
-		// from disk. All these specification are incrementing (i.e., not overriding one another)
 		{
 		    // Specification of single computational particles.
 		    "single particle" : {         
 			"position" : [ 0, 0, 0 ], // Position is at (0,00)
-			"weight" : 1              // Physical particle with weight = 1
-		    }
-		},
-		{
-		    // Specification of initial particles sampled uniformly in space. This will distribute
-		    // the particles over the MPI rank. 
-		    "uniform distribution" : {
-			"low corner" : [ -0.04, 0, 0 ],    // Lower-left physical corner of sampling region
-			"high corner" : [ 0.04, 0.04, 0 ], // Upper-right physical corner of sampling region
-			"num particles": 0,             // Number of computational particles
-			"weight" : 1                       // Particle weights
-		    } 
-		},
-		{
-		    // Specification of initial particles sampled uniformly inside of a sphere (circle in 2D). This 
-		    // will distribute the particles over the MPI rank. 			
-		    "sphere distribution" : {
-			"center" : [ 0, 0.0E-3, 0 ], // Sphere center
-			"radius" : 10E-6,         // Sphere radius
-			"num particles": 100,     // Number computational particles
-			"weight" : 1            // Particle weights
-		    }
-		},
-		{
-		    // Specification of initial particles sampled from a Gaussian distribution. This
-		    // will distribute the particles over the MPI rank. 						
-		    "gaussian distribution" : {
-			"center" : [ 0, 0, 0 ], // Center of the gaussian distribution
-			"radius" : 1.0,         // Gaussian radius
-			"num particles": 0,   // Number of computational particles
-			"weight" : 1            // Particle weights
-		    }
-		},
-		{
-		    // Specification of initial particles read from an input list. This
-		    // will put all the particles on the master MPI rank. 
-		    "list": {
-			"file": "initial_particles.dat", // File containing the particles
-			"x column": 0,                   // Optional specification of column containing x coordinate (defaults to 0)
-			"y column": 1,                   // Optional specification of column containing y coordinate (defaults to 1)
-			"z column": 2,                   // Optional specification of column containing z coordinate (defaults to 2)
-			"w column": 3                    // Optional specification of column containing the particle weight (defaults to 3)
+			"weight" : 5              // Physical particle with weight = 1
 		    }
 		}
 	    ]
@@ -228,7 +185,7 @@
 	    "diffusion": {          // Specification of diffusion coefficient
 		"type": "constant", // Diffusion coefficient is constant
 		"value": 0.0        // Diffusion coefficient is 0.0
-	    }		
+	    }
 	},
 	{
 	    // Definition of O2- plasma species.
