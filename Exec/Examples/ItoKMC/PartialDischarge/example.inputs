@@ -208,7 +208,7 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # you need to set 'num_spheres' to the number of spheres that you want. Each sphere needs a separate
 # radius and center. 
 # ====================================================================================================
-Aerosol.num_spheres       = 2              # Number of spheres
+Aerosol.num_spheres       = 1              # Number of spheres
 Aerosol.invert            = false          # Invert so that instead of particles we have holes
 Aerosol.permittivity      = 5.0            # Dielectric permittivity
 Aerosol.eps0              = 1              # Permittivity
@@ -220,9 +220,6 @@ Aerosol.noise_reseed      = false           # Reseed noise
 
 Aerosol.sphere1.radius    = 250E-6           # Sphere radius
 Aerosol.sphere1.center    = 0.0 0.0 0.0    # Sphere position
-
-Aerosol.sphere2.radius    = 500E-6           # Sphere radius
-Aerosol.sphere2.center    = 2E-3 0.0 0.0    # Sphere position
 
 # ==================================================================================================== 
 # ItoKMCGodunovStepper class options
