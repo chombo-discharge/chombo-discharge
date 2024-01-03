@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = 40E3
+ItoKMC.potential = 20E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
@@ -11,7 +11,7 @@ AmrMesh.lo_corner        =  -2E-3 -2E-3 -2E-3     # Low corner of problem domain
 AmrMesh.hi_corner        =  2E-3 2E-3  2E-3 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 64 64 64    # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 4           # Maximum amr depth
+AmrMesh.max_amr_depth    = 6           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -63,7 +63,7 @@ Driver.allow_coarsening                = false             # Allows removal of g
 Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
 Driver.refine_angles                   = 10.              # Refine cells if angle between elements exceed this value.
 Driver.refine_electrodes               = 2                # Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics              = 2                # Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics              = 6                # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
 # ====================================================================================================
