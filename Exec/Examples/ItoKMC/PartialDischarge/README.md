@@ -29,7 +29,13 @@ or in 3D
 
 ```mpirun -np <num_proc> program3d.*ex example.inputs
 
-The user can select between different algorithms and initial conditions in the input script and chemistry file. 
+The user can select between different algorithms and initial conditions in the input script and chemistry file.
+
+# Caveats
+
+This simulation is fully stochastic and starts from a single physical electron.
+There is a substantial probability that the initial electron is attached before it ionizes, in which case the simulation will still proceed but discharges fail to initiate.
+Another common event is that the initial electron undergoes ionization but the resulting ions do not generate secondary electron emission at the cathode side of the avoid.
 
 # Output
 
