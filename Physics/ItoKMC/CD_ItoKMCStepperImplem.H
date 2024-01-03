@@ -1210,12 +1210,16 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
   }
   }
 
+  // Calculate the total charge
+  const Real Qtot = this->computeTotalCharge();
+
   // Print the step report.
 
   //clang-format off
   const std::string whitespace = "                                   ";
   pout() << "                                   " + str << endl;
   pout() << whitespace + "Emax        = " << Emax << endl
+         << whitespace + "Qtot        = " << Qtot << endl
          << whitespace + "Max density = " << maxDensity << " (" << maxSolver << ")" << endl
          << whitespace + "CFL (Ito)   = " << m_dt / m_particleAdvectionDiffusionDt << endl
          << whitespace + "CFL (CDR)   = " << m_dt / m_fluidAdvectionDiffusionDt << endl
