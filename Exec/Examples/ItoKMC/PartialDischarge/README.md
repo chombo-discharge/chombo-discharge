@@ -1,9 +1,9 @@
-## Exec/Examples/ItoKMC/AirDBD
+## Exec/Examples/ItoKMC/PartialDischarge
 
-This example runs a model of 2D and 3D streamer discharges over a dielectric surface.
-the input scripts and plasma chemistry are defined in
+This example (which is a work-in-progress) runs a model of 2D and 3D streamer discharges in a void geometry.
+The input scripts and plasma chemistry are defined in
 
-* Plasma chemistry: air_chemistry.json
+* Plasma chemistry: simple_air_chemistry.json
 * Input files: example.inputs
 
 This model uses an Ito-KMC model.
