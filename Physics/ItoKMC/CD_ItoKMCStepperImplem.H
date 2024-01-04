@@ -330,8 +330,13 @@ ItoKMCStepper<I, C, R, F>::parseTimeStepRestrictions() noexcept
   pp.get("max_growth_dt", m_maxGrowthDt);
   pp.get("max_shrink_dt", m_maxShrinkDt);
 
-  m_maxGrowthDt = std::max(m_maxGrowthDt, 1.0);
-  m_maxShrinkDt = std::min(m_maxShrinkDt, 1.0);
+  if (m_maxGrowthDt <= 1.0) {
+    MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have max_growth_dt > 1.0");
+  }
+
+  if (m_maxShrinkDt <= 1.0) {
+    MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have max_shrink_dt > 1.0");
+  }
 
   if (m_relaxTimeFactor <= 0.0) {
     MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have relax_dt > 0.0");
@@ -1365,7 +1370,7 @@ ItoKMCStepper<I, C, R, F>::computeDt()
   Real dt = std::numeric_limits<Real>::max();
 
   const Real maxGrowthDt = m_prevDt > 0.0 ? m_prevDt * m_maxGrowthDt : dt;
-  const Real minShrinkDt = m_prevDt > 0.0 ? m_prevDt / m_maxShrinkDt : dt;
+  const Real minShrinkDt = m_prevDt > 0.0 ? m_prevDt / m_maxShrinkDt : 0.0;
 
   // Compute various time steps.
   timer.startEvent("Advection (Ito)");
