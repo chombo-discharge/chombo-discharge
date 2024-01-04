@@ -5,7 +5,7 @@ AmrMesh.lo_corner        = -6E-2 0E-2 -6E-2    # Low corner of problem domain
 AmrMesh.hi_corner        =  6E-2 6E-2  6E-2    # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 64 128  # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 7           # Maximum amr depth
+AmrMesh.max_amr_depth    = 8           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -38,7 +38,7 @@ Driver.checkpoint_interval             = 100              # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 4                # Number of initial regrids
+Driver.initial_regrids                 = 2                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
@@ -64,7 +64,7 @@ Driver.refine_dielectrics              = 0                # Refine dielectric su
 # TracerParticleSolver class options
 # ====================================================================================================
 TracerParticleSolver.verbosity     = -1     # Solver verbosity level. 
-TracerParticleSolver.deposition    = cic    # Deposition method. Must be 'ngp' or 'cic'
+TracerParticleSolver.deposition    = ngp    # Deposition method. Must be 'ngp' or 'cic'
 TracerParticleSolver.interpolation = cic    # Interpolation method. Must be 'ngp' or 'cic'
 TracerParticleSolver.deposition_cf = halo   # Coarse-fine deposition. Must be interp or halo
 TracerParticleSolver.plot_weight   = true   # Turn on/off plotting of the particle weight.
@@ -79,8 +79,8 @@ FieldSolverMultigrid.verbosity         = -1                # Class verbosity
 FieldSolverMultigrid.jump_bc           = natural           # Jump BC type ('natural' or 'saturation_charge')
 FieldSolverMultigrid.bc.x.lo           = neumann 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.x.hi           = neumann 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.y.lo           = dirichlet 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.y.hi           = dirichlet 1.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.y.lo           = dirichlet 1.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.y.hi           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.z.lo           = neumann 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.z.hi           = neumann 0.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E Esol         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
@@ -149,12 +149,12 @@ MechanicalShaft.use_dielectric = true # Turn on/off dielectric
 --------------------
 MechanicalShaft.electrode.orientation     = "+y"  # Electrode orientation
 MechanicalShaft.electrode.translate       = 2.25E-3 0 0 # Electrode translation after rotation
-MechanicalShaft.electrode.live            = false  # Live electrode or not
+MechanicalShaft.electrode.live            = true  # Live electrode or not
 MechanicalShaft.electrode.length          = 5E-3   # Electrode length 
 MechanicalShaft.electrode.outer.radius    = 2.001E-2  # Electrode outer radius
 MechanicalShaft.electrode.inner.radius    = 1.75001E-2   # Electrode inner radius	
-MechanicalShaft.electrode.outer.curvature = 500E-6   # Outer curvature
-MechanicalShaft.electrode.inner.curvature = 500E-6   # Inner curvature
+MechanicalShaft.electrode.outer.curvature = 100E-6   # Outer curvature
+MechanicalShaft.electrode.inner.curvature = 100E-6   # Inner curvature
 
 
 # Main dielectric settings
@@ -192,7 +192,7 @@ StreamerInceptionStepper.verbosity        = -1                      ## Chattines
 StreamerInceptionStepper.profile          = false                   ## Turn on/off run-time profiling
 StreamerInceptionStepper.full_integration = false                   ## Use full reconstruction of K-region or not
 StreamerInceptionStepper.mode             = stationary              ## Mode (stationary or transient)
-StreamerInceptionStepper.inception_alg    = euler alpha 0.1         ## Integration algorithm and step size selection
+StreamerInceptionStepper.inception_alg    = euler alpha 0.5         ## Integration algorithm and step size selection
 StreamerInceptionStepper.output_file      = report.txt              ## Output file
 StreamerInceptionStepper.K_inception      = 12                      ## User-specified inception value
 StreamerInceptionStepper.plt_vars         = alpha eta K Uinc bg_rate emission poisson ## Plot variables

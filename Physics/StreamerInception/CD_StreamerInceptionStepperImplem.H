@@ -135,6 +135,7 @@ StreamerInceptionStepper<P, F, C>::setupSolvers()
   m_tracerParticleSolver->setTime(0, 0.0, 0.0);
   m_tracerParticleSolver->setName("Tracer particle solver");
   m_tracerParticleSolver->setVolumeScale(true);
+  m_tracerParticleSolver->setDeposition(DepositionType::NGP);
 
   // Instantiate the ion solver.
   m_ionSolver = RefCountedPtr<CdrSolver>(new C());
