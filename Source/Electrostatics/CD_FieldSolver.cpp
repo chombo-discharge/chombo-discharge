@@ -1315,6 +1315,7 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
   CH_START(t5);
   if (reallyMultiPhase) {
     const DisjointBoxLayout& dbl        = m_amr->getGrids(m_realm)[a_level];
+    const ProblemDomain&     domain     = m_amr->getDomains()[a_level];
     const EBISLayout&        ebislGas   = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
     const EBISLayout&        ebislSolid = m_amr->getEBISLayout(m_realm, phase::solid)[a_level];
 
@@ -1354,6 +1355,7 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
               const bool irregGas     = ebisBoxGas.isIrregular(iv);
               const bool regularSolid = ebisBoxSolid.isRegular(iv);
               const bool irregSolid   = ebisBoxSolid.isIrregular(iv);
+              const bool coveredSolid = !irregSolid && !regularSolid;
 
               if (regularSolid && coveredGas) {
                 fabGas(iv, comp) = fabSolid(iv, comp);
@@ -1363,9 +1365,14 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
                   fabGas(iv, comp) = fabSolid(iv, comp);
                 }
               }
+              else if (coveredSolid) {
+                if (a_phase == phase::solid) {
+                  fabGas(iv, comp) = fabSolid(iv, comp);
+                }
+              }
             };
 
-            BoxLoops::loop(fabGas.box(), kernel);
+            BoxLoops::loop(fabGas.box() & domain, kernel);
           }
         }
       }
