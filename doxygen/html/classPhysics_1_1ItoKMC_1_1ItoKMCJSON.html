@@ -101,12 +101,13 @@ Collaboration diagram for Physics::ItoKMC::ItoKMCJSON:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1ItoKMC_1_1ItoKMCJSON__coll__graph.png" border="0" usemap="#aPhysics_1_1ItoKMC_1_1ItoKMCJSON_coll__map" alt="Collaboration graph"/></div>
 <map name="aPhysics_1_1ItoKMC_1_1ItoKMCJSON_coll__map" id="aPhysics_1_1ItoKMC_1_1ItoKMCJSON_coll__map">
-<area shape="rect" title="Implementation of ItoKMCPhysics which parses input data from a JSON file." alt="" coords="88,289,301,316"/>
-<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="79,213,310,240"/>
-<area shape="rect" href="classKMCDualState.html" title=" " alt="" coords="5,117,176,143"/>
-<area shape="rect" href="classKMCDualState.html" title="Declaration of a &quot;dual state&quot; for advancing with the Kinetic Monte Carlo module." alt="" coords="13,5,168,32"/>
-<area shape="rect" href="classKMCSolver.html" title=" " alt="" coords="201,109,399,151"/>
-<area shape="rect" href="classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="205,5,395,32"/>
+<area shape="rect" title="Implementation of ItoKMCPhysics which parses input data from a JSON file." alt="" coords="1123,65,1336,92"/>
+<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="843,65,1073,92"/>
+<area shape="rect" href="classKMCDualState.html" title=" " alt="" coords="457,7,627,33"/>
+<area shape="rect" href="classKMCDualState.html" title="Declaration of a &quot;dual state&quot; for advancing with the Kinetic Monte Carlo module." alt="" coords="23,7,178,33"/>
+<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html" title="Class for holding a set of surface reactions." alt="" coords="427,58,657,99"/>
+<area shape="rect" href="classKMCSolver.html" title=" " alt="" coords="443,123,641,165"/>
+<area shape="rect" href="classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="5,131,196,157"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -329,10 +330,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a9ed0d1a3dd8e679d17d8c2c070b48366">initializePhotoReactions</a> ()</td></tr>
 <tr class="memdesc:a9ed0d1a3dd8e679d17d8c2c070b48366"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize photo-reactions. <br /></td></tr>
 <tr class="separator:a9ed0d1a3dd8e679d17d8c2c070b48366"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3e961d5ae02459983db2fdb8a1879e3b"><td class="memItemLeft" align="right" valign="top"><a id="a3e961d5ae02459983db2fdb8a1879e3b"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a3e961d5ae02459983db2fdb8a1879e3b">initializeSurfaceReactions</a> ()</td></tr>
-<tr class="memdesc:a3e961d5ae02459983db2fdb8a1879e3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize photo-reactions. <br /></td></tr>
-<tr class="separator:a3e961d5ae02459983db2fdb8a1879e3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a045ac44a5b54e9d8fea257900d80ca6f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a045ac44a5b54e9d8fea257900d80ca6f">initializeSurfaceEmission</a> (const std::string a_surface)</td></tr>
+<tr class="memdesc:a045ac44a5b54e9d8fea257900d80ca6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize surface reactions.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a045ac44a5b54e9d8fea257900d80ca6f">More...</a><br /></td></tr>
+<tr class="separator:a045ac44a5b54e9d8fea257900d80ca6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:affd41e9d65670e6652b91dd5b982cc0d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#affd41e9d65670e6652b91dd5b982cc0d">parseReactionString</a> (std::vector&lt; std::string &gt; &amp;a_reactants, std::vector&lt; std::string &gt; &amp;a_products, const std::string &amp;a_reaction) const noexcept</td></tr>
 <tr class="memdesc:affd41e9d65670e6652b91dd5b982cc0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a reaction string into reactangs and products.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#affd41e9d65670e6652b91dd5b982cc0d">More...</a><br /></td></tr>
 <tr class="separator:affd41e9d65670e6652b91dd5b982cc0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -351,12 +351,15 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a4bd500f5b50a92554482ae5b38224d1b"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; Real, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a4bd500f5b50a92554482ae5b38224d1b">parseTableEByN</a> (const nlohmann::json &amp;a_tableEntry, const std::string &amp;a_dataID) const</td></tr>
 <tr class="memdesc:a4bd500f5b50a92554482ae5b38224d1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a table which is stored in E/N format.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a4bd500f5b50a92554482ae5b38224d1b">More...</a><br /></td></tr>
 <tr class="separator:a4bd500f5b50a92554482ae5b38224d1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a72a944c7c061f92e72b9c8aa9ab8ee6f"><td class="memItemLeft" align="right" valign="top">virtual std::list&lt; std::tuple&lt; std::string, std::vector&lt; std::string &gt;, std::vector&lt; std::string &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a72a944c7c061f92e72b9c8aa9ab8ee6f">parseReactionWildcards</a> (const std::vector&lt; std::string &gt; &amp;a_reactants, const std::vector&lt; std::string &gt; &amp;a_products, const nlohmann::json &amp;a_reactionJSON) const noexcept</td></tr>
-<tr class="memdesc:a72a944c7c061f92e72b9c8aa9ab8ee6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make a reaction set into a superset. This parses wildcards '@' in reaction string.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a72a944c7c061f92e72b9c8aa9ab8ee6f">More...</a><br /></td></tr>
-<tr class="separator:a72a944c7c061f92e72b9c8aa9ab8ee6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65c007ad6bc243ccc02f900f8eab2ceb"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::tuple&lt; std::string, std::vector&lt; std::string &gt;, std::vector&lt; std::string &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a65c007ad6bc243ccc02f900f8eab2ceb">parseReactionWildcards</a> (const std::vector&lt; std::string &gt; &amp;a_reactants, const std::vector&lt; std::string &gt; &amp;a_products, const nlohmann::json &amp;a_reactionJSON) const noexcept</td></tr>
+<tr class="memdesc:a65c007ad6bc243ccc02f900f8eab2ceb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make a reaction set into a superset. This parses wildcards '@' in reaction string.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a65c007ad6bc243ccc02f900f8eab2ceb">More...</a><br /></td></tr>
+<tr class="separator:a65c007ad6bc243ccc02f900f8eab2ceb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed799670f17fe11a73652bc5e8badfa7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aed799670f17fe11a73652bc5e8badfa7">updateReactionRates</a> (const RealVect a_E, const RealVect a_pos, const Vector&lt; Real &gt; &amp;a_phi, const Vector&lt; RealVect &gt; &amp;a_gradPhi, const Real a_dx, const Real a_kappa) const noexcept override</td></tr>
 <tr class="memdesc:aed799670f17fe11a73652bc5e8badfa7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update reaction rates.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aed799670f17fe11a73652bc5e8badfa7">More...</a><br /></td></tr>
 <tr class="separator:aed799670f17fe11a73652bc5e8badfa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98d867d578f2eecb36df2039d80119b6"><td class="memItemLeft" align="right" valign="top">std::vector&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a98d867d578f2eecb36df2039d80119b6">multinomial</a> (const size_t N, const std::discrete_distribution&lt; size_t &gt; &amp;a_distribution) const noexcept</td></tr>
+<tr class="memdesc:a98d867d578f2eecb36df2039d80119b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample a multinomial distribution with N samples.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a98d867d578f2eecb36df2039d80119b6">More...</a><br /></td></tr>
+<tr class="separator:a98d867d578f2eecb36df2039d80119b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html">Physics::ItoKMC::ItoKMCPhysics</a></td></tr>
 <tr class="memitem:ad07dced52dea863e99271fb07956a143 inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memItemLeft" align="right" valign="top"><a id="ad07dced52dea863e99271fb07956a143"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ad07dced52dea863e99271fb07956a143">define</a> () noexcept</td></tr>
@@ -587,6 +590,10 @@ std::vector&lt; std::shared_ptr&lt; const <a class="el" href="classPhysics_1_1It
 <tr class="memitem:a8f66156f4d8ec2366f17d65039d588f9 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, std::pair&lt; std::discrete_distribution&lt; int &gt;, std::map&lt; int, int &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8f66156f4d8ec2366f17d65039d588f9">m_photoPathways</a></td></tr>
 <tr class="memdesc:a8f66156f4d8ec2366f17d65039d588f9 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRandom.html" title="Class for encapsulating random number generation.">Random</a> number generators for photoionization pathways.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8f66156f4d8ec2366f17d65039d588f9">More...</a><br /></td></tr>
 <tr class="separator:a8f66156f4d8ec2366f17d65039d588f9 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab40ef30340dd1038995d29bf86ccd369 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memItemLeft" align="right" valign="top"><a id="ab40ef30340dd1038995d29bf86ccd369"></a>
+<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html">ItoKMCSurfaceReactionSet</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ab40ef30340dd1038995d29bf86ccd369">m_surfaceReactions</a></td></tr>
+<tr class="memdesc:ab40ef30340dd1038995d29bf86ccd369 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface reactions. <br /></td></tr>
+<tr class="separator:ab40ef30340dd1038995d29bf86ccd369 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a539eba97f3e484c832ba50232336fea7 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memItemLeft" align="right" valign="top"><a id="a539eba97f3e484c832ba50232336fea7"></a>
 Vector&lt; RefCountedPtr&lt; <a class="el" href="classItoSpecies.html">ItoSpecies</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a539eba97f3e484c832ba50232336fea7">m_itoSpecies</a></td></tr>
 <tr class="memdesc:a539eba97f3e484c832ba50232336fea7 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of solver-tracked particle drift-diffusion species. <br /></td></tr>
@@ -1395,6 +1402,40 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
+<a id="a045ac44a5b54e9d8fea257900d80ca6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a045ac44a5b54e9d8fea257900d80ca6f">&#9670;&nbsp;</a></span>initializeSurfaceEmission()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCJSON::initializeSurfaceEmission </td>
+          <td>(</td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_surface</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Initialize surface reactions. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_surface</td><td>Surface type </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a6d996661de876bc15607675e98815d51"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6d996661de876bc15607675e98815d51">&#9670;&nbsp;</a></span>initializeTownsendCoefficient()</h2>
 
@@ -1559,6 +1600,51 @@ Additional Inherited Members</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_name</td><td>Species name </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a98d867d578f2eecb36df2039d80119b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98d867d578f2eecb36df2039d80119b6">&#9670;&nbsp;</a></span>multinomial()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; size_t &gt; ItoKMCJSON::multinomial </td>
+          <td>(</td>
+          <td class="paramtype">const size_t&#160;</td>
+          <td class="paramname"><em>N</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::discrete_distribution&lt; size_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_distribution</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Sample a multinomial distribution with N samples. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_N</td><td>Number of samples </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_distribution</td><td>Discrete distribution </td></tr>
   </table>
   </dd>
 </dl>
@@ -1738,8 +1824,8 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<a id="a72a944c7c061f92e72b9c8aa9ab8ee6f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a72a944c7c061f92e72b9c8aa9ab8ee6f">&#9670;&nbsp;</a></span>parseReactionWildcards()</h2>
+<a id="a65c007ad6bc243ccc02f900f8eab2ceb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65c007ad6bc243ccc02f900f8eab2ceb">&#9670;&nbsp;</a></span>parseReactionWildcards()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1748,7 +1834,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::list&lt; std::tuple&lt; std::string, std::vector&lt; std::string &gt;, std::vector&lt; std::string &gt; &gt; &gt; ItoKMCJSON::parseReactionWildcards </td>
+          <td class="memname">std::vector&lt; std::tuple&lt; std::string, std::vector&lt; std::string &gt;, std::vector&lt; std::string &gt; &gt; &gt; ItoKMCJSON::parseReactionWildcards </td>
           <td>(</td>
           <td class="paramtype">const std::vector&lt; std::string &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_reactants</em>, </td>

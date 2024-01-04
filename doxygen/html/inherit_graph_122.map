@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classSurfaceODESolver.html" title="Surface ODE solver." alt="" coords="5,5,185,32"/>
+<area shape="rect" id="node1" href="$classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="5,31,83,57"/>
+<area shape="rect" id="node2" href="$classEddingtonSP1.html" title="Radiative tranfer equation solver in the SP1 (diffusion) approximation." alt="" coords="131,5,241,32"/>
+<area shape="rect" id="node3" href="$classMcPhoto.html" title="Radiative tranfer equation solver using Monte&#45;Carlo simulation." alt="" coords="147,56,225,83"/>
 </map>

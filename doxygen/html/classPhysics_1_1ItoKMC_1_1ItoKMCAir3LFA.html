@@ -101,12 +101,13 @@ Collaboration diagram for Physics::ItoKMC::ItoKMCAir3LFA:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA__coll__graph.png" border="0" usemap="#aPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA_coll__map" alt="Collaboration graph"/></div>
 <map name="aPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA_coll__map" id="aPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA_coll__map">
-<area shape="rect" title="Hard&#45;coded implementation of ItoKMCPhysics for simplified discharges in STP air. @detail Transport da..." alt="" coords="80,289,309,316"/>
-<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="79,213,310,240"/>
-<area shape="rect" href="classKMCDualState.html" title=" " alt="" coords="5,117,176,143"/>
-<area shape="rect" href="classKMCDualState.html" title="Declaration of a &quot;dual state&quot; for advancing with the Kinetic Monte Carlo module." alt="" coords="13,5,168,32"/>
-<area shape="rect" href="classKMCSolver.html" title=" " alt="" coords="201,109,399,151"/>
-<area shape="rect" href="classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="205,5,395,32"/>
+<area shape="rect" title="Hard&#45;coded implementation of ItoKMCPhysics for simplified discharges in STP air. @detail Transport da..." alt="" coords="1123,65,1352,92"/>
+<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="843,65,1073,92"/>
+<area shape="rect" href="classKMCDualState.html" title=" " alt="" coords="457,7,627,33"/>
+<area shape="rect" href="classKMCDualState.html" title="Declaration of a &quot;dual state&quot; for advancing with the Kinetic Monte Carlo module." alt="" coords="23,7,178,33"/>
+<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html" title="Class for holding a set of surface reactions." alt="" coords="427,58,657,99"/>
+<area shape="rect" href="classKMCSolver.html" title=" " alt="" coords="443,123,641,165"/>
+<area shape="rect" href="classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="5,131,196,157"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -390,6 +391,10 @@ std::vector&lt; std::shared_ptr&lt; const <a class="el" href="classPhysics_1_1It
 <tr class="memitem:a8f66156f4d8ec2366f17d65039d588f9 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, std::pair&lt; std::discrete_distribution&lt; int &gt;, std::map&lt; int, int &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8f66156f4d8ec2366f17d65039d588f9">m_photoPathways</a></td></tr>
 <tr class="memdesc:a8f66156f4d8ec2366f17d65039d588f9 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRandom.html" title="Class for encapsulating random number generation.">Random</a> number generators for photoionization pathways.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8f66156f4d8ec2366f17d65039d588f9">More...</a><br /></td></tr>
 <tr class="separator:a8f66156f4d8ec2366f17d65039d588f9 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab40ef30340dd1038995d29bf86ccd369 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memItemLeft" align="right" valign="top"><a id="ab40ef30340dd1038995d29bf86ccd369"></a>
+<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html">ItoKMCSurfaceReactionSet</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ab40ef30340dd1038995d29bf86ccd369">m_surfaceReactions</a></td></tr>
+<tr class="memdesc:ab40ef30340dd1038995d29bf86ccd369 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface reactions. <br /></td></tr>
+<tr class="separator:ab40ef30340dd1038995d29bf86ccd369 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a539eba97f3e484c832ba50232336fea7 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memItemLeft" align="right" valign="top"><a id="a539eba97f3e484c832ba50232336fea7"></a>
 Vector&lt; RefCountedPtr&lt; <a class="el" href="classItoSpecies.html">ItoSpecies</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a539eba97f3e484c832ba50232336fea7">m_itoSpecies</a></td></tr>
 <tr class="memdesc:a539eba97f3e484c832ba50232336fea7 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of solver-tracked particle drift-diffusion species. <br /></td></tr>

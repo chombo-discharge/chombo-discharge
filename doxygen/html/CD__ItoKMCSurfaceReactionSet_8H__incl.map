@@ -1,0 +1,13 @@
+<map id="Physics/ItoKMC/CD_ItoKMCSurfaceReactionSet.H" name="Physics/ItoKMC/CD_ItoKMCSurfaceReactionSet.H">
+<area shape="rect" id="node1" title="Declaration of a class that encapsulates a set of secondary emission reactions." alt="" coords="337,5,585,47"/>
+<area shape="rect" id="node2" href="$CD__ItoKMCSurfaceReactions_8H.html" title="Declaration of a class that encapsulates a set secondary emission at EBs and domain edges/faces." alt="" coords="114,102,337,129"/>
+<area shape="rect" id="node7" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="21,363,206,389"/>
+<area shape="rect" id="node8" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="613,363,792,389"/>
+<area shape="rect" id="node11" href="$CD__ItoKMCSurfaceReactionSetImplem_8H.html" title="Declaration of a class that encapsulates secondary emission at EBs and domain edges/faces." alt="" coords="361,95,562,136"/>
+<area shape="rect" id="node3" title=" " alt="" coords="271,191,343,218"/>
+<area shape="rect" id="node4" href="$CD__ItoKMCSurfaceReaction_8H.html" title="Declaration of a class that encapsulates a set secondary emission at EBs and domain edges/faces." alt="" coords="418,191,633,218"/>
+<area shape="rect" id="node10" href="$CD__ItoKMCSurfaceReactionsImplem_8H.html" title="Implementation of CD_ItoKMCSurfaceReactions.H." alt="" coords="39,184,247,225"/>
+<area shape="rect" id="node5" title=" " alt="" coords="504,281,547,307"/>
+<area shape="rect" id="node6" title=" " alt="" coords="571,281,640,307"/>
+<area shape="rect" id="node9" href="$CD__ItoKMCSurfaceReactionImplem_8H.html" title="Declaration of a class that encapsulates secondary emission at EBs and domain edges/faces." alt="" coords="278,273,479,315"/>
+</map>

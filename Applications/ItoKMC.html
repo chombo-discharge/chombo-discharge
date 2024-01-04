@@ -308,6 +308,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_ItoParticle.H&gt;</span><span class="cp"></span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_PointParticle.H&gt;</span><span class="cp"></span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_ItoKMCPhotoReaction.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_ItoKMCSurfaceReactionSet.H&gt;</span><span class="cp"></span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_KMCDualState.H&gt;</span><span class="cp"></span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_KMCDualStateReaction.H&gt;</span><span class="cp"></span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_KMCSolver.H&gt;</span><span class="cp"></span>
@@ -717,6 +718,11 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">	reaction from the RNG generator with an index in m_photoReactions.</span>
 <span class="cm">      */</span><span class="w"></span>
 <span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">discrete_distribution</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;&gt;&gt;</span><span class="w"> </span><span class="n">m_photoPathways</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Surface reactions.</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="n">ItoKMCSurfaceReactionSet</span><span class="w"> </span><span class="n">m_surfaceReactions</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">      </span><span class="cm">/*!</span>
 <span class="cm">	@brief List of solver-tracked particle drift-diffusion species. </span>
@@ -2315,10 +2321,49 @@ When multiple pathways are specified this way, and they have probabilities <span
 </section>
 <section id="secondary-emission">
 <h3>Secondary emission<a class="headerlink" href="#secondary-emission" title="Permalink to this heading"></a></h3>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Secondary emission on surfaces are not implemented (yet). Only purely absorbing BCs are currently supported.</p>
+<p>Secondary emission is supported for particles, including photons, but not for fluid species.
+Specification of secondary emission is done separately on dielectrics and electrodes by specifying JSON entries <code class="docutils literal notranslate"><span class="pre">electrode</span> <span class="pre">emission</span></code> and <code class="docutils literal notranslate"><span class="pre">dielectric</span> <span class="pre">emission</span></code>.
+The internal specification for these are identical, so all examples below use <code class="docutils literal notranslate"><span class="pre">dielectric</span> <span class="pre">emission</span></code>.
+Secondary emission reactions are specified similarly to photoionization reactions.
+However, the left-hand side must consist of a single species (photon or particle), while the right-hand side can consist of multiple species.
+Wildcards <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> are supported, as is the <code class="docutils literal notranslate"><span class="pre">(null)</span></code> species which enables null-reactions, as further discussed below.
+An example JSON specification that enables secondary electron emission due to photons and ion impact is</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;dielectric emission&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="p">[</span><span class="w"></span>
+<span class="w">   </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;reaction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Y -&gt; e&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;efficiency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="w"></span>
+<span class="w">   </span><span class="p">},</span><span class="w"></span>
+<span class="w">   </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;reaction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Y -&gt; (null)&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;efficiency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.9</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
+</pre></div>
 </div>
+<p>The <code class="docutils literal notranslate"><span class="pre">reaction</span></code> field specifies which reaction is triggered: The left hand side is the primary (outgoing) species and the left hand side must contain the secondary emissions.
+The left-hand side can consist of either photons (e.g., <code class="docutils literal notranslate"><span class="pre">Y</span></code>) or particle (e.g., <code class="docutils literal notranslate"><span class="pre">O2+</span></code>) species.
+The efficiency field specifies the efficiency of the reaction.
+When multiple reactions are specified, we randomly sample the reaction according to a discrete distribution with probabilities</p>
+<div class="math notranslate nohighlight">
+\[p(i) = \frac{\nu_i}{\sum_i \nu_i},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\nu_i\)</span> are the efficiencies.
+Note that the efficiencies do not need to sum to one, and if only a single reaction is specified the efficiency specifier has not real effect.
+The above reactions include the null reaction in order to ensure that the correct secondary emission probability is reached, where the <code class="docutils literal notranslate"><span class="pre">(null)</span></code> specifier implies that no secondary emission takes place.
+In the above example the probability of secondary electron emission is 0.1, while the probability of a null-reaction (outgoing particle is absorbed without any associated emission) is 0.9.
+The above example can be compressed by using a wildcard and an <code class="docutils literal notranslate"><span class="pre">efficiencies</span></code> array as follows:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;dielectric emission&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="p">[</span><span class="w"></span>
+<span class="w">   </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;reaction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Y -&gt; @&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;@&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;e&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;(null)&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;efficiencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">9</span><span class="p">]</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+<p>where for the sake of demonstration the efficiencies are set to 1 and 9 (rather than 0.1 and 0.9).
+This has no effect on the probabilities <span class="math notranslate nohighlight">\(p(i)\)</span> given above.</p>
 </section>
 <section id="warnings-and-caveats">
 <span id="chap-itokmcwarnings"></span><h3>Warnings and caveats<a class="headerlink" href="#warnings-and-caveats" title="Permalink to this heading"></a></h3>

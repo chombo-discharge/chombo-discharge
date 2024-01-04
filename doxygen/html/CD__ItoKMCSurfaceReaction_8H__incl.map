@@ -1,0 +1,8 @@
+<map id="Physics/ItoKMC/CD_ItoKMCSurfaceReaction.H" name="Physics/ItoKMC/CD_ItoKMCSurfaceReaction.H">
+<area shape="rect" id="node1" title="Declaration of a class that encapsulates a set secondary emission at EBs and domain edges/faces." alt="" coords="124,5,372,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,102,48,129"/>
+<area shape="rect" id="node3" title=" " alt="" coords="72,102,141,129"/>
+<area shape="rect" id="node4" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="121,184,306,211"/>
+<area shape="rect" id="node5" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="348,184,527,211"/>
+<area shape="rect" id="node6" href="$CD__ItoKMCSurfaceReactionImplem_8H.html" title="Declaration of a class that encapsulates secondary emission at EBs and domain edges/faces." alt="" coords="217,95,418,136"/>
+</map>
