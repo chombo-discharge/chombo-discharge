@@ -221,7 +221,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   //  debugCharge("advance");
 
   // Previous time step is needed when regridding.
-  m_prevDt = a_dt;
+  this->m_prevDt = a_dt;
 
   // Done only so we can plot the absorbed photons (advanceReactionNetwork absorbs them)
   m_timer.startEvent("Deposit photons");
@@ -553,7 +553,7 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
   m_timer.startEvent("Setup field solver");
   (this->m_fieldSolver)->setupSolver();
   this->computeConductivities(m_conductivityParticles);
-  this->setupSemiImplicitPoisson(m_prevDt);
+  this->setupSemiImplicitPoisson(this->m_prevDt);
   m_timer.stopEvent("Setup field solver");
 
   // Solve the Poisson equation.
@@ -1494,7 +1494,7 @@ ItoKMCGodunovStepper<I, C, R, F>::writeCheckpointHeader(HDF5HeaderData& a_header
     pout() << this->m_name + "::writeCheckpointHeader" << endl;
   }
 
-  a_header.m_real["prev_dt"]             = m_prevDt;
+  a_header.m_real["prev_dt"]             = this->m_prevDt;
   a_header.m_int["checkpoint_particles"] = m_writeCheckpointParticles ? 1 : 0;
 }
 #endif
@@ -1509,7 +1509,7 @@ ItoKMCGodunovStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header)
     pout() << this->m_name + "::readCheckpointHeader" << endl;
   }
 
-  m_prevDt                  = a_header.m_real["prev_dt"];
+  this->m_prevDt                  = a_header.m_real["prev_dt"];
   m_readCheckpointParticles = (a_header.m_int["checkpoint_particles"] != 0) ? true : false;
   m_canRegridOnRestart      = m_readCheckpointParticles;
 }

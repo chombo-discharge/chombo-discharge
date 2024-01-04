@@ -41,6 +41,9 @@ ItoKMCStepper<I, C, R, F>::ItoKMCStepper() noexcept
   m_name                             = "ItoKMCStepper";
   m_plasmaPhase                      = phase::gas;
   m_dt                               = 0.0;
+  m_prevDt                           = -1.0;
+  m_maxGrowthDt                      = 1.E99;
+  m_maxShrinkDt                      = 1.E99;
   m_time                             = 0.0;
   m_timeStep                         = 0;
   m_loadPerCell                      = 1.0;
@@ -324,6 +327,11 @@ ItoKMCStepper<I, C, R, F>::parseTimeStepRestrictions() noexcept
   pp.get("relax_dt_factor", m_relaxTimeFactor);
   pp.get("min_dt", m_minDt);
   pp.get("max_dt", m_maxDt);
+  pp.get("max_growth_dt", m_maxGrowthDt);
+  pp.get("max_shrink_dt", m_maxShrinkDt);
+
+  m_maxGrowthDt = std::max(m_maxGrowthDt, 1.0);
+  m_maxShrinkDt = std::min(m_maxShrinkDt, 1.0);
 
   if (m_relaxTimeFactor <= 0.0) {
     MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have relax_dt > 0.0");
@@ -1356,6 +1364,9 @@ ItoKMCStepper<I, C, R, F>::computeDt()
 
   Real dt = std::numeric_limits<Real>::max();
 
+  const Real maxGrowthDt = m_prevDt > 0.0 ? m_prevDt * m_maxGrowthDt : dt;
+  const Real minShrinkDt = m_prevDt > 0.0 ? m_prevDt / m_maxShrinkDt : dt;
+
   // Compute various time steps.
   timer.startEvent("Advection (Ito)");
   m_particleAdvectionDt = m_ito->computeAdvectiveDt();
@@ -1427,6 +1438,14 @@ ItoKMCStepper<I, C, R, F>::computeDt()
     dt = m_minParticleAdvectionDiffusionCFL * m_particleAdvectionDiffusionDt;
 
     m_timeCode = TimeCode::AdvectionDiffusionIto;
+  }
+
+  if (dt > maxGrowthDt) {
+    dt = maxGrowthDt;
+  }
+
+  if (dt < minShrinkDt) {
+    dt = minShrinkDt;
   }
 
   if (m_minDt > dt) {
