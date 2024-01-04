@@ -1365,16 +1365,22 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
                   fabGas(iv, comp) = fabSolid(iv, comp);
                 }
               }
-              else if (coveredSolid) {
-                if (a_phase == phase::solid) {
-                  fabGas(iv, comp) = fabSolid(iv, comp);
-                }
+              else if (coveredSolid && coveredGas) {
+		// Covered on both phases is bogus.
+		fabGas(iv, comp) = 0.0;
               }
             };
 
             BoxLoops::loop(fabGas.box() & domain, kernel);
           }
         }
+	else {
+	  fabGas.setVal(0.0);
+	}
+      }
+      else {
+	// Covered on both phases is bogus.
+	fabGas.setVal(0.0);
       }
     }
   }
