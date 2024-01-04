@@ -1639,6 +1639,24 @@ namespace Physics {
       computeTotalCharge() const noexcept;
 
       /*!
+	@brief Compute positive charge
+      */
+      virtual Real
+      computeQplus() const noexcept;
+
+      /*!
+	@brief Compute negative charge
+      */
+      virtual Real
+      computeQminu() const noexcept;
+
+      /*!
+	@brief Compute surface charge
+      */
+      virtual Real
+      computeQsurf() const noexcept;
+
+      /*!
 	@brief Photon advancement routine
 	@param[in] a_dt Time step
       */

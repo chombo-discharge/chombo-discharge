@@ -1210,8 +1210,11 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
   }
   }
 
-  // Calculate the total charge
-  const Real Qtot = this->computeTotalCharge();
+  // Calculate the charge
+  const Real Qplus = this->computeQplus();
+  const Real Qminu = this->computeQminu();
+  const Real Qsurf = this->computeQsurf();
+  const Real Qtot  = Qplus + Qminu + Qsurf;
 
   // Print the step report.
 
@@ -1219,8 +1222,11 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
   const std::string whitespace = "                                   ";
   pout() << "                                   " + str << endl;
   pout() << whitespace + "Emax        = " << Emax << endl
-         << whitespace + "Qtot        = " << Qtot << endl
          << whitespace + "Max density = " << maxDensity << " (" << maxSolver << ")" << endl
+         << whitespace + "Qplus       = " << Qplus << endl
+         << whitespace + "Qminu       = " << Qminu << endl
+         << whitespace + "Qsurf       = " << Qsurf << endl
+         << whitespace + "Qtot        = " << Qtot << endl
          << whitespace + "CFL (Ito)   = " << m_dt / m_particleAdvectionDiffusionDt << endl
          << whitespace + "CFL (CDR)   = " << m_dt / m_fluidAdvectionDiffusionDt << endl
          << whitespace + "dt/dt_relax = " << m_dt / m_relaxationTime << endl
@@ -5122,6 +5128,26 @@ ItoKMCStepper<I, C, R, F>::computeTotalCharge() const noexcept
 
   Real totalCharge = 0.0;
 
+  totalCharge += this->computeQplus();
+  totalCharge += this->computeQminu();
+  totalCharge += this->computeQsurf();
+
+  return totalCharge;
+}
+
+template <typename I, typename C, typename R, typename F>
+Real
+ItoKMCStepper<I, C, R, F>::computeQplus() const noexcept
+{
+  CH_TIME("ItoKMCStepper::computeQplus()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeQplus()" << endl;
+  }
+
+  const bool kappaScale = true;
+
+  Real totalCharge = 0.0;
+
   // Charge from Ito solvers.
   for (auto it = m_ito->iterator(); it.ok(); ++it) {
     const RefCountedPtr<ItoSolver>&  solver  = it();
@@ -5129,7 +5155,7 @@ ItoKMCStepper<I, C, R, F>::computeTotalCharge() const noexcept
 
     const int Z = species->getChargeNumber();
 
-    if (Z != 0) {
+    if (Z > 0) {
       const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
       totalCharge += Z * ParticleOps::sum<ItoParticle, &ItoParticle::weight>(particles);
@@ -5143,17 +5169,70 @@ ItoKMCStepper<I, C, R, F>::computeTotalCharge() const noexcept
 
     const int Z = species->getChargeNumber();
 
-    if (Z != 0) {
+    if (Z > 0) {
       const EBAMRCellData& phi = solver->getPhi();
 
       totalCharge += Z * solver->computeMass(phi, kappaScale);
     }
   }
 
-  // Surface charge
-  totalCharge += m_sigmaSolver->computeMass();
+  return totalCharge * Units::Qe;
+}
+
+template <typename I, typename C, typename R, typename F>
+Real
+ItoKMCStepper<I, C, R, F>::computeQminu() const noexcept
+{
+  CH_TIME("ItoKMCStepper::computeQminu()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeQminu()" << endl;
+  }
+
+  const bool kappaScale = true;
+
+  Real totalCharge = 0.0;
+
+  // Charge from Ito solvers.
+  for (auto it = m_ito->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<ItoSolver>&  solver  = it();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+
+    const int Z = species->getChargeNumber();
+
+    if (Z < 0) {
+      const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+      totalCharge += Z * ParticleOps::sum<ItoParticle, &ItoParticle::weight>(particles);
+    }
+  }
+
+  // Charge from CDR solvers
+  for (auto it = m_cdr->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<CdrSolver>&  solver  = it();
+    const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
+
+    const int Z = species->getChargeNumber();
+
+    if (Z < 0) {
+      const EBAMRCellData& phi = solver->getPhi();
+
+      totalCharge += Z * solver->computeMass(phi, kappaScale);
+    }
+  }
 
   return totalCharge * Units::Qe;
+}
+
+template <typename I, typename C, typename R, typename F>
+Real
+ItoKMCStepper<I, C, R, F>::computeQsurf() const noexcept
+{
+  CH_TIME("ItoKMCStepper::computeQsurf()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeQsurf()" << endl;
+  }
+
+  return m_sigmaSolver->computeMass();
 }
 
 template <typename I, typename C, typename R, typename F>
