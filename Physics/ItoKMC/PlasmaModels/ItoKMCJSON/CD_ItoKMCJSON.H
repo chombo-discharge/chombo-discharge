@@ -610,10 +610,11 @@ namespace Physics {
       initializePhotoReactions();
 
       /*!
-	@brief Initialize photo-reactions
+	@brief Initialize surface reactions
+	@param[in] a_surface Surface type
       */
       virtual void
-      initializeSurfaceReactions();
+      initializeSurfaceEmission(const std::string a_surface);
 
       /*!
 	@brief Parses a reaction string into reactangs and products
@@ -689,7 +690,7 @@ namespace Physics {
 	@param[in] a_reactionJSON  JSON reaction entry. 
 	@return Returns a list of reactants and products with wilcards replaced. The tuple entries are: <wildcard, reactants, products>
       */
-      virtual std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
+      virtual std::vector<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
       parseReactionWildcards(const std::vector<std::string>& a_reactants,
                              const std::vector<std::string>& a_products,
                              const nlohmann::json&           a_reactionJSON) const noexcept;
@@ -710,6 +711,14 @@ namespace Physics {
                           const Vector<RealVect>& a_gradPhi,
                           const Real              a_dx,
                           const Real              a_kappa) const noexcept override;
+
+      /*!
+	@brief Sample a multinomial distribution with N samples 
+	@param[in] a_N Number of samples
+	@param[in] a_distribution Discrete distribution
+      */
+      std::vector<size_t>
+      multinomial(const size_t N, const std::discrete_distribution<size_t>& a_distribution) const noexcept;
     };
   } // namespace ItoKMC
 } // namespace Physics

@@ -61,7 +61,8 @@ ItoKMCJSON::ItoKMCJSON()
   this->initializeTownsendCoefficient("eta");
   this->initializePlasmaReactions();
   this->initializePhotoReactions();
-  this->initializeSurfaceReactions();
+  this->initializeSurfaceEmission("dielectric");
+  this->initializeSurfaceEmission("electrode");
 
   // Initialize automatic Townsend coefficients. Triggers only if
   // user asked for it.
@@ -1731,14 +1732,161 @@ ItoKMCJSON::initializePhotoReactions()
 }
 
 void
-ItoKMCJSON::initializeSurfaceReactions()
+ItoKMCJSON::initializeSurfaceEmission(const std::string a_surface)
 {
-  CH_TIME("ItoKMCJSON::initializeSurfaceReactions");
+  CH_TIME("ItoKMCJSON::initializeSurfaceEmission");
   if (m_verbose) {
-    pout() << m_className + "::initializeSurfaceReactions" << endl;
+    pout() << m_className + "::initializeSurfaceEmission" << endl;
   }
 
-  pout() << "ItoKMCJSON::initializeSurfaceReactions - not implemented" << endl;
+  const std::string baseError = "ItoKMCJSON::initializePhotoReactions";
+
+  std::string reactionSpecifier;
+  if (a_surface == "dielectric") {
+    reactionSpecifier = "dielectric emission";
+  }
+  else if (a_surface == "electrode") {
+    reactionSpecifier = "electrode emission";
+  }
+  else {
+    MayDay::Abort("ItoKMCJSON::initializeSurfaceEmission -- logic bust");
+  }
+
+  for (const auto& reactionJSON : m_json[reactionSpecifier]) {
+    if (!(reactionJSON.contains("reaction"))) {
+      this->throwParserError(baseError + " but one of the reactions is missing the field 'reaction'");
+    }
+    if (!(reactionJSON.contains("efficiencies")) && !(reactionJSON.contains("efficiency"))) {
+      this->throwParserError(baseError + " but one of the reactions is missing the field 'efficiencies/efficiency'");
+    }
+
+    const std::string reaction    = this->trim(reactionJSON["reaction"].get<std::string>());
+    const std::string baseErrorID = baseError + " for reaction '" + reaction + "'";
+
+    std::vector<std::string> reactants;
+    std::vector<std::string> products;
+    std::vector<Real>        efficiencies;
+
+    this->parseReactionString(reactants, products, reaction);
+
+    const auto reactionSets = this->parseReactionWildcards(reactants, products, reactionJSON);
+
+    if (reactionJSON.contains("efficiencies") && !(reactionJSON.contains("efficiency"))) {
+      efficiencies = reactionJSON["efficiencies"].get<std::vector<Real>>();
+    }
+    else if (!(reactionJSON.contains("efficiencies")) && reactionJSON.contains("efficiency")) {
+      efficiencies.push_back(reactionJSON["efficiency"].get<Real>());
+    }
+    else {
+      this->throwParserError(baseErrorID + " but reaction contains both 'efficiencies' and 'efficiency'");
+    }
+
+    if (efficiencies.size() != reactionSets.size()) {
+      this->throwParserError(baseErrorID + " but efficiencies array does not match number of wildcards");
+    }
+
+    for (int i = 0; i < reactionSets.size(); i++) {
+      const auto curReaction = reactionSets[i];
+
+      const std::string              wildcard     = std::get<0>(curReaction);
+      const std::vector<std::string> curReactants = std::get<1>(curReaction);
+      const std::vector<std::string> curProducts  = std::get<2>(curReaction);
+
+      // Ignore species which are enclosed by brackets (), except if (null) is included
+      std::vector<std::string> trimmedReactants;
+      std::vector<std::string> trimmedProducts;
+      for (const auto& r : curReactants) {
+        if (!(this->isBracketed(r))) {
+          trimmedReactants.emplace_back(r);
+        }
+      }
+      for (const auto& p : curProducts) {
+        if (!(this->isBracketed(p)) || p == "(null)") {
+          trimmedProducts.emplace_back(p);
+        }
+      }
+
+      // Do not permit more than one species on the right-hand side.
+      if (trimmedReactants.size() != 1) {
+        this->throwParserError(baseErrorID + " - only one species allowed on the left-hand side (can't be wildcard)");
+      }
+
+      // Left-hand side must be a particle species (Ito or photon)
+      const std::string r        = trimmedReactants.front();
+      const bool        isPlasma = this->isPlasmaSpecies(r);
+      const bool        isPhoton = this->isPhotonSpecies(r);
+
+      size_t reactantIndex;
+
+      if (isPhoton) {
+        reactantIndex = m_photonIndexMap.at(r);
+      }
+      else if (isPlasma) {
+        const SpeciesType speciesType = m_plasmaSpeciesTypes.at(r);
+
+        if (speciesType != SpeciesType::Ito) {
+          this->throwParserError(baseErrorID + " but reactant is not a particle (Ito or photon) species");
+        }
+
+        reactantIndex = m_itoSpeciesMap.at(r);
+      }
+      else {
+        this->throwParserError(baseErrorID + " but reactant is not a particle (Ito or photon) species");
+      }
+
+      // Turn product strings into indices
+      std::list<size_t> productIndices;
+      for (const auto& p : trimmedProducts) {
+        if (p != "(null)") {
+          if (this->isPhotonSpecies(p)) {
+            this->throwParserError(baseErrorID + " but product must be an Ito species");
+          }
+          else if (this->isPlasmaSpecies(p)) {
+            if (m_plasmaSpeciesTypes.at(p) != SpeciesType::Ito) {
+              this->throwParserError(baseErrorID + " but product must be an Ito species");
+            }
+          }
+          else {
+            this->throwParserError(baseErrorID + " but product must be an Ito species");
+          }
+
+          productIndices.emplace_back((size_t)m_itoSpeciesMap.at(p));
+        }
+      }
+
+      // Create the reaction and append it to the set.
+      ItoKMCSurfaceReaction reaction(reactantIndex, productIndices, efficiencies[i]);
+
+      ItoKMCSurfaceReactions reactions;
+
+      reactions.add(reaction);
+
+      if (isPlasma && a_surface == "dielectric") {
+        m_surfaceReactions.add(reactantIndex,
+                               reaction,
+                               ItoKMCSurfaceReactionSet::Surface::Dielectric,
+                               ItoKMCSurfaceReactionSet::Species::Plasma);
+      }
+      else if (isPlasma && a_surface == "electrode") {
+        m_surfaceReactions.add(reactantIndex,
+                               reaction,
+                               ItoKMCSurfaceReactionSet::Surface::Electrode,
+                               ItoKMCSurfaceReactionSet::Species::Plasma);
+      }
+      else if (isPhoton && a_surface == "dielectric") {
+        m_surfaceReactions.add(reactantIndex,
+                               reaction,
+                               ItoKMCSurfaceReactionSet::Surface::Dielectric,
+                               ItoKMCSurfaceReactionSet::Species::Photon);
+      }
+      else if (isPhoton && a_surface == "electrode") {
+        m_surfaceReactions.add(reactantIndex,
+                               reaction,
+                               ItoKMCSurfaceReactionSet::Surface::Electrode,
+                               ItoKMCSurfaceReactionSet::Species::Photon);
+      }
+    }
+  }
 }
 
 void
@@ -2577,7 +2725,7 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
   return tabulatedCoefficient;
 }
 
-std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
+std::vector<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
 ItoKMCJSON::parseReactionWildcards(const std::vector<std::string>& a_reactants,
                                    const std::vector<std::string>& a_products,
                                    const nlohmann::json&           a_reactionJSON) const noexcept
@@ -2588,7 +2736,7 @@ ItoKMCJSON::parseReactionWildcards(const std::vector<std::string>& a_reactants,
   }
 
   // This is what we return. A horrific creature.
-  std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>> reactionSets;
+  std::vector<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>> reactionSets;
 
   // This is the reaction name.
   const std::string reaction  = a_reactionJSON["reaction"].get<std::string>();
@@ -2780,8 +2928,87 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
     pout() << m_className + "::secondaryEmissionEB" << endl;
   }
 
+  const bool isCathode = a_E.dotProduct(a_bndryNormal) <= 0.0;
+  const bool isAnode   = !isCathode;
+
+  const RealVect releasePosition = a_cellCenter + a_dx * a_cellCentroid;
+
+  // Outflow for all CDR fluxes.
   for (int i = 0; i < a_primaryCDRFluxes.size(); i++) {
     a_secondaryCDRFluxes[i] = std::max(a_primaryCDRFluxes[i], 0.0);
+  }
+
+  // Go through all primary particles.
+  const std::map<size_t, ItoKMCSurfaceReactions>& plasmaReactions =
+    a_isDielectric ? m_surfaceReactions.getDielectricPlasmaReactions()
+                   : m_surfaceReactions.getElectrodePlasmaReactions();
+
+  const std::map<size_t, ItoKMCSurfaceReactions>& photonReactions =
+    a_isDielectric ? m_surfaceReactions.getDielectricPhotonReactions()
+                   : m_surfaceReactions.getElectrodePhotonReactions();
+
+  // Do secondary emission for each intersected particle if there's a corresponding surface reaction.
+  for (int i = 0; i < m_itoSpecies.size(); i++) {
+    if (plasmaReactions.count(i) > 0) {
+
+      // These are the products and distribution for this reaction.
+      const auto& reactions      = plasmaReactions.at(i);
+      const auto& plasmaProducts = reactions.getProducts();
+      const auto& distribution   = reactions.getDistribution();
+
+      // Figure out the number of particles to sample and then run a multinomial sampling
+      size_t N = 0;
+      for (ListIterator<ItoParticle> lit(a_primaryParticles[i]); lit.ok(); ++lit) {
+        N += (size_t)lit().weight();
+      }
+
+      const std::vector<size_t> X = this->multinomial(N, distribution);
+
+      // Release the particles.
+      for (int i = 0; i < X.size(); i++) {
+        if (X[i] > 0) {
+          for (const auto& p : plasmaProducts[i]) {
+            const int Z = m_itoSpecies[p]->getChargeNumber();
+
+            if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
+              a_secondaryParticles[p].add(ItoParticle(1.0 * X[i], releasePosition));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Do secondary emission for each intersected photon if there's a corresponding surface reaction.
+  for (int i = 0; i < m_rtSpecies.size(); i++) {
+    if (photonReactions.count(i) > 0) {
+
+      // These are the products and distribution for this reaction.
+      const auto& reactions      = photonReactions.at(i);
+      const auto& plasmaProducts = reactions.getProducts();
+      const auto& distribution   = reactions.getDistribution();
+
+      // Figure out the number of particles to sample and then run a multinomial sampling
+      size_t N = 0;
+      for (ListIterator<Photon> lit(a_primaryPhotons[i]); lit.ok(); ++lit) {
+        N += (size_t)lit().weight();
+      }
+
+      const std::vector<size_t> X = this->multinomial(N, distribution);
+
+      // Release the particles.
+      for (int i = 0; i < X.size(); i++) {
+        if (X[i] > 0) {
+          for (const auto& p : plasmaProducts[i]) {
+            const int Z = m_itoSpecies[p]->getChargeNumber();
+
+            if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
+              a_secondaryParticles[p].add(ItoParticle(1.0 * X[i], releasePosition));
+            }
+          }
+        }
+      }
+    }
   }
 }
 
@@ -2905,6 +3132,35 @@ ItoKMCJSON::getPlotVariables(const RealVect          a_E,
   }
 
   return plotVars;
+}
+
+std::vector<size_t>
+ItoKMCJSON::multinomial(const size_t N, const std::discrete_distribution<size_t>& a_distribution) const noexcept
+{
+  CH_TIME("ItoKMCJSON::multinomial");
+  if (m_verbose) {
+    pout() << m_className + "::multinomial" << endl;
+  }
+
+  const std::vector<double>& P = a_distribution.probabilities();
+
+  std::vector<size_t> X(P.size(), 0);
+
+  size_t S   = N;
+  Real   rho = 1.0;
+
+  for (int i = 0; i < P.size(); i++) {
+    if (rho > 0.0) {
+      std::binomial_distribution<size_t> d(S, P[i] / rho);
+
+      X[i] = Random::getDiscrete(d);
+    }
+
+    rho = rho - P[i];
+    S   = S - X[i];
+  }
+
+  return X;
 }
 
 #include <CD_NamespaceFooter.H>

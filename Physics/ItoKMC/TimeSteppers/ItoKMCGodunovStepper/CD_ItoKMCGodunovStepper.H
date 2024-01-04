@@ -162,11 +162,6 @@ namespace Physics {
       bool m_smoothConductivity;
 
       /*!
-	@brief Previous time step.
-      */
-      Real m_prevDt;
-
-      /*!
 	@brief Which advancement algorithm to use.
       */
       WhichAlgorithm m_algorithm;

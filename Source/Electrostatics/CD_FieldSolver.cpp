@@ -1314,6 +1314,7 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
   // we determine the data based on the a_phase input flag.
   CH_START(t5);
   if (reallyMultiPhase) {
+    const ProblemDomain&     domain     = m_amr->getDomains()[a_level];
     const DisjointBoxLayout& dbl        = m_amr->getGrids(m_realm)[a_level];
     const EBISLayout&        ebislGas   = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
     const EBISLayout&        ebislSolid = m_amr->getEBISLayout(m_realm, phase::solid)[a_level];
@@ -1365,20 +1366,28 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
               }
             };
 
-            BoxLoops::loop(dbl[dit()], kernel);
+            BoxLoops::loop(fabGas.box() & domain, kernel);
           }
         }
       }
     }
   }
-  CH_START(t5);
+  CH_STOP(t5);
 
   // Copy the single-phase data to the output data holder.
   const Interval srcInterv(0, numComp - 1);
   const Interval dstInterv(a_comp, numComp - 1 + a_comp);
 
   CH_START(t6);
-  m_amr->copyData(a_output, scratchGas, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  m_amr->copyData(a_output,
+                  scratchGas,
+                  a_level,
+                  a_outputRealm,
+                  m_realm,
+                  dstInterv,
+                  srcInterv,
+                  CopyStrategy::ValidGhost,
+                  CopyStrategy::ValidGhost);
   CH_STOP(t6);
 
   a_comp += numComp;

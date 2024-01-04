@@ -198,6 +198,15 @@ Random::get(T& a_distribution)
   return a_distribution(s_rng);
 }
 
+template <typename T>
+inline size_t
+Random::getDiscrete(T& a_distribution)
+{
+  CH_assert(s_seeded);
+
+  return a_distribution(s_rng);
+}
+
 inline RealVect
 Random::randomPosition(const RealVect a_cellPos,
                        const RealVect a_lo,

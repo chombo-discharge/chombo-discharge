@@ -495,6 +495,21 @@ namespace Physics {
       int m_mergeInterval;
 
       /*!
+	@brief Previous time step
+      */
+      Real m_prevDt;
+
+      /*!
+	@brief Maximum permissible time step growth
+      */
+      Real m_maxGrowthDt;
+
+      /*!
+	@brief Maximum permissible time step shrinkage
+      */
+      Real m_maxShrinkDt;
+
+      /*!
 	@brief The "background" load per cell when using particle load balancing.
 	@note This is used when computing the loads per patch on the particle realm such that the total load 
 	is m_loadPerCell * numGridPoints + numParticles. 
@@ -1637,6 +1652,24 @@ namespace Physics {
       */
       virtual Real
       computeTotalCharge() const noexcept;
+
+      /*!
+	@brief Compute positive charge
+      */
+      virtual Real
+      computeQplus() const noexcept;
+
+      /*!
+	@brief Compute negative charge
+      */
+      virtual Real
+      computeQminu() const noexcept;
+
+      /*!
+	@brief Compute surface charge
+      */
+      virtual Real
+      computeQsurf() const noexcept;
 
       /*!
 	@brief Photon advancement routine
