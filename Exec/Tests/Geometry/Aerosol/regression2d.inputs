@@ -79,11 +79,6 @@ Aerosol.num_spheres       = 3              # Number of spheres
 Aerosol.invert            = false          # Invert so that instead of particles we have holes
 Aerosol.permittivity      = 5.0            # Dielectric permittivity, if the geometry is a dielectric		
 Aerosol.eps0              = 1              # Permittivity
-Aerosol.noise_amplitude   = 0.1            # Noise amplitude
-Aerosol.noise_frequency   = 5. 5. 5.       # Noise frequency
-Aerosol.noise_persistence = 0.5            # Noise persistence
-Aerosol.noise_octaves     = 1              # Noise octaves
-Aerosol.noise_reseed      = false          # Reseed noise
 
 Aerosol.sphere1.radius    = 0.2            # Sphere radius
 Aerosol.sphere1.center    = -0.5 -0.5 -0.5 # Sphere position
