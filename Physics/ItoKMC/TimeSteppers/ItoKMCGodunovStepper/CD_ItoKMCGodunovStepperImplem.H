@@ -1509,7 +1509,7 @@ ItoKMCGodunovStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header)
     pout() << this->m_name + "::readCheckpointHeader" << endl;
   }
 
-  this->m_prevDt                  = a_header.m_real["prev_dt"];
+  this->m_prevDt            = a_header.m_real["prev_dt"];
   m_readCheckpointParticles = (a_header.m_int["checkpoint_particles"] != 0) ? true : false;
   m_canRegridOnRestart      = m_readCheckpointParticles;
 }

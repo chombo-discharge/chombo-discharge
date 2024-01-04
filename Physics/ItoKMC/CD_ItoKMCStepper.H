@@ -507,7 +507,7 @@ namespace Physics {
       /*!
 	@brief Maximum permissible time step shrinkage
       */
-      Real m_maxShrinkDt;      
+      Real m_maxShrinkDt;
 
       /*!
 	@brief The "background" load per cell when using particle load balancing.
