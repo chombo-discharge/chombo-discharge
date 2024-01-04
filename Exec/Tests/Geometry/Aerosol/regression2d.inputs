@@ -76,6 +76,7 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # radius and center. 
 # ====================================================================================================
 Aerosol.num_spheres       = 3              # Number of spheres
+Aerosol.invert            = false          # Invert so that instead of particles we have holes
 Aerosol.permittivity      = 5.0            # Dielectric permittivity, if the geometry is a dielectric		
 Aerosol.eps0              = 1              # Permittivity
 Aerosol.noise_amplitude   = 0.1            # Noise amplitude
