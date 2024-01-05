@@ -372,7 +372,9 @@ StreamerInceptionStepper<P, F, C>::parseVoltages() noexcept
   pp.get("K_inception", m_inceptionK);
 
   // Define voltages
-  const Real dV = (voltageHi - voltageLo) / (1 + voltageSteps);
+  const Real deltaV = voltageHi - voltageLo;
+  
+  const Real dV = deltaV / (1 + voltageSteps);
 
   m_voltageSweeps.push_back(voltageLo);
 

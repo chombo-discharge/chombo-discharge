@@ -125,8 +125,7 @@ MechanicalShaft.electrode.live            = true  # Live electrode or not
 MechanicalShaft.electrode.length          = 2E-2   # Electrode length 
 MechanicalShaft.electrode.outer.radius    = 30E-3   # Electrode outer radius
 MechanicalShaft.electrode.inner.radius    = 20E-3   # Electrode inner radius	
-MechanicalShaft.electrode.outer.curvature = 3E-3   # Outer curvature
-MechanicalShaft.electrode.inner.curvature = 3E-3   # Inner curvature
+MechanicalShaft.electrode.curvature = 3E-3   # Electrode curvature
 
 
 # Main dielectric settings

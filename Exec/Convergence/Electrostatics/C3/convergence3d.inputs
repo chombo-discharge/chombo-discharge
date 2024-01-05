@@ -119,8 +119,7 @@ MechanicalShaft.electrode.endpoint1       = -10 0 0         # One endpoint
 MechanicalShaft.electrode.endpoint2       = 10 0 0           # Other endpoint
 MechanicalShaft.electrode.outer_radius    = 0.8             # Electrode outer radius
 MechanicalShaft.electrode.inner_radius    = 0.4             # Electrode inner radius	
-MechanicalShaft.electrode.outer_curvature = 0.1             # Outer curvature
-MechanicalShaft.electrode.inner_curvature = 0.1             # Inner curvature
+MechanicalShaft.electrode.curvature = 0.1             # Outer curvature
 
 # Mechshaft settings
 --------------------
