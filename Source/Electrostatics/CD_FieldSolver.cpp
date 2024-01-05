@@ -1316,7 +1316,6 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
   if (reallyMultiPhase) {
     const ProblemDomain&     domain     = m_amr->getDomains()[a_level];
     const DisjointBoxLayout& dbl        = m_amr->getGrids(m_realm)[a_level];
-    const ProblemDomain&     domain     = m_amr->getDomains()[a_level];
     const EBISLayout&        ebislGas   = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
     const EBISLayout&        ebislSolid = m_amr->getEBISLayout(m_realm, phase::solid)[a_level];
 
@@ -1340,6 +1339,37 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
       const bool validData = !(isGasCovered && isSolidCovered);
       if (validData) {
 
+        int comp;
+
+        auto kernel = [&](const IntVect& iv) -> void {
+          const bool coveredGas = ebisBoxGas.isCovered(iv);
+          const bool irregGas   = ebisBoxGas.isIrregular(iv);
+          const bool regularGas = ebisBoxGas.isRegular(iv);
+
+          const bool coveredSolid = ebisBoxSolid.isCovered(iv);
+          const bool irregSolid   = ebisBoxSolid.isIrregular(iv);
+          const bool regularSolid = ebisBoxSolid.isRegular(iv);
+
+          if (regularSolid && coveredGas) {
+            fabGas(iv, comp) = fabSolid(iv, comp);
+          }
+          else if (irregGas && irregSolid) {
+            if (a_phase == phase::solid) {
+              fabGas(iv, comp) = fabSolid(iv, comp);
+            }
+          }
+          else if (irregGas && coveredSolid) {
+            if (a_phase == phase::solid) {
+              fabGas(iv, comp) = 0.0;
+            }
+          }
+          else if (coveredGas && coveredSolid) {
+            if (a_phase == phase::solid) {
+              fabGas(iv, comp) = 0.0;
+            }
+          }
+        };
+
         if (isSolidRegular) {
           // In this case we are purely inside the solid region -- take the data from the solid phase.
           fabGas.copy(fabSolid);
@@ -1349,39 +1379,16 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
           // go into the output region. We happen to know that all gas-side data is already filled, so we only need to grok
           // the solid-side data.
 
-          for (int comp = 0; comp < numComp; comp++) {
-
-            auto kernel = [&](const IntVect& iv) -> void {
-              const bool coveredGas   = ebisBoxGas.isCovered(iv);
-              const bool irregGas     = ebisBoxGas.isIrregular(iv);
-              const bool regularSolid = ebisBoxSolid.isRegular(iv);
-              const bool irregSolid   = ebisBoxSolid.isIrregular(iv);
-              const bool coveredSolid = !irregSolid && !regularSolid;
-
-              if (regularSolid && coveredGas) {
-                fabGas(iv, comp) = fabSolid(iv, comp);
-              }
-              else if (irregGas && irregSolid) {
-                if (a_phase == phase::solid) {
-                  fabGas(iv, comp) = fabSolid(iv, comp);
-                }
-              }
-              else if (coveredSolid && coveredGas) {
-		// Covered on both phases is bogus.
-		fabGas(iv, comp) = 0.0;
-              }
-            };
-
+          for (comp = 0; comp < numComp; comp++) {
             BoxLoops::loop(fabGas.box() & domain, kernel);
           }
         }
-	else {
-	  fabGas.setVal(0.0);
-	}
-      }
-      else {
-	// Covered on both phases is bogus.
-	fabGas.setVal(0.0);
+        else if (isSolidCovered && isGasIrregular) {
+          // In this case we are looking at a grid patch that lies on the gas-electrode boundary.
+          for (comp = 0; comp < numComp; comp++) {
+            BoxLoops::loop(fabGas.box() & domain, kernel);
+          }
+        }
       }
     }
   }
