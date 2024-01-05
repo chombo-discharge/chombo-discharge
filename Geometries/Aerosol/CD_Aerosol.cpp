@@ -20,65 +20,71 @@
 
 // Our includes
 #include <CD_Aerosol.H>
-#include <CD_PerlinSphereSdf.H>
+#include <CD_EBGeometryIF.H>
 #include <CD_NamespaceHeader.H>
 
 Aerosol::Aerosol()
 {
 
-  Real     eps, eps0, noise_persistence, noise_amplitude;
-  RealVect noise_frequency;
-  int      noise_octaves, num_spheres;
-  bool     noise_reseed, invert;
+  Real gasPermittivity   = 1.0;
+  Real solidPermittivity = 1.0;
+  bool invert;
+  int  numSpheres;
 
+  Real         radius;
   Vector<Real> v(SpaceDim);
 
   // Get a bunch of parameters from the input script
   ParmParse pp("Aerosol");
 
   pp.get("invert", invert);
-  pp.get("eps0", eps0);
-  pp.get("permittivity", eps);
-  pp.get("num_spheres", num_spheres);
-  pp.get("noise_amplitude", noise_amplitude);
-  pp.get("noise_octaves", noise_octaves);
-  pp.get("noise_persistence", noise_persistence);
-  pp.get("noise_reseed", noise_reseed);
-  pp.getarr("noise_frequency", v, 0, SpaceDim);
-  noise_frequency = RealVect(D_DECL(v[0], v[1], v[2]));
+  pp.get("eps0", gasPermittivity);
+  pp.get("permittivity", solidPermittivity);
+  pp.get("num_spheres", numSpheres);
 
-  this->setGasPermittivity(eps0);
+  this->setGasPermittivity(gasPermittivity);
+
+  if (gasPermittivity <= 0.0) {
+    MayDay::Error("Aerosol::Aerosol() -- eps0 cannot be <= 0.0");
+  }
+  if (solidPermittivity <= 0.0) {
+    MayDay::Error("Aerosol::Aerosol() -- permittivity cannot be <= 0.0");
+  }
 
   m_dielectrics.resize(0);
   m_electrodes.resize(0);
 
-  // Add spheres
-  for (int i = 0; i < num_spheres; i++) {
-    const int ndigits = (int)log10((double)num_spheres) + 1;
-
-    RealVect center;
-    Real     radius;
+  // Construct tht CSG union of spheres
+  if (numSpheres > 0) {
+    const int ndigits = (int)log10((double)numSpheres) + 1;
 
     char* cstr = new char[ndigits];
-    sprintf(cstr, "%d", 1 + i);
-    const std::string str = "Aerosol.sphere" + std::string(cstr);
 
-    ParmParse pp2(str);
-    pp2.get("radius", radius);
-    pp2.getarr("center", v, 0, SpaceDim);
-    center = RealVect(D_DECL(v[0], v[1], v[2]));
+    std::vector<std::shared_ptr<EBGeometry::ImplicitFunction<Real>>> spheres;
 
-    // Get the perlin sphere.
-    RefCountedPtr<BaseIF> sph = RefCountedPtr<BaseIF>(new PerlinSphereSdf(radius,
-                                                                          center,
-                                                                          invert,
-                                                                          noise_amplitude,
-                                                                          noise_frequency,
-                                                                          noise_persistence,
-                                                                          noise_octaves,
-                                                                          noise_reseed));
+    for (int i = 0; i < numSpheres; i++) {
 
-    m_dielectrics.push_back(Dielectric(sph, eps));
+      sprintf(cstr, "%d", 1 + i);
+      const std::string str = "Aerosol.sphere" + std::string(cstr);
+      ParmParse         pp2(str);
+
+      // Get center and radius.
+      pp2.get("radius", radius);
+      pp2.getarr("center", v, 0, SpaceDim);
+
+      auto c = EBGeometry::Vec3T<Real>::zero();
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        c[dir] = v[dir];
+      }
+
+      spheres.emplace_back(std::make_shared<EBGeometry::SphereSDF<Real>>(c, radius));
+    }
+
+    const auto unionChombo = RefCountedPtr<BaseIF>(new EBGeometryIF<>(EBGeometry::Union<Real>(spheres), !invert, 0.0));
+
+    m_dielectrics.push_back(Dielectric(unionChombo, solidPermittivity));
+
+    delete[] cstr;
   }
 }
 

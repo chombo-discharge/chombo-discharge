@@ -90,10 +90,5 @@ Aerosol.permittivity      = 5.0           # Dielectric permittivity, if the geom
 Aerosol.eps0              = 1             # Permittivity
 Aerosol.sphere1.radius    = 0.5           # Sphere radius
 Aerosol.sphere1.center    = 0. 0. 0.      # Sphere center
-Aerosol.noise_amplitude   = 0.1           # Noise amplitude
-Aerosol.noise_frequency   = 1. 1. 1.      # Noise frequency
-Aerosol.noise_persistence = 0.5           # Noise persistence
-Aerosol.noise_octaves     = 2             # Noise octaves
-Aerosol.noise_reseed      = false         # Reseed noise
 
 
