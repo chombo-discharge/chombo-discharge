@@ -373,7 +373,7 @@ StreamerInceptionStepper<P, F, C>::parseVoltages() noexcept
 
   // Define voltages
   const Real deltaV = voltageHi - voltageLo;
-  
+
   const Real dV = deltaV / (1 + voltageSteps);
 
   m_voltageSweeps.push_back(voltageLo);
@@ -2223,7 +2223,7 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
         break;
       }
       case StepSizeMethod::Alpha: {
-        spaceStep = m_stepSizeFactor*dx;
+        spaceStep = m_stepSizeFactor * dx;
         alphaStep = m_stepSizeFactor;
 
         break;
