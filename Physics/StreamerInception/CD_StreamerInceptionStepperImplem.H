@@ -954,13 +954,23 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
 
   if (m_plotAlpha) {
     LevelData<EBCellFAB> alpha;
+    LevelData<EBCellFAB> alphaCoar;
+
     m_amr->allocate(alpha, m_realm, m_phase, a_level, 1);
+    if (a_level > 0) {
+      m_amr->allocate(alphaCoar, m_realm, m_phase, a_level - 1, 1);
+    }
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
       this->evaluateFunction(alpha, m_voltageSweeps[i], m_alpha, a_level);
+      if (a_level > 0) {
+        this->evaluateFunction(alphaCoar, m_voltageSweeps[i], m_alpha, a_level - 1);
+        m_amr->interpGhost(alpha, alphaCoar, a_level, m_realm, m_phase);
+      }
+      else {
+        alpha.exchange();
+      }
 
-      // Do a copy, but note that this does not include ghost cells across the CF interface since
-      // we are only computing for a single grid level.
       m_amr->copyData(a_output, alpha, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
       a_icomp++;
@@ -969,13 +979,23 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
 
   if (m_plotEta) {
     LevelData<EBCellFAB> eta;
+    LevelData<EBCellFAB> etaCoar;
+
     m_amr->allocate(eta, m_realm, m_phase, a_level, 1);
+    if (a_level > 0) {
+      m_amr->allocate(etaCoar, m_realm, m_phase, a_level - 1, 1);
+    }
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
       this->evaluateFunction(eta, m_voltageSweeps[i], m_eta, a_level);
+      if (a_level > 0) {
+        this->evaluateFunction(etaCoar, m_voltageSweeps[i], m_eta, a_level - 1);
+        m_amr->interpGhost(eta, etaCoar, a_level, m_realm, m_phase);
+      }
+      else {
+        eta.exchange();
+      }
 
-      // Do a copy, but note that this does not include ghost cells across the CF interface since
-      // we are only computing for a single grid level.
       m_amr->copyData(a_output, eta, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
       a_icomp++;
@@ -984,7 +1004,12 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
 
   if (m_plotAlpha && m_plotEta) {
     LevelData<EBCellFAB> alphaEff;
+    LevelData<EBCellFAB> alphaEffCoar;
+
     m_amr->allocate(alphaEff, m_realm, m_phase, a_level, 1);
+    if (a_level > 0) {
+      m_amr->allocate(alphaEffCoar, m_realm, m_phase, a_level - 1, 1);
+    }
 
     auto alphaFunc = [alpha = this->m_alpha, eta = this->m_eta](const Real E, const RealVect x) -> Real {
       return alpha(E, x) - eta(E, x);
@@ -992,6 +1017,13 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
       this->evaluateFunction(alphaEff, m_voltageSweeps[i], alphaFunc, a_level);
+      if (a_level > 0) {
+        this->evaluateFunction(alphaEffCoar, m_voltageSweeps[i], alphaFunc, a_level - 1);
+        m_amr->interpGhost(alphaEff, alphaEffCoar, a_level, m_realm, m_phase);
+      }
+      else {
+        alphaEff.exchange();
+      }
 
       // Do a copy, but note that this does not include ghost cells across the CF interface since
       // we are only computing for a single grid level.
@@ -1053,12 +1085,19 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
   if (m_plotDetachment) {
     LevelData<EBCellFAB> detachRate;
+    LevelData<EBCellFAB> detachRateCoar;
+
     m_amr->allocate(detachRate, m_realm, m_phase, a_level, 1);
+    if (a_level > 0) {
+      m_amr->allocate(detachRateCoar, m_realm, m_phase, a_level - 1, 1);
+    }
 
     this->evaluateFunction(detachRate, m_voltageCurve(m_time), m_detachmentRate, a_level);
+    if (a_level > 0) {
+      this->evaluateFunction(detachRateCoar, m_voltageCurve(m_time), m_detachmentRate, a_level - 1);
+      m_amr->interpGhost(detachRate, detachRateCoar, a_level, m_realm, m_phase);
+    }
 
-    // Do a copy, but note that this does not include ghost cells across the CF interface since
-    // we are only computing for a single grid level.
     m_amr->copyData(a_output, detachRate, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
     a_icomp++;
@@ -1070,9 +1109,21 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
   if (m_plotAlpha) {
     LevelData<EBCellFAB> alpha;
+    LevelData<EBCellFAB> alphaCoar;
+
     m_amr->allocate(alpha, m_realm, m_phase, a_level, 1);
+    if (a_level > 0) {
+      m_amr->allocate(alphaCoar, m_realm, m_phase, a_level - 1, 1);
+    }
 
     this->evaluateFunction(alpha, m_voltageCurve(m_time), m_alpha, a_level);
+    if (a_level > 0) {
+      this->evaluateFunction(alphaCoar, m_voltageCurve(m_time), m_alpha, a_level - 1);
+      m_amr->interpGhost(alpha, alphaCoar, a_level, m_realm, m_phase);
+    }
+    else {
+      alpha.exchange();
+    }
 
     // Do a copy, but note that this does not include ghost cells across the CF interface since
     // we are only computing for a single grid level.
@@ -1083,9 +1134,21 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
   if (m_plotEta) {
     LevelData<EBCellFAB> eta;
+    LevelData<EBCellFAB> etaCoar;
+
     m_amr->allocate(eta, m_realm, m_phase, a_level, 1);
+    if (a_level > 0) {
+      m_amr->allocate(etaCoar, m_realm, m_phase, a_level - 1, 1);
+    }
 
     this->evaluateFunction(eta, m_voltageCurve(m_time), m_eta, a_level);
+    if (a_level > 0) {
+      this->evaluateFunction(etaCoar, m_voltageCurve(m_time), m_eta, a_level - 1);
+      m_amr->interpGhost(eta, etaCoar, a_level, m_realm, m_phase);
+    }
+    else {
+      eta.exchange();
+    }
 
     // Do a copy, but note that this does not include ghost cells across the CF interface since
     // we are only computing for a single grid level.
@@ -1096,13 +1159,25 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
   if (m_plotAlpha && m_plotEta) {
     LevelData<EBCellFAB> alphaEff;
+    LevelData<EBCellFAB> alphaEffCoar;
+
     m_amr->allocate(alphaEff, m_realm, m_phase, a_level, 1);
+    if (a_level > 0) {
+      m_amr->allocate(alphaEffCoar, m_realm, m_phase, a_level - 1, 1);
+    }
 
     auto alphaFunc = [alpha = this->m_alpha, eta = this->m_eta](const Real E, const RealVect x) -> Real {
       return alpha(E, x) - eta(E, x);
     };
 
     this->evaluateFunction(alphaEff, m_voltageCurve(m_time), alphaFunc, a_level);
+    if (a_level > 0) {
+      this->evaluateFunction(alphaEffCoar, m_voltageCurve(m_time), alphaFunc, a_level - 1);
+      m_amr->interpGhost(alphaEff, alphaEffCoar, a_level, m_realm, m_phase);
+    }
+    else {
+      alphaEff.exchange();
+    }
 
     // Do a copy, but note that this does not include ghost cells across the CF interface since
     // we are only computing for a single grid level.
@@ -2148,7 +2223,7 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
         break;
       }
       case StepSizeMethod::Alpha: {
-        spaceStep = dx;
+        spaceStep = m_stepSizeFactor*dx;
         alphaStep = m_stepSizeFactor;
 
         break;
