@@ -504,6 +504,16 @@ namespace Physics {
       */
       EBAMRCellData m_inceptionVoltageMinu;
 
+      /*!
+	@brief Secondary emission coefficient for remnant positive ions
+      */
+      EBAMRCellData m_secondaryTownsendPlus;
+
+      /*!
+	@brief Secondary emission coefficient for remnant positive ions. 
+      */
+      EBAMRCellData m_secondaryTownsendMinu;
+
       /*! 
 	@brief Max K value for every voltage
 	@note Stationary mode, positive polarity
@@ -653,6 +663,11 @@ namespace Physics {
       bool m_debug;
 
       /*!
+	@brief Evaluate secondary emission
+      */
+      bool m_evaluateTownsend;
+
+      /*!
 	@brief Use full reconstruction of critical volume or not
       */
       bool m_fullIntegration;
@@ -711,6 +726,11 @@ namespace Physics {
 	@brief If true, plot eta
       */
       bool m_plotEta;
+
+      /*!
+	@brief Plot the gamma-coefficient for initiatory ions
+      */
+      bool m_plotGamma;
 
       /*!
 	@brief Time-dependent voltage
@@ -824,6 +844,21 @@ namespace Physics {
       */
       virtual void
       inceptionIntegrateTrapezoidal(const Real& a_voltage) noexcept;
+
+      /*!
+	@brief Solve for the Townsend criterion for each particle in each voltage. 
+	@details This is called in postInitialize() only. 
+	@note For stationary mode only. 
+      */
+      virtual void
+      computeTownsendCriterion() noexcept;
+
+      /*!
+	@brief Track particles (positive ions) using an Euler rule and check if the collide with a cathode
+	@param[in] a_voltage Voltage multiplier
+      */
+      virtual void
+      townsendTrackEuler(const Real& a_voltage) noexcept;
 
       /*!
 	@brief Compute integral_Vcr(dne/dt * (1 - eta/alpha) dV)
