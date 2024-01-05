@@ -1314,6 +1314,7 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
   // we determine the data based on the a_phase input flag.
   CH_START(t5);
   if (reallyMultiPhase) {
+    const ProblemDomain&     domain     = m_amr->getDomains()[a_level];
     const DisjointBoxLayout& dbl        = m_amr->getGrids(m_realm)[a_level];
     const ProblemDomain&     domain     = m_amr->getDomains()[a_level];
     const EBISLayout&        ebislGas   = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
