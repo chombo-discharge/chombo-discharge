@@ -52,6 +52,8 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   if (procID() == 0) {
     std::cout << "StreamerInceptinoStepper::StreamerInceptionStepper() -- remember to add as input parameter"
               << std::endl;
+    std::cout << "StreamerInceptinoStepper::StreamerInceptionStepper() -- implement trapz tracking for ions"
+              << std::endl;
   }
   m_evaluateTownsend = true;
 #endif
@@ -83,6 +85,10 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   };
 
   m_fieldEmission = [](const Real E, const RealVect x) -> Real {
+    return 0.0;
+  };
+
+  m_secondaryEmission = [](const Real E, const RealVect x) -> Real {
     return 0.0;
   };
 
@@ -523,7 +529,7 @@ StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
   m_plotFieldEmission        = false;
   m_plotAlpha                = false;
   m_plotEta                  = false;
-  m_plotGamma                = false;
+  m_plotTownsend                = false;
 
   ParmParse pp("StreamerInceptionStepper");
 
@@ -564,8 +570,8 @@ StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
       else if (plotVars[i] == "eta") {
         m_plotEta = true;
       }
-      else if (plotVars[i] == "gamma") {
-        m_plotGamma = true;
+      else if (plotVars[i] == "townsend") {
+        m_plotTownsend = true;
       }
     }
   }
@@ -661,7 +667,7 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
     }
 
     // Plotting gamma coefficient
-    if (m_plotGamma) {
+    if (m_plotTownsend) {
       ncomp += 2 * m_voltageSweeps.size();
     }
 
@@ -816,15 +822,15 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
   }
 
   // Secondary emission coefficient for initiatory ions
-  if (m_plotGamma) {
+  if (m_plotTownsend) {
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      const std::string varName = prefix + "Gamma/ V = +" + std::to_string(m_voltageSweeps[i]);
+      const std::string varName = prefix + "Townsend Crit/ V = +" + std::to_string(m_voltageSweeps[i]);
 
       plotVars.push_back(varName);
     }
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      const std::string varName = prefix + "Gamma/ V = -" + std::to_string(m_voltageSweeps[i]);
+      const std::string varName = prefix + "Townsend Crit/ V = -" + std::to_string(m_voltageSweeps[i]);
 
       plotVars.push_back(varName);
     }
@@ -991,7 +997,7 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
     this->writeData(a_output, a_icomp, m_emissionRatesMinu, a_outputRealm, a_level, false, true);
   }
 
-  if (m_plotGamma) {
+  if (m_plotTownsend) {
     this->writeData(a_output, a_icomp, m_secondaryTownsendPlus, a_outputRealm, a_level, false, true);
     this->writeData(a_output, a_icomp, m_secondaryTownsendMinu, a_outputRealm, a_level, false, true);
   }
@@ -1822,6 +1828,19 @@ StreamerInceptionStepper<P, F, C>::setFieldEmission(
   }
 
   m_fieldEmission = a_currentDensity;
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::setSecondaryEmission(
+  const std::function<Real(const Real& E, const RealVect& x)>& a_coefficient) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setSecondaryEmission");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setSecondaryEmission" << endl;
+  }
+
+  m_secondaryEmission = a_coefficient;
 }
 
 template <typename P, typename F, typename C>
@@ -2693,7 +2712,7 @@ StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noe
           const bool insideEB      = this->particleInsideEB(newPos);
 
           if (insideEB) {
-            p.weight() = 0.123456789;
+            p.weight() = m_secondaryEmission(E, x);
             processedParticles.transfer(lit);
           }
           else if (outsideDomain) {

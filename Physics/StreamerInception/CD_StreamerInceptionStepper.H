@@ -388,6 +388,13 @@ namespace Physics {
       setFieldEmission(const std::function<Real(const Real& E, const RealVect& x)>& a_currentDensity) noexcept;
 
       /*!
+	@brief Set the secondary emission coefficient
+	@param[in] a_coeff Secondary emission coefficient. 
+      */
+      virtual void
+      setSecondaryEmission(const std::function<Real(const Real& E, const RealVect& x)>& a_coeff) noexcept;
+
+      /*!
 	@brief Get the solver mode
       */
       virtual Mode
@@ -728,9 +735,9 @@ namespace Physics {
       bool m_plotEta;
 
       /*!
-	@brief Plot the gamma-coefficient for initiatory ions
+	@brief Plot the Townsend-criterion for initiatory ions
       */
-      bool m_plotGamma;
+      bool m_plotTownsend;
 
       /*!
 	@brief Time-dependent voltage
@@ -801,6 +808,11 @@ namespace Physics {
 	@brief Field emission current
       */
       std::function<Real(const Real& E, const RealVect& x)> m_fieldEmission;
+
+      /*!
+	@brief Secondary emission coefficient
+      */
+      std::function<Real(const Real& E, const RealVect& x)> m_secondaryEmission;
 
       /*!
 	@brief Distribute particles in every grid cell
