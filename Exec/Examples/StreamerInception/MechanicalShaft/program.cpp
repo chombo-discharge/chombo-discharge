@@ -90,7 +90,7 @@ main(int argc, char* argv[])
     return C1 * (E * E) * exp(-C2 / (beta * E));
   };
   auto secondCoeff = [&](const Real& E, const RealVect& x) -> Real {
-    return 0.1;
+    return 0.01;
   };
 
   // Set up time stepper
@@ -107,7 +107,7 @@ main(int argc, char* argv[])
   timestepper->setBackgroundRate(bgRate);
   timestepper->setDetachmentRate(detachRate);
   timestepper->setFieldEmission(fieldEmission);
-  timestepper->setSecondaryEmission(secondCoeff);  
+  timestepper->setSecondaryEmission(secondCoeff);
   timestepper->setIonMobility(ionMobility);
   timestepper->setIonDiffusion(ionDiffusion);
   timestepper->setIonDensity(ionDensity);

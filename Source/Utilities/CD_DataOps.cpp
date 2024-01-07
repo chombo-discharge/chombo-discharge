@@ -438,6 +438,52 @@ DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
 }
 
 void
+DataOps::compute(EBAMRCellData& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept
+{
+  CH_TIME("DataOps::compute(EBAMRCellData, std::function)");
+
+  for (int lvl = 0; lvl < a_data.size(); lvl++) {
+    DataOps::compute(*a_data[lvl], a_func);
+  }
+}
+
+void
+DataOps::compute(LevelData<EBCellFAB>& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept
+{
+  CH_TIME("DataOps::compute(LevelData<EBCellFAB>, std::function)");
+
+  const int nComp = a_data.nComp();
+
+  for (DataIterator dit = a_data.dataIterator(); dit.ok(); ++dit) {
+    EBCellFAB& data    = a_data[dit()];
+    FArrayBox& dataReg = data.getFArrayBox();
+
+    EBCellFAB tmp;
+    tmp.clone(data);
+    FArrayBox& tmpReg = tmp.getFArrayBox();
+
+    // Kernel regions
+    const Box&        box     = a_data.disjointBoxLayout().get(dit());
+    const EBISBox&    ebisbox = data.getEBISBox();
+    const EBGraph&    ebgraph = ebisbox.getEBGraph();
+    const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
+    VoFIterator       vofit(ivs, ebgraph);
+
+    for (int comp = 0; comp < nComp; comp++) {
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        dataReg(iv, comp) = a_func(tmpReg(iv, comp));
+      };
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        data(vof, comp) = a_func(tmp(vof, comp));
+      };
+
+      BoxLoops::loop(box, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+}
+
+void
 DataOps::dotProduct(MFAMRCellData& a_result, const MFAMRCellData& a_data1, const MFAMRCellData& a_data2)
 {
   CH_TIME("DataOps::dotProduct(mfamrcell)");

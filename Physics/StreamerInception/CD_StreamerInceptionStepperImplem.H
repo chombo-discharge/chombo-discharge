@@ -54,6 +54,8 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
               << std::endl;
     std::cout << "StreamerInceptinoStepper::StreamerInceptionStepper() -- implement trapz tracking for ions"
               << std::endl;
+    std::cout << "StreamerInceptinoStepper::StreamerInceptionStepper() -- get max Townsend value and add to report"
+              << std::endl;
   }
   m_evaluateTownsend = true;
 #endif
@@ -529,7 +531,7 @@ StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
   m_plotFieldEmission        = false;
   m_plotAlpha                = false;
   m_plotEta                  = false;
-  m_plotTownsend                = false;
+  m_plotTownsend             = false;
 
   ParmParse pp("StreamerInceptionStepper");
 
@@ -824,13 +826,13 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
   // Secondary emission coefficient for initiatory ions
   if (m_plotTownsend) {
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      const std::string varName = prefix + "Townsend Crit/ V = +" + std::to_string(m_voltageSweeps[i]);
+      const std::string varName = prefix + "Townsend crit/ V = +" + std::to_string(m_voltageSweeps[i]);
 
       plotVars.push_back(varName);
     }
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      const std::string varName = prefix + "Townsend Crit/ V = -" + std::to_string(m_voltageSweeps[i]);
+      const std::string varName = prefix + "Townsend crit/ V = -" + std::to_string(m_voltageSweeps[i]);
 
       plotVars.push_back(varName);
     }
@@ -2559,8 +2561,10 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
 
   // Allocate storage for gamma-coefficient
   EBAMRCellData gamma;
+  EBAMRCellData expK;
 
   m_amr->allocate(gamma, m_realm, m_phase, 1);
+  m_amr->allocate(expK, m_realm, m_phase, 1);
 
   // Do all voltages and both polarities
   for (int i = 0; i < m_voltageSweeps.size(); ++i) {
@@ -2591,6 +2595,7 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
       }
       case IntegrationAlgorithm::Trapezoidal: {
         //      this->townsendTrackTrapezoidal(m_voltageSweeps[i]);
+        this->townsendTrackEuler(m_voltageSweeps[i]);
         MayDay::Warning("StreamerInceptionStepper::computeTownsendCriterion -- trapz not supported (yet)");
 
         break;
@@ -2608,9 +2613,22 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
       m_amr->conservativeAverage(gamma, m_realm, m_phase);
       m_amr->interpGhost(gamma, m_realm, m_phase);
 
-      // Reuse gamma to compute gamma = exp(K), then compute the
-      MayDay::Warning("StreamerInceptionStepper::townsendTrackEuler -- add functionality for calculating exp(K)");
+      // Compute gamma/exp(K)
+      auto func = [](const Real& a_value) -> Real {
+        return exp(a_value);
+      };
+
+      // Compute gamma * exp(K)
+      auto exponentiate = [](const Real x) -> Real {
+        return x > 0.0 ? exp(x) : 0.0;
+      };
+
       if (p > 0.0) {
+        EBAMRCellData Kplus = m_amr->slice(m_inceptionIntegralPlus, Interval(i, i));
+        DataOps::copy(expK, Kplus);
+        DataOps::compute(expK, exponentiate);
+        DataOps::multiply(gamma, expK);
+
         DataOps::copy(m_secondaryTownsendPlus, gamma, Interval(i, i), Interval(0, 0));
       }
       else {
@@ -2691,19 +2709,10 @@ StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noe
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
 
-          const RealVect x        = p.position();
-          const RealVect vel      = p.velocity();
-          const Real     v        = vel.vectorLength();
-          const Real     E        = std::abs(a_voltage * v);
-          const Real     alpha    = m_alpha(E, x);
-          const Real     eta      = m_eta(E, x);
-          const Real     alphaEff = alpha - eta;
-
-          // Stop integration if avalanche phase is over
-          const bool negativeAlpha = alphaEff <= 0.0;
-
-          p.weight() = 0.0;
-
+          const RealVect x      = p.position();
+          const RealVect vel    = p.velocity();
+          const Real     v      = vel.vectorLength();
+          const Real     E      = std::abs(a_voltage * v);
           const Real     deltaX = spaceStep;
           const Real     dt     = deltaX / v;
           const RealVect newPos = p.position() + dt * vel;
@@ -2711,14 +2720,19 @@ StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noe
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
+          // Stop integration if avalanche phase is over
+          const Real alpha         = m_alpha(E, x);
+          const Real eta           = m_eta(E, x);
+          const Real alphaEff      = alpha - eta;
+          const bool negativeAlpha = alphaEff <= 0.0;
+
+          p.weight() = 0.0;
+
           if (insideEB) {
             p.weight() = m_secondaryEmission(E, x);
             processedParticles.transfer(lit);
           }
-          else if (outsideDomain) {
-            processedParticles.transfer(lit);
-          }
-          else if (negativeAlpha) {
+          else if (outsideDomain || negativeAlpha) {
             processedParticles.transfer(lit);
           }
           else {
@@ -2888,7 +2902,7 @@ StreamerInceptionStepper<P, F, C>::resetTracerParticles() noexcept
       for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
         P& p = lit();
 
-        p.weight() = 5.0;
+        p.weight() = 0.0;
       }
     }
   }
