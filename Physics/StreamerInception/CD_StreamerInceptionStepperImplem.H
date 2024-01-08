@@ -50,18 +50,13 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   m_fullIntegration     = false;
 #if 1
   if (procID() == 0) {
-    std::cout << "StreamerInceptinoStepper::StreamerInceptionStepper() -- remember to add as input parameter"
-              << std::endl;
-    std::cout << "StreamerInceptinoStepper::StreamerInceptionStepper() -- implement trapz tracking for ions"
-              << std::endl;
-    std::cout << "StreamerInceptinoStepper::StreamerInceptionStepper() -- get max Townsend value and add to report"
-              << std::endl;
-    std::cout
-      << "StreamerInceptinoStepper::StreamerInceptionStepper() -- fix trapz tracking for electrons with halt integration"
-      << std::endl;
-    std::cout
-      << "StreamerInceptinoStepper::StreamerInceptionStepper() -- fix remnant alpha*dx when colliding with bndry"
-      << std::endl;
+    std::cout << "StreamerInceptionStepper -- remember to add townsend track as input parameter" << std::endl;
+    std::cout << "StreamerInceptionStepper -- implement trapz tracking for ions" << std::endl;
+    std::cout << "StreamerInceptionStepper -- get max Townsend value and add to report" << std::endl;
+    std::cout << "StreamerInceptionStepper -- fix trapz tracking for electrons with halt integration" << std::endl;
+    std::cout << "StreamerInceptionStepper -- how to compute Uinc when truncating the integration...?" << std::endl;
+    std::cout << "StreamerInceptionStepper -- fix remnant alpha*dx when colliding with bndry" << std::endl;
+    std::cout << "StreamerInceptionStepper -- how to halt ion tracking...?" << std::endl;
   }
   m_evaluateTownsend = true;
 #endif
@@ -2328,7 +2323,12 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
           const bool negativeAlpha   = alphaEff <= 0.0;
           const bool haltIntegration = p.weight() > m_inceptionK && !m_fullIntegration;
 
-          if (negativeAlpha || haltIntegration) {
+          if (negativeAlpha) {
+            processedParticles.transfer(lit);
+          }
+          else if (haltIntegration) {
+            p.weight() = m_inceptionK;
+
             processedParticles.transfer(lit);
           }
           else {
@@ -2339,19 +2339,21 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
             const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
             const bool insideEB      = this->particleInsideEB(newPos);
 
-            if (outsideDomain || insideEB) {
-              if (insideEB) {
-                const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
-                Real                         s       = 0.0;
+            if (insideEB) {
+              const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
 
-                const bool intersect = ParticleOps::ebIntersectionBisect(impFunc, x, newPos, spaceStep, s);
+              // Compute the intersection point between the particle and the EB and add the remainder of the integrand.
+              Real       s         = 0.0;
+              const bool intersect = ParticleOps::ebIntersectionBisect(impFunc, x, newPos, spaceStep, s);
 
-                if (intersect) {
-                  const Real delta = (newPos - x).vectorLength();
+              if (intersect) {
+                const Real delta = (newPos - x).vectorLength();
 
-                  p.weight() = p.weight() + s * delta * alphaEff;
-                }
+                p.weight() = p.weight() + s * delta * alphaEff;
               }
+              processedParticles.transfer(lit);
+            }
+            else if (outsideDomain) {
               processedParticles.transfer(lit);
             }
             else {

@@ -164,7 +164,7 @@ Vessel.live_shroom   = false          # Mushroom is live or not
 # ====================================================================================================
 StreamerInceptionStepper.verbosity        = -1                      ## Chattiness.
 StreamerInceptionStepper.profile          = false                   ## Turn on/off run-time profiling
-StreamerInceptionStepper.full_integration = false                   ## Turn on/off full integration
+StreamerInceptionStepper.full_integration = true                    ## Turn on/off full integration
 StreamerInceptionStepper.mode             = stationary              ## Mode (stationary or transient)
 StreamerInceptionStepper.inception_alg    = trapz alpha 0.25        ## Integration algorithm for inception integral.
 StreamerInceptionStepper.output_file      = report.txt              ## Output file

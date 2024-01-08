@@ -189,11 +189,11 @@ MechanicalShaft.dielectric.profile.circular.profile_smooth       = 200E-6  # Pro
 # ====================================================================================================
 StreamerInceptionStepper.verbosity        = -1                      ## Chattiness.
 StreamerInceptionStepper.profile          = false                   ## Turn on/off run-time profiling
-StreamerInceptionStepper.full_integration = false                   ## Use full reconstruction of K-region or not
+StreamerInceptionStepper.full_integration = true                    ## Use full reconstruction of K-region or not
 StreamerInceptionStepper.mode             = stationary              ## Mode (stationary or transient)
-StreamerInceptionStepper.inception_alg    = euler alpha 1.0        ## Integration algorithm and step size selection
+StreamerInceptionStepper.inception_alg    = euler alpha 0.1         ## Integration algorithm and step size selection
 StreamerInceptionStepper.output_file      = report.txt              ## Output file
-StreamerInceptionStepper.K_inception      = 12                      ## User-specified inception value
+StreamerInceptionStepper.K_inception      = 10                      ## User-specified inception value
 StreamerInceptionStepper.plt_vars         = alpha eta K Uinc bg_rate emission poisson townsend ## Plot variables
 
 # Static mode
