@@ -56,6 +56,12 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
               << std::endl;
     std::cout << "StreamerInceptinoStepper::StreamerInceptionStepper() -- get max Townsend value and add to report"
               << std::endl;
+    std::cout
+      << "StreamerInceptinoStepper::StreamerInceptionStepper() -- fix trapz tracking for electrons with halt integration"
+      << std::endl;
+    std::cout
+      << "StreamerInceptinoStepper::StreamerInceptionStepper() -- fix remnant alpha*dx when colliding with bndry"
+      << std::endl;
   }
   m_evaluateTownsend = true;
 #endif
@@ -2334,6 +2340,18 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
             const bool insideEB      = this->particleInsideEB(newPos);
 
             if (outsideDomain || insideEB) {
+              if (insideEB) {
+                const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
+                Real                         s       = 0.0;
+
+                const bool intersect = ParticleOps::ebIntersectionBisect(impFunc, x, newPos, spaceStep, s);
+
+                if (intersect) {
+                  const Real delta = (newPos - x).vectorLength();
+
+                  p.weight() = p.weight() + s * delta * alphaEff;
+                }
+              }
               processedParticles.transfer(lit);
             }
             else {
@@ -2430,7 +2448,7 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
         break;
       }
       case StepSizeMethod::Alpha: {
-        spaceStep = dx;
+        spaceStep = m_stepSizeFactor * dx;
         alphaStep = m_stepSizeFactor;
 
         break;
@@ -2632,6 +2650,11 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
         DataOps::copy(m_secondaryTownsendPlus, gamma, Interval(i, i), Interval(0, 0));
       }
       else {
+        EBAMRCellData Kminu = m_amr->slice(m_inceptionIntegralMinu, Interval(i, i));
+        DataOps::copy(expK, Kminu);
+        DataOps::compute(expK, exponentiate);
+        DataOps::multiply(gamma, expK);
+
         DataOps::copy(m_secondaryTownsendMinu, gamma, Interval(i, i), Interval(0, 0));
       }
     }
