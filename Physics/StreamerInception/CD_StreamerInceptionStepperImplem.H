@@ -53,11 +53,8 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
 #if 1
   if (procID() == 0) {
     std::cout << "StreamerInceptionStepper -- implement trapz tracking for ions" << std::endl;
-    std::cout << "StreamerInceptionStepper -- get max Townsend value and add to report" << std::endl;
-    std::cout << "StreamerInceptionStepper -- fix trapz tracking for electrons with halt integration" << std::endl;
-    std::cout << "StreamerInceptionStepper -- how to compute Uinc when truncating the integration...?" << std::endl;
-    std::cout << "StreamerInceptionStepper -- Combine Uinc with Townsend?" << std::endl;
     std::cout << "StreamerInceptionStepper -- how to halt ion tracking...?" << std::endl;
+    std::cout << "StreamerInceptionStepper -- get max Townsend value and add to report" << std::endl;
   }
 
 #endif
@@ -2771,6 +2768,13 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
         DataOps::multiply(gamma, expK);
 
         DataOps::copy(m_townsendCriterionPlus, gamma, Interval(i, i), Interval(0, 0));
+
+        Real minT = 0.0;
+        Real maxT = 0.0;
+
+        DataOps::getMaxMin(maxT, minT, gamma, 0);
+
+        m_maxTPlus.emplace_back(maxT);
       }
       else {
         EBAMRCellData Kminu = m_amr->slice(m_inceptionIntegralMinu, Interval(i, i));
@@ -2779,6 +2783,13 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
         DataOps::multiply(gamma, expK);
 
         DataOps::copy(m_townsendCriterionMinu, gamma, Interval(i, i), Interval(0, 0));
+
+        Real minT = 0.0;
+        Real maxT = 0.0;
+
+        DataOps::getMaxMin(maxT, minT, gamma, 0);
+
+        m_maxTMinu.emplace_back(maxT);
       }
     }
   }
@@ -4121,49 +4132,52 @@ StreamerInceptionStepper<P, F, C>::writeReportStationary() const noexcept
 
     std::ofstream output(m_outputFile, std::ofstream::out);
 
+    const std::string lineBreak = "# " + std::string(178, '=');
+
     // clang-format off
-    output << "# ==================================================================================================================================" << "\n";
+    output << lineBreak << "\n";
     if (std::isnan(UIncPlus.first) || std::isnan(UIncMinu.first)) {
       output << "# Could not compute inception voltage\n";
     }
     else {
       if(m_fullIntegration){
-      output << "# Inception voltage(+) = " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
-      output << "# Inception voltage(-) = " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";
+	output << "# Inception voltage(+) = " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
+	output << "# Inception voltage(-) = " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";
       }
       else{
-      output << "# Inception voltage(+) >= " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
-      output << "# Inception voltage(-) >= " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";
+	output << "# Inception voltage(+) >= " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
+	output << "# Inception voltage(-) >= " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";
       }      
     }
-    
-    output << "# ==================================================================================================================================" << "\n";    
+
+
+    output << lineBreak << "\n";
     output << left << setw(15) << setfill(' ') << "# +/- Voltage";
     output << left << setw(15) << setfill(' ') << "Max K(+)";
     output << left << setw(15) << setfill(' ') << "Max K(-)";
+    output << left << setw(20) << setfill(' ') << "Max T(+)";
+    output << left << setw(20) << setfill(' ') << "Max T(-)";    
     output << left << setw(20) << setfill(' ') << "Crit. vol(+)";
     output << left << setw(20) << setfill(' ') << "Crit. vol(-)";
     output << left << setw(20) << setfill(' ') << "Crit. area(+)";
     output << left << setw(20) << setfill(' ') << "Crit. area(-)";
-    output << left << setw(20) << setfill(' ') << "Ionization vol.";
-    output << left << setw(20) << setfill(' ') << "Rdot (+)";
-    output << left << setw(20) << setfill(' ') << "Rdot (-)" << "\n";
-    output << "# ==================================================================================================================================" << "\n";        
+    output << left << setw(20) << setfill(' ') << "Ionization vol." << "\n";
+    output << lineBreak << "\n";        
 
     for (int i = 0; i < m_voltageSweeps.size(); i++) {
       output << left << setw(15) << setfill(' ') << m_voltageSweeps[i];
       output << left << setw(15) << setfill(' ') << m_maxKPlus[i];
       output << left << setw(15) << setfill(' ') << m_maxKMinu[i];
+      output << left << setw(20) << setfill(' ') << m_maxTPlus[i];
+      output << left << setw(20) << setfill(' ') << m_maxTMinu[i];      
       output << left << setw(20) << setfill(' ') << m_criticalVolumePlus[i];
       output << left << setw(20) << setfill(' ') << m_criticalVolumeMinu[i];
       output << left << setw(20) << setfill(' ') << m_criticalAreaPlus[i];
       output << left << setw(20) << setfill(' ') << m_criticalAreaMinu[i];
       output << left << setw(20) << setfill(' ') << m_ionizationVolume[i];
-      output << left << setw(20) << setfill(' ') << m_RdotPlus[i];
-      output << left << setw(20) << setfill(' ') << m_RdotMinu[i];
       output << endl;
     }
-    output << "# ==================================================================================================================================" << "\n";
+    output << lineBreak << "\n";
     // clang-format on
 #ifdef CH_MPI
   }

@@ -194,7 +194,7 @@ StreamerInceptionStepper.mode             = stationary              ## Mode (sta
 StreamerInceptionStepper.eval_townsend    = true                    ## Evaluate Townsend criterion or not (only for stationary)
 StreamerInceptionStepper.inception_alg    = trapz alpha 0.5         ## Integration algorithm and step size selection
 StreamerInceptionStepper.output_file      = report.txt              ## Output file
-StreamerInceptionStepper.K_inception      = 10                      ## User-specified inception value
+StreamerInceptionStepper.K_inception      = 14                      ## User-specified inception value
 StreamerInceptionStepper.plt_vars         = alpha eta K Uinc bg_rate emission poisson townsend ## Plot variables
 
 # Static mode
