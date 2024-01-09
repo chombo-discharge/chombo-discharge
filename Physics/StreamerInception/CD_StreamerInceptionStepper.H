@@ -885,6 +885,13 @@ namespace Physics {
       townsendTrackEuler(const Real& a_voltage) noexcept;
 
       /*!
+	@brief Track particles (positive ions) using a trapezoidal rule and check if the collide with a cathode
+	@param[in] a_voltage Voltage multiplier
+      */
+      virtual void
+      townsendTrackTrapezoidal(const Real& a_voltage) noexcept;
+
+      /*!
 	@brief Compute integral_Vcr(dne/dt * (1 - eta/alpha) dV)
 	@param[in] a_voltage Voltage multiplier. 
       */

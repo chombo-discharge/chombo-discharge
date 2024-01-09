@@ -52,9 +52,7 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
 
 #if 1
   if (procID() == 0) {
-    std::cout << "StreamerInceptionStepper -- implement trapz tracking for ions" << std::endl;
     std::cout << "StreamerInceptionStepper -- how to halt ion tracking...?" << std::endl;
-    std::cout << "StreamerInceptionStepper -- get max Townsend value and add to report" << std::endl;
   }
 
 #endif
@@ -2732,9 +2730,7 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
         break;
       }
       case IntegrationAlgorithm::Trapezoidal: {
-        //      this->townsendTrackTrapezoidal(m_voltageSweeps[i]);
-        this->townsendTrackEuler(m_voltageSweeps[i]);
-        MayDay::Warning("StreamerInceptionStepper::computeTownsendCriterion -- trapz not supported (yet)");
+        this->townsendTrackTrapezoidal(m_voltageSweeps[i]);
 
         break;
       }
@@ -2919,10 +2915,209 @@ StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noe
   }
 
   if (particlesBefore != particlesAfter) {
-    MayDay::Warning("StreamerInceptionStepper::inceptionIntegrateEuler - lost/gained particles!");
+    MayDay::Warning("StreamerInceptionStepper::townsendTrackEuler - lost/gained particles!");
   }
   if (outcastsBefore != outcastsAfter) {
-    MayDay::Warning("StreamerInceptionStepper::inceptionIntegrateEuler - lost/gained outcast particles!");
+    MayDay::Warning("StreamerInceptionStepper::townsendTrackEuler - lost/gained outcast particles!");
+  }
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltage) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::townsendTrackTrapezoidal");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::townsendTrackTrapezoidal" << endl;
+  }
+
+  // TLDR: We move the particle using Heun's method.
+  //
+  //          p^(k+1) = p^k + 0.5 * dt * [v(p^k) + v(p^l)]
+  //
+  //       where p^l = p^k + dt * v(p^k). We will set dt = d/|v(p^k)|.
+
+  const RealVect probLo = m_amr->getProbLo();
+  const RealVect probHi = m_amr->getProbHi();
+
+  // Allocate a data holder for holding the processed particles. This
+  // will be faster because then we only have to iterate through the
+  // particles that are actually still moving.
+  ParticleContainer<P> amrProcessedParticles;
+  m_amr->allocate(amrProcessedParticles, m_realm);
+
+  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
+
+  m_tracerParticleSolver->remap();
+  m_tracerParticleSolver->interpolateVelocities();
+
+  size_t outcastsBefore  = 0;
+  size_t particlesBefore = 0;
+
+  if (m_debug) {
+    outcastsBefore  = amrParticles.getNumberOfOutcastParticlesGlobal();
+    particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
+  }
+
+  while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
+
+    // Euler stage.
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Real dx = m_amr->getDx()[lvl];
+
+      Real spaceStep = std::numeric_limits<Real>::max();
+      Real alphaStep = std::numeric_limits<Real>::max();
+
+      switch (m_stepSizeMethod) {
+      case StepSizeMethod::Fixed: {
+        spaceStep = m_stepSizeFactor;
+
+        break;
+      }
+      case StepSizeMethod::Dx: {
+        spaceStep = m_stepSizeFactor * dx;
+
+        break;
+      }
+      case StepSizeMethod::Alpha: {
+        spaceStep = m_stepSizeFactor * dx;
+
+        break;
+      }
+      default: {
+        MayDay::Error("StreamerInceptionStepper::townsendTrackTrapezoidal - logic bust");
+
+        break;
+      }
+      }
+
+      // First stage
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+        List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
+        List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
+
+        for (ListIterator<P> lit(solverParticles); lit.ok();) {
+          P& p = lit();
+
+          const RealVect x        = p.position();
+          const RealVect vel      = p.velocity();
+          const Real     v        = vel.vectorLength();
+          const Real     E        = std::abs(a_voltage * v);
+          const Real     alpha    = m_alpha(E, x);
+          const Real     eta      = m_eta(E, x);
+          const Real     alphaEff = alpha - eta;
+
+          // Compute a time step that we will use for the integration.
+          const Real     deltaX = spaceStep;
+          const Real     dt     = deltaX / v;
+          const RealVect newPos = p.position() + vel * dt;
+
+          const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
+          const bool insideEB      = this->particleInsideEB(newPos);
+
+          if (insideEB) {
+            p.weight() = m_secondaryEmission(E, x);
+
+            processedParticles.transfer(lit);
+          }
+          else if (outsideDomain || alphaEff < 0.0) {
+            processedParticles.transfer(lit);
+          }
+          else {
+            // Do an Euler step, storaging alpha(p^k), v(p^k), and the time step size.
+            p.template real<0>() = alphaEff;
+            p.template real<1>() = dt;
+            p.template vect<1>() = vel;
+
+            p.position() = newPos;
+
+            ++lit;
+          }
+        }
+      }
+    }
+
+    // Remap and update velocities.
+    m_tracerParticleSolver->remap();
+    m_tracerParticleSolver->interpolateVelocities();
+
+    // Second stage.
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+        List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
+        List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
+
+        for (ListIterator<P> lit(solverParticles); lit.ok();) {
+
+          P& p = lit();
+
+          const Real     dt  = p.template real<1>();
+          const RealVect vk  = p.template vect<1>();
+          const RealVect vk1 = p.velocity();
+          const RealVect x   = p.position();
+          const Real     E   = std::abs(a_voltage * vk1.vectorLength());
+
+          // Note the weird subtraction since p.position() was updated
+          // to p^k + dt * v^k.
+          const RealVect oldPos = p.position() - dt * vk;
+          const RealVect newPos = p.position() + 0.5 * dt * (vk1 - vk);
+
+          // Compute new alpha.
+          const Real alphak  = p.template real<0>();
+          const Real alphak1 = m_alpha(E, x) - m_eta(E, x);
+
+          // Stop integration for particles that move into regions alpha < 0.0,
+          // inside the EB or outside of the domain.
+          const bool negativeAlpha = (alphak + alphak1) <= 0.0;
+          const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
+          const bool insideEB      = this->particleInsideEB(newPos);
+
+          // If the particle wound up inside the EB we finish off the integration with a partial Euler step
+          Real s = 0.0;
+
+          if (negativeAlpha) {
+            processedParticles.transfer(lit);
+          }
+          else if (insideEB) {
+            p.weight() = m_secondaryEmission(E, oldPos);
+
+            processedParticles.transfer(lit);
+          }
+          else if (negativeAlpha || outsideDomain) {
+            processedParticles.transfer(lit);
+          }
+          else {
+            p.position() = newPos;
+
+            ++lit;
+          }
+        }
+      }
+    }
+
+    // Remap and update velocities.
+    m_tracerParticleSolver->remap();
+    m_tracerParticleSolver->interpolateVelocities();
+  }
+
+  // Copy processed particles over to the solver particles.
+  ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);
+
+  this->rewindTracerParticles();
+
+  size_t outcastsAfter  = 0;
+  size_t particlesAfter = 0;
+
+  if (m_debug) {
+    outcastsAfter  = amrParticles.getNumberOfOutcastParticlesGlobal();
+    particlesAfter = amrParticles.getNumberOfValidParticlesGlobal();
+  }
+
+  if (particlesBefore != particlesAfter) {
+    MayDay::Warning("StreamerInceptionStepper::townsendTrackTrapezoidal - lost/gained particles!");
+  }
+  if (outcastsBefore != outcastsAfter) {
+    MayDay::Warning("StreamerInceptionStepper::townsendTrackTrapezoidal - lost/gained outcast particles!");
   }
 }
 
