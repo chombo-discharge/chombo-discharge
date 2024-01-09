@@ -54,7 +54,6 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   if (procID() == 0) {
     std::cout << "StreamerInceptionStepper -- how to halt ion tracking...?" << std::endl;
   }
-
 #endif
 
   this->parseOptions();
@@ -3589,6 +3588,8 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
       Real streamerInc = std::numeric_limits<Real>::quiet_NaN();
       Real townsendInc = std::numeric_limits<Real>::quiet_NaN();
 
+      bool foundInception = false;
+
       // Streamer criterion
       for (size_t i = 0; i < K.size() - 1; i++) {
         if (K[i] <= Kinc && K[i + 1] > Kinc) {
@@ -3617,7 +3618,22 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
         }
       }
 
-      return std::min(streamerInc, townsendInc);
+      Real Uinc;
+
+      if (std::isnan(streamerInc) && std::isnan(townsendInc)) {
+        Uinc = std::numeric_limits<Real>::quiet_NaN();
+      }
+      else if (std::isnan(streamerInc) && !std::isnan(townsendInc)) {
+        Uinc = townsendInc;
+      }
+      else if (!std::isnan(streamerInc) && std::isnan(townsendInc)) {
+        Uinc = streamerInc;
+      }
+      else {
+        Uinc = std::min(streamerInc, townsendInc);
+      }
+
+      return Uinc;
     };
 
     // Same functionality as above, but without interpolation.
@@ -3645,7 +3661,22 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
         }
       }
 
-      return std::min(streamerInc, townsendInc);
+      Real Uinc;
+
+      if (std::isnan(streamerInc) && std::isnan(townsendInc)) {
+        Uinc = std::numeric_limits<Real>::quiet_NaN();
+      }
+      else if (std::isnan(streamerInc) && !std::isnan(townsendInc)) {
+        Uinc = townsendInc;
+      }
+      else if (!std::isnan(streamerInc) && std::isnan(townsendInc)) {
+        Uinc = streamerInc;
+      }
+      else {
+        Uinc = std::min(streamerInc, townsendInc);
+      }
+
+      return Uinc;
     };
 
     // Iterate through m_inceptionIntegral data and calculate inception voltage.

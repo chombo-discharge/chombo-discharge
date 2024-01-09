@@ -198,8 +198,8 @@ StreamerInceptionStepper.K_inception      = 14                      ## User-spec
 StreamerInceptionStepper.plt_vars         = alpha eta K Uinc bg_rate emission poisson townsend ## Plot variables
 
 # Static mode
-StreamerInceptionStepper.voltage_lo       = 50E3                   ## Low voltage multiplier
-StreamerInceptionStepper.voltage_hi       = 150E3                   ## Highest voltage multiplier
+StreamerInceptionStepper.voltage_lo       = 10E3                   ## Low voltage multiplier
+StreamerInceptionStepper.voltage_hi       = 90E3                   ## Highest voltage multiplier
 StreamerInceptionStepper.voltage_steps    = 9                     ## Number of voltage steps
 
 # Dynamic mode
