@@ -310,6 +310,9 @@ Driver::getGeometryTags()
       };
 
       BoxLoops::loop(vofit, kernel);
+
+      // Always refine multi-valued cells.
+      m_geomTags[lvl] |= ebisbox.getMultiCells(box);
     }
   }
 
