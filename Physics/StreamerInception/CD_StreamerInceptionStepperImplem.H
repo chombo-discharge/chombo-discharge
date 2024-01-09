@@ -48,9 +48,10 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   m_profile             = false;
   m_debug               = false;
   m_fullIntegration     = false;
+  m_evaluateTownsend    = false;
+
 #if 1
   if (procID() == 0) {
-    std::cout << "StreamerInceptionStepper -- remember to add townsend track as input parameter" << std::endl;
     std::cout << "StreamerInceptionStepper -- implement trapz tracking for ions" << std::endl;
     std::cout << "StreamerInceptionStepper -- get max Townsend value and add to report" << std::endl;
     std::cout << "StreamerInceptionStepper -- fix trapz tracking for electrons with halt integration" << std::endl;
@@ -59,7 +60,7 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
     std::cout << "StreamerInceptionStepper -- fix remnant alpha*dx when colliding with bndry" << std::endl;
     std::cout << "StreamerInceptionStepper -- how to halt ion tracking...?" << std::endl;
   }
-  m_evaluateTownsend = true;
+
 #endif
 
   this->parseOptions();
@@ -395,7 +396,7 @@ StreamerInceptionStepper<P, F, C>::parseVoltages() noexcept
   pp.get("voltage_hi", voltageHi);
   pp.get("voltage_steps", voltageSteps);
   pp.get("K_inception", m_inceptionK);
-  pp.get("evaluate_townsend", m_evaluateTownsend);
+  pp.get("eval_townsend", m_evaluateTownsend);
 
   // Define voltages
   const Real deltaV = voltageHi - voltageLo;
