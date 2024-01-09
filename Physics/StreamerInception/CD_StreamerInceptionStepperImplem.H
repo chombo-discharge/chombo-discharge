@@ -2341,22 +2341,21 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
             const Real     deltaX = std::min(spaceStep, alphaStep / alphaEff);
             const Real     dt     = deltaX / v;
             const RealVect newPos = p.position() + dt * vel;
+            const Real     delta  = (newPos - x).vectorLength();
 
             const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
             const bool insideEB      = this->particleInsideEB(newPos);
 
             if (insideEB) {
+              // If the particle struck the EB we finish off the integration with a partial step
               const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
 
-              // Compute the intersection point between the particle and the EB and add the remainder of the integrand.
-              Real       s         = 0.0;
-              const bool intersect = ParticleOps::ebIntersectionBisect(impFunc, x, newPos, spaceStep, s);
+              Real s = 0.0;
 
-              if (intersect) {
-                const Real delta = (newPos - x).vectorLength();
-
+              if (ParticleOps::ebIntersectionBisect(impFunc, x, newPos, spaceStep, s)) {
                 p.weight() = p.weight() + s * delta * alphaEff;
               }
+
               processedParticles.transfer(lit);
             }
             else if (outsideDomain) {
@@ -2495,11 +2494,24 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
             const Real     deltaX = std::min(spaceStep, alphaStep / alphaEff);
             const Real     dt     = deltaX / v;
             const RealVect newPos = p.position() + sgn * vel * dt;
+            const Real     delta  = (newPos - x).vectorLength();
 
             const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
             const bool insideEB      = this->particleInsideEB(newPos);
 
-            if (outsideDomain || insideEB) {
+            if (insideEB) {
+              // If particle wound up inside the EB we finish off the integration with a partial Euler step.
+              const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
+
+              Real s = 0.0;
+
+              if (ParticleOps::ebIntersectionBisect(impFunc, x, newPos, spaceStep, s)) {
+                p.weight() = p.weight() + s * delta * alphaEff;
+              }
+
+              processedParticles.transfer(lit);
+            }
+            else if (outsideDomain) {
               processedParticles.transfer(lit);
             }
             else {
@@ -2523,6 +2535,35 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
 
     // Second stage.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Real dx = m_amr->getDx()[lvl];
+
+      Real spaceStep = std::numeric_limits<Real>::max();
+      Real alphaStep = std::numeric_limits<Real>::max();
+
+      switch (m_stepSizeMethod) {
+      case StepSizeMethod::Fixed: {
+        spaceStep = m_stepSizeFactor;
+
+        break;
+      }
+      case StepSizeMethod::Dx: {
+        spaceStep = m_stepSizeFactor * dx;
+
+        break;
+      }
+      case StepSizeMethod::Alpha: {
+        spaceStep = m_stepSizeFactor * dx;
+        alphaStep = m_stepSizeFactor;
+
+        break;
+      }
+      default: {
+        MayDay::Error("StreamerInceptionStepper::inceptionIntegrateEuler - logic bust");
+
+        break;
+      }
+      }
+
       for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
         List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
         List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
@@ -2539,12 +2580,13 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
 
           // Note the weird subtraction since p.position() was updated
           // to p^k + dt * v^k.
+          const RealVect oldPos = p.position() - dt * vk;
           const RealVect newPos = p.position() + 0.5 * sgn * dt * (vk1 - vk);
 
           // Compute new alpha.
           const Real alphak  = p.template real<0>();
           const Real alphak1 = m_alpha(E, x) - m_eta(E, x);
-          const Real d       = 0.5 * dt * (vk + vk1).vectorLength();
+          const Real delta   = 0.5 * dt * (vk + vk1).vectorLength();
 
           // Stop integration for particles that move into regions alpha < 0.0,
           // inside the EB or outside of the domain.
@@ -2552,12 +2594,27 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
-          if (negativeAlpha || outsideDomain || insideEB) {
+          if (negativeAlpha) {
+            processedParticles.transfer(lit);
+          }
+          else if (insideEB) {
+            // If the particle wound up insid ethe EB we finish off the integration with a partial Euler step
+            const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
+
+            Real s = 0.0;
+
+            if (ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, spaceStep, s)) {
+              p.weight() = p.weight() + s * delta * alphak;
+            }
+
+            processedParticles.transfer(lit);
+          }
+          else if (outsideDomain) {
             processedParticles.transfer(lit);
           }
           else {
             p.position() = newPos;
-            p.weight()   = p.weight() + 0.5 * d * (alphak + alphak1);
+            p.weight()   = p.weight() + 0.5 * delta * (alphak + alphak1);
 
             ++lit;
           }
