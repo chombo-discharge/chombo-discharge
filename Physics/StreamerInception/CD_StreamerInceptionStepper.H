@@ -512,14 +512,14 @@ namespace Physics {
       EBAMRCellData m_inceptionVoltageMinu;
 
       /*!
-	@brief Secondary emission coefficient for remnant positive ions
+	@brief Townsend criterion for starting positive ions
       */
-      EBAMRCellData m_secondaryTownsendPlus;
+      EBAMRCellData m_townsendCriterionPlus;
 
       /*!
-	@brief Secondary emission coefficient for remnant positive ions. 
+	@brief Townsend criterion for starting positive ions
       */
-      EBAMRCellData m_secondaryTownsendMinu;
+      EBAMRCellData m_townsendCriterionMinu;
 
       /*! 
 	@brief Max K value for every voltage
