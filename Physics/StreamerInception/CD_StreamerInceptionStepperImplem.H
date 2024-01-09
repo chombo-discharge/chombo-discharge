@@ -55,6 +55,7 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
     std::cout << "StreamerInceptionStepper -- get max Townsend value and add to report" << std::endl;
     std::cout << "StreamerInceptionStepper -- fix trapz tracking for electrons with halt integration" << std::endl;
     std::cout << "StreamerInceptionStepper -- how to compute Uinc when truncating the integration...?" << std::endl;
+    std::cout << "StreamerInceptionStepper -- Combine Uinc with Townsend?" << std::endl;
     std::cout << "StreamerInceptionStepper -- fix remnant alpha*dx when colliding with bndry" << std::endl;
     std::cout << "StreamerInceptionStepper -- how to halt ion tracking...?" << std::endl;
   }
@@ -394,6 +395,7 @@ StreamerInceptionStepper<P, F, C>::parseVoltages() noexcept
   pp.get("voltage_hi", voltageHi);
   pp.get("voltage_steps", voltageSteps);
   pp.get("K_inception", m_inceptionK);
+  pp.get("evaluate_townsend", m_evaluateTownsend);
 
   // Define voltages
   const Real deltaV = voltageHi - voltageLo;
@@ -2035,6 +2037,9 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
 
   switch (m_mode) {
   case Mode::Stationary: {
+
+    // Must always use full integration
+    m_fullIntegration = true;
 
     this->computeInceptionIntegralStationary();
     this->computeInceptionVoltageVolume();
