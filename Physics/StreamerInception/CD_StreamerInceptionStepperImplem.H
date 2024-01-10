@@ -53,6 +53,8 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
 #if 1
   if (procID() == 0) {
     std::cout << "StreamerInceptionStepper -- how to halt ion tracking...?" << std::endl;
+    std::cout << "StreamerInceptionStepper -- check that Townsend can be turned off" << std::endl;
+    std::cout << "StreamerInceptionStepper -- theres a bug in TownsendTrackTrapezoidal" << std::endl;
   }
 #endif
 
@@ -2517,7 +2519,7 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
 
           // If particle hit the EB or domain we finish off with a partial Euler step
           Real s = 0.0;
-          if (alphaEff <= 0.0) {
+          if (alphaEff < 0.0) {
             processedParticles.transfer(lit);
           }
           else if (insideEB) {
@@ -2611,7 +2613,7 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
 
           // Stop integration for particles that move into regions alpha < 0.0,
           // inside the EB or outside of the domain.
-          const bool negativeAlpha = (alphak + alphak1) <= 0.0;
+          const bool negativeAlpha = (alphak + alphak1) < 0.0;
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
@@ -3011,15 +3013,16 @@ StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltag
           const Real     dt     = deltaX / v;
           const RealVect newPos = p.position() + vel * dt;
 
+          const bool negativeAlpha = alphaEff < 0.0;
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
-          if (insideEB) {
+          if (insideEB && !negativeAlpha) {
             p.weight() = m_secondaryEmission(E, x);
 
             processedParticles.transfer(lit);
           }
-          else if (outsideDomain || alphaEff < 0.0) {
+          else if (outsideDomain || negativeAlpha) {
             processedParticles.transfer(lit);
           }
           else {
@@ -3067,17 +3070,14 @@ StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltag
 
           // Stop integration for particles that move into regions alpha < 0.0,
           // inside the EB or outside of the domain.
-          const bool negativeAlpha = (alphak + alphak1) <= 0.0;
+          const bool negativeAlpha = (alphak + alphak1) < 0.0;
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
           // If the particle wound up inside the EB we finish off the integration with a partial Euler step
           Real s = 0.0;
 
-          if (negativeAlpha) {
-            processedParticles.transfer(lit);
-          }
-          else if (insideEB) {
+          if (insideEB && !negativeAlpha) {
             p.weight() = m_secondaryEmission(E, oldPos);
 
             processedParticles.transfer(lit);
