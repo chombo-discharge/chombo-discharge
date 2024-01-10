@@ -52,7 +52,7 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
 
 #if 1
   if (procID() == 0) {
-    std::cout << "StreamerInceptionStepper -- how to halt ion tracking...?" << std::endl;
+    std::cout << "StreamerInceptionStepper -- how to halt ion tracking...? Can we do K-evaluations...?" << std::endl;
   }
 #endif
 
@@ -403,6 +403,10 @@ StreamerInceptionStepper<P, F, C>::parseVoltages() noexcept
   m_voltageSweeps.push_back(voltageHi);
   m_maxTPlus.resize(m_voltageSweeps.size(), 0.0);
   m_maxTMinu.resize(m_voltageSweeps.size(), 0.0);
+
+  if (m_evaluateTownsend && m_mode == Mode::Transient) {
+    MayDay::Warning("StreamerInceptionStepper -- combined Townsend tracking and transient mode is not (yet) supported");
+  }
 }
 
 template <typename P, typename F, typename C>
