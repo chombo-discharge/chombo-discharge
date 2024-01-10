@@ -5,7 +5,7 @@ AmrMesh.lo_corner        = -7E-2 0E-2 -7E-2    # Low corner of problem domain
 AmrMesh.hi_corner        =  7E-2 7E-2  7E-2    # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 64 128  # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 7           # Maximum amr depth
+AmrMesh.max_amr_depth    = 8           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -148,12 +148,12 @@ MechanicalShaft.use_dielectric = true # Turn on/off dielectric
 # Electrode settings
 --------------------
 MechanicalShaft.electrode.orientation     = "+y"  # Electrode orientation
-MechanicalShaft.electrode.translate       = 2E-3 0 0 # Electrode translation after rotation
+MechanicalShaft.electrode.translate       = 2.1E-3 0 0 # Electrode translation after rotation
 MechanicalShaft.electrode.live            = true  # Live electrode or not
 MechanicalShaft.electrode.length          = 4.00123E-2   # Electrode length 
 MechanicalShaft.electrode.outer.radius    = 2.001E-2  # Electrode outer radius
 MechanicalShaft.electrode.inner.radius    = 1.7500001E-2   # Electrode inner radius	
-MechanicalShaft.electrode.curvature = 100E-6   # Electrode curvature curvature
+MechanicalShaft.electrode.curvature = 200E-6   # Electrode curvature curvature
 
 
 # Main dielectric settings
@@ -194,13 +194,13 @@ StreamerInceptionStepper.mode             = stationary              ## Mode (sta
 StreamerInceptionStepper.eval_townsend    = true                    ## Evaluate Townsend criterion or not (only for stationary)
 StreamerInceptionStepper.inception_alg    = trapz alpha 0.5         ## Integration algorithm and step size selection
 StreamerInceptionStepper.output_file      = report.txt              ## Output file
-StreamerInceptionStepper.K_inception      = 10                      ## User-specified inception value
+StreamerInceptionStepper.K_inception      = 12                      ## User-specified inception value
 StreamerInceptionStepper.plt_vars         = alpha eta K Uinc bg_rate emission poisson townsend ## Plot variables
 
 # Static mode
 StreamerInceptionStepper.voltage_lo       = 20E3                   ## Low voltage multiplier
-StreamerInceptionStepper.voltage_hi       = 60E3                   ## Highest voltage multiplier
-StreamerInceptionStepper.voltage_steps    = 39                     ## Number of voltage steps
+StreamerInceptionStepper.voltage_hi       = 40E3                   ## Highest voltage multiplier
+StreamerInceptionStepper.voltage_steps    = 9                      ## Number of voltage steps
 
 # Dynamic mode
 StreamerInceptionStepper.ion_transport = true                       ## Turn on/off ion transport
@@ -218,7 +218,7 @@ StreamerInceptionStepper.max_dt_growth = 0.05                       ## Maximum r
 # ====================================================================================================
 StreamerInceptionTagger.verbosity   = -1    # Tagger chattiness. 
 StreamerInceptionTagger.buffer      = 0     # Grown buffer around flagged cells
-StreamerInceptionTagger.max_voltage = 60E3   # Maximum applied voltage 
+StreamerInceptionTagger.max_voltage = 50E3   # Maximum applied voltage 
 StreamerInceptionTagger.ref_alpha   = 1.0   # Refinement curvature criterion. Lower => more mesh
 StreamerInceptionTagger.plot        = false # Plot tagging field or not. 
 

@@ -53,8 +53,6 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
 #if 1
   if (procID() == 0) {
     std::cout << "StreamerInceptionStepper -- how to halt ion tracking...?" << std::endl;
-    std::cout << "StreamerInceptionStepper -- check that Townsend can be turned off" << std::endl;
-    std::cout << "StreamerInceptionStepper -- theres a bug in TownsendTrackTrapezoidal" << std::endl;
   }
 #endif
 
@@ -208,13 +206,11 @@ StreamerInceptionStepper<P, F, C>::allocate()
       DataOps::setValue(m_detachment, 0.0);
     }
 
-    if (m_evaluateTownsend) {
-      m_amr->allocate(m_townsendCriterionPlus, m_realm, m_phase, m_voltageSweeps.size());
-      m_amr->allocate(m_townsendCriterionMinu, m_realm, m_phase, m_voltageSweeps.size());
+    m_amr->allocate(m_townsendCriterionPlus, m_realm, m_phase, m_voltageSweeps.size());
+    m_amr->allocate(m_townsendCriterionMinu, m_realm, m_phase, m_voltageSweeps.size());
 
-      DataOps::setValue(m_townsendCriterionPlus, 0.0);
-      DataOps::setValue(m_townsendCriterionMinu, 0.0);
-    }
+    DataOps::setValue(m_townsendCriterionPlus, 0.0);
+    DataOps::setValue(m_townsendCriterionMinu, 0.0);
 
     DataOps::setValue(m_inceptionIntegralPlus, 0.0);
     DataOps::setValue(m_inceptionIntegralMinu, 0.0);
@@ -405,6 +401,8 @@ StreamerInceptionStepper<P, F, C>::parseVoltages() noexcept
   }
 
   m_voltageSweeps.push_back(voltageHi);
+  m_maxTPlus.resize(m_voltageSweeps.size(), 0.0);
+  m_maxTMinu.resize(m_voltageSweeps.size(), 0.0);
 }
 
 template <typename P, typename F, typename C>
@@ -1637,10 +1635,8 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
       m_amr->reallocate(m_emissionRatesMinu, m_phase, a_lmin);
     }
 
-    if (m_evaluateTownsend) {
-      m_amr->reallocate(m_townsendCriterionPlus, m_phase, a_lmin);
-      m_amr->reallocate(m_townsendCriterionMinu, m_phase, a_lmin);
-    }
+    m_amr->reallocate(m_townsendCriterionPlus, m_phase, a_lmin);
+    m_amr->reallocate(m_townsendCriterionMinu, m_phase, a_lmin);
 
     break;
   }
@@ -2037,13 +2033,13 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
   switch (m_mode) {
   case Mode::Stationary: {
     this->computeInceptionIntegralStationary();
+    if (m_evaluateTownsend) {
+      this->computeTownsendCriterion();
+    }
     this->computeCriticalVolumeStationary();
     this->computeCriticalAreaStationary();
     this->computeIonizationVolumeStationary();
     this->computeRdotStationary();
-    if (m_evaluateTownsend) {
-      this->computeTownsendCriterion();
-    }
     this->computeInceptionVoltageVolume();
 
     // Compute background ionization and field emission on the mesh. Mostly for plotting.
@@ -2487,7 +2483,7 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
         break;
       }
       default: {
-        MayDay::Error("StreamerInceptionStepper::inceptionIntegrateEuler - logic bust");
+        MayDay::Error("StreamerInceptionStepper::inceptionIntegrateTrapezoidal - logic bust");
 
         break;
       }
@@ -2771,7 +2767,7 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
 
         DataOps::getMaxMin(maxT, minT, gamma, 0);
 
-        m_maxTPlus.emplace_back(maxT);
+        m_maxTPlus[i] = maxT;
       }
       else {
         EBAMRCellData Kminu = m_amr->slice(m_inceptionIntegralMinu, Interval(i, i));
@@ -2786,7 +2782,7 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
 
         DataOps::getMaxMin(maxT, minT, gamma, 0);
 
-        m_maxTMinu.emplace_back(maxT);
+        m_maxTMinu[i] = maxT;
       }
     }
   }
@@ -2884,6 +2880,7 @@ StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noe
 
           if (insideEB) {
             p.weight() = m_secondaryEmission(E, x);
+
             processedParticles.transfer(lit);
           }
           else if (outsideDomain || negativeAlpha) {
@@ -3013,16 +3010,18 @@ StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltag
           const Real     dt     = deltaX / v;
           const RealVect newPos = p.position() + vel * dt;
 
-          const bool negativeAlpha = alphaEff < 0.0;
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
-          if (insideEB && !negativeAlpha) {
+          if (insideEB) {
             p.weight() = m_secondaryEmission(E, x);
 
             processedParticles.transfer(lit);
           }
-          else if (outsideDomain || negativeAlpha) {
+          else if (alphaEff < 0.0) {
+            processedParticles.transfer(lit);
+          }
+          else if (outsideDomain) {
             processedParticles.transfer(lit);
           }
           else {
@@ -3077,12 +3076,12 @@ StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltag
           // If the particle wound up inside the EB we finish off the integration with a partial Euler step
           Real s = 0.0;
 
-          if (insideEB && !negativeAlpha) {
+          if (insideEB) {
             p.weight() = m_secondaryEmission(E, oldPos);
 
             processedParticles.transfer(lit);
           }
-          else if (negativeAlpha || outsideDomain) {
+          else if (outsideDomain) {
             processedParticles.transfer(lit);
           }
           else {
@@ -3866,12 +3865,18 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeStationary() noexcept
         const FArrayBox& inceptionIntegralPlusReg = inceptionIntegralPlus.getFArrayBox();
         const FArrayBox& inceptionIntegralMinuReg = inceptionIntegralMinu.getFArrayBox();
 
+        const EBCellFAB& townsendCritPlus = (*m_townsendCriterionPlus[lvl])[dit()];
+        const EBCellFAB& townsendCritMinu = (*m_townsendCriterionMinu[lvl])[dit()];
+
+        const FArrayBox& townsendCritPlusReg = townsendCritPlus.getFArrayBox();
+        const FArrayBox& townsendCritMinuReg = townsendCritMinu.getFArrayBox();
+
         auto regularKernel = [&](const IntVect& iv) -> void {
           if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
-            if (inceptionIntegralPlusReg(iv, i) >= m_inceptionK) {
+            if (inceptionIntegralPlusReg(iv, i) >= m_inceptionK || townsendCritPlusReg(iv, i) >= 1.0) {
               criticalVolumePlus += std::pow(dx, SpaceDim);
             }
-            if (inceptionIntegralMinuReg(iv, i) >= m_inceptionK) {
+            if (inceptionIntegralMinuReg(iv, i) >= m_inceptionK || townsendCritMinuReg(iv, i) >= 1.0) {
               criticalVolumeMinu += std::pow(dx, SpaceDim);
             }
           }
@@ -3881,10 +3886,10 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeStationary() noexcept
           if (validCells(vof.gridIndex())) {
             const Real kappa = ebisbox.volFrac(vof);
 
-            if (inceptionIntegralPlus(vof, i) >= m_inceptionK) {
+            if (inceptionIntegralPlus(vof, i) >= m_inceptionK || townsendCritPlus(vof, i) >= 1.0) {
               criticalVolumePlus += kappa * std::pow(dx, SpaceDim);
             }
-            if (inceptionIntegralMinu(vof, i) >= m_inceptionK) {
+            if (inceptionIntegralMinu(vof, i) >= m_inceptionK || townsendCritMinu(vof, i) >= 1.0) {
               criticalVolumeMinu += kappa * std::pow(dx, SpaceDim);
             }
           }
@@ -3988,14 +3993,17 @@ StreamerInceptionStepper<P, F, C>::computeCriticalAreaStationary() noexcept
         const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
         const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
 
+        const EBCellFAB& townsendCriterionPlus = (*m_townsendCriterionPlus[lvl])[dit()];
+        const EBCellFAB& townsendCriterionMinu = (*m_townsendCriterionMinu[lvl])[dit()];
+
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           if (validCells(vof.gridIndex())) {
             const Real boundaryArea = ebisbox.bndryArea(vof);
 
-            if (inceptionIntegralPlus(vof, i) >= m_inceptionK) {
+            if (inceptionIntegralPlus(vof, i) >= m_inceptionK || townsendCriterionPlus(vof, i) >= 1.0) {
               criticalAreaPlus += boundaryArea * std::pow(dx, SpaceDim - 1);
             }
-            if (inceptionIntegralMinu(vof, i) >= m_inceptionK) {
+            if (inceptionIntegralMinu(vof, i) >= m_inceptionK || townsendCriterionMinu(vof, i) >= 1.0) {
               criticalAreaMinu += boundaryArea * std::pow(dx, SpaceDim - 1);
             }
           }
