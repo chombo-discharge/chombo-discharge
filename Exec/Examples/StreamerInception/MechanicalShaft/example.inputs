@@ -55,7 +55,7 @@ Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 15.              # Refine cells if angle between elements exceed this value.
+Driver.refine_angles                   = 30.              # Refine cells if angle between elements exceed this value.
 Driver.refine_electrodes               = 0                # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = 0                # Refine dielectric surfaces. -1 => equal to refine_geometry
 
@@ -158,7 +158,7 @@ MechanicalShaft.electrode.curvature = 200E-6   # Electrode curvature curvature
 
 # Main dielectric settings
 --------------------------
-MechanicalShaft.dielectric.shape        = cylinder # 'polygon', 'cylinder', or 'circular_profiles'
+MechanicalShaft.dielectric.shape        = circular_profiles # 'polygon', 'cylinder', or 'circular_profiles'
 MechanicalShaft.dielectric.permittivity = 4.3               # Dielectric permittivity
 MechanicalShaft.dielectric.orientation  = "+y"              # Dielectric orientation
 MechanicalShaft.dielectric.translate    = 0 0 0             # Dielectric translation after rotatino

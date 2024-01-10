@@ -2760,6 +2760,13 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
         DataOps::compute(expK, exponentiate);
         DataOps::multiply(gamma, expK);
 
+        // If we're running without full integration we truncate the Townsend value to 1.
+        if (!m_fullIntegration) {
+          DataOps::compute(gamma, [](const Real x) {
+            return std::min(x, 1.0);
+          });
+        }
+
         DataOps::copy(m_townsendCriterionPlus, gamma, Interval(i, i), Interval(0, 0));
 
         Real minT = 0.0;
@@ -2774,6 +2781,13 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
         DataOps::copy(expK, Kminu);
         DataOps::compute(expK, exponentiate);
         DataOps::multiply(gamma, expK);
+
+        // If we're running without full integration we truncate the Townsend value to 1.
+        if (!m_fullIntegration) {
+          DataOps::compute(gamma, [](const Real x) {
+            return std::min(x, 1.0);
+          });
+        }
 
         DataOps::copy(m_townsendCriterionMinu, gamma, Interval(i, i), Interval(0, 0));
 
