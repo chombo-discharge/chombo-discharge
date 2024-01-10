@@ -278,17 +278,17 @@
 	{
 	    "reaction": "Y -> @",
 	    "@": ["e", "(null)"],
-	    "efficiencies": [1.5E-3, 1]
+	    "efficiencies": [0.1, 0.9]
 	},
 	{
 	    "reaction": "N2+ -> @",
 	    "@": ["e", "(null)"],
-	    "efficiencies": [1.5E-3,1]
+	    "efficiencies": [0.01, 1.0]
 	},
 	{
 	    "reaction": "O2+ -> @",
 	    "@": ["e", "(null)"],
-	    "efficiencies": [1.5E-3,1]	    
+	    "efficiencies": [0.01, 1.0]	    
 	}		
     ]        
 }
