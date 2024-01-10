@@ -90,7 +90,7 @@ main(int argc, char* argv[])
     return C1 * (E * E) * exp(-C2 / (beta * E));
   };
   auto secondCoeff = [&](const Real& E, const RealVect& x) -> Real {
-    return 1E-2;
+    return 1E-4;
   };
 
   // Set up time stepper
