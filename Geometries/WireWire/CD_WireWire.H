@@ -49,7 +49,7 @@ protected:
     @param[in] a_pp Parameter parser object for the wire. 
   */
   virtual std::shared_ptr<EBGeometry::ImplicitFunction<Real>>
-  addDielectric(ParmParse& a_pp);  
+  addDielectric(ParmParse& a_pp);
 };
 
 #include <CD_NamespaceFooter.H>
