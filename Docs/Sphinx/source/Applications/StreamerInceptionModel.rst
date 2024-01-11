@@ -8,7 +8,7 @@ Overview
 
 The streamer inception model computes the inception voltage and probability of streamer inception for arbitrary geometries and voltage forms.
 
-For estimating the streamer inception, the module the electron avalanche integral
+For estimating the streamer inception, the module solves the electron avalanche integral
 
 .. math::
 
@@ -28,6 +28,15 @@ In addition to the above, the user can specify a critical threshold value for :m
 
 Note that since the :math:`K\left(\mathbf{x}\right) = K(\mathbf{x}; U)` where :math:`U` is the applied voltage, these values are computed for a user-specified range of voltages. 
 This "range of voltages" can be a series of discrete values, or a voltage curve (e.g., lightning impulse).
+
+In addition to this, one may also track positive ions and solve for the Townsend inception criterion, which is formulated as
+
+.. math::
+
+   T\left(\mathbf{x}\right) = \gamma \exp\left[K\left(\mathbf{x}\right)\right] \geq 1.
+
+The interpretation of this criterion is that each starting electron grows into :math:`\exp\left[K\left(\mathbf{x}\right)\right]` electron-ion pairs.
+The residual ions will drift towards cathode surfaces and generate secondary ionization with a user-supplied efficiency :math:`\gamma=\gamma\left(E,\mathbf{x}\right)`.
 
 The streamer inception model can be run in two modes:
 
@@ -61,8 +70,9 @@ _______________
 The stationary mode solves the :math:`K` integral for a range of input voltages.
 The computation is done for both polarities so that the user obtains:
 
-* :math:`K` values for positive and negative voltages.
+* :math:`K` values for positive and negative voltages, as well as the Townsend criterion.
 * Critical volumes :math:`V_c` for positive and negative voltages.
+* Inception voltage, using a combined Townsend-streamer criterion.
 
 .. _Chap:TransientMode:
 
@@ -73,8 +83,8 @@ In the transient mode we apply a voltage curve :math:`U = U(t)` reconstruct the 
 
 .. math::
 
-   K = K(t)
-   
+   K = K(t) \\
+   T = T(t) \\
    V_c = V_c(t)
 
 We also assume that ions move as drifting Brownian walkers in the electric field (see :ref:`Chap:ItoDiffusion`).
@@ -136,6 +146,7 @@ The input to the streamer inception model are:
 #. Negative ion mobility.
 #. Negative ion diffusion coefficient.   
 #. Initial negative ion density.
+#. Secondary emission coefficients.
 #. Voltage curve (for transient simulations).
 
 The input data to the streamer inception model is mostly done by passing in C++-functions to the class.
@@ -168,6 +179,7 @@ Tabulated data (see :ref:`Chap:LookupTable1D`) can also be used as follows,
 .. note::
 
    The :math:`K` integral is determined only by the Townsend ionization and attachment coefficients.
+   The Townsend criterion is then a derived value of :math:`K` and the secondary electron emission coefficient :math:`\gamma` .
    The remaining transport data is used for calculating the inception probability (appearance of a first electron in the critical volume). 
    
 
@@ -230,6 +242,17 @@ To set the negative ion density, use the member function
 .. code-block:: c++
 
    StreamerInceptionStepper::setIonDensity(const std::function<Real(const RealVect x)>& a_density) noexcept;
+
+Secondary emission
+__________________
+
+To set the secondary emission efficiency at cathodes, use the member function
+
+.. code-block:: c++
+
+   StreamerInceptionStepper::setSecondaryEmission(const std::function<Real(const Real& E, const RealVect& x)>& a_coeff) noexcept;
+
+This efficiency is position-dependent so that the user can set different efficiencies for different materials (or different positions in a single material).
 
    
 Background ionization rate
@@ -354,6 +377,12 @@ followed by
 
       w_p^{k+1} = w_p^k + \frac{\Delta x}{2}\left[\alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^k\right)\right|,\mathbf{x}_p^k\right) + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^\prime\right)\right|,\mathbf{x}_p^\prime\right)\right]
 
+.. note::
+
+   When tracking positive ions for evaluation of the Townsend criterion, the same algorithms are used.
+   The exception is that the positive ions are simply tracked along field lines until they strike a cathode, so that there is no integration with respect to :math:`\alpha_{\text{eff}}`.
+
+
 Critical volume
 _______________
 
@@ -361,9 +390,20 @@ The critical volume is computed as
 
 .. math::
 
-   V_c = \int_{K\left(\mathbf{x}\right) > K}\text{d}V.
+   V_c = \int_{K\left(\mathbf{x}\right) > K \cup \gamma\exp\left[K\left(\mathbf{x}\right)\right] \ge 1} \text{d}V.
 
 Note that the critical volume is both voltage and polarity dependent.
+
+Critical surface
+________________
+
+The critical surface is computed as
+
+.. math::
+
+   A_c = \int_{K\left(\mathbf{x}\right) > K \cup \gamma\exp\left[K\left(\mathbf{x}\right)\right] \ge 1} \text{d}A.
+
+Note that the critical surface is both voltage and polarity dependent, and is non-zero only on cathode surfaces.
 
 Inception voltage
 _________________
@@ -386,13 +426,34 @@ then we can estimate the inception voltage for a starting electron at position :
 
 .. math::
 
-   U_{\text{inc}}\left(\mathbf{x}\right) = U_a + \frac{K_c - K_a}{K_b - K_a}\left(U_b - U_a\right)
+   U_{\text{inc, streamer}}\left(\mathbf{x}\right) = U_a + \frac{K_c - K_a}{K_b - K_a}\left(U_b - U_a\right)
+
+A similar method is used for the Townsend criterion, using e.g. :math:`T\left(\mathbf{x}; U\right) = \gamma\exp\left[K\left(\mathbf{x}; U\right)\right]`, then if
+
+
+.. math::
+   
+   T_a = T\left(\mathbf{x}; U_a\right) \leq 1
+
+   T_b = T\left(\mathbf{x}; U_b\right) \ge 1
+
+then we can estimate the inception voltage for a starting electron at position :math:`\mathbf{x}` through linear interpolation as
+
+.. math::
+
+   U_{\text{inc, Townsend}}\left(\mathbf{x}\right) = U_a + \frac{1 - T_a}{T_b - T_a}\left(U_b - U_a\right)
+
+The inception voltage for position :math:`\mathbf{x}` is then
+
+.. math::
+
+   U_{\text{inc}} = \min\left[U_{\text{inc, streamer}}\left(\mathbf{x}\right), U_{\text{inc, Townsend}}\left(\mathbf{x}\right)\right]
    
 
 Minimum inception voltage
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The minium inception voltage is the minimum voltage required for starting a critical avalanche for an arbitrary starting electron.
+The minium inception voltage is the minimum voltage required for starting a critical avalanche (or Townsend process) for an arbitrary starting electron.
 From the above, this is simply
 
 .. math::
@@ -539,6 +600,19 @@ E.g.,
 
    StreamerInceptionStepper.K_inception = 12
 
+eval_townsend
+_____________
+
+Controls whether or not the Townsend criterion is also evaluated.
+
+E.g.,
+
+.. code-block:: text
+
+   StreamerInceptionStepper.eval_townsend = true
+
+Will turn on the Townsend criterion. 
+
 plt_vars
 ________
 
@@ -554,6 +628,7 @@ Valid options are
 * ``poisson``  - Poisson solver
 * ``tracer``   - Tracer particle solver
 * ``ions``     - Ion solver
+* ``townsend`` - Townsend criterion
 
 For example:
 
@@ -688,40 +763,10 @@ ________________________________
 
 * :file:`$DISCHARGE_HOME/Exec/Examples/StreamerInception/ElectrodeRoughness`.
   This program is set up in 2D (stationary) and 3D (transient) for streamer inception on an irregular electrode surface. 
-  We use SF6 transport data as input data, computed using BOLSIG+.  
+  We use SF6 transport data as input data, computed using BOLSIG+.
 
+Electrode with surface roughness
+________________________________
 
-..
-   Electrode with surface roughness
-   ________________________________
-
-   * :file:`$DISCHARGE_HOME/Exec/Examples/StreamerInception/ElectrodeRoughness`.
-
-
-   The figure below shows an example of the avalanche integral :math:`K` solved for an |SF6| gas with an irregular electrode surface:
-
-   .. _Fig:field:
-   .. figure:: /_static/figures/StreamerInception/field.png
-      :width: 45%
-      :align: center
-
-      Electron avalanche integral :math:`K` for a rough electrode surface and |SF6| gas. POLARIZATION?
-
-   .. |SF6| replace:: SF\ :sub:`6`
-
-   Underneath is the same example zoomed into one of the electrode crevices, both for positive and negative polarization:
-
-   .. _Fig:Kplus:
-   .. figure:: /_static/figures/StreamerInception/Kplus.png
-      :width: 45%
-      :align: center
-
-      :math:`K` in the crevice with positive polarization.
-
-   .. _Fig:Kminu:
-   .. figure:: /_static/figures/StreamerInception/Kminu.png
-      :width: 45%
-      :align: center
-
-      :math:`K` in the crevice with negative polarization. 
-
+* :file:`$DISCHARGE_HOME/Exec/Examples/StreamerInception/ElectrodeRoughness`.
+  This program is set up in 2D and 3D (stationary) mode, and includes the influence of the Townsend criterion.
