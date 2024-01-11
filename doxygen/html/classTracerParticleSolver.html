@@ -159,6 +159,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a2173dd281f00cc869d7ed513ddf46eb4">remap</a> ()</td></tr>
 <tr class="memdesc:a2173dd281f00cc869d7ed513ddf46eb4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remap particles. <br /></td></tr>
 <tr class="separator:a2173dd281f00cc869d7ed513ddf46eb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe831132f078df82b38007faad8e40c2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#abe831132f078df82b38007faad8e40c2">setDeposition</a> (const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition) noexcept</td></tr>
+<tr class="memdesc:abe831132f078df82b38007faad8e40c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set deposition method.  <a href="classTracerParticleSolver.html#abe831132f078df82b38007faad8e40c2">More...</a><br /></td></tr>
+<tr class="separator:abe831132f078df82b38007faad8e40c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5be376a0d90160ca293b5318914c8bdf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a5be376a0d90160ca293b5318914c8bdf">deposit</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi) const noexcept</td></tr>
 <tr class="memdesc:a5be376a0d90160ca293b5318914c8bdf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit particle weight on mesh.  <a href="classTracerParticleSolver.html#a5be376a0d90160ca293b5318914c8bdf">More...</a><br /></td></tr>
 <tr class="separator:a5be376a0d90160ca293b5318914c8bdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -947,6 +950,42 @@ template&lt;typename P &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_compGeom</td><td>Computational geometry </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="abe831132f078df82b38007faad8e40c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe831132f078df82b38007faad8e40c2">&#9670;&nbsp;</a></span>setDeposition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classTracerParticleSolver.html">TracerParticleSolver</a>&lt; P &gt;::setDeposition </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
+          <td class="paramname"><em>a_deposition</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set deposition method. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_deposition</td><td>Deposition method </td></tr>
   </table>
   </dd>
 </dl>

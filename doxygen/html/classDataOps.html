@@ -112,6 +112,12 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:ae0b2f78fdee7dfd457d03da57a1fabb1"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ae0b2f78fdee7dfd457d03da57a1fabb1">averageFaceToCell</a> (LevelData&lt; EBCellFAB &gt; &amp;a_cellData, const LevelData&lt; EBFluxFAB &gt; &amp;a_fluxData, const ProblemDomain &amp;a_domain)</td></tr>
 <tr class="memdesc:ae0b2f78fdee7dfd457d03da57a1fabb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average all components of face centered data to cell centers.  <a href="classDataOps.html#ae0b2f78fdee7dfd457d03da57a1fabb1">More...</a><br /></td></tr>
 <tr class="separator:ae0b2f78fdee7dfd457d03da57a1fabb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a380921f9b664379fc6738dffdfe6bfcd"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a380921f9b664379fc6738dffdfe6bfcd">compute</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::function&lt; Real(const Real a_cellValue)&gt; &amp;a_func) noexcept</td></tr>
+<tr class="memdesc:a380921f9b664379fc6738dffdfe6bfcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a new value given the old cell value.  <a href="classDataOps.html#a380921f9b664379fc6738dffdfe6bfcd">More...</a><br /></td></tr>
+<tr class="separator:a380921f9b664379fc6738dffdfe6bfcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26172cef3ac6df3e23499d67de2c31b9"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a26172cef3ac6df3e23499d67de2c31b9">compute</a> (LevelData&lt; EBCellFAB &gt; &amp;a_data, const std::function&lt; Real(const Real a_cellValue)&gt; &amp;a_func) noexcept</td></tr>
+<tr class="memdesc:a26172cef3ac6df3e23499d67de2c31b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a new value given the old cell value.  <a href="classDataOps.html#a26172cef3ac6df3e23499d67de2c31b9">More...</a><br /></td></tr>
+<tr class="separator:a26172cef3ac6df3e23499d67de2c31b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab9a534acad1c2edb95b95fd89ccaa156"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ab9a534acad1c2edb95b95fd89ccaa156">dotProduct</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_result, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_data1, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_data2)</td></tr>
 <tr class="memdesc:ab9a534acad1c2edb95b95fd89ccaa156"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compote the cell-wise dot product between two data holders.  <a href="classDataOps.html#ab9a534acad1c2edb95b95fd89ccaa156">More...</a><br /></td></tr>
 <tr class="separator:ab9a534acad1c2edb95b95fd89ccaa156"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -983,6 +989,96 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>Only valid cells are filled (not ghost cells) </dd></dl>
+
+</div>
+</div>
+<a id="a380921f9b664379fc6738dffdfe6bfcd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a380921f9b664379fc6738dffdfe6bfcd">&#9670;&nbsp;</a></span>compute() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::compute </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::function&lt; Real(const Real a_cellValue)&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_func</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute a new value given the old cell value. </p>
+<p>Useful for quickly calculating a cell value as e.g. exp(x) where the original data was only x </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Input data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_func</td><td>Function for transforming the data </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a26172cef3ac6df3e23499d67de2c31b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26172cef3ac6df3e23499d67de2c31b9">&#9670;&nbsp;</a></span>compute() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::compute </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::function&lt; Real(const Real a_cellValue)&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_func</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute a new value given the old cell value. </p>
+<p>Useful for quickly calculating a cell value as e.g. exp(x) where the original data was only x </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Input data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_func</td><td>Function for transforming the data </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
