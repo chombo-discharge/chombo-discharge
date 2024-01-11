@@ -50,12 +50,6 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   m_fullIntegration     = false;
   m_evaluateTownsend    = false;
 
-#if 1
-  if (procID() == 0) {
-    std::cout << "StreamerInceptionStepper -- how to halt ion tracking...? Can we do K-evaluations...?" << std::endl;
-  }
-#endif
-
   this->parseOptions();
 
   m_rho = [](const RealVect x) -> Real {
@@ -1989,7 +1983,7 @@ StreamerInceptionStepper<P, F, C>::seedIonizationParticles(const Real& a_voltage
             const Real alpha = m_alpha(E, x);
             const Real eta   = m_eta(E, x);
 
-            if (alpha >= eta) {
+            if (alpha > eta) {
               P p;
 
               p.position() = x;
@@ -2918,6 +2912,10 @@ StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noe
     particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
   }
 
+  // The input here is m_electricFieldPlus, in which case there is a voltage U = 1 on all electrodes. Particles are seed with this velocity
+  // but the user-supplied input voltage determines the "true" direction.
+  const Real sgn = (a_voltage > 0.0) - (a_voltage < 0.0);
+
   while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
 
     // Euler integration.
@@ -2959,7 +2957,7 @@ StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noe
           P& p = lit();
 
           const RealVect x      = p.position();
-          const RealVect vel    = p.velocity();
+          const RealVect vel    = sgn * p.velocity();
           const Real     v      = vel.vectorLength();
           const Real     E      = std::abs(a_voltage * v);
           const Real     deltaX = spaceStep;
@@ -4138,8 +4136,6 @@ StreamerInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcept
 
   Real Acr = 0.0;
 
-  MayDay::Warning("computeCriticalAreaTransient - add Townsend criterion");
-
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
@@ -4154,10 +4150,13 @@ StreamerInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcept
       const BaseFab<bool>& validCells = validCellsLD[dit()];
 
       const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[dit()];
+      const EBCellFAB& townsendCriterion = (*m_townsendCriterion[lvl])[dit()];
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
-        if (validCells(vof.gridIndex()) && inceptionIntegral(vof, 0) >= m_inceptionK) {
-          Acr += ebisbox.bndryArea(vof) * area;
+        if (validCells(vof.gridIndex())) {
+          if (inceptionIntegral(vof, 0) >= m_inceptionK || townsendCriterion(vof, 0) >= 1.0) {
+            Acr += ebisbox.bndryArea(vof) * area;
+          }
         }
       };
 
