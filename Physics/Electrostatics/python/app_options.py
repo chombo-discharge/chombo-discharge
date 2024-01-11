@@ -24,5 +24,5 @@ def write_template(args):
             optf.write('\n\n')
             f.close()
         else:
-            print 'Could not find options file (this _may_ be normal behavior) ' + opt
+            print('Could not find options file (this _may_ be normal behavior) ' + opt)
     optf.close()

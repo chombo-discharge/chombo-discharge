@@ -32,6 +32,7 @@ LB.txt
 
 Exec/Examples/StreamerInception/Vessel/report.txt
 Exec/Examples/StreamerInception/ElectrodeRoughness/report.txt
+Exec/Examples/StreamerInception/MechanicalShaft/report.txt
 Exec/Tests/StreamerInception/Vessel/report.txt
 
 pout.*

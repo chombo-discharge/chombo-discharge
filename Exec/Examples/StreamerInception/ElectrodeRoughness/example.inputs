@@ -166,9 +166,10 @@ NoisePlane.clamp_dx          =  100E-6      # Noise clamp falloff
 # ====================================================================================================
 StreamerInceptionStepper.verbosity     = -1                            # Chattiness.
 StreamerInceptionStepper.profile       = false
-StreamerInceptionStepper.full_integration       = false
+StreamerInceptionStepper.full_integration       = true
 StreamerInceptionStepper.mode          = stationary                    # Mode (stationary or transient)
-StreamerInceptionStepper.inception_alg = euler alpha 0.25                  # Integration algorithm for inception integral.
+StreamerInceptionStepper.eval_townsend    = true                    ## Evaluate Townsend criterion or not (only for stationary)
+StreamerInceptionStepper.inception_alg = euler alpha 0.5                  # Integration algorithm for inception integral.
 StreamerInceptionStepper.output_file   = report.txt                    # Output file
 StreamerInceptionStepper.K_inception   = 15                            # User-specified inception value
 StreamerInceptionStepper.plt_vars      = K Uinc poisson                # Plot variables

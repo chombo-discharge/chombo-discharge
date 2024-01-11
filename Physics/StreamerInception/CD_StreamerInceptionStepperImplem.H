@@ -48,6 +48,13 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   m_profile             = false;
   m_debug               = false;
   m_fullIntegration     = false;
+  m_evaluateTownsend    = false;
+
+#if 1
+  if (procID() == 0) {
+    std::cout << "StreamerInceptionStepper -- how to halt ion tracking...? Can we do K-evaluations...?" << std::endl;
+  }
+#endif
 
   this->parseOptions();
 
@@ -76,6 +83,10 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   };
 
   m_fieldEmission = [](const Real E, const RealVect x) -> Real {
+    return 0.0;
+  };
+
+  m_secondaryEmission = [](const Real E, const RealVect x) -> Real {
     return 0.0;
   };
 
@@ -135,6 +146,7 @@ StreamerInceptionStepper<P, F, C>::setupSolvers()
   m_tracerParticleSolver->setTime(0, 0.0, 0.0);
   m_tracerParticleSolver->setName("Tracer particle solver");
   m_tracerParticleSolver->setVolumeScale(true);
+  m_tracerParticleSolver->setDeposition(DepositionType::NGP);
 
   // Instantiate the ion solver.
   m_ionSolver = RefCountedPtr<CdrSolver>(new C());
@@ -193,6 +205,12 @@ StreamerInceptionStepper<P, F, C>::allocate()
 
       DataOps::setValue(m_detachment, 0.0);
     }
+
+    m_amr->allocate(m_townsendCriterionPlus, m_realm, m_phase, m_voltageSweeps.size());
+    m_amr->allocate(m_townsendCriterionMinu, m_realm, m_phase, m_voltageSweeps.size());
+
+    DataOps::setValue(m_townsendCriterionPlus, 0.0);
+    DataOps::setValue(m_townsendCriterionMinu, 0.0);
 
     DataOps::setValue(m_inceptionIntegralPlus, 0.0);
     DataOps::setValue(m_inceptionIntegralMinu, 0.0);
@@ -369,9 +387,12 @@ StreamerInceptionStepper<P, F, C>::parseVoltages() noexcept
   pp.get("voltage_hi", voltageHi);
   pp.get("voltage_steps", voltageSteps);
   pp.get("K_inception", m_inceptionK);
+  pp.get("eval_townsend", m_evaluateTownsend);
 
   // Define voltages
-  const Real dV = (voltageHi - voltageLo) / (1 + voltageSteps);
+  const Real deltaV = voltageHi - voltageLo;
+
+  const Real dV = deltaV / (1 + voltageSteps);
 
   m_voltageSweeps.push_back(voltageLo);
 
@@ -380,6 +401,12 @@ StreamerInceptionStepper<P, F, C>::parseVoltages() noexcept
   }
 
   m_voltageSweeps.push_back(voltageHi);
+  m_maxTPlus.resize(m_voltageSweeps.size(), 0.0);
+  m_maxTMinu.resize(m_voltageSweeps.size(), 0.0);
+
+  if (m_evaluateTownsend && m_mode == Mode::Transient) {
+    MayDay::Warning("StreamerInceptionStepper -- combined Townsend tracking and transient mode is not (yet) supported");
+  }
 }
 
 template <typename P, typename F, typename C>
@@ -505,6 +532,7 @@ StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
   m_plotFieldEmission        = false;
   m_plotAlpha                = false;
   m_plotEta                  = false;
+  m_plotTownsend             = false;
 
   ParmParse pp("StreamerInceptionStepper");
 
@@ -544,6 +572,9 @@ StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
       }
       else if (plotVars[i] == "eta") {
         m_plotEta = true;
+      }
+      else if (plotVars[i] == "townsend") {
+        m_plotTownsend = true;
       }
     }
   }
@@ -636,6 +667,11 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
     // When plotting both, add the effective ionization coefficient
     if (m_plotAlpha && m_plotEta) {
       ncomp += m_voltageSweeps.size();
+    }
+
+    // Plotting gamma coefficient
+    if (m_plotTownsend) {
+      ncomp += 2 * m_voltageSweeps.size();
     }
 
     break;
@@ -788,6 +824,21 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
     }
   }
 
+  // Secondary emission coefficient for initiatory ions
+  if (m_plotTownsend) {
+    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+      const std::string varName = prefix + "Townsend crit/ V = +" + std::to_string(m_voltageSweeps[i]);
+
+      plotVars.push_back(varName);
+    }
+
+    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+      const std::string varName = prefix + "Townsend crit/ V = -" + std::to_string(m_voltageSweeps[i]);
+
+      plotVars.push_back(varName);
+    }
+  }
+
   // Alpha value
   if (m_plotAlpha) {
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
@@ -807,7 +858,7 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
     }
   }
 
-  //
+  // Effective alpha coefficient
   if (m_plotAlpha && m_plotEta) {
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
       const std::string varName = prefix + "Alpha_eff/ V = " + std::to_string(m_voltageSweeps[i]);
@@ -949,15 +1000,30 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
     this->writeData(a_output, a_icomp, m_emissionRatesMinu, a_outputRealm, a_level, false, true);
   }
 
+  if (m_plotTownsend) {
+    this->writeData(a_output, a_icomp, m_townsendCriterionPlus, a_outputRealm, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_townsendCriterionMinu, a_outputRealm, a_level, false, true);
+  }
+
   if (m_plotAlpha) {
     LevelData<EBCellFAB> alpha;
+    LevelData<EBCellFAB> alphaCoar;
+
     m_amr->allocate(alpha, m_realm, m_phase, a_level, 1);
+    if (a_level > 0) {
+      m_amr->allocate(alphaCoar, m_realm, m_phase, a_level - 1, 1);
+    }
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
       this->evaluateFunction(alpha, m_voltageSweeps[i], m_alpha, a_level);
+      if (a_level > 0) {
+        this->evaluateFunction(alphaCoar, m_voltageSweeps[i], m_alpha, a_level - 1);
+        m_amr->interpGhost(alpha, alphaCoar, a_level, m_realm, m_phase);
+      }
+      else {
+        alpha.exchange();
+      }
 
-      // Do a copy, but note that this does not include ghost cells across the CF interface since
-      // we are only computing for a single grid level.
       m_amr->copyData(a_output, alpha, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
       a_icomp++;
@@ -966,13 +1032,23 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
 
   if (m_plotEta) {
     LevelData<EBCellFAB> eta;
+    LevelData<EBCellFAB> etaCoar;
+
     m_amr->allocate(eta, m_realm, m_phase, a_level, 1);
+    if (a_level > 0) {
+      m_amr->allocate(etaCoar, m_realm, m_phase, a_level - 1, 1);
+    }
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
       this->evaluateFunction(eta, m_voltageSweeps[i], m_eta, a_level);
+      if (a_level > 0) {
+        this->evaluateFunction(etaCoar, m_voltageSweeps[i], m_eta, a_level - 1);
+        m_amr->interpGhost(eta, etaCoar, a_level, m_realm, m_phase);
+      }
+      else {
+        eta.exchange();
+      }
 
-      // Do a copy, but note that this does not include ghost cells across the CF interface since
-      // we are only computing for a single grid level.
       m_amr->copyData(a_output, eta, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
       a_icomp++;
@@ -981,7 +1057,12 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
 
   if (m_plotAlpha && m_plotEta) {
     LevelData<EBCellFAB> alphaEff;
+    LevelData<EBCellFAB> alphaEffCoar;
+
     m_amr->allocate(alphaEff, m_realm, m_phase, a_level, 1);
+    if (a_level > 0) {
+      m_amr->allocate(alphaEffCoar, m_realm, m_phase, a_level - 1, 1);
+    }
 
     auto alphaFunc = [alpha = this->m_alpha, eta = this->m_eta](const Real E, const RealVect x) -> Real {
       return alpha(E, x) - eta(E, x);
@@ -989,6 +1070,13 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
       this->evaluateFunction(alphaEff, m_voltageSweeps[i], alphaFunc, a_level);
+      if (a_level > 0) {
+        this->evaluateFunction(alphaEffCoar, m_voltageSweeps[i], alphaFunc, a_level - 1);
+        m_amr->interpGhost(alphaEff, alphaEffCoar, a_level, m_realm, m_phase);
+      }
+      else {
+        alphaEff.exchange();
+      }
 
       // Do a copy, but note that this does not include ghost cells across the CF interface since
       // we are only computing for a single grid level.
@@ -1050,12 +1138,19 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
   if (m_plotDetachment) {
     LevelData<EBCellFAB> detachRate;
+    LevelData<EBCellFAB> detachRateCoar;
+
     m_amr->allocate(detachRate, m_realm, m_phase, a_level, 1);
+    if (a_level > 0) {
+      m_amr->allocate(detachRateCoar, m_realm, m_phase, a_level - 1, 1);
+    }
 
     this->evaluateFunction(detachRate, m_voltageCurve(m_time), m_detachmentRate, a_level);
+    if (a_level > 0) {
+      this->evaluateFunction(detachRateCoar, m_voltageCurve(m_time), m_detachmentRate, a_level - 1);
+      m_amr->interpGhost(detachRate, detachRateCoar, a_level, m_realm, m_phase);
+    }
 
-    // Do a copy, but note that this does not include ghost cells across the CF interface since
-    // we are only computing for a single grid level.
     m_amr->copyData(a_output, detachRate, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
     a_icomp++;
@@ -1067,9 +1162,21 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
   if (m_plotAlpha) {
     LevelData<EBCellFAB> alpha;
+    LevelData<EBCellFAB> alphaCoar;
+
     m_amr->allocate(alpha, m_realm, m_phase, a_level, 1);
+    if (a_level > 0) {
+      m_amr->allocate(alphaCoar, m_realm, m_phase, a_level - 1, 1);
+    }
 
     this->evaluateFunction(alpha, m_voltageCurve(m_time), m_alpha, a_level);
+    if (a_level > 0) {
+      this->evaluateFunction(alphaCoar, m_voltageCurve(m_time), m_alpha, a_level - 1);
+      m_amr->interpGhost(alpha, alphaCoar, a_level, m_realm, m_phase);
+    }
+    else {
+      alpha.exchange();
+    }
 
     // Do a copy, but note that this does not include ghost cells across the CF interface since
     // we are only computing for a single grid level.
@@ -1080,9 +1187,21 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
   if (m_plotEta) {
     LevelData<EBCellFAB> eta;
+    LevelData<EBCellFAB> etaCoar;
+
     m_amr->allocate(eta, m_realm, m_phase, a_level, 1);
+    if (a_level > 0) {
+      m_amr->allocate(etaCoar, m_realm, m_phase, a_level - 1, 1);
+    }
 
     this->evaluateFunction(eta, m_voltageCurve(m_time), m_eta, a_level);
+    if (a_level > 0) {
+      this->evaluateFunction(etaCoar, m_voltageCurve(m_time), m_eta, a_level - 1);
+      m_amr->interpGhost(eta, etaCoar, a_level, m_realm, m_phase);
+    }
+    else {
+      eta.exchange();
+    }
 
     // Do a copy, but note that this does not include ghost cells across the CF interface since
     // we are only computing for a single grid level.
@@ -1093,13 +1212,25 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
   if (m_plotAlpha && m_plotEta) {
     LevelData<EBCellFAB> alphaEff;
+    LevelData<EBCellFAB> alphaEffCoar;
+
     m_amr->allocate(alphaEff, m_realm, m_phase, a_level, 1);
+    if (a_level > 0) {
+      m_amr->allocate(alphaEffCoar, m_realm, m_phase, a_level - 1, 1);
+    }
 
     auto alphaFunc = [alpha = this->m_alpha, eta = this->m_eta](const Real E, const RealVect x) -> Real {
       return alpha(E, x) - eta(E, x);
     };
 
     this->evaluateFunction(alphaEff, m_voltageCurve(m_time), alphaFunc, a_level);
+    if (a_level > 0) {
+      this->evaluateFunction(alphaEffCoar, m_voltageCurve(m_time), alphaFunc, a_level - 1);
+      m_amr->interpGhost(alphaEff, alphaEffCoar, a_level, m_realm, m_phase);
+    }
+    else {
+      alphaEff.exchange();
+    }
 
     // Do a copy, but note that this does not include ghost cells across the CF interface since
     // we are only computing for a single grid level.
@@ -1278,6 +1409,9 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
 
     DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0);
 
+    if (!m_fullIntegration) {
+      maxK = std::min(maxK, m_inceptionK);
+    }
     m_maxK.emplace_back(m_time + a_dt, maxK);
     timer.stopEvent("Get max/min K");
 
@@ -1505,6 +1639,9 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
       m_amr->reallocate(m_emissionRatesMinu, m_phase, a_lmin);
     }
 
+    m_amr->reallocate(m_townsendCriterionPlus, m_phase, a_lmin);
+    m_amr->reallocate(m_townsendCriterionMinu, m_phase, a_lmin);
+
     break;
   }
   case Mode::Transient: {
@@ -1698,6 +1835,19 @@ StreamerInceptionStepper<P, F, C>::setFieldEmission(
 }
 
 template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::setSecondaryEmission(
+  const std::function<Real(const Real& E, const RealVect& x)>& a_coefficient) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setSecondaryEmission");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setSecondaryEmission" << endl;
+  }
+
+  m_secondaryEmission = a_coefficient;
+}
+
+template <typename P, typename F, typename C>
 Mode
 StreamerInceptionStepper<P, F, C>::getMode() const noexcept
 {
@@ -1886,13 +2036,15 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
 
   switch (m_mode) {
   case Mode::Stationary: {
-
     this->computeInceptionIntegralStationary();
-    this->computeInceptionVoltageVolume();
+    if (m_evaluateTownsend) {
+      this->computeTownsendCriterion();
+    }
     this->computeCriticalVolumeStationary();
     this->computeCriticalAreaStationary();
     this->computeIonizationVolumeStationary();
     this->computeRdotStationary();
+    this->computeInceptionVoltageVolume();
 
     // Compute background ionization and field emission on the mesh. Mostly for plotting.
     if (m_plotBackgroundIonization) {
@@ -1925,6 +2077,9 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
     Real minK = +std::numeric_limits<Real>::max();
 
     DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0);
+    if (!m_fullIntegration) {
+      maxK = std::min(maxK, m_inceptionK);
+    }
 
     m_Rdot.emplace_back(m_time, this->computeRdot(m_voltageCurve(m_time)));
     m_criticalVolume.emplace_back(m_time, this->computeCriticalVolumeTransient());
@@ -1966,18 +2121,15 @@ StreamerInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcept
   //          T += 0.5 * dx * [alpha_eff(E(x)) + alpha_eff(E(x+dx))]
 
   // Transient storage we can deposit particles onto.
-  EBAMRCellData K;
   EBAMRCellData Kplus;
   EBAMRCellData Kminu;
 
-  m_amr->allocate(K, m_realm, m_phase, 1);
   m_amr->allocate(Kplus, m_realm, m_phase, 1);
   m_amr->allocate(Kminu, m_realm, m_phase, 1);
 
   // Integrate for each voltage
   for (int i = 0; i < m_voltageSweeps.size(); ++i) {
 
-    DataOps::setValue(K, 0.0);
     DataOps::setValue(Kplus, 0.0);
     DataOps::setValue(Kminu, 0.0);
 
@@ -2033,6 +2185,9 @@ StreamerInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcept
         Real minK = +std::numeric_limits<Real>::max();
 
         DataOps::getMaxMin(maxK, minK, Kplus, 0);
+        if (!m_fullIntegration) {
+          maxK = std::min(maxK, m_inceptionK);
+        }
 
         m_maxKPlus.push_back(maxK);
       }
@@ -2049,6 +2204,9 @@ StreamerInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcept
         Real minK = +std::numeric_limits<Real>::max();
 
         DataOps::getMaxMin(maxK, minK, Kminu, 0);
+        if (!m_fullIntegration) {
+          maxK = std::min(maxK, m_inceptionK);
+        }
 
         m_maxKMinu.push_back(maxK);
       }
@@ -2145,7 +2303,7 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
         break;
       }
       case StepSizeMethod::Alpha: {
-        spaceStep = dx;
+        spaceStep = m_stepSizeFactor * dx;
         alphaStep = m_stepSizeFactor;
 
         break;
@@ -2172,28 +2330,54 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
           const Real     eta      = m_eta(E, x);
           const Real     alphaEff = alpha - eta;
 
-          // Stop integration if avalanche phase is over
-          const bool negativeAlpha   = alphaEff <= 0.0;
-          const bool haltIntegration = p.weight() > m_inceptionK && !m_fullIntegration;
+          const Real     deltaX = std::min(spaceStep, alphaStep / alphaEff);
+          const Real     dt     = deltaX / v;
+          const RealVect newPos = p.position() + dt * vel;
+          const Real     delta  = (newPos - x).vectorLength();
 
-          if (negativeAlpha || haltIntegration) {
+          const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
+          const bool insideEB      = this->particleInsideEB(newPos);
+
+          // If the particle struck the EB or domain we finish off the integration with a partial step
+          Real s = 0.0;
+
+          if (alphaEff < 0.0) {
             processedParticles.transfer(lit);
           }
+          else if (insideEB) {
+            const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
+
+            if (ParticleOps::ebIntersectionBisect(impFunc, x, newPos, spaceStep, s)) {
+              p.weight() = p.weight() + s * delta * alphaEff;
+            }
+
+            processedParticles.transfer(lit);
+          }
+          else if (outsideDomain) {
+            if (ParticleOps::domainIntersection(x, newPos, m_amr->getProbLo(), m_amr->getProbHi(), s)) {
+              p.weight() = p.weight() + s * delta * alphaEff;
+            }
+
+            processedParticles.transfer(lit);
+          }
+
           else {
-            const Real     deltaX = std::min(spaceStep, alphaStep / alphaEff);
-            const Real     dt     = deltaX / v;
-            const RealVect newPos = p.position() + dt * vel;
+            p.position() = newPos;
+            p.weight()   = p.weight() + deltaX * alphaEff;
 
-            const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
-            const bool insideEB      = this->particleInsideEB(newPos);
+            ++lit;
+          }
+        }
 
-            if (outsideDomain || insideEB) {
+        // Transfer particles that completed their integration.
+        if (!m_fullIntegration) {
+          for (ListIterator<P> lit(solverParticles); lit.ok();) {
+            P& p = lit();
+
+            if (p.weight() >= m_inceptionK) {
               processedParticles.transfer(lit);
             }
             else {
-              p.position() = newPos;
-              p.weight()   = p.weight() + deltaX * alphaEff;
-
               ++lit;
             }
           }
@@ -2207,6 +2391,19 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
   }
 
   ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);
+
+  // Truncate the weights if we didn't run full integration
+  if (!m_fullIntegration) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+        List<P>& solverParticles = amrParticles[lvl][dit()].listItems();
+
+        for (ListIterator<P> lit(solverParticles); lit.ok(); ++lit) {
+          lit().weight() = std::min(m_inceptionK, lit().weight());
+        }
+      }
+    }
+  }
 
   this->rewindTracerParticles();
 
@@ -2284,13 +2481,13 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
         break;
       }
       case StepSizeMethod::Alpha: {
-        spaceStep = dx;
+        spaceStep = m_stepSizeFactor * dx;
         alphaStep = m_stepSizeFactor;
 
         break;
       }
       default: {
-        MayDay::Error("StreamerInceptionStepper::inceptionIntegrateEuler - logic bust");
+        MayDay::Error("StreamerInceptionStepper::inceptionIntegrateTrapezoidal - logic bust");
 
         break;
       }
@@ -2311,35 +2508,549 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
           const Real     eta      = m_eta(E, x);
           const Real     alphaEff = alpha - eta;
 
-          // Stop integration if avalanche phase is over
-          const bool negativeAlpha   = (alphaEff <= 0.0);
-          const bool haltIntegration = p.weight() > m_inceptionK && !m_fullIntegration;
+          // Compute a time step that we will use for the integration.
+          const Real     deltaX = std::min(spaceStep, alphaStep / alphaEff);
+          const Real     dt     = deltaX / v;
+          const RealVect newPos = p.position() + sgn * vel * dt;
+          const Real     delta  = (newPos - x).vectorLength();
 
-          if (negativeAlpha || haltIntegration) {
+          const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
+          const bool insideEB      = this->particleInsideEB(newPos);
+
+          // If particle hit the EB or domain we finish off with a partial Euler step
+          Real s = 0.0;
+          if (alphaEff < 0.0) {
+            processedParticles.transfer(lit);
+          }
+          else if (insideEB) {
+            const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
+
+            if (ParticleOps::ebIntersectionBisect(impFunc, x, newPos, spaceStep, s)) {
+              p.weight() = p.weight() + s * delta * alphaEff;
+            }
+
+            processedParticles.transfer(lit);
+          }
+          else if (outsideDomain) {
+            if (ParticleOps::domainIntersection(x, newPos, m_amr->getProbLo(), m_amr->getProbHi(), s)) {
+              p.weight() = p.weight() + s * delta * alphaEff;
+            }
+
             processedParticles.transfer(lit);
           }
           else {
-            // Compute a time step that we will use for the integration.
-            const Real     deltaX = std::min(spaceStep, alphaStep / alphaEff);
-            const Real     dt     = deltaX / v;
-            const RealVect newPos = p.position() + sgn * vel * dt;
+            // Do an Euler step, storaging alpha(p^k), v(p^k), and the time step size.
+            p.template real<0>() = alphaEff;
+            p.template real<1>() = dt;
+            p.template vect<1>() = vel;
 
-            const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
-            const bool insideEB      = this->particleInsideEB(newPos);
+            p.position() = newPos;
 
-            if (outsideDomain || insideEB) {
+            ++lit;
+          }
+        }
+      }
+    }
+
+    // Remap and update velocities.
+    m_tracerParticleSolver->remap();
+    m_tracerParticleSolver->interpolateVelocities();
+
+    // Second stage.
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Real dx = m_amr->getDx()[lvl];
+
+      Real spaceStep = std::numeric_limits<Real>::max();
+      Real alphaStep = std::numeric_limits<Real>::max();
+
+      switch (m_stepSizeMethod) {
+      case StepSizeMethod::Fixed: {
+        spaceStep = m_stepSizeFactor;
+
+        break;
+      }
+      case StepSizeMethod::Dx: {
+        spaceStep = m_stepSizeFactor * dx;
+
+        break;
+      }
+      case StepSizeMethod::Alpha: {
+        spaceStep = m_stepSizeFactor * dx;
+        alphaStep = m_stepSizeFactor;
+
+        break;
+      }
+      default: {
+        MayDay::Error("StreamerInceptionStepper::inceptionIntegrateEuler - logic bust");
+
+        break;
+      }
+      }
+
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+        List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
+        List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
+
+        for (ListIterator<P> lit(solverParticles); lit.ok();) {
+
+          P& p = lit();
+
+          const Real     dt  = p.template real<1>();
+          const RealVect vk  = p.template vect<1>();
+          const RealVect vk1 = p.velocity();
+          const RealVect x   = p.position();
+          const Real     E   = std::abs(a_voltage * vk1.vectorLength());
+
+          // Note the weird subtraction since p.position() was updated
+          // to p^k + dt * v^k.
+          const RealVect oldPos = p.position() - dt * vk;
+          const RealVect newPos = p.position() + 0.5 * sgn * dt * (vk1 - vk);
+
+          // Compute new alpha.
+          const Real alphak  = p.template real<0>();
+          const Real alphak1 = m_alpha(E, x) - m_eta(E, x);
+          const Real delta   = 0.5 * dt * (vk + vk1).vectorLength();
+
+          // Stop integration for particles that move into regions alpha < 0.0,
+          // inside the EB or outside of the domain.
+          const bool negativeAlpha = (alphak + alphak1) < 0.0;
+          const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
+          const bool insideEB      = this->particleInsideEB(newPos);
+
+          // If the particle wound up inside the EB we finish off the integration with a partial Euler step
+          Real s = 0.0;
+
+          if (negativeAlpha) {
+            processedParticles.transfer(lit);
+          }
+          else if (insideEB) {
+            const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
+
+            if (ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, spaceStep, s)) {
+              p.weight() = p.weight() + s * delta * alphak;
+            }
+
+            processedParticles.transfer(lit);
+          }
+          else if (outsideDomain) {
+            if (ParticleOps::domainIntersection(oldPos, newPos, m_amr->getProbLo(), m_amr->getProbHi(), s)) {
+              p.weight() = p.weight() + s * delta * alphak;
+            }
+
+            processedParticles.transfer(lit);
+          }
+          else {
+            p.position() = newPos;
+            p.weight()   = p.weight() + 0.5 * delta * (alphak + alphak1);
+
+            ++lit;
+          }
+        }
+
+        // Transfer particles that completed their integration (if we're doing partial integration)
+        if (!m_fullIntegration) {
+          for (ListIterator<P> lit(solverParticles); lit.ok();) {
+            P& p = lit();
+
+            if (p.weight() >= m_inceptionK) {
               processedParticles.transfer(lit);
             }
             else {
-              // Do an Euler step, storaging alpha(p^k), v(p^k), and the time step size.
-              p.template real<0>() = alphaEff;
-              p.template real<1>() = dt;
-              p.template vect<1>() = vel;
-
-              p.position() = newPos;
-
               ++lit;
             }
+          }
+        }
+      }
+    }
+
+    // Remap and update velocities.
+    m_tracerParticleSolver->remap();
+    m_tracerParticleSolver->interpolateVelocities();
+  }
+
+  // Copy processed particles over to the solver particles.
+  ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);
+
+  // Truncate the weights if we didn't run full integration
+  if (!m_fullIntegration) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+        List<P>& solverParticles = amrParticles[lvl][dit()].listItems();
+
+        for (ListIterator<P> lit(solverParticles); lit.ok(); ++lit) {
+          lit().weight() = std::min(m_inceptionK, lit().weight());
+        }
+      }
+    }
+  }
+
+  this->rewindTracerParticles();
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::computeTownsendCriterion");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::computeTownsendCriterion" << endl;
+  }
+
+  // Allocate storage for gamma-coefficient
+  EBAMRCellData gamma;
+  EBAMRCellData expK;
+
+  m_amr->allocate(gamma, m_realm, m_phase, 1);
+  m_amr->allocate(expK, m_realm, m_phase, 1);
+
+  // Do all voltages and both polarities
+  for (int i = 0; i < m_voltageSweeps.size(); ++i) {
+
+    // Polarities. Here, we are dealing with positive ions so the particles move with the field.
+    std::vector<Real> polarities{1.0, -1.0};
+
+    this->seedIonizationParticles(m_voltageSweeps[i]);
+
+    for (const auto& p : polarities) {
+
+      DataOps::setValue(gamma, 0.0);
+
+      if (p > 0.0) {
+        m_tracerParticleSolver->setVelocity(m_electricFieldPlus);
+      }
+      else {
+        m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
+      }
+
+      this->resetTracerParticles();
+
+      switch (m_inceptionAlgorithm) {
+      case IntegrationAlgorithm::Euler: {
+        this->townsendTrackEuler(m_voltageSweeps[i]);
+
+        break;
+      }
+      case IntegrationAlgorithm::Trapezoidal: {
+        this->townsendTrackTrapezoidal(m_voltageSweeps[i]);
+
+        break;
+      }
+      default: {
+        MayDay::Error("StreamerInceptionStepper::computeTownsendCriterion -- logic bust");
+
+        break;
+      }
+      }
+
+      // Deposit the particles on the mesh and see if they struck a cathode surface.
+      m_tracerParticleSolver->deposit(gamma);
+
+      m_amr->conservativeAverage(gamma, m_realm, m_phase);
+      m_amr->interpGhost(gamma, m_realm, m_phase);
+
+      // Compute gamma/exp(K)
+      auto func = [](const Real& a_value) -> Real {
+        return exp(a_value);
+      };
+
+      // Compute gamma * exp(K)
+      auto exponentiate = [](const Real x) -> Real {
+        return x > 0.0 ? exp(x) : 0.0;
+      };
+
+      if (p > 0.0) {
+        EBAMRCellData Kplus = m_amr->slice(m_inceptionIntegralPlus, Interval(i, i));
+        DataOps::copy(expK, Kplus);
+        DataOps::compute(expK, exponentiate);
+        DataOps::multiply(gamma, expK);
+
+        // If we're running without full integration we truncate the Townsend value to 1.
+        if (!m_fullIntegration) {
+          DataOps::compute(gamma, [](const Real x) {
+            return std::min(x, 1.0);
+          });
+        }
+
+        DataOps::copy(m_townsendCriterionPlus, gamma, Interval(i, i), Interval(0, 0));
+
+        Real minT = 0.0;
+        Real maxT = 0.0;
+
+        DataOps::getMaxMin(maxT, minT, gamma, 0);
+
+        m_maxTPlus[i] = maxT;
+      }
+      else {
+        EBAMRCellData Kminu = m_amr->slice(m_inceptionIntegralMinu, Interval(i, i));
+        DataOps::copy(expK, Kminu);
+        DataOps::compute(expK, exponentiate);
+        DataOps::multiply(gamma, expK);
+
+        // If we're running without full integration we truncate the Townsend value to 1.
+        if (!m_fullIntegration) {
+          DataOps::compute(gamma, [](const Real x) {
+            return std::min(x, 1.0);
+          });
+        }
+
+        DataOps::copy(m_townsendCriterionMinu, gamma, Interval(i, i), Interval(0, 0));
+
+        Real minT = 0.0;
+        Real maxT = 0.0;
+
+        DataOps::getMaxMin(maxT, minT, gamma, 0);
+
+        m_maxTMinu[i] = maxT;
+      }
+    }
+  }
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::townsendTrackEuler");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::townsendTrackEuler" << endl;
+  }
+
+  const RealVect probLo = m_amr->getProbLo();
+  const RealVect probHi = m_amr->getProbHi();
+
+  // Allocate a data holder for holding the processed particles. This
+  // will be faster because then we only have to iterate through the
+  // particles that are actually still moving.
+  ParticleContainer<P> amrProcessedParticles;
+  m_amr->allocate(amrProcessedParticles, m_realm);
+
+  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
+
+  m_tracerParticleSolver->remap();
+  m_tracerParticleSolver->interpolateVelocities();
+
+  size_t outcastsBefore  = 0;
+  size_t particlesBefore = 0;
+
+  if (m_debug) {
+    outcastsBefore  = amrParticles.getNumberOfOutcastParticlesGlobal();
+    particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
+  }
+
+  while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
+
+    // Euler integration.
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Real dx = m_amr->getDx()[lvl];
+
+      // Set the spatial step.
+      Real spaceStep = std::numeric_limits<Real>::max();
+
+      switch (m_stepSizeMethod) {
+      case StepSizeMethod::Fixed: {
+        spaceStep = m_stepSizeFactor;
+
+        break;
+      }
+      case StepSizeMethod::Dx: {
+        spaceStep = m_stepSizeFactor * dx;
+
+        break;
+      }
+      case StepSizeMethod::Alpha: {
+        spaceStep = m_stepSizeFactor * dx;
+
+        break;
+      }
+      default: {
+        MayDay::Error("StreamerInceptionStepper::townsendTrackEuler - logic bust");
+
+        break;
+      }
+      }
+
+      // Integrate particles until they leave alpha > 0 or strike a cathode surface.
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+        List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
+        List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
+
+        for (ListIterator<P> lit(solverParticles); lit.ok();) {
+          P& p = lit();
+
+          const RealVect x      = p.position();
+          const RealVect vel    = p.velocity();
+          const Real     v      = vel.vectorLength();
+          const Real     E      = std::abs(a_voltage * v);
+          const Real     deltaX = spaceStep;
+          const Real     dt     = deltaX / v;
+          const RealVect newPos = p.position() + dt * vel;
+
+          const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
+          const bool insideEB      = this->particleInsideEB(newPos);
+
+          // Stop integration if avalanche phase is over
+          const Real alpha         = m_alpha(E, x);
+          const Real eta           = m_eta(E, x);
+          const Real alphaEff      = alpha - eta;
+          const bool negativeAlpha = alphaEff <= 0.0;
+
+          p.weight() = 0.0;
+
+          if (insideEB) {
+            p.weight() = m_secondaryEmission(E, x);
+
+            processedParticles.transfer(lit);
+          }
+          else if (outsideDomain || negativeAlpha) {
+            processedParticles.transfer(lit);
+          }
+          else {
+            p.position() = newPos;
+
+            ++lit;
+          }
+        }
+      }
+    }
+
+    // Update velocities.
+    m_tracerParticleSolver->remap();
+    m_tracerParticleSolver->interpolateVelocities();
+  }
+
+  ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);
+
+  this->rewindTracerParticles();
+
+  size_t outcastsAfter  = 0;
+  size_t particlesAfter = 0;
+
+  if (m_debug) {
+    outcastsAfter  = amrParticles.getNumberOfOutcastParticlesGlobal();
+    particlesAfter = amrParticles.getNumberOfValidParticlesGlobal();
+  }
+
+  if (particlesBefore != particlesAfter) {
+    MayDay::Warning("StreamerInceptionStepper::townsendTrackEuler - lost/gained particles!");
+  }
+  if (outcastsBefore != outcastsAfter) {
+    MayDay::Warning("StreamerInceptionStepper::townsendTrackEuler - lost/gained outcast particles!");
+  }
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltage) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::townsendTrackTrapezoidal");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::townsendTrackTrapezoidal" << endl;
+  }
+
+  // TLDR: We move the particle using Heun's method.
+  //
+  //          p^(k+1) = p^k + 0.5 * dt * [v(p^k) + v(p^l)]
+  //
+  //       where p^l = p^k + dt * v(p^k). We will set dt = d/|v(p^k)|.
+
+  const RealVect probLo = m_amr->getProbLo();
+  const RealVect probHi = m_amr->getProbHi();
+
+  // Allocate a data holder for holding the processed particles. This
+  // will be faster because then we only have to iterate through the
+  // particles that are actually still moving.
+  ParticleContainer<P> amrProcessedParticles;
+  m_amr->allocate(amrProcessedParticles, m_realm);
+
+  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
+
+  m_tracerParticleSolver->remap();
+  m_tracerParticleSolver->interpolateVelocities();
+
+  size_t outcastsBefore  = 0;
+  size_t particlesBefore = 0;
+
+  if (m_debug) {
+    outcastsBefore  = amrParticles.getNumberOfOutcastParticlesGlobal();
+    particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
+  }
+
+  while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
+
+    // Euler stage.
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Real dx = m_amr->getDx()[lvl];
+
+      Real spaceStep = std::numeric_limits<Real>::max();
+      Real alphaStep = std::numeric_limits<Real>::max();
+
+      switch (m_stepSizeMethod) {
+      case StepSizeMethod::Fixed: {
+        spaceStep = m_stepSizeFactor;
+
+        break;
+      }
+      case StepSizeMethod::Dx: {
+        spaceStep = m_stepSizeFactor * dx;
+
+        break;
+      }
+      case StepSizeMethod::Alpha: {
+        spaceStep = m_stepSizeFactor * dx;
+
+        break;
+      }
+      default: {
+        MayDay::Error("StreamerInceptionStepper::townsendTrackTrapezoidal - logic bust");
+
+        break;
+      }
+      }
+
+      // First stage
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+        List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
+        List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
+
+        for (ListIterator<P> lit(solverParticles); lit.ok();) {
+          P& p = lit();
+
+          const RealVect x        = p.position();
+          const RealVect vel      = p.velocity();
+          const Real     v        = vel.vectorLength();
+          const Real     E        = std::abs(a_voltage * v);
+          const Real     alpha    = m_alpha(E, x);
+          const Real     eta      = m_eta(E, x);
+          const Real     alphaEff = alpha - eta;
+
+          // Compute a time step that we will use for the integration.
+          const Real     deltaX = spaceStep;
+          const Real     dt     = deltaX / v;
+          const RealVect newPos = p.position() + vel * dt;
+
+          const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
+          const bool insideEB      = this->particleInsideEB(newPos);
+
+          if (insideEB) {
+            p.weight() = m_secondaryEmission(E, x);
+
+            processedParticles.transfer(lit);
+          }
+          else if (alphaEff < 0.0) {
+            processedParticles.transfer(lit);
+          }
+          else if (outsideDomain) {
+            processedParticles.transfer(lit);
+          }
+          else {
+            // Do an Euler step, storaging alpha(p^k), v(p^k), and the time step size.
+            p.template real<0>() = alphaEff;
+            p.template real<1>() = dt;
+            p.template vect<1>() = vel;
+
+            p.position() = newPos;
+
+            ++lit;
           }
         }
       }
@@ -2367,25 +3078,32 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
 
           // Note the weird subtraction since p.position() was updated
           // to p^k + dt * v^k.
-          const RealVect newPos = p.position() + 0.5 * sgn * dt * (vk1 - vk);
+          const RealVect oldPos = p.position() - dt * vk;
+          const RealVect newPos = p.position() + 0.5 * dt * (vk1 - vk);
 
           // Compute new alpha.
           const Real alphak  = p.template real<0>();
           const Real alphak1 = m_alpha(E, x) - m_eta(E, x);
-          const Real d       = 0.5 * dt * (vk + vk1).vectorLength();
 
           // Stop integration for particles that move into regions alpha < 0.0,
           // inside the EB or outside of the domain.
-          const bool negativeAlpha = (alphak + alphak1) <= 0.0;
+          const bool negativeAlpha = (alphak + alphak1) < 0.0;
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
-          if (negativeAlpha || outsideDomain || insideEB) {
+          // If the particle wound up inside the EB we finish off the integration with a partial Euler step
+          Real s = 0.0;
+
+          if (insideEB) {
+            p.weight() = m_secondaryEmission(E, oldPos);
+
+            processedParticles.transfer(lit);
+          }
+          else if (outsideDomain) {
             processedParticles.transfer(lit);
           }
           else {
             p.position() = newPos;
-            p.weight()   = p.weight() + 0.5 * d * (alphak + alphak1);
 
             ++lit;
           }
@@ -2402,6 +3120,21 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
   ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);
 
   this->rewindTracerParticles();
+
+  size_t outcastsAfter  = 0;
+  size_t particlesAfter = 0;
+
+  if (m_debug) {
+    outcastsAfter  = amrParticles.getNumberOfOutcastParticlesGlobal();
+    particlesAfter = amrParticles.getNumberOfValidParticlesGlobal();
+  }
+
+  if (particlesBefore != particlesAfter) {
+    MayDay::Warning("StreamerInceptionStepper::townsendTrackTrapezoidal - lost/gained particles!");
+  }
+  if (outcastsBefore != outcastsAfter) {
+    MayDay::Warning("StreamerInceptionStepper::townsendTrackTrapezoidal - lost/gained outcast particles!");
+  }
 }
 
 template <typename P, typename F, typename C>
@@ -2866,19 +3599,101 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
 
     constexpr int comp = 0;
 
-    // Function which interpolates the inception voltage if possible. Used in the kernels.
-    auto interpVinc = [Kinc = this->m_inceptionK, &V = this->m_voltageSweeps](const std::vector<Real>& K) -> Real {
-      Real Vinc = std::numeric_limits<Real>::quiet_NaN();
-      for (size_t i = 0; i < K.size() - 1; i++) {
+    // Function which interpolates the inception voltage if possible. Used in the kernels. This one does interpolation.
+    auto calcUincInterp = [Kinc = this->m_inceptionK, &V = this->m_voltageSweeps](const std::vector<Real>& K,
+                                                                                  const std::vector<Real>& T) -> Real {
+      Real streamerInc = std::numeric_limits<Real>::quiet_NaN();
+      Real townsendInc = std::numeric_limits<Real>::quiet_NaN();
 
+      bool foundInception = false;
+
+      // Streamer criterion
+      for (size_t i = 0; i < K.size() - 1; i++) {
         if (K[i] <= Kinc && K[i + 1] > Kinc) {
-          Vinc = V[i] + (Kinc - K[i]) * (V[i + 1] - V[i]) / (K[i + 1] - K[i]);
+          streamerInc = V[i] + (Kinc - K[i]) * (V[i + 1] - V[i]) / (K[i + 1] - K[i]);
+
+          break;
+        }
+        else if (K[i] == Kinc) {
+          streamerInc = V[i];
 
           break;
         }
       }
 
-      return Vinc;
+      // Townsend criterion
+      for (size_t i = 0; i < T.size() - 1; i++) {
+        if (T[i] <= 1.0 && T[i + 1] > 1) {
+          townsendInc = V[i] + (1.0 - T[i]) * (V[i + 1] - V[i]) / (T[i + 1] - T[i]);
+
+          break;
+        }
+        else if (T[i] == 1.0) {
+          townsendInc = V[i];
+
+          break;
+        }
+      }
+
+      Real Uinc;
+
+      if (std::isnan(streamerInc) && std::isnan(townsendInc)) {
+        Uinc = std::numeric_limits<Real>::quiet_NaN();
+      }
+      else if (std::isnan(streamerInc) && !std::isnan(townsendInc)) {
+        Uinc = townsendInc;
+      }
+      else if (!std::isnan(streamerInc) && std::isnan(townsendInc)) {
+        Uinc = streamerInc;
+      }
+      else {
+        Uinc = std::min(streamerInc, townsendInc);
+      }
+
+      return Uinc;
+    };
+
+    // Same functionality as above, but without interpolation.
+    auto calcUincNoInterp = [Kinc = this->m_inceptionK,
+                             &V   = this->m_voltageSweeps](const std::vector<Real>& K,
+                                                         const std::vector<Real>& T) -> Real {
+      Real streamerInc = std::numeric_limits<Real>::quiet_NaN();
+      Real townsendInc = std::numeric_limits<Real>::quiet_NaN();
+
+      // Streamer criterion
+      for (size_t i = 0; i < K.size() - 1; i++) {
+        if (K[i] <= Kinc && K[i + 1] >= Kinc) {
+          streamerInc = V[i];
+
+          break;
+        }
+      }
+
+      // Townsend criterion
+      for (size_t i = 0; i < T.size() - 1; i++) {
+        if (T[i] <= 1.0 && T[i + 1] >= 1) {
+          townsendInc = V[i];
+
+          break;
+        }
+      }
+
+      Real Uinc;
+
+      if (std::isnan(streamerInc) && std::isnan(townsendInc)) {
+        Uinc = std::numeric_limits<Real>::quiet_NaN();
+      }
+      else if (std::isnan(streamerInc) && !std::isnan(townsendInc)) {
+        Uinc = townsendInc;
+      }
+      else if (!std::isnan(streamerInc) && std::isnan(townsendInc)) {
+        Uinc = streamerInc;
+      }
+      else {
+        Uinc = std::min(streamerInc, townsendInc);
+      }
+
+      return Uinc;
     };
 
     // Iterate through m_inceptionIntegral data and calculate inception voltage.
@@ -2898,18 +3713,36 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
         const FArrayBox& inceptionIntegralPlusReg = inceptionIntegralPlus.getFArrayBox();
         const FArrayBox& inceptionIntegralMinuReg = inceptionIntegralMinu.getFArrayBox();
 
+        const EBCellFAB& townsendCriterionPlus = (*m_townsendCriterionPlus[lvl])[dit()];
+        const EBCellFAB& townsendCriterionMinu = (*m_townsendCriterionMinu[lvl])[dit()];
+
+        const FArrayBox& townsendCriterionPlusReg = townsendCriterionPlus.getFArrayBox();
+        const FArrayBox& townsendCriterionMinuReg = townsendCriterionMinu.getFArrayBox();
+
         // Regular kernel.
         auto regularKernel = [&](const IntVect& iv) -> void {
           std::vector<Real> Kplus;
           std::vector<Real> Kminu;
 
+          std::vector<Real> Tplus;
+          std::vector<Real> Tminu;
+
           for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
             Kplus.emplace_back(inceptionIntegralPlusReg(iv, i));
             Kminu.emplace_back(inceptionIntegralMinuReg(iv, i));
+
+            Tplus.emplace_back(townsendCriterionPlusReg(iv, i));
+            Tminu.emplace_back(townsendCriterionMinuReg(iv, i));
           }
 
-          inceptionVoltagePlusReg(iv, comp) = interpVinc(Kplus);
-          inceptionVoltageMinuReg(iv, comp) = interpVinc(Kminu);
+          if (m_fullIntegration) {
+            inceptionVoltagePlusReg(iv, comp) = calcUincInterp(Kplus, Tplus);
+            inceptionVoltageMinuReg(iv, comp) = calcUincInterp(Kminu, Tminu);
+          }
+          else {
+            inceptionVoltagePlusReg(iv, comp) = calcUincNoInterp(Kplus, Tplus);
+            inceptionVoltageMinuReg(iv, comp) = calcUincNoInterp(Kminu, Tminu);
+          }
         };
 
         // Irregular kernel.
@@ -2917,13 +3750,25 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
           std::vector<Real> Kplus;
           std::vector<Real> Kminu;
 
+          std::vector<Real> Tplus;
+          std::vector<Real> Tminu;
+
           for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
             Kplus.emplace_back(inceptionIntegralPlus(vof, i));
             Kminu.emplace_back(inceptionIntegralMinu(vof, i));
+
+            Tplus.emplace_back(townsendCriterionPlus(vof, i));
+            Tminu.emplace_back(townsendCriterionMinu(vof, i));
           }
 
-          inceptionVoltagePlus(vof, comp) = interpVinc(Kplus);
-          inceptionVoltageMinu(vof, comp) = interpVinc(Kminu);
+          if (m_fullIntegration) {
+            inceptionVoltagePlus(vof, comp) = calcUincInterp(Kplus, Tplus);
+            inceptionVoltageMinu(vof, comp) = calcUincInterp(Kminu, Tminu);
+          }
+          else {
+            inceptionVoltagePlus(vof, comp) = calcUincNoInterp(Kplus, Tplus);
+            inceptionVoltageMinu(vof, comp) = calcUincNoInterp(Kminu, Tminu);
+          }
         };
 
         // Kernel regions.
@@ -3038,12 +3883,18 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeStationary() noexcept
         const FArrayBox& inceptionIntegralPlusReg = inceptionIntegralPlus.getFArrayBox();
         const FArrayBox& inceptionIntegralMinuReg = inceptionIntegralMinu.getFArrayBox();
 
+        const EBCellFAB& townsendCritPlus = (*m_townsendCriterionPlus[lvl])[dit()];
+        const EBCellFAB& townsendCritMinu = (*m_townsendCriterionMinu[lvl])[dit()];
+
+        const FArrayBox& townsendCritPlusReg = townsendCritPlus.getFArrayBox();
+        const FArrayBox& townsendCritMinuReg = townsendCritMinu.getFArrayBox();
+
         auto regularKernel = [&](const IntVect& iv) -> void {
           if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
-            if (inceptionIntegralPlusReg(iv, i) >= m_inceptionK) {
+            if (inceptionIntegralPlusReg(iv, i) >= m_inceptionK || townsendCritPlusReg(iv, i) >= 1.0) {
               criticalVolumePlus += std::pow(dx, SpaceDim);
             }
-            if (inceptionIntegralMinuReg(iv, i) >= m_inceptionK) {
+            if (inceptionIntegralMinuReg(iv, i) >= m_inceptionK || townsendCritMinuReg(iv, i) >= 1.0) {
               criticalVolumeMinu += std::pow(dx, SpaceDim);
             }
           }
@@ -3053,10 +3904,10 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeStationary() noexcept
           if (validCells(vof.gridIndex())) {
             const Real kappa = ebisbox.volFrac(vof);
 
-            if (inceptionIntegralPlus(vof, i) >= m_inceptionK) {
+            if (inceptionIntegralPlus(vof, i) >= m_inceptionK || townsendCritPlus(vof, i) >= 1.0) {
               criticalVolumePlus += kappa * std::pow(dx, SpaceDim);
             }
-            if (inceptionIntegralMinu(vof, i) >= m_inceptionK) {
+            if (inceptionIntegralMinu(vof, i) >= m_inceptionK || townsendCritMinu(vof, i) >= 1.0) {
               criticalVolumeMinu += kappa * std::pow(dx, SpaceDim);
             }
           }
@@ -3160,14 +4011,17 @@ StreamerInceptionStepper<P, F, C>::computeCriticalAreaStationary() noexcept
         const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
         const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
 
+        const EBCellFAB& townsendCriterionPlus = (*m_townsendCriterionPlus[lvl])[dit()];
+        const EBCellFAB& townsendCriterionMinu = (*m_townsendCriterionMinu[lvl])[dit()];
+
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           if (validCells(vof.gridIndex())) {
             const Real boundaryArea = ebisbox.bndryArea(vof);
 
-            if (inceptionIntegralPlus(vof, i) >= m_inceptionK) {
+            if (inceptionIntegralPlus(vof, i) >= m_inceptionK || townsendCriterionPlus(vof, i) >= 1.0) {
               criticalAreaPlus += boundaryArea * std::pow(dx, SpaceDim - 1);
             }
-            if (inceptionIntegralMinu(vof, i) >= m_inceptionK) {
+            if (inceptionIntegralMinu(vof, i) >= m_inceptionK || townsendCriterionMinu(vof, i) >= 1.0) {
               criticalAreaMinu += boundaryArea * std::pow(dx, SpaceDim - 1);
             }
           }
@@ -3530,43 +4384,52 @@ StreamerInceptionStepper<P, F, C>::writeReportStationary() const noexcept
 
     std::ofstream output(m_outputFile, std::ofstream::out);
 
+    const std::string lineBreak = "# " + std::string(178, '=');
+
     // clang-format off
-    output << "# ==================================================================================================================================" << "\n";
+    output << lineBreak << "\n";
     if (std::isnan(UIncPlus.first) || std::isnan(UIncMinu.first)) {
       output << "# Could not compute inception voltage\n";
     }
     else {
-      output << "# Inception voltage + = " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
-      output << "# Inception voltage - = " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";      
+      if(m_fullIntegration){
+	output << "# Inception voltage(+) = " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
+	output << "# Inception voltage(-) = " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";
+      }
+      else{
+	output << "# Inception voltage(+) >= " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
+	output << "# Inception voltage(-) >= " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";
+      }      
     }
-    
-    output << "# ==================================================================================================================================" << "\n";    
+
+
+    output << lineBreak << "\n";
     output << left << setw(15) << setfill(' ') << "# +/- Voltage";
     output << left << setw(15) << setfill(' ') << "Max K(+)";
     output << left << setw(15) << setfill(' ') << "Max K(-)";
+    output << left << setw(20) << setfill(' ') << "Max T(+)";
+    output << left << setw(20) << setfill(' ') << "Max T(-)";    
     output << left << setw(20) << setfill(' ') << "Crit. vol(+)";
     output << left << setw(20) << setfill(' ') << "Crit. vol(-)";
     output << left << setw(20) << setfill(' ') << "Crit. area(+)";
     output << left << setw(20) << setfill(' ') << "Crit. area(-)";
-    output << left << setw(20) << setfill(' ') << "Ionization vol.";
-    output << left << setw(20) << setfill(' ') << "Rdot (+)";
-    output << left << setw(20) << setfill(' ') << "Rdot (-)" << "\n";
-    output << "# ==================================================================================================================================" << "\n";        
+    output << left << setw(20) << setfill(' ') << "Ionization vol." << "\n";
+    output << lineBreak << "\n";        
 
     for (int i = 0; i < m_voltageSweeps.size(); i++) {
       output << left << setw(15) << setfill(' ') << m_voltageSweeps[i];
       output << left << setw(15) << setfill(' ') << m_maxKPlus[i];
       output << left << setw(15) << setfill(' ') << m_maxKMinu[i];
+      output << left << setw(20) << setfill(' ') << m_maxTPlus[i];
+      output << left << setw(20) << setfill(' ') << m_maxTMinu[i];      
       output << left << setw(20) << setfill(' ') << m_criticalVolumePlus[i];
       output << left << setw(20) << setfill(' ') << m_criticalVolumeMinu[i];
       output << left << setw(20) << setfill(' ') << m_criticalAreaPlus[i];
       output << left << setw(20) << setfill(' ') << m_criticalAreaMinu[i];
       output << left << setw(20) << setfill(' ') << m_ionizationVolume[i];
-      output << left << setw(20) << setfill(' ') << m_RdotPlus[i];
-      output << left << setw(20) << setfill(' ') << m_RdotMinu[i];
       output << endl;
     }
-    output << "# ==================================================================================================================================" << "\n";
+    output << lineBreak << "\n";
     // clang-format on
 #ifdef CH_MPI
   }

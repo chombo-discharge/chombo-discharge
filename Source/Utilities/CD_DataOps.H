@@ -148,6 +148,24 @@ public:
                     const ProblemDomain&        a_domain);
 
   /*!
+    @brief Compute a new value given the old cell value. 
+    @details Useful for quickly calculating a cell value as e.g. exp(x) where the original data was only x
+    @param[inout] a_data Input data
+    @param[in]    a_func Function for transforming the data
+  */
+  static void
+  compute(EBAMRCellData& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept;
+
+  /*!
+    @brief Compute a new value given the old cell value. 
+    @details Useful for quickly calculating a cell value as e.g. exp(x) where the original data was only x
+    @param[inout] a_data Input data
+    @param[in]    a_func Function for transforming the data
+  */
+  static void
+  compute(LevelData<EBCellFAB>& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept;
+
+  /*!
     @brief Compote the cell-wise dot product between two data holders. 
     @param[out] a_result Result. Holds the dot product in each cell.
     @param[in]  a_data1 First data holder.

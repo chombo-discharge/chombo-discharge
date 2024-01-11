@@ -388,6 +388,13 @@ namespace Physics {
       setFieldEmission(const std::function<Real(const Real& E, const RealVect& x)>& a_currentDensity) noexcept;
 
       /*!
+	@brief Set the secondary emission coefficient
+	@param[in] a_coeff Secondary emission coefficient. 
+      */
+      virtual void
+      setSecondaryEmission(const std::function<Real(const Real& E, const RealVect& x)>& a_coeff) noexcept;
+
+      /*!
 	@brief Get the solver mode
       */
       virtual Mode
@@ -504,6 +511,16 @@ namespace Physics {
       */
       EBAMRCellData m_inceptionVoltageMinu;
 
+      /*!
+	@brief Townsend criterion for starting positive ions
+      */
+      EBAMRCellData m_townsendCriterionPlus;
+
+      /*!
+	@brief Townsend criterion for starting positive ions
+      */
+      EBAMRCellData m_townsendCriterionMinu;
+
       /*! 
 	@brief Max K value for every voltage
 	@note Stationary mode, positive polarity
@@ -515,6 +532,18 @@ namespace Physics {
 	@note Stationary mode, negative polarity
       */
       std::vector<Real> m_maxKMinu;
+
+      /*! 
+	@brief Max Townsend value (exp(K)/gamma) for every voltage
+	@note Stationary mode, positive polarity
+      */
+      std::vector<Real> m_maxTPlus;
+
+      /*! 
+	@brief Max Townsend value (exp(K)/gamma) for every voltage
+	@note Stationary mode, negative polarity
+      */
+      std::vector<Real> m_maxTMinu;
 
       /*!
 	@brief Max K value for every time step
@@ -653,6 +682,11 @@ namespace Physics {
       bool m_debug;
 
       /*!
+	@brief Evaluate secondary emission
+      */
+      bool m_evaluateTownsend;
+
+      /*!
 	@brief Use full reconstruction of critical volume or not
       */
       bool m_fullIntegration;
@@ -711,6 +745,11 @@ namespace Physics {
 	@brief If true, plot eta
       */
       bool m_plotEta;
+
+      /*!
+	@brief Plot the Townsend-criterion for initiatory ions
+      */
+      bool m_plotTownsend;
 
       /*!
 	@brief Time-dependent voltage
@@ -783,6 +822,11 @@ namespace Physics {
       std::function<Real(const Real& E, const RealVect& x)> m_fieldEmission;
 
       /*!
+	@brief Secondary emission coefficient
+      */
+      std::function<Real(const Real& E, const RealVect& x)> m_secondaryEmission;
+
+      /*!
 	@brief Distribute particles in every grid cell
       */
       virtual void
@@ -824,6 +868,28 @@ namespace Physics {
       */
       virtual void
       inceptionIntegrateTrapezoidal(const Real& a_voltage) noexcept;
+
+      /*!
+	@brief Solve for the Townsend criterion for each particle in each voltage. 
+	@details This is called in postInitialize() only. 
+	@note For stationary mode only. 
+      */
+      virtual void
+      computeTownsendCriterion() noexcept;
+
+      /*!
+	@brief Track particles (positive ions) using an Euler rule and check if the collide with a cathode
+	@param[in] a_voltage Voltage multiplier
+      */
+      virtual void
+      townsendTrackEuler(const Real& a_voltage) noexcept;
+
+      /*!
+	@brief Track particles (positive ions) using a trapezoidal rule and check if the collide with a cathode
+	@param[in] a_voltage Voltage multiplier
+      */
+      virtual void
+      townsendTrackTrapezoidal(const Real& a_voltage) noexcept;
 
       /*!
 	@brief Compute integral_Vcr(dne/dt * (1 - eta/alpha) dV)

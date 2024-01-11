@@ -168,6 +168,7 @@ StreamerInceptionStepper.verbosity     = -1                            # Chattin
 StreamerInceptionStepper.profile       = false                         # Turn on/off run-time profiling
 StreamerInceptionStepper.full_integration = false
 StreamerInceptionStepper.mode          = transient                     # Mode (stationary or transient)
+StreamerInceptionStepper.eval_townsend    = true                    ## Evaluate Townsend criterion or not (only for stationary)
 StreamerInceptionStepper.inception_alg = euler alpha 0.25                  # Integration algorithm for inception integral.
 StreamerInceptionStepper.output_file   = report.txt                    # Output file
 StreamerInceptionStepper.K_inception   = 10                            # User-specified inception value

@@ -347,6 +347,18 @@ TracerParticleSolver<P>::remap()
 
 template <typename P>
 inline void
+TracerParticleSolver<P>::setDeposition(const DepositionType a_deposition) noexcept
+{
+  CH_TIME("TracerParticleSolver::setDeposition");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::setDeposition" << endl;
+  }
+
+  m_deposition = a_deposition;
+}
+
+template <typename P>
+inline void
 TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const noexcept
 {
   CH_TIME("TracerParticleSolver::deposit(EBAMRCellData)");
