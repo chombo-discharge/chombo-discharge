@@ -203,4 +203,4 @@ StreamerInceptionTagger.plot        = false # Plot tagging field or not.
 gamma_ions                       = 1.E-2 # Secondary emission coefficient due to ion impact
 pressure                         = 1.0   # Pressure in atmospheres
 temperature                      = 300   # Temperature in Kelvin
-WireWire.insulation_permittivity =10.0   # Insulation permittivity
+WireWire.insulation_permittivity =4.0   # Insulation permittivity
