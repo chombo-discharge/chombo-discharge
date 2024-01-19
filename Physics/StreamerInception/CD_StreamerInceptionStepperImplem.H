@@ -179,6 +179,10 @@ StreamerInceptionStepper<P, F, C>::allocate()
     m_amr->allocate(m_inceptionIntegralMinu, m_realm, m_phase, m_voltageSweeps.size());
     m_amr->allocate(m_inceptionVoltagePlus, m_realm, m_phase, 1);
     m_amr->allocate(m_inceptionVoltageMinu, m_realm, m_phase, 1);
+    m_amr->allocate(m_streamerInceptionVoltagePlus, m_realm, m_phase, 1);
+    m_amr->allocate(m_streamerInceptionVoltageMinu, m_realm, m_phase, 1);
+    m_amr->allocate(m_townsendInceptionVoltagePlus, m_realm, m_phase, 1);
+    m_amr->allocate(m_townsendInceptionVoltageMinu, m_realm, m_phase, 1);
 
     if (m_plotFieldEmission) {
       m_amr->allocate(m_emissionRatesPlus, m_realm, m_phase, m_voltageSweeps.size());
@@ -629,7 +633,7 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
 
     // Inception voltage.
     if (m_plotInceptionVoltage) {
-      ncomp += 2;
+      ncomp += 6;
     }
 
     // Background ionization rates
@@ -767,8 +771,12 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
   const std::string prefix = "StreamerInceptionStepper/";
 
   if (m_plotInceptionVoltage) {
-    plotVars.push_back(prefix + "Inception voltage +");
-    plotVars.push_back(prefix + "Inception voltage -");
+    plotVars.push_back(prefix + "Minimum inception voltage +");
+    plotVars.push_back(prefix + "Minimum inception voltage -");
+    plotVars.push_back(prefix + "Streamer inception voltage +");
+    plotVars.push_back(prefix + "Streamer inception voltage -");
+    plotVars.push_back(prefix + "Townsend inception voltage +");
+    plotVars.push_back(prefix + "Townsend inception voltage -");
   }
 
   if (m_plotInceptionIntegral) {
@@ -980,6 +988,10 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
   if (m_plotInceptionVoltage) {
     this->writeData(a_output, a_icomp, m_inceptionVoltagePlus, a_outputRealm, a_level, false, true);
     this->writeData(a_output, a_icomp, m_inceptionVoltageMinu, a_outputRealm, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_streamerInceptionVoltagePlus, a_outputRealm, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_streamerInceptionVoltageMinu, a_outputRealm, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_townsendInceptionVoltagePlus, a_outputRealm, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_townsendInceptionVoltageMinu, a_outputRealm, a_level, false, true);
   }
 
   if (m_plotInceptionIntegral) {
@@ -1637,6 +1649,10 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
     m_amr->reallocate(m_inceptionIntegralMinu, m_phase, a_lmin);
     m_amr->reallocate(m_inceptionVoltagePlus, m_phase, a_lmin);
     m_amr->reallocate(m_inceptionVoltageMinu, m_phase, a_lmin);
+    m_amr->reallocate(m_streamerInceptionVoltagePlus, m_phase, a_lmin);
+    m_amr->reallocate(m_streamerInceptionVoltageMinu, m_phase, a_lmin);
+    m_amr->reallocate(m_townsendInceptionVoltagePlus, m_phase, a_lmin);
+    m_amr->reallocate(m_townsendInceptionVoltageMinu, m_phase, a_lmin);
 
     if (m_plotBackgroundIonization) {
       m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
@@ -3671,6 +3687,8 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
   // TLDR: This routine runs through all the K-values in each cell and estimates the
   //       inception voltage using linear interpolation.
 
+  CH_assert(m_mode == Mode::Stationary);
+
   if (m_voltageSweeps.size() < 2) {
     DataOps::setValue(m_inceptionVoltagePlus, std::numeric_limits<Real>::quiet_NaN());
     DataOps::setValue(m_inceptionVoltageMinu, std::numeric_limits<Real>::quiet_NaN());
@@ -3683,8 +3701,9 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
     constexpr int comp = 0;
 
     // Function which interpolates the inception voltage if possible. Used in the kernels. This one does interpolation.
-    auto calcUincInterp = [Kinc = this->m_inceptionK, &V = this->m_voltageSweeps](const std::vector<Real>& K,
-                                                                                  const std::vector<Real>& T) -> Real {
+    auto calcUincInterp = [Kinc = this->m_inceptionK,
+                           &V   = this->m_voltageSweeps](const std::vector<Real>& K,
+                                                       const std::vector<Real>& T) -> std::array<Real, 3> {
       Real streamerInc = std::numeric_limits<Real>::quiet_NaN();
       Real townsendInc = std::numeric_limits<Real>::quiet_NaN();
 
@@ -3733,13 +3752,13 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
         Uinc = std::min(streamerInc, townsendInc);
       }
 
-      return Uinc;
+      return std::array<Real, 3>{Uinc, streamerInc, townsendInc};
     };
 
     // Same functionality as above, but without interpolation.
     auto calcUincNoInterp = [Kinc = this->m_inceptionK,
                              &V   = this->m_voltageSweeps](const std::vector<Real>& K,
-                                                         const std::vector<Real>& T) -> Real {
+                                                         const std::vector<Real>& T) -> std::array<Real, 3> {
       Real streamerInc = std::numeric_limits<Real>::quiet_NaN();
       Real townsendInc = std::numeric_limits<Real>::quiet_NaN();
 
@@ -3776,7 +3795,7 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
         Uinc = std::min(streamerInc, townsendInc);
       }
 
-      return Uinc;
+      return std::array<Real, 3>{Uinc, streamerInc, townsendInc};
     };
 
     // Iterate through m_inceptionIntegral data and calculate inception voltage.
@@ -3787,8 +3806,20 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
         EBCellFAB& inceptionVoltagePlus = (*m_inceptionVoltagePlus[lvl])[dit()];
         EBCellFAB& inceptionVoltageMinu = (*m_inceptionVoltageMinu[lvl])[dit()];
 
+        EBCellFAB& streamerInceptionVoltagePlus = (*m_streamerInceptionVoltagePlus[lvl])[dit()];
+        EBCellFAB& streamerInceptionVoltageMinu = (*m_streamerInceptionVoltageMinu[lvl])[dit()];
+
+        EBCellFAB& townsendInceptionVoltagePlus = (*m_townsendInceptionVoltagePlus[lvl])[dit()];
+        EBCellFAB& townsendInceptionVoltageMinu = (*m_townsendInceptionVoltageMinu[lvl])[dit()];
+
         FArrayBox& inceptionVoltagePlusReg = inceptionVoltagePlus.getFArrayBox();
         FArrayBox& inceptionVoltageMinuReg = inceptionVoltageMinu.getFArrayBox();
+
+        FArrayBox& streamerInceptionVoltagePlusReg = streamerInceptionVoltagePlus.getFArrayBox();
+        FArrayBox& streamerInceptionVoltageMinuReg = streamerInceptionVoltageMinu.getFArrayBox();
+
+        FArrayBox& townsendInceptionVoltagePlusReg = townsendInceptionVoltagePlus.getFArrayBox();
+        FArrayBox& townsendInceptionVoltageMinuReg = townsendInceptionVoltageMinu.getFArrayBox();
 
         const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
         const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
@@ -3818,14 +3849,26 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
             Tminu.emplace_back(townsendCriterionMinuReg(iv, i));
           }
 
+          std::array<Real, 3> inceptionVoltagesPlus;
+          std::array<Real, 3> inceptionVoltagesMinu;
+
           if (m_fullIntegration) {
-            inceptionVoltagePlusReg(iv, comp) = calcUincInterp(Kplus, Tplus);
-            inceptionVoltageMinuReg(iv, comp) = calcUincInterp(Kminu, Tminu);
+            inceptionVoltagesPlus = calcUincInterp(Kplus, Tplus);
+            inceptionVoltagesMinu = calcUincInterp(Kminu, Tminu);
           }
           else {
-            inceptionVoltagePlusReg(iv, comp) = calcUincNoInterp(Kplus, Tplus);
-            inceptionVoltageMinuReg(iv, comp) = calcUincNoInterp(Kminu, Tminu);
+            inceptionVoltagesPlus = calcUincNoInterp(Kplus, Tplus);
+            inceptionVoltagesMinu = calcUincNoInterp(Kminu, Tminu);
           }
+
+          inceptionVoltagePlusReg(iv, comp) = std::get<0>(inceptionVoltagesPlus);
+          inceptionVoltageMinuReg(iv, comp) = std::get<0>(inceptionVoltagesMinu);
+
+          streamerInceptionVoltagePlusReg(iv, comp) = std::get<1>(inceptionVoltagesPlus);
+          streamerInceptionVoltageMinuReg(iv, comp) = std::get<1>(inceptionVoltagesMinu);
+
+          townsendInceptionVoltagePlusReg(iv, comp) = std::get<2>(inceptionVoltagesPlus);
+          townsendInceptionVoltageMinuReg(iv, comp) = std::get<2>(inceptionVoltagesMinu);
         };
 
         // Irregular kernel.
@@ -3844,14 +3887,26 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
             Tminu.emplace_back(townsendCriterionMinu(vof, i));
           }
 
+          std::array<Real, 3> inceptionVoltagesPlus;
+          std::array<Real, 3> inceptionVoltagesMinu;
+
           if (m_fullIntegration) {
-            inceptionVoltagePlus(vof, comp) = calcUincInterp(Kplus, Tplus);
-            inceptionVoltageMinu(vof, comp) = calcUincInterp(Kminu, Tminu);
+            inceptionVoltagesPlus = calcUincInterp(Kplus, Tplus);
+            inceptionVoltagesMinu = calcUincInterp(Kminu, Tminu);
           }
           else {
-            inceptionVoltagePlus(vof, comp) = calcUincNoInterp(Kplus, Tplus);
-            inceptionVoltageMinu(vof, comp) = calcUincNoInterp(Kminu, Tminu);
+            inceptionVoltagesPlus = calcUincNoInterp(Kplus, Tplus);
+            inceptionVoltagesMinu = calcUincNoInterp(Kminu, Tminu);
           }
+
+          inceptionVoltagePlus(vof, comp) = std::get<0>(inceptionVoltagesPlus);
+          inceptionVoltageMinu(vof, comp) = std::get<0>(inceptionVoltagesMinu);
+
+          streamerInceptionVoltagePlus(vof, comp) = std::get<1>(inceptionVoltagesPlus);
+          streamerInceptionVoltageMinu(vof, comp) = std::get<1>(inceptionVoltagesMinu);
+
+          townsendInceptionVoltagePlus(vof, comp) = std::get<2>(inceptionVoltagesPlus);
+          townsendInceptionVoltageMinu(vof, comp) = std::get<2>(inceptionVoltagesMinu);
         };
 
         // Kernel regions.
@@ -4467,6 +4522,16 @@ StreamerInceptionStepper<P, F, C>::writeReportStationary() const noexcept
   const std::pair<Real, RealVect> UIncPlus = this->computeMinimumInceptionVoltage(m_inceptionVoltagePlus);
   const std::pair<Real, RealVect> UIncMinu = this->computeMinimumInceptionVoltage(m_inceptionVoltageMinu);
 
+  const std::pair<Real, RealVect> streamerUIncPlus = this->computeMinimumInceptionVoltage(
+    m_streamerInceptionVoltagePlus);
+  const std::pair<Real, RealVect> streamerUIncMinu = this->computeMinimumInceptionVoltage(
+    m_streamerInceptionVoltageMinu);
+
+  const std::pair<Real, RealVect> townsendUIncPlus = this->computeMinimumInceptionVoltage(
+    m_townsendInceptionVoltagePlus);
+  const std::pair<Real, RealVect> townsendUIncMinu = this->computeMinimumInceptionVoltage(
+    m_townsendInceptionVoltageMinu);
+
 #ifdef CH_MPI
   if (procID() == 0) {
 #endif
@@ -4482,12 +4547,24 @@ StreamerInceptionStepper<P, F, C>::writeReportStationary() const noexcept
     }
     else {
       if(m_fullIntegration){
-	output << "# Inception voltage(+) = " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
-	output << "# Inception voltage(-) = " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";
+	output << "# Minimum inception voltage(+)  = " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
+	output << "# Minimum inception voltage(-)  = " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";
+	output << "# \n";
+	output << "# Streamer inception voltage(+) = " << streamerUIncPlus.first << ",\t x = " << streamerUIncPlus.second << "\n";
+	output << "# Streamer inception voltage(-) = " << streamerUIncMinu.first << ",\t x = " << streamerUIncMinu.second << "\n";
+	output << "# \n";
+	output << "# Townsend inception voltage(+) = " << townsendUIncPlus.first << ",\t x = " << townsendUIncPlus.second << "\n";
+	output << "# Townsend inception voltage(-) = " << townsendUIncMinu.first << ",\t x = " << townsendUIncMinu.second << "\n";		
       }
       else{
-	output << "# Inception voltage(+) >= " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
-	output << "# Inception voltage(-) >= " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";
+	output << "# Minimum inception voltage(+)  >= " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
+	output << "# Minimum inception voltage(-)  >= " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";
+	output << "# \n";
+	output << "# Streamer inception voltage(+) >= " << streamerUIncPlus.first << ",\t x = " << streamerUIncPlus.second << "\n";
+	output << "# Streamer inception voltage(-) >= " << streamerUIncMinu.first << ",\t x = " << streamerUIncMinu.second << "\n";
+	output << "# \n";
+	output << "# Townsend inception voltage(+) >= " << townsendUIncPlus.first << ",\t x = " << townsendUIncPlus.second << "\n";
+	output << "# Townsend inception voltage(-) >= " << townsendUIncMinu.first << ",\t x = " << townsendUIncMinu.second << "\n";			
       }      
     }
 

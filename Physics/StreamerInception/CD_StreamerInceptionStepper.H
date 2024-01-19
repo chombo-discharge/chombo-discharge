@@ -512,6 +512,30 @@ namespace Physics {
       EBAMRCellData m_inceptionVoltageMinu;
 
       /*!
+	@brief Computed streamer inception voltage
+	@note Stationary mode, positive polarity
+      */
+      EBAMRCellData m_streamerInceptionVoltagePlus;
+
+      /*!
+	@brief Computed streamer inception voltage
+	@note Stationary mode, negative polarity
+      */
+      EBAMRCellData m_streamerInceptionVoltageMinu;
+
+      /*!
+	@brief Computed Townsend inception voltage
+	@note Stationary mode, positive polarity
+      */
+      EBAMRCellData m_townsendInceptionVoltagePlus;
+
+      /*!
+	@brief Computed Townsend inception voltage
+	@note Stationary mode, negative polarity
+      */
+      EBAMRCellData m_townsendInceptionVoltageMinu;
+
+      /*!
 	@brief Townsend criterion
 	@note Transient mode. 
       */

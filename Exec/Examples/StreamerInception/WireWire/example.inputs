@@ -38,7 +38,7 @@ Driver.checkpoint_interval             = 100              # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 0                # Number of initial regrids
+Driver.initial_regrids                 = 4                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
@@ -165,8 +165,8 @@ StreamerInceptionStepper.verbosity        = -1                      ## Chattines
 StreamerInceptionStepper.profile          = false                   ## Turn on/off run-time profiling
 StreamerInceptionStepper.full_integration = true                    ## Use full reconstruction of K-region or not
 StreamerInceptionStepper.mode             = stationary              ## Mode (stationary or transient)
-StreamerInceptionStepper.eval_townsend    = true                    ## Evaluate Townsend criterion or not (only for stationary)
-StreamerInceptionStepper.inception_alg    = trapz alpha 0.5         ## Integration algorithm and step size selection
+StreamerInceptionStepper.eval_townsend    = true                    ## Evaluate Townsend criterion or not
+StreamerInceptionStepper.inception_alg    = trapz alpha 0.25         ## Integration algorithm and step size selection
 StreamerInceptionStepper.output_file      = report.txt              ## Output file
 StreamerInceptionStepper.K_inception      = 12                      ## User-specified inception value
 StreamerInceptionStepper.plt_vars         = K Uinc bg_rate emission poisson townsend ## Plot variables
@@ -192,8 +192,8 @@ StreamerInceptionStepper.max_dt_growth = 0.05                       ## Maximum r
 # ====================================================================================================
 StreamerInceptionTagger.verbosity   = -1    # Tagger chattiness. 
 StreamerInceptionTagger.buffer      = 4     # Grown buffer around flagged cells
-StreamerInceptionTagger.max_voltage = 1.0   # Maximum applied voltage 
-StreamerInceptionTagger.ref_alpha   = 5.0   # Refinement curvature criterion. Lower => more mesh
+StreamerInceptionTagger.max_voltage = 2000.0   # Maximum applied voltage 
+StreamerInceptionTagger.ref_alpha   = 1.0   # Refinement curvature criterion. Lower => more mesh
 StreamerInceptionTagger.plot        = false # Plot tagging field or not. 
 
 
@@ -201,6 +201,6 @@ StreamerInceptionTagger.plot        = false # Plot tagging field or not.
 # Physical parameters for simulation. Some of these override settings above
 # ====================================================================================================
 gamma_ions                       = 1.E-2 # Secondary emission coefficient due to ion impact
-pressure                         = 0.1   # Pressure in atmospheres
+pressure                         = 1.0   # Pressure in atmospheres
 temperature                      = 300   # Temperature in Kelvin
 WireWire.insulation_permittivity =10.0   # Insulation permittivity
