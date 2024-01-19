@@ -24,7 +24,6 @@ main(int argc, char* argv[])
   RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new WireWire());
   RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
 
-
   Real gamma = 0.0;
   Real p     = 1.0;
   Real T     = 300.0;
@@ -33,9 +32,9 @@ main(int argc, char* argv[])
   pp.get("pressure", p);
   pp.get("gamma_ions", gamma);
 
-  const Real N = p * Units::atm2pascal / (Units::kb * T);
+  const Real N  = p * Units::atm2pascal / (Units::kb * T);
   const Real O2 = 0.2;
-  const Real N2 = 0.8;  
+  const Real N2 = 0.8;
 
   // Read BOLSIG+ data into alpha and eta coefficients
   LookupTable1D<> ionizationData = DataParser::fractionalFileReadASCII("bolsig_air.dat",
