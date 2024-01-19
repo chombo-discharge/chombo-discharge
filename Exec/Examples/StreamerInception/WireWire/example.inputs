@@ -200,7 +200,7 @@ StreamerInceptionTagger.plot        = false # Plot tagging field or not.
 # ====================================================================================================
 # Physical parameters for simulation. Some of these override settings above
 # ====================================================================================================
-gamma_ions                       = 1.E-2 # Secondary emission coefficient due to ion impact
+gamma_ions                       = 1.E-3 # Secondary emission coefficient due to ion impact
 pressure                         = 1.0   # Pressure in atmospheres
 temperature                      = 300   # Temperature in Kelvin
 WireWire.insulation_permittivity =4.0   # Insulation permittivity
