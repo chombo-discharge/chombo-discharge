@@ -11,13 +11,13 @@ AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm   = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting      = morton      # 'none', 'shuffle', 'morton'
-AmrMesh.blocking_factor  = 16          # Blocking factor. 
-AmrMesh.max_box_size     = 16          # Maximum allowed box size
+AmrMesh.blocking_factor  = 8          # Blocking factor. 
+AmrMesh.max_box_size     = 8          # Maximum allowed box size
 AmrMesh.max_ebis_box     = 16          # Maximum allowed box size for EBIS generation. 
 AmrMesh.ref_rat          = 2 2 2 2 2 2 # Refinement ratios (mixed ratios are allowed). 
 AmrMesh.num_ghost        = 2           # Number of ghost cells. 
 AmrMesh.lsf_ghost        = 2           # Number of ghost cells when writing level-set to grid
-AmrMesh.eb_ghost         = 4           # Set number of of ghost cells for EB stuff
+AmrMesh.eb_ghost         = 2           # Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
 AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
@@ -77,12 +77,12 @@ TracerParticleSolver.volume_scale  = false  # If true, depositions yield density
 # ====================================================================================================
 FieldSolverMultigrid.verbosity         = -1                # Class verbosity
 FieldSolverMultigrid.jump_bc           = natural           # Jump BC type ('natural' or 'saturation_charge')
-FieldSolverMultigrid.bc.x.lo           = dirichlet 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.x.hi           = dirichlet 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.y.lo           = dirichlet 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.y.hi           = dirichlet 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.x.lo           = neumann 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.x.hi           = neumann 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.y.lo           = neumann 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.y.hi           = neumann 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.z.lo           = dirichlet 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.z.hi           = neumann   0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.z.hi           = dirichlet   1.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
@@ -150,12 +150,12 @@ Vessel.use_rod       = true           # Rod is on/off
 Vessel.use_shroom    = true           # Plate is on/off
 
 Vessel.rod_point     = 0. 0.0 8E-2        # Rod center point
-Vessel.rod_radius    = 1E-3            # Rod radius
+Vessel.rod_radius    = 1E-2            # Rod radius
 
-Vessel.shroom_point  = 0. 0.0 4.1E-2   # Mushroom center point
+Vessel.shroom_point  = 0. 0.0 4.0E-2   # Mushroom center point
 Vessel.shroom_R      = 3E-2            # Mushroom head radius
-Vessel.shroom_r      = 1E-3            # Mushroom stem radius
-Vessel.shroom_d      = 2.5E-3          # Mushroom head thickness
+Vessel.shroom_r      = 1E-2            # Mushroom stem radius
+Vessel.shroom_d      = 1E-2          # Mushroom head thickness
 Vessel.shroom_curv   = 500E-6            # Mushroom corner curvatures
 
 Vessel.live_rod      = true           # Rod is live or not
@@ -164,15 +164,15 @@ Vessel.live_shroom   = false          # Mushroom is live or not
 # ====================================================================================================
 # StreamerInceptionStepper class options
 # ====================================================================================================
-StreamerInceptionStepper.verbosity     = -1                            # Chattiness.
-StreamerInceptionStepper.profile       = false                         # Turn on/off run-time profiling
-StreamerInceptionStepper.full_integration = false
-StreamerInceptionStepper.mode          = transient                     # Mode (stationary or transient)
-StreamerInceptionStepper.eval_townsend    = true                    ## Evaluate Townsend criterion or not (only for stationary)
-StreamerInceptionStepper.inception_alg = euler alpha 0.25                  # Integration algorithm for inception integral.
-StreamerInceptionStepper.output_file   = report.txt                    # Output file
-StreamerInceptionStepper.K_inception   = 10                            # User-specified inception value
-StreamerInceptionStepper.plt_vars      = K ions Uinc bg_rate detachment alpha eta # Plot variables
+StreamerInceptionStepper.verbosity		= -1						# Chattiness.
+StreamerInceptionStepper.profile		= false						# Turn on/off run-time profiling
+StreamerInceptionStepper.full_integration	= false						# Full integration or not
+StreamerInceptionStepper.mode			= transient					# Mode (stationary or transient)
+StreamerInceptionStepper.eval_townsend		= true						## Evaluate Townsend criterion or not (only for stationary)
+StreamerInceptionStepper.inception_alg		= trapz alpha 0.5				# Integration algorithm for inception integral.
+StreamerInceptionStepper.output_file		= report.txt					# Output file
+StreamerInceptionStepper.K_inception		= 10						# User-specified inception value
+StreamerInceptionStepper.plt_vars		= K ions Uinc bg_rate detachment alpha eta	# Plot variables
 
 # Static mode
 StreamerInceptionStepper.voltage_lo    = 30E3                           # Low voltage multiplier
