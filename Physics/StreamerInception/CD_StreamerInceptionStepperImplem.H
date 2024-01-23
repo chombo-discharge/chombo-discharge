@@ -570,7 +570,7 @@ StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
       else if (plotVars[i] == "eta") {
         m_plotEta = true;
       }
-      else if (plotVars[i] == "townsend") {
+      else if (plotVars[i] == "T") {
         m_plotTownsend = true;
       }
     }
@@ -831,13 +831,13 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
   // Secondary emission coefficient for initiatory ions
   if (m_plotTownsend) {
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      const std::string varName = prefix + "Townsend crit/ V = +" + std::to_string(m_voltageSweeps[i]);
+      const std::string varName = prefix + "T/ V = +" + std::to_string(m_voltageSweeps[i]);
 
       plotVars.push_back(varName);
     }
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      const std::string varName = prefix + "Townsend crit/ V = -" + std::to_string(m_voltageSweeps[i]);
+      const std::string varName = prefix + "T/ V = -" + std::to_string(m_voltageSweeps[i]);
 
       plotVars.push_back(varName);
     }

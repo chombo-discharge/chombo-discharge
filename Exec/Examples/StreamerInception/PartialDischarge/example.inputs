@@ -173,9 +173,9 @@ StreamerInceptionStepper.K_inception      = 15                      ## User-spec
 StreamerInceptionStepper.plt_vars         = poisson K T Uinc bg_rate emission ## Plot variables
 
 # Static mode
-StreamerInceptionStepper.voltage_lo       = 1E3                     ## Low voltage multiplier
-StreamerInceptionStepper.voltage_hi       = 15E3                    ## Highest voltage multiplier
-StreamerInceptionStepper.voltage_steps    = 30                       ## Number of voltage steps
+StreamerInceptionStepper.voltage_lo       = 0E3                     ## Low voltage multiplier
+StreamerInceptionStepper.voltage_hi       = 25E3                    ## Highest voltage multiplier
+StreamerInceptionStepper.voltage_steps    = 24                       ## Number of voltage steps
 
 # Dynamic mode
 StreamerInceptionStepper.ion_transport = true                       ## Turn on/off ion transport

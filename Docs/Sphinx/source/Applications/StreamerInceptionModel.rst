@@ -628,7 +628,7 @@ Valid options are
 * ``poisson``  - Poisson solver
 * ``tracer``   - Tracer particle solver
 * ``ions``     - Ion solver
-* ``townsend`` - Townsend criterion
+* ``T``        - Townsend criterion
 
 For example:
 
