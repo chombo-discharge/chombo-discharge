@@ -1,5 +1,5 @@
 #include <CD_Driver.H>
-#include <CD_WireWire.H>
+#include <CD_Aerosol.H>
 #include <CD_StreamerInceptionStepper.H>
 #include <CD_StreamerInceptionTagger.H>
 #include <CD_DataParser.H>
@@ -21,7 +21,7 @@ main(int argc, char* argv[])
   ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
 
   // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new WireWire());
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new Aerosol());
   RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
 
   Real gamma = 0.0;
