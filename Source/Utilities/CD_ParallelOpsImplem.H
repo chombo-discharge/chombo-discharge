@@ -107,7 +107,7 @@ ParallelOps::min(const Real& a_val, const RealVect& a_pos) noexcept
   Real  x = a_pos[0];
   Real* X = new Real[nProc];
 
-  Real  y = a_pos[0];
+  Real  y = a_pos[1];
   Real* Y = new Real[nProc];
 
 #if CH_SPACEDIM == 3
@@ -205,7 +205,7 @@ ParallelOps::max(const Real& a_val, const RealVect& a_pos) noexcept
   Real  x = a_pos[0];
   Real* X = new Real[nProc];
 
-  Real  y = a_pos[0];
+  Real  y = a_pos[1];
   Real* Y = new Real[nProc];
 
 #if CH_SPACEDIM == 3

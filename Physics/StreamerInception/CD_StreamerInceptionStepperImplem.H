@@ -3957,8 +3957,10 @@ StreamerInceptionStepper<P, F, C>::computeMinimumInceptionVoltage(const EBAMRCel
           const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
 
           if (!(std::isnan(U))) {
-            UInc = std::min(UInc, std::abs(U));
-            xInc = pos;
+            if (std::abs(U) < UInc) {
+              UInc = std::abs(U);
+              xInc = pos;
+            }
           }
         }
       };
@@ -3972,8 +3974,10 @@ StreamerInceptionStepper<P, F, C>::computeMinimumInceptionVoltage(const EBAMRCel
           const RealVect pos      = probLo + (0.5 * RealVect::Unit + RealVect(iv) + centroid) * dx;
 
           if (!(std::isnan(U))) {
-            UInc = std::min(UInc, std::abs(U));
-            xInc = pos;
+            if (std::abs(U) < UInc) {
+              UInc = std::abs(U);
+              xInc = pos;
+            }
           }
         }
       };
