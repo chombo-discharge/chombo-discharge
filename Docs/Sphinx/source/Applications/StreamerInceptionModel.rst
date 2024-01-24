@@ -105,7 +105,18 @@ However, we are interested in the average ion distribution over many experiments
 
 This equation is sensible only when :math:`\langle n_-\rangle` is interpreted as an ion density distribution (over many identical experiments). 
 
-The above quantities are then used for computing the probability of streamer inception in time :math:`t` by
+The above quantities are then used for computing the probability of streamer inception in a time interval :math:`[t,t+\text{d}t]`, which is
+
+.. math::
+   \text{d}P(t) = \left[1-P\left(t\right)\right]\lambda(t) \text{d}t,
+
+where :math:`\lambda(t)` is a placeholder for the electron generation rate, given by
+
+.. math::
+
+    \lambda(t) = \int_{V_c(t)}\left\langle\frac{\partial n_e}{\partial t}\right\rangle\left(1 - \frac{\eta}{\alpha}\right)\text{d}V + \int_{A_c(t)}\frac{\left\langle j_e\right\rangle}{e}\left(1-\frac{\eta}{\alpha}\right)\text{d} A,
+
+Inserting the expression for :math:`\lambda` and integrating for :math:`P(t)` yields
 
 .. math::
    :label: StreamerInceptionProbability
@@ -130,6 +141,14 @@ We also compute the probability of a first electron appearing in the time interv
    \Delta P(t, t+\Delta t) = \left[1-P(t)\right] \left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\Delta t
 
 When running in transient mode the user must set the voltage curve (see :ref:`Chap:StreamerInceptionVoltageCurve`) and pay particular caution to setting the initial ion density, mobility, and detachment rates.
+
+The statistical time lag, or average waiting time for the first electron, is available from the computed data, and is given by integrating :math:`t \text{d}P`, which yields
+
+.. math::
+
+   \tau = \int_0^\infty t\left[1-P(t)\right]\lambda(t)\text{d}t.
+
+Other derived values (such as the standard deviation of the waiting time) is also available, and can be calculated from the :math:`P(t)` and :math`\lambda(t)` similar to the procedure above. 
 
 .. _Chap:StreamerInceptionInputData:
 
