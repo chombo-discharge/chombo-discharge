@@ -4623,7 +4623,7 @@ StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
     output << std::left << std::setw(15) << setfill(' ') << "Vcr(t)";
     output << std::left << std::setw(15) << setfill(' ') << "Acr(t)";
     output << std::left << std::setw(15) << setfill(' ') << "Vion(t)";
-    output << std::left << std::setw(15) << setfill(' ') << "Rdot(t)";
+    output << std::left << std::setw(15) << setfill(' ') << "lambda(t)";
     output << std::left << std::setw(15) << setfill(' ') << "P(t)";
     output << std::left << std::setw(15) << setfill(' ') << "dP(t, t+dt)";
     output << "\n";
