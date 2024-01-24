@@ -570,7 +570,7 @@ StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
       else if (plotVars[i] == "eta") {
         m_plotEta = true;
       }
-      else if (plotVars[i] == "T") {
+      else if (plotVars[i] == "T-value") {
         m_plotTownsend = true;
       }
     }
