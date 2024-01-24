@@ -570,7 +570,7 @@ StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
       else if (plotVars[i] == "eta") {
         m_plotEta = true;
       }
-      else if (plotVars[i] == "T-value") {
+      else if (plotVars[i] == "T") {
         m_plotTownsend = true;
       }
     }
@@ -793,6 +793,21 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
     }
   }
 
+  // Secondary emission coefficient for initiatory ions
+  if (m_plotTownsend) {
+    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+      const std::string varName = prefix + "T-value/ V = +" + std::to_string(m_voltageSweeps[i]);
+
+      plotVars.push_back(varName);
+    }
+
+    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+      const std::string varName = prefix + "T-value/ V = -" + std::to_string(m_voltageSweeps[i]);
+
+      plotVars.push_back(varName);
+    }
+  }
+
   // Write the background ionization rates
   if (m_plotBackgroundIonization) {
     std::string varName;
@@ -824,21 +839,6 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
 
     for (const Real& V : m_voltageSweeps) {
       varName = prefix + "Field emission rate/ V = -" + std::to_string(V);
-      plotVars.push_back(varName);
-    }
-  }
-
-  // Secondary emission coefficient for initiatory ions
-  if (m_plotTownsend) {
-    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      const std::string varName = prefix + "T/ V = +" + std::to_string(m_voltageSweeps[i]);
-
-      plotVars.push_back(varName);
-    }
-
-    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      const std::string varName = prefix + "T/ V = -" + std::to_string(m_voltageSweeps[i]);
-
       plotVars.push_back(varName);
     }
   }
@@ -999,6 +999,11 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
     this->writeData(a_output, a_icomp, m_inceptionIntegralMinu, a_outputRealm, a_level, false, true);
   }
 
+  if (m_plotTownsend) {
+    this->writeData(a_output, a_icomp, m_townsendCriterionPlus, a_outputRealm, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_townsendCriterionMinu, a_outputRealm, a_level, false, true);
+  }
+
   if (m_plotBackgroundIonization) {
     this->writeData(a_output, a_icomp, m_backgroundIonization, a_outputRealm, a_level, false, true);
   }
@@ -1010,11 +1015,6 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
   if (m_plotFieldEmission) {
     this->writeData(a_output, a_icomp, m_emissionRatesPlus, a_outputRealm, a_level, false, true);
     this->writeData(a_output, a_icomp, m_emissionRatesMinu, a_outputRealm, a_level, false, true);
-  }
-
-  if (m_plotTownsend) {
-    this->writeData(a_output, a_icomp, m_townsendCriterionPlus, a_outputRealm, a_level, false, true);
-    this->writeData(a_output, a_icomp, m_townsendCriterionMinu, a_outputRealm, a_level, false, true);
   }
 
   if (m_plotAlpha) {
