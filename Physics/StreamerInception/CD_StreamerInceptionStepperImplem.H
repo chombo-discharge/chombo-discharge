@@ -4626,11 +4626,13 @@ StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
     output << std::left << std::setw(15) << setfill(' ') << "lambda(t)";
     output << std::left << std::setw(15) << setfill(' ') << "P(t)";
     output << std::left << std::setw(15) << setfill(' ') << "dP(t, t+dt)";
+    output << std::left << std::setw(15) << setfill(' ') << "Time lag";
     output << "\n";
 
     // Compute dP(t, t+dt)
     std::vector<Real> dProb;
     for (size_t i = 0; i < m_Rdot.size() - 1; i++) {
+      const Real t    = m_Rdot[i].first;
       const Real dt   = m_Rdot[i + 1].first - m_Rdot[i].first;
       const Real prob = m_inceptionProbability[i].second;
       const Real Rdot = m_Rdot[i].second;
@@ -4639,8 +4641,26 @@ StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
     }
     dProb.emplace_back(0.0);
 
+    // Compute the average waiting time.
+    std::vector<Real> tau(m_Rdot.size(), 0.0);
+    for (size_t i = 0; i < m_Rdot.size() - 1; i++) {
+      const Real t1     = m_Rdot[i].first;
+      const Real t2     = m_Rdot[i + 1].first;
+      const Real dt     = t2 - t1;
+      const Real prob   = m_inceptionProbability[i].second;
+      const Real lambda = m_Rdot[i].second;
+
+      tau[i + 1] = tau[i] + t1 * (1 - prob) * lambda * dt;
+    }
+    for (int i = 0; i < tau.size(); i++) {
+      const Real prob = m_inceptionProbability[i].second;
+
+      tau[i] = prob > 0.0 ? tau[i] / prob : std::numeric_limits<Real>::infinity();
+    }
+
     for (size_t i = 0; i < m_Rdot.size(); i++) {
       const Real time = m_Rdot[i].first;
+
       output << std::left << std::setw(15) << time;
       output << std::left << std::setw(15) << m_voltageCurve(time);
       output << std::left << std::setw(15) << m_maxK[i].second;
@@ -4651,6 +4671,7 @@ StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
       output << std::left << std::setw(15) << m_Rdot[i].second;
       output << std::left << std::setw(15) << m_inceptionProbability[i].second;
       output << std::left << std::setw(15) << dProb[i];
+      output << std::left << std::setw(15) << tau[i];
       output << "\n";
     }
 

@@ -146,9 +146,9 @@ The statistical time lag, or average waiting time for the first electron, is ava
 
 .. math::
 
-   \tau = \int_0^\infty t\left[1-P(t)\right]\lambda(t)\text{d}t.
+   \tau = \frac{1}{P(t)}\int_0^\infty t\left[1-P(t)\right]\lambda(t)\text{d}t.
 
-Other derived values (such as the standard deviation of the waiting time) is also available, and can be calculated from the :math:`P(t)` and :math`\lambda(t)` similar to the procedure above.
+Other derived values (such as the standard deviation of the waiting time) is also available, and can be calculated from the :math:`P(t)` and :math:`\lambda(t)` similar to the procedure above.
 Numerically, this is calculated using the trapezoidal rule. 
 
 .. _Chap:StreamerInceptionInputData:
