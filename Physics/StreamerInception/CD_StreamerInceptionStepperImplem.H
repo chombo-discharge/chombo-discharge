@@ -2791,9 +2791,9 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcept
       m_amr->conservativeAverage(gamma, m_realm, m_phase);
       m_amr->interpGhost(gamma, m_realm, m_phase);
 
-      // For turning K into exp(K)
+      // For turning K into exp(K)-1
       auto exponentiate = [](const Real x) -> Real {
-        return x > 0.0 ? exp(x) : 0.0;
+        return x > 0.0 ? exp(x) - 1 : 0.0;
       };
 
       if (p > 0.0) {
@@ -2878,9 +2878,9 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterionTransient(const Real&
   DataOps::setValue(gamma, 0.0);
   m_tracerParticleSolver->deposit(gamma);
 
-  // Turn K into exp(K)
+  // Turn K into exp(K)-1
   auto exponentiate = [](const Real x) -> Real {
-    return x > 0.0 ? exp(x) : 0.0;
+    return x > 0.0 ? exp(x) - 1 : 0.0;
   };
   DataOps::copy(m_townsendCriterion, m_inceptionIntegral);
   DataOps::compute(m_townsendCriterion, exponentiate);
