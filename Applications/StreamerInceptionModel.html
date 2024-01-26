@@ -105,6 +105,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#negative-ion-mobility">Negative ion mobility</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#negative-ion-diffusion-coefficient">Negative ion diffusion coefficient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#negative-ion-density">Negative ion density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#secondary-emission">Secondary emission</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#background-ionization-rate">Background ionization rate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#detachment-rate">Detachment rate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#field-emission">Field emission</a></li>
@@ -120,6 +121,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#critical-volume">Critical volume</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#critical-surface">Critical surface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#inception-voltage">Inception voltage</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#arbitrary-starting-electron">Arbitrary starting electron</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#minimum-inception-voltage">Minimum inception voltage</a></li>
@@ -136,6 +138,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#full-integration">full_integration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#output-file">output_file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#k-inception">K_inception</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#eval-townsend">eval_townsend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#plt-vars">plt_vars</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#for-stationary-mode">For stationary mode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#for-transient-mode">For transient mode</a></li>
@@ -147,6 +150,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#example-programs">Example programs</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#high-voltage-vessel">High-voltage vessel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#electrode-with-surface-roughness">Electrode with surface roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Electrode with surface roughness</a></li>
 </ul>
 </li>
 </ul>
@@ -209,7 +213,7 @@
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h2>
 <p>The streamer inception model computes the inception voltage and probability of streamer inception for arbitrary geometries and voltage forms.</p>
-<p>For estimating the streamer inception, the module the electron avalanche integral</p>
+<p>For estimating the streamer inception, the module solves the electron avalanche integral</p>
 <div class="math notranslate nohighlight">
 \[K\left(\mathbf{x}\right) = \int_{\mathbf{x}}^{\text{until }\alpha_{\text{eff}} \leq 0} \alpha_{\text{eff}}(E,\mathbf{x}^\prime)\text{d}l\]</div>
 <p>where <span class="math notranslate nohighlight">\(E = |\mathbf{E}|\)</span> and where <span class="math notranslate nohighlight">\(\alpha_{\text{eff}}(E,\mathbf{x}) = \alpha(E,\mathbf{x}) - \eta(E,\mathbf{x})\)</span> is the effective ionization coefficient.
@@ -224,6 +228,11 @@ This differs from the conventional approach where the user will first extract el
 </ul>
 <p>Note that since the <span class="math notranslate nohighlight">\(K\left(\mathbf{x}\right) = K(\mathbf{x}; U)\)</span> where <span class="math notranslate nohighlight">\(U\)</span> is the applied voltage, these values are computed for a user-specified range of voltages.
 This “range of voltages” can be a series of discrete values, or a voltage curve (e.g., lightning impulse).</p>
+<p>In addition to this, one may also track positive ions and solve for the Townsend inception criterion, which is formulated as</p>
+<div class="math notranslate nohighlight">
+\[T\left(\mathbf{x}\right) = \gamma \exp\left[K\left(\mathbf{x}\right)\right] \geq 1.\]</div>
+<p>The interpretation of this criterion is that each starting electron grows into <span class="math notranslate nohighlight">\(\exp\left[K\left(\mathbf{x}\right)\right]\)</span> electron-ion pairs.
+The residual ions will drift towards cathode surfaces and generate secondary ionization with a user-supplied efficiency <span class="math notranslate nohighlight">\(\gamma=\gamma\left(E,\mathbf{x}\right)\)</span>.</p>
 <p>The streamer inception model can be run in two modes:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#chap-stationarymode"><span class="std std-ref">Stationary mode</span></a>.</p></li>
@@ -250,15 +259,18 @@ The following solvers are used within the model:</p>
 <p>The stationary mode solves the <span class="math notranslate nohighlight">\(K\)</span> integral for a range of input voltages.
 The computation is done for both polarities so that the user obtains:</p>
 <ul class="simple">
-<li><p><span class="math notranslate nohighlight">\(K\)</span> values for positive and negative voltages.</p></li>
+<li><p><span class="math notranslate nohighlight">\(K\)</span> values for positive and negative voltages, as well as the Townsend criterion.</p></li>
 <li><p>Critical volumes <span class="math notranslate nohighlight">\(V_c\)</span> for positive and negative voltages.</p></li>
+<li><p>Inception voltage, using a combined Townsend-streamer criterion.</p></li>
 </ul>
 </section>
 <section id="transient-mode">
 <span id="chap-transientmode"></span><h3>Transient mode<a class="headerlink" href="#transient-mode" title="Permalink to this heading"></a></h3>
 <p>In the transient mode we apply a voltage curve <span class="math notranslate nohighlight">\(U = U(t)\)</span> reconstruct the <span class="math notranslate nohighlight">\(K\)</span> value at each time step and recompute the critical volume so that we obtain</p>
 <div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}K = K(t)\\V_c = V_c(t)\end{aligned}\end{align} \]</div>
+\[\begin{split}K = K(t) \\
+T = T(t) \\
+V_c = V_c(t)\end{split}\]</div>
 <p>We also assume that ions move as drifting Brownian walkers in the electric field (see <a class="reference internal" href="../Solvers/Ito.html#chap-itodiffusion"><span class="std std-ref">Îto diffusion</span></a>).
 This can be written in the fluctuating hydrodynamics limit as an evolution equation for the ion distribution (not density!) as</p>
 <div class="math notranslate nohighlight">
@@ -269,7 +281,13 @@ Note that the above equation is a mere rewrite of the Ito process for a collecti
 <div class="math notranslate nohighlight">
 \[\frac{\partial \langle n_-\rangle}{\partial t} = -\nabla\cdot\left(\mathbf{v} \langle n_-\rangle\right) + \nabla\cdot\left(D\nabla \langle n_-\rangle\right).\]</div>
 <p>This equation is sensible only when <span class="math notranslate nohighlight">\(\langle n_-\rangle\)</span> is interpreted as an ion density distribution (over many identical experiments).</p>
-<p>The above quantities are then used for computing the probability of streamer inception in time <span class="math notranslate nohighlight">\(t\)</span> by</p>
+<p>The above quantities are then used for computing the probability of streamer inception in a time interval <span class="math notranslate nohighlight">\([t,t+\text{d}t]\)</span>, which is</p>
+<div class="math notranslate nohighlight">
+\[\text{d}P(t) = \left[1-P\left(t\right)\right]\lambda(t) \text{d}t,\]</div>
+<p>where <span class="math notranslate nohighlight">\(\lambda(t)\)</span> is a placeholder for the electron generation rate, given by</p>
+<div class="math notranslate nohighlight">
+\[\lambda(t) = \int_{V_c(t)}\left\langle\frac{\partial n_e}{\partial t}\right\rangle\left(1 - \frac{\eta}{\alpha}\right)\text{d}V + \int_{A_c(t)}\frac{\left\langle j_e\right\rangle}{e}\left(1-\frac{\eta}{\alpha}\right)\text{d} A,\]</div>
+<p>Inserting the expression for <span class="math notranslate nohighlight">\(\lambda\)</span> and integrating for <span class="math notranslate nohighlight">\(P(t)\)</span> yields</p>
 <div class="math notranslate nohighlight" id="equation-streamerinceptionprobability">
 <span class="eqno">(9)<a class="headerlink" href="#equation-streamerinceptionprobability" title="Permalink to this equation"></a></span>\[P(t) = 1  - \exp\left[-\int_0^t\left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\text{d}t^\prime\right].\]</div>
 <p>Here, <span class="math notranslate nohighlight">\(\left\langle\frac{d n_{\text{e}}}{dt}\right\rangle\)</span> is the electron production rate from both background ionization and electron detachment, i.e.</p>
@@ -282,6 +300,11 @@ Note that, internally, we always ensure that <span class="math notranslate nohig
 <div class="math notranslate nohighlight" id="equation-streamerinceptionprobability2">
 <span class="eqno">(10)<a class="headerlink" href="#equation-streamerinceptionprobability2" title="Permalink to this equation"></a></span>\[\Delta P(t, t+\Delta t) = \left[1-P(t)\right] \left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\Delta t\]</div>
 <p>When running in transient mode the user must set the voltage curve (see <a class="reference internal" href="#chap-streamerinceptionvoltagecurve"><span class="std std-ref">Voltage curve</span></a>) and pay particular caution to setting the initial ion density, mobility, and detachment rates.</p>
+<p>The statistical time lag, or average waiting time for the first electron, is available from the computed data, and is given by integrating <span class="math notranslate nohighlight">\(t \text{d}P\)</span>, which yields</p>
+<div class="math notranslate nohighlight">
+\[\tau = \frac{1}{P(t)}\int_0^\infty t\left[1-P(t)\right]\lambda(t)\text{d}t.\]</div>
+<p>Other derived values (such as the standard deviation of the waiting time) is also available, and can be calculated from the <span class="math notranslate nohighlight">\(P(t)\)</span> and <span class="math notranslate nohighlight">\(\lambda(t)\)</span> similar to the procedure above.
+Numerically, this is calculated using the trapezoidal rule.</p>
 </section>
 </section>
 <section id="input-data">
@@ -296,6 +319,7 @@ Note that, internally, we always ensure that <span class="math notranslate nohig
 <li><p>Negative ion mobility.</p></li>
 <li><p>Negative ion diffusion coefficient.</p></li>
 <li><p>Initial negative ion density.</p></li>
+<li><p>Secondary emission coefficients.</p></li>
 <li><p>Voltage curve (for transient simulations).</p></li>
 </ol>
 <p>The input data to the streamer inception model is mostly done by passing in C++-functions to the class.
@@ -322,6 +346,7 @@ An example of defining an analytic input function is</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The <span class="math notranslate nohighlight">\(K\)</span> integral is determined only by the Townsend ionization and attachment coefficients.
+The Townsend criterion is then a derived value of <span class="math notranslate nohighlight">\(K\)</span> and the secondary electron emission coefficient <span class="math notranslate nohighlight">\(\gamma\)</span> .
 The remaining transport data is used for calculating the inception probability (appearance of a first electron in the critical volume).</p>
 </div>
 <section id="inception-threshold">
@@ -366,6 +391,14 @@ The remaining transport data is used for calculating the inception probability (
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setIonDensity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_density</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
+</section>
+<section id="secondary-emission">
+<h3>Secondary emission<a class="headerlink" href="#secondary-emission" title="Permalink to this heading"></a></h3>
+<p>To set the secondary emission efficiency at cathodes, use the member function</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setSecondaryEmission</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_coeff</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>This efficiency is position-dependent so that the user can set different efficiencies for different materials (or different positions in a single material).</p>
 </section>
 <section id="background-ionization-rate">
 <h3>Background ionization rate<a class="headerlink" href="#background-ionization-rate" title="Permalink to this heading"></a></h3>
@@ -449,14 +482,26 @@ Once the particle integration halts, we rewind the particles back to their start
 <p>followed by</p>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}\mathbf{x}_p^{k+1} = \mathbf{x}_p^k + \frac{\Delta x}{2}\left[\mathbf{\hat{E}}\left(\mathbf{x}_p^k\right) + \mathbf{\hat{E}}\left(\mathbf{x}_p^\prime\right)\right].\\w_p^{k+1} = w_p^k + \frac{\Delta x}{2}\left[\alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^k\right)\right|,\mathbf{x}_p^k\right) + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^\prime\right)\right|,\mathbf{x}_p^\prime\right)\right]\end{aligned}\end{align} \]</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When tracking positive ions for evaluation of the Townsend criterion, the same algorithms are used.
+The exception is that the positive ions are simply tracked along field lines until they strike a cathode, so that there is no integration with respect to <span class="math notranslate nohighlight">\(\alpha_{\text{eff}}\)</span>.</p>
+</div>
 </section>
 </section>
 <section id="critical-volume">
 <h3>Critical volume<a class="headerlink" href="#critical-volume" title="Permalink to this heading"></a></h3>
 <p>The critical volume is computed as</p>
 <div class="math notranslate nohighlight">
-\[V_c = \int_{K\left(\mathbf{x}\right) &gt; K}\text{d}V.\]</div>
+\[V_c = \int_{K\left(\mathbf{x}\right) &gt; K \cup \gamma\exp\left[K\left(\mathbf{x}\right)\right] \ge 1} \text{d}V.\]</div>
 <p>Note that the critical volume is both voltage and polarity dependent.</p>
+</section>
+<section id="critical-surface">
+<h3>Critical surface<a class="headerlink" href="#critical-surface" title="Permalink to this heading"></a></h3>
+<p>The critical surface is computed as</p>
+<div class="math notranslate nohighlight">
+\[A_c = \int_{K\left(\mathbf{x}\right) &gt; K \cup \gamma\exp\left[K\left(\mathbf{x}\right)\right] \ge 1} \text{d}A.\]</div>
+<p>Note that the critical surface is both voltage and polarity dependent, and is non-zero only on cathode surfaces.</p>
 </section>
 <section id="inception-voltage">
 <h3>Inception voltage<a class="headerlink" href="#inception-voltage" title="Permalink to this heading"></a></h3>
@@ -469,11 +514,20 @@ In this case we compute <span class="math notranslate nohighlight">\(K\left(\mat
 \[ \begin{align}\begin{aligned}K_a = K\left(\mathbf{x}; U_a\right) \leq K_c\\K_b = K\left(\mathbf{x}; U_b\right) \geq K_c\end{aligned}\end{align} \]</div>
 <p>then we can estimate the inception voltage for a starting electron at position <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> through linear interpolation as</p>
 <div class="math notranslate nohighlight">
-\[U_{\text{inc}}\left(\mathbf{x}\right) = U_a + \frac{K_c - K_a}{K_b - K_a}\left(U_b - U_a\right)\]</div>
+\[U_{\text{inc, streamer}}\left(\mathbf{x}\right) = U_a + \frac{K_c - K_a}{K_b - K_a}\left(U_b - U_a\right)\]</div>
+<p>A similar method is used for the Townsend criterion, using e.g. <span class="math notranslate nohighlight">\(T\left(\mathbf{x}; U\right) = \gamma\exp\left[K\left(\mathbf{x}; U\right)\right]\)</span>, then if</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}T_a = T\left(\mathbf{x}; U_a\right) \leq 1\\T_b = T\left(\mathbf{x}; U_b\right) \ge 1\end{aligned}\end{align} \]</div>
+<p>then we can estimate the inception voltage for a starting electron at position <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> through linear interpolation as</p>
+<div class="math notranslate nohighlight">
+\[U_{\text{inc, Townsend}}\left(\mathbf{x}\right) = U_a + \frac{1 - T_a}{T_b - T_a}\left(U_b - U_a\right)\]</div>
+<p>The inception voltage for position <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> is then</p>
+<div class="math notranslate nohighlight">
+\[U_{\text{inc}} = \min\left[U_{\text{inc, streamer}}\left(\mathbf{x}\right), U_{\text{inc, Townsend}}\left(\mathbf{x}\right)\right]\]</div>
 </section>
 <section id="minimum-inception-voltage">
 <h4>Minimum inception voltage<a class="headerlink" href="#minimum-inception-voltage" title="Permalink to this heading"></a></h4>
-<p>The minium inception voltage is the minimum voltage required for starting a critical avalanche for an arbitrary starting electron.
+<p>The minium inception voltage is the minimum voltage required for starting a critical avalanche (or Townsend process) for an arbitrary starting electron.
 From the above, this is simply</p>
 <div class="math notranslate nohighlight">
 \[U_{\text{inc}}^{\text{min}} = \min_{\forall \mathbf{x}} \left[U_{\text{inc}}\left(\mathbf{x}\right)\right].\]</div>
@@ -590,6 +644,15 @@ E.g.,</p>
 </pre></div>
 </div>
 </section>
+<section id="eval-townsend">
+<h3>eval_townsend<a class="headerlink" href="#eval-townsend" title="Permalink to this heading"></a></h3>
+<p>Controls whether or not the Townsend criterion is also evaluated.</p>
+<p>E.g.,</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>StreamerInceptionStepper.eval_townsend = true
+</pre></div>
+</div>
+<p>Will turn on the Townsend criterion.</p>
+</section>
 <section id="plt-vars">
 <h3>plt_vars<a class="headerlink" href="#plt-vars" title="Permalink to this heading"></a></h3>
 <p>Controls plot variables that will be written to HDF5 outputs in the <code class="file docutils literal notranslate"><span class="pre">plt</span></code> folder.
@@ -604,6 +667,7 @@ Valid options are</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">poisson</span></code>  - Poisson solver</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tracer</span></code>   - Tracer particle solver</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ions</span></code>     - Ion solver</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">T</span></code>        - Townsend criterion</p></li>
 </ul>
 <p>For example:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>StreamerInceptionStepper.plt_vars = K Uinc bg_rate emission ions
@@ -715,6 +779,13 @@ The input data is computed using BOLSIG+.</p></li>
 <li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/StreamerInception/ElectrodeRoughness</span></code>.
 This program is set up in 2D (stationary) and 3D (transient) for streamer inception on an irregular electrode surface.
 We use SF6 transport data as input data, computed using BOLSIG+.</p></li>
+</ul>
+</section>
+<section id="id1">
+<h3>Electrode with surface roughness<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/StreamerInception/ElectrodeRoughness</span></code>.
+This program is set up in 2D and 3D (stationary) mode, and includes the influence of the Townsend criterion.</p></li>
 </ul>
 </section>
 </section>

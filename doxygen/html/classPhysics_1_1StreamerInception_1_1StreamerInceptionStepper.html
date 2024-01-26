@@ -319,9 +319,12 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:aff6609412d836e0b3e38874f6eed2f7a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aff6609412d836e0b3e38874f6eed2f7a">inceptionIntegrateTrapezoidal</a> (const Real &amp;a_voltage) noexcept</td></tr>
 <tr class="memdesc:aff6609412d836e0b3e38874f6eed2f7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">K integral: Add integration parts after particles move.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aff6609412d836e0b3e38874f6eed2f7a">More...</a><br /></td></tr>
 <tr class="separator:aff6609412d836e0b3e38874f6eed2f7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a25a66ae3b473a4a536fe11b9a4ba7f7f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a25a66ae3b473a4a536fe11b9a4ba7f7f">computeTownsendCriterion</a> () noexcept</td></tr>
-<tr class="memdesc:a25a66ae3b473a4a536fe11b9a4ba7f7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve for the Townsend criterion for each particle in each voltage.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a25a66ae3b473a4a536fe11b9a4ba7f7f">More...</a><br /></td></tr>
-<tr class="separator:a25a66ae3b473a4a536fe11b9a4ba7f7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a774f0fc17aa32b0ed4e139c90a51200f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a774f0fc17aa32b0ed4e139c90a51200f">computeTownsendCriterionStationary</a> () noexcept</td></tr>
+<tr class="memdesc:a774f0fc17aa32b0ed4e139c90a51200f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve for the Townsend criterion for each particle in each voltage.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a774f0fc17aa32b0ed4e139c90a51200f">More...</a><br /></td></tr>
+<tr class="separator:a774f0fc17aa32b0ed4e139c90a51200f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10aacc007272685bf03e6807b6001e54"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a10aacc007272685bf03e6807b6001e54">computeTownsendCriterionTransient</a> (const Real &amp;a_voltage) noexcept</td></tr>
+<tr class="memdesc:a10aacc007272685bf03e6807b6001e54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve for the Townsend criterion for each particle in each voltage.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a10aacc007272685bf03e6807b6001e54">More...</a><br /></td></tr>
+<tr class="separator:a10aacc007272685bf03e6807b6001e54"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a327ba6574b09f629854d79a1e82b41ca"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a327ba6574b09f629854d79a1e82b41ca">townsendTrackEuler</a> (const Real &amp;a_voltage) noexcept</td></tr>
 <tr class="memdesc:a327ba6574b09f629854d79a1e82b41ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Track particles (positive ions) using an Euler rule and check if the collide with a cathode.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a327ba6574b09f629854d79a1e82b41ca">More...</a><br /></td></tr>
 <tr class="separator:a327ba6574b09f629854d79a1e82b41ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -516,6 +519,21 @@ RefCountedPtr&lt; <a class="el" href="classCdrSolver.html">CdrSolver</a> &gt;&#1
 <tr class="memitem:a4721824905e51296b96bd1f0028a0b5b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a4721824905e51296b96bd1f0028a0b5b">m_inceptionVoltageMinu</a></td></tr>
 <tr class="memdesc:a4721824905e51296b96bd1f0028a0b5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computed inception voltage.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a4721824905e51296b96bd1f0028a0b5b">More...</a><br /></td></tr>
 <tr class="separator:a4721824905e51296b96bd1f0028a0b5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d5b6ca81edced087055ecfd77e73c81"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a9d5b6ca81edced087055ecfd77e73c81">m_streamerInceptionVoltagePlus</a></td></tr>
+<tr class="memdesc:a9d5b6ca81edced087055ecfd77e73c81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computed streamer inception voltage.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a9d5b6ca81edced087055ecfd77e73c81">More...</a><br /></td></tr>
+<tr class="separator:a9d5b6ca81edced087055ecfd77e73c81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b6e5722d17282cc7be7475b7e3d262c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a2b6e5722d17282cc7be7475b7e3d262c">m_streamerInceptionVoltageMinu</a></td></tr>
+<tr class="memdesc:a2b6e5722d17282cc7be7475b7e3d262c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computed streamer inception voltage.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a2b6e5722d17282cc7be7475b7e3d262c">More...</a><br /></td></tr>
+<tr class="separator:a2b6e5722d17282cc7be7475b7e3d262c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad436b7f89cb18dcbce8f4f431c6e4dc3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ad436b7f89cb18dcbce8f4f431c6e4dc3">m_townsendInceptionVoltagePlus</a></td></tr>
+<tr class="memdesc:ad436b7f89cb18dcbce8f4f431c6e4dc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computed Townsend inception voltage.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ad436b7f89cb18dcbce8f4f431c6e4dc3">More...</a><br /></td></tr>
+<tr class="separator:ad436b7f89cb18dcbce8f4f431c6e4dc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f55f45aab318c0e05691c4aba20a6e6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a1f55f45aab318c0e05691c4aba20a6e6">m_townsendInceptionVoltageMinu</a></td></tr>
+<tr class="memdesc:a1f55f45aab318c0e05691c4aba20a6e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computed Townsend inception voltage.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a1f55f45aab318c0e05691c4aba20a6e6">More...</a><br /></td></tr>
+<tr class="separator:a1f55f45aab318c0e05691c4aba20a6e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad85c3e1b7a701ae1c5793be07f0c1928"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ad85c3e1b7a701ae1c5793be07f0c1928">m_townsendCriterion</a></td></tr>
+<tr class="memdesc:ad85c3e1b7a701ae1c5793be07f0c1928"><td class="mdescLeft">&#160;</td><td class="mdescRight">Townsend criterion.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ad85c3e1b7a701ae1c5793be07f0c1928">More...</a><br /></td></tr>
+<tr class="separator:ad85c3e1b7a701ae1c5793be07f0c1928"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3044b69dd4b8b08923ff237a7a162185"><td class="memItemLeft" align="right" valign="top"><a id="a3044b69dd4b8b08923ff237a7a162185"></a>
 <a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3044b69dd4b8b08923ff237a7a162185">m_townsendCriterionPlus</a></td></tr>
 <tr class="memdesc:a3044b69dd4b8b08923ff237a7a162185"><td class="mdescLeft">&#160;</td><td class="mdescRight">Townsend criterion for starting positive ions. <br /></td></tr>
@@ -539,6 +557,9 @@ RefCountedPtr&lt; <a class="el" href="classCdrSolver.html">CdrSolver</a> &gt;&#1
 <tr class="memitem:a7656c601ff5c05bd69c850174a7e46c2"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; Real, Real &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a7656c601ff5c05bd69c850174a7e46c2">m_maxK</a></td></tr>
 <tr class="memdesc:a7656c601ff5c05bd69c850174a7e46c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max K value for every time step.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a7656c601ff5c05bd69c850174a7e46c2">More...</a><br /></td></tr>
 <tr class="separator:a7656c601ff5c05bd69c850174a7e46c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6fac147d57b2dac72a3cbc9200c454b6"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; Real, Real &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a6fac147d57b2dac72a3cbc9200c454b6">m_maxT</a></td></tr>
+<tr class="memdesc:a6fac147d57b2dac72a3cbc9200c454b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max Townsend value for every time step.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a6fac147d57b2dac72a3cbc9200c454b6">More...</a><br /></td></tr>
+<tr class="separator:a6fac147d57b2dac72a3cbc9200c454b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a40f56ecb28665878c5f71894e1b0b81d"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a40f56ecb28665878c5f71894e1b0b81d">m_criticalVolumePlus</a></td></tr>
 <tr class="memdesc:a40f56ecb28665878c5f71894e1b0b81d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Critical volumes of K values for each voltage.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a40f56ecb28665878c5f71894e1b0b81d">More...</a><br /></td></tr>
 <tr class="separator:a40f56ecb28665878c5f71894e1b0b81d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1335,8 +1356,8 @@ template&lt;typename P , typename F , typename C &gt; </div>
 
 </div>
 </div>
-<a id="a25a66ae3b473a4a536fe11b9a4ba7f7f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a25a66ae3b473a4a536fe11b9a4ba7f7f">&#9670;&nbsp;</a></span>computeTownsendCriterion()</h2>
+<a id="a774f0fc17aa32b0ed4e139c90a51200f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a774f0fc17aa32b0ed4e139c90a51200f">&#9670;&nbsp;</a></span>computeTownsendCriterionStationary()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1347,7 +1368,7 @@ template&lt;typename P , typename F , typename C &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void StreamerInceptionStepper::computeTownsendCriterion</td>
+          <td class="memname">void StreamerInceptionStepper::computeTownsendCriterionStationary</td>
         </tr>
       </table>
   </td>
@@ -1359,6 +1380,43 @@ template&lt;typename P , typename F , typename C &gt; </div>
 
 <p>Solve for the Townsend criterion for each particle in each voltage. </p>
 <p>This is called in <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a31d2ac7ac0430daca8bef0fddf612587" title="Perform any post-initialization steps.">postInitialize()</a> only. </p><dl class="section note"><dt>Note</dt><dd>For stationary mode only. </dd></dl>
+
+</div>
+</div>
+<a id="a10aacc007272685bf03e6807b6001e54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10aacc007272685bf03e6807b6001e54">&#9670;&nbsp;</a></span>computeTownsendCriterionTransient()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename F , typename C &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void StreamerInceptionStepper::computeTownsendCriterionTransient </td>
+          <td>(</td>
+          <td class="paramtype">const Real &amp;&#160;</td>
+          <td class="paramname"><em>a_voltage</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Solve for the Townsend criterion for each particle in each voltage. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_voltage</td><td>Voltage multiplier </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>For transient mode </dd></dl>
 
 </div>
 </div>
@@ -3329,6 +3387,33 @@ template&lt;typename P  = TracerParticle&lt;2, 2&gt;, typename F  = FieldSolverM
 
 </div>
 </div>
+<a id="a6fac147d57b2dac72a3cbc9200c454b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6fac147d57b2dac72a3cbc9200c454b6">&#9670;&nbsp;</a></span>m_maxT</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P  = TracerParticle&lt;2, 2&gt;, typename F  = FieldSolverMultigrid, typename C  = CdrCTU&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::pair&lt;Real, Real&gt; &gt; <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html">Physics::StreamerInception::StreamerInceptionStepper</a>&lt; P, F, C &gt;::m_maxT</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Max Townsend value for every time step. </p>
+<dl class="section note"><dt>Note</dt><dd>For transient runs </dd></dl>
+
+</div>
+</div>
 <a id="ad25a7efba1d79fbcc9941f98e81ab009"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad25a7efba1d79fbcc9941f98e81ab009">&#9670;&nbsp;</a></span>m_maxTMinu</h2>
 
@@ -3488,6 +3573,141 @@ template&lt;typename P  = TracerParticle&lt;2, 2&gt;, typename F  = FieldSolverM
 
 <p>Fixed step size (physical dimensions) </p>
 <p>Step size factor </p>
+
+</div>
+</div>
+<a id="a2b6e5722d17282cc7be7475b7e3d262c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b6e5722d17282cc7be7475b7e3d262c">&#9670;&nbsp;</a></span>m_streamerInceptionVoltageMinu</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P  = TracerParticle&lt;2, 2&gt;, typename F  = FieldSolverMultigrid, typename C  = CdrCTU&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html">Physics::StreamerInception::StreamerInceptionStepper</a>&lt; P, F, C &gt;::m_streamerInceptionVoltageMinu</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Computed streamer inception voltage. </p>
+<dl class="section note"><dt>Note</dt><dd>Stationary mode, negative polarity </dd></dl>
+
+</div>
+</div>
+<a id="a9d5b6ca81edced087055ecfd77e73c81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d5b6ca81edced087055ecfd77e73c81">&#9670;&nbsp;</a></span>m_streamerInceptionVoltagePlus</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P  = TracerParticle&lt;2, 2&gt;, typename F  = FieldSolverMultigrid, typename C  = CdrCTU&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html">Physics::StreamerInception::StreamerInceptionStepper</a>&lt; P, F, C &gt;::m_streamerInceptionVoltagePlus</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Computed streamer inception voltage. </p>
+<dl class="section note"><dt>Note</dt><dd>Stationary mode, positive polarity </dd></dl>
+
+</div>
+</div>
+<a id="ad85c3e1b7a701ae1c5793be07f0c1928"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad85c3e1b7a701ae1c5793be07f0c1928">&#9670;&nbsp;</a></span>m_townsendCriterion</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P  = TracerParticle&lt;2, 2&gt;, typename F  = FieldSolverMultigrid, typename C  = CdrCTU&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html">Physics::StreamerInception::StreamerInceptionStepper</a>&lt; P, F, C &gt;::m_townsendCriterion</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Townsend criterion. </p>
+<dl class="section note"><dt>Note</dt><dd>Transient mode. </dd></dl>
+
+</div>
+</div>
+<a id="a1f55f45aab318c0e05691c4aba20a6e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f55f45aab318c0e05691c4aba20a6e6">&#9670;&nbsp;</a></span>m_townsendInceptionVoltageMinu</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P  = TracerParticle&lt;2, 2&gt;, typename F  = FieldSolverMultigrid, typename C  = CdrCTU&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html">Physics::StreamerInception::StreamerInceptionStepper</a>&lt; P, F, C &gt;::m_townsendInceptionVoltageMinu</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Computed Townsend inception voltage. </p>
+<dl class="section note"><dt>Note</dt><dd>Stationary mode, negative polarity </dd></dl>
+
+</div>
+</div>
+<a id="ad436b7f89cb18dcbce8f4f431c6e4dc3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad436b7f89cb18dcbce8f4f431c6e4dc3">&#9670;&nbsp;</a></span>m_townsendInceptionVoltagePlus</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P  = TracerParticle&lt;2, 2&gt;, typename F  = FieldSolverMultigrid, typename C  = CdrCTU&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html">Physics::StreamerInception::StreamerInceptionStepper</a>&lt; P, F, C &gt;::m_townsendInceptionVoltagePlus</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Computed Townsend inception voltage. </p>
+<dl class="section note"><dt>Note</dt><dd>Stationary mode, positive polarity </dd></dl>
 
 </div>
 </div>
