@@ -50,12 +50,6 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   m_fullIntegration     = false;
   m_evaluateTownsend    = false;
 
-#if 1
-  if (procID() == 0) {
-    std::cout << "StreamerInceptionStepper -- how to halt ion tracking...? Can we do K-evaluations...?" << std::endl;
-  }
-#endif
-
   this->parseOptions();
 
   m_rho = [](const RealVect x) -> Real {
@@ -185,6 +179,10 @@ StreamerInceptionStepper<P, F, C>::allocate()
     m_amr->allocate(m_inceptionIntegralMinu, m_realm, m_phase, m_voltageSweeps.size());
     m_amr->allocate(m_inceptionVoltagePlus, m_realm, m_phase, 1);
     m_amr->allocate(m_inceptionVoltageMinu, m_realm, m_phase, 1);
+    m_amr->allocate(m_streamerInceptionVoltagePlus, m_realm, m_phase, 1);
+    m_amr->allocate(m_streamerInceptionVoltageMinu, m_realm, m_phase, 1);
+    m_amr->allocate(m_townsendInceptionVoltagePlus, m_realm, m_phase, 1);
+    m_amr->allocate(m_townsendInceptionVoltageMinu, m_realm, m_phase, 1);
 
     if (m_plotFieldEmission) {
       m_amr->allocate(m_emissionRatesPlus, m_realm, m_phase, m_voltageSweeps.size());
@@ -221,13 +219,16 @@ StreamerInceptionStepper<P, F, C>::allocate()
   }
   case Mode::Transient: {
     m_amr->allocate(m_inceptionIntegral, m_realm, m_phase, 1);
+    m_amr->allocate(m_townsendCriterion, m_realm, m_phase, 1);
     m_amr->allocate(m_emissionRate, m_realm, m_phase, 1);
     m_amr->allocate(m_backgroundIonization, m_realm, m_phase, 1);
     m_amr->allocate(m_detachment, m_realm, m_phase, 1);
 
     DataOps::setValue(m_inceptionIntegral, 0.0);
+    DataOps::setValue(m_townsendCriterion, 0.0);
     DataOps::setValue(m_emissionRate, 0.0);
     DataOps::setValue(m_backgroundIonization, 0.0);
+    DataOps::setValue(m_detachment, 0.0);
 
     break;
   }
@@ -403,10 +404,6 @@ StreamerInceptionStepper<P, F, C>::parseVoltages() noexcept
   m_voltageSweeps.push_back(voltageHi);
   m_maxTPlus.resize(m_voltageSweeps.size(), 0.0);
   m_maxTMinu.resize(m_voltageSweeps.size(), 0.0);
-
-  if (m_evaluateTownsend && m_mode == Mode::Transient) {
-    MayDay::Warning("StreamerInceptionStepper -- combined Townsend tracking and transient mode is not (yet) supported");
-  }
 }
 
 template <typename P, typename F, typename C>
@@ -573,7 +570,7 @@ StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
       else if (plotVars[i] == "eta") {
         m_plotEta = true;
       }
-      else if (plotVars[i] == "townsend") {
+      else if (plotVars[i] == "T") {
         m_plotTownsend = true;
       }
     }
@@ -636,7 +633,7 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
 
     // Inception voltage.
     if (m_plotInceptionVoltage) {
-      ncomp += 2;
+      ncomp += 6;
     }
 
     // Background ionization rates
@@ -682,6 +679,9 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
     ncomp += SpaceDim + 1;
 
     if (m_plotInceptionIntegral) {
+      ncomp += 1;
+    }
+    if (m_plotTownsend) {
       ncomp += 1;
     }
     if (m_plotBackgroundIonization) {
@@ -771,8 +771,12 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
   const std::string prefix = "StreamerInceptionStepper/";
 
   if (m_plotInceptionVoltage) {
-    plotVars.push_back(prefix + "Inception voltage +");
-    plotVars.push_back(prefix + "Inception voltage -");
+    plotVars.push_back(prefix + "Minimum inception voltage +");
+    plotVars.push_back(prefix + "Minimum inception voltage -");
+    plotVars.push_back(prefix + "Streamer inception voltage +");
+    plotVars.push_back(prefix + "Streamer inception voltage -");
+    plotVars.push_back(prefix + "Townsend inception voltage +");
+    plotVars.push_back(prefix + "Townsend inception voltage -");
   }
 
   if (m_plotInceptionIntegral) {
@@ -785,6 +789,21 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
 
     for (const Real& V : m_voltageSweeps) {
       varName = prefix + "K-value/ V = -" + std::to_string(V);
+      plotVars.push_back(varName);
+    }
+  }
+
+  // Secondary emission coefficient for initiatory ions
+  if (m_plotTownsend) {
+    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+      const std::string varName = prefix + "T-value/ V = +" + std::to_string(m_voltageSweeps[i]);
+
+      plotVars.push_back(varName);
+    }
+
+    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+      const std::string varName = prefix + "T-value/ V = -" + std::to_string(m_voltageSweeps[i]);
+
       plotVars.push_back(varName);
     }
   }
@@ -820,21 +839,6 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
 
     for (const Real& V : m_voltageSweeps) {
       varName = prefix + "Field emission rate/ V = -" + std::to_string(V);
-      plotVars.push_back(varName);
-    }
-  }
-
-  // Secondary emission coefficient for initiatory ions
-  if (m_plotTownsend) {
-    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      const std::string varName = prefix + "Townsend crit/ V = +" + std::to_string(m_voltageSweeps[i]);
-
-      plotVars.push_back(varName);
-    }
-
-    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      const std::string varName = prefix + "Townsend crit/ V = -" + std::to_string(m_voltageSweeps[i]);
-
       plotVars.push_back(varName);
     }
   }
@@ -891,6 +895,10 @@ StreamerInceptionStepper<P, F, C>::getTransientPlotVariableNames() const noexcep
 
   if (m_plotInceptionIntegral) {
     plotVars.push_back("Inception integral");
+  }
+
+  if (m_plotTownsend) {
+    plotVars.push_back("Townsend criterion");
   }
 
   if (m_plotBackgroundIonization) {
@@ -980,11 +988,20 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
   if (m_plotInceptionVoltage) {
     this->writeData(a_output, a_icomp, m_inceptionVoltagePlus, a_outputRealm, a_level, false, true);
     this->writeData(a_output, a_icomp, m_inceptionVoltageMinu, a_outputRealm, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_streamerInceptionVoltagePlus, a_outputRealm, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_streamerInceptionVoltageMinu, a_outputRealm, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_townsendInceptionVoltagePlus, a_outputRealm, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_townsendInceptionVoltageMinu, a_outputRealm, a_level, false, true);
   }
 
   if (m_plotInceptionIntegral) {
     this->writeData(a_output, a_icomp, m_inceptionIntegralPlus, a_outputRealm, a_level, false, true);
     this->writeData(a_output, a_icomp, m_inceptionIntegralMinu, a_outputRealm, a_level, false, true);
+  }
+
+  if (m_plotTownsend) {
+    this->writeData(a_output, a_icomp, m_townsendCriterionPlus, a_outputRealm, a_level, false, true);
+    this->writeData(a_output, a_icomp, m_townsendCriterionMinu, a_outputRealm, a_level, false, true);
   }
 
   if (m_plotBackgroundIonization) {
@@ -998,11 +1015,6 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
   if (m_plotFieldEmission) {
     this->writeData(a_output, a_icomp, m_emissionRatesPlus, a_outputRealm, a_level, false, true);
     this->writeData(a_output, a_icomp, m_emissionRatesMinu, a_outputRealm, a_level, false, true);
-  }
-
-  if (m_plotTownsend) {
-    this->writeData(a_output, a_icomp, m_townsendCriterionPlus, a_outputRealm, a_level, false, true);
-    this->writeData(a_output, a_icomp, m_townsendCriterionMinu, a_outputRealm, a_level, false, true);
   }
 
   if (m_plotAlpha) {
@@ -1120,6 +1132,10 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
   if (m_plotInceptionIntegral) {
     this->writeData(a_output, a_icomp, m_inceptionIntegral, a_outputRealm, a_level, false, true);
+  }
+
+  if (m_plotTownsend) {
+    this->writeData(a_output, a_icomp, m_townsendCriterion, a_outputRealm, a_level, false, true);
   }
 
   if (m_plotBackgroundIonization) {
@@ -1364,17 +1380,19 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
     timer.stopEvent("Ion advance");
 
     // Seed new particles and compute the inception integral.
-    timer.startEvent("Set velocity");
+    timer.startEvent("Inception integral");
     m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
-    timer.stopEvent("Set velocity");
-
-    timer.startEvent("Seed particles");
     this->seedIonizationParticles(curVoltage);
-    timer.stopEvent("Seed particles");
-
-    timer.startEvent("Compute integral");
     this->computeInceptionIntegralTransient(curVoltage);
-    timer.stopEvent("Compute integral");
+    timer.stopEvent("Inception integral");
+
+    if (m_evaluateTownsend) {
+      timer.startEvent("Townsend criterion");
+      m_tracerParticleSolver->setVelocity(m_electricFieldPlus);
+      this->seedIonizationParticles(curVoltage);
+      this->computeTownsendCriterionTransient(curVoltage);
+      timer.stopEvent("Townsend criterion");
+    }
 
     // Compute the critical volume, critical area, the ionization volume and the electron appearance rate.
     timer.startEvent("Compute Vcr");
@@ -1402,17 +1420,23 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
       m_inceptionProbability.emplace_back(curTime, 1.0 - exp(-p));
     }
 
-    // Get the maximum K-value
+    // Get the maximum K and T values
     timer.startEvent("Get max/min K");
     Real maxK = -std::numeric_limits<Real>::max();
     Real minK = +std::numeric_limits<Real>::max();
 
+    Real maxT = -std::numeric_limits<Real>::max();
+    Real minT = +std::numeric_limits<Real>::max();
+
     DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0);
+    DataOps::getMaxMin(maxT, minT, m_townsendCriterion, 0);
 
     if (!m_fullIntegration) {
       maxK = std::min(maxK, m_inceptionK);
+      maxT = std::min(maxT, 1.0);
     }
     m_maxK.emplace_back(m_time + a_dt, maxK);
+    m_maxT.emplace_back(m_time + a_dt, maxT);
     timer.stopEvent("Get max/min K");
 
     timer.startEvent("Write report");
@@ -1625,6 +1649,10 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
     m_amr->reallocate(m_inceptionIntegralMinu, m_phase, a_lmin);
     m_amr->reallocate(m_inceptionVoltagePlus, m_phase, a_lmin);
     m_amr->reallocate(m_inceptionVoltageMinu, m_phase, a_lmin);
+    m_amr->reallocate(m_streamerInceptionVoltagePlus, m_phase, a_lmin);
+    m_amr->reallocate(m_streamerInceptionVoltageMinu, m_phase, a_lmin);
+    m_amr->reallocate(m_townsendInceptionVoltagePlus, m_phase, a_lmin);
+    m_amr->reallocate(m_townsendInceptionVoltageMinu, m_phase, a_lmin);
 
     if (m_plotBackgroundIonization) {
       m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
@@ -1647,6 +1675,7 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
   case Mode::Transient: {
 
     m_amr->reallocate(m_inceptionIntegral, m_phase, a_lmin);
+    m_amr->reallocate(m_townsendCriterion, m_phase, a_lmin);
     m_amr->reallocate(m_emissionRate, m_phase, a_lmin);
     m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
 
@@ -1970,7 +1999,7 @@ StreamerInceptionStepper<P, F, C>::seedIonizationParticles(const Real& a_voltage
             const Real alpha = m_alpha(E, x);
             const Real eta   = m_eta(E, x);
 
-            if (alpha >= eta) {
+            if (alpha > eta) {
               P p;
 
               p.position() = x;
@@ -2038,7 +2067,7 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
   case Mode::Stationary: {
     this->computeInceptionIntegralStationary();
     if (m_evaluateTownsend) {
-      this->computeTownsendCriterion();
+      this->computeTownsendCriterionStationary();
     }
     this->computeCriticalVolumeStationary();
     this->computeCriticalAreaStationary();
@@ -2072,13 +2101,26 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
     // Compute the 'Rdot' value at current time (which is probably t = 0).
     this->computeInceptionIntegralTransient(m_voltageCurve(m_time));
 
-    // Get the maximum K-value
+    // Evaluate the Townsend criterion if the user asks for it.
+    if (m_evaluateTownsend) {
+      this->seedIonizationParticles(m_voltageCurve(m_time));
+      m_tracerParticleSolver->setVelocity(m_electricFieldPlus);
+
+      this->computeTownsendCriterionTransient(m_voltageCurve(m_time));
+    }
+
+    // Get the maximum K and T values
     Real maxK = -std::numeric_limits<Real>::max();
     Real minK = +std::numeric_limits<Real>::max();
 
+    Real maxT = -std::numeric_limits<Real>::max();
+    Real minT = +std::numeric_limits<Real>::max();
+
     DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0);
+    DataOps::getMaxMin(maxT, minT, m_townsendCriterion, 0);
     if (!m_fullIntegration) {
       maxK = std::min(maxK, m_inceptionK);
+      maxT = std::min(maxT, 1.0);
     }
 
     m_Rdot.emplace_back(m_time, this->computeRdot(m_voltageCurve(m_time)));
@@ -2087,6 +2129,7 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
     m_ionizationVolumeTransient.emplace_back(m_time, this->computeIonizationVolumeTransient(m_voltageCurve(m_time)));
     m_inceptionProbability.emplace_back(m_time, 0.0);
     m_maxK.emplace_back(m_time, maxK);
+    m_maxT.emplace_back(m_time, maxT);
 
     break;
   }
@@ -2689,11 +2732,11 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
+StreamerInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcept
 {
-  CH_TIME("StreamerInceptionStepper::computeTownsendCriterion");
+  CH_TIME("StreamerInceptionStepper::computeTownsendCriterionStationary");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeTownsendCriterion" << endl;
+    pout() << "StreamerInceptionStepper::computeTownsendCriterionStationary" << endl;
   }
 
   // Allocate storage for gamma-coefficient
@@ -2736,7 +2779,7 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
         break;
       }
       default: {
-        MayDay::Error("StreamerInceptionStepper::computeTownsendCriterion -- logic bust");
+        MayDay::Error("StreamerInceptionStepper::computeTownsendCriterionStationary -- logic bust");
 
         break;
       }
@@ -2748,14 +2791,9 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
       m_amr->conservativeAverage(gamma, m_realm, m_phase);
       m_amr->interpGhost(gamma, m_realm, m_phase);
 
-      // Compute gamma/exp(K)
-      auto func = [](const Real& a_value) -> Real {
-        return exp(a_value);
-      };
-
-      // Compute gamma * exp(K)
+      // For turning K into exp(K)-1
       auto exponentiate = [](const Real x) -> Real {
-        return x > 0.0 ? exp(x) : 0.0;
+        return x > 0.0 ? exp(x) - 1 : 0.0;
       };
 
       if (p > 0.0) {
@@ -2808,6 +2846,59 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterion() noexcept
 
 template <typename P, typename F, typename C>
 void
+StreamerInceptionStepper<P, F, C>::computeTownsendCriterionTransient(const Real& a_voltage) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::computeTownsendCriterionTransient");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::computeTownsendCriterionTransient" << endl;
+  }
+
+  // Compute T-value on each particle using specified algorithm.
+  switch (m_inceptionAlgorithm) {
+  case IntegrationAlgorithm::Euler: {
+    this->townsendTrackEuler(a_voltage);
+
+    break;
+  }
+  case IntegrationAlgorithm::Trapezoidal: {
+    this->townsendTrackTrapezoidal(a_voltage);
+
+    break;
+  }
+  default: {
+    MayDay::Error("StreamerInceptionStepper::computeTownsendCriterionTransient - logic bust");
+
+    break;
+  }
+  }
+
+  // Compute gamma
+  EBAMRCellData gamma;
+  m_amr->allocate(gamma, m_realm, m_phase, 1);
+  DataOps::setValue(gamma, 0.0);
+  m_tracerParticleSolver->deposit(gamma);
+
+  // Turn K into exp(K)-1
+  auto exponentiate = [](const Real x) -> Real {
+    return x > 0.0 ? exp(x) - 1 : 0.0;
+  };
+  DataOps::copy(m_townsendCriterion, m_inceptionIntegral);
+  DataOps::compute(m_townsendCriterion, exponentiate);
+  DataOps::multiply(m_townsendCriterion, gamma);
+
+  // If we're running without full integration we truncate the Townsend value to 1.
+  if (!m_fullIntegration) {
+    DataOps::compute(m_townsendCriterion, [](const Real x) {
+      return std::min(x, 1.0);
+    });
+  }
+
+  m_amr->conservativeAverage(m_townsendCriterion, m_realm, m_phase);
+  m_amr->interpGhost(m_townsendCriterion, m_realm, m_phase);
+}
+
+template <typename P, typename F, typename C>
+void
 StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noexcept
 {
   CH_TIME("StreamerInceptionStepper::townsendTrackEuler");
@@ -2836,6 +2927,10 @@ StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noe
     outcastsBefore  = amrParticles.getNumberOfOutcastParticlesGlobal();
     particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
   }
+
+  // The input here is m_electricFieldPlus, in which case there is a voltage U = 1 on all electrodes. Particles are seed with this velocity
+  // but the user-supplied input voltage determines the "true" direction.
+  const Real sgn = (a_voltage > 0.0) - (a_voltage < 0.0);
 
   while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
 
@@ -2878,7 +2973,7 @@ StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noe
           P& p = lit();
 
           const RealVect x      = p.position();
-          const RealVect vel    = p.velocity();
+          const RealVect vel    = sgn * p.velocity();
           const Real     v      = vel.vectorLength();
           const Real     E      = std::abs(a_voltage * v);
           const Real     deltaX = spaceStep;
@@ -2975,6 +3070,10 @@ StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltag
     particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
   }
 
+  // The input here is m_electricFieldPlus, in which case there is a voltage U = 1 on all electrodes. Particles are seed with this velocity
+  // but the user-supplied input voltage determines the "true" direction.
+  const Real sgn = (a_voltage > 0.0) - (a_voltage < 0.0);
+
   while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
 
     // Euler stage.
@@ -3016,7 +3115,7 @@ StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltag
           P& p = lit();
 
           const RealVect x        = p.position();
-          const RealVect vel      = p.velocity();
+          const RealVect vel      = sgn * p.velocity();
           const Real     v        = vel.vectorLength();
           const Real     E        = std::abs(a_voltage * v);
           const Real     alpha    = m_alpha(E, x);
@@ -3079,7 +3178,7 @@ StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltag
           // Note the weird subtraction since p.position() was updated
           // to p^k + dt * v^k.
           const RealVect oldPos = p.position() - dt * vk;
-          const RealVect newPos = p.position() + 0.5 * dt * (vk1 - vk);
+          const RealVect newPos = p.position() + 0.5 * sgn * dt * (vk1 - vk);
 
           // Compute new alpha.
           const Real alphak  = p.template real<0>();
@@ -3588,6 +3687,8 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
   // TLDR: This routine runs through all the K-values in each cell and estimates the
   //       inception voltage using linear interpolation.
 
+  CH_assert(m_mode == Mode::Stationary);
+
   if (m_voltageSweeps.size() < 2) {
     DataOps::setValue(m_inceptionVoltagePlus, std::numeric_limits<Real>::quiet_NaN());
     DataOps::setValue(m_inceptionVoltageMinu, std::numeric_limits<Real>::quiet_NaN());
@@ -3600,8 +3701,9 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
     constexpr int comp = 0;
 
     // Function which interpolates the inception voltage if possible. Used in the kernels. This one does interpolation.
-    auto calcUincInterp = [Kinc = this->m_inceptionK, &V = this->m_voltageSweeps](const std::vector<Real>& K,
-                                                                                  const std::vector<Real>& T) -> Real {
+    auto calcUincInterp = [Kinc = this->m_inceptionK,
+                           &V   = this->m_voltageSweeps](const std::vector<Real>& K,
+                                                       const std::vector<Real>& T) -> std::array<Real, 3> {
       Real streamerInc = std::numeric_limits<Real>::quiet_NaN();
       Real townsendInc = std::numeric_limits<Real>::quiet_NaN();
 
@@ -3650,13 +3752,13 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
         Uinc = std::min(streamerInc, townsendInc);
       }
 
-      return Uinc;
+      return std::array<Real, 3>{Uinc, streamerInc, townsendInc};
     };
 
     // Same functionality as above, but without interpolation.
     auto calcUincNoInterp = [Kinc = this->m_inceptionK,
                              &V   = this->m_voltageSweeps](const std::vector<Real>& K,
-                                                         const std::vector<Real>& T) -> Real {
+                                                         const std::vector<Real>& T) -> std::array<Real, 3> {
       Real streamerInc = std::numeric_limits<Real>::quiet_NaN();
       Real townsendInc = std::numeric_limits<Real>::quiet_NaN();
 
@@ -3693,7 +3795,7 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
         Uinc = std::min(streamerInc, townsendInc);
       }
 
-      return Uinc;
+      return std::array<Real, 3>{Uinc, streamerInc, townsendInc};
     };
 
     // Iterate through m_inceptionIntegral data and calculate inception voltage.
@@ -3704,8 +3806,20 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
         EBCellFAB& inceptionVoltagePlus = (*m_inceptionVoltagePlus[lvl])[dit()];
         EBCellFAB& inceptionVoltageMinu = (*m_inceptionVoltageMinu[lvl])[dit()];
 
+        EBCellFAB& streamerInceptionVoltagePlus = (*m_streamerInceptionVoltagePlus[lvl])[dit()];
+        EBCellFAB& streamerInceptionVoltageMinu = (*m_streamerInceptionVoltageMinu[lvl])[dit()];
+
+        EBCellFAB& townsendInceptionVoltagePlus = (*m_townsendInceptionVoltagePlus[lvl])[dit()];
+        EBCellFAB& townsendInceptionVoltageMinu = (*m_townsendInceptionVoltageMinu[lvl])[dit()];
+
         FArrayBox& inceptionVoltagePlusReg = inceptionVoltagePlus.getFArrayBox();
         FArrayBox& inceptionVoltageMinuReg = inceptionVoltageMinu.getFArrayBox();
+
+        FArrayBox& streamerInceptionVoltagePlusReg = streamerInceptionVoltagePlus.getFArrayBox();
+        FArrayBox& streamerInceptionVoltageMinuReg = streamerInceptionVoltageMinu.getFArrayBox();
+
+        FArrayBox& townsendInceptionVoltagePlusReg = townsendInceptionVoltagePlus.getFArrayBox();
+        FArrayBox& townsendInceptionVoltageMinuReg = townsendInceptionVoltageMinu.getFArrayBox();
 
         const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
         const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
@@ -3735,14 +3849,26 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
             Tminu.emplace_back(townsendCriterionMinuReg(iv, i));
           }
 
+          std::array<Real, 3> inceptionVoltagesPlus;
+          std::array<Real, 3> inceptionVoltagesMinu;
+
           if (m_fullIntegration) {
-            inceptionVoltagePlusReg(iv, comp) = calcUincInterp(Kplus, Tplus);
-            inceptionVoltageMinuReg(iv, comp) = calcUincInterp(Kminu, Tminu);
+            inceptionVoltagesPlus = calcUincInterp(Kplus, Tplus);
+            inceptionVoltagesMinu = calcUincInterp(Kminu, Tminu);
           }
           else {
-            inceptionVoltagePlusReg(iv, comp) = calcUincNoInterp(Kplus, Tplus);
-            inceptionVoltageMinuReg(iv, comp) = calcUincNoInterp(Kminu, Tminu);
+            inceptionVoltagesPlus = calcUincNoInterp(Kplus, Tplus);
+            inceptionVoltagesMinu = calcUincNoInterp(Kminu, Tminu);
           }
+
+          inceptionVoltagePlusReg(iv, comp) = std::get<0>(inceptionVoltagesPlus);
+          inceptionVoltageMinuReg(iv, comp) = std::get<0>(inceptionVoltagesMinu);
+
+          streamerInceptionVoltagePlusReg(iv, comp) = std::get<1>(inceptionVoltagesPlus);
+          streamerInceptionVoltageMinuReg(iv, comp) = std::get<1>(inceptionVoltagesMinu);
+
+          townsendInceptionVoltagePlusReg(iv, comp) = std::get<2>(inceptionVoltagesPlus);
+          townsendInceptionVoltageMinuReg(iv, comp) = std::get<2>(inceptionVoltagesMinu);
         };
 
         // Irregular kernel.
@@ -3761,14 +3887,26 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
             Tminu.emplace_back(townsendCriterionMinu(vof, i));
           }
 
+          std::array<Real, 3> inceptionVoltagesPlus;
+          std::array<Real, 3> inceptionVoltagesMinu;
+
           if (m_fullIntegration) {
-            inceptionVoltagePlus(vof, comp) = calcUincInterp(Kplus, Tplus);
-            inceptionVoltageMinu(vof, comp) = calcUincInterp(Kminu, Tminu);
+            inceptionVoltagesPlus = calcUincInterp(Kplus, Tplus);
+            inceptionVoltagesMinu = calcUincInterp(Kminu, Tminu);
           }
           else {
-            inceptionVoltagePlus(vof, comp) = calcUincNoInterp(Kplus, Tplus);
-            inceptionVoltageMinu(vof, comp) = calcUincNoInterp(Kminu, Tminu);
+            inceptionVoltagesPlus = calcUincNoInterp(Kplus, Tplus);
+            inceptionVoltagesMinu = calcUincNoInterp(Kminu, Tminu);
           }
+
+          inceptionVoltagePlus(vof, comp) = std::get<0>(inceptionVoltagesPlus);
+          inceptionVoltageMinu(vof, comp) = std::get<0>(inceptionVoltagesMinu);
+
+          streamerInceptionVoltagePlus(vof, comp) = std::get<1>(inceptionVoltagesPlus);
+          streamerInceptionVoltageMinu(vof, comp) = std::get<1>(inceptionVoltagesMinu);
+
+          townsendInceptionVoltagePlus(vof, comp) = std::get<2>(inceptionVoltagesPlus);
+          townsendInceptionVoltageMinu(vof, comp) = std::get<2>(inceptionVoltagesMinu);
         };
 
         // Kernel regions.
@@ -3819,8 +3957,10 @@ StreamerInceptionStepper<P, F, C>::computeMinimumInceptionVoltage(const EBAMRCel
           const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
 
           if (!(std::isnan(U))) {
-            UInc = std::min(UInc, std::abs(U));
-            xInc = pos;
+            if (std::abs(U) < UInc) {
+              UInc = std::abs(U);
+              xInc = pos;
+            }
           }
         }
       };
@@ -3834,8 +3974,10 @@ StreamerInceptionStepper<P, F, C>::computeMinimumInceptionVoltage(const EBAMRCel
           const RealVect pos      = probLo + (0.5 * RealVect::Unit + RealVect(iv) + centroid) * dx;
 
           if (!(std::isnan(U))) {
-            UInc = std::min(UInc, std::abs(U));
-            xInc = pos;
+            if (std::abs(U) < UInc) {
+              UInc = std::abs(U);
+              xInc = pos;
+            }
           }
         }
       };
@@ -3954,9 +4096,12 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeTransient() const noexce
       const EBCellFAB& inceptionIntegral    = (*m_inceptionIntegral[lvl])[dit()];
       const FArrayBox& inceptionIntegralReg = inceptionIntegral.getFArrayBox();
 
+      const EBCellFAB& townsendCriterion    = (*m_townsendCriterion[lvl])[dit()];
+      const FArrayBox& townsendCriterionReg = townsendCriterion.getFArrayBox();
+
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
-          if (inceptionIntegralReg(iv, 0) >= m_inceptionK) {
+          if (inceptionIntegralReg(iv, 0) >= m_inceptionK || townsendCriterionReg(iv, 0) >= 1.0) {
             Vcr += vol;
           }
         }
@@ -3964,7 +4109,7 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeTransient() const noexce
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         if (validCells(vof.gridIndex())) {
-          if (inceptionIntegral(vof, 0) >= m_inceptionK) {
+          if (inceptionIntegral(vof, 0) >= m_inceptionK || townsendCriterion(vof, 0) >= 1.0) {
             Vcr += ebisbox.volFrac(vof) * vol;
           }
         }
@@ -4064,10 +4209,13 @@ StreamerInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcept
       const BaseFab<bool>& validCells = validCellsLD[dit()];
 
       const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[dit()];
+      const EBCellFAB& townsendCriterion = (*m_townsendCriterion[lvl])[dit()];
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
-        if (validCells(vof.gridIndex()) && inceptionIntegral(vof, 0) >= m_inceptionK) {
-          Acr += ebisbox.bndryArea(vof) * area;
+        if (validCells(vof.gridIndex())) {
+          if (inceptionIntegral(vof, 0) >= m_inceptionK || townsendCriterion(vof, 0) >= 1.0) {
+            Acr += ebisbox.bndryArea(vof) * area;
+          }
         }
       };
 
@@ -4378,6 +4526,16 @@ StreamerInceptionStepper<P, F, C>::writeReportStationary() const noexcept
   const std::pair<Real, RealVect> UIncPlus = this->computeMinimumInceptionVoltage(m_inceptionVoltagePlus);
   const std::pair<Real, RealVect> UIncMinu = this->computeMinimumInceptionVoltage(m_inceptionVoltageMinu);
 
+  const std::pair<Real, RealVect> streamerUIncPlus = this->computeMinimumInceptionVoltage(
+    m_streamerInceptionVoltagePlus);
+  const std::pair<Real, RealVect> streamerUIncMinu = this->computeMinimumInceptionVoltage(
+    m_streamerInceptionVoltageMinu);
+
+  const std::pair<Real, RealVect> townsendUIncPlus = this->computeMinimumInceptionVoltage(
+    m_townsendInceptionVoltagePlus);
+  const std::pair<Real, RealVect> townsendUIncMinu = this->computeMinimumInceptionVoltage(
+    m_townsendInceptionVoltageMinu);
+
 #ifdef CH_MPI
   if (procID() == 0) {
 #endif
@@ -4393,12 +4551,24 @@ StreamerInceptionStepper<P, F, C>::writeReportStationary() const noexcept
     }
     else {
       if(m_fullIntegration){
-	output << "# Inception voltage(+) = " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
-	output << "# Inception voltage(-) = " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";
+	output << "# Minimum inception voltage(+)  = " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
+	output << "# Minimum inception voltage(-)  = " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";
+	output << "# \n";
+	output << "# Streamer inception voltage(+) = " << streamerUIncPlus.first << ",\t x = " << streamerUIncPlus.second << "\n";
+	output << "# Streamer inception voltage(-) = " << streamerUIncMinu.first << ",\t x = " << streamerUIncMinu.second << "\n";
+	output << "# \n";
+	output << "# Townsend inception voltage(+) = " << townsendUIncPlus.first << ",\t x = " << townsendUIncPlus.second << "\n";
+	output << "# Townsend inception voltage(-) = " << townsendUIncMinu.first << ",\t x = " << townsendUIncMinu.second << "\n";		
       }
       else{
-	output << "# Inception voltage(+) >= " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
-	output << "# Inception voltage(-) >= " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";
+	output << "# Minimum inception voltage(+)  >= " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
+	output << "# Minimum inception voltage(-)  >= " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";
+	output << "# \n";
+	output << "# Streamer inception voltage(+) >= " << streamerUIncPlus.first << ",\t x = " << streamerUIncPlus.second << "\n";
+	output << "# Streamer inception voltage(-) >= " << streamerUIncMinu.first << ",\t x = " << streamerUIncMinu.second << "\n";
+	output << "# \n";
+	output << "# Townsend inception voltage(+) >= " << townsendUIncPlus.first << ",\t x = " << townsendUIncPlus.second << "\n";
+	output << "# Townsend inception voltage(-) >= " << townsendUIncMinu.first << ",\t x = " << townsendUIncMinu.second << "\n";			
       }      
     }
 
@@ -4453,17 +4623,20 @@ StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
     output << std::left << std::setw(15) << setfill(' ') << "# Time t";
     output << std::left << std::setw(15) << setfill(' ') << "V(t)";
     output << std::left << std::setw(15) << setfill(' ') << "max K(t)";
+    output << std::left << std::setw(15) << setfill(' ') << "max T(t)";
     output << std::left << std::setw(15) << setfill(' ') << "Vcr(t)";
     output << std::left << std::setw(15) << setfill(' ') << "Acr(t)";
     output << std::left << std::setw(15) << setfill(' ') << "Vion(t)";
-    output << std::left << std::setw(15) << setfill(' ') << "Rdot(t)";
+    output << std::left << std::setw(15) << setfill(' ') << "lambda(t)";
     output << std::left << std::setw(15) << setfill(' ') << "P(t)";
     output << std::left << std::setw(15) << setfill(' ') << "dP(t, t+dt)";
+    output << std::left << std::setw(15) << setfill(' ') << "Time lag";
     output << "\n";
 
     // Compute dP(t, t+dt)
     std::vector<Real> dProb;
     for (size_t i = 0; i < m_Rdot.size() - 1; i++) {
+      const Real t    = m_Rdot[i].first;
       const Real dt   = m_Rdot[i + 1].first - m_Rdot[i].first;
       const Real prob = m_inceptionProbability[i].second;
       const Real Rdot = m_Rdot[i].second;
@@ -4472,17 +4645,37 @@ StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
     }
     dProb.emplace_back(0.0);
 
+    // Compute the average waiting time.
+    std::vector<Real> tau(m_Rdot.size(), 0.0);
+    for (size_t i = 0; i < m_Rdot.size() - 1; i++) {
+      const Real t1     = m_Rdot[i].first;
+      const Real t2     = m_Rdot[i + 1].first;
+      const Real dt     = t2 - t1;
+      const Real prob   = m_inceptionProbability[i].second;
+      const Real lambda = m_Rdot[i].second;
+
+      tau[i + 1] = tau[i] + t1 * (1 - prob) * lambda * dt;
+    }
+    for (int i = 0; i < tau.size(); i++) {
+      const Real prob = m_inceptionProbability[i].second;
+
+      tau[i] = prob > 0.0 ? tau[i] / prob : std::numeric_limits<Real>::infinity();
+    }
+
     for (size_t i = 0; i < m_Rdot.size(); i++) {
       const Real time = m_Rdot[i].first;
+
       output << std::left << std::setw(15) << time;
       output << std::left << std::setw(15) << m_voltageCurve(time);
       output << std::left << std::setw(15) << m_maxK[i].second;
+      output << std::left << std::setw(15) << m_maxT[i].second;
       output << std::left << std::setw(15) << m_criticalVolume[i].second;
       output << std::left << std::setw(15) << m_criticalArea[i].second;
       output << std::left << std::setw(15) << m_ionizationVolumeTransient[i].second;
       output << std::left << std::setw(15) << m_Rdot[i].second;
       output << std::left << std::setw(15) << m_inceptionProbability[i].second;
       output << std::left << std::setw(15) << dProb[i];
+      output << std::left << std::setw(15) << tau[i];
       output << "\n";
     }
 

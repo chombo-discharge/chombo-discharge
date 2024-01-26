@@ -512,6 +512,36 @@ namespace Physics {
       EBAMRCellData m_inceptionVoltageMinu;
 
       /*!
+	@brief Computed streamer inception voltage
+	@note Stationary mode, positive polarity
+      */
+      EBAMRCellData m_streamerInceptionVoltagePlus;
+
+      /*!
+	@brief Computed streamer inception voltage
+	@note Stationary mode, negative polarity
+      */
+      EBAMRCellData m_streamerInceptionVoltageMinu;
+
+      /*!
+	@brief Computed Townsend inception voltage
+	@note Stationary mode, positive polarity
+      */
+      EBAMRCellData m_townsendInceptionVoltagePlus;
+
+      /*!
+	@brief Computed Townsend inception voltage
+	@note Stationary mode, negative polarity
+      */
+      EBAMRCellData m_townsendInceptionVoltageMinu;
+
+      /*!
+	@brief Townsend criterion
+	@note Transient mode. 
+      */
+      EBAMRCellData m_townsendCriterion;
+
+      /*!
 	@brief Townsend criterion for starting positive ions
       */
       EBAMRCellData m_townsendCriterionPlus;
@@ -550,6 +580,12 @@ namespace Physics {
 	@note For transient runs
       */
       std::vector<std::pair<Real, Real>> m_maxK;
+
+      /*!
+	@brief Max Townsend value for every time step
+	@note For transient runs
+      */
+      std::vector<std::pair<Real, Real>> m_maxT;
 
       /*!
 	@brief Critical volumes of K values for each voltage
@@ -875,7 +911,15 @@ namespace Physics {
 	@note For stationary mode only. 
       */
       virtual void
-      computeTownsendCriterion() noexcept;
+      computeTownsendCriterionStationary() noexcept;
+
+      /*!
+	@brief Solve for the Townsend criterion for each particle in each voltage. 
+	@param[in] a_voltage Voltage multiplier
+	@note For transient mode
+      */
+      virtual void
+      computeTownsendCriterionTransient(const Real& a_voltage) noexcept;
 
       /*!
 	@brief Track particles (positive ions) using an Euler rule and check if the collide with a cathode
