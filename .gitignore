@@ -1,5 +1,6 @@
 *.ex
 *.hdf5
+*.h5part
 *.MPI
 *.session*
 **/Make.defs.local
