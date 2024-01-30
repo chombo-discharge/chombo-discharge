@@ -40,6 +40,16 @@ class ItoParticle : public GenericParticle<5, 3>
 {
 public:
   /*!
+    @brief Naming convention for scalar fields
+  */
+  static std::vector<std::string> s_realVariables;
+
+  /*!
+    @brief Naming convention for vector fields
+  */
+  static std::vector<std::string> s_vectVariables;
+
+  /*!
     @brief Default constructor -- user should subsequently set the variables or call define.
     @note If the user has called setNumRuntimeScalars/Vectors then  will allocate runtime buffers
   */
