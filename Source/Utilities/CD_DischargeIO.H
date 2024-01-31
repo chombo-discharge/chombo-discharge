@@ -135,7 +135,6 @@ namespace DischargeIO {
   writeEBHDF5(const EBAMRCellData& a_data, const std::string& a_file);
 #endif
 
-#ifdef CH_USE_HDF5
   /*!
     @brief Write a particle container to an H5Part file. Good for quick and dirty visualization of particles
     @details Use case is pretty straightforward but the user might need to cast particle types. E.g. call
@@ -156,8 +155,6 @@ namespace DischargeIO {
               const std::vector<std::string>                  a_realVars = std::vector<std::string>(),
               const std::vector<std::string>                  a_vectVars = std::vector<std::string>(),
               const RealVect                                  a_shift    = RealVect::Zero) noexcept;
-
-#endif
 
 } // namespace DischargeIO
 

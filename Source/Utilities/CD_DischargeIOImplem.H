@@ -13,13 +13,14 @@
 #define CD_DischargeIOImplem_H
 
 // Std includes
+#ifdef CH_USE_HDF5
 #include <hdf5.h>
+#endif
 
 // Our includes
 #include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
-#ifdef CH_USE_HDF5
 template <size_t M, size_t N>
 void
 DischargeIO::writeH5Part(const std::string                               a_filename,
@@ -28,10 +29,11 @@ DischargeIO::writeH5Part(const std::string                               a_filen
                          const std::vector<std::string>                  a_vectVars,
                          const RealVect                                  a_shift) noexcept
 {
+#ifdef CH_USE_HDF5
   CH_TIME("DischargeIO::writeH5Part");
 
   CH_assert(a_realVars.size() == 0 || a_realVars.size() == M);
-  CH_assert(a_vectVars.size() == 0 || a_vecVars.size() == N);
+  CH_assert(a_vectVars.size() == 0 || a_vectVars.size() == N);
 
   std::vector<std::string> realVariables(M);
   std::vector<std::string> vectVariables(N);
@@ -250,8 +252,8 @@ DischargeIO::writeH5Part(const std::string                               a_filen
   // Close top group and file
   H5Gclose(grp);
   H5Fclose(fileID);
-}
 #endif
+}
 
 #include <CD_NamespaceFooter.H>
 

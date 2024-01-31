@@ -21,6 +21,7 @@
 // Our includes
 #include <CD_SimpleItoParticle.H>
 #include <CD_NonCommParticle.H>
+#include <CD_DischargeIO.H>
 #include <CD_ItoSolver.H>
 #include <CD_Random.H>
 #include <CD_DataOps.H>
@@ -533,6 +534,12 @@ ItoSolver::initialData()
 
   // Add particles, remove the ones that are inside the EB, and then deposit
   this->removeCoveredParticles(bulkParticles, EBRepresentation::ImplicitFunction, tolerance);
+  const std::string fname = m_name + ".h5part";
+
+  //  const auto& outputParticles =
+
+  DischargeIO::writeH5Part(fname, (const ParticleContainer<GenericParticle<5, 3>>&)bulkParticles);
+
   this->depositParticles<ItoParticle, &ItoParticle::weight>(m_phi, bulkParticles, m_deposition, m_coarseFineDeposition);
 }
 
