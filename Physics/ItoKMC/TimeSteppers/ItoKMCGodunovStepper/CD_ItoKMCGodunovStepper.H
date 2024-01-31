@@ -376,6 +376,12 @@ namespace Physics {
       */
       virtual void
       stepEulerMaruyamaCDR(const Real a_dt) noexcept;
+
+      /*!
+	@brief Utility function for plotting the ItoSolver particles. These are written in a particles folder
+      */
+      virtual void
+      plotParticles() const noexcept;
     };
   } // namespace ItoKMC
 } // namespace Physics

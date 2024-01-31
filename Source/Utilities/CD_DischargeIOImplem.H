@@ -27,7 +27,8 @@ DischargeIO::writeH5Part(const std::string                               a_filen
                          const ParticleContainer<GenericParticle<M, N>>& a_particles,
                          const std::vector<std::string>                  a_realVars,
                          const std::vector<std::string>                  a_vectVars,
-                         const RealVect                                  a_shift) noexcept
+                         const RealVect                                  a_shift,
+                         const Real                                      a_time) noexcept
 {
 #ifdef CH_USE_HDF5
   CH_TIME("DischargeIO::writeH5Part");

@@ -147,6 +147,7 @@ namespace DischargeIO {
     @param[in] a_realVars  Variable names for the M real variables
     @param[in] a_vectVars  Variable names for the N vector variables
     @param[in] a_shift     Particle position shift
+    @param[in] a_shift     Time 
   */
   template <size_t M, size_t N>
   void
@@ -154,7 +155,8 @@ namespace DischargeIO {
               const ParticleContainer<GenericParticle<M, N>>& a_particles,
               const std::vector<std::string>                  a_realVars = std::vector<std::string>(),
               const std::vector<std::string>                  a_vectVars = std::vector<std::string>(),
-              const RealVect                                  a_shift    = RealVect::Zero) noexcept;
+              const RealVect                                  a_shift    = RealVect::Zero,
+              const Real                                      a_time     = 0.0) noexcept;
 
 } // namespace DischargeIO
 
