@@ -24,22 +24,26 @@ template <size_t M, size_t N>
 void
 DischargeIO::writeH5Part(const std::string                               a_filename,
                          const ParticleContainer<GenericParticle<M, N>>& a_particles,
-                         const RealVect&                                 a_shift,
-                         const std::vector<std::string>&                 a_realVars,
-                         const std::vector<std::string>&                 a_vectVars) noexcept
+                         const std::vector<std::string>                  a_realVars,
+                         const std::vector<std::string>                  a_vectVars,
+                         const RealVect                                  a_shift) noexcept
 {
   CH_TIME("DischargeIO::writeH5Part");
 
-  MayDay::Warning("DischargeIOwriteH5Part -- should support header including time step and time");
-  MayDay::Warning("DischargeIOwriteH5Part -- add assertions if realVars > 0 && != M");
-  MayDay::Warning("DischargeIOwriteH5Part -- add assertions if vectVars > 0 && != N");
-  MayDay::Warning("DischargeIOwriteH5Part -- shift should be laster argument");
+  CH_assert(a_realVars.size() == 0 || a_realVars.size() == M);
+  CH_assert(a_vectVars.size() == 0 || a_vecVars.size() == N);
 
   std::vector<std::string> realVariables(M);
   std::vector<std::string> vectVariables(N);
 
   if (a_realVars.size() == M) {
     realVariables = a_realVars;
+
+    for (int i = 0; i < M; i++) {
+      if (realVariables[i] == "") {
+        realVariables[i] = "real-" + std::to_string(i);
+      }
+    }
   }
   else {
     for (int i = 0; i < M; i++) {
@@ -49,6 +53,12 @@ DischargeIO::writeH5Part(const std::string                               a_filen
 
   if (a_vectVars.size() == N) {
     vectVariables = a_vectVars;
+
+    for (int i = 0; i < N; i++) {
+      if (vectVariables[i] == "") {
+        vectVariables[i] = "vect-" + std::to_string(i);
+      }
+    }
   }
   else {
     for (int i = 0; i < N; i++) {
@@ -144,10 +154,10 @@ DischargeIO::writeH5Part(const std::string                               a_filen
 
       for (ListIterator<GenericParticle<M, N>> lit(particles); lit.ok(); ++lit) {
         id.push_back(procID());
-        x.push_back(lit().position()[0]);
-        y.push_back(lit().position()[1]);
+        x.push_back(lit().position()[0] - a_shift[0]);
+        y.push_back(lit().position()[1] - a_shift[0]);
 #if CH_SPACEDIM == 3
-        z.push_back(lit().position()[2]);
+        z.push_back(lit().position()[2] - a_shift[0]);
 #endif
       }
     }
