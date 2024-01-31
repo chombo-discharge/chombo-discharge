@@ -126,6 +126,12 @@ namespace Physics {
       readCheckpointData(HDF5Handle& a_handle, const int a_lvl) noexcept override;
 #endif
 
+      /*!
+	@brief Perform post-plot operations
+      */
+      virtual void
+      postPlot() noexcept override;
+
     protected:
       /*!
 	@brief Simple enum for distinguishing between algorithms

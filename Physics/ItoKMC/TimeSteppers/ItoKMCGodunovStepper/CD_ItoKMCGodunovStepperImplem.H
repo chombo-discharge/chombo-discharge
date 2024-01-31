@@ -202,9 +202,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     pout() << this->m_name + "::advance" << endl;
   }
 
-  // Option for plotting the Ito particles.
-  this->plotParticles();
-
   auto debugCharge = [this](const std::string a_message) -> void {
     const Real Qtot = this->computeTotalCharge();
     if (procID() == 0) {
@@ -1597,6 +1594,20 @@ ItoKMCGodunovStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const
   }
 }
 #endif
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::postPlot() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::postPlot");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::postPlot" << endl;
+  }
+
+  this->m_physicsPlotVariables.clear();
+
+  this->plotParticles();
+}
 
 template <typename I, typename C, typename R, typename F>
 void
