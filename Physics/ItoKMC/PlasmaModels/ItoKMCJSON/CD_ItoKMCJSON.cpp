@@ -20,6 +20,7 @@
 #include <CD_Units.H>
 #include <CD_DataParser.H>
 #include <CD_ParticleManagement.H>
+#include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::ItoKMC;
@@ -2931,7 +2932,10 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
   const bool isCathode = a_E.dotProduct(a_bndryNormal) <= 0.0;
   const bool isAnode   = !isCathode;
 
-  const RealVect releasePosition = a_cellCenter + a_dx * a_cellCentroid;
+  RealVect lo = -0.5 * RealVect::Unit;
+  RealVect hi = +0.5 * RealVect::Unit;
+
+  DataOps::computeMinValidBox(lo, hi, a_bndryNormal, a_bndryCentroid);
 
   // Outflow for all CDR fluxes.
   for (int i = 0; i < a_primaryCDRFluxes.size(); i++) {
@@ -2967,6 +2971,9 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
       // Release the particles.
       for (int i = 0; i < X.size(); i++) {
         if (X[i] > 0) {
+          const RealVect releasePosition =
+            Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
+
           for (const auto& p : plasmaProducts[i]) {
             const int Z = m_itoSpecies[p]->getChargeNumber();
 
@@ -2999,6 +3006,9 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
       // Release the particles.
       for (int i = 0; i < X.size(); i++) {
         if (X[i] > 0) {
+          const RealVect releasePosition =
+            Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
+
           for (const auto& p : plasmaProducts[i]) {
             const int Z = m_itoSpecies[p]->getChargeNumber();
 
