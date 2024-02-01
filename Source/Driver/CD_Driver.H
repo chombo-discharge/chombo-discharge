@@ -242,6 +242,11 @@ protected:
   EBAMRBool m_cachedTags;
 
   /*!
+    @brief Time between outputs
+  */
+  Real m_outputDt;
+
+  /*!
     @brief Simulation start time
   */
   Real m_startTime;
