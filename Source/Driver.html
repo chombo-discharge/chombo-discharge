@@ -293,6 +293,7 @@ Which refinement level to initiate the <code class="docutils literal notranslate
 This entry indicates the number of refinements of the coarsest AMR level used in the simulation.
 E.g. if the <code class="docutils literal notranslate"><span class="pre">Driver.geometry_scan_level=1</span></code> and the coarsest AMR level is <span class="math notranslate nohighlight">\(128^3\)</span> then the signed distance pruning (see <a class="reference internal" href="SpatialDiscretization.html#chap-geometrygeneration"><span class="std std-ref">Geometry generation</span></a>) begins at the AMR level <span class="math notranslate nohighlight">\(256^3\)</span>.
 Note that negative numbers are also permitted, in which case the pruning initiates at a coarsened level.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Driver.output_dt</span></code>. Time interval between output files. This overrides step-based output and also affects the selected time steps.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Driver.plot_interval</span></code>. Time steps between each plot file.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Driver.checkpoint_interval</span></code>. Time steps between each checkpoint file.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Driver.regrid_interval</span></code>. Time steps between each regrid.</p></li>
