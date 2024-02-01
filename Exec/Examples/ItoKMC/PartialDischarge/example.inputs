@@ -232,8 +232,8 @@ ItoKMCGodunovStepper.load_balance_particles                = false           # T
 ItoKMCGodunovStepper.load_indices                          = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoKMCGodunovStepper.load_per_cell                         = 1.0            # Default load per grid cell.
 ItoKMCGodunovStepper.box_sorting                           = morton         # Box sorting when load balancing
-ItoKMCGodunovStepper.particles_per_cell                    = 32             # Max computational particles per cell
-ItoKMCGodunovStepper.merge_interval                        = -1             # Time steps between superparticle merging
+ItoKMCGodunovStepper.particles_per_cell                    = 64             # Max computational particles per cell
+ItoKMCGodunovStepper.merge_interval                        = 1             # Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                 = false          # Make superparticles during regrids
 ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0            # Advective time step CFL restriction
 ItoKMCGodunovStepper.max_particle_advection_cfl            = 10.0           # Advective time step CFL restriction
@@ -263,8 +263,8 @@ ItoKMCJSON.chemistry_file     = simple_air_chemistry.json ## Chemistry file
 ItoKMCJSON.dX                 = 2.0                     ## Maximum relative change Xnew/Xold during one time step.
 
 # Kinetic Monte Carlo solver settings. 
-ItoKMCJSON.max_new_particles  = 16                      ## Maximum number of computational particles to produce in reaction step
-ItoKMCJSON.max_new_photons    = 16                      ## Maximum number of computational photons to produce in reaction step	
+ItoKMCJSON.max_new_particles  = 64                      ## Maximum number of computational particles to produce in reaction step
+ItoKMCJSON.max_new_photons    = 64                      ## Maximum number of computational photons to produce in reaction step	
 ItoKMCJSON.Ncrit              = 5                       ## How many firings away from a Negative particle number?
 ItoKMCJSON.prop_eps           = 1.E99                   ## Maximum relative change in propensity function
 ItoKMCJSON.NSSA               = 10                      ## How many SSA steps to run when tau-leaping is inefficient
