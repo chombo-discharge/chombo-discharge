@@ -44,6 +44,7 @@ Driver.stop_time                       = 100.0         # Stop time
 Driver.max_steps                       = 100           # Maximum number of steps
 Driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 Driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
+Driver.output_dt                       = -1.0             # Output interval (values <= 0 enforces step-based output)
 Driver.write_memory                    = false         # Write MPI memory report
 Driver.write_loads                     = false         # Write (accumulated) computational loads
 Driver.output_directory                = ./            # Output directory
