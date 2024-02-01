@@ -229,8 +229,6 @@ ItoKMCStepper<I, C, R, F>::parseSuperParticles() noexcept
       MayDay::Error("ItoKMCStepper::parseSuperParticles -- must have 'particles_per_cell' > 0");
     }
   }
-
-  m_mergeInterval = std::max(m_mergeInterval, 1);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -4232,11 +4230,13 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
 
       // Merge the particles together.
-      if ((this->m_timeStep + 1) % this->m_mergeInterval == 0 && this->m_mergeInterval > 0) {
-        for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-          const int idx = solverIt.index();
+      if (this->m_mergeInterval > 0) {
+        if ((this->m_timeStep + 1) % this->m_mergeInterval == 0) {
+          for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+            const int idx = solverIt.index();
 
-          solverIt()->makeSuperparticlesEqualWeightKD(*itoParticles[idx], ppc);
+            solverIt()->makeSuperparticlesEqualWeightKD(*itoParticles[idx], ppc);
+          }
         }
       }
     }
@@ -4314,11 +4314,13 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
 
       // Merge the particles together.
-      if ((this->m_timeStep + 1) % this->m_mergeInterval == 0 && this->m_mergeInterval > 0) {
-        for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-          const int idx = solverIt.index();
+      if (this->m_mergeInterval > 0) {
+        if ((this->m_timeStep + 1) % this->m_mergeInterval) {
+          for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+            const int idx = solverIt.index();
 
-          solverIt()->makeSuperparticlesEqualWeightKD(*itoParticles[idx], ppc);
+            solverIt()->makeSuperparticlesEqualWeightKD(*itoParticles[idx], ppc);
+          }
         }
       }
     }

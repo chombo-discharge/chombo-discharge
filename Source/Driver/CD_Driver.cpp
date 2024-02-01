@@ -63,6 +63,7 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   m_timeStep = 0;
   m_time     = 0.0;
   m_dt       = 0.0;
+  m_outputDt = -1.0;
 
   m_profile      = false;
   m_doCoarsening = true;
@@ -828,10 +829,39 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
         MayDay::Error("Driver::run(Real, Real, int) - the time step became too small.");
       }
 
+      // Adjust time step to conform with the specified output intervals
+      bool writePltFile = false;
+
+      if (m_outputDt > 0.0) {
+        const int k = std::floor(m_time / m_outputDt);
+
+        Real lastOutputTime = k * m_outputDt;
+        Real nextOutputTime = (k + 1) * m_outputDt;
+
+        const Real thresh = 1.E-10 * m_outputDt;
+
+        // Weird, but can happen due to flooring when m_time is an integer multiple of m_outputDt
+        if (std::abs(m_time - nextOutputTime) < thresh) {
+          lastOutputTime += m_outputDt;
+          nextOutputTime += m_outputDt;
+        }
+
+        // Adjust dt so that we land on the next output interval
+        if ((m_time + m_dt) >= nextOutputTime) {
+          m_dt = nextOutputTime - m_time;
+        }
+
+        // Write plot file if we're landing on the next output time.
+        if (std::abs((m_time + m_dt) - nextOutputTime) <= thresh) {
+          writePltFile = true;
+        }
+      }
+
       // Adjust last time step -- it can be smaller than the one we computed because we want to
       // end the simulation at a_endTime.
       if (m_time + m_dt > a_endTime) {
-        m_dt       = a_endTime - m_time;
+        m_dt = a_endTime - m_time;
+
         isLastStep = true;
       }
 
@@ -872,8 +902,12 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
           this->writeComputationalLoads();
         }
 
-        // Plot file
-        if (m_timeStep % m_plotInterval == 0 || isLastStep == true) {
+        // Check if we should output this time step anyways.
+        if (m_outputDt <= 0.0) {
+          writePltFile = (m_timeStep % m_plotInterval == 0) || isLastStep == true;
+        }
+
+        if (writePltFile) {
           if (m_verbosity > 2) {
             pout() << "Driver::run -- Writing plot file" << endl;
           }
@@ -1037,6 +1071,7 @@ Driver::parseOptions()
   pp.get("max_plot_depth", m_maxPlotLevel);
   pp.get("max_chk_depth", m_maxCheckpointDepth);
   pp.get("do_init_load_balance", m_doInitLoadBalancing);
+  pp.get("output_dt", m_outputDt);
 
   m_restart = (m_restartStep > 0) ? true : false;
 
@@ -1073,6 +1108,7 @@ Driver::parseRuntimeOptions()
   pp.get("max_plot_depth", m_maxPlotLevel);
   pp.get("max_steps", m_maxSteps);
   pp.get("stop_time", m_stopTime);
+  pp.get("output_dt", m_outputDt);
 
   this->parseGeometryRefinement();
   this->parsePlotVariables();
