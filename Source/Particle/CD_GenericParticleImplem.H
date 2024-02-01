@@ -57,6 +57,34 @@ GenericParticle<M, N>::position() const
 }
 
 template <size_t M, size_t N>
+inline const std::array<Real, M>&
+GenericParticle<M, N>::getReals() const noexcept
+{
+  return m_scalars;
+}
+
+template <size_t M, size_t N>
+inline std::array<Real, M>&
+GenericParticle<M, N>::getReals() noexcept
+{
+  return m_scalars;
+}
+
+template <size_t M, size_t N>
+inline const std::array<RealVect, N>&
+GenericParticle<M, N>::getVects() const noexcept
+{
+  return m_vectors;
+}
+
+template <size_t M, size_t N>
+inline std::array<RealVect, N>&
+GenericParticle<M, N>::getVects() noexcept
+{
+  return m_vectors;
+}
+
+template <size_t M, size_t N>
 template <size_t K>
 inline Real&
 GenericParticle<M, N>::real()

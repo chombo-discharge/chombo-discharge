@@ -258,7 +258,7 @@ Random::randomPosition(const RealVect a_lo, const RealVect a_hi) noexcept
   RealVect pos = RealVect::Zero;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
-    pos[dir] = a_lo[dir] + 0.5 * (1.0 + Random::getUniformReal11()) * (a_hi[dir] - a_lo[dir]);
+    pos[dir] = a_lo[dir] + Random::getUniformReal01() * (a_hi[dir] - a_lo[dir]);
   }
 
   return pos;

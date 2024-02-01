@@ -22,6 +22,7 @@
 #include <CD_DataOps.H>
 #include <CD_Units.H>
 #include <CD_Photon.H>
+#include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::ItoKMC;
@@ -200,8 +201,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   if (this->m_verbosity > 5) {
     pout() << this->m_name + "::advance" << endl;
   }
-
-  //  MayDay::Warning("ItoKMCGodunovStepper::advance -- missing hard conservation for extended conductivity");
 
   auto debugCharge = [this](const std::string a_message) -> void {
     const Real Qtot = this->computeTotalCharge();
@@ -1595,6 +1594,68 @@ ItoKMCGodunovStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const
   }
 }
 #endif
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::postPlot() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::postPlot");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::postPlot" << endl;
+  }
+
+  this->m_physicsPlotVariables.clear();
+
+  this->plotParticles();
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::plotParticles");
+  if (this->m_verbosity > 2) {
+    pout() << this->m_name + "::plotParticles" << endl;
+  }
+
+  bool plotParticles = false;
+
+  ParmParse pp(this->m_name.c_str());
+
+  pp.query("plot_particles", plotParticles);
+
+  if (plotParticles) {
+
+    // Create the output folder
+    std::string cmd;
+    int         success = 0;
+    if (procID() == 0) {
+      success = system("mkdir -p particles");
+    }
+
+    if (success != 0) {
+      MayDay::Error("ItoKMCGodunovStepper::plotParticles - could not create 'particles' directory");
+    }
+
+    for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
+      const RefCountedPtr<ItoSolver>&       solver    = solverIt();
+      const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+      // Set plot file name
+      const std::string prefix = "./particles/" + solver->getName();
+      char              fileChar[1000];
+      sprintf(fileChar, "%s.step%07d.%dd.h5part", prefix.c_str(), this->m_timeStep, SpaceDim);
+
+      // Plot the particles
+      DischargeIO::writeH5Part(std::string(fileChar),
+                               (const ParticleContainer<GenericParticle<5, 3>>&)particles,
+                               ItoParticle::s_realVariables,
+                               ItoParticle::s_vectVariables,
+                               this->m_amr->getProbLo(),
+                               this->m_time);
+    }
+  }
+}
 
 #include <CD_NamespaceFooter.H>
 
