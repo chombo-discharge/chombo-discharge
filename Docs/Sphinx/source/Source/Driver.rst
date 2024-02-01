@@ -152,6 +152,7 @@ Various class options are available for adjusting the behavior of the ``Driver``
   This entry indicates the number of refinements of the coarsest AMR level used in the simulation.
   E.g. if the ``Driver.geometry_scan_level=1`` and the coarsest AMR level is :math:`128^3` then the signed distance pruning (see :ref:`Chap:GeometryGeneration`) begins at the AMR level :math:`256^3`.
   Note that negative numbers are also permitted, in which case the pruning initiates at a coarsened level.
+* ``Driver.output_dt``. Time interval between output files. This overrides step-based output and also affects the selected time steps. 
 * ``Driver.plot_interval``. Time steps between each plot file. 
 * ``Driver.checkpoint_interval``. Time steps between each checkpoint file. 
 * ``Driver.regrid_interval``. Time steps between each regrid. 
