@@ -4236,6 +4236,25 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
             const int idx = solverIt.index();
 
             solverIt()->makeSuperparticlesEqualWeightKD(*itoParticles[idx], ppc);
+
+#if 1 // Re-initialize particles
+            List<ItoParticle>& oldParticles = *itoParticles[idx];
+            long long          numPhysPart  = 0;
+            for (ListIterator<ItoParticle> lit(oldParticles); lit.ok(); ++lit) {
+              numPhysPart += (long long)(lit().weight());
+            }
+
+            const std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(numPhysPart,
+                                                                                                        (long long)ppc);
+
+            oldParticles.clear();
+            for (int i = 0; i < particleWeights.size(); i++) {
+              const Real     w = 1.0 * particleWeights[i];
+              const RealVect p = Random::randomPosition(cellPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
+
+              oldParticles.add(ItoParticle(w, p));
+            }
+#endif
           }
         }
       }
@@ -4315,7 +4334,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Merge the particles together.
       if (this->m_mergeInterval > 0) {
-        if ((this->m_timeStep + 1) % this->m_mergeInterval) {
+        if ((this->m_timeStep + 1) % this->m_mergeInterval == 0) {
           for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
             const int idx = solverIt.index();
 
