@@ -710,7 +710,42 @@ Likewise, to interpolate onto these fields we can call
    RefCountedPtr<AmrMesh> amr;
 
    amr->interpolateParticles<KineticParticle, &KineticParticle::mass >(...);
-   amr->interpolateParticles<KineticParticle, &KineticParticle::velocity>(...);		
+   amr->interpolateParticles<KineticParticle, &KineticParticle::velocity>(...);
+
+.. _Chap:ParticleVisualization:   
+
+Particle visualization
+----------------------
+
+.. note::
+
+   Particle visualization is currently a work in progress.
+
+Simple particle visualization can be performed by writing ``H5Part`` compatible files which can be read by VisIt.
+This is done through the function ``writeH5Part`` in the ``DischargeIO`` namespace, with the following signature:
+
+.. code-block:: c++
+
+  template <size_t M, size_t N>
+  void
+  writeH5Part(const std::string                               a_filename,
+              const ParticleContainer<GenericParticle<M, N>>& a_particles,
+              const std::vector<std::string>                  a_realVars = std::vector<std::string>(),
+              const std::vector<std::string>                  a_vectVars = std::vector<std::string>(),
+              const RealVect                                  a_shift    = RealVect::Zero) noexcept;
+
+This routine permits particles to be written (in parallel, when using MPI) into a file readable by VisIt.
+While users will typically not work directly with ``GenericParticle``, casting to a proper format is quite simple, e.g.
+
+.. code-block:: c++
+
+   // ItoParticle inherits GenericParticle<5,3>		
+   ParticleContainer<ItoParticle> myParticles;
+
+   DischargeIO::writeH5Part("my_particles.h5part", (const ParticleContainer<GenericParticle<5,3>>&) myParticles);
+
+The optional arguments ``a_realVars`` and ``a_vectVars`` permit the user to set the output variable names for the ``M`` scalar variables and the ``N`` vector variables.
+The argument ``a_shift`` will simply shift the particle positions in the output HDF5 file. 
 
 .. _Chap:SuperParticles:
 

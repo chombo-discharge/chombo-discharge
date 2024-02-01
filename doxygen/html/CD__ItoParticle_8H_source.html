@@ -97,90 +97,94 @@ $(function() {
 <div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="classItoParticle.html">   39</a></span>&#160;<span class="keyword">class </span><a class="code" href="classItoParticle.html">ItoParticle</a> : <span class="keyword">public</span> <a class="code" href="classGenericParticle.html">GenericParticle</a>&lt;5, 3&gt;</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;{</div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  <span class="keyword">inline</span> <a class="code" href="classItoParticle.html#a796cf9c232ca92dfa21353f6d2338a6f">ItoParticle</a>();</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  <span class="keyword">inline</span> <a class="code" href="classItoParticle.html#a796cf9c232ca92dfa21353f6d2338a6f">ItoParticle</a>(<span class="keyword">const</span> Real      a_weight,</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                     <span class="keyword">const</span> RealVect&amp; a_position,</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                     <span class="keyword">const</span> RealVect&amp; a_velocity  = RealVect::Zero,</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                     <span class="keyword">const</span> Real      a_diffusion = 0.0,</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;                     <span class="keyword">const</span> Real      a_mobility  = 1.0,</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                     <span class="keyword">const</span> Real      a_energy    = 0.0);</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  <span class="keyword">inline</span> <a class="code" href="classItoParticle.html#a796cf9c232ca92dfa21353f6d2338a6f">ItoParticle</a>(<span class="keyword">const</span> <a class="code" href="classItoParticle.html">ItoParticle</a>&amp; a_other);</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  <span class="keyword">inline</span> <span class="keyword">virtual</span> <a class="code" href="classItoParticle.html#a6b0b72faf0a62842e4c584bd930796e2">~ItoParticle</a>();</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;  <span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;  <a class="code" href="classItoParticle.html#aae4ff06942a7139bbc4378f7a977cff9">define</a>(<span class="keyword">const</span> Real      a_weight,</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;         <span class="keyword">const</span> RealVect&amp; a_position,</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;         <span class="keyword">const</span> RealVect&amp; a_velocity  = RealVect::Zero,</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;         <span class="keyword">const</span> Real      a_diffusion = 0.0,</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;         <span class="keyword">const</span> Real      a_mobility  = 1.0,</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;         <span class="keyword">const</span> Real      a_energy    = 0.0);</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;  <span class="keyword">inline</span> Real&amp;</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;  <a class="code" href="classItoParticle.html#ace2987006443046c441fcf85a566c4a4">weight</a>();</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160; </div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> Real&amp;</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;  <a class="code" href="classItoParticle.html#ace2987006443046c441fcf85a566c4a4">weight</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160; </div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;  <span class="keyword">inline</span> Real&amp;</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  <a class="code" href="classItoParticle.html#a727d24878e21ac2e59d276e2781fc58b">diffusion</a>();</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160; </div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> Real&amp;</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;  <a class="code" href="classItoParticle.html#a727d24878e21ac2e59d276e2781fc58b">diffusion</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160; </div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;  <span class="keyword">inline</span> Real&amp;</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;  <a class="code" href="classItoParticle.html#a9bcd6efe926f67357da3361e7f9b9069">mobility</a>();</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160; </div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> Real&amp;</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;  <a class="code" href="classItoParticle.html#a9bcd6efe926f67357da3361e7f9b9069">mobility</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160; </div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;  <span class="keyword">inline</span> Real&amp;</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;  <a class="code" href="classItoParticle.html#a1a4948eed61551c09c9148bb7e4c700e">energy</a>();</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160; </div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> Real&amp;</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;  <a class="code" href="classItoParticle.html#a1a4948eed61551c09c9148bb7e4c700e">energy</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160; </div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;  <span class="keyword">inline</span> RealVect&amp;</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;  <a class="code" href="classItoParticle.html#aa900eed2e637b1baaa53ed6614efaeca">oldPosition</a>();</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160; </div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> RealVect&amp;</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;  <a class="code" href="classItoParticle.html#aa900eed2e637b1baaa53ed6614efaeca">oldPosition</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160; </div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;  <span class="keyword">inline</span> RealVect&amp;</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;  <a class="code" href="classItoParticle.html#af0ab9b63b7837f63f6a5a75ca324af09">velocity</a>();</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160; </div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> RealVect&amp;</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;  <a class="code" href="classItoParticle.html#af0ab9b63b7837f63f6a5a75ca324af09">velocity</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160; </div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;  <span class="keyword">inline</span> Real</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;  <a class="code" href="classItoParticle.html#acdc135ea05df6eaf4f19ec744352436d">totalEnergy</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160; </div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;  <span class="keyword">inline</span> Real</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;  <a class="code" href="classItoParticle.html#a5923d4232fce9a308496ddc83ea1bb4e">conductivity</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160; </div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;  <span class="keyword">inline</span> Real</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;  <a class="code" href="classItoParticle.html#ab656aad16ad19b87d5fd0657b53af5a7">diffusivity</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160; </div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;  <span class="keyword">inline</span> Real&amp;</div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;  <a class="code" href="classItoParticle.html#af6e91a7e561eb0f7ce8948494b42aa27">tmpReal</a>();</div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160; </div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> Real&amp;</div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;  <a class="code" href="classItoParticle.html#af6e91a7e561eb0f7ce8948494b42aa27">tmpReal</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160; </div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;  <span class="keyword">inline</span> RealVect&amp;</div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;  <a class="code" href="classItoParticle.html#aa9cf181b5c870c7a5d980eaa1dae9ea7">tmpVect</a>();</div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160; </div>
-<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> RealVect&amp;</div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;  <a class="code" href="classItoParticle.html#aa9cf181b5c870c7a5d980eaa1dae9ea7">tmpVect</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;};</div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160; </div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160; </div>
-<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="CD__ItoParticleImplem_8H.html">CD_ItoParticleImplem.H</a>&gt;</span></div>
-<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160; </div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="classItoParticle.html#aced9d0c84e60da8edc95f57c20715bde">   45</a></span>&#160;  <span class="keyword">static</span> std::vector&lt;std::string&gt; <a class="code" href="classItoParticle.html#aced9d0c84e60da8edc95f57c20715bde">s_realVariables</a>;</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
+<div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="classItoParticle.html#abd9d490e68dcd50fb375e778cd4b2f03">   50</a></span>&#160;  <span class="keyword">static</span> std::vector&lt;std::string&gt; <a class="code" href="classItoParticle.html#abd9d490e68dcd50fb375e778cd4b2f03">s_vectVariables</a>;</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  <span class="keyword">inline</span> <a class="code" href="classItoParticle.html#a796cf9c232ca92dfa21353f6d2338a6f">ItoParticle</a>();</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;  <span class="keyword">inline</span> <a class="code" href="classItoParticle.html#a796cf9c232ca92dfa21353f6d2338a6f">ItoParticle</a>(<span class="keyword">const</span> Real      a_weight,</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                     <span class="keyword">const</span> RealVect&amp; a_position,</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                     <span class="keyword">const</span> RealVect&amp; a_velocity  = RealVect::Zero,</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                     <span class="keyword">const</span> Real      a_diffusion = 0.0,</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                     <span class="keyword">const</span> Real      a_mobility  = 1.0,</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                     <span class="keyword">const</span> Real      a_energy    = 0.0);</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="keyword">inline</span> <a class="code" href="classItoParticle.html#a796cf9c232ca92dfa21353f6d2338a6f">ItoParticle</a>(<span class="keyword">const</span> <a class="code" href="classItoParticle.html">ItoParticle</a>&amp; a_other);</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;  <span class="keyword">inline</span> <span class="keyword">virtual</span> <a class="code" href="classItoParticle.html#a6b0b72faf0a62842e4c584bd930796e2">~ItoParticle</a>();</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;  <span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;  <a class="code" href="classItoParticle.html#aae4ff06942a7139bbc4378f7a977cff9">define</a>(<span class="keyword">const</span> Real      a_weight,</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;         <span class="keyword">const</span> RealVect&amp; a_position,</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;         <span class="keyword">const</span> RealVect&amp; a_velocity  = RealVect::Zero,</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;         <span class="keyword">const</span> Real      a_diffusion = 0.0,</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;         <span class="keyword">const</span> Real      a_mobility  = 1.0,</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;         <span class="keyword">const</span> Real      a_energy    = 0.0);</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160; </div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;  <span class="keyword">inline</span> Real&amp;</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;  <a class="code" href="classItoParticle.html#ace2987006443046c441fcf85a566c4a4">weight</a>();</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160; </div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> Real&amp;</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;  <a class="code" href="classItoParticle.html#ace2987006443046c441fcf85a566c4a4">weight</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160; </div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;  <span class="keyword">inline</span> Real&amp;</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  <a class="code" href="classItoParticle.html#a727d24878e21ac2e59d276e2781fc58b">diffusion</a>();</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160; </div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> Real&amp;</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;  <a class="code" href="classItoParticle.html#a727d24878e21ac2e59d276e2781fc58b">diffusion</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160; </div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;  <span class="keyword">inline</span> Real&amp;</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;  <a class="code" href="classItoParticle.html#a9bcd6efe926f67357da3361e7f9b9069">mobility</a>();</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160; </div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> Real&amp;</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;  <a class="code" href="classItoParticle.html#a9bcd6efe926f67357da3361e7f9b9069">mobility</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160; </div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;  <span class="keyword">inline</span> Real&amp;</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;  <a class="code" href="classItoParticle.html#a1a4948eed61551c09c9148bb7e4c700e">energy</a>();</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160; </div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> Real&amp;</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;  <a class="code" href="classItoParticle.html#a1a4948eed61551c09c9148bb7e4c700e">energy</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160; </div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;  <span class="keyword">inline</span> RealVect&amp;</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;  <a class="code" href="classItoParticle.html#aa900eed2e637b1baaa53ed6614efaeca">oldPosition</a>();</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160; </div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> RealVect&amp;</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;  <a class="code" href="classItoParticle.html#aa900eed2e637b1baaa53ed6614efaeca">oldPosition</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160; </div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;  <span class="keyword">inline</span> RealVect&amp;</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;  <a class="code" href="classItoParticle.html#af0ab9b63b7837f63f6a5a75ca324af09">velocity</a>();</div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160; </div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> RealVect&amp;</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;  <a class="code" href="classItoParticle.html#af0ab9b63b7837f63f6a5a75ca324af09">velocity</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160; </div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;  <span class="keyword">inline</span> Real</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;  <a class="code" href="classItoParticle.html#acdc135ea05df6eaf4f19ec744352436d">totalEnergy</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160; </div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;  <span class="keyword">inline</span> Real</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;  <a class="code" href="classItoParticle.html#a5923d4232fce9a308496ddc83ea1bb4e">conductivity</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160; </div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;  <span class="keyword">inline</span> Real</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;  <a class="code" href="classItoParticle.html#ab656aad16ad19b87d5fd0657b53af5a7">diffusivity</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160; </div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;  <span class="keyword">inline</span> Real&amp;</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;  <a class="code" href="classItoParticle.html#af6e91a7e561eb0f7ce8948494b42aa27">tmpReal</a>();</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160; </div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> Real&amp;</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;  <a class="code" href="classItoParticle.html#af6e91a7e561eb0f7ce8948494b42aa27">tmpReal</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160; </div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;  <span class="keyword">inline</span> RealVect&amp;</div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;  <a class="code" href="classItoParticle.html#aa9cf181b5c870c7a5d980eaa1dae9ea7">tmpVect</a>();</div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160; </div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> RealVect&amp;</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;  <a class="code" href="classItoParticle.html#aa9cf181b5c870c7a5d980eaa1dae9ea7">tmpVect</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;};</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160; </div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160; </div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="CD__ItoParticleImplem_8H.html">CD_ItoParticleImplem.H</a>&gt;</span></div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160; </div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__GenericParticle_8H_html"><div class="ttname"><a href="CD__GenericParticle_8H.html">CD_GenericParticle.H</a></div><div class="ttdoc">Declaration of a generic particle class.</div></div>
 <div class="ttc" id="aCD__ItoParticleImplem_8H_html"><div class="ttname"><a href="CD__ItoParticleImplem_8H.html">CD_ItoParticleImplem.H</a></div><div class="ttdoc">Implementation of CD_ItoParticle.H.</div></div>
 <div class="ttc" id="aclassGenericParticle_html"><div class="ttname"><a href="classGenericParticle.html">GenericParticle</a></div><div class="ttdoc">A generic particle class, holding the position and a specified number of real and vector values.</div><div class="ttdef"><b>Definition:</b> CD_GenericParticle.H:33</div></div>
@@ -195,8 +199,10 @@ $(function() {
 <div class="ttc" id="aclassItoParticle_html_aa9cf181b5c870c7a5d980eaa1dae9ea7"><div class="ttname"><a href="classItoParticle.html#aa9cf181b5c870c7a5d980eaa1dae9ea7">ItoParticle::tmpVect</a></div><div class="ttdeci">RealVect &amp; tmpVect()</div><div class="ttdoc">Return scratch RealVect storage.</div><div class="ttdef"><b>Definition:</b> CD_ItoParticleImplem.H:169</div></div>
 <div class="ttc" id="aclassItoParticle_html_aae4ff06942a7139bbc4378f7a977cff9"><div class="ttname"><a href="classItoParticle.html#aae4ff06942a7139bbc4378f7a977cff9">ItoParticle::define</a></div><div class="ttdeci">void define(const Real a_weight, const RealVect &amp;a_position, const RealVect &amp;a_velocity=RealVect::Zero, const Real a_diffusion=0.0, const Real a_mobility=1.0, const Real a_energy=0.0)</div><div class="ttdoc">Full define function.</div><div class="ttdef"><b>Definition:</b> CD_ItoParticleImplem.H:51</div></div>
 <div class="ttc" id="aclassItoParticle_html_ab656aad16ad19b87d5fd0657b53af5a7"><div class="ttname"><a href="classItoParticle.html#ab656aad16ad19b87d5fd0657b53af5a7">ItoParticle::diffusivity</a></div><div class="ttdeci">Real diffusivity() const</div><div class="ttdoc">Get the particle diffusivity.</div><div class="ttdef"><b>Definition:</b> CD_ItoParticleImplem.H:145</div></div>
+<div class="ttc" id="aclassItoParticle_html_abd9d490e68dcd50fb375e778cd4b2f03"><div class="ttname"><a href="classItoParticle.html#abd9d490e68dcd50fb375e778cd4b2f03">ItoParticle::s_vectVariables</a></div><div class="ttdeci">static std::vector&lt; std::string &gt; s_vectVariables</div><div class="ttdoc">Naming convention for vector fields.</div><div class="ttdef"><b>Definition:</b> CD_ItoParticle.H:50</div></div>
 <div class="ttc" id="aclassItoParticle_html_acdc135ea05df6eaf4f19ec744352436d"><div class="ttname"><a href="classItoParticle.html#acdc135ea05df6eaf4f19ec744352436d">ItoParticle::totalEnergy</a></div><div class="ttdeci">Real totalEnergy() const</div><div class="ttdoc">Get the total energy.</div><div class="ttdef"><b>Definition:</b> CD_ItoParticleImplem.H:151</div></div>
 <div class="ttc" id="aclassItoParticle_html_ace2987006443046c441fcf85a566c4a4"><div class="ttname"><a href="classItoParticle.html#ace2987006443046c441fcf85a566c4a4">ItoParticle::weight</a></div><div class="ttdeci">Real &amp; weight()</div><div class="ttdoc">Get particle weight.</div><div class="ttdef"><b>Definition:</b> CD_ItoParticleImplem.H:67</div></div>
+<div class="ttc" id="aclassItoParticle_html_aced9d0c84e60da8edc95f57c20715bde"><div class="ttname"><a href="classItoParticle.html#aced9d0c84e60da8edc95f57c20715bde">ItoParticle::s_realVariables</a></div><div class="ttdeci">static std::vector&lt; std::string &gt; s_realVariables</div><div class="ttdoc">Naming convention for scalar fields.</div><div class="ttdef"><b>Definition:</b> CD_ItoParticle.H:45</div></div>
 <div class="ttc" id="aclassItoParticle_html_af0ab9b63b7837f63f6a5a75ca324af09"><div class="ttname"><a href="classItoParticle.html#af0ab9b63b7837f63f6a5a75ca324af09">ItoParticle::velocity</a></div><div class="ttdeci">RealVect &amp; velocity()</div><div class="ttdoc">Get the particle velocity.</div><div class="ttdef"><b>Definition:</b> CD_ItoParticleImplem.H:127</div></div>
 <div class="ttc" id="aclassItoParticle_html_af6e91a7e561eb0f7ce8948494b42aa27"><div class="ttname"><a href="classItoParticle.html#af6e91a7e561eb0f7ce8948494b42aa27">ItoParticle::tmpReal</a></div><div class="ttdeci">Real &amp; tmpReal()</div><div class="ttdoc">Return scratch scalar storage.</div><div class="ttdef"><b>Definition:</b> CD_ItoParticleImplem.H:157</div></div>
 </div><!-- fragment --></div><!-- contents -->

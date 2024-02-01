@@ -86,6 +86,10 @@ Functions</h2></td></tr>
 <tr class="memitem:af011b8696d2e1e06676a019d40b42879"><td class="memItemLeft" align="right" valign="top">Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceDischargeIO.html#af011b8696d2e1e06676a019d40b42879">numberFmt</a> (const Vector&lt; long long &gt; a_numbers, char a_sep=',') noexcept</td></tr>
 <tr class="memdesc:af011b8696d2e1e06676a019d40b42879"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number formatting game. This just prints the number 123456 as 123,456.  <a href="namespaceDischargeIO.html#af011b8696d2e1e06676a019d40b42879">More...</a><br /></td></tr>
 <tr class="separator:af011b8696d2e1e06676a019d40b42879"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a3484df3fea8728523bb95416498ce4"><td class="memTemplParams" colspan="2">template&lt;size_t M, size_t N&gt; </td></tr>
+<tr class="memitem:a1a3484df3fea8728523bb95416498ce4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceDischargeIO.html#a1a3484df3fea8728523bb95416498ce4">writeH5Part</a> (const std::string a_filename, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classGenericParticle.html">GenericParticle</a>&lt; M, N &gt;&gt; &amp;a_particles, const std::vector&lt; std::string &gt; a_realVars=std::vector&lt; std::string &gt;(), const std::vector&lt; std::string &gt; a_vectVars=std::vector&lt; std::string &gt;(), const RealVect a_shift=RealVect::Zero, const Real a_time=0.0) noexcept</td></tr>
+<tr class="memdesc:a1a3484df3fea8728523bb95416498ce4"><td class="mdescLeft">&#160;</td><td class="mdescRight">A shameless copy of Chombo's writeEBHDF5 but including the lower-left corner of the physical domain as well.  <a href="namespaceDischargeIO.html#a1a3484df3fea8728523bb95416498ce4">More...</a><br /></td></tr>
+<tr class="separator:a1a3484df3fea8728523bb95416498ce4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Namespace which encapsulates chombo-discharge IO functionality. </p>
@@ -174,6 +178,101 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_numbers</td><td>Numbers to format as string with separator </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_sep</td><td>Separator </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1a3484df3fea8728523bb95416498ce4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a3484df3fea8728523bb95416498ce4">&#9670;&nbsp;</a></span>writeH5Part()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;size_t M, size_t N&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DischargeIO::writeH5Part </td>
+          <td>(</td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_filename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classGenericParticle.html">GenericParticle</a>&lt; M, N &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::string &gt;&#160;</td>
+          <td class="paramname"><em>a_realVars</em> = <code>std::vector&lt;std::string&gt;()</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::string &gt;&#160;</td>
+          <td class="paramname"><em>a_vectVars</em> = <code>std::vector&lt;std::string&gt;()</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_shift</em> = <code>RealVect::Zero</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_time</em> = <code>0.0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>A shameless copy of Chombo's writeEBHDF5 but including the lower-left corner of the physical domain as well. </p>
+<p>User are not supported to call this. <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> will perform calls to writeEBHDF5Header and writeEBHDF5Level </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_filename</td><td>File name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_variableNames</td><td>Grid variable names </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_grids</td><td>Grids on each AMR level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data on the AMR levels </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domains</td><td>Grid domains </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolutions </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refinementRatios</td><td>Refinement ratios </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_time</td><td>Time </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left physical corner </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numLevels</td><td>Number of AMR levels </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numGhost</td><td>Number of ghost cells included in the output.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>Write a particle container to an H5Part file. Good for quick and dirty visualization of particles</p>
+<p>Use case is pretty straightforward but the user might need to cast particle types. E.g. call</p>
+<p>writeH5Part&lt;M,N&gt;(a_filename, (const ParticleContainer&lt;GenericParticle&lt;M,N&gt;&gt;&amp;) a_particles, ...)</p>
+<p>Template substitution is not straightforward for this one. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_filename</td><td>File name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles. Particle type must derive from GenericParticle&lt;M, N&gt; </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realVars</td><td>Variable names for the M real variables </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_vectVars</td><td>Variable names for the N vector variables </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_shift</td><td>Particle position shift </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_shift</td><td>Time </td></tr>
   </table>
   </dd>
 </dl>

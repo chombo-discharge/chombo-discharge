@@ -330,7 +330,7 @@ $(function() {
 <div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;  RealVect pos = RealVect::Zero;</div>
 <div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160; </div>
 <div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
-<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;    pos[dir] = a_lo[dir] + 0.5 * (1.0 + <a class="code" href="classRandom.html#a4f6bd6e78fccf3554f1718b7d0788334">Random::getUniformReal11</a>()) * (a_hi[dir] - a_lo[dir]);</div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;    pos[dir] = a_lo[dir] + <a class="code" href="classRandom.html#a6b7bc4a5071c4946e36f9fabdaf7490d">Random::getUniformReal01</a>() * (a_hi[dir] - a_lo[dir]);</div>
 <div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;  }</div>
 <div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160; </div>
 <div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;  <span class="keywordflow">return</span> pos;</div>

@@ -115,6 +115,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#particle-visualization">Particle visualization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#superparticles">Superparticles</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#custom-approach">Custom approach</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#kd-trees">kD-trees</a><ul>
@@ -798,6 +799,34 @@ Likewise, if interpolating a vector variable, the mesh variable must have exact 
 </pre></div>
 </div>
 </section>
+</section>
+<section id="particle-visualization">
+<span id="chap-particlevisualization"></span><h2>Particle visualization<a class="headerlink" href="#particle-visualization" title="Permalink to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Particle visualization is currently a work in progress.</p>
+</div>
+<p>Simple particle visualization can be performed by writing <code class="docutils literal notranslate"><span class="pre">H5Part</span></code> compatible files which can be read by VisIt.
+This is done through the function <code class="docutils literal notranslate"><span class="pre">writeH5Part</span></code> in the <code class="docutils literal notranslate"><span class="pre">DischargeIO</span></code> namespace, with the following signature:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"></span>
+<span class="n">writeH5Part</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">                               </span><span class="n">a_filename</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="w">                  </span><span class="n">a_realVars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"></span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="w">                  </span><span class="n">a_vectVars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"></span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">                                  </span><span class="n">a_shift</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">RealVect</span><span class="o">::</span><span class="n">Zero</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>This routine permits particles to be written (in parallel, when using MPI) into a file readable by VisIt.
+While users will typically not work directly with <code class="docutils literal notranslate"><span class="pre">GenericParticle</span></code>, casting to a proper format is quite simple, e.g.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// ItoParticle inherits GenericParticle&lt;5,3&gt;</span>
+<span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myParticles</span><span class="p">;</span><span class="w"></span>
+
+<span class="n">DischargeIO</span><span class="o">::</span><span class="n">writeH5Part</span><span class="p">(</span><span class="s">&quot;my_particles.h5part&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">,</span><span class="mi">3</span><span class="o">&gt;&gt;&amp;</span><span class="p">)</span><span class="w"> </span><span class="n">myParticles</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The optional arguments <code class="docutils literal notranslate"><span class="pre">a_realVars</span></code> and <code class="docutils literal notranslate"><span class="pre">a_vectVars</span></code> permit the user to set the output variable names for the <code class="docutils literal notranslate"><span class="pre">M</span></code> scalar variables and the <code class="docutils literal notranslate"><span class="pre">N</span></code> vector variables.
+The argument <code class="docutils literal notranslate"><span class="pre">a_shift</span></code> will simply shift the particle positions in the output HDF5 file.</p>
 </section>
 <section id="superparticles">
 <span id="chap-superparticles"></span><h2>Superparticles<a class="headerlink" href="#superparticles" title="Permalink to this heading"></a></h2>
