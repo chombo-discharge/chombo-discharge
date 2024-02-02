@@ -21,6 +21,7 @@
 #include <CD_ParticleContainer.H>
 #include <CD_EBRepresentation.H>
 #include <CD_EBIntersection.H>
+#include <CD_CellInfo.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
