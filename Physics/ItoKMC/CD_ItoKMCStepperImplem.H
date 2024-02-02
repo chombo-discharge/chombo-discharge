@@ -4237,7 +4237,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
             solverIt()->makeSuperparticlesEqualWeightKD(*itoParticles[idx], ppc);
 
-#if 1 // Re-initialize particles
+#if 0 // Re-initialize particles
             List<ItoParticle>& oldParticles = *itoParticles[idx];
             long long          numPhysPart  = 0;
             for (ListIterator<ItoParticle> lit(oldParticles); lit.ok(); ++lit) {
