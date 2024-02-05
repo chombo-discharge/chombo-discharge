@@ -51,7 +51,10 @@ ItoSolver::ItoSolver()
   m_checkpointing        = WhichCheckpoint::Particles;
   m_mobilityInterp       = WhichMobilityInterpolation::Direct;
 
-  this->setDefaultParticleMerger();
+  // Default is to not merge particles
+  m_particleMerger = [](List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
+
+  };
 }
 
 ItoSolver::~ItoSolver() { CH_TIME("ItoSolver::~ItoSolver"); }
@@ -81,17 +84,7 @@ ItoSolver::setRealm(const std::string a_realm)
 }
 
 void
-ItoSolver::setDefaultParticleMerger() noexcept
-{
-  CH_TIME("ItoSolver::setParticleMerger");
-
-  m_particleMerger = [this](List<ItoParticle>& a_particles, const int a_ppc) {
-    this->makeSuperparticlesEqualWeightKD(a_particles, a_ppc);
-  };
-}
-
-void
-ItoSolver::setParticleMerger(const ParticleMerger& a_particleMerger) noexcept
+ItoSolver::setParticleMerger(const ParticleManagement::ParticleMerger<ItoParticle>& a_particleMerger) noexcept
 {
   CH_TIME("ItoSolver::setParticleMerger");
 
@@ -128,6 +121,7 @@ ItoSolver::parseOptions()
   this->parseRedistribution();
   this->parseDivergenceComputation();
   this->parseCheckpointing();
+  this->parseParticleMerger();
 }
 
 void
@@ -146,6 +140,7 @@ ItoSolver::parseRuntimeOptions()
   this->parseRedistribution();
   this->parseDivergenceComputation();
   this->parseCheckpointing();
+  this->parseParticleMerger();
 }
 
 void
@@ -387,6 +382,38 @@ ItoSolver::parseCheckpointing()
   }
   else {
     MayDay::Abort("ItoSolver::parseCheckpointing - unknown checkpointing method requested");
+  }
+}
+
+void
+ItoSolver::parseParticleMerger()
+{
+  CH_TIME("ItoSolver::parseParticleMerger");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::parseParticleMerger" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  std::string str;
+
+  pp.get("merge_algorithm", str);
+  if (str == "none") {
+    m_particleMerger = [](List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
+    };
+  }
+  else if (str == "equal_weight_kd") {
+    m_particleMerger = [this](List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
+      this->makeSuperparticlesEqualWeightKD(a_particles, a_cellInfo, a_ppc);
+    };
+  }
+  else if (str == "reinitialize") {
+    m_particleMerger = [this](List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
+      this->reinitializeParticles(a_particles, a_cellInfo, a_ppc);
+    };
+  }
+  else if (str == "external") {
+    // Do nothing, because the user will set the merger algorithm through setParticleMerger
   }
 }
 
@@ -2917,29 +2944,61 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
   ParticleContainer<ItoParticle>& particles     = this->getParticles(a_container);
   BinFab<ItoParticle>&            cellParticles = particles.getCellParticles(a_level, a_dit);
 
-  // Kernel for particle merging.
-  auto kernel = [&](const IntVect& iv) -> void {
+  const Real     dx      = m_amr->getDx()[a_level];
+  const EBISBox& ebisbox = m_amr->getEBISLayout(m_realm, m_phase)[a_level][a_dit];
+
+  // Kernel for particle merging in regular cells
+  auto regularKernel = [&](const IntVect& iv) -> void {
+    if (ebisbox.isRegular(iv)) {
+      List<ItoParticle>& particles = cellParticles(iv, m_comp);
+
+      if (particles.length() > 0) {
+        m_particleMerger(particles, CellInfo(iv, dx), a_particlesPerCell);
+      }
+    }
+  };
+
+  // Kernel for particle merging in irregular cells
+  auto irregularKernel = [&](const VolIndex& vof) -> void {
+    const IntVect iv = vof.gridIndex();
+
     List<ItoParticle>& particles = cellParticles(iv, m_comp);
 
     if (particles.length() > 0) {
-      m_particleMerger(particles, a_particlesPerCell);
+      const Real      kappa         = ebisbox.volFrac(vof);
+      const RealVect& bndryCentroid = ebisbox.bndryCentroid(vof);
+      const RealVect& bndryNormal   = ebisbox.normal(vof);
+
+      CellInfo cellInfo(iv, dx, kappa, bndryCentroid, bndryNormal);
+
+      m_particleMerger(particles, cellInfo, a_particlesPerCell);
     }
   };
 
   // Iteration space.
-  const Box cellBox = m_amr->getGrids(m_realm)[a_level][a_dit];
+  const Box    cellBox = m_amr->getGrids(m_realm)[a_level][a_dit];
+  VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[a_dit];
 
   // Run kernel
-  BoxLoops::loop(cellBox, kernel);
+  BoxLoops::loop(cellBox, regularKernel);
+  BoxLoops::loop(vofit, irregularKernel);
 }
 
 void
-ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles, const int a_ppc)
+ItoSolver::mergeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc)
 {
-  CH_TIMERS("ItoSolver::makeSuperparticles");
-  CH_TIMER("ItoSolver::makeSuperParticles::populate_list", t1);
-  CH_TIMER("ItoSolver::makeSuperParticles::build_kd", t2);
-  CH_TIMER("ItoSolver::makeSuperParticles::merge_particles", t3);
+  CH_TIMERS("ItoSolver::mergeParticles");
+
+  m_particleMerger(a_particles, a_cellInfo, a_ppc);
+}
+
+void
+ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc)
+{
+  CH_TIMERS("ItoSolver::makeSuperparticlesEqualWeightKD");
+  CH_TIMER("ItoSolver::makeSuperparticlesEqualWeightKD::populate_list", t1);
+  CH_TIMER("ItoSolver::makeSuperparticlesEqualWeightKD::build_kd", t2);
+  CH_TIMER("ItoSolver::makeSuperparticlesEqualWeightKD::merge_particles", t3);
 
   using PType        = NonCommParticle<2, 1>;
   using Node         = KDNode<PType>;
@@ -2997,6 +3056,51 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles, const
     a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, e));
   }
   CH_STOP(t3);
+}
+
+void
+ItoSolver::reinitializeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc)
+{
+  CH_TIME("ItoSolver::reinitializeParticles");
+
+  // Compute number of physical particles and partition them into a_ppc computational particles
+  // with weights as equal as possible. Average energy becomes true average energy (same for all particles).
+  long long numPhysicalParticles = 0LL;
+  Real      averageEnergy        = 0.0;
+  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
+    const ItoParticle& p = lit();
+    const Real         w = p.weight();
+    const Real         e = p.energy();
+
+    numPhysicalParticles += (long long)w;
+    averageEnergy += w * e;
+  }
+
+  if (numPhysicalParticles > 0) {
+    averageEnergy *= 1.0 / numPhysicalParticles;
+  }
+
+  const std::vector<long long> weights = ParticleManagement::partitionParticleWeights(numPhysicalParticles,
+                                                                                      (long long)a_ppc);
+
+  // randomPosition wants the physical corners.
+  const Real     dx            = a_cellInfo.getDx();
+  const Real     kappa         = a_cellInfo.getVolFrac();
+  const RealVect probLo        = m_amr->getProbLo();
+  const RealVect cellPos       = probLo + dx * (a_cellInfo.getGridIndex() + 0.5 * RealVect::Unit);
+  const RealVect validLo       = a_cellInfo.getValidLo();
+  const RealVect validHi       = a_cellInfo.getValidHi();
+  const RealVect bndryCentroid = a_cellInfo.getBndryCentroid();
+  const RealVect bndryNormal   = a_cellInfo.getBndryNormal();
+
+  a_particles.clear();
+
+  for (int i = 0; i < weights.size(); i++) {
+    const Real     w = weights[i];
+    const RealVect x = Random::randomPosition(cellPos, validLo, validHi, bndryCentroid, bndryNormal, dx, kappa);
+
+    a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, averageEnergy));
+  }
 }
 
 void

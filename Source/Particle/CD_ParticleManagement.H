@@ -22,12 +22,22 @@
 
 // Our includes
 #include <CD_KDNode.H>
+#include <CD_CellInfo.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief Namespace for various particle management tools. 
 */
 namespace ParticleManagement {
+
+  /*!
+    @brief Concept for splitting/merging particles
+    @param[inout] a_particles Particles to be merged/split
+    @param[in] a_numTargetParticles Number of target particles
+  */
+  template <class P>
+  using ParticleMerger =
+    std::function<void(List<P>& a_particles, const CellInfo& a_cellInfo, const int a_numTargetParticles)>;
 
   /*!
     @brief Declaration of a reconciliation function when splitting particles.

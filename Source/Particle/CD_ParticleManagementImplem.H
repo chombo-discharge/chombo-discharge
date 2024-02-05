@@ -375,12 +375,15 @@ namespace ParticleManagement {
       }
       else {
         const T W = a_numPhysicalParticles / a_maxCompParticles;
-        const T r = a_numPhysicalParticles % a_maxCompParticles;
+        T       r = a_numPhysicalParticles % a_maxCompParticles;
 
         if (W > zero) {
           ret.resize(a_maxCompParticles, W);
 
-          ret.back() += r;
+          for (int i = 0; i < ret.size() && r > zero; i++) {
+            ret[i] += one;
+            r--;
+          }
         }
         else {
           ret.resize(1, r);

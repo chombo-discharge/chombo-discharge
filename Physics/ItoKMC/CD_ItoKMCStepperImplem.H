@@ -4235,7 +4235,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
           for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
             const int idx = solverIt.index();
 
-            solverIt()->makeSuperparticlesEqualWeightKD(*itoParticles[idx], ppc);
+            solverIt()->mergeParticles(*itoParticles[idx], CellInfo(iv, a_dx), ppc);
           }
         }
       }
@@ -4315,11 +4315,13 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Merge the particles together.
       if (this->m_mergeInterval > 0) {
-        if ((this->m_timeStep + 1) % this->m_mergeInterval) {
+        if ((this->m_timeStep + 1) % this->m_mergeInterval == 0) {
           for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
             const int idx = solverIt.index();
 
-            solverIt()->makeSuperparticlesEqualWeightKD(*itoParticles[idx], ppc);
+            const CellInfo cellInfo(iv, a_dx, kappa, bndryCentroid, bndryNormal);
+
+            solverIt()->mergeParticles(*itoParticles[idx], cellInfo, ppc);
           }
         }
       }

@@ -1626,23 +1626,23 @@ ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
 
   if (plotParticles) {
 
-    // Create the output folder
-    std::string cmd;
-    int         success = 0;
-    if (procID() == 0) {
-      success = system("mkdir -p particles");
-    }
-
-    if (success != 0) {
-      MayDay::Error("ItoKMCGodunovStepper::plotParticles - could not create 'particles' directory");
-    }
-
     for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
       const RefCountedPtr<ItoSolver>&       solver    = solverIt();
       const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
+      // Create the output folder
+      std::string cmd     = "mkdir -p particles/" + solver->getName();
+      int         success = 0;
+      if (procID() == 0) {
+        success = system(cmd.c_str());
+      }
+
+      if (success != 0) {
+        MayDay::Error("ItoKMCGodunovStepper::plotParticles - could not create 'particles' directory");
+      }
+
       // Set plot file name
-      const std::string prefix = "./particles/" + solver->getName();
+      const std::string prefix = "./particles/" + solver->getName() + "/" + solver->getName();
       char              fileChar[1000];
       sprintf(fileChar, "%s.step%07d.%dd.h5part", prefix.c_str(), this->m_timeStep, SpaceDim);
 
