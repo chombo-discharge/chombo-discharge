@@ -25,27 +25,59 @@ class CellInfo
 {
 public:
   /*!
-    @brief Info for a regular cell
-  */
-  static const CellInfo Regular;
-
-  /*!
     @brief Default constructor - creates a regular cell
   */
-  CellInfo() noexcept;
+  CellInfo() = delete;
+
+  /*!
+    @brief Constructor which creates a regular cell 
+    @param[in] a_gridIndex     Grid index
+    @param[in] a_dx            Grid resolution
+  */
+  CellInfo(const IntVect a_gridIndex, const Real a_dx) noexcept;
 
   /*!
     @brief Constructor which automatically constructs an approximation to the minimum box enclosing the valid region of the cell
+    @param[in] a_gridIndex     Grid index
+    @param[in] a_dx            Grid resolution
     @param[in] a_volFrac       Volume fraction. 
     @param[in] a_bndryCentroid Boundary centroid
     @param[in] a_bndryNormal   Boundary normal
   */
-  CellInfo(const Real a_volFrac, const RealVect a_bndryCentroid, const RealVect a_bndryNormal) noexcept;
+  CellInfo(const IntVect  a_gridIndex,
+           const Real     a_dx,
+           const Real     a_volFrac,
+           const RealVect a_bndryCentroid,
+           const RealVect a_bndryNormal) noexcept;
 
   /*!
     @brief Destructor
   */
   virtual ~CellInfo() noexcept;
+
+  /*!
+    @brief Get the grid index
+  */
+  IntVect&
+  getGridIndex() noexcept;
+
+  /*!
+    @brief Get the grid index
+  */
+  const IntVect&
+  getGridIndex() const noexcept;
+
+  /*!
+    @brief Get the grid spacing
+  */
+  Real&
+  getDx() noexcept;
+
+  /*!
+    @brief Get the grid spacing
+  */
+  const Real&
+  getDx() const noexcept;
 
   /*!
     @brief Get the volume fraction
@@ -108,6 +140,16 @@ public:
   getValidHi() const noexcept;
 
 protected:
+  /*!
+    @brief Grid index
+  */
+  IntVect m_gridIndex;
+
+  /*!
+    @brief Grid spacing
+  */
+  Real m_dx;
+
   /*!
     @brief Volume fraction
   */
