@@ -111,9 +111,6 @@ Public Types</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:a070d75d0d3ac16e04013d25574c1ffa5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enum class for distinguishing various types of particle containers.  <a href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">More...</a><br /></td></tr>
 <tr class="separator:a070d75d0d3ac16e04013d25574c1ffa5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a034996b9642d6a8cae3903ee3197840d"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a034996b9642d6a8cae3903ee3197840d">ParticleMerger</a> = std::function&lt; void(List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const int a_numTargetParticles)&gt;</td></tr>
-<tr class="memdesc:a034996b9642d6a8cae3903ee3197840d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concept for splitting/merging particles.  <a href="classItoSolver.html#a034996b9642d6a8cae3903ee3197840d">More...</a><br /></td></tr>
-<tr class="separator:a034996b9642d6a8cae3903ee3197840d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -125,13 +122,9 @@ Public Member Functions</h2></td></tr>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a73d05094e1614798857464ab8bc7f728">~ItoSolver</a> ()</td></tr>
 <tr class="memdesc:a73d05094e1614798857464ab8bc7f728"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing). <br /></td></tr>
 <tr class="separator:a73d05094e1614798857464ab8bc7f728"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6eefee269c2d2b5019830f1c49c09b2e"><td class="memItemLeft" align="right" valign="top"><a id="a6eefee269c2d2b5019830f1c49c09b2e"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a6eefee269c2d2b5019830f1c49c09b2e">setDefaultParticleMerger</a> () noexcept</td></tr>
-<tr class="memdesc:a6eefee269c2d2b5019830f1c49c09b2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a default particle merger. This defaults to KD-tree merging following an "equal weight" principle. <br /></td></tr>
-<tr class="separator:a6eefee269c2d2b5019830f1c49c09b2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a391cfa76b8d790c6dfbd441a569fdd48"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a391cfa76b8d790c6dfbd441a569fdd48">setParticleMerger</a> (const <a class="el" href="classItoSolver.html#a034996b9642d6a8cae3903ee3197840d">ParticleMerger</a> &amp;a_particleMerger) noexcept</td></tr>
-<tr class="memdesc:a391cfa76b8d790c6dfbd441a569fdd48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the particle merger. This will get called when merging particles using makeSuperparticles.  <a href="classItoSolver.html#a391cfa76b8d790c6dfbd441a569fdd48">More...</a><br /></td></tr>
-<tr class="separator:a391cfa76b8d790c6dfbd441a569fdd48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae05b92be13086d225ea918350fdb006f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ae05b92be13086d225ea918350fdb006f">setParticleMerger</a> (const <a class="el" href="namespaceParticleManagement.html#a364a6f0f8a9453a123262e6008f0fc4b">ParticleManagement::ParticleMerger</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particleMerger) noexcept</td></tr>
+<tr class="memdesc:ae05b92be13086d225ea918350fdb006f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the particle merger. This will get called when merging particles using makeSuperparticles.  <a href="classItoSolver.html#ae05b92be13086d225ea918350fdb006f">More...</a><br /></td></tr>
+<tr class="separator:ae05b92be13086d225ea918350fdb006f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e6fcdccd99f9369d87b8e74646f0296"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a6e6fcdccd99f9369d87b8e74646f0296">getName</a> () const</td></tr>
 <tr class="memdesc:a6e6fcdccd99f9369d87b8e74646f0296"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get this solver's name.  <a href="classItoSolver.html#a6e6fcdccd99f9369d87b8e74646f0296">More...</a><br /></td></tr>
 <tr class="separator:a6e6fcdccd99f9369d87b8e74646f0296"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -378,9 +371,15 @@ virtual <a class="el" href="CD__EBIntersection_8H.html#ad8aa543cfc22c9b4f2a6a6da
 <tr class="memitem:aa8859e84b563c9aa49927b39628571d3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aa8859e84b563c9aa49927b39628571d3">makeSuperparticles</a> (const <a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">WhichContainer</a> a_container, const int a_particlesPerCell, const int a_level, const DataIndex a_dit)</td></tr>
 <tr class="memdesc:aa8859e84b563c9aa49927b39628571d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make superparticles for a particle container &ndash; this is used for a specified grid level and patch.  <a href="classItoSolver.html#aa8859e84b563c9aa49927b39628571d3">More...</a><br /></td></tr>
 <tr class="separator:aa8859e84b563c9aa49927b39628571d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a19632aa05427ba1e6cbb2e1f2f597b5f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a19632aa05427ba1e6cbb2e1f2f597b5f">makeSuperparticlesEqualWeightKD</a> (List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const int a_particlesPerCell)</td></tr>
-<tr class="memdesc:a19632aa05427ba1e6cbb2e1f2f597b5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Superparticle merging with KD/BVH trees.  <a href="classItoSolver.html#a19632aa05427ba1e6cbb2e1f2f597b5f">More...</a><br /></td></tr>
-<tr class="separator:a19632aa05427ba1e6cbb2e1f2f597b5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8786e78c443731d830c73334e2f50987"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a8786e78c443731d830c73334e2f50987">mergeParticles</a> (List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const <a class="el" href="classCellInfo.html">CellInfo</a> &amp;a_cellInfo, const int a_particlesPerCell)</td></tr>
+<tr class="memdesc:a8786e78c443731d830c73334e2f50987"><td class="mdescLeft">&#160;</td><td class="mdescRight">General superparticle merging with underlying algorithm through m_particleMerger.  <a href="classItoSolver.html#a8786e78c443731d830c73334e2f50987">More...</a><br /></td></tr>
+<tr class="separator:a8786e78c443731d830c73334e2f50987"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26412f2f4e2a135b2aaaab9f4ad1b54d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a26412f2f4e2a135b2aaaab9f4ad1b54d">makeSuperparticlesEqualWeightKD</a> (List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const <a class="el" href="classCellInfo.html">CellInfo</a> &amp;a_cellInfo, const int a_particlesPerCell)</td></tr>
+<tr class="memdesc:a26412f2f4e2a135b2aaaab9f4ad1b54d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Superparticle merging with KD/BVH trees.  <a href="classItoSolver.html#a26412f2f4e2a135b2aaaab9f4ad1b54d">More...</a><br /></td></tr>
+<tr class="separator:a26412f2f4e2a135b2aaaab9f4ad1b54d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37b8a8b504b2eb3080673fb72909a883"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a37b8a8b504b2eb3080673fb72909a883">reinitializeParticles</a> (List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const <a class="el" href="classCellInfo.html">CellInfo</a> &amp;a_cellInfo, const int a_particlesPerCell)</td></tr>
+<tr class="memdesc:a37b8a8b504b2eb3080673fb72909a883"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle re-initialization algorithm.  <a href="classItoSolver.html#a37b8a8b504b2eb3080673fb72909a883">More...</a><br /></td></tr>
+<tr class="separator:a37b8a8b504b2eb3080673fb72909a883"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a802e12734bd28664a925cf946f485350"><td class="memItemLeft" align="right" valign="top"><a id="a802e12734bd28664a925cf946f485350"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a802e12734bd28664a925cf946f485350">remap</a> ()</td></tr>
 <tr class="memdesc:a802e12734bd28664a925cf946f485350"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remap the bulk particle container. <br /></td></tr>
@@ -474,6 +473,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ae99beba4bb3d6b11b26c1a031225c038">parseDeposition</a> ()</td></tr>
 <tr class="memdesc:ae99beba4bb3d6b11b26c1a031225c038"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse particle deposition methods. <br /></td></tr>
 <tr class="separator:ae99beba4bb3d6b11b26c1a031225c038"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c33ca03f4f05b4b9c69eaae228ca794"><td class="memItemLeft" align="right" valign="top"><a id="a4c33ca03f4f05b4b9c69eaae228ca794"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a4c33ca03f4f05b4b9c69eaae228ca794">parseParticleMerger</a> ()</td></tr>
+<tr class="memdesc:a4c33ca03f4f05b4b9c69eaae228ca794"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the super-particle merger. <br /></td></tr>
+<tr class="separator:a4c33ca03f4f05b4b9c69eaae228ca794"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a32226502e97aa02f9750ca9f19a7d088"><td class="memItemLeft" align="right" valign="top"><a id="a32226502e97aa02f9750ca9f19a7d088"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a32226502e97aa02f9750ca9f19a7d088">parseIntersectionEB</a> ()</td></tr>
 <tr class="memdesc:a32226502e97aa02f9750ca9f19a7d088"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse EB intersection algorithms. <br /></td></tr>
@@ -554,10 +557,10 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classItoSolver.html#ac7ea13986249a06a5185c8315e4548bc">WhichMobilityInterpolation</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aa8a28b6a171ed4a0aa2093e39c42cebe">m_mobilityInterp</a></td></tr>
 <tr class="memdesc:aa8a28b6a171ed4a0aa2093e39c42cebe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Switch for deciding how to interpolate mobilities, i.e. interpolating either mu*E or just mu (to the particle position) <br /></td></tr>
 <tr class="separator:aa8a28b6a171ed4a0aa2093e39c42cebe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac7bc2be51fdfa92d02244e5b06f67201"><td class="memItemLeft" align="right" valign="top"><a id="ac7bc2be51fdfa92d02244e5b06f67201"></a>
-<a class="el" href="classItoSolver.html#a034996b9642d6a8cae3903ee3197840d">ParticleMerger</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ac7bc2be51fdfa92d02244e5b06f67201">m_particleMerger</a></td></tr>
-<tr class="memdesc:ac7bc2be51fdfa92d02244e5b06f67201"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle merger. <br /></td></tr>
-<tr class="separator:ac7bc2be51fdfa92d02244e5b06f67201"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad800ffce929d21041ba7e37797f535d0"><td class="memItemLeft" align="right" valign="top"><a id="ad800ffce929d21041ba7e37797f535d0"></a>
+<a class="el" href="namespaceParticleManagement.html#a364a6f0f8a9453a123262e6008f0fc4b">ParticleManagement::ParticleMerger</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad800ffce929d21041ba7e37797f535d0">m_particleMerger</a></td></tr>
+<tr class="memdesc:ad800ffce929d21041ba7e37797f535d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle merger. <br /></td></tr>
+<tr class="separator:ad800ffce929d21041ba7e37797f535d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ecdbaf1fcff7620202eef2892684dcc"><td class="memItemLeft" align="right" valign="top"><a id="a2ecdbaf1fcff7620202eef2892684dcc"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a2ecdbaf1fcff7620202eef2892684dcc">m_restartPPC</a></td></tr>
 <tr class="memdesc:a2ecdbaf1fcff7620202eef2892684dcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of particles used when restarting a simulation &ndash; this is relevant only when restarting from a "fluid" checkpoint file. <br /></td></tr>
@@ -743,31 +746,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Base class for Ito diffusion particle models. </p>
 <p>This is a particle class for solving Ito diffusion problems dX = v*dt + sqrt(2*D)*dW_t (dW_t is a Wiener process over dt) over an AMR hierarchy. The diffusion coefficient is related to the hydrodynamic diffusion coefficient by D(fluid) = sqrt(2*D(Ito)). </p><dl class="section note"><dt>Note</dt><dd>To use this class, the user must add a species and set the realm and phase where the solver will live. </dd></dl>
-</div><h2 class="groupheader">Member Typedef Documentation</h2>
-<a id="a034996b9642d6a8cae3903ee3197840d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a034996b9642d6a8cae3903ee3197840d">&#9670;&nbsp;</a></span>ParticleMerger</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">using <a class="el" href="classItoSolver.html#a034996b9642d6a8cae3903ee3197840d">ItoSolver::ParticleMerger</a> =  std::function&lt;void(List&lt;<a class="el" href="classItoParticle.html">ItoParticle</a>&gt;&amp; a_particles, const int a_numTargetParticles)&gt;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Concept for splitting/merging particles. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particles to be merged/split </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_numTargetParticles</td><td>Number of target particles </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<h2 class="groupheader">Member Enumeration Documentation</h2>
+</div><h2 class="groupheader">Member Enumeration Documentation</h2>
 <a id="a93be4b5f935a4ba80472db227c9d75cd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a93be4b5f935a4ba80472db227c9d75cd">&#9670;&nbsp;</a></span>WhichCheckpoint</h2>
 
@@ -3808,8 +3787,8 @@ template&lt;class P , Real(P ::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="a19632aa05427ba1e6cbb2e1f2f597b5f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a19632aa05427ba1e6cbb2e1f2f597b5f">&#9670;&nbsp;</a></span>makeSuperparticlesEqualWeightKD()</h2>
+<a id="a26412f2f4e2a135b2aaaab9f4ad1b54d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26412f2f4e2a135b2aaaab9f4ad1b54d">&#9670;&nbsp;</a></span>makeSuperparticlesEqualWeightKD()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3822,6 +3801,12 @@ template&lt;class P , Real(P ::*)() const particleScalarField&gt; </div>
           <td>(</td>
           <td class="paramtype">List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classCellInfo.html">CellInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_cellInfo</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -3846,6 +3831,59 @@ template&lt;class P , Real(P ::*)() const particleScalarField&gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particles to be merged/split </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellInfo</td><td>Arithmetic information about the current grid cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target number of particles per cell </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a8786e78c443731d830c73334e2f50987"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8786e78c443731d830c73334e2f50987">&#9670;&nbsp;</a></span>mergeParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoSolver::mergeParticles </td>
+          <td>(</td>
+          <td class="paramtype">List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classCellInfo.html">CellInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_cellInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_particlesPerCell</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>General superparticle merging with underlying algorithm through m_particleMerger. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particles to be merged/split </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellInfo</td><td>Arithmetic information about the current grid cell. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target number of particles per cell </td></tr>
   </table>
   </dd>
@@ -4131,6 +4169,58 @@ template&lt;class P , Real(P ::*)() const particleScalarField&gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level where grids did not change. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_oldFinestLevel</td><td>Finest AMR level before the regrid. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_newFinestLevel</td><td>Finest AMR level after the regrid. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a37b8a8b504b2eb3080673fb72909a883"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a37b8a8b504b2eb3080673fb72909a883">&#9670;&nbsp;</a></span>reinitializeParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoSolver::reinitializeParticles </td>
+          <td>(</td>
+          <td class="paramtype">List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classCellInfo.html">CellInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_cellInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_particlesPerCell</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Particle re-initialization algorithm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particles to be merged/split </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellInfo</td><td>Arithmetic information about the current grid cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target number of particles per cell </td></tr>
   </table>
   </dd>
 </dl>
@@ -4458,8 +4548,8 @@ template&lt;class P , Real(P ::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="a391cfa76b8d790c6dfbd441a569fdd48"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a391cfa76b8d790c6dfbd441a569fdd48">&#9670;&nbsp;</a></span>setParticleMerger()</h2>
+<a id="ae05b92be13086d225ea918350fdb006f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae05b92be13086d225ea918350fdb006f">&#9670;&nbsp;</a></span>setParticleMerger()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4470,7 +4560,7 @@ template&lt;class P , Real(P ::*)() const particleScalarField&gt; </div>
         <tr>
           <td class="memname">void ItoSolver::setParticleMerger </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="classItoSolver.html#a034996b9642d6a8cae3903ee3197840d">ParticleMerger</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="namespaceParticleManagement.html#a364a6f0f8a9453a123262e6008f0fc4b">ParticleManagement::ParticleMerger</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particleMerger</em></td><td>)</td>
           <td></td>
         </tr>

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['particlelist_7341',['ParticleList',['../classKDNode.html#ab71b1da1c0226f2c623a480260b2f96e',1,'KDNode']]],
-  ['particlemerger_7342',['ParticleMerger',['../classItoSolver.html#a034996b9642d6a8cae3903ee3197840d',1,'ItoSolver']]],
-  ['products_7343',['Products',['../classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html#a38756855e8ce4a7fafb99afea390eb80',1,'Physics::ItoKMC::ItoKMCSurfaceReactions']]]
+  ['particlelist_7376',['ParticleList',['../classKDNode.html#ab71b1da1c0226f2c623a480260b2f96e',1,'KDNode']]],
+  ['particlemerger_7377',['ParticleMerger',['../namespaceParticleManagement.html#a364a6f0f8a9453a123262e6008f0fc4b',1,'ParticleManagement']]],
+  ['products_7378',['Products',['../classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html#a38756855e8ce4a7fafb99afea390eb80',1,'Physics::ItoKMC::ItoKMCSurfaceReactions']]]
 ];

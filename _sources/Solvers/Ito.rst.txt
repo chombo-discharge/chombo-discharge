@@ -28,7 +28,7 @@ This class can advance a set of particles (see :ref:`Chap:ItoParticle`) with the
 * Compute particle intersection with embedded boundaries and domain edges.
 * Deposit particles and other particle types on the mesh.
 * Interpolate velocities and diffusion coefficients to the particle positons.
-* Manage superparticle splitting and merging using kD-trees.
+* Manage superparticle splitting and merging.
 
 ``ItoSolver`` also defines an enum ``WhichContainer`` for classification of ``ParticleContainer`` data holders for holding particles that live on:
 
@@ -335,16 +335,35 @@ This routine computes the time step
 Superparticles
 --------------
 
-``ItoSolver`` currently handles superparticles through a kD-tree, see :ref:`Chap:SuperParticles`.
-The function for splitting and merging the particles is
+``ItoSolver`` currently handles superparticles through kD-trees, see :ref:`Chap:SuperParticles`, re-initialization, or user-based criteria. 
+The function for splitting and merging the particles is in all cases
 
 .. code-block:: c++
 
    void
    ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a_particlesPerCell);
 
-Calling this function will merge/split the particles such that their computational weights differ by at most one.   
-``ItoSolver`` uses the kD-node implementation from :ref:`Chap:SuperParticles` and partitioners for splitting the particles into two subsets with equal weights.
+Calling this function will merge/split the particles.
+
+The default behavior in ``ItoSolver`` is to not merge the particles, but the user can set the merging algorithm through the input script, or supply one externally.
+In order to specify the merging algorithm the user must set the ``ItoSolver.merge_algorithm`` to one of the following:
+
+* ``none`` - No particle merging/splitting is performed.
+* ``equal_weight_kd`` Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles.
+* ``reinitialize`` Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.
+* ``external`` Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through
+
+  .. code-block:: c++
+
+     // Set a particle merging algorithm
+     virtual void
+     setParticleMerger(const std::function<void(List<ItoParticle>& a_particles, const CelInfo& a_cellinfo, const int a_numParticles)>);
+
+  where the input function is a function which merges the input particles, possibly also taking into account geometric information in the cell.
+
+.. tip::
+   
+   ``ItoSolver`` uses the kD-node implementation from :ref:`Chap:SuperParticles` and partitioners for splitting the particles into two subsets with equal weights.
 
 .. _Chap:ItoIO:
 

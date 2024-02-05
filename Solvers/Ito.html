@@ -189,7 +189,7 @@ This class can advance a set of particles (see <a class="reference internal" hre
 <li><p>Compute particle intersection with embedded boundaries and domain edges.</p></li>
 <li><p>Deposit particles and other particle types on the mesh.</p></li>
 <li><p>Interpolate velocities and diffusion coefficients to the particle positons.</p></li>
-<li><p>Manage superparticle splitting and merging using kD-trees.</p></li>
+<li><p>Manage superparticle splitting and merging.</p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> also defines an enum <code class="docutils literal notranslate"><span class="pre">WhichContainer</span></code> for classification of <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code> data holders for holding particles that live on:</p>
 <ul class="simple">
@@ -427,14 +427,32 @@ Note that there is no fundamental limitation to how far the particles can move, 
 </section>
 <section id="superparticles">
 <h2>Superparticles<a class="headerlink" href="#superparticles" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> currently handles superparticles through a kD-tree, see <a class="reference internal" href="../Source/Particles.html#chap-superparticles"><span class="std std-ref">Superparticles</span></a>.
-The function for splitting and merging the particles is</p>
+<p><code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> currently handles superparticles through kD-trees, see <a class="reference internal" href="../Source/Particles.html#chap-superparticles"><span class="std std-ref">Superparticles</span></a>, re-initialization, or user-based criteria.
+The function for splitting and merging the particles is in all cases</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
 <span class="nf">ItoSolver::makeSuperparticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_particlesPerCell</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Calling this function will merge/split the particles such that their computational weights differ by at most one.
-<code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> uses the kD-node implementation from <a class="reference internal" href="../Source/Particles.html#chap-superparticles"><span class="std std-ref">Superparticles</span></a> and partitioners for splitting the particles into two subsets with equal weights.</p>
+<p>Calling this function will merge/split the particles.</p>
+<p>The default behavior in <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> is to not merge the particles, but the user can set the merging algorithm through the input script, or supply one externally.
+In order to specify the merging algorithm the user must set the <code class="docutils literal notranslate"><span class="pre">ItoSolver.merge_algorithm</span></code> to one of the following:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">none</span></code> - No particle merging/splitting is performed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code> Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reinitialize</span></code> Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">external</span></code> Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Set a particle merging algorithm</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="nf">setParticleMerger</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">CelInfo</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_cellinfo</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_numParticles</span><span class="p">)</span><span class="o">&gt;</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>where the input function is a function which merges the input particles, possibly also taking into account geometric information in the cell.</p>
+</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> uses the kD-node implementation from <a class="reference internal" href="../Source/Particles.html#chap-superparticles"><span class="std std-ref">Superparticles</span></a> and partitioners for splitting the particles into two subsets with equal weights.</p>
+</div>
 </section>
 <section id="i-o">
 <span id="chap-itoio"></span><h2>I/O<a class="headerlink" href="#i-o" title="Permalink to this heading"></a></h2>
@@ -501,6 +519,7 @@ Valid options are <code class="docutils literal notranslate"><span class="pre">i
 <span class="c1"># ItoSolver class options</span>
 <span class="c1"># ====================================================================================================</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">verbosity</span>           <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>            <span class="c1"># Class verbosity</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">merge_algorithm</span>     <span class="o">=</span> <span class="n">reinitialize</span>  <span class="c1"># Particle merging algorithm (see documentation)</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">plt_vars</span>            <span class="o">=</span> <span class="n">phi</span> <span class="n">vel</span> <span class="n">dco</span>   <span class="c1"># &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;part&#39;, &#39;eb_part&#39;, &#39;dom_part&#39;, &#39;src_part&#39;, &#39;energy_density&#39;, &#39;energy&#39;</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">intersection_alg</span>    <span class="o">=</span> <span class="n">bisection</span>     <span class="c1"># Intersection algorithm for EB-particle intersections.</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">bisect_step</span>         <span class="o">=</span> <span class="mf">1.E-4</span>         <span class="c1"># Bisection step length for intersection tests</span>
