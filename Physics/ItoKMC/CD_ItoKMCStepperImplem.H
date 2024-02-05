@@ -4236,25 +4236,6 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
             const int idx = solverIt.index();
 
             solverIt()->mergeParticles(*itoParticles[idx], CellInfo(iv, a_dx), ppc);
-
-#if 0 // Re-initialize particles
-            List<ItoParticle>& oldParticles = *itoParticles[idx];
-            long long          numPhysPart  = 0;
-            for (ListIterator<ItoParticle> lit(oldParticles); lit.ok(); ++lit) {
-              numPhysPart += (long long)(lit().weight());
-            }
-
-            const std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(numPhysPart,
-                                                                                                        (long long)ppc);
-
-            oldParticles.clear();
-            for (int i = 0; i < particleWeights.size(); i++) {
-              const Real     w = 1.0 * particleWeights[i];
-              const RealVect p = Random::randomPosition(cellPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
-
-              oldParticles.add(ItoParticle(w, p));
-            }
-#endif
           }
         }
       }
