@@ -450,6 +450,17 @@ FieldSolver::setSigma(const Real a_sigma)
 }
 
 void
+FieldSolver::setSigma(const std::function<Real(const RealVect)>& a_sigma)
+{
+  CH_TIME("FieldSolver::setSigma(std::function<Real(const RealVect)>)");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolver::setSigma(std::function<Real(const RealVect)>))" << endl;
+  }
+
+  DataOps::setValue(m_sigma, a_sigma, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+}
+
+void
 FieldSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry)
 {
   CH_TIME("FieldSolver::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>)");

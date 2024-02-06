@@ -247,9 +247,9 @@ StreamerInceptionStepper<P, F, C>::initialData()
     pout() << "StreamerInceptionStepper::initialData" << endl;
   }
 
-  // Set rho = sigma = 0 for field solver and then solve the Poisson equation.
+  // Set rho and sigma and solve the Poisson equation
   m_fieldSolver->setRho(m_rho);
-  m_fieldSolver->setSigma(0.0);
+  m_fieldSolver->setSigma(m_sigma);
 
   const bool converged =
     m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma(), false);
@@ -1688,7 +1688,7 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
 
   // Solve Poisson equation again.
   m_fieldSolver->setRho(m_rho);
-  m_fieldSolver->setSigma(0.0);
+  m_fieldSolver->setSigma(m_sigma);
 
   const bool converged = m_fieldSolver->solve(m_fieldSolver->getPotential(),
                                               m_fieldSolver->getRho(),
@@ -1747,6 +1747,18 @@ StreamerInceptionStepper<P, F, C>::setRho(const std::function<Real(const RealVec
   }
 
   m_rho = a_rho;
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::setSigma(const std::function<Real(const RealVect& x)>& a_sigma) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setSigma");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setSigma" << endl;
+  }
+
+  m_sigma = a_sigma;
 }
 
 template <typename P, typename F, typename C>

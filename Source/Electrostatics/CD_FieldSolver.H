@@ -239,6 +239,13 @@ public:
   setSigma(const Real a_sigma);
 
   /*!
+    @brief Set surface charge density to spatially dependent function
+    @param[in] a_sigma Spatially dependent value of the surface charge density.
+  */
+  void
+  setSigma(const std::function<Real(const RealVect)>& a_sigma);
+
+  /*!
     @brief Set the computational geometry
     @param[in] a_computationalGeometry Computational geometry. 
   */

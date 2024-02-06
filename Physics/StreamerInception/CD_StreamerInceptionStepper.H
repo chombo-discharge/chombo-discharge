@@ -314,9 +314,17 @@ namespace Physics {
 
       /*!
 	@brief Set space charge distribution
+	@param[in] a_rho Space charge distribution
       */
       virtual void
       setRho(const std::function<Real(const RealVect& x)>& a_rho) noexcept;
+
+      /*!
+	@brief Set surface charge distribution
+	@param[in] a_sigma Surface charge distribution
+      */
+      virtual void
+      setSigma(const std::function<Real(const RealVect& x)>& a_sigma) noexcept;
 
       /*!
 	@brief Set the negative ion density
@@ -816,6 +824,11 @@ namespace Physics {
 	@brief Space charge distribution
       */
       std::function<Real(const RealVect& x)> m_rho;
+
+      /*!
+	@brief Surface charge distribution
+      */
+      std::function<Real(const RealVect& x)> m_sigma;
 
       /*!
 	@brief Negative ion density

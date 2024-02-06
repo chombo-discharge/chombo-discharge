@@ -24,13 +24,15 @@ main(int argc, char* argv[])
   RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new Aerosol());
   RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
 
-  Real gamma = 0.0;
-  Real p     = 1.0;
-  Real T     = 300.0;
+  Real gamma  = 0.0;
+  Real p      = 1.0;
+  Real T      = 300.0;
+  Real sigma0 = 0.0;
 
   pp.get("temperature", T);
   pp.get("pressure", p);
   pp.get("gamma_ions", gamma);
+  pp.get("sigma0", sigma0);
 
   const Real N  = p * Units::atm2pascal / (Units::kb * T);
   const Real O2 = 0.2;
@@ -90,6 +92,20 @@ main(int argc, char* argv[])
   auto voltageCurve = [&](const Real& time) -> Real {
     return 1.0;
   };
+  auto sigma = [&](const RealVect& x) -> Real {
+    Real xy = 0.0;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      if (dir != 1) {
+        xy += x[dir] * x[dir];
+      }
+    }
+
+    xy = sqrt(xy);
+
+    const Real theta = atan2(x[1], xy);
+
+    return sigma0 * std::pow(sin(theta), 3);
+  };
 
   // Set up time stepper
   auto timestepper = RefCountedPtr<StreamerInceptionStepper<>>(new StreamerInceptionStepper<>());
@@ -107,6 +123,7 @@ main(int argc, char* argv[])
   timestepper->setIonDiffusion(ionDiffusion);
   timestepper->setIonDensity(ionDensity);
   timestepper->setVoltageCurve(voltageCurve);
+  timestepper->setSigma(sigma);
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, celltagger));
