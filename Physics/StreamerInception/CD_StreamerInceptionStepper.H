@@ -89,6 +89,8 @@ namespace Physics {
     class StreamerInceptionStepper : public TimeStepper
     {
     public:
+      EBAMRCellData m_electricFieldPlus;
+      EBAMRCellData m_electricFieldMinu;
       /*!
 	@brief Default constructor
       */
@@ -238,13 +240,6 @@ namespace Physics {
       */
       virtual Vector<std::string>
       getTransientPlotVariableNames() const noexcept;
-
-      /*!
-	@brief Get the electric field
-	@note Returns the CELL-CENTROID centered electric field. 
-      */
-      virtual const EBAMRCellData* const
-      getElectricField() const noexcept;
 
       /*!
 	@brief Compute a time step to be used by Driver. 
@@ -408,6 +403,15 @@ namespace Physics {
       virtual Mode
       getMode() const noexcept;
 
+      /*!
+	@brief Get the electric field
+      */
+      virtual const EBAMRCellData*
+      getElectricField() const noexcept
+      {
+        return &m_electricFieldHomo;
+      }
+
     protected:
       /*!
 	@brief Mode
@@ -450,14 +454,19 @@ namespace Physics {
       RefCountedPtr<CdrSolver> m_ionSolver;
 
       /*!
-	@brief Electric field.
+	@brief Storage for electric field. Obtained via superposition
       */
-      EBAMRCellData m_electricFieldPlus;
+      EBAMRCellData m_electricField;
 
       /*!
-	@brief Negated electric field (= -E)
+	@brief Electric field without space/surface charge and V = 1 on live electrodes
       */
-      EBAMRCellData m_electricFieldMinu;
+      EBAMRCellData m_electricFieldHomo;
+
+      /*!
+	@brief Electric field with space/surface charge and V = 0 on all electrodes
+      */
+      EBAMRCellData m_electricFieldInho;
 
       /*!
 	@brief Inception integral values. 
@@ -883,9 +892,10 @@ namespace Physics {
 
       /*!
 	@brief Add particles to every cell where alpha - eta > 0.0
+	@param[in] a_voltage Input voltage
       */
       virtual void
-      seedIonizationParticles(const Real& a_voltage) noexcept;
+      seedIonizationParticles(const Real a_voltage) noexcept;
 
       /*!
 	@brief Solve streamer inception integral for each particle in each voltage and store K values in m_inceptionIntegral. 
@@ -906,7 +916,6 @@ namespace Physics {
 
       /*!
 	@brief Integrate the inception integral using the Euler rule.
-	@param[in] a_voltage Voltage multiplier. 
       */
       virtual void
       inceptionIntegrateEuler(const Real& a_voltage) noexcept;
@@ -1150,7 +1159,7 @@ namespace Physics {
       particleInsideEB(const RealVect a_pos) const noexcept;
 
       /*!
-	@brief Set the negative ion velocity
+	@brief Set the negative ion velocity. Note
 	@param[in] a_voltage Current voltage
       */
       inline void
@@ -1204,6 +1213,34 @@ namespace Physics {
       */
       inline void
       parsePlotVariables() noexcept;
+
+      /*!
+	@brief Calculate the total electric field = inhomogeneous + V * homogeneous
+	@param[in] a_sumField Sum of contributions
+	@param[in] a_inhomogeneousField Inhomogeneous field contribution
+	@param[in] a_homogeneous Homogeneous field contribution
+	@param[in] a_voltage Electrode voltage
+      */
+      inline void
+      superposition(EBAMRCellData&       a_sumField,
+                    const EBAMRCellData& a_inhomogeneousField,
+                    const EBAMRCellData& a_homogeneousField,
+                    const Real           a_voltage) const noexcept;
+
+      /*!
+	@brief Update m_electricField with the input voltage
+	@param[in] a_voltage Electrode voltage
+      */
+      inline void
+      superposition(const Real a_voltage) noexcept;
+
+      /*!
+	@brief Update the input field with the scaled voltage
+	@param[out] a_sumField Sum of fields
+	@param[in] a_voltage Electrode voltage
+      */
+      inline void
+      superposition(EBAMRCellData& a_sumField, const Real a_voltage) const noexcept;
 
       /*!
 	@brief Write data to output. Convenience function used for IO.
