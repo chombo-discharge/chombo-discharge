@@ -3570,7 +3570,7 @@ StreamerInceptionStepper<P, F, C>::computeFieldEmissionStationary() noexcept
             D_DECL(electricFieldMinu(vof, 0), electricFieldMinu(vof, 1), electricFieldMinu(vof, 2)));
 
           const Real normalEplus = Eplus.dotProduct(ebisbox.normal(vof));
-          const Real normalEMinu = Eminu.dotProduct(ebisbox.normal(vof));
+          const Real normalEminu = Eminu.dotProduct(ebisbox.normal(vof));
 
           emissionPlus(vof, i) = 0.0;
           emissionMinu(vof, i) = 0.0;
