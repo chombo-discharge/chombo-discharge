@@ -386,7 +386,7 @@ protected:
   /*!
     @brief Mesh-based velocity field. Must be set through setVelocity
   */
-  const EBAMRCellData* m_velocityField;
+  EBAMRCellData m_velocityField;
 
   /*!
     @brief Computational particles. 
