@@ -58,7 +58,7 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
 
   m_sigma = [](const RealVect x) -> Real {
     return 0.0;
-  };  
+  };
 
   m_alpha = [](const Real E, const RealVect x) -> Real {
     return 0.0;
