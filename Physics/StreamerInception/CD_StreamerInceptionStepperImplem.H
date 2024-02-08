@@ -4382,7 +4382,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
   for (size_t i = 0; i < m_voltageSweeps.size(); ++i) {
     Real ionizationVolume = 0.0;
 
-    this->superposition(scratch, m_electricFieldInho, m_electricFieldHomo, m_voltageSweeps[i]);
+    this->superposition(scratch, m_voltageSweeps[i]);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
@@ -4405,7 +4405,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
             const RealVect x  = probLo + dx * (0.5 * RealVect::Unit + RealVect(iv));
             const RealVect EE = RealVect(
               D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-            const Real E = std::abs(m_voltageSweeps[i] * EE.vectorLength());
+            const Real E = EE.vectorLength();
 
             const Real alpha = m_alpha(E, x);
             const Real eta   = m_eta(E, x);
@@ -4421,7 +4421,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
 
             const RealVect x  = probLo + Location::position(Location::Cell::Center, vof, ebisbox, dx);
             const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-            const Real     E  = std::abs(m_voltageSweeps[i] * EE.vectorLength());
+            const Real     E  = EE.vectorLength();
 
             const Real alpha = m_alpha(E, x);
             const Real eta   = m_eta(E, x);
@@ -4885,6 +4885,7 @@ StreamerInceptionStepper<P, F, C>::superposition(EBAMRCellData&       a_sumField
 
   m_amr->arithmeticAverage(a_sumField, m_realm, m_phase);
   m_amr->interpGhostPwl(a_sumField, m_realm, m_phase);
+  m_amr->interpToCentroids(a_sumField, m_realm, m_phase);
 }
 
 template <typename P, typename F, typename C>
