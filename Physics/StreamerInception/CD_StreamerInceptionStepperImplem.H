@@ -38,6 +38,8 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
     pout() << "StreamerInceptionStepper::StreamerInceptionStepper" << endl;
   }
 
+  MayDay::Warning("Put electric field magnitude in output -- use MFAMRCellData for homogeneous/inhomogeneous parts");
+
   // Default settings.
   m_verbosity           = -1;
   m_realm               = Realm::Primal;
@@ -1481,8 +1483,6 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
 
     const Real curTime    = m_time + a_dt;
     const Real curVoltage = m_voltageCurve(curTime);
-
-    this->superposition(curVoltage);
 
     // Move the negative ions -- still want this for the time step.
     timer.startEvent("Ion advance");
@@ -4786,7 +4786,7 @@ StreamerInceptionStepper<P, F, C>::computeIonVelocity(const Real& a_voltage) noe
   EBAMRCellData& vel = m_ionSolver->getCellCenteredVelocity();
 
   // Compute electric field at the input voltage and set v = -E
-  this->superposition(vel, m_electricFieldInho, m_electricFieldHomo, a_voltage);
+  this->superposition(vel, a_voltage);
   DataOps::scale(vel, -1.0);
 
   // Allocate mesh data that holds mu and compute it on the mesh.
@@ -4847,7 +4847,7 @@ StreamerInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) no
   // Compute the electric field at the input voltage.
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
-  this->superposition(scratch, m_electricFieldInho, m_electricFieldHomo, a_voltage);
+  this->superposition(scratch, a_voltage);
 
   // Compute the diffusion coefficient on cell centers.
   EBAMRCellData diffCoCell;
@@ -4997,7 +4997,7 @@ const EBAMRCellData*
 StreamerInceptionStepper<P, F, C>::getElectricField() const noexcept {
   CH_TIMERS("StreamerInceptionStepper::getElectricField");
 
-  return &m_electricField;
+  return &m_electricFieldHomo;
 }
 
 #include <CD_NamespaceFooter.H>
