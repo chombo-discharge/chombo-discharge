@@ -3756,16 +3756,13 @@ StreamerInceptionStepper<P, F, C>::evaluateFunction(LevelData<EBCellFAB>& a_data
     pout() << "StreamerInceptionStepper::evaluateFunction(level)" << endl;
   }
 
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
   // Compute the electric field
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
-
-  DataOps::setValue(*scratch[a_level], 0.0);
-  DataOps::incr(*scratch[a_level], *m_electricFieldHomo[a_level], a_voltage);
-  DataOps::incr(*scratch[a_level], *m_electricFieldInho[a_level], 1.0);
-
-  CH_assert(a_level >= 0);
-  CH_assert(a_level <= m_amr->getFinestLevel());
+  this->superposition(scratch, a_voltage);  
 
   const RealVect probLo = m_amr->getProbLo();
 
