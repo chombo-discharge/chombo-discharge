@@ -176,7 +176,7 @@ StreamerInceptionStepper.plt_vars         = K Uinc bg_rate emission tracer poiss
 # Static mode
 StreamerInceptionStepper.voltage_lo       = 20E3                     # Low voltage multiplier
 StreamerInceptionStepper.voltage_hi       = 60E3                     # Highest voltage multiplier
-StreamerInceptionStepper.voltage_steps    = 9                       # Number of voltage steps
+StreamerInceptionStepper.voltage_steps    = 20			                            # Number of voltage steps
 
 # Dynamic mode
 StreamerInceptionStepper.ion_transport = true                    # Turn on/off ion transport

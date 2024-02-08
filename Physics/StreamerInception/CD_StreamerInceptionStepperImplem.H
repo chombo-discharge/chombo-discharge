@@ -174,9 +174,16 @@ StreamerInceptionStepper<P, F, C>::allocate()
   m_ionSolver->allocate();
 
   // Needed for all modes.
+  m_amr->allocate(m_potential, m_realm, 1);
+  m_amr->allocate(m_potentialHomo, m_realm, 1);
+  m_amr->allocate(m_potentialInho, m_realm, 1);
+
   m_amr->allocate(m_electricField, m_realm, m_phase, SpaceDim);
   m_amr->allocate(m_electricFieldHomo, m_realm, m_phase, SpaceDim);
   m_amr->allocate(m_electricFieldInho, m_realm, m_phase, SpaceDim);
+
+  DataOps::setValue(m_potentialHomo, 0.0);
+  DataOps::setValue(m_potentialInho, 0.0);
 
   switch (m_mode) {
   case Mode::Stationary: {
@@ -252,6 +259,18 @@ StreamerInceptionStepper<P, F, C>::initialData()
     pout() << "StreamerInceptionStepper::initialData" << endl;
   }
 
+  this->solvePoisson();
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::solvePoisson() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::solvePoisson");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::solvePoisson" << endl;
+  }
+
   // Solve for the inhomogeneous part
   m_fieldSolver->setRho(m_rho);
   m_fieldSolver->setSigma(m_sigma);
@@ -259,13 +278,16 @@ StreamerInceptionStepper<P, F, C>::initialData()
     return 0.0;
   });
 
+  // Solve using our m_potentialInho as an initial guess.
+  DataOps::copy(m_fieldSolver->getPotential(), m_potentialInho);
   const bool convergedInho =
     m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma(), false);
 
   if (!convergedInho) {
-    MayDay::Warning("StreamerInceptionStepper::initialData -- could not solve the inhomogeneous Poisson equation. ");
+    MayDay::Error("StreamerInceptionStepper::solvePoisson -- could not solve the inhomogeneous Poisson equation. ");
   }
 
+  DataOps::copy(m_potentialInho, m_fieldSolver->getPotential());
   DataOps::copy(m_electricFieldInho, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
 
   // Solve for the homogeneous part
@@ -279,14 +301,55 @@ StreamerInceptionStepper<P, F, C>::initialData()
     return 1.0;
   });
 
+  DataOps::copy(m_fieldSolver->getPotential(), m_potentialHomo);
   const bool convergedHomo =
     m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma(), false);
 
   if (!convergedHomo) {
-    MayDay::Warning("StreamerInceptionStepper::initialData -- could not solve the homogeneous Poisson equation. ");
+    MayDay::Error("StreamerInceptionStepper::solvePoisson -- could not solve the homogeneous Poisson equation. ");
   }
 
+  DataOps::copy(m_potentialHomo, m_fieldSolver->getPotential());
   DataOps::copy(m_electricFieldHomo, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
+
+  if (m_debug) {
+
+    // Do a dummy check if the homogeneous and inhomogeneous solutions with a potential of one, and check that the
+    // difference is "sufficiently small"
+    const Real testVoltage = 1.0;
+    const Real errorThresh = 1.E-6;
+
+    // This is the sum of the two potentials
+    DataOps::setValue(m_potential, 0.0);
+    DataOps::incr(m_potential, m_potentialHomo, testVoltage);
+    DataOps::incr(m_potential, m_potentialInho, 1.0);
+
+    // Do a true solution with a test voltage and space/surface charge.
+    auto voltage = [V = testVoltage](const Real& a_time) {
+      return V;
+    };
+
+    DataOps::copy(m_fieldSolver->getPotential(), m_potential);
+
+    m_fieldSolver->setRho(m_rho);
+    m_fieldSolver->setSigma(m_sigma);
+    m_fieldSolver->setVoltage(voltage);
+    m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma(), false);
+
+    // Do the difference between the two potentials and figure out the max error. It should be < 1.E-6 * testVoltage
+    DataOps::incr(m_potential, m_fieldSolver->getPotential(), -1.0);
+
+    EBAMRCellData phiGas = m_amr->alias(phase::gas, m_potential);
+
+    Real max;
+    Real min;
+
+    DataOps::getMaxMin(max, min, phiGas, 0);
+
+    if (std::max(std::abs(max), std::abs(min)) > errorThresh * testVoltage) {
+      MayDay::Error("StreamerInceptionStepper::solvePoisson - debug test failed. Check your BCs!");
+    }
+  }
 }
 
 template <typename P, typename F, typename C>
@@ -357,6 +420,7 @@ StreamerInceptionStepper<P, F, C>::parseVerbosity() noexcept
   ParmParse pp("StreamerInceptionStepper");
   pp.get("verbosity", m_verbosity);
   pp.get("profile", m_profile);
+  pp.query("debug", m_debug);
 }
 
 template <typename P, typename F, typename C>
@@ -1629,6 +1693,12 @@ StreamerInceptionStepper<P, F, C>::preRegrid(const int a_lmin, const int a_oldFi
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_tracerParticleSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_ionSolver->preRegrid(a_lmin, a_oldFinestLevel);
+
+  m_amr->allocate(m_scratchHomo, m_realm, 1);
+  m_amr->allocate(m_scratchInho, m_realm, 1);
+
+  m_amr->copyData(m_scratchHomo, m_potentialHomo);
+  m_amr->copyData(m_scratchInho, m_potentialInho);
 }
 
 template <typename P, typename F, typename C>
@@ -1645,10 +1715,19 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
   m_tracerParticleSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_ionSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
-  // Regrid velocity field
+  // Regrid electric field and potentials
+  m_amr->reallocate(m_potential, a_lmin);
+  m_amr->reallocate(m_potentialHomo, a_lmin);
+  m_amr->reallocate(m_potentialInho, a_lmin);
+
   m_amr->reallocate(m_electricField, m_phase, a_lmin);
   m_amr->reallocate(m_electricFieldHomo, m_phase, a_lmin);
   m_amr->reallocate(m_electricFieldInho, m_phase, a_lmin);
+
+  const EBCoarseToFineInterp::Type interpType = EBCoarseToFineInterp::ConservativeMinMod;
+
+  m_amr->interpToNewGrids(m_potentialHomo, m_scratchHomo, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);
+  m_amr->interpToNewGrids(m_potentialInho, m_scratchInho, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);
 
   switch (m_mode) {
   case Mode::Stationary: {
@@ -1694,7 +1773,7 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
   }
 
   // Solve for the inhomogeneous and homogeneous Poisson fields again
-  this->initialData();
+  this->solvePoisson();
 
   // Re-compute the ion velocity and diffusion coefficients
   this->computeIonVelocity(m_voltageCurve(m_time));
@@ -1709,6 +1788,9 @@ StreamerInceptionStepper<P, F, C>::postRegrid()
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::postRegrid" << endl;
   }
+
+  m_scratchHomo.clear();
+  m_scratchInho.clear();
 }
 
 template <typename P, typename F, typename C>

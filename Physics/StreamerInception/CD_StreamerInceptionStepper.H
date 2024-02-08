@@ -454,6 +454,31 @@ namespace Physics {
       RefCountedPtr<CdrSolver> m_ionSolver;
 
       /*!
+	@brief Electric potential 
+      */
+      MFAMRCellData m_potential;
+
+      /*!
+	@brief Electric potential without charges
+      */
+      MFAMRCellData m_potentialHomo;
+
+      /*!
+	@brief Electric potential with charges
+      */
+      MFAMRCellData m_potentialInho;
+
+      /*!
+	@brief Scratch storage used during regrids. 
+      */
+      MFAMRCellData m_scratchHomo;
+
+      /*!
+	@brief Scratch storage used during regrids. 
+      */
+      MFAMRCellData m_scratchInho;
+
+      /*!
 	@brief Storage for electric field. Obtained via superposition
       */
       EBAMRCellData m_electricField;
@@ -1213,6 +1238,12 @@ namespace Physics {
       */
       inline void
       parsePlotVariables() noexcept;
+
+      /*!
+	@brief Solve the Poisson equation
+      */
+      inline void
+      solvePoisson() noexcept;
 
       /*!
 	@brief Calculate the total electric field = inhomogeneous + V * homogeneous
