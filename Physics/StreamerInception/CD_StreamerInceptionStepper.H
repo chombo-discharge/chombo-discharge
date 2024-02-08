@@ -405,10 +405,7 @@ namespace Physics {
 	@brief Get the electric field
       */
       virtual const EBAMRCellData*
-      getElectricField() const noexcept
-      {
-        return &m_electricFieldHomo;
-      }
+      getElectricField() const noexcept;
 
     protected:
       /*!
@@ -454,7 +451,7 @@ namespace Physics {
       /*!
 	@brief Electric potential 
       */
-      MFAMRCellData m_potential;
+      mutable MFAMRCellData m_potential;
 
       /*!
 	@brief Electric potential without charges
@@ -475,11 +472,6 @@ namespace Physics {
 	@brief Scratch storage used during regrids. 
       */
       MFAMRCellData m_scratchInho;
-
-      /*!
-	@brief Storage for electric field. Obtained via superposition
-      */
-      EBAMRCellData m_electricField;
 
       /*!
 	@brief Electric field without space/surface charge and V = 1 on live electrodes
@@ -1242,13 +1234,6 @@ namespace Physics {
                     const EBAMRCellData& a_inhomogeneousField,
                     const EBAMRCellData& a_homogeneousField,
                     const Real           a_voltage) const noexcept;
-
-      /*!
-	@brief Update m_electricField with the input voltage
-	@param[in] a_voltage Electrode voltage
-      */
-      inline void
-      superposition(const Real a_voltage) noexcept;
 
       /*!
 	@brief Update the input field with the scaled voltage

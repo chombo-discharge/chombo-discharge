@@ -38,8 +38,6 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
     pout() << "StreamerInceptionStepper::StreamerInceptionStepper" << endl;
   }
 
-  MayDay::Warning("Add potential/field to ouput");
-
   // Default settings.
   m_verbosity           = -1;
   m_realm               = Realm::Primal;
@@ -180,7 +178,6 @@ StreamerInceptionStepper<P, F, C>::allocate()
   m_amr->allocate(m_potentialHomo, m_realm, 1);
   m_amr->allocate(m_potentialInho, m_realm, 1);
 
-  m_amr->allocate(m_electricField, m_realm, m_phase, SpaceDim);
   m_amr->allocate(m_electricFieldHomo, m_realm, m_phase, SpaceDim);
   m_amr->allocate(m_electricFieldInho, m_realm, m_phase, SpaceDim);
 
@@ -710,6 +707,12 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
 
   switch (m_mode) {
   case Mode::Stationary: {
+    // Electric potential for each voltage
+    ncomp += 2 * m_voltageSweeps.size();
+
+    // Electric field magnitude
+    //    ncomp =+ 2 * m_voltageSweeps.size();
+    
     // K-values
     if (m_plotInceptionIntegral) {
       ncomp += 2 * m_voltageSweeps.size();
@@ -809,15 +812,27 @@ StreamerInceptionStepper<P, F, C>::getPlotVariableNames() const
   Vector<std::string> plotVars;
 
   if (m_plotPoisson) {
-    plotVars.append(m_fieldSolver->getPlotVariableNames());
+    Vector<std::string> poissonVars = m_fieldSolver->getPlotVariableNames();
+    for (int i = 0; i < poissonVars.size(); i++) {
+      poissonVars[i] = "Poisson/" + poissonVars[i];
+    }
+    plotVars.append(poissonVars);
   }
 
   if (m_plotTracer) {
-    plotVars.append(m_tracerParticleSolver->getPlotVariableNames());
+    Vector<std::string> tracerVars = m_tracerParticleSolver->getPlotVariableNames();
+    for (int i = 0; i < tracerVars.size(); i++) {
+      tracerVars[i] = "Tracer/" + tracerVars[i];
+    }    
+    plotVars.append(tracerVars);
   }
 
   if (m_plotNegativeIons) {
-    plotVars.append(m_ionSolver->getPlotVariableNames());
+    Vector<std::string> cdrVars = m_ionSolver->getPlotVariableNames();
+    for (int i = 0; i < cdrVars.size(); i++) {
+      cdrVars[i] = "CDR/" + cdrVars[i];
+    }        
+    plotVars.append(cdrVars);
   }
 
   switch (m_mode) {
@@ -854,6 +869,15 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
 
   const std::string prefix = "StreamerInceptionStepper/";
 
+  // Always plotted.
+  for(const Real& V : m_voltageSweeps) {
+    plotVars.push_back(prefix + "Potential/+/ V = +" + std::to_string(V));
+    plotVars.push_back(prefix + "Potential/-/ V = -" + std::to_string(V));
+
+    // plotVars.push_back(prefix + "E/+/ V = +" + std::to_string(V));
+    // plotVars.push_back(prefix + "E/-/ V = -" + std::to_string(V));        
+  }
+
   if (m_plotInceptionVoltage) {
     plotVars.push_back(prefix + "Minimum inception voltage +");
     plotVars.push_back(prefix + "Minimum inception voltage -");
@@ -867,12 +891,12 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
     std::string varName;
 
     for (const Real& V : m_voltageSweeps) {
-      varName = prefix + "K-value/ V = +" + std::to_string(V);
+      varName = prefix + "K-value/+/ V = +" + std::to_string(V);
       plotVars.push_back(varName);
     }
 
     for (const Real& V : m_voltageSweeps) {
-      varName = prefix + "K-value/ V = -" + std::to_string(V);
+      varName = prefix + "K-value/-/ V = -" + std::to_string(V);
       plotVars.push_back(varName);
     }
   }
@@ -880,13 +904,13 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
   // Secondary emission coefficient for initiatory ions
   if (m_plotTownsend) {
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      const std::string varName = prefix + "T-value/ V = +" + std::to_string(m_voltageSweeps[i]);
+      const std::string varName = prefix + "T-value/+/ V = +" + std::to_string(m_voltageSweeps[i]);
 
       plotVars.push_back(varName);
     }
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      const std::string varName = prefix + "T-value/ V = -" + std::to_string(m_voltageSweeps[i]);
+      const std::string varName = prefix + "T-value/-/ V = -" + std::to_string(m_voltageSweeps[i]);
 
       plotVars.push_back(varName);
     }
@@ -917,12 +941,12 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
     std::string varName;
 
     for (const Real& V : m_voltageSweeps) {
-      varName = prefix + "Field emission rate/ V = +" + std::to_string(V);
+      varName = prefix + "Field emission rate/+/ V = +" + std::to_string(V);
       plotVars.push_back(varName);
     }
 
     for (const Real& V : m_voltageSweeps) {
-      varName = prefix + "Field emission rate/ V = -" + std::to_string(V);
+      varName = prefix + "Field emission rate/-/ V = -" + std::to_string(V);
       plotVars.push_back(varName);
     }
   }
@@ -1068,6 +1092,22 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
   }
 
   const std::string prefix = "StreamerInceptionStepper/";
+
+  for (const auto& V : m_voltageSweeps) {
+    DataOps::setValue(m_potential, 0.0);
+    DataOps::incr(m_potential, m_potentialHomo, Real(V));
+    DataOps::incr(m_potential, m_potentialInho, 1.0);
+    
+    m_fieldSolver
+    ->writeMultifluidData(a_output, a_icomp, m_potential, phase::gas, a_outputRealm, a_level, true);
+    
+    DataOps::setValue(m_potential, 0.0);
+    DataOps::incr(m_potential, m_potentialHomo, -Real(V));
+    DataOps::incr(m_potential, m_potentialInho, 1.0);
+    
+    m_fieldSolver
+    ->writeMultifluidData(a_output, a_icomp, m_potential, phase::gas, a_outputRealm, a_level, true);
+  }   
 
   if (m_plotInceptionVoltage) {
     this->writeData(a_output, a_icomp, m_inceptionVoltagePlus, a_outputRealm, a_level, false, true);
@@ -1722,7 +1762,6 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
   m_amr->reallocate(m_potentialHomo, a_lmin);
   m_amr->reallocate(m_potentialInho, a_lmin);
 
-  m_amr->reallocate(m_electricField, m_phase, a_lmin);
   m_amr->reallocate(m_electricFieldHomo, m_phase, a_lmin);
   m_amr->reallocate(m_electricFieldInho, m_phase, a_lmin);
 
@@ -3377,7 +3416,7 @@ StreamerInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noex
             const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
             const RealVect EE  = RealVect(
               D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-            const Real E = std::abs(a_voltage * EE.vectorLength());
+            const Real E = EE.vectorLength();
 
             const Real alpha = m_alpha(E, pos);
             const Real eta   = m_eta(E, pos);
@@ -3398,7 +3437,7 @@ StreamerInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noex
           if (inceptionIntegral(vof, 0) >= m_inceptionK) {
             const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
             const RealVect EE  = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-            const Real     E   = std::abs(a_voltage * EE.vectorLength());
+            const Real     E   = EE.vectorLength();
 
             const Real kappa    = ebisbox.volFrac(vof);
             const Real areaFrac = ebisbox.bndryArea(vof);
@@ -3713,7 +3752,7 @@ StreamerInceptionStepper<P, F, C>::computeFieldEmission(EBAMRCellData& a_emissio
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
         const RealVect EE  = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-        const Real     E   = std::abs(a_voltage * EE.vectorLength());
+        const Real     E   = EE.vectorLength();
 
         if (EE.dotProduct(ebisbox.normal(vof)) > 0.0) {
           emission(vof, 0) = m_fieldEmission(E, pos);
@@ -3786,7 +3825,7 @@ StreamerInceptionStepper<P, F, C>::evaluateFunction(LevelData<EBCellFAB>& a_data
     auto regularKernel = [&](const IntVect& iv) -> void {
       const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
       const RealVect EE  = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-      const Real     E   = std::abs(a_voltage * EE.vectorLength());
+      const Real     E   = EE.vectorLength();
 
       dataReg(iv, 0) = a_func(E, pos);
     };
@@ -3794,7 +3833,7 @@ StreamerInceptionStepper<P, F, C>::evaluateFunction(LevelData<EBCellFAB>& a_data
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
       const RealVect EE  = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-      const Real     E   = std::abs(a_voltage * EE.vectorLength());
+      const Real     E   = EE.vectorLength();
 
       data(vof, 0) = a_func(E, pos);
     };
@@ -4483,7 +4522,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real& 
           const RealVect x  = probLo + dx * (0.5 * RealVect::Unit + RealVect(iv));
           const RealVect EE = RealVect(
             D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-          const Real E = std::abs(a_voltage * EE.vectorLength());
+          const Real E = EE.vectorLength();
 
           const Real alpha = m_alpha(E, x);
           const Real eta   = m_eta(E, x);
@@ -4498,7 +4537,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real& 
 
           const RealVect x  = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
           const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-          const Real     E  = std::abs(a_voltage * EE.vectorLength());
+          const Real     E  = EE.vectorLength();
 
           const Real alpha = m_alpha(E, x);
           const Real eta   = m_eta(E, x);
@@ -4829,14 +4868,14 @@ StreamerInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) no
         const RealVect EE = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
         const Real     E  = EE.vectorLength();
 
-        dCoReg(iv, 0) = m_ionDiffusion(a_voltage * E);
+        dCoReg(iv, 0) = m_ionDiffusion(E);
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
         const Real     E  = EE.vectorLength();
 
-        dCo(vof, 0) = m_ionDiffusion(a_voltage * E);
+        dCo(vof, 0) = m_ionDiffusion(E);
       };
 
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
@@ -4896,15 +4935,6 @@ StreamerInceptionStepper<P, F, C>::superposition(EBAMRCellData& a_sumField, cons
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::superposition(const Real a_voltage) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::superposition(short)");
-
-  this->superposition(m_electricField, m_electricFieldInho, m_electricFieldHomo, a_voltage);
-}
-
-template <typename P, typename F, typename C>
-void
 StreamerInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
                                              int&                  a_comp,
                                              const EBAMRCellData&  a_data,
@@ -4960,6 +4990,14 @@ StreamerInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
   CH_STOP(t5);
 
   a_comp += numComp;
+}
+
+template <typename P, typename F, typename C>
+const EBAMRCellData*
+StreamerInceptionStepper<P, F, C>::getElectricField() const noexcept {
+  CH_TIMERS("StreamerInceptionStepper::getElectricField");
+
+  return &m_electricField;
 }
 
 #include <CD_NamespaceFooter.H>
