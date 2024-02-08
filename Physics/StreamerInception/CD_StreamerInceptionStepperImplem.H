@@ -40,6 +40,7 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
 
   MayDay::Warning("Field/potential should be optionally plotted");
   MayDay::Warning("Put electric field magnitude in output -- use MFAMRCellData for homogeneous/inhomogeneous parts");
+  MayDay::Warning("m_potential and m_electricField should be update in advance");
 
   // Default settings.
   m_verbosity           = -1;
@@ -181,6 +182,7 @@ StreamerInceptionStepper<P, F, C>::allocate()
   m_amr->allocate(m_potentialHomo, m_realm, 1);
   m_amr->allocate(m_potentialInho, m_realm, 1);
 
+  m_amr->allocate(m_electricField,     m_realm, SpaceDim);  
   m_amr->allocate(m_electricFieldHomo, m_realm, SpaceDim);
   m_amr->allocate(m_electricFieldInho, m_realm, SpaceDim);
 
@@ -721,9 +723,6 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
     if (m_plotField) {
       // Electric potential for each voltage
       ncomp += 2 * m_voltageSweeps.size();
-
-      // Electric field magnitude
-      //    ncomp =+ 2 * m_voltageSweeps.size();
     }
 
     // K-values
@@ -888,9 +887,6 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
     for (const Real& V : m_voltageSweeps) {
       plotVars.push_back(prefix + "Potential/+/ V = +" + std::to_string(V));
       plotVars.push_back(prefix + "Potential/-/ V = -" + std::to_string(V));
-
-      // plotVars.push_back(prefix + "E/+/ V = +" + std::to_string(V));
-      // plotVars.push_back(prefix + "E/-/ V = -" + std::to_string(V));
     }
   }
 
@@ -1262,7 +1258,7 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
   // Add potential and electric field to output. Note that we need to scale appropriately.
   if (m_plotField) {
-    MayDay::Abort("writePlotDataTransient - wrong field");
+    MayDay::Abort("writePlotDataTransient - field and potential is not implemented");
     LevelData<EBCellFAB> aliasData;
     aliasLevelData<EBCellFAB>(aliasData, &a_output, Interval(a_icomp, a_icomp + SpaceDim));
 
@@ -1785,6 +1781,7 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
   m_amr->reallocate(m_potentialHomo, a_lmin);
   m_amr->reallocate(m_potentialInho, a_lmin);
 
+  m_amr->reallocate(m_electricField, a_lmin);  
   m_amr->reallocate(m_electricFieldHomo, a_lmin);
   m_amr->reallocate(m_electricFieldInho, a_lmin);
 

@@ -474,6 +474,11 @@ namespace Physics {
       MFAMRCellData m_scratchInho;
 
       /*!
+	@brief Electric field
+      */
+      mutable MFAMRCellData m_electricField;
+
+      /*!
 	@brief Electric field without space/surface charge and V = 1 on live electrodes
       */
       MFAMRCellData m_electricFieldHomo;
