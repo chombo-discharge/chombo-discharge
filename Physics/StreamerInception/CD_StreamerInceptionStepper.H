@@ -89,8 +89,6 @@ namespace Physics {
     class StreamerInceptionStepper : public TimeStepper
     {
     public:
-      EBAMRCellData m_electricFieldPlus;
-      EBAMRCellData m_electricFieldMinu;
       /*!
 	@brief Default constructor
       */
@@ -1111,19 +1109,6 @@ namespace Physics {
       */
       virtual Real
       computeIonizationVolumeTransient(const Real& a_voltage) const noexcept;
-
-      /*!
-	@brief Compute time to first critical electron.
-      */
-      virtual void
-      computeRdotStationary() noexcept;
-
-      /*!
-	@brief Print data report
-	@note For transient runs
-      */
-      void
-      writeDataReportTransient(const Real& a_voltage) const noexcept;
 
       /*!
 	@brief Print report to the terminal. 
