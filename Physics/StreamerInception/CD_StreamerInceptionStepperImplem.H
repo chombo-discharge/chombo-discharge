@@ -38,6 +38,7 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
     pout() << "StreamerInceptionStepper::StreamerInceptionStepper" << endl;
   }
 
+  MayDay::Warning("Field/potential should be optionally plotted");
   MayDay::Warning("Put electric field magnitude in output -- use MFAMRCellData for homogeneous/inhomogeneous parts");
 
   // Default settings.
