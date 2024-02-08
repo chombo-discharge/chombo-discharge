@@ -181,8 +181,8 @@ StreamerInceptionStepper<P, F, C>::allocate()
   m_amr->allocate(m_potentialHomo, m_realm, 1);
   m_amr->allocate(m_potentialInho, m_realm, 1);
 
-  m_amr->allocate(m_electricFieldHomo, m_realm, m_phase, SpaceDim);
-  m_amr->allocate(m_electricFieldInho, m_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_electricFieldHomo, m_realm, SpaceDim);
+  m_amr->allocate(m_electricFieldInho, m_realm, SpaceDim);
 
   DataOps::setValue(m_potentialHomo, 0.0);
   DataOps::setValue(m_potentialInho, 0.0);
@@ -290,7 +290,7 @@ StreamerInceptionStepper<P, F, C>::solvePoisson() noexcept
   }
 
   DataOps::copy(m_potentialInho, m_fieldSolver->getPotential());
-  DataOps::copy(m_electricFieldInho, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
+  DataOps::copy(m_electricFieldInho, m_fieldSolver->getElectricField());
 
   // Solve for the homogeneous part
   m_fieldSolver->setRho([](const RealVect& a_pos) {
@@ -312,7 +312,10 @@ StreamerInceptionStepper<P, F, C>::solvePoisson() noexcept
   }
 
   DataOps::copy(m_potentialHomo, m_fieldSolver->getPotential());
-  DataOps::copy(m_electricFieldHomo, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
+  DataOps::copy(m_electricFieldHomo, m_fieldSolver->getElectricField());
+
+  // Alias the field to send to the cell tagger
+  m_homogeneousFieldGas = m_amr->alias(phase::gas, m_electricFieldHomo);
 
   if (m_debug) {
 
@@ -603,6 +606,7 @@ StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
     pout() << "StreamerInceptionStepper::parsePlotVariables" << endl;
   }
 
+  m_plotField                = false;
   m_plotPoisson              = false;
   m_plotTracer               = false;
   m_plotNegativeIons         = false;
@@ -624,7 +628,10 @@ StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
     pp.getarr("plt_vars", plotVars, 0, num);
 
     for (int i = 0; i < num; i++) {
-      if (plotVars[i] == "poisson") {
+      if (plotVars[i] == "field") {
+        m_plotField = true;
+      }
+      else if (plotVars[i] == "poisson") {
         m_plotPoisson = true;
       }
       else if (plotVars[i] == "tracer") {
@@ -710,12 +717,15 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
 
   switch (m_mode) {
   case Mode::Stationary: {
-    // Electric potential for each voltage
-    ncomp += 2 * m_voltageSweeps.size();
 
-    // Electric field magnitude
-    //    ncomp =+ 2 * m_voltageSweeps.size();
-    
+    if (m_plotField) {
+      // Electric potential for each voltage
+      ncomp += 2 * m_voltageSweeps.size();
+
+      // Electric field magnitude
+      //    ncomp =+ 2 * m_voltageSweeps.size();
+    }
+
     // K-values
     if (m_plotInceptionIntegral) {
       ncomp += 2 * m_voltageSweeps.size();
@@ -765,8 +775,9 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
   }
   case Mode::Transient: {
 
-    // Always write the electric field and potential.
-    ncomp += SpaceDim + 1;
+    if (m_plotField) {
+      ncomp += SpaceDim + 1;
+    }
 
     if (m_plotInceptionIntegral) {
       ncomp += 1;
@@ -826,7 +837,7 @@ StreamerInceptionStepper<P, F, C>::getPlotVariableNames() const
     Vector<std::string> tracerVars = m_tracerParticleSolver->getPlotVariableNames();
     for (int i = 0; i < tracerVars.size(); i++) {
       tracerVars[i] = "Tracer/" + tracerVars[i];
-    }    
+    }
     plotVars.append(tracerVars);
   }
 
@@ -834,7 +845,7 @@ StreamerInceptionStepper<P, F, C>::getPlotVariableNames() const
     Vector<std::string> cdrVars = m_ionSolver->getPlotVariableNames();
     for (int i = 0; i < cdrVars.size(); i++) {
       cdrVars[i] = "CDR/" + cdrVars[i];
-    }        
+    }
     plotVars.append(cdrVars);
   }
 
@@ -873,12 +884,14 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
   const std::string prefix = "StreamerInceptionStepper/";
 
   // Always plotted.
-  for(const Real& V : m_voltageSweeps) {
-    plotVars.push_back(prefix + "Potential/+/ V = +" + std::to_string(V));
-    plotVars.push_back(prefix + "Potential/-/ V = -" + std::to_string(V));
+  if (m_plotField) {
+    for (const Real& V : m_voltageSweeps) {
+      plotVars.push_back(prefix + "Potential/+/ V = +" + std::to_string(V));
+      plotVars.push_back(prefix + "Potential/-/ V = -" + std::to_string(V));
 
-    // plotVars.push_back(prefix + "E/+/ V = +" + std::to_string(V));
-    // plotVars.push_back(prefix + "E/-/ V = -" + std::to_string(V));        
+      // plotVars.push_back(prefix + "E/+/ V = +" + std::to_string(V));
+      // plotVars.push_back(prefix + "E/-/ V = -" + std::to_string(V));
+    }
   }
 
   if (m_plotInceptionVoltage) {
@@ -997,11 +1010,13 @@ StreamerInceptionStepper<P, F, C>::getTransientPlotVariableNames() const noexcep
   Vector<std::string> plotVars;
 
   // Add potential and electric field to output
-  plotVars.push_back("Electric potential");
-  plotVars.push_back("x-E");
-  plotVars.push_back("y-E");
-  if (SpaceDim == 3) {
-    plotVars.push_back("z-E");
+  if (m_plotField) {
+    plotVars.push_back("Electric potential");
+    plotVars.push_back("x-E");
+    plotVars.push_back("y-E");
+    if (SpaceDim == 3) {
+      plotVars.push_back("z-E");
+    }
   }
 
   if (m_plotInceptionIntegral) {
@@ -1034,6 +1049,10 @@ StreamerInceptionStepper<P, F, C>::getTransientPlotVariableNames() const noexcep
 
   if (m_plotAlpha && m_plotEta) {
     plotVars.push_back("Effective Townsend coefficient");
+  }
+
+  for (int i = 0; i < plotVars.size(); i++) {
+    plotVars[i] = "StreamerInceptionStepper/" + plotVars[i];
   }
 
   return plotVars;
@@ -1096,21 +1115,21 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
 
   const std::string prefix = "StreamerInceptionStepper/";
 
-  for (const auto& V : m_voltageSweeps) {
-    DataOps::setValue(m_potential, 0.0);
-    DataOps::incr(m_potential, m_potentialHomo, Real(V));
-    DataOps::incr(m_potential, m_potentialInho, 1.0);
-    
-    m_fieldSolver
-    ->writeMultifluidData(a_output, a_icomp, m_potential, phase::gas, a_outputRealm, a_level, true);
-    
-    DataOps::setValue(m_potential, 0.0);
-    DataOps::incr(m_potential, m_potentialHomo, -Real(V));
-    DataOps::incr(m_potential, m_potentialInho, 1.0);
-    
-    m_fieldSolver
-    ->writeMultifluidData(a_output, a_icomp, m_potential, phase::gas, a_outputRealm, a_level, true);
-  }   
+  if (m_plotField) {
+    for (const auto& V : m_voltageSweeps) {
+      DataOps::setValue(m_potential, 0.0);
+      DataOps::incr(m_potential, m_potentialHomo, Real(V));
+      DataOps::incr(m_potential, m_potentialInho, 1.0);
+
+      m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_potential, phase::gas, a_outputRealm, a_level, true);
+
+      DataOps::setValue(m_potential, 0.0);
+      DataOps::incr(m_potential, m_potentialHomo, -Real(V));
+      DataOps::incr(m_potential, m_potentialInho, 1.0);
+
+      m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_potential, phase::gas, a_outputRealm, a_level, true);
+    }
+  }
 
   if (m_plotInceptionVoltage) {
     this->writeData(a_output, a_icomp, m_inceptionVoltagePlus, a_outputRealm, a_level, false, true);
@@ -1242,20 +1261,23 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
   CH_assert(a_level <= m_amr->getFinestLevel());
 
   // Add potential and electric field to output. Note that we need to scale appropriately.
-  LevelData<EBCellFAB> aliasData;
-  aliasLevelData<EBCellFAB>(aliasData, &a_output, Interval(a_icomp, a_icomp + SpaceDim));
+  if (m_plotField) {
+    MayDay::Abort("writePlotDataTransient - wrong field");
+    LevelData<EBCellFAB> aliasData;
+    aliasLevelData<EBCellFAB>(aliasData, &a_output, Interval(a_icomp, a_icomp + SpaceDim));
 
-  m_fieldSolver
-    ->writeMultifluidData(a_output, a_icomp, m_fieldSolver->getPotential(), phase::gas, a_outputRealm, a_level, true);
-  m_fieldSolver->writeMultifluidData(a_output,
-                                     a_icomp,
-                                     m_fieldSolver->getElectricField(),
-                                     phase::gas,
-                                     a_outputRealm,
-                                     a_level,
-                                     true);
+    m_fieldSolver
+      ->writeMultifluidData(a_output, a_icomp, m_fieldSolver->getPotential(), phase::gas, a_outputRealm, a_level, true);
+    m_fieldSolver->writeMultifluidData(a_output,
+                                       a_icomp,
+                                       m_fieldSolver->getElectricField(),
+                                       phase::gas,
+                                       a_outputRealm,
+                                       a_level,
+                                       true);
 
-  DataOps::scale(aliasData, m_voltageCurve(m_time));
+    DataOps::scale(aliasData, m_voltageCurve(m_time));
+  }
 
   if (m_plotInceptionIntegral) {
     this->writeData(a_output, a_icomp, m_inceptionIntegral, a_outputRealm, a_level, false, true);
@@ -1763,8 +1785,8 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
   m_amr->reallocate(m_potentialHomo, a_lmin);
   m_amr->reallocate(m_potentialInho, a_lmin);
 
-  m_amr->reallocate(m_electricFieldHomo, m_phase, a_lmin);
-  m_amr->reallocate(m_electricFieldInho, m_phase, a_lmin);
+  m_amr->reallocate(m_electricFieldHomo, a_lmin);
+  m_amr->reallocate(m_electricFieldInho, a_lmin);
 
   const EBCoarseToFineInterp::Type interpType = EBCoarseToFineInterp::ConservativeMinMod;
 
@@ -3057,7 +3079,7 @@ StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noe
   // Allocate something that holds the velocity of the ions
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
-  this->superposition(scratch, m_electricFieldInho, m_electricFieldHomo, a_voltage);
+  this->superposition(scratch, a_voltage);
 
   m_tracerParticleSolver->setVelocity(scratch);
   m_tracerParticleSolver->interpolateVelocities();
@@ -3202,7 +3224,7 @@ StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltag
   // Allocate something that holds the velocity of the ions
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
-  this->superposition(scratch, m_electricFieldInho, m_electricFieldHomo, a_voltage);
+  this->superposition(scratch, a_voltage);
 
   m_tracerParticleSolver->setVelocity(scratch);
   m_tracerParticleSolver->interpolateVelocities();
@@ -3802,7 +3824,7 @@ StreamerInceptionStepper<P, F, C>::evaluateFunction(LevelData<EBCellFAB>& a_data
   // Compute the electric field
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
-  this->superposition(scratch, a_voltage);  
+  this->superposition(scratch, a_voltage);
 
   const RealVect probLo = m_amr->getProbLo();
 
@@ -4498,7 +4520,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real& 
   // Calculate electric field
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
-  this->superposition(scratch, m_electricFieldInho, m_electricFieldHomo, a_voltage);
+  this->superposition(scratch, a_voltage);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
@@ -4910,15 +4932,18 @@ StreamerInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) no
 template <typename P, typename F, typename C>
 void
 StreamerInceptionStepper<P, F, C>::superposition(EBAMRCellData&       a_sumField,
-                                                 const EBAMRCellData& a_inhomogeneousField,
-                                                 const EBAMRCellData& a_homogeneousField,
+                                                 const MFAMRCellData& a_inhomogeneousField,
+                                                 const MFAMRCellData& a_homogeneousField,
                                                  const Real           a_voltage) const noexcept
 {
   CH_TIME("StreamerInceptionStepper::superposition(full)");
 
+  const EBAMRCellData homogeneousField   = m_amr->alias(phase::gas, a_homogeneousField);
+  const EBAMRCellData inhomogeneousField = m_amr->alias(phase::gas, a_inhomogeneousField);
+
   DataOps::setValue(a_sumField, 0.0);
-  DataOps::incr(a_sumField, a_homogeneousField, a_voltage);
-  DataOps::incr(a_sumField, a_inhomogeneousField, 1.0);
+  DataOps::incr(a_sumField, homogeneousField, a_voltage);
+  DataOps::incr(a_sumField, inhomogeneousField, 1.0);
 
   m_amr->arithmeticAverage(a_sumField, m_realm, m_phase);
   m_amr->interpGhostPwl(a_sumField, m_realm, m_phase);
@@ -4995,10 +5020,11 @@ StreamerInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
 
 template <typename P, typename F, typename C>
 const EBAMRCellData*
-StreamerInceptionStepper<P, F, C>::getElectricField() const noexcept {
+StreamerInceptionStepper<P, F, C>::getElectricField() const noexcept
+{
   CH_TIMERS("StreamerInceptionStepper::getElectricField");
 
-  return &m_electricFieldHomo;
+  return &m_homogeneousFieldGas;
 }
 
 #include <CD_NamespaceFooter.H>

@@ -476,12 +476,17 @@ namespace Physics {
       /*!
 	@brief Electric field without space/surface charge and V = 1 on live electrodes
       */
-      EBAMRCellData m_electricFieldHomo;
+      MFAMRCellData m_electricFieldHomo;
 
       /*!
 	@brief Electric field with space/surface charge and V = 0 on all electrodes
       */
-      EBAMRCellData m_electricFieldInho;
+      MFAMRCellData m_electricFieldInho;
+
+      /*!
+	@brief Gas-phase homogeneous field
+      */
+      EBAMRCellData m_homogeneousFieldGas;
 
       /*!
 	@brief Inception integral values. 
@@ -763,6 +768,11 @@ namespace Physics {
 	@brief Ion transport on/off
       */
       bool m_ionTransport;
+
+      /*!
+	@brief Plot field
+      */
+      bool m_plotField;
 
       /*!
 	@brief Plot Poisson solver or not.
@@ -1231,8 +1241,8 @@ namespace Physics {
       */
       inline void
       superposition(EBAMRCellData&       a_sumField,
-                    const EBAMRCellData& a_inhomogeneousField,
-                    const EBAMRCellData& a_homogeneousField,
+                    const MFAMRCellData& a_inhomogeneousField,
+                    const MFAMRCellData& a_homogeneousField,
                     const Real           a_voltage) const noexcept;
 
       /*!
