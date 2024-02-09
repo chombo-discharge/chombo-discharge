@@ -171,7 +171,7 @@ StreamerInceptionStepper.eval_townsend    = false                   ## Evaluate 
 StreamerInceptionStepper.inception_alg    = euler alpha 0.25        ## Integration algorithm for inception integral.
 StreamerInceptionStepper.output_file      = report.txt              ## Output file
 StreamerInceptionStepper.K_inception      = 12                      ## User-specified inception value
-StreamerInceptionStepper.plt_vars         = K Uinc bg_rate emission tracer poisson ## Plot variables
+StreamerInceptionStepper.plt_vars         = K Uinc bg_rate emission field poisson tracer cdr ## Plot variables
 
 # Static mode
 StreamerInceptionStepper.voltage_lo       = 20E3                     # Low voltage multiplier

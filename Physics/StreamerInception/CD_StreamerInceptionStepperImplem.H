@@ -38,8 +38,6 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
     pout() << "StreamerInceptionStepper::StreamerInceptionStepper" << endl;
   }
 
-  MayDay::Warning("Field/potential should be optionally plotted");
-  MayDay::Warning("Put electric field magnitude in output -- use MFAMRCellData for homogeneous/inhomogeneous parts");
   MayDay::Warning("m_potential and m_electricField should be update in advance");
 
   // Default settings.
@@ -182,7 +180,7 @@ StreamerInceptionStepper<P, F, C>::allocate()
   m_amr->allocate(m_potentialHomo, m_realm, 1);
   m_amr->allocate(m_potentialInho, m_realm, 1);
 
-  m_amr->allocate(m_electricField,     m_realm, SpaceDim);  
+  m_amr->allocate(m_electricField, m_realm, SpaceDim);
   m_amr->allocate(m_electricFieldHomo, m_realm, SpaceDim);
   m_amr->allocate(m_electricFieldInho, m_realm, SpaceDim);
 
@@ -723,6 +721,12 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
     if (m_plotField) {
       // Electric potential for each voltage
       ncomp += 2 * m_voltageSweeps.size();
+
+      // Electric field magnitude
+      ncomp += 2 * m_voltageSweeps.size();
+
+      // All the electric field components
+      ncomp += 2 * SpaceDim * m_voltageSweeps.size();
     }
 
     // K-values
@@ -887,6 +891,23 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
     for (const Real& V : m_voltageSweeps) {
       plotVars.push_back(prefix + "Potential/+/ V = +" + std::to_string(V));
       plotVars.push_back(prefix + "Potential/-/ V = -" + std::to_string(V));
+    }
+
+    for (const Real& V : m_voltageSweeps) {
+      plotVars.push_back(prefix + "E/+/ V = +" + std::to_string(V));
+      plotVars.push_back(prefix + "x-E/+/ V= +" + std::to_string(V));
+      plotVars.push_back(prefix + "y-E/+/ V= +" + std::to_string(V));
+      if(SpaceDim == 3) {
+      	plotVars.push_back(prefix + "z-E/+/ V= +" + std::to_string(V));
+      }
+
+      
+      plotVars.push_back(prefix + "E/-/ V = -" + std::to_string(V));
+      plotVars.push_back(prefix + "x-E/-/ V = -" + std::to_string(V));
+      plotVars.push_back(prefix + "y-E/-/ V = -" + std::to_string(V));
+      if(SpaceDim == 3) {
+      	plotVars.push_back(prefix + "z-E/-/ V= -" + std::to_string(V));
+      }      
     }
   }
 
@@ -1112,18 +1133,43 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
   const std::string prefix = "StreamerInceptionStepper/";
 
   if (m_plotField) {
+    MFAMRCellData scratch;
+    m_amr->allocate(scratch, m_realm, 1);
+    
     for (const auto& V : m_voltageSweeps) {
+
+      // Potential for positive applied voltage
       DataOps::setValue(m_potential, 0.0);
       DataOps::incr(m_potential, m_potentialHomo, Real(V));
       DataOps::incr(m_potential, m_potentialInho, 1.0);
-
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_potential, phase::gas, a_outputRealm, a_level, true);
 
+      // Potential for negative applied voltage
       DataOps::setValue(m_potential, 0.0);
       DataOps::incr(m_potential, m_potentialHomo, -Real(V));
       DataOps::incr(m_potential, m_potentialInho, 1.0);
-
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_potential, phase::gas, a_outputRealm, a_level, true);
+
+    }
+
+    for (const auto& V : m_voltageSweeps) {
+      // Field magnitude for positive applied field
+      DataOps::setValue(m_electricField, 0.0);
+      DataOps::incr(m_electricField, m_electricFieldHomo, Real(V));
+      DataOps::incr(m_electricField, m_electricFieldInho, 1.0);
+      DataOps::dotProduct(scratch, m_electricField, m_electricField);
+      DataOps::squareRoot(scratch);
+      m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
+      m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);      
+
+      // Field magnitude for positive applied field
+      DataOps::setValue(m_electricField, 0.0);
+      DataOps::incr(m_electricField, m_electricFieldHomo, -Real(V));
+      DataOps::incr(m_electricField, m_electricFieldInho, 1.0);
+      DataOps::dotProduct(scratch, m_electricField, m_electricField);
+      DataOps::squareRoot(scratch);      
+      m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
+      m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);            
     }
   }
 
@@ -1781,7 +1827,7 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
   m_amr->reallocate(m_potentialHomo, a_lmin);
   m_amr->reallocate(m_potentialInho, a_lmin);
 
-  m_amr->reallocate(m_electricField, a_lmin);  
+  m_amr->reallocate(m_electricField, a_lmin);
   m_amr->reallocate(m_electricFieldHomo, a_lmin);
   m_amr->reallocate(m_electricFieldInho, a_lmin);
 
