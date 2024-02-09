@@ -38,8 +38,6 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
     pout() << "StreamerInceptionStepper::StreamerInceptionStepper" << endl;
   }
 
-  MayDay::Warning("m_potential and m_electricField should be update in advance");
-
   // Default settings.
   m_verbosity           = -1;
   m_realm               = Realm::Primal;
@@ -779,7 +777,15 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
   case Mode::Transient: {
 
     if (m_plotField) {
-      ncomp += SpaceDim + 1;
+
+      // Potential
+      ncomp += 1;
+
+      // Field magnitude
+      ncomp += 1;
+
+      // Field components
+      ncomp += SpaceDim;
     }
 
     if (m_plotInceptionIntegral) {
@@ -897,17 +903,16 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
       plotVars.push_back(prefix + "E/+/ V = +" + std::to_string(V));
       plotVars.push_back(prefix + "x-E/+/ V= +" + std::to_string(V));
       plotVars.push_back(prefix + "y-E/+/ V= +" + std::to_string(V));
-      if(SpaceDim == 3) {
-      	plotVars.push_back(prefix + "z-E/+/ V= +" + std::to_string(V));
+      if (SpaceDim == 3) {
+        plotVars.push_back(prefix + "z-E/+/ V= +" + std::to_string(V));
       }
 
-      
       plotVars.push_back(prefix + "E/-/ V = -" + std::to_string(V));
       plotVars.push_back(prefix + "x-E/-/ V = -" + std::to_string(V));
       plotVars.push_back(prefix + "y-E/-/ V = -" + std::to_string(V));
-      if(SpaceDim == 3) {
-      	plotVars.push_back(prefix + "z-E/-/ V= -" + std::to_string(V));
-      }      
+      if (SpaceDim == 3) {
+        plotVars.push_back(prefix + "z-E/-/ V= -" + std::to_string(V));
+      }
     }
   }
 
@@ -1029,6 +1034,7 @@ StreamerInceptionStepper<P, F, C>::getTransientPlotVariableNames() const noexcep
   // Add potential and electric field to output
   if (m_plotField) {
     plotVars.push_back("Electric potential");
+    plotVars.push_back("E");
     plotVars.push_back("x-E");
     plotVars.push_back("y-E");
     if (SpaceDim == 3) {
@@ -1135,7 +1141,7 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
   if (m_plotField) {
     MFAMRCellData scratch;
     m_amr->allocate(scratch, m_realm, 1);
-    
+
     for (const auto& V : m_voltageSweeps) {
 
       // Potential for positive applied voltage
@@ -1149,7 +1155,6 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
       DataOps::incr(m_potential, m_potentialHomo, -Real(V));
       DataOps::incr(m_potential, m_potentialInho, 1.0);
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_potential, phase::gas, a_outputRealm, a_level, true);
-
     }
 
     for (const auto& V : m_voltageSweeps) {
@@ -1160,16 +1165,16 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
       DataOps::dotProduct(scratch, m_electricField, m_electricField);
       DataOps::squareRoot(scratch);
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
-      m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);      
+      m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
 
       // Field magnitude for positive applied field
       DataOps::setValue(m_electricField, 0.0);
       DataOps::incr(m_electricField, m_electricFieldHomo, -Real(V));
       DataOps::incr(m_electricField, m_electricFieldInho, 1.0);
       DataOps::dotProduct(scratch, m_electricField, m_electricField);
-      DataOps::squareRoot(scratch);      
+      DataOps::squareRoot(scratch);
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
-      m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);            
+      m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
     }
   }
 
@@ -1304,21 +1309,17 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
   // Add potential and electric field to output. Note that we need to scale appropriately.
   if (m_plotField) {
-    MayDay::Abort("writePlotDataTransient - field and potential is not implemented");
-    LevelData<EBCellFAB> aliasData;
-    aliasLevelData<EBCellFAB>(aliasData, &a_output, Interval(a_icomp, a_icomp + SpaceDim));
 
-    m_fieldSolver
-      ->writeMultifluidData(a_output, a_icomp, m_fieldSolver->getPotential(), phase::gas, a_outputRealm, a_level, true);
-    m_fieldSolver->writeMultifluidData(a_output,
-                                       a_icomp,
-                                       m_fieldSolver->getElectricField(),
-                                       phase::gas,
-                                       a_outputRealm,
-                                       a_level,
-                                       true);
+    // Holds the field magnitude
+    MFAMRCellData scratch;
+    m_amr->allocate(scratch, m_realm, 1);
 
-    DataOps::scale(aliasData, m_voltageCurve(m_time));
+    DataOps::dotProduct(scratch, m_electricField, m_electricField);
+    DataOps::squareRoot(scratch);
+
+    m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_potential, phase::gas, a_outputRealm, a_level, true);
+    m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
+    m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
   }
 
   if (m_plotInceptionIntegral) {
@@ -1548,6 +1549,21 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
 
     const Real curTime    = m_time + a_dt;
     const Real curVoltage = m_voltageCurve(curTime);
+
+    // Compute the electric potential and field at the current time step -- these are used in the output routines
+    DataOps::setValue(m_potential, 0.0);
+    DataOps::incr(m_potential, m_potentialHomo, curVoltage);
+    DataOps::incr(m_potential, m_potentialInho, 1.0);
+
+    m_amr->arithmeticAverage(m_potential, m_realm);
+    m_amr->interpGhostPwl(m_potential, m_realm);
+
+    DataOps::setValue(m_electricField, 0.0);
+    DataOps::incr(m_electricField, m_electricFieldHomo, curVoltage);
+    DataOps::incr(m_electricField, m_electricFieldInho, 1.0);
+
+    m_amr->arithmeticAverage(m_electricField, m_realm);
+    m_amr->interpGhostPwl(m_electricField, m_realm);
 
     // Move the negative ions -- still want this for the time step.
     timer.startEvent("Ion advance");
