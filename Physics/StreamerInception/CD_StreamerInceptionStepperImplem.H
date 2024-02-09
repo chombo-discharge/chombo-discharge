@@ -725,6 +725,9 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
 
       // All the electric field components
       ncomp += 2 * SpaceDim * m_voltageSweeps.size();
+
+      // Surface and space charge densities
+      ncomp += 2;
     }
 
     // K-values
@@ -786,6 +789,8 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
 
       // Field components
       ncomp += SpaceDim;
+
+      // Space and surface charge
     }
 
     if (m_plotInceptionIntegral) {
@@ -914,6 +919,10 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
         plotVars.push_back(prefix + "z-E/-/ V= -" + std::to_string(V));
       }
     }
+
+    // Surface charge
+    plotVars.push_back(prefix + "Space charge density");
+    plotVars.push_back(prefix + "Surface charge density");
   }
 
   if (m_plotInceptionVoltage) {
@@ -1031,8 +1040,8 @@ StreamerInceptionStepper<P, F, C>::getTransientPlotVariableNames() const noexcep
 
   Vector<std::string> plotVars;
 
-  // Add potential and electric field to output
   if (m_plotField) {
+    // Add potential and electric field to output
     plotVars.push_back("Electric potential");
     plotVars.push_back("E");
     plotVars.push_back("x-E");
@@ -1040,6 +1049,10 @@ StreamerInceptionStepper<P, F, C>::getTransientPlotVariableNames() const noexcep
     if (SpaceDim == 3) {
       plotVars.push_back("z-E");
     }
+
+    // Space and surface charge
+    plotVars.push_back("Space charge density");
+    plotVars.push_back("Surface charge density");
   }
 
   if (m_plotInceptionIntegral) {
@@ -1140,7 +1153,10 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
 
   if (m_plotField) {
     MFAMRCellData scratch;
+    EBAMRIVData   scratchSurf;
+
     m_amr->allocate(scratch, m_realm, 1);
+    m_amr->allocate(scratchSurf, m_realm, phase::gas, 1);
 
     for (const auto& V : m_voltageSweeps) {
 
@@ -1176,6 +1192,15 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
     }
+
+    // Write the space charge density
+    DataOps::setValue(scratch, m_rho, m_amr->getProbLo(), m_amr->getDx(), 0);
+    m_amr->arithmeticAverage(scratch, m_realm);
+    m_amr->interpGhostPwl(scratch, m_realm);
+    m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
+
+    DataOps::setValue(scratchSurf, m_sigma, m_amr->getProbLo(), m_amr->getDx(), 0);
+    m_fieldSolver->writeSurfaceData(a_output, a_icomp, *scratchSurf[a_level], a_outputRealm, a_level);
   }
 
   if (m_plotInceptionVoltage) {
@@ -1312,14 +1337,28 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 
     // Holds the field magnitude
     MFAMRCellData scratch;
+    EBAMRIVData   scratchSurf;
+
     m_amr->allocate(scratch, m_realm, 1);
+    m_amr->allocate(scratchSurf, m_realm, phase::gas, 1);
 
     DataOps::dotProduct(scratch, m_electricField, m_electricField);
     DataOps::squareRoot(scratch);
+    m_amr->arithmeticAverage(scratch, m_realm);
+    m_amr->interpGhostPwl(scratch, m_realm);
 
     m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_potential, phase::gas, a_outputRealm, a_level, true);
     m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
     m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
+
+    // Write the space charge density
+    DataOps::setValue(scratch, m_rho, m_amr->getProbLo(), m_amr->getDx(), 0);
+    m_amr->arithmeticAverage(scratch, m_realm);
+    m_amr->interpGhostPwl(scratch, m_realm);
+    m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
+
+    DataOps::setValue(scratchSurf, m_sigma, m_amr->getProbLo(), m_amr->getDx(), 0);
+    m_fieldSolver->writeSurfaceData(a_output, a_icomp, *scratchSurf[a_level], a_outputRealm, a_level);
   }
 
   if (m_plotInceptionIntegral) {

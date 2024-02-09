@@ -171,7 +171,7 @@ StreamerInceptionStepper.eval_townsend    = true                    ## Evaluate 
 StreamerInceptionStepper.inception_alg    = trapz alpha 0.5         ## Integration algorithm and step size selection
 StreamerInceptionStepper.output_file      = report.txt              ## Output file
 StreamerInceptionStepper.K_inception      = 15                      ## User-specified inception value
-StreamerInceptionStepper.plt_vars         = poisson K T Uinc bg_rate emission ## Plot variables
+StreamerInceptionStepper.plt_vars         = field K T Uinc bg_rate emission poisson tracer cdr ## Plot variables
 
 # Static mode
 StreamerInceptionStepper.voltage_lo       = 0E3                     ## Low voltage multiplier
