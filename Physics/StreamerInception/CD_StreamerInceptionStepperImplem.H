@@ -791,6 +791,7 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
       ncomp += SpaceDim;
 
       // Space and surface charge
+      ncomp += 2;
     }
 
     if (m_plotInceptionIntegral) {
