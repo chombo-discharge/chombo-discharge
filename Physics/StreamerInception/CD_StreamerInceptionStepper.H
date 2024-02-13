@@ -240,13 +240,6 @@ namespace Physics {
       getTransientPlotVariableNames() const noexcept;
 
       /*!
-	@brief Get the electric field
-	@note Returns the CELL-CENTROID centered electric field. 
-      */
-      virtual const EBAMRCellData* const
-      getElectricField() const noexcept;
-
-      /*!
 	@brief Compute a time step to be used by Driver. 
       */
       virtual Real
@@ -314,9 +307,17 @@ namespace Physics {
 
       /*!
 	@brief Set space charge distribution
+	@param[in] a_rho Space charge distribution
       */
       virtual void
       setRho(const std::function<Real(const RealVect& x)>& a_rho) noexcept;
+
+      /*!
+	@brief Set surface charge distribution
+	@param[in] a_sigma Surface charge distribution
+      */
+      virtual void
+      setSigma(const std::function<Real(const RealVect& x)>& a_sigma) noexcept;
 
       /*!
 	@brief Set the negative ion density
@@ -400,6 +401,12 @@ namespace Physics {
       virtual Mode
       getMode() const noexcept;
 
+      /*!
+	@brief Get the electric field
+      */
+      virtual const EBAMRCellData*
+      getElectricField() const noexcept;
+
     protected:
       /*!
 	@brief Mode
@@ -442,14 +449,49 @@ namespace Physics {
       RefCountedPtr<CdrSolver> m_ionSolver;
 
       /*!
-	@brief Electric field.
+	@brief Electric potential 
       */
-      EBAMRCellData m_electricFieldPlus;
+      mutable MFAMRCellData m_potential;
 
       /*!
-	@brief Negated electric field (= -E)
+	@brief Electric potential without charges
       */
-      EBAMRCellData m_electricFieldMinu;
+      MFAMRCellData m_potentialHomo;
+
+      /*!
+	@brief Electric potential with charges
+      */
+      MFAMRCellData m_potentialInho;
+
+      /*!
+	@brief Scratch storage used during regrids. 
+      */
+      MFAMRCellData m_scratchHomo;
+
+      /*!
+	@brief Scratch storage used during regrids. 
+      */
+      MFAMRCellData m_scratchInho;
+
+      /*!
+	@brief Electric field
+      */
+      mutable MFAMRCellData m_electricField;
+
+      /*!
+	@brief Electric field without space/surface charge and V = 1 on live electrodes
+      */
+      MFAMRCellData m_electricFieldHomo;
+
+      /*!
+	@brief Electric field with space/surface charge and V = 0 on all electrodes
+      */
+      MFAMRCellData m_electricFieldInho;
+
+      /*!
+	@brief Gas-phase homogeneous field
+      */
+      EBAMRCellData m_homogeneousFieldGas;
 
       /*!
 	@brief Inception integral values. 
@@ -733,6 +775,11 @@ namespace Physics {
       bool m_ionTransport;
 
       /*!
+	@brief Plot field
+      */
+      bool m_plotField;
+
+      /*!
 	@brief Plot Poisson solver or not.
       */
       bool m_plotPoisson;
@@ -818,6 +865,11 @@ namespace Physics {
       std::function<Real(const RealVect& x)> m_rho;
 
       /*!
+	@brief Surface charge distribution
+      */
+      std::function<Real(const RealVect& x)> m_sigma;
+
+      /*!
 	@brief Negative ion density
       */
       std::function<Real(const RealVect& x)> m_initialIonDensity;
@@ -870,9 +922,10 @@ namespace Physics {
 
       /*!
 	@brief Add particles to every cell where alpha - eta > 0.0
+	@param[in] a_voltage Input voltage
       */
       virtual void
-      seedIonizationParticles(const Real& a_voltage) noexcept;
+      seedIonizationParticles(const Real a_voltage) noexcept;
 
       /*!
 	@brief Solve streamer inception integral for each particle in each voltage and store K values in m_inceptionIntegral. 
@@ -893,7 +946,6 @@ namespace Physics {
 
       /*!
 	@brief Integrate the inception integral using the Euler rule.
-	@param[in] a_voltage Voltage multiplier. 
       */
       virtual void
       inceptionIntegrateEuler(const Real& a_voltage) noexcept;
@@ -1066,19 +1118,6 @@ namespace Physics {
       computeIonizationVolumeTransient(const Real& a_voltage) const noexcept;
 
       /*!
-	@brief Compute time to first critical electron.
-      */
-      virtual void
-      computeRdotStationary() noexcept;
-
-      /*!
-	@brief Print data report
-	@note For transient runs
-      */
-      void
-      writeDataReportTransient(const Real& a_voltage) const noexcept;
-
-      /*!
 	@brief Print report to the terminal. 
 	@note For stationary runs
       */
@@ -1137,7 +1176,7 @@ namespace Physics {
       particleInsideEB(const RealVect a_pos) const noexcept;
 
       /*!
-	@brief Set the negative ion velocity
+	@brief Set the negative ion velocity. Note
 	@param[in] a_voltage Current voltage
       */
       inline void
@@ -1191,6 +1230,33 @@ namespace Physics {
       */
       inline void
       parsePlotVariables() noexcept;
+
+      /*!
+	@brief Solve the Poisson equation
+      */
+      inline void
+      solvePoisson() noexcept;
+
+      /*!
+	@brief Calculate the total electric field = inhomogeneous + V * homogeneous
+	@param[in] a_sumField Sum of contributions
+	@param[in] a_inhomogeneousField Inhomogeneous field contribution
+	@param[in] a_homogeneous Homogeneous field contribution
+	@param[in] a_voltage Electrode voltage
+      */
+      inline void
+      superposition(EBAMRCellData&       a_sumField,
+                    const MFAMRCellData& a_inhomogeneousField,
+                    const MFAMRCellData& a_homogeneousField,
+                    const Real           a_voltage) const noexcept;
+
+      /*!
+	@brief Update the input field with the scaled voltage
+	@param[out] a_sumField Sum of fields
+	@param[in] a_voltage Electrode voltage
+      */
+      inline void
+      superposition(EBAMRCellData& a_sumField, const Real a_voltage) const noexcept;
 
       /*!
 	@brief Write data to output. Convenience function used for IO.

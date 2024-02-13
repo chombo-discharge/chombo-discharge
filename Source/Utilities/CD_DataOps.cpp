@@ -2843,6 +2843,57 @@ DataOps::squareRoot(LevelData<EBFluxFAB>& a_lhs)
 }
 
 void
+DataOps::squareRoot(MFAMRCellData& a_lhs)
+{
+  CH_TIME("DataOps::squareRoot(MFAMRCellData)");
+
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
+    DataOps::squareRoot(*a_lhs[lvl]);
+  }
+}
+
+void
+DataOps::squareRoot(LevelData<MFCellFAB>& a_lhs)
+{
+  CH_TIME("DataOps::squareRoot(LD<MFCellFAB>)");
+
+  const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+
+    MFCellFAB& lhs = a_lhs[dit()];
+
+    for (int i = 0; i < lhs.numPhases(); i++) {
+      EBCellFAB& phaseData    = lhs.getPhase(i);
+      FArrayBox& phaseDataReg = phaseData.getFArrayBox();
+
+      // Kernel regions
+      const Box         box     = phaseData.box();
+      const EBISBox&    ebisbox = phaseData.getEBISBox();
+      const EBGraph&    ebgraph = ebisbox.getEBGraph();
+      const IntVectSet& irreg   = ebisbox.getMultiCells(box);
+      VoFIterator       vofit(irreg, ebgraph);
+
+      // Regular cells
+      for (int comp = 0; comp < phaseData.nComp(); comp++) {
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          phaseDataReg(iv, comp) = sqrt(phaseDataReg(iv, comp));
+        };
+
+        // Cut-cells.
+        auto irregularKernel = [&](const VolIndex& vof) -> void {
+          phaseData(vof, comp) = sqrt(phaseData(vof, comp));
+        };
+
+        // Run kernels.
+        BoxLoops::loop(box, regularKernel);
+        BoxLoops::loop(vofit, irregularKernel);
+      }
+    }
+  }
+}
+
+void
 DataOps::vectorLength(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs)
 {
   CH_TIME("DataOps::vectorLength(EBAMRCellData)");

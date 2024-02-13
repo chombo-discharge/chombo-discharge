@@ -56,6 +56,10 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
     return 0.0;
   };
 
+  m_sigma = [](const RealVect x) -> Real {
+    return 0.0;
+  };
+
   m_alpha = [](const Real E, const RealVect x) -> Real {
     return 0.0;
   };
@@ -170,8 +174,16 @@ StreamerInceptionStepper<P, F, C>::allocate()
   m_ionSolver->allocate();
 
   // Needed for all modes.
-  m_amr->allocate(m_electricFieldPlus, m_realm, m_phase, SpaceDim);
-  m_amr->allocate(m_electricFieldMinu, m_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_potential, m_realm, 1);
+  m_amr->allocate(m_potentialHomo, m_realm, 1);
+  m_amr->allocate(m_potentialInho, m_realm, 1);
+
+  m_amr->allocate(m_electricField, m_realm, SpaceDim);
+  m_amr->allocate(m_electricFieldHomo, m_realm, SpaceDim);
+  m_amr->allocate(m_electricFieldInho, m_realm, SpaceDim);
+
+  DataOps::setValue(m_potentialHomo, 0.0);
+  DataOps::setValue(m_potentialInho, 0.0);
 
   switch (m_mode) {
   case Mode::Stationary: {
@@ -247,28 +259,100 @@ StreamerInceptionStepper<P, F, C>::initialData()
     pout() << "StreamerInceptionStepper::initialData" << endl;
   }
 
-  // Set rho = sigma = 0 for field solver and then solve the Poisson equation.
-  m_fieldSolver->setRho(m_rho);
-  m_fieldSolver->setSigma(0.0);
+  this->solvePoisson();
+}
 
-  const bool converged =
-    m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma(), false);
-
-  if (!converged) {
-    MayDay::Warning("StreamerInceptionStepper::initialData -- could not solve Poisson equation. ");
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::solvePoisson() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::solvePoisson");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::solvePoisson" << endl;
   }
 
-  // Get the gas-side electric field and give it to the particle solvers.
-  DataOps::copy(m_electricFieldPlus, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
+  // Solve for the inhomogeneous part
+  m_fieldSolver->setRho(m_rho);
+  m_fieldSolver->setSigma(m_sigma);
+  m_fieldSolver->setVoltage([](const Real& a_time) {
+    return 0.0;
+  });
 
-  m_amr->conservativeAverage(m_electricFieldPlus, m_realm, m_phase);
-  m_amr->interpGhostMG(m_electricFieldPlus, m_realm, m_phase);
+  // Solve using our m_potentialInho as an initial guess.
+  DataOps::copy(m_fieldSolver->getPotential(), m_potentialInho);
+  const bool convergedInho =
+    m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma(), false);
 
-  m_amr->interpToCentroids(m_electricFieldPlus, m_realm, m_phase);
+  if (!convergedInho) {
+    MayDay::Warning("StreamerInceptionStepper::solvePoisson -- could not solve the inhomogeneous Poisson equation. ");
+  }
 
-  // Also store -E
-  DataOps::copy(m_electricFieldMinu, m_electricFieldPlus);
-  DataOps::scale(m_electricFieldMinu, -1.0);
+  DataOps::copy(m_potentialInho, m_fieldSolver->getPotential());
+  DataOps::copy(m_electricFieldInho, m_fieldSolver->getElectricField());
+
+  // Solve for the homogeneous part
+  m_fieldSolver->setRho([](const RealVect& a_pos) {
+    return 0.0;
+  });
+  m_fieldSolver->setSigma([](const RealVect& a_pos) {
+    return 0.0;
+  });
+  m_fieldSolver->setVoltage([](const Real& a_time) {
+    return 1.0;
+  });
+
+  DataOps::copy(m_fieldSolver->getPotential(), m_potentialHomo);
+  const bool convergedHomo =
+    m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma(), false);
+
+  if (!convergedHomo) {
+    MayDay::Warning("StreamerInceptionStepper::solvePoisson -- could not solve the homogeneous Poisson equation. ");
+  }
+
+  DataOps::copy(m_potentialHomo, m_fieldSolver->getPotential());
+  DataOps::copy(m_electricFieldHomo, m_fieldSolver->getElectricField());
+
+  // Alias the field to send to the cell tagger
+  m_homogeneousFieldGas = m_amr->alias(phase::gas, m_electricFieldHomo);
+
+  if (m_debug) {
+
+    // Do a dummy check if the homogeneous and inhomogeneous solutions with a potential of one, and check that the
+    // difference is "sufficiently small"
+    const Real testVoltage = 1.0;
+    const Real errorThresh = 1.E-6;
+
+    // This is the sum of the two potentials
+    DataOps::setValue(m_potential, 0.0);
+    DataOps::incr(m_potential, m_potentialHomo, testVoltage);
+    DataOps::incr(m_potential, m_potentialInho, 1.0);
+
+    // Do a true solution with a test voltage and space/surface charge.
+    auto voltage = [V = testVoltage](const Real& a_time) {
+      return V;
+    };
+
+    DataOps::copy(m_fieldSolver->getPotential(), m_potential);
+
+    m_fieldSolver->setRho(m_rho);
+    m_fieldSolver->setSigma(m_sigma);
+    m_fieldSolver->setVoltage(voltage);
+    m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma(), false);
+
+    // Do the difference between the two potentials and figure out the max error. It should be < 1.E-6 * testVoltage
+    DataOps::incr(m_potential, m_fieldSolver->getPotential(), -1.0);
+
+    EBAMRCellData phiGas = m_amr->alias(phase::gas, m_potential);
+
+    Real max;
+    Real min;
+
+    DataOps::getMaxMin(max, min, phiGas, 0);
+
+    if (std::max(std::abs(max), std::abs(min)) > errorThresh * testVoltage) {
+      MayDay::Error("StreamerInceptionStepper::solvePoisson - debug test failed. Check your BCs!");
+    }
+  }
 }
 
 template <typename P, typename F, typename C>
@@ -339,6 +423,7 @@ StreamerInceptionStepper<P, F, C>::parseVerbosity() noexcept
   ParmParse pp("StreamerInceptionStepper");
   pp.get("verbosity", m_verbosity);
   pp.get("profile", m_profile);
+  pp.query("debug", m_debug);
 }
 
 template <typename P, typename F, typename C>
@@ -519,6 +604,7 @@ StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
     pout() << "StreamerInceptionStepper::parsePlotVariables" << endl;
   }
 
+  m_plotField                = false;
   m_plotPoisson              = false;
   m_plotTracer               = false;
   m_plotNegativeIons         = false;
@@ -540,7 +626,10 @@ StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
     pp.getarr("plt_vars", plotVars, 0, num);
 
     for (int i = 0; i < num; i++) {
-      if (plotVars[i] == "poisson") {
+      if (plotVars[i] == "field") {
+        m_plotField = true;
+      }
+      else if (plotVars[i] == "poisson") {
         m_plotPoisson = true;
       }
       else if (plotVars[i] == "tracer") {
@@ -626,6 +715,21 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
 
   switch (m_mode) {
   case Mode::Stationary: {
+
+    if (m_plotField) {
+      // Electric potential for each voltage
+      ncomp += 2 * m_voltageSweeps.size();
+
+      // Electric field magnitude
+      ncomp += 2 * m_voltageSweeps.size();
+
+      // All the electric field components
+      ncomp += 2 * SpaceDim * m_voltageSweeps.size();
+
+      // Surface and space charge densities
+      ncomp += 2;
+    }
+
     // K-values
     if (m_plotInceptionIntegral) {
       ncomp += 2 * m_voltageSweeps.size();
@@ -675,8 +779,20 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
   }
   case Mode::Transient: {
 
-    // Always write the electric field and potential.
-    ncomp += SpaceDim + 1;
+    if (m_plotField) {
+
+      // Potential
+      ncomp += 1;
+
+      // Field magnitude
+      ncomp += 1;
+
+      // Field components
+      ncomp += SpaceDim;
+
+      // Space and surface charge
+      ncomp += 2;
+    }
 
     if (m_plotInceptionIntegral) {
       ncomp += 1;
@@ -725,15 +841,27 @@ StreamerInceptionStepper<P, F, C>::getPlotVariableNames() const
   Vector<std::string> plotVars;
 
   if (m_plotPoisson) {
-    plotVars.append(m_fieldSolver->getPlotVariableNames());
+    Vector<std::string> poissonVars = m_fieldSolver->getPlotVariableNames();
+    for (int i = 0; i < poissonVars.size(); i++) {
+      poissonVars[i] = "Poisson/" + poissonVars[i];
+    }
+    plotVars.append(poissonVars);
   }
 
   if (m_plotTracer) {
-    plotVars.append(m_tracerParticleSolver->getPlotVariableNames());
+    Vector<std::string> tracerVars = m_tracerParticleSolver->getPlotVariableNames();
+    for (int i = 0; i < tracerVars.size(); i++) {
+      tracerVars[i] = "Tracer/" + tracerVars[i];
+    }
+    plotVars.append(tracerVars);
   }
 
   if (m_plotNegativeIons) {
-    plotVars.append(m_ionSolver->getPlotVariableNames());
+    Vector<std::string> cdrVars = m_ionSolver->getPlotVariableNames();
+    for (int i = 0; i < cdrVars.size(); i++) {
+      cdrVars[i] = "CDR/" + cdrVars[i];
+    }
+    plotVars.append(cdrVars);
   }
 
   switch (m_mode) {
@@ -770,6 +898,34 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
 
   const std::string prefix = "StreamerInceptionStepper/";
 
+  // Always plotted.
+  if (m_plotField) {
+    for (const Real& V : m_voltageSweeps) {
+      plotVars.push_back(prefix + "Potential/+/ V = +" + std::to_string(V));
+      plotVars.push_back(prefix + "Potential/-/ V = -" + std::to_string(V));
+    }
+
+    for (const Real& V : m_voltageSweeps) {
+      plotVars.push_back(prefix + "E/+/ V = +" + std::to_string(V));
+      plotVars.push_back(prefix + "x-E/+/ V= +" + std::to_string(V));
+      plotVars.push_back(prefix + "y-E/+/ V= +" + std::to_string(V));
+      if (SpaceDim == 3) {
+        plotVars.push_back(prefix + "z-E/+/ V= +" + std::to_string(V));
+      }
+
+      plotVars.push_back(prefix + "E/-/ V = -" + std::to_string(V));
+      plotVars.push_back(prefix + "x-E/-/ V = -" + std::to_string(V));
+      plotVars.push_back(prefix + "y-E/-/ V = -" + std::to_string(V));
+      if (SpaceDim == 3) {
+        plotVars.push_back(prefix + "z-E/-/ V= -" + std::to_string(V));
+      }
+    }
+
+    // Surface charge
+    plotVars.push_back(prefix + "Space charge density");
+    plotVars.push_back(prefix + "Surface charge density");
+  }
+
   if (m_plotInceptionVoltage) {
     plotVars.push_back(prefix + "Minimum inception voltage +");
     plotVars.push_back(prefix + "Minimum inception voltage -");
@@ -783,12 +939,12 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
     std::string varName;
 
     for (const Real& V : m_voltageSweeps) {
-      varName = prefix + "K-value/ V = +" + std::to_string(V);
+      varName = prefix + "K-value/+/ V = +" + std::to_string(V);
       plotVars.push_back(varName);
     }
 
     for (const Real& V : m_voltageSweeps) {
-      varName = prefix + "K-value/ V = -" + std::to_string(V);
+      varName = prefix + "K-value/-/ V = -" + std::to_string(V);
       plotVars.push_back(varName);
     }
   }
@@ -796,13 +952,13 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
   // Secondary emission coefficient for initiatory ions
   if (m_plotTownsend) {
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      const std::string varName = prefix + "T-value/ V = +" + std::to_string(m_voltageSweeps[i]);
+      const std::string varName = prefix + "T-value/+/ V = +" + std::to_string(m_voltageSweeps[i]);
 
       plotVars.push_back(varName);
     }
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      const std::string varName = prefix + "T-value/ V = -" + std::to_string(m_voltageSweeps[i]);
+      const std::string varName = prefix + "T-value/-/ V = -" + std::to_string(m_voltageSweeps[i]);
 
       plotVars.push_back(varName);
     }
@@ -833,12 +989,12 @@ StreamerInceptionStepper<P, F, C>::getStationaryPlotVariableNames() const noexce
     std::string varName;
 
     for (const Real& V : m_voltageSweeps) {
-      varName = prefix + "Field emission rate/ V = +" + std::to_string(V);
+      varName = prefix + "Field emission rate/+/ V = +" + std::to_string(V);
       plotVars.push_back(varName);
     }
 
     for (const Real& V : m_voltageSweeps) {
-      varName = prefix + "Field emission rate/ V = -" + std::to_string(V);
+      varName = prefix + "Field emission rate/-/ V = -" + std::to_string(V);
       plotVars.push_back(varName);
     }
   }
@@ -885,12 +1041,19 @@ StreamerInceptionStepper<P, F, C>::getTransientPlotVariableNames() const noexcep
 
   Vector<std::string> plotVars;
 
-  // Add potential and electric field to output
-  plotVars.push_back("Electric potential");
-  plotVars.push_back("x-E");
-  plotVars.push_back("y-E");
-  if (SpaceDim == 3) {
-    plotVars.push_back("z-E");
+  if (m_plotField) {
+    // Add potential and electric field to output
+    plotVars.push_back("Electric potential");
+    plotVars.push_back("E");
+    plotVars.push_back("x-E");
+    plotVars.push_back("y-E");
+    if (SpaceDim == 3) {
+      plotVars.push_back("z-E");
+    }
+
+    // Space and surface charge
+    plotVars.push_back("Space charge density");
+    plotVars.push_back("Surface charge density");
   }
 
   if (m_plotInceptionIntegral) {
@@ -923,6 +1086,10 @@ StreamerInceptionStepper<P, F, C>::getTransientPlotVariableNames() const noexcep
 
   if (m_plotAlpha && m_plotEta) {
     plotVars.push_back("Effective Townsend coefficient");
+  }
+
+  for (int i = 0; i < plotVars.size(); i++) {
+    plotVars[i] = "StreamerInceptionStepper/" + plotVars[i];
   }
 
   return plotVars;
@@ -984,6 +1151,58 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>&
   }
 
   const std::string prefix = "StreamerInceptionStepper/";
+
+  if (m_plotField) {
+    MFAMRCellData scratch;
+    EBAMRIVData   scratchSurf;
+
+    m_amr->allocate(scratch, m_realm, 1);
+    m_amr->allocate(scratchSurf, m_realm, phase::gas, 1);
+
+    for (const auto& V : m_voltageSweeps) {
+
+      // Potential for positive applied voltage
+      DataOps::setValue(m_potential, 0.0);
+      DataOps::incr(m_potential, m_potentialHomo, Real(V));
+      DataOps::incr(m_potential, m_potentialInho, 1.0);
+      m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_potential, phase::gas, a_outputRealm, a_level, true);
+
+      // Potential for negative applied voltage
+      DataOps::setValue(m_potential, 0.0);
+      DataOps::incr(m_potential, m_potentialHomo, -Real(V));
+      DataOps::incr(m_potential, m_potentialInho, 1.0);
+      m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_potential, phase::gas, a_outputRealm, a_level, true);
+    }
+
+    for (const auto& V : m_voltageSweeps) {
+      // Field magnitude for positive applied field
+      DataOps::setValue(m_electricField, 0.0);
+      DataOps::incr(m_electricField, m_electricFieldHomo, Real(V));
+      DataOps::incr(m_electricField, m_electricFieldInho, 1.0);
+      DataOps::dotProduct(scratch, m_electricField, m_electricField);
+      DataOps::squareRoot(scratch);
+      m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
+      m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
+
+      // Field magnitude for positive applied field
+      DataOps::setValue(m_electricField, 0.0);
+      DataOps::incr(m_electricField, m_electricFieldHomo, -Real(V));
+      DataOps::incr(m_electricField, m_electricFieldInho, 1.0);
+      DataOps::dotProduct(scratch, m_electricField, m_electricField);
+      DataOps::squareRoot(scratch);
+      m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
+      m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
+    }
+
+    // Write the space charge density
+    DataOps::setValue(scratch, m_rho, m_amr->getProbLo(), m_amr->getDx(), 0);
+    m_amr->arithmeticAverage(scratch, m_realm);
+    m_amr->interpGhostPwl(scratch, m_realm);
+    m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
+
+    DataOps::setValue(scratchSurf, m_sigma, m_amr->getProbLo(), m_amr->getDx(), 0);
+    m_fieldSolver->writeSurfaceData(a_output, a_icomp, *scratchSurf[a_level], a_outputRealm, a_level);
+  }
 
   if (m_plotInceptionVoltage) {
     this->writeData(a_output, a_icomp, m_inceptionVoltagePlus, a_outputRealm, a_level, false, true);
@@ -1115,20 +1334,33 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
   CH_assert(a_level <= m_amr->getFinestLevel());
 
   // Add potential and electric field to output. Note that we need to scale appropriately.
-  LevelData<EBCellFAB> aliasData;
-  aliasLevelData<EBCellFAB>(aliasData, &a_output, Interval(a_icomp, a_icomp + SpaceDim));
+  if (m_plotField) {
 
-  m_fieldSolver
-    ->writeMultifluidData(a_output, a_icomp, m_fieldSolver->getPotential(), phase::gas, a_outputRealm, a_level, true);
-  m_fieldSolver->writeMultifluidData(a_output,
-                                     a_icomp,
-                                     m_fieldSolver->getElectricField(),
-                                     phase::gas,
-                                     a_outputRealm,
-                                     a_level,
-                                     true);
+    // Holds the field magnitude
+    MFAMRCellData scratch;
+    EBAMRIVData   scratchSurf;
 
-  DataOps::scale(aliasData, m_voltageCurve(m_time));
+    m_amr->allocate(scratch, m_realm, 1);
+    m_amr->allocate(scratchSurf, m_realm, phase::gas, 1);
+
+    DataOps::dotProduct(scratch, m_electricField, m_electricField);
+    DataOps::squareRoot(scratch);
+    m_amr->arithmeticAverage(scratch, m_realm);
+    m_amr->interpGhostPwl(scratch, m_realm);
+
+    m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_potential, phase::gas, a_outputRealm, a_level, true);
+    m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
+    m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
+
+    // Write the space charge density
+    DataOps::setValue(scratch, m_rho, m_amr->getProbLo(), m_amr->getDx(), 0);
+    m_amr->arithmeticAverage(scratch, m_realm);
+    m_amr->interpGhostPwl(scratch, m_realm);
+    m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
+
+    DataOps::setValue(scratchSurf, m_sigma, m_amr->getProbLo(), m_amr->getDx(), 0);
+    m_fieldSolver->writeSurfaceData(a_output, a_icomp, *scratchSurf[a_level], a_outputRealm, a_level);
+  }
 
   if (m_plotInceptionIntegral) {
     this->writeData(a_output, a_icomp, m_inceptionIntegral, a_outputRealm, a_level, false, true);
@@ -1257,18 +1489,6 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& 
 }
 
 template <typename P, typename F, typename C>
-const EBAMRCellData* const
-StreamerInceptionStepper<P, F, C>::getElectricField() const noexcept
-{
-  CH_TIME("StreamerInceptionStepper::getElectricField");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::getElectricField" << endl;
-  }
-
-  return &m_electricFieldPlus;
-}
-
-template <typename P, typename F, typename C>
 Real
 StreamerInceptionStepper<P, F, C>::computeDt()
 {
@@ -1370,6 +1590,21 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
     const Real curTime    = m_time + a_dt;
     const Real curVoltage = m_voltageCurve(curTime);
 
+    // Compute the electric potential and field at the current time step -- these are used in the output routines
+    DataOps::setValue(m_potential, 0.0);
+    DataOps::incr(m_potential, m_potentialHomo, curVoltage);
+    DataOps::incr(m_potential, m_potentialInho, 1.0);
+
+    m_amr->arithmeticAverage(m_potential, m_realm);
+    m_amr->interpGhostPwl(m_potential, m_realm);
+
+    DataOps::setValue(m_electricField, 0.0);
+    DataOps::incr(m_electricField, m_electricFieldHomo, curVoltage);
+    DataOps::incr(m_electricField, m_electricFieldInho, 1.0);
+
+    m_amr->arithmeticAverage(m_electricField, m_realm);
+    m_amr->interpGhostPwl(m_electricField, m_realm);
+
     // Move the negative ions -- still want this for the time step.
     timer.startEvent("Ion advance");
     if (m_ionTransport) {
@@ -1381,14 +1616,12 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
 
     // Seed new particles and compute the inception integral.
     timer.startEvent("Inception integral");
-    m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
     this->seedIonizationParticles(curVoltage);
     this->computeInceptionIntegralTransient(curVoltage);
     timer.stopEvent("Inception integral");
 
     if (m_evaluateTownsend) {
       timer.startEvent("Townsend criterion");
-      m_tracerParticleSolver->setVelocity(m_electricFieldPlus);
       this->seedIonizationParticles(curVoltage);
       this->computeTownsendCriterionTransient(curVoltage);
       timer.stopEvent("Townsend criterion");
@@ -1623,6 +1856,12 @@ StreamerInceptionStepper<P, F, C>::preRegrid(const int a_lmin, const int a_oldFi
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_tracerParticleSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_ionSolver->preRegrid(a_lmin, a_oldFinestLevel);
+
+  m_amr->allocate(m_scratchHomo, m_realm, 1);
+  m_amr->allocate(m_scratchInho, m_realm, 1);
+
+  m_amr->copyData(m_scratchHomo, m_potentialHomo);
+  m_amr->copyData(m_scratchInho, m_potentialInho);
 }
 
 template <typename P, typename F, typename C>
@@ -1639,9 +1878,19 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
   m_tracerParticleSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_ionSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
-  // Regrid velocity field
-  m_amr->reallocate(m_electricFieldPlus, m_phase, a_lmin);
-  m_amr->reallocate(m_electricFieldMinu, m_phase, a_lmin);
+  // Regrid electric field and potentials
+  m_amr->reallocate(m_potential, a_lmin);
+  m_amr->reallocate(m_potentialHomo, a_lmin);
+  m_amr->reallocate(m_potentialInho, a_lmin);
+
+  m_amr->reallocate(m_electricField, a_lmin);
+  m_amr->reallocate(m_electricFieldHomo, a_lmin);
+  m_amr->reallocate(m_electricFieldInho, a_lmin);
+
+  const EBCoarseToFineInterp::Type interpType = EBCoarseToFineInterp::ConservativeMinMod;
+
+  m_amr->interpToNewGrids(m_potentialHomo, m_scratchHomo, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);
+  m_amr->interpToNewGrids(m_potentialInho, m_scratchInho, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);
 
   switch (m_mode) {
   case Mode::Stationary: {
@@ -1686,29 +1935,8 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
   }
   }
 
-  // Solve Poisson equation again.
-  m_fieldSolver->setRho(m_rho);
-  m_fieldSolver->setSigma(0.0);
-
-  const bool converged = m_fieldSolver->solve(m_fieldSolver->getPotential(),
-                                              m_fieldSolver->getRho(),
-                                              m_fieldSolver->getSigma());
-
-  if (!converged) {
-    MayDay::Error("StreamerInceptionStepper::initialData -- could not solve Poisson equation. Aborting application.");
-  }
-
-  // Get the gas-side electric field
-  DataOps::copy(m_electricFieldPlus, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
-
-  m_amr->average(m_electricFieldPlus, m_realm, m_phase, Average::Conservative);
-  m_amr->interpGhostMG(m_electricFieldPlus, m_realm, m_phase);
-
-  m_amr->interpToCentroids(m_electricFieldPlus, m_realm, m_phase);
-
-  // Also store -E
-  DataOps::copy(m_electricFieldMinu, m_electricFieldPlus);
-  DataOps::scale(m_electricFieldMinu, -1.0);
+  // Solve for the inhomogeneous and homogeneous Poisson fields again
+  this->solvePoisson();
 
   // Re-compute the ion velocity and diffusion coefficients
   this->computeIonVelocity(m_voltageCurve(m_time));
@@ -1723,6 +1951,9 @@ StreamerInceptionStepper<P, F, C>::postRegrid()
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::postRegrid" << endl;
   }
+
+  m_scratchHomo.clear();
+  m_scratchInho.clear();
 }
 
 template <typename P, typename F, typename C>
@@ -1747,6 +1978,18 @@ StreamerInceptionStepper<P, F, C>::setRho(const std::function<Real(const RealVec
   }
 
   m_rho = a_rho;
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::setSigma(const std::function<Real(const RealVect& x)>& a_sigma) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setSigma");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setSigma" << endl;
+  }
+
+  m_sigma = a_sigma;
 }
 
 template <typename P, typename F, typename C>
@@ -1956,7 +2199,7 @@ StreamerInceptionStepper<P, F, C>::seedUniformParticles() noexcept
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::seedIonizationParticles(const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage) noexcept
 {
   CH_TIME("StreamerInceptionStepper::seedIonizationParticles");
   if (m_verbosity > 5) {
@@ -1965,6 +2208,11 @@ StreamerInceptionStepper<P, F, C>::seedIonizationParticles(const Real& a_voltage
 
   ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
   amrParticles.clearParticles();
+
+  // Compute the electric field at the input voltage
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  this->superposition(scratch, a_voltage);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
@@ -1983,7 +2231,7 @@ StreamerInceptionStepper<P, F, C>::seedIonizationParticles(const Real& a_voltage
 
       List<P>& particles = levelParticles[dit()].listItems();
 
-      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
+      const EBCellFAB& electricField    = (*scratch[lvl])[dit()];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       if (!ebisbox.isAllCovered()) {
@@ -1995,7 +2243,7 @@ StreamerInceptionStepper<P, F, C>::seedIonizationParticles(const Real& a_voltage
             const RealVect EE = RealVect(
               D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
 
-            const Real E     = std::abs(a_voltage * EE.vectorLength());
+            const Real E     = EE.vectorLength();
             const Real alpha = m_alpha(E, x);
             const Real eta   = m_eta(E, x);
 
@@ -2016,7 +2264,7 @@ StreamerInceptionStepper<P, F, C>::seedIonizationParticles(const Real& a_voltage
 
             const RealVect x  = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
             const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-            const Real     E  = std::abs(a_voltage * EE.vectorLength());
+            const Real     E  = EE.vectorLength();
 
             const Real alpha = m_alpha(E, x);
             const Real eta   = m_eta(E, x);
@@ -2072,7 +2320,6 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
     this->computeCriticalVolumeStationary();
     this->computeCriticalAreaStationary();
     this->computeIonizationVolumeStationary();
-    this->computeRdotStationary();
     this->computeInceptionVoltageVolume();
 
     // Compute background ionization and field emission on the mesh. Mostly for plotting.
@@ -2096,16 +2343,11 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
 
     // Seed tracer particles and set velocity
     this->seedIonizationParticles(m_voltageCurve(m_time));
-    m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
-
-    // Compute the 'Rdot' value at current time (which is probably t = 0).
     this->computeInceptionIntegralTransient(m_voltageCurve(m_time));
 
     // Evaluate the Townsend criterion if the user asks for it.
     if (m_evaluateTownsend) {
       this->seedIonizationParticles(m_voltageCurve(m_time));
-      m_tracerParticleSolver->setVelocity(m_electricFieldPlus);
-
       this->computeTownsendCriterionTransient(m_voltageCurve(m_time));
     }
 
@@ -2184,13 +2426,6 @@ StreamerInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcept
 
     for (const auto& p : polarities) {
 
-      if (p > 0.0) {
-        m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
-      }
-      else {
-        m_tracerParticleSolver->setVelocity(m_electricFieldPlus);
-      }
-
       this->resetTracerParticles();
 
       // Switch between various integration algorithms. At the end of this
@@ -2198,12 +2433,12 @@ StreamerInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcept
       // should be back in their original grid cells.
       switch (m_inceptionAlgorithm) {
       case IntegrationAlgorithm::Euler: {
-        this->inceptionIntegrateEuler(m_voltageSweeps[i]);
+        this->inceptionIntegrateEuler(p * m_voltageSweeps[i]);
 
         break;
       }
       case IntegrationAlgorithm::Trapezoidal: {
-        this->inceptionIntegrateTrapezoidal(m_voltageSweeps[i]);
+        this->inceptionIntegrateTrapezoidal(p * m_voltageSweeps[i]);
 
         break;
       }
@@ -2313,7 +2548,6 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
   ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   m_tracerParticleSolver->remap();
-  m_tracerParticleSolver->interpolateVelocities();
 
   size_t outcastsBefore  = 0;
   size_t particlesBefore = 0;
@@ -2323,7 +2557,14 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
     particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
   }
 
-  const Real sgn = (a_voltage > 0.0) - (a_voltage < 0.0);
+  // Allocate something that holds the velocity of the electrons
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  this->superposition(scratch, a_voltage);
+  DataOps::scale(scratch, -1.0);
+
+  m_tracerParticleSolver->setVelocity(scratch);
+  m_tracerParticleSolver->interpolateVelocities();
 
   while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
 
@@ -2366,9 +2607,9 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
           P& p = lit();
 
           const RealVect x        = p.position();
-          const RealVect vel      = sgn * p.velocity();
+          const RealVect vel      = p.velocity();
           const Real     v        = vel.vectorLength();
-          const Real     E        = std::abs(a_voltage * v);
+          const Real     E        = v;
           const Real     alpha    = m_alpha(E, x);
           const Real     eta      = m_eta(E, x);
           const Real     alphaEff = alpha - eta;
@@ -2499,9 +2740,23 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
   ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   m_tracerParticleSolver->remap();
-  m_tracerParticleSolver->interpolateVelocities();
 
-  const Real sgn = (a_voltage > 0.0) - (a_voltage < 0.0);
+  size_t outcastsBefore  = 0;
+  size_t particlesBefore = 0;
+
+  if (m_debug) {
+    outcastsBefore  = amrParticles.getNumberOfOutcastParticlesGlobal();
+    particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
+  }
+
+  // Allocate something that holds the velocity of the electrons
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  this->superposition(scratch, a_voltage);
+  DataOps::scale(scratch, -1.0);
+
+  m_tracerParticleSolver->setVelocity(scratch);
+  m_tracerParticleSolver->interpolateVelocities();
 
   while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
 
@@ -2546,15 +2801,14 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
           const RealVect x        = p.position();
           const RealVect vel      = p.velocity();
           const Real     v        = vel.vectorLength();
-          const Real     E        = std::abs(a_voltage * v);
+          const Real     E        = v;
           const Real     alpha    = m_alpha(E, x);
           const Real     eta      = m_eta(E, x);
           const Real     alphaEff = alpha - eta;
 
-          // Compute a time step that we will use for the integration.
           const Real     deltaX = std::min(spaceStep, alphaStep / alphaEff);
           const Real     dt     = deltaX / v;
-          const RealVect newPos = p.position() + sgn * vel * dt;
+          const RealVect newPos = p.position() + dt * vel;
           const Real     delta  = (newPos - x).vectorLength();
 
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
@@ -2562,6 +2816,7 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
 
           // If particle hit the EB or domain we finish off with a partial Euler step
           Real s = 0.0;
+
           if (alphaEff < 0.0) {
             processedParticles.transfer(lit);
           }
@@ -2642,17 +2897,17 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
           const RealVect vk  = p.template vect<1>();
           const RealVect vk1 = p.velocity();
           const RealVect x   = p.position();
-          const Real     E   = std::abs(a_voltage * vk1.vectorLength());
+          const Real     E   = vk1.vectorLength();
 
           // Note the weird subtraction since p.position() was updated
           // to p^k + dt * v^k.
           const RealVect oldPos = p.position() - dt * vk;
-          const RealVect newPos = p.position() + 0.5 * sgn * dt * (vk1 - vk);
+          const RealVect newPos = oldPos + 0.5 * dt * (vk + vk1);
 
           // Compute new alpha.
           const Real alphak  = p.template real<0>();
           const Real alphak1 = m_alpha(E, x) - m_eta(E, x);
-          const Real delta   = 0.5 * dt * (vk + vk1).vectorLength();
+          const Real delta   = (newPos - oldPos).vectorLength();
 
           // Stop integration for particles that move into regions alpha < 0.0,
           // inside the EB or outside of the domain.
@@ -2758,23 +3013,16 @@ StreamerInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcept
 
       DataOps::setValue(gamma, 0.0);
 
-      if (p > 0.0) {
-        m_tracerParticleSolver->setVelocity(m_electricFieldPlus);
-      }
-      else {
-        m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
-      }
-
       this->resetTracerParticles();
 
       switch (m_inceptionAlgorithm) {
       case IntegrationAlgorithm::Euler: {
-        this->townsendTrackEuler(m_voltageSweeps[i]);
+        this->townsendTrackEuler(p * m_voltageSweeps[i]);
 
         break;
       }
       case IntegrationAlgorithm::Trapezoidal: {
-        this->townsendTrackTrapezoidal(m_voltageSweeps[i]);
+        this->townsendTrackTrapezoidal(p * m_voltageSweeps[i]);
 
         break;
       }
@@ -2918,7 +3166,6 @@ StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noe
   ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   m_tracerParticleSolver->remap();
-  m_tracerParticleSolver->interpolateVelocities();
 
   size_t outcastsBefore  = 0;
   size_t particlesBefore = 0;
@@ -2928,9 +3175,13 @@ StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noe
     particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
   }
 
-  // The input here is m_electricFieldPlus, in which case there is a voltage U = 1 on all electrodes. Particles are seed with this velocity
-  // but the user-supplied input voltage determines the "true" direction.
-  const Real sgn = (a_voltage > 0.0) - (a_voltage < 0.0);
+  // Allocate something that holds the velocity of the ions
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  this->superposition(scratch, a_voltage);
+
+  m_tracerParticleSolver->setVelocity(scratch);
+  m_tracerParticleSolver->interpolateVelocities();
 
   while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
 
@@ -2973,9 +3224,9 @@ StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noe
           P& p = lit();
 
           const RealVect x      = p.position();
-          const RealVect vel    = sgn * p.velocity();
+          const RealVect vel    = p.velocity();
           const Real     v      = vel.vectorLength();
-          const Real     E      = std::abs(a_voltage * v);
+          const Real     E      = v;
           const Real     deltaX = spaceStep;
           const Real     dt     = deltaX / v;
           const RealVect newPos = p.position() + dt * vel;
@@ -3060,7 +3311,6 @@ StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltag
   ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   m_tracerParticleSolver->remap();
-  m_tracerParticleSolver->interpolateVelocities();
 
   size_t outcastsBefore  = 0;
   size_t particlesBefore = 0;
@@ -3070,9 +3320,13 @@ StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltag
     particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
   }
 
-  // The input here is m_electricFieldPlus, in which case there is a voltage U = 1 on all electrodes. Particles are seed with this velocity
-  // but the user-supplied input voltage determines the "true" direction.
-  const Real sgn = (a_voltage > 0.0) - (a_voltage < 0.0);
+  // Allocate something that holds the velocity of the ions
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  this->superposition(scratch, a_voltage);
+
+  m_tracerParticleSolver->setVelocity(scratch);
+  m_tracerParticleSolver->interpolateVelocities();
 
   while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
 
@@ -3115,9 +3369,9 @@ StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltag
           P& p = lit();
 
           const RealVect x        = p.position();
-          const RealVect vel      = sgn * p.velocity();
+          const RealVect vel      = p.velocity();
           const Real     v        = vel.vectorLength();
-          const Real     E        = std::abs(a_voltage * v);
+          const Real     E        = v;
           const Real     alpha    = m_alpha(E, x);
           const Real     eta      = m_eta(E, x);
           const Real     alphaEff = alpha - eta;
@@ -3173,12 +3427,12 @@ StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltag
           const RealVect vk  = p.template vect<1>();
           const RealVect vk1 = p.velocity();
           const RealVect x   = p.position();
-          const Real     E   = std::abs(a_voltage * vk1.vectorLength());
+          const Real     E   = vk1.vectorLength();
 
           // Note the weird subtraction since p.position() was updated
           // to p^k + dt * v^k.
           const RealVect oldPos = p.position() - dt * vk;
-          const RealVect newPos = p.position() + 0.5 * sgn * dt * (vk1 - vk);
+          const RealVect newPos = p.position() + 0.5 * dt * (vk1 - vk);
 
           // Compute new alpha.
           const Real alphak  = p.template real<0>();
@@ -3248,8 +3502,12 @@ StreamerInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noex
   Real Rdot = 0.0;
 
   // TLDR: We are computing the integral of dne/dt * (1-eta/alpha) over the critical volume and integral(j/e * dS) over the "critical surface"
-
   const RealVect probLo = m_amr->getProbLo();
+
+  // Compute the electric field at the input voltage
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  this->superposition(scratch, a_voltage);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
@@ -3264,7 +3522,7 @@ StreamerInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noex
       const EBISBox&       ebisbox    = ebisl[dit()];
       const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
 
-      const EBCellFAB& electricField     = (*m_electricFieldPlus[lvl])[dit()];
+      const EBCellFAB& electricField     = (*scratch[lvl])[dit()];
       const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[dit()];
       const EBCellFAB& fieldEmission     = (*m_emissionRate[lvl])[dit()];
       const EBCellFAB& ionDensity        = (*m_ionSolver->getPhi()[lvl])[dit()];
@@ -3280,7 +3538,7 @@ StreamerInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noex
             const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
             const RealVect EE  = RealVect(
               D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-            const Real E = std::abs(a_voltage * EE.vectorLength());
+            const Real E = EE.vectorLength();
 
             const Real alpha = m_alpha(E, pos);
             const Real eta   = m_eta(E, pos);
@@ -3301,7 +3559,7 @@ StreamerInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noex
           if (inceptionIntegral(vof, 0) >= m_inceptionK) {
             const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
             const RealVect EE  = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-            const Real     E   = std::abs(a_voltage * EE.vectorLength());
+            const Real     E   = EE.vectorLength();
 
             const Real kappa    = ebisbox.volFrac(vof);
             const Real areaFrac = ebisbox.bndryArea(vof);
@@ -3386,45 +3644,52 @@ StreamerInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noexc
 
   const RealVect probLo = m_amr->getProbLo();
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const Real               dx    = m_amr->getDx()[lvl];
+  // Holds the electric field
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox& ebisbox = ebisl[dit()];
+  for (int i = 0; i < m_voltageSweeps.size(); i++) {
 
-      EBCellFAB& bgIonization    = (*m_backgroundIonization[lvl])[dit()];
-      FArrayBox& bgIonizationReg = bgIonization.getFArrayBox();
+    // Compute the electric field into the scratch storage
+    this->superposition(scratch, m_voltageSweeps[i]);
 
-      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
-      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real               dx    = m_amr->getDx()[lvl];
 
-      auto regularKernel = [&](const IntVect& iv) -> void {
-        const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-        const RealVect EE = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-        const Real     E  = EE.vectorLength();
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        const EBISBox& ebisbox = ebisl[dit()];
 
-        for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-          bgIonizationReg(iv, i) = m_backgroundRate(std::abs(m_voltageSweeps[i] * E), pos);
-        }
-      };
+        EBCellFAB& bgIonization    = (*m_backgroundIonization[lvl])[dit()];
+        FArrayBox& bgIonizationReg = bgIonization.getFArrayBox();
 
-      auto irregularKernel = [&](const VolIndex& vof) -> void {
-        const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-        const RealVect EE  = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-        const Real     E   = EE.vectorLength();
+        const EBCellFAB& electricField    = (*scratch[lvl])[dit()];
+        const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
-        for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-          bgIonization(vof, i) = m_backgroundRate(std::abs(m_voltageSweeps[i] * E), pos);
-        }
-      };
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
+          const RealVect EE  = RealVect(
+            D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+          const Real E = EE.vectorLength();
 
-      // Execute kernels
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+          bgIonizationReg(iv, i) = m_backgroundRate(E, pos);
+        };
 
-      BoxLoops::loop(dbl[dit()], regularKernel);
-      BoxLoops::loop(vofit, irregularKernel);
+        auto irregularKernel = [&](const VolIndex& vof) -> void {
+          const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+          const RealVect EE  = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+          const Real     E   = EE.vectorLength();
+
+          bgIonization(vof, i) = m_backgroundRate(E, pos);
+        };
+
+        // Execute kernels
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+        BoxLoops::loop(dbl[dit()], regularKernel);
+        BoxLoops::loop(vofit, irregularKernel);
+      }
     }
   }
 }
@@ -3440,54 +3705,61 @@ StreamerInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
 
   const RealVect probLo = m_amr->getProbLo();
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const Real               dx    = m_amr->getDx()[lvl];
+  // Holds the electric field
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox& ebisbox = ebisl[dit()];
+  for (int i = 0; i < m_voltageSweeps.size(); i++) {
 
-      EBCellFAB& detachment    = (*m_detachment[lvl])[dit()];
-      FArrayBox& detachmentReg = detachment.getFArrayBox();
+    // Compute the electric field into the scratch storage
+    this->superposition(scratch, m_voltageSweeps[i]);
 
-      const EBCellFAB& ionDensity    = (*m_ionSolver->getPhi()[lvl])[dit()];
-      const EBCellFAB& electricField = (*m_electricFieldPlus[lvl])[dit()];
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real               dx    = m_amr->getDx()[lvl];
 
-      const FArrayBox& ionDensityReg    = ionDensity.getFArrayBox();
-      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        const EBISBox& ebisbox = ebisl[dit()];
 
-      auto regularKernel = [&](const IntVect& iv) -> void {
-        const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-        const RealVect EE = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-        const Real     E  = EE.vectorLength();
-        const Real     phi = ionDensityReg(iv, 0);
+        EBCellFAB& detachment    = (*m_detachment[lvl])[dit()];
+        FArrayBox& detachmentReg = detachment.getFArrayBox();
 
-        for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-          detachmentReg(iv, i) = m_detachmentRate(std::abs(m_voltageSweeps[i] * E), pos) * phi;
-        }
-      };
+        const EBCellFAB& ionDensity    = (*m_ionSolver->getPhi()[lvl])[dit()];
+        const EBCellFAB& electricField = (*scratch[lvl])[dit()];
 
-      auto irregularKernel = [&](const VolIndex& vof) -> void {
-        const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-        const RealVect EE  = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-        const Real     E   = EE.vectorLength();
-        const Real     phi = ionDensity(vof, 0);
+        const FArrayBox& ionDensityReg    = ionDensity.getFArrayBox();
+        const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
-        for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-          detachment(vof, i) = m_detachmentRate(std::abs(m_voltageSweeps[i] * E), pos) * phi;
-        }
-      };
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
+          const RealVect EE  = RealVect(
+            D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+          const Real E   = EE.vectorLength();
+          const Real phi = ionDensityReg(iv, 0);
 
-      // Execute kernels
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+          detachmentReg(iv, i) = m_detachmentRate(E, pos) * phi;
+        };
 
-      BoxLoops::loop(dbl[dit()], regularKernel);
-      BoxLoops::loop(vofit, irregularKernel);
+        auto irregularKernel = [&](const VolIndex& vof) -> void {
+          const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+          const RealVect EE  = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+          const Real     E   = EE.vectorLength();
+          const Real     phi = ionDensity(vof, 0);
+
+          detachment(vof, i) = m_detachmentRate(E, pos) * phi;
+        };
+
+        // Execute kernels
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+        BoxLoops::loop(dbl[dit()], regularKernel);
+        BoxLoops::loop(vofit, irregularKernel);
+      }
     }
-  }
 
-  m_amr->conservativeAverage(m_detachment, m_realm, m_phase);
+    m_amr->conservativeAverage(m_detachment, m_realm, m_phase);
+  }
 }
 
 template <typename P, typename F, typename C>
@@ -3501,52 +3773,64 @@ StreamerInceptionStepper<P, F, C>::computeFieldEmissionStationary() noexcept
 
   const RealVect probLo = m_amr->getProbLo();
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const Real&              dx    = m_amr->getDx()[lvl];
+  // Holds the electric field
+  EBAMRCellData scratchPlus;
+  EBAMRCellData scratchMinu;
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox& ebisbox = ebisl[dit()];
+  m_amr->allocate(scratchPlus, m_realm, m_phase, SpaceDim);
+  m_amr->allocate(scratchMinu, m_realm, m_phase, SpaceDim);
 
-      // Here, emissionPlus is when we have the standard voltage (V = 1) and
-      // emissionMinu is when the voltage is reverted.
-      EBCellFAB& emissionPlus = (*m_emissionRatesPlus[lvl])[dit()];
-      EBCellFAB& emissionMinu = (*m_emissionRatesMinu[lvl])[dit()];
+  for (int i = 0; i < m_voltageSweeps.size(); i++) {
 
-      emissionPlus.setVal(0.0);
-      emissionMinu.setVal(0.0);
+    // Compute the electric field into the scratch storage
+    this->superposition(scratchPlus, m_voltageSweeps[i]);
+    this->superposition(scratchMinu, -m_voltageSweeps[i]);
 
-      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
-      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real&              dx    = m_amr->getDx()[lvl];
 
-      auto irregularKernel = [&](const VolIndex& vof) -> void {
-        const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-        const RealVect E   = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        const EBISBox& ebisbox = ebisl[dit()];
 
-        const Real normalE    = E.dotProduct(ebisbox.normal(vof));
-        const Real magnitudeE = E.vectorLength();
+        // Here, emissionPlus is when we have the standard voltage (V = 1) and
+        // emissionMinu is when the voltage is reverted.
+        EBCellFAB& emissionPlus = (*m_emissionRatesPlus[lvl])[dit()];
+        EBCellFAB& emissionMinu = (*m_emissionRatesMinu[lvl])[dit()];
 
-        if (normalE > 0.0) {
-          // Field points out of the electrode but for the opposite polarity it will
-          // point into the electrode and the electrons can then escape.
-          for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-            emissionPlus(vof, i) = 0.0;
-            emissionMinu(vof, i) = m_fieldEmission(std::abs(magnitudeE * m_voltageSweeps[i]), pos);
+        emissionPlus.setVal(0.0);
+        emissionMinu.setVal(0.0);
+
+        const EBCellFAB& electricFieldPlus = (*scratchPlus[lvl])[dit()];
+        const EBCellFAB& electricFieldMinu = (*scratchMinu[lvl])[dit()];
+
+        auto irregularKernel = [&](const VolIndex& vof) -> void {
+          const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+
+          const RealVect Eplus = RealVect(
+            D_DECL(electricFieldPlus(vof, 0), electricFieldPlus(vof, 1), electricFieldPlus(vof, 2)));
+          const RealVect Eminu = RealVect(
+            D_DECL(electricFieldMinu(vof, 0), electricFieldMinu(vof, 1), electricFieldMinu(vof, 2)));
+
+          const Real normalEplus = Eplus.dotProduct(ebisbox.normal(vof));
+          const Real normalEminu = Eminu.dotProduct(ebisbox.normal(vof));
+
+          emissionPlus(vof, i) = 0.0;
+          emissionMinu(vof, i) = 0.0;
+
+          if (normalEplus < 0.0) {
+            emissionPlus(vof, i) = m_fieldEmission(Eplus.vectorLength(), pos);
           }
-        }
-        else if (normalE < 0.0) {
-          // Opposite case of the above.
-          for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-            emissionPlus(vof, i) = m_fieldEmission(std::abs(magnitudeE * m_voltageSweeps[i]), pos);
-            emissionMinu(vof, i) = 0.0;
+          if (normalEminu < 0.0) {
+            emissionMinu(vof, i) = m_fieldEmission(Eminu.vectorLength(), pos);
           }
-        }
-      };
+        };
 
-      // Execute kernels
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-      BoxLoops::loop(vofit, irregularKernel);
+        // Execute kernels
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+        BoxLoops::loop(vofit, irregularKernel);
+      }
     }
   }
 }
@@ -3565,6 +3849,11 @@ StreamerInceptionStepper<P, F, C>::computeFieldEmission(EBAMRCellData& a_emissio
 
   const RealVect probLo = m_amr->getProbLo();
 
+  // Compute the electric field into the scratch storage
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  this->superposition(scratch, a_voltage);
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
@@ -3579,13 +3868,13 @@ StreamerInceptionStepper<P, F, C>::computeFieldEmission(EBAMRCellData& a_emissio
 
       emission.setVal(0.0);
 
-      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
+      const EBCellFAB& electricField    = (*scratch[lvl])[dit()];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
         const RealVect EE  = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-        const Real     E   = std::abs(a_voltage * EE.vectorLength());
+        const Real     E   = EE.vectorLength();
 
         if (EE.dotProduct(ebisbox.normal(vof)) > 0.0) {
           emission(vof, 0) = m_fieldEmission(E, pos);
@@ -3631,6 +3920,11 @@ StreamerInceptionStepper<P, F, C>::evaluateFunction(LevelData<EBCellFAB>& a_data
   CH_assert(a_level >= 0);
   CH_assert(a_level <= m_amr->getFinestLevel());
 
+  // Compute the electric field
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  this->superposition(scratch, a_voltage);
+
   const RealVect probLo = m_amr->getProbLo();
 
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_level];
@@ -3647,13 +3941,13 @@ StreamerInceptionStepper<P, F, C>::evaluateFunction(LevelData<EBCellFAB>& a_data
 
     data.setVal(0.0);
 
-    const EBCellFAB& electricField    = (*m_electricFieldPlus[a_level])[dit()];
+    const EBCellFAB& electricField    = (*scratch[a_level])[dit()];
     const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
     auto regularKernel = [&](const IntVect& iv) -> void {
       const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
       const RealVect EE  = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-      const Real     E   = std::abs(a_voltage * EE.vectorLength());
+      const Real     E   = EE.vectorLength();
 
       dataReg(iv, 0) = a_func(E, pos);
     };
@@ -3661,7 +3955,7 @@ StreamerInceptionStepper<P, F, C>::evaluateFunction(LevelData<EBCellFAB>& a_data
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
       const RealVect EE  = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-      const Real     E   = std::abs(a_voltage * EE.vectorLength());
+      const Real     E   = EE.vectorLength();
 
       data(vof, 0) = a_func(E, pos);
     };
@@ -4238,9 +4532,15 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
     pout() << "StreamerInceptionStepper::computeIonizationVolumeStationary" << endl;
   }
 
+  // Storage something that holds the electric filed
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+
   // Solve ionization volume for each voltage
   for (size_t i = 0; i < m_voltageSweeps.size(); ++i) {
     Real ionizationVolume = 0.0;
+
+    this->superposition(scratch, m_voltageSweeps[i]);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
@@ -4255,7 +4555,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
         const EBISBox&       ebisbox    = ebisl[dit()];
         const BaseFab<bool>& validCells = validCellsLD[dit()];
 
-        const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
+        const EBCellFAB& electricField    = (*scratch[lvl])[dit()];
         const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
         auto regularKernel = [&](const IntVect& iv) -> void {
@@ -4263,7 +4563,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
             const RealVect x  = probLo + dx * (0.5 * RealVect::Unit + RealVect(iv));
             const RealVect EE = RealVect(
               D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-            const Real E = std::abs(m_voltageSweeps[i] * EE.vectorLength());
+            const Real E = EE.vectorLength();
 
             const Real alpha = m_alpha(E, x);
             const Real eta   = m_eta(E, x);
@@ -4279,7 +4579,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
 
             const RealVect x  = probLo + Location::position(Location::Cell::Center, vof, ebisbox, dx);
             const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-            const Real     E  = std::abs(m_voltageSweeps[i] * EE.vectorLength());
+            const Real     E  = EE.vectorLength();
 
             const Real alpha = m_alpha(E, x);
             const Real eta   = m_eta(E, x);
@@ -4316,6 +4616,11 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real& 
 
   Real Vion = 0.0;
 
+  // Calculate electric field
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  this->superposition(scratch, a_voltage);
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
@@ -4330,7 +4635,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real& 
       const EBISBox&       ebisbox    = ebisl[dit()];
       const BaseFab<bool>& validCells = validCellsLD[dit()];
 
-      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
+      const EBCellFAB& electricField    = (*scratch[lvl])[dit()];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -4339,7 +4644,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real& 
           const RealVect x  = probLo + dx * (0.5 * RealVect::Unit + RealVect(iv));
           const RealVect EE = RealVect(
             D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-          const Real E = std::abs(a_voltage * EE.vectorLength());
+          const Real E = EE.vectorLength();
 
           const Real alpha = m_alpha(E, x);
           const Real eta   = m_eta(E, x);
@@ -4354,7 +4659,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real& 
 
           const RealVect x  = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
           const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-          const Real     E  = std::abs(a_voltage * EE.vectorLength());
+          const Real     E  = EE.vectorLength();
 
           const Real alpha = m_alpha(E, x);
           const Real eta   = m_eta(E, x);
@@ -4374,144 +4679,6 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real& 
   }
 
   return ParallelOps::sum(Vion);
-}
-
-template <typename P, typename F, typename C>
-void
-StreamerInceptionStepper<P, F, C>::computeRdotStationary() noexcept
-{
-  CH_TIME("StreamerInceptionStepper::computeRdotStationary");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeRdotStationary" << endl;
-  }
-
-  // TLDR: This routine computes the average time to the appereance of an electron
-  //       anywhere in the critical volume. We do this by assuming that we have a
-  //       background ionization rate m_backgroundIonization(E).
-
-  // Total rate.
-  std::vector<Real> Rplus(m_voltageSweeps.size(), 0.0);
-  std::vector<Real> Rminu(m_voltageSweeps.size(), 0.0);
-
-  const RealVect probLo = m_amr->getProbLo();
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const Real&              dx    = m_amr->getDx()[lvl];
-
-    const Real vol  = std::pow(dx, SpaceDim);
-    const Real area = std::pow(dx, SpaceDim - 1);
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox&       ebisbox    = ebisl[dit()];
-      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
-
-      const EBCellFAB& electricField         = (*m_electricFieldPlus[lvl])[dit()];
-      const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
-      const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
-      const EBCellFAB& ionDensity            = (*m_ionSolver->getPhi()[lvl])[dit()];
-
-      const FArrayBox& electricFieldReg         = electricField.getFArrayBox();
-      const FArrayBox& inceptionIntegralPlusReg = inceptionIntegralPlus.getFArrayBox();
-      const FArrayBox& inceptionIntegralMinuReg = inceptionIntegralMinu.getFArrayBox();
-      const FArrayBox& ionDensityReg            = ionDensity.getFArrayBox();
-
-      // Regular kernel for background ionization plus detachment from negative ions.
-      auto regularKernel = [&](const IntVect& iv) -> void {
-        if (validCells(iv) && ebisbox.isRegular(iv)) {
-          const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-          const RealVect EE  = RealVect(
-            D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-
-          for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-
-            const Real E = std::abs(m_voltageSweeps[i] * EE.vectorLength());
-
-            const Real alpha = m_alpha(E, pos);
-            const Real eta   = m_eta(E, pos);
-            const Real k     = m_detachmentRate(E, pos);
-            const Real dndt  = m_backgroundRate(E, pos) + k * ionDensityReg(iv, 0);
-
-            // Add background ionization rate.
-            if (inceptionIntegralPlusReg(iv, i) >= m_inceptionK) {
-              Rplus[i] += dndt * (1.0 - eta / alpha) * vol;
-            }
-
-            if (inceptionIntegralMinuReg(iv, i) >= m_inceptionK) {
-              Rminu[i] += dndt * (1.0 - eta / alpha) * vol;
-            }
-          }
-        }
-      };
-
-      // Irregular kernel for background ionization + detachment from negative ions.
-      auto irregularKernel = [&](const VolIndex& vof) -> void {
-        const IntVect iv = vof.gridIndex();
-        if (validCells(iv, 0)) {
-          const Real     volFrac = ebisbox.volFrac(vof);
-          const RealVect pos     = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-          const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-
-          for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-
-            const Real E = std::abs(m_voltageSweeps[i] * EE.vectorLength());
-
-            const Real alpha = m_alpha(E, pos);
-            const Real eta   = m_eta(E, pos);
-            const Real k     = m_detachmentRate(E, pos);
-            const Real dndt  = m_backgroundRate(E, pos) + k * ionDensity(vof, 0);
-
-            // Add background ionization rate.
-            if (inceptionIntegralPlus(vof, i) >= m_inceptionK) {
-              Rplus[i] += dndt * (1.0 - eta / alpha) * vol * volFrac;
-            }
-            if (inceptionIntegralMinu(vof, i) >= m_inceptionK) {
-              Rminu[i] += dndt * (1.0 - eta / alpha) * vol * volFrac;
-            }
-          }
-        }
-      };
-
-      // Field emission irregular kernel.
-      auto fieldEmissionKernel = [&](const VolIndex& vof) -> void {
-        const IntVect iv = vof.gridIndex();
-
-        if (validCells(iv, 0)) {
-          const Real     areaFrac = ebisbox.bndryArea(vof);
-          const RealVect pos      = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-          const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-
-          for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-
-            const Real E = std::abs(m_voltageSweeps[i] * EE.vectorLength());
-
-            if (EE.dotProduct(ebisbox.normal(vof)) > 0.0) {
-              if (inceptionIntegralMinu(vof, i) >= m_inceptionK) {
-                Rminu[i] += m_fieldEmission(E, pos) * area * areaFrac;
-              }
-            }
-            else if (EE.dotProduct(ebisbox.normal(vof)) < 0.0) {
-              if (inceptionIntegralPlus(vof, i) >= m_inceptionK) {
-                Rplus[i] += m_fieldEmission(E, pos) * area * areaFrac;
-              }
-            }
-          }
-        }
-      };
-
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-
-      BoxLoops::loop(dbl[dit()], regularKernel);
-      BoxLoops::loop(vofit, irregularKernel);
-      BoxLoops::loop(vofit, fieldEmissionKernel);
-    }
-  }
-
-  for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-    m_RdotPlus.push_back(ParallelOps::sum(Rplus[i]));
-    m_RdotMinu.push_back(ParallelOps::sum(Rminu[i]));
-  }
 }
 
 template <typename P, typename F, typename C>
@@ -4687,129 +4854,6 @@ StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
 }
 
 template <typename P, typename F, typename C>
-void
-StreamerInceptionStepper<P, F, C>::writeDataReportTransient(const Real& a_voltage) const noexcept
-{
-  CH_TIME("StreamerInceptionStepper::writeDataReportTransient");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::writeDataReportTransient" << endl;
-  }
-
-  std::vector<RealVect> pos;
-  std::vector<Real>     E;
-  std::vector<Real>     dA;
-  std::vector<Real>     dV;
-  std::vector<Real>     ionDensityVector;
-
-  const RealVect probLo = m_amr->getProbLo();
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
-    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-
-    const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
-
-    const Real dx   = m_amr->getDx()[lvl];
-    const Real vol  = std::pow(dx, SpaceDim);
-    const Real area = std::pow(dx, SpaceDim - 1);
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      const EBISBox&       ebisbox    = ebisl[dit()];
-      const BaseFab<bool>& validCells = validCellsLD[dit()];
-
-      const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[dit()];
-
-      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
-      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
-
-      const EBCellFAB& ionDensity    = (*m_ionSolver->getPhi()[lvl])[dit()];
-      const FArrayBox& ionDensityReg = ionDensity.getFArrayBox();
-
-      auto regularKernel = [&](const IntVect& iv) -> void {
-        if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
-          const RealVect x  = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-          const RealVect EE = RealVect(
-            D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-
-          const Real currE = std::abs(a_voltage * EE.vectorLength());
-          const Real alpha = m_alpha(currE, x);
-          const Real eta   = m_eta(currE, x);
-
-          pos.push_back(x);
-          dA.push_back(0.0);
-          E.push_back(currE);
-          ionDensityVector.push_back(ionDensityReg(iv, 0));
-
-          if (alpha >= eta) {
-            dV.push_back(vol);
-          }
-          else {
-            dV.push_back(0.0);
-          }
-        }
-      };
-      auto irregularKernel = [&](const VolIndex& vof) -> void {
-        if (validCells(vof.gridIndex())) {
-
-          const RealVect x     = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-          const RealVect EE    = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-          const Real     currE = std::abs(a_voltage * EE.vectorLength());
-          const Real     alpha = m_alpha(currE, x);
-          const Real     eta   = m_eta(currE, x);
-
-          pos.push_back(x);
-          E.push_back(currE);
-          ionDensityVector.push_back(ionDensity(vof, 0));
-
-          if (alpha >= eta) {
-            dV.push_back(ebisbox.volFrac(vof) * vol);
-          }
-          else {
-            dV.push_back(0.0);
-          }
-          if (inceptionIntegral(vof, 0) >= m_inceptionK) {
-            dA.push_back(ebisbox.bndryArea(vof) * area);
-          }
-          else {
-            dA.push_back(0.0);
-          }
-        }
-      };
-
-      // Kernel regions.
-      const Box    cellBox = dbl[dit()];
-      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-
-      BoxLoops::loop(cellBox, regularKernel);
-      BoxLoops::loop(vofit, irregularKernel);
-    }
-  }
-  std::ofstream output{m_dataOutputFile, std::ofstream::out};
-
-  output << std::left << std::setw(15) << setfill(' ') << "x";
-  output << std::left << std::setw(15) << setfill(' ') << "y";
-  output << std::left << std::setw(15) << setfill(' ') << "z";
-  output << std::left << std::setw(15) << setfill(' ') << "E";
-  output << std::left << std::setw(15) << setfill(' ') << "dVcr";
-  output << std::left << std::setw(15) << setfill(' ') << "dAcr";
-  output << std::left << std::setw(15) << setfill(' ') << "ionDensity";
-  output << "\n";
-
-  for (size_t i = 0; i < pos.size(); ++i) {
-    output << std::left << std::setw(15) << pos[i][0];
-    output << std::left << std::setw(15) << pos[i][1];
-    output << std::left << std::setw(15) << pos[i][2];
-    output << std::left << std::setw(15) << E[i];
-    output << std::left << std::setw(15) << dV[i];
-    output << std::left << std::setw(15) << dA[i];
-    output << std::left << std::setw(15) << ionDensityVector[i];
-    output << "\n";
-  }
-
-  output.close();
-}
-
-template <typename P, typename F, typename C>
 bool
 StreamerInceptionStepper<P, F, C>::particleOutsideGrid(const RealVect& a_pos,
                                                        const RealVect& a_probLo,
@@ -4863,9 +4907,9 @@ StreamerInceptionStepper<P, F, C>::computeIonVelocity(const Real& a_voltage) noe
 
   EBAMRCellData& vel = m_ionSolver->getCellCenteredVelocity();
 
-  // Set v = -E
-  DataOps::copy(vel, m_electricFieldPlus);
-  DataOps::scale(vel, -a_voltage);
+  // Compute electric field at the input voltage and set v = -E
+  this->superposition(vel, a_voltage);
+  DataOps::scale(vel, -1.0);
 
   // Allocate mesh data that holds mu and compute it on the mesh.
   EBAMRCellData mu;
@@ -4906,8 +4950,8 @@ StreamerInceptionStepper<P, F, C>::computeIonVelocity(const Real& a_voltage) noe
 
   DataOps::multiplyScalar(vel, mu);
 
-  m_amr->average(vel, m_realm, m_phase, Average::Conservative);
-  m_amr->interpGhost(vel, m_realm, m_phase);
+  m_amr->arithmeticAverage(vel, m_realm, m_phase);
+  m_amr->interpGhostPwl(vel, m_realm, m_phase);
 }
 
 template <typename P, typename F, typename C>
@@ -4922,6 +4966,11 @@ StreamerInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) no
   CH_assert(!(m_ionSolver.isNull()));
   CH_assert(m_ionSolver->isMobile());
 
+  // Compute the electric field at the input voltage.
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  this->superposition(scratch, a_voltage);
+
   // Compute the diffusion coefficient on cell centers.
   EBAMRCellData diffCoCell;
   m_amr->allocate(diffCoCell, m_realm, m_phase, 1);
@@ -4931,7 +4980,7 @@ StreamerInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) no
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
 
-      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
+      const EBCellFAB& electricField    = (*scratch[lvl])[dit()];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       EBCellFAB& dCo    = (*diffCoCell[lvl])[dit()];
@@ -4941,14 +4990,14 @@ StreamerInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) no
         const RealVect EE = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
         const Real     E  = EE.vectorLength();
 
-        dCoReg(iv, 0) = m_ionDiffusion(a_voltage * E);
+        dCoReg(iv, 0) = m_ionDiffusion(E);
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
         const Real     E  = EE.vectorLength();
 
-        dCo(vof, 0) = m_ionDiffusion(a_voltage * E);
+        dCo(vof, 0) = m_ionDiffusion(E);
       };
 
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
@@ -4960,8 +5009,8 @@ StreamerInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) no
   }
 
   // Coarsen and update ghost cells
-  m_amr->average(diffCoCell, m_realm, m_phase, Average::Conservative);
-  m_amr->interpGhost(diffCoCell, m_realm, m_phase);
+  m_amr->arithmeticAverage(diffCoCell, m_realm, m_phase);
+  m_amr->interpGhostPwl(diffCoCell, m_realm, m_phase);
 
   // Fetch from solver and average to grid faces.
   EBAMRFluxData& diffCoFace = m_ionSolver->getFaceCenteredDiffusionCoefficient();
@@ -4977,6 +5026,36 @@ StreamerInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) no
                              Interval(0, 0),
                              Interval(0, 0),
                              Average::Arithmetic);
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::superposition(EBAMRCellData&       a_sumField,
+                                                 const MFAMRCellData& a_inhomogeneousField,
+                                                 const MFAMRCellData& a_homogeneousField,
+                                                 const Real           a_voltage) const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::superposition(full)");
+
+  const EBAMRCellData homogeneousField   = m_amr->alias(phase::gas, a_homogeneousField);
+  const EBAMRCellData inhomogeneousField = m_amr->alias(phase::gas, a_inhomogeneousField);
+
+  DataOps::setValue(a_sumField, 0.0);
+  DataOps::incr(a_sumField, homogeneousField, a_voltage);
+  DataOps::incr(a_sumField, inhomogeneousField, 1.0);
+
+  m_amr->arithmeticAverage(a_sumField, m_realm, m_phase);
+  m_amr->interpGhostPwl(a_sumField, m_realm, m_phase);
+  m_amr->interpToCentroids(a_sumField, m_realm, m_phase);
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::superposition(EBAMRCellData& a_sumField, const Real a_voltage) const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::superposition(short)");
+
+  this->superposition(a_sumField, m_electricFieldInho, m_electricFieldHomo, a_voltage);
 }
 
 template <typename P, typename F, typename C>
@@ -5036,6 +5115,15 @@ StreamerInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
   CH_STOP(t5);
 
   a_comp += numComp;
+}
+
+template <typename P, typename F, typename C>
+const EBAMRCellData*
+StreamerInceptionStepper<P, F, C>::getElectricField() const noexcept
+{
+  CH_TIMERS("StreamerInceptionStepper::getElectricField");
+
+  return &m_homogeneousFieldGas;
 }
 
 #include <CD_NamespaceFooter.H>

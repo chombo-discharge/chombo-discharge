@@ -89,9 +89,9 @@ FieldSolverMultigrid.filter_rho        = 0                 # Number of filtering
 FieldSolverMultigrid.filter_potential  = 0                 # Number of filterings of potential after Poisson solve
 
 FieldSolverMultigrid.gmg_verbosity     = -1                # GMG verbosity
-FieldSolverMultigrid.gmg_pre_smooth    = 12                # Number of relaxations in downsweep
-FieldSolverMultigrid.gmg_post_smooth   = 12                # Number of relaxations in upsweep
-FieldSolverMultigrid.gmg_bott_smooth   = 12                # Number of at bottom level (before dropping to bottom solver)
+FieldSolverMultigrid.gmg_pre_smooth    = 16                # Number of relaxations in downsweep
+FieldSolverMultigrid.gmg_post_smooth   = 16                # Number of relaxations in upsweep
+FieldSolverMultigrid.gmg_bott_smooth   = 16                # Number of at bottom level (before dropping to bottom solver)
 FieldSolverMultigrid.gmg_min_iter      = 5                 # Minimum number of iterations
 FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
@@ -167,16 +167,16 @@ StreamerInceptionStepper.verbosity        = -1                      ## Chattines
 StreamerInceptionStepper.profile          = false                   ## Turn on/off run-time profiling
 StreamerInceptionStepper.full_integration = true                    ## Turn on/off full integration
 StreamerInceptionStepper.mode             = stationary              ## Mode (stationary or transient)
-StreamerInceptionStepper.eval_townsend    = true                    ## Evaluate Townsend criterion or not (only for stationary)
-StreamerInceptionStepper.inception_alg    = trapz alpha 0.25        ## Integration algorithm for inception integral.
+StreamerInceptionStepper.eval_townsend    = false                   ## Evaluate Townsend criterion or not (only for stationary)
+StreamerInceptionStepper.inception_alg    = euler alpha 0.25        ## Integration algorithm for inception integral.
 StreamerInceptionStepper.output_file      = report.txt              ## Output file
 StreamerInceptionStepper.K_inception      = 12                      ## User-specified inception value
-StreamerInceptionStepper.plt_vars         = K Uinc bg_rate emission ## Plot variables
+StreamerInceptionStepper.plt_vars         = K Uinc bg_rate emission field poisson tracer cdr ## Plot variables
 
 # Static mode
 StreamerInceptionStepper.voltage_lo       = 20E3                     # Low voltage multiplier
-StreamerInceptionStepper.voltage_hi       = 80E3                     # Highest voltage multiplier
-StreamerInceptionStepper.voltage_steps    = 19                       # Number of voltage steps
+StreamerInceptionStepper.voltage_hi       = 60E3                     # Highest voltage multiplier
+StreamerInceptionStepper.voltage_steps    = 20			                            # Number of voltage steps
 
 # Dynamic mode
 StreamerInceptionStepper.ion_transport = true                    # Turn on/off ion transport
@@ -192,8 +192,8 @@ StreamerInceptionStepper.max_dt_growth = 0.05                    # Maximum relat
 # StreamerInceptionTagger class options
 # ====================================================================================================
 StreamerInceptionTagger.verbosity   = -1    # Tagger chattiness. 
-StreamerInceptionTagger.buffer      = 8     # Grown buffer around flagged cells
-StreamerInceptionTagger.max_voltage = 80E3 # Maximum applied voltage 
+StreamerInceptionTagger.buffer      = 0     # Grown buffer around flagged cells
+StreamerInceptionTagger.max_voltage = 40E3 # Maximum applied voltage 
 StreamerInceptionTagger.ref_alpha   = 1.0   # Refinement curvature criterion. Lower => more mesh
 StreamerInceptionTagger.plot        = false # Plot tagging field or not.
 

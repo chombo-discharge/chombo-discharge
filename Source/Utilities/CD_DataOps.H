@@ -1280,6 +1280,20 @@ public:
   squareRoot(LevelData<EBFluxFAB>& a_lhs);
 
   /*!
+    @brief Take the square root of the input data
+    @param[inout] a_data Input data
+  */
+  static void
+  squareRoot(MFAMRCellData& a_data);
+
+  /*!
+    @brief Take the square root of the input data
+    @param[inout] a_data Input data
+  */
+  static void
+  squareRoot(LevelData<MFCellFAB>& a_data);
+
+  /*!
     @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components. 
     @param[out] a_lhs Vector length
     @param[in]  a_rhs Input vector

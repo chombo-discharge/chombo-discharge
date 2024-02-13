@@ -425,6 +425,9 @@ FieldSolver::setRho(const Real a_rho)
   }
 
   DataOps::setValue(m_rho, a_rho);
+
+  m_amr->conservativeAverage(m_potential, m_realm);
+  m_amr->interpGhost(m_potential, m_realm);
 }
 
 void
@@ -436,6 +439,9 @@ FieldSolver::setRho(const std::function<Real(const RealVect)>& a_rho)
   }
 
   DataOps::setValue(m_rho, a_rho, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+
+  m_amr->conservativeAverage(m_rho, m_realm);
+  m_amr->interpGhost(m_rho, m_realm);
 }
 
 void
@@ -447,6 +453,21 @@ FieldSolver::setSigma(const Real a_sigma)
   }
 
   DataOps::setValue(m_sigma, a_sigma);
+
+  m_amr->arithmeticAverage(m_sigma, m_realm, phase::gas);
+}
+
+void
+FieldSolver::setSigma(const std::function<Real(const RealVect)>& a_sigma)
+{
+  CH_TIME("FieldSolver::setSigma(std::function<Real(const RealVect)>)");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolver::setSigma(std::function<Real(const RealVect)>))" << endl;
+  }
+
+  DataOps::setValue(m_sigma, a_sigma, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+
+  m_amr->arithmeticAverage(m_sigma, m_realm, phase::gas);
 }
 
 void

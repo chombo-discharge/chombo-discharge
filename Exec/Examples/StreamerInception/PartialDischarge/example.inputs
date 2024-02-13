@@ -84,7 +84,7 @@ FieldSolverMultigrid.bc.y.lo           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.y.hi           = dirichlet 1.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.z.lo           = neumann 0.0       # Bc type (see docs)
 FieldSolverMultigrid.bc.z.hi           = neumann 0.0       # Bc type (see docs)
-FieldSolverMultigrid.plt_vars          = phi rho E Esol         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+FieldSolverMultigrid.plt_vars          = phi rho E Esol sigma         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
 FieldSolverMultigrid.filter_rho        = 0                 # Number of filterings of space charge before Poisson solve
@@ -171,7 +171,7 @@ StreamerInceptionStepper.eval_townsend    = true                    ## Evaluate 
 StreamerInceptionStepper.inception_alg    = trapz alpha 0.5         ## Integration algorithm and step size selection
 StreamerInceptionStepper.output_file      = report.txt              ## Output file
 StreamerInceptionStepper.K_inception      = 15                      ## User-specified inception value
-StreamerInceptionStepper.plt_vars         = poisson K T Uinc bg_rate emission ## Plot variables
+StreamerInceptionStepper.plt_vars         = field K T Uinc bg_rate emission poisson tracer cdr ## Plot variables
 
 # Static mode
 StreamerInceptionStepper.voltage_lo       = 0E3                     ## Low voltage multiplier
@@ -199,7 +199,8 @@ StreamerInceptionTagger.ref_alpha   = 2.0   # Refinement curvature criterion. Lo
 StreamerInceptionTagger.plot        = false # Plot tagging field or not. 
 
 
-gamma_ions                       = 1.E-3 # Secondary emission coefficient due to ion impact
-pressure                         = 1.0   # Pressure in atmospheres
-temperature                      = 300   # Temperature in Kelvin
+gamma_ions           = 1.E-3 # Secondary emission coefficient due to ion impact
+pressure             = 1.0   # Pressure in atmospheres
+temperature          = 300   # Temperature in Kelvin
 Aerosol.permittivity = 4.0   # Permittivity
+sigma0               = -1E-7   # Surface charge density (given as sigma0 * (sin theta)^3)
