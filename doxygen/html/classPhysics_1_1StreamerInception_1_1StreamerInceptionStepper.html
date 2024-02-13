@@ -100,10 +100,11 @@ Collaboration diagram for Physics::StreamerInception::StreamerInceptionStepper&l
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper__coll__graph.png" border="0" usemap="#aPhysics_1_1StreamerInception_1_1StreamerInceptionStepper_3_01P_00_01F_00_01C_01_4_coll__map" alt="Collaboration graph"/></div>
 <map name="aPhysics_1_1StreamerInception_1_1StreamerInceptionStepper_3_01P_00_01F_00_01C_01_4_coll__map" id="aPhysics_1_1StreamerInception_1_1StreamerInceptionStepper_3_01P_00_01F_00_01C_01_4_coll__map">
-<area shape="rect" title="Class for streamer inception integral evaluations." alt="" coords="13,331,213,387"/>
+<area shape="rect" title="Class for streamer inception integral evaluations." alt="" coords="134,331,334,387"/>
 <area shape="rect" href="classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,95,111,121"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="135,95,331,121"/>
-<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="163,5,302,32"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="135,95,333,121"/>
+<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="274,5,413,32"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="357,95,553,121"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -185,9 +186,6 @@ virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="b
 virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ab4d0ae558832aa4c5ae19898bf37e0e5">getTransientPlotVariableNames</a> () const noexcept</td></tr>
 <tr class="memdesc:ab4d0ae558832aa4c5ae19898bf37e0e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names for transient mode. <br /></td></tr>
 <tr class="separator:ab4d0ae558832aa4c5ae19898bf37e0e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a265c455ead32115c7059c75b626992e5"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> *const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a265c455ead32115c7059c75b626992e5">getElectricField</a> () const noexcept</td></tr>
-<tr class="memdesc:a265c455ead32115c7059c75b626992e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the electric field.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a265c455ead32115c7059c75b626992e5">More...</a><br /></td></tr>
-<tr class="separator:a265c455ead32115c7059c75b626992e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad592f398421a4a7321fbb5ee6f73352e"><td class="memItemLeft" align="right" valign="top"><a id="ad592f398421a4a7321fbb5ee6f73352e"></a>
 virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ad592f398421a4a7321fbb5ee6f73352e">computeDt</a> () override</td></tr>
 <tr class="memdesc:ad592f398421a4a7321fbb5ee6f73352e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>. <br /></td></tr>
@@ -218,10 +216,12 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a202534109056f80308fec81568d37e1f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a202534109056f80308fec81568d37e1f">setVoltageCurve</a> (const std::function&lt; Real(const Real &amp;a_time)&gt; &amp;a_voltageCurve) noexcept</td></tr>
 <tr class="memdesc:a202534109056f80308fec81568d37e1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the voltage curve (used for transient mode)  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a202534109056f80308fec81568d37e1f">More...</a><br /></td></tr>
 <tr class="separator:a202534109056f80308fec81568d37e1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1ab287f850a51ca1cfa92ca4baa78004"><td class="memItemLeft" align="right" valign="top"><a id="a1ab287f850a51ca1cfa92ca4baa78004"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a1ab287f850a51ca1cfa92ca4baa78004">setRho</a> (const std::function&lt; Real(const RealVect &amp;x)&gt; &amp;a_rho) noexcept</td></tr>
-<tr class="memdesc:a1ab287f850a51ca1cfa92ca4baa78004"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set space charge distribution. <br /></td></tr>
+<tr class="memitem:a1ab287f850a51ca1cfa92ca4baa78004"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a1ab287f850a51ca1cfa92ca4baa78004">setRho</a> (const std::function&lt; Real(const RealVect &amp;x)&gt; &amp;a_rho) noexcept</td></tr>
+<tr class="memdesc:a1ab287f850a51ca1cfa92ca4baa78004"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set space charge distribution.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a1ab287f850a51ca1cfa92ca4baa78004">More...</a><br /></td></tr>
 <tr class="separator:a1ab287f850a51ca1cfa92ca4baa78004"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acdb1f0321f0f8f536d5b56a744e8f915"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#acdb1f0321f0f8f536d5b56a744e8f915">setSigma</a> (const std::function&lt; Real(const RealVect &amp;x)&gt; &amp;a_sigma) noexcept</td></tr>
+<tr class="memdesc:acdb1f0321f0f8f536d5b56a744e8f915"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set surface charge distribution.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#acdb1f0321f0f8f536d5b56a744e8f915">More...</a><br /></td></tr>
+<tr class="separator:acdb1f0321f0f8f536d5b56a744e8f915"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1719199869b4a587bf4d15ba4518c47e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a1719199869b4a587bf4d15ba4518c47e">setIonDensity</a> (const std::function&lt; Real(const RealVect x)&gt; &amp;a_density) noexcept</td></tr>
 <tr class="memdesc:a1719199869b4a587bf4d15ba4518c47e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the negative ion density.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a1719199869b4a587bf4d15ba4518c47e">More...</a><br /></td></tr>
 <tr class="separator:a1719199869b4a587bf4d15ba4518c47e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -261,6 +261,10 @@ virtual const std::function&lt; Real(const Real &amp;E, const RealVect &amp;x)&g
 virtual <a class="el" href="CD__StreamerInceptionStepper_8H.html#af655f05a634af7f120b02f162dc8fa8f">Mode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ac1e08f3e6776655ebafbffe96f22e6f2">getMode</a> () const noexcept</td></tr>
 <tr class="memdesc:ac1e08f3e6776655ebafbffe96f22e6f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the solver mode. <br /></td></tr>
 <tr class="separator:ac1e08f3e6776655ebafbffe96f22e6f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3647a54d199126dd477f7f075aac94c3"><td class="memItemLeft" align="right" valign="top"><a id="a3647a54d199126dd477f7f075aac94c3"></a>
+virtual const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3647a54d199126dd477f7f075aac94c3">getElectricField</a> () const noexcept</td></tr>
+<tr class="memdesc:a3647a54d199126dd477f7f075aac94c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the electric field. <br /></td></tr>
+<tr class="separator:a3647a54d199126dd477f7f075aac94c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classTimeStepper"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classTimeStepper')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classTimeStepper.html">TimeStepper</a></td></tr>
 <tr class="memitem:a88c17d2b22882ca947e83c25e903be1d inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top"><a id="a88c17d2b22882ca947e83c25e903be1d"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a88c17d2b22882ca947e83c25e903be1d">TimeStepper</a> ()</td></tr>
@@ -303,18 +307,18 @@ Protected Member Functions</h2></td></tr>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ad522ca71e5f5f340bb7e34da63215404">seedUniformParticles</a> () noexcept</td></tr>
 <tr class="memdesc:ad522ca71e5f5f340bb7e34da63215404"><td class="mdescLeft">&#160;</td><td class="mdescRight">Distribute particles in every grid cell. <br /></td></tr>
 <tr class="separator:ad522ca71e5f5f340bb7e34da63215404"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac127f3dc900c0fc71e7a8c90c9841a16"><td class="memItemLeft" align="right" valign="top"><a id="ac127f3dc900c0fc71e7a8c90c9841a16"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ac127f3dc900c0fc71e7a8c90c9841a16">seedIonizationParticles</a> (const Real &amp;a_voltage) noexcept</td></tr>
-<tr class="memdesc:ac127f3dc900c0fc71e7a8c90c9841a16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add particles to every cell where alpha - eta &gt; 0.0. <br /></td></tr>
-<tr class="separator:ac127f3dc900c0fc71e7a8c90c9841a16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a4ba060d23c63897cbb8ec3b9d3424a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3a4ba060d23c63897cbb8ec3b9d3424a">seedIonizationParticles</a> (const Real a_voltage) noexcept</td></tr>
+<tr class="memdesc:a3a4ba060d23c63897cbb8ec3b9d3424a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add particles to every cell where alpha - eta &gt; 0.0.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3a4ba060d23c63897cbb8ec3b9d3424a">More...</a><br /></td></tr>
+<tr class="separator:a3a4ba060d23c63897cbb8ec3b9d3424a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea76490785c5a51b260a73339b63c6a6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aea76490785c5a51b260a73339b63c6a6">computeInceptionIntegralStationary</a> () noexcept</td></tr>
 <tr class="memdesc:aea76490785c5a51b260a73339b63c6a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve streamer inception integral for each particle in each voltage and store K values in m_inceptionIntegral.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aea76490785c5a51b260a73339b63c6a6">More...</a><br /></td></tr>
 <tr class="separator:aea76490785c5a51b260a73339b63c6a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0842f1a2f747290c4e76bb9d20012f6e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a0842f1a2f747290c4e76bb9d20012f6e">computeInceptionIntegralTransient</a> (const Real &amp;a_voltage) noexcept</td></tr>
 <tr class="memdesc:a0842f1a2f747290c4e76bb9d20012f6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve streamer inception integral.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a0842f1a2f747290c4e76bb9d20012f6e">More...</a><br /></td></tr>
 <tr class="separator:a0842f1a2f747290c4e76bb9d20012f6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5bcf5f498f3d250831c99e7cb369f0c8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a5bcf5f498f3d250831c99e7cb369f0c8">inceptionIntegrateEuler</a> (const Real &amp;a_voltage) noexcept</td></tr>
-<tr class="memdesc:a5bcf5f498f3d250831c99e7cb369f0c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integrate the inception integral using the Euler rule.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a5bcf5f498f3d250831c99e7cb369f0c8">More...</a><br /></td></tr>
+<tr class="memitem:a5bcf5f498f3d250831c99e7cb369f0c8"><td class="memItemLeft" align="right" valign="top"><a id="a5bcf5f498f3d250831c99e7cb369f0c8"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a5bcf5f498f3d250831c99e7cb369f0c8">inceptionIntegrateEuler</a> (const Real &amp;a_voltage) noexcept</td></tr>
+<tr class="memdesc:a5bcf5f498f3d250831c99e7cb369f0c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integrate the inception integral using the Euler rule. <br /></td></tr>
 <tr class="separator:a5bcf5f498f3d250831c99e7cb369f0c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aff6609412d836e0b3e38874f6eed2f7a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aff6609412d836e0b3e38874f6eed2f7a">inceptionIntegrateTrapezoidal</a> (const Real &amp;a_voltage) noexcept</td></tr>
 <tr class="memdesc:aff6609412d836e0b3e38874f6eed2f7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">K integral: Add integration parts after particles move.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aff6609412d836e0b3e38874f6eed2f7a">More...</a><br /></td></tr>
@@ -384,13 +388,6 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a9300fce4bff573594c9af946d89c4f2d"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a9300fce4bff573594c9af946d89c4f2d">computeIonizationVolumeTransient</a> (const Real &amp;a_voltage) const noexcept</td></tr>
 <tr class="memdesc:a9300fce4bff573594c9af946d89c4f2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the ionization volume for each voltage.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a9300fce4bff573594c9af946d89c4f2d">More...</a><br /></td></tr>
 <tr class="separator:a9300fce4bff573594c9af946d89c4f2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1bb5ccb23694d1d856dfc95c5fdc2abc"><td class="memItemLeft" align="right" valign="top"><a id="a1bb5ccb23694d1d856dfc95c5fdc2abc"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a1bb5ccb23694d1d856dfc95c5fdc2abc">computeRdotStationary</a> () noexcept</td></tr>
-<tr class="memdesc:a1bb5ccb23694d1d856dfc95c5fdc2abc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute time to first critical electron. <br /></td></tr>
-<tr class="separator:a1bb5ccb23694d1d856dfc95c5fdc2abc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c9200bf2348b192dd15a4936e445ba7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a4c9200bf2348b192dd15a4936e445ba7">writeDataReportTransient</a> (const Real &amp;a_voltage) const noexcept</td></tr>
-<tr class="memdesc:a4c9200bf2348b192dd15a4936e445ba7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print data report.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a4c9200bf2348b192dd15a4936e445ba7">More...</a><br /></td></tr>
-<tr class="separator:a4c9200bf2348b192dd15a4936e445ba7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2cee377b63ac0ab53af5861d6d78f471"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a2cee377b63ac0ab53af5861d6d78f471">writeReportStationary</a> () const noexcept</td></tr>
 <tr class="memdesc:a2cee377b63ac0ab53af5861d6d78f471"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print report to the terminal.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a2cee377b63ac0ab53af5861d6d78f471">More...</a><br /></td></tr>
 <tr class="separator:a2cee377b63ac0ab53af5861d6d78f471"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -410,7 +407,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memdesc:acf405d8980fa05b2cabdd45bc3ca79ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if particle is inside electrode.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#acf405d8980fa05b2cabdd45bc3ca79ae">More...</a><br /></td></tr>
 <tr class="separator:acf405d8980fa05b2cabdd45bc3ca79ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a296f11c8d20b86d9fab01300522930f5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a296f11c8d20b86d9fab01300522930f5">computeIonVelocity</a> (const Real &amp;a_voltage) noexcept</td></tr>
-<tr class="memdesc:a296f11c8d20b86d9fab01300522930f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the negative ion velocity.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a296f11c8d20b86d9fab01300522930f5">More...</a><br /></td></tr>
+<tr class="memdesc:a296f11c8d20b86d9fab01300522930f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the negative ion velocity. Note.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a296f11c8d20b86d9fab01300522930f5">More...</a><br /></td></tr>
 <tr class="separator:a296f11c8d20b86d9fab01300522930f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8301a67cc4eef6a762ac13066d9693db"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a8301a67cc4eef6a762ac13066d9693db">computeIonDiffusion</a> (const Real &amp;a_voltage) noexcept</td></tr>
 <tr class="memdesc:a8301a67cc4eef6a762ac13066d9693db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the negative ion diffusion coefficient.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a8301a67cc4eef6a762ac13066d9693db">More...</a><br /></td></tr>
@@ -443,6 +440,16 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#af43849097e02a9686b2dfc757f0fda95">parsePlotVariables</a> () noexcept</td></tr>
 <tr class="memdesc:af43849097e02a9686b2dfc757f0fda95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse plot variables. <br /></td></tr>
 <tr class="separator:af43849097e02a9686b2dfc757f0fda95"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d500fdec93cebe472f5dd88c092e4a9"><td class="memItemLeft" align="right" valign="top"><a id="a6d500fdec93cebe472f5dd88c092e4a9"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a6d500fdec93cebe472f5dd88c092e4a9">solvePoisson</a> () noexcept</td></tr>
+<tr class="memdesc:a6d500fdec93cebe472f5dd88c092e4a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve the Poisson equation. <br /></td></tr>
+<tr class="separator:a6d500fdec93cebe472f5dd88c092e4a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adaeded4ae06ec78614e62f0a38ab0741"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#adaeded4ae06ec78614e62f0a38ab0741">superposition</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_sumField, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_inhomogeneousField, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_homogeneousField, const Real a_voltage) const noexcept</td></tr>
+<tr class="memdesc:adaeded4ae06ec78614e62f0a38ab0741"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the total electric field = inhomogeneous + V * homogeneous.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#adaeded4ae06ec78614e62f0a38ab0741">More...</a><br /></td></tr>
+<tr class="separator:adaeded4ae06ec78614e62f0a38ab0741"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac969bf326bdf2200b46549a38ebd3047"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ac969bf326bdf2200b46549a38ebd3047">superposition</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_sumField, const Real a_voltage) const noexcept</td></tr>
+<tr class="memdesc:ac969bf326bdf2200b46549a38ebd3047"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the input field with the scaled voltage.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ac969bf326bdf2200b46549a38ebd3047">More...</a><br /></td></tr>
+<tr class="separator:ac969bf326bdf2200b46549a38ebd3047"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a03a4094bad3600f77a6875483a1b36af"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a03a4094bad3600f77a6875483a1b36af">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_outputRealm, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
 <tr class="memdesc:a03a4094bad3600f77a6875483a1b36af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function used for IO.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a03a4094bad3600f77a6875483a1b36af">More...</a><br /></td></tr>
 <tr class="separator:a03a4094bad3600f77a6875483a1b36af"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -481,14 +488,42 @@ RefCountedPtr&lt; <a class="el" href="classFieldSolver.html">FieldSolver</a> &gt
 RefCountedPtr&lt; <a class="el" href="classCdrSolver.html">CdrSolver</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a21be2cc73369b0bb258fe388aa04f45a">m_ionSolver</a></td></tr>
 <tr class="memdesc:a21be2cc73369b0bb258fe388aa04f45a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Negative ion solver. <br /></td></tr>
 <tr class="separator:a21be2cc73369b0bb258fe388aa04f45a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ac150d94bbe94771ac388ee9c3c5144"><td class="memItemLeft" align="right" valign="top"><a id="a3ac150d94bbe94771ac388ee9c3c5144"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3ac150d94bbe94771ac388ee9c3c5144">m_electricFieldPlus</a></td></tr>
-<tr class="memdesc:a3ac150d94bbe94771ac388ee9c3c5144"><td class="mdescLeft">&#160;</td><td class="mdescRight">Electric field. <br /></td></tr>
-<tr class="separator:a3ac150d94bbe94771ac388ee9c3c5144"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6f9b4dd3a8db1c4bf5442c15a83173fb"><td class="memItemLeft" align="right" valign="top"><a id="a6f9b4dd3a8db1c4bf5442c15a83173fb"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a6f9b4dd3a8db1c4bf5442c15a83173fb">m_electricFieldMinu</a></td></tr>
-<tr class="memdesc:a6f9b4dd3a8db1c4bf5442c15a83173fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Negated electric field (= -E) <br /></td></tr>
-<tr class="separator:a6f9b4dd3a8db1c4bf5442c15a83173fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abbdbbfb81f835747ea06485f92074e70"><td class="memItemLeft" align="right" valign="top"><a id="abbdbbfb81f835747ea06485f92074e70"></a>
+<a class="el" href="classEBAMRData.html">MFAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#abbdbbfb81f835747ea06485f92074e70">m_potential</a></td></tr>
+<tr class="memdesc:abbdbbfb81f835747ea06485f92074e70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Electric potential. <br /></td></tr>
+<tr class="separator:abbdbbfb81f835747ea06485f92074e70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae71dc3f9abe68cf1c94a0f39b66266d2"><td class="memItemLeft" align="right" valign="top"><a id="ae71dc3f9abe68cf1c94a0f39b66266d2"></a>
+<a class="el" href="classEBAMRData.html">MFAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ae71dc3f9abe68cf1c94a0f39b66266d2">m_potentialHomo</a></td></tr>
+<tr class="memdesc:ae71dc3f9abe68cf1c94a0f39b66266d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Electric potential without charges. <br /></td></tr>
+<tr class="separator:ae71dc3f9abe68cf1c94a0f39b66266d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0620b8dde9a5df1f3251cec5b540394"><td class="memItemLeft" align="right" valign="top"><a id="ad0620b8dde9a5df1f3251cec5b540394"></a>
+<a class="el" href="classEBAMRData.html">MFAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ad0620b8dde9a5df1f3251cec5b540394">m_potentialInho</a></td></tr>
+<tr class="memdesc:ad0620b8dde9a5df1f3251cec5b540394"><td class="mdescLeft">&#160;</td><td class="mdescRight">Electric potential with charges. <br /></td></tr>
+<tr class="separator:ad0620b8dde9a5df1f3251cec5b540394"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82e256e0450371c596ec0a6d2bdefe75"><td class="memItemLeft" align="right" valign="top"><a id="a82e256e0450371c596ec0a6d2bdefe75"></a>
+<a class="el" href="classEBAMRData.html">MFAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a82e256e0450371c596ec0a6d2bdefe75">m_scratchHomo</a></td></tr>
+<tr class="memdesc:a82e256e0450371c596ec0a6d2bdefe75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage used during regrids. <br /></td></tr>
+<tr class="separator:a82e256e0450371c596ec0a6d2bdefe75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abecb01cde04101caafeb59e33f97619b"><td class="memItemLeft" align="right" valign="top"><a id="abecb01cde04101caafeb59e33f97619b"></a>
+<a class="el" href="classEBAMRData.html">MFAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#abecb01cde04101caafeb59e33f97619b">m_scratchInho</a></td></tr>
+<tr class="memdesc:abecb01cde04101caafeb59e33f97619b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage used during regrids. <br /></td></tr>
+<tr class="separator:abecb01cde04101caafeb59e33f97619b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace9359eb156e0225be5e7eaae21bf8af"><td class="memItemLeft" align="right" valign="top"><a id="ace9359eb156e0225be5e7eaae21bf8af"></a>
+<a class="el" href="classEBAMRData.html">MFAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ace9359eb156e0225be5e7eaae21bf8af">m_electricField</a></td></tr>
+<tr class="memdesc:ace9359eb156e0225be5e7eaae21bf8af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Electric field. <br /></td></tr>
+<tr class="separator:ace9359eb156e0225be5e7eaae21bf8af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47cd5c98d5a849e5770e8fa0a19ca268"><td class="memItemLeft" align="right" valign="top"><a id="a47cd5c98d5a849e5770e8fa0a19ca268"></a>
+<a class="el" href="classEBAMRData.html">MFAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a47cd5c98d5a849e5770e8fa0a19ca268">m_electricFieldHomo</a></td></tr>
+<tr class="memdesc:a47cd5c98d5a849e5770e8fa0a19ca268"><td class="mdescLeft">&#160;</td><td class="mdescRight">Electric field without space/surface charge and V = 1 on live electrodes. <br /></td></tr>
+<tr class="separator:a47cd5c98d5a849e5770e8fa0a19ca268"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ba130602ca567ce6b93f6690b69727a"><td class="memItemLeft" align="right" valign="top"><a id="a4ba130602ca567ce6b93f6690b69727a"></a>
+<a class="el" href="classEBAMRData.html">MFAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a4ba130602ca567ce6b93f6690b69727a">m_electricFieldInho</a></td></tr>
+<tr class="memdesc:a4ba130602ca567ce6b93f6690b69727a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Electric field with space/surface charge and V = 0 on all electrodes. <br /></td></tr>
+<tr class="separator:a4ba130602ca567ce6b93f6690b69727a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac5a88d361e70e6289484632e85c21398"><td class="memItemLeft" align="right" valign="top"><a id="ac5a88d361e70e6289484632e85c21398"></a>
+<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ac5a88d361e70e6289484632e85c21398">m_homogeneousFieldGas</a></td></tr>
+<tr class="memdesc:ac5a88d361e70e6289484632e85c21398"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gas-phase homogeneous field. <br /></td></tr>
+<tr class="separator:ac5a88d361e70e6289484632e85c21398"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac5d52f87abb8e484ff72b294251a1d34"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ac5d52f87abb8e484ff72b294251a1d34">m_inceptionIntegral</a></td></tr>
 <tr class="memdesc:ac5d52f87abb8e484ff72b294251a1d34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inception integral values.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ac5d52f87abb8e484ff72b294251a1d34">More...</a><br /></td></tr>
 <tr class="separator:ac5d52f87abb8e484ff72b294251a1d34"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -650,6 +685,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a5b1a6baf186af8d2478b4365ce5c5b5a">m_ionTransport</a></td></tr>
 <tr class="memdesc:a5b1a6baf186af8d2478b4365ce5c5b5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ion transport on/off. <br /></td></tr>
 <tr class="separator:a5b1a6baf186af8d2478b4365ce5c5b5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9d0e357cdfc952817f38e5263424938"><td class="memItemLeft" align="right" valign="top"><a id="ac9d0e357cdfc952817f38e5263424938"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ac9d0e357cdfc952817f38e5263424938">m_plotField</a></td></tr>
+<tr class="memdesc:ac9d0e357cdfc952817f38e5263424938"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plot field. <br /></td></tr>
+<tr class="separator:ac9d0e357cdfc952817f38e5263424938"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aacc9e5027499300ba0863fe50cc8a2f6"><td class="memItemLeft" align="right" valign="top"><a id="aacc9e5027499300ba0863fe50cc8a2f6"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aacc9e5027499300ba0863fe50cc8a2f6">m_plotPoisson</a></td></tr>
 <tr class="memdesc:aacc9e5027499300ba0863fe50cc8a2f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plot Poisson solver or not. <br /></td></tr>
@@ -718,6 +757,10 @@ phase::which_phase&#160;</td><td class="memItemRight" valign="bottom"><a class="
 std::function&lt; Real(const RealVect &amp;x)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a47d94584a2f6ff68c3bde12996b16a53">m_rho</a></td></tr>
 <tr class="memdesc:a47d94584a2f6ff68c3bde12996b16a53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Space charge distribution. <br /></td></tr>
 <tr class="separator:a47d94584a2f6ff68c3bde12996b16a53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3daef17ef8785e8ddd19c03dff002c31"><td class="memItemLeft" align="right" valign="top"><a id="a3daef17ef8785e8ddd19c03dff002c31"></a>
+std::function&lt; Real(const RealVect &amp;x)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3daef17ef8785e8ddd19c03dff002c31">m_sigma</a></td></tr>
+<tr class="memdesc:a3daef17ef8785e8ddd19c03dff002c31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface charge distribution. <br /></td></tr>
+<tr class="separator:a3daef17ef8785e8ddd19c03dff002c31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55c8f5fd25310179104bb74021d0e123"><td class="memItemLeft" align="right" valign="top"><a id="a55c8f5fd25310179104bb74021d0e123"></a>
 std::function&lt; Real(const RealVect &amp;x)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a55c8f5fd25310179104bb74021d0e123">m_initialIonDensity</a></td></tr>
 <tr class="memdesc:a55c8f5fd25310179104bb74021d0e123"><td class="mdescLeft">&#160;</td><td class="mdescRight">Negative ion density. <br /></td></tr>
@@ -1274,7 +1317,7 @@ template&lt;typename P , typename F , typename C &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Set the negative ion velocity. </p>
+<p>Set the negative ion velocity. Note. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_voltage</td><td>Current voltage </td></tr>
@@ -1537,33 +1580,6 @@ template&lt;typename P , typename F , typename C &gt; </div>
 
 </div>
 </div>
-<a id="a265c455ead32115c7059c75b626992e5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a265c455ead32115c7059c75b626992e5">&#9670;&nbsp;</a></span>getElectricField()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename P , typename F , typename C &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> *const StreamerInceptionStepper::getElectricField</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get the electric field. </p>
-<dl class="section note"><dt>Note</dt><dd>Returns the CELL-CENTROID centered electric field. </dd></dl>
-
-</div>
-</div>
 <a id="a3ed78c8c7dfac6e327fc24a5294317ed"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3ed78c8c7dfac6e327fc24a5294317ed">&#9670;&nbsp;</a></span>getNumberOfPlotVariables()</h2>
 
@@ -1590,42 +1606,6 @@ template&lt;typename P , typename F , typename C &gt; </div>
 <p>This is necessary because <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>, not <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a>, is responsible for allocating the necessary memory. </p><dl class="section return"><dt>Returns</dt><dd>Returns number of plot variables that will be written during writePlotData </dd></dl>
 
 <p>Implements <a class="el" href="classTimeStepper.html#a914746cb3a04bcbd965f1fdd09631ce4">TimeStepper</a>.</p>
-
-</div>
-</div>
-<a id="a5bcf5f498f3d250831c99e7cb369f0c8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5bcf5f498f3d250831c99e7cb369f0c8">&#9670;&nbsp;</a></span>inceptionIntegrateEuler()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename P , typename F , typename C &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void StreamerInceptionStepper::inceptionIntegrateEuler </td>
-          <td>(</td>
-          <td class="paramtype">const Real &amp;&#160;</td>
-          <td class="paramname"><em>a_voltage</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Integrate the inception integral using the Euler rule. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_voltage</td><td>Voltage multiplier. </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -1952,6 +1932,42 @@ template&lt;typename P , typename F , typename C &gt; </div>
 
 </div>
 </div>
+<a id="a3a4ba060d23c63897cbb8ec3b9d3424a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a4ba060d23c63897cbb8ec3b9d3424a">&#9670;&nbsp;</a></span>seedIonizationParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename F , typename C &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void StreamerInceptionStepper::seedIonizationParticles </td>
+          <td>(</td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_voltage</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add particles to every cell where alpha - eta &gt; 0.0. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_voltage</td><td>Input voltage </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a35001e0e381a5965f7d4af812cb88988"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a35001e0e381a5965f7d4af812cb88988">&#9670;&nbsp;</a></span>setAlpha()</h2>
 
@@ -2240,6 +2256,42 @@ template&lt;typename P  = TracerParticle&lt;2, 2&gt;, typename F  = FieldSolverM
 
 </div>
 </div>
+<a id="a1ab287f850a51ca1cfa92ca4baa78004"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ab287f850a51ca1cfa92ca4baa78004">&#9670;&nbsp;</a></span>setRho()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename F , typename C &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void StreamerInceptionStepper::setRho </td>
+          <td>(</td>
+          <td class="paramtype">const std::function&lt; Real(const RealVect &amp;x)&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_rho</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set space charge distribution. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_rho</td><td>Space charge distribution </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a6fb3711b322cd033ea4da4f0a0d2f5ed"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6fb3711b322cd033ea4da4f0a0d2f5ed">&#9670;&nbsp;</a></span>setSecondaryEmission()</h2>
 
@@ -2276,6 +2328,42 @@ template&lt;typename P , typename F , typename C &gt; </div>
 
 </div>
 </div>
+<a id="acdb1f0321f0f8f536d5b56a744e8f915"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acdb1f0321f0f8f536d5b56a744e8f915">&#9670;&nbsp;</a></span>setSigma()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename F , typename C &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void StreamerInceptionStepper::setSigma </td>
+          <td>(</td>
+          <td class="paramtype">const std::function&lt; Real(const RealVect &amp;x)&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_sigma</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set surface charge distribution. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_sigma</td><td>Surface charge distribution </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a202534109056f80308fec81568d37e1f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a202534109056f80308fec81568d37e1f">&#9670;&nbsp;</a></span>setVoltageCurve()</h2>
 
@@ -2306,6 +2394,114 @@ template&lt;typename P  = TracerParticle&lt;2, 2&gt;, typename F  = FieldSolverM
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_voltageCurve</td><td>Voltage curve </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="adaeded4ae06ec78614e62f0a38ab0741"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adaeded4ae06ec78614e62f0a38ab0741">&#9670;&nbsp;</a></span>superposition() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename F , typename C &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void StreamerInceptionStepper::superposition </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_sumField</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_inhomogeneousField</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_homogeneousField</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_voltage</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Calculate the total electric field = inhomogeneous + V * homogeneous. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_sumField</td><td>Sum of contributions </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_inhomogeneousField</td><td>Inhomogeneous field contribution </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_homogeneous</td><td>Homogeneous field contribution </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_voltage</td><td><a class="el" href="classElectrode.html" title="Electrode class for encapsulating the concept of an electrical conductor.">Electrode</a> voltage </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac969bf326bdf2200b46549a38ebd3047"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac969bf326bdf2200b46549a38ebd3047">&#9670;&nbsp;</a></span>superposition() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename F , typename C &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void StreamerInceptionStepper::superposition </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_sumField</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_voltage</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Update the input field with the scaled voltage. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_sumField</td><td>Sum of fields </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_voltage</td><td><a class="el" href="classElectrode.html" title="Electrode class for encapsulating the concept of an electrical conductor.">Electrode</a> voltage </td></tr>
   </table>
   </dd>
 </dl>
@@ -2519,37 +2715,6 @@ template&lt;typename P , typename F , typename C &gt; </div>
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a id="a4c9200bf2348b192dd15a4936e445ba7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4c9200bf2348b192dd15a4936e445ba7">&#9670;&nbsp;</a></span>writeDataReportTransient()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename P , typename F , typename C &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void StreamerInceptionStepper::writeDataReportTransient </td>
-          <td>(</td>
-          <td class="paramtype">const Real &amp;&#160;</td>
-          <td class="paramname"><em>a_voltage</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Print data report. </p>
-<dl class="section note"><dt>Note</dt><dd>For transient runs </dd></dl>
 
 </div>
 </div>

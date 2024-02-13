@@ -1,4 +1,5 @@
 <map id="TracerParticleSolver&lt; P &gt;" name="TracerParticleSolver&lt; P &gt;">
-<area shape="rect" id="node1" title="Base class for a tracer particle solver. This solver can advance particles in a pre&#45;defined velocity ..." alt="" coords="5,95,193,121"/>
-<area shape="rect" id="node2" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="30,5,169,32"/>
+<area shape="rect" id="node1" title="Base class for a tracer particle solver. This solver can advance particles in a pre&#45;defined velocity ..." alt="" coords="9,184,197,211"/>
+<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="5,95,201,121"/>
+<area shape="rect" id="node3" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="34,5,173,32"/>
 </map>

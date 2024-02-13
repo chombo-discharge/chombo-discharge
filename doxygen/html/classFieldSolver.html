@@ -200,6 +200,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a04b5c8d4031caed79240a80797f922a6">setSigma</a> (const Real a_sigma)</td></tr>
 <tr class="memdesc:a04b5c8d4031caed79240a80797f922a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set surface charge to specified value. <br /></td></tr>
 <tr class="separator:a04b5c8d4031caed79240a80797f922a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc13018ddcb3da8eb853bfe44ae8a176"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#abc13018ddcb3da8eb853bfe44ae8a176">setSigma</a> (const std::function&lt; Real(const RealVect)&gt; &amp;a_sigma)</td></tr>
+<tr class="memdesc:abc13018ddcb3da8eb853bfe44ae8a176"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set surface charge density to spatially dependent function.  <a href="classFieldSolver.html#abc13018ddcb3da8eb853bfe44ae8a176">More...</a><br /></td></tr>
+<tr class="separator:abc13018ddcb3da8eb853bfe44ae8a176"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8c78cf97497e7b05f1fc255f774f133"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ab8c78cf97497e7b05f1fc255f774f133">setComputationalGeometry</a> (const RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> &gt; &amp;a_computationalGeometry)</td></tr>
 <tr class="memdesc:ab8c78cf97497e7b05f1fc255f774f133"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the computational geometry.  <a href="classFieldSolver.html#ab8c78cf97497e7b05f1fc255f774f133">More...</a><br /></td></tr>
 <tr class="separator:ab8c78cf97497e7b05f1fc255f774f133"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -221,6 +224,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a9d2f21d46752c86b23d0aef127f0c58b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a9d2f21d46752c86b23d0aef127f0c58b">writeMultifluidData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_data, const phase::which_phase a_phase, const std::string a_outputRealm, const int a_level, const bool a_interp) const noexcept</td></tr>
 <tr class="memdesc:a9d2f21d46752c86b23d0aef127f0c58b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write multifluid data to single-fluid data holders.  <a href="classFieldSolver.html#a9d2f21d46752c86b23d0aef127f0c58b">More...</a><br /></td></tr>
 <tr class="separator:a9d2f21d46752c86b23d0aef127f0c58b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab470d3a76fee10bd40361bbb166c6d04"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ab470d3a76fee10bd40361bbb166c6d04">writeSurfaceData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_data, const std::string a_outputRealm, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:ab470d3a76fee10bd40361bbb166c6d04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write surface data to volume data holder.  <a href="classFieldSolver.html#ab470d3a76fee10bd40361bbb166c6d04">More...</a><br /></td></tr>
+<tr class="separator:ab470d3a76fee10bd40361bbb166c6d04"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23561315186bb33eb58899a4fe545f90"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a23561315186bb33eb58899a4fe545f90">setRealm</a> (const std::string a_realm)</td></tr>
 <tr class="memdesc:a23561315186bb33eb58899a4fe545f90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a>.  <a href="classFieldSolver.html#a23561315186bb33eb58899a4fe545f90">More...</a><br /></td></tr>
 <tr class="separator:a23561315186bb33eb58899a4fe545f90"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -342,9 +348,6 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a0f209367f32a6c4a8afa2b26b7cf681d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a0f209367f32a6c4a8afa2b26b7cf681d">setEbPermittivities</a> (BaseIVFAB&lt; Real &gt; &amp;a_perm, const Box &amp;a_cellBox, const EBISBox &amp;a_ebisbox, const RealVect &amp;a_origin, const Real &amp;a_dx)</td></tr>
 <tr class="memdesc:a0f209367f32a6c4a8afa2b26b7cf681d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set EB-centered permittivities.  <a href="classFieldSolver.html#a0f209367f32a6c4a8afa2b26b7cf681d">More...</a><br /></td></tr>
 <tr class="separator:a0f209367f32a6c4a8afa2b26b7cf681d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab470d3a76fee10bd40361bbb166c6d04"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ab470d3a76fee10bd40361bbb166c6d04">writeSurfaceData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_data, const std::string a_outputRealm, const int a_level) const noexcept</td></tr>
-<tr class="memdesc:ab470d3a76fee10bd40361bbb166c6d04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write surface data to volume data holder.  <a href="classFieldSolver.html#ab470d3a76fee10bd40361bbb166c6d04">More...</a><br /></td></tr>
-<tr class="separator:ab470d3a76fee10bd40361bbb166c6d04"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a07d5385f7fc47518c1a89f42124e2385"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classElectrostaticDomainBc.html#a313bf6a5f5d16731a6b0349835ebb934">ElectrostaticDomainBc::BcType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a07d5385f7fc47518c1a89f42124e2385">parseBcString</a> (const std::string a_str) const</td></tr>
 <tr class="memdesc:a07d5385f7fc47518c1a89f42124e2385"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns BC type based on string.  <a href="classFieldSolver.html#a07d5385f7fc47518c1a89f42124e2385">More...</a><br /></td></tr>
 <tr class="separator:a07d5385f7fc47518c1a89f42124e2385"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1938,6 +1941,32 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
+<a id="abc13018ddcb3da8eb853bfe44ae8a176"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc13018ddcb3da8eb853bfe44ae8a176">&#9670;&nbsp;</a></span>setSigma()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FieldSolver::setSigma </td>
+          <td>(</td>
+          <td class="paramtype">const std::function&lt; Real(const RealVect)&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_sigma</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set surface charge density to spatially dependent function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_sigma</td><td>Spatially dependent value of the surface charge density. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a73190bc31e96ed450982d9747b2c0b1d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a73190bc31e96ed450982d9747b2c0b1d">&#9670;&nbsp;</a></span>setSolverPermittivities()</h2>
 
@@ -2467,7 +2496,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">

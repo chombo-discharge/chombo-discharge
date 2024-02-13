@@ -99,6 +99,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#input-data">Input data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#free-charges">Free charges</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#inception-threshold">Inception threshold</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#townsend-ionization-coefficient">Townsend ionization coefficient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#townsend-attachment-coefficient">Townsend attachment coefficient</a></li>
@@ -311,6 +312,7 @@ Numerically, this is calculated using the trapezoidal rule.</p>
 <span id="chap-streamerinceptioninputdata"></span><h2>Input data<a class="headerlink" href="#input-data" title="Permalink to this heading"></a></h2>
 <p>The input to the streamer inception model are:</p>
 <ol class="arabic simple">
+<li><p>Space and surface charge.</p></li>
 <li><p>Streamer inception threshold.</p></li>
 <li><p>Townsend ionization coefficient.</p></li>
 <li><p>Townsend attachment coefficients.</p></li>
@@ -349,6 +351,24 @@ An example of defining an analytic input function is</p>
 The Townsend criterion is then a derived value of <span class="math notranslate nohighlight">\(K\)</span> and the secondary electron emission coefficient <span class="math notranslate nohighlight">\(\gamma\)</span> .
 The remaining transport data is used for calculating the inception probability (appearance of a first electron in the critical volume).</p>
 </div>
+<section id="free-charges">
+<h3>Free charges<a class="headerlink" href="#free-charges" title="Permalink to this heading"></a></h3>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">StreamerInceptionStepper</span></code> assume that the simulation region is charge-free, i.e. <span class="math notranslate nohighlight">\(\rho = \sigma= 0\)</span>.
+Nonetheless, the class has member functions for specifying these, which are given by</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Set the space charge</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">setRho</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rho</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// Set the surface charge</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">setSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_sigma</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This feature is currently a work-in-progress and relies on the superposition of a homogeneous solution <span class="math notranslate nohighlight">\(\Phi_1\)</span> (one without charges) and an inhomogeneous solution <span class="math notranslate nohighlight">\(\Phi_2\)</span> (one with charges), i.e. <span class="math notranslate nohighlight">\(\Phi = U\Phi_1 + \Phi_2\)</span> where <span class="math notranslate nohighlight">\(U\)</span> is the applied potential.</p>
+<p>As this feature has not (yet) been sufficiently hardened, it is recommend to run with debugging enabled.
+This can be done by adding <code class="docutils literal notranslate"><span class="pre">StreamerInceptionStepper.debug=true</span></code> to the input script of command line, which should catch cases where the superposition is not properly taken care of (typically due to conflicting BCs).</p>
+</div>
+</section>
 <section id="inception-threshold">
 <h3>Inception threshold<a class="headerlink" href="#inception-threshold" title="Permalink to this heading"></a></h3>
 <p>Use in class input value <code class="docutils literal notranslate"><span class="pre">StreamerInceptionStepper.K_inception</span></code> for setting the inception threshold.</p>
@@ -598,7 +618,7 @@ This can be the following:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">fixed</span></code> for a spatially fixed step size.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">dx</span></code> for step sizes relative to the grid resolution <span class="math notranslate nohighlight">\(\Delta x\)</span>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">alpha</span></code> For setting the step size relative to the avalanche length <span class="math notranslate nohighlight">\(1/\alpha\)</span>.and mode is either <code class="docutils literal notranslate"><span class="pre">fixed</span></code> or <code class="docutils literal notranslate"><span class="pre">dx</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">alpha</span></code> For setting the step size relative to the avalanche length <span class="math notranslate nohighlight">\(1/\alpha\)</span>, and mode is either <code class="docutils literal notranslate"><span class="pre">fixed</span></code> or <code class="docutils literal notranslate"><span class="pre">dx</span></code>.</p></li>
 </ul>
 <p>Normally, <code class="docutils literal notranslate"><span class="pre">alpha</span></code> will yield the best integration results since the step size is adaptively selected, taking large steps where <span class="math notranslate nohighlight">\(\alpha\)</span> is small and smaller steps where <span class="math notranslate nohighlight">\(\alpha\)</span> is large.</p>
 </li>
@@ -658,16 +678,18 @@ E.g.,</p>
 <p>Controls plot variables that will be written to HDF5 outputs in the <code class="file docutils literal notranslate"><span class="pre">plt</span></code> folder.
 Valid options are</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">K</span></code>        - Inception integral</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Uinc</span></code>     - Inception voltage</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">bg_rate</span></code>  - Background ionization rate</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">emission</span></code> - Field emission</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">alpha</span></code>    - Effective ionization coefficient</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">eta</span></code>      - Eta coefficient</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">poisson</span></code>  - Poisson solver</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">tracer</span></code>   - Tracer particle solver</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ions</span></code>     - Ion solver</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">T</span></code>        - Townsend criterion</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">field</span></code>    - Potential, field, and charge distributions.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">K</span></code>        - Inception integral.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">T</span></code>        - Townsend criterion.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Uinc</span></code>     - Inception voltage.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">alpha</span></code>    - Effective ionization coefficient.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">eta</span></code>      - Eta coefficient.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bg_rate</span></code>  - Background ionization rate.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">emission</span></code> - Field emission.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">poisson</span></code>  - Poisson solver.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tracer</span></code>   - Tracer particle solver.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cdr</span></code>      - CDR solver.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ions</span></code>     - Ion solver.</p></li>
 </ul>
 <p>For example:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>StreamerInceptionStepper.plt_vars = K Uinc bg_rate emission ions

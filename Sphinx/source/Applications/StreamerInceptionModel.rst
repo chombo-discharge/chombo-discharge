@@ -158,6 +158,7 @@ Input data
 
 The input to the streamer inception model are:
 
+#. Space and surface charge. 
 #. Streamer inception threshold.
 #. Townsend ionization coefficient.
 #. Townsend attachment coefficients.
@@ -200,7 +201,28 @@ Tabulated data (see :ref:`Chap:LookupTable1D`) can also be used as follows,
 
    The :math:`K` integral is determined only by the Townsend ionization and attachment coefficients.
    The Townsend criterion is then a derived value of :math:`K` and the secondary electron emission coefficient :math:`\gamma` .
-   The remaining transport data is used for calculating the inception probability (appearance of a first electron in the critical volume). 
+   The remaining transport data is used for calculating the inception probability (appearance of a first electron in the critical volume).
+
+Free charges
+____________
+
+By default, ``StreamerInceptionStepper`` assume that the simulation region is charge-free, i.e. :math:`\rho = \sigma= 0`.
+Nonetheless, the class has member functions for specifying these, which are given by
+
+.. code-block:: c++
+
+   // Set the space charge
+   void setRho(const std::function<Real(const RealVect&x)>& a_rho) noexcept;
+
+   // Set the surface charge
+   void setSigma(const std::function<Real(const RealVect&x)>& a_sigma) noexcept;
+
+.. warning::
+
+   This feature is currently a work-in-progress and relies on the superposition of a homogeneous solution :math:`\Phi_1` (one without charges) and an inhomogeneous solution :math:`\Phi_2` (one with charges), i.e. :math:`\Phi = U\Phi_1 + \Phi_2` where :math:`U` is the applied potential.
+
+   As this feature has not (yet) been sufficiently hardened, it is recommend to run with debugging enabled.
+   This can be done by adding ``StreamerInceptionStepper.debug=true`` to the input script of command line, which should catch cases where the superposition is not properly taken care of (typically due to conflicting BCs). 
    
 
 Inception threshold
@@ -565,7 +587,7 @@ These indicate the following:
   
   * ``fixed`` for a spatially fixed step size.
   * ``dx`` for step sizes relative to the grid resolution :math:`\Delta x`.
-  * ``alpha`` For setting the step size relative to the avalanche length :math:`1/\alpha`.and mode is either ``fixed`` or ``dx``.
+  * ``alpha`` For setting the step size relative to the avalanche length :math:`1/\alpha`, and mode is either ``fixed`` or ``dx``.
 
   Normally, ``alpha`` will yield the best integration results since the step size is adaptively selected, taking large steps where :math:`\alpha` is small and smaller steps where :math:`\alpha` is large.
 
@@ -639,16 +661,18 @@ ________
 Controls plot variables that will be written to HDF5 outputs in the :file:`plt` folder. 
 Valid options are
 
-* ``K``        - Inception integral
-* ``Uinc``     - Inception voltage
-* ``bg_rate``  - Background ionization rate
-* ``emission`` - Field emission
-* ``alpha``    - Effective ionization coefficient
-* ``eta``      - Eta coefficient  
-* ``poisson``  - Poisson solver
-* ``tracer``   - Tracer particle solver
-* ``ions``     - Ion solver
-* ``T``        - Townsend criterion
+* ``field``    - Potential, field, and charge distributions.
+* ``K``        - Inception integral.
+* ``T``        - Townsend criterion.  
+* ``Uinc``     - Inception voltage.
+* ``alpha``    - Effective ionization coefficient.
+* ``eta``      - Eta coefficient.  
+* ``bg_rate``  - Background ionization rate.
+* ``emission`` - Field emission.
+* ``poisson``  - Poisson solver.
+* ``tracer``   - Tracer particle solver.
+* ``cdr``      - CDR solver.
+* ``ions``     - Ion solver.
 
 For example:
 
