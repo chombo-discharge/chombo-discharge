@@ -24,7 +24,7 @@ Driver.output_names                    = simulation       # Simulation output na
 Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
 Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
-Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset', 'loads'
+Driver.plt_vars                        = levelset         # 'tags', 'mpi_rank', 'levelset', 'loads'
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
