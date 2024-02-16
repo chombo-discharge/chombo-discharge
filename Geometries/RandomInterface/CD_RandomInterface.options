@@ -1,13 +1,12 @@
 # ====================================================================================================
 # RandomInterface class options
 # ====================================================================================================
+RandomInterface.reseed                   = false       ## Create a new surface every time or no
 RandomInterface.smooth_len               = 1E-4        ## Smoothing length when merging planes
 RandomInterface.gas_permittivity         = 1.0         ## Gas permittivity
 RandomInterface.solid_permittivity       = 1.0         ## Gas permittivity
 
 RandomInterface.plane1.use               = true        ## Turn on/off this plane
-RandomInterface.plane1.permittivity      = 5.0         ## Dielectric permittivity (if dielectric)
-RandomInterface.plane1.live              = true        ## Live/ground voltage (if electrode)
 RandomInterface.plane1.noise_amplitude   = 0.1         ## Noise amplitude
 RandomInterface.plane1.noise_frequency   = 0.1 0.1 0.1 ## Noise frequency
 RandomInterface.plane1.noise_octaves     = 5           ## Number of octaves in noise
@@ -19,8 +18,6 @@ RandomInterface.plane1.clamp_hi          = 1 1 1       ## Noise clamp on high en
 RandomInterface.plane1.clamp_dx          = 0.1 0.1 0.1 ## Clamping length
 
 RandomInterface.plane2.use               = true        ## Turn on/off this plane
-RandomInterface.plane2.permittivity      = 5.0         ## Dielectric permittivity (if dielectric)
-RandomInterface.plane2.live              = true        ## Live/ground voltage (if electrode)
 RandomInterface.plane2.noise_amplitude   = 0.1         ## Noise amplitude
 RandomInterface.plane2.noise_frequency   = 0.1 0.1 0.1 ## Noise frequency
 RandomInterface.plane2.noise_octaves     = 5           ## Number of octaves in noise

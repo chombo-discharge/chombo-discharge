@@ -9,6 +9,10 @@
   @author Robert Marskar
 */
 
+// Std includes
+#include <random>
+#include <chrono>
+
 // Chombo includes
 #include <ParmParse.H>
 
@@ -18,12 +22,6 @@
 #include <CD_BoundedNoisePlane.H>
 #include <CD_NamespaceHeader.H>
 
-// TODO:
-// 1. Add RNG to constructor and member and use the reseed flag
-// 2. Update EBGeometry (again)
-// 3. Update input parameters and options files
-// 4. Set up example program and try to solve
-
 RandomInterface::ClampedNoisePlane::ClampedNoisePlane(const Vec3 a_point,
                                                       const Vec3 a_normal,
                                                       const Vec3 a_clampLo,
@@ -32,20 +30,29 @@ RandomInterface::ClampedNoisePlane::ClampedNoisePlane(const Vec3 a_point,
                                                       const Vec3 a_noiseFrequency,
                                                       const Real a_noiseAmplitude,
                                                       const Real a_noisePersistence,
-                                                      const int  a_noiseOctaves,
-                                                      const bool a_reseed) noexcept
+                                                      const int  a_noiseOctaves) noexcept
 {
-
   m_point   = a_point;
   m_normal  = a_normal;
-  m_clampLo = a_clampLo;
-  m_clampHi = a_clampHi;
+  m_clampDx = a_clampDx;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    m_clampLo[dir] = std::min(a_clampLo[dir], a_clampHi[dir]);
+    m_clampHi[dir] = std::max(a_clampLo[dir], a_clampHi[dir]);
+  }
 
   m_plane  = std::make_shared<EBGeometry::PlaneSDF<Real>>(m_point, m_normal);
   m_perlin = std::make_shared<EBGeometry::PerlinSDF<Real>>(a_noiseAmplitude,
                                                            a_noiseFrequency,
                                                            a_noisePersistence,
                                                            a_noiseOctaves);
+}
+
+template <class URNG>
+void
+RandomInterface::ClampedNoisePlane::shuffle(URNG& a_rng) noexcept
+{
+  m_perlin->shuffle(a_rng);
 }
 
 Real
@@ -55,7 +62,18 @@ RandomInterface::ClampedNoisePlane::signedDistance(const Vec3& a_point) const no
   const Vec3 x1 = a_point;
   const Vec3 xp = x1 - dot((x1 - x0), m_normal) * m_normal;
 
-  return m_plane->signedDistance(a_point) + m_perlin->signedDistance(xp);
+  // Clamping function.
+  Real clamp = 1.0;
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    const Real& x  = a_point[dir];
+    const Real& xL = m_clampLo[dir];
+    const Real& xH = m_clampHi[dir];
+    const Real& dx = m_clampDx[dir];
+
+    clamp *= 0.5 * (tanh((x - xL) / dx) - tanh((x - xH) / dx));
+  }
+
+  return m_plane->signedDistance(a_point) + clamp * m_perlin->signedDistance(xp);
 }
 
 RandomInterface::RandomInterface() noexcept
@@ -80,12 +98,6 @@ RandomInterface::RandomInterface() noexcept
   bool reseed    = false;
   bool usePlane1 = false;
   bool usePlane2 = false;
-
-  std::string material1 = "dielectric";
-  std::string material2 = "dielectric";
-
-  bool live1 = false;
-  bool live2 = false;
 
   Real noiseAmplitude1 = 0.0;
   Real noiseAmplitude2 = 0.0;
@@ -122,8 +134,6 @@ RandomInterface::RandomInterface() noexcept
   // Get parameters for the planes
   pp.get("plane1.use", usePlane1);
   pp.get("plane2.use", usePlane2);
-  pp.get("plane1.live", live1);
-  pp.get("plane2.live", live2);
   pp.get("plane1.noise_amplitude", noiseAmplitude1);
   pp.get("plane2.noise_amplitude", noiseAmplitude2);
   pp.get("plane1.noise_persistence", noisePersistence1);
@@ -145,10 +155,8 @@ RandomInterface::RandomInterface() noexcept
   clampDx2        = getVec("plane2.clamp_dx");
 
   std::shared_ptr<EBGeometry::ImplicitFunction<Real>> dielectric;
-  std::shared_ptr<EBGeometry::ImplicitFunction<Real>> plane1;
-  std::shared_ptr<EBGeometry::ImplicitFunction<Real>> plane2;
-  std::shared_ptr<EBGeometry::PerlinSDF<Real>>        noiseFunction1;
-  std::shared_ptr<EBGeometry::PerlinSDF<Real>>        noiseFunction2;
+  std::shared_ptr<ClampedNoisePlane>                  plane1;
+  std::shared_ptr<ClampedNoisePlane>                  plane2;
 
   // Planes are constructed along the y-axis
   if (usePlane1) {
@@ -160,8 +168,17 @@ RandomInterface::RandomInterface() noexcept
                                                  noiseFrequency1,
                                                  noiseAmplitude1,
                                                  noisePersistence1,
-                                                 noiseOctaves1,
-                                                 rng);
+                                                 noiseOctaves1);
+
+    // Find a seed to use for the RNG
+    int seed = reseed ? std::chrono::system_clock::now().time_since_epoch().count() : 0;
+#ifdef CH_MPI
+    MPI_Bcast(&seed, 1, MPI_INT, 0, Chombo_MPI::comm);
+#endif
+
+    std::mt19937 rng(seed);
+
+    plane1->shuffle(rng);
   }
 
   if (usePlane2) {
@@ -173,11 +190,19 @@ RandomInterface::RandomInterface() noexcept
                                                  noiseFrequency2,
                                                  noiseAmplitude2,
                                                  noisePersistence2,
-                                                 noiseOctaves2,
-                                                 rng);
+                                                 noiseOctaves2);
+
+    // Find a seed to use for the RNG
+    int seed = reseed ? std::chrono::system_clock::now().time_since_epoch().count() : 1;
+#ifdef CH_MPI
+    MPI_Bcast(&seed, 1, MPI_INT, 0, Chombo_MPI::comm);
+#endif
+
+    std::mt19937 rng(seed);
+    plane2->shuffle(rng);
   }
 
-  // Merge the planes and add them to
+  // Merge the planes if using two planes.
   if (usePlane1 && usePlane2) {
     if (smoothLength > 0.0) {
       dielectric = EBGeometry::SmoothUnion<Real>(plane1, plane2, smoothLength);

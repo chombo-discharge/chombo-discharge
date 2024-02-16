@@ -41,7 +41,6 @@ protected:
   /*!
     @brief Clamped noisy plane signed distance function. 
   */
-  template <class URNG>
   class ClampedNoisePlane : public EBGeometry::SignedDistanceFunction<Real>
   {
   public:
@@ -52,6 +51,15 @@ protected:
 
     /*!
       @brief Full constructor
+      @param[in] a_point Point on plane
+      @param[in] a_normal Plane normal vector
+      @param[in] a_clampLo Clamping at low end
+      @param[in] a_clampHi Clamping at high
+      @param[in] a_clampDx Clamping length
+      @param[in] a_noiseFrequency Noise frequency
+      @param[in] a_noiseAmplitude Noise amplitude
+      @param[in] a_noisePersistence Noise persistence
+      @param[in] a_noiseOctaves Number of noise octaves
     */
     ClampedNoisePlane(const Vec3 a_point,
                       const Vec3 a_normal,
@@ -61,8 +69,19 @@ protected:
                       const Vec3 a_noiseFrequency,
                       const Real a_noiseAmplitude,
                       const Real a_noisePersistence,
-                      const int  a_noiseOctaves,
-                      const URNG a_rng) noexcept;
+                      const int  a_noiseOctaves) noexcept;
+
+    /*!
+      @brief Destructor (does nothing)
+    */
+    ~ClampedNoisePlane() = default;
+
+    /*!
+      @brief Shuffle the permutation array
+    */
+    template <class URNG>
+    void
+    shuffle(URNG& a_rng) noexcept;
 
     /*!
       @brief Signed distance function
@@ -96,11 +115,6 @@ protected:
       @brief Clamping length
     */
     Vec3 m_clampDx;
-
-    /*!
-      @brief Random number generator
-    */
-    URNG m_rng;
 
     /*!
       @brief Base implicit function
