@@ -9,7 +9,7 @@ StreamerInceptionStepper.eval_townsend    = true                    ## Evaluate 
 StreamerInceptionStepper.inception_alg    = trapz alpha 0.5         ## Integration algorithm and step size selection
 StreamerInceptionStepper.output_file      = report.txt              ## Output file
 StreamerInceptionStepper.K_inception      = 12                      ## User-specified inception value
-StreamerInceptionStepper.plt_vars         = K Uinc bg_rate emission ## Plot variables
+StreamerInceptionStepper.plt_vars         = K T Uinc field          ## Plot variables
 
 # Static mode
 StreamerInceptionStepper.voltage_lo       = 1.0                     ## Low voltage multiplier

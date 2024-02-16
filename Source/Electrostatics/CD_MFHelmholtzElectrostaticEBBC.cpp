@@ -189,8 +189,13 @@ MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&           a_si
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
 
+  // This is a safeguard against a corner case where we fail to correctly represent the interface region and also have
+  // no electrodes. In this case we simply bypass the flux calculation. Note that this normally happens when the user
+  // only has dielectrics AND some of the dielectric cells become incorrectly represented at the coarser multigrid levels.
+  const bool hasElectrode = m_electrostaticBCs.getBcs().size() > 0;
+
   // Do single phase cells
-  if (!a_homogeneousPhysBC) {
+  if (!a_homogeneousPhysBC && hasElectrode) {
     auto kernel = [&](const VolIndex& vof) -> void {
       const RealVect pos   = this->getBoundaryPosition(vof, a_dit);
       const Real     value = this->getElectrodePotential(pos);
