@@ -192,10 +192,6 @@ MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&           a_si
   // Do single phase cells
   if (!a_homogeneousPhysBC) {
     auto kernel = [&](const VolIndex& vof) -> void {
-      const RealVect pos   = this->getBoundaryPosition(vof, a_dit);
-      const Real     value = this->getElectrodePotential(pos);
-      const Real     Bcoef = a_Bcoef(vof, m_comp);
-
 #if 1
       if (m_electrostaticBCs.getBcs().size() == 0) {
         pout() << "MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase -- Aborting (remove this error message later"
@@ -204,6 +200,10 @@ MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&           a_si
           "MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase -- applying single-phase flux even though there is no electrode EB");
       }
 #endif
+
+      const RealVect pos   = this->getBoundaryPosition(vof, a_dit);
+      const Real     value = this->getElectrodePotential(pos);
+      const Real     Bcoef = a_Bcoef(vof, m_comp);
 
       a_Lphi(vof, m_comp) += a_beta * Bcoef * value * m_boundaryWeights[a_dit](vof, m_comp);
     };
