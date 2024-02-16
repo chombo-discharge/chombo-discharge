@@ -226,8 +226,6 @@ RandomInterface::RandomInterface() noexcept
   this->setGasPermittivity(gasPermittivity);
 }
 
-RandomInterface::~RandomInterface() noexcept{
-
-}
+RandomInterface::~RandomInterface() noexcept {}
 
 #include <CD_NamespaceFooter.H>
