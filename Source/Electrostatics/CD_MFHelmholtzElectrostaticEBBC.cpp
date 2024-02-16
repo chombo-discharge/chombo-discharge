@@ -196,6 +196,15 @@ MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&           a_si
       const Real     value = this->getElectrodePotential(pos);
       const Real     Bcoef = a_Bcoef(vof, m_comp);
 
+#if 1
+      if (m_electrostaticBCs.getBcs().size() == 0) {
+        pout() << "MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase -- Aborting (remove this error message later"
+               << endl;
+        MayDay::Abort(
+          "MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase -- applying single-phase flux even though there is no electrode EB");
+      }
+#endif
+
       a_Lphi(vof, m_comp) += a_beta * Bcoef * value * m_boundaryWeights[a_dit](vof, m_comp);
     };
 
