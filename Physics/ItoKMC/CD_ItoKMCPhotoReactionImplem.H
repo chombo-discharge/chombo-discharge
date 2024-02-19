@@ -22,7 +22,7 @@ inline ItoKMCPhotoReaction::ItoKMCPhotoReaction(const size_t            a_source
                                                 const std::list<size_t> a_targets,
                                                 const Real              a_efficiency) noexcept
 {
-  this->define(a_source, a_targets);
+  this->define(a_source, a_targets, a_efficiency);
 }
 
 inline ItoKMCPhotoReaction::~ItoKMCPhotoReaction() noexcept {}
