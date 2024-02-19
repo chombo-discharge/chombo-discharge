@@ -166,9 +166,9 @@ DischargeIO::writeH5Part(const std::string                               a_filen
       for (ListIterator<GenericParticle<M, N>> lit(particles); lit.ok(); ++lit) {
         id.push_back(procID());
         x.push_back(lit().position()[0] - a_shift[0]);
-        y.push_back(lit().position()[1] - a_shift[0]);
+        y.push_back(lit().position()[1] - a_shift[1]);
 #if CH_SPACEDIM == 3
-        z.push_back(lit().position()[2] - a_shift[0]);
+        z.push_back(lit().position()[2] - a_shift[2]);
 #endif
       }
     }
