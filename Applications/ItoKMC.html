@@ -155,6 +155,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#gradient-correction">Gradient correction</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#understanding-reaction-rates">Understanding reaction rates</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#plotting-rates">Plotting rates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#printing-rates">Printing rates</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#id12">Photoionization</a></li>
@@ -2255,6 +2256,25 @@ A JSON specification that includes these</p>
 ]
 </pre></div>
 </div>
+</section>
+<section id="printing-rates">
+<h4>Printing rates<a class="headerlink" href="#printing-rates" title="Permalink to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">ItoKMCJSON</span></code> can print the plasma reaction rates (including photon-generating ones) to file.
+This is done through an optional input argument <code class="docutils literal notranslate"><span class="pre">print_rates</span></code> in the input file (not the JSON specification).
+The following options are supported:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ItoKMCJSON.print_rates            = true
+ItoKMCJSON.print_rates_minEN      = 1
+ItoKMCJSON.print_rates_maxEN      = 1000
+ItoKMCJSON.print_rates_num_points = 200
+ItoKMCJSON.print_rates_spacing    = exponential
+ItoKMCJSON.print_rates_filename   = fluid_rates.dat
+ItoKMCJSON.print_rates_pos        = 0 0 0
+</pre></div>
+</div>
+<p>Setting <code class="docutils literal notranslate"><span class="pre">ItoKMCJSON.print_rates</span></code> to true in the input file will write all reaction rates as column data <span class="math notranslate nohighlight">\(E/N, k(E/N)\)</span>.
+Here, <span class="math notranslate nohighlight">\(k\)</span> indicates the <em>fluid rate</em>, so for a reaction <span class="math notranslate nohighlight">\(A + B + C \xrightarrow{k}\ldots\)</span> it will include the rate <span class="math notranslate nohighlight">\(k\)</span>.
+Reactions are ordered identical to the order of the reactions in the JSON specification.
+This feature is mostly used for debugging or development efforts.</p>
 </section>
 </section>
 <section id="id12">

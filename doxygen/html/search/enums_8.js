@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['jumpbctype_7439',['JumpBCType',['../classFieldSolverMultigrid.html#aa055a38a36d010695144d174518ae958',1,'FieldSolverMultigrid']]]
+  ['jumpbctype_7444',['JumpBCType',['../classFieldSolverMultigrid.html#aa055a38a36d010695144d174518ae958',1,'FieldSolverMultigrid']]]
 ];
