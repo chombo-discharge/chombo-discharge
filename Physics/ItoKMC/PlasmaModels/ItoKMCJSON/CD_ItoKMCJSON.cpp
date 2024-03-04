@@ -848,7 +848,7 @@ ItoKMCJSON::printFluidRates() const noexcept
     Vector<Real> pos;
     pp.query("print_rates_minEN", minEByN);
     pp.query("print_rates_maxEN", maxEByN);
-    pp.query("print_rates_num_point", numPoints);
+    pp.query("print_rates_num_points", numPoints);
     pp.query("print_rates_spacing", spacing);
     pp.query("print_rates_filename", filename);
     pp.queryarr("print_rates_pos", pos, 0, SpaceDim);
