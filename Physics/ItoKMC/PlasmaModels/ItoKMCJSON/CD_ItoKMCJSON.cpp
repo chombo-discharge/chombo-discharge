@@ -74,6 +74,9 @@ ItoKMCJSON::ItoKMCJSON()
   this->previewFunctionEX(m_json["alpha"], m_alpha);
   this->previewFunctionEX(m_json["eta"], m_eta);
 
+  // Print the fluid rates if users ask for it.
+  this->printFluidRates();
+
   // Define internals. This includes the KMC solver instantiation.
   this->define();
 }
@@ -818,6 +821,85 @@ ItoKMCJSON::initializeAutomaticTownsend(const std::string a_coeff)
     else if (a_coeff == "eta") {
       m_eta = townsendCoeff;
     }
+  }
+}
+
+void
+ItoKMCJSON::printFluidRates() const noexcept
+{
+  CH_TIME("ItoKMCJSON::printFluidRates");
+  if (m_verbose) {
+    pout() << m_className + "::printFluidRates" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  bool        printRates = false;
+  Real        minEByN    = 1.0;
+  Real        maxEByN    = 1000.0;
+  RealVect    position   = RealVect::Zero;
+  int         numPoints  = 200;
+  std::string spacing    = "exponential";
+  std::string filename   = "fluid_rates.dat";
+
+  pp.query("print_rates", printRates);
+
+  if (printRates) {
+    Vector<Real> pos;
+    pp.query("print_rates_minEN", minEByN);
+    pp.query("print_rates_maxEN", maxEByN);
+    pp.query("print_rates_num_point", numPoints);
+    pp.query("print_rates_spacing", spacing);
+    pp.query("print_rates_filename", filename);
+    pp.queryarr("print_rates_pos", pos, 0, SpaceDim);
+
+    minEByN  = std::max(0.0, minEByN);
+    maxEByN  = std::max(0.0, maxEByN);
+    position = RealVect(D_DECL(pos[0], pos[1], pos[2]));
+
+    CH_assert(maxEByN > minEByN);
+    CH_assert(numPoints >= 2);
+
+    const Real N = m_gasNumberDensity(position);
+
+    // Build the grid
+    std::vector<Real> EN;
+    std::vector<Real> E;
+    for (int i = 0; i < numPoints; i++) {
+      Real curEN;
+      Real curE;
+      if (spacing == "uniform") {
+        curEN = minEByN + i * (maxEByN - minEByN) / (numPoints - 1);
+      }
+      else if (spacing == "exponential") {
+        curEN = minEByN * std::pow(10.0, i * log10(maxEByN / minEByN) / (numPoints - 1));
+      }
+
+      curE = curEN * m_gasNumberDensity(position) * Units::Td;
+
+      EN.push_back(curEN);
+      E.push_back(curE);
+    }
+
+#ifdef CH_MPI
+    if (procID() == 0) {
+#endif
+      std::ofstream outputFile;
+
+      outputFile.open(filename);
+      for (int i = 0; i < numPoints; i++) {
+        outputFile << std::left << std::setw(14) << EN[i];
+
+        for (int k = 0; k < m_fluidRates.size(); k++) {
+          outputFile << std::left << std::setw(14) << m_fluidRates[k](E[i], position);
+        }
+        outputFile << "\n";
+      }
+
+      outputFile.close();
+#ifdef CH_MPI
+    }
+#endif
   }
 }
 
