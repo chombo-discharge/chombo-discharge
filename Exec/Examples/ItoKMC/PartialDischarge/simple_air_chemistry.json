@@ -188,8 +188,8 @@
 	    }
 	},
 	{
-	    // Definition of O2- plasma species.
-            "id": "O2-",            // Species ID
+	    // Definition of O- plasma species.
+            "id": "O-",            // Species ID
 	    "Z" : -1,               // Charge number
 	    "solver" : "ito",       // Solver type. Either 'ito' or 'cdr'
 	    "mobile" : true,       // Mobile or not
@@ -284,8 +284,8 @@
 	    "plot": true                                     // Optional. If true, the reaction rate will be plotted.
 	},
 	{
-	    // Tabulated reaction rate for e + O2 -> e + e + O2+	    
-	    "reaction": "e + O2 -> O2-",         // Reaction. Must contain the '->'
+	    // Tabulated reaction rate for e + O2 -> O + O-
+	    "reaction": "e + O2 -> O-",         // Reaction. Must contain the '->'
 	    "description": "Rate/O2 attachment", // Optional description of the reaction. Used when plotting the rate
 	    "type": "table vs E/N",              // Specification of reaction rate type
 	    "file" : "bolsig_air.dat",           // File containing the data

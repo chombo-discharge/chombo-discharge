@@ -562,6 +562,12 @@ namespace Physics {
       previewFunctionEX(const nlohmann::json& a_json, const FunctionEX& a_function) const;
 
       /*!
+	@brief Print the fluid-representation of the reaction rates.
+      */
+      virtual void
+      printFluidRates() const noexcept;
+
+      /*!
 	@brief Initialize the plasma species
       */
       virtual void

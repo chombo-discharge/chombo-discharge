@@ -1754,6 +1754,27 @@ A JSON specification that includes these
 	}	
     ]
 
+Printing rates
+______________
+
+``ItoKMCJSON`` can print the plasma reaction rates (including photon-generating ones) to file.
+This is done through an optional input argument ``print_rates`` in the input file (not the JSON specification).
+The following options are supported:
+
+.. code-block:: text
+
+   ItoKMCJSON.print_rates            = true
+   ItoKMCJSON.print_rates_minEN      = 1
+   ItoKMCJSON.print_rates_maxEN      = 1000
+   ItoKMCJSON.print_rates_num_points = 200
+   ItoKMCJSON.print_rates_spacing    = exponential
+   ItoKMCJSON.print_rates_filename   = fluid_rates.dat
+   ItoKMCJSON.print_rates_pos        = 0 0 0
+
+Setting ``ItoKMCJSON.print_rates`` to true in the input file will write all reaction rates as column data :math:`E/N, k(E/N)`.
+Here, :math:`k` indicates the *fluid rate*, so for a reaction :math:`A + B + C \xrightarrow{k}\ldots` it will include the rate :math:`k`.
+Reactions are ordered identical to the order of the reactions in the JSON specification.
+This feature is mostly used for debugging or development efforts. 
 
 
 Photoionization
