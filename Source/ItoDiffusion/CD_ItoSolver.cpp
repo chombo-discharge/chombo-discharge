@@ -415,6 +415,9 @@ ItoSolver::parseParticleMerger()
   else if (str == "external") {
     // Do nothing, because the user will set the merger algorithm through setParticleMerger
   }
+  else {
+    MayDay::Abort("ItoSolver::parseParticleMerger - unknown particle merging algorithm requested");
+  }
 }
 
 EBIntersection
