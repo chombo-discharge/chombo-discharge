@@ -52,20 +52,25 @@ DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&       a_faceDat
   CH_assert(a_cellData.nComp() == SpaceDim);
 
   const DisjointBoxLayout& dbl = a_cellData.disjointBoxLayout();
+  const DataIterator& dit = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const EBCellFAB& cellData    = a_cellData[dit()];
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {  
+    const DataIndex& din = dit[mybox];
+    
+    const EBCellFAB& cellData    = a_cellData[din];
     const FArrayBox& cellDataReg = cellData.getFArrayBox();
 
     const EBISBox& ebisbox = cellData.getEBISBox();
     const EBGraph& ebgraph = ebisbox.getEBGraph();
 
     for (int faceDir = 0; faceDir < SpaceDim; faceDir++) {
-      EBFaceFAB& faceData    = a_faceData[dit()][faceDir];
+      EBFaceFAB& faceData    = a_faceData[din][faceDir];
       FArrayBox& faceDataReg = faceData.getFArrayBox();
 
       // Build the computation box, including the ghost faces. We only want interior faces.
-      Box cellBox = dbl[dit()];
+      Box cellBox = dbl[din];
       cellBox.grow(a_tanGhosts);
       cellBox &= a_domain;
       cellBox.grow(faceDir, -a_tanGhosts);
@@ -102,7 +107,7 @@ DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&       a_faceDat
 
       // Fix up domain faces
       for (SideIterator sit; sit.ok(); ++sit) {
-        const Box outsideBox = adjCellBox(dbl[dit()], faceDir, sit(), 1);
+        const Box outsideBox = adjCellBox(dbl[din], faceDir, sit(), 1);
 
         if (!(a_domain.contains(outsideBox))) {
           Box insideBox = outsideBox;
