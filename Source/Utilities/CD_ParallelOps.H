@@ -54,6 +54,13 @@ namespace ParallelOps {
   min(const int& a_input) noexcept;
 
   /*!
+    @brief Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)
+    @param[in] a_input Data input. Returns the smallest. 
+  */
+  inline long long int
+  min(const long long int& a_input) noexcept;  
+
+  /*!
     @brief Get the minimum value and the position corresponding to the minimum value of a_val
     @details This returns the value a_val and position a_pos such that they correspond to the 
     input variables for the processer which held the smallest value a_val. 

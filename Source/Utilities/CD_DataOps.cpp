@@ -459,7 +459,10 @@ DataOps::axby(LevelData<EBCellFAB>&       a_lhs,
     const DataIndex& din = dit[mybox];
 
     a_lhs[din].axby(a_x[din], a_y[din], a_a, a_b);
+  }
+}
 
+void
 DataOps::compute(EBAMRCellData& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept
 {
   CH_TIME("DataOps::compute(EBAMRCellData, std::function)");
@@ -827,9 +830,17 @@ DataOps::plus(LevelData<EBCellFAB>&       a_lhs,
 {
   CH_TIME("DataOps::plus(LD<EBCellFAB>)");
 
-  for (DataIterator dit = a_lhs.disjointBoxLayout().dataIterator(); dit.ok(); ++dit) {
-    EBCellFAB&       lhs = a_lhs[dit()];
-    const EBCellFAB& rhs = a_rhs[dit()];
+  const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
+  const DataIterator& dit = dbl.dataIterator();
+  
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+    
+    EBCellFAB&       lhs = a_lhs[din];
+    const EBCellFAB& rhs = a_rhs[din];
 
     lhs.plus(rhs, a_srcComp, a_dstComp, a_numComp);
   }
