@@ -75,6 +75,7 @@ CdrPlasmaGodunovStepper::parseOptions()
   this->parseProfile();
   this->parseFHD();
   this->parseRegridSlopes();
+  this->parseFiltering();
 }
 
 void
@@ -102,6 +103,7 @@ CdrPlasmaGodunovStepper::parseRuntimeOptions()
   this->parseProfile();
   this->parseFHD();
   this->parseRegridSlopes();
+  this->parseFiltering();
 
   // Solvers also parse their runtime options.
   m_cdr->parseRuntimeOptions();
@@ -272,6 +274,20 @@ CdrPlasmaGodunovStepper::parseRegridSlopes()
   ParmParse pp(m_className.c_str());
 
   pp.get("use_regrid_slopes", m_regridSlopes);
+}
+
+void
+CdrPlasmaGodunovStepper::parseFiltering()
+{
+  CH_TIME("CdrPlasmaGodunovStepper::parseFiltering");
+  if (m_verbosity > 5) {
+    pout() << "CdrPlasmaGodunovStepper::parseFiltering" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("filter_rho", m_numFilterRho);
+  pp.get("filter_compensate", m_filterCompensate);
 }
 
 RefCountedPtr<CdrStorage>&
@@ -581,6 +597,28 @@ CdrPlasmaGodunovStepper::solveSemiImplicitPoisson()
 
   m_amr->arithmeticAverage(rho, m_realm);
   m_amr->interpGhostPwl(rho, m_realm);
+
+  // Apply filtering of the space charge.
+  if (m_numFilterRho > 0) {
+    const Real alpha  = 0.5;
+    const int  stride = 1;
+
+    for (int i = 0; i < m_numFilterRho; i++) {
+      DataOps::filterSmooth(rhoPhase, alpha, stride, true);
+
+      m_amr->arithmeticAverage(rho, m_realm);
+      m_amr->interpGhostPwl(rho, m_realm);
+    }
+
+    if (m_filterCompensate) {
+      const Real alphaComp = 1 + 0.5 * m_numFilterRho;
+
+      DataOps::filterSmooth(rhoPhase, alphaComp, stride, true);
+
+      m_amr->arithmeticAverage(rho, m_realm);
+      m_amr->interpGhostPwl(rho, m_realm);
+    }
+  }
 
   m_amr->interpToCentroids(rhoPhase, m_realm, m_phase);
 

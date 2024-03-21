@@ -205,8 +205,6 @@ RtSolver::setSource(const EBAMRCellData& a_source)
     pout() << m_name + "::setSource(ebamrcell)" << endl;
   }
 
-  const int finestLevel = m_amr->getFinestLevel();
-
   m_amr->copyData(m_source, a_source);
 
   m_amr->conservativeAverage(m_source, m_realm, m_phase);
@@ -328,8 +326,7 @@ RtSolver::writeData(LevelData<EBCellFAB>& a_output,
   CH_TIMER("RtSolver::writeData::local_copy", t2);
   CH_TIMER("RtSolver::writeData::interp_ghost", t3);
   CH_TIMER("RtSolver::writeData::interp_centroid", t4);
-  CH_TIMER("RtSolver::writeData::define_copier", t5);
-  CH_TIMER("RtSolver::writeData::final_copy", t6);
+  CH_TIMER("RtSolver::writeData::final_copy", t5);
   if (m_verbosity > 5) {
     pout() << m_name + "::writeData" << endl;
   }
@@ -371,22 +368,19 @@ RtSolver::writeData(LevelData<EBCellFAB>& a_output,
   }
   CH_STOP(t4);
 
-  // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
-  // we can't call EBAMRData<T>::copy either (because components don't align). So -- general type of copy here.
-  CH_START(t5);
-  Copier copier;
-  copier.ghostDefine(scratch.disjointBoxLayout(),
-                     a_output.disjointBoxLayout(),
-                     m_amr->getDomains()[a_level],
-                     scratch.ghostVect(),
-                     a_output.ghostVect());
-  CH_STOP(t5);
-
   DataOps::setCoveredValue(scratch, 0.0);
 
-  CH_START(t6);
-  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
-  CH_STOP(t6);
+  CH_START(t5);
+  m_amr->copyData(a_output,
+                  scratch,
+                  a_level,
+                  a_outputRealm,
+                  m_realm,
+                  dstInterv,
+                  srcInterv,
+                  CopyStrategy::ValidGhost,
+                  CopyStrategy::ValidGhost);
+  CH_STOP(t5);
 
   a_comp += numComp;
 }
@@ -454,6 +448,21 @@ RtSolver::parseVerbosity() noexcept
   ParmParse pp(m_className.c_str());
 
   pp.get("verbosity", m_verbosity);
+}
+
+void
+RtSolver::computeLoads(Vector<long long>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level) const noexcept
+{
+  CH_TIME("RtSolver::computeLoads");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeLoads" << endl;
+  }
+
+  a_loads.resize(a_dbl.size(), 0LL);
+
+  for (DataIterator dit(a_dbl); dit.ok(); ++dit) {
+    a_loads[dit().intCode()] = a_dbl[dit()].numPts();
+  }
 }
 
 #include <CD_NamespaceFooter.H>

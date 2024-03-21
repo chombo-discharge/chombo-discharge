@@ -105,7 +105,6 @@ StreamerInceptionTagger::tagCells(EBAMRTags& a_tags)
       const EBISBox& ebisbox = ebisl[dit()];
 
       DenseIntVectSet& tags = (*a_tags[lvl])[dit()];
-      tags.makeEmptyBits();
 
       const EBCellFAB& tracerField    = (*m_tracerField[lvl])[dit()];
       const FArrayBox& tracerFieldReg = tracerField.getFArrayBox();

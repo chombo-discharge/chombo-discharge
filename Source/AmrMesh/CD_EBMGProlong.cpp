@@ -97,7 +97,7 @@ EBMGProlong::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar
   }
 
   // Note: MUST have the same number of ghost cells as the buffer being defined in prolongResidual
-  m_copier.ghostDefine(m_eblgCoar.getDBL(), dblCoFi, m_eblgCoar.getDomain(), IntVect::Zero);
+  m_copier.define(m_eblgCoar.getDBL(), dblCoFi, IntVect::Zero);
 
   m_isDefined = true;
 }

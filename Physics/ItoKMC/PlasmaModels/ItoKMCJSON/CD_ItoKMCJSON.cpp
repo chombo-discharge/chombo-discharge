@@ -20,6 +20,7 @@
 #include <CD_Units.H>
 #include <CD_DataParser.H>
 #include <CD_ParticleManagement.H>
+#include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::ItoKMC;
@@ -28,8 +29,9 @@ ItoKMCJSON::ItoKMCJSON()
 {
   CH_TIME("ItoKMCJSON::ItoKMCJSON");
 
-  m_verbose   = false;
-  m_className = "ItoKMCJSON";
+  m_verbose      = false;
+  m_previewRates = false;
+  m_className    = "ItoKMCJSON";
 
   this->parseVerbose();
   this->parsePPC();
@@ -42,8 +44,8 @@ ItoKMCJSON::ItoKMCJSON()
   this->initializeBackgroundSpecies();
 
   // Initialize Townsend coefficients
-  this->initializeTownsendCoefficient("alpha");
-  this->initializeTownsendCoefficient("eta");
+  m_autoAlpha = std::make_pair(false, "");
+  m_autoEta   = std::make_pair(false, "");
 
   // Initialize the plasma species
   this->initializePlasmaSpecies();
@@ -56,9 +58,24 @@ ItoKMCJSON::ItoKMCJSON()
   this->initializePhotonSpecies();
 
   // Initialize reactions
+  this->initializeTownsendCoefficient("alpha");
+  this->initializeTownsendCoefficient("eta");
   this->initializePlasmaReactions();
   this->initializePhotoReactions();
-  this->initializeSurfaceReactions();
+  this->initializeSurfaceEmission("dielectric");
+  this->initializeSurfaceEmission("electrode");
+
+  // Initialize automatic Townsend coefficients. Triggers only if
+  // user asked for it.
+  this->initializeAutomaticTownsend("alpha");
+  this->initializeAutomaticTownsend("eta");
+
+  // In case people want to preview their Townsend coefficients or rates.
+  this->previewFunctionEX(m_json["alpha"], m_alpha);
+  this->previewFunctionEX(m_json["eta"], m_eta);
+
+  // Print the fluid rates if users ask for it.
+  this->printFluidRates();
 
   // Define internals. This includes the KMC solver instantiation.
   this->define();
@@ -630,7 +647,9 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string a_coeff)
 
   const std::string baseError = "ItoKMCJSON::initializeTownsendCoefficient";
 
-  FunctionEX func;
+  FunctionEX func = [](const Real& E, const RealVect& x) -> Real {
+    return 0.0;
+  };
 
   if (!(m_json.contains(a_coeff))) {
     this->throwParserError(baseError + " but field '" + a_coeff + "' is missing");
@@ -674,16 +693,292 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string a_coeff)
       return tabulatedCoeff.interpolate<1>(Etd) * N;
     };
   }
+  else if (type == "auto") {
+    if (!(m_json[a_coeff].contains("species"))) {
+      this->throwParserError(baseError + " and got 'auto' but 'species' field is missing!");
+    }
+
+    const std::string species = m_json[a_coeff]["species"].get<std::string>();
+
+    if (!(this->isPlasmaSpecies(species))) {
+      this->throwParserError(baseError + " and got 'auto' but 'species' is not a plasma species");
+    }
+
+    if (a_coeff == "alpha") {
+      m_autoAlpha = std::make_pair(true, this->trim(species));
+    }
+    else if (a_coeff == "eta") {
+      m_autoEta = std::make_pair(true, this->trim(species));
+    }
+  }
   else {
-    this->throwParserError(baseError + "but type specification '" + type + "' is not supported");
+    this->throwParserError(baseError + " but type specification '" + type + "' is not supported");
   }
 
-  // Associate with correct internal functions.
+  // Check if we should plot the coefficient
+  bool plotCoeff = false;
+  if (m_json[a_coeff].contains("plot")) {
+    plotCoeff = m_json[a_coeff]["plot"].get<bool>();
+  }
+
+  // Associate with correct internal functions. This should be safe to do even if we are using 'auto' mode for the
+  // coefficients because proper warnings will be given later on.
   if (a_coeff == "alpha") {
-    m_alpha = func;
+    m_alpha     = func;
+    m_plotAlpha = plotCoeff;
   }
   else if (a_coeff == "eta") {
-    m_eta = func;
+    m_eta     = func;
+    m_plotEta = plotCoeff;
+  }
+  else {
+    this->throwParserError(baseError + " but input argument 'a_coeff' was not 'alpha' or 'eta'");
+  }
+}
+
+void
+ItoKMCJSON::initializeAutomaticTownsend(const std::string a_coeff)
+{
+  CH_TIME("ItoKMCJSON::initializeAutomaticTownsend");
+  if (m_verbose) {
+    pout() << m_className + "::initializeAutomaticTownsend" << endl;
+  }
+
+  // TLDR: This computes the alpha-coefficient as alpha/N = k_k/(mu * E) where k_k is the rate coefficient for purely ionizing reactions that
+  //       lead to electron growth (similarly is done for eta)
+
+  std::pair<bool, std::string> whichCoeff;
+
+  int sign;
+  if (a_coeff == "alpha") {
+    whichCoeff = m_autoAlpha;
+    sign       = 1;
+  }
+  else if (a_coeff == "eta") {
+    whichCoeff = m_autoEta;
+    sign       = -1;
+  }
+  else {
+    this->throwParserError("ItoKMCJSON::initializeAutomaticTownsend - logic bust");
+  }
+
+  if (whichCoeff.first) {
+    const std::string speciesStr = whichCoeff.second;
+    const int         speciesIdx = m_plasmaIndexMap.at(speciesStr);
+
+    // Mobility for this species.
+    const FunctionEX& mu = m_mobilityFunctions[speciesIdx];
+
+    std::vector<FunctionEX> rates;
+
+    for (int i = 0; i < m_kmcReactions.size(); i++) {
+      const std::list<size_t>& bgReactants     = m_plasmaReactionBackgroundReactants[i];
+      const std::list<size_t>& plasmaReactants = m_plasmaReactionPlasmaReactants[i];
+      const std::list<size_t>& plasmaProducts  = m_plasmaReactionPlasmaProducts[i];
+
+      if (plasmaReactants.size() == 1 && plasmaReactants.front() == speciesIdx) {
+        const FPR stateChange = m_kmcReactions[i]->getStateChange(speciesIdx);
+
+        if (sign * stateChange > (FPR)0) {
+          const FunctionEX& fluidRate = m_fluidRates[i];
+
+          auto k = [&fluidRate,
+                    stateChange,
+                    &bgReactants,
+                    &bgSpecies = this->m_backgroundSpecies,
+                    &N         = this->m_gasNumberDensity](const Real E, const RealVect x) -> Real {
+            Real k = fluidRate(E, x) * std::abs(stateChange);
+
+            const Real n = N(x);
+            for (const auto& idx : bgReactants) {
+              k *= bgSpecies[idx].molarFraction(x) * n;
+            }
+
+            return k;
+          };
+
+          rates.emplace_back(k);
+        }
+      }
+    }
+
+    auto townsendCoeff = [rates, &mu](const Real E, const RealVect x) -> Real {
+      Real k = 0.0;
+
+      for (const auto& r : rates) {
+        k += r(E, x);
+      }
+
+      k /= (std::numeric_limits<Real>::epsilon() + mu(E, x) * E);
+
+      return k;
+    };
+
+    // Initialize the coefficients.
+    if (a_coeff == "alpha") {
+      m_alpha = townsendCoeff;
+    }
+    else if (a_coeff == "eta") {
+      m_eta = townsendCoeff;
+    }
+  }
+}
+
+void
+ItoKMCJSON::printFluidRates() const noexcept
+{
+  CH_TIME("ItoKMCJSON::printFluidRates");
+  if (m_verbose) {
+    pout() << m_className + "::printFluidRates" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  bool        printRates = false;
+  Real        minEByN    = 1.0;
+  Real        maxEByN    = 1000.0;
+  RealVect    position   = RealVect::Zero;
+  int         numPoints  = 200;
+  std::string spacing    = "exponential";
+  std::string filename   = "fluid_rates.dat";
+
+  pp.query("print_rates", printRates);
+
+  if (printRates) {
+    Vector<Real> pos;
+    pp.query("print_rates_minEN", minEByN);
+    pp.query("print_rates_maxEN", maxEByN);
+    pp.query("print_rates_num_points", numPoints);
+    pp.query("print_rates_spacing", spacing);
+    pp.query("print_rates_filename", filename);
+    pp.queryarr("print_rates_pos", pos, 0, SpaceDim);
+
+    minEByN  = std::max(0.0, minEByN);
+    maxEByN  = std::max(0.0, maxEByN);
+    position = RealVect(D_DECL(pos[0], pos[1], pos[2]));
+
+    CH_assert(maxEByN > minEByN);
+    CH_assert(numPoints >= 2);
+
+    const Real N = m_gasNumberDensity(position);
+
+    // Build the grid
+    std::vector<Real> EN;
+    std::vector<Real> E;
+    for (int i = 0; i < numPoints; i++) {
+      Real curEN;
+      Real curE;
+      if (spacing == "uniform") {
+        curEN = minEByN + i * (maxEByN - minEByN) / (numPoints - 1);
+      }
+      else if (spacing == "exponential") {
+        curEN = minEByN * std::pow(10.0, i * log10(maxEByN / minEByN) / (numPoints - 1));
+      }
+
+      curE = curEN * m_gasNumberDensity(position) * Units::Td;
+
+      EN.push_back(curEN);
+      E.push_back(curE);
+    }
+
+#ifdef CH_MPI
+    if (procID() == 0) {
+#endif
+      std::ofstream outputFile;
+
+      outputFile.open(filename);
+      for (int i = 0; i < numPoints; i++) {
+        outputFile << std::left << std::setw(14) << EN[i];
+
+        for (int k = 0; k < m_fluidRates.size(); k++) {
+          outputFile << std::left << std::setw(14) << m_fluidRates[k](E[i], position);
+        }
+        outputFile << "\n";
+      }
+
+      outputFile.close();
+#ifdef CH_MPI
+    }
+#endif
+  }
+}
+
+void
+ItoKMCJSON::previewFunctionEX(const nlohmann::json& a_json, const FunctionEX& a_function) const
+{
+  CH_TIME("ItoKMCJSON::previewFunctionEX");
+  if (m_verbose) {
+    pout() << m_className + "::previewFunctionEX" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::previewFunctionEX";
+
+  if ((a_json.contains("preview"))) {
+    const std::string fileName = a_json["preview"].get<std::string>();
+
+    // Some default settings that can be changed.
+    Real        minEbyN   = 1.0;
+    Real        maxEbyN   = 1000.0;
+    RealVect    position  = RealVect::Zero;
+    int         numPoints = 100;
+    std::string spacing   = "exponential";
+
+    if (a_json.contains("preview min E/N")) {
+      minEbyN = a_json["preview min E/N"].get<Real>();
+    }
+    if (a_json.contains("preview max E/N")) {
+      maxEbyN = a_json["preview max E/N"].get<Real>();
+    }
+    if (a_json.contains("preview num points")) {
+      numPoints = a_json["preview num points"].get<int>();
+      if (numPoints <= 1) {
+        this->throwParserError(baseError + " but can't have 'preview num points' <= 1");
+      }
+    }
+    if (a_json.contains("preview spacing")) {
+      spacing = this->trim(a_json["preview spacing"].get<string>());
+
+      if (!(spacing == "exponential" || spacing == "uniform")) {
+        this->throwParserError(baseError + " but 'preview spacing' is not 'exponential' or 'uniform'");
+      }
+      if (minEbyN <= std::numeric_limits<Real>::epsilon()) {
+        this->throwParserError(baseError + " but 'preview spacing' can't be 'exponential' with 'min E/N <= 0'");
+      }
+    }
+    if (a_json.contains("preview pos")) {
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        position[dir] = a_json["preview pos"][dir].get<Real>();
+      }
+    }
+
+    // Write to file
+#ifdef CH_MPI
+    if (procID() == 0) {
+#endif
+      std::ofstream outputFile;
+
+      outputFile.open(fileName);
+
+      for (int i = 0; i < numPoints; i++) {
+        Real EN;
+        if (spacing == "uniform") {
+          EN = minEbyN + i * (maxEbyN - minEbyN) / (numPoints - 1);
+        }
+        else if (spacing == "exponential") {
+          EN = minEbyN * std::pow(10.0, i * log10(maxEbyN / minEbyN) / (numPoints - 1));
+        }
+
+        const Real E = EN * m_gasNumberDensity(position) * Units::Td;
+
+        outputFile << std::left << std::setw(14) << EN;
+        outputFile << std::left << std::setw(14) << a_function(E, position);
+        outputFile << "\n";
+      }
+
+      outputFile.close();
+#ifdef CH_MPI
+    }
+#endif
   }
 }
 
@@ -1292,6 +1587,44 @@ ItoKMCJSON::initializePhotonSpecies()
         return K1 * std::pow(K2 / K1, a);
       };
     }
+    else if (type == "stochastic B") {
+      if (!(kappaJSON.contains("chi min"))) {
+        this->throwParserError(baseErrorID + " and got 'stochastic B' but field 'chi min' is not specified");
+      }
+      if (!(kappaJSON.contains("chi max"))) {
+        this->throwParserError(baseErrorID + " and got 'stochastic B' but field 'chi max' is not specified");
+      }
+      if (!(kappaJSON.contains("neutral"))) {
+        this->throwParserError(baseErrorID + " and got 'stochastic B' but field 'neutral' is not specified");
+      }
+
+      const Real        chiMin  = kappaJSON["chi min"].get<Real>();
+      const Real        chiMax  = kappaJSON["chi max"].get<Real>();
+      const std::string neutral = this->trim(kappaJSON["neutral"].get<std::string>());
+
+      if (chiMin >= chiMax) {
+        this->throwParserError(baseErrorID + " and got 'stochastic B' but can't have 'chi min' >= 'chi max'");
+      }
+      if (m_backgroundSpeciesMap.count(neutral) != 1) {
+        this->throwParserError(baseErrorID + " and got 'stochastic B' but don't now species '" + neutral + "'");
+      }
+
+      kappaFunction = [x1              = chiMin,
+                       x2              = chiMax,
+                       &gasPressure    = this->m_gasPressure,
+                       &neutralSpecies = this->m_backgroundSpecies[m_backgroundSpeciesMap.at(neutral)]](
+                        const RealVect a_position) mutable -> Real {
+        const Real m = neutralSpecies.molarFraction(a_position);
+        const Real P = gasPressure(a_position);
+        const Real p = m * P;
+
+        const Real u  = Random::getUniformReal01();
+        const Real K1 = x1 * p;
+        const Real K2 = x2 * p;
+
+        return K1 * std::pow(K2 / K1, u);
+      };
+    }
     else {
       this->throwParserError(baseErrorID + " but type specification '" + type + "' is not supported");
     }
@@ -1386,9 +1719,15 @@ ItoKMCJSON::initializePlasmaReactions()
 
       m_kmcReactions.emplace_back(std::make_shared<KMCReaction>(plasmaReactants, plasmaProducts, photonProducts));
       m_kmcReactionRates.emplace_back(reactionRates.first);
-      m_fluidRates.emplace_back(reactionRates.second);
       m_kmcReactionRatePlots.emplace_back(reactionPlot);
       m_kmcReactionGradientCorrections.emplace_back(gradientCorrection);
+      m_fluidRates.emplace_back(reactionRates.second);
+
+      // Store the list of reactants/products.
+      m_plasmaReactionPlasmaReactants.emplace_back(plasmaReactants);
+      m_plasmaReactionBackgroundReactants.emplace_back(backgroundReactants);
+      m_plasmaReactionPlasmaProducts.emplace_back(plasmaProducts);
+      m_plasmaReactionPhotonProducts.emplace_back(photonProducts);
     }
   }
 }
@@ -1476,14 +1815,161 @@ ItoKMCJSON::initializePhotoReactions()
 }
 
 void
-ItoKMCJSON::initializeSurfaceReactions()
+ItoKMCJSON::initializeSurfaceEmission(const std::string a_surface)
 {
-  CH_TIME("ItoKMCJSON::initializeSurfaceReactions");
+  CH_TIME("ItoKMCJSON::initializeSurfaceEmission");
   if (m_verbose) {
-    pout() << m_className + "::initializeSurfaceReactions" << endl;
+    pout() << m_className + "::initializeSurfaceEmission" << endl;
   }
 
-  pout() << "ItoKMCJSON::initializeSurfaceReactions - not implemented" << endl;
+  const std::string baseError = "ItoKMCJSON::initializePhotoReactions";
+
+  std::string reactionSpecifier;
+  if (a_surface == "dielectric") {
+    reactionSpecifier = "dielectric emission";
+  }
+  else if (a_surface == "electrode") {
+    reactionSpecifier = "electrode emission";
+  }
+  else {
+    MayDay::Abort("ItoKMCJSON::initializeSurfaceEmission -- logic bust");
+  }
+
+  for (const auto& reactionJSON : m_json[reactionSpecifier]) {
+    if (!(reactionJSON.contains("reaction"))) {
+      this->throwParserError(baseError + " but one of the reactions is missing the field 'reaction'");
+    }
+    if (!(reactionJSON.contains("efficiencies")) && !(reactionJSON.contains("efficiency"))) {
+      this->throwParserError(baseError + " but one of the reactions is missing the field 'efficiencies/efficiency'");
+    }
+
+    const std::string reaction    = this->trim(reactionJSON["reaction"].get<std::string>());
+    const std::string baseErrorID = baseError + " for reaction '" + reaction + "'";
+
+    std::vector<std::string> reactants;
+    std::vector<std::string> products;
+    std::vector<Real>        efficiencies;
+
+    this->parseReactionString(reactants, products, reaction);
+
+    const auto reactionSets = this->parseReactionWildcards(reactants, products, reactionJSON);
+
+    if (reactionJSON.contains("efficiencies") && !(reactionJSON.contains("efficiency"))) {
+      efficiencies = reactionJSON["efficiencies"].get<std::vector<Real>>();
+    }
+    else if (!(reactionJSON.contains("efficiencies")) && reactionJSON.contains("efficiency")) {
+      efficiencies.push_back(reactionJSON["efficiency"].get<Real>());
+    }
+    else {
+      this->throwParserError(baseErrorID + " but reaction contains both 'efficiencies' and 'efficiency'");
+    }
+
+    if (efficiencies.size() != reactionSets.size()) {
+      this->throwParserError(baseErrorID + " but efficiencies array does not match number of wildcards");
+    }
+
+    for (int i = 0; i < reactionSets.size(); i++) {
+      const auto curReaction = reactionSets[i];
+
+      const std::string              wildcard     = std::get<0>(curReaction);
+      const std::vector<std::string> curReactants = std::get<1>(curReaction);
+      const std::vector<std::string> curProducts  = std::get<2>(curReaction);
+
+      // Ignore species which are enclosed by brackets (), except if (null) is included
+      std::vector<std::string> trimmedReactants;
+      std::vector<std::string> trimmedProducts;
+      for (const auto& r : curReactants) {
+        if (!(this->isBracketed(r))) {
+          trimmedReactants.emplace_back(r);
+        }
+      }
+      for (const auto& p : curProducts) {
+        if (!(this->isBracketed(p)) || p == "(null)") {
+          trimmedProducts.emplace_back(p);
+        }
+      }
+
+      // Do not permit more than one species on the right-hand side.
+      if (trimmedReactants.size() != 1) {
+        this->throwParserError(baseErrorID + " - only one species allowed on the left-hand side (can't be wildcard)");
+      }
+
+      // Left-hand side must be a particle species (Ito or photon)
+      const std::string r        = trimmedReactants.front();
+      const bool        isPlasma = this->isPlasmaSpecies(r);
+      const bool        isPhoton = this->isPhotonSpecies(r);
+
+      size_t reactantIndex;
+
+      if (isPhoton) {
+        reactantIndex = m_photonIndexMap.at(r);
+      }
+      else if (isPlasma) {
+        const SpeciesType speciesType = m_plasmaSpeciesTypes.at(r);
+
+        if (speciesType != SpeciesType::Ito) {
+          this->throwParserError(baseErrorID + " but reactant is not a particle (Ito or photon) species");
+        }
+
+        reactantIndex = m_itoSpeciesMap.at(r);
+      }
+      else {
+        this->throwParserError(baseErrorID + " but reactant is not a particle (Ito or photon) species");
+      }
+
+      // Turn product strings into indices
+      std::list<size_t> productIndices;
+      for (const auto& p : trimmedProducts) {
+        if (p != "(null)") {
+          if (this->isPhotonSpecies(p)) {
+            this->throwParserError(baseErrorID + " but product must be an Ito species");
+          }
+          else if (this->isPlasmaSpecies(p)) {
+            if (m_plasmaSpeciesTypes.at(p) != SpeciesType::Ito) {
+              this->throwParserError(baseErrorID + " but product must be an Ito species");
+            }
+          }
+          else {
+            this->throwParserError(baseErrorID + " but product must be an Ito species");
+          }
+
+          productIndices.emplace_back((size_t)m_itoSpeciesMap.at(p));
+        }
+      }
+
+      // Create the reaction and append it to the set.
+      ItoKMCSurfaceReaction reaction(reactantIndex, productIndices, efficiencies[i]);
+
+      ItoKMCSurfaceReactions reactions;
+
+      reactions.add(reaction);
+
+      if (isPlasma && a_surface == "dielectric") {
+        m_surfaceReactions.add(reactantIndex,
+                               reaction,
+                               ItoKMCSurfaceReactionSet::Surface::Dielectric,
+                               ItoKMCSurfaceReactionSet::Species::Plasma);
+      }
+      else if (isPlasma && a_surface == "electrode") {
+        m_surfaceReactions.add(reactantIndex,
+                               reaction,
+                               ItoKMCSurfaceReactionSet::Surface::Electrode,
+                               ItoKMCSurfaceReactionSet::Species::Plasma);
+      }
+      else if (isPhoton && a_surface == "dielectric") {
+        m_surfaceReactions.add(reactantIndex,
+                               reaction,
+                               ItoKMCSurfaceReactionSet::Surface::Dielectric,
+                               ItoKMCSurfaceReactionSet::Species::Photon);
+      }
+      else if (isPhoton && a_surface == "electrode") {
+        m_surfaceReactions.add(reactantIndex,
+                               reaction,
+                               ItoKMCSurfaceReactionSet::Surface::Electrode,
+                               ItoKMCSurfaceReactionSet::Species::Photon);
+      }
+    }
+  }
 }
 
 void
@@ -1851,6 +2337,9 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     if (!(a_reactionJSON.contains("species"))) {
       this->throwParserError(baseError + " and got 'alpha*v' but 'species' not not specified!");
     }
+    if (m_autoAlpha.first) {
+      this->throwParserError(baseError + " and got 'alpha*v' but 'alpha' is in auto-mode!");
+    }
 
     const std::string species = a_reactionJSON["species"].get<std::string>();
 
@@ -1867,6 +2356,9 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   else if (type == "eta*v") {
     if (!(a_reactionJSON.contains("species"))) {
       this->throwParserError(baseError + " and got 'eta*v' but 'species' not not specified!");
+    }
+    if (m_autoEta.first) {
+      this->throwParserError(baseError + " and got 'eta*v' but 'eta' is in auto-mode!");
     }
 
     const std::string species = a_reactionJSON["species"].get<std::string>();
@@ -2030,7 +2522,6 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   }
 
   // Scale the reaction according to various input variables.
-
   if (a_reactionJSON.contains("scale")) {
     const Real scale = a_reactionJSON["scale"].get<Real>();
 
@@ -2043,6 +2534,34 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     fluidRate = [fluidRate, efficiency](const Real E, const RealVect x) {
       return fluidRate(E, x) * efficiency;
+    };
+  }
+  if (a_reactionJSON.contains("efficiency vs E/N")) {
+    const std::string file = a_reactionJSON["efficiency vs E/N"].get<std::string>();
+
+    LookupTable1D<Real, 1> tabulatedEfficiency = DataParser::simpleFileReadASCII(file);
+
+    tabulatedEfficiency.prepareTable(0, 500, LookupTable::Spacing::Uniform);
+
+    fluidRate = [fluidRate, tabulatedEfficiency, &N = this->m_gasNumberDensity](const Real E, const RealVect x) {
+      const Real ETd = E / (N(x) * Units::Td);
+
+      const Real eff = tabulatedEfficiency.interpolate<1>(ETd);
+
+      return eff * fluidRate(E, x);
+    };
+  }
+  if (a_reactionJSON.contains("efficiency vs E")) {
+    const std::string file = a_reactionJSON["efficiency vs E"].get<std::string>();
+
+    LookupTable1D<Real, 1> tabulatedEfficiency = DataParser::simpleFileReadASCII(file);
+
+    tabulatedEfficiency.prepareTable(0, 500, LookupTable::Spacing::Uniform);
+
+    fluidRate = [fluidRate, tabulatedEfficiency](const Real E, const RealVect x) {
+      const Real eff = tabulatedEfficiency.interpolate<1>(E);
+
+      return eff * fluidRate(E, x);
     };
   }
   if (a_reactionJSON.contains("quenching pressure")) {
@@ -2289,7 +2808,7 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
   return tabulatedCoefficient;
 }
 
-std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
+std::vector<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
 ItoKMCJSON::parseReactionWildcards(const std::vector<std::string>& a_reactants,
                                    const std::vector<std::string>& a_products,
                                    const nlohmann::json&           a_reactionJSON) const noexcept
@@ -2300,7 +2819,7 @@ ItoKMCJSON::parseReactionWildcards(const std::vector<std::string>& a_reactants,
   }
 
   // This is what we return. A horrific creature.
-  std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>> reactionSets;
+  std::vector<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>> reactionSets;
 
   // This is the reaction name.
   const std::string reaction  = a_reactionJSON["reaction"].get<std::string>();
@@ -2491,6 +3010,98 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
   if (m_verbose) {
     pout() << m_className + "::secondaryEmissionEB" << endl;
   }
+
+  const bool isCathode = a_E.dotProduct(a_bndryNormal) <= 0.0;
+  const bool isAnode   = !isCathode;
+
+  RealVect lo = -0.5 * RealVect::Unit;
+  RealVect hi = +0.5 * RealVect::Unit;
+
+  DataOps::computeMinValidBox(lo, hi, a_bndryNormal, a_bndryCentroid);
+
+  // Outflow for all CDR fluxes.
+  for (int i = 0; i < a_primaryCDRFluxes.size(); i++) {
+    a_secondaryCDRFluxes[i] = std::max(a_primaryCDRFluxes[i], 0.0);
+  }
+
+  // Go through all primary particles.
+  const std::map<size_t, ItoKMCSurfaceReactions>& plasmaReactions =
+    a_isDielectric ? m_surfaceReactions.getDielectricPlasmaReactions()
+                   : m_surfaceReactions.getElectrodePlasmaReactions();
+
+  const std::map<size_t, ItoKMCSurfaceReactions>& photonReactions =
+    a_isDielectric ? m_surfaceReactions.getDielectricPhotonReactions()
+                   : m_surfaceReactions.getElectrodePhotonReactions();
+
+  // Do secondary emission for each intersected particle if there's a corresponding surface reaction.
+  for (int i = 0; i < m_itoSpecies.size(); i++) {
+    if (plasmaReactions.count(i) > 0) {
+
+      // These are the products and distribution for this reaction.
+      const auto& reactions      = plasmaReactions.at(i);
+      const auto& plasmaProducts = reactions.getProducts();
+      const auto& distribution   = reactions.getDistribution();
+
+      // Figure out the number of particles to sample and then run a multinomial sampling
+      size_t N = 0;
+      for (ListIterator<ItoParticle> lit(a_primaryParticles[i]); lit.ok(); ++lit) {
+        N += (size_t)lit().weight();
+      }
+
+      const std::vector<size_t> X = this->multinomial(N, distribution);
+
+      // Release the particles.
+      for (int i = 0; i < X.size(); i++) {
+        if (X[i] > 0) {
+          const RealVect releasePosition =
+            Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
+
+          for (const auto& p : plasmaProducts[i]) {
+            const int Z = m_itoSpecies[p]->getChargeNumber();
+
+            if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
+              a_secondaryParticles[p].add(ItoParticle(1.0 * X[i], releasePosition));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Do secondary emission for each intersected photon if there's a corresponding surface reaction.
+  for (int i = 0; i < m_rtSpecies.size(); i++) {
+    if (photonReactions.count(i) > 0) {
+
+      // These are the products and distribution for this reaction.
+      const auto& reactions      = photonReactions.at(i);
+      const auto& plasmaProducts = reactions.getProducts();
+      const auto& distribution   = reactions.getDistribution();
+
+      // Figure out the number of particles to sample and then run a multinomial sampling
+      size_t N = 0;
+      for (ListIterator<Photon> lit(a_primaryPhotons[i]); lit.ok(); ++lit) {
+        N += (size_t)lit().weight();
+      }
+
+      const std::vector<size_t> X = this->multinomial(N, distribution);
+
+      // Release the particles.
+      for (int i = 0; i < X.size(); i++) {
+        if (X[i] > 0) {
+          const RealVect releasePosition =
+            Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
+
+          for (const auto& p : plasmaProducts[i]) {
+            const int Z = m_itoSpecies[p]->getChargeNumber();
+
+            if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
+              a_secondaryParticles[p].add(ItoParticle(1.0 * X[i], releasePosition));
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 int
@@ -2517,6 +3128,14 @@ ItoKMCJSON::getNumberOfPlotVariables() const noexcept
     if (std::get<0>(m_kmcReactionRatePlots[i])) {
       numPlots++;
     }
+  }
+
+  if (m_plotAlpha) {
+    numPlots++;
+  }
+
+  if (m_plotEta) {
+    numPlots++;
   }
 
   return numPlots;
@@ -2548,6 +3167,13 @@ ItoKMCJSON::getPlotVariableNames() const noexcept
     if (std::get<0>(m_kmcReactionRatePlots[i])) {
       plotVariableNames.push_back(std::get<1>(m_kmcReactionRatePlots[i]));
     }
+  }
+
+  if (m_plotAlpha) {
+    plotVariableNames.push_back("Townsend ionization coefficient");
+  }
+  if (m_plotEta) {
+    plotVariableNames.push_back("Townsend attachment coefficient");
   }
 
   return plotVariableNames;
@@ -2590,7 +3216,43 @@ ItoKMCJSON::getPlotVariables(const RealVect          a_E,
     }
   }
 
+  if (m_plotAlpha) {
+    plotVars.push_back(m_alpha(E, a_pos));
+  }
+  if (m_plotEta) {
+    plotVars.push_back(m_eta(E, a_pos));
+  }
+
   return plotVars;
+}
+
+std::vector<size_t>
+ItoKMCJSON::multinomial(const size_t N, const std::discrete_distribution<size_t>& a_distribution) const noexcept
+{
+  CH_TIME("ItoKMCJSON::multinomial");
+  if (m_verbose) {
+    pout() << m_className + "::multinomial" << endl;
+  }
+
+  const std::vector<double>& P = a_distribution.probabilities();
+
+  std::vector<size_t> X(P.size(), 0);
+
+  size_t S   = N;
+  Real   rho = 1.0;
+
+  for (int i = 0; i < P.size(); i++) {
+    if (rho > 0.0) {
+      std::binomial_distribution<size_t> d(S, P[i] / rho);
+
+      X[i] = Random::getDiscrete(d);
+    }
+
+    rho = rho - P[i];
+    S   = S - X[i];
+  }
+
+  return X;
 }
 
 #include <CD_NamespaceFooter.H>

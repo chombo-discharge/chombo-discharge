@@ -163,6 +163,24 @@ public:
        const Real                  a_b) noexcept;
 
   /*!
+    @brief Compute a new value given the old cell value. 
+    @details Useful for quickly calculating a cell value as e.g. exp(x) where the original data was only x
+    @param[inout] a_data Input data
+    @param[in]    a_func Function for transforming the data
+  */
+  static void
+  compute(EBAMRCellData& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept;
+
+  /*!
+    @brief Compute a new value given the old cell value. 
+    @details Useful for quickly calculating a cell value as e.g. exp(x) where the original data was only x
+    @param[inout] a_data Input data
+    @param[in]    a_func Function for transforming the data
+  */
+  static void
+  compute(LevelData<EBCellFAB>& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept;
+
+  /*!
     @brief Compote the cell-wise dot product between two data holders. 
     @param[out] a_result Result. Holds the dot product in each cell.
     @param[in]  a_data1 First data holder.
@@ -219,9 +237,12 @@ public:
     @param[inout] a_data   Data to be filtered.
     @param[in]    a_alpha  Filter factor
     @param[in]    a_stride Cell stride s
+    @param[in]    a_zeroEB Set value in covered cells to zero or not
+    @note This routine will fill ghost cells outside the domain boundary, but ignore the corner ghost cells at the domain corners. This routine may
+    be dangerous to use with EBs as the data inside the EB is either kept as-is or replaced by zero.
   */
   static void
-  filterSmooth(EBAMRCellData& a_data, const Real a_alpha, const int a_stride) noexcept;
+  filterSmooth(EBAMRCellData& a_data, const Real a_alpha, const int a_stride, const bool a_zeroEB) noexcept;
 
   /*!
     @brief Apply a convolved filter phi = alpha * phi_i + 0.5*(1-alpha) * [phi_(i+s) + phi_(i-s)] in each direction. 
@@ -229,9 +250,12 @@ public:
     @param[inout] a_data   Data to be filtered.
     @param[in]    a_alpha  Filter factor
     @param[in]    a_stride Cell stride s
+    @param[in]    a_zeroEB Set value in covered cells to zero or not
+    @note This routine will fill ghost cells outside the domain boundary, but ignore the corner ghost cells at the domain corners. This routine may
+    be dangerous to use with EBs as the data inside the EB is either kept as-is or replaced by zero.
   */
   static void
-  filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const int a_stride) noexcept;
+  filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const int a_stride, const bool a_zeroEB) noexcept;
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
@@ -1324,6 +1348,20 @@ public:
   */
   static void
   squareRoot(LevelData<EBFluxFAB>& a_lhs);
+
+  /*!
+    @brief Take the square root of the input data
+    @param[inout] a_data Input data
+  */
+  static void
+  squareRoot(MFAMRCellData& a_data);
+
+  /*!
+    @brief Take the square root of the input data
+    @param[inout] a_data Input data
+  */
+  static void
+  squareRoot(LevelData<MFCellFAB>& a_data);
 
   /*!
     @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components. 

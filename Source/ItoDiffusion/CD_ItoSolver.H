@@ -21,6 +21,8 @@
 #include <CD_ParticleContainer.H>
 #include <CD_EBRepresentation.H>
 #include <CD_EBIntersection.H>
+#include <CD_CellInfo.H>
+#include <CD_ParticleManagement.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -32,13 +34,6 @@
 class ItoSolver
 {
 public:
-  /*!
-    @brief Concept for splitting/merging particles
-    @param[inout] a_particles Particles to be merged/split
-    @param[in] a_numTargetParticles Number of target particles
-  */
-  using ParticleMerger = std::function<void(List<ItoParticle>& a_particles, const int a_numTargetParticles)>;
-
   /*!
     @brief Enum class for distinguishing various types of particle containers.
     @details This exists because the ItoSolver can partition particles into various containers, which is very useful when one wants to add particles from
@@ -71,17 +66,11 @@ public:
   virtual ~ItoSolver();
 
   /*!
-    @brief Set a default particle merger. This defaults to KD-tree merging following an "equal weight" principle.
-  */
-  virtual void
-  setDefaultParticleMerger() noexcept;
-
-  /*!
     @brief Set the particle merger. This will get called when merging particles using makeSuperparticles.
     @param[in] a_particleMerger Particle merger
   */
   virtual void
-  setParticleMerger(const ParticleMerger& a_particleMerger) noexcept;
+  setParticleMerger(const ParticleManagement::ParticleMerger<ItoParticle>& a_particleMerger) noexcept;
 
   /*!
     @brief Get this solver's name 
@@ -829,6 +818,35 @@ public:
                      const DataIndex      a_dit);
 
   /*!
+    @brief General superparticle merging with underlying algorithm through m_particleMerger
+    @param[inout] a_particles        Particles to be merged/split
+    @param[in]    a_cellInfo         Arithmetic information about the current grid cell. 
+    @param[in]    a_particlesPerCell Target number of particles per cell
+  */
+  virtual void
+  mergeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_particlesPerCell);
+
+  /*!
+    @brief Superparticle merging with KD/BVH trees
+    @param[inout] a_particles        Particles to be merged/split
+    @param[in]    a_cellInfo         Arithmetic information about the current grid cell. 
+    @param[in]    a_particlesPerCell Target number of particles per cell
+  */
+  virtual void
+  makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
+                                  const CellInfo&    a_cellInfo,
+                                  const int          a_particlesPerCell);
+
+  /*!
+    @brief Particle re-initialization algorithm
+    @param[inout] a_particles        Particles to be merged/split
+    @param[in]    a_cellInfo         Arithmetic information about the current grid cell. 
+    @param[in]    a_particlesPerCell Target number of particles per cell
+  */
+  virtual void
+  reinitializeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_particlesPerCell);
+
+  /*!
     @brief Remap the bulk particle container.
   */
   virtual void
@@ -1049,7 +1067,7 @@ protected:
   /*!
     @brief Particle merger
   */
-  ParticleMerger m_particleMerger;
+  ParticleManagement::ParticleMerger<ItoParticle> m_particleMerger;
 
   /*!
     @brief Number of particles used when restarting a simulation -- this is relevant only when restarting from a "fluid" checkpoint file. 
@@ -1287,6 +1305,12 @@ protected:
   parseDeposition();
 
   /*!
+    @brief Parse the super-particle merger
+  */
+  void
+  parseParticleMerger();
+
+  /*!
     @brief Parse EB intersection algorithms
   */
   void
@@ -1444,14 +1468,6 @@ protected:
   */
   virtual void
   depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC) const;
-
-  /*!
-    @brief Superparticle merging with KD/BVH trees
-    @param[inout] a_particles        Particles to be merged/split
-    @param[in]    a_particlesPerCell Target number of particles per cell
-  */
-  virtual void
-  makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles, const int a_particlesPerCell);
 
   /*!
     @brief Interpolate mobilities -- this will switch between the two ways of computing the particle mobility.

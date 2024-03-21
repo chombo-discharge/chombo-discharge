@@ -239,6 +239,13 @@ public:
   setSigma(const Real a_sigma);
 
   /*!
+    @brief Set surface charge density to spatially dependent function
+    @param[in] a_sigma Spatially dependent value of the surface charge density.
+  */
+  void
+  setSigma(const std::function<Real(const RealVect)>& a_sigma);
+
+  /*!
     @brief Set the computational geometry
     @param[in] a_computationalGeometry Computational geometry. 
   */
@@ -330,6 +337,22 @@ public:
                       const std::string        a_outputRealm,
                       const int                a_level,
                       const bool               a_interp) const noexcept;
+
+  /*!
+    @brief Write surface data to volume data holder. 
+    @details This takes the valid data from a_data and puts in onto a_output. 
+    @param[inout] a_output Output data holder
+    @param[inout] a_comp   Current component in a_output. 
+    @param[in]    a_data   Surface data. 
+    @param[in]    a_outputRealm Realm where a_output belongs
+    @param[in]    a_level Grid level
+  */
+  virtual void
+  writeSurfaceData(LevelData<EBCellFAB>&             a_output,
+                   int&                              a_comp,
+                   const LevelData<BaseIVFAB<Real>>& a_data,
+                   const std::string                 a_outputRealm,
+                   const int                         a_level) const noexcept;
 
   /*!
     @brief Set Realm
@@ -783,22 +806,6 @@ protected:
                       const EBISBox&   a_ebisbox,
                       const RealVect&  a_origin,
                       const Real&      a_dx);
-
-  /*!
-    @brief Write surface data to volume data holder. 
-    @details This takes the valid data from a_data and puts in onto a_output. 
-    @param[inout] a_output Output data holder
-    @param[inout] a_comp   Current component in a_output. 
-    @param[in]    a_data   Surface data. 
-    @param[in]    a_outputRealm Realm where a_output belongs
-    @param[in]    a_level Grid level
-  */
-  virtual void
-  writeSurfaceData(LevelData<EBCellFAB>&             a_output,
-                   int&                              a_comp,
-                   const LevelData<BaseIVFAB<Real>>& a_data,
-                   const std::string                 a_outputRealm,
-                   const int                         a_level) const noexcept;
 
   /*!
     @brief Returns BC type based on string.

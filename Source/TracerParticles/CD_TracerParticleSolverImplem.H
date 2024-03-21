@@ -39,7 +39,6 @@ inline TracerParticleSolver<P>::TracerParticleSolver()
   m_deposition           = DepositionType::CIC;
   m_interpolation        = DepositionType::CIC;
   m_coarseFineDeposition = CoarseFineDeposition::Halo;
-  m_velocityField        = nullptr;
 }
 
 template <typename P>
@@ -202,6 +201,7 @@ TracerParticleSolver<P>::allocate()
 
   // Allocate data for storing the velocity field on the mesh, and storage for the particles.
   m_amr->allocate(m_particles, m_realm);
+  m_amr->allocate(m_velocityField, m_realm, m_phase, SpaceDim);
 }
 
 template <typename P>
@@ -299,7 +299,7 @@ TracerParticleSolver<P>::setVelocity(const EBAMRCellData& a_velocityField)
     pout() << m_name + "::setVelocity(EBAMRCellData)" << endl;
   }
 
-  m_velocityField = &a_velocityField;
+  DataOps::copy(m_velocityField, a_velocityField);
 }
 
 template <typename P>
@@ -331,6 +331,7 @@ TracerParticleSolver<P>::regrid(const int a_lmin, const int a_oldFinestLevel, co
   CH_assert(a_newFinestLevel >= 0);
 
   m_amr->remapToNewGrids(m_particles, a_lmin, a_newFinestLevel);
+  m_amr->allocate(m_velocityField, m_realm, m_phase, SpaceDim);
 }
 
 template <typename P>
@@ -343,6 +344,18 @@ TracerParticleSolver<P>::remap()
   }
 
   m_particles.remap();
+}
+
+template <typename P>
+inline void
+TracerParticleSolver<P>::setDeposition(const DepositionType a_deposition) noexcept
+{
+  CH_TIME("TracerParticleSolver::setDeposition");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::setDeposition" << endl;
+  }
+
+  m_deposition = a_deposition;
 }
 
 template <typename P>
@@ -383,9 +396,7 @@ TracerParticleSolver<P>::interpolateVelocities()
     pout() << m_name + "::interpolateVelocities()" << endl;
   }
 
-  CH_assert(!(m_velocityField == nullptr));
-
-  m_amr->interpolateParticles<P, &P::velocity>(m_particles, m_realm, m_phase, *m_velocityField, m_interpolation, false);
+  m_amr->interpolateParticles<P, &P::velocity>(m_particles, m_realm, m_phase, m_velocityField, m_interpolation, false);
 }
 
 template <typename P>
@@ -513,9 +524,7 @@ TracerParticleSolver<P>::writePlotData(LevelData<EBCellFAB>& a_output,
 
   // Write the velocity field to the output data holder.
   if (m_plotVelocity) {
-    CH_assert(!(m_velocityField == nullptr));
-
-    this->writeData(a_output, a_comp, *m_velocityField, a_outputRealm, a_level, true, true);
+    this->writeData(a_output, a_comp, m_velocityField, a_outputRealm, a_level, true, true);
   }
 }
 
@@ -670,9 +679,7 @@ TracerParticleSolver<P>::getVelocityField() const
     pout() << m_name + "::getVelocityField()" << endl;
   }
 
-  CH_assert(!(m_velocityField == nullptr));
-
-  return *m_velocityField;
+  return m_velocityField;
 }
 
 template <typename P>

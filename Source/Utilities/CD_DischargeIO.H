@@ -28,6 +28,8 @@
 
 // Our includes
 #include <CD_EBAMRData.H>
+#include <CD_ParticleContainer.H>
+#include <CD_GenericParticle.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -133,8 +135,33 @@ namespace DischargeIO {
   writeEBHDF5(const EBAMRCellData& a_data, const std::string& a_file);
 #endif
 
+  /*!
+    @brief Write a particle container to an H5Part file. Good for quick and dirty visualization of particles
+    @details Use case is pretty straightforward but the user might need to cast particle types. E.g. call
+
+    writeH5Part<M,N>(a_filename, (const ParticleContainer<GenericParticle<M,N>>&) a_particles, ...)
+
+    Template substitution is not straightforward for this one. 
+    @param[in] a_filename  File name
+    @param[in] a_particles Particles. Particle type must derive from GenericParticle<M, N>
+    @param[in] a_realVars  Variable names for the M real variables
+    @param[in] a_vectVars  Variable names for the N vector variables
+    @param[in] a_shift     Particle position shift
+    @param[in] a_shift     Time 
+  */
+  template <size_t M, size_t N>
+  void
+  writeH5Part(const std::string                               a_filename,
+              const ParticleContainer<GenericParticle<M, N>>& a_particles,
+              const std::vector<std::string>                  a_realVars = std::vector<std::string>(),
+              const std::vector<std::string>                  a_vectVars = std::vector<std::string>(),
+              const RealVect                                  a_shift    = RealVect::Zero,
+              const Real                                      a_time     = 0.0) noexcept;
+
 } // namespace DischargeIO
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_DischargeIOImplem.H>
 
 #endif

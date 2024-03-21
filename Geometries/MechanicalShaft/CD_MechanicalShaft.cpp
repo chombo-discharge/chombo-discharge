@@ -79,14 +79,12 @@ MechanicalShaft::defineElectrode() noexcept
   Real length      = -1.0;
   Real innerRadius = -1.0;
   Real outerRadius = -1.0;
-  Real innerCurv   = -1.0;
-  Real outerCurv   = -1.0;
+  Real curvature   = -1.0;
 
   pp.get("electrode.live", live);
   pp.get("electrode.inner.radius", innerRadius);
   pp.get("electrode.outer.radius", outerRadius);
-  pp.get("electrode.inner.curvature", innerCurv);
-  pp.get("electrode.outer.curvature", outerCurv);
+  pp.get("electrode.curvature", curvature);
   pp.get("electrode.length", length);
   pp.get("electrode.orientation", orientation);
   pp.getarr("electrode.translate", v, 0, SpaceDim);
@@ -98,26 +96,31 @@ MechanicalShaft::defineElectrode() noexcept
   CH_assert(length > 0.0);
   CH_assert(innerRadius > 0.0);
   CH_assert(outerRadius > 0.0);
-  CH_assert(innerCurv >= 0.0);
-  CH_assert(outerCurv >= 0.0);
   CH_assert(outerRadius > innerRadius);
+  CH_assert(curvature > 0.0);
 
   std::shared_ptr<ImpFunc> outerCylinder;
   std::shared_ptr<ImpFunc> innerCylinder;
-  std::shared_ptr<ImpFunc> torus;
+  std::shared_ptr<ImpFunc> outerTorus;
+  std::shared_ptr<ImpFunc> innerTorus;
   std::shared_ptr<ImpFunc> hollowCylinder;
 
-  const Vec3 zHi(0.0, 0.0, 0.5 * outerCurv);
-  const Vec3 zLo(0.0, 0.0, -0.5 * outerCurv);
+  const Vec3 zHi(0.0, 0.0, 0.5 * curvature);
+  const Vec3 zLo(0.0, 0.0, -0.5 * curvature);
 
-  outerCylinder  = std::make_shared<EBGeometry::CylinderSDF<Real>>(zLo, zHi, outerRadius);
-  innerCylinder  = std::make_shared<EBGeometry::CylinderSDF<Real>>(zLo, zHi, innerRadius);
-  torus          = std::make_shared<EBGeometry::TorusSDF<Real>>(Vec3::zero(), outerRadius, 0.5 * outerCurv);
-  hollowCylinder = EBGeometry::Union<Real>(outerCylinder, torus);
-  hollowCylinder = EBGeometry::SmoothDifference<Real>(hollowCylinder, innerCylinder, innerCurv);
+  const Real halfCurv = 0.5 * curvature;
 
-  if (length - outerCurv > 0.0) {
-    hollowCylinder = EBGeometry::Elongate<Real>(hollowCylinder, Vec3(0.0, 0.0, 0.5 * (length - outerCurv)));
+  outerCylinder = std::make_shared<EBGeometry::CylinderSDF<Real>>(zLo, zHi, outerRadius - halfCurv);
+  innerCylinder = std::make_shared<EBGeometry::CylinderSDF<Real>>(zLo, zHi, innerRadius + halfCurv);
+  outerTorus    = std::make_shared<EBGeometry::TorusSDF<Real>>(Vec3::zero(), outerRadius - halfCurv, halfCurv);
+  innerTorus    = std::make_shared<EBGeometry::TorusSDF<Real>>(Vec3::zero(), innerRadius + halfCurv, halfCurv);
+
+  hollowCylinder = EBGeometry::Difference<Real>(outerCylinder, innerCylinder);
+  hollowCylinder = EBGeometry::Union<Real>(hollowCylinder, outerTorus);
+  hollowCylinder = EBGeometry::Union<Real>(hollowCylinder, innerTorus);
+
+  if (length - curvature > 0.0) {
+    hollowCylinder = EBGeometry::Elongate<Real>(hollowCylinder, Vec3(0.0, 0.0, 0.5 * (length - curvature)));
   }
 
   // Rotate into place and translate

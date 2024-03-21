@@ -17,6 +17,7 @@
 
 // Our includes
 #include <CD_ComputationalGeometry.H>
+#include <CD_EBGeometryIF.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -25,12 +26,30 @@
 class WireWire : public ComputationalGeometry
 {
 public:
+  /*!
+    @brief Constructor
+  */
   WireWire();
-  ~WireWire();
+
+  /*!
+    @brief Destructor
+  */
+  virtual ~WireWire();
 
 protected:
-  void
-  addWire(ParmParse& a_pp);
+  /*!
+    @brief Add another cylinder electrode
+    @param[in] a_pp Parameter parser object for the wire. 
+  */
+  virtual std::pair<std::shared_ptr<EBGeometry::ImplicitFunction<Real>>, Real>
+  addElectrode(ParmParse& a_pp);
+
+  /*!
+    @brief Add another cylinder dielectric
+    @param[in] a_pp Parameter parser object for the wire. 
+  */
+  virtual std::shared_ptr<EBGeometry::ImplicitFunction<Real>>
+  addDielectric(ParmParse& a_pp);
 };
 
 #include <CD_NamespaceFooter.H>

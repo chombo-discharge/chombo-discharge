@@ -39,6 +39,7 @@ Driver.verbosity                       = 2                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
+Driver.output_dt                       = -1.0             # Output interval (values <= 0 enforces step-based output)
 Driver.plot_interval                   = 10               # Plot interval
 Driver.checkpoint_interval             = 50               # Checkpoint interval
 Driver.regrid_interval                 = 5                # Regrid interval
@@ -80,7 +81,8 @@ FieldSolverMultigrid.bc.z.hi           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E perm         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
-FieldSolverMultigrid.filter            = 0                 # Number of filterings after Poisson solve
+FieldSolverMultigrid.filter_rho        = 0                 # Number of filterings of space charge before Poisson solve
+FieldSolverMultigrid.filter_potential  = 0                 # Number of filterings of potential after Poisson solve
 
 FieldSolverMultigrid.gmg_verbosity     = 10                # GMG verbosity
 FieldSolverMultigrid.gmg_pre_smooth    = 16                # Number of relaxations in downsweep
@@ -105,6 +107,7 @@ FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'j
 # ItoSolver class options
 # ====================================================================================================
 ItoSolver.verbosity           = -1            # Class verbosity
+ItoSolver.merge_algorithm     = reinitialize  # Particle merging algorithm (see documentation)
 ItoSolver.plt_vars            = phi mu vel dco   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.intersection_alg    = bisection     # Intersection algorithm for EB-particle intersections.
 ItoSolver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
@@ -135,7 +138,7 @@ CdrCTU.plt_vars             = phi vel src dco ebflux  # Plot variables. Options 
 CdrCTU.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
 CdrCTU.blend_conservation   = true                    # Turn on/off blending with nonconservative divergenceo
 CdrCTU.which_redistribution = volume                  # Redistribution type. 'volume', 'mass', or 'none' (turned off)
-CdrCTU.use_regrid_slopes    = false                   # Turn on/off slopes when regridding
+CdrCTU.use_regrid_slopes    = true                    # Turn on/off slopes when regridding
 CdrCTU.gmg_verbosity        = -1                      # GMG verbosity
 CdrCTU.gmg_pre_smooth       = 12                      # Number of relaxations in GMG downsweep
 CdrCTU.gmg_post_smooth      = 12                      # Number of relaxations in upsweep
@@ -156,7 +159,8 @@ CdrCTU.gmg_smoother         = red_black               # Relaxation type. 'jacobi
 # ====================================================================================================
 McPhoto.verbosity          = -1            # Solver verbosity
 McPhoto.instantaneous      = true          # Instantaneous transport or not
-McPhoto.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical photons)
+McPhoto.max_photons_per_cell        = 1             # Maximum no. generated in a cell (< = 0 yields physical photons)
+McPhoto.num_sampling_packets = 1 ## Number of sub-sampling packets for max_photons_per_cell
 McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
 McPhoto.transparent_eb     = false         # Turn on/off transparent boundaries. Only for instantaneous=true
 McPhoto.random_kappa       = true          # Randomize absorption length (taken from Photon implementation)
@@ -256,6 +260,8 @@ ItoKMCGodunovStepper.fluid_advection_diffusion_cfl         = 0.5            # Ad
 ItoKMCGodunovStepper.relax_dt_factor                       = 100.0          # Relaxation time step restriction. 
 ItoKMCGodunovStepper.min_dt                                = 25.E-12        # Minimum permitted time step
 ItoKMCGodunovStepper.max_dt                                = 1.E99          # Maximum permitted time step
+ItoKMCGodunovStepper.max_growth_dt                         = 1.E99          # Maximum permitted time step increase (dt * factor)
+ItoKMCGodunovStepper.max_shrink_dt                         = 1.E99          # Maximum permissible time step reduction (dt/factor)
 ItoKMCGodunovStepper.extend_conductivity                   = true           # Permit particles to live outside the EB to avoid bad gradients near EB
 ItoKMCGodunovStepper.smooth_conductivity                   = false          # Use bilinear smoothing on the conductivity.
 ItoKMCGodunovStepper.eb_tolerance                          = 0.0            # EB intersection test tolerance

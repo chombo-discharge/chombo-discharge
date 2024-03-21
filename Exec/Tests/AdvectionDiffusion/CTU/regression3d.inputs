@@ -44,6 +44,7 @@ Driver.stop_time                       = 100.0         # Stop time
 Driver.max_steps                       = 100           # Maximum number of steps
 Driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 Driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
+Driver.output_dt                       = -1.0             # Output interval (values <= 0 enforces step-based output)
 Driver.write_memory                    = false         # Write MPI memory report
 Driver.write_loads                     = false         # Write (accumulated) computational loads
 Driver.output_directory                = ./            # Output directory
@@ -75,7 +76,7 @@ CdrCTU.plt_vars             = phi vel src dco ebflux  # Plot variables. Options 
 CdrCTU.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
 CdrCTU.blend_conservation   = true                    # Turn on/off blending with nonconservative divergenceo
 CdrCTU.which_redistribution = volume                  # Redistribution type. 'volume', 'mass', or 'none' (turned off)
-CdrCTU.use_regrid_slopes    = false                   # Turn on/off slopes when regridding
+CdrCTU.use_regrid_slopes    = true                    # Turn on/off slopes when regridding
 CdrCTU.gmg_verbosity        = -1                      # GMG verbosity
 CdrCTU.gmg_pre_smooth       = 6                       # Number of relaxations in GMG downsweep
 CdrCTU.gmg_post_smooth      = 6                       # Number of relaxations in upsweep

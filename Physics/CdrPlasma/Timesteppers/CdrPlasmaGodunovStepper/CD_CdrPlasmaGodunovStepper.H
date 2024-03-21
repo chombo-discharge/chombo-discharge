@@ -248,6 +248,11 @@ namespace Physics {
       bool m_regridSlopes;
 
       /*!
+	@brief Use compensation step in filter or not
+      */
+      bool m_filterCompensate;
+
+      /*!
 	@brief Diffusion threshold factor
       */
       Real m_implicitDiffusionThreshold;
@@ -256,6 +261,11 @@ namespace Physics {
 	@brief Integration order for diffusion equations
       */
       int m_diffusionOrder;
+
+      /*!
+	@brief Number of filterings for space charge
+      */
+      int m_numFilterRho;
 
       /*!
 	@brief If true, we are using implicit diffusion. Otherwise it's explicit diffusion
@@ -492,6 +502,12 @@ namespace Physics {
       */
       void
       parseRegridSlopes();
+
+      /*!
+	@brief Parse filtering settings
+      */
+      void
+      parseFiltering();
 
       /*!
 	@brief Solve the semi-implicit Poisson equation

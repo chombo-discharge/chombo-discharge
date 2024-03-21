@@ -104,7 +104,24 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
       bool                        foundStencil = false;
       std::pair<Real, VoFStencil> pairSten;
 
-      // Try quadrants first.
+      // Try semi-circle first.
+      order = m_order;
+      while (!foundStencil && order > 0) {
+        foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
+                                                                vof,
+                                                                VofUtils::Neighborhood::SemiCircle,
+                                                                dit(),
+                                                                order,
+                                                                m_weight);
+        order--;
+
+        // Check if stencil reaches too far across CF
+        if (foundStencil) {
+          foundStencil = this->isStencilValidCF(pairSten.second, dit());
+        }
+      }
+
+      // Try quadrant if that didn't work.
       order = m_order;
       while (!foundStencil && order > 0) {
         foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
@@ -121,7 +138,7 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
         }
       }
 
-      // If we couldn't find in a quadrant, try a larger neighborhood
+      // Last ditch effort: Try a full radius
       order = m_order;
       while (!foundStencil && order > 0) {
         foundStencil =
@@ -144,11 +161,11 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
       }
       else {
         // Dead cell. No flux
-        // const std::string baseErr = "MFHelmholtzElectrostaticEBBC::defineSinglePhase - dead cell on domain = ";
-        // const std::string vofErr  = " on vof = ";
-        // const std::string impErr  = " (this may cause multigrid divergence)";
+        const std::string baseErr = "MFHelmholtzElectrostaticEBBC::defineSinglePhase - dead cell on domain = ";
+        const std::string vofErr  = " on vof = ";
+        const std::string impErr  = " (this may cause multigrid divergence)";
 
-        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << std::endl;
+        //        std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << std::endl;
 
         weights(vof, m_comp) = 0.0;
         stencils(vof, m_comp).clear();
@@ -174,8 +191,13 @@ MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&           a_si
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
 
+  // This is a safeguard against a corner case where we fail to correctly represent the interface region and also have
+  // no electrodes. In this case we simply bypass the flux calculation. Note that this normally happens when the user
+  // only has dielectrics AND some of the dielectric cells become incorrectly represented at the coarser multigrid levels.
+  const bool hasElectrode = m_electrostaticBCs.getBcs().size() > 0;
+
   // Do single phase cells
-  if (!a_homogeneousPhysBC) {
+  if (!a_homogeneousPhysBC && hasElectrode) {
     auto kernel = [&](const VolIndex& vof) -> void {
       const RealVect pos   = this->getBoundaryPosition(vof, a_dit);
       const Real     value = this->getElectrodePotential(pos);

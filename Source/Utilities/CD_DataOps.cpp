@@ -459,6 +459,49 @@ DataOps::axby(LevelData<EBCellFAB>&       a_lhs,
     const DataIndex& din = dit[mybox];
 
     a_lhs[din].axby(a_x[din], a_y[din], a_a, a_b);
+
+DataOps::compute(EBAMRCellData& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept
+{
+  CH_TIME("DataOps::compute(EBAMRCellData, std::function)");
+
+  for (int lvl = 0; lvl < a_data.size(); lvl++) {
+    DataOps::compute(*a_data[lvl], a_func);
+  }
+}
+
+void
+DataOps::compute(LevelData<EBCellFAB>& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept
+{
+  CH_TIME("DataOps::compute(LevelData<EBCellFAB>, std::function)");
+
+  const int nComp = a_data.nComp();
+
+  for (DataIterator dit = a_data.dataIterator(); dit.ok(); ++dit) {
+    EBCellFAB& data    = a_data[dit()];
+    FArrayBox& dataReg = data.getFArrayBox();
+
+    EBCellFAB tmp;
+    tmp.clone(data);
+    FArrayBox& tmpReg = tmp.getFArrayBox();
+
+    // Kernel regions
+    const Box&        box     = a_data.disjointBoxLayout().get(dit());
+    const EBISBox&    ebisbox = data.getEBISBox();
+    const EBGraph&    ebgraph = ebisbox.getEBGraph();
+    const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
+    VoFIterator       vofit(ivs, ebgraph);
+
+    for (int comp = 0; comp < nComp; comp++) {
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        dataReg(iv, comp) = a_func(tmpReg(iv, comp));
+      };
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        data(vof, comp) = a_func(tmp(vof, comp));
+      };
+
+      BoxLoops::loop(box, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
   }
 }
 
@@ -576,17 +619,20 @@ DataOps::dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellF
 }
 
 void
-DataOps::filterSmooth(EBAMRCellData& a_data, const Real a_alpha, const int a_stride) noexcept
+DataOps::filterSmooth(EBAMRCellData& a_data, const Real a_alpha, const int a_stride, const bool a_zeroEB) noexcept
 {
   CH_TIME("DataOps::filterSmooth(EBAMRCellData)");
 
   for (int lvl = 0; lvl < a_data.size(); lvl++) {
-    DataOps::filterSmooth(*a_data[lvl], a_alpha, a_stride);
+    DataOps::filterSmooth(*a_data[lvl], a_alpha, a_stride, a_zeroEB);
   }
 }
 
 void
-DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const int a_stride) noexcept
+DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
+                      const Real            a_alpha,
+                      const int             a_stride,
+                      const bool            a_zeroEB) noexcept
 {
   CH_TIME("DataOps::filterSmooth(LevelData<EBCellFAB>)");
 
@@ -607,106 +653,89 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const in
   const DisjointBoxLayout& dbl = a_data.disjointBoxLayout();
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    FArrayBox& data = a_data[dit()].getFArrayBox();
+    EBCellFAB& data    = a_data[dit()];
+    FArrayBox& dataReg = data.getFArrayBox();
 
     const Box            cellBox = dbl[dit()];
+    const Box            dataBox = dataReg.box();
     const EBISBox&       ebisbox = a_data[dit()].getEBISBox();
+    const EBGraph&       ebgraph = ebisbox.getEBGraph();
     const ProblemDomain& domain  = ebisbox.getDomain();
 
     // Make a copy of the input data.
-    FArrayBox phi;
-    phi.define(data.box(), 1);
+    EBCellFAB clone;
 
-    // Kernel for checking if we should indeed smooth the cell.
-    auto doThisCell = [&](const IntVect& iv) -> bool {
-      bool ret = ebisbox.isRegular(iv);
-
-      const Box grownBox = grow(Box(iv, iv), a_stride);
-
-      for (BoxIterator bit(grownBox); bit.ok(); ++bit) {
-        if (!(ebisbox.isRegular(bit()))) {
-          ret = false;
-        }
-      }
-
-      return ret;
-    };
-
-#if CH_SPACEDIM == 2
-    const Real A = std::pow(a_alpha, 2.0) * std::pow((1.0 - a_alpha) / 2.0, 0.0);
-    const Real B = std::pow(a_alpha, 1.0) * std::pow((1.0 - a_alpha) / 2.0, 1.0);
-    const Real C = std::pow(a_alpha, 0.0) * std::pow((1.0 - a_alpha) / 2.0, 2.0);
-
-    const IntVect x = a_stride * BASISV(0);
-    const IntVect y = a_stride * BASISV(1);
+    clone.define(ebisbox, dataBox, 1);
+    FArrayBox& cloneReg = clone.getFArrayBox();
 
     for (int icomp = 0; icomp < nComp; icomp++) {
 
-      // Copy current compnent into transient storage and then fill ghost cells outside of the domain.
-      phi.copy(data, icomp, 0);
+      // Do a copy.
+      const Box validBox = dataBox & domain;
+      clone.setVal(0.0);
+      clone.copy(validBox, Interval(0, 0), validBox, data, Interval(icomp, icomp));
+      if (a_zeroEB) {
+        clone.setCoveredCellVal(0.0, 0, true);
+      }
+
+      // Fill ghost cells by extending the data on the inside of the domain. This ignores corner cells.
       for (int dir = 0; dir < SpaceDim; dir++) {
         for (SideIterator sit; sit.ok(); ++sit) {
           const Box insideBox = adjCellBox(domain.domainBox(), dir, sit(), -1) & cellBox;
 
           for (BoxIterator bit(insideBox); bit.ok(); ++bit) {
             for (int s = 1; s <= a_stride; s++) {
-              phi(bit() + sign(sit()) * BASISV(dir), icomp) = data(bit(), icomp);
+              cloneReg(bit() + s * sign(sit()) * BASISV(dir)) = dataReg(bit(), icomp);
             }
           }
         }
       }
 
-      auto regularKernel = [&](const IntVect& iv) -> void {
-        if (doThisCell(iv)) {
-          data(iv, icomp) = A * phi(iv);
-          data(iv, icomp) += B * (phi(iv + x) + phi(iv - x) + phi(iv + y) + phi(iv - y));
-          data(iv, icomp) += C * (phi(iv + x + y) + phi(iv + x - y) + phi(iv - x + y) + phi(iv - x - y));
-        }
-        else {
-          data(iv, icomp) = phi(iv);
-        }
-      };
+#if CH_SPACEDIM == 2
+      const Real A = std::pow(a_alpha, 2.0) * std::pow((1.0 - a_alpha) / 2.0, 0.0);
+      const Real B = std::pow(a_alpha, 1.0) * std::pow((1.0 - a_alpha) / 2.0, 1.0);
+      const Real C = std::pow(a_alpha, 0.0) * std::pow((1.0 - a_alpha) / 2.0, 2.0);
 
-      BoxLoops::loop(cellBox, regularKernel);
-    }
+      const IntVect x = a_stride * BASISV(0);
+      const IntVect y = a_stride * BASISV(1);
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        dataReg(iv, icomp) = A * cloneReg(iv);
+        dataReg(iv, icomp) += B * (cloneReg(iv + x) + cloneReg(iv - x) + cloneReg(iv + y) + cloneReg(iv - y));
+        dataReg(iv, icomp) += C * (cloneReg(iv + x + y) + cloneReg(iv + x - y) + cloneReg(iv - x + y) +
+                                   cloneReg(iv - x - y));
+      };
 #elif CH_SPACEDIM == 3
+      const Real A = std::pow(a_alpha, 3.0) * std::pow((1.0 - a_alpha) / 2.0, 0.0);
+      const Real B = std::pow(a_alpha, 2.0) * std::pow((1.0 - a_alpha) / 2.0, 1.0);
+      const Real C = std::pow(a_alpha, 1.0) * std::pow((1.0 - a_alpha) / 2.0, 2.0);
+      const Real D = std::pow(a_alpha, 0.0) * std::pow((1.0 - a_alpha) / 2.0, 3.0);
 
-    const Real A = std::pow(a_alpha, 3.0) * std::pow((1.0 - a_alpha) / 2.0, 0.0);
-    const Real B = std::pow(a_alpha, 2.0) * std::pow((1.0 - a_alpha) / 2.0, 1.0);
-    const Real C = std::pow(a_alpha, 1.0) * std::pow((1.0 - a_alpha) / 2.0, 2.0);
-    const Real D = std::pow(a_alpha, 0.0) * std::pow((1.0 - a_alpha) / 2.0, 3.0);
-
-    const IntVect x = a_stride * BASISV(0);
-    const IntVect y = a_stride * BASISV(1);
-    const IntVect z = a_stride * BASISV(2);
-
-    for (int icomp = 0; icomp < nComp; icomp++) {
-
-      // Copy current compnent into transient storage.
-      phi.copy(data, icomp, 0);
+      const IntVect x = a_stride * BASISV(0);
+      const IntVect y = a_stride * BASISV(1);
+      const IntVect z = a_stride * BASISV(2);
 
       auto regularKernel = [&](const IntVect& iv) -> void {
-        if (doThisCell(iv)) {
-          data(iv, icomp) = A * phi(iv);
-          data(iv, icomp) += B * (phi(iv + x) + phi(iv - x) + phi(iv + y) + phi(iv - y) + phi(iv + z) + phi(iv - z));
-          data(iv, icomp) += C * (phi(iv + x + y) + phi(iv + x - y) + phi(iv - x + y) + phi(iv - x - y));
-          data(iv, icomp) += C * (phi(iv + x + z) + phi(iv + x - z) + phi(iv - x + z) + phi(iv - x - z));
-          data(iv, icomp) += C * (phi(iv + y + z) + phi(iv + y - z) + phi(iv - y + z) + phi(iv - y - z));
-          data(iv, icomp) += D *
-                             (phi(iv + x + y + z) + phi(iv + x + y - z) + phi(iv + x - y + z) + phi(iv + x - y - z));
-          data(iv, icomp) += D *
-                             (phi(iv - x + y + z) + phi(iv - x + y - z) + phi(iv - x - y + z) + phi(iv - x - y - z));
-        }
-        else {
-          data(iv, icomp) = phi(iv);
-        }
+        dataReg(iv, icomp) = A * cloneReg(iv);
+        dataReg(iv, icomp) += B * (cloneReg(iv + x) + cloneReg(iv - x) + cloneReg(iv + y) + cloneReg(iv - y) +
+                                   cloneReg(iv + z) + cloneReg(iv - z));
+        dataReg(iv, icomp) += C * (cloneReg(iv + x + y) + cloneReg(iv + x - y) + cloneReg(iv - x + y) +
+                                   cloneReg(iv - x - y));
+        dataReg(iv, icomp) += C * (cloneReg(iv + x + z) + cloneReg(iv + x - z) + cloneReg(iv - x + z) +
+                                   cloneReg(iv - x - z));
+        dataReg(iv, icomp) += C * (cloneReg(iv + y + z) + cloneReg(iv + y - z) + cloneReg(iv - y + z) +
+                                   cloneReg(iv - y - z));
+        dataReg(iv, icomp) += D * (cloneReg(iv + x + y + z) + cloneReg(iv + x + y - z) + cloneReg(iv + x - y + z) +
+                                   cloneReg(iv + x - y - z));
+        dataReg(iv, icomp) += D * (cloneReg(iv - x + y + z) + cloneReg(iv - x + y - z) + cloneReg(iv - x - y + z) +
+                                   cloneReg(iv - x - y - z));
       };
+#else
+      MayDay::Error("DataOps::filterSmooth -- dimensionality logic bust");
+#endif
 
       BoxLoops::loop(cellBox, regularKernel);
     }
-#else
-    MayDay::Error("DataOps::filterSmooth -- dimensionality logic bust");
-#endif
   }
 }
 
@@ -2988,6 +3017,57 @@ DataOps::squareRoot(LevelData<EBFluxFAB>& a_lhs)
 }
 
 void
+DataOps::squareRoot(MFAMRCellData& a_lhs)
+{
+  CH_TIME("DataOps::squareRoot(MFAMRCellData)");
+
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
+    DataOps::squareRoot(*a_lhs[lvl]);
+  }
+}
+
+void
+DataOps::squareRoot(LevelData<MFCellFAB>& a_lhs)
+{
+  CH_TIME("DataOps::squareRoot(LD<MFCellFAB>)");
+
+  const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+
+    MFCellFAB& lhs = a_lhs[dit()];
+
+    for (int i = 0; i < lhs.numPhases(); i++) {
+      EBCellFAB& phaseData    = lhs.getPhase(i);
+      FArrayBox& phaseDataReg = phaseData.getFArrayBox();
+
+      // Kernel regions
+      const Box         box     = phaseData.box();
+      const EBISBox&    ebisbox = phaseData.getEBISBox();
+      const EBGraph&    ebgraph = ebisbox.getEBGraph();
+      const IntVectSet& irreg   = ebisbox.getMultiCells(box);
+      VoFIterator       vofit(irreg, ebgraph);
+
+      // Regular cells
+      for (int comp = 0; comp < phaseData.nComp(); comp++) {
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          phaseDataReg(iv, comp) = sqrt(phaseDataReg(iv, comp));
+        };
+
+        // Cut-cells.
+        auto irregularKernel = [&](const VolIndex& vof) -> void {
+          phaseData(vof, comp) = sqrt(phaseData(vof, comp));
+        };
+
+        // Run kernels.
+        BoxLoops::loop(box, regularKernel);
+        BoxLoops::loop(vofit, irregularKernel);
+      }
+    }
+  }
+}
+
+void
 DataOps::vectorLength(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs)
 {
   CH_TIME("DataOps::vectorLength(EBAMRCellData)");
@@ -3183,7 +3263,9 @@ DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect a_nor
       RealVect shift_vector = RealVect::Zero;
       bool     allInside    = DataOps::allCornersInsideEb(corners, a_normal, a_centroid);
 
-      while (allInside) {
+      int numIter = 0;
+
+      while (allInside && numIter < num_segments) {
 
         // Shift the corners
         DataOps::shiftCorners(corners, base_shift);
@@ -3201,6 +3283,8 @@ DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect a_nor
             a_hi[dir] = 0.5 + shift_vector[dir];
           }
         }
+
+        numIter++;
       }
     }
   }

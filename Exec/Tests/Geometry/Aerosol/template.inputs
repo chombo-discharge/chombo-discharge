@@ -43,6 +43,7 @@ Driver.stop_time                       = 1.0           # Stop time
 Driver.max_steps                       = 100           # Maximum number of steps
 Driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 Driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
+Driver.output_dt                       = -1.0             # Output interval (values <= 0 enforces step-based output)
 Driver.write_memory                    = false         # Write MPI memory report
 Driver.write_loads                     = false         # Write (accumulated) computational loads
 Driver.output_directory                = ./            # Output directory
@@ -50,7 +51,7 @@ Driver.output_names                    = simulation    # Simulation output names
 Driver.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
 Driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
-Driver.plt_vars                        = 0             # 'tags', 'mpi_rank', 'levelset'
+Driver.plt_vars                        = mpi_rank             # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true          # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
@@ -84,14 +85,11 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 #
 # ====================================================================================================
 Aerosol.num_spheres       = 1             # Number of spheres
+Aerosol.invert            = false          # Invert so that instead of particles we have holes
+Aerosol.invert            = false         # Invert so that instead of particles we have holes
 Aerosol.permittivity      = 5.0           # Dielectric permittivity, if the geometry is a dielectric		
 Aerosol.eps0              = 1             # Permittivity
-Aerosol.sphere1_radius    = 1             # Sphere radius
-Aerosol.sphere1_center    = 0. 0. 0.      # Sphere center
-Aerosol.noise_amplitude   = 0.0           # Noise amplitude
-Aerosol.noise_frequency   = 1. 1. 1.      # Noise frequency
-Aerosol.noise_persistence = 0.5           # Noise persistence
-Aerosol.noise_octaves     = 1             # Noise octaves
-Aerosol.noise_reseed      = false         # Reseed noise
+Aerosol.sphere1.radius    = 0.5           # Sphere radius
+Aerosol.sphere1.center    = 0. 0. 0.      # Sphere center
 
 

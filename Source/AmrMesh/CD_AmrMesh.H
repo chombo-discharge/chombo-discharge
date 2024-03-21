@@ -98,25 +98,6 @@ public:
 
   /*!
     @brief Method for copying from a source container to a destination container. User supplies information
-    about from/to regions. 
-    @param[inout] a_dst        Destination data 
-    @param[in]    a_src        Source data
-    @param[in]    a_level      Grid level
-    @param[in]    a_fromRegion Region we copy from
-    @param[in]    a_toRegion   Region we copy into
-    @note If the user requests copying into ghosted regions, the Copiers MUST USE THE CORRECT NUMBER OF GHOST CELLS
-    @note This routine will not work if copying between grids before/after regrids. 
-  */
-  template <typename T>
-  void
-  copyData(LevelData<T>&       a_dst,
-           const LevelData<T>& a_src,
-           const int           a_level,
-           const CopyStrategy& a_toRegion   = CopyStrategy::Valid,
-           const CopyStrategy& a_fromRegion = CopyStrategy::Valid) const noexcept;
-
-  /*!
-    @brief Method for copying from a source container to a destination container. User supplies information
     @param[inout] a_dst        Destination data 
     @param[in]    a_src        Source data
     @param[in]    a_dstComps   Destination components

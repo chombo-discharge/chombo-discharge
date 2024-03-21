@@ -45,6 +45,7 @@ Driver.stop_time                       = 1.0           # Stop time
 Driver.max_steps                       = 0             # Maximum number of steps
 Driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 Driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
+Driver.output_dt                       = -1.0             # Output interval (values <= 0 enforces step-based output)
 Driver.write_memory                    = false         # Write MPI memory report
 Driver.write_loads                     = false         # Write (accumulated) computational loads
 Driver.output_directory                = ./            # Output directory
@@ -73,7 +74,8 @@ FieldSolverMultigrid.bc.y.hi   = dirichlet 1.0     # Bc type.
 FieldSolverMultigrid.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source = true              # Volume weighted space charge density or not (depends on algorithm)
-FieldSolverMultigrid.filter            = 0                 # Number of filterings after Poisson solve
+FieldSolverMultigrid.filter_rho        = 0                 # Number of filterings of space charge before Poisson solve
+FieldSolverMultigrid.filter_potential  = 0                 # Number of filterings of potential after Poisson solve
 
 FieldSolverMultigrid.gmg_verbosity     = 10        # GMG verbosity
 FieldSolverMultigrid.gmg_pre_smooth    = 10        # Number of relaxations in downsweep

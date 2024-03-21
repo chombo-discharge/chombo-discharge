@@ -1,4 +1,4 @@
-.. _Chap:KMC:
+.. _Chap:ItoKMC:
 
 Îto-KMC plasma model
 ********************
@@ -504,7 +504,7 @@ Townsend coefficients
 Townsend ionization and attachment coefficients :math:`\alpha` and :math:`\eta` must be specified, and have two usages:
 
 #. Flagging cells for refinement (users can override this).
-#. Usage in plasma reactions.
+#. Potential usage in plasma reactions (which requires particular care, see :ref:`Chap:ItoKMCWarnings`. 
 
 These are specified by including JSON entries ``alpha`` and ``eta``, e.g.
 
@@ -520,6 +520,33 @@ These are specified by including JSON entries ``alpha`` and ``eta``, e.g.
    }
 
 There are various way of specifying these, as discussed below:
+
+Automatic
+_________
+
+In auto-mode the Townsend coefficients for the electrons is automatically derived from the user-specified list of reactions.
+E.g., the Townsend ionization coefficient is computed as
+
+.. math::
+
+   \alpha = \frac{\sum k}{\mu E},
+
+where :math:`\sum k` is the sum of all ionizing reactions, also incorporating the neutral density.
+The advantage of this approach is that one may choose to discard some of the reactions from e.g. BOLSIG+ output but without recomputing the Townsend coefficients.
+   
+To automatically set Townsend coefficients, set ``type`` to auto and specify the species that is involved, e.g.
+
+.. code-block:: json
+		
+   {
+      "alpha": {
+         "type": "auto",
+	 "species": "e"
+      }
+   }
+
+The advantage of using auto-mode for the coefficients is that one automatically ensures consistency between the user-specified list of reactions and the 
+   
 
 Constant
 ________
@@ -586,7 +613,22 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
 	  "scale E/N" : 1.0,                                         // Optional scaling of the column containing E/N
 	  "scale alpha/N" : 1.0                                      // Optional scaling       
        }
-   }		
+   }
+
+Plotting
+________
+
+To include the Townsend coefficients as mesh variables in HDF5 files, include the ``plot`` specifier, e.g.
+
+.. code-block:: json
+   
+   {
+      "alpha": {
+         "type": "auto",
+	 "species": "e",
+	 "plot": true
+      }
+   }
 
 Plasma species
 --------------
@@ -1092,6 +1134,139 @@ For example:
        }
     ]
 
+Photon species
+--------------
+
+Photon species are species that are tracked using a radiative transfer solver.
+These are defined by an array of entries in a ``photon species`` JSON entry, and must define the following information:
+
+* An ID/name for the species.
+* The absorption coefficient for the photon type.
+
+Basic definition
+________________
+
+A basic definition of a single photon species is
+
+.. code-block:: json
+
+   "photon species":
+    [
+	{
+	    "id": "Y",              // Photon species id. Must be unique
+	    "kappa": {              // Specification of absorption coefficient. 
+		"type": "constant", // Specify constant absorption coefficient
+		"value": 1E4        // Value of the absorption coefficeint
+	    }
+	}
+    ]
+
+Multiple photon species are added by appending with more entries, e.g.
+
+.. code-block:: json
+
+   "photon species":
+    [
+	{
+	    "id": "Y1",             // Photon species id. Must be unique
+	    "kappa": {              // Specification of absorption coefficient. 
+		"type": "constant", // Specify constant absorption coefficient
+		"value": 1E4        // Value of the absorption coefficeint
+	    }
+	},
+	{
+	    "id": "Y2",             // Photon species id. Must be unique
+	    "kappa": {              // Specification of absorption coefficient. 
+		"type": "constant", // Specify constant absorption coefficient
+		"value": 1E4        // Value of the absorption coefficeint
+	    }
+	}	
+    ]
+
+
+Absorption coefficient
+______________________
+
+Constant
+^^^^^^^^
+
+In order to set a constant absorption coefficient, set ``type`` to constant and then specify the ``value`` field.
+For example:
+
+.. code-block:: json
+
+   "photon species":
+    [
+	{
+	    "id": "Y",
+	    "kappa": { 
+		"type": "constant",
+		"value": 1E4       
+	    }
+	}
+    ]
+
+stochastic A
+^^^^^^^^^^^^
+
+The ``stochastic A`` specifier computes a random absorption length from the expression
+
+.. math::
+
+   \kappa = \left(\chi_{\textrm{min}}p_i\right)\left(\frac{\chi_{\textrm{max}}}{\chi_{\textrm{min}}}\right)^{\frac{f-f_1}{f_2 - f_1}},
+
+where :math:`p_i` is the partial pressure of some species :math:`i`, and :math:`p_i\chi_{\textrm{min}}` and :math:`p_i\chi_{\textrm{max}}` are minimum and maximum absorption lengths on the frequency interval :math:`f\in[f_1,f_2]`.
+The user must specify :math:`\chi_{\textrm{min}}`, :math:`\chi_{\textrm{max}}`, :math:`f_1`, :math:`f_2`, and the background species used when computing :math:`p_i`.
+This is done through fields ``f1``, ``f_2``, ``chi min``, ``chi max``, and ``neutral``.
+For example:
+
+.. code-block:: json
+
+    "photon species":
+    [
+	{
+	    "id": "Y",                  
+	    "kappa": {                  
+		"type": "stochastic A", 
+		"f1":   2.925E15,       
+		"f2":   3.059E15,       
+		"chi min": 2.625E-2,    
+		"chi max": 1.5,         
+		"neutral": "O2"         
+	    }
+	}
+    ]		
+
+stochastic B
+^^^^^^^^^^^^
+
+The ``stochastic B`` specifier computes a random absorption length from the expression
+
+.. math::
+
+   \kappa = \left(\chi_{\textrm{min}}p_i\right)\left(\frac{\chi_{\textrm{max}}}{\chi_{\textrm{min}}}\right)^u,
+
+where :math:`p_i` is the partial pressure of some species :math:`i`, and :math:`p_i\chi_{\textrm{min}}` and :math:`p_i\chi_{\textrm{max}}` are minimum and maximum absorption lengths, and :math:`u` is a random number between 0 and 1.
+Note that that this is just a simpler way of using the ``stochastic A`` specifier above. 
+The user must specify :math:`\chi_{\textrm{min}}`, :math:`\chi_{\textrm{max}}`, and the background species used when computing :math:`p_i`.
+This is done through fields ``chi min``, ``chi max``, and ``neutral``.
+For example:
+
+.. code-block:: json
+
+    "photon species":
+    [
+	{
+	    "id": "Y",                  
+	    "kappa": {                  
+		"type": "stochastic B", 
+		"chi min": 2.625E-2,    
+		"chi max": 1.5,         
+		"neutral": "O2"         
+	    }
+	}
+    ]		
+
 
 Plasma reactions
 ----------------
@@ -1366,19 +1541,68 @@ Reactions efficiencies can be modified in the same way as one do with the ``scal
    k \rightarrow \nu k,
 
 where :math:`\nu` is the reaction efficiency.
-An example JSON specification is
+Specifications of the efficiency can be achieved in the forms discussed below.
+
+Constant efficiency
+^^^^^^^^^^^^^^^^^^^
+
+An example JSON specification for a constant efficiency is:
 
 .. code-block:: json
 		
     "plasma reactions":
     [
 	{
-	    "reaction": "e -> e + e + M+", // Reaction string
-	    "type": "alpha*v",             // Rate is alpha*v
-	    "species": "e",                // Species for v,
-	    "efficiency": 0.5              // Reaction efficiency.
+	    "reaction": "e -> e + e + M+", 
+	    "efficiency": 0.5              
 	}	
     ]
+
+Efficiency vs E/N
+^^^^^^^^^^^^^^^^^
+
+An example JSON specification for an efficiency computed versus :math:`E/N` is
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e -> e + e + M+", 
+	    "efficiency vs E/N": "efficiencies.dat"
+	}	
+    ]
+
+where the file ``efficiencies.dat`` must contain two-column data containing values of :math:`E/N` along the first column and efficiencies along the second column.
+An example file is e.g.
+
+.. code-block:: text
+
+   0    0
+   100  0.1
+   200  0.3
+   500  0.8
+   1000 1.0
+   
+This data is then internally convered to a uniformly spaced lookup table (see :ref:`LookupTable`).
+
+Efficiency vs E
+^^^^^^^^^^^^^^^^^
+
+An example JSON specification for an efficiency computed versus :math:`E` is
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e -> e + e + M+", 
+	    "efficiency vs E": "efficiencies.dat"
+	}	
+    ]
+
+where the file ``efficiencies.dat`` must contain two-column data containing values of :math:`E` along the first column and efficiencies along the second column.
+This method follows the same as ``efficiency vs E/N`` where the data in the input file is put in a lookup table.
 
 Quenching
 _________
@@ -1530,6 +1754,29 @@ A JSON specification that includes these
 	}	
     ]
 
+Printing rates
+______________
+
+``ItoKMCJSON`` can print the plasma reaction rates (including photon-generating ones) to file.
+This is done through an optional input argument ``print_rates`` in the input file (not the JSON specification).
+The following options are supported:
+
+.. code-block:: text
+
+   ItoKMCJSON.print_rates            = true
+   ItoKMCJSON.print_rates_minEN      = 1
+   ItoKMCJSON.print_rates_maxEN      = 1000
+   ItoKMCJSON.print_rates_num_points = 200
+   ItoKMCJSON.print_rates_spacing    = exponential
+   ItoKMCJSON.print_rates_filename   = fluid_rates.dat
+   ItoKMCJSON.print_rates_pos        = 0 0 0
+
+Setting ``ItoKMCJSON.print_rates`` to true in the input file will write all reaction rates as column data :math:`E/N, k(E/N)`.
+Here, :math:`k` indicates the *fluid rate*, so for a reaction :math:`A + B + C \xrightarrow{k}\ldots` it will include the rate :math:`k`.
+Reactions are ordered identical to the order of the reactions in the JSON specification.
+This feature is mostly used for debugging or development efforts. 
+
+
 Photoionization
 ---------------
 
@@ -1604,9 +1851,84 @@ When multiple pathways are specified this way, and they have probabilities :math
 Secondary emission
 ------------------
 
+Secondary emission is supported for particles, including photons, but not for fluid species.
+Specification of secondary emission is done separately on dielectrics and electrodes by specifying JSON entries ``electrode emission`` and ``dielectric emission``.
+The internal specification for these are identical, so all examples below use ``dielectric emission``.
+Secondary emission reactions are specified similarly to photoionization reactions.
+However, the left-hand side must consist of a single species (photon or particle), while the right-hand side can consist of multiple species.
+Wildcards ``@`` are supported, as is the ``(null)`` species which enables null-reactions, as further discussed below.
+An example JSON specification that enables secondary electron emission due to photons and ion impact is
+
+.. code-block:: json
+
+   "dielectric emission":
+   [
+      {
+         "reaction": "Y -> e",
+	 "efficiency": 0.1
+      },
+      {
+         "reaction": "Y -> (null)",
+	 "efficiency": 0.9
+      }
+   ]
+
+The ``reaction`` field specifies which reaction is triggered: The left hand side is the primary (outgoing) species and the left hand side must contain the secondary emissions.
+The left-hand side can consist of either photons (e.g., ``Y``) or particle (e.g., ``O2+``) species.
+The efficiency field specifies the efficiency of the reaction.
+When multiple reactions are specified, we randomly sample the reaction according to a discrete distribution with probabilities
+
+.. math::
+
+   p(i) = \frac{\nu_i}{\sum_i \nu_i},
+
+where :math:`\nu_i` are the efficiencies.
+Note that the efficiencies do not need to sum to one, and if only a single reaction is specified the efficiency specifier has not real effect.
+The above reactions include the null reaction in order to ensure that the correct secondary emission probability is reached, where the ``(null)`` specifier implies that no secondary emission takes place.
+In the above example the probability of secondary electron emission is 0.1, while the probability of a null-reaction (outgoing particle is absorbed without any associated emission) is 0.9.
+The above example can be compressed by using a wildcard and an ``efficiencies`` array as follows:
+
+.. code-block:: json
+
+   "dielectric emission":
+   [
+      {
+         "reaction": "Y -> @",
+	 "@": ["e", "(null)"],
+	 "efficiencies": [1,9]
+      }
+   ]
+
+where for the sake of demonstration the efficiencies are set to 1 and 9 (rather than 0.1 and 0.9).
+This has no effect on the probabilities :math:`p(i)` given above. 
+
+
+.. _Chap:ItoKMCWarnings:
+		
+Warnings and caveats
+--------------------
+
+Higher-order reactions
+______________________
+
+Usually, many rate coefficients depend on the output of other software (e.g., BOLSIG+) and the scaling of rate coefficients is not immediately obvious.
+This is particularly the case for three-body reactions with BOLSIG+ that may require scaling before running the Boltzmann solver (by scaling the input cross sections), or after running the Boltzmann solver, in which case the rate coefficients themselves might require scaling. In any case the user should investigate the cross-section file that BOLSIG+ uses, and figure out the required scaling. 
+
+.. important::
+   
+   For two-body reactions, e.g. :math:`A + B\rightarrow \varnothing` the rate coefficient must be specified in units of :math:`\textrm{m}^3\textrm{s}^{-1}`, while for three-body reactions :math:`A + B + C\rightarrow\varnothing` the rate coefficient must have units of :math:`\textrm{m}^6\textrm{s}^{-1}`.
+
+   For three-body reactions the units given by BOLSIG+ in the output file may or may not be incorrect (depending on whether or not the user scaled the cross sections).
+
+Townsend coefficients
+_____________________
+
+Townsend coefficients are not fundamentally required for specifying the reactions, but as with the higher-order reactions some of the output rates for three-body reactions might be inconsistently represented in the BOLSIG+ output files.
+For example, some care might be required when using the Townsend attachment coefficient for air when the reaction :math:`\textrm{e} + \textrm{O}_2 + \textrm{O}_2\rightarrow \textrm{O}_2^- + \textrm{O}_2` is included because the rate constant might require proper scaling after running the Boltzmann solver, but this scaling is invisible to the BOLSIG+'s calculation of the attachment coefficient :math:`\eta/N`.
+
 .. warning::
 
-   Secondary emission on surfaces are not implemented (yet). Only purely absorbing BCs are currently supported.
+   The JSON interface *does not guard* against inconsitencies in the user-provided chemistry, and provision of inconsistent :math:`\eta/N` and attachment reaction rates are quite possible.       
       
 Example programs
 ================

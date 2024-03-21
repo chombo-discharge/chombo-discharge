@@ -33,6 +33,7 @@ Driver.verbosity                       = 2                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
+Driver.output_dt                       = -1.0             # Output interval (values <= 0 enforces step-based output)
 Driver.plot_interval                   = 10               # Plot interval
 Driver.checkpoint_interval             = -1               # Checkpoint interval
 Driver.regrid_interval                 = -1               # Regrid interval
@@ -84,12 +85,13 @@ FieldSolverMultigrid.bc.y.hi           = neumann   0.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
-FieldSolverMultigrid.filter            = 0                 # Number of filterings after Poisson solve
+FieldSolverMultigrid.filter_rho        = 0                 # Number of filterings of space charge before Poisson solve
+FieldSolverMultigrid.filter_potential  = 0                 # Number of filterings of potential after Poisson solve
 
 FieldSolverMultigrid.gmg_verbosity     = -1                # GMG verbosity
-FieldSolverMultigrid.gmg_pre_smooth    = 12                # Number of relaxations in downsweep
-FieldSolverMultigrid.gmg_post_smooth   = 12                # Number of relaxations in upsweep
-FieldSolverMultigrid.gmg_bott_smooth   = 12                # Number of at bottom level (before dropping to bottom solver)
+FieldSolverMultigrid.gmg_pre_smooth    = 16                # Number of relaxations in downsweep
+FieldSolverMultigrid.gmg_post_smooth   = 16                # Number of relaxations in upsweep
+FieldSolverMultigrid.gmg_bott_smooth   = 16                # Number of at bottom level (before dropping to bottom solver)
 FieldSolverMultigrid.gmg_min_iter      = 5                 # Minimum number of iterations
 FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
@@ -121,7 +123,7 @@ CdrCTU.plt_vars             = phi vel src dco ebflux  # Plot variables. Options 
 CdrCTU.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
 CdrCTU.blend_conservation   = true                    # Turn on/off blending with nonconservative divergenceo
 CdrCTU.which_redistribution = volume                  # Redistribution type. 'volume', 'mass', or 'none' (turned off)
-CdrCTU.use_regrid_slopes    = false                   # Turn on/off slopes when regridding
+CdrCTU.use_regrid_slopes    = true                    # Turn on/off slopes when regridding
 CdrCTU.gmg_verbosity        = -1                      # GMG verbosity
 CdrCTU.gmg_pre_smooth       = 12                      # Number of relaxations in GMG downsweep
 CdrCTU.gmg_post_smooth      = 12                      # Number of relaxations in upsweep
@@ -163,17 +165,18 @@ Vessel.live_shroom   = false          # Mushroom is live or not
 # ====================================================================================================
 StreamerInceptionStepper.verbosity        = -1                      ## Chattiness.
 StreamerInceptionStepper.profile          = false                   ## Turn on/off run-time profiling
-StreamerInceptionStepper.full_integration = false                   ## Turn on/off full integration
+StreamerInceptionStepper.full_integration = true                    ## Turn on/off full integration
 StreamerInceptionStepper.mode             = stationary              ## Mode (stationary or transient)
-StreamerInceptionStepper.inception_alg    = trapz alpha 0.25        ## Integration algorithm for inception integral.
+StreamerInceptionStepper.eval_townsend    = false                   ## Evaluate Townsend criterion or not (only for stationary)
+StreamerInceptionStepper.inception_alg    = euler alpha 0.25        ## Integration algorithm for inception integral.
 StreamerInceptionStepper.output_file      = report.txt              ## Output file
 StreamerInceptionStepper.K_inception      = 12                      ## User-specified inception value
-StreamerInceptionStepper.plt_vars         = K Uinc bg_rate emission ## Plot variables
+StreamerInceptionStepper.plt_vars         = K Uinc bg_rate emission field poisson tracer cdr ## Plot variables
 
 # Static mode
 StreamerInceptionStepper.voltage_lo       = 20E3                     # Low voltage multiplier
-StreamerInceptionStepper.voltage_hi       = 80E3                     # Highest voltage multiplier
-StreamerInceptionStepper.voltage_steps    = 19                       # Number of voltage steps
+StreamerInceptionStepper.voltage_hi       = 60E3                     # Highest voltage multiplier
+StreamerInceptionStepper.voltage_steps    = 20			                            # Number of voltage steps
 
 # Dynamic mode
 StreamerInceptionStepper.ion_transport = true                    # Turn on/off ion transport
@@ -189,8 +192,8 @@ StreamerInceptionStepper.max_dt_growth = 0.05                    # Maximum relat
 # StreamerInceptionTagger class options
 # ====================================================================================================
 StreamerInceptionTagger.verbosity   = -1    # Tagger chattiness. 
-StreamerInceptionTagger.buffer      = 8     # Grown buffer around flagged cells
-StreamerInceptionTagger.max_voltage = 80E3 # Maximum applied voltage 
+StreamerInceptionTagger.buffer      = 0     # Grown buffer around flagged cells
+StreamerInceptionTagger.max_voltage = 40E3 # Maximum applied voltage 
 StreamerInceptionTagger.ref_alpha   = 1.0   # Refinement curvature criterion. Lower => more mesh
 StreamerInceptionTagger.plot        = false # Plot tagging field or not.
 

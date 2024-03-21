@@ -126,6 +126,12 @@ namespace Physics {
       readCheckpointData(HDF5Handle& a_handle, const int a_lvl) noexcept override;
 #endif
 
+      /*!
+	@brief Perform post-plot operations
+      */
+      virtual void
+      postPlot() noexcept override;
+
     protected:
       /*!
 	@brief Simple enum for distinguishing between algorithms
@@ -160,11 +166,6 @@ namespace Physics {
 	@brief Smooth the conductivity or not.
       */
       bool m_smoothConductivity;
-
-      /*!
-	@brief Previous time step.
-      */
-      Real m_prevDt;
 
       /*!
 	@brief Which advancement algorithm to use.
@@ -381,6 +382,12 @@ namespace Physics {
       */
       virtual void
       stepEulerMaruyamaCDR(const Real a_dt) noexcept;
+
+      /*!
+	@brief Utility function for plotting the ItoSolver particles. These are written in a particles folder
+      */
+      virtual void
+      plotParticles() const noexcept;
     };
   } // namespace ItoKMC
 } // namespace Physics

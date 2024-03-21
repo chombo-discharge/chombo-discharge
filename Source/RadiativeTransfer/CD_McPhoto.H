@@ -25,6 +25,7 @@
 #include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
 #include <CD_Photon.H>
+#include <CD_PointParticle.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -103,19 +104,6 @@ public:
   isInstantaneous();
 
   /*!
-    @brief Generate computational photon sfrom a source term 
-    @param[out] a_photons Computational photons. 
-    @param[in]  a_source  Source term, i.e. number of photons produced per unit time. The photons will be generated
-    based on what the user specifies in the input parameters for this class. I.e., whether or not a_source will generate stochastic or deterministic photons, and
-    scaled based on what a_source actually contains (number of photons, number/volume, number/second, number/(volume*second)). 
-    @param[in] a_dt Time step
-    @details This will generate photons and put them in a_particles
-    @todo Implementation could use a lambda to avoid the double definition. 
-  */
-  virtual void
-  generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellData& a_source, const Real a_dt);
-
-  /*!
     @brief Move photons and absorb them on various objects
     @param[out]   a_bulkPhotons   Photons absorbed on the mesh
     @param[out]   a_ebPhotons     Photons absorbed on the EB
@@ -148,6 +136,47 @@ public:
                           const Real                 a_dt);
 
   /*!
+    @brief Compute the number of physical photons in each grid cell.
+    @param[out] a_numPhysPhotonsTotal Total number of physical photons to be generated in each grid cell.
+    @param[out] a_numPhysPhotonsPacket Number of physical photons to be generated in each packet. Must have a components = m_numSamplingPackets
+    @param[in] a_source Source term -- the interpretation of this depends on the user-specified interpretation of the source term.
+    @param[in] a_dt Time step
+  */
+  virtual void
+  computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
+                            EBAMRCellData&       a_numPhysPhotonsPerPacket,
+                            const EBAMRCellData& a_source,
+                            const Real           a_dt) const noexcept;
+
+  /*!
+    @brief Generate computational photons.
+    @param[inout] a_photons Computational photons
+    @param[in] a_numPhysicalPhotons Number of physical photons to add to a_photons
+    @param[in] a_maxPhotonsPerCell Maximum number of photons generated per cell.
+  */
+  virtual void
+  generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
+                               const EBAMRCellData&       a_numPhysicalPhotons,
+                               const size_t               a_maxPhotonsPerCell) const noexcept;
+
+  /*!
+    @brief Dirty-sampling method for photons. 
+    @details This is a "dirty" routine in the sense that it does not respect the EB and avoids filling m_bulkParticles.
+    If you also use an NGP scheme this avoids communication between sampling buckets. But this is not something that we recommend using,
+    unless you have a geometry-less domain. If those are good for you, feel free to 
+    use this routine. 
+    @param[inout] a_photons Computational photons. Will be populated and depleted inside the routine.
+    @param[inout] a_phi Mesh-based density. Will be incremented by the generated photons.
+    @param[in] a_numPhysicalPhotons Number of physical photons to add to a_photons
+    @param[in] a_maxPhotonsPerCell Maximum number of photons generated per cell.
+  */
+  virtual void
+  dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
+                     EBAMRCellData&                    a_phi,
+                     const EBAMRCellData&              a_numPhysicalPhotons,
+                     const size_t                      a_maxPhotonsPerCell) const noexcept;
+
+  /*!
     @brief Remap computational particles. This remaps m_photons
   */
   virtual void
@@ -173,8 +202,11 @@ public:
     @param[inout] a_photons    Computational photons to be deposited
     @param[in]    a_deposition Deposition method
   */
-  virtual void
-  depositPhotons(EBAMRCellData& a_phi, ParticleContainer<Photon>& a_particles, const DepositionType& a_deposition);
+  template <class P, const Real& (P::*particleScalarField)() const>
+  void
+  depositPhotons(EBAMRCellData&        a_phi,
+                 ParticleContainer<P>& a_particles,
+                 const DepositionType& a_deposition) const noexcept;
 
   /*!
     @brief Sort container by cell
@@ -405,6 +437,30 @@ public:
   virtual ParticleContainer<Photon>&
   getSourcePhotons();
 
+  /*!
+    @brief Get maximum number of photons generated per cell
+  */
+  virtual int
+  getMaxPhotonsPerCell() const noexcept;
+
+  /*!
+    @brief Get maximum number of photons generated per cell
+  */
+  virtual int
+  getNumSamplingPackets() const noexcept;
+
+  /*!
+    @brief Get computational loads for a specific grid level. This computes the number of photons in the bulk data holder.
+    @param[out] a_loads Grid loads for this level. 
+    @param[in] a_dbl Grids on input level
+    @param[in] a_level Input level
+    @return Loads for each box on a grid level. 
+    @note The return vector should have the same order as the boxes in a_dbl. E.g. ret[0] must be the load for a_dbl.boxArray()[0];
+    @details The default implementation returns the number of cells in the grid patch as a proxy for the load. 
+  */
+  virtual void
+  computeLoads(Vector<long long>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level) const noexcept;
+
 protected:
   /*!
     @brief Enum for interpreting how photons are generated when using fluid codes
@@ -488,9 +544,19 @@ protected:
   bool m_plotDomainPhotons;
 
   /*!
-    @brief Number of Photons per pseudoPhoton
+    @brief Dirty sampling or not
+  */
+  bool m_dirtySampling;
+
+  /*!
+    @brief Number of computational photons generated per cell
   */
   size_t m_maxPhotonsGeneratedPerCell;
+
+  /*!
+    @brief 
+  */
+  int m_numSamplingPackets;
 
   /*!
     @brief RNG seed
@@ -540,12 +606,12 @@ protected:
   /*!
     @brief Scratch storage for holding the non-conservative deposition
   */
-  EBAMRIVData m_depositionNC;
+  mutable EBAMRIVData m_depositionNC;
 
   /*!
     @brief Scratch storage for holding the mass difference when using hybrid deposition
   */
-  EBAMRIVData m_massDiff;
+  mutable EBAMRIVData m_massDiff;
 
   /*!
     @brief All particles
@@ -580,7 +646,7 @@ protected:
     @details The return result of this function depends on the input parameters to this class. 
   */
   size_t
-  drawPhotons(const Real a_source, const Real a_volume, const Real a_dt);
+  drawPhotons(const Real a_source, const Real a_volume, const Real a_dt) const noexcept;
 
   /*!
     @brief Mapping function for domain boundary conditions
@@ -595,7 +661,7 @@ protected:
     @param[in] a_mean Mean value in exponential distribution. 
   */
   Real
-  randomExponential(const Real a_mean);
+  randomExponential(const Real a_mean) const noexcept;
 
   /*!
     @brief This computes the "conservative" deposition, multiplied by kappa
@@ -604,11 +670,12 @@ protected:
     @param[in] a_deposition Deposition method
     @param[in] a_coarseFineDeposition Coarse-fine deposition strategy.
   */
+  template <class P, const Real& (P::*particleScalarField)() const>
   void
   depositKappaConservative(EBAMRCellData&             a_phi,
-                           ParticleContainer<Photon>& a_particles,
+                           ParticleContainer<P>&      a_particles,
                            const DepositionType       a_deposition,
-                           const CoarseFineDeposition a_coarseFineDeposition);
+                           const CoarseFineDeposition a_coarseFineDeposition) const noexcept;
 
   /*!
     @brief Make the "non-conservative" kappa deposition
@@ -616,7 +683,7 @@ protected:
     @param[in]  a_depositionKappaC Conservative deposition
   */
   void
-  depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC);
+  depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC) const noexcept;
 
   /*!
     @brief Make the hybrid deposition. Also compute the mass difference
@@ -625,13 +692,24 @@ protected:
     @param[in]    a_depositioNC    Non-conservative deposition
   */
   void
-  depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC);
+  depositHybrid(EBAMRCellData&     a_depositionH,
+                EBAMRIVData&       a_massDifference,
+                const EBAMRIVData& a_depositionNC) const noexcept;
 
   /*!
     @brief Turn on/off transparent boundaries
   */
   void
   parseTransparentBoundaries();
+
+  /*!
+    @brief Parse dirty sampling for photons.
+    @details This is a hidden option -- I really don't want it to be part of the regular user interface
+    because the code is not general (only works for instantaneous, non-EB cases where photons aren't even absorbed on the
+    domain boundaries)
+  */
+  void
+  parseDirtySampling();
 
   /*!
     @brief Parse the divergence computation, i.e. if we blend with non-conservative divergence or not
@@ -694,5 +772,7 @@ protected:
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_McPhotoImplem.H>
 
 #endif

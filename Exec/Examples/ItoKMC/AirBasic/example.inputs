@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = +30E3
+ItoKMC.potential = +40E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
@@ -11,7 +11,7 @@ AmrMesh.lo_corner        = -4E-2 -4E-2 -4E-2    # Low corner of problem domain
 AmrMesh.hi_corner        =  4E-2  4E-2  4E-2  # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 64 64 64    # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 8           # Maximum amr depth
+AmrMesh.max_amr_depth    = 10          # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -39,10 +39,11 @@ Driver.verbosity                       = 2                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
+Driver.output_dt                       = -1.0             # Output interval (values <= 0 enforces step-based output)
 Driver.plot_interval                   = 10               # Plot interval
 Driver.checkpoint_interval             = 50               # Checkpoint interval
 Driver.regrid_interval                 = 5                # Regrid interval
-Driver.write_regrid_files              = true             # Write regrid files or not.
+Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
 Driver.initial_regrids                 = 3                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
@@ -80,7 +81,8 @@ FieldSolverMultigrid.bc.z.hi           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E perm         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
-FieldSolverMultigrid.filter            = 0                 # Number of filterings after Poisson solve
+FieldSolverMultigrid.filter_rho        = 0                 # Number of filterings of space charge before Poisson solve
+FieldSolverMultigrid.filter_potential  = 0                 # Number of filterings of potential after Poisson solve
 
 FieldSolverMultigrid.gmg_verbosity     = 10                # GMG verbosity
 FieldSolverMultigrid.gmg_pre_smooth    = 16                # Number of relaxations in downsweep
@@ -90,7 +92,7 @@ FieldSolverMultigrid.gmg_min_iter      = 5                 # Minimum number of i
 FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2               # Solver hang
-FieldSolverMultigrid.gmg_min_cells     = 16                 # Bottom drop
+FieldSolverMultigrid.gmg_min_cells     = 4                 # Bottom drop
 FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2                 # Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight     = 1                 # Boundary condition weights (for least squares)
@@ -105,6 +107,7 @@ FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'j
 # ItoSolver class options
 # ====================================================================================================
 ItoSolver.verbosity           = -1            # Class verbosity
+ItoSolver.merge_algorithm     = reinitialize  # Particle merging algorithm (see documentation)
 ItoSolver.plt_vars            = phi mu vel dco   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.intersection_alg    = bisection     # Intersection algorithm for EB-particle intersections.
 ItoSolver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
@@ -135,7 +138,7 @@ CdrCTU.plt_vars             = phi vel src dco ebflux  # Plot variables. Options 
 CdrCTU.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
 CdrCTU.blend_conservation   = true                    # Turn on/off blending with nonconservative divergenceo
 CdrCTU.which_redistribution = volume                  # Redistribution type. 'volume', 'mass', or 'none' (turned off)
-CdrCTU.use_regrid_slopes    = false                   # Turn on/off slopes when regridding
+CdrCTU.use_regrid_slopes    = true                    # Turn on/off slopes when regridding
 CdrCTU.gmg_verbosity        = -1                      # GMG verbosity
 CdrCTU.gmg_pre_smooth       = 12                      # Number of relaxations in GMG downsweep
 CdrCTU.gmg_post_smooth      = 12                      # Number of relaxations in upsweep
@@ -156,7 +159,8 @@ CdrCTU.gmg_smoother         = red_black               # Relaxation type. 'jacobi
 # ====================================================================================================
 McPhoto.verbosity          = -1            # Solver verbosity
 McPhoto.instantaneous      = true          # Instantaneous transport or not
-McPhoto.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical photons)
+McPhoto.max_photons_per_cell        = 1             # Maximum no. generated in a cell (< = 0 yields physical photons)
+McPhoto.num_sampling_packets = 1 ## Number of sub-sampling packets for max_photons_per_cell
 McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
 McPhoto.transparent_eb     = false         # Turn on/off transparent boundaries. Only for instantaneous=true
 McPhoto.random_kappa       = true          # Randomize absorption length (taken from Photon implementation)
@@ -219,8 +223,8 @@ RodNeedleDisk.rod_smooth           = 5E-3       # Transition length between smal
 RodNeedleDisk.rod_needle_smooth    = 1E-3      # Transition length between needle and actual rod
 
 RodNeedleDisk.needle_length        = 100        # Needle length (from some origin)
-RodNeedleDisk.needle_radius        = 200E-6      # Needle radius
-RodNeedleDisk.needle_tip_radius    = 50E-6       # Needle tip radius
+RodNeedleDisk.needle_radius        = 200E-6     # Needle radius
+RodNeedleDisk.needle_tip_radius    = 100E-6     # Needle tip radius
 RodNeedleDisk.needle_angle         = 30         # Full opening angle of needle tip (in degrees)
 
 RodNeedleDisk.disk_point           = -0.5       # Top position of disk
@@ -235,7 +239,7 @@ ItoKMCGodunovStepper.checkpoint_particles                  = true           # If
 ItoKMCGodunovStepper.verbosity                             = -1             # Verbosity
 ItoKMCGodunovStepper.abort_on_failure                      = true           # Abort on Poisson solver failure or not
 ItoKMCGodunovStepper.redistribute_cdr                      = true           # Turn on/off reactive redistribution
-ItoKMCGodunovStepper.profile                               = false          # Turn on/off run-time profiling
+ItoKMCGodunovStepper.profile                               = true          # Turn on/off run-time profiling
 ItoKMCGodunovStepper.plt_vars                              = none           # 'conductivity', 'current_density', 'particles_per_patch'
 ItoKMCGodunovStepper.dual_grid                             = true           # Turn on/off dual-grid functionality
 ItoKMCGodunovStepper.load_balance_fluid                    = false          # Turn on/off fluid realm load balancing. 
@@ -243,7 +247,7 @@ ItoKMCGodunovStepper.load_balance_particles                = true           # Tu
 ItoKMCGodunovStepper.load_indices                          = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoKMCGodunovStepper.load_per_cell                         = 1.0            # Default load per grid cell.
 ItoKMCGodunovStepper.box_sorting                           = morton         # Box sorting when load balancing
-ItoKMCGodunovStepper.particles_per_cell                    = 16             # Max computational particles per cell
+ItoKMCGodunovStepper.particles_per_cell                    = 32             # Max computational particles per cell
 ItoKMCGodunovStepper.merge_interval                        = 1              # Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                 = false          # Make superparticles during regrids
 ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0            # Advective time step CFL restriction
@@ -254,8 +258,10 @@ ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl  = 0.0            # Ad
 ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl  = 1.E99          # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.fluid_advection_diffusion_cfl         = 0.5            # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.relax_dt_factor                       = 500.0          # Relaxation time step restriction. 
-ItoKMCGodunovStepper.min_dt                                = 25.E-12        # Minimum permitted time step
-ItoKMCGodunovStepper.max_dt                                = 1.E99          # Maximum permitted time step
+ItoKMCGodunovStepper.min_dt                                = 10.E-12        # Minimum permitted time step
+ItoKMCGodunovStepper.max_dt                                = 10.E-12        # Maximum permitted time step
+ItoKMCGodunovStepper.max_growth_dt                         = 1.E99          # Maximum permitted time step increase (dt * factor)
+ItoKMCGodunovStepper.max_shrink_dt                         = 1.E99          # Maximum permissible time step reduction (dt/factor)
 ItoKMCGodunovStepper.extend_conductivity                   = true           # Permit particles to live outside the EB to avoid bad gradients near EB
 ItoKMCGodunovStepper.smooth_conductivity                   = false          # Use bilinear smoothing on the conductivity.
 ItoKMCGodunovStepper.eb_tolerance                          = 0.0            # EB intersection test tolerance
@@ -278,7 +284,7 @@ ItoKMCJSON.Ncrit              = 5                       ## How many firings away
 ItoKMCJSON.prop_eps           = 1.E99                   ## Maximum relative change in propensity function
 ItoKMCJSON.NSSA               = 10                      ## How many SSA steps to run when tau-leaping is inefficient
 ItoKMCJSON.SSAlim             = 1.0                     ## When to enter SSA instead of tau-leaping
-ItoKMCJSON.algorithm          = hybrid_midpoint         ## 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
+ItoKMCJSON.algorithm          = tau_plain         ## 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
 
 # ====================================================================================================
 # ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS
@@ -294,4 +300,4 @@ ItoKMCStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
 ItoKMCStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
 ItoKMCStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha     = 0.0          # Set alpha coarsening. Higher => Less mesh
-ItoKMCStreamerTagger.max_coarsen_lvl   = 6            # Set max coarsening depth
+ItoKMCStreamerTagger.max_coarsen_lvl   = 7            # Set max coarsening depth

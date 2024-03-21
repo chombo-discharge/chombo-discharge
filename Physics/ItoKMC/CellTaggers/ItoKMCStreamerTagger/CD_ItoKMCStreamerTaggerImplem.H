@@ -170,10 +170,11 @@ ItoKMCStreamerTagger<S>::refineCell(const RealVect         a_pos,
   const Real     alphaDx = a_tagFields[1];
   const RealVect gradE   = a_gradTagFields[0];
 
-  const bool refineCurv  = gradE.vectorLength() * a_dx / E > m_refineCurvature;
-  const bool refineAlpha = alphaDx > m_refineAlpha;
+  const bool refineCurv   = gradE.vectorLength() * a_dx / E > m_refineCurvature;
+  const bool refineAlpha  = alphaDx > m_refineAlpha;
+  const bool refineManual = (a_lvl < this->getManualRefinementLevel(a_pos));
 
-  return refineCurv || refineAlpha;
+  return refineCurv || refineAlpha || refineManual;
 }
 
 #include <CD_NamespaceFooter.H>

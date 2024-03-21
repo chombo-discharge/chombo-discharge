@@ -430,6 +430,9 @@ FieldSolver::setRho(const Real a_rho)
   }
 
   DataOps::setValue(m_rho, a_rho);
+
+  m_amr->conservativeAverage(m_potential, m_realm);
+  m_amr->interpGhost(m_potential, m_realm);
 }
 
 void
@@ -441,6 +444,9 @@ FieldSolver::setRho(const std::function<Real(const RealVect)>& a_rho)
   }
 
   DataOps::setValue(m_rho, a_rho, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+
+  m_amr->conservativeAverage(m_rho, m_realm);
+  m_amr->interpGhost(m_rho, m_realm);
 }
 
 void
@@ -452,6 +458,21 @@ FieldSolver::setSigma(const Real a_sigma)
   }
 
   DataOps::setValue(m_sigma, a_sigma);
+
+  m_amr->arithmeticAverage(m_sigma, m_realm, phase::gas);
+}
+
+void
+FieldSolver::setSigma(const std::function<Real(const RealVect)>& a_sigma)
+{
+  CH_TIME("FieldSolver::setSigma(std::function<Real(const RealVect)>)");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolver::setSigma(std::function<Real(const RealVect)>))" << endl;
+  }
+
+  DataOps::setValue(m_sigma, a_sigma, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+
+  m_amr->arithmeticAverage(m_sigma, m_realm, phase::gas);
 }
 
 void
@@ -1195,8 +1216,7 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
   CH_TIMER("FieldSolver::writeMultifluidData::interp_ghost", t3);
   CH_TIMER("FieldSolver::writeMultifluidData::centroid_interp", t4);
   CH_TIMER("FieldSolver::writeMultifluidData::set_data", t5);
-  CH_TIMER("FieldSolver::writeMultifluidData::define_copier", t6);
-  CH_TIMER("FieldSolver::writeMultifluidData::copy_to_output", t7);
+  CH_TIMER("FieldSolver::writeMultifluidData::copy_to_output", t6);
   if (m_verbosity > 5) {
     pout() << "FieldSolver::writeMultifluidData" << endl;
   }
@@ -1325,6 +1345,7 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
   // we determine the data based on the a_phase input flag.
   CH_START(t5);
   if (reallyMultiPhase) {
+    const ProblemDomain&     domain     = m_amr->getDomains()[a_level];
     const DisjointBoxLayout& dbl        = m_amr->getGrids(m_realm)[a_level];
     const EBISLayout&        ebislGas   = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
     const EBISLayout&        ebislSolid = m_amr->getEBISLayout(m_realm, phase::solid)[a_level];
@@ -1354,6 +1375,37 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
       const bool validData = !(isGasCovered && isSolidCovered);
       if (validData) {
 
+        int comp;
+
+        auto kernel = [&](const IntVect& iv) -> void {
+          const bool coveredGas = ebisBoxGas.isCovered(iv);
+          const bool irregGas   = ebisBoxGas.isIrregular(iv);
+          const bool regularGas = ebisBoxGas.isRegular(iv);
+
+          const bool coveredSolid = ebisBoxSolid.isCovered(iv);
+          const bool irregSolid   = ebisBoxSolid.isIrregular(iv);
+          const bool regularSolid = ebisBoxSolid.isRegular(iv);
+
+          if (regularSolid && coveredGas) {
+            fabGas(iv, comp) = fabSolid(iv, comp);
+          }
+          else if (irregGas && irregSolid) {
+            if (a_phase == phase::solid) {
+              fabGas(iv, comp) = fabSolid(iv, comp);
+            }
+          }
+          else if (irregGas && coveredSolid) {
+            if (a_phase == phase::solid) {
+              fabGas(iv, comp) = 0.0;
+            }
+          }
+          else if (coveredGas && coveredSolid) {
+            if (a_phase == phase::solid) {
+              fabGas(iv, comp) = 0.0;
+            }
+          }
+        };
+
         if (isSolidRegular) {
           // In this case we are purely inside the solid region -- take the data from the solid phase.
           fabGas.copy(fabSolid);
@@ -1362,50 +1414,36 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
           // In this case we are looking at a grid patch that lies on the gas-solid boundary. We need to determine which cells
           // go into the output region. We happen to know that all gas-side data is already filled, so we only need to grok
           // the solid-side data.
-
-          for (int comp = 0; comp < numComp; comp++) {
-
-            auto kernel = [&](const IntVect& iv) -> void {
-              const bool coveredGas   = ebisBoxGas.isCovered(iv);
-              const bool irregGas     = ebisBoxGas.isIrregular(iv);
-              const bool regularSolid = ebisBoxSolid.isRegular(iv);
-              const bool irregSolid   = ebisBoxSolid.isIrregular(iv);
-
-              if (regularSolid && coveredGas) {
-                fabGas(iv, comp) = fabSolid(iv, comp);
-              }
-              else if (irregGas && irregSolid) {
-                if (a_phase == phase::solid) {
-                  fabGas(iv, comp) = fabSolid(iv, comp);
-                }
-              }
-            };
-
-            BoxLoops::loop(dbl[din], kernel);
+          for (comp = 0; comp < numComp; comp++) {
+            BoxLoops::loop(fabGas.box() & domain, kernel);
+          }
+        }
+        else if (isSolidCovered && isGasIrregular) {
+          // In this case we are looking at a grid patch that lies on the gas-electrode boundary.
+          for (comp = 0; comp < numComp; comp++) {
+            BoxLoops::loop(fabGas.box() & domain, kernel);
           }
         }
       }
     }
   }
-  CH_START(t5);
+  CH_STOP(t5);
 
   // Copy the single-phase data to the output data holder.
   const Interval srcInterv(0, numComp - 1);
   const Interval dstInterv(a_comp, numComp - 1 + a_comp);
 
-  // Now do the copy - make sure we include our newly interpolated ghost cells.
   CH_START(t6);
-  Copier copier;
-  copier.ghostDefine(scratchGas.disjointBoxLayout(),
-                     a_output.disjointBoxLayout(),
-                     m_amr->getDomains()[a_level],
-                     scratchGas.ghostVect(),
-                     a_output.ghostVect());
+  m_amr->copyData(a_output,
+                  scratchGas,
+                  a_level,
+                  a_outputRealm,
+                  m_realm,
+                  dstInterv,
+                  srcInterv,
+                  CopyStrategy::ValidGhost,
+                  CopyStrategy::ValidGhost);
   CH_STOP(t6);
-
-  CH_START(t7);
-  m_amr->copyData(a_output, scratchGas, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
-  CH_STOP(t7);
 
   a_comp += numComp;
 }

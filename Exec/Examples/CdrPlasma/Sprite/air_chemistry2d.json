@@ -220,7 +220,7 @@
 	 "scale": 1.0,
 	 "plot": true,
 	 "soloviev" : {
-	     "correction": false,
+	     "correction": true,
 	     "species": "e"
 	 }
      },
@@ -240,7 +240,7 @@
 	 "plot": true,
 	 "scale": 1.0,
 	 "soloviev" : {
-	     "correction": false,
+	     "correction": true,
 	     "species": "e"
 	 }
      },
@@ -273,7 +273,11 @@
 	 "spacing": "exponential",     
 	 "points": 1000,	 	 	 
 	 "quenching pressure": 4000,
-	 "scale": 0.06
+	 "scale": 0.06,
+	 "soloviev" : {
+	     "correction": true,
+	     "species": "e"
+	 }	 
      },
      {
 	 // Removal of positive thundercloud charge. 

@@ -246,6 +246,11 @@ protected:
   EBAMRBool m_cachedTags;
 
   /*!
+    @brief Time between outputs
+  */
+  Real m_outputDt;
+
+  /*!
     @brief Simulation start time
   */
   Real m_startTime;
@@ -360,6 +365,11 @@ protected:
     @brief Plot MPI ranks
   */
   bool m_plotRanks;
+
+  /*!
+    @brief Plot patch loads
+  */
+  bool m_plotLoads;
 
   /*!
     @brief Plot level sets
@@ -748,6 +758,16 @@ protected:
   */
   virtual void
   writeLevelset(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept;
+
+  /*!
+    @brief Write computational loads to output
+    @param[inout] a_output Output data holder
+    @param[inout] a_comp   Starting component
+    @param[in]    a_level  AMR level
+    @details This adds data to a_output where the data in each grid patch is the MPI rank. 
+  */
+  virtual void
+  writeLoads(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept;
 
   /*!
     @brief Return the finest tag level

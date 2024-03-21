@@ -116,6 +116,14 @@ public:
   get(T& a_distribution);
 
   /*!
+    @brief For getting a random number from a user-supplied distribution. T must be a distribution for which we can call T(s_rng)
+    @param[in] a_distribution Distribution. Must have object of type
+  */
+  template <typename T>
+  inline static size_t
+  getDiscrete(T& a_distribution);
+
+  /*!
     @brief Seed the RNG
   */
   inline static void

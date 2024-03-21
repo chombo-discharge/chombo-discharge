@@ -33,6 +33,7 @@ Driver.verbosity                       = 2                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
+Driver.output_dt                       = -1.0             # Output interval (values <= 0 enforces step-based output)
 Driver.plot_interval                   = 10               # Plot interval
 Driver.checkpoint_interval             = 100              # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
@@ -86,7 +87,8 @@ FieldSolverMultigrid.bc.z.hi           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
-FieldSolverMultigrid.filter            = 0                 # Number of filterings after Poisson solve
+FieldSolverMultigrid.filter_rho        = 0                 # Number of filterings of space charge before Poisson solve
+FieldSolverMultigrid.filter_potential  = 0                 # Number of filterings of potential after Poisson solve
 
 FieldSolverMultigrid.gmg_verbosity     = -1                # GMG verbosity
 FieldSolverMultigrid.gmg_pre_smooth    = 12                # Number of relaxations in downsweep
@@ -123,7 +125,7 @@ CdrCTU.plt_vars             = phi vel src dco ebflux  # Plot variables. Options 
 CdrCTU.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
 CdrCTU.blend_conservation   = true                    # Turn on/off blending with nonconservative divergenceo
 CdrCTU.which_redistribution = volume                  # Redistribution type. 'volume', 'mass', or 'none' (turned off)
-CdrCTU.use_regrid_slopes    = false                   # Turn on/off slopes when regridding
+CdrCTU.use_regrid_slopes    = true                    # Turn on/off slopes when regridding
 CdrCTU.gmg_verbosity        = -1                      # GMG verbosity
 CdrCTU.gmg_pre_smooth       = 12                      # Number of relaxations in GMG downsweep
 CdrCTU.gmg_post_smooth      = 12                      # Number of relaxations in upsweep
@@ -165,6 +167,7 @@ NoisePlane.clamp_dx          = 0.1          # Noise clamp falloff
 # ====================================================================================================
 StreamerInceptionStepper.verbosity     = -1                            # Chattiness. 
 StreamerInceptionStepper.mode          = stationary                    # Mode (stationary or transient)
+StreamerInceptionStepper.eval_townsend    = true                    ## Evaluate Townsend criterion or not (only for stationary)
 StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
 StreamerInceptionStepper.output_file   = report.txt                    # Output file
 StreamerInceptionStepper.K_inception   = 12                            # User-specified inception value

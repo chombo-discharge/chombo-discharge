@@ -43,6 +43,7 @@ Driver.stop_time                       = 1.0           # Stop time
 Driver.max_steps                       = 0             # Maximum number of steps
 Driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 Driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
+Driver.output_dt                       = -1.0             # Output interval (values <= 0 enforces step-based output)
 Driver.write_memory                    = false         # Write MPI memory report
 Driver.write_loads                     = false         # Write (accumulated) computational loads
 Driver.output_directory                = ./            # Output directory
@@ -76,13 +77,9 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # radius and center. 
 # ====================================================================================================
 Aerosol.num_spheres       = 3              # Number of spheres
+Aerosol.invert            = false          # Invert so that instead of particles we have holes
 Aerosol.permittivity      = 5.0            # Dielectric permittivity, if the geometry is a dielectric		
 Aerosol.eps0              = 1              # Permittivity
-Aerosol.noise_amplitude   = 0.1            # Noise amplitude
-Aerosol.noise_frequency   = 5. 5. 5.       # Noise frequency
-Aerosol.noise_persistence = 0.5            # Noise persistence
-Aerosol.noise_octaves     = 1              # Noise octaves
-Aerosol.noise_reseed      = false          # Reseed noise
 
 Aerosol.sphere1.radius    = 0.2            # Sphere radius
 Aerosol.sphere1.center    = -0.5 -0.5 -0.5 # Sphere position

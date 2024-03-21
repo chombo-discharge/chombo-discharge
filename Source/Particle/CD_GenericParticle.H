@@ -63,6 +63,34 @@ public:
   position() const;
 
   /*!
+    @brief Get the M scalars
+    @return m_scalars
+  */
+  inline const std::array<Real, M>&
+  getReals() const noexcept;
+
+  /*!
+    @brief Get the M scalars
+    @return m_scalars
+  */
+  inline std::array<Real, M>&
+  getReals() noexcept;
+
+  /*!
+    @brief Get the N vectors
+    @return m_vects
+  */
+  inline const std::array<RealVect, N>&
+  getVects() const noexcept;
+
+  /*!
+    @brief Get the N vectors
+    @return m_vects
+  */
+  inline std::array<RealVect, N>&
+  getVects() noexcept;
+
+  /*!
     @brief Get one of the scalars. 
     @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
     compile-time errors if trying to fetch elements out of range. 

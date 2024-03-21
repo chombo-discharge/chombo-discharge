@@ -107,7 +107,7 @@ ParallelOps::min(const Real& a_val, const RealVect& a_pos) noexcept
   Real  x = a_pos[0];
   Real* X = new Real[nProc];
 
-  Real  y = a_pos[0];
+  Real  y = a_pos[1];
   Real* Y = new Real[nProc];
 
 #if CH_SPACEDIM == 3
@@ -224,7 +224,7 @@ ParallelOps::max(const Real& a_val, const RealVect& a_pos) noexcept
   Real  x = a_pos[0];
   Real* X = new Real[nProc];
 
-  Real  y = a_pos[0];
+  Real  y = a_pos[1];
   Real* Y = new Real[nProc];
 
 #if CH_SPACEDIM == 3
@@ -471,6 +471,20 @@ ParallelOps::vectorSum(Vector<long long int>& a_data) noexcept
 
 #ifdef CH_MPI
   const int result = MPI_Allreduce(MPI_IN_PLACE, &(a_data[0]), a_data.size(), MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+  if (result != MPI_SUCCESS) {
+    MayDay::Error("In file ParallelOps::vectorSum -- MPI communication error");
+  }
+#endif
+}
+
+inline void
+ParallelOps::vectorSum(Vector<long long int>& a_data) noexcept
+{
+  CH_TIME("ParallelOps::vectorSum(long int)");
+
+#ifdef CH_MPI
+  const Vector<long long int> tmp = a_data;
+  const int result = MPI_Allreduce(&(tmp[0]), &(a_data[0]), a_data.size(), MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
   if (result != MPI_SUCCESS) {
     MayDay::Error("In file ParallelOps::vectorSum -- MPI communication error");
   }

@@ -41,6 +41,9 @@ ItoKMCStepper<I, C, R, F>::ItoKMCStepper() noexcept
   m_name                             = "ItoKMCStepper";
   m_plasmaPhase                      = phase::gas;
   m_dt                               = 0.0;
+  m_prevDt                           = -1.0;
+  m_maxGrowthDt                      = 1.E99;
+  m_maxShrinkDt                      = 1.E99;
   m_time                             = 0.0;
   m_timeStep                         = 0;
   m_loadPerCell                      = 1.0;
@@ -226,8 +229,6 @@ ItoKMCStepper<I, C, R, F>::parseSuperParticles() noexcept
       MayDay::Error("ItoKMCStepper::parseSuperParticles -- must have 'particles_per_cell' > 0");
     }
   }
-
-  m_mergeInterval = std::max(m_mergeInterval, 1);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -324,6 +325,16 @@ ItoKMCStepper<I, C, R, F>::parseTimeStepRestrictions() noexcept
   pp.get("relax_dt_factor", m_relaxTimeFactor);
   pp.get("min_dt", m_minDt);
   pp.get("max_dt", m_maxDt);
+  pp.get("max_growth_dt", m_maxGrowthDt);
+  pp.get("max_shrink_dt", m_maxShrinkDt);
+
+  if (m_maxGrowthDt <= 1.0) {
+    MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have max_growth_dt > 1.0");
+  }
+
+  if (m_maxShrinkDt <= 1.0) {
+    MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have max_shrink_dt > 1.0");
+  }
 
   if (m_relaxTimeFactor <= 0.0) {
     MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have relax_dt > 0.0");
@@ -1023,10 +1034,6 @@ ItoKMCStepper<I, C, R, F>::writeData(LevelData<EBCellFAB>& a_output,
     pout() << m_name + "::writeData" << endl;
   }
 
-  if (a_data[a_level].isNull()) {
-    pout() << "wtf" << endl;
-  }
-
   // Number of components we are working with.
   const int numComp = a_data[a_level]->nComp();
 
@@ -1059,7 +1066,15 @@ ItoKMCStepper<I, C, R, F>::writeData(LevelData<EBCellFAB>& a_output,
   DataOps::setCoveredValue(scratch, 0.0);
 
   CH_START(t5);
-  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, a_data.getRealm(), dstInterv, srcInterv);
+  m_amr->copyData(a_output,
+                  scratch,
+                  a_level,
+                  a_outputRealm,
+                  a_data.getRealm(),
+                  dstInterv,
+                  srcInterv,
+                  CopyStrategy::ValidGhost,
+                  CopyStrategy::ValidGhost);
   CH_STOP(t5);
 
   a_comp += numComp;
@@ -1206,6 +1221,12 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
   }
   }
 
+  // Calculate the charge
+  const Real Qplus = this->computeQplus();
+  const Real Qminu = this->computeQminu();
+  const Real Qsurf = this->computeQsurf();
+  const Real Qtot  = Qplus + Qminu + Qsurf;
+
   // Print the step report.
 
   //clang-format off
@@ -1213,6 +1234,10 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
   pout() << "                                   " + str << endl;
   pout() << whitespace + "Emax        = " << Emax << endl
          << whitespace + "Max density = " << maxDensity << " (" << maxSolver << ")" << endl
+         << whitespace + "Qplus       = " << Qplus << endl
+         << whitespace + "Qminu       = " << Qminu << endl
+         << whitespace + "Qsurf       = " << Qsurf << endl
+         << whitespace + "Qtot        = " << Qtot << endl
          << whitespace + "CFL (Ito)   = " << m_dt / m_particleAdvectionDiffusionDt << endl
          << whitespace + "CFL (CDR)   = " << m_dt / m_fluidAdvectionDiffusionDt << endl
          << whitespace + "dt/dt_relax = " << m_dt / m_relaxationTime << endl
@@ -1342,6 +1367,9 @@ ItoKMCStepper<I, C, R, F>::computeDt()
 
   Real dt = std::numeric_limits<Real>::max();
 
+  const Real maxGrowthDt = m_prevDt > 0.0 ? m_prevDt * m_maxGrowthDt : dt;
+  const Real minShrinkDt = m_prevDt > 0.0 ? m_prevDt / m_maxShrinkDt : 0.0;
+
   // Compute various time steps.
   timer.startEvent("Advection (Ito)");
   m_particleAdvectionDt = m_ito->computeAdvectiveDt();
@@ -1413,6 +1441,14 @@ ItoKMCStepper<I, C, R, F>::computeDt()
     dt = m_minParticleAdvectionDiffusionCFL * m_particleAdvectionDiffusionDt;
 
     m_timeCode = TimeCode::AdvectionDiffusionIto;
+  }
+
+  if (dt > maxGrowthDt) {
+    dt = maxGrowthDt;
+  }
+
+  if (dt < minShrinkDt) {
+    dt = minShrinkDt;
   }
 
   if (m_minDt > dt) {
@@ -4067,6 +4103,9 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   const RealVect probLo  = m_amr->getProbLo();
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level][a_dit];
 
+  // Number of computational particles to make on this level
+  const int ppc = (a_level < m_particlesPerCell.size()) ? m_particlesPerCell[a_level] : m_particlesPerCell.back();
+
   // List of valid grid cells
   const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_particleRealm)[a_level])[a_dit];
 
@@ -4189,6 +4228,17 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
+
+      // Merge the particles together.
+      if (this->m_mergeInterval > 0) {
+        if ((this->m_timeStep + 1) % this->m_mergeInterval == 0) {
+          for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+            const int idx = solverIt.index();
+
+            solverIt()->mergeParticles(*itoParticles[idx], CellInfo(iv, a_dx), ppc);
+          }
+        }
+      }
     }
   };
 
@@ -4262,6 +4312,19 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
+
+      // Merge the particles together.
+      if (this->m_mergeInterval > 0) {
+        if ((this->m_timeStep + 1) % this->m_mergeInterval == 0) {
+          for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+            const int idx = solverIt.index();
+
+            const CellInfo cellInfo(iv, a_dx, kappa, bndryCentroid, bndryNormal);
+
+            solverIt()->mergeParticles(*itoParticles[idx], cellInfo, ppc);
+          }
+        }
+      }
     }
   };
 
@@ -4712,7 +4775,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(Vector<ParticleContainer<ItoP
                                          cdrFluxesExtrap,
                                          primaryPhotons,
                                          E,
-                                         physPos,
+                                         cellCenter,
                                          cellCentroid,
                                          bndryCentroid,
                                          bndryNormal,
@@ -4722,10 +4785,17 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(Vector<ParticleContainer<ItoP
                                          isDielectric,
                                          matIndex);
 
-          // Secondary particles and photons are filled directly because the containers are cell-sorted, but the CDR fluxes are not. Put them
-          // in the correct place now.
+          // Fill output data holders.
+          for (int i = 0; i < numItoSpecies; i++) {
+            (*secondaryParticlesFAB[i])(iv, 0) = secondaryParticles[i];
+          }
+
           for (int i = 0; i < numCdrSpecies; i++) {
             (*cdrFluxesFAB[i])(vof, 0) = cdrFluxes[i];
+          }
+
+          for (int i = 0; i < numPhotonSpecies; i++) {
+            (*secondaryPhotonsFAB[i])(iv, 0) = secondaryPhotons[i];
           }
         }
       };
@@ -4853,9 +4923,13 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
 
     // Add the secondary particles into the solvers and remove the primary particles.
     ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
-
     particles.transferParticles(*a_secondaryParticles[idx]);
+
     a_primaryParticles[idx]->clearParticles();
+
+    if (a_secondaryParticles[idx]->getNumberOfValidParticlesGlobal() > 0) {
+      MayDay::Abort("logic bust");
+    }
   }
 
   // Add CDR fluxes to the CDR solvers
@@ -5082,6 +5156,26 @@ ItoKMCStepper<I, C, R, F>::computeTotalCharge() const noexcept
 
   Real totalCharge = 0.0;
 
+  totalCharge += this->computeQplus();
+  totalCharge += this->computeQminu();
+  totalCharge += this->computeQsurf();
+
+  return totalCharge;
+}
+
+template <typename I, typename C, typename R, typename F>
+Real
+ItoKMCStepper<I, C, R, F>::computeQplus() const noexcept
+{
+  CH_TIME("ItoKMCStepper::computeQplus()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeQplus()" << endl;
+  }
+
+  const bool kappaScale = true;
+
+  Real totalCharge = 0.0;
+
   // Charge from Ito solvers.
   for (auto it = m_ito->iterator(); it.ok(); ++it) {
     const RefCountedPtr<ItoSolver>&  solver  = it();
@@ -5089,7 +5183,7 @@ ItoKMCStepper<I, C, R, F>::computeTotalCharge() const noexcept
 
     const int Z = species->getChargeNumber();
 
-    if (Z != 0) {
+    if (Z > 0) {
       const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
       totalCharge += Z * ParticleOps::sum<ItoParticle, &ItoParticle::weight>(particles);
@@ -5103,17 +5197,70 @@ ItoKMCStepper<I, C, R, F>::computeTotalCharge() const noexcept
 
     const int Z = species->getChargeNumber();
 
-    if (Z != 0) {
+    if (Z > 0) {
       const EBAMRCellData& phi = solver->getPhi();
 
       totalCharge += Z * solver->computeMass(phi, kappaScale);
     }
   }
 
-  // Surface charge
-  totalCharge += m_sigmaSolver->computeMass();
+  return totalCharge * Units::Qe;
+}
+
+template <typename I, typename C, typename R, typename F>
+Real
+ItoKMCStepper<I, C, R, F>::computeQminu() const noexcept
+{
+  CH_TIME("ItoKMCStepper::computeQminu()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeQminu()" << endl;
+  }
+
+  const bool kappaScale = true;
+
+  Real totalCharge = 0.0;
+
+  // Charge from Ito solvers.
+  for (auto it = m_ito->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<ItoSolver>&  solver  = it();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+
+    const int Z = species->getChargeNumber();
+
+    if (Z < 0) {
+      const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+      totalCharge += Z * ParticleOps::sum<ItoParticle, &ItoParticle::weight>(particles);
+    }
+  }
+
+  // Charge from CDR solvers
+  for (auto it = m_cdr->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<CdrSolver>&  solver  = it();
+    const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
+
+    const int Z = species->getChargeNumber();
+
+    if (Z < 0) {
+      const EBAMRCellData& phi = solver->getPhi();
+
+      totalCharge += Z * solver->computeMass(phi, kappaScale);
+    }
+  }
 
   return totalCharge * Units::Qe;
+}
+
+template <typename I, typename C, typename R, typename F>
+Real
+ItoKMCStepper<I, C, R, F>::computeQsurf() const noexcept
+{
+  CH_TIME("ItoKMCStepper::computeQsurf()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeQsurf()" << endl;
+  }
+
+  return m_sigmaSolver->computeMass();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -5141,6 +5288,10 @@ ItoKMCStepper<I, C, R, F>::advancePhotons(const Real a_dt) noexcept
     ParticleContainer<Photon>& ebPhotons     = solver->getEbPhotons();
     ParticleContainer<Photon>& domainPhotons = solver->getDomainPhotons();
     ParticleContainer<Photon>& sourcePhotons = solver->getSourcePhotons();
+
+    solver->clear(bulkPhotons);
+    solver->clear(ebPhotons);
+    solver->clear(domainPhotons);
 
     if (solver->isInstantaneous()) {
       solver->clear(photons);
@@ -5815,6 +5966,9 @@ ItoKMCStepper<I, C, R, F>::computePhysicsPlotVariables(EBAMRCellData& a_physicsP
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
+
+  m_amr->average(a_physicsPlotVars, m_fluidRealm, m_plasmaPhase, Average::Arithmetic, Interval(0, numVars - 1));
+  m_amr->interpGhost(a_physicsPlotVars, m_fluidRealm, m_plasmaPhase);
 }
 
 #include <CD_NamespaceFooter.H>

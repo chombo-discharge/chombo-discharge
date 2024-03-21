@@ -243,6 +243,11 @@ namespace Physics {
       bool m_skipReactions;
 
       /*!
+	@brief Preview rates or not
+      */
+      bool m_previewRates;
+
+      /*!
 	@brief Total number of plasma species
       */
       int m_numPlasmaSpecies;
@@ -336,9 +341,30 @@ namespace Physics {
       std::vector<FunctionEVX> m_kmcReactionRates;
 
       /*!
-	@brief Function-based plasma reaction rates. Same index as actual reactions. For plotting only.
+	@brief Function-based plasma reaction rates as if they appeared in the reaction rate equation. Same index as actual reactions. 
+	@details If S = k * n_1 * n_2 * n_3 where n_1, n_2, n_3 is any species, then this contains 'k'.
       */
       std::vector<FunctionEX> m_fluidRates;
+
+      /*!
+	@brief List of background species involved in a reaction
+      */
+      std::vector<std::list<size_t>> m_plasmaReactionBackgroundReactants;
+
+      /*!
+	@brief List of plasma species on the left-hand side of a reaction.
+      */
+      std::vector<std::list<size_t>> m_plasmaReactionPlasmaReactants;
+
+      /*!
+	@brief List of plasma species on the right-hand side of a reaction.
+      */
+      std::vector<std::list<size_t>> m_plasmaReactionPlasmaProducts;
+
+      /*!
+	@brief List of photon species on the right-hand side of a reaction.
+      */
+      std::vector<std::list<size_t>> m_plasmaReactionPhotonProducts;
 
       /*!
 	@brief Whether or not a reaction uses a gradient correction for the rate (Soloviev et. al. paper)
@@ -354,6 +380,16 @@ namespace Physics {
 	@brief Map of reactions that will be plotted.
       */
       std::map<int, std::pair<bool, int>> m_plasmaReactionSolovievCorrection;
+
+      /*!
+	@brief Flag if the user wants to compute the alpha coefficient from the reactions 
+      */
+      std::pair<bool, std::string> m_autoAlpha;
+
+      /*!
+	@brief Flag if the user wants to compute the alpha coefficient from the reactions 
+      */
+      std::pair<bool, std::string> m_autoEta;
 
       /*!
 	@brief Townsend ionization coefficient. Defined during parseAlpha
@@ -508,7 +544,28 @@ namespace Physics {
 	@param[in] a_coeff Which coefficient. Must be "alpha" or "eta"
       */
       virtual void
-      initializeTownsendCoefficient(const std::string a_str);
+      initializeTownsendCoefficient(const std::string a_coeff);
+
+      /*!
+	@brief Initialize automatic Townsend coefficient (ionizatino or attachment) from the reaction rates.
+	@param[in] a_coeff Which coefficient. Must be "alpha" or "eta"
+      */
+      virtual void
+      initializeAutomaticTownsend(const std::string a_coeff);
+
+      /*!
+	@brief Simple function for previewing a rate/coefficient defined as a function f = f(E,x)
+	@param[in] a_json JSON entry containing the previewing information.
+	@param[in] a_function Function to be previewed.
+      */
+      virtual void
+      previewFunctionEX(const nlohmann::json& a_json, const FunctionEX& a_function) const;
+
+      /*!
+	@brief Print the fluid-representation of the reaction rates.
+      */
+      virtual void
+      printFluidRates() const noexcept;
 
       /*!
 	@brief Initialize the plasma species
@@ -559,10 +616,11 @@ namespace Physics {
       initializePhotoReactions();
 
       /*!
-	@brief Initialize photo-reactions
+	@brief Initialize surface reactions
+	@param[in] a_surface Surface type
       */
       virtual void
-      initializeSurfaceReactions();
+      initializeSurfaceEmission(const std::string a_surface);
 
       /*!
 	@brief Parses a reaction string into reactangs and products
@@ -601,7 +659,7 @@ namespace Physics {
 	@param[in] a_reactionJSON Reaction entry in JSON file
 	@param[in] a_backgroundReactants List of background species appearing on the left hand side of the reaction
 	@param[in] a_plasmaReactants List of plasma species appearing on the left-hand side of the reaction
-	@return This should return a pair of KMC and fluid rates. The KMC rate will also be multiplied by background species on the 
+	@return This should return a tuple of KMC and fluid rates. The KMC rate will also be multiplied by background species on the 
 	left hand side of the reaction.
       */
       virtual std::pair<FunctionEVX, FunctionEX>
@@ -638,7 +696,7 @@ namespace Physics {
 	@param[in] a_reactionJSON  JSON reaction entry. 
 	@return Returns a list of reactants and products with wilcards replaced. The tuple entries are: <wildcard, reactants, products>
       */
-      virtual std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
+      virtual std::vector<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
       parseReactionWildcards(const std::vector<std::string>& a_reactants,
                              const std::vector<std::string>& a_products,
                              const nlohmann::json&           a_reactionJSON) const noexcept;
@@ -659,6 +717,14 @@ namespace Physics {
                           const Vector<RealVect>& a_gradPhi,
                           const Real              a_dx,
                           const Real              a_kappa) const noexcept override;
+
+      /*!
+	@brief Sample a multinomial distribution with N samples 
+	@param[in] a_N Number of samples
+	@param[in] a_distribution Discrete distribution
+      */
+      std::vector<size_t>
+      multinomial(const size_t N, const std::discrete_distribution<size_t>& a_distribution) const noexcept;
     };
   } // namespace ItoKMC
 } // namespace Physics

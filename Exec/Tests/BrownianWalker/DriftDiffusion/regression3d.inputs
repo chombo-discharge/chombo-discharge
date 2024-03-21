@@ -45,6 +45,7 @@ Driver.stop_time                       = 3.0           # Stop time
 Driver.max_steps                       = 100           # Maximum number of steps
 Driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 Driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
+Driver.output_dt                       = -1.0             # Output interval (values <= 0 enforces step-based output)
 Driver.write_memory                    = false         # Write MPI memory report
 Driver.write_loads                     = false         # Write (accumulated) computational loads
 Driver.output_directory                = ./            # Output directory
@@ -65,6 +66,7 @@ Driver.refine_dielectrics              = -1            # Refine dielectric surfa
 # ITO_SOLVER CLASS OPTIONS
 # ====================================================================================================
 ItoSolver.verbosity           = -1            # Class verbosity
+ItoSolver.merge_algorithm     = reinitialize  # Particle merging algorithm (see documentation)
 ItoSolver.plt_vars            = phi vel dco   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.intersection_alg    = bisection     # Intersection algorithm for EB-particle intersections.
 ItoSolver.bisect_step         = 1.E-4         # Bisection step length for intersection tests

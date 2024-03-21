@@ -1,5 +1,6 @@
 *.ex
 *.hdf5
+*.h5part
 *.MPI
 *.session*
 **/Make.defs.local
@@ -30,9 +31,10 @@ LB.txt
 **/*.a
 **/*.o
 
-Exec/Examples/StreamerInception/Vessel/report.txt
-Exec/Examples/StreamerInception/ElectrodeRoughness/report.txt
-Exec/Tests/StreamerInception/Vessel/report.txt
+Exec/Examples/StreamerInception/**/report.txt
+Exec/Examples/StreamerInception/**/report.txt
+Exec/Examples/StreamerInception/**/report.txt
+Exec/Tests/StreamerInception/**/report.txt
 
 pout.*
 time.table*

@@ -64,6 +64,7 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   m_timeStep = 0;
   m_time     = 0.0;
   m_dt       = 0.0;
+  m_outputDt = -1.0;
 
   m_profile      = false;
   m_doCoarsening = true;
@@ -101,6 +102,9 @@ Driver::getNumberOfPlotVariables() const
   if (m_plotLevelset) {
     numPlotVars = numPlotVars + 2;
   }
+  if (m_plotLoads) {
+    numPlotVars += m_amr->getRealms().size();
+  }
 
   return numPlotVars;
 }
@@ -134,6 +138,15 @@ Driver::getPlotVariableNames() const
   if (m_plotLevelset) {
     plotVarNames.push_back("levelset_gas");
     plotVarNames.push_back("levelset_solid");
+  }
+  if (m_plotLoads) {
+    const std::string base = "_load";
+
+    for (const auto& str : m_amr->getRealms()) {
+      const std::string id = str + base;
+
+      plotVarNames.push_back(id);
+    }
   }
 
   return plotVarNames;
@@ -313,6 +326,9 @@ Driver::getGeometryTags()
       };
 
       BoxLoops::loop(vofit, kernel);
+
+      // Always refine multi-valued cells.
+      m_geomTags[lvl] |= ebisbox.getMultiCells(box);
     }
 
     // Things from depth specifications
@@ -832,10 +848,39 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
         MayDay::Error("Driver::run(Real, Real, int) - the time step became too small.");
       }
 
+      // Adjust time step to conform with the specified output intervals
+      bool writePltFile = false;
+
+      if (m_outputDt > 0.0) {
+        const int k = std::floor(m_time / m_outputDt);
+
+        Real lastOutputTime = k * m_outputDt;
+        Real nextOutputTime = (k + 1) * m_outputDt;
+
+        const Real thresh = 1.E-10 * m_outputDt;
+
+        // Weird, but can happen due to flooring when m_time is an integer multiple of m_outputDt
+        if (std::abs(m_time - nextOutputTime) < thresh) {
+          lastOutputTime += m_outputDt;
+          nextOutputTime += m_outputDt;
+        }
+
+        // Adjust dt so that we land on the next output interval
+        if ((m_time + m_dt) >= nextOutputTime) {
+          m_dt = nextOutputTime - m_time;
+        }
+
+        // Write plot file if we're landing on the next output time.
+        if (std::abs((m_time + m_dt) - nextOutputTime) <= thresh) {
+          writePltFile = true;
+        }
+      }
+
       // Adjust last time step -- it can be smaller than the one we computed because we want to
       // end the simulation at a_endTime.
       if (m_time + m_dt > a_endTime) {
-        m_dt       = a_endTime - m_time;
+        m_dt = a_endTime - m_time;
+
         isLastStep = true;
       }
 
@@ -876,8 +921,12 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
           this->writeComputationalLoads();
         }
 
-        // Plot file
-        if (m_timeStep % m_plotInterval == 0 || isLastStep == true) {
+        // Check if we should output this time step anyways.
+        if (m_outputDt <= 0.0) {
+          writePltFile = (m_timeStep % m_plotInterval == 0) || isLastStep == true;
+        }
+
+        if (writePltFile) {
           if (m_verbosity > 2) {
             pout() << "Driver::run -- Writing plot file" << endl;
           }
@@ -1041,6 +1090,7 @@ Driver::parseOptions()
   pp.get("max_plot_depth", m_maxPlotLevel);
   pp.get("max_chk_depth", m_maxCheckpointDepth);
   pp.get("do_init_load_balance", m_doInitLoadBalancing);
+  pp.get("output_dt", m_outputDt);
 
   m_restart = (m_restartStep > 0) ? true : false;
 
@@ -1074,8 +1124,10 @@ Driver::parseRuntimeOptions()
   pp.get("write_restart_files", m_writeRestartFiles);
   pp.get("num_plot_ghost", m_numPlotGhost);
   pp.get("allow_coarsening", m_allowCoarsening);
+  pp.get("max_plot_depth", m_maxPlotLevel);
   pp.get("max_steps", m_maxSteps);
   pp.get("stop_time", m_stopTime);
+  pp.get("output_dt", m_outputDt);
 
   this->parseGeometryRefinement();
   this->parsePlotVariables();
@@ -1094,6 +1146,7 @@ Driver::parsePlotVariables()
   m_plotTags     = false;
   m_plotRanks    = false;
   m_plotLevelset = false;
+  m_plotLoads    = false;
 
   // Check input script to see which variables to include in plot files.
   ParmParse pp("Driver");
@@ -1103,12 +1156,18 @@ Driver::parsePlotVariables()
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++) {
-    if (str[i] == "tags")
+    if (str[i] == "tags") {
       m_plotTags = true;
-    else if (str[i] == "mpi_rank")
+    }
+    else if (str[i] == "mpi_rank") {
       m_plotRanks = true;
-    else if (str[i] == "levelset")
+    }
+    else if (str[i] == "levelset") {
       m_plotLevelset = true;
+    }
+    else if (str[i] == "loads") {
+      m_plotLoads = true;
+    }
   }
 }
 
@@ -2284,6 +2343,9 @@ Driver::writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_l
   if (m_plotLevelset) {
     this->writeLevelset(a_output, a_comp, a_level);
   }
+  if (m_plotLoads) {
+    this->writeLoads(a_output, a_comp, a_level);
+  }
 }
 
 void
@@ -2410,6 +2472,39 @@ Driver::writeLevelset(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_l
 }
 
 void
+Driver::writeLoads(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept
+{
+  CH_TIME("Driver::writeLoads");
+  if (m_verbosity > 3) {
+    pout() << "Driver::writeLoads" << endl;
+  }
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
+  for (const auto& r : m_amr->getRealms()) {
+    CH_assert(a_output.nComp() > a_comp);
+
+    LevelData<EBCellFAB> scratch;
+    m_amr->allocate(scratch, r, phase::gas, a_level, 1);
+
+    const Vector<long int> loads = m_timeStepper->getCheckpointLoads(r, a_level);
+
+    const DisjointBoxLayout& dbl = m_amr->getGrids(r)[a_level];
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      scratch[dit()].setVal(loads[dit().intCode()]);
+    }
+
+    const Interval srcInterv(0, 0);
+    const Interval dstInterv(a_comp, a_comp);
+
+    m_amr->copyData(a_output, scratch, a_level, m_realm, r, dstInterv, srcInterv);
+
+    a_comp++;
+  }
+}
+
+void
 Driver::writeCheckpointFile()
 {
   CH_TIME("Driver::writeCheckpointFile()");
@@ -2454,10 +2549,16 @@ Driver::writeCheckpointFile()
   Timer timer("Driver::writeCheckpointFile");
   if (m_verbosity >= 3) {
     pout() << "Driver::writeCheckpointFile - writing checkpoint file..." << endl;
+  }
+  if (m_profile) {
     timer.startEvent("Write data");
   }
 
   for (int lvl = 0; lvl <= finestCheckLevel; lvl++) {
+    if (m_verbosity >= 4) {
+      pout() << "Driver::writeCheckpointFile -- writing level = " << lvl << endl;
+    }
+
     handleOut.setGroupToLevel(lvl);
 
     // Write amr grids

@@ -23,6 +23,7 @@
 #include <DenseIntVectSet.H>
 
 // Our includes
+#include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -46,13 +47,15 @@ public:
 
   /*!
     @brief Neighborhood type
-    @param[in] Quadrant. Only fetch vofs in a specified quadrant. 
-    @param[in] Radius.   Fetch all vofs in a specified radius. 
+    @param[in] Quadrant.   Only fetch vofs in a specified quadrant. 
+    @param[in] Radius.     Fetch all vofs in a specified radius. 
+    @param[in] SemiCircle. Fetch all vofs in a half-circle with specified radius. 
   */
   enum class Neighborhood
   {
     Quadrant,
-    Radius
+    Radius,
+    SemiCircle
   };
 
   /*!
@@ -109,6 +112,31 @@ public:
                     const int          a_radius,
                     const Connectivity a_connectivity,
                     const bool         a_addStartVof);
+
+  /*!
+    @brief Get all vofs lying in a semi-circle (sphere in 3D) from the indicated position in the starting vof
+    @param[in] a_startVof     Starting Vof. 
+    @param[in] a_ebisbox      EBISBox.
+    @param[in] a_normal       Normal vector
+    @param[in] a_radius       Radius.
+    @param[in] a_deltaThresh  Threshold for the normal distance betw
+    @param[in] a_connectivity Connectivity specification (e.g. monotone path or simplyconnected)
+    @param[in] a_vofLocation  Point inside the current vof
+    @param[in] a_cellLocation Other cell locations to test with. 
+    @param[in] a_addStartVof  If false, a_startVof will not be included in the list. 
+    @note This routine will fetch vofs within a_radius and discard the ones that fall on the ''wrong'' side of the semi-circle (sphere in 3D). Here, the
+    wrong side is defined as all points (x-x0)*n < a_deltaThresh
+  */
+  static Vector<VolIndex>
+  getVofsInSemiCircle(const VolIndex&      a_startVof,
+                      const EBISBox&       a_ebisbox,
+                      const RealVect&      a_normal,
+                      const int            a_radius,
+                      const Real           a_deltaThresh,
+                      const Connectivity   a_connectivity,
+                      const Location::Cell a_vofLocation,
+                      const Location::Cell a_cellLocation,
+                      const bool           a_addStartVof);
 
   /*!
     @brief Modifies a_vofs so it doesn't include cells in a_excludeIVS

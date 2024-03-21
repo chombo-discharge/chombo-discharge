@@ -21,6 +21,8 @@
 #include <CD_ParallelOps.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
+#include <CD_Photon.H>
+#include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::ItoKMC;
@@ -200,8 +202,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     pout() << this->m_name + "::advance" << endl;
   }
 
-  //  MayDay::Warning("ItoKMCGodunovStepper::advance -- missing hard conservation for extended conductivity");
-
   auto debugCharge = [this](const std::string a_message) -> void {
     const Real Qtot = this->computeTotalCharge();
     if (procID() == 0) {
@@ -220,12 +220,17 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   //  debugCharge("advance");
 
   // Previous time step is needed when regridding.
-  m_prevDt = a_dt;
+  this->m_prevDt = a_dt;
 
   // Done only so we can plot the absorbed photons (advanceReactionNetwork absorbs them)
   m_timer.startEvent("Deposit photons");
   for (auto solverIt = (this->m_rte)->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->depositPhotons(solverIt()->getPhi(), solverIt()->getBulkPhotons(), DepositionType::NGP);
+    RefCountedPtr<McPhoto> solver = solverIt();
+
+    EBAMRCellData&             phi     = solver->getPhi();
+    ParticleContainer<Photon>& photons = solver->getBulkPhotons();
+
+    solver->depositPhotons<Photon, &Photon::weight>(phi, photons, DepositionType::NGP);
   }
   m_timer.stopEvent("Deposit photons");
 
@@ -374,14 +379,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   m_timer.startEvent("Reaction network");
   this->advanceReactionNetwork(a_dt);
   m_timer.stopEvent("Reaction network");
-
-  // Build superparticles.
-  if ((this->m_timeStep + 1) % this->m_mergeInterval == 0 && this->m_mergeInterval > 0) {
-    this->barrier();
-    m_timer.startEvent("Super-particle management");
-    (this->m_ito)->makeSuperparticles(ItoSolver::WhichContainer::Bulk, (this->m_particlesPerCell));
-    m_timer.stopEvent("Super-particle management");
-  }
 
   // Sort particles per patch.
   this->barrier();
@@ -555,7 +552,7 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
   m_timer.startEvent("Setup field solver");
   (this->m_fieldSolver)->setupSolver();
   this->computeConductivities(m_conductivityParticles);
-  this->setupSemiImplicitPoisson(m_prevDt);
+  this->setupSemiImplicitPoisson(this->m_prevDt);
   m_timer.stopEvent("Setup field solver");
 
   // Solve the Poisson equation.
@@ -567,9 +564,17 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
     this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::All);
     this->computeSemiImplicitRho();
   }
+
   const bool converged = this->solvePoisson();
+
   if (!converged) {
-    MayDay::Warning("ItoKMCGodunovStepper::regrid - Poisson solve did not converge after regrid!!!");
+    const std::string errMsg = "ItoKMCGodunovStepper::regrid - Poisson solve did not converge after regrid";
+
+    pout() << errMsg << endl;
+
+    if (this->m_abortOnFailure) {
+      MayDay::Error(errMsg.c_str());
+    }
   }
   m_timer.stopEvent("Solve Poisson");
 
@@ -1020,7 +1025,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
     const Real alpha  = 0.5;
     const int  stride = 1;
 
-    DataOps::filterSmooth(a_conductivityCell, alpha, stride);
+    DataOps::filterSmooth(a_conductivityCell, alpha, stride, true);
 
     (this->m_amr)->arithmeticAverage(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
     (this->m_amr)->interpGhostPwl(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
@@ -1266,10 +1271,20 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   this->computeSemiImplicitRho();
   m_timer.stopEvent("Deposit point particles");
 
-  // Solve the stinking equation.
+  // Solve the semi-implicit Poisson equation.
   this->barrier();
   m_timer.startEvent("Solve Poisson");
-  this->solvePoisson();
+  const bool converged = this->solvePoisson();
+  if (!converged) {
+    const std::string errMsg =
+      "ItoKMCGodunovStepper::advanceEulerMaruyama - Poisson solve did not converge after regrid";
+
+    pout() << errMsg << endl;
+
+    if (this->m_abortOnFailure) {
+      MayDay::Error(errMsg.c_str());
+    }
+  }
   m_timer.stopEvent("Solve Poisson");
 
   // Recompute velocities with the new electric field. This interpolates the velocities to the current particle positions, i.e.
@@ -1478,7 +1493,7 @@ ItoKMCGodunovStepper<I, C, R, F>::writeCheckpointHeader(HDF5HeaderData& a_header
     pout() << this->m_name + "::writeCheckpointHeader" << endl;
   }
 
-  a_header.m_real["prev_dt"]             = m_prevDt;
+  a_header.m_real["prev_dt"]             = this->m_prevDt;
   a_header.m_int["checkpoint_particles"] = m_writeCheckpointParticles ? 1 : 0;
 }
 #endif
@@ -1493,7 +1508,7 @@ ItoKMCGodunovStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header)
     pout() << this->m_name + "::readCheckpointHeader" << endl;
   }
 
-  m_prevDt                  = a_header.m_real["prev_dt"];
+  this->m_prevDt            = a_header.m_real["prev_dt"];
   m_readCheckpointParticles = (a_header.m_int["checkpoint_particles"] != 0) ? true : false;
   m_canRegridOnRestart      = m_readCheckpointParticles;
 }
@@ -1579,6 +1594,68 @@ ItoKMCGodunovStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const
   }
 }
 #endif
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::postPlot() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::postPlot");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::postPlot" << endl;
+  }
+
+  this->m_physicsPlotVariables.clear();
+
+  this->plotParticles();
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::plotParticles");
+  if (this->m_verbosity > 2) {
+    pout() << this->m_name + "::plotParticles" << endl;
+  }
+
+  bool plotParticles = false;
+
+  ParmParse pp(this->m_name.c_str());
+
+  pp.query("plot_particles", plotParticles);
+
+  if (plotParticles) {
+
+    for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
+      const RefCountedPtr<ItoSolver>&       solver    = solverIt();
+      const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+      // Create the output folder
+      std::string cmd     = "mkdir -p particles/" + solver->getName();
+      int         success = 0;
+      if (procID() == 0) {
+        success = system(cmd.c_str());
+      }
+
+      if (success != 0) {
+        MayDay::Error("ItoKMCGodunovStepper::plotParticles - could not create 'particles' directory");
+      }
+
+      // Set plot file name
+      const std::string prefix = "./particles/" + solver->getName() + "/" + solver->getName();
+      char              fileChar[1000];
+      sprintf(fileChar, "%s.step%07d.%dd.h5part", prefix.c_str(), this->m_timeStep, SpaceDim);
+
+      // Plot the particles
+      DischargeIO::writeH5Part(std::string(fileChar),
+                               (const ParticleContainer<GenericParticle<5, 3>>&)particles,
+                               ItoParticle::s_realVariables,
+                               ItoParticle::s_vectVariables,
+                               this->m_amr->getProbLo(),
+                               this->m_time);
+    }
+  }
+}
 
 #include <CD_NamespaceFooter.H>
 

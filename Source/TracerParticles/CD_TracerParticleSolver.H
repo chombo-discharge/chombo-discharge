@@ -176,6 +176,13 @@ public:
   remap();
 
   /*!
+    @brief Set deposition method
+    @param[in] a_deposition Deposition method
+  */
+  virtual void
+  setDeposition(const DepositionType a_deposition) noexcept;
+
+  /*!
     @brief Deposit particle weight on mesh. 
     @param[out] a_phi Deposited weight. 
   */
@@ -379,7 +386,7 @@ protected:
   /*!
     @brief Mesh-based velocity field. Must be set through setVelocity
   */
-  const EBAMRCellData* m_velocityField;
+  EBAMRCellData m_velocityField;
 
   /*!
     @brief Computational particles. 

@@ -1659,9 +1659,6 @@ The above code will add two reactions to the reaction set: :math:`N_2 + N_2 + N_
 It is not possible to set different reaction rates for the two reactions. 
 
 
-
-
-
 Specifying reaction rates
 _________________________
 
@@ -1964,7 +1961,41 @@ For example, if we know the rate :math:`k` for excitation of nitrogen to a speci
 
 This reaction is a dud in terms of the discharge evolution (the left and right hand sides are the same), but it can be useful for plotting the excitation rate. 
 
-.. note:: This functionality should be used with care because each reaction increases the I/O load.   
+.. note:: This functionality should be used with care because each reaction increases the I/O load.
+
+Warnings and caveats
+____________________
+
+Note that the JSON interface *always* computes reactions as if they were specified by the deterministic reaction rate equation
+
+.. math::
+
+   \partial_t n_i = \sum_r k_r n_j n_k n_l\ldots,
+   
+where the fluid source term for any reaction :math:`r` is :math:`S_r = k_r n_j n_k n_l\ldots`.
+Caution should always be exercised when defining a reaction set.
+
+Higher-order reactions
+^^^^^^^^^^^^^^^^^^^^^^
+
+Usually, many rate coefficients depend on the output of other software (e.g., BOLSIG+) and the scaling of rate coefficients is not immediately obvious.
+This is particularly the case for three-body reactions with BOLSIG+ that may require scaling before running the Boltzmann solver (by scaling the input cross sections), or after running the Boltzmann solver, in which case the rate coefficients themselves might require scaling. In any case the user should investigate the cross-section file that BOLSIG+ uses, and figure out the required scaling. 
+
+.. important::
+   
+   For two-body reactions, e.g. :math:`A + B\rightarrow \varnothing` the rate coefficient must be specified in units of :math:`\textrm{m}^3\textrm{s}^{-1}`, while for three-body reactions :math:`A + B + C\rightarrow\varnothing` the rate coefficient must have units of :math:`\textrm{m}^6\textrm{s}^{-1}`.
+
+   For three-body reactions the units given by BOLSIG+ in the output file may or may not be incorrect (depending on whether or not the user scaled the cross sections).
+
+Townsend coefficients
+^^^^^^^^^^^^^^^^^^^^^
+
+Townsend coefficients are not fundamentally required for specifying the reactions, but as with the higher-order reactions some of the output rates for three-body reactions might be inconsistently represented in the BOLSIG+ output files.
+For example, some care might be required when using the Townsend attachment coefficient for air when the reaction :math:`\textrm{e} + \textrm{O}_2 + \textrm{O}_2\rightarrow \textrm{O}_2^- + \textrm{O}_2` is included because the rate constant might require proper scaling after running the Boltzmann solver, but this scaling is invisible to the BOLSIG+'s calculation of the attachment coefficient :math:`\eta/N`.
+
+.. warning::
+
+   The JSON interface *does not guard* against inconsistencies in the user-provided chemistry, and provision of inconsistent :math:`\eta/N` and attachment reaction rates are quite possible.
 
 .. _Chap:PhotoReactionsJSON:
 

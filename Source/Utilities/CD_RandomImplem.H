@@ -198,6 +198,15 @@ Random::get(T& a_distribution)
   return a_distribution(s_rng);
 }
 
+template <typename T>
+inline size_t
+Random::getDiscrete(T& a_distribution)
+{
+  CH_assert(s_seeded);
+
+  return a_distribution(s_rng);
+}
+
 inline RealVect
 Random::randomPosition(const RealVect a_cellPos,
                        const RealVect a_lo,
@@ -249,7 +258,7 @@ Random::randomPosition(const RealVect a_lo, const RealVect a_hi) noexcept
   RealVect pos = RealVect::Zero;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
-    pos[dir] = a_lo[dir] + 0.5 * (1.0 + Random::getUniformReal11()) * (a_hi[dir] - a_lo[dir]);
+    pos[dir] = a_lo[dir] + Random::getUniformReal01() * (a_hi[dir] - a_lo[dir]);
   }
 
   return pos;
