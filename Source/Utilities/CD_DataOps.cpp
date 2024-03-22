@@ -52,13 +52,14 @@ DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&       a_faceDat
   CH_assert(a_cellData.nComp() == SpaceDim);
 
   const DisjointBoxLayout& dbl = a_cellData.disjointBoxLayout();
-  const DataIterator& dit = dbl.dataIterator();
+  const DataIterator&      dit = dbl.dataIterator();
 
   const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
-  for (int mybox = 0; mybox < nbox; mybox++) {  
+  for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
-    
+
     const EBCellFAB& cellData    = a_cellData[din];
     const FArrayBox& cellDataReg = cellData.getFArrayBox();
 
@@ -836,14 +837,14 @@ DataOps::plus(LevelData<EBCellFAB>&       a_lhs,
   CH_TIME("DataOps::plus(LD<EBCellFAB>)");
 
   const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
-  const DataIterator& dit = dbl.dataIterator();
-  
+  const DataIterator&      dit = dbl.dataIterator();
+
   const int nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
-    
+
     EBCellFAB&       lhs = a_lhs[din];
     const EBCellFAB& rhs = a_rhs[din];
 

@@ -719,7 +719,9 @@ FieldSolverMultigrid::setupMultigrid()
 
   // Define the Chombo multigrid solver
   m_multigridSolver = RefCountedPtr<AMRMultiGrid<LevelData<MFCellFAB>>>(new AMRMultiGrid<LevelData<MFCellFAB>>);
+  pout() << "define mg" << endl;
   m_multigridSolver->define(coarsestDomain, *m_helmholtzOpFactory, bottomSolver, 1 + finestLevel);
+  pout() << "set parameters" << endl;  
   m_multigridSolver->setSolverParameters(m_multigridPreSmooth,
                                          m_multigridPostSmooth,
                                          m_multigridBottomSmooth,
@@ -754,6 +756,7 @@ FieldSolverMultigrid::setupMultigrid()
   m_amr->alias(rhs, dummy2);
 
   // Init the solver. This instantiates the all the operators in AMRMultiGrid so we can just call "solve"
+  pout() << "init mg " << endl;
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
 }
 
