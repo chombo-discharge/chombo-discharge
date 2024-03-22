@@ -108,7 +108,10 @@ ItoKMCAir3LFA::ItoKMCAir3LFA()
   this->define();
 }
 
-ItoKMCAir3LFA::~ItoKMCAir3LFA() { CH_TIME("ItoKMCAir3LFA::~ItoKMCAir3LFA"); }
+ItoKMCAir3LFA::~ItoKMCAir3LFA()
+{
+  CH_TIME("ItoKMCAir3LFA::~ItoKMCAir3LFA");
+}
 
 void
 ItoKMCAir3LFA::parseRuntimeOptions() noexcept
@@ -368,7 +371,10 @@ ItoKMCAir3LFA::Electron::Electron()
   m_chargeNumber = -1;
 }
 
-ItoKMCAir3LFA::Electron::~Electron() { CH_TIME("ItoKMCAir3LFA::Electron::Electron"); }
+ItoKMCAir3LFA::Electron::~Electron()
+{
+  CH_TIME("ItoKMCAir3LFA::Electron::Electron");
+}
 
 ItoKMCAir3LFA::Positive::Positive()
 {
@@ -384,7 +390,10 @@ ItoKMCAir3LFA::Positive::Positive()
   pp.get("ion_transport", m_isDiffusive);
 }
 
-ItoKMCAir3LFA::Positive::~Positive() { CH_TIME("ItoKMCAir3LFA::Positive::~Positive"); }
+ItoKMCAir3LFA::Positive::~Positive()
+{
+  CH_TIME("ItoKMCAir3LFA::Positive::~Positive");
+}
 
 Real
 ItoKMCAir3LFA::Positive::initialData(const RealVect a_pos, const Real a_time) const
@@ -406,7 +415,10 @@ ItoKMCAir3LFA::Negative::Negative()
   pp.get("ion_transport", m_isDiffusive);
 }
 
-ItoKMCAir3LFA::Negative::~Negative() { CH_TIME("ItoKMCAir3LFA::Negative::~Negative"); }
+ItoKMCAir3LFA::Negative::~Negative()
+{
+  CH_TIME("ItoKMCAir3LFA::Negative::~Negative");
+}
 
 Real
 ItoKMCAir3LFA::Negative::initialData(const RealVect a_pos, const Real a_time) const
@@ -435,7 +447,10 @@ ItoKMCAir3LFA::PhotonZ::PhotonZ()
   m_K2 = m_K2 * pO2;
 }
 
-ItoKMCAir3LFA::PhotonZ::~PhotonZ() { CH_TIME("ItoKMCAir3LFA::PhotonZ::~PhotonZ"); }
+ItoKMCAir3LFA::PhotonZ::~PhotonZ()
+{
+  CH_TIME("ItoKMCAir3LFA::PhotonZ::~PhotonZ");
+}
 
 Real
 ItoKMCAir3LFA::PhotonZ::getAbsorptionCoefficient(const RealVect a_pos) const

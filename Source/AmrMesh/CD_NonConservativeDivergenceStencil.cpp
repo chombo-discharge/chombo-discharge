@@ -54,8 +54,11 @@ NonConservativeDivergenceStencil::buildStencil(VoFStencil&              a_sten,
 
   Real sumKappa = 0.;
 
-  const Vector<VolIndex> vofs =
-    VofUtils::getVofsInRadius(a_vof, a_ebisbox, m_radius, VofUtils::Connectivity::MonotonePath, true);
+  const Vector<VolIndex> vofs = VofUtils::getVofsInRadius(a_vof,
+                                                          a_ebisbox,
+                                                          m_radius,
+                                                          VofUtils::Connectivity::MonotonePath,
+                                                          true);
 
   for (int i = 0; i < vofs.size(); i++) {
     const VolIndex& ivof  = vofs[i];

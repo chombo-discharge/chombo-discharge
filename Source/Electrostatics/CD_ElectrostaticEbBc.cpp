@@ -13,9 +13,15 @@
 #include <CD_ElectrostaticEbBc.H>
 #include <CD_NamespaceHeader.H>
 
-ElectrostaticEbBc::ElectrostaticEbBc() { CH_TIME("ElectrostaticEbBc::ElectrostaticEbBc()"); }
+ElectrostaticEbBc::ElectrostaticEbBc()
+{
+  CH_TIME("ElectrostaticEbBc::ElectrostaticEbBc()");
+}
 
-ElectrostaticEbBc::~ElectrostaticEbBc() { CH_TIME("ElectrostaticEbBc::~ElectrostaticEbBc()"); }
+ElectrostaticEbBc::~ElectrostaticEbBc()
+{
+  CH_TIME("ElectrostaticEbBc::~ElectrostaticEbBc()");
+}
 
 void
 ElectrostaticEbBc::clear()

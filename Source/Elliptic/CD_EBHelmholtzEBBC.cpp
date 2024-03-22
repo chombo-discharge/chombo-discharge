@@ -20,9 +20,15 @@
 constexpr int EBHelmholtzEBBC::m_comp;
 constexpr int EBHelmholtzEBBC::m_nComp;
 
-EBHelmholtzEBBC::EBHelmholtzEBBC() { CH_TIME("EBHelmholtzEBBC::EBHelmholtzEBBC()"); }
+EBHelmholtzEBBC::EBHelmholtzEBBC()
+{
+  CH_TIME("EBHelmholtzEBBC::EBHelmholtzEBBC()");
+}
 
-EBHelmholtzEBBC::~EBHelmholtzEBBC() { CH_TIME("EBHelmholtzEBBC::~EBHelmholtzEBBC()"); }
+EBHelmholtzEBBC::~EBHelmholtzEBBC()
+{
+  CH_TIME("EBHelmholtzEBBC::~EBHelmholtzEBBC()");
+}
 
 void
 EBHelmholtzEBBC::define(const Location::Cell a_dataLocation,

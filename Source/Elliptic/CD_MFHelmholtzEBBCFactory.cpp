@@ -16,8 +16,14 @@
 #include <CD_MFHelmholtzEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzEBBCFactory::MFHelmholtzEBBCFactory() { CH_TIME("MFHelmholtzEBBCFactory::MFHelmholtzEBBCFactory()"); }
+MFHelmholtzEBBCFactory::MFHelmholtzEBBCFactory()
+{
+  CH_TIME("MFHelmholtzEBBCFactory::MFHelmholtzEBBCFactory()");
+}
 
-MFHelmholtzEBBCFactory::~MFHelmholtzEBBCFactory() { CH_TIME("MFHelmholtzEBBCFactory::~MFHelmholtzEBBCFactory()"); }
+MFHelmholtzEBBCFactory::~MFHelmholtzEBBCFactory()
+{
+  CH_TIME("MFHelmholtzEBBCFactory::~MFHelmholtzEBBCFactory()");
+}
 
 #include <CD_NamespaceFooter.H>

@@ -15,8 +15,10 @@
 
 using namespace Physics::Geometry;
 
-GeometryStepper::GeometryStepper() {}
-GeometryStepper::~GeometryStepper() {}
+GeometryStepper::GeometryStepper()
+{}
+GeometryStepper::~GeometryStepper()
+{}
 
 void
 GeometryStepper::setupSolvers()

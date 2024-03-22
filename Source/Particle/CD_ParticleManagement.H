@@ -36,8 +36,8 @@ namespace ParticleManagement {
     @param[in] a_numTargetParticles Number of target particles
   */
   template <class P>
-  using ParticleMerger =
-    std::function<void(List<P>& a_particles, const CellInfo& a_cellInfo, const int a_numTargetParticles)>;
+  using ParticleMerger = std::function<
+    void(List<P>& a_particles, const CellInfo& a_cellInfo, const int a_numTargetParticles)>;
 
   /*!
     @brief Declaration of a reconciliation function when splitting particles.

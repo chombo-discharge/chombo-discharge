@@ -38,14 +38,19 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_ebGrids[lvl]->getDBL();
     const EBISLayout&        ebisl = m_ebGrids[lvl]->getEBISL();
+    const DataIterator&      dit   = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box                    cellBox  = dbl[dit()];
-      const EBISBox&               ebisbox  = ebisl[dit()];
-      const BaseIVFAB<VoFStencil>& stencils = (*m_depositionStencils[lvl])[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      BaseIVFAB<Real>& meshData  = (*m_data[lvl])[dit()];
-      const List<P>&   particles = a_particles[lvl][dit()].listItems();
+      const Box                    cellBox  = dbl[din];
+      const EBISBox&               ebisbox  = ebisl[din];
+      const BaseIVFAB<VoFStencil>& stencils = (*m_depositionStencils[lvl])[din];
+
+      BaseIVFAB<Real>& meshData  = (*m_data[lvl])[din];
+      const List<P>&   particles = a_particles[lvl][din].listItems();
 
       meshData.setVal(0.0);
 
@@ -108,14 +113,19 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_ebGrids[lvl]->getDBL();
     const EBISLayout&        ebisl = m_ebGrids[lvl]->getEBISL();
+    const DataIterator&      dit   = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box                    cellBox  = dbl[dit()];
-      const EBISBox&               ebisbox  = ebisl[dit()];
-      const BaseIVFAB<VoFStencil>& stencils = (*m_depositionStencils[lvl])[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      BaseIVFAB<Real>& meshData  = (*m_data[lvl])[dit()];
-      const List<P>&   particles = a_particles[lvl][dit()].listItems();
+      const Box                    cellBox  = dbl[din];
+      const EBISBox&               ebisbox  = ebisl[din];
+      const BaseIVFAB<VoFStencil>& stencils = (*m_depositionStencils[lvl])[din];
+
+      BaseIVFAB<Real>& meshData  = (*m_data[lvl])[din];
+      const List<P>&   particles = a_particles[lvl][din].listItems();
 
       meshData.setVal(0.0);
 

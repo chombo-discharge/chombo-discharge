@@ -39,7 +39,8 @@ EBCoarseToFineInterp::EBCoarseToFineInterp(const EBLevelGrid& a_eblgFine,
   this->define(a_eblgFine, a_eblgCoFi, a_eblgCoar, a_refRat);
 }
 
-EBCoarseToFineInterp::~EBCoarseToFineInterp() noexcept {}
+EBCoarseToFineInterp::~EBCoarseToFineInterp() noexcept
+{}
 
 void
 EBCoarseToFineInterp::define(const EBLevelGrid& a_eblgFine,
@@ -48,8 +49,8 @@ EBCoarseToFineInterp::define(const EBLevelGrid& a_eblgFine,
                              const int&         a_refRat) noexcept
 {
   CH_TIMERS("EBCoarseToFineInterp::define");
-  CH_TIMER("EBCoarseToFineInterp::define_ebpwlfineinterp", t0);
-  CH_TIMER("EBCoarseToFineInterp::define_buffers", t1);
+  CH_TIMER("EBCoarseToFineInterp::define::define_ebpwlfineinterp", t0);
+  CH_TIMER("EBCoarseToFineInterp::define::define_buffers", t1);
 
   CH_assert(a_refRat > 1);
 
@@ -60,25 +61,35 @@ EBCoarseToFineInterp::define(const EBLevelGrid& a_eblgFine,
   m_cellCopiers.clear();
 
   CH_START(t1);
+
+  const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
+  const DisjointBoxLayout& dblCoFi = m_eblgCoFi.getDBL();
+
   // Define the irreg data holder.
-  LayoutData<IntVectSet> irregFine(m_eblgFine.getDBL());
-  LayoutData<IntVectSet> irregCoar(m_eblgCoFi.getDBL());
+  LayoutData<IntVectSet> irregFine(dblFine);
+  LayoutData<IntVectSet> irregCoar(dblCoFi);
 
-  m_fineVoFs.define(m_eblgFine.getDBL());
-  m_coarVoFs.define(m_eblgFine.getDBL());
+  m_fineVoFs.define(dblFine);
+  m_coarVoFs.define(dblFine);
 
-  for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
-    const Box& fineBox = m_eblgFine.getDBL()[dit()];
-    const Box& coarBox = m_eblgCoFi.getDBL()[dit()];
+  const DataIterator& dit  = dblFine.dataIterator();
+  const int           nbox = dit.size();
 
-    const EBISBox& fineEBISBox = m_eblgFine.getEBISL()[dit()];
-    const EBISBox& coarEBISBox = m_eblgCoFi.getEBISL()[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    irregFine[dit()] = fineEBISBox.getIrregIVS(fineBox);
-    irregCoar[dit()] = coarEBISBox.getIrregIVS(coarBox);
+    const Box& fineBox = m_eblgFine.getDBL()[din];
+    const Box& coarBox = m_eblgCoFi.getDBL()[din];
 
-    m_fineVoFs[dit()].define(irregFine[dit()], fineEBISBox.getEBGraph());
-    m_coarVoFs[dit()].define(coarEBISBox.getIrregIVS(coarBox), coarEBISBox.getEBGraph());
+    const EBISBox& fineEBISBox = m_eblgFine.getEBISL()[din];
+    const EBISBox& coarEBISBox = m_eblgCoFi.getEBISL()[din];
+
+    irregFine[din] = fineEBISBox.getIrregIVS(fineBox);
+    irregCoar[din] = coarEBISBox.getIrregIVS(coarBox);
+
+    m_fineVoFs[din].define(irregFine[din], fineEBISBox.getEBGraph());
+    m_coarVoFs[din].define(coarEBISBox.getIrregIVS(coarBox), coarEBISBox.getEBGraph());
   }
 
   m_irregCoFi.define(m_eblgCoFi.getDBL(), 1, IntVect::Zero, BaseIVFactory<Real>(m_eblgCoFi.getEBISL(), irregCoar));
@@ -96,18 +107,25 @@ EBCoarseToFineInterp::defineWeights() noexcept
 {
   CH_TIME("EBCoarseToFineInterp::defineWeights");
 
+  const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
+  const DataIterator&      ditFine = dblFine.dataIterator();
+
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
   const Real areaFactor   = std::pow(m_refRat, SpaceDim - 1);
   const Real volumeFactor = std::pow(m_refRat, SpaceDim);
 
-  for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
-    const EBISBox& ebisBoxFine = ebislFine[dit()];
-    const EBISBox& ebisBoxCoar = ebislCoar[dit()];
+  const int nbox = ditFine.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = ditFine[mybox];
 
-    BaseIVFAB<Real>& volumeWeights = m_volumeWeights[dit()];
-    BaseIVFAB<Real>& areaWeights   = m_areaWeights[dit()];
+    const EBISBox& ebisBoxFine = ebislFine[din];
+    const EBISBox& ebisBoxCoar = ebislCoar[din];
+
+    BaseIVFAB<Real>& volumeWeights = m_volumeWeights[din];
+    BaseIVFAB<Real>& areaWeights   = m_areaWeights[din];
 
     volumeWeights.setVal(0.0);
     areaWeights.setVal(0.0);
@@ -116,8 +134,8 @@ EBCoarseToFineInterp::defineWeights() noexcept
       // TLDR: We want refRat^(D-1) * coarArea/fineArea. We refine the coarse vof (which also gives regular cells)
       // but that won't matter because they don't have a boundary area. We do it similarly for the volume fractions.
 
-      const VolIndex         coarVoF  = ebislFine.coarsen(fineVoF, m_refRat, dit());
-      const Vector<VolIndex> fineVoFs = ebislCoar.refine(coarVoF, m_refRat, dit());
+      const VolIndex         coarVoF  = ebislFine.coarsen(fineVoF, m_refRat, din);
+      const Vector<VolIndex> fineVoFs = ebislCoar.refine(coarVoF, m_refRat, din);
 
       Real fineVolume = 0.0;
       Real fineArea   = 0.0;
@@ -139,7 +157,7 @@ EBCoarseToFineInterp::defineWeights() noexcept
       }
     };
 
-    BoxLoops::loop(m_fineVoFs[dit()], kernel);
+    BoxLoops::loop(m_fineVoFs[din], kernel);
   }
 }
 
@@ -156,6 +174,9 @@ EBCoarseToFineInterp::interpolate(LevelData<EBCellFAB>&             a_fineData,
   CH_assert(a_fineData.nComp() > a_variables.end());
   CH_assert(a_coarData.nComp() > a_variables.end());
 
+  const DisjointBoxLayout& dblCoFi = m_eblgCoFi.getDBL();
+  const DataIterator&      ditCoFi = dblCoFi.dataIterator();
+
   LevelData<EBCellFAB> m_coFiData(m_eblgCoFi.getDBL(), 1, IntVect::Unit, EBCellFactory(m_eblgCoFi.getEBISL()));
 
   // Define the copier that we need if we don't already have it.
@@ -171,27 +192,31 @@ EBCoarseToFineInterp::interpolate(LevelData<EBCellFAB>&             a_fineData,
     a_coarData.copyTo(srcInterv, m_coFiData, dstInterv, cellCopier);
 
     CH_START(t1);
-    for (DataIterator dit(m_eblgCoFi.getDBL()); dit.ok(); ++dit) {
+    const int nbox = ditCoFi.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = ditCoFi[mybox];
+
       switch (a_interpType) {
       case EBCoarseToFineInterp::Type::PWC: {
-        this->interpolatePWC(a_fineData[dit()], m_coFiData[dit()], dit(), ivar, 0);
+        this->interpolatePWC(a_fineData[din], m_coFiData[din], din, ivar, 0);
 
         break;
       }
       case EBCoarseToFineInterp::Type::ConservativePWC: {
-        this->interpolateConservativePWC(a_fineData[dit()], m_coFiData[dit()], dit(), ivar, 0);
+        this->interpolateConservativePWC(a_fineData[din], m_coFiData[din], din, ivar, 0);
 
         break;
       }
       case EBCoarseToFineInterp::Type::ConservativeMinMod: {
-        this->interpolateConservativeSlope(a_fineData[dit()], m_coFiData[dit()], dit(), ivar, 0, SlopeLimiter::MinMod);
+        this->interpolateConservativeSlope(a_fineData[din], m_coFiData[din], din, ivar, 0, SlopeLimiter::MinMod);
 
         break;
       }
       case EBCoarseToFineInterp::Type::ConservativeMonotonizedCentral: {
-        this->interpolateConservativeSlope(a_fineData[dit()],
-                                           m_coFiData[dit()],
-                                           dit(),
+        this->interpolateConservativeSlope(a_fineData[din],
+                                           m_coFiData[din],
+                                           din,
                                            ivar,
                                            0,
                                            SlopeLimiter::MonotonizedCentral);
@@ -224,6 +249,7 @@ EBCoarseToFineInterp::interpolate(LevelData<BaseIVFAB<Real>>&       a_fineData,
   CH_assert(a_coarData.nComp() > a_variables.end());
 
   const DisjointBoxLayout& dblCoFi = m_eblgCoFi.getDBL();
+  const DataIterator&      ditCoFi = dblCoFi.dataIterator();
 
   if (!(m_ebCopier.isDefined())) {
     m_ebCopier.define(a_coarData.disjointBoxLayout(), dblCoFi);
@@ -234,15 +260,19 @@ EBCoarseToFineInterp::interpolate(LevelData<BaseIVFAB<Real>>&       a_fineData,
     a_coarData.copyTo(Interval(ivar, ivar), m_irregCoFi, Interval(0, 0), m_ebCopier);
     CH_STOP(t1);
 
-    for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
+    const int nbox = ditCoFi.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = ditCoFi[mybox];
+
       switch (a_interpType) {
       case EBCoarseToFineInterp::Type::PWC: {
-        this->interpolatePWC(a_fineData[dit()], m_irregCoFi[dit()], dit(), ivar, 0);
+        this->interpolatePWC(a_fineData[din], m_irregCoFi[din], din, ivar, 0);
 
         break;
       }
       case EBCoarseToFineInterp::Type::ConservativePWC: {
-        this->interpolateConservativePWC(a_fineData[dit()], m_irregCoFi[dit()], dit(), ivar, 0);
+        this->interpolateConservativePWC(a_fineData[din], m_irregCoFi[din], din, ivar, 0);
 
         break;
       }

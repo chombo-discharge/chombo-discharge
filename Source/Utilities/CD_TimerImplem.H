@@ -44,7 +44,10 @@ inline Timer::Timer(const std::string a_processName)
   m_events.clear();
 }
 
-inline Timer::~Timer() { m_events.clear(); }
+inline Timer::~Timer()
+{
+  m_events.clear();
+}
 
 inline void
 Timer::clear() noexcept

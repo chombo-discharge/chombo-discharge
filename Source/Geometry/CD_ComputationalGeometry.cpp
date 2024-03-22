@@ -42,7 +42,10 @@ ComputationalGeometry::ComputationalGeometry()
   m_multifluidIndexSpace = RefCountedPtr<MultiFluidIndexSpace>(new MultiFluidIndexSpace());
 }
 
-ComputationalGeometry::~ComputationalGeometry() { CH_TIME("ComputationalGeometry::~ComputationalGeometry()"); }
+ComputationalGeometry::~ComputationalGeometry()
+{
+  CH_TIME("ComputationalGeometry::~ComputationalGeometry()");
+}
 
 void
 ComputationalGeometry::useScanShop(const ProblemDomain a_beginDomain)

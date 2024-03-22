@@ -46,7 +46,8 @@ namespace Physics {
       /*!
 	@brief Destructor
       */
-      virtual ~AdvectionDiffusionSpecies() {}
+      virtual ~AdvectionDiffusionSpecies()
+      {}
 
       /*!
 	@brief Initial data. 

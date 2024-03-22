@@ -13,14 +13,16 @@
 #include <CD_MFMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
-MFMultigridInterpolator::MFMultigridInterpolator() {}
+MFMultigridInterpolator::MFMultigridInterpolator()
+{}
 
 MFMultigridInterpolator::MFMultigridInterpolator(const Vector<RefCountedPtr<EBMultigridInterpolator>>& a_interpolators)
 {
   this->define(a_interpolators);
 }
 
-MFMultigridInterpolator::~MFMultigridInterpolator() {}
+MFMultigridInterpolator::~MFMultigridInterpolator()
+{}
 
 MFMultigridInterpolator&
 MFMultigridInterpolator::operator=(const MFMultigridInterpolator& a_other)

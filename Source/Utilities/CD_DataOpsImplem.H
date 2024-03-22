@@ -24,8 +24,16 @@ DataOps::setValue(LevelData<MFInterfaceFAB<T>>& a_lhs, const T& a_value)
 {
   CH_TIME("DataOps::setValue");
 
-  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit) {
-    a_lhs[dit()].setVal(a_value);
+  const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    a_lhs[din].setVal(a_value);
   }
 }
 

@@ -27,7 +27,8 @@ SphereSdf::SphereSdf(const SphereSdf& a_inputIF)
   m_fluidInside = a_inputIF.m_fluidInside;
 }
 
-SphereSdf::~SphereSdf() {}
+SphereSdf::~SphereSdf()
+{}
 
 Real
 SphereSdf::value(const RealVect& a_point) const

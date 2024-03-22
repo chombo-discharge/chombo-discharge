@@ -44,7 +44,8 @@ CellInfo::CellInfo(const IntVect  a_gridIndex,
   }
 }
 
-CellInfo::~CellInfo() noexcept {}
+CellInfo::~CellInfo() noexcept
+{}
 
 IntVect&
 CellInfo::getGridIndex() noexcept

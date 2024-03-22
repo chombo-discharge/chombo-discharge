@@ -73,6 +73,7 @@ Cylinder::Cylinder()
   }
 }
 
-Cylinder::~Cylinder() {}
+Cylinder::~Cylinder()
+{}
 
 #include <CD_NamespaceFooter.H>

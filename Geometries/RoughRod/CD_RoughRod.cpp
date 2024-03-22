@@ -55,6 +55,7 @@ RoughRod::RoughRod()
   }
 }
 
-RoughRod::~RoughRod() {}
+RoughRod::~RoughRod()
+{}
 
 #include <CD_NamespaceFooter.H>

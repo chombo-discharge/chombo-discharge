@@ -40,7 +40,8 @@ McPhoto::McPhoto()
   m_dirtySampling = false;
 }
 
-McPhoto::~McPhoto() {}
+McPhoto::~McPhoto()
+{}
 
 bool
 McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi)
@@ -737,8 +738,8 @@ McPhoto::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi)
     pout() << m_name + "::computeFlux" << endl;
   }
 
-  const std::string str =
-    "McPhoto::computeFlux - Fluid flux can't be computed with discrete photons. Calling this is an error";
+  const std::string
+    str = "McPhoto::computeFlux - Fluid flux can't be computed with discrete photons. Calling this is an error";
 
   MayDay::Error(str.c_str());
 }
@@ -1277,8 +1278,9 @@ McPhoto::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData
   }
 
   if (m_blendConservation) {
-    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils =
-      m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
+    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(
+      m_realm,
+      m_phase);
     stencils.apply(a_depositionNC, a_depositionKappaC);
   }
   else {

@@ -26,7 +26,8 @@ CdrPlasmaReactionJSON::CdrPlasmaReactionJSON(const std::list<int> a_plasmaReacta
   m_photonProducts   = a_photonProducts;
 }
 
-CdrPlasmaReactionJSON::~CdrPlasmaReactionJSON() {}
+CdrPlasmaReactionJSON::~CdrPlasmaReactionJSON()
+{}
 
 const std::list<int>&
 CdrPlasmaReactionJSON::getPlasmaReactants() const

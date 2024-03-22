@@ -26,7 +26,10 @@ MFHelmholtzNeumannEBBC::MFHelmholtzNeumannEBBC(const int a_phase, const RefCount
   m_useFunction = false;
 }
 
-MFHelmholtzNeumannEBBC::~MFHelmholtzNeumannEBBC() { CH_TIME("MFHelmholtzNeumannEBBC::~MFHelmholtzNeumannEBBC()"); }
+MFHelmholtzNeumannEBBC::~MFHelmholtzNeumannEBBC()
+{
+  CH_TIME("MFHelmholtzNeumannEBBC::~MFHelmholtzNeumannEBBC()");
+}
 
 void
 MFHelmholtzNeumannEBBC::setDphiDn(const Real a_DphiDn)

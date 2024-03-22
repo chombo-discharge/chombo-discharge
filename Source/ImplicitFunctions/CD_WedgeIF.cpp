@@ -78,7 +78,8 @@ WedgeIF::WedgeIF(const WedgeIF& a_inputIF)
   m_baseIF = a_inputIF.m_baseIF;
 }
 
-WedgeIF::~WedgeIF() {}
+WedgeIF::~WedgeIF()
+{}
 
 Real
 WedgeIF::value(const RealVect& a_pos) const

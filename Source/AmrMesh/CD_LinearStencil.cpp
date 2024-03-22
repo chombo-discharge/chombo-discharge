@@ -229,10 +229,18 @@ LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
       // 1. First, starting on a_vof, compute the linear interpolation stencil in 1D along dir0 and dir1
       VoFStencil curStenDir0;
       VoFStencil curStenDir1;
-      const bool foundFirstStencil0 =
-        LinearStencil::computeInterpStencil1D(curStenDir0, a_pos, a_vof, a_domain, a_ebisbox, dir0);
-      const bool foundFirstStencil1 =
-        LinearStencil::computeInterpStencil1D(curStenDir1, a_pos, a_vof, a_domain, a_ebisbox, dir1);
+      const bool foundFirstStencil0 = LinearStencil::computeInterpStencil1D(curStenDir0,
+                                                                            a_pos,
+                                                                            a_vof,
+                                                                            a_domain,
+                                                                            a_ebisbox,
+                                                                            dir0);
+      const bool foundFirstStencil1 = LinearStencil::computeInterpStencil1D(curStenDir1,
+                                                                            a_pos,
+                                                                            a_vof,
+                                                                            a_domain,
+                                                                            a_ebisbox,
+                                                                            dir1);
 
 #if LINEARSTENCIL_DEBUG
       if (!foundFirstStencil0 || !foundFirstStencil1) { // If we made it into this loop, this shouldn't happen
@@ -253,8 +261,12 @@ LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
 
       for (int i = 0; i < otherVoFsInDir1.size(); i++) {
         VoFStencil sten;
-        const bool found =
-          LinearStencil::computeInterpStencil1D(sten, a_pos, otherVoFsInDir1[i], a_domain, a_ebisbox, dir0);
+        const bool found = LinearStencil::computeInterpStencil1D(sten,
+                                                                 a_pos,
+                                                                 otherVoFsInDir1[i],
+                                                                 a_domain,
+                                                                 a_ebisbox,
+                                                                 dir0);
 
         if (found) {
           foundSecondStencil0 = true;
@@ -264,8 +276,12 @@ LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
       }
       for (int i = 0; i < otherVoFsInDir0.size(); i++) {
         VoFStencil sten;
-        const bool found =
-          LinearStencil::computeInterpStencil1D(sten, a_pos, otherVoFsInDir0[i], a_domain, a_ebisbox, dir1);
+        const bool found = LinearStencil::computeInterpStencil1D(sten,
+                                                                 a_pos,
+                                                                 otherVoFsInDir0[i],
+                                                                 a_domain,
+                                                                 a_ebisbox,
+                                                                 dir1);
 
         if (found) {
           foundSecondStencil1 = true;
@@ -464,8 +480,12 @@ LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
     // This is the bilinear stencil in the xy-plane of this VoF. This will always return true (right..?) because
     // of how we handle pathological cases for 2D
     VoFStencil stenThisPlane;
-    const bool foundFirstStencil =
-      LinearStencil::computeInterpStencil2D(stenThisPlane, a_pos, a_vof, a_domain, a_ebisbox, interpDir3D);
+    const bool foundFirstStencil = LinearStencil::computeInterpStencil2D(stenThisPlane,
+                                                                         a_pos,
+                                                                         a_vof,
+                                                                         a_domain,
+                                                                         a_ebisbox,
+                                                                         interpDir3D);
 
     // This code tries to compute a bilinear stencil in the xy plane but for the cell (i,j,k+-1). There can be multiple if
     // the cell (i,j,k+1) is multivalued, hence the loop. We take the other bilinear stencil to be the average of those
@@ -476,8 +496,12 @@ LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
     const Vector<VolIndex> otherVoFs = a_ebisbox.getVoFs(a_vof, interpDir3D, side, 1);
     for (int ivof = 0; ivof < otherVoFs.size(); ivof++) {
       VoFStencil otherStencil;
-      const bool foundOtherStencil =
-        LinearStencil::computeInterpStencil2D(otherStencil, a_pos, otherVoFs[ivof], a_domain, a_ebisbox, interpDir3D);
+      const bool foundOtherStencil = LinearStencil::computeInterpStencil2D(otherStencil,
+                                                                           a_pos,
+                                                                           otherVoFs[ivof],
+                                                                           a_domain,
+                                                                           a_ebisbox,
+                                                                           interpDir3D);
 
       if (foundOtherStencil) {
         foundSecondStencil = true;

@@ -143,12 +143,19 @@ The main variables that the user needs to set are
   This is a requirement.
 * ``USE_HDF5 = TRUE/FALSE``
   This enables and disables HDF5 code.
+* ``OPENMPCC = TRUE/FALSE``
+  Turn on/off OpenMP threading. 
+  
 
 MPI
 ___
 
 To enable MPI, make sure that ``MPI`` is set to true and that the ``MPICXX`` compiler is set.
 For GNU installations, one will usually have ``MPICXX = mpicxx`` or ``MPICXX = mpic++``, while for Intel builds one will usually have ``MPICXX = mpiicpc``.
+
+.. note::
+
+   The MPI layer distributes grid patches among processes, i.e. uses *domain decomposition*.
 
 HDF5
 ____
@@ -164,6 +171,16 @@ If using HDF5, one must also set the following flags:
 
    ``Chombo`` only supports HDF5 APIs at version 1.10 and below.
    To use a newer version of HDF5 together with the 1.10 API, add ``-DH5_USE_110_API`` to the HDFINC flags.
+
+OpenMP
+______
+
+To turn on OpenMP threading one can set the ``OPENMPCC`` to ``TRUE``.
+
+.. note::
+
+   The OpenMP parallelization layer uses threaded loops over grid patches (potentially within each MPI rank).
+
 
 Compiler flags
 ______________

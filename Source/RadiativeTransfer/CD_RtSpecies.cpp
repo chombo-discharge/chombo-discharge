@@ -19,7 +19,8 @@ RtSpecies::RtSpecies()
   m_name = "DefaultRtSpecies";
 }
 
-RtSpecies::~RtSpecies() {}
+RtSpecies::~RtSpecies()
+{}
 
 std::string
 RtSpecies::getName() const

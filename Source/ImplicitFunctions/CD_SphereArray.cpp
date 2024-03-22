@@ -79,7 +79,10 @@ SphereArray::SphereArray(const SphereArray& a_input)
   m_flipInside = a_input.m_flipInside;
 }
 
-SphereArray::~SphereArray() { CH_TIME("SphereArray::~SphereArray"); }
+SphereArray::~SphereArray()
+{
+  CH_TIME("SphereArray::~SphereArray");
+}
 
 Real
 SphereArray::value(const RealVect& a_point) const

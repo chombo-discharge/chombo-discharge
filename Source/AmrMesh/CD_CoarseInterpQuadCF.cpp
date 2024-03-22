@@ -25,7 +25,10 @@ CoarseInterpQuadCF::CoarseInterpQuadCF() noexcept
   m_isDefined = false;
 }
 
-CoarseInterpQuadCF::~CoarseInterpQuadCF() noexcept { CH_TIME("CoarseInterpQuadCF::~CoarseInterpQuadCF()"); }
+CoarseInterpQuadCF::~CoarseInterpQuadCF() noexcept
+{
+  CH_TIME("CoarseInterpQuadCF::~CoarseInterpQuadCF()");
+}
 
 void
 CoarseInterpQuadCF::define(const DisjointBoxLayout& a_dblFine,

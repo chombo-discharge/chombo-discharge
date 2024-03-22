@@ -84,7 +84,8 @@ ProfilePlaneIF::ProfilePlaneIF(const ProfilePlaneIF& a_inputIF)
   m_baseif      = a_inputIF.m_baseif;
 }
 
-ProfilePlaneIF::~ProfilePlaneIF() {}
+ProfilePlaneIF::~ProfilePlaneIF()
+{}
 
 Real
 ProfilePlaneIF::value(const RealVect& a_pos) const

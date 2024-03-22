@@ -44,7 +44,10 @@ RodIF::RodIF(const RealVect& a_center1, const RealVect& a_center2, const Real& a
   }
 }
 
-RodIF::RodIF(const RodIF& a_inputIF) { this->m_baseif = a_inputIF.m_baseif; }
+RodIF::RodIF(const RodIF& a_inputIF)
+{
+  this->m_baseif = a_inputIF.m_baseif;
+}
 
 Real
 RodIF::value(const RealVect& a_point) const

@@ -15,7 +15,10 @@
 
 using namespace Physics::CdrPlasma;
 
-NeutralSpeciesJSON::NeutralSpeciesJSON() { m_isDefined = false; }
+NeutralSpeciesJSON::NeutralSpeciesJSON()
+{
+  m_isDefined = false;
+}
 
 NeutralSpeciesJSON::NeutralSpeciesJSON(const std::string                               a_name,
                                        const Real                                      a_molarFraction,
@@ -24,7 +27,8 @@ NeutralSpeciesJSON::NeutralSpeciesJSON(const std::string                        
   this->define(a_name, a_molarFraction, a_function);
 }
 
-NeutralSpeciesJSON::~NeutralSpeciesJSON() {}
+NeutralSpeciesJSON::~NeutralSpeciesJSON()
+{}
 
 void
 NeutralSpeciesJSON::define(const std::string                               a_name,

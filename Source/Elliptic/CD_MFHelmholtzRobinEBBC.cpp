@@ -31,7 +31,10 @@ MFHelmholtzRobinEBBC::MFHelmholtzRobinEBBC(const int a_phase, const RefCountedPt
   m_useFunction = false;
 }
 
-MFHelmholtzRobinEBBC::~MFHelmholtzRobinEBBC() { CH_TIME("MFHelmholtzRobinEBBC::~MFHelmholtzRobinEBBC()"); }
+MFHelmholtzRobinEBBC::~MFHelmholtzRobinEBBC()
+{
+  CH_TIME("MFHelmholtzRobinEBBC::~MFHelmholtzRobinEBBC()");
+}
 
 void
 MFHelmholtzRobinEBBC::setOrder(const int a_order)
@@ -111,6 +114,9 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
 
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
   const ProblemDomain&     domain = m_eblg.getDomain();
+  const DataIterator&      dit    = dbl.dataIterator();
+
+  const int nbox = dit.size();
 
   // Drop order if we must
   for (int dir = 0; dir < SpaceDim; dir++) {
@@ -119,7 +125,10 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
     }
   }
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
     const Box      box     = dbl[dit()];
     const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
 
@@ -306,8 +315,12 @@ MFHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
   }
 
   // Build displacements vector, i.e. distances from cell centers/centroids to the cut-cell EB centroid.
-  const Vector<RealVect> displacements =
-    LeastSquares::getDisplacements(Location::Cell::Boundary, m_dataLocation, a_vof, vofs, ebisbox, m_dx);
+  const Vector<RealVect> displacements = LeastSquares::getDisplacements(Location::Cell::Boundary,
+                                                                        m_dataLocation,
+                                                                        a_vof,
+                                                                        vofs,
+                                                                        ebisbox,
+                                                                        m_dx);
 
   // M = Number of unknowns in Taylor expansion of order a_order.
   // K = Number of equations (displacements)

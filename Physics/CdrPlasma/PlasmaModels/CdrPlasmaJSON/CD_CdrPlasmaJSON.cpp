@@ -70,7 +70,10 @@ CdrPlasmaJSON::CdrPlasmaJSON()
   m_numRtSpecies  = m_rtSpecies.size();
 }
 
-CdrPlasmaJSON::~CdrPlasmaJSON() { CH_TIME("CdrPlasmaJSON::~CdrPlasmaJSON()"); }
+CdrPlasmaJSON::~CdrPlasmaJSON()
+{
+  CH_TIME("CdrPlasmaJSON::~CdrPlasmaJSON()");
+}
 
 void
 CdrPlasmaJSON::parseOptions()

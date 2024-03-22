@@ -13,7 +13,10 @@
 #include <CD_MultiIndex.H>
 #include <CD_NamespaceHeader.H>
 
-MultiIndex::MultiIndex(const int a_order) { this->define(a_order); }
+MultiIndex::MultiIndex(const int a_order)
+{
+  this->define(a_order);
+}
 
 void
 MultiIndex::define(const int a_order)

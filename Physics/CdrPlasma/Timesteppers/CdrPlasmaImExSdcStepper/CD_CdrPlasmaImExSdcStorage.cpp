@@ -16,7 +16,8 @@
 
 using namespace Physics::CdrPlasma;
 
-CdrPlasmaImExSdcStepper::CdrStorage::CdrStorage() {}
+CdrPlasmaImExSdcStepper::CdrStorage::CdrStorage()
+{}
 
 CdrPlasmaImExSdcStepper::CdrStorage::CdrStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                                 const std::string             a_realm,
@@ -29,7 +30,10 @@ CdrPlasmaImExSdcStepper::CdrStorage::CdrStorage(const RefCountedPtr<AmrMesh>& a_
   m_ncomp = a_ncomp;
 }
 
-CdrPlasmaImExSdcStepper::CdrStorage::~CdrStorage() { deallocateStorage(); }
+CdrPlasmaImExSdcStepper::CdrStorage::~CdrStorage()
+{
+  deallocateStorage();
+}
 
 void
 CdrPlasmaImExSdcStepper::CdrStorage::allocateStorage(const int a_p)
@@ -102,7 +106,8 @@ CdrPlasmaImExSdcStepper::CdrStorage::deallocateStorage()
   }
 }
 
-CdrPlasmaImExSdcStepper::FieldStorage::FieldStorage() {}
+CdrPlasmaImExSdcStepper::FieldStorage::FieldStorage()
+{}
 
 CdrPlasmaImExSdcStepper::FieldStorage::FieldStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                                     const std::string             a_realm,
@@ -115,7 +120,10 @@ CdrPlasmaImExSdcStepper::FieldStorage::FieldStorage(const RefCountedPtr<AmrMesh>
   m_phase = a_phase;
 }
 
-CdrPlasmaImExSdcStepper::FieldStorage::~FieldStorage() { deallocateStorage(); }
+CdrPlasmaImExSdcStepper::FieldStorage::~FieldStorage()
+{
+  deallocateStorage();
+}
 
 void
 CdrPlasmaImExSdcStepper::FieldStorage::allocateStorage(const int a_p)
@@ -139,7 +147,8 @@ CdrPlasmaImExSdcStepper::FieldStorage::deallocateStorage()
   m_amr->deallocate(m_E_dom);
 }
 
-CdrPlasmaImExSdcStepper::RtStorage::RtStorage() {}
+CdrPlasmaImExSdcStepper::RtStorage::RtStorage()
+{}
 
 CdrPlasmaImExSdcStepper::RtStorage::RtStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                               const std::string             a_realm,
@@ -152,7 +161,10 @@ CdrPlasmaImExSdcStepper::RtStorage::RtStorage(const RefCountedPtr<AmrMesh>& a_am
   m_ncomp = a_ncomp;
 }
 
-CdrPlasmaImExSdcStepper::RtStorage::~RtStorage() { deallocateStorage(); }
+CdrPlasmaImExSdcStepper::RtStorage::~RtStorage()
+{
+  deallocateStorage();
+}
 
 void
 CdrPlasmaImExSdcStepper::RtStorage::allocateStorage(const int a_p)
@@ -172,7 +184,8 @@ CdrPlasmaImExSdcStepper::RtStorage::deallocateStorage()
   m_amr->deallocate(m_scratchIF);
 }
 
-CdrPlasmaImExSdcStepper::SigmaStorage::SigmaStorage() {}
+CdrPlasmaImExSdcStepper::SigmaStorage::SigmaStorage()
+{}
 
 CdrPlasmaImExSdcStepper::SigmaStorage::SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                                     const std::string             a_realm,
@@ -185,7 +198,10 @@ CdrPlasmaImExSdcStepper::SigmaStorage::SigmaStorage(const RefCountedPtr<AmrMesh>
   m_ncomp = a_ncomp;
 }
 
-CdrPlasmaImExSdcStepper::SigmaStorage::~SigmaStorage() { deallocateStorage(); }
+CdrPlasmaImExSdcStepper::SigmaStorage::~SigmaStorage()
+{
+  deallocateStorage();
+}
 
 void
 CdrPlasmaImExSdcStepper::SigmaStorage::allocateStorage(const int a_p)

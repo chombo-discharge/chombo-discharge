@@ -104,6 +104,9 @@ EBHelmholtzDirichletEBBC::define()
 
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
   const ProblemDomain&     domain = m_eblg.getDomain();
+  const DataIterator&      dit    = dbl.dataIterator();
+
+  const int nbox = dit.size();
 
   // Drop order if we must
   for (int dir = 0; dir < SpaceDim; dir++) {
@@ -115,14 +118,17 @@ EBHelmholtzDirichletEBBC::define()
   m_boundaryWeights.define(dbl);
   m_gradPhiStencils.define(dbl);
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box         box     = dbl[dit()];
-    const EBISBox&    ebisbox = m_eblg.getEBISL()[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box         box     = dbl[din];
+    const EBISBox&    ebisbox = m_eblg.getEBISL()[din];
     const EBGraph&    ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
-    BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
+    BaseIVFAB<Real>&       weights  = m_boundaryWeights[din];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[din];
 
     weights.define(ivs, ebgraph, m_nComp);
     stencils.define(ivs, ebgraph, m_nComp);
@@ -141,24 +147,24 @@ EBHelmholtzDirichletEBBC::define()
       // Try quadrants first.
       order = m_order;
       while (!foundStencil && order > 0) {
-        foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, dit(), order);
+        foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, din, order);
         order--;
 
         // Check if stencil reaches too far across CF
         if (foundStencil) {
-          foundStencil = this->isStencilValidCF(pairSten.second, dit());
+          foundStencil = this->isStencilValidCF(pairSten.second, din);
         }
       }
 
       // If we couldn't find in a quadrant, try a larger neighborhood
       order = m_order;
       while (!foundStencil && order > 0) {
-        foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order);
+        foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Radius, din, order);
         order--;
 
         // Check if stencil reaches too far across CF
         if (foundStencil) {
-          foundStencil = this->isStencilValidCF(pairSten.second, dit());
+          foundStencil = this->isStencilValidCF(pairSten.second, din);
         }
       }
 

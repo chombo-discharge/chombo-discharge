@@ -10,9 +10,9 @@
 */
 
 // Chombo includes
-#include <EBLevelDataOps.H>
 #include <memtrack.H>
 #include <memusage.H>
+#include <SPMD.H>
 #include <CH_Timer.H>
 
 // Our includes

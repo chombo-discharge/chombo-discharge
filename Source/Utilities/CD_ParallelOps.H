@@ -12,6 +12,9 @@
 #ifndef CD_ParallelOps_H
 #define CD_ParallelOps_H
 
+// Chombo includes
+#include <RealVect.H>
+
 // Our includes
 #include <CD_NamespaceHeader.H>
 
@@ -51,6 +54,13 @@ namespace ParallelOps {
   min(const int& a_input) noexcept;
 
   /*!
+    @brief Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)
+    @param[in] a_input Data input. Returns the smallest. 
+  */
+  inline long long int
+  min(const long long int& a_input) noexcept;
+
+  /*!
     @brief Get the minimum value and the position corresponding to the minimum value of a_val
     @details This returns the value a_val and position a_pos such that they correspond to the 
     input variables for the processer which held the smallest value a_val. 
@@ -71,6 +81,13 @@ namespace ParallelOps {
   */
   inline int
   max(const int& a_input) noexcept;
+
+  /*!
+    @brief Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)
+    @param[in] a_input Data input. 
+  */
+  inline long long
+  max(const long long& a_input) noexcept;
 
   /*!
     @brief Get the maximum value and the position corresponding to the maximum value of a_val
@@ -151,6 +168,14 @@ namespace ParallelOps {
   */
   inline void
   vectorSum(Vector<Real>& a_data) noexcept;
+  /*!
+    @brief Perform a summation of all the MPI ranks's input data. 
+    @details This performs a rank-wise summation. If rank 1 has data (1,2,3) and rank 2 has data (3,4,5), the output data
+    on both ranks is (4,6,8).
+    @param[inout] a_data On 
+  */
+  inline void
+  vectorSum(Vector<int>& a_data) noexcept;
 
   /*!
     @brief Perform a summation of all the MPI ranks's input data. 

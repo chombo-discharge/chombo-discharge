@@ -72,7 +72,8 @@ PerlinRodSdf::PerlinRodSdf(const PerlinRodSdf& a_inputIF) : PerlinSphereSdf(a_in
   m_baseif = a_inputIF.m_baseif;
 }
 
-PerlinRodSdf::~PerlinRodSdf() {}
+PerlinRodSdf::~PerlinRodSdf()
+{}
 
 Real
 PerlinRodSdf::value(const RealVect& a_pos) const

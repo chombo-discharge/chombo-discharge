@@ -58,13 +58,16 @@ CentroidInterpolationStencil::buildStencil(VoFStencil&              a_sten,
 
   switch (m_stencilType) {
   case IrregStencil::StencilType::Linear: {
-    found_stencil =
-      LinearStencil::getLinearInterpStencil(a_sten, a_ebisbox.centroid(a_vof), a_vof, a_domain, a_ebisbox);
+    found_stencil = LinearStencil::getLinearInterpStencil(a_sten,
+                                                          a_ebisbox.centroid(a_vof),
+                                                          a_vof,
+                                                          a_domain,
+                                                          a_ebisbox);
     break;
   }
   case IrregStencil::StencilType::TaylorExtrapolation: {
-    found_stencil =
-      this->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
+    found_stencil = this
+                      ->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
     break;
   }
   case IrregStencil::StencilType::LeastSquares: {

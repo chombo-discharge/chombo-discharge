@@ -26,7 +26,8 @@ EBHelmholtzEddingtonSP1DomainBCFactory::EBHelmholtzEddingtonSP1DomainBCFactory(
   m_r2           = a_r2;
 }
 
-EBHelmholtzEddingtonSP1DomainBCFactory::~EBHelmholtzEddingtonSP1DomainBCFactory() {}
+EBHelmholtzEddingtonSP1DomainBCFactory::~EBHelmholtzEddingtonSP1DomainBCFactory()
+{}
 
 RefCountedPtr<EBHelmholtzDomainBC>
 EBHelmholtzEddingtonSP1DomainBCFactory::create() const

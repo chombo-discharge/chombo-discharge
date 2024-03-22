@@ -30,7 +30,10 @@ EddingtonSP1DomainBc::EddingtonSP1DomainBc()
   }
 }
 
-EddingtonSP1DomainBc::~EddingtonSP1DomainBc() { m_bcFunctions.clear(); }
+EddingtonSP1DomainBc::~EddingtonSP1DomainBc()
+{
+  m_bcFunctions.clear();
+}
 
 void
 EddingtonSP1DomainBc::setBc(const DomainSide a_domainSide, const Bc a_bc)

@@ -31,7 +31,8 @@ EBHelmholtzLarsenEBBCFactory::EBHelmholtzLarsenEBBCFactory(const int            
   this->setRobinCoefficients();
 }
 
-EBHelmholtzLarsenEBBCFactory::~EBHelmholtzLarsenEBBCFactory() {}
+EBHelmholtzLarsenEBBCFactory::~EBHelmholtzLarsenEBBCFactory()
+{}
 
 void
 EBHelmholtzLarsenEBBCFactory::setRobinCoefficients()

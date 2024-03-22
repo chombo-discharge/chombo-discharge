@@ -38,7 +38,8 @@ RealBox::RealBox(const Box a_box, const RealVect a_origin, const Real a_dx)
   m_hi = a_origin + a_dx * RealVect(hi);
 }
 
-RealBox::~RealBox() {}
+RealBox::~RealBox()
+{}
 
 RealVect
 RealBox::getLo() const

@@ -49,7 +49,8 @@ PerlinPlaneSdf::PerlinPlaneSdf(const PerlinPlaneSdf& a_inputIF)
   m_perlin = a_inputIF.m_perlin;
 }
 
-PerlinPlaneSdf::~PerlinPlaneSdf() {}
+PerlinPlaneSdf::~PerlinPlaneSdf()
+{}
 
 Real
 PerlinPlaneSdf::value(const RealVect& a_pos) const

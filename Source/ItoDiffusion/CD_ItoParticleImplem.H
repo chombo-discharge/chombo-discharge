@@ -22,7 +22,10 @@
 #include <CD_ItoParticle.H>
 #include <CD_NamespaceHeader.H>
 
-inline ItoParticle::ItoParticle() { this->define(1.0, RealVect::Zero, RealVect::Zero, 0.0, 0.0, 0.0); }
+inline ItoParticle::ItoParticle()
+{
+  this->define(1.0, RealVect::Zero, RealVect::Zero, 0.0, 0.0, 0.0);
+}
 
 inline ItoParticle::ItoParticle(const Real      a_weight,
                                 const RealVect& a_position,
@@ -45,7 +48,8 @@ inline ItoParticle::ItoParticle(const ItoParticle& a_other)
   this->energy()      = a_other.energy();
 }
 
-inline ItoParticle::~ItoParticle() {}
+inline ItoParticle::~ItoParticle()
+{}
 
 inline void
 ItoParticle::define(const Real      a_weight,

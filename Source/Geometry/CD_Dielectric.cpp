@@ -41,7 +41,8 @@ Dielectric::Dielectric(const RefCountedPtr<BaseIF>&                     a_baseIF
   this->define(a_baseIF, a_permittivity);
 }
 
-Dielectric::~Dielectric() {}
+Dielectric::~Dielectric()
+{}
 
 void
 Dielectric::define(const RefCountedPtr<BaseIF>& a_baseIF, const Real a_permittivity)

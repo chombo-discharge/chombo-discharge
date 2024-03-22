@@ -27,9 +27,11 @@ GradedPerlinSphereSdf::GradedPerlinSphereSdf(const Real&     a_rad,
   : PerlinSphereSdf(a_rad, a_center, a_inside, a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed)
 {}
 
-GradedPerlinSphereSdf::GradedPerlinSphereSdf(const GradedPerlinSphereSdf& a_inputIF) : PerlinSphereSdf(a_inputIF) {}
+GradedPerlinSphereSdf::GradedPerlinSphereSdf(const GradedPerlinSphereSdf& a_inputIF) : PerlinSphereSdf(a_inputIF)
+{}
 
-GradedPerlinSphereSdf::~GradedPerlinSphereSdf() {}
+GradedPerlinSphereSdf::~GradedPerlinSphereSdf()
+{}
 
 Real
 GradedPerlinSphereSdf::value(const RealVect& a_pos) const

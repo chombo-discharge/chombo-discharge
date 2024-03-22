@@ -19,7 +19,8 @@ DomainFluxIFFABFactory::DomainFluxIFFABFactory(const EBISLayout& a_ebisl, const 
   m_domain = a_domain;
 }
 
-DomainFluxIFFABFactory::~DomainFluxIFFABFactory() {}
+DomainFluxIFFABFactory::~DomainFluxIFFABFactory()
+{}
 
 DomainFluxIFFAB*
 DomainFluxIFFABFactory::create(const Box& a_box, int a_nComp, const DataIndex& a_dit) const

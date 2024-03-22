@@ -25,7 +25,8 @@ MultiFluidIndexSpace::MultiFluidIndexSpace()
   }
 }
 
-MultiFluidIndexSpace::~MultiFluidIndexSpace() {}
+MultiFluidIndexSpace::~MultiFluidIndexSpace()
+{}
 
 void
 MultiFluidIndexSpace::define(const Box&                      a_domain,

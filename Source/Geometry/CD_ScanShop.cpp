@@ -14,8 +14,6 @@
 
 // Chombo includes
 #include <BRMeshRefine.H>
-#include <LoadBalance.H>
-#include <EBLevelDataOps.H>
 #include <ParmParse.H>
 
 // Our includes
@@ -207,24 +205,45 @@ ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize)
   Vector<Box> cutCellBoxes;
   Vector<Box> regularBoxes;
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box box      = dbl[dit()];
-    const Box grownBox = grow(box, m_ebGhost) & m_domains[a_level];
+  const DataIterator& dit = dbl.dataIterator();
 
-    const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[a_level]);
-    const bool isCovered = ScanShop::isCovered(grownBox, m_probLo, m_dx[a_level]);
+  const int nbox = dit.size();
+#pragma omp parallel
+  {
 
-    if (isCovered && !isRegular) {
-      coveredBoxes.push_back(box);
+    Vector<Box> localCoveredBoxes;
+    Vector<Box> localCutCellBoxes;
+    Vector<Box> localRegularBoxes;
+
+#pragma omp for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box box      = dbl[din];
+      const Box grownBox = grow(box, m_ebGhost) & m_domains[a_level];
+
+      const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[a_level]);
+      const bool isCovered = ScanShop::isCovered(grownBox, m_probLo, m_dx[a_level]);
+
+      if (isCovered && !isRegular) {
+        localCoveredBoxes.push_back(box);
+      }
+      else if (isRegular && !isCovered) {
+        localRegularBoxes.push_back(box);
+      }
+      else if (!isRegular && !isCovered) {
+        localCutCellBoxes.push_back(box);
+      }
+      else {
+        MayDay::Error("ScanShop::buildCoarseLevel - logic bust");
+      }
     }
-    else if (isRegular && !isCovered) {
-      regularBoxes.push_back(box);
-    }
-    else if (!isRegular && !isCovered) {
-      cutCellBoxes.push_back(box);
-    }
-    else {
-      MayDay::Error("ScanShop::buildCoarseLevel - logic bust");
+
+#pragma omp critical
+    {
+      coveredBoxes.append(localCoveredBoxes);
+      cutCellBoxes.append(localCutCellBoxes);
+      regularBoxes.append(localRegularBoxes);
     }
   }
 
@@ -244,49 +263,69 @@ ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize)
     const int coarLvl = a_coarserLevel;
     const int fineLvl = coarLvl - 1;
 
-    // Coar stuff
+    // Find out which boxes were covered/regular/cut on the coarse level. Every box that had cut-cells
+    // is split up into new boxes. We will redo these boxes later.
+    const DisjointBoxLayout& dblCoar = m_grids[coarLvl];
+    const DataIterator&      dit     = dblCoar.dataIterator();
+
     Vector<Box> coveredBoxes;
     Vector<Box> regularBoxes;
     Vector<Box> cutCellBoxes;
 
-    // Find out which boxes were covered/regular/cut on the coarse level. Every box that had cut-cells
-    // is split up into new boxes. We will redo these boxes later.
-    const DisjointBoxLayout& dblCoar = m_grids[coarLvl];
-    for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
-      const Box coarBox = dblCoar[dit()];
-      const Box fineBox = refine(coarBox, 2);
+    const int nbox = dit.size();
+#pragma omp parallel
+    {
 
-      const GeometryService::InOut& boxType = (*m_boxMap[coarLvl])[dit()];
+      Vector<Box> localCoveredBoxes;
+      Vector<Box> localRegularBoxes;
+      Vector<Box> localCutCellBoxes;
 
-      if (boxType == GeometryService::Covered) {
-        coveredBoxes.push_back(fineBox);
-      }
-      else if (boxType == GeometryService::Regular) {
-        regularBoxes.push_back(fineBox);
-      }
-      else if (boxType == GeometryService::Irregular) {
-        Vector<Box> boxes;
-        domainSplit(fineBox, boxes, a_maxGridSize, a_maxGridSize);
+#pragma omp for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
 
-        for (const auto& box : boxes.stdVector()) {
-          const Box grownBox = grow(box, m_ebGhost) & m_domains[fineLvl];
+        const Box coarBox = dblCoar[din];
+        const Box fineBox = refine(coarBox, 2);
 
-          const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[fineLvl]);
-          const bool isCovered = ScanShop::isCovered(grownBox, m_probLo, m_dx[fineLvl]);
+        const GeometryService::InOut& boxType = (*m_boxMap[coarLvl])[din];
 
-          if (isCovered) {
-            coveredBoxes.push_back(box);
-          }
-          else if (isRegular) {
-            regularBoxes.push_back(box);
-          }
-          else if (!isRegular && !isCovered) {
-            cutCellBoxes.push_back(box);
-          }
-          else {
-            MayDay::Error("ScanShop::buildFinerLevels - logic bust!");
+        if (boxType == GeometryService::Covered) {
+          localCoveredBoxes.push_back(fineBox);
+        }
+        else if (boxType == GeometryService::Regular) {
+          localRegularBoxes.push_back(fineBox);
+        }
+        else if (boxType == GeometryService::Irregular) {
+          Vector<Box> boxes;
+          domainSplit(fineBox, boxes, a_maxGridSize, a_maxGridSize);
+
+          for (const auto& box : boxes.stdVector()) {
+            const Box grownBox = grow(box, m_ebGhost) & m_domains[fineLvl];
+
+            const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[fineLvl]);
+            const bool isCovered = ScanShop::isCovered(grownBox, m_probLo, m_dx[fineLvl]);
+
+            if (isCovered) {
+              localCoveredBoxes.push_back(box);
+            }
+            else if (isRegular) {
+              localRegularBoxes.push_back(box);
+            }
+            else if (!isRegular && !isCovered) {
+              localCutCellBoxes.push_back(box);
+            }
+            else {
+              MayDay::Error("ScanShop::buildFinerLevels - logic bust!");
+            }
           }
         }
+      }
+
+#pragma omp critical
+      {
+        coveredBoxes.append(localCoveredBoxes);
+        cutCellBoxes.append(localCutCellBoxes);
+        regularBoxes.append(localRegularBoxes);
       }
     }
     m_timer.stopEvent("Fine from coar");
@@ -384,24 +423,30 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   m_timer.stopEvent("Define map");
 
   m_timer.startEvent("Set box types");
-  for (DataIterator dit(m_grids[a_level]); dit.ok(); ++dit) {
-    const Box box  = sortedBoxesAndTypes[dit().intCode()].first;
-    const int type = sortedBoxesAndTypes[dit().intCode()].second;
+  const DataIterator& dit = m_grids[a_level].dataIterator();
+
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box box  = sortedBoxesAndTypes[din.intCode()].first;
+    const int type = sortedBoxesAndTypes[din.intCode()].second;
 
     // This is an error.
-    if (box != m_grids[a_level][dit()]) {
+    if (box != m_grids[a_level][din]) {
       MayDay::Error("ScanShop::defineLevel -- logic bust, boxes should be the same!");
     }
 
     // Otherwise we are fine, set the map to what it should be.
     if (type == 0) {
-      (*m_boxMap[a_level])[dit()] = GeometryService::Covered;
+      (*m_boxMap[a_level])[din] = GeometryService::Covered;
     }
     else if (type == 1) {
-      (*m_boxMap[a_level])[dit()] = GeometryService::Regular;
+      (*m_boxMap[a_level])[din] = GeometryService::Regular;
     }
     else if (type == 2) {
-      (*m_boxMap[a_level])[dit()] = GeometryService::Irregular;
+      (*m_boxMap[a_level])[din] = GeometryService::Irregular;
     }
     else {
       MayDay::Error("ScanShop::defineLevel - logic bust, did not find type!");

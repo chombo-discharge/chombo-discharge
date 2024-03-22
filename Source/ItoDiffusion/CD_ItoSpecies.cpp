@@ -29,7 +29,8 @@ ItoSpecies::ItoSpecies(const std::string a_name, const int a_chargeNumber, const
   m_isDiffusive  = a_diffusive;
 }
 
-ItoSpecies::~ItoSpecies() {}
+ItoSpecies::~ItoSpecies()
+{}
 
 std::string
 ItoSpecies::getName() const

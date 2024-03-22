@@ -5053,8 +5053,11 @@ ItoKMCStepper<I, C, R, F>::computePhysicsDt(const LevelData<EBCellFAB>& a_electr
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Real patchDt =
-      this->computePhysicsDt(a_electricField[dit()], a_particlesPerCell[dit()], a_level, dit(), dbl[dit()]);
+    const Real patchDt = this->computePhysicsDt(a_electricField[dit()],
+                                                a_particlesPerCell[dit()],
+                                                a_level,
+                                                dit(),
+                                                dbl[dit()]);
 
     minDt = std::min(minDt, patchDt);
   }

@@ -106,6 +106,9 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
   // TLDR: We compute the stencil for reconstructing dphi/dn on the boundary. This is done with least squares reconstruction.
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
   const ProblemDomain&     domain = m_eblg.getDomain();
+  const DataIterator&      dit    = dbl.dataIterator();
+
+  const int nbox = dit.size();
 
   // Drop order if we must
   for (int dir = 0; dir < SpaceDim; dir++) {
@@ -114,15 +117,18 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
     }
   }
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box         box     = dbl[dit()];
-    const EBISBox&    ebisbox = m_eblg.getEBISL()[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box         box     = dbl[din];
+    const EBISBox&    ebisbox = m_eblg.getEBISL()[din];
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
-    BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
+    BaseIVFAB<Real>&       weights  = m_boundaryWeights[din];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[din];
 
-    VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());
+    VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, din);
 
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
@@ -137,14 +143,14 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
         foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
                                                                 vof,
                                                                 VofUtils::Neighborhood::Quadrant,
-                                                                dit(),
+                                                                din,
                                                                 order,
                                                                 m_weight);
         order--;
 
         // Check if stencil reaches too far across CF
         if (foundStencil) {
-          foundStencil = this->isStencilValidCF(pairSten.second, dit());
+          foundStencil = this->isStencilValidCF(pairSten.second, din);
         }
       }
 
@@ -154,14 +160,14 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
         foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
                                                                 vof,
                                                                 VofUtils::Neighborhood::Radius,
-                                                                dit(),
+                                                                din,
                                                                 order,
                                                                 m_weight);
         order--;
 
         // Check if stencil reaches too far across CF
         if (foundStencil) {
-          foundStencil = this->isStencilValidCF(pairSten.second, dit());
+          foundStencil = this->isStencilValidCF(pairSten.second, din);
         }
       }
 

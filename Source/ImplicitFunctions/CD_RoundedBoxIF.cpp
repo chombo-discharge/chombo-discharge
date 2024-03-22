@@ -62,7 +62,8 @@ RoundedBoxIF::RoundedBoxIF(const RoundedBoxIF& a_inputIF)
   m_baseIF      = a_inputIF.m_baseIF;
 }
 
-RoundedBoxIF::~RoundedBoxIF() {}
+RoundedBoxIF::~RoundedBoxIF()
+{}
 
 Real
 RoundedBoxIF::value(const RealVect& a_point) const

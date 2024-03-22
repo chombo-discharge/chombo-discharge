@@ -235,8 +235,13 @@ DischargeIO::writeH5Part(const std::string                               a_filen
         varName = vectVariables[curVar] + "-z";
       }
 
-      hid_t dataset =
-        H5Dcreate2(grp, varName.c_str(), H5T_NATIVE_DOUBLE, fileSpaceID, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      hid_t dataset = H5Dcreate2(grp,
+                                 varName.c_str(),
+                                 H5T_NATIVE_DOUBLE,
+                                 fileSpaceID,
+                                 H5P_DEFAULT,
+                                 H5P_DEFAULT,
+                                 H5P_DEFAULT);
 
       std::vector<double> ds;
 

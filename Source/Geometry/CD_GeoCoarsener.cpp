@@ -66,7 +66,10 @@ GeoCoarsener::GeoCoarsener()
   }
 }
 
-GeoCoarsener::~GeoCoarsener() { CH_TIME("GeoCoarsener::~GeoCoarsener"); }
+GeoCoarsener::~GeoCoarsener()
+{
+  CH_TIME("GeoCoarsener::~GeoCoarsener");
+}
 
 void
 GeoCoarsener::coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_probLo) const

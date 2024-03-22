@@ -84,9 +84,13 @@ PolygonRodIF::PolygonRodIF(const RealVect a_endPoint1,
   }
 }
 
-PolygonRodIF::PolygonRodIF(const PolygonRodIF& a_inputIF) { m_baseif = a_inputIF.m_baseif; }
+PolygonRodIF::PolygonRodIF(const PolygonRodIF& a_inputIF)
+{
+  m_baseif = a_inputIF.m_baseif;
+}
 
-PolygonRodIF::~PolygonRodIF() {}
+PolygonRodIF::~PolygonRodIF()
+{}
 
 Real
 PolygonRodIF::value(const RealVect& a_pos) const

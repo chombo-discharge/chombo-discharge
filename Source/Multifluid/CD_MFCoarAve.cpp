@@ -13,11 +13,16 @@
 #include <CD_MFCoarAve.H>
 #include <CD_NamespaceHeader.H>
 
-MFCoarAve::MFCoarAve() {}
+MFCoarAve::MFCoarAve()
+{}
 
-MFCoarAve::~MFCoarAve() {}
+MFCoarAve::~MFCoarAve()
+{}
 
-MFCoarAve::MFCoarAve(const Vector<RefCountedPtr<EBCoarAve>>& a_aveOps) { this->define(a_aveOps); }
+MFCoarAve::MFCoarAve(const Vector<RefCountedPtr<EBCoarAve>>& a_aveOps)
+{
+  this->define(a_aveOps);
+}
 
 void
 MFCoarAve::define(const Vector<RefCountedPtr<EBCoarAve>>& a_aveOps)

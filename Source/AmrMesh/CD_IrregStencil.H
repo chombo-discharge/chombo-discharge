@@ -16,6 +16,7 @@
 #include <DisjointBoxLayout.H>
 #include <EBISLayout.H>
 #include <BaseIVFAB.H>
+#include <EBCellFAB.H>
 #include <RefCountedPtr.H>
 #include <Stencils.H>
 #include <LayoutData.H>

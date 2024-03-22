@@ -148,6 +148,21 @@ public:
                     const ProblemDomain&        a_domain);
 
   /*!
+    @brief Compute lhs = a * x + b * y
+    @param[out] a_lhs Result
+    @param[in] a_x First FAB
+    @param[in] a_y Second FAB
+    @param[in] a_a Scaling factor
+    @param[in] a_b Scaling factor
+  */
+  static void
+  axby(LevelData<EBCellFAB>&       a_lhs,
+       const LevelData<EBCellFAB>& a_x,
+       const LevelData<EBCellFAB>& a_y,
+       const Real                  a_a,
+       const Real                  a_b) noexcept;
+
+  /*!
     @brief Compute a new value given the old cell value. 
     @details Useful for quickly calculating a cell value as e.g. exp(x) where the original data was only x
     @param[inout] a_data Input data
@@ -249,7 +264,7 @@ public:
     @param[in]    a_scale Scale factor.
   */
   static void
-  incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale);
+  incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale) noexcept;
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
@@ -258,7 +273,7 @@ public:
     @param[in]    a_scale Scale factor.
   */
   static void
-  incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Real a_scale);
+  incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Real a_scale) noexcept;
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
@@ -267,7 +282,7 @@ public:
     @param[in]    a_scale Scale factor.
   */
   static void
-  incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_scale);
+  incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_scale) noexcept;
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
@@ -276,7 +291,7 @@ public:
     @param[in]    a_scale Scale factor.
   */
   static void
-  incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real& a_scale);
+  incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real& a_scale) noexcept;
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
@@ -601,7 +616,28 @@ public:
     @param[in]  a_comp Component
   */
   static void
-  getMaxMin(Real& max, Real& min, LevelData<EBCellFAB>& a_data, const int a_comp);
+  getMaxMin(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data, const int a_comp);
+
+  /*!
+    @brief Get maximum and minimum value of specified component
+    @param[out] a_max  Maximum value
+    @param[out] a_min  Minium value
+    @param[in]  a_data Cell-centered data
+    @param[in]  a_comp Component
+    @note This does the calculation over all levels, including grids that is covered by other grids. 
+  */
+  static void
+  getMaxMin(Real& a_max, Real& a_min, EBAMRFluxData& a_data, const int a_comp) noexcept;
+
+  /*!
+    @brief Get maximum and minimum value of specified component
+    @param[out] a_max  Maximum value
+    @param[out] a_min  Minium value
+    @param[in]  a_data Cell-centered data
+    @param[in]  a_comp Component
+  */
+  static void
+  getMaxMin(Real& a_max, Real& a_min, LevelData<EBFluxFAB>& a_data, const int a_comp) noexcept;
 
   /*!
     @brief Get maximum and minimum value. Assumes single-component data.
@@ -689,28 +725,28 @@ public:
     @param[inout] a_data Data to be scaled. On output we have a_data = kappa * a_data
   */
   static void
-  kappaScale(EBAMRCellData& a_data);
+  kappaScale(EBAMRCellData& a_data) noexcept;
 
   /*!
     @brief Scale data by volume fraction
     @param[inout] a_data Data to be scaled. On output we have a_data = kappa * a_data
   */
   static void
-  kappaScale(LevelData<EBCellFAB>& a_data);
+  kappaScale(LevelData<EBCellFAB>& a_data) noexcept;
 
   /*!
     @brief Scale data by volume fraction
     @param[inout] a_data Data to be scaled. On output we have a_data = kappa * a_data
   */
   static void
-  kappaScale(MFAMRCellData& a_data);
+  kappaScale(MFAMRCellData& a_data) noexcept;
 
   /*!
     @brief Scale data by volume fraction
     @param[inout] a_data Data to be scaled. On output we have a_data = kappa * a_data
   */
   static void
-  kappaScale(LevelData<MFCellFAB>& a_data);
+  kappaScale(LevelData<MFCellFAB>& a_data) noexcept;
 
   /*!
     @brief Scale data by dx^SpaceDim
@@ -853,7 +889,7 @@ public:
     @param[in]    a_scale Scaling factor
   */
   static void
-  scale(MFAMRCellData& a_lhs, const Real& a_scale);
+  scale(MFAMRCellData& a_lhs, const Real& a_scale) noexcept;
 
   /*!
     @brief Scale data by factor
@@ -861,7 +897,7 @@ public:
     @param[in]    a_scale Scaling factor
   */
   static void
-  scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale);
+  scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale) noexcept;
 
   /*!
     @brief Scale data by factor
@@ -893,7 +929,7 @@ public:
     @param[in]    a_scale Scaling factor
   */
   static void
-  scale(EBAMRCellData& a_lhs, const Real a_scale);
+  scale(EBAMRCellData& a_lhs, const Real a_scale) noexcept;
 
   /*!
     @brief Scale data by factor
@@ -901,7 +937,7 @@ public:
     @param[in]    a_scale Scaling factor
   */
   static void
-  scale(LevelData<EBCellFAB>& a_lhs, const Real a_scale);
+  scale(LevelData<EBCellFAB>& a_lhs, const Real a_scale) noexcept;
 
   /*!
     @brief Scale data by factor
@@ -930,8 +966,8 @@ public:
   /*!
     @brief Set value in covered cells. Does specified component
     @param[inout] a_lhs   Input/output data. 
-    @param[ino]   a_comp  Component to set
-    @param[ino]   a_value Value to set
+    @param[in]   a_comp  Component to set
+    @param[in]   a_value Value to set
   */
   static void
   setCoveredValue(EBAMRCellData& a_lhs, const int a_comp, const Real a_value);
@@ -939,14 +975,14 @@ public:
   /*!
     @brief Set value in covered cells. Does specified component
     @param[inout] a_lhs   Input/output data. 
-    @param[ino]   a_comp  Component to set
-    @param[ino]   a_value Value to set
+    @param[in]   a_comp  Component to set
+    @param[in]   a_value Value to set
   */
   static void
   setCoveredValue(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value);
 
   /*!
-    @brief Version of setCoveredValue which does all component
+    @brief Version of setCoveredValue which does all components
     @param[inout] a_lhs   Data 
     @param[in]    a_value Value in covered grid cells. 
   */
@@ -960,6 +996,40 @@ public:
   */
   static void
   setCoveredValue(LevelData<EBCellFAB>& a_lhs, const Real a_value);
+
+  /*!
+    @brief Set value on covered faces.
+    @param[inout] a_lhs   Input/output data. 
+    @param[in]   a_comp  Component to set
+    @param[in]   a_value Value to set
+  */
+  static void
+  setCoveredValue(EBAMRFluxData& a_lhs, const int a_comp, const Real a_value) noexcept;
+
+  /*!
+    @brief Set value on covered faces.
+    @param[inout] a_lhs   Input/output data. 
+    @param[in]   a_comp  Component to set
+    @param[in]   a_value Value to set
+  */
+  static void
+  setCoveredValue(LevelData<EBFluxFAB>& a_lhs, const int a_comp, const Real a_value) noexcept;
+
+  /*!
+    @brief Set all covered face values.
+    @param[inout] a_lhs   Data 
+    @param[in]    a_value Value in covered grid cells. 
+  */
+  static void
+  setCoveredValue(EBAMRFluxData& a_lhs, const Real a_value) noexcept;
+
+  /*!
+    @brief Set all covered face values.
+    @param[inout] a_lhs   Data 
+    @param[in]    a_value Value in covered grid cells. 
+  */
+  static void
+  setCoveredValue(LevelData<EBFluxFAB>& a_lhs, const Real a_value) noexcept;
 
   /*!
     @brief Set value in cells that are covered by a finer grid.
@@ -1198,7 +1268,7 @@ public:
     @param[in]  a_value Value to set
   */
   static void
-  setValue(MFAMRCellData& a_lhs, const Real& a_value);
+  setValue(MFAMRCellData& a_lhs, const Real& a_value) noexcept;
 
   /*!
     @brief Set value in data
@@ -1206,7 +1276,7 @@ public:
     @param[in]  a_value Value to set
   */
   static void
-  setValue(LevelData<MFCellFAB>& a_lhs, const Real& a_value);
+  setValue(LevelData<MFCellFAB>& a_lhs, const Real& a_value) noexcept;
 
   /*!
     @brief Set value in data

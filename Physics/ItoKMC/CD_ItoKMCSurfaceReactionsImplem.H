@@ -18,9 +18,15 @@
 
 using namespace Physics::ItoKMC;
 
-inline ItoKMCSurfaceReactions::ItoKMCSurfaceReactions() noexcept { this->reset(); }
+inline ItoKMCSurfaceReactions::ItoKMCSurfaceReactions() noexcept
+{
+  this->reset();
+}
 
-inline ItoKMCSurfaceReactions::~ItoKMCSurfaceReactions() noexcept { this->reset(); }
+inline ItoKMCSurfaceReactions::~ItoKMCSurfaceReactions() noexcept
+{
+  this->reset();
+}
 
 inline void
 ItoKMCSurfaceReactions::add(const ItoKMCSurfaceReaction& a_surfaceReaction) noexcept

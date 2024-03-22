@@ -95,6 +95,7 @@ CoaxialCable::CoaxialCable()
   }
 }
 
-CoaxialCable::~CoaxialCable() {}
+CoaxialCable::~CoaxialCable()
+{}
 
 #include <CD_NamespaceFooter.H>

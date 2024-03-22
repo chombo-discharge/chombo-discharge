@@ -34,12 +34,14 @@ namespace Physics {
       /*!
 	@brief Default constructor. Does nothing. 
       */
-      CdrPlasmaPhysics() {}
+      CdrPlasmaPhysics()
+      {}
 
       /*!
 	@brief Base destructor. Does nothing.
       */
-      virtual ~CdrPlasmaPhysics() {}
+      virtual ~CdrPlasmaPhysics()
+      {}
 
       /*!
 	@brief Parse run-time options

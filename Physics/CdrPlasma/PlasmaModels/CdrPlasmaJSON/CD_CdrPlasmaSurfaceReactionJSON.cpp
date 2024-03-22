@@ -24,7 +24,8 @@ CdrPlasmaSurfaceReactionJSON::CdrPlasmaSurfaceReactionJSON(const std::list<int> 
   m_plasmaProducts  = a_plasmaProducts;
 }
 
-CdrPlasmaSurfaceReactionJSON::~CdrPlasmaSurfaceReactionJSON() {}
+CdrPlasmaSurfaceReactionJSON::~CdrPlasmaSurfaceReactionJSON()
+{}
 
 const std::list<int>&
 CdrPlasmaSurfaceReactionJSON::getPlasmaReactants() const

@@ -96,7 +96,8 @@ RodPlaneProfile::RodPlaneProfile()
   this->setGasPermittivity(1.0);
 }
 
-RodPlaneProfile::~RodPlaneProfile() {}
+RodPlaneProfile::~RodPlaneProfile()
+{}
 
 BaseIF*
 RodPlaneProfile::getBaseIF()

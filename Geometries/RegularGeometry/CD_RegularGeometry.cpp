@@ -19,6 +19,7 @@ RegularGeometry::RegularGeometry()
   m_electrodes.resize(0);
 }
 
-RegularGeometry::~RegularGeometry() {}
+RegularGeometry::~RegularGeometry()
+{}
 
 #include <CD_NamespaceFooter.H>

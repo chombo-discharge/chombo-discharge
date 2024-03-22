@@ -28,7 +28,8 @@ CdrPlasmaPhotoReactionJSON::CdrPlasmaPhotoReactionJSON(const std::list<int> a_pl
   m_neutralProducts  = a_neutralProducts;
 }
 
-CdrPlasmaPhotoReactionJSON::~CdrPlasmaPhotoReactionJSON() {}
+CdrPlasmaPhotoReactionJSON::~CdrPlasmaPhotoReactionJSON()
+{}
 
 const std::list<int>&
 CdrPlasmaPhotoReactionJSON::getPlasmaReactants() const
