@@ -35,7 +35,10 @@ EBMGRestrict::EBMGRestrict(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_e
   this->define(a_eblgFine, a_eblgCoar, a_refRat);
 }
 
-EBMGRestrict::~EBMGRestrict() noexcept { CH_TIME("EBMGRestrict::~EBMGRestrict"); }
+EBMGRestrict::~EBMGRestrict() noexcept
+{
+  CH_TIME("EBMGRestrict::~EBMGRestrict");
+}
 
 void
 EBMGRestrict::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept

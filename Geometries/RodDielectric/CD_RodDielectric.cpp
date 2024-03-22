@@ -44,7 +44,8 @@ RodDielectric::RodDielectric()
     this->defineInsulator();
 }
 
-RodDielectric::~RodDielectric() {}
+RodDielectric::~RodDielectric()
+{}
 
 void
 RodDielectric::defineElectrode()

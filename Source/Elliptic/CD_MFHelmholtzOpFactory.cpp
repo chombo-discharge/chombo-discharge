@@ -103,7 +103,10 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
   this->setJump(0.0, 0.0);
 }
 
-MFHelmholtzOpFactory::~MFHelmholtzOpFactory() { CH_TIME("MFHelmholtzOpFactory::~MFHelmholtzOpFactory()"); }
+MFHelmholtzOpFactory::~MFHelmholtzOpFactory()
+{
+  CH_TIME("MFHelmholtzOpFactory::~MFHelmholtzOpFactory()");
+}
 
 void
 MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_scale)

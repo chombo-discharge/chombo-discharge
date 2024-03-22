@@ -37,7 +37,10 @@ FieldSolverMultigrid::FieldSolverMultigrid() : FieldSolver()
   m_className     = "FieldSolverMultigrid";
 }
 
-FieldSolverMultigrid::~FieldSolverMultigrid() { CH_TIME("FieldSolverMultigrid::~FieldSolverMultigrid()"); }
+FieldSolverMultigrid::~FieldSolverMultigrid()
+{
+  CH_TIME("FieldSolverMultigrid::~FieldSolverMultigrid()");
+}
 
 void
 FieldSolverMultigrid::parseOptions()
@@ -721,7 +724,7 @@ FieldSolverMultigrid::setupMultigrid()
   m_multigridSolver = RefCountedPtr<AMRMultiGrid<LevelData<MFCellFAB>>>(new AMRMultiGrid<LevelData<MFCellFAB>>);
   pout() << "define mg" << endl;
   m_multigridSolver->define(coarsestDomain, *m_helmholtzOpFactory, bottomSolver, 1 + finestLevel);
-  pout() << "set parameters" << endl;  
+  pout() << "set parameters" << endl;
   m_multigridSolver->setSolverParameters(m_multigridPreSmooth,
                                          m_multigridPostSmooth,
                                          m_multigridBottomSmooth,

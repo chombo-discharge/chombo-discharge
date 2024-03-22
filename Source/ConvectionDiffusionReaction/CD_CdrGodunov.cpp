@@ -29,7 +29,10 @@ CdrGodunov::CdrGodunov() : CdrMultigrid()
   m_name      = "CdrGodunov";
 }
 
-CdrGodunov::~CdrGodunov() { CH_TIME("CdrGodunov::~CdrGodunov()"); }
+CdrGodunov::~CdrGodunov()
+{
+  CH_TIME("CdrGodunov::~CdrGodunov()");
+}
 
 void
 CdrGodunov::parseOptions()

@@ -42,8 +42,11 @@ ProfileCylinderIF::ProfileCylinderIF(const RealVect a_endPoint1,
 
   Vector<BaseIF*> parts;
 
-  BaseIF* cyl =
-    (BaseIF*)new RoundedCylinderIF(RealVect::Zero, length * zhat, a_cylinderRadius, a_roundingRadius, a_fluidInside);
+  BaseIF* cyl   = (BaseIF*)new RoundedCylinderIF(RealVect::Zero,
+                                               length * zhat,
+                                               a_cylinderRadius,
+                                               a_roundingRadius,
+                                               a_fluidInside);
   BaseIF* torus = (BaseIF*)new TorusSdf(center, a_torusMajorRadius, a_torusMinorRadius, !a_fluidInside);
 
   // "Left" profiles
@@ -92,9 +95,13 @@ ProfileCylinderIF::ProfileCylinderIF(const RealVect a_endPoint1,
   delete base;
 }
 
-ProfileCylinderIF::ProfileCylinderIF(const ProfileCylinderIF& a_inputIF) { m_baseIF = a_inputIF.m_baseIF; }
+ProfileCylinderIF::ProfileCylinderIF(const ProfileCylinderIF& a_inputIF)
+{
+  m_baseIF = a_inputIF.m_baseIF;
+}
 
-ProfileCylinderIF::~ProfileCylinderIF() {}
+ProfileCylinderIF::~ProfileCylinderIF()
+{}
 
 Real
 ProfileCylinderIF::value(const RealVect& a_pos) const

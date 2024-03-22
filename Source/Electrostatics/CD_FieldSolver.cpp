@@ -45,7 +45,8 @@ FieldSolver::FieldSolver()
   this->setDefaultDomainBcFunctions();
 }
 
-FieldSolver::~FieldSolver() {}
+FieldSolver::~FieldSolver()
+{}
 
 void
 FieldSolver::setDataLocation(const Location::Cell a_dataLocation)

@@ -42,7 +42,8 @@ AmrMesh::AmrMesh()
   m_refinementRatios.push_back(2);
 }
 
-AmrMesh::~AmrMesh() {}
+AmrMesh::~AmrMesh()
+{}
 
 EBAMRCellData
 AmrMesh::slice(EBAMRCellData& a_original, const Interval a_variables) const noexcept
@@ -234,8 +235,9 @@ AmrMesh::allocate(EBAMRCellData&           a_data,
   // we use the default number of ghost cells in AmrMesh.
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str =
-      "AmrMesh::allocate(EBAMRCellData, string, phase::which_phase, int, int) - could not find realm '" + a_realm + "'";
+    const std::string
+      str = "AmrMesh::allocate(EBAMRCellData, string, phase::which_phase, int, int) - could not find realm '" +
+            a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
@@ -302,8 +304,9 @@ AmrMesh::allocate(EBAMRFluxData&           a_data,
   // we use the default number of ghost cells in AmrMesh.
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str =
-      "AmrMesh::allocate(EBAMRFluxData, string, phase::which_phase, int, int) - could not find realm '" + a_realm + "'";
+    const std::string
+      str = "AmrMesh::allocate(EBAMRFluxData, string, phase::which_phase, int, int) - could not find realm '" +
+            a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
@@ -340,8 +343,9 @@ AmrMesh::allocate(EBAMRIVData&             a_data,
   // we use the default number of ghost cells in AmrMesh.
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str =
-      "AmrMesh::allocate(EBAMRIVData, string, phase::which_phase, int, int) - could not find realm '" + a_realm + "'";
+    const std::string
+      str = "AmrMesh::allocate(EBAMRIVData, string, phase::which_phase, int, int) - could not find realm '" + a_realm +
+            "'";
     MayDay::Abort(str.c_str());
   }
 
@@ -766,8 +770,8 @@ AmrMesh::reallocate(MFAMRCellData& a_data, const int a_lmin) const
 
   const IntVect ghost = a_data[0]->ghostVect();
   const int     nComp = a_data[0]->nComp();
-  const int     ignored =
-    nComp; // A strange but true thing -- for multifluid data we pass in the number of components through the factory.
+  const int
+            ignored = nComp; // A strange but true thing -- for multifluid data we pass in the number of components through the factory.
   const int nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
@@ -811,8 +815,8 @@ AmrMesh::reallocate(MFAMRFluxData& a_data, const int a_lmin) const
 
   const IntVect ghost = a_data[0]->ghostVect();
   const int     nComp = a_data[0]->nComp();
-  const int     ignored =
-    nComp; // Strange but true thing, for multifluid data the number of components come in through the factory.
+  const int
+            ignored = nComp; // Strange but true thing, for multifluid data the number of components come in through the factory.
   const int nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
@@ -856,8 +860,8 @@ AmrMesh::reallocate(MFAMRIVData& a_data, const int a_lmin) const
 
   const IntVect ghost = a_data[0]->ghostVect();
   const int     nComp = a_data[0]->nComp();
-  const int     ignored =
-    nComp; // Strange but true thing, for multifluid data the number of components come in through the factory.
+  const int
+            ignored = nComp; // Strange but true thing, for multifluid data the number of components come in through the factory.
   const int nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
@@ -1867,9 +1871,9 @@ AmrMesh::interpGhost(LevelData<EBCellFAB>&       a_fineData,
   }
 
   if (!this->queryRealm(a_realm)) {
-    std::string str =
-      "AmrMesh::interpGhost(LD<EBCellFAB>, LD<EBCellFAB>, int, string, phase::which_phase) - could not find realm '" +
-      a_realm + "'";
+    std::string
+      str = "AmrMesh::interpGhost(LD<EBCellFAB>, LD<EBCellFAB>, int, string, phase::which_phase) - could not find realm '" +
+            a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
@@ -3216,8 +3220,9 @@ AmrMesh::getCentroidInterpolationStencils(const std::string a_realm, const phase
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str =
-      "AmrMesh::getCentroidInterpolationStencil(string, phase::which_phase) - could not find realm '" + a_realm + "'";
+    const std::string
+      str = "AmrMesh::getCentroidInterpolationStencil(string, phase::which_phase) - could not find realm '" + a_realm +
+            "'";
     MayDay::Abort(str.c_str());
   }
 
@@ -3233,8 +3238,9 @@ AmrMesh::getEbCentroidInterpolationStencils(const std::string a_realm, const pha
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str =
-      "AmrMesh::getEbCentroidInterpolationStencil(string, phase::which_phase) - could not find realm '" + a_realm + "'";
+    const std::string
+      str = "AmrMesh::getEbCentroidInterpolationStencil(string, phase::which_phase) - could not find realm '" +
+            a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
@@ -3250,9 +3256,9 @@ AmrMesh::getNonConservativeDivergenceStencils(const std::string a_realm, const p
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str =
-      "AmrMesh::getNonConservativeDivergenceStencil(string, phase::which_phase) - could not find realm '" + a_realm +
-      "'";
+    const std::string
+      str = "AmrMesh::getNonConservativeDivergenceStencil(string, phase::which_phase) - could not find realm '" +
+            a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
@@ -3376,9 +3382,9 @@ AmrMesh::regridRealm(const std::string          a_realm,
   // TLDR: This function does a base-regrid of a realm, using the specified input processor IDs and boxes.
 
   if (!this->queryRealm(a_realm)) {
-    std::string str =
-      "AmrMesh::regridRealm(string, Vector<Vector<int> >, Vector<Vector<Box> >, int) - could not find realm '" +
-      a_realm + "'";
+    std::string
+      str = "AmrMesh::regridRealm(string, Vector<Vector<int> >, Vector<Vector<Box> >, int) - could not find realm '" +
+            a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 

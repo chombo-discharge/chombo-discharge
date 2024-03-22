@@ -55,7 +55,10 @@ MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
   this->defineStencils();
 }
 
-MFHelmholtzJumpBC::~MFHelmholtzJumpBC() { CH_TIME("MFHelmholtzJumpBC::~MFHelmholtzJumpBC()"); }
+MFHelmholtzJumpBC::~MFHelmholtzJumpBC()
+{
+  CH_TIME("MFHelmholtzJumpBC::~MFHelmholtzJumpBC()");
+}
 
 int
 MFHelmholtzJumpBC::getOrder() const
@@ -211,8 +214,11 @@ MFHelmholtzJumpBC::defineStencils()
           // Try quadrant if that didn't work.
           order = m_order;
           while (!foundStencil && order > 0) {
-            foundStencil =
-              this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Quadrant, order);
+            foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
+                                                                    vof,
+                                                                    ebisbox,
+                                                                    VofUtils::Neighborhood::Quadrant,
+                                                                    order);
             order--;
 
             // Check if stencil reaches too far across CF
@@ -224,8 +230,11 @@ MFHelmholtzJumpBC::defineStencils()
           // Last ditch effort: Try a full radius
           order = m_order;
           while (!foundStencil && order > 0) {
-            foundStencil =
-              this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Radius, order);
+            foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
+                                                                    vof,
+                                                                    ebisbox,
+                                                                    VofUtils::Neighborhood::Radius,
+                                                                    order);
             order--;
 
             // Check if stencil reaches too far across CF

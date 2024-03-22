@@ -93,8 +93,11 @@ VofUtils::getVofsInSemiCircle(const VolIndex&      a_startVof,
   if (a_normal != RealVect::Zero) {
     const RealVect x0 = Location::position(a_vofLocation, a_startVof, a_ebisbox, 1.0);
 
-    const Vector<VolIndex> vofsInRadius =
-      VofUtils::getVofsInRadius(a_startVof, a_ebisbox, a_radius, a_connectivity, false);
+    const Vector<VolIndex> vofsInRadius = VofUtils::getVofsInRadius(a_startVof,
+                                                                    a_ebisbox,
+                                                                    a_radius,
+                                                                    a_connectivity,
+                                                                    false);
 
     for (int i = 0; i < vofsInRadius.size(); i++) {
       const VolIndex& curVoF = vofsInRadius[i];

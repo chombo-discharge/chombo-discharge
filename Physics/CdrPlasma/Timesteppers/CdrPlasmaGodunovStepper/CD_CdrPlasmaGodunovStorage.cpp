@@ -26,7 +26,10 @@ CdrPlasmaGodunovStepper::CdrStorage::CdrStorage(const RefCountedPtr<AmrMesh>& a_
   m_phase = a_phase;
 }
 
-CdrPlasmaGodunovStepper::CdrStorage::~CdrStorage() { deallocateStorage(); }
+CdrPlasmaGodunovStepper::CdrStorage::~CdrStorage()
+{
+  deallocateStorage();
+}
 
 void
 CdrPlasmaGodunovStepper::CdrStorage::allocateStorage()
@@ -86,7 +89,10 @@ CdrPlasmaGodunovStepper::FieldStorage::FieldStorage(const RefCountedPtr<AmrMesh>
   m_realm = a_realm;
 }
 
-CdrPlasmaGodunovStepper::FieldStorage::~FieldStorage() { this->deallocateStorage(); }
+CdrPlasmaGodunovStepper::FieldStorage::~FieldStorage()
+{
+  this->deallocateStorage();
+}
 
 void
 CdrPlasmaGodunovStepper::FieldStorage::allocateStorage()
@@ -117,7 +123,8 @@ CdrPlasmaGodunovStepper::RtStorage::RtStorage(const RefCountedPtr<AmrMesh>& a_am
   m_phase = a_phase;
 }
 
-CdrPlasmaGodunovStepper::RtStorage::~RtStorage() {}
+CdrPlasmaGodunovStepper::RtStorage::~RtStorage()
+{}
 
 void
 CdrPlasmaGodunovStepper::RtStorage::allocateStorage()
@@ -148,7 +155,8 @@ CdrPlasmaGodunovStepper::SigmaStorage::SigmaStorage(const RefCountedPtr<AmrMesh>
   m_phase = a_phase;
 }
 
-CdrPlasmaGodunovStepper::SigmaStorage::~SigmaStorage() {}
+CdrPlasmaGodunovStepper::SigmaStorage::~SigmaStorage()
+{}
 
 void
 CdrPlasmaGodunovStepper::SigmaStorage::allocateStorage()

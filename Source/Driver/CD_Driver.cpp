@@ -81,7 +81,10 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   Random::seed();
 }
 
-Driver::~Driver() { CH_TIME("Driver::~Driver()"); }
+Driver::~Driver()
+{
+  CH_TIME("Driver::~Driver()");
+}
 
 int
 Driver::getNumberOfPlotVariables() const
@@ -303,8 +306,11 @@ Driver::getGeometryTags()
 
         // Check the angle between the normal vector in this irregular cell and neighboring irregular cells. If the
         // angle exceeds a specified threshold the cell is refined.
-        const Vector<VolIndex> otherVofs =
-          VofUtils::getVofsInRadius(vof, ebisbox, 1, VofUtils::Connectivity::MonotonePath, false);
+        const Vector<VolIndex> otherVofs = VofUtils::getVofsInRadius(vof,
+                                                                     ebisbox,
+                                                                     1,
+                                                                     VofUtils::Connectivity::MonotonePath,
+                                                                     false);
 
         for (int i = 0; i < otherVofs.size(); i++) {
           const VolIndex& curVof = otherVofs[i];

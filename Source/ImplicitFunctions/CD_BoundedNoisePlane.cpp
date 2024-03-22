@@ -85,7 +85,8 @@ BoundedNoisePlane::BoundedNoisePlane(const BoundedNoisePlane& a_inputIF)
   m_clampK  = a_inputIF.m_clampK;
 }
 
-BoundedNoisePlane::~BoundedNoisePlane() {}
+BoundedNoisePlane::~BoundedNoisePlane()
+{}
 
 Real
 BoundedNoisePlane::value(const RealVect& a_pos) const

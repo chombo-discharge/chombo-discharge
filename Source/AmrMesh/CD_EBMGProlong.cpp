@@ -35,7 +35,10 @@ EBMGProlong::EBMGProlong(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_ebl
   this->define(a_eblgFine, a_eblgCoar, a_refRat);
 }
 
-EBMGProlong::~EBMGProlong() noexcept { CH_TIME("EBMGProlong::~EBMGProlong"); }
+EBMGProlong::~EBMGProlong() noexcept
+{
+  CH_TIME("EBMGProlong::~EBMGProlong");
+}
 
 void
 EBMGProlong::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept

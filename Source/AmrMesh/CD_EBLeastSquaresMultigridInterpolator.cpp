@@ -540,10 +540,16 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
   Vector<VolIndex> coarVofs;
 
   // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells or in a_validCoarCells.
-  fineVofs =
-    VofUtils::getVofsInRadius(a_ghostVofFine, a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, false);
-  coarVofs =
-    VofUtils::getVofsInRadius(a_ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, true);
+  fineVofs = VofUtils::getVofsInRadius(a_ghostVofFine,
+                                       a_ebisboxFine,
+                                       fineRadius,
+                                       VofUtils::Connectivity::MonotonePath,
+                                       false);
+  coarVofs = VofUtils::getVofsInRadius(a_ghostVofCoar,
+                                       a_ebisboxCoar,
+                                       coarRadius,
+                                       VofUtils::Connectivity::MonotonePath,
+                                       true);
 
   VofUtils::includeCells(fineVofs, a_validFineCells);
   VofUtils::includeCells(coarVofs, a_validCoarCells);

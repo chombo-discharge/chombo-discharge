@@ -20,9 +20,11 @@
 constexpr int IrregStencil::m_defaultStenComp;
 constexpr int IrregStencil::m_defaultNumSten;
 
-IrregStencil::IrregStencil() {}
+IrregStencil::IrregStencil()
+{}
 
-IrregStencil::~IrregStencil() {}
+IrregStencil::~IrregStencil()
+{}
 
 IrregStencil::IrregStencil(const DisjointBoxLayout&        a_dbl,
                            const EBISLayout&               a_ebisl,

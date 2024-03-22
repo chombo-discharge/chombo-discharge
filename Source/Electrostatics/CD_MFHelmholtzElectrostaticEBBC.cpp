@@ -141,8 +141,12 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
       // Last ditch effort: Try a full radius
       order = m_order;
       while (!foundStencil && order > 0) {
-        foundStencil =
-          this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Radius, din, order, m_weight);
+        foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
+                                                                vof,
+                                                                VofUtils::Neighborhood::Radius,
+                                                                din,
+                                                                order,
+                                                                m_weight);
         order--;
 
         // Check if stencil reaches too far across CF

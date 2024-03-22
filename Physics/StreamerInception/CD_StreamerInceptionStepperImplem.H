@@ -280,8 +280,10 @@ StreamerInceptionStepper<P, F, C>::solvePoisson() noexcept
 
   // Solve using our m_potentialInho as an initial guess.
   DataOps::copy(m_fieldSolver->getPotential(), m_potentialInho);
-  const bool convergedInho =
-    m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma(), false);
+  const bool convergedInho = m_fieldSolver->solve(m_fieldSolver->getPotential(),
+                                                  m_fieldSolver->getRho(),
+                                                  m_fieldSolver->getSigma(),
+                                                  false);
 
   if (!convergedInho) {
     MayDay::Warning("StreamerInceptionStepper::solvePoisson -- could not solve the inhomogeneous Poisson equation. ");
@@ -302,8 +304,10 @@ StreamerInceptionStepper<P, F, C>::solvePoisson() noexcept
   });
 
   DataOps::copy(m_fieldSolver->getPotential(), m_potentialHomo);
-  const bool convergedHomo =
-    m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma(), false);
+  const bool convergedHomo = m_fieldSolver->solve(m_fieldSolver->getPotential(),
+                                                  m_fieldSolver->getRho(),
+                                                  m_fieldSolver->getSigma(),
+                                                  false);
 
   if (!convergedHomo) {
     MayDay::Warning("StreamerInceptionStepper::solvePoisson -- could not solve the homogeneous Poisson equation. ");

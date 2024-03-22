@@ -56,7 +56,10 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
 #endif
 }
 
-inline ItoKMCPhysics::~ItoKMCPhysics() noexcept { CH_TIME("ItoKMCPhysics::~ItoKMCPhysics"); }
+inline ItoKMCPhysics::~ItoKMCPhysics() noexcept
+{
+  CH_TIME("ItoKMCPhysics::~ItoKMCPhysics");
+}
 
 inline void
 ItoKMCPhysics::define() noexcept
@@ -423,8 +426,9 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
 
     if (diff > 0LL) {
       // Adding particles, which is fairly simple. Just choose weights for the particles and go.
-      const std::vector<long long> particleWeights =
-        ParticleManagement::partitionParticleWeights(diff, (long long)m_maxNewParticles);
+      const std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(
+        diff,
+        (long long)m_maxNewParticles);
 
       for (const auto& w : particleWeights) {
         RealVect x = RealVect::Zero;
@@ -542,8 +546,9 @@ ItoKMCPhysics::reconcilePhotons(Vector<List<Photon>*>& a_newPhotons,
   for (int i = 0; i < a_newPhotons.size(); i++) {
     if (a_numNewPhotons[i] > 0LL) {
 
-      const std::vector<long long> photonWeights =
-        ParticleManagement::partitionParticleWeights((long long)a_numNewPhotons[i], (long long)m_maxNewPhotons);
+      const std::vector<long long> photonWeights = ParticleManagement::partitionParticleWeights(
+        (long long)a_numNewPhotons[i],
+        (long long)m_maxNewPhotons);
 
       for (const auto& w : photonWeights) {
         const RealVect x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);

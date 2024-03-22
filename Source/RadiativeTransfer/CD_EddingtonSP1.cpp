@@ -54,7 +54,8 @@ EddingtonSP1::EddingtonSP1() : RtSolver()
   this->setDefaultDomainBcFunctions();
 }
 
-EddingtonSP1::~EddingtonSP1() {}
+EddingtonSP1::~EddingtonSP1()
+{}
 
 void
 EddingtonSP1::parseOptions()

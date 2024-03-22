@@ -31,7 +31,10 @@ RtSolver::RtSolver()
   m_className = "RtSolver";
 }
 
-RtSolver::~RtSolver() { CH_TIME("RtSolver::~RtSolver"); }
+RtSolver::~RtSolver()
+{
+  CH_TIME("RtSolver::~RtSolver");
+}
 
 std::string
 RtSolver::getName()

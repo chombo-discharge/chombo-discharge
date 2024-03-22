@@ -26,7 +26,10 @@ EBHelmholtzNeumannEBBC::EBHelmholtzNeumannEBBC()
   m_useFunction = false;
 }
 
-EBHelmholtzNeumannEBBC::~EBHelmholtzNeumannEBBC() { CH_TIME("EBHelmholtzNeumannEBBC::~EBHelmholtzNeumannEBBC()"); }
+EBHelmholtzNeumannEBBC::~EBHelmholtzNeumannEBBC()
+{
+  CH_TIME("EBHelmholtzNeumannEBBC::~EBHelmholtzNeumannEBBC()");
+}
 
 void
 EBHelmholtzNeumannEBBC::setDphiDn(const Real a_DphiDn)

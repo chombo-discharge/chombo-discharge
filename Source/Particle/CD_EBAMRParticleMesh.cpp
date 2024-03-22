@@ -36,7 +36,10 @@ EBAMRParticleMesh::EBAMRParticleMesh(const Vector<RefCountedPtr<EBLevelGrid>>& a
   this->define(a_eblgs, a_refRat, a_dx, a_probLo, a_ghost, a_maxParticleWidth, a_finestLevel);
 }
 
-EBAMRParticleMesh::~EBAMRParticleMesh() { CH_TIME("EBAMRParticleMesh::~EBAMRParticleMesh()"); }
+EBAMRParticleMesh::~EBAMRParticleMesh()
+{
+  CH_TIME("EBAMRParticleMesh::~EBAMRParticleMesh()");
+}
 
 void
 EBAMRParticleMesh::define(const Vector<RefCountedPtr<EBLevelGrid>>& a_eblgs,

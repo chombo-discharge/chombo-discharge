@@ -39,7 +39,8 @@ EBCoarseToFineInterp::EBCoarseToFineInterp(const EBLevelGrid& a_eblgFine,
   this->define(a_eblgFine, a_eblgCoFi, a_eblgCoar, a_refRat);
 }
 
-EBCoarseToFineInterp::~EBCoarseToFineInterp() noexcept {}
+EBCoarseToFineInterp::~EBCoarseToFineInterp() noexcept
+{}
 
 void
 EBCoarseToFineInterp::define(const EBLevelGrid& a_eblgFine,

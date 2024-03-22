@@ -119,7 +119,10 @@ EBGradient::define(const EBLevelGrid& a_eblg,
   m_isDefined = true;
 }
 
-EBGradient::~EBGradient() noexcept { CH_TIME("EBGradient::~EBGradient"); }
+EBGradient::~EBGradient() noexcept
+{
+  CH_TIME("EBGradient::~EBGradient");
+}
 
 void
 EBGradient::computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelData<EBCellFAB>& a_phi) const noexcept
@@ -893,8 +896,11 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
   const int coarRadius = 1;
 
   // Get coar vofs in range. The fine VoFs are defined as the VoFs that are available through refinement of the coarse vofs.
-  Vector<VolIndex> coarVoFs =
-    VofUtils::getVofsInRadius(a_vofCoar, ebisBoxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, false);
+  Vector<VolIndex> coarVoFs = VofUtils::getVofsInRadius(a_vofCoar,
+                                                        ebisBoxCoar,
+                                                        coarRadius,
+                                                        VofUtils::Connectivity::MonotonePath,
+                                                        false);
   Vector<VolIndex> fineVoFs;
   for (int i = 0; i < coarVoFs.size(); i++) {
     fineVoFs.append(a_ebislCoar.refine(coarVoFs[i], m_refRat, a_dit));

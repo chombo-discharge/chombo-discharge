@@ -39,7 +39,8 @@ CdrSolver::CdrSolver()
   this->setDefaultDomainBC(); // Set default domain BCs (wall)
 }
 
-CdrSolver::~CdrSolver() {}
+CdrSolver::~CdrSolver()
+{}
 
 RefCountedPtr<CdrSpecies>&
 CdrSolver::getSpecies() noexcept
@@ -1458,8 +1459,9 @@ CdrSolver::nonConservativeDivergence(EBAMRIVData& a_nonConservativeDivergence, c
   //       AmrMesh's stencil in cut cells. The neighborhood consists of cells that can be reached with a monotone path.
 
   if (m_blendConservation) {
-    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils =
-      m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
+    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(
+      m_realm,
+      m_phase);
 
     stencils.apply(a_nonConservativeDivergence, a_divG);
   }

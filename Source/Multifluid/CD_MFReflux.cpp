@@ -13,11 +13,16 @@
 #include <CD_MFReflux.H>
 #include <CD_NamespaceHeader.H>
 
-MFReflux::MFReflux() {}
+MFReflux::MFReflux()
+{}
 
-MFReflux::MFReflux(const Vector<RefCountedPtr<EBReflux>>& a_fluxRegs) { this->define(a_fluxRegs); }
+MFReflux::MFReflux(const Vector<RefCountedPtr<EBReflux>>& a_fluxRegs)
+{
+  this->define(a_fluxRegs);
+}
 
-MFReflux::~MFReflux() {}
+MFReflux::~MFReflux()
+{}
 
 void
 MFReflux::define(const Vector<RefCountedPtr<EBReflux>>& a_fluxRegs)

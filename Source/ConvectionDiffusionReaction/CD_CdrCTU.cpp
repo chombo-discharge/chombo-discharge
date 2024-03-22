@@ -30,7 +30,10 @@ CdrCTU::CdrCTU()
   m_useCTU    = true;
 }
 
-CdrCTU::~CdrCTU() { CH_TIME("CdrCTU::~CdrCTU()"); }
+CdrCTU::~CdrCTU()
+{
+  CH_TIME("CdrCTU::~CdrCTU()");
+}
 
 void
 CdrCTU::parseOptions()

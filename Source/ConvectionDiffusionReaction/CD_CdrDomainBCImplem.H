@@ -36,7 +36,8 @@ CdrDomainBC::CdrDomainBC()
   }
 }
 
-CdrDomainBC::~CdrDomainBC() {}
+CdrDomainBC::~CdrDomainBC()
+{}
 
 CdrDomainBC::DomainSide
 CdrDomainBC::domainSide(const int a_dir, const Side::LoHiSide a_side) const

@@ -50,7 +50,10 @@ EBFluxRedistribution::EBFluxRedistribution(const EBLevelGrid& a_eblgCoar,
                a_redistributeOutside);
 }
 
-EBFluxRedistribution::~EBFluxRedistribution() noexcept { CH_TIME("EBFluxRedistribution::~EBFluxRedistribution"); }
+EBFluxRedistribution::~EBFluxRedistribution() noexcept
+{
+  CH_TIME("EBFluxRedistribution::~EBFluxRedistribution");
+}
 
 void
 EBFluxRedistribution::define(const EBLevelGrid& a_eblgCoar,
@@ -203,9 +206,12 @@ EBFluxRedistribution::defineStencils() noexcept
       const VolIndex& vof = vofit();
 
       // Get the VoFs in the neighborhood of this VoF. When we redistribute, also permit self-redistribution back into this cell.
-      const bool             includeSelf = true;
-      const Vector<VolIndex> neighborVoFs =
-        VofUtils::getVofsInRadius(vof, ebisBox, m_redistRadius, VofUtils::Connectivity::SimplyConnected, includeSelf);
+      const bool             includeSelf  = true;
+      const Vector<VolIndex> neighborVoFs = VofUtils::getVofsInRadius(vof,
+                                                                      ebisBox,
+                                                                      m_redistRadius,
+                                                                      VofUtils::Connectivity::SimplyConnected,
+                                                                      includeSelf);
 
       Vector<VolIndex> fineVoFs;
       Vector<VolIndex> levelVoFs;

@@ -43,7 +43,8 @@ PhaseRealm::PhaseRealm()
   pp.query("verbosity", m_verbose);
 }
 
-PhaseRealm::~PhaseRealm() {}
+PhaseRealm::~PhaseRealm()
+{}
 
 void
 PhaseRealm::define(const Vector<DisjointBoxLayout>&   a_grids,
@@ -846,15 +847,15 @@ PhaseRealm::defineNonConsDivSten()
     const int order = 1; // Dummy argument
 
     m_NonConservativeDivergenceStencil = RefCountedPtr<IrregAmrStencil<NonConservativeDivergenceStencil>>(
-      new IrregAmrStencil<
-        NonConservativeDivergenceStencil>(m_grids,
-                                          m_ebisl,
-                                          m_domains,
-                                          m_dx,
-                                          m_finestLevel,
-                                          order, // Dummy argument
-                                          m_redistributionRadius,
-                                          m_centroidStencilType)); // Dummy argument, just use centroidStencilType.
+      new IrregAmrStencil<NonConservativeDivergenceStencil>(
+        m_grids,
+        m_ebisl,
+        m_domains,
+        m_dx,
+        m_finestLevel,
+        order, // Dummy argument
+        m_redistributionRadius,
+        m_centroidStencilType)); // Dummy argument, just use centroidStencilType.
   }
 }
 

@@ -81,7 +81,10 @@ ItoKMCJSON::ItoKMCJSON()
   this->define();
 }
 
-ItoKMCJSON::~ItoKMCJSON() noexcept { CH_TIME("ItoKMCJSON::~ItoKMCJSON"); }
+ItoKMCJSON::~ItoKMCJSON() noexcept
+{
+  CH_TIME("ItoKMCJSON::~ItoKMCJSON");
+}
 
 void
 ItoKMCJSON::parseRuntimeOptions() noexcept
@@ -3025,13 +3028,13 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
   }
 
   // Go through all primary particles.
-  const std::map<size_t, ItoKMCSurfaceReactions>& plasmaReactions =
-    a_isDielectric ? m_surfaceReactions.getDielectricPlasmaReactions()
-                   : m_surfaceReactions.getElectrodePlasmaReactions();
+  const std::map<size_t, ItoKMCSurfaceReactions>&
+    plasmaReactions = a_isDielectric ? m_surfaceReactions.getDielectricPlasmaReactions()
+                                     : m_surfaceReactions.getElectrodePlasmaReactions();
 
-  const std::map<size_t, ItoKMCSurfaceReactions>& photonReactions =
-    a_isDielectric ? m_surfaceReactions.getDielectricPhotonReactions()
-                   : m_surfaceReactions.getElectrodePhotonReactions();
+  const std::map<size_t, ItoKMCSurfaceReactions>&
+    photonReactions = a_isDielectric ? m_surfaceReactions.getDielectricPhotonReactions()
+                                     : m_surfaceReactions.getElectrodePhotonReactions();
 
   // Do secondary emission for each intersected particle if there's a corresponding surface reaction.
   for (int i = 0; i < m_itoSpecies.size(); i++) {
@@ -3053,8 +3056,8 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
       // Release the particles.
       for (int i = 0; i < X.size(); i++) {
         if (X[i] > 0) {
-          const RealVect releasePosition =
-            Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
+          const RealVect
+            releasePosition = Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
 
           for (const auto& p : plasmaProducts[i]) {
             const int Z = m_itoSpecies[p]->getChargeNumber();
@@ -3088,8 +3091,8 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
       // Release the particles.
       for (int i = 0; i < X.size(); i++) {
         if (X[i] > 0) {
-          const RealVect releasePosition =
-            Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
+          const RealVect
+            releasePosition = Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
 
           for (const auto& p : plasmaProducts[i]) {
             const int Z = m_itoSpecies[p]->getChargeNumber();

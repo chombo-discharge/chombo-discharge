@@ -20,9 +20,15 @@
 constexpr int EBHelmholtzDomainBC::m_comp;
 constexpr int EBHelmholtzDomainBC::m_nComp;
 
-EBHelmholtzDomainBC::EBHelmholtzDomainBC() { CH_TIME("EBHelmholtzDomainBC::EBHelmholtzDomainBC()"); }
+EBHelmholtzDomainBC::EBHelmholtzDomainBC()
+{
+  CH_TIME("EBHelmholtzDomainBC::EBHelmholtzDomainBC()");
+}
 
-EBHelmholtzDomainBC::~EBHelmholtzDomainBC() { CH_TIME("EBHelmholtzDomainBC::~EBHelmholtzDomainBC()"); }
+EBHelmholtzDomainBC::~EBHelmholtzDomainBC()
+{
+  CH_TIME("EBHelmholtzDomainBC::~EBHelmholtzDomainBC()");
+}
 
 void
 EBHelmholtzDomainBC::define(const Location::Cell a_dataLocation,

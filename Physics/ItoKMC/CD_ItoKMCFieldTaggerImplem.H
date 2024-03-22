@@ -144,8 +144,8 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
           const RealVect gradE = RealVect(
             D_DECL(gradElectricFieldReg(iv, 0), gradElectricFieldReg(iv, 1), gradElectricFieldReg(iv, 2)));
 
-          const Vector<Real> compTagFields =
-            this->computeTagFields(pos, time, dx, E, minE, maxE, gradE, minGradE, maxGradE);
+          const Vector<Real>
+            compTagFields = this->computeTagFields(pos, time, dx, E, minE, maxE, gradE, minGradE, maxGradE);
 
           for (int i = 0; i < this->m_numTagFields; i++) {
             (*tagFieldsReg[i])(iv, 0) = compTagFields[i];
@@ -161,8 +161,8 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
         const RealVect gradE = RealVect(
           D_DECL(gradElectricField(vof, 0), gradElectricField(vof, 1), gradElectricField(vof, 2)));
 
-        const Vector<Real> compTagFields =
-          this->computeTagFields(pos, time, dx, E, minE, maxE, gradE, minGradE, maxGradE);
+        const Vector<Real>
+          compTagFields = this->computeTagFields(pos, time, dx, E, minE, maxE, gradE, minGradE, maxGradE);
 
         for (int i = 0; i < this->m_numTagFields; i++) {
           (*tagFields[i])(vof, 0) = compTagFields[i];

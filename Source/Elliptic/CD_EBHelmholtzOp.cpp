@@ -185,7 +185,10 @@ EBHelmholtzOp::getBcoefIrreg()
   return m_BcoefIrreg;
 }
 
-EBHelmholtzOp::~EBHelmholtzOp() { CH_TIME("EBHelmholtzOp::~EBHelmholtzOp()"); }
+EBHelmholtzOp::~EBHelmholtzOp()
+{
+  CH_TIME("EBHelmholtzOp::~EBHelmholtzOp()");
+}
 
 void
 EBHelmholtzOp::turnOffCFInterp()
@@ -2041,8 +2044,10 @@ EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataInd
 
       // Irregular face, but using cell-centered data. Get face-centered stencils and interpolate them to centroids.
       if (m_dataLocation == Location::Cell::Center) {
-        const FaceStencil interpolationStencil =
-          EBArith::getInterpStencil(a_face, IntVectSet(), ebisbox, m_eblg.getDomain());
+        const FaceStencil interpolationStencil = EBArith::getInterpStencil(a_face,
+                                                                           IntVectSet(),
+                                                                           ebisbox,
+                                                                           m_eblg.getDomain());
 
         for (int i = 0; i < interpolationStencil.size(); i++) {
           const FaceIndex& iface   = interpolationStencil.face(i);

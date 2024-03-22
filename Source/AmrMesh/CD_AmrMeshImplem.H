@@ -242,8 +242,9 @@ AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T>>>& a_particles, const std
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str =
-      "AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >, string) - could not find Realm '" + a_realm + "'";
+    const std::string
+      str = "AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >, string) - could not find Realm '" + a_realm +
+            "'";
     MayDay::Abort(str.c_str());
   }
 

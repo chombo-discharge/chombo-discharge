@@ -36,7 +36,8 @@ Realm::Realm()
   m_realms.emplace(phase::solid, RefCountedPtr<PhaseRealm>(new PhaseRealm()));
 }
 
-Realm::~Realm() {}
+Realm::~Realm()
+{}
 
 void
 Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,

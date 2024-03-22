@@ -58,7 +58,7 @@ namespace ParallelOps {
     @param[in] a_input Data input. Returns the smallest. 
   */
   inline long long int
-  min(const long long int& a_input) noexcept;  
+  min(const long long int& a_input) noexcept;
 
   /*!
     @brief Get the minimum value and the position corresponding to the minimum value of a_val

@@ -31,7 +31,10 @@ MFHelmholtzRobinEBBC::MFHelmholtzRobinEBBC(const int a_phase, const RefCountedPt
   m_useFunction = false;
 }
 
-MFHelmholtzRobinEBBC::~MFHelmholtzRobinEBBC() { CH_TIME("MFHelmholtzRobinEBBC::~MFHelmholtzRobinEBBC()"); }
+MFHelmholtzRobinEBBC::~MFHelmholtzRobinEBBC()
+{
+  CH_TIME("MFHelmholtzRobinEBBC::~MFHelmholtzRobinEBBC()");
+}
 
 void
 MFHelmholtzRobinEBBC::setOrder(const int a_order)
@@ -312,8 +315,12 @@ MFHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
   }
 
   // Build displacements vector, i.e. distances from cell centers/centroids to the cut-cell EB centroid.
-  const Vector<RealVect> displacements =
-    LeastSquares::getDisplacements(Location::Cell::Boundary, m_dataLocation, a_vof, vofs, ebisbox, m_dx);
+  const Vector<RealVect> displacements = LeastSquares::getDisplacements(Location::Cell::Boundary,
+                                                                        m_dataLocation,
+                                                                        a_vof,
+                                                                        vofs,
+                                                                        ebisbox,
+                                                                        m_dx);
 
   // M = Number of unknowns in Taylor expansion of order a_order.
   // K = Number of equations (displacements)

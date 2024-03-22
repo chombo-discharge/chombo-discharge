@@ -63,7 +63,10 @@ BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver)
   m_solver = a_solver;
 }
 
-BrownianWalkerStepper::~BrownianWalkerStepper() { CH_TIME("BrownianWalkerStepper::~BrownianWalkerStepper"); }
+BrownianWalkerStepper::~BrownianWalkerStepper()
+{
+  CH_TIME("BrownianWalkerStepper::~BrownianWalkerStepper");
+}
 
 void
 BrownianWalkerStepper::parseRuntimeOptions()

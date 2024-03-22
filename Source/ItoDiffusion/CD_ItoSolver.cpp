@@ -57,7 +57,10 @@ ItoSolver::ItoSolver()
   };
 }
 
-ItoSolver::~ItoSolver() { CH_TIME("ItoSolver::~ItoSolver"); }
+ItoSolver::~ItoSolver()
+{
+  CH_TIME("ItoSolver::~ItoSolver");
+}
 
 std::string
 ItoSolver::getName() const
@@ -1786,8 +1789,9 @@ ItoSolver::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellDa
   }
 
   if (m_blendConservation) {
-    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils =
-      m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
+    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(
+      m_realm,
+      m_phase);
     stencils.apply(a_depositionNC, a_depositionKappaC);
   }
   else {
@@ -3031,12 +3035,11 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles, const
   };
 
   // 2. Build KD-tree.
-  const std::vector<std::shared_ptr<Node>> leaves =
-    ParticleManagement::recursivePartitionAndSplitEqualWeightKD<PType,
-                                                                &PType::template real<0>,
-                                                                &PType::template vect<0>>(particles,
-                                                                                          a_ppc,
-                                                                                          particleReconcile);
+  const std::vector<std::shared_ptr<Node>> leaves = ParticleManagement::
+    recursivePartitionAndSplitEqualWeightKD<PType, &PType::template real<0>, &PType::template vect<0>>(
+      particles,
+      a_ppc,
+      particleReconcile);
 
   // Merge leaves into new particles.
   CH_START(t3);

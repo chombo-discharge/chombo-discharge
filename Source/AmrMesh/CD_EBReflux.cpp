@@ -37,7 +37,10 @@ EBReflux::EBReflux(const EBLevelGrid& a_eblg,
   this->define(a_eblg, a_eblgFine, a_eblgCoFi, a_refRat);
 }
 
-EBReflux::~EBReflux() noexcept { CH_TIME("EBReflux::~EBReflux"); }
+EBReflux::~EBReflux() noexcept
+{
+  CH_TIME("EBReflux::~EBReflux");
+}
 
 void
 EBReflux::define(const EBLevelGrid& a_eblg,

@@ -28,7 +28,10 @@ MFHelmholtzEBBC::MFHelmholtzEBBC(const int a_phase, const RefCountedPtr<MFHelmho
   m_phase  = a_phase;
 }
 
-MFHelmholtzEBBC::~MFHelmholtzEBBC() { CH_TIME("MFHelmholtzEBBC::~MFHelmholtzEBBC()"); }
+MFHelmholtzEBBC::~MFHelmholtzEBBC()
+{
+  CH_TIME("MFHelmholtzEBBC::~MFHelmholtzEBBC()");
+}
 
 void
 MFHelmholtzEBBC::define()

@@ -242,8 +242,7 @@ CdrPlasmaImExSdcStepper::parseAdvectionOptions()
   ParmParse   pp(m_className.c_str());
   std::string str;
 
-  m_extrapDt =
-    0.5; // Relic of an ancient past. I don't see any reason why extrapolating to anything but the half interval
+  m_extrapDt = 0.5; // Relic of an ancient past. I don't see any reason why extrapolating to anything but the half interval
   // would make sense.
 
   pp.get("extrap_advect", str);
@@ -732,18 +731,18 @@ CdrPlasmaImExSdcStepper::integrate(const Real a_dt, const Real a_time, const boo
 
     // Update source terms every time we go through this
     CdrPlasmaImExSdcStepper::computeElectricFieldIntoScratch();
-    CdrPlasmaImExSdcStepper::
-      computeReactionNetwork(m,
-                             a_time,
-                             m_dtm[m]); // Ppdate the CDR and RTE source terms using the correct step size
+    CdrPlasmaImExSdcStepper::computeReactionNetwork(
+      m,
+      a_time,
+      m_dtm[m]); // Ppdate the CDR and RTE source terms using the correct step size
 
     // Always update boundary conditions on the way in. All of these calls use the stuff that reside in the solvers,
     // which is what we need to do at the start of the time step. In principle, these things do not change
     // and so we could probably store them somewhere for increased performance.
     if (m == 0 &&
         !a_lagged_terms) { // This updates the CDR boundary conditions; since these are used to compute the slopes,
-      t0 =
-        Timer::wallClock(); // and the m=0 hyperbolic slopes do not change, we only need to do this for the predictor.
+      t0 = Timer::
+        wallClock(); // and the m=0 hyperbolic slopes do not change, we only need to do this for the predictor.
       CdrPlasmaImExSdcStepper::computeCdrEbStates();
       CdrPlasmaImExSdcStepper::computeCdrFluxes(a_time);
       CdrPlasmaImExSdcStepper::computeCdrDomainStates();

@@ -29,7 +29,10 @@ CellTagger::CellTagger()
   m_name      = "CellTagger";
 }
 
-CellTagger::~CellTagger() { CH_TIME("CellTagger::~CellTagger()"); }
+CellTagger::~CellTagger()
+{
+  CH_TIME("CellTagger::~CellTagger()");
+}
 
 void
 CellTagger::preRegrid() noexcept

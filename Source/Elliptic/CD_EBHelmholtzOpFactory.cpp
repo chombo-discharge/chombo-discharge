@@ -86,7 +86,10 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell    a_dataLocatio
   this->defineMultigridLevels();
 }
 
-EBHelmholtzOpFactory::~EBHelmholtzOpFactory() { CH_TIME("EBHelmholtzOpFactory::~EBHelmholtzOpFactory()"); }
+EBHelmholtzOpFactory::~EBHelmholtzOpFactory()
+{
+  CH_TIME("EBHelmholtzOpFactory::~EBHelmholtzOpFactory()");
+}
 
 void
 EBHelmholtzOpFactory::defineMultigridLevels()

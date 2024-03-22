@@ -649,8 +649,9 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
   CH_assert(a_rteDensities.size() == numRteSpecies);
 
   // Stencils for putting cell-centered data on cell centroids.
-  const IrregAmrStencil<CentroidInterpolationStencil>& interpStencils =
-    m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->getPhase());
+  const IrregAmrStencil<CentroidInterpolationStencil>& interpStencils = m_amr->getCentroidInterpolationStencils(
+    m_realm,
+    m_cdr->getPhase());
 
   // Grids and EBIS information for this grid level.
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
@@ -1483,8 +1484,9 @@ CdrPlasmaStepper::computeCdrDiffusion(const EBAMRCellData& a_electricFieldCell, 
     m_amr->allocate(*cdrDensitiesExtrap[idx], m_realm, m_cdr->getPhase(), numComp);
 
     // Extrapolate the cell-centered densities to the EB.
-    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil =
-      m_amr->getEbCentroidInterpolationStencils(m_realm, m_cdr->getPhase());
+    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencils(
+      m_realm,
+      m_cdr->getPhase());
 
     stencil.apply(*cdrDensitiesExtrap[idx], *cdrDensities[idx]);
   }
@@ -1737,8 +1739,9 @@ CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&       a_c
   Vector<Real> cdrDensities(numCdrSpecies, 0.0);
 
   // Interpolation stencils
-  const BaseIVFAB<VoFStencil>& interpStencils =
-    m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->getPhase())[a_lvl][a_dit];
+  const BaseIVFAB<VoFStencil>& interpStencils = m_amr->getCentroidInterpolationStencils(
+    m_realm,
+    m_cdr->getPhase())[a_lvl][a_dit];
 
   // Irreegular kernel.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -2245,8 +2248,9 @@ CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a
   Vector<Real> cdrDensities(numCdrSpecies, 0.0);
 
   // Interpolation stencils
-  const BaseIVFAB<VoFStencil>& interpStencils =
-    m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->getPhase())[a_lvl][a_dit];
+  const BaseIVFAB<VoFStencil>& interpStencils = m_amr->getCentroidInterpolationStencils(
+    m_realm,
+    m_cdr->getPhase())[a_lvl][a_dit];
 
   // Irregular kernel.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -2752,8 +2756,9 @@ CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extra
   m_amr->allocate(ebPhi, m_realm, a_phase, 1);
 
   // This stencil takes cell centered data and puts it on the centroid.
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& interpStencils =
-    m_amr->getEbCentroidInterpolationStencils(m_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& interpStencils = m_amr->getEbCentroidInterpolationStencils(
+    m_realm,
+    a_phase);
 
   // Go through the CDR solvers.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -3172,8 +3177,9 @@ CdrPlasmaStepper::computeElectricField(EBAMRIVData&             a_electricFieldE
   CH_assert(a_electricFieldCell[0]->nComp() == SpaceDim);
 
   // Interpolate to the EB centroid
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& interpStencils =
-    m_amr->getEbCentroidInterpolationStencils(m_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& interpStencils = m_amr->getEbCentroidInterpolationStencils(
+    m_realm,
+    a_phase);
   interpStencils.apply(a_electricFieldEB, a_electricFieldCell);
 }
 
@@ -4148,9 +4154,9 @@ CdrPlasmaStepper::computeElectrodeCurrent()
     // Grid kernel.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const Real& bndryFrac = ebisBox.bndryArea(vof);
-      const Real& flux =
-        patchCurrent(vof,
-                     comp); // Recall -- this holds the normal component of the current density on the EB surface.
+      const Real& flux      = patchCurrent(
+        vof,
+        comp); // Recall -- this holds the normal component of the current density on the EB surface.
 
       current += flux * bndryFrac;
     };
@@ -4230,9 +4236,9 @@ CdrPlasmaStepper::computeDielectricCurrent()
     // Grid kernel.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const Real& bndryFrac = ebisBox.bndryArea(vof);
-      const Real& flux =
-        patchCurrent(vof,
-                     comp); // Recall -- this holds the normal component of the current density on the EB surface.
+      const Real& flux      = patchCurrent(
+        vof,
+        comp); // Recall -- this holds the normal component of the current density on the EB surface.
 
       current += flux * bndryFrac;
     };

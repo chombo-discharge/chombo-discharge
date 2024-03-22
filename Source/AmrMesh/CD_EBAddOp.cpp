@@ -16,9 +16,15 @@
 #include <CD_EBAddOp.H>
 #include <CD_NamespaceHeader.H>
 
-EBAddOp::EBAddOp() { CH_TIME("EBAddOp::EBAddOp"); }
+EBAddOp::EBAddOp()
+{
+  CH_TIME("EBAddOp::EBAddOp");
+}
 
-EBAddOp::~EBAddOp() { CH_TIME("EBAddOp::~EBAddOp"); }
+EBAddOp::~EBAddOp()
+{
+  CH_TIME("EBAddOp::~EBAddOp");
+}
 
 void
 EBAddOp::linearIn(EBCellFAB& a_data, void* a_buffer, const Box& a_region, const Interval& a_comps) const

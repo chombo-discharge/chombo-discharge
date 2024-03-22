@@ -25,7 +25,8 @@ inline ItoKMCSurfaceReaction::ItoKMCSurfaceReaction(const size_t            a_re
   this->define(a_reactant, a_products, a_efficiency);
 }
 
-inline ItoKMCSurfaceReaction::~ItoKMCSurfaceReaction() noexcept {}
+inline ItoKMCSurfaceReaction::~ItoKMCSurfaceReaction() noexcept
+{}
 
 inline void
 ItoKMCSurfaceReaction::define(const size_t            a_reactant,
