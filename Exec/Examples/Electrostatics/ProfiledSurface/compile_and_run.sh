@@ -1,8 +1,8 @@
 export CH_TIMER=1
 export DIM=2
-export NCORES=12
+export NCORES=8
 export NPROCS=1
-export OMP_NUM_THREADS=12
+export OMP_NUM_THREADS=8
 export OMP_PLACES=cores
 export OMP_PROC_BIND=true
 export OMP_SCHEDULE="dynamic"
