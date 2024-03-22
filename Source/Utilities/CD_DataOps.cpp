@@ -210,6 +210,7 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
   const DataIterator&      dit = dbl.dataIterator();
 
   const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
@@ -387,14 +388,21 @@ DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
 
   const int numComp = a_cellData.nComp();
 
-  for (DataIterator dit = a_cellData.dataIterator(); dit.ok(); ++dit) {
-    EBCellFAB&       cellData = a_cellData[dit()];
-    const EBFluxFAB& fluxData = a_fluxData[dit()];
+  const DataIterator dit = a_cellData.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    EBCellFAB&       cellData = a_cellData[din];
+    const EBFluxFAB& fluxData = a_fluxData[din];
     const EBISBox&   ebisbox  = cellData.getEBISBox();
     const EBGraph&   ebgraph  = ebisbox.getEBGraph();
 
     // Regions for the kernels.
-    const Box&        cellBox = a_cellData.disjointBoxLayout()[dit()];
+    const Box&        cellBox = a_cellData.disjointBoxLayout()[din];
     const IntVectSet& ivs     = ebisbox.getIrregIVS(cellBox);
     VoFIterator       vofit(ivs, ebgraph);
 
@@ -485,8 +493,15 @@ DataOps::compute(LevelData<EBCellFAB>& a_data, const std::function<Real(const Re
 
   const int nComp = a_data.nComp();
 
-  for (DataIterator dit = a_data.dataIterator(); dit.ok(); ++dit) {
-    EBCellFAB& data    = a_data[dit()];
+  const DataIterator& dit = a_data.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    EBCellFAB& data    = a_data[din];
     FArrayBox& dataReg = data.getFArrayBox();
 
     EBCellFAB tmp;
@@ -494,7 +509,7 @@ DataOps::compute(LevelData<EBCellFAB>& a_data, const std::function<Real(const Re
     FArrayBox& tmpReg = tmp.getFArrayBox();
 
     // Kernel regions
-    const Box&        box     = a_data.disjointBoxLayout().get(dit());
+    const Box&        box     = a_data.disjointBoxLayout().get(din);
     const EBISBox&    ebisbox = data.getEBISBox();
     const EBGraph&    ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
@@ -534,11 +549,18 @@ DataOps::dotProduct(LevelData<MFCellFAB>&       a_result,
   CH_assert(a_data2.nComp() == a_data1.nComp());
   CH_assert(a_result.nComp() == 1);
 
-  for (DataIterator dit = a_result.dataIterator(); dit.ok(); ++dit) {
-    MFCellFAB&       result = a_result[dit()];
-    const MFCellFAB& data1  = a_data1[dit()];
-    const MFCellFAB& data2  = a_data2[dit()];
-    const Box&       box    = a_result.disjointBoxLayout().get(dit());
+  const DataIterator& dit = a_result.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    MFCellFAB&       result = a_result[din];
+    const MFCellFAB& data1  = a_data1[din];
+    const MFCellFAB& data2  = a_data2[din];
+    const Box&       box    = a_result.disjointBoxLayout().get(din);
 
     for (int i = 0; i < result.numPhases(); i++) {
       EBCellFAB&       resultPhase = result.getPhase(i);
@@ -573,11 +595,18 @@ DataOps::dotProduct(LevelData<EBCellFAB>&       a_result,
   CH_assert(a_data1.nComp() == a_data2.nComp());
   CH_assert(a_result.nComp() == 1);
 
-  for (DataIterator dit = a_result.dataIterator(); dit.ok(); ++dit) {
-    EBCellFAB&       result = a_result[dit()];
-    const EBCellFAB& data1  = a_data1[dit()];
-    const EBCellFAB& data2  = a_data2[dit()];
-    const Box&       box    = a_result.disjointBoxLayout().get(dit());
+  const DataIterator& dit = a_result.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    EBCellFAB&       result = a_result[din];
+    const EBCellFAB& data1  = a_data1[din];
+    const EBCellFAB& data2  = a_data2[din];
+    const Box&       box    = a_result.disjointBoxLayout().get(din);
 
     DataOps::dotProduct(result, data1, data2, box);
   }
@@ -660,14 +689,20 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
   }
 
   const DisjointBoxLayout& dbl = a_data.disjointBoxLayout();
+  const DataIterator&      dit = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    EBCellFAB& data    = a_data[dit()];
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    EBCellFAB& data    = a_data[din];
     FArrayBox& dataReg = data.getFArrayBox();
 
-    const Box            cellBox = dbl[dit()];
+    const Box            cellBox = dbl[din];
     const Box            dataBox = dataReg.box();
-    const EBISBox&       ebisbox = a_data[dit()].getEBISBox();
+    const EBISBox&       ebisbox = a_data[din].getEBISBox();
     const EBGraph&       ebgraph = ebisbox.getEBGraph();
     const ProblemDomain& domain  = ebisbox.getDomain();
 
@@ -869,7 +904,14 @@ DataOps::incr(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs, co
 
   CH_assert(a_lhs.nComp() == a_rhs.nComp());
 
-  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit) {
+  const DataIterator& dit = a_lhs.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
     DataOps::incr(a_lhs[dit()], a_rhs[dit()], a_scale);
   }
 }
