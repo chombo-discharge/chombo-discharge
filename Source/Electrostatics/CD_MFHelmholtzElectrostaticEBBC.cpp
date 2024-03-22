@@ -110,14 +110,14 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
         foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
                                                                 vof,
                                                                 VofUtils::Neighborhood::SemiCircle,
-                                                                dit(),
+                                                                din,
                                                                 order,
                                                                 m_weight);
         order--;
 
         // Check if stencil reaches too far across CF
         if (foundStencil) {
-          foundStencil = this->isStencilValidCF(pairSten.second, dit());
+          foundStencil = this->isStencilValidCF(pairSten.second, din);
         }
       }
 
