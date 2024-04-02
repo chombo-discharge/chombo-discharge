@@ -52,12 +52,18 @@ ParticleOps::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleCon
 
   for (int lvl = 0; lvl <= a_src.getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = a_src.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
     const RealVect           dx  = a_src.getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const List<P>& particles = a_src[lvl][dit()].listItems();
+    const int nbox = dit.size();
 
-      FArrayBox& ppc = (*a_ppc[lvl])[dit()].getFArrayBox();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const List<P>& particles = a_src[lvl][din].listItems();
+
+      FArrayBox& ppc = (*a_ppc[lvl])[din].getFArrayBox();
       ppc.setVal(0.0);
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
@@ -82,12 +88,18 @@ ParticleOps::getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const Partic
 
   for (int lvl = 0; lvl <= a_src.getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = a_src.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
     const RealVect           dx  = a_src.getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const List<P>& particles = a_src[lvl][dit()].listItems();
+    const int nbox = dit.size();
 
-      FArrayBox& ppc = (*a_ppc[lvl])[dit()].getFArrayBox();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const List<P>& particles = a_src[lvl][din].listItems();
+
+      FArrayBox& ppc = (*a_ppc[lvl])[din].getFArrayBox();
       ppc.setVal(0.0);
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
@@ -260,8 +272,16 @@ ParticleOps::copy(ParticleContainer<P>& a_dst, const ParticleContainer<P>& a_src
   CH_assert(a_dst.getRealm() == a_src.getRealm());
 
   for (int lvl = 0; lvl <= a_dst.getFinestLevel(); lvl++) {
-    for (DataIterator dit(a_dst.getGrids()[lvl]); dit.ok(); ++dit) {
-      a_dst[lvl][dit()].listItems() = a_src[lvl][dit()].listItems();
+    const DisjointBoxLayout& dbl = a_dst.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      a_dst[lvl][din].listItems() = a_src[lvl][din].listItems();
     }
   }
 }
@@ -275,10 +295,18 @@ ParticleOps::copyDestructive(ParticleContainer<P>& a_dst, ParticleContainer<P>& 
   CH_assert(a_dst.getRealm() == a_src.getRealm());
 
   for (int lvl = 0; lvl <= a_dst.getFinestLevel(); lvl++) {
-    for (DataIterator dit(a_dst.getGrids()[lvl]); dit.ok(); ++dit) {
-      a_dst[lvl][dit()].listItems() = a_src[lvl][dit()].listItems();
+    const DisjointBoxLayout& dbl = a_dst.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-      a_src[lvl][dit()].listItems().clear();
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      a_dst[lvl][din].listItems() = a_src[lvl][din].listItems();
+
+      a_src[lvl][din].listItems().clear();
     }
   }
 }
@@ -292,8 +320,16 @@ ParticleOps::sum(const ParticleContainer<P>& a_particles) noexcept
   Real particleSum = 0.0;
 
   for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-    for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
-      const List<P>& particles = a_particles[lvl][dit()].listItems();
+    const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const List<P>& particles = a_particles[lvl][din].listItems();
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         particleSum += (lit().*scalarQuantity)();
@@ -313,8 +349,16 @@ ParticleOps::sum(const ParticleContainer<P>& a_particles) noexcept
   Real particleSum = 0.0;
 
   for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-    for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
-      const List<P>& particles = a_particles[lvl][dit()].listItems();
+    const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const List<P>& particles = a_particles[lvl][din].listItems();
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         particleSum += (lit().*scalarQuantity)();
@@ -333,8 +377,16 @@ ParticleOps::removeParticles(ParticleContainer<P>&                a_particles,
   CH_TIME("ParticleOps::removeParticles(ParticleContainer<P>, std::function<bool(const P&)>)");
 
   for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-    for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
-      List<P>& particles = a_particles[lvl][dit()].listItems();
+    const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<P>& particles = a_particles[lvl][din].listItems();
 
       for (ListIterator<P> lit(particles); lit.ok();) {
         if (a_removeCriterion(lit())) {
@@ -360,10 +412,17 @@ ParticleOps::transferParticles(ParticleContainer<P>&                a_dstParticl
   CH_assert(a_dstParticles.getFinestLevel() == a_srcParticles.getFinestLevel());
 
   for (int lvl = 0; lvl <= a_srcParticles.getFinestLevel(); lvl++) {
-    for (DataIterator dit(a_srcParticles.getGrids()[lvl]); dit.ok(); ++dit) {
+    const DisjointBoxLayout& dbl = a_srcParticles.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-      List<P>& dstParticles = a_dstParticles[lvl][dit()].listItems();
-      List<P>& srcParticles = a_srcParticles[lvl][dit()].listItems();
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<P>& dstParticles = a_dstParticles[lvl][din].listItems();
+      List<P>& srcParticles = a_srcParticles[lvl][din].listItems();
 
       for (ListIterator<P> lit(srcParticles); lit.ok();) {
         if (a_transferCrit(lit())) {
@@ -384,8 +443,16 @@ ParticleOps::setData(ParticleContainer<P>& a_particles, const std::function<void
   CH_TIME("ParticleOps::setData(ParticleContainer<P>, std::function<void(P&)>)");
 
   for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-    for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
-      List<P>& particles = a_particles[lvl][dit()].listItems();
+    const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<P>& particles = a_particles[lvl][din].listItems();
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         a_functor(lit());
@@ -401,8 +468,16 @@ ParticleOps::setValue(ParticleContainer<P>& a_particles, const Real a_value) noe
   CH_TIME("ParticleOps::setValue(ParticleContainer<P>, Real");
 
   for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-    for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
-      List<P>& particles = a_particles[lvl][dit()].listItems();
+    const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<P>& particles = a_particles[lvl][din].listItems();
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         P& p = lit();
@@ -420,8 +495,16 @@ ParticleOps::setValue(ParticleContainer<P>& a_particles, const RealVect a_value)
   CH_TIME("ParticleOps::setValue(ParticleContainer<P>, RealVect");
 
   for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-    for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
-      List<P>& particles = a_particles[lvl][dit()].listItems();
+    const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<P>& particles = a_particles[lvl][din].listItems();
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         P& p = lit();
