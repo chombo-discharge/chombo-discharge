@@ -172,9 +172,16 @@ DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
   LevelData<FArrayBox> levelData(dbl, numCompTotal, a_numGhost * IntVect::Unit);
   CH_STOP(t1);
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    FArrayBox&       levelFAB      = levelData[dit()];
-    const EBCellFAB& outputData    = a_outputData[dit()];
+  const DataIterator& dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    FArrayBox&       levelFAB      = levelData[din];
+    const EBCellFAB& outputData    = a_outputData[din];
     const FArrayBox& outputDataReg = outputData.getFArrayBox();
     const EBISBox&   ebisbox       = outputData.getEBISBox();
     const Box        outputBox     = levelFAB.box() & a_domain;

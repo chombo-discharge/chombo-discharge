@@ -160,8 +160,17 @@ DischargeIO::writeH5Part(const std::string                               a_filen
   std::vector<double>             z;
 
   for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-    for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
-      const List<GenericParticle<M, N>>& particles = a_particles[lvl][dit()].listItems();
+
+    const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const List<GenericParticle<M, N>>& particles = a_particles[lvl][din].listItems();
 
       for (ListIterator<GenericParticle<M, N>> lit(particles); lit.ok(); ++lit) {
         id.push_back(procID());
@@ -207,8 +216,17 @@ DischargeIO::writeH5Part(const std::string                               a_filen
     std::vector<double> ds;
 
     for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-      for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
-        const List<GenericParticle<M, N>>& particles = a_particles[lvl][dit()].listItems();
+
+      const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const List<GenericParticle<M, N>>& particles = a_particles[lvl][din].listItems();
 
         for (ListIterator<GenericParticle<M, N>> lit(particles); lit.ok(); ++lit) {
           ds.push_back(lit().getReals()[curVar]);
@@ -246,8 +264,17 @@ DischargeIO::writeH5Part(const std::string                               a_filen
       std::vector<double> ds;
 
       for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-        for (DataIterator dit(a_particles.getGrids()[lvl]); dit.ok(); ++dit) {
-          const List<GenericParticle<M, N>>& particles = a_particles[lvl][dit()].listItems();
+
+        const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
+        const DataIterator&      dit = dbl.dataIterator();
+
+        const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex& din = dit[mybox];
+
+          const List<GenericParticle<M, N>>& particles = a_particles[lvl][din].listItems();
 
           for (ListIterator<GenericParticle<M, N>> lit(particles); lit.ok(); ++lit) {
             const RealVect var = lit().getVects()[curVar];

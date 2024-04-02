@@ -129,14 +129,14 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const Box      box     = dbl[dit()];
-    const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
+    const Box      box     = dbl[din];
+    const EBISBox& ebisbox = m_eblg.getEBISL()[din];
 
-    BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
+    BaseIVFAB<Real>&       weights  = m_boundaryWeights[din];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[din];
 
     // Build interpolation stencils.
-    VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());
+    VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, din);
 
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
@@ -152,24 +152,24 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
       // that fall within the quadrant that the cut-cell normal points into.
       order = m_order;
       while (!foundStencil && order > 0) {
-        fluxStencil = this->getInterpolationStencil(vof, dit(), VofUtils::Neighborhood::Quadrant, order);
+        fluxStencil = this->getInterpolationStencil(vof, din, VofUtils::Neighborhood::Quadrant, order);
         order--;
 
         // Check that the stencil doesn't reach into ghost cells it shouldn't!
         if (foundStencil) {
-          foundStencil = this->isStencilValidCF(fluxStencil, dit());
+          foundStencil = this->isStencilValidCF(fluxStencil, din);
         }
       }
 
       // If the above failed we try a larger neighborhood
       order = m_order;
       while (!foundStencil && order > 0) {
-        fluxStencil = this->getInterpolationStencil(vof, dit(), VofUtils::Neighborhood::Radius, order);
+        fluxStencil = this->getInterpolationStencil(vof, din, VofUtils::Neighborhood::Radius, order);
         order--;
 
         // Check that the stencil doesn't reach into ghost cells it shouldn't!
         if (foundStencil) {
-          foundStencil = this->isStencilValidCF(fluxStencil, dit());
+          foundStencil = this->isStencilValidCF(fluxStencil, din);
         }
       }
 
@@ -183,7 +183,7 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
           B = m_constantB;
         }
         else if (m_useFunction) {
-          const RealVect pos = this->getBoundaryPosition(vof, dit());
+          const RealVect pos = this->getBoundaryPosition(vof, din);
           A                  = m_functionA(pos);
           B                  = m_functionB(pos);
         }

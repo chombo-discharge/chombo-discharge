@@ -207,7 +207,7 @@ MFHelmholtzJumpBC::defineStencils()
 
             // Check if stencil reaches too far across CF
             if (foundStencil) {
-              foundStencil = this->isStencilValidCF(pairSten.second, dit());
+              foundStencil = this->isStencilValidCF(pairSten.second, din);
             }
           }
 
