@@ -951,11 +951,17 @@ DataOps::incr(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>
 
   CH_assert(a_lhs.nComp() == a_rhs.nComp());
 
-  const int numComp = a_lhs.nComp();
+  const DataIterator& dit = a_lhs.dataIterator();
 
-  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit) {
-    BaseIVFAB<Real>&       lhs = a_lhs[dit()];
-    const BaseIVFAB<Real>& rhs = a_rhs[dit()];
+  const int numComp = a_lhs.nComp();
+  const int nbox    = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    BaseIVFAB<Real>&       lhs = a_lhs[din];
+    const BaseIVFAB<Real>& rhs = a_rhs[din];
 
     // Iteration space
     VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph());
@@ -967,7 +973,6 @@ DataOps::incr(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>
     };
 
     // Run kernel
-
     BoxLoops::loop(vofit, kernel);
   }
 }
@@ -989,11 +994,17 @@ DataOps::incr(LevelData<DomainFluxIFFAB>& a_lhs, const LevelData<DomainFluxIFFAB
 
   CH_assert(a_lhs.nComp() == a_rhs.nComp());
 
-  const int numComp = a_lhs.nComp();
+  const DataIterator& dit = a_lhs.dataIterator();
 
-  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit) {
-    DomainFluxIFFAB&       lhs = a_lhs[dit()];
-    const DomainFluxIFFAB& rhs = a_rhs[dit()];
+  const int numComp = a_lhs.nComp();
+  const int nbox    = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    DomainFluxIFFAB&       lhs = a_lhs[din];
+    const DomainFluxIFFAB& rhs = a_rhs[din];
 
     for (int dir = 0; dir < SpaceDim; dir++) {
       for (SideIterator sit; sit.ok(); ++sit) {
@@ -1034,11 +1045,17 @@ DataOps::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_r
 
   CH_assert(a_lhs.nComp() == a_rhs.nComp());
 
-  const int numComp = a_lhs.nComp();
+  const DataIterator& dit = a_lhs.dataIterator();
 
-  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit) {
-    EBCellFAB&             lhs     = a_lhs[dit()];
-    const BaseIVFAB<Real>& rhs     = a_rhs[dit()];
+  const int numComp = a_lhs.nComp();
+  const int nbox    = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    EBCellFAB&             lhs     = a_lhs[din];
+    const BaseIVFAB<Real>& rhs     = a_rhs[din];
     const EBGraph&         ebgraph = rhs.getEBGraph();
     const IntVectSet&      ivs     = rhs.getIVS();
 
