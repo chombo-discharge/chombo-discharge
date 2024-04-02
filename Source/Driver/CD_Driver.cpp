@@ -2497,8 +2497,15 @@ Driver::writeLoads(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_leve
     const Vector<long int> loads = m_timeStepper->getCheckpointLoads(r, a_level);
 
     const DisjointBoxLayout& dbl = m_amr->getGrids(r)[a_level];
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      scratch[dit()].setVal(loads[dit().intCode()]);
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      scratch[din].setVal(loads[din.intCode()]);
     }
 
     const Interval srcInterv(0, 0);
@@ -2850,8 +2857,8 @@ Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    DenseIntVectSet& taggedCells = (*m_tags[a_level])[dit()];
-    FArrayBox&       scratchFAB  = scratch[dit()].getFArrayBox();
+    DenseIntVectSet& taggedCells = (*m_tags[a_level])[din];
+    FArrayBox&       scratchFAB  = scratch[din].getFArrayBox();
 
     auto kernel = [&](const IntVect& iv) -> void {
       if (scratchFAB(iv, 0) > 0.9999) {
