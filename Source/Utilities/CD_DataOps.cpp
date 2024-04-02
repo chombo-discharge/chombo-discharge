@@ -3089,7 +3089,9 @@ DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect a_nor
       RealVect shift_vector = RealVect::Zero;
       bool     allInside    = DataOps::allCornersInsideEb(corners, a_normal, a_centroid);
 
-      while (allInside) {
+      int numIter = 0;
+
+      while (allInside && numIter < num_segments) {
 
         // Shift the corners
         DataOps::shiftCorners(corners, base_shift);
@@ -3107,6 +3109,8 @@ DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect a_nor
             a_hi[dir] = 0.5 + shift_vector[dir];
           }
         }
+
+        numIter++;
       }
     }
   }
