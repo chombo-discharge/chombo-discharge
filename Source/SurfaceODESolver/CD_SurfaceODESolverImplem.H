@@ -293,16 +293,22 @@ SurfaceODESolver<N>::computeMass(const EBAMRIVData& a_data, const int a_comp) co
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
     const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const Real               dx     = m_amr->getDx()[lvl];
     const Real               dxArea = std::pow(dx, SpaceDim - 1);
 
     CH_assert(a_data[lvl]->nComp() > a_comp);
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox&         ebisbox    = ebisl[dit()];
-      const BaseFab<bool>&   validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
-      const BaseIVFAB<Real>& data       = (*a_data[lvl])[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBISBox&         ebisbox    = ebisl[din];
+      const BaseFab<bool>&   validCells = (*m_amr->getValidCells(m_realm)[lvl])[din];
+      const BaseIVFAB<Real>& data       = (*a_data[lvl])[din];
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         const IntVect iv = vof.gridIndex();
@@ -312,7 +318,7 @@ SurfaceODESolver<N>::computeMass(const EBAMRIVData& a_data, const int a_comp) co
         }
       };
 
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       BoxLoops::loop(vofit, irregularKernel);
     }
@@ -531,21 +537,27 @@ SurfaceODESolver<N>::defineVoFIterators() noexcept
 
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const MFLevelGrid&       mflg  = *m_amr->getMFLevelGrid(m_realm)[lvl];
 
     m_dielectricVoFs[lvl] = RefCountedPtr<LDVoFs>(new LDVoFs(dbl));
     m_electrodeVoFs[lvl]  = RefCountedPtr<LDVoFs>(new LDVoFs(dbl));
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box&     cellBox = dbl[dit()];
-      const EBISBox& ebisBox = ebisl[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box&     cellBox = dbl[din];
+      const EBISBox& ebisBox = ebisl[din];
       const EBGraph& ebGraph = ebisBox.getEBGraph();
 
-      VoFIterator& dielectricVoFIt = (*m_dielectricVoFs[lvl])[dit()];
-      VoFIterator& electrodeVoFIt  = (*m_electrodeVoFs[lvl])[dit()];
+      VoFIterator& dielectricVoFIt = (*m_dielectricVoFs[lvl])[din];
+      VoFIterator& electrodeVoFIt  = (*m_electrodeVoFs[lvl])[din];
 
-      IntVectSet dielectricIVS = mflg.interfaceRegion(cellBox, dit());
+      IntVectSet dielectricIVS = mflg.interfaceRegion(cellBox, din);
       IntVectSet electrodeIVS  = ebisBox.getIrregIVS(cellBox) - dielectricIVS;
 
       dielectricVoFIt.define(dielectricIVS, ebGraph);
@@ -628,10 +640,16 @@ SurfaceODESolver<N>::resetElectrodes(EBAMRIVData& a_phi, const Real a_value) con
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      BaseIVFAB<Real>& phi   = (*a_phi[lvl])[dit()];
-      VoFIterator&     vofit = (*m_electrodeVoFs[lvl])[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      BaseIVFAB<Real>& phi   = (*a_phi[lvl])[din];
+      VoFIterator&     vofit = (*m_electrodeVoFs[lvl])[din];
 
       auto kernel = [&](const VolIndex& vof) -> void {
         for (int comp = 0; comp < N; comp++) {
@@ -667,10 +685,16 @@ SurfaceODESolver<N>::resetDielectrics(EBAMRIVData& a_phi, const Real a_value) co
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      BaseIVFAB<Real>& phi   = (*a_phi[lvl])[dit()];
-      VoFIterator&     vofit = (*m_dielectricVoFs[lvl])[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      BaseIVFAB<Real>& phi   = (*a_phi[lvl])[din];
+      VoFIterator&     vofit = (*m_dielectricVoFs[lvl])[din];
 
       auto kernel = [&](const VolIndex& vof) -> void {
         for (int comp = 0; comp < N; comp++) {
