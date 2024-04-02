@@ -10,7 +10,7 @@ export OMP_SCHEDULE="dynamic"
 COMPILE=true
 RUN=true
 PROFILE=true
-INPUT="example.inputs Driver.max_steps=5"
+INPUT="example.inputs Driver.max_steps=5 Driver.verbosity=10 ItoKMCGodunovStepper.verbosity=10"
 # Driver.initial_regrids=1 Driver.write_memory=true Driver.write_loads=true FieldStepper.load_balance=true"
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
