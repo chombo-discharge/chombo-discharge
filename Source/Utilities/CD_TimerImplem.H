@@ -58,91 +58,115 @@ Timer::clear() noexcept
 inline void
 Timer::startEvent(const std::string a_event) noexcept
 {
-  if (m_events.find(a_event) == m_events.end()) { // Create a new event.
-    const TimePoint startTime   = Clock::now();
-    const Duration  elapsedTime = Duration(0.0);
+#ifdef _OPENMP
+  if (omp_get_thread_num() == 0) {
+#endif
+    if (m_events.find(a_event) == m_events.end()) { // Create a new event.
+      const TimePoint startTime   = Clock::now();
+      const Duration  elapsedTime = Duration(0.0);
 
-    m_events.emplace(a_event, std::make_tuple(false, startTime, elapsedTime));
-  }
-  else { // If the event is not new, we just leave the elapsed time intact.
-    //    const TimePoint startTime = Clock::now();
-    std::tuple<bool, TimePoint, Duration>& event        = m_events.at(a_event);
-    const bool                             stoppedEvent = std::get<StoppedEvent>(event);
-
-    if (stoppedEvent) { // Only start the event if it is not already running.
-      const TimePoint startTime           = Clock::now();
-      const Duration& previousElapsedTime = std::get<ElapsedTime>(event);
-
-      event = std::make_tuple(false, startTime, previousElapsedTime);
+      m_events.emplace(a_event, std::make_tuple(false, startTime, elapsedTime));
     }
+    else { // If the event is not new, we just leave the elapsed time intact.
+      //    const TimePoint startTime = Clock::now();
+      std::tuple<bool, TimePoint, Duration>& event        = m_events.at(a_event);
+      const bool                             stoppedEvent = std::get<StoppedEvent>(event);
+
+      if (stoppedEvent) { // Only start the event if it is not already running.
+        const TimePoint startTime           = Clock::now();
+        const Duration& previousElapsedTime = std::get<ElapsedTime>(event);
+
+        event = std::make_tuple(false, startTime, previousElapsedTime);
+      }
+    }
+#ifdef _OPENMP
   }
+#endif
 }
 
 inline void
 Timer::stopEvent(const std::string a_event) noexcept
 {
-  if (m_events.find(a_event) != m_events.end()) {
-    std::tuple<bool, TimePoint, Duration>& event = m_events.at(a_event);
+#ifdef _OPENMP
+  if (omp_get_thread_num() == 0) {
+#endif
+    if (m_events.find(a_event) != m_events.end()) {
+      std::tuple<bool, TimePoint, Duration>& event = m_events.at(a_event);
 
-    const TimePoint startTime           = std::get<StartClock>(event);
-    const TimePoint stopTime            = Clock::now();
-    const Duration  curElapsedTime      = stopTime - startTime;
-    const Duration  previousElapsedTime = std::get<ElapsedTime>(event);
-    const Duration  totalElapsedTime    = previousElapsedTime + curElapsedTime;
+      const TimePoint startTime           = std::get<StartClock>(event);
+      const TimePoint stopTime            = Clock::now();
+      const Duration  curElapsedTime      = stopTime - startTime;
+      const Duration  previousElapsedTime = std::get<ElapsedTime>(event);
+      const Duration  totalElapsedTime    = previousElapsedTime + curElapsedTime;
 
-    event = std::make_tuple(true, startTime, totalElapsedTime);
+      event = std::make_tuple(true, startTime, totalElapsedTime);
+    }
+    else {
+      std::cerr << "Timer::stopEvent -- event '" + a_event + "' has not been started\n";
+    }
+#ifdef _OPENMP
   }
-  else {
-    std::cerr << "Timer::stopEvent -- event '" + a_event + "' has not been started\n";
-  }
+#endif
 }
 
 inline void
 Timer::printReportHeader(std::ostream& a_outputStream) const noexcept
 {
-
-  std::stringstream header;
-  header
-    << "| ---------------------------------------------------------------------------------------------------------|"
-    << "\n"
-    << "| " + m_processName + " kernel report: "
-    << "\n"
-    << "| ---------------------------------------------------------------------------------------------------------|"
-    << "\n"
-    << "| " << std::left << std::setw(25) << "Event"
-    << "| " << std::right << std::setw(8) << "Loc. (s)"
-    << "| " << std::right << std::setw(8) << "Loc. (%)"
-#ifdef CH_MPI
-    << "| " << std::right << std::setw(8) << "Min. (s)"
-    << "| " << std::right << std::setw(8) << "Max. (s)"
-    << "| " << std::right << std::setw(8) << "Avg. (s)"
-    << "| " << std::right << std::setw(8) << "Dev. (s)"
-    << "| " << std::right << std::setw(8) << "Min rank"
-    << "| " << std::right << std::setw(8) << "Max rank"
-    << "| "
-    << "\n"
+#ifdef _OPENMP
+  if (omp_get_thread_num() == 0) {
 #endif
-    << "| ---------------------------------------------------------------------------------------------------------|"
-    << "\n";
+    std::stringstream header;
+    header
+      << "| ---------------------------------------------------------------------------------------------------------|"
+      << "\n"
+      << "| " + m_processName + " kernel report: "
+      << "\n"
+      << "| ---------------------------------------------------------------------------------------------------------|"
+      << "\n"
+      << "| " << std::left << std::setw(25) << "Event"
+      << "| " << std::right << std::setw(8) << "Loc. (s)"
+      << "| " << std::right << std::setw(8) << "Loc. (%)"
+#ifdef CH_MPI
+      << "| " << std::right << std::setw(8) << "Min. (s)"
+      << "| " << std::right << std::setw(8) << "Max. (s)"
+      << "| " << std::right << std::setw(8) << "Avg. (s)"
+      << "| " << std::right << std::setw(8) << "Dev. (s)"
+      << "| " << std::right << std::setw(8) << "Min rank"
+      << "| " << std::right << std::setw(8) << "Max rank"
+      << "| "
+#endif
+      << "\n"
+      << "| ---------------------------------------------------------------------------------------------------------|"
+      << "\n";
 
-  a_outputStream << header.str();
+    a_outputStream << header.str();
+#ifdef _OPENMP
+  }
+#endif
 }
 
 inline void
 Timer::printReportTail(std::ostream& a_outputStream, const std::pair<Real, Real> a_elapsedTime) const noexcept
 {
-  std::stringstream tail;
+#ifdef _OPENMP
+  if (omp_get_thread_num() == 0) {
+#endif
+    std::stringstream tail;
 
-  tail << "| ---------------------------------------------------------------------------------------------------------|"
-       << "\n"
-       << "| Local elapsed time  = " << std::fixed << std::setprecision(4) << a_elapsedTime.first << " seconds"
-       << "\n"
-       << "| Global elapsed time = " << std::fixed << std::setprecision(4) << a_elapsedTime.second << " seconds"
-       << "\n"
-       << "| ---------------------------------------------------------------------------------------------------------|"
-       << "\n";
+    tail
+      << "| ---------------------------------------------------------------------------------------------------------|"
+      << "\n"
+      << "| Local elapsed time  = " << std::fixed << std::setprecision(4) << a_elapsedTime.first << " seconds"
+      << "\n"
+      << "| Global elapsed time = " << std::fixed << std::setprecision(4) << a_elapsedTime.second << " seconds"
+      << "\n"
+      << "| ---------------------------------------------------------------------------------------------------------|"
+      << "\n";
 
-  a_outputStream << tail.str();
+    a_outputStream << tail.str();
+#ifdef _OPENMP
+  }
+#endif
 }
 
 inline void
@@ -150,129 +174,136 @@ Timer::eventReport(std::ostream& a_outputStream, const bool a_localReportOnly) c
 {
   // This routine prints a header, the timing report for the various event, and a tail. All events are included
   // but unfinished ones are not counted towards the elapsed time.
+#ifdef _OPENMP
+  if (omp_get_thread_num() == 0) {
+#endif
 
-  this->printReportHeader(a_outputStream);
+    this->printReportHeader(a_outputStream);
 
-  const std::pair<Real, Real> totalTime      = this->computeTotalElapsedTime(a_localReportOnly);
-  const Real                  totalTimeLocal = totalTime.first;
+    const std::pair<Real, Real> totalTime      = this->computeTotalElapsedTime(a_localReportOnly);
+    const Real                  totalTimeLocal = totalTime.first;
 
-  for (const auto& e : m_events) {
+    for (const auto& e : m_events) {
 
-    const std::string& eventName     = e.first;
-    const bool         finishedEvent = std::get<StoppedEvent>(e.second);
+      const std::string& eventName     = e.first;
+      const bool         finishedEvent = std::get<StoppedEvent>(e.second);
 
-    std::stringstream ssLocalDuration;
-    std::stringstream ssPercentage;
-    std::stringstream ssMinDuration;
-    std::stringstream ssMaxDuration;
-    std::stringstream ssAvgDuration;
-    std::stringstream ssDevDuration;
-    std::stringstream ssMinRank;
-    std::stringstream ssMaxRank;
+      std::stringstream ssLocalDuration;
+      std::stringstream ssPercentage;
+      std::stringstream ssMinDuration;
+      std::stringstream ssMaxDuration;
+      std::stringstream ssAvgDuration;
+      std::stringstream ssDevDuration;
+      std::stringstream ssMinRank;
+      std::stringstream ssMaxRank;
 
-    if (finishedEvent) {
-      const Duration localDuration          = std::get<ElapsedTime>(e.second);
-      const Real     localDurationInSeconds = localDuration.count();
+      if (finishedEvent) {
+        const Duration localDuration          = std::get<ElapsedTime>(e.second);
+        const Real     localDurationInSeconds = localDuration.count();
 
-      ssLocalDuration << std::fixed << std::setprecision(4) << localDurationInSeconds;
-      ssPercentage << std::fixed << std::setprecision(4) << 100. * localDurationInSeconds / totalTimeLocal;
+        ssLocalDuration << std::fixed << std::setprecision(4) << localDurationInSeconds;
+        ssPercentage << std::fixed << std::setprecision(4) << 100. * localDurationInSeconds / totalTimeLocal;
 
 #ifdef CH_MPI
-      if (!a_localReportOnly) {
+        if (!a_localReportOnly) {
 
-        const int srcRank = 0;
-        const int numRank = numProc();
+          const int srcRank = 0;
+          const int numRank = numProc();
 
-        Vector<Real> allDurations(numRank);
-        gather(allDurations, localDurationInSeconds, srcRank);
+          Vector<Real> allDurations(numRank);
+          gather(allDurations, localDurationInSeconds, srcRank);
 
-        // Compute average time and standard deviation
-        Real average;
-        Real sigma;
+          // Compute average time and standard deviation
+          Real average;
+          Real sigma;
 
-        Real maxTime = std::numeric_limits<Real>::min();
-        Real minTime = std::numeric_limits<Real>::max();
+          Real maxTime = std::numeric_limits<Real>::min();
+          Real minTime = std::numeric_limits<Real>::max();
 
-        int minRank;
-        int maxRank;
+          int minRank;
+          int maxRank;
 
-        if (procID() == 0) {
+          if (procID() == 0) {
 
-          average = 0.0;
-          for (int i = 0; i < allDurations.size(); i++) {
-            average += allDurations[i];
+            average = 0.0;
+            for (int i = 0; i < allDurations.size(); i++) {
+              average += allDurations[i];
 
-            if (allDurations[i] < minTime) {
-              minRank = i;
-              minTime = allDurations[i];
+              if (allDurations[i] < minTime) {
+                minRank = i;
+                minTime = allDurations[i];
+              }
+              if (allDurations[i] > maxTime) {
+                maxRank = i;
+                maxTime = allDurations[i];
+              }
             }
-            if (allDurations[i] > maxTime) {
-              maxRank = i;
-              maxTime = allDurations[i];
-            }
-          }
-          average *= 1. / numRank;
+            average *= 1. / numRank;
 
-          sigma = 0.0;
-          for (int i = 0; i < allDurations.size(); i++) {
-            sigma += sqrt(std::pow(allDurations[i] - average, 2));
+            sigma = 0.0;
+            for (int i = 0; i < allDurations.size(); i++) {
+              sigma += sqrt(std::pow(allDurations[i] - average, 2));
+            }
+            sigma = sqrt(sigma / numRank);
           }
-          sigma = sqrt(sigma / numRank);
+
+          broadcast(average, srcRank);
+          broadcast(sigma, srcRank);
+          broadcast(maxTime, srcRank);
+          broadcast(minTime, srcRank);
+          broadcast(minRank, srcRank);
+          broadcast(maxRank, srcRank);
+
+          ssMinDuration << std::fixed << std::setprecision(4) << minTime;
+          ssMaxDuration << std::fixed << std::setprecision(4) << maxTime;
+          ssAvgDuration << std::fixed << std::setprecision(4) << average;
+          ssDevDuration << std::fixed << std::setprecision(4) << sigma;
+          ssMinRank << std::fixed << std::setprecision(4) << minRank;
+          ssMaxRank << std::fixed << std::setprecision(4) << maxRank;
         }
-
-        broadcast(average, srcRank);
-        broadcast(sigma, srcRank);
-        broadcast(maxTime, srcRank);
-        broadcast(minTime, srcRank);
-        broadcast(minRank, srcRank);
-        broadcast(maxRank, srcRank);
-
-        ssMinDuration << std::fixed << std::setprecision(4) << minTime;
-        ssMaxDuration << std::fixed << std::setprecision(4) << maxTime;
-        ssAvgDuration << std::fixed << std::setprecision(4) << average;
-        ssDevDuration << std::fixed << std::setprecision(4) << sigma;
-        ssMinRank << std::fixed << std::setprecision(4) << minRank;
-        ssMaxRank << std::fixed << std::setprecision(4) << maxRank;
+        else {
+          ssMinDuration << " N/A ";
+          ssMaxDuration << " N/A ";
+          ssAvgDuration << " N/A ";
+          ssDevDuration << " N/A ";
+          ssMinRank << " N/A ";
+          ssMaxRank << " N/A ";
+        }
+#endif
       }
       else {
-        ssMinDuration << " N/A ";
-        ssMaxDuration << " N/A ";
-        ssAvgDuration << " N/A ";
-        ssDevDuration << " N/A ";
-        ssMinRank << " N/A ";
-        ssMaxRank << " N/A ";
+        ssLocalDuration << " - ";
+        ssPercentage << " - ";
+        ssMinDuration << " - ";
+        ssMaxDuration << " - ";
+        ssAvgDuration << " - ";
+        ssDevDuration << " - ";
+        ssMinRank << " - ";
+        ssMaxRank << " - ";
       }
-#endif
-    }
-    else {
-      ssLocalDuration << " - ";
-      ssPercentage << " - ";
-      ssMinDuration << " - ";
-      ssMaxDuration << " - ";
-      ssAvgDuration << " - ";
-      ssDevDuration << " - ";
-      ssMinRank << " - ";
-      ssMaxRank << " - ";
-    }
 
-    std::stringstream outputString;
+      std::stringstream outputString;
 
-    // Now print to pout
-    outputString << "| " << std::left << std::setw(25) << eventName << "| " << std::right << std::setw(8)
-                 << ssLocalDuration.str() << "| " << std::right << std::setw(8) << ssPercentage.str()
+      // Now print to pout
+      outputString << "| " << std::left << std::setw(25) << eventName << "| " << std::right << std::setw(8)
+                   << ssLocalDuration.str() << "| " << std::right << std::setw(8) << ssPercentage.str()
 #ifdef CH_MPI
-                 << "| " << std::right << std::setw(8) << ssMinDuration.str() << "| " << std::right << std::setw(8)
-                 << ssMaxDuration.str() << "| " << std::right << std::setw(8) << ssAvgDuration.str() << "| "
-                 << std::right << std::setw(8) << ssDevDuration.str() << "| " << std::right << std::setw(8)
-                 << ssMinRank.str() << "| " << std::right << std::setw(8) << ssMaxRank.str()
+                   << "| " << std::right << std::setw(8) << ssMinDuration.str() << "| " << std::right << std::setw(8)
+                   << ssMaxDuration.str() << "| " << std::right << std::setw(8) << ssAvgDuration.str() << "| "
+                   << std::right << std::setw(8) << ssDevDuration.str() << "| " << std::right << std::setw(8)
+                   << ssMinRank.str() << "| " << std::right << std::setw(8) << ssMaxRank.str()
 #endif
-                 << "| "
-                 << "\n";
+                   << "| "
+                   << "\n";
 
-    a_outputStream << outputString.str();
+      a_outputStream << outputString.str();
+    }
+
+    this->printReportTail(a_outputStream, totalTime);
+
+#ifdef _OPENMP
   }
-
-  this->printReportTail(a_outputStream, totalTime);
+#endif
 }
 
 inline std::pair<Real, Real>
@@ -339,7 +370,6 @@ Timer::writeReportToFile(const std::string a_fileName) const noexcept
       const Real   localEventDuration = std::get<ElapsedTime>(eventData).count();
       Vector<Real> allTimes(numRanks, 0.0);
 #ifdef CH_MPI
-
       gather(allTimes, localEventDuration, srcRank);
 #else
       allTimes[0] = localEventDuration;
@@ -354,25 +384,31 @@ Timer::writeReportToFile(const std::string a_fileName) const noexcept
 #if CH_MPI
   if (procID() == srcRank) {
 #endif
-    std::ofstream f;
-    f.open(a_fileName, std::ios_base::trunc);
+#ifdef _OPENMP
+    if (omp_get_thread_num() == 0) {
+#endif
+      std::ofstream f;
+      f.open(a_fileName, std::ios_base::trunc);
 
-    const int width = 12;
-    for (int col = 0; col < headerRow.size(); col++) {
-      f << std::left << std::setw(width) << headerRow[col] << "\t";
-    }
-    f << "\n";
-
-    // Write the data for rank = 0 etc
-    for (int irank = 0; irank < numRanks; irank++) {
-      f << std::left << std::setw(width) << irank << "\t";
-      for (int event = 0; event < finishedEvents.size(); event++) {
-        f << std::left << std::setw(width) << finishedEvents[event][irank] << "\t";
+      const int width = 12;
+      for (int col = 0; col < headerRow.size(); col++) {
+        f << std::left << std::setw(width) << headerRow[col] << "\t";
       }
       f << "\n";
-    }
 
-    f.close();
+      // Write the data for rank = 0 etc
+      for (int irank = 0; irank < numRanks; irank++) {
+        f << std::left << std::setw(width) << irank << "\t";
+        for (int event = 0; event < finishedEvents.size(); event++) {
+          f << std::left << std::setw(width) << finishedEvents[event][irank] << "\t";
+        }
+        f << "\n";
+      }
+
+      f.close();
+#ifdef _OPENMP
+    }
+#endif
 #if CH_MPI
   }
 #endif
