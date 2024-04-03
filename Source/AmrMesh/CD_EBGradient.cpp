@@ -635,7 +635,7 @@ EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF,
           if (!hasStencil) {
             ebcfIVS |= ivCoar;
 
-            localHasEBCF += 1;
+            localHasEBCF = 1;
           }
         }
       };

@@ -5,7 +5,7 @@ export NPROCS=1
 export OMP_NUM_THREADS=8
 export OMP_PLACES=cores
 export OMP_PROC_BIND=true
-export OMP_SCHEDULE="dynamic"
+export OMP_SCHEDULE="dynamic,4"
 
 COMPILE=false
 RUN=true
