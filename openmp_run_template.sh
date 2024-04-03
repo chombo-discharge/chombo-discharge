@@ -9,7 +9,9 @@
 # Source/Elliptic -> Exec/Examples/Electrostatics/ProfiledSurface
 # Source/Geometry -> Exec/Tests/Geometry/RodPlaneProfile
 # Source/ItoDiffusion -> Exec/Tests/BrownianWalker/DriftDiffusion
-# Source/Particle -> Exec/Examples/ItoKMC/AirBasic => EXAMPLE BREAKS FOR SOME REASON => INVESTIGATE!!!
+# Source/Particle -> Exec/Examples/ItoKMC/AirBasic
+#
+# Physics/BrownianWalker -> Exec/Tests/BrownianWalker/DriftDiffusion
 #
 # NOTE: ALL FOLDERS SHOULD BE THREADED BEFORE MERGING.
 # NOTE: CHECK ALL CRITICAL PERFORMANCE BOTTLENECKS BEFORE MERGING

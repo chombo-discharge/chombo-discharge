@@ -467,13 +467,19 @@ BrownianWalkerStepper::advance(const Real a_dt)
 
   // 1. Euler-Maruayma kernel on each patch.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout&   dbl       = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
     ParticleData<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
       // Particles that we iterate through.
-      List<ItoParticle>& particleList = particles[dit()].listItems();
+      List<ItoParticle>& particleList = particles[din].listItems();
 
       // Euler step.
       if (m_solver->isMobile()) {
@@ -646,7 +652,8 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
 
   // Load balance these levels.
   for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl = a_grids[lvl]; // Grids on this level.
+    const DisjointBoxLayout& dbl = a_grids[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
     const Real               dx  = m_amr->getDx()[lvl];
     const Real               dV  = std::pow(dx, SpaceDim);
 
@@ -655,13 +662,18 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
     Vector<long int> loads;
     Vector<int>      ranks;
 
-    loads.resize(boxes.size());
+    loads.resize(boxes.size(), 0L);
     ranks.resize(boxes.size());
 
     // Compute loads in each grid patch.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box            cellBox          = dbl[dit()];
-      const EBCellFAB&     particlesPerCell = (*newParticlesPerCell[lvl])[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box            cellBox          = dbl[din];
+      const EBCellFAB&     particlesPerCell = (*newParticlesPerCell[lvl])[din];
       const EBISBox&       ebisBox          = particlesPerCell.getEBISBox();
       const BaseFab<Real>& ppcFAB           = particlesPerCell.getSingleValuedFAB();
 
@@ -682,7 +694,7 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
 
       BoxLoops::loop(cellBox, kernel);
 
-      loads[dit().intCode()] = lround(sum);
+      loads[din.intCode()] = lround(sum);
     }
 
     // If running with MPI, loads must be gathered on all ranks.
@@ -741,6 +753,7 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
   // Load balance these levels.
   for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = a_grids[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
     Vector<Box>      boxes;
     Vector<long int> loads;
@@ -749,14 +762,19 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
     // Boxes -- note that these are currently lexicographically ordered.
     boxes = dbl.boxArray();
 
-    loads.resize(boxes.size());
+    loads.resize(boxes.size(), 0L);
     ranks.resize(boxes.size());
 
     // Count the number of particles in each grid patch.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const List<ItoParticle>& patchParticles = particles[lvl][dit()].listItems();
+    const int nbox = dit.size();
 
-      loads[dit().intCode()] = long(patchParticles.length());
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const List<ItoParticle>& patchParticles = particles[lvl][din].listItems();
+
+      loads[din.intCode()] = long(patchParticles.length());
     }
 
     // If running with MPI, loads must be gathered on all ranks.
@@ -786,15 +804,22 @@ BrownianWalkerStepper::getCheckpointLoads(const std::string a_realm, const int a
   Vector<long int> loads;
 
   const DisjointBoxLayout& dbl      = m_amr->getGrids(a_realm)[a_level];
+  const DataIterator&      dit      = dbl.dataIterator();
   const Vector<Box>        boxArray = dbl.boxArray();
 
   loads.resize(boxArray.size(), 0L);
 
   const ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const List<ItoParticle>& patchParticles = particles[a_level][dit()].listItems();
 
-    loads[dit().intCode()] = patchParticles.length();
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const List<ItoParticle>& patchParticles = particles[a_level][din].listItems();
+
+    loads[din.intCode()] = patchParticles.length();
   }
 
   // If running with MPI, loads must be gathered on all ranks.

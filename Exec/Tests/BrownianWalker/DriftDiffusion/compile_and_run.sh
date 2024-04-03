@@ -10,7 +10,7 @@ export OMP_SCHEDULE="dynamic"
 COMPILE=true
 RUN=true
 PROFILE=true
-INPUT="regression2d.inputs Driver.max_steps=0"
+INPUT="regression2d.inputs Driver.max_steps=10"
 # Driver.initial_regrids=1 Driver.write_memory=true Driver.write_loads=true FieldStepper.load_balance=true"
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
@@ -60,6 +60,10 @@ then
 		       'ItoSolver::computeAdvectiveDt(int)' \
 		       'ItoSolver::computeDiffusiveDt(int)' \
 		       'ItoSolver::makeSuperparticles(WhichContainer, int, int)' \
+		       'BrownianWalkerStepper::advance' \
+		       'BrownianWalkerStepper::loadBalanceBoxesMesh' \
+		       'BrownianWalkerStepper::loadBalanceBoxesParticles' \
+		       'BrownianWalkerStepper::getCheckpointLoads(string, int)' \
 		   ; do
 
 	if grep -q "${PATTERN}" time.table.serial
