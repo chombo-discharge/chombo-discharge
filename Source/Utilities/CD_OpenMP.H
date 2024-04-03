@@ -14,18 +14,37 @@
 
 // Chombo includes
 #include <IntVectSet.H>
+#include <List.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-// Thread-safe reduction operator for taking the union of IntVectSet
 #ifdef _OPENMP
+
+// Thread-safe reduction operator for taking the union of IntVectSet
 inline void
-ThreadSafeIVSUnion(IntVectSet& ivsInOut, const IntVectSet& ivsIn)
+ThreadSafeIVSUnion(IntVectSet& ivsInOut, const IntVectSet& ivsIn) noexcept
 {
   ivsInOut |= ivsIn;
 }
 #pragma omp declare reduction(+ : IntVectSet : ThreadSafeIVSUnion(omp_out, omp_in))
+
+// Thread-safe catenation for a particle list.
+template <typename P>
+inline void
+ThreadSafeCatenation(List<P>& particlesOut, List<P>& particlesIn) noexcept
+{
+  particlesOut.catenate(particlesIn);
+}
+
+// Thread-safe join for a particle list.
+template <typename P>
+inline void
+ThreadSafeJoin(List<P>& particlesOut, List<P>& particlesIn) noexcept
+{
+  particlesOut.join(particlesIn);
+}
+
 #endif
 
 #include <CD_NamespaceFooter.H>

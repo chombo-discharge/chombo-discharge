@@ -55,6 +55,21 @@ then
 		       'ParticleOps::setData(ParticleContainer<P>, std::function<void(P&)>)' \
 		       'ParticleOps::setValue(ParticleContainer<P>, Real' \
 		       'ParticleOps::setValue(ParticleContainer<P>, RealVect' \
+		       'ParticleContainer<P>::sortParticles()' \
+		       'ParticleContainer<P>::organizeParticlesByPatch' \
+		       'ParticleContainer<P>::organizeParticlesByPatch' \
+		       'ParticleContainer<P>::addParticles(ParticleContainer)' \
+		       'ParticleContainer<P>::addParticlesDestructive(ParticleContainer)' \
+		       'ParticleContainer<P>::transferParticles(AMRParticles)' \
+		       'ParticleContainer::evictInvalidParticles' \
+		       'ParticleContainer<P>::remap' \
+		       'ParticleContainer<P>::preRegrid' \
+		       'ParticleContainer<P>::setValue' \
+		       'ParticleContainer<P>::getNumberOfValidParticlesLocal' \
+		       'ParticleContainer<P>::getNumberOfOutcastParticlesLocal' \
+		       'ParticleContainer<P>::getNumberOfMaskParticlesLocal' \
+		       'ParticleContainer<P>::copyMaskParticles(level)' \
+		       'ParticleContainer<P>::transferMaskParticles(level)' \
 		   ; do
 
 	if grep -q "${PATTERN}" time.table.serial
