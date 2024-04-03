@@ -14,6 +14,7 @@
 
 // Std includes
 #include <chrono>
+#include <omp.h>
 
 // Chombo includes
 #include <SPMD.H>
@@ -51,12 +52,32 @@ inline void
 Random::setSeed(const int a_seed)
 {
 #ifdef CH_MPI
-  const int seed = a_seed + procID();
+#ifdef _OPENMP
+#pragma omp parallel
+  {
+    const int seed = a_seed + procID() * omp_get_num_threads() + omp_get_thread_num();
+
+    s_rng = std::mt19937_64(seed);
+  }
 #else
-  const int seed = a_seed;
-#endif
+  const int seed = a_seed + procID();
 
   s_rng = std::mt19937_64(seed);
+#endif
+#else
+#ifdef _OPENMP
+#pragma omp parallel
+  {
+    const int seed = a_seed + omp_get_thread_num();
+
+    s_rng = std::mt19937_64(seed);
+  }
+#else
+  const int seed = a_seed;
+
+  s_rng = std::mt19937_64(seed);
+#endif
+#endif
 
   s_seeded = true;
 }
@@ -64,21 +85,14 @@ Random::setSeed(const int a_seed)
 inline void
 Random::setRandomSeed()
 {
-
   int seed = std::chrono::system_clock::now().time_since_epoch().count();
 
   // Special hook for MPI -- master rank broadcasts the seed and everyone increments by their processor ID.
 #ifdef CH_MPI
   MPI_Bcast(&seed, 1, MPI_INT, 0, Chombo_MPI::comm);
-
-  seed += procID();
 #endif
 
-  // Init the RNG
-  s_rng = std::mt19937_64(seed);
-
-  // Duh.
-  s_seeded = true;
+  Random::setSeed(seed);
 }
 
 template <typename T, typename>
@@ -172,9 +186,9 @@ Random::getDirection()
 
   return RealVect(x1, x2) / sqrt(r);
 #elif CH_SPACEDIM == 3
-  Real      x1   = 2.0;
-  Real      x2   = 2.0;
-  Real      r    = x1 * x1 + x2 * x2;
+  Real x1 = 2.0;
+  Real x2 = 2.0;
+  Real r  = x1 * x1 + x2 * x2;
   while (r >= 1.0 || r < safety) {
     x1 = Random::getUniformReal11();
     x2 = Random::getUniformReal11();
