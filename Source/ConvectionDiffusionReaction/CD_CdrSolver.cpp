@@ -555,6 +555,7 @@ CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
   const DataIterator&      dit = dbl.dataIterator();
 
   const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
@@ -621,6 +622,7 @@ CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EB
   const DataIterator&      dit       = dbl.dataIterator();
 
   const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
@@ -702,6 +704,7 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
     const DataIterator&      dit    = dbl.dataIterator();
 
     const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
@@ -798,6 +801,7 @@ CdrSolver::resetDomainFlux(EBAMRFluxData& a_flux)
     const DataIterator&      dit    = dbl.dataIterator();
 
     const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
@@ -874,6 +878,7 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
   const DataIterator&      dit    = dbl.dataIterator();
 
   const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
@@ -1031,6 +1036,7 @@ CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&             a_divG,
   const DataIterator&      dit   = dbl.dataIterator();
 
   const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
@@ -1158,6 +1164,7 @@ CdrSolver::defineInterpolationStencils()
         new LayoutData<BaseIFFAB<FaceStencil>>(dbl));
 
       const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
@@ -1271,6 +1278,7 @@ CdrSolver::initialDataParticles()
 
       // 2. Deposit this levels particles. We use an NGP scheme to do this.
       const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
@@ -1337,6 +1345,7 @@ CdrSolver::hybridDivergence(LevelData<EBCellFAB>&             a_hybridDivergence
   const DataIterator&      dit   = dbl.dataIterator();
 
   const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
@@ -1398,6 +1407,7 @@ CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const in
   const DataIterator&      dit   = dbl.dataIterator();
 
   const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
@@ -1997,6 +2007,7 @@ CdrSolver::computeAdvectionDt()
       const DataIterator&      dit   = dbl.dataIterator();
 
       const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime) reduction(min : minDt)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
@@ -2070,6 +2081,7 @@ CdrSolver::computeDiffusionDt()
       const DataIterator&      dit   = dbl.dataIterator();
 
       const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime) reduction(min : minDt)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
@@ -2169,6 +2181,7 @@ CdrSolver::computeAdvectionDiffusionDt()
       const DataIterator&      dit   = dbl.dataIterator();
 
       const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime) reduction(min : minDt)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
@@ -2263,6 +2276,7 @@ CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance)
       const DataIterator&      dit = dbl.dataIterator();
 
       const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime) reduction(min : minDt)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
@@ -2338,6 +2352,7 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
       const DataIterator&      dit   = dbl.dataIterator();
 
       const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
@@ -2506,6 +2521,7 @@ CdrSolver::computeMass(const EBAMRCellData& a_phi, const bool a_kappaScale)
     const DataIterator& dit = dbl.dataIterator();
 
     const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime) reduction(+ : mass)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
@@ -2741,6 +2757,7 @@ CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
       const DataIterator&      dit   = dbl.dataIterator();
 
       const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
@@ -3002,6 +3019,7 @@ CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a
     const DataIterator&      dit   = dbl.dataIterator();
 
     const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
@@ -3133,6 +3151,7 @@ CdrSolver::fillGwn(EBAMRFluxData& a_noise, const Real a_sigma)
     const DataIterator&      dit   = dbl.dataIterator();
 
     const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];

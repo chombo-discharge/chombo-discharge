@@ -995,8 +995,10 @@ ItoSolver::writeCheckPointLevelParticles(HDF5Handle& a_handle, const int a_level
 
     // Make the ItoParticle into a SimpleItoParticle for checkpointing purposes -- we only need weight, position, and energy.
     simpleParticles.clear();
+
     for (ListIterator<ItoParticle> lit(myParticles[a_level][din].listItems()); lit.ok(); ++lit) {
       const ItoParticle& p = lit();
+
       simpleParticles.append(SimpleItoParticle(p.weight(), p.position(), p.energy()));
     }
   }
@@ -2475,7 +2477,7 @@ ItoSolver::computeDt(const int a_lvl) const
 
   const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(min : dt)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
@@ -2610,7 +2612,7 @@ ItoSolver::computeHopDt(const Real a_maxCellsToMove, const int a_lvl) const
 
   const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(min : dt)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
@@ -2764,7 +2766,7 @@ ItoSolver::computeAdvectiveDt(const int a_lvl) const
 
   const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(min : dt)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
@@ -2851,7 +2853,7 @@ ItoSolver::computeDiffusiveDt(const int a_lvl) const
 
   const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(min : dt)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 

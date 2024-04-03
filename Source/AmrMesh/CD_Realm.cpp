@@ -16,6 +16,7 @@
 // Our includes
 #include <CD_Realm.H>
 #include <CD_BoxLoops.H>
+#include <CD_OpenMP.H>
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
@@ -311,7 +312,7 @@ Realm::defineHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
     const int           nboxCoFi = ditCoFi.size();
 
     // Go through the cofi grid and set the halo to true
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(+ : halo)
     for (int mybox = 0; mybox < nboxCoFi; mybox++) {
       const DataIndex& din = ditCoFi[mybox];
 

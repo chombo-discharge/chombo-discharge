@@ -302,7 +302,7 @@ SurfaceODESolver<N>::computeMass(const EBAMRIVData& a_data, const int a_comp) co
 
     const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(+ : dataSum)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 

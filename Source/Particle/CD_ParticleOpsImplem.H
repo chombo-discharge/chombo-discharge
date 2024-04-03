@@ -325,7 +325,7 @@ ParticleOps::sum(const ParticleContainer<P>& a_particles) noexcept
 
     const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(+ : particleSum)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
@@ -354,7 +354,7 @@ ParticleOps::sum(const ParticleContainer<P>& a_particles) noexcept
 
     const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(+ : particleSum)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 

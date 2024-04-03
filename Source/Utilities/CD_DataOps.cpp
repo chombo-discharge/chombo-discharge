@@ -1667,7 +1667,7 @@ DataOps::getMaxMin(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data, const
 
   const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(max : a_max) reduction(min : a_min)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
@@ -1812,7 +1812,7 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data)
   const int numComp  = a_data.nComp();
   const int nbox     = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(min : a_min) reduction(max : a_max)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
@@ -1901,7 +1901,7 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real>>& a_d
   const int numComp = a_data.nComp();
   const int nbox    = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(min : a_min) reduction(max : a_max)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
@@ -2010,7 +2010,7 @@ DataOps::kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs, const int a_c
 
   const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(+ : a_mass)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
@@ -2324,7 +2324,7 @@ DataOps::norm(const LevelData<EBCellFAB>& a_data, const int a_p, const int a_com
 
   const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(+ : L)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 

@@ -93,6 +93,7 @@ CdrGodunov::computeAdvectionDt()
       const DataIterator&      dit   = dbl.dataIterator();
 
       const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime) reduction(min : minDt)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din     = dit[mybox];
@@ -256,6 +257,7 @@ CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellP
     const DataIterator&      dit = dbl.dataIterator();
 
     const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];

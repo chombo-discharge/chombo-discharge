@@ -20,7 +20,7 @@
 
 // Thread-safe reduction operator for taking the union of IntVectSet
 #ifdef _OPENMP
-void
+inline void
 ThreadSafeIVSUnion(IntVectSet& ivsInOut, const IntVectSet& ivsIn)
 {
   ivsInOut |= ivsIn;
