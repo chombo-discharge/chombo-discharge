@@ -503,8 +503,11 @@ Driver::gridReport()
     totalValidCells += validLevelCells[lvl];
   }
 
-  int numThreads = 1;
+  int numThreads = 0;
 #pragma omp parallel reduction(+ : numThreads)
+  {
+    numThreads += 1;
+  }
 
   // Begin writing a report.
   pout() << "=======================================================================" << endl
