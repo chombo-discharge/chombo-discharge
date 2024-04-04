@@ -200,8 +200,8 @@ DiskProfiledPlane::defineDielectric() noexcept
     profile2 = SmoothDifference<Real>(profile, profile2, boxCurvature);
 
     std::shared_ptr<ImpFunc> profile3 = std::make_shared<BoxSDF<Real>>(-0.5 * squareDim, 0.5 * squareDim);
-    profile3                          = Rotate<Real>(profile3, 30.0, 2);
-    profile3                          = Translate<Real>(profile3, 0.7 * Vec3(squareDim[0], squareDim[1], 0.0));
+    profile3                          = Rotate<Real>(profile3, 79.38, 2);
+    profile3                          = Translate<Real>(profile3, Vec3(0.1*squareDim[0], 0.88*squareDim[1], 0.0));
 
     profile2 = SmoothDifference<Real>(profile2, profile3, boxCurvature);
   }
