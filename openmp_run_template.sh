@@ -13,6 +13,7 @@
 #
 # Physics/AdvectionDiffusion -> Exec/Examples/AdvectionDiffusion/PipeFlow
 # Physics/BrownianWalker -> Exec/Tests/BrownianWalker/DriftDiffusion
+# Physics/CdrPlasma -> Exec/Examples/CdrPlasma/StochasticAir
 # Physics/ItoKMC -> Exec/Examples/ItoKMC/AirDBD => How to advance KMC in a thread-safe way????
 # Physics/StreamerInception -> Exec/Examples/StreamerInception/PartialDis
 # Physics/TracerParticle -> Exec/Tests/TracerParticle/CoaxialCable

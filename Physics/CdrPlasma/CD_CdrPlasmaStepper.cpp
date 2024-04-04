@@ -11,7 +11,6 @@
 
 // Chombo includes
 #include <ParmParse.H>
-#include <EBLevelDataOps.H>
 #include <EBArith.H>
 #include <PolyGeom.H>
 
@@ -655,11 +654,17 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
 
   // Grids and EBIS information for this grid level.
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const DataIterator&      dit = dbl.dataIterator();
   const Real               dx  = m_amr->getDx()[a_lvl];
 
   // Grid loop
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box cellBox = dbl[dit()];
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box cellBox = dbl[din];
 
     // Things that are passed into the kernels. The stuff with EBCellFAB* signatures is for the irregular kernel. The vectors with FArrayBox* signatures
     // are for the regular kernels.
@@ -683,9 +688,9 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
 
       const int idx = solverIt.index();
 
-      cdrSources[idx]   = &(*a_cdrSources[idx])[dit()];
-      cdrDensities[idx] = &(*a_cdrDensities[idx])[dit()];
-      cdrGradients[idx] = &(*a_cdrGradients[idx])[dit()];
+      cdrSources[idx]   = &(*a_cdrSources[idx])[din];
+      cdrDensities[idx] = &(*a_cdrDensities[idx])[din];
+      cdrGradients[idx] = &(*a_cdrGradients[idx])[din];
 
       cdrSourcesFAB[idx]   = &(cdrSources[idx]->getFArrayBox());
       cdrDensitiesFAB[idx] = &(cdrDensities[idx]->getFArrayBox());
@@ -695,7 +700,7 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
       if (solver->isMobile()) {
         const EBAMRCellData& velo = solver->getCellCenteredVelocity();
 
-        cdrVelocities[idx] = &((*velo[a_lvl])[dit()]);
+        cdrVelocities[idx] = &((*velo[a_lvl])[din]);
 
         cdrVelocitiesFAB[idx] = &(cdrVelocities[idx]->getFArrayBox());
       }
@@ -705,8 +710,8 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
     for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
 
-      rteSources[idx]   = &(*a_rteSources[idx])[dit()];
-      rteDensities[idx] = &(*a_rteDensities[idx])[dit()];
+      rteSources[idx]   = &(*a_rteSources[idx])[din];
+      rteDensities[idx] = &(*a_rteDensities[idx])[din];
 
       rteSourcesFAB[idx]   = &(rteSources[idx]->getFArrayBox());
       rteDensitiesFAB[idx] = &(rteDensities[idx]->getFArrayBox());
@@ -718,7 +723,7 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
                                              cdrDensitiesFAB,
                                              cdrGradientsFAB,
                                              rteDensitiesFAB,
-                                             a_E[dit()].getFArrayBox(),
+                                             a_E[din].getFArrayBox(),
                                              a_time,
                                              a_dt,
                                              dx,
@@ -731,14 +736,14 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
                                       cdrGradients,
                                       cdrVelocities,
                                       rteDensities,
-                                      interpStencils[a_lvl][dit()],
-                                      a_E[dit()],
+                                      interpStencils[a_lvl][din],
+                                      a_E[din],
                                       a_time,
                                       a_dt,
                                       dx,
                                       cellBox,
                                       a_lvl,
-                                      dit());
+                                      din);
 
     // Covered cells are bogus.
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -1570,14 +1575,19 @@ CdrPlasmaStepper::computeCdrDiffusionCell(Vector<LevelData<EBCellFAB>*>&       a
 
   // Grids on this level.
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const DataIterator&      dit = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
     // Computational region for the kernels.
-    const Box cellBox = dbl[dit()];
+    const Box cellBox = dbl[din];
 
     // Handle to the electric field.
-    const EBCellFAB& electricField    = a_electricFieldCell[dit()];
+    const EBCellFAB& electricField    = a_electricFieldCell[din];
     const FArrayBox& electricFieldFAB = electricField.getFArrayBox();
 
     // Get handle to the cell-centered diffusion coefficients and densities for the current patch.
@@ -1590,8 +1600,8 @@ CdrPlasmaStepper::computeCdrDiffusionCell(Vector<LevelData<EBCellFAB>*>&       a
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
 
-      cdrDcoCell[idx]   = &(*a_cdrDcoCell[idx])[dit()];
-      cdrDensities[idx] = &(*a_cdrDensities[idx])[dit()];
+      cdrDcoCell[idx]   = &(*a_cdrDcoCell[idx])[din];
+      cdrDensities[idx] = &(*a_cdrDensities[idx])[din];
 
       cdrDcoCellFAB[idx]   = &(cdrDcoCell[idx]->getFArrayBox());
       cdrDensitiesFAB[idx] = &(cdrDensities[idx]->getFArrayBox());
@@ -1612,7 +1622,7 @@ CdrPlasmaStepper::computeCdrDiffusionCell(Vector<LevelData<EBCellFAB>*>&       a
                                            m_amr->getDx()[a_lvl],
                                            a_time,
                                            a_lvl,
-                                           dit());
+                                           din);
 
     // Covered data is bogus.
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -1950,15 +1960,22 @@ CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real>>*>&    
 
   // Grids on this level.
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_lvl];
+  const DataIterator&      dit   = dbl.dataIterator();
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
   const Real               dx    = m_amr->getDx()[a_lvl];
 
   // Grid patch loop.
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const EBISBox& ebisbox = ebisl[dit()];
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const EBISBox& ebisbox = ebisl[din];
 
     // Electric field in this grid patch.
-    const BaseIVFAB<Real>& electricFieldPatchEB = a_electricFieldEB[dit()];
+    const BaseIVFAB<Real>& electricFieldPatchEB = a_electricFieldEB[din];
 
     // Irregular kernel.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -1970,7 +1987,7 @@ CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real>>*>&    
       // Construct the CDR densities on the EB -- it needs to be in a form understandable by CdrPlasmaPhysics
       for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
         const int  idx = solverIt.index();
-        const Real phi = (*a_cdrDensitiesEB[idx])[dit()](vof, comp);
+        const Real phi = (*a_cdrDensitiesEB[idx])[din](vof, comp);
 
         cdrDensitiesEB[idx] = std::max(zero, phi);
       }
@@ -1985,13 +2002,13 @@ CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real>>*>&    
 
         // The check here is important because some of the input data will be nullptr if the species is not diffusive.
         if (solverIt()->isDiffusive()) {
-          (*a_cdrDcoEB[idx])[dit()](vof, comp) = Dcos[idx];
+          (*a_cdrDcoEB[idx])[din](vof, comp) = Dcos[idx];
         }
       }
     };
 
     // Kernel region.
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[din];
 
     // Launch the kernel.
     BoxLoops::loop(vofit, irregularKernel);
@@ -2087,13 +2104,18 @@ CdrPlasmaStepper::computeCdrDriftVelocities(Vector<LevelData<EBCellFAB>*>&      
 
   // Grid level and resolution
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const DataIterator&      dit = dbl.dataIterator();
   const Real               dx  = m_amr->getDx()[a_lvl];
 
   // Grid loop
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
     // Computational region.
-    const Box cellBox = dbl[dit()];
+    const Box cellBox = dbl[din];
 
     // Data holding velocities and densities on each grid patch.
     Vector<EBCellFAB*> cdrVelocities(numCdrSpecies, nullptr);
@@ -2103,7 +2125,7 @@ CdrPlasmaStepper::computeCdrDriftVelocities(Vector<LevelData<EBCellFAB>*>&      
     Vector<FArrayBox*> cdrDensitiesFAB(numCdrSpecies, nullptr);
 
     // Data holding the electric field.
-    const EBCellFAB& electricField    = a_electricField[dit()];
+    const EBCellFAB& electricField    = a_electricField[din];
     const FArrayBox& electricFieldFAB = electricField.getFArrayBox();
 
     // Populate the patch data.
@@ -2113,12 +2135,12 @@ CdrPlasmaStepper::computeCdrDriftVelocities(Vector<LevelData<EBCellFAB>*>&      
       // If the species is mobile we fetch the data holding it's cell centered velocity. If it's not, the data holder
       // will be nullptr (because the solver did not allocate the data).
       if (solverIt()->isMobile()) {
-        cdrVelocities[idx]    = &(*a_cdrVelocities[idx])[dit()];
+        cdrVelocities[idx]    = &(*a_cdrVelocities[idx])[din];
         cdrVelocitiesFAB[idx] = &(cdrVelocities[idx]->getFArrayBox());
       }
 
       // Densities -- this is always allocated.
-      cdrDensities[idx]    = &(*a_cdrDensities[idx])[dit()];
+      cdrDensities[idx]    = &(*a_cdrDensities[idx])[din];
       cdrDensitiesFAB[idx] = &(cdrDensities[idx]->getFArrayBox());
     }
 
@@ -2126,7 +2148,7 @@ CdrPlasmaStepper::computeCdrDriftVelocities(Vector<LevelData<EBCellFAB>*>&      
     this->computeCdrDriftVelocitiesRegular(cdrVelocitiesFAB, cdrDensitiesFAB, electricFieldFAB, cellBox, a_time, dx);
 
     // Do the irregular and multi-valued cells.
-    this->computeCdrDriftVelocitiesIrregular(cdrVelocities, cdrDensities, electricField, a_time, dx, a_lvl, dit());
+    this->computeCdrDriftVelocitiesIrregular(cdrVelocities, cdrDensities, electricField, a_time, dx, a_lvl, din);
 
     // Velocities in covered cells are always bogus.
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -2425,23 +2447,29 @@ CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real>>*>&       a_
 
   // Grids and EB information on this level.
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_lvl];
+  const DataIterator&      dit   = dbl.dataIterator();
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
   const Real               dx    = m_amr->getDx()[a_lvl];
   const MFLevelGrid&       mflg  = *(m_amr->getMFLevelGrid(m_realm)[a_lvl]);
 
   // Patch loop
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box&     cellBox = dbl[dit()];
-    const EBISBox& ebisBox = ebisl[dit()];
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box&     cellBox = dbl[din];
+    const EBISBox& ebisBox = ebisl[din];
     const EBGraph& ebgraph = ebisBox.getEBGraph();
 
     // These are the dielectric and electrode cells in the current grid patch. They form a complete set of
     // cut-cells.
-    const IntVectSet& dielectricCells = mflg.interfaceRegion(cellBox, dit());
+    const IntVectSet& dielectricCells = mflg.interfaceRegion(cellBox, din);
     const IntVectSet& electrodeCells  = ebisBox.getIrregIVS(cellBox) - dielectricCells;
 
     // Electric field in this patch.
-    const BaseIVFAB<Real>& electricField = a_electricField[dit()];
+    const BaseIVFAB<Real>& electricField = a_electricField[din];
 
     // Kernel for generating boundary conditions on an electrode cut-cell. This kernel will call the CdrPlasmaPhysics routine
     // which computes the electrode EB boundary fluxes.
@@ -2455,17 +2483,17 @@ CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real>>*>&       a_
       for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
         const int idx = solverIt.index();
 
-        extrapCdrFluxes[idx]     = (*a_extrapCdrFluxes[idx])[dit()](vof, comp);
-        extrapCdrDensities[idx]  = (*a_extrapCdrDensities[idx])[dit()](vof, comp);
-        extrapCdrVelocities[idx] = (*a_extrapCdrVelocities[idx])[dit()](vof, comp);
-        extrapCdrGradients[idx]  = (*a_extrapCdrGradients[idx])[dit()](vof, comp);
+        extrapCdrFluxes[idx]     = (*a_extrapCdrFluxes[idx])[din](vof, comp);
+        extrapCdrDensities[idx]  = (*a_extrapCdrDensities[idx])[din](vof, comp);
+        extrapCdrVelocities[idx] = (*a_extrapCdrVelocities[idx])[din](vof, comp);
+        extrapCdrGradients[idx]  = (*a_extrapCdrGradients[idx])[din](vof, comp);
       }
 
       // Populate the RTE related quantities.
       for (RtIterator<RtSolver> solverIt(*m_rte); solverIt.ok(); ++solverIt) {
         const int idx = solverIt.index();
 
-        extrapRteFluxes[idx] = (*a_extrapRteFluxes[idx])[dit()](vof, comp);
+        extrapRteFluxes[idx] = (*a_extrapRteFluxes[idx])[din](vof, comp);
       }
 
       // Compute the CDR fluxes using our framework.
@@ -2481,8 +2509,8 @@ CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real>>*>&       a_
 
       // Put the fluxes in their respective place
       for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-        const int idx                           = solverIt.index();
-        (*a_cdrFluxesEB[idx])[dit()](vof, comp) = cdrFluxes[idx];
+        const int idx                         = solverIt.index();
+        (*a_cdrFluxesEB[idx])[din](vof, comp) = cdrFluxes[idx];
       }
     };
 
@@ -2498,17 +2526,17 @@ CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real>>*>&       a_
       for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
         const int idx = solverIt.index();
 
-        extrapCdrFluxes[idx]     = (*a_extrapCdrFluxes[idx])[dit()](vof, comp);
-        extrapCdrDensities[idx]  = (*a_extrapCdrDensities[idx])[dit()](vof, comp);
-        extrapCdrVelocities[idx] = (*a_extrapCdrVelocities[idx])[dit()](vof, comp);
-        extrapCdrGradients[idx]  = (*a_extrapCdrGradients[idx])[dit()](vof, comp);
+        extrapCdrFluxes[idx]     = (*a_extrapCdrFluxes[idx])[din](vof, comp);
+        extrapCdrDensities[idx]  = (*a_extrapCdrDensities[idx])[din](vof, comp);
+        extrapCdrVelocities[idx] = (*a_extrapCdrVelocities[idx])[din](vof, comp);
+        extrapCdrGradients[idx]  = (*a_extrapCdrGradients[idx])[din](vof, comp);
       }
 
       // Populate the RTE related quantities.
       for (RtIterator<RtSolver> solverIt(*m_rte); solverIt.ok(); ++solverIt) {
         const int idx = solverIt.index();
 
-        extrapRteFluxes[idx] = (*a_extrapRteFluxes[idx])[dit()](vof, comp);
+        extrapRteFluxes[idx] = (*a_extrapRteFluxes[idx])[din](vof, comp);
       }
 
       // Compute the CDR fluxes using our framework.
@@ -2524,8 +2552,8 @@ CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real>>*>&       a_
 
       // Put the fluxes in their respective place
       for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-        const int idx                           = solverIt.index();
-        (*a_cdrFluxesEB[idx])[dit()](vof, comp) = cdrFluxes[idx];
+        const int idx                         = solverIt.index();
+        (*a_cdrFluxesEB[idx])[din](vof, comp) = cdrFluxes[idx];
       }
     };
 
@@ -2648,6 +2676,7 @@ CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>    
 
   // Fetch various grid information on this level. I.e, the box distribution, the EB description, resolution, and physical corner.
   const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_lvl];
+  const DataIterator&      dit    = dbl.dataIterator();
   const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
   const Real               dx     = m_amr->getDx()[a_lvl];
   const RealVect           probLo = m_amr->getProbLo();
@@ -2656,8 +2685,13 @@ CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>    
   const FaceStop::WhichFaces stopCrit = FaceStop::AllBoundaryOnly;
 
   // Iterate through patches on this level.
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const EBISBox& ebisBox = ebisl[dit()];
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const EBISBox& ebisBox = ebisl[din];
     const EBGraph& ebgraph = ebisBox.getEBGraph();
 
     // Go through each coordinate direction
@@ -2667,7 +2701,7 @@ CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>    
       for (SideIterator sit; sit.ok(); ++sit) {
 
         // Get the IntVectSet where we have valid domain faces.
-        const IntVectSet& ivs = (*a_cdrFluxes[0])[dit()](dir, sit()).getIVS();
+        const IntVectSet& ivs = (*a_cdrFluxes[0])[din](dir, sit()).getIVS();
 
         // Iterate through those faces.
         for (FaceIterator faceit(ivs, ebgraph, dir, stopCrit); faceit.ok(); ++faceit) {
@@ -2678,25 +2712,25 @@ CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>    
           const RealVect   pos  = probLo + Location::position(Location::Face::Center, face, ebisBox, dx);
 
           // Get the electric field on the current face.
-          const RealVect E = RealVect(D_DECL((a_electricField)[dit()](dir, sit())(face, 0),
-                                             (a_electricField)[dit()](dir, sit())(face, 1),
-                                             (a_electricField)[dit()](dir, sit())(face, 2)));
+          const RealVect E = RealVect(D_DECL((a_electricField)[din](dir, sit())(face, 0),
+                                             (a_electricField)[din](dir, sit())(face, 1),
+                                             (a_electricField)[din](dir, sit())(face, 2)));
 
           // Get the CDR densities on the current face.
           for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
             const int idx = solverIt.index();
 
-            extrapCdrFluxes[idx]     = (*a_extrapCdrFluxes[idx])[dit()](dir, sit())(face, comp);
-            extrapCdrDensities[idx]  = (*a_extrapCdrDensities[idx])[dit()](dir, sit())(face, comp);
-            extrapCdrVelocities[idx] = (*a_extrapCdrVelocities[idx])[dit()](dir, sit())(face, comp);
-            extrapCdrGradients[idx]  = (*a_extrapCdrGradients[idx])[dit()](dir, sit())(face, comp);
+            extrapCdrFluxes[idx]     = (*a_extrapCdrFluxes[idx])[din](dir, sit())(face, comp);
+            extrapCdrDensities[idx]  = (*a_extrapCdrDensities[idx])[din](dir, sit())(face, comp);
+            extrapCdrVelocities[idx] = (*a_extrapCdrVelocities[idx])[din](dir, sit())(face, comp);
+            extrapCdrGradients[idx]  = (*a_extrapCdrGradients[idx])[din](dir, sit())(face, comp);
           }
 
           // Get the RTE fluxes on the current face.
           for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
             const int idx = solverIt.index();
 
-            extrapRteFluxes[idx] = (*a_extrapRteFluxes[idx])[dit()](dir, sit())(face, comp);
+            extrapRteFluxes[idx] = (*a_extrapRteFluxes[idx])[din](dir, sit())(face, comp);
           }
 
           // Call CdrPlasmaPhysics -- it will compute the domain fluxes for us.
@@ -2715,7 +2749,7 @@ CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>    
           for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
             const int idx = solverIt.index();
 
-            (*a_cdrFluxes[idx])[dit()](dir, sit())(face, comp) = fluxes[idx];
+            (*a_cdrFluxes[idx])[din](dir, sit())(face, comp) = fluxes[idx];
           }
         }
       }
@@ -3130,32 +3164,39 @@ CdrPlasmaStepper::computeElectricField(EBAMRFluxData&           a_electricFieldF
 
     // Patch distribution and EB information on this level.
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
     const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, a_phase)[lvl];
     const ProblemDomain&     domain = m_amr->getDomains()[lvl];
 
     // Patch loop
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBCellFAB& electricFieldCell = (*a_electricFieldCell[lvl])[dit()];
-      const EBISBox&   ebisbox           = ebisl[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBCellFAB& electricFieldCell = (*a_electricFieldCell[lvl])[din];
+      const EBISBox&   ebisbox           = ebisl[din];
       const EBGraph&   ebgraph           = ebisbox.getEBGraph();
-      const Box&       cellBox           = dbl.get(dit());
+      const Box&       cellBox           = dbl.get(din);
 
       // Do faces in all directions.
       for (int dir = 0; dir < SpaceDim; dir++) {
-        EBFaceFAB& electricFieldFace = (*a_electricFieldFace[lvl])[dit()][dir];
+        EBFaceFAB& electricFieldFace = (*a_electricFieldFace[lvl])[din][dir];
 
         electricFieldFace.setVal(0.0);
 
         // Average to faces.
-        EBLevelDataOps::averageCellToFace(electricFieldFace,
-                                          electricFieldCell,
-                                          ebgraph,
-                                          cellBox,
-                                          0,
-                                          dir,
-                                          domain,
-                                          dir,
-                                          dir);
+        MayDay::Abort("CdrPlasmaStepper::computeElectricField(face) -- not called?");
+        // EBLevelDataOps::averageCellToFace(electricFieldFace,
+        //                                   electricFieldCell,
+        //                                   ebgraph,
+        //                                   cellBox,
+        //                                   0,
+        //                                   dir,
+        //                                   domain,
+        //                                   dir,
+        //                                   dir);
       }
     }
     //    DataOps::averageCellToFace(*a_electricFieldFace[lvl], *a_electricFieldCell[lvl], m_amr->getDomains()[lvl]);
@@ -3330,15 +3371,21 @@ CdrPlasmaStepper::extrapolateToDomainFaces(LevelData<DomainFluxIFFAB>& a_domainD
 
   // Fetch patch distribution and EB information on this grid.
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_lvl];
+  const DataIterator&      dit   = dbl.dataIterator();
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, a_phase)[a_lvl];
 
   // Stop criterion for face iteration. We will only set data on domain faces.
   const FaceStop::WhichFaces stopCrit = FaceStop::AllBoundaryOnly;
 
   // Grid loop.
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const EBCellFAB&     cellData    = a_cellData[dit()];
-    const EBISBox&       ebisBox     = ebisl[dit()];
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const EBCellFAB&     cellData    = a_cellData[din];
+    const EBISBox&       ebisBox     = ebisl[din];
     const BaseFab<Real>& cellDataReg = cellData.getSingleValuedFAB();
 
     // Go through each coordinate direction and side.
@@ -3346,7 +3393,7 @@ CdrPlasmaStepper::extrapolateToDomainFaces(LevelData<DomainFluxIFFAB>& a_domainD
       for (SideIterator sit; sit.ok(); ++sit) {
 
         // Get a handle to the domain-centered data.
-        BaseIFFAB<Real>& extrap = a_domainData[dit()](dir, sit());
+        BaseIFFAB<Real>& extrap = a_domainData[din](dir, sit());
 
         // This is the region over which the data is defined.
         const IntVectSet& ivs     = extrap.getIVS();
@@ -3516,14 +3563,20 @@ CdrPlasmaStepper::initialSigma()
 
     // Get grid information on this level.
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, phase::gas)[lvl];
     const Real               dx    = m_amr->getDx()[lvl];
 
     // Patch loop.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      BaseIVFAB<Real>& state = (*sigma[lvl])[dit()];
+    const int nbox = dit.size();
 
-      const EBISBox& ebisbox = ebisl[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      BaseIVFAB<Real>& state = (*sigma[lvl])[din];
+
+      const EBISBox& ebisbox = ebisl[din];
 
       // Kernel.
       auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -3583,15 +3636,20 @@ CdrPlasmaStepper::projectFlux(LevelData<BaseIVFAB<Real>>&       a_projectedFlux,
 
   // Get the grid infromation on this level.
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_lvl];
+  const DataIterator&      dit   = dbl.dataIterator();
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
 
   // Iterate through grid patches.
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+  const int nbox = dit.size();
 
-    const EBISBox& ebisbox = ebisl[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    BaseIVFAB<Real>&       projectedFlux = a_projectedFlux[dit()];
-    const BaseIVFAB<Real>& flux          = a_flux[dit()];
+    const EBISBox& ebisbox = ebisl[din];
+
+    BaseIVFAB<Real>&       projectedFlux = a_projectedFlux[din];
+    const BaseIVFAB<Real>& flux          = a_flux[din];
 
     // This is our kernel.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -3603,7 +3661,7 @@ CdrPlasmaStepper::projectFlux(LevelData<BaseIVFAB<Real>>&       a_projectedFlux,
     };
 
     // Kernel region
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[din];
 
     // Launch the kernel
     BoxLoops::loop(vofit, irregularKernel);
@@ -3627,20 +3685,25 @@ CdrPlasmaStepper::projectDomain(EBAMRIFData& a_projectedFlux, const EBAMRIFData&
     CH_assert(a_flux[lvl]->nComp() == SpaceDim);
 
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
     // Stop criterion for our face iteration loop. We only do boundary faces.
     const FaceStop::WhichFaces stopCrit = FaceStop::AllBoundaryOnly;
 
     // Go through grid patches.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
       // Loop through each coordinate direction and low/high side.
       for (int dir = 0; dir < SpaceDim; dir++) {
         for (SideIterator sit; sit.ok(); ++sit) {
 
           // Handle to projected flux and full flux.
-          BaseIFFAB<Real>&       projectedFlux = (*a_projectedFlux[lvl])[dit()](dir, sit());
-          const BaseIFFAB<Real>& flux          = (*a_flux[lvl])[dit()](dir, sit());
+          BaseIFFAB<Real>&       projectedFlux = (*a_projectedFlux[lvl])[din](dir, sit());
+          const BaseIFFAB<Real>& flux          = (*a_flux[lvl])[din](dir, sit());
 
           // Normal vector sign.
           const int sgn = sign(sit());
@@ -3735,12 +3798,18 @@ CdrPlasmaStepper::resetDielectricCells(EBAMRIVData& a_data) const
 
     // Get handle to grid information on this level.
     const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit  = dbl.dataIterator();
     const MFLevelGrid&       mflg = *m_amr->getMFLevelGrid(m_realm)[lvl];
 
     // Grid loop -- go through all patches.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box        box  = dbl.get(dit());
-      BaseIVFAB<Real>& data = (*a_data[lvl])[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box        box  = dbl.get(din);
+      BaseIVFAB<Real>& data = (*a_data[lvl])[din];
 
       // Our kernel.
       auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -3750,7 +3819,7 @@ CdrPlasmaStepper::resetDielectricCells(EBAMRIVData& a_data) const
       };
 
       // Kernel region.
-      const IntVectSet ivs     = data.getIVS() & mflg.interfaceRegion(box, dit());
+      const IntVectSet ivs     = data.getIVS() & mflg.interfaceRegion(box, din);
       const EBGraph&   ebgraph = data.getEBGraph();
       VoFIterator      vofit(ivs, ebgraph);
 
@@ -4140,16 +4209,22 @@ CdrPlasmaStepper::computeElectrodeCurrent()
 
   // Handles to grid information on the coarsest level.
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[integrationLevel];
+  const DataIterator&      dit   = dbl.dataIterator();
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[integrationLevel];
 
   // Local value of the current -- need to sum this over all ranks later.
   Real current = 0.0;
 
   // Iterate over grid patches.
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box&             cellBox      = dbl[dit()];
-    const EBISBox&         ebisBox      = ebisl[dit()];
-    const BaseIVFAB<Real>& patchCurrent = (*currentDensity[integrationLevel])[dit()];
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(+ : current)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box&             cellBox      = dbl[din];
+    const EBISBox&         ebisBox      = ebisl[din];
+    const BaseIVFAB<Real>& patchCurrent = (*currentDensity[integrationLevel])[din];
 
     // Grid kernel.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -4222,31 +4297,36 @@ CdrPlasmaStepper::computeDielectricCurrent()
 
   // Handles to grid information on the coarsest level.
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[integrationLevel];
+  const DataIterator&      dit   = dbl.dataIterator();
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[integrationLevel];
 
   // Local value of the current -- need to sum this over all ranks later.
   Real current = 0.0;
 
   // Iterate over grid patches.
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box&             cellBox      = dbl[dit()];
-    const EBISBox&         ebisBox      = ebisl[dit()];
-    const BaseIVFAB<Real>& patchCurrent = (*currentDensity[integrationLevel])[dit()];
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(+ : current)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box&             cellBox      = dbl[din];
+    const EBISBox&         ebisBox      = ebisl[din];
+    const BaseIVFAB<Real>& patchCurrent = (*currentDensity[integrationLevel])[din];
 
     // Grid kernel.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const Real& bndryFrac = ebisBox.bndryArea(vof);
-      const Real& flux      = patchCurrent(
-        vof,
-        comp); // Recall -- this holds the normal component of the current density on the EB surface.
+
+      // Recall -- this holds the normal component of the current density on the EB surface.
+      const Real& flux = patchCurrent(vof, comp);
 
       current += flux * bndryFrac;
     };
 
-    // Kernel region.
-    const IntVectSet ivs = patchCurrent.getIVS() &
-                           cellBox; // Integration restricted to cellBox because I don't want to include ghost cells.
-    VoFIterator vofit(ivs, patchCurrent.getEBGraph());
+    // Kernel region - restricted to cell box because I don't want to include ghost cells.
+    const IntVectSet ivs = patchCurrent.getIVS() & cellBox;
+    VoFIterator      vofit(ivs, patchCurrent.getEBGraph());
 
     // Launch kernel.
     BoxLoops::loop(vofit, irregularKernel);
@@ -4299,11 +4379,17 @@ CdrPlasmaStepper::computeDomainCurrent()
   Real      current          = 0.0;
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[integrationLevel];
+  const DataIterator&      dit = dbl.dataIterator();
 
   // Iterate through patches on the integration level.
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box              cellBox = dbl[dit()];
-    const DomainFluxIFFAB& flux    = (*currentDensity[integrationLevel])[dit()];
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(+ : current)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box              cellBox = dbl[din];
+    const DomainFluxIFFAB& flux    = (*currentDensity[integrationLevel])[din];
 
     for (int dir = 0; dir < SpaceDim; dir++) {
       for (SideIterator sit; sit.ok(); ++sit) {
@@ -4775,40 +4861,46 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
     // Level loop.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, phase::gas)[lvl];
       const Real               dx    = m_amr->getDx()[lvl];
 
       // Patch loop.
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box&     cellBox = dbl[dit()]; // <--- regular region.
-        const EBISBox& ebisBox = ebisl[dit()];
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box&     cellBox = dbl[din]; // <--- regular region.
+        const EBISBox& ebisBox = ebisl[din];
 
         // Irregular region.
-        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
         // Output data holder.
-        EBCellFAB&     output      = (*a_plotVars[lvl])[dit()];
-        BaseFab<Real>& regularData = (*a_plotVars[lvl])[dit()].getSingleValuedFAB();
+        EBCellFAB&     output      = (*a_plotVars[lvl])[din];
+        BaseFab<Real>& regularData = (*a_plotVars[lvl])[din].getSingleValuedFAB();
 
         // Regular kernel.
         auto regularKernel = [&](const IntVect& iv) -> void {
           const RealVect position = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-          const RealVect localE   = RealVect(D_DECL((*E[lvl])[dit()].getSingleValuedFAB()(iv, 0),
-                                                  (*E[lvl])[dit()].getSingleValuedFAB()(iv, 1),
-                                                  (*E[lvl])[dit()].getSingleValuedFAB()(iv, 2)));
+          const RealVect localE   = RealVect(D_DECL((*E[lvl])[din].getSingleValuedFAB()(iv, 0),
+                                                  (*E[lvl])[din].getSingleValuedFAB()(iv, 1),
+                                                  (*E[lvl])[din].getSingleValuedFAB()(iv, 2)));
 
           for (int i = 0; i < cdrDensities.size(); i++) {
-            localCdrDensities[i] = (*(*cdrDensities[i])[lvl])[dit()].getSingleValuedFAB()(iv, 0);
+            localCdrDensities[i] = (*(*cdrDensities[i])[lvl])[din].getSingleValuedFAB()(iv, 0);
           }
 
           for (int i = 0; i < numCdrSpecies; i++) {
-            localCdrGradients[i] = RealVect(D_DECL((*(*cdrGradients[i])[lvl])[dit()].getSingleValuedFAB()(iv, 0),
-                                                   (*(*cdrGradients[i])[lvl])[dit()].getSingleValuedFAB()(iv, 1),
-                                                   (*(*cdrGradients[i])[lvl])[dit()].getSingleValuedFAB()(iv, 2)));
+            localCdrGradients[i] = RealVect(D_DECL((*(*cdrGradients[i])[lvl])[din].getSingleValuedFAB()(iv, 0),
+                                                   (*(*cdrGradients[i])[lvl])[din].getSingleValuedFAB()(iv, 1),
+                                                   (*(*cdrGradients[i])[lvl])[din].getSingleValuedFAB()(iv, 2)));
           }
 
           for (int i = 0; i < rteDensities.size(); i++) {
-            localRteDensities[i] = (*(*rteDensities[i])[lvl])[dit()].getSingleValuedFAB()(iv, 0);
+            localRteDensities[i] = (*(*rteDensities[i])[lvl])[din].getSingleValuedFAB()(iv, 0);
           }
 
           // Get plot variables from plasma physics.
@@ -4830,20 +4922,20 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           const RealVect position = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisBox, dx);
           const RealVect localE   = RealVect(
-            D_DECL((*E[lvl])[dit()](vof, 0), (*E[lvl])[dit()](vof, 1), (*E[lvl])[dit()](vof, 2)));
+            D_DECL((*E[lvl])[din](vof, 0), (*E[lvl])[din](vof, 1), (*E[lvl])[din](vof, 2)));
 
           for (int i = 0; i < cdrDensities.size(); i++) {
-            localCdrDensities[i] = (*(*cdrDensities[i])[lvl])[dit()](vof, 0);
+            localCdrDensities[i] = (*(*cdrDensities[i])[lvl])[din](vof, 0);
           }
 
           for (int i = 0; i < numCdrSpecies; i++) {
-            localCdrGradients[i] = RealVect(D_DECL((*(*cdrGradients[i])[lvl])[dit()](vof, 0),
-                                                   (*(*cdrGradients[i])[lvl])[dit()](vof, 1),
-                                                   (*(*cdrGradients[i])[lvl])[dit()](vof, 2)));
+            localCdrGradients[i] = RealVect(D_DECL((*(*cdrGradients[i])[lvl])[din](vof, 0),
+                                                   (*(*cdrGradients[i])[lvl])[din](vof, 1),
+                                                   (*(*cdrGradients[i])[lvl])[din](vof, 2)));
           }
 
           for (int i = 0; i < rteDensities.size(); i++) {
-            localRteDensities[i] = (*(*rteDensities[i])[lvl])[dit()](vof, 0);
+            localRteDensities[i] = (*(*rteDensities[i])[lvl])[din](vof, 0);
           }
 
           // Get plot variables from plasma physics.
