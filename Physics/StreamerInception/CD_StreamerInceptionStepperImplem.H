@@ -24,6 +24,7 @@
 
 // Our includes
 #include <CD_Units.H>
+#include <CD_OpenMP.H>
 #include <CD_StreamerInceptionSpecies.H>
 #include <CD_StreamerInceptionStepper.H>
 #include <CD_NamespaceHeader.H>
@@ -2144,6 +2145,7 @@ StreamerInceptionStepper<P, F, C>::seedUniformParticles() noexcept
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
     const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
@@ -2152,11 +2154,16 @@ StreamerInceptionStepper<P, F, C>::seedUniformParticles() noexcept
 
     ParticleData<P>& levelParticles = amrParticles[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox&       ebisbox    = ebisl[dit()];
-      const BaseFab<bool>& validCells = validCellsLD[dit()];
+    const int nbox = dit.size();
 
-      List<P>& particles = levelParticles[dit()].listItems();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBISBox&       ebisbox    = ebisl[din];
+      const BaseFab<bool>& validCells = validCellsLD[din];
+
+      List<P>& particles = levelParticles[din].listItems();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
@@ -2177,8 +2184,8 @@ StreamerInceptionStepper<P, F, C>::seedUniformParticles() noexcept
       };
 
       // Execute kernels over appropriate regions.
-      const Box    cellBox = dbl[dit()];
-      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      const Box    cellBox = dbl[din];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
@@ -2220,6 +2227,7 @@ StreamerInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage)
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
     const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
@@ -2229,13 +2237,18 @@ StreamerInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage)
 
     ParticleData<P>& levelParticles = amrParticles[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox&       ebisbox    = ebisl[dit()];
-      const BaseFab<bool>& validCells = validCellsLD[dit()];
+    const int nbox = dit.size();
 
-      List<P>& particles = levelParticles[dit()].listItems();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      const EBCellFAB& electricField    = (*scratch[lvl])[dit()];
+      const EBISBox&       ebisbox    = ebisl[din];
+      const BaseFab<bool>& validCells = validCellsLD[din];
+
+      List<P>& particles = levelParticles[din].listItems();
+
+      const EBCellFAB& electricField    = (*scratch[lvl])[din];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       if (!ebisbox.isAllCovered()) {
@@ -2284,8 +2297,8 @@ StreamerInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage)
         };
 
         // Execute kernels over appropriate regions.
-        const Box    cellBox = dbl[dit()];
-        VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+        const Box    cellBox = dbl[din];
+        VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
         BoxLoops::loop(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
@@ -2603,9 +2616,17 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
       }
       }
 
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-        List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
+        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
 
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
@@ -2683,8 +2704,16 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
   // Truncate the weights if we didn't run full integration
   if (!m_fullIntegration) {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-        List<P>& solverParticles = amrParticles[lvl][dit()].listItems();
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        List<P>& solverParticles = amrParticles[lvl][din].listItems();
 
         for (ListIterator<P> lit(solverParticles); lit.ok(); ++lit) {
           lit().weight() = std::min(m_inceptionK, lit().weight());
@@ -2795,9 +2824,17 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
       }
       }
 
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-        List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
+        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
 
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
@@ -2883,15 +2920,23 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
         break;
       }
       default: {
-        MayDay::Error("StreamerInceptionStepper::inceptionIntegrateEuler - logic bust");
+        MayDay::Error("StreamerInceptionStepper::inceptionIntegrateTrapezoidal - logic bust");
 
         break;
       }
       }
 
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-        List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
+        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
 
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
 
@@ -2976,8 +3021,16 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
   // Truncate the weights if we didn't run full integration
   if (!m_fullIntegration) {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-        List<P>& solverParticles = amrParticles[lvl][dit()].listItems();
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        List<P>& solverParticles = amrParticles[lvl][din].listItems();
 
         for (ListIterator<P> lit(solverParticles); lit.ok(); ++lit) {
           lit().weight() = std::min(m_inceptionK, lit().weight());
@@ -3220,9 +3273,17 @@ StreamerInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) noe
       }
 
       // Integrate particles until they leave alpha > 0 or strike a cathode surface.
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-        List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
+        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
 
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
@@ -3365,9 +3426,17 @@ StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltag
       }
 
       // First stage
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-        List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
+        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
 
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
@@ -3419,9 +3488,17 @@ StreamerInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_voltag
 
     // Second stage.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-        List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
+        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
 
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
 
@@ -3515,21 +3592,26 @@ StreamerInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noex
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const Real               dx    = m_amr->getDx()[lvl];
 
     const Real vol  = std::pow(dx, SpaceDim);
     const Real area = std::pow(dx, SpaceDim - 1);
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const int nbox = dit.size();
 
-      const EBISBox&       ebisbox    = ebisl[dit()];
-      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
+#pragma omp parallel for schedule(runtime) reduction(+ : Rdot)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      const EBCellFAB& electricField     = (*scratch[lvl])[dit()];
-      const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[dit()];
-      const EBCellFAB& fieldEmission     = (*m_emissionRate[lvl])[dit()];
-      const EBCellFAB& ionDensity        = (*m_ionSolver->getPhi()[lvl])[dit()];
+      const EBISBox&       ebisbox    = ebisl[din];
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[din];
+
+      const EBCellFAB& electricField     = (*scratch[lvl])[din];
+      const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[din];
+      const EBCellFAB& fieldEmission     = (*m_emissionRate[lvl])[din];
+      const EBCellFAB& ionDensity        = (*m_ionSolver->getPhi()[lvl])[din];
 
       const FArrayBox& electricFieldReg     = electricField.getFArrayBox();
       const FArrayBox& inceptionIntegralReg = inceptionIntegral.getFArrayBox();
@@ -3580,8 +3662,8 @@ StreamerInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noex
       };
 
       // Run the kernels.
-      Box          cellBox = dbl[dit()];
-      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      Box          cellBox = dbl[din];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
@@ -3603,8 +3685,16 @@ StreamerInceptionStepper<P, F, C>::rewindTracerParticles() noexcept
   ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-      for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      for (ListIterator<P> lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {
         P& p = lit();
 
         p.position() = p.template vect<0>();
@@ -3627,8 +3717,16 @@ StreamerInceptionStepper<P, F, C>::resetTracerParticles() noexcept
   ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-      for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      for (ListIterator<P> lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {
         P& p = lit();
 
         p.weight() = 0.0;
@@ -3659,16 +3757,22 @@ StreamerInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noexc
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
       const Real               dx    = m_amr->getDx()[lvl];
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const EBISBox& ebisbox = ebisl[dit()];
+      const int nbox = dit.size();
 
-        EBCellFAB& bgIonization    = (*m_backgroundIonization[lvl])[dit()];
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const EBISBox& ebisbox = ebisl[din];
+
+        EBCellFAB& bgIonization    = (*m_backgroundIonization[lvl])[din];
         FArrayBox& bgIonizationReg = bgIonization.getFArrayBox();
 
-        const EBCellFAB& electricField    = (*scratch[lvl])[dit()];
+        const EBCellFAB& electricField    = (*scratch[lvl])[din];
         const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
         auto regularKernel = [&](const IntVect& iv) -> void {
@@ -3689,9 +3793,9 @@ StreamerInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noexc
         };
 
         // Execute kernels
-        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-        BoxLoops::loop(dbl[dit()], regularKernel);
+        BoxLoops::loop(dbl[din], regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -3720,17 +3824,23 @@ StreamerInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
       const Real               dx    = m_amr->getDx()[lvl];
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const EBISBox& ebisbox = ebisl[dit()];
+      const int nbox = dit.size();
 
-        EBCellFAB& detachment    = (*m_detachment[lvl])[dit()];
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const EBISBox& ebisbox = ebisl[din];
+
+        EBCellFAB& detachment    = (*m_detachment[lvl])[din];
         FArrayBox& detachmentReg = detachment.getFArrayBox();
 
-        const EBCellFAB& ionDensity    = (*m_ionSolver->getPhi()[lvl])[dit()];
-        const EBCellFAB& electricField = (*scratch[lvl])[dit()];
+        const EBCellFAB& ionDensity    = (*m_ionSolver->getPhi()[lvl])[din];
+        const EBCellFAB& electricField = (*scratch[lvl])[din];
 
         const FArrayBox& ionDensityReg    = ionDensity.getFArrayBox();
         const FArrayBox& electricFieldReg = electricField.getFArrayBox();
@@ -3755,9 +3865,9 @@ StreamerInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
         };
 
         // Execute kernels
-        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-        BoxLoops::loop(dbl[dit()], regularKernel);
+        BoxLoops::loop(dbl[din], regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -3792,22 +3902,28 @@ StreamerInceptionStepper<P, F, C>::computeFieldEmissionStationary() noexcept
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
       const Real&              dx    = m_amr->getDx()[lvl];
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const EBISBox& ebisbox = ebisl[dit()];
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const EBISBox& ebisbox = ebisl[din];
 
         // Here, emissionPlus is when we have the standard voltage (V = 1) and
         // emissionMinu is when the voltage is reverted.
-        EBCellFAB& emissionPlus = (*m_emissionRatesPlus[lvl])[dit()];
-        EBCellFAB& emissionMinu = (*m_emissionRatesMinu[lvl])[dit()];
+        EBCellFAB& emissionPlus = (*m_emissionRatesPlus[lvl])[din];
+        EBCellFAB& emissionMinu = (*m_emissionRatesMinu[lvl])[din];
 
         emissionPlus.setVal(0.0);
         emissionMinu.setVal(0.0);
 
-        const EBCellFAB& electricFieldPlus = (*scratchPlus[lvl])[dit()];
-        const EBCellFAB& electricFieldMinu = (*scratchMinu[lvl])[dit()];
+        const EBCellFAB& electricFieldPlus = (*scratchPlus[lvl])[din];
+        const EBCellFAB& electricFieldMinu = (*scratchMinu[lvl])[din];
 
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
@@ -3832,7 +3948,7 @@ StreamerInceptionStepper<P, F, C>::computeFieldEmissionStationary() noexcept
         };
 
         // Execute kernels
-        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -3860,19 +3976,25 @@ StreamerInceptionStepper<P, F, C>::computeFieldEmission(EBAMRCellData& a_emissio
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const Real               dx    = m_amr->getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox& ebisbox = ebisl[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBISBox& ebisbox = ebisl[din];
 
       // Here, emissionPlus is when we have the standard voltage (V = 1) and
       // emissionMinu is when the voltage is reverted.
-      EBCellFAB& emission = (*a_emissionRate[lvl])[dit()];
+      EBCellFAB& emission = (*a_emissionRate[lvl])[din];
 
       emission.setVal(0.0);
 
-      const EBCellFAB& electricField    = (*scratch[lvl])[dit()];
+      const EBCellFAB& electricField    = (*scratch[lvl])[din];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -3886,7 +4008,7 @@ StreamerInceptionStepper<P, F, C>::computeFieldEmission(EBAMRCellData& a_emissio
       };
 
       // Execute kernels
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -3932,20 +4054,26 @@ StreamerInceptionStepper<P, F, C>::evaluateFunction(LevelData<EBCellFAB>& a_data
   const RealVect probLo = m_amr->getProbLo();
 
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_level];
+  const DataIterator&      dit   = dbl.dataIterator();
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[a_level];
   const Real               dx    = m_amr->getDx()[a_level];
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const EBISBox& ebisbox = ebisl[dit()];
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const EBISBox& ebisbox = ebisl[din];
 
     // Here, emissionPlus is when we have the standard voltage (V = 1) and
     // emissionMinu is when the voltage is reverted.
-    EBCellFAB& data    = a_data[dit()];
+    EBCellFAB& data    = a_data[din];
     FArrayBox& dataReg = data.getFArrayBox();
 
     data.setVal(0.0);
 
-    const EBCellFAB& electricField    = (*scratch[a_level])[dit()];
+    const EBCellFAB& electricField    = (*scratch[a_level])[din];
     const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
     auto regularKernel = [&](const IntVect& iv) -> void {
@@ -3965,8 +4093,8 @@ StreamerInceptionStepper<P, F, C>::evaluateFunction(LevelData<EBCellFAB>& a_data
     };
 
     // Execute kernels
-    Box          cellBox = dbl[dit()];
-    VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[dit()];
+    Box          cellBox = dbl[din];
+    VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[din];
 
     BoxLoops::loop(cellBox, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
@@ -4099,16 +4227,22 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
     // Iterate through m_inceptionIntegral data and calculate inception voltage.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        EBCellFAB& inceptionVoltagePlus = (*m_inceptionVoltagePlus[lvl])[dit()];
-        EBCellFAB& inceptionVoltageMinu = (*m_inceptionVoltageMinu[lvl])[dit()];
+      const int nbox = dit.size();
 
-        EBCellFAB& streamerInceptionVoltagePlus = (*m_streamerInceptionVoltagePlus[lvl])[dit()];
-        EBCellFAB& streamerInceptionVoltageMinu = (*m_streamerInceptionVoltageMinu[lvl])[dit()];
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
 
-        EBCellFAB& townsendInceptionVoltagePlus = (*m_townsendInceptionVoltagePlus[lvl])[dit()];
-        EBCellFAB& townsendInceptionVoltageMinu = (*m_townsendInceptionVoltageMinu[lvl])[dit()];
+        EBCellFAB& inceptionVoltagePlus = (*m_inceptionVoltagePlus[lvl])[din];
+        EBCellFAB& inceptionVoltageMinu = (*m_inceptionVoltageMinu[lvl])[din];
+
+        EBCellFAB& streamerInceptionVoltagePlus = (*m_streamerInceptionVoltagePlus[lvl])[din];
+        EBCellFAB& streamerInceptionVoltageMinu = (*m_streamerInceptionVoltageMinu[lvl])[din];
+
+        EBCellFAB& townsendInceptionVoltagePlus = (*m_townsendInceptionVoltagePlus[lvl])[din];
+        EBCellFAB& townsendInceptionVoltageMinu = (*m_townsendInceptionVoltageMinu[lvl])[din];
 
         FArrayBox& inceptionVoltagePlusReg = inceptionVoltagePlus.getFArrayBox();
         FArrayBox& inceptionVoltageMinuReg = inceptionVoltageMinu.getFArrayBox();
@@ -4119,14 +4253,14 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
         FArrayBox& townsendInceptionVoltagePlusReg = townsendInceptionVoltagePlus.getFArrayBox();
         FArrayBox& townsendInceptionVoltageMinuReg = townsendInceptionVoltageMinu.getFArrayBox();
 
-        const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
-        const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
+        const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[din];
+        const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[din];
 
         const FArrayBox& inceptionIntegralPlusReg = inceptionIntegralPlus.getFArrayBox();
         const FArrayBox& inceptionIntegralMinuReg = inceptionIntegralMinu.getFArrayBox();
 
-        const EBCellFAB& townsendCriterionPlus = (*m_townsendCriterionPlus[lvl])[dit()];
-        const EBCellFAB& townsendCriterionMinu = (*m_townsendCriterionMinu[lvl])[dit()];
+        const EBCellFAB& townsendCriterionPlus = (*m_townsendCriterionPlus[lvl])[din];
+        const EBCellFAB& townsendCriterionMinu = (*m_townsendCriterionMinu[lvl])[din];
 
         const FArrayBox& townsendCriterionPlusReg = townsendCriterionPlus.getFArrayBox();
         const FArrayBox& townsendCriterionMinuReg = townsendCriterionMinu.getFArrayBox();
@@ -4208,8 +4342,8 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
         };
 
         // Kernel regions.
-        const Box&   cellBox = dbl[dit()];
-        VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+        const Box&   cellBox = dbl[din];
+        VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
         BoxLoops::loop(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
@@ -4231,33 +4365,40 @@ StreamerInceptionStepper<P, F, C>::computeMinimumInceptionVoltage(const EBAMRCel
     pout() << "StreamerInceptionStepper::computeMinimumInceptionVoltage" << endl;
   }
 
-  Real     UInc = std::numeric_limits<Real>::infinity();
-  RealVect xInc = RealVect::Zero;
-
   const RealVect probLo = m_amr->getProbLo();
+
+  std::pair<Real, RealVect> UxInc;
+
+  UxInc.first  = std::numeric_limits<Real>::max();
+  UxInc.second = RealVect::Zero;
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const Real&              dx    = m_amr->getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
-      const EBISBox&       ebisBox    = ebisl[dit()];
+    const int nbox = dit.size();
 
-      const EBCellFAB& voltage    = (*a_Uinc[lvl])[dit()];
+#pragma omp parallel for schedule(runtime) reduction(pairmin : UxInc)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[din];
+      const EBISBox&       ebisBox    = ebisl[din];
+
+      const EBCellFAB& voltage    = (*a_Uinc[lvl])[din];
       const FArrayBox& voltageReg = voltage.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (validCells(iv, 0) && ebisBox.isRegular(iv)) {
-          const Real& U = voltageReg(iv, 0);
-
+          const Real&    U   = voltageReg(iv, 0);
           const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
 
           if (!(std::isnan(U))) {
-            if (std::abs(U) < UInc) {
-              UInc = std::abs(U);
-              xInc = pos;
+            if (std::abs(U) < UxInc.first) {
+              UxInc.first  = std::abs(U);
+              UxInc.second = pos;
             }
           }
         }
@@ -4266,29 +4407,28 @@ StreamerInceptionStepper<P, F, C>::computeMinimumInceptionVoltage(const EBAMRCel
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         const IntVect iv = vof.gridIndex();
         if (validCells(iv, 0) && ebisBox.isIrregular(iv)) {
-          const Real& U = voltage(vof, 0);
-
+          const Real&    U        = voltage(vof, 0);
           const RealVect centroid = ebisBox.centroid(vof);
           const RealVect pos      = probLo + (0.5 * RealVect::Unit + RealVect(iv) + centroid) * dx;
 
           if (!(std::isnan(U))) {
-            if (std::abs(U) < UInc) {
-              UInc = std::abs(U);
-              xInc = pos;
+            if (std::abs(U) < UxInc.first) {
+              UxInc.first  = std::abs(U);
+              UxInc.second = pos;
             }
           }
         }
       };
 
-      Box          cellBox = dbl[dit()];
-      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      Box          cellBox = dbl[din];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
 
-  return ParallelOps::min(UInc, xInc);
+  return ParallelOps::min(UxInc.first, UxInc.second);
 }
 
 template <typename P, typename F, typename C>
@@ -4307,24 +4447,30 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeStationary() noexcept
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
       const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
 
       const Real dx = m_amr->getDx()[lvl];
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        const EBISBox&       ebisbox    = ebisl[dit()];
-        const BaseFab<bool>& validCells = validCellsLD[dit()];
+      const int nbox = dit.size();
 
-        const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
-        const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
+#pragma omp parallel for schedule(runtime) reduction(+ : criticalVolumePlus, criticalVolumeMinu)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const EBISBox&       ebisbox    = ebisl[din];
+        const BaseFab<bool>& validCells = validCellsLD[din];
+
+        const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[din];
+        const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[din];
 
         const FArrayBox& inceptionIntegralPlusReg = inceptionIntegralPlus.getFArrayBox();
         const FArrayBox& inceptionIntegralMinuReg = inceptionIntegralMinu.getFArrayBox();
 
-        const EBCellFAB& townsendCritPlus = (*m_townsendCriterionPlus[lvl])[dit()];
-        const EBCellFAB& townsendCritMinu = (*m_townsendCriterionMinu[lvl])[dit()];
+        const EBCellFAB& townsendCritPlus = (*m_townsendCriterionPlus[lvl])[din];
+        const EBCellFAB& townsendCritMinu = (*m_townsendCriterionMinu[lvl])[din];
 
         const FArrayBox& townsendCritPlusReg = townsendCritPlus.getFArrayBox();
         const FArrayBox& townsendCritMinuReg = townsendCritMinu.getFArrayBox();
@@ -4354,8 +4500,8 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeStationary() noexcept
         };
 
         // Kernel regions.
-        const Box    cellBox = dbl[dit()];
-        VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+        const Box    cellBox = dbl[din];
+        VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
         BoxLoops::loop(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
@@ -4380,6 +4526,7 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeTransient() const noexce
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
     const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
@@ -4387,14 +4534,19 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeTransient() const noexce
     const Real dx  = m_amr->getDx()[lvl];
     const Real vol = std::pow(dx, SpaceDim);
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      const EBISBox&       ebisbox    = ebisl[dit()];
-      const BaseFab<bool>& validCells = validCellsLD[dit()];
+    const int nbox = dit.size();
 
-      const EBCellFAB& inceptionIntegral    = (*m_inceptionIntegral[lvl])[dit()];
+#pragma omp parallel for schedule(runtime) reduction(+ : Vcr)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBISBox&       ebisbox    = ebisl[din];
+      const BaseFab<bool>& validCells = validCellsLD[din];
+
+      const EBCellFAB& inceptionIntegral    = (*m_inceptionIntegral[lvl])[din];
       const FArrayBox& inceptionIntegralReg = inceptionIntegral.getFArrayBox();
 
-      const EBCellFAB& townsendCriterion    = (*m_townsendCriterion[lvl])[dit()];
+      const EBCellFAB& townsendCriterion    = (*m_townsendCriterion[lvl])[din];
       const FArrayBox& townsendCriterionReg = townsendCriterion.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -4414,8 +4566,8 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeTransient() const noexce
       };
 
       // Kernel regions.
-      const Box    cellBox = dbl[dit()];
-      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      const Box    cellBox = dbl[din];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
@@ -4441,21 +4593,27 @@ StreamerInceptionStepper<P, F, C>::computeCriticalAreaStationary() noexcept
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
       const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
 
       const Real dx = m_amr->getDx()[lvl];
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        const EBISBox&       ebisbox    = ebisl[dit()];
-        const BaseFab<bool>& validCells = validCellsLD[dit()];
+      const int nbox = dit.size();
 
-        const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
-        const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
+#pragma omp parallel for schedule(runtime) reduction(+ : criticalAreaPlus, criticalAreaMinu)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
 
-        const EBCellFAB& townsendCriterionPlus = (*m_townsendCriterionPlus[lvl])[dit()];
-        const EBCellFAB& townsendCriterionMinu = (*m_townsendCriterionMinu[lvl])[dit()];
+        const EBISBox&       ebisbox    = ebisl[din];
+        const BaseFab<bool>& validCells = validCellsLD[din];
+
+        const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[din];
+        const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[din];
+
+        const EBCellFAB& townsendCriterionPlus = (*m_townsendCriterionPlus[lvl])[din];
+        const EBCellFAB& townsendCriterionMinu = (*m_townsendCriterionMinu[lvl])[din];
 
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           if (validCells(vof.gridIndex())) {
@@ -4471,7 +4629,7 @@ StreamerInceptionStepper<P, F, C>::computeCriticalAreaStationary() noexcept
         };
 
         // Kernel regions.
-        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
         BoxLoops::loop(vofit, irregularKernel);
       }
@@ -4495,6 +4653,7 @@ StreamerInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcept
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
     const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
@@ -4502,12 +4661,17 @@ StreamerInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcept
     const Real dx   = m_amr->getDx()[lvl];
     const Real area = std::pow(dx, SpaceDim - 1);
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      const EBISBox&       ebisbox    = ebisl[dit()];
-      const BaseFab<bool>& validCells = validCellsLD[dit()];
+    const int nbox = dit.size();
 
-      const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[dit()];
-      const EBCellFAB& townsendCriterion = (*m_townsendCriterion[lvl])[dit()];
+#pragma omp parallel for schedule(runtime) reduction(+ : Acr)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBISBox&       ebisbox    = ebisl[din];
+      const BaseFab<bool>& validCells = validCellsLD[din];
+
+      const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[din];
+      const EBCellFAB& townsendCriterion = (*m_townsendCriterion[lvl])[din];
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         if (validCells(vof.gridIndex())) {
@@ -4518,7 +4682,7 @@ StreamerInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcept
       };
 
       // Kernel regions.
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       BoxLoops::loop(vofit, irregularKernel);
     }
@@ -4548,6 +4712,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
       const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
@@ -4555,11 +4720,16 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
       const Real     dx     = m_amr->getDx()[lvl];
       const RealVect probLo = m_amr->getProbLo();
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        const EBISBox&       ebisbox    = ebisl[dit()];
-        const BaseFab<bool>& validCells = validCellsLD[dit()];
+      const int nbox = dit.size();
 
-        const EBCellFAB& electricField    = (*scratch[lvl])[dit()];
+#pragma omp parallel for schedule(runtime) reduction(+ : ionizationVolume)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const EBISBox&       ebisbox    = ebisl[din];
+        const BaseFab<bool>& validCells = validCellsLD[din];
+
+        const EBCellFAB& electricField    = (*scratch[lvl])[din];
         const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
         auto regularKernel = [&](const IntVect& iv) -> void {
@@ -4597,8 +4767,8 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
         };
 
         // Kernel regions.
-        const Box    cellBox = dbl[dit()];
-        VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+        const Box    cellBox = dbl[din];
+        VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
         BoxLoops::loop(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
@@ -4627,6 +4797,7 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real& 
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
     const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
@@ -4635,11 +4806,16 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real& 
     const Real     vol    = std::pow(dx, SpaceDim);
     const RealVect probLo = m_amr->getProbLo();
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      const EBISBox&       ebisbox    = ebisl[dit()];
-      const BaseFab<bool>& validCells = validCellsLD[dit()];
+    const int nbox = dit.size();
 
-      const EBCellFAB& electricField    = (*scratch[lvl])[dit()];
+#pragma omp parallel for schedule(runtime) reduction(+ : Vion)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBISBox&       ebisbox    = ebisl[din];
+      const BaseFab<bool>& validCells = validCellsLD[din];
+
+      const EBCellFAB& electricField    = (*scratch[lvl])[din];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -4674,8 +4850,8 @@ StreamerInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real& 
       };
 
       // Kernel regions.
-      const Box    cellBox = dbl[dit()];
-      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      const Box    cellBox = dbl[din];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
@@ -4921,13 +5097,18 @@ StreamerInceptionStepper<P, F, C>::computeIonVelocity(const Real& a_voltage) noe
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const int nbox = dit.size();
 
-      const EBCellFAB& v    = (*vel[lvl])[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBCellFAB& v    = (*vel[lvl])[din];
       const FArrayBox& vReg = v.getFArrayBox();
 
-      EBCellFAB& MU    = (*mu[lvl])[dit()];
+      EBCellFAB& MU    = (*mu[lvl])[din];
       FArrayBox& MUREG = MU.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -4944,8 +5125,8 @@ StreamerInceptionStepper<P, F, C>::computeIonVelocity(const Real& a_voltage) noe
         MU(vof, 0) = m_ionMobility(E);
       };
 
-      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-      Box          cellBox = dbl[dit()];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+      Box          cellBox = dbl[din];
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
@@ -4981,13 +5162,18 @@ StreamerInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) no
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const int nbox = dit.size();
 
-      const EBCellFAB& electricField    = (*scratch[lvl])[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBCellFAB& electricField    = (*scratch[lvl])[din];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
-      EBCellFAB& dCo    = (*diffCoCell[lvl])[dit()];
+      EBCellFAB& dCo    = (*diffCoCell[lvl])[din];
       FArrayBox& dCoReg = dCo.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -5004,8 +5190,8 @@ StreamerInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) no
         dCo(vof, 0) = m_ionDiffusion(E);
       };
 
-      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-      Box          cellBox = dbl[dit()];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+      Box          cellBox = dbl[din];
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);

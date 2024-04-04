@@ -13,7 +13,8 @@
 #
 # Physics/BrownianWalker -> Exec/Tests/BrownianWalker/DriftDiffusion
 # Physics/TracerParticle -> Exec/Tests/TracerParticle/CoaxialCable
-# Physics/AdvectionDiffusion -> Exec/Examples/AdvectionDiffusion/PipeFlow => HYBRID IS NOT WELL-BEHAVED!!!
+# Physics/AdvectionDiffusion -> Exec/Examples/AdvectionDiffusion/PipeFlow
+# Physics/StreamerInception -> Exec/Examples/StreamerInception/PartialDischarge
 #
 # NOTE: ALL FOLDERS SHOULD BE THREADED BEFORE MERGING.
 # NOTE: CHECK ALL CRITICAL PERFORMANCE BOTTLENECKS BEFORE MERGING

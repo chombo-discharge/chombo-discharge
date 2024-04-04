@@ -45,6 +45,14 @@ ThreadSafeJoin(List<P>& particlesOut, List<P>& particlesIn) noexcept
   particlesOut.join(particlesIn);
 }
 
+// Thread-safe minimum of pair<Real, RealVect>.
+inline void
+ThreadSafePairMin(std::pair<Real, RealVect>& ompOut, const std::pair<Real, RealVect>& ompIn) noexcept
+{
+  ompOut = (ompIn.first < ompOut.first) ? ompIn : ompOut;
+}
+#pragma omp declare reduction(pairmin : std::pair<Real, RealVect> : ThreadSafePairMin(omp_out, omp_in)) initializer(omp_priv=omp_orig)
+
 #endif
 
 #include <CD_NamespaceFooter.H>

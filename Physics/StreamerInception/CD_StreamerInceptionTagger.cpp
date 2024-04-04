@@ -91,7 +91,7 @@ StreamerInceptionTagger::tagCells(EBAMRTags& a_tags)
 
   this->computeTracerField();
 
-  int foundTags = -1;
+  int foundTags = 0;
 
   const int finestLevel    = m_amr->getFinestLevel();
   const int maxLevel       = m_amr->getMaxAmrDepth();
@@ -99,9 +99,15 @@ StreamerInceptionTagger::tagCells(EBAMRTags& a_tags)
 
   for (int lvl = 0; lvl <= finestTagLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(max : foundTags)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
       const EBISBox& ebisbox = ebisl[dit()];
 
       DenseIntVectSet& tags = (*a_tags[lvl])[dit()];
@@ -185,9 +191,15 @@ StreamerInceptionTagger::computeTracerField() const noexcept
   // Compute alphaEff * dx on all grid levels.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
     const Real               dx  = m_amr->getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
       const EBCellFAB& electricField    = (*(*m_electricField)[lvl])[dit()];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
