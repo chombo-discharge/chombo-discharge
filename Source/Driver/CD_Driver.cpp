@@ -480,23 +480,18 @@ Driver::gridReport()
     ref_rat[lvl] = refRat[lvl];
   }
 
-  // Get boxes for each Realm
-  const std::vector<std::string> realms = m_amr->getRealms();
-
-  for (const auto& str : realms) {
-    this->getCellsAndBoxes(localCells,
-                           localCellsGhosts,
-                           localBoxes,
-                           totalCells,
-                           totalCellsGhosts,
-                           totalBoxes,
-                           localLevelBoxes,
-                           totalLevelBoxes,
-                           localLevelCells,
-                           totalLevelCells,
-                           finestLevel,
-                           m_amr->getGrids(str));
-  }
+  this->getCellsAndBoxes(localCells,
+                         localCellsGhosts,
+                         localBoxes,
+                         totalCells,
+                         totalCellsGhosts,
+                         totalBoxes,
+                         localLevelBoxes,
+                         totalLevelBoxes,
+                         localLevelCells,
+                         totalLevelCells,
+                         finestLevel,
+                         m_amr->getGrids(m_realm));
 
   long long totalValidCells = totalLevelCells[finestLevel];
 
@@ -508,10 +503,19 @@ Driver::gridReport()
     totalValidCells += validLevelCells[lvl];
   }
 
+  int numThreads = 1;
+#pragma omp parallel reduction(+ : numThreads)
+
   // Begin writing a report.
   pout() << "=======================================================================" << endl
          << "Driver::Grid report - timestep = " << m_timeStep << endl
          << "---------------------------------------------------------" << endl
+#ifdef CH_MPI
+         << "\tMPI ranks................ = " << numProc() << endl
+#endif
+#if _OPENMP
+         << "\tOpenMP threads........... = " << numThreads << endl
+#endif
          << "\tFinest level............. = " << finestLevel << endl
 #if CH_SPACEDIM == 2
          << "\tFinest AMR domain........ = " << finestBox.size()[0] << " x " << finestBox.size()[1] << endl
@@ -534,6 +538,8 @@ Driver::gridReport()
          << "\tValid # of cells (lvl)... = " << DischargeIO::numberFmt(validLevelCells) << endl;
 
   // Do a local report for each Realm
+  const std::vector<std::string> realms = m_amr->getRealms();
+
   for (const auto& str : realms) {
     this->getCellsAndBoxes(localCells,
                            localCellsGhosts,

@@ -10,7 +10,7 @@ export OMP_SCHEDULE="dynamic,4"
 COMPILE=true
 RUN=true
 PROFILE=true
-INPUT="example.inputs Driver.max_steps=20"
+INPUT="example.inputs Driver.max_steps=20 ItoKMCGodunovStepper.verbosity=100"
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
 if $COMPILE
@@ -24,11 +24,11 @@ fi
 if $RUN
 then
     # Run serial version
-    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.ex $INPUT
+    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.ex $INPUT >& pout.serial
     cp time.table time.table.serial
 
     # Run OpenMP version
-    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.OPENMPCC.ex $INPUT
+    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.OPENMPCC.ex $INPUT >& pout.openmp
     cp time.table time.table.omp
 
     # # Run MPI version
@@ -44,6 +44,28 @@ fi
 if $PROFILE
 then
     for PATTERN in 'ItoKMCTagger::tagCells'\
+		       'ItoKMCStepper::initialSigma' \
+		       'ItoKMCStepper::writeNumberOfParticlesPerPatch' \
+		       'ItoKMCStepper::computeMobilities(mobilities, E, level, time)' \
+		       'ItoKMCStepper::computeDiffusionCoefficients(Vector<LD<EBCellFAB>*>, LD<EBCellFAB>, int, Real)' \
+		       'ItoKMCStepper::computeReactiveItoParticlesPerCell(LD<EBCellFAB>, int)' \
+		       'ItoKMCStepper::computeReactiveCdrParticlesPerCell(LD<EBCellFAB>, int)' \
+		       'ItoKMCStepper::computeReactiveMeanEnergiesPerCell(LD<EBCellFAB>, int)' \
+		       'ItoKMCStepper::advanceReactionNetwork(LD<EBCellFAB>x3, int, Real)' \
+		       'ItoKMCStepper::reconcileParticles(LevelData<EBCellFAB>x3, int)' \
+		       'ItoKMCStepper::reconcilePhotoionization()' \
+		       'ItoKMCStepper::reconcileCdrDensities(EBAMRCellDatax2, Real)' \
+		       'ItoKMCStepper::reconcileCdrDensities(LD<EBCellFAB>x2, int, Real)' \
+		       'ItoKMCStepper::fillSecondaryEmissionEB(full)' \
+		       'ItoKMCStepper::computePhysicsDt(LD<EBCellFAB>, LD<EBCellFAB>, int)' \
+		       'ItoKMCStepper::loadBalanceParticleRealm(...)' \
+		       'ItoKMCStepper::computeEdotJSource(a_dt)' \
+		       'ItoKMCStepper::computePhysicsPlotVariables' \
+		       'ItoKMCGodunovStepper::advance' \
+		       'ItoKMCGodunovStepper::setOldPositions' \
+		       'ItoKMCGodunovStepper::copyConductivityParticles' \
+		       'ItoKMCGodunovStepper::diffuseParticlesEulerMaruyama' \
+		       'ItoKMCGodunovStepper::stepEulerMaruyamaParticles' \
 		   ; do
 
 	if grep -q "${PATTERN}" time.table.serial

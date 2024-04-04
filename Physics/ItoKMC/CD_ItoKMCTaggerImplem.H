@@ -257,7 +257,7 @@ ItoKMCTagger<S>::tagCells(EBAMRTags& a_tags) noexcept
         cpy2 -= cpy1; // = new tags minus old tags. If nonzero, we got some new tags.
         cpy1 -= tags; // = old_tags minus new tags. If nonzero, we got some new tags
         if (cpy1.numPts() != 0 || cpy2.numPts() != 0) {
-          gotNewTags = 1
+          gotNewTags = 1;
         }
       }
     }

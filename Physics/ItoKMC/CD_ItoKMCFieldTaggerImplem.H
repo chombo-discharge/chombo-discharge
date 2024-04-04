@@ -115,7 +115,7 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
 
   for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = this->m_amr->getGrids(this->m_realm)[lvl];
-    const DataIterator&      dit = dbl.dataIterator();    
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = this->m_amr->getEBISLayout(this->m_realm, this->m_phase)[lvl];
     const Real               dx    = this->m_amr->getDx()[lvl];
 
@@ -123,7 +123,7 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
 
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];    
+      const DataIndex& din = dit[mybox];
 
       const Box&     box     = dbl[din];
       const EBISBox& ebisbox = ebisl[din];

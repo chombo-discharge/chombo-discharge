@@ -297,10 +297,16 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
       if (Z != 0 && solver->isMobile()) {
         for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
           const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
+          const DataIterator&      dit = dbl.dataIterator();
 
-          for (DataIterator dit(dbl); dit.ok(); ++dit) {
-            List<PointParticle>&     pointParticles = irregParticles[lvl][dit()].listItems();
-            const List<ItoParticle>& patchParticles = bulkParticles[lvl][dit()].listItems();
+          const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+          for (int mybox = 0; mybox < nbox; mybox++) {
+            const DataIndex& din = dit[mybox];
+
+            List<PointParticle>&     pointParticles = irregParticles[lvl][din].listItems();
+            const List<ItoParticle>& patchParticles = bulkParticles[lvl][din].listItems();
 
             for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
               const ItoParticle& p = lit();
@@ -617,12 +623,18 @@ ItoKMCGodunovStepper<I, C, R, F>::setOldPositions() noexcept
     RefCountedPtr<ItoSolver>& solver = solverIt();
 
     for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout&   dbl       = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
+      const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
       ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const int nbox = dit.size();
 
-        List<ItoParticle>& particleList = particles[dit()].listItems();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        List<ItoParticle>& particleList = particles[din].listItems();
 
         for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
           ItoParticle& p = lit();
@@ -1201,12 +1213,18 @@ ItoKMCGodunovStepper<I, C, R, F>::copyConductivityParticles(
 
       for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
         const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
+        const DataIterator&      dit = dbl.dataIterator();
 
-        for (DataIterator dit(dbl); dit.ok(); ++dit) {
-          const List<ItoParticle>& patchParticles = solverParticles[lvl][dit()].listItems();
+        const int nbox = dit.size();
 
-          List<PointParticle>& pointParticles = (*a_conductivityParticles[idx])[lvl][dit()].listItems();
-          List<PointParticle>& irregParticles = (*m_irregularParticles[idx])[lvl][dit()].listItems();
+#pragma omp parallel for schedule(runtime)
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex& din = dit[mybox];
+
+          const List<ItoParticle>& patchParticles = solverParticles[lvl][din].listItems();
+
+          List<PointParticle>& pointParticles = (*a_conductivityParticles[idx])[lvl][din].listItems();
+          List<PointParticle>& irregParticles = (*m_irregularParticles[idx])[lvl][din].listItems();
 
           for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
             const ItoParticle& p        = lit();
@@ -1333,12 +1351,19 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
     const int  Z         = species->getChargeNumber();
 
     for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout&   dbl       = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
+      const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
       ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        List<ItoParticle>&   itoParticles   = particles[dit()].listItems();
-        List<PointParticle>& pointParticles = (*a_rhoDaggerParticles[idx])[lvl][dit()].listItems();
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        List<ItoParticle>&   itoParticles   = particles[din].listItems();
+        List<PointParticle>& pointParticles = (*a_rhoDaggerParticles[idx])[lvl][din].listItems();
 
         for (ListIterator<ItoParticle> lit(itoParticles); lit.ok(); ++lit) {
           ItoParticle&    p      = lit();
@@ -1423,11 +1448,18 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaParticles(const Real a_dt) no
 
     if (mobile || diffusive) {
       for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
-        const DisjointBoxLayout&   dbl       = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
+        const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
+        const DataIterator&      dit = dbl.dataIterator();
+
         ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
-        for (DataIterator dit(dbl); dit.ok(); ++dit) {
-          List<ItoParticle>& particleList = particles[dit()].listItems();
+        const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex& din = dit[mybox];
+
+          List<ItoParticle>& particleList = particles[din].listItems();
 
           for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
             ItoParticle& p = lit();
