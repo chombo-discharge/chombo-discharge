@@ -108,11 +108,11 @@ StreamerInceptionTagger::tagCells(EBAMRTags& a_tags)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const EBISBox& ebisbox = ebisl[dit()];
+      const EBISBox& ebisbox = ebisl[din];
 
-      DenseIntVectSet& tags = (*a_tags[lvl])[dit()];
+      DenseIntVectSet& tags = (*a_tags[lvl])[din];
 
-      const EBCellFAB& tracerField    = (*m_tracerField[lvl])[dit()];
+      const EBCellFAB& tracerField    = (*m_tracerField[lvl])[din];
       const FArrayBox& tracerFieldReg = tracerField.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -132,8 +132,8 @@ StreamerInceptionTagger::tagCells(EBAMRTags& a_tags)
       };
 
       // Run the kernels.
-      Box         cellBox = dbl[dit()];
-      VoFIterator vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      Box         cellBox = dbl[din];
+      VoFIterator vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       // Execute the kernels.
       BoxLoops::loop(cellBox, regularKernel);
@@ -200,10 +200,10 @@ StreamerInceptionTagger::computeTracerField() const noexcept
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const EBCellFAB& electricField    = (*(*m_electricField)[lvl])[dit()];
+      const EBCellFAB& electricField    = (*(*m_electricField)[lvl])[din];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
-      EBCellFAB& tracerField    = (*m_tracerField[lvl])[dit()];
+      EBCellFAB& tracerField    = (*m_tracerField[lvl])[din];
       FArrayBox& tracerFieldReg = tracerField.getFArrayBox();
 
       const EBISBox& ebisbox = electricField.getEBISBox();
@@ -224,8 +224,8 @@ StreamerInceptionTagger::computeTracerField() const noexcept
         tracerField(vof, 0) = m_alphaEff(m_maxVoltage * E, x) * dx;
       };
 
-      Box          cellBox = dbl[dit()];
-      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      Box          cellBox = dbl[din];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);

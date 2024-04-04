@@ -10,7 +10,7 @@ export OMP_SCHEDULE="dynamic"
 COMPILE=true
 RUN=true
 PROFILE=true
-INPUT="positive2d.inputs Driver.max_steps=1"
+INPUT="positive2d.inputs Driver.max_steps=5"
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
 if $COMPILE
@@ -61,6 +61,7 @@ then
 		       'CdrPlasmaStepper::computeDielectricCurrent()' \
 		       'CdrPlasmaStepper::computeDomainCurrent()' \
 		       'CdrPlasmaStepper::computePhysicsPlotVars' \
+		       'CdrPlasmaGodunovStepper::advance(Real)' \
 		   ; do
 
 	if grep -q "${PATTERN}" time.table.serial

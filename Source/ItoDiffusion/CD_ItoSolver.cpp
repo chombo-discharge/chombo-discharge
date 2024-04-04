@@ -16,7 +16,6 @@
 #include <CH_Timer.H>
 #include <ParmParse.H>
 #include <ParticleIO.H>
-#include <EBLevelDataOps.H>
 
 // Our includes
 #include <CD_SimpleItoParticle.H>
@@ -1037,7 +1036,7 @@ ItoSolver::writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_level) co
 
   // Create transient storage that holds the particle numbers.
   LevelData<EBCellFAB> particleNumbers(dbl, m_nComp, IntVect::Zero, EBCellFactory(ebisl));
-  EBLevelDataOps::setVal(particleNumbers, 0.0);
+  DataOps::setValue(particleNumbers, 0.0);
 
   // Now go through the grid and add the number of particles in each cell
   const int nbox = dit.size();
