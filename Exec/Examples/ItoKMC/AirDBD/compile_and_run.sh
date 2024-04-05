@@ -5,12 +5,12 @@ export NPROCS=1
 export OMP_NUM_THREADS=8
 export OMP_PLACES=cores
 export OMP_PROC_BIND=true
-export OMP_SCHEDULE="dynamic,4"
+export OMP_SCHEDULE="dynamic"
 
 COMPILE=false
 RUN=true
 PROFILE=true
-INPUT="example.inputs Driver.max_steps=5"
+INPUT="example.inputs Driver.max_steps=20"
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
 if $COMPILE
@@ -36,7 +36,7 @@ then
     cp time.table.0 time.table.mpi
 
     # # Run MPI+OpenMP version
-    mpiexec --report-bindings --bind-to none --map-by slot:PE=$OMP_NUM_THREADS -n $NPROCS ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex $INPUT
+    mpiexec --report-bindings --bind-to core --map-by slot:PE=$OMP_NUM_THREADS -n $NPROCS ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex $INPUT
     cp time.table.0 time.table.hybrid
 fi
 
