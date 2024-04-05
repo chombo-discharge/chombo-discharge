@@ -7,10 +7,10 @@ export OMP_PLACES=cores
 export OMP_PROC_BIND=true
 export OMP_SCHEDULE="dynamic,4"
 
-COMPILE=true
+COMPILE=false
 RUN=true
 PROFILE=true
-INPUT="example.inputs Driver.max_steps=20 ItoKMCGodunovStepper.verbosity=100"
+INPUT="example.inputs Driver.max_steps=5"
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
 if $COMPILE
