@@ -1,12 +1,6 @@
 # Regression
 This folder can run various regression or unit tests.
 
-Applications have been set up using various modules. To see how to run the tests do
-
-```shell
-python3 tests.py --help
-```
-
 ## Running a specific suite
 To run a specific suite of tests do
 ```shell
@@ -24,10 +18,11 @@ Configrable options are
 * ```--benchmark``` Generate benchmark files.
 * ```--no_exec``` Compile, but do not run tests.
 * ```--compare``` Run, and then compare with benchmark files.
+* ```--mpi``` Use MPI
+* ```--hdf``` Use HDF5
+* ```--openmp``` Use OpenMP
 * ```-dim```Test dimensionality. E.g. ```-dim 2``` does all 2d tests. If ```-dim``` is not 2 or 3, both 2d and 3d are run. 
-* ```-mpi``` (true/false) Use MPI or not
-* ```-hdf``` (true/false) Use HDF5 or not
-* ```-cores``` Run with specified number of cores.
+* ```-cores``` Run with specified number of cores. If using MPI+OpenMP this will use 1 MPI rank. 
 * ```-suites``` Tests suites to run. E.g. ```-suite AdvectionDiffusion Electrostatics```.
 * ```-tests``` Specific tests to run. E.g. ```-tests AdvectionDiffusion/Godunov```.
 
