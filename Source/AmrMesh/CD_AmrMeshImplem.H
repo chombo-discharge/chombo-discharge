@@ -942,7 +942,7 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFro
     const Real               dx    = this->getDx()[lvl];
 
     const int nbox = dit.size();
-#pragma omp paralle for schedule(runtime)
+#pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din     = dit[mybox];
       const EBISBox&   ebisBox = ebisl[din];

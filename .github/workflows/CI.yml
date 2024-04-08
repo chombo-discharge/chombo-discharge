@@ -45,7 +45,7 @@ jobs:
     env:
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
-      CORES: 2
+      CORES: 4
 
     steps:
       - uses: actions/checkout@v4
@@ -108,7 +108,7 @@ jobs:
     env:
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
-      CORES: 2
+      CORES: 4
 
     steps:
       - uses: actions/checkout@v4
