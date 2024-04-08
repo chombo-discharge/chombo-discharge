@@ -349,7 +349,7 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   kmcSolver.define(kmcReactions);
   kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
 
-  // Update the reaction rates to be used by the KMC solver. 
+  // Update the reaction rates to be used by the KMC solver.
   this->updateReactionRates(kmcReactions, a_E, a_pos, a_phi, a_gradPhi, a_dx, a_kappa);
 
   // Run the KMC solver.

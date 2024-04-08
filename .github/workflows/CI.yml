@@ -40,11 +40,12 @@ jobs:
         dim: [2, 3]
         mpi: ["TRUE", "FALSE"]
         hdf: ["TRUE", "FALSE"]
+        omp: ["TRUE", "FALSE"]
         
     env:
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
-      CORES: 2
+      CORES: 4
 
     steps:
       - uses: actions/checkout@v3
@@ -81,14 +82,14 @@ jobs:
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
         if: always()        
         run: |
-          python3 tests.py --compile --clean --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }}
+          python3 tests.py --compile --clean --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
       - name: Run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
         if: always()        
         run: |
-          python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }}
+          python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
   Linux-Intel:
@@ -102,6 +103,7 @@ jobs:
         dim: [2, 3]
         mpi: ["TRUE", "FALSE"]
         hdf: ["FALSE"]
+        omp: ["TRUE", "FALSE"]        
         
     env:
       DISCHARGE_HOME: ${{github.workspace}}
@@ -160,7 +162,7 @@ jobs:
         if: always()        
         run: |
           source /opt/intel/oneapi/setvars.sh                              
-          python3 tests.py --compile --clean --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }}
+          python3 tests.py --compile --clean --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
       - name: Run tests
@@ -168,7 +170,7 @@ jobs:
         if: always()        
         run: |
           source /opt/intel/oneapi/setvars.sh                              
-          python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }}
+          python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi                                                  
 
   Build-documentation:
