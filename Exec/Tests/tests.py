@@ -102,8 +102,8 @@ def compile_test(silent, build_procs, dim, mpi, omp, hdf, clean, main):
     makeCommand += "MPI=" + str(mpi).upper() + " "
     makeCommand += "OPENMPCC=" + str(omp).upper() + " "    
     makeCommand += "USE_HDF=" + str(hdf).upper() + " "
-    if omp:
-        makeCommand += "USE_MT=FALSE "
+    makeCommand += "USE_MT=FALSE "
+    
     if clean:
         makeCommand += "clean "
     makeCommand += str(config[str(test)]['exec'])        
