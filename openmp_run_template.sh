@@ -11,11 +11,13 @@
 # Source/ItoDiffusion -> Exec/Tests/BrownianWalker/DriftDiffusion
 # Source/Particle -> Exec/Examples/ItoKMC/AirBasic
 #
-# Physics/AdvectionDiffusion -> Exec/Examples/AdvectionDiffusion/PipeFlow
+# Physics/AdvectionDiffusion -> Exec/Examples/AdvectionDiffusion/PipeFlow => VisIt shows no diff in phi for 2D example
 # Physics/BrownianWalker -> Exec/Tests/BrownianWalker/DriftDiffusion
-# Physics/CdrPlasma -> Exec/Examples/CdrPlasma/StochasticAir => Does not run correctly with OpenMP -- weird things going on in space charge layer near anode
-# Physics/ItoKMC -> Exec/Examples/ItoKMC/AirDBD => How to advance KMC in a thread-safe way????
-# Physics/StreamerInception -> Exec/Examples/StreamerInception/PartialDis
+# Physics/CdrPlasma -> Exec/Examples/CdrPlasma/StochasticAir
+# Physics/CdrPlasma -> Exec/Examples/CdrPlasma/DeterministicAir => VisIt shows no diff in electron density for 2D example
+# Physics/Electrostatics -> Exec/Examples/ProfiledSurface => VisIt shows no diff in potential for 2D example.
+# Physics/ItoKMC -> Exec/Examples/ItoKMC/AirDBD
+# Physics/StreamerInception -> Exec/Examples/StreamerInception/PartialDischarge
 # Physics/TracerParticle -> Exec/Tests/TracerParticle/CoaxialCable
 
 #

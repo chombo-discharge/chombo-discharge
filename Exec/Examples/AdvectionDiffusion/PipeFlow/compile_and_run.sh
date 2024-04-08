@@ -5,11 +5,12 @@ export NPROCS=1
 export OMP_NUM_THREADS=8
 export OMP_PLACES=cores
 export OMP_PROC_BIND=true
-export OMP_SCHEDULE="dynamic,4"
+export OMP_SCHEDULE="dynamic"
 
 COMPILE=false
 RUN=true
-PROFILE=true
+PROFILE=false
+INPUT="example.inputs Driver.max_steps=10"
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
 if $COMPILE
@@ -23,19 +24,19 @@ fi
 if $RUN
 then
     # Run serial version
-    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.ex example.inputs
+    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.ex $INPUT Driver.output_names=serial
     cp time.table time.table.serial
 
     # Run OpenMP version
-    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.OPENMPCC.ex example.inputs
+    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.OPENMPCC.ex $INPUT Driver.output_names=omp
     cp time.table time.table.omp
 
     # # Run MPI version
-    mpiexec --report-bindings -n $NCORES --bind-to core ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex example.inputs
+    mpiexec --report-bindings -n $NCORES --bind-to core ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex $INPUT Driver.output_names=hybrid
     cp time.table.0 time.table.mpi
 
     # # Run MPI+OpenMP version
-    mpiexec --report-bindings --bind-to none --map-by slot:PE=$OMP_NUM_THREADS -n $NPROCS ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex example.inputs
+    mpiexec --report-bindings --bind-to none --map-by slot:PE=$OMP_NUM_THREADS -n $NPROCS ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex $INPUT Driver.output_names=mpi
     cp time.table.0 time.table.hybrid
 fi
 

@@ -25,19 +25,19 @@ fi
 if $RUN
 then
     # Run serial version
-    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.ex $INPUT
+    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.ex $INPUT Driver.output_names=serial
     cp time.table time.table.serial
 
     # Run OpenMP version
-    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.OPENMPCC.ex $INPUT
+    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.OPENMPCC.ex $INPUT Driver.output_names=openmp
     cp time.table time.table.omp
 
     # Run MPI version
-    mpiexec --report-bindings -n $NCORES --bind-to core ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex $INPUT
+    mpiexec --report-bindings -n $NCORES --bind-to core ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex $INPUT Driver.output_names=mpi
     cp time.table.0 time.table.mpi
 
     # Run MPI+OpenMP version
-    mpiexec --report-bindings --bind-to none --map-by slot:PE=$OMP_NUM_THREADS -n $NPROCS ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex $INPUT
+    mpiexec --report-bindings --bind-to none --map-by slot:PE=$OMP_NUM_THREADS -n $NPROCS ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex $INPUT Driver.output_names=hybrid
     cp time.table.0 time.table.hybrid
 fi
 
