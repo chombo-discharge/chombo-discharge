@@ -1955,9 +1955,6 @@ CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real>>*>&    
   // Physical coordinates of lower left corner
   const RealVect probLo = m_amr->getProbLo();
 
-  // This is passed into the plasma kinetics framework.
-  Vector<Real> cdrDensitiesEB(numCdrSpecies, 0.0);
-
   // Grids on this level.
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_lvl];
   const DataIterator&      dit   = dbl.dataIterator();
@@ -1965,7 +1962,6 @@ CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real>>*>&    
   const Real               dx    = m_amr->getDx()[a_lvl];
 
   // Grid patch loop.
-
   const int nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime)
@@ -1976,6 +1972,9 @@ CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real>>*>&    
 
     // Electric field in this grid patch.
     const BaseIVFAB<Real>& electricFieldPatchEB = a_electricFieldEB[din];
+
+    // This is passed into the plasma kinetics framework.
+    Vector<Real> cdrDensitiesEB(numCdrSpecies, 0.0);
 
     // Irregular kernel.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -2435,13 +2434,6 @@ CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real>>*>&       a_
   CH_assert(a_extrapRteFluxes.size() == numRteSpecies);
   CH_assert(a_electricField.nComp() == SpaceDim);
 
-  // Things that will be passed into our nifty little plasma physics framework.
-  Vector<Real> extrapCdrFluxes(numCdrSpecies, 0.0);
-  Vector<Real> extrapCdrDensities(numCdrSpecies, 0.0);
-  Vector<Real> extrapCdrVelocities(numCdrSpecies, 0.0);
-  Vector<Real> extrapCdrGradients(numCdrSpecies, 0.0);
-  Vector<Real> extrapRteFluxes(numRteSpecies, 0.0);
-
   // Lower left corner (physical coordinates).
   const RealVect probLo = m_amr->getProbLo();
 
@@ -2470,6 +2462,13 @@ CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real>>*>&       a_
 
     // Electric field in this patch.
     const BaseIVFAB<Real>& electricField = a_electricField[din];
+
+    // Things that will be passed into our nifty little plasma physics framework.
+    Vector<Real> extrapCdrFluxes(numCdrSpecies, 0.0);
+    Vector<Real> extrapCdrDensities(numCdrSpecies, 0.0);
+    Vector<Real> extrapCdrVelocities(numCdrSpecies, 0.0);
+    Vector<Real> extrapCdrGradients(numCdrSpecies, 0.0);
+    Vector<Real> extrapRteFluxes(numRteSpecies, 0.0);
 
     // Kernel for generating boundary conditions on an electrode cut-cell. This kernel will call the CdrPlasmaPhysics routine
     // which computes the electrode EB boundary fluxes.
@@ -2667,13 +2666,6 @@ CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>    
   CH_assert(a_extrapCdrGradients.size() == numCdrSpecies);
   CH_assert(a_extrapRteFluxes.size() == numRteSpecies);
 
-  // These are data holders that we will pass into CdrPlasmaPhysics
-  Vector<Real> extrapCdrFluxes(numCdrSpecies, 0.0);
-  Vector<Real> extrapCdrDensities(numCdrSpecies, 0.0);
-  Vector<Real> extrapCdrVelocities(numCdrSpecies, 0.0);
-  Vector<Real> extrapCdrGradients(numCdrSpecies, 0.0);
-  Vector<Real> extrapRteFluxes(numRteSpecies, 0.0);
-
   // Fetch various grid information on this level. I.e, the box distribution, the EB description, resolution, and physical corner.
   const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_lvl];
   const DataIterator&      dit    = dbl.dataIterator();
@@ -2693,6 +2685,13 @@ CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>    
 
     const EBISBox& ebisBox = ebisl[din];
     const EBGraph& ebgraph = ebisBox.getEBGraph();
+
+    // These are data holders that we will pass into CdrPlasmaPhysics
+    Vector<Real> extrapCdrFluxes(numCdrSpecies, 0.0);
+    Vector<Real> extrapCdrDensities(numCdrSpecies, 0.0);
+    Vector<Real> extrapCdrVelocities(numCdrSpecies, 0.0);
+    Vector<Real> extrapCdrGradients(numCdrSpecies, 0.0);
+    Vector<Real> extrapRteFluxes(numRteSpecies, 0.0);
 
     // Go through each coordinate direction
     for (int dir = 0; dir < SpaceDim; dir++) {
@@ -4845,12 +4844,6 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
       m_amr->interpGhost(*cdrGradients[idx], m_realm, m_cdr->getPhase());
     }
 
-    // This is stuff that is on a per-cell basis. We visit each cell and populate these fields and then pass them to our
-    // nifty plasma physics object.
-    Vector<Real>     localCdrDensities(cdrDensities.size(), 0.0);
-    Vector<RealVect> localCdrGradients(cdrDensities.size(), RealVect::Zero);
-    Vector<Real>     localRteDensities(rteDensities.size(), 0.0);
-
     // E and the gradients can be put on the centroids immediately because their lifetimes are limited to
     // this function.
     m_amr->interpToCentroids(E, m_realm, phase::gas);
@@ -4874,6 +4867,12 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
 
         const Box&     cellBox = dbl[din]; // <--- regular region.
         const EBISBox& ebisBox = ebisl[din];
+
+        // This is stuff that is on a per-cell basis. We visit each cell and populate these fields and then pass them to our
+        // nifty plasma physics object.
+        Vector<Real>     localCdrDensities(cdrDensities.size(), 0.0);
+        Vector<RealVect> localCdrGradients(cdrDensities.size(), RealVect::Zero);
+        Vector<Real>     localRteDensities(rteDensities.size(), 0.0);
 
         // Irregular region.
         VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];

@@ -31,11 +31,11 @@ then
     ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.OPENMPCC.ex $INPUT >& pout.openmp
     cp time.table time.table.omp
 
-    # # Run MPI version
+    # Run MPI version
     mpiexec --report-bindings -n $NCORES --bind-to core ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex $INPUT
     cp time.table.0 time.table.mpi
 
-    # # Run MPI+OpenMP version
+    # Run MPI+OpenMP version
     mpiexec --report-bindings --bind-to none --map-by slot:PE=$OMP_NUM_THREADS -n $NPROCS ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex $INPUT
     cp time.table.0 time.table.hybrid
 fi
