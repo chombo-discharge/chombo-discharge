@@ -191,8 +191,10 @@ DiskProfiledPlane::defineDielectric() noexcept
   }
   else if (str == "l_shape") {
     profile = std::make_shared<RoundedBoxSDF<Real>>(squareDim, boxCurvature);
+	// std::shared_ptr<ImpFunc> profile = std::make_shared<BoxSDF<Real>>(-0.5 * squareDim, 0.5 * squareDim);
     //    profile = Translate<Real>(profile, -0.5 * Vec3::unit(0) * squareDim[0]);
-
+	
+	// std::shared_ptr<ImpFunc> profile2 = std::make_shared<BoxSDF<Real>>(-0.5 * squareDim, 0.5 * squareDim);
     profile2 = std::make_shared<RoundedBoxSDF<Real>>(squareDim, boxCurvature);
     profile2 = Translate<Real>(profile2, -0.5 * Vec3(squareDim[0], squareDim[1], 0.0));
     // profile2 = Translate<Real>(profile2, -0.5 * Vec3::unit(0) * squareDim2[0]);
@@ -201,9 +203,9 @@ DiskProfiledPlane::defineDielectric() noexcept
 
     std::shared_ptr<ImpFunc> profile3 = std::make_shared<BoxSDF<Real>>(-0.5 * squareDim, 0.5 * squareDim);
     profile3                          = Rotate<Real>(profile3, 79.38, 2);
-    profile3                          = Translate<Real>(profile3, Vec3(0.1*squareDim[0], 0.88*squareDim[1], 0.0));
+    profile3                          = Translate<Real>(profile3, Vec3(0*squareDim[0], squareDim[0.85], 0.0));
 
-    profile2 = SmoothDifference<Real>(profile2, profile3, boxCurvature);
+    // profile2 = SmoothDifference<Real>(profile2, profile3, boxCurvature);
   }
   else if (str == "none") {
   }
