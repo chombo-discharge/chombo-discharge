@@ -87,7 +87,7 @@ DiskProfiledPlane.wheel_extra_thickness = 0.0                     # Extra wheel 
 DiskProfiledPlane.box_dimensions        = 7.2000123E-2 0.020012 1 # Box dimensions
 DiskProfiledPlane.box_translate         = 0.00E-3 4.0123E-3 0           # Box translation
 DiskProfiledPlane.box_permittivity      = 4.0                     # Dielectric box permittivity
-DiskProfiledPlane.box_curvature         = 100E-6                   # Corner curvatures
+DiskProfiledPlane.box_curvature         = 10E-6                   # Corner curvatures
 
 
 DiskProfiledPlane.profile_type          = l_shape                # Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'
