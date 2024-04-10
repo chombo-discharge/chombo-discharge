@@ -171,6 +171,8 @@ DiskProfiledPlane::defineDielectric() noexcept
   // Determine the requested profile type.
   std::shared_ptr<ImpFunc> profile;
   std::shared_ptr<ImpFunc> profile2;
+  std::shared_ptr<ImpFunc> profile3;
+  std::shared_ptr<ImpFunc> plane;
   if (str == "square") {
     profile = std::make_shared<RoundedBoxSDF<Real>>(squareDim, boxCurvature);
   }
@@ -190,7 +192,7 @@ DiskProfiledPlane::defineDielectric() noexcept
     profile = Elongate<Real>(profile, std::numeric_limits<Real>::max() * Vec3::unit(2));
   }
   else if (str == "l_shape") {
-    profile = std::make_shared<RoundedBoxSDF<Real>>(squareDim, boxCurvature);
+    profile = std::make_shared<RoundedBoxSDF<Real>>(Vec3(squareDim[0], 1.1*squareDim[1], 0.0), boxCurvature);
 	// std::shared_ptr<ImpFunc> profile = std::make_shared<BoxSDF<Real>>(-0.5 * squareDim, 0.5 * squareDim);
     //    profile = Translate<Real>(profile, -0.5 * Vec3::unit(0) * squareDim[0]);
 	
@@ -199,15 +201,17 @@ DiskProfiledPlane::defineDielectric() noexcept
     profile2 = Translate<Real>(profile2, -0.5 * Vec3(squareDim[0]+2*boxCurvature, squareDim[1]+2*boxCurvature, 0.0));
 
     // profile2 = Translate<Real>(profile2, -0.5 * Vec3::unit(0) * squareDim2[0]);
+	
+    plane = std::make_shared<PlaneSDF<Real>>(Vec3(-0.5*squareDim[0], 0.5*squareDim[1]+boxCurvature, 0.0), Vec3(-std::sin(0.185353), -std::cos(0.185353), 0.0));
 
     profile2 = SmoothDifference<Real>(profile, profile2, boxCurvature);
-    //    profile2 = Union<Real>(profile, profile2);
 
-    std::shared_ptr<ImpFunc> profile3 = std::make_shared<BoxSDF<Real>>(-0.8 * squareDim, 0.5 * squareDim);
-    profile3                          = Rotate<Real>(profile3, 79.38, 2);
-    profile3                          = Translate<Real>(profile3, Vec3(0*squareDim[0], 0.999*squareDim[1], 0.0));
+    // profile3 = std::make_shared<BoxSDF<Real>>(-0.5 * squareDim, 0.5 * squareDim);
+    // profile3                          = Rotate<Real>(profile3, 79.38, 2);
+    // profile3                          = Translate<Real>(profile3, Vec3(0.1*squareDim[0], (0.79)*squareDim[1], 0.0));
 
-    profile2 = SmoothDifference<Real>(profile2, profile3, boxCurvature);
+    // profile2 = SmoothDifference<Real>(profile2, profile3, boxCurvature);
+    profile2 = SmoothDifference<Real>(profile2, plane, boxCurvature);
   }
   else if (str == "none") {
   }
@@ -224,8 +228,11 @@ DiskProfiledPlane::defineDielectric() noexcept
   if (str == "l_shape") {
     profile2 = FiniteRepetition<Real>(profile2, profilePer, profileRepLo, profileRepHi);
     profile2 = Translate<Real>(profile2, profileTra2);
+	
 
     roundedBox = SmoothUnion<Real>(roundedBox, profile2, boxCurvature);
+	// profile3 = Reflect<Real>(profile2, 0);
+	// roundedBox = SmoothUnion<Real>(roundedBox, profile3, boxCurvature);
   }
   // Translate box into place.
   roundedBox = Translate<Real>(roundedBox, Vec3(boxTranslation[0], boxTranslation[1], boxTranslation[2]));
