@@ -98,7 +98,9 @@ DiskProfiledPlane.profile_repetition_hi = 26 0 0                  # Repetition p
 DiskProfiledPlane.profile_period        = 1.32E-3 1 1                # Repetition period
 
 DiskProfiledPlane.square_dimensions     = 800E-6 999E-6 10       # Dimensions for squares/square channels
-DiskProfiledPlane.square_dimensions2    = 920E-6 301E-6 10     # Dimensions for squares/square channels
+DiskProfiledPlane.lshape_dimensions     = 800E-6 999E-6 10     # Main dimensions for l_shape channels
+DiskProfiledPlane.lshape_cut_angle    	= 0.185353              # in radians (cut plane from upper corner)
 DiskProfiledPlane.sphere_radius         = 300E-6                    # Radius for sphere profiles
 DiskProfiledPlane.cylinder_radius       = 1E-3                    # Radius for cylinder profiles
+
 

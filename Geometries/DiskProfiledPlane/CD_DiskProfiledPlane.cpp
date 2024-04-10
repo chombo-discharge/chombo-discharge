@@ -124,8 +124,10 @@ DiskProfiledPlane::defineDielectric() noexcept
   Vector<Real> profileRepetitionHi(3, 0.0);
   Vector<Real> profilePeriod(3, 0.0);
   Vector<Real> squareDimensions(3, std::numeric_limits<Real>::max());
-  Vector<Real> squareDimensions2(3, std::numeric_limits<Real>::max());
-
+  Vector<Real> lshapeDimensions(3, std::numeric_limits<Real>::max());
+  
+  Real lshapeCutAngle = 0.0;
+  
   // Get input parameters.
   ParmParse pp("DiskProfiledPlane");
 
@@ -143,7 +145,8 @@ DiskProfiledPlane::defineDielectric() noexcept
   pp.getarr("profile_repetition_hi", profileRepetitionHi, 0, 3);
   pp.getarr("profile_period", profilePeriod, 0, 3);
   pp.getarr("square_dimensions", squareDimensions, 0, 3);
-  pp.getarr("square_dimensions2", squareDimensions2, 0, 3);
+  pp.getarr("lshape_dimensions", lshapeDimensions, 0, 3);
+  pp.get("lshape_cut_angle", lshapeCutAngle);
 
   if (boxCurvature <= 0.0) {
     MayDay::Error("DiskProfiledPlane::defineDielectric - must have 'box_curvature' > 0.0");
@@ -160,9 +163,9 @@ DiskProfiledPlane::defineDielectric() noexcept
   const Vec3 squareDim(squareDimensions[0] - 2 * boxCurvature,
                        squareDimensions[1] - 2 * boxCurvature,
                        squareDimensions[2] - 2 * boxCurvature);
-  const Vec3 squareDim2(squareDimensions2[0] - 2 * boxCurvature,
-                        squareDimensions2[1] - 2 * boxCurvature,
-                        squareDimensions2[2] - 2 * boxCurvature);
+  const Vec3 lshapeDim(lshapeDimensions[0] - 2 * boxCurvature,
+                       lshapeDimensions[1] - 2 * boxCurvature,
+                       lshapeDimensions[2] - 2 * boxCurvature);
 
   // Basic rounded box.
   std::shared_ptr<ImpFunc> roundedBox = std::make_shared<RoundedBoxSDF<Real>>(boxDims, boxCurvature);
@@ -192,25 +195,18 @@ DiskProfiledPlane::defineDielectric() noexcept
     profile = Elongate<Real>(profile, std::numeric_limits<Real>::max() * Vec3::unit(2));
   }
   else if (str == "l_shape") {
-    profile = std::make_shared<RoundedBoxSDF<Real>>(Vec3(squareDim[0], 1.1*squareDim[1], 0.0), boxCurvature);
-	// std::shared_ptr<ImpFunc> profile = std::make_shared<BoxSDF<Real>>(-0.5 * squareDim, 0.5 * squareDim);
-    //    profile = Translate<Real>(profile, -0.5 * Vec3::unit(0) * squareDim[0]);
-	
-	// std::shared_ptr<ImpFunc> profile2 = std::make_shared<BoxSDF<Real>>(-0.5 * squareDim, 0.5 * squareDim);
-    profile2 = std::make_shared<RoundedBoxSDF<Real>>(squareDim, boxCurvature);
-    profile2 = Translate<Real>(profile2, -0.5 * Vec3(squareDim[0]+2*boxCurvature, squareDim[1]+2*boxCurvature, 0.0));
+    profile = std::make_shared<RoundedBoxSDF<Real>>(Vec3(lshapeDim[0], 2*(lshapeDim[1]+boxCurvature), 0.0), boxCurvature);
+	profile = Translate<Real>(profile, Vec3(0.0, -0.5*(lshapeDim[1] + 2*boxCurvature),0.0));
 
-    // profile2 = Translate<Real>(profile2, -0.5 * Vec3::unit(0) * squareDim2[0]);
+    profile2 = std::make_shared<RoundedBoxSDF<Real>>(lshapeDim, boxCurvature);
+    profile2 = Translate<Real>(profile2, -0.5 * Vec3(lshapeDim[0]+2*boxCurvature, lshapeDim[1]+2*boxCurvature, 0.0));
+
 	
-    plane = std::make_shared<PlaneSDF<Real>>(Vec3(-0.5*squareDim[0], 0.5*squareDim[1]+boxCurvature, 0.0), Vec3(-std::sin(0.185353), -std::cos(0.185353), 0.0));
+    plane = std::make_shared<PlaneSDF<Real>>(Vec3(-0.5*lshapeDim[0], 0.5*lshapeDim[1]+boxCurvature, 0.0), Vec3(-std::sin(lshapeCutAngle), -std::cos(lshapeCutAngle), 0.0));
 
     profile2 = SmoothDifference<Real>(profile, profile2, boxCurvature);
 
-    // profile3 = std::make_shared<BoxSDF<Real>>(-0.5 * squareDim, 0.5 * squareDim);
-    // profile3                          = Rotate<Real>(profile3, 79.38, 2);
-    // profile3                          = Translate<Real>(profile3, Vec3(0.1*squareDim[0], (0.79)*squareDim[1], 0.0));
 
-    // profile2 = SmoothDifference<Real>(profile2, profile3, boxCurvature);
     profile2 = SmoothDifference<Real>(profile2, plane, boxCurvature);
   }
   else if (str == "none") {
@@ -231,8 +227,8 @@ DiskProfiledPlane::defineDielectric() noexcept
 	
 
     roundedBox = SmoothUnion<Real>(roundedBox, profile2, boxCurvature);
-	// profile3 = Reflect<Real>(profile2, 0);
-	// roundedBox = SmoothUnion<Real>(roundedBox, profile3, boxCurvature);
+	profile3 = Reflect<Real>(profile2, 0);
+	roundedBox = SmoothUnion<Real>(roundedBox, profile3, boxCurvature);
   }
   // Translate box into place.
   roundedBox = Translate<Real>(roundedBox, Vec3(boxTranslation[0], boxTranslation[1], boxTranslation[2]));
