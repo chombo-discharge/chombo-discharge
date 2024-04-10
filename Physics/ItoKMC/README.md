@@ -1,4 +1,4 @@
-# Physics/ItoPlasma
+# Physics/ItoKMC
 This physics module solves the minimal plasma model
 
 The folders contains
@@ -13,7 +13,7 @@ The folders contains
 To set up a new problem, use the Python script. For example:
 
 ```shell
-./setup.py -base_dir=MyApplications -app_name=MyPlasmaModel -geometry=CoaxialCable -physics=ItoPlasmaJSON
+./setup.py -base_dir=MyApplications -app_name=MyPlasmaModel -geometry=CoaxialCable -physics=ItoKMCJSON
 ```
 
 The application will be installed to $DISCHARGE_HOME/MyApplications/MyPlasmaApplication
