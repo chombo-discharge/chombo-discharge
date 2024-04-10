@@ -122,7 +122,7 @@ RodDielectric.electrode.endpoint2       = 0 0 2         # Other endpoint
 RodDielectric.electrode.radius          = 0.1           # Electrode radius
 RodDielectric.electrode.live            = true          # Live or not
 
-RodDielectric.dielectric.on             = true          # Use dielectric or not
+RodDielectric.dielectric.on             = false          # Use dielectric or not
 RodDielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'.
 RodDielectric.dielectric.permittivity   = 4             # Dielectric permittivity
 
