@@ -14,6 +14,7 @@ USE_EB         = TRUE
 USE_MF         = TRUE
 USE_HDF        = FALSE
 USE_MT         = FALSE
+OPENMPCC       = FALSE
 #HDFINCFLAGS   = -I<hdf_serial_dir>/include
 #HDFLIBFLAGS   = -L<hdf_serial_dir>/lib -lhdf5 -lz
 #HDFMPIINCFLAGS= -I<hdf_parallel_dir>/include
