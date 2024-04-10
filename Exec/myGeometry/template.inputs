@@ -91,7 +91,7 @@ DiskProfiledPlane.box_curvature         = 100E-6                   # Corner curv
 
 
 DiskProfiledPlane.profile_type          = l_shape                # Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'
-DiskProfiledPlane.profile_translate     = -0.2E-3 1.75E-3 0        # Profile translation
+DiskProfiledPlane.profile_translate     = -0.0E-3 1.75E-3 0        # Profile translation
 DiskProfiledPlane.profile_translate2     = 0.0E-3 1.35E-3 0        # Profile translation
 DiskProfiledPlane.profile_repetition_lo = 3 0 0                  # Repetition pattern in low coordinate direction
 DiskProfiledPlane.profile_repetition_hi = 3 0 0                  # Repetition pattern in high coordinate direction

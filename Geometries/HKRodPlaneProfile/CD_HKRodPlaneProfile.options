@@ -1,0 +1,42 @@
+# ====================================================================================================
+# HKRodPlaneProfile geometry class options
+#
+# This class described a rod-plane geometry with holes on the dielectric plane. The plane_point
+# argument determines the point on the plane (oriented along the y axis), and acts as a reference
+# for where the "holes" are placed.
+#
+# Arguments 'profile_num_left' and 'profile_num_right' sets the number of holes to the left and right
+# of this point. You can shift the holes vertically with 'profile_offset', and increase the distance
+# between the holes with 'profile_dist'. The 'profile_shift' argument shifts all holes to the left
+# or right along the x-axis. The 'profile_curv' arguments sets the radius of curvature. 
+# ====================================================================================================
+HKRodPlaneProfile.turn_on_rod       = true          # Turn on/off electrode
+HKRodPlaneProfile.turn_on_plane     = true          # Turn on/off dielectric
+HKRodPlaneProfile.rod_live          = true          # Live electrode or not
+HKRodPlaneProfile.rod_radius        = 5.E-3         # Electrode inner radius
+HKRodPlaneProfile.rod_center1       = 0.0 0.0 1E-2  # Center 1
+HKRodPlaneProfile.rod_center2       = 0.0 1.0 0E-2  # Center 2
+HKRodPlaneProfile.plane_width       = 5.E-3         # Plane width	
+HKRodPlaneProfile.plane_normal      = 0.0 1.0 0.0   # Plane normal. Not used, oriented along +y only 
+HKRodPlaneProfile.plane_point       = 0.0 0.0 0.0   # Center point on plane
+HKRodPlaneProfile.plane_eps         = 4.0           # Plane permittivity
+HKRodPlaneProfile.profile_num_left  = 1             # Number of holes to the left
+HKRodPlaneProfile.profile_num_right = 1             # Number of holes to the left
+HKRodPlaneProfile.profile_dist      = 1.0           # Distance between each hole
+HKRodPlaneProfile.profile_xshift    = 0.0           # Horizontal offset
+HKRodPlaneProfile.profile_yshift    = 0.0           # Vertical offset
+HKRodPlaneProfile.profile_curv      = 0.0           # Rounding radius
+
+# Shape set. Can use 'circle' or 'square'
+HKRodPlaneProfile.profile       = circle
+
+# Circle specific parameters
+HKRodPlaneProfile.circle_radius = 1E-3
+
+# Square specific parameters
+HKRodPlaneProfile.square_width  = 1E-3
+HKRodPlaneProfile.square_height = 1E-3
+
+# Shroom specific parameters
+HKRodPlaneProfile.shroom_stem  = 1E-3
+HKRodPlaneProfile.shroom_head = 1E-3	
