@@ -6,6 +6,7 @@
 **/Make.defs.local
 *.log
 *.aux
+*.0
 LB.txt
 
 

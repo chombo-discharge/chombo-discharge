@@ -1,15 +1,15 @@
 export CH_TIMER=1
 export DIM=2
-export NCORES=12
+export NCORES=8
 export NPROCS=1
-export OMP_NUM_THREADS=12
+export OMP_NUM_THREADS=8
 export OMP_PLACES=cores
 export OMP_PROC_BIND=true
 export OMP_SCHEDULE="dynamic"
 
-COMPILE=true
-RUN=false
-PROFILE=false
+COMPILE=false
+RUN=true
+PROFILE=true
 INPUT="example2d.inputs Driver.max_steps=0"
 # Driver.initial_regrids=1 Driver.write_memory=true Driver.write_loads=true FieldStepper.load_balance=true"
 
@@ -22,24 +22,31 @@ then
     make -s -j$NCORES OPT=HIGH DEBUG=FALSE OPENMPCC=TRUE  MPI=TRUE  DIM=$DIM
 fi
 
+rm *.0
+
 if $RUN
 then
     # Run serial version
-    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.ex $INPUT Driver.output_names=serial
+    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.ex $INPUT Driver.output_names=serial >& serial.0
     cp time.table time.table.serial
 
     # Run OpenMP version
-    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.OPENMPCC.ex $INPUT Driver.output_names=openmp
+    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.OPENMPCC.ex $INPUT Driver.output_names=openmp >& openmp.0
     cp time.table time.table.omp
 
     # Run MPI version
     mpiexec --report-bindings -n $NCORES --bind-to core ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex $INPUT Driver.output_names=mpi
     cp time.table.0 time.table.mpi
+    cp pout.0 mpi.0
 
     # Run MPI+OpenMP version
-    mpiexec --report-bindings --bind-to none --map-by slot:PE=$OMP_NUM_THREADS -n $NPROCS ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex $INPUT Driver.output_names=hybrid
+    export OMP_NUM_THREADS=4
+    mpiexec --report-bindings --bind-to core --map-by slot:PE=4 -n 2 ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex $INPUT Driver.output_names=hybrid
     cp time.table.0 time.table.hybrid
+    cp pout.0 hybrid.0
 fi
+
+rm pout.*
 
 # Kernel comparison for Source/AmrMesh
 if $PROFILE
